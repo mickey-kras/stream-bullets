@@ -1,0 +1,2 @@
+CREATE INDEX `poll_comments_history_idx` ON `poll_comments` (`poll_id`,`created_at`,`id`);--> statement-breakpoint
+CREATE INDEX `poll_comments_rate_idx` ON `poll_comments` (`poll_id`,`user_id`,`created_at`);

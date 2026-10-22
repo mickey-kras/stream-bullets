@@ -1,5 +1,5 @@
 // @ts-check
-import { icon, el, categoryIcons } from './app.js';
+import { icon, el, categoryIcons } from './shared.js';
 /** @param {string} name */
 function showView(name) {
   for (const view of ['topics','polls','schedule','about','community']) el(`#${view}-view`).hidden = view !== name;

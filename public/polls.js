@@ -1,11 +1,13 @@
 // @ts-check
-import { el, esc, icon, notify, commentText, authorName } from './app.js';
+import { el, esc, icon, notify, commentText, authorName } from './shared.js';
 import { showView } from './ui.js';
 /** @typedef {{likes:number, dislikes:number, reaction:number, comments:number, id:string, question:string, kind:'choice'|'binary', options:string[], endsAt:number, revealed:boolean, total:number, score:number, counts:number[]|null, myVote:number|null}} Poll */
-/** @typedef {{polls:Poll[], comments:{id:string,mine:boolean,text:string,createdAt:number}[], canHost:boolean, signedIn:boolean, serverNow:number}} Snapshot */
+/** @typedef {{polls:Poll[], comments:{id:string,mine:boolean,text:string,createdAt:number}[], nextCommentsCursor:string|null, canHost:boolean, signedIn:boolean, serverNow:number}} Snapshot */
 /** @type {Snapshot|null} */let snapshot=null;
 let selectedPoll='', pollSort='newest', commentSignature='', pendingDiscussionFocus=false;
 let discussionRevision=0, snapshotRevision=-1, draftRevision=0;
+let loadingOlder=false, loadedOlder=false;
+/** @type {string|null} */let olderCursor=null;
 let clockOffset=0, lastRender='', fetching=false, saving=false;
 const panel=el('#polls-view'), cards=el('#poll-cards');
 const dialog=/** @type {HTMLDialogElement} */(el('#poll-dialog'));
@@ -50,6 +52,13 @@ async function refresh(){
     if(!response.ok)throw new Error('Could not load polls. Reconnecting...');
     const result=/** @type {Snapshot} */(await response.json());
     if(requestKey!==`${pollSort}:${selectedPoll}`||requestRevision!==discussionRevision)return;
+    if(selectedPoll && loadedOlder && snapshotRevision===discussionRevision && snapshot) {
+      // Preserve expanded history on live refresh, deduplicating overlapping pages.
+      // A busy thread can advance by a whole page between refreshes. Start
+      // pagination at the new boundary so the intervening history stays reachable.
+      if(result.nextCommentsCursor&&!result.comments.some(comment=>snapshot?.comments.some(previous=>previous.id===comment.id))) olderCursor=result.nextCommentsCursor;
+      result.comments=mergeComments(snapshot.comments,result.comments);
+    } else olderCursor=result.nextCommentsCursor??null;
     snapshot=result;snapshotRevision=requestRevision;
     clockOffset=snapshot.serverNow-Date.now();
     el('#create-poll').hidden=!snapshot.canHost;
@@ -107,6 +116,10 @@ function renderDiscussion(){
   el('#poll-discussion').hidden=!poll;
   /** @type {HTMLTextAreaElement} */(el('#poll-comment-text')).disabled=!poll||!snapshot?.signedIn;
   /** @type {HTMLButtonElement} */(el('#poll-comment-form button')).disabled=!poll||!snapshot?.signedIn||saving;
+  const older=/** @type {HTMLButtonElement} */(el('#poll-load-older'));
+  older.hidden=!poll||!olderCursor;
+  older.disabled=loadingOlder;
+  older.textContent=loadingOlder?'Loading older comments...':'Load older comments';
   if(!poll)return;
   el('#poll-discussion-reference').textContent=poll.question;
   if(pendingDiscussionFocus){pendingDiscussionFocus=false;el('#poll-discussion').scrollIntoView({block:'start',behavior:'smooth'});}
@@ -116,11 +129,37 @@ function renderDiscussion(){
     commentSignature=signature;
   }
 }
+/** @param {Snapshot['comments']} previous @param {Snapshot['comments']} incoming */
+function mergeComments(previous,incoming){
+  return [...new Map([...previous,...incoming].map(comment=>[comment.id,comment])).values()]
+    .sort((a,b)=>a.createdAt-b.createdAt||(a.id<b.id?-1:a.id>b.id?1:0));
+}
+el('#poll-load-older').addEventListener('click',async()=>{
+  if(loadingOlder||!olderCursor||!selectedPoll||snapshotRevision!==discussionRevision)return;
+  const revision=discussionRevision, pollId=selectedPoll, cursor=olderCursor;
+  loadingOlder=true;el('#poll-history-error').textContent='';renderDiscussion();
+  try{
+    const response=await fetch(`/api/polls?poll=${encodeURIComponent(pollId)}&before=${encodeURIComponent(cursor)}`,{cache:'no-store'});
+    if(revision!==discussionRevision)return;
+    if(!response.ok)throw new Error('Could not load older comments. Please try again.');
+    const result=/** @type {Snapshot} */(await response.json());
+    if(revision!==discussionRevision||!snapshot)return;
+    snapshot.comments=mergeComments(result.comments,snapshot.comments);
+    olderCursor=result.nextCommentsCursor??null;loadedOlder=true;
+    renderDiscussion();
+  }catch(error){
+    if(revision===discussionRevision)el('#poll-history-error').textContent=error instanceof Error?error.message:'Could not load older comments.';
+  }finally{
+    if(revision===discussionRevision){loadingOlder=false;renderDiscussion();}
+  }
+});
 // Invalidate the displayed thread before a new selection can accept comments.
 /** @param {string} next */
 function selectDiscussion(next){
   if(next!==selectedPoll){
     selectedPoll=next;discussionRevision++;
+    loadingOlder=false;loadedOlder=false;olderCursor=null;
+    el('#poll-history-error').textContent='';
     /** @type {HTMLTextAreaElement} */(el('#poll-comment-text')).value='';
     commentSignature='';el('#poll-comment-error').textContent='';
   }

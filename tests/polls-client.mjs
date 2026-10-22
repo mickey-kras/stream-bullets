@@ -166,3 +166,70 @@ test('finishing a poll reaction immediately re-enables the discussion composer',
   await c.load(A);
   assert.equal(c.el('#poll-comment-form button').disabled, false);
 });
+
+test('older comments merge in order without duplicates and survive live refresh', async () => {
+  const c = client();
+  c.navigate(A);
+  const latest = {...snapshot(A), nextCommentsCursor:'200:'+A, comments:[{id:'new',mine:false,text:'Newest',createdAt:200}]};
+  c.gets.at(-1).resolve({ok:true,json:async()=>latest}); await settle();
+  assert.equal(c.el('#poll-load-older').hidden,false);
+  c.el('#poll-load-older').dispatchEvent(new Event('click'));
+  assert.match(c.gets.at(-1).url,/before=200%3A/);
+  assert.equal(c.el('#poll-load-older').disabled,true);
+  const count=c.gets.length;
+  c.el('#poll-load-older').dispatchEvent(new Event('click'));
+  assert.equal(c.gets.length,count);
+  c.gets.at(-1).resolve({ok:true,json:async()=>({...snapshot(A),nextCommentsCursor:null,comments:[{id:'old',mine:false,text:'Older',createdAt:100},latest.comments[0]]})}); await settle();
+  const html=c.el('#poll-comments').innerHTML;
+  assert.ok(html.indexOf('Older')<html.indexOf('Newest'));
+  assert.equal(html.match(/Newest/g).length,1);
+  assert.equal(c.el('#poll-load-older').hidden,true);
+  c.refresh();
+  c.gets.at(-1).resolve({ok:true,json:async()=>latest}); await settle();
+  assert.match(c.el('#poll-comments').innerHTML,/Older/);
+  assert.equal(c.el('#poll-load-older').hidden,true);
+  c.refresh();
+  c.gets.at(-1).resolve({ok:true,json:async()=>({...latest,nextCommentsCursor:'400:'+A,comments:[{id:'future',mine:false,text:'Busy thread',createdAt:400}]})});await settle();
+  assert.match(c.el('#poll-comments').innerHTML,/Older/);
+  assert.equal(c.el('#poll-load-older').hidden,false);
+  c.el('#poll-load-older').dispatchEvent(new Event('click'));
+  assert.match(c.gets.at(-1).url,/before=400%3A/);
+});
+
+test('older-page bodies and failures cannot affect a new selection or a return to the same poll', async () => {
+  for(const returnToA of [false,true]) for(const fail of [false,true]) {
+    const c=client(), body=deferred();
+    c.navigate(A);
+    c.gets.at(-1).resolve({ok:true,json:async()=>({...snapshot(A),nextCommentsCursor:'0:'+A})}); await settle();
+    c.el('#poll-load-older').dispatchEvent(new Event('click'));
+    const pending=c.gets.at(-1);
+    if(!fail){pending.resolve({ok:true,json:()=>body.promise});await settle();}
+    c.navigate(B);await c.load(B);
+    if(returnToA){c.navigate(A);await c.load(A);}
+    if(fail)pending.resolve({ok:false});
+    else body.resolve({...snapshot(A),nextCommentsCursor:null,comments:[{id:'stale',mine:false,text:'Stale older page',createdAt:-100}]});
+    await settle();
+    assert.doesNotMatch(c.el('#poll-comments').innerHTML,/Stale older page/);
+    assert.equal(c.el('#poll-history-error').textContent,'');
+    assert.equal(c.el('#poll-load-older').hidden,true);
+  }
+});
+
+test('history failure leaves the cursor available for retry', async()=>{
+  const c=client();c.navigate(A);
+  c.gets.at(-1).resolve({ok:true,json:async()=>({...snapshot(A),nextCommentsCursor:'0:'+A})});await settle();
+  c.el('#poll-load-older').dispatchEvent(new Event('click'));
+  c.gets.at(-1).resolve({ok:false});await settle();
+  assert.equal(c.el('#poll-load-older').disabled,false);
+  assert.equal(c.el('#poll-load-older').hidden,false);
+  assert.match(c.el('#poll-history-error').textContent,/try again/);
+  c.el('#poll-load-older').dispatchEvent(new Event('click'));
+  assert.equal(c.el('#poll-history-error').textContent,'');
+});
+
+test('shared helpers import without a document or topic initialization', async()=>{
+  const shared=await import('../public/shared.js');
+  assert.equal(shared.esc('<hello>'),'&lt;hello&gt;');
+  shared.setDisplayName('Viewer');
+  assert.equal(shared.authorName('You'),'Viewer');
+});
