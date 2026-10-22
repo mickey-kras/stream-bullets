@@ -5,6 +5,7 @@ import { showView } from './ui.js';
 /** @typedef {{polls:Poll[], comments:{id:string,mine:boolean,text:string,createdAt:number}[], canHost:boolean, signedIn:boolean, serverNow:number}} Snapshot */
 /** @type {Snapshot|null} */let snapshot=null;
 let selectedPoll='', pollSort='newest', commentSignature='', pendingDiscussionFocus=false;
+let discussionRevision=0, snapshotRevision=-1, draftRevision=0;
 let clockOffset=0, lastRender='', fetching=false, saving=false;
 const panel=el('#polls-view'), cards=el('#poll-cards');
 const dialog=/** @type {HTMLDialogElement} */(el('#poll-dialog'));
@@ -43,11 +44,13 @@ async function refresh(){
   if(fetching||panel.hidden||document.hidden)return;
   fetching=true;
   try{
-    const requestKey=`${pollSort}:${selectedPoll}`;
+    const requestKey=`${pollSort}:${selectedPoll}`, requestRevision=discussionRevision;
     const response=await fetch(`/api/polls?sort=${pollSort}${selectedPoll?'&poll='+encodeURIComponent(selectedPoll):''}`,{cache:'no-store'});
-    if(requestKey!==`${pollSort}:${selectedPoll}`)return;
+    if(requestKey!==`${pollSort}:${selectedPoll}`||requestRevision!==discussionRevision)return;
     if(!response.ok)throw new Error('Could not load polls. Reconnecting...');
-    snapshot=/** @type {Snapshot} */(await response.json());
+    const result=/** @type {Snapshot} */(await response.json());
+    if(requestKey!==`${pollSort}:${selectedPoll}`||requestRevision!==discussionRevision)return;
+    snapshot=result;snapshotRevision=requestRevision;
     clockOffset=snapshot.serverNow-Date.now();
     el('#create-poll').hidden=!snapshot.canHost;
     el('#poll-connection').textContent='Live updates every 2 seconds';
@@ -74,7 +77,7 @@ cards.addEventListener('click',async(event)=>{
     else if(button.dataset.poll)await mutate({action:'vote',id:button.dataset.poll,choice:Number(button.dataset.choice)});
     await refresh();
   }catch(error){el('#poll-connection').textContent=error instanceof Error?error.message:'Could not save. Please try again.';}
-  finally{saving=false;lastRender='';tick();}
+  finally{saving=false;lastRender='';tick();renderDiscussion();}
 });
 el('#create-poll').addEventListener('click',()=>{el('#poll-form-error').textContent='';dialog.showModal();});
 el('#poll-close').addEventListener('click',()=>dialog.close());
@@ -89,9 +92,9 @@ form.addEventListener('submit',async(event)=>{
   const options=kind==='binary'?['Yes','No']:String(data.get('options')).split('\n').map(value=>value.trim()).filter(Boolean);
   if(options.length<2||options.length>6||options.some(value=>value.length>80)||new Set(options.map(value=>value.toLowerCase())).size!==options.length){el('#poll-form-error').textContent='Add 2 to 6 different options, each under 81 characters.';return;}
   saving=true;const submit=/** @type {HTMLButtonElement} */(form.querySelector('[type="submit"]'));submit.disabled=true;
-  try{await mutate({action:'create',question:String(data.get('question')).trim(),kind,options,duration:Number(data.get('duration'))});dialog.close();selectedPoll='';history.replaceState(null,'',location.pathname);form.reset();el('#poll-options-label').hidden=false;el('#binary-help').hidden=true;/** @type {HTMLTextAreaElement} */(form.elements.namedItem('options')).required=true;await refresh();}
+  try{await mutate({action:'create',question:String(data.get('question')).trim(),kind,options,duration:Number(data.get('duration'))});dialog.close();selectDiscussion('');history.replaceState(null,'',location.pathname);form.reset();el('#poll-options-label').hidden=false;el('#binary-help').hidden=true;/** @type {HTMLTextAreaElement} */(form.elements.namedItem('options')).required=true;await refresh();}
   catch(error){el('#poll-form-error').textContent=error instanceof Error?error.message:'Could not start poll. Please try again.';}
-  finally{saving=false;submit.disabled=false;}
+  finally{saving=false;submit.disabled=false;renderDiscussion();}
 });
 document.addEventListener('viewchange',()=>{void refresh();});
 document.addEventListener('visibilitychange',()=>{void refresh();});
@@ -99,9 +102,11 @@ setInterval(()=>{void refresh();},2000);
 setInterval(tick,500);
 
 function renderDiscussion(){
-  const poll=snapshot?.polls.find(p=>p.id===selectedPoll);
+  const poll=snapshotRevision===discussionRevision?snapshot?.polls.find(p=>p.id===selectedPoll):undefined;
   el('#all-polls').hidden=!selectedPoll;
   el('#poll-discussion').hidden=!poll;
+  /** @type {HTMLTextAreaElement} */(el('#poll-comment-text')).disabled=!poll||!snapshot?.signedIn;
+  /** @type {HTMLButtonElement} */(el('#poll-comment-form button')).disabled=!poll||!snapshot?.signedIn||saving;
   if(!poll)return;
   el('#poll-discussion-reference').textContent=poll.question;
   if(pendingDiscussionFocus){pendingDiscussionFocus=false;el('#poll-discussion').scrollIntoView({block:'start',behavior:'smooth'});}
@@ -110,34 +115,50 @@ function renderDiscussion(){
     el('#poll-comments').innerHTML=snapshot?.comments.map(comment=>`<article class="comment"><strong>${comment.mine?esc(authorName('You')):'Community member'}</strong><small>${new Date(comment.createdAt).toLocaleString()}</small><p>${commentText(comment.text)}</p></article>`).join('')||'<p class="empty">Start the conversation. What shaped your vote?</p>';
     commentSignature=signature;
   }
-  /** @type {HTMLTextAreaElement} */(el('#poll-comment-text')).disabled=!snapshot?.signedIn;
-  /** @type {HTMLButtonElement} */(el('#poll-comment-form button')).disabled=!snapshot?.signedIn;
+}
+// Invalidate the displayed thread before a new selection can accept comments.
+/** @param {string} next */
+function selectDiscussion(next){
+  if(next!==selectedPoll){
+    selectedPoll=next;discussionRevision++;
+    /** @type {HTMLTextAreaElement} */(el('#poll-comment-text')).value='';
+    commentSignature='';el('#poll-comment-error').textContent='';
+  }
+  renderDiscussion();
 }
 function openReference(){
   const match=location.hash.match(/^#poll=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i);
   const next=match?.[1]??'';
-  if(next!==selectedPoll){/** @type {HTMLTextAreaElement} */(el('#poll-comment-text')).value='';commentSignature='';}
-  selectedPoll=next;lastRender='';pendingDiscussionFocus=!!next;
+  selectDiscussion(next);lastRender='';pendingDiscussionFocus=!!next;
   if(selectedPoll)showView('polls');
   void refresh();
 }
 window.addEventListener('hashchange',openReference);
 document.addEventListener('click',event=>{const link=event.target instanceof Element?event.target.closest('a[href^="#poll="]'):null;if(link&&link.getAttribute('href')===location.hash)openReference();});
-function allPolls(){selectedPoll='';history.replaceState(null,'',location.pathname);lastRender='';el('#poll-discussion').hidden=true;el('#all-polls').hidden=true;void refresh();}
+function allPolls(){selectDiscussion('');history.replaceState(null,'',location.pathname);lastRender='';el('#poll-discussion').hidden=true;el('#all-polls').hidden=true;void refresh();}
 el('#all-polls').addEventListener('click',allPolls);
 for(const sort of ['newest','top'])el(`#poll-${sort}`).addEventListener('click',()=>{
   pollSort=sort;
   for(const name of ['newest','top']){el(`#poll-${name}`).setAttribute('aria-pressed',String(name===sort));el(`#poll-${name}`).classList.toggle('active',name===sort);}
   allPolls();
 });
+el('#poll-comment-text').addEventListener('input',()=>{draftRevision++;});
 el('#poll-comment-form').addEventListener('submit',async(event)=>{
-  event.preventDefault();if(saving||!selectedPoll)return;
+  event.preventDefault();if(saving||!selectedPoll||snapshotRevision!==discussionRevision||!snapshot?.signedIn||!snapshot.polls.some(p=>p.id===selectedPoll))return;
   const input=/** @type {HTMLTextAreaElement} */(el('#poll-comment-text')),text=input.value.trim();
   if(!text){el('#poll-comment-error').textContent='Please write a comment.';return;}
+  const pollId=selectedPoll, submittedRevision=discussionRevision, submittedDraft=draftRevision;
   saving=true;const button=/** @type {HTMLButtonElement} */(el('#poll-comment-form button'));button.disabled=true;
-  try{await mutate({action:'comment',id:selectedPoll,text});input.value='';el('#poll-comment-error').textContent='';await refresh();}
-  catch(error){el('#poll-comment-error').textContent=error instanceof Error?error.message:'Could not post your comment.';}
-  finally{saving=false;button.disabled=false;}
+  try{
+    await mutate({action:'comment',id:pollId,text});
+    if(submittedRevision===discussionRevision){
+      if(submittedDraft===draftRevision)input.value='';
+      el('#poll-comment-error').textContent='';
+    }
+    await refresh();
+  }
+  catch(error){if(submittedRevision===discussionRevision)el('#poll-comment-error').textContent=error instanceof Error?error.message:'Could not post your comment.';}
+  finally{saving=false;renderDiscussion();}
 });
 if(location.hash.startsWith('#poll='))openReference();
 
