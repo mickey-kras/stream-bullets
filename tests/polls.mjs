@@ -5,7 +5,9 @@ import ts from 'typescript';
 import { z } from 'zod';
 const sqlite = new DatabaseSync(':memory:');
 for (const file of readdirSync(new URL('../drizzle/', import.meta.url)).filter(name => name.endsWith('.sql')).sort()) sqlite.exec(readFileSync(new URL('../drizzle/'+file, import.meta.url), 'utf8').replaceAll('--> statement-breakpoint', ''));
+let queryCount = 0;
 const env = { POLL_HOST_EMAIL: 'host@example.test', DB: { prepare(sql) {
+  queryCount++;
   const statement = sqlite.prepare(sql);
   return { bind(...parameters) { return {
     async all() { return { results: statement.all(...parameters) }; },
@@ -78,5 +80,60 @@ assert.equal((await get('different-person',`?poll=${unlimited.id}`)).comments[0]
 assert.equal((await post({action:'reveal',id:unlimited.id},{viewer:true})).status,403);
 assert.equal((await post({action:'reveal',id:unlimited.id})).status,200);
 assert.equal((await post({action:'vote',id:unlimited.id,choice:0},{viewer:true})).status,409);
+assert.equal((await get('test-viewer', '?sort=newest')).polls.length, 3);
+for (let i = 0; i < 45; i++) sqlite.prepare('INSERT INTO polls VALUES (?, ?, ?, ?, ?, ?, ?)').run(crypto.randomUUID(), 'Another poll', 'choice', '["A","B"]', i, 0, 0);
+queryCount = 0;
+assert.equal((await get()).polls.length, 48);
+assert.equal(queryCount, 4);
+queryCount = 0;
+assert.equal((await get('same-viewer', `?poll=${poll.id}`)).polls[0].myVote, 1);
+assert.equal(queryCount, 5);
+for (const query of ['?poll=bad', '?before=1:bad', `?before=1:${poll.id}`, `?poll=${poll.id}&before=9007199254740992:${poll.id}`, '?sort=unknown', '?extra=1', '?sort=top&sort=newest']) {
+  assert.equal((await routes.GET(new Request(base + '/api/polls' + query))).status, 400);
+}
+const insert = sqlite.prepare('INSERT INTO poll_comments VALUES (?, ?, ?, ?, ?)');
+for (let i = 0; i < 205; i++) insert.run(crypto.randomUUID(), poll.id, 'history-user', 'History ' + i, 1000);
+let cursor = null;
+const seen = new Set();
+do {
+  const page = await get('history-user', `?poll=${poll.id}` + (cursor ? '&before=' + encodeURIComponent(cursor) : ''));
+  assert.ok(page.comments.length <= 100);
+  for (const comment of page.comments) { assert.ok(!seen.has(comment.id)); seen.add(comment.id); }
+  assert.deepEqual(page.comments.map(c => c.id), page.comments.map(c => c.id).sort());
+  cursor = page.nextCommentsCursor;
+} while (cursor);
+assert.equal(seen.size, 205);
+const burst = await Promise.all(Array.from({length: 8}, () => post({action:'comment',id:poll.id,text:'Burst'}, {viewer:true,user:'burst-user'})));
+assert.equal(burst.filter(r => r.status === 200).length, 5);
+assert.equal(burst.filter(r => r.status === 429).length, 3);
+assert.equal(burst.find(r => r.status === 429).headers.get('Retry-After'), '60');
+assert.equal((await post({action:'comment',id:unlimited.id,text:'Independent poll'}, {user:'burst-user'})).status, 200);
+assert.equal((await post({action:'comment',id:crypto.randomUUID(),text:'Missing'}, {user:'burst-user'})).status, 404);
+Date.now = () => realNow() + 60_001;
+assert.equal((await post({action:'comment',id:poll.id,text:'Window elapsed'}, {user:'burst-user'})).status, 200);
+Date.now = realNow;
+async function streamPost(chunks, contentLength) {
+  let index = 0, cancelled = false;
+  const stream = new ReadableStream({ pull(controller) { if (index < chunks.length) controller.enqueue(chunks[index++]); else controller.close(); }, cancel() { cancelled = true; } }, { highWaterMark: 0 });
+  const headers = { Origin:base, 'oai-authenticated-user-id':'stream-user', ...(contentLength ? {'Content-Length':contentLength} : {}) };
+  const response = await routes.POST(new Request(base + '/api/polls', {method:'POST', headers, body:stream, duplex:'half'}));
+  return {response, cancelled, consumed:index};
+}
+const encode = value => new TextEncoder().encode(value);
+for (const length of [undefined, '1']) {
+  const result = await streamPost([new Uint8Array(8192), new Uint8Array(8193), new Uint8Array(8192)], length);
+  assert.equal(result.response.status, 413); assert.equal(result.cancelled, true); assert.equal(result.consumed, 2);
+}
+const escaped = '{"action":"comment","id":"' + poll.id + '","text":"' + String.raw`\u0061`.repeat(2000) + '"}';
+assert.equal((await streamPost([encode(escaped)])).response.status, 200);
+for (const text of ['界'.repeat(2000), '😀'.repeat(1000)]) {
+  const encoded = encode(JSON.stringify({action:'comment', id:poll.id, text}));
+  assert.equal((await streamPost([encoded.slice(0, 80), encoded.slice(80)])).response.status, 200);
+}
+assert.equal((await streamPost([new Uint8Array([255])])).response.status, 400);
+assert.equal((await streamPost([encode('{')])).response.status, 400);
+assert.equal((await post({action:'comment',id:poll.id,text:'a'.repeat(2001)})).status, 400);
+assert.ok(sqlite.prepare("EXPLAIN QUERY PLAN SELECT * FROM poll_comments WHERE poll_id = ? ORDER BY created_at DESC, id DESC LIMIT 101").all(poll.id).some(row => row.detail.includes('poll_comments_history_idx')));
+assert.ok(sqlite.prepare("EXPLAIN QUERY PLAN SELECT COUNT(*) FROM poll_comments WHERE poll_id = ? AND user_id = ? AND created_at > ?").all(poll.id, 'burst-user', 0).some(row => row.detail.includes('poll_comments_rate_idx')));
 sqlite.close();
-console.log('Passed: host authorization, origin validation, vote bounds, concurrent deduplication, vote changes, shared totals, reveal, concurrent starts, server deadline.');
+console.log('Passed: authorization, atomic writes, bounded body streams, grouped queries, indexed history pagination, comment rate limits, deadline and results.');

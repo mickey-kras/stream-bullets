@@ -1,4 +1,4 @@
-import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 export const polls = sqliteTable('polls', {
   id: text('id').primaryKey(), question: text('question').notNull(),
   kind: text('kind').notNull(), options: text('options').notNull(),
@@ -16,4 +16,7 @@ export const reactions = sqliteTable('poll_reactions', {
 export const comments = sqliteTable('poll_comments', {
   id: text('id').primaryKey(), pollId: text('poll_id').notNull().references(() => polls.id),
   userId: text('user_id').notNull(), text: text('text').notNull(), createdAt: integer('created_at').notNull(),
-});
+}, (table) => [
+  index('poll_comments_history_idx').on(table.pollId, table.createdAt, table.id),
+  index('poll_comments_rate_idx').on(table.pollId, table.userId, table.createdAt),
+]);
