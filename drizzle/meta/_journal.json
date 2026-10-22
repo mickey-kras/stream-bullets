@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1792612280363,
+      "tag": "0000_cultured_the_captain",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792613561628,
+      "tag": "0001_normal_cerebro",
+      "breakpoints": true
+    }
+  ]
+}
