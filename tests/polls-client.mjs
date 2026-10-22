@@ -233,3 +233,31 @@ test('shared helpers import without a document or topic initialization', async()
   shared.setDisplayName('Viewer');
   assert.equal(shared.authorName('You'),'Viewer');
 });
+
+test('live refresh during the first history page retains its boundary and any newer gap cursor', async()=>{
+  const comments=(first,last)=>Array.from({length:last-first+1},(_,index)=>{
+    const number=first+index;
+    return {id:String(number).padStart(4,'0'),mine:false,text:`Comment ${number}.`,createdAt:number};
+  });
+  for(const busy of [false,true]){
+    const c=client();c.navigate(A);
+    c.gets.at(-1).resolve({ok:true,json:async()=>({...snapshot(A),comments:comments(101,200),nextCommentsCursor:'101:'+A})});await settle();
+    c.el('#poll-load-older').dispatchEvent(new Event('click'));
+    const history=c.gets.at(-1);
+    c.refresh();
+    const first=busy?302:102,last=busy?401:201;
+    c.gets.at(-1).resolve({ok:true,json:async()=>({...snapshot(A),comments:comments(first,last),nextCommentsCursor:first+':'+A})});await settle();
+    history.resolve({ok:true,json:async()=>({...snapshot(A),comments:comments(1,100),nextCommentsCursor:null})});await settle();
+    const html=c.el('#poll-comments').innerHTML;
+    assert.match(html,/Comment 101\./);
+    assert.match(html,/Comment 1\./);
+    assert.match(html,new RegExp(`Comment ${last}\\.`));
+    assert.equal(c.el('#poll-load-older').hidden,!busy);
+    if(busy){
+      c.el('#poll-load-older').dispatchEvent(new Event('click'));
+      assert.match(c.gets.at(-1).url,/before=302%3A/);
+    }else{
+      for(let number=1;number<=201;number++)assert.equal(html.split(`Comment ${number}.`).length-1,1);
+    }
+  }
+});

@@ -52,7 +52,7 @@ async function refresh(){
     if(!response.ok)throw new Error('Could not load polls. Reconnecting...');
     const result=/** @type {Snapshot} */(await response.json());
     if(requestKey!==`${pollSort}:${selectedPoll}`||requestRevision!==discussionRevision)return;
-    if(selectedPoll && loadedOlder && snapshotRevision===discussionRevision && snapshot) {
+    if(selectedPoll && (loadedOlder||loadingOlder) && snapshotRevision===discussionRevision && snapshot) {
       // Preserve expanded history on live refresh, deduplicating overlapping pages.
       // A busy thread can advance by a whole page between refreshes. Start
       // pagination at the new boundary so the intervening history stays reachable.
@@ -145,7 +145,10 @@ el('#poll-load-older').addEventListener('click',async()=>{
     const result=/** @type {Snapshot} */(await response.json());
     if(revision!==discussionRevision||!snapshot)return;
     snapshot.comments=mergeComments(result.comments,snapshot.comments);
-    olderCursor=result.nextCommentsCursor??null;loadedOlder=true;
+    // Live refresh may have found a newer gap while this page was in flight.
+    // Only advance the boundary that this response actually fills.
+    if(olderCursor===cursor)olderCursor=result.nextCommentsCursor??null;
+    loadedOlder=true;
     renderDiscussion();
   }catch(error){
     if(revision===discussionRevision)el('#poll-history-error').textContent=error instanceof Error?error.message:'Could not load older comments.';
