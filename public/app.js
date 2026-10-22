@@ -97,5 +97,3 @@ avatarSave.addEventListener('click',()=>{
 });
 el('#profile').innerHTML=avatarMarkup(userAvatar);
 render();
-
-
