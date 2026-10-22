@@ -53,9 +53,6 @@ async function refresh(){
     const result=/** @type {Snapshot} */(await response.json());
     if(requestKey!==`${pollSort}:${selectedPoll}`||requestRevision!==discussionRevision)return;
     if(selectedPoll && (loadedOlder||loadingOlder) && snapshotRevision===discussionRevision && snapshot) {
-      // Preserve expanded history on live refresh, deduplicating overlapping pages.
-      // A busy thread can advance by a whole page between refreshes. Start
-      // pagination at the new boundary so the intervening history stays reachable.
       if(result.nextCommentsCursor&&!result.comments.some(comment=>snapshot?.comments.some(previous=>previous.id===comment.id))) olderCursor=result.nextCommentsCursor;
       result.comments=mergeComments(snapshot.comments,result.comments);
     } else olderCursor=result.nextCommentsCursor??null;
@@ -145,8 +142,6 @@ el('#poll-load-older').addEventListener('click',async()=>{
     const result=/** @type {Snapshot} */(await response.json());
     if(revision!==discussionRevision||!snapshot)return;
     snapshot.comments=mergeComments(result.comments,snapshot.comments);
-    // Live refresh may have found a newer gap while this page was in flight.
-    // Only advance the boundary that this response actually fills.
     if(olderCursor===cursor)olderCursor=result.nextCommentsCursor??null;
     loadedOlder=true;
     renderDiscussion();

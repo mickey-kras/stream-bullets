@@ -12,8 +12,6 @@ function identity(request: Request): { id: string | null; host: boolean } {
   return { id, host: !!id && !!env.POLL_HOST_EMAIL && email?.toLowerCase() === env.POLL_HOST_EMAIL.toLowerCase() };
 }
 function json(value: unknown, status = 200): Response { return Response.json(value, { status, headers: { 'Cache-Control': 'no-store' } }); }
-// 2000 UTF-16 code units need at most 12000 bytes as JSON unicode escapes.
-// Leave room for the action, UUID, keys, and modest formatting overhead.
 const MAX_BODY_BYTES = 16 * 1024;
 const COMMENT_WINDOW_MS = 60_000;
 const COMMENT_LIMIT = 5;
@@ -34,7 +32,6 @@ export async function GET(request: Request): Promise<Response> {
   const rows = selected ? await db.prepare('SELECT * FROM polls WHERE id = ?').bind(selected).all<PollRow>() : await db.prepare(`SELECT * FROM polls ORDER BY ${order} LIMIT 50`).all<PollRow>();
   const ids = rows.results.map(poll => poll.id);
   const placeholders = ids.map(() => '?').join(',');
-  // Three grouped reads for the whole page, independent of the number of polls.
   const votes = ids.length ? (await db.prepare(`SELECT poll_id, choice, COUNT(*) AS count, MAX(CASE WHEN user_id = ? THEN 1 ELSE 0 END) AS mine FROM poll_votes WHERE poll_id IN (${placeholders}) GROUP BY poll_id, choice`).bind(user.id, ...ids).all<{poll_id:string; choice:number; count:number; mine:number}>()).results : [];
   const reactions = ids.length ? (await db.prepare(`SELECT poll_id, value, COUNT(*) AS count, MAX(CASE WHEN user_id = ? THEN 1 ELSE 0 END) AS mine FROM poll_reactions WHERE poll_id IN (${placeholders}) GROUP BY poll_id, value`).bind(user.id, ...ids).all<{poll_id:string; value:number; count:number; mine:number}>()).results : [];
   const commentCounts = ids.length ? (await db.prepare(`SELECT poll_id, COUNT(*) AS count FROM poll_comments WHERE poll_id IN (${placeholders}) GROUP BY poll_id`).bind(...ids).all<{poll_id:string; count:number}>()).results : [];
@@ -108,8 +105,6 @@ export async function POST(request: Request): Promise<Response> {
     const result = await db.prepare('INSERT INTO poll_reactions (poll_id, user_id, value) SELECT id, ?, ? FROM polls WHERE id = ? ON CONFLICT(poll_id, user_id) DO UPDATE SET value = excluded.value').bind(user.id, data.value, data.id).run();
     if (!result.meta.changes) return json({ error: 'Poll not found.' }, 404);
   } else if (data.action === 'comment') {
-    // The limit check and insert are one SQLite statement, so concurrent requests
-    // cannot both claim the final slot. The composite index bounds the lookup.
     const result = await db.prepare('INSERT INTO poll_comments (id, poll_id, user_id, text, created_at) SELECT ?, id, ?, ?, ? FROM polls WHERE id = ? AND (SELECT COUNT(*) FROM poll_comments WHERE poll_id = ? AND user_id = ? AND created_at > ?) < ?').bind(crypto.randomUUID(), user.id, data.text, now, data.id, data.id, user.id, now - COMMENT_WINDOW_MS, COMMENT_LIMIT).run();
     if (!result.meta.changes) {
       const poll = await db.prepare('SELECT id FROM polls WHERE id = ?').bind(data.id).first<{id:string}>();

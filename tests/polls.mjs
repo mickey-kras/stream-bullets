@@ -81,7 +81,6 @@ assert.equal((await post({action:'reveal',id:unlimited.id},{viewer:true})).statu
 assert.equal((await post({action:'reveal',id:unlimited.id})).status,200);
 assert.equal((await post({action:'vote',id:unlimited.id,choice:0},{viewer:true})).status,409);
 assert.equal((await get('test-viewer', '?sort=newest')).polls.length, 3);
-// Query work stays fixed as the page grows; all aggregates remain correct.
 for (let i = 0; i < 45; i++) sqlite.prepare('INSERT INTO polls VALUES (?, ?, ?, ?, ?, ?, ?)').run(crypto.randomUUID(), 'Another poll', 'choice', '["A","B"]', i, 0, 0);
 queryCount = 0;
 assert.equal((await get()).polls.length, 48);
@@ -92,7 +91,6 @@ assert.equal(queryCount, 5);
 for (const query of ['?poll=bad', '?before=1:bad', `?before=1:${poll.id}`, `?poll=${poll.id}&before=9007199254740992:${poll.id}`, '?sort=unknown', '?extra=1', '?sort=top&sort=newest']) {
   assert.equal((await routes.GET(new Request(base + '/api/polls' + query))).status, 400);
 }
-// Tie timestamps exercise the id tiebreaker across every page.
 const insert = sqlite.prepare('INSERT INTO poll_comments VALUES (?, ?, ?, ?, ?)');
 for (let i = 0; i < 205; i++) insert.run(crypto.randomUUID(), poll.id, 'history-user', 'History ' + i, 1000);
 let cursor = null;
@@ -105,7 +103,6 @@ do {
   cursor = page.nextCommentsCursor;
 } while (cursor);
 assert.equal(seen.size, 205);
-// A simultaneous burst cannot exceed the per-user/per-poll window.
 const burst = await Promise.all(Array.from({length: 8}, () => post({action:'comment',id:poll.id,text:'Burst'}, {viewer:true,user:'burst-user'})));
 assert.equal(burst.filter(r => r.status === 200).length, 5);
 assert.equal(burst.filter(r => r.status === 429).length, 3);
