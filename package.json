@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
-    "start": "wrangler dev --config build/server/wrangler.json --port 4173",
+    "start": "wrangler dev --config build/server/wrangler.json --port 5173",
     "check": "react-router typegen && tsc --noEmit",
     "lint": "eslint app db worker tests *.ts",
     "test": "vitest run",

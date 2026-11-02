@@ -18,6 +18,11 @@ export interface Streamer {
   ownerId: string;
 }
 
+export interface StreamerDirectory {
+  streamers: Streamer[];
+  nextCursor: string | null;
+}
+
 export interface Entry {
   id: string;
   streamerId: string;

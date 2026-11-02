@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { AppEnv } from '../app/env';
 import type { Streamer } from '../app/types';
-import { consumeMutationQuota, getEntry, getOwnStreamer, getStreamer, listComments, listEntries, listStreamers, mutateComment, mutateEntry, saveStreamer } from '../app/server/data.server';
+import { consumeMutationQuota, getEntry, getOverlaySnapshot, getOwnStreamer, getStreamer, listComments, listEntries, listStreamers, mutateComment, mutateEntry, saveStreamer } from '../app/server/data.server';
 import { createTestDatabase } from './helpers/database';
 import type { TestDatabase } from './helpers/database';
 
@@ -43,7 +43,7 @@ beforeEach(async (): Promise<void> => {
 describe('streamer profiles', (): void => {
   it('keeps viewers private until they claim a unique public handle', async (): Promise<void> => {
     expect(await getOwnStreamer(env, 'viewer')).toBeNull();
-    expect((await listStreamers(env)).map((value: Streamer): string => value.handle)).toEqual(['misha', 'other']);
+    expect((await listStreamers(env)).streamers.map((value: Streamer): string => value.handle)).toEqual(['misha', 'other']);
     await env.DB.prepare("UPDATE user SET image='/images/avatar/viewer' WHERE id='viewer'").run();
     const profile = await saveStreamer(env, 'viewer', { handle: 'viewer', name: 'Viewer', about: '' });
     expect(profile.avatar).toBe('/images/avatar/viewer');
@@ -66,6 +66,44 @@ describe('streamer profiles', (): void => {
 });
 
 describe('topics and polls', (): void => {
+  it('selects an older active overlay poll beyond the newest page and falls back after reveal', async (): Promise<void> => {
+    const activeId = await seedEntry('binary');
+    await env.DB.prepare('UPDATE entries SET created_at=1 WHERE id=?').bind(activeId).run();
+    await mutateEntry(env, 'viewer', streamer.id, { action: 'vote', id: activeId, choice: 0 });
+    const newerIds: string[] = Array.from({ length: 50 }, (): string => crypto.randomUUID());
+    await env.DB.batch(newerIds.map((id: string, index: number): D1PreparedStatement => env.DB.prepare(`
+      INSERT INTO entries(id,streamer_id,author_id,kind,title,options,created_at,revealed)
+      VALUES (?,?,'owner','choice','Newer poll','["One","Two"]',?,1)
+    `).bind(id, streamer.id, index + 2)));
+    const initial = await getOverlaySnapshot(env, streamer.id, null);
+    expect(initial.polls).toMatchObject([{ id: activeId, counts: null, total: 1 }]);
+    expect(initial.polls).toHaveLength(1);
+    expect(Object.keys(initial.polls[0]).sort()).toEqual(['counts', 'endsAt', 'id', 'kind', 'options', 'revealed', 'title', 'total']);
+    await mutateEntry(env, 'owner', streamer.id, { action: 'reveal', id: activeId });
+    const next = await getOverlaySnapshot(env, streamer.id, null);
+    expect(next.polls.map((poll): string => poll.id)).toEqual([newerIds[49]]);
+    expect(next.revision).toBeGreaterThan(initial.revision);
+    const pinned = await getOverlaySnapshot(env, streamer.id, activeId);
+    expect(pinned.polls).toMatchObject([{ id: activeId, counts: [1, 0], revealed: true }]);
+    expect((await getOverlaySnapshot(env, otherStreamer.id, activeId)).polls).toEqual([]);
+  });
+
+  it('excludes expired polls and topics from automatic overlay selection', async (): Promise<void> => {
+    expect((await getOverlaySnapshot(env, streamer.id, null)).polls).toEqual([]);
+    const unlimitedId = await seedEntry('choice');
+    const expiredId = await seedEntry('choice');
+    const topicId = await seedEntry();
+    await env.DB.batch([
+      env.DB.prepare('UPDATE entries SET created_at=1 WHERE id=?').bind(unlimitedId),
+      env.DB.prepare('UPDATE entries SET created_at=2,ends_at=3 WHERE id=?').bind(expiredId),
+    ]);
+    expect((await getOverlaySnapshot(env, streamer.id, null)).polls.map((poll): string => poll.id)).toEqual([unlimitedId]);
+    expect((await getOverlaySnapshot(env, streamer.id, topicId)).polls).toEqual([]);
+    const newestActiveId = await seedEntry('choice');
+    await env.DB.prepare('UPDATE entries SET ends_at=created_at+60000 WHERE id=?').bind(newestActiveId).run();
+    expect((await getOverlaySnapshot(env, streamer.id, null)).polls.map((poll): string => poll.id)).toEqual([newestActiveId]);
+  });
+
   it('persists viewer topics but permits only the owner to create polls', async (): Promise<void> => {
     const topic = await mutateEntry(env, 'viewer', streamer.id, { action: 'create', kind: 'topic', title: 'Useful tools', body: 'What do you use?', category: 'Creative' });
     expect(await getEntry(env, topic.id, 'viewer')).toMatchObject({ kind: 'topic', author: 'viewer', body: 'What do you use?', options: [] });
@@ -199,6 +237,32 @@ describe('discussion', (): void => {
 });
 
 describe('bounded reads and writes', (): void => {
+  it('continues the streamer directory past fifty profiles with a validated handle cursor', async (): Promise<void> => {
+    const statements: D1PreparedStatement[] = [];
+    for (let index = 0; index < 55; index++) {
+      const id = crypto.randomUUID();
+      const handle = `streamer_${String(index).padStart(2, '0')}`;
+      statements.push(
+        env.DB.prepare('INSERT INTO user(id,name,email,created_at,updated_at) VALUES (?,?,?,1,1)').bind(id, handle, `${handle}@example.test`),
+        env.DB.prepare('INSERT INTO streamers(id,owner_id,handle,name) VALUES (?,?,?,?)').bind(crypto.randomUUID(), id, handle, handle),
+      );
+    }
+    await env.DB.batch(statements);
+    const first = await listStreamers(env);
+    expect(first.streamers).toHaveLength(50);
+    expect(first.nextCursor).toBe('streamer_47');
+    const next = await listStreamers(env, first.nextCursor);
+    expect(next.streamers).toHaveLength(7);
+    expect(next.nextCursor).toBeNull();
+    const handles = [...first.streamers, ...next.streamers].map((value: Streamer): string => value.handle);
+    expect(new Set(handles).size).toBe(57);
+    expect(handles).toEqual([...handles].sort());
+    expect(await listStreamers(env, 'zzzzzz')).toEqual({ streamers: [], nextCursor: null });
+    for (const cursor of ['', '../misha', 'MiSha', 'x'.repeat(31)]) {
+      await expect(listStreamers(env, cursor)).rejects.toMatchObject({ status: 400 });
+    }
+  });
+
   it('rejects new content when a streamer or discussion reaches its capacity', async (): Promise<void> => {
     await env.DB.prepare(`WITH RECURSIVE sequence(n) AS (SELECT 1 UNION ALL SELECT n+1 FROM sequence WHERE n<1000)
       INSERT INTO entries(id,streamer_id,author_id,kind,title,created_at)

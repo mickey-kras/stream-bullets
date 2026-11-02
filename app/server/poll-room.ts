@@ -153,10 +153,18 @@ export class PollRoom extends DurableObject<AppEnv> {
     const [streamer, polls] = await this.env.DB.batch([
       this.env.DB.prepare('SELECT revision FROM streamers WHERE id = ?').bind(this.streamerId),
       this.env.DB.prepare(`
-        WITH selected AS (
+        WITH recent AS (
           SELECT id, title, kind, options, ends_at, revealed, created_at
           FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary')
           ORDER BY created_at DESC, id DESC LIMIT 50
+        ), active AS (
+          SELECT id, title, kind, options, ends_at, revealed, created_at
+          FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary')
+            AND revealed = 0 AND (ends_at IS NULL OR ends_at > unixepoch('subsec') * 1000)
+          ORDER BY created_at DESC, id DESC LIMIT 1
+        ), selected AS (
+          SELECT * FROM (SELECT * FROM recent UNION SELECT * FROM active)
+          ORDER BY (id = (SELECT id FROM active)) DESC, created_at DESC, id DESC LIMIT 50
         )
         SELECT e.id, e.title, e.kind, e.options, e.ends_at, e.revealed,
           COUNT(v.user_id) AS total,
@@ -168,7 +176,7 @@ export class PollRoom extends DurableObject<AppEnv> {
           SUM(CASE WHEN v.choice = 5 THEN 1 ELSE 0 END) AS count_5
         FROM selected e LEFT JOIN entry_votes v ON v.entry_id = e.id
         GROUP BY e.id ORDER BY e.created_at DESC, e.id DESC
-      `).bind(this.streamerId),
+      `).bind(this.streamerId, this.streamerId),
     ]);
     const revisionRow = streamer.results[0] as { revision: number } | undefined;
     if (!revisionRow || !Number.isSafeInteger(revisionRow.revision) || revisionRow.revision < 0) {

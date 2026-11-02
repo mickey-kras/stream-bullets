@@ -1,9 +1,9 @@
-import { eq } from 'drizzle-orm';
+import { eq, gt } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/d1';
 import { z } from 'zod';
 import { streamers, user } from '../../db/schema';
 import type { AppEnv } from '../env';
-import type { BoardSnapshot, Comment, DiscussionSnapshot, Entry, EntryKind, Reaction, Streamer } from '../types';
+import type { BoardSnapshot, Comment, DiscussionSnapshot, Entry, EntryKind, LiveSnapshot, Reaction, Streamer, StreamerDirectory } from '../types';
 import { HttpError } from './http.server';
 import { commentActionSchema, commentQuerySchema, entryActionSchema, entryQuerySchema, streamerSchema } from './validation';
 import type { CommentQuery, EntryAction, EntryQuery, StreamerInput } from './validation';
@@ -64,9 +64,11 @@ function streamerValue(row: typeof streamers.$inferSelect): Streamer {
   return { id: row.id, ownerId: row.ownerId, handle: row.handle, name: row.name, about: row.about, avatar: publicAvatar(row.ownerId, row.avatar), background: row.background === `/images/background/${encodeURIComponent(row.ownerId)}` ? row.background : null };
 }
 
-export async function listStreamers(env: AppEnv): Promise<Streamer[]> {
-  const rows = await drizzle(env.DB).select().from(streamers).orderBy(streamers.handle).limit(50);
-  return rows.map(streamerValue);
+export async function listStreamers(env: AppEnv, cursor: string | null = null): Promise<StreamerDirectory> {
+  const handle = cursor === null ? null : parsed(streamerSchema.shape.handle, cursor);
+  const rows = await drizzle(env.DB).select().from(streamers).where(handle === null ? undefined : gt(streamers.handle, handle)).orderBy(streamers.handle).limit(PAGE_SIZE + 1);
+  const page = rows.slice(0, PAGE_SIZE);
+  return { streamers: page.map(streamerValue), nextCursor: rows.length > PAGE_SIZE ? page.at(-1)?.handle ?? null : null };
 }
 
 export async function getStreamer(env: AppEnv, handle: string): Promise<Streamer | null> {
@@ -143,6 +145,30 @@ function entryValue(row: EntryRow): Entry {
 export async function getEntry(env: AppEnv, id: string, viewerId: string | null): Promise<Entry | null> {
   const row = await env.DB.prepare(`${entrySelect} WHERE e.id=?`).bind(viewerId ?? '', viewerId ?? '', id).first<EntryRow>();
   return row ? entryValue(row) : null;
+}
+
+export async function getOverlaySnapshot(env: AppEnv, streamerId: string, pollId: string | null): Promise<LiveSnapshot> {
+  const selection = pollId !== null ? '?' : `COALESCE(
+    (SELECT id FROM entries WHERE streamer_id=? AND kind!='topic' AND revealed=0
+      AND (ends_at IS NULL OR ends_at>CAST(strftime('%s','now') AS INTEGER)*1000+CAST(substr(strftime('%f','now'),4,3) AS INTEGER))
+      ORDER BY created_at DESC,id DESC LIMIT 1),
+    (SELECT id FROM entries WHERE streamer_id=? AND kind!='topic' ORDER BY created_at DESC,id DESC LIMIT 1)
+  )`;
+  const parameters: string[] = pollId !== null ? ['', '', pollId, streamerId] : ['', '', streamerId, streamerId, streamerId];
+  const results = await env.DB.batch([
+    env.DB.prepare('SELECT revision FROM streamers WHERE id=?').bind(streamerId),
+    env.DB.prepare(`${entrySelect} WHERE e.id=${selection} AND e.streamer_id=? AND e.kind!='topic'`).bind(...parameters),
+  ]);
+  const revision = (results[0]?.results[0] as { revision: number } | undefined)?.revision;
+  if (revision === undefined) throw new HttpError(404, 'Streamer not found.');
+  const rows = results[1].results as unknown as EntryRow[];
+  return {
+    type: 'snapshot', revision, serverNow: Date.now(),
+    polls: rows.map((row: EntryRow): LiveSnapshot['polls'][number] => {
+      const entry = entryValue(row);
+      return { id: entry.id, title: entry.title, kind: entry.kind, options: entry.options, endsAt: entry.endsAt, revealed: entry.revealed, counts: entry.counts, total: entry.total };
+    }),
+  };
 }
 
 export async function listEntries(env: AppEnv, streamer: Streamer, viewerId: string | null, input: EntryQuery): Promise<BoardSnapshot> {

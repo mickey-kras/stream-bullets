@@ -102,7 +102,7 @@ html, body { min-width: 320px; }
 .content-actions { margin-top: 18px; }
 .content-actions button, .small-button { font-size: 13px; padding: 6px 10px; min-height: 32px; }
 .comment-sort { margin-left: auto; }
-.comment-sort select { width: 105px; }
+.comment-sort select { width: 125px; }
 .comment-meta time { font-size: 11px; color: var(--muted); }
 .comment-text { white-space: pre-wrap; }
 .comment-actions { flex-wrap: wrap; gap: 14px; }
@@ -139,7 +139,7 @@ html:has(.overlay-screen) { background: transparent; }
   .modal-content h2 { font-size: 30px; }
   .comment-meta { flex-wrap: wrap; gap: 4px 10px; }
   .comment-meta time { font-size: 10px; }
-  .comment-sort select { width: 88px; }
+  .comment-sort select { width: 106px; }
   .discussion-head { flex-wrap: wrap; }
   .settings-footer { flex-wrap: wrap; }
   .page-error { margin: 8px 12px; }

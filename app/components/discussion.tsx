@@ -44,7 +44,8 @@ export function Discussion({ entryId, handle, viewer, ownerId, refreshKey, onCha
   const [reply, setReply] = useState<Comment | null>(null);
   const [revision, setRevision] = useState<number>(0);
   const loadGeneration = useRef<number>(0);
-  const loadedHistory = useRef<boolean>(false);
+  const loadedPages = useRef<number>(1);
+  const historyBoundary = useRef<Comment | null>(null);
   const threadKey = useRef<string>('');
   const textarea = useRef<HTMLTextAreaElement>(null);
 
@@ -53,7 +54,8 @@ export function Discussion({ entryId, handle, viewer, ownerId, refreshKey, onCha
     const key: string = `${entryId}:${sort}`;
     if (threadKey.current !== key) {
       threadKey.current = key;
-      loadedHistory.current = false;
+      loadedPages.current = 1;
+      historyBoundary.current = null;
       setComments([]);
       setCursor(null);
     }
@@ -62,22 +64,39 @@ export function Discussion({ entryId, handle, viewer, ownerId, refreshKey, onCha
     setLoading(true);
     setLoadingMore(false);
     setError('');
-    void requestJson<DiscussionSnapshot>(`/api/entries/${encodeURIComponent(entryId)}/comments?sort=${sort}`, { signal: controller.signal })
-      .then((snapshot: DiscussionSnapshot) => {
+    async function refresh(): Promise<void> {
+      const targetPages: number = loadedPages.current;
+      const boundary: Comment | null = historyBoundary.current;
+      const refreshed: Comment[] = [];
+      const compare = (a: Comment, b: Comment): number => (sort === 'top' ? b.likes - a.likes : 0) || b.createdAt - a.createdAt || b.id.localeCompare(a.id);
+      let pages: number = 0;
+      let nextCursor: string | null = null;
+      do {
+        const query: string = `sort=${sort}${nextCursor ? `&cursor=${encodeURIComponent(nextCursor)}` : ''}`;
+        const snapshot: DiscussionSnapshot = await requestJson<DiscussionSnapshot>(`/api/entries/${encodeURIComponent(entryId)}/comments?${query}`, { signal: controller.signal });
         if (controller.signal.aborted || generation !== loadGeneration.current) return;
-        if (!loadedHistory.current || !snapshot.nextCursor) {
-          setComments(snapshot.comments);
-          setCursor(snapshot.nextCursor);
-          return;
-        }
-        setComments((previous: Comment[]) => {
-          if (!snapshot.comments.some((incoming: Comment) => previous.some((old: Comment) => old.id === incoming.id))) setCursor(snapshot.nextCursor);
-          const tail: Comment | undefined = snapshot.comments.at(-1);
-          const compare = (a: Comment, b: Comment): number => (sort === 'top' ? b.likes - a.likes : 0) || b.createdAt - a.createdAt || b.id.localeCompare(a.id);
-          const older: Comment[] = tail ? previous.filter((comment: Comment) => compare(comment, tail) > 0) : [];
-          return [...new Map([...older, ...snapshot.comments].map((comment: Comment) => [comment.id, comment])).values()].sort(compare);
-        });
-      })
+        refreshed.push(...snapshot.comments);
+        pages += 1;
+        nextCursor = snapshot.nextCursor;
+        const tail: Comment | undefined = snapshot.comments.at(-1);
+        // Re-read every loaded page; continue through its old boundary if new comments shifted it.
+        if (pages >= targetPages && (!boundary || !tail || compare(tail, boundary) >= 0)) break;
+      } while (nextCursor);
+      const current: Comment[] = [...new Map(refreshed.map((comment: Comment) => [comment.id, comment])).values()].sort(compare);
+      loadedPages.current = pages;
+      historyBoundary.current = pages > 1 ? current.at(-1) ?? null : null;
+      setComments(current);
+      setCursor(nextCursor);
+      setReply((selected: Comment | null) => {
+        if (!selected) return null;
+        const updated: Comment | undefined = current.find((comment: Comment) => comment.id === selected.id);
+        if (updated) return updated;
+        const tail: Comment | undefined = current.at(-1);
+        // A sort change can leave a valid reply target beyond the refreshed range.
+        return !nextCursor || (tail && compare(selected, tail) <= 0) ? null : selected;
+      });
+    }
+    void refresh()
       .catch((cause: unknown) => { if (!controller.signal.aborted && generation === loadGeneration.current) setError(errorMessage(cause)); })
       .finally(() => { if (!controller.signal.aborted && generation === loadGeneration.current) setLoading(false); });
     return (): void => controller.abort();
@@ -91,7 +110,8 @@ export function Discussion({ entryId, handle, viewer, ownerId, refreshKey, onCha
     try {
       const snapshot: DiscussionSnapshot = await requestJson<DiscussionSnapshot>(`/api/entries/${encodeURIComponent(entryId)}/comments?sort=${sort}&cursor=${encodeURIComponent(cursor)}`);
       if (generation !== loadGeneration.current) return;
-      loadedHistory.current = true;
+      loadedPages.current += 1;
+      historyBoundary.current = snapshot.comments.at(-1) ?? historyBoundary.current;
       setComments((previous: Comment[]) => [...new Map([...previous, ...snapshot.comments].map((comment: Comment) => [comment.id, comment])).values()]);
       setCursor(snapshot.nextCursor);
     } catch (cause: unknown) { if (generation === loadGeneration.current) setError(errorMessage(cause)); }

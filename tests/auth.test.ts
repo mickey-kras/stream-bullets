@@ -1,4 +1,5 @@
-import { makeSignature } from 'better-auth/crypto';
+import { generateKeyPairSync, sign } from 'node:crypto';
+import { makeSignature, symmetricDecrypt } from 'better-auth/crypto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { AppContext, AppEnv } from '../app/env';
 import { configuredProviders, createAuth, getViewer } from '../app/server/auth.server';
@@ -32,20 +33,48 @@ async function seedSession(id: string, options: { expiresAt?: number; updatedAt?
   return token;
 }
 
-async function twitchCallback(): Promise<Request> {
+async function oauthCallback(provider: 'google' | 'twitch' = 'twitch'): Promise<Request> {
   const clientAddress: string = `192.0.2.${oauthClient++}`;
   const response: Response = await createAuth(env).handler(new Request(`${env.APP_ORIGIN}/api/auth/sign-in/social`, {
     method: 'POST',
     headers: { origin: env.APP_ORIGIN, 'content-type': 'application/json', 'cf-connecting-ip': clientAddress },
-    body: JSON.stringify({ provider: 'twitch', callbackURL: '/' }),
+    body: JSON.stringify({ provider, callbackURL: '/' }),
   }));
   expect(response.status).toBe(200);
   const result: { url: string } = await response.json() as { url: string };
   const state: string | null = new URL(result.url).searchParams.get('state');
   expect(state).not.toBeNull();
-  return new Request(`${env.APP_ORIGIN}/api/auth/callback/twitch?state=${encodeURIComponent(state ?? '')}&code=test-code`, {
+  return new Request(`${env.APP_ORIGIN}/api/auth/callback/${provider}?state=${encodeURIComponent(state ?? '')}&code=test-code`, {
     headers: { cookie: response.headers.getSetCookie().map((cookie: string) => cookie.split(';')[0]).join('; '), 'cf-connecting-ip': clientAddress },
   });
+}
+
+function stubGoogleIdentity(subject: string | undefined, email: string): { restore: () => void; tokenRequests: URLSearchParams[] } {
+  const originalFetch: typeof fetch = globalThis.fetch;
+  const tokenRequests: URLSearchParams[] = [];
+  const encode = (value: Record<string, unknown>): string => Buffer.from(JSON.stringify(value)).toString('base64url');
+  const now: number = Math.floor(Date.now() / 1000);
+  const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const tokenBody: string = `${encode({ alg: 'RS256', typ: 'JWT', kid: 'test-google-key' })}.${encode({
+    iss: 'https://accounts.google.com', aud: env.GOOGLE_CLIENT_ID, sub: subject,
+    iat: now, exp: now + 3600, email, email_verified: true, name: 'Google viewer',
+    picture: 'https://provider.example.test/google-avatar.png',
+  })}`;
+  const idToken: string = `${tokenBody}.${sign('RSA-SHA256', Buffer.from(tokenBody), privateKey).toString('base64url')}`;
+  const mock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+    const url: string = input instanceof Request ? input.url : String(input);
+    if (url === 'https://oauth2.googleapis.com/token') {
+      tokenRequests.push(new URLSearchParams(await new Request(input, init).text()));
+      // The authorization-code flow reads identity from this backchannel ID token;
+      // userinfo and JWKS fetches belong to other provider authentication paths.
+      return Response.json({ access_token: 'private-google-access-token', refresh_token: 'private-google-refresh-token', token_type: 'Bearer', expires_in: 3600, scope: 'openid email profile', id_token: idToken });
+    }
+    if (new URL(url).hostname.endsWith('googleapis.com') || new URL(url).hostname === 'accounts.google.com') {
+      throw new Error('Unexpected Google network request in OAuth test');
+    }
+    return originalFetch(input, init);
+  });
+  return { restore: (): void => mock.mockRestore(), tokenRequests };
 }
 
 function stubTwitchIdentity(subject: string, email: string, name: string = 'Twitch viewer'): () => void {
@@ -159,7 +188,7 @@ describe('OAuth boundary', () => {
     ['control', 'Viewer\u0085Name'],
     ['separator', 'Viewer\u2028Name'],
   ])('rejects a %s OAuth display name before creating an account', async (label: string, name: string) => {
-    const callback: Request = await twitchCallback();
+    const callback: Request = await oauthCallback();
     const email: string = `invalid-name-${label}@example.test`;
     const restore: () => void = stubTwitchIdentity(`invalid-name-${label}`, email, name);
     try {
@@ -174,7 +203,7 @@ describe('OAuth boundary', () => {
   });
 
   it('completes OAuth through D1, encrypts provider tokens, and rejects state replay', async () => {
-    const callback: Request = await twitchCallback();
+    const callback: Request = await oauthCallback();
     const name: string = 'N'.repeat(40);
     const restore: () => void = stubTwitchIdentity('twitch-new-viewer', 'new-viewer@example.test', name);
     try {
@@ -195,9 +224,50 @@ describe('OAuth boundary', () => {
     } finally { restore(); }
   });
 
+  it('completes Google OAuth with a provider account, encrypted tokens, and a usable session', async () => {
+    const callback: Request = await oauthCallback('google');
+    const { restore, tokenRequests } = stubGoogleIdentity('google-new-viewer', 'google-viewer@example.test');
+    try {
+      const response: Response = await createAuth(env).handler(callback);
+      expect(response.status).toBe(302);
+      expect(new URL(response.headers.get('location') ?? '', env.APP_ORIGIN).href).toBe(`${env.APP_ORIGIN}/`);
+      expect(tokenRequests).toHaveLength(1);
+      expect(Object.fromEntries(tokenRequests[0])).toMatchObject({
+        client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET,
+        grant_type: 'authorization_code', code: 'test-code', redirect_uri: `${env.APP_ORIGIN}/api/auth/callback/google`,
+      });
+      expect(tokenRequests[0].get('code_verifier')).toMatch(/^[A-Za-z0-9._~-]{43,128}$/);
+
+      const record: { user_id: string; access_token: string; refresh_token: string } | null = await env.DB.prepare('SELECT user_id,access_token,refresh_token FROM account WHERE provider_id=? AND account_id=?').bind('google', 'google-new-viewer').first();
+      expect(record).not.toBeNull();
+      expect(record?.access_token).not.toBe('private-google-access-token');
+      expect(record?.refresh_token).not.toBe('private-google-refresh-token');
+      expect(await symmetricDecrypt({ key: secret, data: record?.access_token ?? '' })).toBe('private-google-access-token');
+      expect(await symmetricDecrypt({ key: secret, data: record?.refresh_token ?? '' })).toBe('private-google-refresh-token');
+      expect(await env.DB.prepare('SELECT name,email,email_verified FROM user WHERE id=?').bind(record?.user_id ?? '').first()).toEqual({ name: 'Google viewer', email: 'google-viewer@example.test', email_verified: 1 });
+      expect(await env.DB.prepare('SELECT COUNT(*) AS count FROM session WHERE user_id=?').bind(record?.user_id ?? '').first()).toEqual({ count: 1 });
+      const cookie: string = response.headers.getSetCookie().map((value: string) => value.split(';')[0]).join('; ');
+      expect(await getViewer(new Request(`${env.APP_ORIGIN}/`, { headers: { cookie } }), context())).toEqual({ id: record?.user_id, name: 'Google viewer', avatar: null });
+    } finally { restore(); }
+  });
+
+  it('does not create a Google account or session without a stable provider subject', async () => {
+    const callback: Request = await oauthCallback('google');
+    const email: string = 'google-missing-subject@example.test';
+    const { restore } = stubGoogleIdentity(undefined, email);
+    try {
+      const response: Response = await createAuth(env).handler(callback);
+      expect(response.status).toBe(302);
+      expect(new URL(response.headers.get('location') ?? '', env.APP_ORIGIN).searchParams.has('error')).toBe(true);
+      expect(await env.DB.prepare('SELECT id FROM user WHERE email=?').bind(email).first()).toBeNull();
+      expect(await env.DB.prepare('SELECT id FROM account WHERE provider_id=? AND account_id=?').bind('google', 'undefined').first()).toBeNull();
+      expect(response.headers.getSetCookie().some((value: string) => value.startsWith('__Secure-stream-bullets.session_token='))).toBe(false);
+    } finally { restore(); }
+  });
+
   it('does not grant an existing account to a different provider identity with the same email', async () => {
     await seedSession('viewer-implicit-link');
-    const callback: Request = await twitchCallback();
+    const callback: Request = await oauthCallback();
     const restore: () => void = stubTwitchIdentity('twitch-unlinked-identity', 'viewer-implicit-link@example.test');
     try {
       const response: Response = await createAuth(env).handler(callback);

@@ -220,6 +220,33 @@ describe('public poll updates', (): void => {
     expect(snapshot.polls.at(-1)?.title).toBe('Poll 1');
   });
 
+  it('retains an old active poll beyond fifty newer results and falls back after reveal', async (): Promise<void> => {
+    const active = await addPoll('binary');
+    await database.prepare('UPDATE entries SET created_at = 1 WHERE id = ?').bind(active).run();
+    await vote(active, 0);
+    const newest = crypto.randomUUID();
+    await database.batch(Array.from({ length: 50 }, (_, index) =>
+      database.prepare('INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 1, ?)')
+        .bind(index === 49 ? newest : crypto.randomUUID(), streamerId, `Result ${index}`, 'choice', '["A","B"]', index + 2)));
+    const { socket, snapshot } = await connect();
+    expect(snapshot.polls).toHaveLength(50);
+    expect(snapshot.polls[0].id).toBe(newest);
+    expect(snapshot.polls.at(-1)).toMatchObject({ id: active, revealed: false, counts: null });
+    expect(snapshot.polls.filter((poll) => !poll.revealed).map((poll) => poll.id)).toEqual([active]);
+
+    const update = nextSnapshot(socket);
+    await database.batch([
+      database.prepare('UPDATE entries SET revealed = 1 WHERE id = ?').bind(active),
+      database.prepare('UPDATE streamers SET revision = revision + 1 WHERE id = ?').bind(streamerId),
+    ]);
+    await request('refresh');
+    const revealed = await update;
+    expect(revealed.polls).toHaveLength(50);
+    expect(revealed.polls.every((poll) => poll.revealed)).toBe(true);
+    expect(revealed.polls.some((poll) => poll.id === active)).toBe(false);
+    expect(revealed.polls[0].id).toBe(newest);
+  });
+
   it('rejects messages that try to mutate the read-only stream', async (): Promise<void> => {
     const id = await addPoll();
     const { socket } = await connect();

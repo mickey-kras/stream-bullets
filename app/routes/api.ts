@@ -35,7 +35,10 @@ export async function loader({ request, context, params }: LoaderFunctionArgs): 
       queryParams(request, []);
       return json({ viewer, streamer: viewer ? await getOwnStreamer(app.env, viewer.id) : null, providers: configuredProviders(app.env) });
     }
-    if (path === 'streamers') { queryParams(request, []); return json({ streamers: await listStreamers(app.env) }); }
+    if (path === 'streamers') {
+      const cursor = queryParams(request, ['cursor']).get('cursor');
+      return json(await listStreamers(app.env, cursor));
+    }
     const board = /^streamers\/([a-z0-9_]{3,30})$/.exec(path);
     if (board) {
       const input = parsedQuery(request, ['kind', 'sort', 'query', 'cursor'], entryQuerySchema);
