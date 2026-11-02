@@ -1,0 +1,95 @@
+import { z } from 'zod';
+import type { AppEnv } from '../env';
+
+export class HttpError extends Error {
+  constructor(public readonly status: number, message: string) { super(message); }
+}
+
+export function getOrigin(env: AppEnv): string {
+  let url: URL;
+  try { url = new URL(env.APP_ORIGIN); } catch { throw new HttpError(503, 'Application origin is not configured.'); }
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+  if (url.origin !== env.APP_ORIGIN || url.username || url.password || (url.protocol !== 'https:' && !(local && url.protocol === 'http:'))) {
+    throw new HttpError(503, 'Application origin is not configured.');
+  }
+  return url.origin;
+}
+
+export function requireSameOrigin(request: Request, env: AppEnv): void {
+  if (request.headers.get('Origin') !== getOrigin(env) || request.headers.get('Sec-Fetch-Site') === 'cross-site') {
+    throw new HttpError(403, 'Use this site to submit changes.');
+  }
+}
+
+export async function readBody(request: Request, maxBytes: number): Promise<Uint8Array<ArrayBuffer>> {
+  const length = request.headers.get('Content-Length');
+  if (length !== null && (!/^\d+$/.test(length) || Number(length) > maxBytes)) throw new HttpError(413, 'Request is too large.');
+  if (!request.body) throw new HttpError(400, 'Request body is required.');
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maxBytes) { await reader.cancel(); throw new HttpError(413, 'Request is too large.'); }
+      chunks.push(value);
+    }
+  } finally { reader.releaseLock(); }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  return bytes;
+}
+
+export async function readJson<T>(request: Request, schema: z.ZodType<T>): Promise<T> {
+  if (request.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') {
+    throw new HttpError(415, 'Send JSON with application/json.');
+  }
+  const bytes = await readBody(request, 16 * 1024);
+  let value: unknown;
+  try { value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)); }
+  catch { throw new HttpError(400, 'Send valid JSON.'); }
+  const result = schema.safeParse(value);
+  if (!result.success) throw new HttpError(400, result.error.issues[0]?.message ?? 'Invalid request.');
+  return result.data;
+}
+
+export function queryParams(request: Request, allowed: string[]): URLSearchParams {
+  const params = new URL(request.url).searchParams;
+  for (const key of params.keys()) {
+    if (!allowed.includes(key) || params.getAll(key).length !== 1) throw new HttpError(400, 'Invalid query parameters.');
+  }
+  return params;
+}
+
+export function json(value: unknown, status = 200): Response {
+  return Response.json(value, { status, headers: { 'Cache-Control': 'no-store' } });
+}
+
+export function errorResponse(error: unknown): Response {
+  if (error instanceof HttpError) {
+    const response = json({ error: error.message }, error.status);
+    if (error.status === 429) response.headers.set('Retry-After', '60');
+    return response;
+  }
+  console.error('request_failed');
+  return json({ error: 'The request failed. Please try again.' }, 500);
+}
+
+export function securityHeaders(response: Response, request: Request, nonce: string, origin: string, development: boolean): Response {
+  const headers = new Headers(response.headers);
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('Content-Security-Policy', [
+    "default-src 'self'", `script-src 'self' 'nonce-${nonce}'${development ? " 'unsafe-eval'" : ''}`,
+    "style-src 'self' 'unsafe-inline'", "img-src 'self' blob: data:", "font-src 'self'",
+    `connect-src 'self' ${origin.replace(/^http/, 'ws')}`, "object-src 'none'", "base-uri 'none'", "form-action 'self'", "frame-ancestors 'none'",
+  ].join('; '));
+  if (new URL(request.url).protocol === 'https:') headers.set('Strict-Transport-Security', 'max-age=31536000');
+  if (!headers.has('Cache-Control')) headers.set('Cache-Control', 'no-store');
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers, ...(response.webSocket ? { webSocket: response.webSocket } : {}) });
+}

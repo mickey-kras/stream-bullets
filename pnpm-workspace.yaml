@@ -1,21 +1,17 @@
-# Copied Sites are standalone projects and cannot inherit the monorepo policy.
 minimumReleaseAge: 10080
 minimumReleaseAgeIgnoreMissingTime: false
 trustLockfile: false
 strictDepBuilds: true
 allowBuilds:
   esbuild: true
-  fsevents: true
-  sharp: true
-  unrs-resolver: true
   workerd: true
-storeDir: ${SITES_PNPM_SHARED_STORE:-.sites-runtime/pnpm-store}
-cacheDir: ${SITES_PNPM_SHARED_STORE:-.sites-runtime/pnpm-store}/policy-cache
-enableGlobalVirtualStore: false
-# Reuse store files with clones or hardlinks before falling back to copies.
-packageImportMethod: auto
-# The explicit installer owns dependency setup, including restored workspaces.
+  sharp: true
 verifyDepsBeforeRun: false
-optimisticRepeatInstall: false
 overrides:
-  miniflare>sharp: 0.35.4
+  miniflare>undici: 7.30.1
+  miniflare>sharp: 0.35.5
+  '@esbuild-kit/core-utils>esbuild': 0.28.2
+  'minimatch@10.2.6': 11.0.1
+minimumReleaseAgeExclude:
+  - minimatch@11.0.1
+  - '@isaacs/nonrecursive-glob-match@1.0.1'

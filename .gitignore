@@ -19,6 +19,10 @@ next-env.d.ts
 
 # Test output
 /coverage/
+/build/
+/.react-router/
+/playwright-report/
+/test-results/
 
 # Package-manager logs
 npm-debug.log*

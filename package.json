@@ -1,58 +1,58 @@
 {
-  "name": "site-creator-vinext-starter",
-  "version": "0.1.0",
+  "name": "stream-bullets",
+  "version": "0.2.0",
   "private": true,
+  "type": "module",
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=24.0.0"
   },
+  "packageManager": "pnpm@11.25.0",
   "scripts": {
-    "install:ci": "bash scripts/install-pnpm.sh",
-    "dev": "node scripts/run-framework.mjs dev",
-    "build": "node scripts/run-framework.mjs build",
-    "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "dev": "react-router dev",
+    "build": "react-router build",
+    "start": "wrangler dev --config build/server/wrangler.json --port 4173",
+    "check": "react-router typegen && tsc --noEmit",
+    "lint": "eslint app db worker tests *.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
-    "test": "node tests/polls.mjs && node --test tests/polls-client.mjs",
-    "check": "tsc --noEmit"
+    "db:migrate": "wrangler d1 migrations apply DB --local",
+    "deploy": "wrangler deploy --config build/server/wrangler.json"
   },
   "dependencies": {
-    "class-variance-authority": "0.7.1",
-    "clsx": "2.1.1",
-    "drizzle-orm": "0.45.2",
-    "lucide-react": "^1.31.0",
-    "next": "16.3.4",
-    "radix-ui": "^1.6.7",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "tailwind-merge": "3.6.0",
-    "zod": "^3.25.76"
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router": "8.5.0",
+    "better-auth": "1.7.13",
+    "@better-auth/drizzle-adapter": "1.7.13",
+    "drizzle-orm": "0.45.4",
+    "radix-ui": "1.8.1",
+    "lucide-react": "1.61.0",
+    "zod": "4.6.7",
+    "image-size": "2.0.4"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.37.1",
-    "@cloudflare/workers-types": "4.20260515.1",
-    "@tailwindcss/postcss": "4.2.1",
-    "@types/node": "22.19.19",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.0.2",
-    "@vitejs/plugin-rsc": "0.5.26",
-    "drizzle-kit": "0.31.10",
-    "eslint": "9.39.4",
-    "eslint-config-next": "16.3.4",
-    "json-rpc-2.0": "1.7.1",
-    "raw-body": "3.0.2",
-    "react-server-dom-webpack": "19.2.6",
-    "tailwindcss": "4.2.1",
+    "@cloudflare/vite-plugin": "1.65.0",
+    "@cloudflare/workers-types": "5.20261026.1",
+    "@react-router/dev": "8.5.0",
+    "@tailwindcss/vite": "4.3.3",
+    "tailwindcss": "4.3.3",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "typescript": "5.9.3",
-    "vinext": "1.0.0-beta.5",
-    "vite": "8.0.13",
-    "wrangler": "4.92.0"
-  },
-  "type": "module",
-  "overrides": {
-    "miniflare": {
-      "sharp": "0.35.4"
-    }
-  },
-  "packageManager": "pnpm@11.25.0"
+    "typescript-eslint": "8.72.0",
+    "eslint": "10.13.0",
+    "@eslint/js": "10.0.1",
+    "vite": "8.3.5",
+    "wrangler": "4.152.0",
+    "drizzle-kit": "0.31.11",
+    "vitest": "5.0.5",
+    "@vitest/coverage-v8": "5.0.5",
+    "@playwright/test": "1.64.1",
+    "miniflare": "4.20260730.0",
+    "esbuild": "0.28.2",
+    "react-server-dom-webpack": "19.3.1"
+  }
 }
