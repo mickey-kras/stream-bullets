@@ -75,12 +75,12 @@ export function useLivePolls(handle: string, enabled = true): { snapshot: LiveSn
       current.onclose = (): void => {
         if (!active) return;
         if (watchdog) clearTimeout(watchdog);
-        attempts += 1;
+        attempts = Math.min(9, attempts + 1);
         if (attempts > 8) {
           setStatus('offline');
-          return;
+        } else {
+          setStatus('reconnecting');
         }
-        setStatus('reconnecting');
         timer = setTimeout(connect, Math.min(30_000, 1000 * 2 ** (attempts - 1)));
       };
     }
@@ -106,19 +106,25 @@ export function useServerTime(serverNow: number): number {
   return now;
 }
 
-export function useLiveRevalidation(status: LiveStatus, revision: number | undefined, revalidate: () => Promise<void>): void {
+export function useLiveRevalidation(status: LiveStatus, revision: number | undefined, revalidate: () => Promise<void>, enabled = true): void {
   const observed = useRef<string>('');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    const key: string = `${status}:${revision ?? ''}`;
+    const key: string = `${enabled}:${status}:${revision ?? ''}`;
     if (observed.current === key) return;
     observed.current = key;
-    if (status !== 'live' || timer.current) return;
+    if (!enabled || status !== 'live' || timer.current) return;
     timer.current = setTimeout(() => {
       timer.current = null;
       void revalidate();
     }, 400);
-  }, [status, revision, revalidate]);
+  }, [status, revision, revalidate, enabled]);
+  const disconnected: boolean = enabled && status !== 'live';
+  useEffect(() => {
+    if (!disconnected) return;
+    const fallback = setInterval(() => { void revalidate(); }, 30_000);
+    return (): void => clearInterval(fallback);
+  }, [disconnected, revalidate]);
   useEffect(() => (): void => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;

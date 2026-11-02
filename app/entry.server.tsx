@@ -1,6 +1,10 @@
 import { renderToReadableStream } from 'react-dom/server';
-import { ServerRouter, type EntryContext, type RouterContextProvider } from 'react-router';
+import { ServerRouter, type EntryContext, type HandleErrorFunction, type RouterContextProvider } from 'react-router';
 import { appContext } from './env';
+
+export const handleError: HandleErrorFunction = (_error, { request }) => {
+  if (!request.signal.aborted) console.error('server_request_failed');
+};
 
 export default async function handleRequest(request: Request, status: number, headers: Headers, routerContext: EntryContext, context: RouterContextProvider): Promise<Response> {
   if (request.method === 'HEAD') return new Response(null, { status, headers });

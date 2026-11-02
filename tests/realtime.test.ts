@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { build } from 'esbuild';
+import { build, type PluginBuild } from 'esbuild';
 import { Miniflare } from 'miniflare';
 import { fileURLToPath } from 'node:url';
 import type { LiveSnapshot } from '../app/types';
@@ -12,6 +12,7 @@ let database: Database;
 let streamerId: string;
 const sockets: LiveSocket[] = [];
 const origin = 'https://streambullets.test';
+const clientKey = 'a'.repeat(64);
 
 function nextSnapshot(socket: LiveSocket): Promise<LiveSnapshot> {
   return new Promise((resolve, reject): void => {
@@ -37,13 +38,13 @@ function nextClose(socket: LiveSocket): Promise<number> {
   });
 }
 
-function request(path: string, method: string = 'POST', room: string = streamerId): ReturnType<Miniflare['dispatchFetch']> {
-  return runtime.dispatchFetch(`${origin}/${room}/${path}?streamerId=${streamerId}`, { method });
+function request(path: string, method: string = 'POST', room: string = streamerId, key: string = clientKey): ReturnType<Miniflare['dispatchFetch']> {
+  return runtime.dispatchFetch(`${origin}/${room}/${path}?streamerId=${streamerId}`, { method, headers: { 'X-Stream-Bullets-Client': key } });
 }
 
-async function connect(): Promise<{ socket: LiveSocket; snapshot: LiveSnapshot }> {
+async function connect(key: string = clientKey): Promise<{ socket: LiveSocket; snapshot: LiveSnapshot }> {
   const result = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, {
-    headers: { Upgrade: 'websocket', Origin: origin },
+    headers: { Upgrade: 'websocket', Origin: origin, 'X-Stream-Bullets-Client': key },
   });
   expect(result.status).toBe(101);
   const socket = result.webSocket;
@@ -77,6 +78,12 @@ beforeAll(async (): Promise<void> => {
         export class TestPollRoom extends PollRoom {
           async invokeAlarm() { await this.alarm(); }
           async alarmAt() { return this.ctx.storage.getAlarm(); }
+          async leaseAt(key) {
+            return this.ctx.getWebSockets('client:' + key)[0].deserializeAttachment().expiresAt;
+          }
+          async expireClient(key) {
+            for (const socket of this.ctx.getWebSockets('client:' + key)) socket.serializeAttachment({ expiresAt: Date.now() - 1 });
+          }
         }
         export default {
           async fetch(request, env) {
@@ -85,6 +92,9 @@ beforeAll(async (): Promise<void> => {
             const stub = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(room));
             if (path === 'alarm') { await stub.invokeAlarm(); return new Response(null, { status: 204 }); }
             if (path === 'alarm-at') return Response.json(await stub.alarmAt());
+            const key = request.headers.get('X-Stream-Bullets-Client');
+            if (path === 'lease-at') return Response.json(await stub.leaseAt(key));
+            if (path === 'expire-client') { await stub.expireClient(key); return new Response(null, { status: 204 }); }
             url.pathname = '/' + path;
             return stub.fetch(new Request(url, request));
           }
@@ -221,7 +231,7 @@ describe('public poll updates', (): void => {
 
   it('rejects another stream ID for the same object and cross-origin browser connections', async (): Promise<void> => {
     const other = crypto.randomUUID();
-    const mismatched = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${other}`, { headers: { Upgrade: 'websocket' } });
+    const mismatched = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${other}`, { headers: { Upgrade: 'websocket', 'X-Stream-Bullets-Client': clientKey } });
     expect(mismatched.status).toBe(400);
     const foreignOrigin = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, { headers: { Upgrade: 'websocket', Origin: 'https://foreign.test' } });
     expect(foreignOrigin.status).toBe(403);
@@ -244,8 +254,8 @@ describe('public poll updates', (): void => {
   });
 
   it('enforces the connection cap when subscription reads overlap', async (): Promise<void> => {
-    const responses = await Promise.all(Array.from({ length: 201 }, () =>
-      runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, { headers: { Upgrade: 'websocket' } })));
+    const responses = await Promise.all(Array.from({ length: 201 }, (_, index) =>
+      runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, { headers: { Upgrade: 'websocket', 'X-Stream-Bullets-Client': index.toString(16).padStart(64, '0') } })));
     for (const result of responses) {
       if (result.webSocket) {
         sockets.push(result.webSocket);
@@ -256,10 +266,107 @@ describe('public poll updates', (): void => {
     expect(responses.filter((result) => result.status === 503)).toHaveLength(1);
   });
 
+  it('limits each client to ten concurrent connections without excluding another client', async (): Promise<void> => {
+    const responses = await Promise.all(Array.from({ length: 11 }, () =>
+      runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, { headers: { Upgrade: 'websocket', 'X-Stream-Bullets-Client': clientKey } })));
+    for (const result of responses) {
+      if (result.webSocket) {
+        sockets.push(result.webSocket);
+        result.webSocket.accept();
+      }
+    }
+    expect(responses.filter((result) => result.status === 101)).toHaveLength(10);
+    expect(responses.filter((result) => result.status === 429)).toHaveLength(1);
+    expect((await connect('b'.repeat(64))).snapshot.polls).toEqual([]);
+  });
+
+  it('expires fixed connection leases through alarms even when the client sends ping', async (): Promise<void> => {
+    const started = Date.now();
+    const { socket } = await connect();
+    const expiry: unknown = await (await request('lease-at')).json();
+    expect(expiry).toBeGreaterThanOrEqual(started + 3_600_000);
+    expect(expiry).toBeLessThanOrEqual(Date.now() + 3_600_000);
+    const pong = new Promise<string>((resolve): void => {
+      socket.addEventListener('message', (event): void => resolve(String(event.data)), { once: true });
+    });
+    socket.send('ping');
+    expect(await pong).toBe('pong');
+    expect(await (await request('lease-at')).json()).toBe(expiry);
+    const expired = nextSnapshot(socket);
+    await request('expire-client');
+    await request('alarm');
+    expect(await expired).toEqual({ type: 'unavailable' });
+    expect(await (await request('alarm-at')).json()).toBeNull();
+  });
+
+  it('replaces caller-supplied connection identity with the trusted IP digest in the public Worker', async (): Promise<void> => {
+    const workerPath = fileURLToPath(new URL('../worker/index.ts', import.meta.url));
+    const bundle = await build({
+      stdin: {
+        contents: `
+          import worker from ${JSON.stringify(workerPath)};
+          import { DurableObject } from 'cloudflare:workers';
+          export class CaptureRoom extends DurableObject {
+            fetch(request) { return Response.json({ key: request.headers.get('X-Stream-Bullets-Client') }); }
+          }
+          export default {
+            fetch(request, env) {
+              return worker.fetch(request, { ...env, REQUEST_LIMITER: { limit: async () => ({ success: true }) } });
+            }
+          };
+        `,
+        resolveDir: fileURLToPath(new URL('..', import.meta.url)),
+        loader: 'ts',
+      },
+      bundle: true, write: false, format: 'esm', platform: 'neutral', target: 'es2022',
+      external: ['cloudflare:workers'],
+      define: { 'import.meta.env.DEV': 'false', 'import.meta.env.MODE': '"production"' },
+      plugins: [{
+        name: 'isolate-live-worker-dependencies',
+        setup(plugin: PluginBuild): void {
+          plugin.onResolve({ filter: /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup)\.server$/ }, (args) => ({ path: args.path, namespace: 'live-worker-test' }));
+          plugin.onLoad({ filter: /.*/, namespace: 'live-worker-test' }, (args) => {
+            if (args.path === 'react-router') return { contents: 'export const createContext = () => ({}); export const createRequestHandler = () => () => new Response(null, {status: 404}); export class RouterContextProvider { set() {} }' };
+            if (args.path.endsWith('data.server')) return { contents: 'export const getStreamer = async env => ({ id: env.TEST_STREAMER });' };
+            if (args.path.endsWith('images.server')) return { contents: 'export const serveImage = () => new Response(null, {status: 404});' };
+            if (args.path.endsWith('cleanup.server')) return { contents: 'export const cleanExpiredData = async () => {};' };
+            return { contents: 'export default {};' };
+          });
+        },
+      }],
+    });
+    const worker = new Miniflare({
+      modules: true, script: bundle.outputFiles[0].text, compatibilityDate: '2026-05-15',
+      durableObjects: { POLL_ROOMS: { className: 'CaptureRoom', useSQLite: true } },
+      bindings: { APP_ORIGIN: origin, TEST_STREAMER: streamerId },
+    });
+    try {
+      const ip = '203.0.113.7';
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip));
+      const expected = Array.from(new Uint8Array(digest), (byte: number): string => byte.toString(16).padStart(2, '0')).join('');
+      for (const spoofed of ['0'.repeat(64), '1'.repeat(64)]) {
+        const result = await worker.dispatchFetch(`${origin}/api/live/test_host`, {
+          headers: { Origin: origin, Upgrade: 'websocket', 'CF-Connecting-IP': ip, 'X-Stream-Bullets-Client': spoofed },
+        });
+        expect(result.status).toBe(200);
+        expect(await result.json()).toEqual({ key: expected });
+      }
+    } finally {
+      await worker.dispose();
+    }
+  });
+
+  it('rejects missing or malformed internal client identity', async (): Promise<void> => {
+    for (const key of ['', 'not-a-digest', 'a'.repeat(65)]) {
+      const result = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, { headers: { Upgrade: 'websocket', 'X-Stream-Bullets-Client': key } });
+      expect(result.status).toBe(400);
+    }
+  });
+
   it('rejects malformed stored poll options without sending an unsafe snapshot', async (): Promise<void> => {
     const id = await addPoll();
     await database.prepare('UPDATE entries SET options = ? WHERE id = ?').bind('{"not":"options"}', id).run();
-    const result = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, { headers: { Upgrade: 'websocket' } });
+    const result = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, { headers: { Upgrade: 'websocket', 'X-Stream-Bullets-Client': clientKey } });
     expect(result.status).toBe(503);
     expect(result.webSocket).toBeNull();
   });
@@ -268,7 +375,7 @@ describe('public poll updates', (): void => {
     expect((await request('subscribe', 'POST')).status).toBe(405);
     expect((await request('subscribe', 'GET')).status).toBe(426);
     expect((await request('missing')).status).toBe(404);
-    const repeated = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}&streamerId=${streamerId}`, { headers: { Upgrade: 'websocket' } });
+    const repeated = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}&streamerId=${streamerId}`, { headers: { Upgrade: 'websocket', 'X-Stream-Bullets-Client': clientKey } });
     expect(repeated.status).toBe(400);
   });
 });

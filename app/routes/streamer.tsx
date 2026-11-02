@@ -51,20 +51,21 @@ export default function StreamerPage(): ReactNode {
   const [extra, setExtra] = useState<Entry[]>([]);
   const [cursor, setCursor] = useState<string | null>(board.nextCursor);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [discussionRevision, setDiscussionRevision] = useState<number>(0);
   const [split, setSplit] = useState<number>(40);
   const generation = useRef<number>(0);
   const workspace = useRef<HTMLElement>(null);
   const pointerId = useRef<number | null>(null);
   const live = useLivePolls(streamer.handle, view === 'polls');
-  useLiveRevalidation(live.status, live.snapshot?.revision, revalidator.revalidate);
+  useLiveRevalidation(live.status, live.snapshot?.revision, revalidator.revalidate, view === 'polls');
   const now: number = useServerTime(live.snapshot?.serverNow || board.serverNow);
   const owner: boolean = viewer?.id === streamer.ownerId;
-  const entries: Entry[] = [...new Map([...board.entries, ...extra].map((entry: Entry) => [entry.id, entry])).values()].map((entry: Entry) => {
+  const boardIds: Set<string> = new Set(board.entries.map((entry: Entry) => entry.id));
+  const entries: Entry[] = [...new Map([...board.entries, ...extra.filter((entry: Entry) => !boardIds.has(entry.id))].map((entry: Entry) => [entry.id, entry])).values()].map((cached: Entry) => {
+    const entry: Entry = loadedSelected?.id === cached.id ? loadedSelected : cached;
     const update = live.snapshot && live.snapshot.revision >= board.revision ? live.snapshot.polls.find((poll) => poll.id === entry.id) : null;
     return update ? { ...entry, ...update } : entry;
   });
-  const selectedBase: Entry | null = loadedSelected ? entries.find((entry: Entry) => entry.id === loadedSelected.id) || loadedSelected : entries[0] || null;
+  const selectedBase: Entry | null = loadedSelected || entries[0] || null;
   const selectedUpdate = selectedBase && live.snapshot && live.snapshot.revision >= board.revision ? live.snapshot.polls.find((poll) => poll.id === selectedBase.id) : null;
   const selected: Entry | null = selectedBase && selectedUpdate ? { ...selectedBase, ...selectedUpdate } : selectedBase;
 
@@ -74,7 +75,7 @@ export default function StreamerPage(): ReactNode {
     setCursor(board.nextCursor);
     setLoadingMore(false);
     setError('');
-  }, [streamer.id, view, sort, query, board.nextCursor]);
+  }, [streamer.id, view, sort, query, board.nextCursor, board.revision]);
 
   function navigate(next: View, entryId?: string): void {
     const params = new URLSearchParams();
@@ -133,13 +134,14 @@ export default function StreamerPage(): ReactNode {
   }
 
   function changed(): void {
-    setDiscussionRevision((value: number) => value + 1);
     void revalidator.revalidate();
   }
 
   async function removeSelected(): Promise<void> {
     if (!selected) return;
     await postJson<unknown>(`/api/streamers/${encodeURIComponent(streamer.handle)}`, { action: 'delete', id: selected.id });
+    generation.current += 1;
+    setExtra([]);
     navigate(view);
   }
 
@@ -179,7 +181,7 @@ export default function StreamerPage(): ReactNode {
             {!viewer && <p className="muted">Sign in to vote or suggest a topic.</p>}
             {viewer && (owner || selected.authorId === viewer.id) && <div className="content-actions"><DeleteButton label="Delete topic" onDelete={removeSelected} disabled={pending} /></div>}
           </div>
-          <Discussion key={selected.id} entryId={selected.id} handle={streamer.handle} viewer={viewer} ownerId={streamer.ownerId} refreshKey={discussionRevision} onChanged={changed} />
+          <Discussion key={selected.id} entryId={selected.id} handle={streamer.handle} viewer={viewer} ownerId={streamer.ownerId} refreshKey={board.revision} onChanged={changed} />
         </> : <EmptyState title="Start a conversation.">Suggest a topic for {streamer.name}&apos;s next stream.</EmptyState>}
       </section>
     </main> : <main className="page-panel" id="main-content">
@@ -191,7 +193,7 @@ export default function StreamerPage(): ReactNode {
         {(loadedSelected && selected ? [selected] : entries).map((entry: Entry) => <PollCard key={entry.id} entry={entry} now={now} signedIn={Boolean(viewer)} owner={owner} pending={pending} onAction={act} onDiscuss={() => navigate('polls', entry.id)} />)}
         {entries.length === 0 && !loadedSelected && <EmptyState title="The mic is yours.">No polls yet. The next question starts here.</EmptyState>}
         {cursor && !loadedSelected && <button type="button" className="load-more" disabled={loadingMore} onClick={() => { void loadMore(); }}>{loadingMore ? 'Loading…' : 'Load more polls'}</button>}
-        {loadedSelected && selected && <div className="poll-card poll-discussion"><h2>{selected.title}</h2>{owner && <DeleteButton label="Delete poll" onDelete={removeSelected} disabled={pending} />}<Discussion key={selected.id} entryId={selected.id} handle={streamer.handle} viewer={viewer} ownerId={streamer.ownerId} refreshKey={discussionRevision} onChanged={changed} /></div>}
+        {loadedSelected && selected && <div className="poll-card poll-discussion"><h2>{selected.title}</h2>{owner && <DeleteButton label="Delete poll" onDelete={removeSelected} disabled={pending} />}<Discussion key={selected.id} entryId={selected.id} handle={streamer.handle} viewer={viewer} ownerId={streamer.ownerId} refreshKey={board.revision} onChanged={changed} /></div>}
       </> : view === 'about' ? <><span className="eyebrow">BEHIND THE MIC</span><h1>{streamer.name}</h1><section className="info-card"><Avatar name={streamer.name} url={streamer.avatar} /><p className="description">{streamer.about || 'This streamer has not added an introduction yet.'}</p></section></> : view === 'schedule' ? <><span className="eyebrow">WHAT&apos;S NEXT</span><h1>Stream schedule</h1><EmptyState title="Next stream to be announced.">In the meantime, help choose what we talk about.</EmptyState><button className="gold" type="button" onClick={() => navigate('topics')}>Explore topics</button></> : <><span className="eyebrow">PART OF THE CONVERSATION</span><h1>{streamer.name}&apos;s community</h1><div className="community-grid"><section className="info-card"><h2>Bring an idea</h2><p>Suggest a topic, vote on your favorites, and discuss it with everyone.</p><button className="gold" type="button" onClick={() => navigate('topics')}>Browse topics</button></section><section className="info-card"><h2>Have your say live</h2><p>Vote in live polls. Keep the conversation respectful and on topic.</p><button className="gold" type="button" onClick={() => navigate('polls')}>Open polls</button></section></div></>}
     </main>}
     <CreateEntry key={dialog || 'closed'} mode={dialog || 'topic'} open={dialog !== null} onOpenChange={(open: boolean) => { if (!open) setDialog(null); }} onCreate={async (body: unknown) => { const result = await mutate(body); navigate(dialog === 'poll' ? 'polls' : 'topics', result.id); }} />

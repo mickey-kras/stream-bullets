@@ -3,6 +3,8 @@ import type { Comment, DiscussionSnapshot, SortOrder, Viewer } from '../types';
 import { Avatar, Modal } from './common';
 import { errorMessage, postJson, requestJson } from './api';
 
+type CommentChange = { action: 'like'; id: string; liked: boolean } | { action: 'delete'; id: string };
+
 export function DeleteButton({ label, onDelete, disabled = false }: { label: string; onDelete: () => Promise<void>; disabled?: boolean }): ReactNode {
   const [open, setOpen] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
@@ -56,12 +58,13 @@ export function Discussion({ entryId, handle, viewer, ownerId, refreshKey, onCha
       setCursor(null);
     }
     loadGeneration.current += 1;
+    const generation: number = loadGeneration.current;
     setLoading(true);
     setLoadingMore(false);
     setError('');
     void requestJson<DiscussionSnapshot>(`/api/entries/${encodeURIComponent(entryId)}/comments?sort=${sort}`, { signal: controller.signal })
       .then((snapshot: DiscussionSnapshot) => {
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted || generation !== loadGeneration.current) return;
         if (!loadedHistory.current || !snapshot.nextCursor) {
           setComments(snapshot.comments);
           setCursor(snapshot.nextCursor);
@@ -75,8 +78,8 @@ export function Discussion({ entryId, handle, viewer, ownerId, refreshKey, onCha
           return [...new Map([...older, ...snapshot.comments].map((comment: Comment) => [comment.id, comment])).values()].sort(compare);
         });
       })
-      .catch((cause: unknown) => { if (!controller.signal.aborted) setError(errorMessage(cause)); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+      .catch((cause: unknown) => { if (!controller.signal.aborted && generation === loadGeneration.current) setError(errorMessage(cause)); })
+      .finally(() => { if (!controller.signal.aborted && generation === loadGeneration.current) setLoading(false); });
     return (): void => controller.abort();
   }, [entryId, sort, refreshKey, revision]);
 
@@ -95,11 +98,19 @@ export function Discussion({ entryId, handle, viewer, ownerId, refreshKey, onCha
     finally { if (generation === loadGeneration.current) setLoadingMore(false); }
   }
 
-  async function changeComment(body: unknown): Promise<void> {
+  async function changeComment(body: CommentChange): Promise<void> {
     setBusy(true);
     setError('');
     try {
       await postJson<unknown>('/api/comments', body);
+      loadGeneration.current += 1;
+      setComments((previous: Comment[]) => {
+        const updated: Comment[] = body.action === 'delete'
+          ? previous.filter((comment: Comment) => comment.id !== body.id).map((comment: Comment) => comment.parentId === body.id ? { ...comment, parentId: null } : comment)
+          : previous.map((comment: Comment) => comment.id === body.id ? { ...comment, liked: body.liked, likes: comment.likes + Number(body.liked) - Number(comment.liked) } : comment);
+        return sort === 'top' ? updated.sort((a: Comment, b: Comment) => b.likes - a.likes || b.createdAt - a.createdAt || b.id.localeCompare(a.id)) : updated;
+      });
+      if (body.action === 'delete') setReply((current: Comment | null) => current?.id === body.id ? null : current);
       setRevision((value: number) => value + 1);
       onChanged();
     } finally { setBusy(false); }

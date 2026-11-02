@@ -16,11 +16,12 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 ## Behavior
 
 - Accounts start as viewers. A viewer must create a streamer profile to claim `/@handle`.
+- Display names use 1 to 40 characters on one line. If your provider name does not meet this limit, change it before you sign in.
 - Topics, comments, replies, likes, dislikes, and profile changes persist in D1.
 - Each account has one reaction per topic or poll, one like per comment, and one vote per poll. A poll vote can change until voting closes.
 - Only the page owner can create, end, or reveal its polls. Polls can have a time limit or stay open until the owner ends them.
 - Binary poll counts and percentages stay private until reveal. Multiple-choice results update live.
-- Authors and page owners can remove content. Removing a comment also removes its replies.
+- Authors and page owners can remove content. Replies remain when a parent comment is removed.
 - Newest uses stable cursor pagination. Top uses likes minus dislikes. New votes can move items between Top pages; refresh to see the new order.
 - `/@handle/overlay` shows the latest active poll. Add `?poll=<id>` to select one poll. The overlay is public and cannot submit votes.
 - Schedule shows an empty state until scheduling is implemented. It does not imply an event exists.
@@ -118,7 +119,7 @@ Migrations `0000`–`0002` and their legacy poll tables remain intact. The platf
 
 - All changes require a database session and an exact same-origin request. Forwarded Sites identity headers grant no access. Production cookies use HTTPS, HTTP-only access, and host scope.
 - Owner checks and tenant constraints run on the server. Vote uniqueness and the poll deadline are enforced in atomic database writes. D1 is the source of truth.
-- WebSockets expose public poll data only. They do not accept application mutations. Each room accepts at most 200 connections and returns at most 50 recent polls. Active rooms resync every 15 seconds to recover a missed notification; reconnect also loads current state.
+- WebSockets expose public poll data only. They do not accept application mutations. Each room accepts at most 200 connections, with at most 10 per trusted client IP, and returns at most 50 recent polls. Connections have a fixed one-hour lease. Active rooms resync every 15 seconds to recover a missed notification; reconnect also loads current state. Disconnected views refresh over HTTP every 30 seconds and keep retrying WebSockets automatically.
 - The edge request limiter is approximate and local to a Cloudflare location. D1 mutation limits apply across targets for each account. These limits do not prevent coordinated abuse by many accounts.
 - A page can contain up to 1,000 topics and polls. A discussion can contain up to 10,000 comments. Request bodies and page sizes are bounded.
 - Uploads accept PNG, JPEG, and WebP only, up to 5 MB, 16 million pixels, and 8,192 pixels per side. Each account has one avatar and each streamer has one background. Uploaded images are public through their application URLs. Image metadata is not stripped.

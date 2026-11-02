@@ -54,7 +54,7 @@ test('public access rejects forged identities and unsafe mutations', async ({ br
   await viewer.close();
 });
 
-test('viewer topics, reactions, replies, and comment likes survive reload', async ({ browser }) => {
+test('viewer topics, reactions, replies, and comment likes survive reload', async ({ browser }, testInfo) => {
   const context = await signedIn(browser, 'viewer');
   const page = await context.newPage();
   await assertNoScriptErrors(page, async () => {
@@ -86,10 +86,13 @@ test('viewer topics, reactions, replies, and comment likes survive reload', asyn
     await expect(page.locator('img[src="x"]')).toHaveCount(0);
     await expect(page.getByText('Compare cooling and fan speeds. <img src=x onerror=alert(1)>', { exact: true })).toBeVisible();
   });
+  await page.screenshot({ path: testInfo.outputPath('community-desktop.png') });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: testInfo.outputPath('community-mobile.png') });
   await context.close();
 });
 
-test('streamer controls a binary poll and the public OBS overlay updates live', async ({ browser }) => {
+test('streamer controls a binary poll and the public OBS overlay updates live', async ({ browser }, testInfo) => {
   const ownerContext = await signedIn(browser, 'owner');
   const viewerContext = await signedIn(browser, 'viewer');
   const owner = await ownerContext.newPage();
@@ -131,6 +134,7 @@ test('streamer controls a binary poll and the public OBS overlay updates live', 
   await overlay.reload();
   await expect(overlay.getByText('Results revealed', { exact: true })).toBeVisible();
   await expect(overlay.getByRole('button', { name: /^(Yes|No)$/ })).toHaveCount(0);
+  await overlay.screenshot({ path: testInfo.outputPath('poll-overlay.png') });
   await otherOwner.close();
   await ownerContext.close();
   await viewerContext.close();
@@ -159,7 +163,7 @@ test('a viewer opts into a public streamer page and uploads a bounded image', as
   expect(image.status()).toBe(200);
   expect(image.headers()['content-type']).toBe('image/png');
   expect(await image.body()).toEqual(png);
-  const rejected = await context.request.put('/api/images/avatar', { headers: { Origin: origin, 'Content-Type': 'image/svg+xml' }, data: '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>' });
+  const rejected = await context.request.put('/api/images/avatar', { headers: { Origin: origin, 'Content-Type': 'image/svg+xml' }, data: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script></svg>' });
   expect(rejected.status()).toBe(415);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: 'Suggest a topic', exact: true }).click();

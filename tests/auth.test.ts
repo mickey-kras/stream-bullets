@@ -7,6 +7,7 @@ import { createTestDatabase } from './helpers/database';
 const secret: string = 'test-only-secret-71cbbad72594467d8bcd83e4e0f42d04';
 let database: Awaited<ReturnType<typeof createTestDatabase>>;
 let env: AppEnv;
+let oauthClient: number = 20;
 
 function context(): AppContext {
   return { env, nonce: 'test-nonce', responseHeaders: new Headers() };
@@ -32,9 +33,10 @@ async function seedSession(id: string, options: { expiresAt?: number; updatedAt?
 }
 
 async function twitchCallback(): Promise<Request> {
+  const clientAddress: string = `192.0.2.${oauthClient++}`;
   const response: Response = await createAuth(env).handler(new Request(`${env.APP_ORIGIN}/api/auth/sign-in/social`, {
     method: 'POST',
-    headers: { origin: env.APP_ORIGIN, 'content-type': 'application/json', 'cf-connecting-ip': '192.0.2.20' },
+    headers: { origin: env.APP_ORIGIN, 'content-type': 'application/json', 'cf-connecting-ip': clientAddress },
     body: JSON.stringify({ provider: 'twitch', callbackURL: '/' }),
   }));
   expect(response.status).toBe(200);
@@ -42,15 +44,15 @@ async function twitchCallback(): Promise<Request> {
   const state: string | null = new URL(result.url).searchParams.get('state');
   expect(state).not.toBeNull();
   return new Request(`${env.APP_ORIGIN}/api/auth/callback/twitch?state=${encodeURIComponent(state ?? '')}&code=test-code`, {
-    headers: { cookie: response.headers.getSetCookie().map((cookie: string) => cookie.split(';')[0]).join('; ') },
+    headers: { cookie: response.headers.getSetCookie().map((cookie: string) => cookie.split(';')[0]).join('; '), 'cf-connecting-ip': clientAddress },
   });
 }
 
-function stubTwitchIdentity(subject: string, email: string): () => void {
+function stubTwitchIdentity(subject: string, email: string, name: string = 'Twitch viewer'): () => void {
   const originalFetch: typeof fetch = globalThis.fetch;
   const encode = (value: Record<string, unknown>): string => Buffer.from(JSON.stringify(value)).toString('base64url');
   const idToken: string = `${encode({ alg: 'RS256', typ: 'JWT' })}.${encode({
-    sub: subject, email, email_verified: true, preferred_username: 'Twitch viewer', picture: 'https://provider.example.test/avatar.png',
+    sub: subject, email, email_verified: true, preferred_username: name, picture: 'https://provider.example.test/avatar.png',
   })}.c2lnbmF0dXJl`;
   const mock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     const url: string = input instanceof Request ? input.url : String(input);
@@ -81,6 +83,21 @@ beforeAll(async () => {
 afterAll(async () => { await database.dispose(); });
 
 describe('server identity', () => {
+  it('rejects profile changes through the auth endpoint that bypasses account validation and quotas', async () => {
+    const token: string = await seedSession('viewer-auth-update');
+    const request: Request = await signedRequest(token);
+    request.headers.set('origin', env.APP_ORIGIN);
+    request.headers.set('content-type', 'application/json');
+    request.headers.set('cf-connecting-ip', '192.0.2.6');
+    const response: Response = await createAuth(env).handler(new Request(`${env.APP_ORIGIN}/api/auth/update-user`, {
+      method: 'POST',
+      headers: request.headers,
+      body: JSON.stringify({ name: `${'x'.repeat(41)}\u0001`, image: 'https://attacker.example.test/avatar.png' }),
+    }));
+    expect(response.status).toBe(404);
+    expect(await env.DB.prepare('SELECT name,image FROM user WHERE id=?').bind('viewer-auth-update').first()).toEqual({ name: 'Viewer', image: null });
+  });
+
   it('does not accept prototype identity or preview headers', async () => {
     const request: Request = new Request(`${env.APP_ORIGIN}/`, {
       headers: {
@@ -135,9 +152,31 @@ describe('server identity', () => {
 });
 
 describe('OAuth boundary', () => {
+  it.each([
+    ['long', 'x'.repeat(41)],
+    ['blank', '   '],
+    ['multiline', 'Viewer\nName'],
+    ['control', 'Viewer\u0085Name'],
+    ['separator', 'Viewer\u2028Name'],
+  ])('rejects a %s OAuth display name before creating an account', async (label: string, name: string) => {
+    const callback: Request = await twitchCallback();
+    const email: string = `invalid-name-${label}@example.test`;
+    const restore: () => void = stubTwitchIdentity(`invalid-name-${label}`, email, name);
+    try {
+      const response: Response = await createAuth(env).handler(callback);
+      expect(response.status).toBe(302);
+      const destination: URL = new URL(response.headers.get('location') ?? '', env.APP_ORIGIN);
+      expect(destination.searchParams.get('error')).toBe('INVALID_DISPLAY_NAME');
+      expect(destination.searchParams.get('error_description')).toBe('Set your provider display name to 1 to 40 characters on one line, then sign in again.');
+      expect(await env.DB.prepare('SELECT id FROM user WHERE email=?').bind(email).first()).toBeNull();
+      expect(response.headers.getSetCookie().some((value: string) => value.startsWith('__Secure-stream-bullets.session_token='))).toBe(false);
+    } finally { restore(); }
+  });
+
   it('completes OAuth through D1, encrypts provider tokens, and rejects state replay', async () => {
     const callback: Request = await twitchCallback();
-    const restore: () => void = stubTwitchIdentity('twitch-new-viewer', 'new-viewer@example.test');
+    const name: string = 'N'.repeat(40);
+    const restore: () => void = stubTwitchIdentity('twitch-new-viewer', 'new-viewer@example.test', name);
     try {
       const response: Response = await createAuth(env).handler(new Request(callback.url, { headers: callback.headers }));
       expect(response.status).toBe(302);
@@ -148,7 +187,7 @@ describe('OAuth boundary', () => {
       expect(record?.refresh_token).not.toBe('private-provider-refresh-token');
       expect(record?.access_token).not.toBeNull();
       const cookie: string = response.headers.getSetCookie().map((value: string) => value.split(';')[0]).join('; ');
-      expect(await getViewer(new Request(`${env.APP_ORIGIN}/`, { headers: { cookie } }), context())).toMatchObject({ name: 'Twitch viewer', avatar: null });
+      expect(await getViewer(new Request(`${env.APP_ORIGIN}/`, { headers: { cookie } }), context())).toMatchObject({ name, avatar: null });
       const replay: Response = await createAuth(env).handler(new Request(callback.url, { headers: callback.headers }));
       expect(replay.status).toBe(302);
       expect(new URL(replay.headers.get('location') ?? '', env.APP_ORIGIN).searchParams.has('error')).toBe(true);

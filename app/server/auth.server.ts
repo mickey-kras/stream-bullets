@@ -1,10 +1,11 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
-import { betterAuth, type BetterAuthOptions } from 'better-auth';
+import { APIError, betterAuth, type BetterAuthOptions, type User } from 'better-auth';
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../../db/auth-schema';
 import type { AppContext, AppEnv } from '../env';
 import type { Viewer } from '../types';
 import { getOrigin, HttpError } from './http.server';
+import { displayNameSchema } from './validation';
 
 type Provider = 'google' | 'twitch';
 
@@ -35,6 +36,22 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: [origin],
     database: drizzleAdapter(drizzle(env.DB), { provider: 'sqlite', schema, transaction: false }),
+    databaseHooks: {
+      user: {
+        create: {
+          async before(user: User & Record<string, unknown>): Promise<{ data: User & Record<string, unknown> }> {
+            const name = displayNameSchema.safeParse(user.name);
+            if (!name.success) {
+              throw new APIError('BAD_REQUEST', {
+                code: 'INVALID_DISPLAY_NAME',
+                message: 'Set your provider display name to 1 to 40 characters on one line, then sign in again.',
+              });
+            }
+            return { data: { ...user, name: name.data } };
+          },
+        },
+      },
+    },
     socialProviders: {
       ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? {
         google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
@@ -47,7 +64,7 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
       encryptOAuthTokens: true,
       accountLinking: { enabled: false },
     },
-    disabledPaths: ['/link-social', '/unlink-account'],
+    disabledPaths: ['/link-social', '/unlink-account', '/update-user'],
     session: {
       cookieCache: { enabled: false },
     },

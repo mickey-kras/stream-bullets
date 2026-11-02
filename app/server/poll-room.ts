@@ -3,8 +3,15 @@ import type { AppEnv } from '../env';
 import type { LiveSnapshot } from '../types';
 
 const MAX_CONNECTIONS = 200;
+const MAX_CLIENT_CONNECTIONS = 10;
+const CONNECTION_LEASE_MS = 60 * 60 * 1_000;
+const CLIENT_KEY = /^[0-9a-f]{64}$/;
 const RESYNC_INTERVAL_MS = 15_000;
 const STREAMER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+interface ConnectionLease {
+  expiresAt: number;
+}
 
 interface PollRow {
   id: string;
@@ -58,11 +65,15 @@ export class PollRoom extends DurableObject<AppEnv> {
     }
     if (url.pathname !== '/subscribe' && url.pathname !== '/refresh') return response('Not found', 404);
     if (request.method !== (url.pathname === '/subscribe' ? 'GET' : 'POST')) return response('Method not allowed', 405);
+    const clientKey = request.headers.get('X-Stream-Bullets-Client') ?? '';
     if (url.pathname === '/subscribe') {
       if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return response('WebSocket required', 426);
       const origin = request.headers.get('Origin');
       if (origin !== null && origin !== this.env.APP_ORIGIN) return response('Origin not allowed', 403);
-      if (this.ctx.getWebSockets().length >= MAX_CONNECTIONS) return response('Stream is full', 503);
+      if (!CLIENT_KEY.test(clientKey)) return response('Invalid client', 400);
+      this.expireConnections();
+      const limit = this.connectionLimit(clientKey);
+      if (limit) return limit;
     }
 
     try {
@@ -71,7 +82,8 @@ export class PollRoom extends DurableObject<AppEnv> {
         await this.ctx.storage.put('streamerId', streamerId);
       }
       if (url.pathname === '/refresh') {
-        if (this.ctx.getWebSockets().length > 0) {
+        this.expireConnections();
+        if (this.activeSockets().length > 0) {
           const snapshot = await this.snapshot();
           this.broadcast(snapshot);
           await this.scheduleResync();
@@ -80,10 +92,14 @@ export class PollRoom extends DurableObject<AppEnv> {
       }
 
       const snapshot = await this.snapshot();
-      if (this.ctx.getWebSockets().length >= MAX_CONNECTIONS) return response('Stream is full', 503);
+      this.expireConnections();
+      const limit = this.connectionLimit(clientKey);
+      if (limit) return limit;
       const pair = new WebSocketPair();
       const [client, server] = Object.values(pair);
-      this.ctx.acceptWebSocket(server);
+      this.ctx.acceptWebSocket(server, [`client:${clientKey}`]);
+      const lease: ConnectionLease = { expiresAt: Date.now() + CONNECTION_LEASE_MS };
+      server.serializeAttachment(lease);
       this.send(server, JSON.stringify(snapshot));
       await this.scheduleResync();
       return new Response(null, { status: 101, webSocket: client });
@@ -99,7 +115,7 @@ export class PollRoom extends DurableObject<AppEnv> {
 
   async webSocketClose(socket: WebSocket, _code: number, _reason: string, _wasClean: boolean): Promise<void> {
     socket.close();
-    if (this.ctx.getWebSockets().length === 0) await this.ctx.storage.deleteAlarm();
+    if (this.activeSockets().length === 0) await this.ctx.storage.deleteAlarm();
   }
 
   webSocketError(socket: WebSocket, _error: unknown): void {
@@ -107,7 +123,11 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   async alarm(): Promise<void> {
-    if (this.ctx.getWebSockets().length === 0) return;
+    this.expireConnections();
+    if (this.activeSockets().length === 0) {
+      await this.ctx.storage.deleteAlarm();
+      return;
+    }
     try {
       this.broadcast(await this.snapshot());
       await this.scheduleResync();
@@ -180,7 +200,7 @@ export class PollRoom extends DurableObject<AppEnv> {
 
   private broadcast(snapshot: LiveSnapshot): void {
     const message = JSON.stringify(snapshot);
-    for (const socket of this.ctx.getWebSockets()) this.send(socket, message);
+    for (const socket of this.activeSockets()) this.send(socket, message);
   }
 
   private send(socket: WebSocket, message: string): void {
@@ -193,19 +213,49 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   private disconnect(): void {
-    for (const socket of this.ctx.getWebSockets()) {
+    for (const socket of this.activeSockets()) {
       this.send(socket, JSON.stringify({ type: 'unavailable' }));
       if (socket.readyState === WebSocket.OPEN) socket.close(1011, 'Live updates unavailable');
     }
   }
 
+  private activeSockets(): WebSocket[] {
+    return this.ctx.getWebSockets().filter((socket: WebSocket): boolean => socket.readyState === WebSocket.OPEN);
+  }
+
+  private connectionLimit(clientKey: string): Response | undefined {
+    if (this.ctx.getWebSockets(`client:${clientKey}`).length >= MAX_CLIENT_CONNECTIONS) {
+      return response('Too many live connections from this client', 429);
+    }
+    if (this.ctx.getWebSockets().length >= MAX_CONNECTIONS) return response('Stream is full', 503);
+    return undefined;
+  }
+
+  private leaseExpiry(socket: WebSocket): number {
+    const lease: unknown = socket.deserializeAttachment();
+    if (typeof lease !== 'object' || lease === null || !('expiresAt' in lease)
+      || typeof lease.expiresAt !== 'number' || !Number.isSafeInteger(lease.expiresAt)) return 0;
+    return lease.expiresAt;
+  }
+
+  private expireConnections(): void {
+    const now = Date.now();
+    for (const socket of this.activeSockets()) {
+      if (this.leaseExpiry(socket) > now) continue;
+      this.send(socket, JSON.stringify({ type: 'unavailable' }));
+      if (socket.readyState === WebSocket.OPEN) socket.close(1001, 'Live connection lease expired');
+    }
+  }
+
   private async scheduleResync(): Promise<void> {
-    if (this.ctx.getWebSockets().length === 0) {
+    const sockets = this.activeSockets();
+    if (sockets.length === 0) {
       await this.ctx.storage.deleteAlarm();
       return;
     }
     const now = Date.now();
     let deadline = now + RESYNC_INTERVAL_MS;
+    for (const socket of sockets) deadline = Math.min(deadline, this.leaseExpiry(socket));
     for (const poll of this.latestSnapshot?.polls ?? []) {
       if (!poll.revealed && poll.endsAt !== null && poll.endsAt > now) deadline = Math.min(deadline, poll.endsAt);
     }

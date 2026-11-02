@@ -33,7 +33,7 @@ export default {
         const streamer = await getStreamer(env, live[1]);
         if (!streamer) throw new HttpError(404, 'Streamer not found.');
         const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
-        response = await room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers: { Upgrade: 'websocket' } });
+        response = await room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers: { Upgrade: 'websocket', 'X-Stream-Bullets-Client': key } });
       } else if (path.startsWith('/images/')) {
         if (!['GET', 'HEAD'].includes(request.method)) throw new HttpError(405, 'Method not allowed.');
         response = await serveImage(env, path.slice('/images/'.length), request.method);

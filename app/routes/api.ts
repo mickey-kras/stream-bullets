@@ -6,11 +6,11 @@ import { user } from '../../db/schema';
 import { appContext, type AppContext } from '../env';
 import { configuredProviders, getViewer } from '../server/auth.server';
 import { consumeMutationQuota, getEntry, getOwnStreamer, getStreamer, listComments, listEntries, listStreamers, mutateComment, mutateEntry, saveStreamer } from '../server/data.server';
-import { commentActionSchema, commentQuerySchema, entryActionSchema, entryQuerySchema, streamerSchema } from '../server/validation';
+import { commentActionSchema, commentQuerySchema, displayNameSchema, entryActionSchema, entryQuerySchema, streamerSchema } from '../server/validation';
 import { HttpError, errorResponse, json, queryParams, readJson, requireSameOrigin } from '../server/http.server';
 import { uploadImage } from '../server/images.server';
 
-const accountSchema = z.object({ name: z.string().trim().min(1).max(40).refine((name: string) => !Array.from(name).some((character: string) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127), 'Use a single-line display name.') }).strict();
+const accountSchema = z.object({ name: displayNameSchema }).strict();
 
 function parsedQuery<T>(request: Request, keys: string[], schema: z.ZodType<T>): T {
   const result = schema.safeParse(Object.fromEntries(queryParams(request, keys)));

@@ -4,9 +4,11 @@ const id = z.string().uuid();
 const line = (max: number): z.ZodString => z.string().trim().min(1).max(max).regex(/^[^\p{Cc}]+$/u);
 const text = (max: number): z.ZodString => z.string().trim().min(1).max(max).regex(/^(?:[^\p{Cc}]|[\t\n\r])*$/u);
 
+export const displayNameSchema = z.string().trim().min(1).max(40).regex(/^[^\p{Cc}\p{Zl}\p{Zp}]+$/u, 'Use a single-line display name.');
+
 export const streamerSchema = z.object({
   handle: z.string().regex(/^[a-z0-9_]{3,30}$/u),
-  name: line(40),
+  name: displayNameSchema,
   about: z.string().trim().max(2000).default(''),
 }).strict();
 
