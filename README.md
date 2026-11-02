@@ -81,29 +81,30 @@ Vitest requires 90% line, statement, function, and branch coverage for server mo
 
 ## Deploy to Cloudflare
 
-Use a Cloudflare account with Workers, D1, R2, and SQLite Durable Objects enabled. Authenticate Wrangler on your deployment machine. CI does not receive production credentials or deploy pull requests.
+Production uses `https://streambullets.com`. The `production` environment in `wrangler.jsonc` contains its account, database, bucket, and custom domain. Local development retains its separate configuration. Cloudflare redirects `streambullets.app` and `streambullets.live` to the primary domain with the path and query string preserved.
 
-1. Create a D1 database and R2 bucket:
+Authenticate Wrangler on your deployment machine. CI does not receive production credentials or deploy pull requests.
+
+1. The production D1 database and private R2 bucket are provisioned. For a new account, create replacements:
 
    ```sh
    pnpm exec wrangler d1 create stream-bullets
    pnpm exec wrangler r2 bucket create stream-bullets-images
    ```
 
-2. Put the returned D1 ID in `wrangler.jsonc`. Set `APP_ORIGIN` to the exact HTTPS production origin. Configure that hostname as a Worker route or custom domain. Keep the binding names `DB`, `IMAGES`, `POLL_ROOMS`, and `REQUEST_LIMITER`.
-3. Register the production OAuth callback URLs. Store `BETTER_AUTH_SECRET` and provider credentials as Worker secrets, through the Cloudflare dashboard or `wrangler secret put <NAME>`. Never put secrets in `vars`, the repository, or a browser bundle. A new Worker returns an error until its authentication secret is configured.
+2. For a replacement account, update `env.production` with its account and D1 IDs, bucket, HTTPS `APP_ORIGIN`, and custom domain. Keep the binding names `DB`, `IMAGES`, `POLL_ROOMS`, and `REQUEST_LIMITER`.
+3. Register the production OAuth callback URLs. Store `BETTER_AUTH_SECRET` and provider credentials as Worker secrets through the Cloudflare dashboard or `pnpm exec wrangler secret put <NAME> --env production`. Never put secrets in `vars`, the repository, or a browser bundle. A new Worker returns an error until its authentication secret is configured.
 4. Back up an existing D1 database before applying migrations:
 
    ```sh
    mkdir -p .wrangler/backups
-   pnpm exec wrangler d1 export DB --remote --output .wrangler/backups/pre-deploy.sql
-   pnpm exec wrangler d1 migrations apply DB --remote
+   pnpm exec wrangler d1 export DB --env production --remote --output .wrangler/backups/pre-deploy.sql
+   pnpm exec wrangler d1 migrations apply DB --env production --remote
    ```
 
-5. Run the checks, build with the production configuration, then deploy:
+5. Run the checks, then deploy. This command builds with `CLOUDFLARE_ENV=production` before uploading the generated Worker:
 
    ```sh
-   pnpm build
    pnpm deploy
    ```
 

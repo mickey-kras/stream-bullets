@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
+    "build:production": "CLOUDFLARE_ENV=production react-router build",
     "start": "wrangler dev --config build/server/wrangler.json --port 5173",
     "check": "react-router typegen && tsc --noEmit",
     "lint": "eslint app db worker tests *.ts",
@@ -18,7 +19,7 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply DB --local",
-    "deploy": "wrangler deploy --config build/server/wrangler.json"
+    "deploy": "pnpm build:production && wrangler deploy --config build/server/wrangler.json"
   },
   "dependencies": {
     "react": "19.3.1",
