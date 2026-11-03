@@ -248,12 +248,7 @@ function worksPipework(k: Kit, s: Pick<WorksScope, "works">): void {
     [copper, brass],
     works,
   );
-  pipe(
-    [w(boiler.x, 0.5, boiler.z), w(-0.2, 0.5, -3.4), w(B.x - 0.4, 0.5, B.z)],
-    0.05,
-    [copper, brass],
-    works,
-  );
+  pipe([w(boiler.x, 0.5, boiler.z), w(-0.2, 0.5, -3.4), w(B.x - 0.4, 0.5, B.z)], 0.05, [copper, brass], works);
   valve([B.x + 0.2, 2.4, (B.z + A.z) / 2 + 0.2], new THREE.Euler(0, 0, Math.PI / 2), 0.13, works);
   valve([feedValve.x, 1.6 + 0.07 + 0.08, feedValve.z], new THREE.Euler(0, 0, 0), 0.12, works);
   valve([-0.6, 0.5, -3.33], new THREE.Euler(Math.PI / 2, 0, 0), 0.1, works);
