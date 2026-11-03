@@ -42,7 +42,7 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
           [58, 175],
         ].forEach(([dx, bh]: number[]): void => {
           ctx.beginPath();
-          ctx.roundRect(cx + dx! - 26, cy + 88 - bh!, 52, bh!, 10);
+          ctx.roundRect(cx + dx - 26, cy + 88 - bh, 52, bh, 10);
           ctx.fill();
         });
       } else {
@@ -76,7 +76,7 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
         [1, -0.35],
         [-1, 0.35],
         [1, 0.35],
-      ].map(([bx, by]: number[]): THREE.Vector3 => new THREE.Vector3(bx!, by!, 0.135)),
+      ].map(([bx, by]: number[]): THREE.Vector3 => new THREE.Vector3(bx, by, 0.135)),
       0.028,
       brass,
       board,
@@ -91,7 +91,7 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
         [0.11, -0.11],
         [-0.11, 0.11],
         [0.11, 0.11],
-      ].map(([bx, by]: number[]): THREE.Vector3 => new THREE.Vector3(bx!, by!, -0.165)),
+      ].map(([bx, by]: number[]): THREE.Vector3 => new THREE.Vector3(bx, by, -0.165)),
       0.02,
       brass,
       board,

@@ -49,7 +49,7 @@ function buildTower(k: Kit, mast: THREE.Group): void {
         [0.07, -0.07],
         [-0.07, 0.07],
         [0.07, 0.07],
-      ].map(([dx, dz]: number[]): THREE.Vector3 => new THREE.Vector3(foot.x * 1.05 + dx!, 0.045, foot.z * 1.05 + dz!)),
+      ].map(([dx, dz]: number[]): THREE.Vector3 => new THREE.Vector3(foot.x * 1.05 + dx, 0.045, foot.z * 1.05 + dz)),
       0.015,
       gold,
       mast,

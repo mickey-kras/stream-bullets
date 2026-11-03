@@ -359,7 +359,7 @@ function disposeScene(scene: THREE.Scene, k: Kit): void {
   for (const tile of Object.values(k.tiles)) for (const t of [tile.map, tile.normal, tile.rough]) textures.add(t);
   for (const g of geometries) g.dispose();
   for (const t of textures) t.dispose();
-  (scene.background as THREE.Texture | null)?.dispose();
+  if (scene.background instanceof THREE.Texture) scene.background.dispose();
 }
 
 export function createStation(
