@@ -109,7 +109,7 @@ jobs:
         ignore-unfixed: false
         exit-code: '0'
         limit-severities-for-sarif: true
-        version: v0.71.2
+        version: v0.76.1
         cache: false
         cache-dir: ${{ runner.temp }}/trivy-cache
         trivy-config: trusted/.github/trusted-ci/trivy.yaml
