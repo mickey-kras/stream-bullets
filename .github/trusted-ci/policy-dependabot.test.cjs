@@ -1,7 +1,12 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const YAML = require("yaml");
-const { admittedDependabot, dependencyVersionsOnly, actionPinsOnly } = require("./policy-dependabot.cjs");
+const {
+  admittedDependabot,
+  dependencyVersionsOnly,
+  actionPinsOnly,
+  lockControlsUnchanged,
+} = require("./policy-dependabot.cjs");
 
 const OLD = "a".repeat(40);
 const NEXT = "b".repeat(40);
@@ -191,4 +196,28 @@ test("automatic admission rejects additions, deletions, modes, mixed source and 
   assert.equal(await admit(symlink), false);
   const workflowAdded = fixture({ ".github/workflows/payload.yml": YAML.stringify(workflow) });
   assert.equal(await admit(workflowAdded), false);
+});
+
+test("lock-only non-registry resolution replacements require owner admission", async () => {
+  for (const resolution of [
+    { tarball: "https://example.invalid/payload.tgz" },
+    { integrity: "sha512-test", tarball: "https://example.invalid/payload.tgz" },
+    { tarball: "file:./payload.tgz" },
+    { directory: "./payload", type: "directory" },
+    { repo: "https://example.invalid/repository.git", commit: OLD, type: "git" },
+    { integrity: "file:./payload.tgz" },
+    {},
+  ]) {
+    const after = { ...lock, packages: { "yaml@2.9.1": { resolution } } };
+    assert.equal(lockControlsUnchanged(lock, after, manifest), false);
+    assert.equal(
+      await admit(fixture({ "package.json": JSON.stringify(manifest), "pnpm-lock.yaml": YAML.stringify(after) })),
+      false,
+    );
+  }
+  const nonRegistryKey = {
+    ...lock,
+    packages: { "https://example.invalid/payload.tgz": { resolution: { integrity: "sha512-test" } } },
+  };
+  assert.equal(lockControlsUnchanged(lock, nonRegistryKey, manifest), false);
 });

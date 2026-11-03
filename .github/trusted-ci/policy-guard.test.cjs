@@ -114,6 +114,7 @@ function harness({
   revoked = false,
   dependabot = false,
   actionUpdate = false,
+  maliciousLock = false,
 } = {}) {
   const repository = resolve(__dirname, "../..");
   const files = execFileSync("git", ["ls-files", "-z"], { cwd: repository, encoding: "utf8" })
@@ -122,7 +123,8 @@ function harness({
   const blobs = {};
   const tree = files.map((name, index) => {
     const sha = index.toString(16).padStart(40, "0");
-    if (/^\.github\/workflows\/.*\.ya?ml$/.test(name)) blobs[sha] = readFileSync(resolve(repository, name), "utf8");
+    if (/^\.github\/workflows\/.*\.ya?ml$/.test(name) || ["package.json", "pnpm-lock.yaml"].includes(name))
+      blobs[sha] = readFileSync(resolve(repository, name), "utf8");
     return { path: name, sha, type: "blob", mode: "100644" };
   });
   const candidate = structuredClone(tree);
@@ -141,6 +143,15 @@ function harness({
         'name: Semgrep\n      run: "true"',
       );
   if (!actionUpdate) assert.match(blobs[policy.sha], /name: Semgrep\n {6}run: "true"/);
+  if (maliciousLock) {
+    const YAML = require("yaml");
+    policy.sha = tree.find((file) => file.path === policy.path).sha;
+    const lock = candidate.find((file) => file.path === "pnpm-lock.yaml");
+    const contents = YAML.parse(blobs[lock.sha]);
+    Object.values(contents.packages)[0].resolution = { tarball: "https://example.invalid/payload.tgz" };
+    lock.sha = "f".repeat(40);
+    blobs[lock.sha] = YAML.stringify(contents);
+  }
   const workflows = Object.fromEntries(
     candidate.filter((file) => file.path.startsWith(".github/workflows/")).map((file) => [file.path, blobs[file.sha]]),
   );
@@ -311,4 +322,13 @@ test("live guard admits verified Dependabot action pin changes while owner rejec
   );
   await assert.rejects(run(harness({ dependabot: true }), TRUSTED), /exact-head/);
   await assert.rejects(run(harness({ dependabot: true, actionUpdate: true, fork: true }), TRUSTED), /exact-head/);
+});
+
+test("live guard denies a verified bot lock-only tarball replacement", async () => {
+  const candidate = harness({ dependabot: true, maliciousLock: true });
+  await assert.rejects(runWithStatus(candidate, candidate.context.payload.pull_request, TRUSTED), /exact-head/);
+  assert.deepEqual(
+    candidate.statuses.map((status) => status.state),
+    ["pending", "failure"],
+  );
 });

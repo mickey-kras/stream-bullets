@@ -9,6 +9,7 @@ const PACKAGES = [["package.json", "pnpm-lock.yaml"]];
 // Repository manifests use exact registry versions. URLs, aliases, ranges and
 // local/workspace dependencies are outside automatic admission.
 const VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+const PACKAGE_NAME = /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/;
 const ACTION = /^([\w.-]+(?:\/[\w.-]+)+)@[a-f0-9]{40}$/;
 const without = (object, keys) => Object.fromEntries(Object.entries(object).filter(([key]) => !keys.includes(key)));
 
@@ -55,6 +56,24 @@ function actionPinsOnly(before, after) {
 }
 
 function lockControlsUnchanged(before, after, manifest) {
+  // Registry packages resolve by name/version through the protected registry
+  // configuration. Non-registry resolutions require explicit owner admission.
+  if (!after.packages || typeof after.packages !== "object" || Array.isArray(after.packages)) return false;
+  for (const [identifier, pkg] of Object.entries(after.packages)) {
+    const separator = identifier.lastIndexOf("@");
+    if (!PACKAGE_NAME.test(identifier.slice(0, separator)) || !VERSION.test(identifier.slice(separator + 1))) {
+      return false;
+    }
+    const resolution = pkg?.resolution;
+    if (
+      !resolution ||
+      !isDeepStrictEqual(Object.keys(resolution), ["integrity"]) ||
+      typeof resolution.integrity !== "string" ||
+      !/^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$/.test(resolution.integrity)
+    ) {
+      return false;
+    }
+  }
   if (
     !isDeepStrictEqual(
       without(before, ["packages", "snapshots", "importers"]),
