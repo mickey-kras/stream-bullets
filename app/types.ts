@@ -1,5 +1,5 @@
-export type EntryKind = 'topic' | 'choice' | 'binary';
-export type SortOrder = 'newest' | 'top';
+export type EntryKind = "topic" | "choice" | "binary";
+export type SortOrder = "newest" | "top";
 export type Reaction = -1 | 0 | 1;
 
 export interface Viewer {
@@ -73,8 +73,8 @@ export interface DiscussionSnapshot {
 }
 
 export interface LiveSnapshot {
-  type: 'snapshot';
+  type: "snapshot";
   revision: number;
   serverNow: number;
-  polls: Pick<Entry, 'id' | 'title' | 'kind' | 'options' | 'endsAt' | 'revealed' | 'counts' | 'total'>[];
+  polls: Pick<Entry, "id" | "title" | "kind" | "options" | "endsAt" | "revealed" | "counts" | "total">[];
 }
