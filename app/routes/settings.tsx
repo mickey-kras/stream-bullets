@@ -18,11 +18,11 @@ function ImageUpload({
   label,
   disabled,
   onUpload,
-}: {
+}: Readonly<{
   label: string;
   disabled: boolean;
   onUpload: (file: File | undefined) => Promise<void>;
-}): ReactNode {
+}>): ReactNode {
   return (
     <label className="upload-field">
       {label}
@@ -60,8 +60,8 @@ export default function Settings(): ReactNode {
       await postJson<unknown>(endpoint, body);
       setNotice("Your changes are saved.");
       await revalidator.revalidate();
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
     } finally {
       setPending("");
     }
@@ -85,8 +85,8 @@ export default function Settings(): ReactNode {
       await revalidator.revalidate();
       setImageRevision((revision: number) => revision + 1);
       setNotice(`Your ${kind} is saved.`);
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
     } finally {
       setPending("");
     }
@@ -98,9 +98,9 @@ export default function Settings(): ReactNode {
     try {
       const result = await authClient.signOut();
       if (result.error) throw new Error(result.error.message || "Could not sign out.");
-      window.location.assign("/");
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+      globalThis.location.assign("/");
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
       setPending("");
     }
   }
@@ -111,13 +111,7 @@ export default function Settings(): ReactNode {
       <main className="page-panel settings-page" id="main-content">
         <span className="eyebrow">MAKE YOURSELF AT HOME</span>
         <h1>Your profile</h1>
-        {!viewer ? (
-          <section className="info-card">
-            <h2>Join the conversation</h2>
-            <p>Sign in to vote, comment, and save your profile.</p>
-            <SignIn providers={providers} />
-          </section>
-        ) : (
+        {viewer ? (
           <>
             <p className="form-error" role="alert">
               {error}
@@ -139,7 +133,7 @@ export default function Settings(): ReactNode {
                 }}
               >
                 <label>
-                  Display name
+                  <span>Display name</span>
                   <input
                     name="name"
                     defaultValue={viewer.name}
@@ -185,7 +179,7 @@ export default function Settings(): ReactNode {
                 }}
               >
                 <label>
-                  Handle
+                  <span>Handle</span>
                   <input
                     name="handle"
                     defaultValue={streamer?.handle || ""}
@@ -202,11 +196,11 @@ export default function Settings(): ReactNode {
                   3–30 lowercase letters, numbers, or underscores. Your page uses /@handle.
                 </p>
                 <label>
-                  Streamer name
+                  <span>Streamer name</span>
                   <input name="name" defaultValue={streamer?.name || viewer.name} required maxLength={40} />
                 </label>
                 <label>
-                  About your stream
+                  <span>About your stream</span>
                   <textarea name="about" defaultValue={streamer?.about || ""} maxLength={2000} rows={5} />
                 </label>
                 <button className="gold" type="submit" disabled={Boolean(pending)}>
@@ -245,6 +239,12 @@ export default function Settings(): ReactNode {
               </button>
             </div>
           </>
+        ) : (
+          <section className="info-card">
+            <h2>Join the conversation</h2>
+            <p>Sign in to vote, comment, and save your profile.</p>
+            <SignIn providers={providers} />
+          </section>
         )}
       </main>
     </>

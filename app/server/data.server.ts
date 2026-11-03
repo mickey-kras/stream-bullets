@@ -97,7 +97,7 @@ function decodeCursor(value: string | null, scope: string, sort: "newest" | "top
   let decoded: unknown;
   try {
     const bytes = Uint8Array.from(atob(value.replaceAll("-", "+").replaceAll("_", "/")), (character: string): number =>
-      character.charCodeAt(0),
+      character.codePointAt(0)!,
     );
     decoded = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
   } catch {
@@ -111,10 +111,10 @@ function decodeCursor(value: string | null, scope: string, sort: "newest" | "top
 
 function encodeCursor(cursor: Cursor): string {
   const bytes = new TextEncoder().encode(JSON.stringify(cursor));
-  return btoa(Array.from(bytes, (byte: number): string => String.fromCharCode(byte)).join(""))
+  return btoa(Array.from(bytes, (byte: number): string => String.fromCodePoint(byte)).join(""))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
-    .replace(/=+$/u, "");
+    .replaceAll("=", "");
 }
 
 function streamerValue(row: typeof streamers.$inferSelect): Streamer {
@@ -189,8 +189,11 @@ export async function saveStreamer(env: AppEnv, userId: string, input: StreamerI
     if (!row) throw new Error("Streamer profile was not saved.");
     return streamerValue(row);
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? `${error.message} ${error.cause instanceof Error ? error.cause.message : ""}` : "";
+    let message = "";
+    if (error instanceof Error) {
+      const causeMessage = error.cause instanceof Error ? error.cause.message : "";
+      message = `${error.message} ${causeMessage}`;
+    }
     if (message.includes("UNIQUE constraint failed: streamers.handle"))
       throw new HttpError(409, "This handle is already in use.");
     throw error;
@@ -256,16 +259,16 @@ export async function getOverlaySnapshot(
   pollId: string | null,
 ): Promise<LiveSnapshot> {
   const selection =
-    pollId !== null
-      ? "?"
-      : `COALESCE(
+    pollId === null
+      ? `COALESCE(
     (SELECT id FROM entries WHERE streamer_id=? AND kind!='topic' AND revealed=0
       AND (ends_at IS NULL OR ends_at>CAST(strftime('%s','now') AS INTEGER)*1000+CAST(substr(strftime('%f','now'),4,3) AS INTEGER))
       ORDER BY created_at DESC,id DESC LIMIT 1),
     (SELECT id FROM entries WHERE streamer_id=? AND kind!='topic' ORDER BY created_at DESC,id DESC LIMIT 1)
-  )`;
+  )`
+      : "?";
   const parameters: string[] =
-    pollId !== null ? ["", "", pollId, streamerId] : ["", "", streamerId, streamerId, streamerId];
+    pollId === null ? ["", "", streamerId, streamerId, streamerId] : ["", "", pollId, streamerId];
   const results = await env.DB.batch([
     env.DB.prepare("SELECT revision FROM streamers WHERE id=?").bind(streamerId),
     env.DB.prepare(`${entrySelect} WHERE e.id=${selection} AND e.streamer_id=? AND e.kind!='topic'`).bind(
@@ -304,7 +307,7 @@ export async function listEntries(
   const query = parsed(entryQuerySchema, input);
   const scope = `${streamer.id}:${query.kind}`;
   const cursor = decodeCursor(query.cursor, scope, query.sort, query.query);
-  const escapedQuery = query.query.replace(/[\\%_]/gu, "\\$&");
+  const escapedQuery = query.query.replaceAll(/[\\%_]/gu, String.raw`\$&`);
   const parameters: (string | number)[] = [viewerId ?? "", viewerId ?? "", streamer.id, `%${escapedQuery}%`];
   let where = "";
   if (cursor) {
@@ -312,9 +315,9 @@ export async function listEntries(
     if (query.sort === "top") parameters.push(cursor.score);
     parameters.push(cursor.time, cursor.id);
   }
-  const entriesQuery = env.DB.prepare(`SELECT * FROM (${entrySelect}
+  const entriesQuery = env.DB.prepare(String.raw`SELECT * FROM (${entrySelect}
     WHERE e.streamer_id=? AND e.kind ${query.kind === "topics" ? "= 'topic'" : "!= 'topic'"}
-      AND e.title LIKE ? ESCAPE '\\') ${where}
+      AND e.title LIKE ? ESCAPE '\') ${where}
     ORDER BY ${query.sort === "top" ? "score DESC," : ""}created_at DESC,id DESC LIMIT ${PAGE_SIZE + 1}
   `).bind(...parameters);
   const results = await env.DB.batch([

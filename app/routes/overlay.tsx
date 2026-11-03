@@ -45,11 +45,9 @@ export default function Overlay(): ReactNode {
       )}
       {status !== "live" && (
         <output className="overlay-connection">
-          {status === "connecting" ? (
-            "Connecting…"
-          ) : status === "reconnecting" ? (
-            "Reconnecting…"
-          ) : (
+          {status === "connecting" && "Connecting…"}
+          {status === "reconnecting" && "Reconnecting…"}
+          {status === "offline" && (
             <>
               <span>Live updates offline.</span>{" "}
               <button type="button" onClick={reconnect}>

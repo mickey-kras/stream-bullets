@@ -45,20 +45,29 @@ export function useLivePolls(
     let timer: ReturnType<typeof setTimeout> | undefined;
     let watchdog: ReturnType<typeof setTimeout> | undefined;
     let attempts: number = 0;
+    function armWatchdog(current: WebSocket): void {
+      if (watchdog) clearTimeout(watchdog);
+      watchdog = setTimeout(() => {
+        setStatus("reconnecting");
+        current.close();
+      }, 90_000);
+    }
+    function updateSnapshot(next: LiveSnapshot): void {
+      setSnapshot((previous: LiveSnapshot | null) =>
+        !previous ||
+        next.revision > previous.revision ||
+        (next.revision === previous.revision && next.serverNow >= previous.serverNow)
+          ? next
+          : previous,
+      );
+    }
     function connect(): void {
       if (!active) return;
-      const url: URL = new URL(`/api/live/${encodeURIComponent(handle)}`, window.location.origin);
+      const url: URL = new URL(`/api/live/${encodeURIComponent(handle)}`, globalThis.location.origin);
       url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
       socket = new WebSocket(url);
       const current: WebSocket = socket;
-      function armWatchdog(): void {
-        if (watchdog) clearTimeout(watchdog);
-        watchdog = setTimeout(() => {
-          setStatus("reconnecting");
-          current.close();
-        }, 90_000);
-      }
-      armWatchdog();
+      armWatchdog(current);
       current.onopen = (): void => {
         if (!active) return;
         setStatus("connecting");
@@ -80,14 +89,8 @@ export function useLivePolls(
           const next: LiveSnapshot = parsed.data;
           attempts = 0;
           setStatus("live");
-          armWatchdog();
-          setSnapshot((previous: LiveSnapshot | null) =>
-            !previous ||
-            next.revision > previous.revision ||
-            (next.revision === previous.revision && next.serverNow >= previous.serverNow)
-              ? next
-              : previous,
-          );
+          armWatchdog(current);
+          updateSnapshot(next);
         } catch {
           current.close(1002, "Invalid snapshot");
         }

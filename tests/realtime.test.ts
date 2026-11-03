@@ -499,6 +499,42 @@ describe("public poll updates", (): void => {
     expect(result.webSocket).toBeNull();
   });
 
+  it("preserves stream, route, method, upgrade, origin, and client validation order", async (): Promise<void> => {
+    const cases: {
+      path: string;
+      query: string;
+      method: string;
+      upgrade?: string;
+      status: number;
+    }[] = [
+      { path: "missing", query: "invalid", method: "POST", status: 400 },
+      { path: "missing", query: streamerId, method: "POST", status: 404 },
+      { path: "subscribe", query: streamerId, method: "POST", status: 405 },
+      { path: "subscribe", query: streamerId, method: "GET", status: 426 },
+      {
+        path: "subscribe",
+        query: streamerId,
+        method: "GET",
+        upgrade: "websocket",
+        status: 403,
+      },
+    ];
+    for (const testCase of cases) {
+      const result = await runtime.dispatchFetch(
+        `${origin}/${streamerId}/${testCase.path}?streamerId=${testCase.query}`,
+        {
+          method: testCase.method,
+          headers: {
+            ...(testCase.upgrade ? { Upgrade: testCase.upgrade } : {}),
+            Origin: "https://foreign.test",
+          },
+        },
+      );
+      expect(result.status).toBe(testCase.status);
+      expect(result.webSocket).toBeNull();
+    }
+  });
+
   it("rejects malformed requests before opening a socket", async (): Promise<void> => {
     expect((await request("subscribe", "POST")).status).toBe(405);
     expect((await request("subscribe", "GET")).status).toBe(426);

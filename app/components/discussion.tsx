@@ -5,15 +5,29 @@ import { errorMessage, postJson, requestJson } from "./api";
 
 type CommentChange = { action: "like"; id: string; liked: boolean } | { action: "delete"; id: string };
 
+function refreshedReply(
+  selected: Comment | null,
+  current: Comment[],
+  nextCursor: string | null,
+  compare: (a: Comment, b: Comment) => number,
+): Comment | null {
+  if (!selected) return null;
+  const updated: Comment | undefined = current.find((comment: Comment) => comment.id === selected.id);
+  if (updated) return updated;
+  const tail: Comment | undefined = current.at(-1);
+  // A sort change can leave a valid reply target beyond the refreshed range.
+  return !nextCursor || (tail && compare(selected, tail) <= 0) ? null : selected;
+}
+
 export function DeleteButton({
   label,
   onDelete,
   disabled = false,
-}: {
+}: Readonly<{
   label: string;
   onDelete: () => Promise<void>;
   disabled?: boolean;
-}): ReactNode {
+}>): ReactNode {
   const [open, setOpen] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -23,8 +37,8 @@ export function DeleteButton({
     try {
       await onDelete();
       setOpen(false);
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
     } finally {
       setPending(false);
     }
@@ -72,14 +86,14 @@ export function Discussion({
   ownerId,
   refreshKey,
   onChanged,
-}: {
+}: Readonly<{
   entryId: string;
   handle: string;
   viewer: Viewer | null;
   ownerId: string;
   refreshKey: number;
   onChanged: () => void;
-}): ReactNode {
+}>): ReactNode {
   const [comments, setComments] = useState<Comment[]>([]);
   const [sort, setSort] = useState<SortOrder>("newest");
   const [cursor, setCursor] = useState<string | null>(null);
@@ -130,7 +144,8 @@ export function Discussion({
       let pages: number = 0;
       let nextCursor: string | null = null;
       do {
-        const query: string = `sort=${sort}${nextCursor ? `&cursor=${encodeURIComponent(nextCursor)}` : ""}`;
+        const cursorQuery: string = nextCursor ? `&cursor=${encodeURIComponent(nextCursor)}` : "";
+        const query: string = `sort=${sort}${cursorQuery}`;
         const snapshot: DiscussionSnapshot = await requestJson<DiscussionSnapshot>(
           `/api/entries/${encodeURIComponent(entryId)}/comments?${query}`,
           { signal: controller.signal },
@@ -150,18 +165,11 @@ export function Discussion({
       historyBoundary.current = pages > 1 ? (current.at(-1) ?? null) : null;
       setComments(current);
       setCursor(nextCursor);
-      setReply((selected: Comment | null) => {
-        if (!selected) return null;
-        const updated: Comment | undefined = current.find((comment: Comment) => comment.id === selected.id);
-        if (updated) return updated;
-        const tail: Comment | undefined = current.at(-1);
-        // A sort change can leave a valid reply target beyond the refreshed range.
-        return !nextCursor || (tail && compare(selected, tail) <= 0) ? null : selected;
-      });
+      setReply((selected: Comment | null) => refreshedReply(selected, current, nextCursor, compare));
     }
     void refresh()
-      .catch((cause: unknown) => {
-        if (!controller.signal.aborted && generation === loadGeneration.current) setError(errorMessage(cause));
+      .catch((error_: unknown) => {
+        if (!controller.signal.aborted && generation === loadGeneration.current) setError(errorMessage(error_));
       })
       .finally(() => {
         if (!controller.signal.aborted && generation === loadGeneration.current) setLoading(false);
@@ -185,8 +193,8 @@ export function Discussion({
         ...new Map([...previous, ...snapshot.comments].map((comment: Comment) => [comment.id, comment])).values(),
       ]);
       setCursor(snapshot.nextCursor);
-    } catch (cause: unknown) {
-      if (generation === loadGeneration.current) setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      if (generation === loadGeneration.current) setError(errorMessage(error_));
     } finally {
       if (generation === loadGeneration.current) setLoadingMore(false);
     }
@@ -241,8 +249,8 @@ export function Discussion({
       setReply((current: Comment | null) => (current?.id === parentId ? null : current));
       setRevision((value: number) => value + 1);
       onChanged();
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
     } finally {
       setBusy(false);
     }
@@ -295,7 +303,7 @@ export function Discussion({
                 aria-label={`Like comment by ${comment.author}`}
                 onClick={() => {
                   void changeComment({ action: "like", id: comment.id, liked: !comment.liked }).catch(
-                    (cause: unknown) => setError(errorMessage(cause)),
+                    (error_: unknown) => setError(errorMessage(error_)),
                   );
                 }}
               >

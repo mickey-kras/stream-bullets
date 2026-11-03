@@ -176,7 +176,7 @@ Approve CI policy: head=<HEAD_SHA> base=<CURRENT_PR_BASE_SHA> trusted=<GITHUB_WO
 
 Owner comments trigger a fresh check of `Trusted CI policy`. Comment edits and deletions also trigger the check. A rejection removes approval. New commits or a changed base need new approval.
 
-The configuration for Aislop preserves globals in Cloudflare Workers and the virtual module through narrow compatibility settings. The application uses valid nickname autofill, focusable scroll panels, and an adjustable ARIA separator. The required `pnpm audit` check owns dependency auditing. Aislop does not repeat that check.
+The configuration for Aislop preserves globals in Cloudflare Workers and the virtual module through narrow compatibility settings. The application uses valid nickname autofill, focusable scroll panels, and a native slider to resize the topic panels. The required `pnpm audit` check owns dependency auditing. Aislop does not repeat that check.
 
 Configure these repository settings before production use:
 

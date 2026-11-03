@@ -11,11 +11,11 @@ export function Avatar({
   name,
   url,
   className = "",
-}: {
+}: Readonly<{
   name: string;
   url: string | null;
   className?: string;
-}): ReactNode {
+}>): ReactNode {
   return url ? (
     <img className={`user-avatar ${className}`} src={url} alt="" loading="lazy" />
   ) : (
@@ -31,13 +31,13 @@ export function Modal({
   title,
   description,
   children,
-}: {
+}: Readonly<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   description: string;
   children: ReactNode;
-}): ReactNode {
+}>): ReactNode {
   const returnFocus = useRef<HTMLElement | null>(null);
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -68,10 +68,10 @@ export function Modal({
 export function SignIn({
   providers,
   callbackURL = "/settings",
-}: {
+}: Readonly<{
   providers: Provider[];
   callbackURL?: string;
-}): ReactNode {
+}>): ReactNode {
   const [pending, setPending] = useState<Provider | null>(null);
   const [error, setError] = useState<string>("");
   async function signIn(provider: Provider): Promise<void> {
@@ -80,27 +80,31 @@ export function SignIn({
     try {
       const result = await authClient.signIn.social({ provider, callbackURL });
       if (result.error) throw new Error(result.error.message || "Sign-in failed. Please try again.");
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
     } finally {
       setPending(null);
     }
   }
   return (
     <div className="sign-in-options">
-      {providers.map((provider: Provider) => (
-        <button
-          type="button"
-          className="gold"
-          disabled={pending !== null}
-          key={provider}
-          onClick={() => {
-            void signIn(provider);
-          }}
-        >
-          {pending === provider ? "Connecting…" : `Continue with ${provider === "google" ? "Google" : "Twitch"}`}
-        </button>
-      ))}
+      {providers.map((provider: Provider) => {
+        const providerName: string = provider === "google" ? "Google" : "Twitch";
+        const label: string = pending === provider ? "Connecting…" : `Continue with ${providerName}`;
+        return (
+          <button
+            type="button"
+            className="gold"
+            disabled={pending !== null}
+            key={provider}
+            onClick={() => {
+              void signIn(provider);
+            }}
+          >
+            {label}
+          </button>
+        );
+      })}
       {providers.length === 0 && <output>Sign-in is not available yet.</output>}
       <p className="form-error" role="alert">
         {error}
@@ -109,7 +113,7 @@ export function SignIn({
   );
 }
 
-export function AccountControls({ viewer, providers }: { viewer: Viewer | null; providers: Provider[] }): ReactNode {
+export function AccountControls({ viewer, providers }: Readonly<{ viewer: Viewer | null; providers: Provider[] }>): ReactNode {
   const [open, setOpen] = useState<boolean>(false);
   return viewer ? (
     <Link className="profile" to="/settings" aria-label={`Account settings for ${viewer.name}`}>
@@ -137,12 +141,12 @@ export function SiteHeader({
   providers,
   streamer,
   children,
-}: {
+}: Readonly<{
   viewer: Viewer | null;
   providers: Provider[];
   streamer?: Streamer;
   children?: ReactNode;
-}): ReactNode {
+}>): ReactNode {
   return (
     <header className="site-header">
       <Link
@@ -173,7 +177,7 @@ export function SiteHeader({
   );
 }
 
-export function EmptyState({ title, children }: { title: string; children: ReactNode }): ReactNode {
+export function EmptyState({ title, children }: Readonly<{ title: string; children: ReactNode }>): ReactNode {
   return (
     <div className="empty-state">
       <h2>{title}</h2>

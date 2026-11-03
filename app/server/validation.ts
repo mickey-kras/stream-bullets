@@ -60,7 +60,7 @@ export const entryActionSchema = z
     }
     if (
       value.kind === "choice" &&
-      (!value.options ||
+      (!value.options?.length ||
         new Set(value.options.map((option: string) => option.toLowerCase())).size !== value.options.length)
     ) {
       context.addIssue({ code: z.ZodIssueCode.custom, message: "Add 2 to 6 different poll options." });

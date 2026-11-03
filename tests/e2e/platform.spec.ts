@@ -214,18 +214,30 @@ test("a viewer opts into a public streamer page and uploads a bounded image", as
   await context.close();
 });
 
-test("topic panes and the resize separator remain keyboard accessible", async ({ page }) => {
+test("topic panes and the resize control remain keyboard accessible", async ({ page }) => {
   await page.goto("/@pagination_host");
   const topics = page.getByRole("region", { name: "Scrollable topic list" });
   await topics.focus();
   await page.keyboard.press("PageDown");
   await expect.poll(() => topics.evaluate((element: HTMLElement) => element.scrollTop)).toBeGreaterThan(0);
-  const splitter = page.getByRole("separator", { name: "Resize topic panels" });
+  const splitter = page.getByRole("slider", { name: "Resize topic panels" });
   await splitter.focus();
   await page.keyboard.press("ArrowRight");
-  await expect(splitter).toHaveAttribute("aria-valuenow", "42");
+  await expect(splitter).toHaveValue("42");
   await page.keyboard.press("ArrowLeft");
-  await expect(splitter).toHaveAttribute("aria-valuenow", "40");
+  await expect(splitter).toHaveValue("40");
   await page.keyboard.press("Tab");
   await expect(page.getByRole("region", { name: "Selected topic" })).toBeFocused();
+  const workspace = page.locator(".topic-workspace");
+  const bounds = await workspace.boundingBox();
+  const handle = await splitter.boundingBox();
+  if (!bounds || !handle) throw new Error("Topic workspace and resize control must be visible.");
+  const handleY: number = handle.y + handle.height / 2;
+  await page.mouse.move(handle.x + handle.width / 2, handleY);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + bounds.width * 0.55, handleY);
+  await page.mouse.up();
+  await expect.poll(async () => Number(await splitter.inputValue())).toBeCloseTo(55, 0);
+  await splitter.dblclick();
+  await expect(splitter).toHaveValue("40");
 });
