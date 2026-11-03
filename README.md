@@ -149,7 +149,7 @@ The repository pins dependency versions and the lockfile. Installation retains t
 
 ## Quality gates
 
-Each PR must pass `Required quality gates` and `guard` from the `policy` workflow. This check requires application verification, security scans, policy checks, and documentation checks. Production also requires the SonarQube quality gate on `main`.
+Each PR must pass `Required quality gates` and `Trusted CI policy`. This check requires application verification, security scans, policy checks, and documentation checks. Production also requires the SonarQube quality gate on `main`.
 
 | Check | Failure condition |
 | --- | --- |
@@ -187,6 +187,6 @@ Configure these repository settings before production use:
 
 Dependency review needs an active dependency graph. An administrator can enable it in **Settings > Advanced Security** ([repository security settings](https://github.com/mickey-kras/stream-bullets/settings/security_analysis)). The connector for GitHub cannot change this setting. Keep the dependency review mandatory.
 
-SonarQube uses coverage from the successful verification job for the same commit. The workflow uses these secrets only on `main`. Missing SonarQube configuration fails the job and blocks deployment. CODEOWNERS does not activate repository protection by itself.
+SonarQube uses coverage from the successful verification job for the same commit. The workflow uses these secrets only on `main`. Missing SonarQube configuration fails the job and blocks deployment. CODEOWNERS does not activate repository protection by itself. Writers can publish commit statuses. Make review by code owners mandatory for workflow changes to protect status provenance.
 
 The documentation tools check writing rules. They do not prove full ASD-STE100 Issue 9 compliance or validate dictionary meanings.
