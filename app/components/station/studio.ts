@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import * as T from "./textures";
 import type { Kit } from "./kit";
+import { poster, posterTexture } from "./poster";
+import { WING_AT, WING_YAW, WING_BACK_Z } from "./wing";
 import { add, mesh, box, cyl, ball, torus, rod, tube, plaque, frame, lathe, rivets, TAU, profile } from "./shapes";
-import { plan, facing, facingIn, loop, band, planShape, planSector, GLASS_FROM, GLASS_TO } from "./plan";
+import { plan, facing, facingIn, loop, band, planShape, planSector, GLASS_FROM, GLASS_TO, HALL_AT } from "./plan";
 
 interface StudioScope {
   studio: THREE.Group;
@@ -30,17 +32,17 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
   const head = add(new THREE.Group(), g);
   head.position.set(0, 0.43, 0);
   head.rotation.x = 0.12;
+  // A broadcast "pill" capsule: straight sides with rounded ends (a squared superellipse), not an egg.
+  const radiusAt = (y: number): number => 0.08 * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y / 0.15), 4)), 0.25);
   const capsuleProfile: Array<[number, number]> = [];
-  for (let i = 0; i <= 24; i++) {
-    const t = i / 24,
-      y = -0.15 + t * 0.3;
-    capsuleProfile.push([
-      Math.max(0.001, 0.085 * Math.pow(Math.sin(t * Math.PI), 0.5) * (1 - 0.15 * Math.pow(Math.abs(t - 0.5) * 2, 2))),
-      y,
-    ]);
+  for (let i = 0; i <= 32; i++) {
+    const y = -0.15 + (i / 32) * 0.3;
+    capsuleProfile.push([Math.max(0.001, radiusAt(y)), y]);
   }
+  const body = add(new THREE.Group(), head);
+  body.scale.set(1.05, 1, 0.8);
   const grilleMap = T.grille();
-  const capsule = lathe(
+  lathe(
     capsuleProfile,
     new THREE.MeshStandardMaterial({
       map: grilleMap,
@@ -49,12 +51,16 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
       roughness: 0.28,
     }),
     [0, 0, 0],
-    head,
+    body,
     48,
   );
-  capsule.scale.set(1.1, 1, 0.75);
+  // Chrome ribs wrap the grille, the classic look of a mid-century stage microphone.
+  for (let i = -3; i <= 3; i++) {
+    const y = i * 0.034;
+    torus([radiusAt(y) + 0.002, 0.0045], [0, y, 0], chrome, body);
+  }
   const spine = capsuleProfile.map(
-    ([r, y]: [number, number]): THREE.Vector3 => new THREE.Vector3(0, y, r * 0.75 + 0.004),
+    ([r, y]: [number, number]): THREE.Vector3 => new THREE.Vector3(0, y, r * 0.8 + 0.004),
   );
   tube(spine, 0.009, chrome, head, false, 0.5);
   tube(
@@ -249,8 +255,14 @@ function studioDoor(k: Kit, s: Pick<StudioScope, "studio" | "floorY">): void {
   const { brass, gold, warmSoft } = k;
   const { studio, floorY } = s;
   const g = add(new THREE.Group(), studio);
-  g.position.copy(plan(1.62, -0.07, floorY));
-  g.rotation.y = facingIn(1.62);
+  // The porch block juts into the studio; its inner door sits on the block's back face beside the
+  // locker, clear of the desk, so the front door outside opens through a short vestibule.
+  const at = new THREE.Vector3(-0.3, 0, WING_BACK_Z - 0.012)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), WING_YAW)
+    .add(WING_AT)
+    .sub(HALL_AT);
+  g.position.set(at.x, floorY, at.z);
+  g.rotation.y = WING_YAW + Math.PI;
   plaque([0.78, 1.7, 0.05, 0.1], [0, 0.87, 0], gold, g);
   frame([0.9, 1.82, 0.14, 0.07, 0.06], [0, 0.9, 0.02], brass, g);
   const oval = new THREE.Shape();
@@ -302,6 +314,27 @@ function studioClock(k: Kit, s: Pick<StudioScope, "studio">): void {
   );
   box([0.011, 0.09, 0.004], [0, 0.035, 0.03], iron, g, 0.002).rotation.z = -0.6;
   box([0.009, 0.12, 0.004], [0, 0.045, 0.033], iron, g, 0.002).rotation.z = 1.1;
+}
+
+function studioPoster(k: Kit, s: Pick<StudioScope, "studio">): void {
+  const { brass, repaints } = k;
+  const { studio } = s;
+  const art = posterTexture(k.family);
+  repaints.push((): void => {
+    art.image = poster(k.family);
+    art.needsUpdate = true;
+  });
+  const g = add(new THREE.Group(), studio);
+  g.position.copy(plan(3.18, -0.12, 1.78));
+  g.rotation.y = facingIn(3.18);
+  box([0.5, 0.67, 0.02], [0, 0, 0], brass, g, 0.006);
+  mesh(
+    new THREE.PlaneGeometry(0.46, 0.63),
+    new THREE.MeshStandardMaterial({ map: art, roughness: 0.62 }),
+    [0, 0, 0.012],
+    g,
+    false,
+  );
 }
 
 function studioPendants(k: Kit, s: Pick<StudioScope, "studio">): void {
@@ -382,7 +415,8 @@ function studioPlanters(k: Kit, s: Pick<StudioScope, "hall">): void {
   const { gold, hallCream, soil, plant } = k;
   const { hall } = s;
   for (const [a0, a1, seed] of [
-    [-1.5, -0.55, 17],
+    // Stops short of the atom statue's plinth.
+    [-1.5, -1.0, 17],
     [0.25, 0.62, 19],
   ] as const) {
     planSector([a0, a1], [0.25, 0.7], 0.36, hallCream, 0, hall);
@@ -499,6 +533,7 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
   studioLocker(k, { studio, floorY });
   studioDoor(k, { studio, floorY });
   studioClock(k, { studio });
+  studioPoster(k, { studio });
   // Brass dome pendants over the desk and the counter.
   studioPendants(k, { studio });
   // Swivel chair in tufted tan leather behind the desk, facing the window.

@@ -11,7 +11,7 @@ exports[`paints the clock, poster and backdrop 1`] = `
 }
 `;
 
-exports[`paints the clock, poster and backdrop 2`] = `"c15644aad28f09fb5d5564a0df36a622871e17e59e73a6406c25979abac588db"`;
+exports[`paints the clock, poster and backdrop 2`] = `"254bfe195a741d4c4f2127eaa2aa154ab631b280ff0970a034694ad78c5ccb04"`;
 
 exports[`paints the clock, poster and backdrop 3`] = `
 {
@@ -26,19 +26,17 @@ exports[`paints the clock, poster and backdrop 3`] = `
 
 exports[`preserves model geometry and animations (compact=false) 1`] = `
 {
-  "animators": 20,
-  "geometry": "028f5be1e200364050f115e9b451123e1c06284cf63188df0b84a066b162205a",
-  "meshes": 1065,
-  "vents": 3,
+  "animators": 19,
+  "geometry": "bfe80d7eb8b624d6250afd7cb7f40aacfefde66a43310d03151f741115cf9b43",
+  "meshes": 1068,
 }
 `;
 
 exports[`preserves model geometry and animations (compact=true) 1`] = `
 {
-  "animators": 20,
-  "geometry": "d9b9c6f9e82b1ec74c0e66b364506be0217f7a258f20ed64758fcd9fc7b9d1f0",
-  "meshes": 1065,
-  "vents": 3,
+  "animators": 19,
+  "geometry": "38a5956abfb751aa5b53edcdc6ef1800574b998d3e775eeea30be8c2c5245f97",
+  "meshes": 1068,
 }
 `;
 

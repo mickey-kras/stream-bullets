@@ -565,6 +565,31 @@ export function dial(amber: boolean): THREE.CanvasTexture {
   return t;
 }
 
+/** Glow mask for a dial's red zone: the red ticks and arc on black, for an emissive map. */
+export function dialRedZone(): THREE.CanvasTexture {
+  const [c, a] = layer(256, 256);
+  a.fillStyle = "#000000";
+  a.fillRect(0, 0, 256, 256);
+  a.strokeStyle = "#ffffff";
+  a.lineCap = "round";
+  for (let i = 16; i <= 20; i++) {
+    const ang = Math.PI * (1.15 + (i / 20) * 0.7);
+    const r0 = i % 5 ? 92 : 80;
+    a.lineWidth = i % 5 ? 3 : 6;
+    a.beginPath();
+    a.moveTo(128 + Math.cos(ang) * r0, 150 + Math.sin(ang) * r0);
+    a.lineTo(128 + Math.cos(ang) * 108, 150 + Math.sin(ang) * 108);
+    a.stroke();
+  }
+  a.lineWidth = 10;
+  a.beginPath();
+  a.arc(128, 150, 118, Math.PI * 1.71, Math.PI * 1.85);
+  a.stroke();
+  const t = texture(c, false);
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  return t;
+}
+
 /** Horizontal slot grille for the classic desk microphone. */
 export function grille(): THREE.CanvasTexture {
   const [c, a] = layer(64, 512);
@@ -609,39 +634,7 @@ export function reel(): THREE.CanvasTexture {
   return t;
 }
 
-/** Studio poster and clock faces. */
-export function poster(family: string): HTMLCanvasElement {
-  const [c, a] = layer(256, 360);
-  a.fillStyle = "#e8d8b0";
-  a.fillRect(0, 0, 256, 360);
-  a.save();
-  a.translate(128, 150);
-  for (let i = 0; i < 18; i++) {
-    a.rotate(Math.PI / 9);
-    a.fillStyle = i % 2 ? "#c8452c" : "#e8a43a";
-    a.beginPath();
-    a.moveTo(0, 0);
-    a.lineTo(-20, -200);
-    a.lineTo(20, -200);
-    a.fill();
-  }
-  a.restore();
-  a.fillStyle = "#1d4446";
-  a.beginPath();
-  a.arc(128, 150, 54, 0, 7);
-  a.fill();
-  a.fillStyle = "#e8d8b0";
-  a.font = `800 40px ${family}`;
-  a.textAlign = "center";
-  a.fillText("104.8", 128, 165);
-  a.fillStyle = "#1d4446";
-  a.fillRect(0, 280, 256, 80);
-  a.fillStyle = "#e8d8b0";
-  a.font = `800 46px ${family}`;
-  a.fillText("TUNE IN", 128, 338);
-  return c;
-}
-
+/** Studio clock face. */
 export function clockFace(): THREE.CanvasTexture {
   const [c, a] = layer(256, 256);
   a.fillStyle = "#efe4c6";

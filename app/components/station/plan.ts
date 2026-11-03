@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { add, mesh, TAU } from "./shapes";
+import { add, mesh, TAU, DECK_Y } from "./shapes";
 
 /* The broadcast hall stands on a superellipse plan: round-ish, with a broad, flattened, glazed front.
    Angles run from +z (the street) toward +x; `grow` pushes a point outward from the wall line. */
@@ -7,6 +7,9 @@ import { add, mesh, TAU } from "./shapes";
 const HX = 2.75;
 const HZ = 2.05;
 const SE = 3.2;
+
+/** Where the hall stands on the station deck. */
+export const HALL_AT = new THREE.Vector3(-0.7, DECK_Y, -0.25);
 
 export const GLASS_FROM = -2.05;
 export const GLASS_TO = 1.3;
@@ -164,4 +167,28 @@ export function onWall(hall: THREE.Object3D, a: number, y: number, out = 0): THR
   g.position.copy(plan(a, out, y));
   g.rotation.y = facing(a);
   return g;
+}
+
+/** Where a pipe leaving point p (in a frame where the hall sits at `hall`) meets the hall wall square-on:
+    a point `stand` metres off the wall, then the wall face itself (where the flange shows), both at p's height.
+    `face` is how far that face stands proud of the plan line (the upper fascia is 0.22). */
+export function wallEntry(
+  p: THREE.Vector3,
+  hall: THREE.Vector3,
+  stand = 0.3,
+  face = 0.01,
+): [THREE.Vector3, THREE.Vector3] {
+  let best = 0;
+  let bestDistance = Infinity;
+  for (let i = 0; i < 720; i++) {
+    const a = (i / 720) * TAU;
+    const q = plan(a).add(hall);
+    const d = (q.x - p.x) ** 2 + (q.z - p.z) ** 2;
+    if (d < bestDistance) {
+      bestDistance = d;
+      best = a;
+    }
+  }
+  const y = p.y - hall.y;
+  return [plan(best, face + stand, y).add(hall), plan(best, face, y).add(hall)];
 }
