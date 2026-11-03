@@ -125,10 +125,11 @@ export function pipe(
     path.add(new THREE.QuadraticBezierCurve3(inPoint, p.clone(), outPoint));
     from = outPoint;
   }
-  path.add(new THREE.LineCurve3(from, points.at(-1)!.clone()));
+  const [previous, last] = points.slice(-2);
+  path.add(new THREE.LineCurve3(from, last.clone()));
   const m = mesh(new THREE.TubeGeometry(path, points.length * 24, r, 14, false), mat, [0, 0, 0], parent);
-  for (const p of [points[0], points.at(-1)!]) {
-    const dir = p === points[0] ? points[1].clone().sub(p) : p.clone().sub(points.at(-2)!);
+  for (const p of [points[0], last]) {
+    const dir = p === points[0] ? points[1].clone().sub(p) : p.clone().sub(previous);
     const flange = mesh(new THREE.CylinderGeometry(r * 1.6, r * 1.6, r * 0.8, 16), flangeMat, [p.x, p.y, p.z], parent);
     flange.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
   }
