@@ -21,7 +21,18 @@ import { buildWing } from "./wing";
 import { buildWorks } from "./works";
 
 export type StationView =
-  "entrance" | "hero" | "studio" | "rear" | "atom" | "mast" | "orbit" | "front" | "back" | "left" | "right" | "top";
+  | "entrance"
+  | "hero"
+  | "studio"
+  | "rear"
+  | "atom"
+  | "mast"
+  | "orbit"
+  | "front"
+  | "back"
+  | "left"
+  | "right"
+  | "top";
 
 export interface StationController {
   view: (name: StationView) => void;
