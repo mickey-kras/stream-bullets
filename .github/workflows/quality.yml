@@ -96,6 +96,15 @@ jobs:
         docker run --rm -v "$RUNNER_TEMP/scan:/src:ro" -v "$GITHUB_WORKSPACE/trusted/.github/trusted-ci:/trusted:ro" -w /src
         "$image" semgrep scan --config /trusted/.semgrep.yml --no-git-ignore --disable-nosem --exclude .semgrep.yml --error
         --metrics off'
+    - name: Install verified Trivy release
+      run: |
+        curl --fail --location --silent --show-error --retry 3 --retry-all-errors --connect-timeout 15 --max-time 180 \
+          https://github.com/aquasecurity/trivy/releases/download/v0.76.1/trivy_0.76.1_Linux-64bit.tar.gz -o "$RUNNER_TEMP/trivy.tar.gz"
+        printf '%s  %s\n' c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0 "$RUNNER_TEMP/trivy.tar.gz" | sha256sum --check
+        mkdir -p "$RUNNER_TEMP/trivy-bin"
+        tar --no-same-owner -xzf "$RUNNER_TEMP/trivy.tar.gz" -C "$RUNNER_TEMP/trivy-bin" trivy
+        "$RUNNER_TEMP/trivy-bin/trivy" --version
+        echo "$RUNNER_TEMP/trivy-bin" >> "$GITHUB_PATH"
     - name: Trivy dependency report
       id: trivy
       uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
@@ -109,7 +118,7 @@ jobs:
         ignore-unfixed: false
         exit-code: '0'
         limit-severities-for-sarif: true
-        version: v0.76.1
+        skip-setup-trivy: true
         cache: false
         cache-dir: ${{ runner.temp }}/trivy-cache
         trivy-config: trusted/.github/trusted-ci/trivy.yaml
