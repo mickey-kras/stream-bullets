@@ -1,0 +1,45 @@
+ci:
+  failBelow: 100
+
+exclude:
+  - coverage
+  - dist
+  - node_modules
+  - npm-shrinkwrap.json
+  - build
+  - .wrangler
+
+rules:
+  security/hardcoded-secret: error
+  # The required npm audit gate owns dependency findings and its narrow exception.
+  security/vulnerable-dependency: "off"
+  ai-slop/hardcoded-url: off
+
+quality:
+  maxFileLoc: 900
+  maxFunctionLoc: 150
+
+telemetry:
+  enabled: false
+
+# The Workers runtime supplies this module. It is not an npm dependency.
+imports:
+  provided:
+    - cloudflare:workers
+
+# The required application job runs pnpm audit with the frozen lockfile.
+# Do not let the isolated scanner discover candidate package-manager tools.
+security:
+  audit: false
+
+# Oxlint bundled with Aislop 0.18.1 rejects the standard nickname token.
+# Keep browser autofill and keyboard access to independently scrolling panels.
+overrides:
+  - files: [app/routes/settings.tsx]
+    rules:
+      jsx-a11y/autocomplete-valid: off
+  - files: [app/routes/streamer.tsx]
+    rules:
+      jsx-a11y/no-noninteractive-tabindex: off
+      # This is an adjustable ARIA window splitter, not a static thematic break.
+      jsx-a11y/prefer-tag-over-role: off

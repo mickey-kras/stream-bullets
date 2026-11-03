@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 concurrency:
   group: quality-${{ github.workflow }}-${{ github.ref }}
@@ -14,11 +15,19 @@ concurrency:
   queue: max
 
 jobs:
+  quality:
+    uses: ./.github/workflows/quality.yml
+
   verify:
     name: Verify application
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      coverage-id: ${{ steps.coverage.outputs.artifact-id }}
     steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+        with:
+          egress-policy: audit
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
@@ -31,6 +40,20 @@ jobs:
       - run: pnpm check
       - run: pnpm lint
       - run: pnpm test:coverage
+      - name: Bind coverage to this revision
+        env:
+          REVISION: ${{ github.sha }}
+        run: printf '%s\n' "$REVISION" > coverage/revision.txt
+      - name: Upload verified coverage
+        id: coverage
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: coverage-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            coverage/lcov.info
+            coverage/revision.txt
+          if-no-files-found: error
+          retention-days: 7
       - run: pnpm audit --audit-level high
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
@@ -48,7 +71,7 @@ jobs:
 
   deploy:
     name: Deploy production
-    needs: verify
+    needs: [checks, sonar]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -56,6 +79,9 @@ jobs:
       name: production
       url: https://streambullets.com
     steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+        with:
+          egress-policy: audit
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
@@ -92,3 +118,81 @@ jobs:
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/ --output /tmp/streambullets.html
           grep -q 'Pick the next conversation' /tmp/streambullets.html
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/fonts.css --output /dev/null
+
+  checks:
+    name: Required quality gates
+    needs: [verify, quality]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require all checks
+        env:
+          VERIFY: ${{ needs.verify.result }}
+          QUALITY: ${{ needs.quality.result }}
+        run: test "$VERIFY" = success && test "$QUALITY" = success
+
+  sonar:
+    name: SonarQube quality gate
+    needs: [checks, verify]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require successful coverage artifact
+        env:
+          ARTIFACT_ID: ${{ needs.verify.outputs.coverage-id }}
+        shell: bash
+        run: '[[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          artifact-ids: ${{ needs.verify.outputs.coverage-id }}
+          path: coverage/
+      - name: Verify coverage revision
+        run: test "$(cat coverage/revision.txt)" = "$GITHUB_SHA" && test -s coverage/lcov.info
+      - name: Mask configured SonarQube endpoint
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: python3 .github/scripts/mask-sonar-context.py configured
+      - uses: tailscale/github-action@99a8333667fff04fdd6cffb46dfd409f8329a7bf
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TAILSCALE_AUDIENCE }}
+          tags: tag:github-sonar
+          use-cache: 'true'
+      - name: Mask advertised SonarQube endpoint
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: python3 .github/scripts/mask-sonar-context.py advertised
+      - uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Check SonarQube quality gate
+        id: sonar-gate
+        uses: SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa
+        timeout-minutes: 6
+        with:
+          pollingTimeoutSec: 270
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Synchronize SonarQube findings
+        if: "!cancelled() && failure() && steps.sonar-gate.outcome == 'failure'"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: python3 .github/scripts/sync-sonar-findings.py .scannerwork/report-task.txt

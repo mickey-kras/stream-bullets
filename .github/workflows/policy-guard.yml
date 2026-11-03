@@ -1,0 +1,56 @@
+name: policy
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+  issue_comment:
+    types: [created, edited, deleted]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  guard:
+    name: guard
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      (github.event.issue.pull_request && github.event.issue.state == 'open' &&
+       github.event.comment.user.id == 24433677 &&
+       github.event.comment.user.login == 'mickey-kras' && github.event.comment.user.type == 'User')
+    concurrency:
+      group: trusted-policy-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Invalidate the current head status before validation
+        id: pending
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const number = context.payload.pull_request?.number || context.payload.issue.number;
+            const { data: pull } = await github.rest.pulls.get({ ...context.repo, pull_number: number });
+            await github.rest.repos.createCommitStatus({
+              ...context.repo, sha: pull.head.sha, context: 'Trusted CI policy', state: 'pending',
+              description: 'Validating current policy admission',
+            });
+            return { number, head: { sha: pull.head.sha }, base: { sha: pull.base.sha } };
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: .github/trusted-ci
+      - name: Install trusted policy dependencies
+        run: npm ci --prefix .github/trusted-ci --ignore-scripts --no-audit --no-fund
+      - name: Validate candidate policy with trusted code
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          TRUSTED_SHA: ${{ github.workflow_sha }}
+          POLICY_REVISION: ${{ steps.pending.outputs.result }}
+        with:
+          script: await require('./.github/trusted-ci/policy-guard.cjs').runWithStatus({ github, context }, JSON.parse(process.env.POLICY_REVISION));

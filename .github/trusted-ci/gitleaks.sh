@@ -1,0 +1,1 @@
+"$RUNNER_TEMP/gitleaks/gitleaks" git candidate --log-opts="--full-history --all --text" --redact --ignore-gitleaks-allow --config trusted/.github/trusted-ci/gitleaks.toml --gitleaks-ignore-path trusted/.github/trusted-ci/gitleaksignore --report-format sarif --report-path "$RUNNER_TEMP/reports/gitleaks.sarif"
