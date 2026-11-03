@@ -36,7 +36,11 @@ function texture(canvas: HTMLCanvasElement, color: boolean): THREE.CanvasTexture
 }
 
 function surface(color: HTMLCanvasElement, bump: HTMLCanvasElement, rough: HTMLCanvasElement): Surface {
-  return { map: texture(color, true), bump: texture(bump, false), rough: texture(rough, false) };
+  return {
+    map: texture(color, true),
+    bump: texture(bump, false),
+    rough: texture(rough, false),
+  };
 }
 
 /** Clone a surface with its own repeat, sharing the painted canvases. */
@@ -47,7 +51,11 @@ export function repeat(source: Surface, x: number, y: number): Surface {
     c.needsUpdate = true;
     return c;
   };
-  return { map: clone(source.map), bump: clone(source.bump), rough: clone(source.rough) };
+  return {
+    map: clone(source.map),
+    bump: clone(source.bump),
+    rough: clone(source.rough),
+  };
 }
 
 function blob(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, color: string, alpha: number): void {
@@ -143,26 +151,29 @@ export function paintedMetal(o: PaintOptions): Surface {
   const sx = o.seamsX ?? 6,
     sy = o.seamsY ?? 2;
   const seamPoints: Array<[number, number]> = [];
-  for (let i = 0; i < sx; i++) {
-    const x = ((i + 0.5) * W) / sx;
-    a.fillStyle = "rgba(15,10,6,.55)";
-    a.fillRect(x - 1.5, 0, 3, H);
-    a.fillStyle = "rgba(255,240,210,.14)";
-    a.fillRect(x + 2, 0, 1.5, H);
-    bb.fillStyle = grey(40);
-    bb.fillRect(x - 2, 0, 4, H);
-    if (o.rivets !== false) for (let y = 10; y < H; y += 24) seamPoints.push([x + 9, y], [x - 9, y]);
+  function paintSeams(): void {
+    for (let i = 0; i < sx; i++) {
+      const x = ((i + 0.5) * W) / sx;
+      a.fillStyle = "rgba(15,10,6,.55)";
+      a.fillRect(x - 1.5, 0, 3, H);
+      a.fillStyle = "rgba(255,240,210,.14)";
+      a.fillRect(x + 2, 0, 1.5, H);
+      bb.fillStyle = grey(40);
+      bb.fillRect(x - 2, 0, 4, H);
+      if (o.rivets !== false) for (let y = 10; y < H; y += 24) seamPoints.push([x + 9, y], [x - 9, y]);
+    }
+    for (let j = 0; j < sy; j++) {
+      const y = ((j + 0.5) * H) / sy;
+      a.fillStyle = "rgba(15,10,6,.55)";
+      a.fillRect(0, y - 1.5, W, 3);
+      a.fillStyle = "rgba(255,240,210,.14)";
+      a.fillRect(0, y + 2, W, 1.5);
+      bb.fillStyle = grey(40);
+      bb.fillRect(0, y - 2, W, 4);
+      if (o.rivets !== false) for (let x = 12; x < W; x += 24) seamPoints.push([x, y + 9]);
+    }
   }
-  for (let j = 0; j < sy; j++) {
-    const y = ((j + 0.5) * H) / sy;
-    a.fillStyle = "rgba(15,10,6,.55)";
-    a.fillRect(0, y - 1.5, W, 3);
-    a.fillStyle = "rgba(255,240,210,.14)";
-    a.fillRect(0, y + 2, W, 1.5);
-    bb.fillStyle = grey(40);
-    bb.fillRect(0, y - 2, W, 4);
-    if (o.rivets !== false) for (let x = 12; x < W; x += 24) seamPoints.push([x, y + 9]);
-  }
+  paintSeams();
   for (const [x, y] of seamPoints) {
     a.fillStyle = "rgba(10,6,3,.45)";
     a.beginPath();
@@ -181,33 +192,36 @@ export function paintedMetal(o: PaintOptions): Surface {
     bb.arc(x, y, 3.6, 0, Math.PI * 2);
     bb.fill();
   }
-  // Chipped enamel exposing dark primer and bare metal.
-  for (let i = 0; i < chips * 90; i++) {
-    const near =
-      seamPoints.length && rnd() > 0.4
-        ? seamPoints[Math.floor(rnd() * seamPoints.length)]!
-        : ([rnd() * W, rnd() * H] as [number, number]);
-    const x = near[0] + (rnd() - 0.5) * 20,
-      y = near[1] + (rnd() - 0.5) * 20,
-      rad = 2 + Math.pow(rnd(), 2) * 16;
-    chipShape(a, rnd, x + 1, y + 1, rad * 1.12);
-    a.fillStyle = shade(o.base, 0.1);
-    a.fill();
-    chipShape(a, rnd, x, y, rad);
-    a.fillStyle = rnd() > 0.3 ? "#3b2d22" : "#7d6a55";
-    a.fill();
-    chipShape(bb, rnd, x, y, rad);
-    bb.fillStyle = grey(85);
-    bb.fill();
-    chipShape(rr, rnd, x, y, rad);
-    rr.fillStyle = grey(200);
-    rr.fill();
+  function paintChips(): void {
+    // Chipped enamel exposing dark primer and bare metal.
+    for (let i = 0; i < chips * 90; i++) {
+      const near =
+        seamPoints.length && rnd() > 0.4
+          ? seamPoints[Math.floor(rnd() * seamPoints.length)]
+          : ([rnd() * W, rnd() * H] as [number, number]);
+      const x = near[0] + (rnd() - 0.5) * 20,
+        y = near[1] + (rnd() - 0.5) * 20,
+        rad = 2 + Math.pow(rnd(), 2) * 16;
+      chipShape(a, rnd, x + 1, y + 1, rad * 1.12);
+      a.fillStyle = shade(o.base, 0.1);
+      a.fill();
+      chipShape(a, rnd, x, y, rad);
+      a.fillStyle = rnd() > 0.3 ? "#3b2d22" : "#7d6a55";
+      a.fill();
+      chipShape(bb, rnd, x, y, rad);
+      bb.fillStyle = grey(85);
+      bb.fill();
+      chipShape(rr, rnd, x, y, rad);
+      rr.fillStyle = grey(200);
+      rr.fill();
+    }
   }
+  paintChips();
   // Rust runs that start at seams and rivets and drip downward.
   for (let i = 0; i < rust * 70; i++) {
     const start =
       seamPoints.length && rnd() > 0.3
-        ? seamPoints[Math.floor(rnd() * seamPoints.length)]!
+        ? seamPoints[Math.floor(rnd() * seamPoints.length)]
         : ([rnd() * W, rnd() * H] as [number, number]);
     const x = start[0] + (rnd() - 0.5) * 6,
       y = start[1],
@@ -295,9 +309,21 @@ export function deckPlates(seed: number): Surface {
   rr.fillRect(0, 0, S, S);
   const rings = [0, 120, 250, 370, 470, 512];
   const tones = ["#7b7a72", "#6f6d66", "#85827a", "#66655f", "#76736b", "#5f5e59"];
-  for (let k = 0; k < rings.length - 1; k++) {
-    const r0 = rings[k]!,
-      r1 = rings[k + 1]!;
+  function paintSectorEdge(k: number, a0: number, r0: number, r1: number): void {
+    if (k > 0) {
+      for (const ctx of [a, bb]) {
+        ctx.strokeStyle = ctx === a ? "rgba(20,12,6,.7)" : grey(30);
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(C + Math.cos(a0) * r0, C + Math.sin(a0) * r0);
+        ctx.lineTo(C + Math.cos(a0) * r1, C + Math.sin(a0) * r1);
+        ctx.stroke();
+      }
+    }
+  }
+  function paintRing(k: number): void {
+    const r0 = rings[k],
+      r1 = rings[k + 1];
     const count = k === 0 ? 1 : 8 + k * 6;
     for (let i = 0; i < count; i++) {
       const a0 = (i / count) * Math.PI * 2,
@@ -306,7 +332,7 @@ export function deckPlates(seed: number): Surface {
       a.arc(C, C, r1, a0, a1);
       a.arc(C, C, r0, a1, a0, true);
       a.closePath();
-      a.fillStyle = tones[Math.floor(rnd() * tones.length)]!;
+      a.fillStyle = tones[Math.floor(rnd() * tones.length)];
       a.fill();
       rr.beginPath();
       rr.arc(C, C, r1, a0, a1);
@@ -314,16 +340,7 @@ export function deckPlates(seed: number): Surface {
       rr.closePath();
       rr.fillStyle = grey(110 + rnd() * 70);
       rr.fill();
-      if (k > 0) {
-        for (const ctx of [a, bb]) {
-          ctx.strokeStyle = ctx === a ? "rgba(20,12,6,.7)" : grey(30);
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(C + Math.cos(a0) * r0, C + Math.sin(a0) * r0);
-          ctx.lineTo(C + Math.cos(a0) * r1, C + Math.sin(a0) * r1);
-          ctx.stroke();
-        }
-      }
+      paintSectorEdge(k, a0, r0, r1);
     }
     for (const ctx of [a, bb]) {
       ctx.strokeStyle = ctx === a ? "rgba(20,12,6,.7)" : grey(30);
@@ -352,11 +369,16 @@ export function deckPlates(seed: number): Surface {
       bb.fill();
     }
   }
+  for (let k = 0; k < rings.length - 1; k++) {
+    paintRing(k);
+  }
   for (let i = 0; i < 400; i++) {
     const x = rnd() * S,
       y = rnd() * S,
       rad = 8 + rnd() * 50;
-    blob(a, x, y, rad, rnd() > 0.5 ? "#22201c" : rnd() > 0.6 ? "#7a3c1c" : "#a8a59c", 0.16);
+    let color = "#22201c";
+    if (rnd() <= 0.5) color = rnd() > 0.6 ? "#7a3c1c" : "#a8a59c";
+    blob(a, x, y, rad, color, 0.16);
   }
   // Polished walking ring: brighter and smoother where feet have worn the patina.
   a.globalAlpha = 0.22;
@@ -687,7 +709,10 @@ export function flutes(seed: number): Surface {
 
 /** Face of a rack of broadcast equipment: brushed panels, amber meters, knobs and a tuning dial.
     Returns the colour map and a matching emissive map in which only the meter windows glow. */
-export function rackFace(): { map: THREE.CanvasTexture; glow: THREE.CanvasTexture } {
+export function rackFace(): {
+  map: THREE.CanvasTexture;
+  glow: THREE.CanvasTexture;
+} {
   const W = 512,
     H = 1024;
   const [c, a] = layer(W, H);
@@ -745,6 +770,43 @@ export function rackFace(): { map: THREE.CanvasTexture; glow: THREE.CanvasTextur
     a.lineTo(x + r * 0.6, yy - r * 0.6);
     a.stroke();
   };
+  function paintIndicators(): void {
+    for (let k = 0; k < 4; k++) {
+      for (const ctx of [a, ee]) {
+        ctx.fillStyle = k % 2 ? "#ff5a30" : "#7cff9a";
+        ctx.beginPath();
+        ctx.arc(430, y + 40 + k * 22, 6, 0, TAU2);
+        ctx.fill();
+      }
+    }
+  }
+  function paintRadio(): void {
+    for (const ctx of [a, ee]) {
+      ctx.fillStyle = "#ffcf7a";
+      ctx.fillRect(50, y + 30, W - 100, 56);
+    }
+    a.fillStyle = "#3a2412";
+    a.font = "700 22px sans-serif";
+    a.textAlign = "center";
+    ["88", "92", "96", "100", "104", "108"].forEach((t: string, k: number): void => {
+      a.fillText(t, 80 + k * 70, y + 66);
+    });
+    a.fillStyle = "#b4271a";
+    a.fillRect(360, y + 30, 4, 56);
+    for (let k = 0; k < 4; k++) knob(90 + k * 110, y + 135, 22);
+  }
+  function paintControls(i: number, h: number): void {
+    if (i === 1) {
+      paintRadio();
+    } else if (i === 3) {
+      for (let k = 0; k < 3; k++) meter(40 + k * 150, y + 30, 120, 80);
+      for (let k = 0; k < 6; k++) knob(60 + k * 78, y + 160, 18);
+    } else {
+      for (let k = 0; k < 2; k++) meter(60 + k * 220, y + 26, 150, 90);
+      for (let k = 0; k < 5; k++) knob(70 + k * 92, y + h - 50, 17);
+      if (i === 0) paintIndicators();
+    }
+  }
   units.forEach((h: number, i: number): void => {
     const g = a.createLinearGradient(0, y, 0, y + h);
     g.addColorStop(0, i % 2 ? "#8d8a80" : "#b5ad97");
@@ -760,36 +822,7 @@ export function rackFace(): { map: THREE.CanvasTexture; glow: THREE.CanvasTextur
         a.arc(sx, sy, 6, 0, TAU2);
         a.fill();
       }
-    if (i === 1) {
-      for (const ctx of [a, ee]) {
-        ctx.fillStyle = "#ffcf7a";
-        ctx.fillRect(50, y + 30, W - 100, 56);
-      }
-      a.fillStyle = "#3a2412";
-      a.font = "700 22px sans-serif";
-      a.textAlign = "center";
-      ["88", "92", "96", "100", "104", "108"].forEach((t: string, k: number): void => {
-        a.fillText(t, 80 + k * 70, y + 66);
-      });
-      a.fillStyle = "#b4271a";
-      a.fillRect(360, y + 30, 4, 56);
-      for (let k = 0; k < 4; k++) knob(90 + k * 110, y + 135, 22);
-    } else if (i === 3) {
-      for (let k = 0; k < 3; k++) meter(40 + k * 150, y + 30, 120, 80);
-      for (let k = 0; k < 6; k++) knob(60 + k * 78, y + 160, 18);
-    } else {
-      for (let k = 0; k < 2; k++) meter(60 + k * 220, y + 26, 150, 90);
-      for (let k = 0; k < 5; k++) knob(70 + k * 92, y + h - 50, 17);
-      if (i === 0)
-        for (let k = 0; k < 4; k++) {
-          for (const ctx of [a, ee]) {
-            ctx.fillStyle = k % 2 ? "#ff5a30" : "#7cff9a";
-            ctx.beginPath();
-            ctx.arc(430, y + 40 + k * 22, 6, 0, TAU2);
-            ctx.fill();
-          }
-        }
-    }
+    paintControls(i, h);
     y += h;
   });
   return { map: texture(c, true), glow: texture(e, true) };

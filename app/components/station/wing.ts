@@ -33,7 +33,7 @@ function wingCanopy(k: Kit, s: Pick<WingScope, "wing">): void {
   // Half-round canopy: straight against the wall, an elliptical sweep out front.
   const shape = new THREE.Shape();
   const rx = 1.08,
-    rz = 1.0;
+    rz = 1;
   shape.moveTo(-rx, 0);
   for (let k = 0; k <= 48; k++) {
     const t = Math.PI - (k / 48) * Math.PI;
@@ -65,7 +65,7 @@ function wingCanopyLight(k: Kit, s: Pick<WingScope, "wing">): void {
   dome.scale.y = 0.45;
   torus([0.14, 0.018], [-0.08, 2.31, 1.02], gold, wing);
   halo([-0.08, 2.2, 1.05], 0.6, "#ffc87a", 0.15, wing);
-  practical("#ffc478", [2.8, 3], [-0.08, 2.0, 1.4], wing);
+  practical("#ffc478", [2.8, 3], [-0.08, 2, 1.4], wing);
 }
 
 function wingDoor(k: Kit, s: Pick<WingScope, "wing">): void {
@@ -73,13 +73,20 @@ function wingDoor(k: Kit, s: Pick<WingScope, "wing">): void {
   const { wing } = s;
   const door = add(new THREE.Group(), wing);
   door.position.set(-0.08, 0.5, 0.7);
-  const doorBrass = M.wear(new THREE.MeshStandardMaterial({ color: "#ffe2a6", metalness: 1, roughness: 0.6 }), {
-    ...brassWear,
-    edges: 0.5,
-    tile: tiles.brass,
-    scale: 1.6,
-    detail: 0.4,
-  });
+  const doorBrass = M.wear(
+    new THREE.MeshStandardMaterial({
+      color: "#ffe2a6",
+      metalness: 1,
+      roughness: 0.6,
+    }),
+    {
+      ...brassWear,
+      edges: 0.5,
+      tile: tiles.brass,
+      scale: 1.6,
+      detail: 0.4,
+    },
+  );
   const head = new THREE.Shape();
   head.moveTo(-0.36, 0);
   head.lineTo(0.36, 0);
@@ -116,7 +123,7 @@ function wingDoor(k: Kit, s: Pick<WingScope, "wing">): void {
       new THREE.Vector3(-0.27, 0.72, 0.07),
       new THREE.Vector3(-0.27, 0.75, 0.12),
       new THREE.Vector3(-0.27, 0.97, 0.12),
-      new THREE.Vector3(-0.27, 1.0, 0.07),
+      new THREE.Vector3(-0.27, 1, 0.07),
     ],
     0.014,
     gold,
@@ -150,61 +157,17 @@ function wingSideWall(k: Kit, s: Pick<WingScope, "wing" | "station">): void {
   const w = (x: number, y: number, z: number): THREE.Vector3 =>
     new THREE.Vector3(x, y - DECK_Y, z).applyAxisAngle(new THREE.Vector3(0, 1, 0), wing.rotation.y).add(wing.position);
   pipe(
-    [w(1.02, 0.5, -0.4), w(1.02, 3.0, -0.4), new THREE.Vector3(1.25, 3.0, -1.3), new THREE.Vector3(1.25, 4.55, -1.3)],
+    [w(1.02, 0.5, -0.4), w(1.02, 3, -0.4), new THREE.Vector3(1.25, 3, -1.3), new THREE.Vector3(1.25, 4.55, -1.3)],
     0.055,
     [brass, brass],
     station,
   );
   pipe([w(1.02, 0.3, -0.95), w(1.02, 2.6, -0.95)], 0.04, [brass, brass], station);
-  for (const y of [1.0, 2.0]) box([0.1, 0.05, 0.12], [1.0, y, -0.4], iron, wing, 0.01);
+  for (const y of [1, 2]) box([0.1, 0.05, 0.12], [1, y, -0.4], iron, wing, 0.01);
 }
 
-export function buildWing(k: Kit, station: THREE.Group): THREE.Group {
-  const { tiles, ivoryWear, brass, gold, teal, tealDark, cream, plant } = k;
-  // Teal block with a round tower beside the door, a finned pylon, a cream cantilevered canopy on a
-  // grooved pillar, a brass door, three curved steel steps with brass nosing and brass handrails.
-  const wing = add(new THREE.Group(), station);
-  // The porch is tucked against the end of the hall, opening toward the front-right corner.
-  wing.position.set(2.35, DECK_Y, 0.3);
-  wing.rotation.y = Math.PI / 4;
-  const creamShade = enamel(tiles.ivory, null, "#b9a888", ivoryWear);
-  const stepSteel = M.wear(new THREE.MeshStandardMaterial({ color: "#c4c2bb", metalness: 0.7, roughness: 0.4 }), {
-    exposed: "#f4ecda",
-    edges: 0.45,
-    grime: 0.3,
-    streaks: 0,
-    exposedMetal: 1,
-    exposedRough: 0.2,
-  });
-  slab([2.25, 2.8, 0.08, 0.6], [-0.05, 0.04, 0.28], brass, wing);
-  rivets(
-    Array.from(
-      { length: 15 },
-      (_: unknown, i: number): THREE.Vector3 => new THREE.Vector3(-1.0 + i * 0.135, 0.045, 1.705),
-    ),
-    0.022,
-    gold,
-    wing,
-  );
-  slab([1.9, 1.9, 2.75, 0.35], [0, 0.08 + 1.375, -0.25], teal, wing);
-  slab([1.5, 1.4, 0.32, 0.5], [0.1, 2.99, -0.35], teal, wing);
-  slab([1.0, 0.9, 0.3, 0.4], [0.2, 3.3, -0.45], tealDark, wing);
-  // Round tower to the right of the door, with a stepped cap.
-  cyl([0.5, 0.5, 3.15], [0.8, 0.08 + 1.575, 0.48], teal, wing, [48]);
-  cyl([0.4, 0.4, 0.38], [0.8, 3.42, 0.42], teal, wing, [40]);
-  torus([0.505, 0.025], [0.8, 3.23, 0.48], gold, wing);
-  torus([0.505, 0.022], [0.8, 0.14, 0.48], gold, wing);
-  // Finned pylon on the left, rising through the canopy.
-  extrude(archShape(0.52, 4.15), 0.42, teal, [-0.8, 0.08, 0.62], wing, 0.03);
-  for (const x of [-0.95, -0.8, -0.65]) box([0.055, 1.78, 0.06], [x, 3.2, 1.08], gold, wing, 0.02);
-  // Grooved cream pillar carrying the canopy.
-  box([0.38, 2.25, 0.55], [-0.72, 0.08 + 1.125, 1.0], cream, wing, 0.05);
-  for (const x of [-0.8, -0.64]) box([0.05, 1.05, 0.02], [x, 0.95, 1.28], creamShade, wing, 0.02);
-  // Cantilevered half-round canopy with a dome light beneath.
-  wingCanopy(k, { wing });
-  wingCanopyLight(k, { wing });
-  // Brass door with rounded head, oval light and pull.
-  wingDoor(k, { wing });
+function wingSteps(k: Kit, { wing, stepSteel }: Pick<WingScope, "wing" | "stepSteel">): void {
+  const { gold } = k;
   // Three curved steel steps with brass nosing.
   for (let i = 0; i < 3; i++) {
     const r = 1.08 - i * 0.22;
@@ -234,12 +197,68 @@ export function buildWing(k: Kit, station: THREE.Group): THREE.Group {
     }
     tube(nose, 0.018, gold, wing);
   }
+}
+
+export function buildWing(k: Kit, station: THREE.Group): THREE.Group {
+  const { tiles, ivoryWear, brass, gold, teal, tealDark, cream, plant } = k;
+  // Teal block with a round tower beside the door, a finned pylon, a cream cantilevered canopy on a
+  // grooved pillar, a brass door, three curved steel steps with brass nosing and brass handrails.
+  const wing = add(new THREE.Group(), station);
+  // The porch is tucked against the end of the hall, opening toward the front-right corner.
+  wing.position.set(2.35, DECK_Y, 0.3);
+  wing.rotation.y = Math.PI / 4;
+  const creamShade = enamel(tiles.ivory, null, "#b9a888", ivoryWear);
+  const stepSteel = M.wear(
+    new THREE.MeshStandardMaterial({
+      color: "#c4c2bb",
+      metalness: 0.7,
+      roughness: 0.4,
+    }),
+    {
+      exposed: "#f4ecda",
+      edges: 0.45,
+      grime: 0.3,
+      streaks: 0,
+      exposedMetal: 1,
+      exposedRough: 0.2,
+    },
+  );
+  slab([2.25, 2.8, 0.08, 0.6], [-0.05, 0.04, 0.28], brass, wing);
+  rivets(
+    Array.from(
+      { length: 15 },
+      (_: unknown, i: number): THREE.Vector3 => new THREE.Vector3(-1 + i * 0.135, 0.045, 1.705),
+    ),
+    0.022,
+    gold,
+    wing,
+  );
+  slab([1.9, 1.9, 2.75, 0.35], [0, 0.08 + 1.375, -0.25], teal, wing);
+  slab([1.5, 1.4, 0.32, 0.5], [0.1, 2.99, -0.35], teal, wing);
+  slab([1, 0.9, 0.3, 0.4], [0.2, 3.3, -0.45], tealDark, wing);
+  // Round tower to the right of the door, with a stepped cap.
+  cyl([0.5, 0.5, 3.15], [0.8, 0.08 + 1.575, 0.48], teal, wing, [48]);
+  cyl([0.4, 0.4, 0.38], [0.8, 3.42, 0.42], teal, wing, [40]);
+  torus([0.505, 0.025], [0.8, 3.23, 0.48], gold, wing);
+  torus([0.505, 0.022], [0.8, 0.14, 0.48], gold, wing);
+  // Finned pylon on the left, rising through the canopy.
+  extrude(archShape(0.52, 4.15), 0.42, teal, [-0.8, 0.08, 0.62], wing, 0.03);
+  for (const x of [-0.95, -0.8, -0.65]) box([0.055, 1.78, 0.06], [x, 3.2, 1.08], gold, wing, 0.02);
+  // Grooved cream pillar carrying the canopy.
+  box([0.38, 2.25, 0.55], [-0.72, 0.08 + 1.125, 1], cream, wing, 0.05);
+  for (const x of [-0.8, -0.64]) box([0.05, 1.05, 0.02], [x, 0.95, 1.28], creamShade, wing, 0.02);
+  // Cantilevered half-round canopy with a dome light beneath.
+  wingCanopy(k, { wing });
+  wingCanopyLight(k, { wing });
+  // Brass door with rounded head, oval light and pull.
+  wingDoor(k, { wing });
+  wingSteps(k, { wing, stepSteel });
   for (const side of [-1, 1]) {
     const x0 = -0.08 + side * 0.9,
       x1 = -0.08 + side * 0.5;
     const posts: Array<[number, number, number]> = [
       [x0, 0.08, 1.28],
-      [-0.08 + side * 0.72, 0.36, 1.0],
+      [-0.08 + side * 0.72, 0.36, 1],
       [x1, 0.5, 0.78],
     ];
     for (const [px, py, pz] of posts)

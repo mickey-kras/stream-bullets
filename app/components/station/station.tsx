@@ -29,8 +29,8 @@ export function Station(): ReactNode {
   useEffect(() => {
     const element = host.current;
     if (!element) return;
-    const wide: MediaQueryList = window.matchMedia("(min-width: 701px)");
-    const reduced: MediaQueryList = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const wide: MediaQueryList = globalThis.matchMedia("(min-width: 701px)");
+    const reduced: MediaQueryList = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
     let disposed: boolean = false;
     let started: boolean = false;
     function fail(): void {

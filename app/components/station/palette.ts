@@ -68,10 +68,27 @@ function metals(tiles: Tiles) {
     });
   return {
     brass: brassMat("#ffffff", 1, { scale: 1.1, detail: 0.35 }),
-    gold: brassMat("#fff1d0", 0.75, { edges: 0.4, grime: 0.35, scale: 1.4, detail: 0.25 }),
-    copper: brassMat("#f0a07c", 1, { exposed: "#ffc29a", scale: 1.1, detail: 0.3 }),
-    chrome: new THREE.MeshStandardMaterial({ color: "#e6e6e2", metalness: 1, roughness: 0.16 }),
-    iron: new THREE.MeshStandardMaterial({ color: "#232b2c", metalness: 0.7, roughness: 0.55 }),
+    gold: brassMat("#fff1d0", 0.75, {
+      edges: 0.4,
+      grime: 0.35,
+      scale: 1.4,
+      detail: 0.25,
+    }),
+    copper: brassMat("#f0a07c", 1, {
+      exposed: "#ffc29a",
+      scale: 1.1,
+      detail: 0.3,
+    }),
+    chrome: new THREE.MeshStandardMaterial({
+      color: "#e6e6e2",
+      metalness: 1,
+      roughness: 0.16,
+    }),
+    iron: new THREE.MeshStandardMaterial({
+      color: "#232b2c",
+      metalness: 0.7,
+      roughness: 0.55,
+    }),
   };
 }
 
@@ -121,9 +138,21 @@ function paints(tiles: Tiles, steelSurface: T.Surface) {
 
 function lamps() {
   return {
-    warm: new THREE.MeshStandardMaterial({ color: "#fff0c8", emissive: "#ffbe62", emissiveIntensity: 2.2 }),
-    warmSoft: new THREE.MeshStandardMaterial({ color: "#ffe4b0", emissive: "#ff9f45", emissiveIntensity: 1.1 }),
-    neon: new THREE.MeshStandardMaterial({ color: "#ff8a64", emissive: "#ff3d1e", emissiveIntensity: 3.2 }),
+    warm: new THREE.MeshStandardMaterial({
+      color: "#fff0c8",
+      emissive: "#ffbe62",
+      emissiveIntensity: 2.2,
+    }),
+    warmSoft: new THREE.MeshStandardMaterial({
+      color: "#ffe4b0",
+      emissive: "#ff9f45",
+      emissiveIntensity: 1.1,
+    }),
+    neon: new THREE.MeshStandardMaterial({
+      color: "#ff8a64",
+      emissive: "#ff3d1e",
+      emissiveIntensity: 3.2,
+    }),
     signRed: new THREE.MeshStandardMaterial({
       color: "#5e0f09",
       emissive: "#c42a17",
@@ -131,15 +160,30 @@ function lamps() {
       roughness: 0.35,
       metalness: 0.1,
     }),
-    beacon: new THREE.MeshStandardMaterial({ color: "#ff6a50", emissive: "#ff2a12", emissiveIntensity: 3 }),
+    beacon: new THREE.MeshStandardMaterial({
+      color: "#ff6a50",
+      emissive: "#ff2a12",
+      emissiveIntensity: 3,
+    }),
   };
 }
 
 function furnishings() {
   return {
-    rubber: new THREE.MeshStandardMaterial({ color: "#141617", roughness: 0.8 }),
-    wood: new THREE.MeshStandardMaterial({ map: T.woodPlanks(7, "#6a3520", 3).map, roughness: 0.3, metalness: 0.05 }),
-    leather: new THREE.MeshStandardMaterial({ map: T.tufted(8, "#b4502c").map, roughness: 0.42, metalness: 0.05 }),
+    rubber: new THREE.MeshStandardMaterial({
+      color: "#141617",
+      roughness: 0.8,
+    }),
+    wood: new THREE.MeshStandardMaterial({
+      map: T.woodPlanks(7, "#6a3520", 3).map,
+      roughness: 0.3,
+      metalness: 0.05,
+    }),
+    leather: new THREE.MeshStandardMaterial({
+      map: T.tufted(8, "#b4502c").map,
+      roughness: 0.42,
+      metalness: 0.05,
+    }),
     glass: new THREE.MeshPhysicalMaterial({
       color: "#b9d6cf",
       metalness: 0,
@@ -151,8 +195,16 @@ function furnishings() {
       envMapIntensity: 1.6,
       clearcoat: 1,
     }),
-    plantGreen: new THREE.MeshStandardMaterial({ color: "#5f8a3e", roughness: 0.6, side: THREE.DoubleSide }),
-    plantDark: new THREE.MeshStandardMaterial({ color: "#3f6a34", roughness: 0.6, side: THREE.DoubleSide }),
+    plantGreen: new THREE.MeshStandardMaterial({
+      color: "#5f8a3e",
+      roughness: 0.6,
+      side: THREE.DoubleSide,
+    }),
+    plantDark: new THREE.MeshStandardMaterial({
+      color: "#3f6a34",
+      roughness: 0.6,
+      side: THREE.DoubleSide,
+    }),
     soil: new THREE.MeshStandardMaterial({ color: "#2b1d12", roughness: 1 }),
   };
 }
@@ -191,7 +243,7 @@ export function createPalette(compact: boolean) {
       [lit.warm, 2.2],
       [lit.warmSoft, 1.1],
       [lit.neon, 2.6],
-      [lit.signRed, 1.0],
+      [lit.signRed, 1],
       [lit.beacon, 2.5],
     ] as Array<[THREE.MeshStandardMaterial, number]>,
   };

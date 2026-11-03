@@ -1,0 +1,417 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`paints the clock, poster and backdrop 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "4f9a723e11bd989766b44c252285e45bce1c8b9708fec43750adc01040f7d1d8",
+  "height": 256,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`paints the clock, poster and backdrop 2`] = `"c15644aad28f09fb5d5564a0df36a622871e17e59e73a6406c25979abac588db"`;
+
+exports[`paints the clock, poster and backdrop 3`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "8b1c0642dc7abcb727e7b7fe5da89da33714b91a2bb2e8618da79e9863f42170",
+  "height": 640,
+  "width": 1024,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`preserves model geometry and animations (compact=false) 1`] = `
+{
+  "animators": 20,
+  "geometry": "028f5be1e200364050f115e9b451123e1c06284cf63188df0b84a066b162205a",
+  "meshes": 1065,
+  "vents": 3,
+}
+`;
+
+exports[`preserves model geometry and animations (compact=true) 1`] = `
+{
+  "animators": 20,
+  "geometry": "d9b9c6f9e82b1ec74c0e66b364506be0217f7a258f20ed64758fcd9fc7b9d1f0",
+  "meshes": 1065,
+  "vents": 3,
+}
+`;
+
+exports[`station surface regression > preserves agedBrass colour, normal and roughness pixels 1`] = `
+{
+  "map": {
+    "colorSpace": "srgb",
+    "digest": "d7760e304e954ad0dfb45ba2ac905dca968b2b93cdf04358ca7afee7b6cf02c8",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "normal": {
+    "colorSpace": "",
+    "digest": "13b58edaaca879ab3ab7e9d7e8bbc302470ddefabbd745442c67feb139c4de1f",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "rough": {
+    "colorSpace": "",
+    "digest": "082fd75f90bcc035cbec9ba35b944e2c1c7e5a148af6ade83f4b692f7ef318ae",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+}
+`;
+
+exports[`station surface regression > preserves bolts1 decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "e424fb7206e37efbfbca7638b4f02db049cd66271f219274ea4b64e6deac287b",
+  "height": 512,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves bolts2 decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "4b2af80558595fa5a96f52e23afe0bf0a5862a143e4bf20127728893d833c972",
+  "height": 512,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves bolts3 decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "4a3556ba6a82aa0fe36d4c916dcc3fbc8d97e5c755e16e3f029f292abf5fb900",
+  "height": 512,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves chip decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "8cd16b82e00654046a6a5a707de89139ac45aaebd60bc4684044807233f005b1",
+  "height": 256,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves crossed decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "7067828677d109254efd18523eb5d40b2364d5b65dcc1f261f7ba2439072e91f",
+  "height": 256,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves gouge decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "81052ae2ddbe8b235ddc45f45b1ed470be8be0a8b173952bc6b3b0f88c142119",
+  "height": 256,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves grime decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "50289be484320f53572ec49560774545dc7e73a46e03a9060e1f1d10758a724d",
+  "height": 512,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves ivoryEnamel colour, normal and roughness pixels 1`] = `
+{
+  "map": {
+    "colorSpace": "srgb",
+    "digest": "f79ce1e981660f8f6c58233a82dc40527dd8be3ce5724540e87d6b3ce660da22",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "normal": {
+    "colorSpace": "",
+    "digest": "56d848f12a8056ad3a71be4e9b4b558f6dac3e22bbb3e78d813567c02092e511",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "rough": {
+    "colorSpace": "",
+    "digest": "5a5ea18f380bbc9c159e832097cfb6467351b9a7062393d5f39a428af8ea14d6",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+}
+`;
+
+exports[`station surface regression > preserves painted panels with and without rivets 1`] = `
+{
+  "bump": {
+    "colorSpace": "",
+    "digest": "6a9b382846ec4f7efe401ab1bba6dd65ed840dadd04dbb9089551f9a909a9b6a",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "map": {
+    "colorSpace": "srgb",
+    "digest": "98880ab4d5727bef0eca9e1e6f5dc480e74ac5e97277a9138b42b0bc051abb0e",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "rough": {
+    "colorSpace": "",
+    "digest": "77b22adf3216e8d2fa9b3f400cea1e86d09ed45c1d33fa594b409aeeb76af45c",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+}
+`;
+
+exports[`station surface regression > preserves painted panels with and without rivets 2`] = `
+{
+  "bump": {
+    "colorSpace": "",
+    "digest": "18b086b9582252c4fe401b4a27218ad388e3e0a50e524fe5a9f074193f6c5937",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "map": {
+    "colorSpace": "srgb",
+    "digest": "4b518ea55466e545b1beed87ad9ce0b04185e9058c33ebb1b51e7863daaed5bf",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "rough": {
+    "colorSpace": "",
+    "digest": "cb8d40f4f477d941d994c74851b2240d2dd45de26dfc1dd5a8bf3cfe28fe3490",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+}
+`;
+
+exports[`station surface regression > preserves painted panels with and without rivets 3`] = `
+{
+  "bump": {
+    "colorSpace": "",
+    "digest": "fe81ab6faa86d89c9594cadd139b9d9f6c4ed077153059b124bb2c59fc4203f2",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "map": {
+    "colorSpace": "srgb",
+    "digest": "c6171027da2bdc83028e879f713c954b933f047e8c1fc80e3f45b3e47d1f7786",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "rough": {
+    "colorSpace": "",
+    "digest": "cb8d40f4f477d941d994c74851b2240d2dd45de26dfc1dd5a8bf3cfe28fe3490",
+    "height": 512,
+    "width": 1024,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+}
+`;
+
+exports[`station surface regression > preserves platformSteel colour, normal and roughness pixels 1`] = `
+{
+  "map": {
+    "colorSpace": "srgb",
+    "digest": "41ee7289005529e444a9a077abfb823c4136ed48e0b595e2264e68fd7183441c",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "normal": {
+    "colorSpace": "",
+    "digest": "56d7017476007989e43c2776603903244860124afbd1b76f202bf7bac8f8fde8",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "rough": {
+    "colorSpace": "",
+    "digest": "6762d1465ed0b531ec5527949d6ed63dc0e1ac1223df50888e452c605c44b898",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+}
+`;
+
+exports[`station surface regression > preserves rust decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "234a855ccbde7236e3fdf9d1933fb6a4fbf63dc7ffd40eec9b06441df6e2d50b",
+  "height": 256,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves scratches decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "39609b2563f5c7d99945763363c4dff0ed6fb56bc5f89e1ebef49677d29b89b3",
+  "height": 256,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves scuff decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "61cc300854347ce2a5b74a7a0b5543613acca6e7c031aaaf54f9bbe9c7d5daef",
+  "height": 256,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;
+
+exports[`station surface regression > preserves tealPaint colour, normal and roughness pixels 1`] = `
+{
+  "map": {
+    "colorSpace": "srgb",
+    "digest": "1a66dfb70e36113fce4c7d5b67cc02ddbaf3bf834485e9940d5a82a5ee98c62f",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "normal": {
+    "colorSpace": "",
+    "digest": "c9b466342482a45f72bd9ba2d133b9cbb70d2dcf4851366a4e40be0bbbb91308",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  "rough": {
+    "colorSpace": "",
+    "digest": "df13fa4a2025b2370003b816b9b28a6b28aaeb012d18c578a6a3bc381c8bd2de",
+    "height": 64,
+    "width": 64,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+}
+`;
+
+exports[`station surface regression > preserves the deck plates and equipment faces 1`] = `
+{
+  "bump": {
+    "colorSpace": "",
+    "digest": "251340de93e48078feef46d0622ecca697e8c289605942a84840f1096272e63e",
+    "height": 1024,
+    "width": 1024,
+    "wrapS": 1001,
+    "wrapT": 1001,
+  },
+  "map": {
+    "colorSpace": "srgb",
+    "digest": "4715b43f09cf051d482cff29675182851267fc863a939d9f5b3d474c424f599d",
+    "height": 1024,
+    "width": 1024,
+    "wrapS": 1001,
+    "wrapT": 1001,
+  },
+  "rough": {
+    "colorSpace": "",
+    "digest": "0ee399cfcc38cbde4ba9039118ab19233c74286ef8d65af356a0954b6a4dab32",
+    "height": 1024,
+    "width": 1024,
+    "wrapS": 1001,
+    "wrapT": 1001,
+  },
+}
+`;
+
+exports[`station surface regression > preserves the deck plates and equipment faces 2`] = `
+[
+  {
+    "colorSpace": "srgb",
+    "digest": "334420beb7ae86c07514cadc8b8d6bce70edd1625c73f8e4d286fa1441d25771",
+    "height": 1024,
+    "width": 512,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+  {
+    "colorSpace": "srgb",
+    "digest": "d06f6f142736905792d3110f44149274951afc1ce1b61eed18fe976822d60c0e",
+    "height": 1024,
+    "width": 512,
+    "wrapS": 1000,
+    "wrapT": 1000,
+  },
+]
+`;
+
+exports[`station surface regression > preserves verdigris decal pixels 1`] = `
+{
+  "colorSpace": "srgb",
+  "digest": "fab37ff63dbf9f8b9cfcd6f6ba7bbfc37cc52e450a5f27d90ef9267b40367477",
+  "height": 256,
+  "width": 256,
+  "wrapS": 1001,
+  "wrapT": 1001,
+}
+`;

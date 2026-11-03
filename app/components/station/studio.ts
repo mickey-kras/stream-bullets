@@ -42,7 +42,12 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
   const grilleMap = T.grille();
   const capsule = lathe(
     capsuleProfile,
-    new THREE.MeshStandardMaterial({ map: grilleMap, metalnessMap: grilleMap, metalness: 1, roughness: 0.28 }),
+    new THREE.MeshStandardMaterial({
+      map: grilleMap,
+      metalnessMap: grilleMap,
+      metalness: 1,
+      roughness: 0.28,
+    }),
     [0, 0, 0],
     head,
     48,
@@ -62,7 +67,7 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
   );
   tube(
     [
-      new THREE.Vector3(-0.105, 0.0, 0),
+      new THREE.Vector3(-0.105, 0, 0),
       new THREE.Vector3(-0.105, -0.11, 0),
       new THREE.Vector3(-0.05, -0.18, 0),
       new THREE.Vector3(0, -0.185, 0),
@@ -81,7 +86,7 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
 function studioConsole(k: Kit, s: Pick<StudioScope, "onDesk">): void {
   const { brass, tealDark, rubber, gauge } = k;
   const { onDesk } = s;
-  const g = onDesk(-1.0, -0.7, false);
+  const g = onDesk(-1, -0.7, false);
   g.rotation.y += 0.25;
   box([0.62, 0.12, 0.4], [0, 0.06, 0], tealDark, g, 0.04);
   const top = add(new THREE.Group(), g);
@@ -90,7 +95,11 @@ function studioConsole(k: Kit, s: Pick<StudioScope, "onDesk">): void {
   box(
     [0.6, 0.035, 0.36],
     [0, 0, 0],
-    new THREE.MeshStandardMaterial({ color: "#3a6a63", metalness: 0.4, roughness: 0.45 }),
+    new THREE.MeshStandardMaterial({
+      color: "#3a6a63",
+      metalness: 0.4,
+      roughness: 0.45,
+    }),
     top,
     0.012,
   );
@@ -210,8 +219,8 @@ function studioLocker(k: Kit, s: Pick<StudioScope, "studio" | "floorY">): void {
   const { brass, gold, iron, cream, warm, practical } = k;
   const { studio, floorY } = s;
   const g = add(new THREE.Group(), studio);
-  g.position.copy(plan(2.0, -0.3, floorY));
-  g.rotation.y = facingIn(2.0);
+  g.position.copy(plan(2, -0.3, floorY));
+  g.rotation.y = facingIn(2);
   box([0.5, 1.45, 0.4], [0, 0.725, 0], cream, g, 0.03);
   for (let i = 0; i < 6; i++) box([0.3, 0.02, 0.02], [0, 1.15 + i * 0.04, 0.205], iron, g, 0.005);
   box([0.03, 0.14, 0.03], [0.18, 0.72, 0.21], gold, g, 0.01);
@@ -268,7 +277,7 @@ function studioDoor(k: Kit, s: Pick<StudioScope, "studio" | "floorY">): void {
     [
       new THREE.Vector3(-0.3, 0.75, 0.07),
       new THREE.Vector3(-0.3, 0.78, 0.12),
-      new THREE.Vector3(-0.3, 1.0, 0.12),
+      new THREE.Vector3(-0.3, 1, 0.12),
       new THREE.Vector3(-0.3, 1.03, 0.07),
     ],
     0.014,
@@ -417,7 +426,9 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
     roughness: 0.5,
     metalness: 0.35,
   });
-  band([GLASS_TO + 0.03, GLASS_FROM + TAU - 0.03], [floorY, 2.44], -0.08, flutedWall, studio, { inward: true });
+  band([GLASS_TO + 0.03, GLASS_FROM + TAU - 0.03], [floorY, 2.44], -0.08, flutedWall, studio, {
+    inward: true,
+  });
   const ceilingGeo = new THREE.ShapeGeometry(planShape(0), 4);
   ceilingGeo.rotateX(Math.PI / 2);
   mesh(ceilingGeo, new THREE.MeshStandardMaterial({ color: "#23302f", roughness: 0.85 }), [0, 2.43, 0], studio, false);
@@ -425,7 +436,7 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
     [-1.4, 0.5],
     [1.2, 0.4],
     [-0.2, -1.1],
-    [1.3, -1.0],
+    [1.3, -1],
     [-1.6, -0.9],
   ]) {
     const spot = mesh(new THREE.CircleGeometry(0.07, 20), warm, [x, 2.425, z], studio, false);
@@ -441,10 +452,13 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
   // Curved desk with a teal modesty panel and brass-handled drawer pedestals.
   const deskTop = floorY + 0.8;
   const deskFrom = -1.8,
-    deskTo = 1.0;
+    deskTo = 1;
   planSector([deskFrom, deskTo], [-0.98, -0.34], 0.06, wood, deskTop - 0.06, studio);
   tube(loop(deskFrom, deskTo, -0.98, deskTop + 0.005, 70), 0.022, gold, studio);
-  band([deskFrom, deskTo], [floorY, deskTop - 0.06], -0.9, tealDark, studio, { inward: true, segments: 70 });
+  band([deskFrom, deskTo], [floorY, deskTop - 0.06], -0.9, tealDark, studio, {
+    inward: true,
+    segments: 70,
+  });
   tube(loop(deskFrom, deskTo, -0.91, floorY + 0.08, 70), 0.012, gold, studio);
   for (const a of [-1.45, 0.7]) {
     const g = add(new THREE.Group(), studio);
@@ -473,7 +487,10 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
     counterTo = 3.3,
     counterTop = floorY + 0.74;
   planSector([counterFrom, counterTo], [-0.62, -0.1], 0.05, wood, counterTop - 0.05, studio);
-  band([counterFrom, counterTo], [floorY, counterTop - 0.05], -0.6, cream, studio, { inward: true, segments: 40 });
+  band([counterFrom, counterTo], [floorY, counterTop - 0.05], -0.6, cream, studio, {
+    inward: true,
+    segments: 40,
+  });
   tube(loop(counterFrom, counterTo, -0.62, counterTop + 0.004, 40), 0.016, gold, studio);
   studioCrt(k, { onDesk, counterTop });
   studioTapeDeck(k, { onDesk, counterTop });
