@@ -202,14 +202,20 @@ function wingSteps(k: Kit, { wing, stepSteel }: Pick<WingScope, "wing" | "stepSt
   }
 }
 
+/** Where the porch stands and how it is turned; the studio uses these to line its inner door up. */
+export const WING_AT = new THREE.Vector3(2.35, DECK_Y, 0.3);
+export const WING_YAW = Math.PI / 4;
+/** The porch block's side face (local x) that juts into the studio, facing the glazing. */
+export const WING_SIDE_X = -0.95;
+
 export function buildWing(k: Kit, station: THREE.Group): THREE.Group {
   const { tiles, ivoryWear, brass, gold, teal, tealDark, cream, plant } = k;
   // Teal block with a round tower beside the door, a finned pylon, a cream cantilevered canopy on a
   // grooved pillar, a brass door, three curved steel steps with brass nosing and brass handrails.
   const wing = add(new THREE.Group(), station);
   // The porch is tucked against the end of the hall, opening toward the front-right corner.
-  wing.position.set(2.35, DECK_Y, 0.3);
-  wing.rotation.y = Math.PI / 4;
+  wing.position.copy(WING_AT);
+  wing.rotation.y = WING_YAW;
   const creamShade = enamel(tiles.ivory, null, "#b9a888", ivoryWear);
   const stepSteel = M.wear(
     new THREE.MeshStandardMaterial({

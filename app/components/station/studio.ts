@@ -2,8 +2,9 @@ import * as THREE from "three";
 import * as T from "./textures";
 import type { Kit } from "./kit";
 import { poster, posterTexture } from "./poster";
+import { WING_AT, WING_YAW, WING_SIDE_X } from "./wing";
 import { add, mesh, box, cyl, ball, torus, rod, tube, plaque, frame, lathe, rivets, TAU, profile } from "./shapes";
-import { plan, facing, facingIn, loop, band, planShape, planSector, GLASS_FROM, GLASS_TO } from "./plan";
+import { plan, facing, facingIn, loop, band, planShape, planSector, GLASS_FROM, GLASS_TO, HALL_AT } from "./plan";
 
 interface StudioScope {
   studio: THREE.Group;
@@ -31,17 +32,17 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
   const head = add(new THREE.Group(), g);
   head.position.set(0, 0.43, 0);
   head.rotation.x = 0.12;
+  // A broadcast "pill" capsule: straight sides with rounded ends (a squared superellipse), not an egg.
+  const radiusAt = (y: number): number => 0.08 * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y / 0.15), 4)), 0.25);
   const capsuleProfile: Array<[number, number]> = [];
-  for (let i = 0; i <= 24; i++) {
-    const t = i / 24,
-      y = -0.15 + t * 0.3;
-    capsuleProfile.push([
-      Math.max(0.001, 0.085 * Math.pow(Math.sin(t * Math.PI), 0.5) * (1 - 0.15 * Math.pow(Math.abs(t - 0.5) * 2, 2))),
-      y,
-    ]);
+  for (let i = 0; i <= 32; i++) {
+    const y = -0.15 + (i / 32) * 0.3;
+    capsuleProfile.push([Math.max(0.001, radiusAt(y)), y]);
   }
+  const body = add(new THREE.Group(), head);
+  body.scale.set(1.05, 1, 0.8);
   const grilleMap = T.grille();
-  const capsule = lathe(
+  lathe(
     capsuleProfile,
     new THREE.MeshStandardMaterial({
       map: grilleMap,
@@ -50,12 +51,16 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
       roughness: 0.28,
     }),
     [0, 0, 0],
-    head,
+    body,
     48,
   );
-  capsule.scale.set(1.1, 1, 0.75);
+  // Chrome ribs wrap the grille, the classic look of a mid-century stage microphone.
+  for (let i = -3; i <= 3; i++) {
+    const y = i * 0.034;
+    torus([radiusAt(y) + 0.002, 0.0045], [0, y, 0], chrome, body);
+  }
   const spine = capsuleProfile.map(
-    ([r, y]: [number, number]): THREE.Vector3 => new THREE.Vector3(0, y, r * 0.75 + 0.004),
+    ([r, y]: [number, number]): THREE.Vector3 => new THREE.Vector3(0, y, r * 0.8 + 0.004),
   );
   tube(spine, 0.009, chrome, head, false, 0.5);
   tube(
@@ -250,9 +255,14 @@ function studioDoor(k: Kit, s: Pick<StudioScope, "studio" | "floorY">): void {
   const { brass, gold, warmSoft } = k;
   const { studio, floorY } = s;
   const g = add(new THREE.Group(), studio);
-  // Lines up with the porch door outside: the corridor through the wing meets the hall here.
-  g.position.copy(plan(1.5, -0.07, floorY));
-  g.rotation.y = facingIn(1.5);
+  // The porch block juts into the studio; its inner door sits on the block's side, facing the desk and
+  // the glazing, so the front door outside opens through a short vestibule into the studio.
+  const at = new THREE.Vector3(WING_SIDE_X - 0.012, 0, -0.45)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), WING_YAW)
+    .add(WING_AT)
+    .sub(HALL_AT);
+  g.position.set(at.x, floorY, at.z);
+  g.rotation.y = WING_YAW - Math.PI / 2;
   plaque([0.78, 1.7, 0.05, 0.1], [0, 0.87, 0], gold, g);
   frame([0.9, 1.82, 0.14, 0.07, 0.06], [0, 0.9, 0.02], brass, g);
   const oval = new THREE.Shape();
@@ -315,8 +325,8 @@ function studioPoster(k: Kit, s: Pick<StudioScope, "studio">): void {
     art.needsUpdate = true;
   });
   const g = add(new THREE.Group(), studio);
-  g.position.copy(plan(3.32, -0.12, 1.78));
-  g.rotation.y = facingIn(3.32);
+  g.position.copy(plan(3.18, -0.12, 1.78));
+  g.rotation.y = facingIn(3.18);
   box([0.5, 0.67, 0.02], [0, 0, 0], brass, g, 0.006);
   mesh(
     new THREE.PlaneGeometry(0.46, 0.63),
