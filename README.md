@@ -189,4 +189,12 @@ Dependency review needs an active dependency graph. An administrator can enable 
 
 SonarQube uses coverage from the successful verification job for the same commit. The workflow uses these secrets only on `main`. Missing SonarQube configuration fails the job and blocks deployment. CODEOWNERS does not activate repository protection by itself. Writers can publish commit statuses. Make review by code owners mandatory for workflow changes to protect status provenance.
 
+The Tailscale trust credential must allow the GitHub subject for this repository:
+
+```text
+repo:mickey-kras/stream-bullets:ref:refs/heads/main
+```
+
+Use the audience from that credential for `TAILSCALE_AUDIENCE`. Copying secrets from another repository does not extend its trust scope. A 403 response during token exchange blocks SonarQube. Deployment waits for SonarQube.
+
 The documentation tools check writing rules. They do not prove full ASD-STE100 Issue 9 compliance or validate dictionary meanings.

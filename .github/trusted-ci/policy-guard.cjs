@@ -1,5 +1,7 @@
 const { inspect, isPolicyPath, isApplicationPath } = require("./policy.cjs");
 
+const { admittedDependabot } = require("./policy-dependabot.cjs");
+
 const OWNER = { login: "mickey-kras", id: 24433677 };
 const SHA = /^[a-f0-9]{40}$/;
 
@@ -64,7 +66,17 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
   const base = await snapshot(github, context.repo, trustedSha);
   // Read candidate Git objects as inert data; never checkout or load candidate code.
   const head = await snapshot(github, context.repo, pull.head.sha);
-  let admitted = false;
+  const cache = new Map();
+  const read = async (entry) => {
+    if (!cache.has(entry.sha)) {
+      const { data: blob } = await github.rest.git.getBlob({ ...context.repo, file_sha: entry.sha });
+      if (blob.encoding !== "base64") throw new Error("Unsupported policy blob encoding");
+      cache.set(entry.sha, Buffer.from(blob.content, "base64").toString("utf8"));
+    }
+    return cache.get(entry.sha);
+  };
+  const automated = await admittedDependabot(pull, `${context.repo.owner}/${context.repo.repo}`, base, head, read);
+  let admitted = automated;
   const changedPolicy = [...new Set([...Object.keys(base), ...Object.keys(head)])].some(
     (name) => isPolicyPath(name) && (base[name]?.sha !== head[name]?.sha || base[name]?.mode !== head[name]?.mode),
   );
@@ -74,16 +86,15 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
       issue_number: pull.number,
       per_page: 100,
     });
-    admitted = validComment(comments, pull.head.sha, pull.base.sha, trustedSha);
+    const decision = commentAdmission(comments, pull.head.sha, pull.base.sha, trustedSha);
+    if (decision !== undefined) admitted = decision;
   }
   const failures = inspectChanges(base, head, admitted);
   const workflows = {};
   for (const [name, entry] of Object.entries(head)) {
     if (!/^\.github\/workflows\/.*\.ya?ml$/.test(name)) continue;
     if (entry.type !== "blob" || !["100644", "100755"].includes(entry.mode)) continue;
-    const { data: blob } = await github.rest.git.getBlob({ ...context.repo, file_sha: entry.sha });
-    if (blob.encoding !== "base64") throw new Error("Unsupported policy blob encoding");
-    workflows[name] = Buffer.from(blob.content, "base64").toString("utf8");
+    workflows[name] = await read(entry);
   }
   failures.push(...inspect(workflows));
   const { data: latest } = await github.rest.pulls.get(params);
@@ -94,7 +105,8 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
       issue_number: pull.number,
       per_page: 100,
     });
-    if (!validComment(comments, pull.head.sha, pull.base.sha, trustedSha)) {
+    const decision = commentAdmission(comments, pull.head.sha, pull.base.sha, trustedSha);
+    if (!(decision ?? automated)) {
       failures.push("Owner policy admission changed during validation");
     }
   }
@@ -127,7 +139,10 @@ async function runWithStatus({ github, context }, expected, trustedSha = process
     });
   await status("pending");
   try {
-    await run({ github, context: { ...context, payload: { ...context.payload, pull_request: expected } } }, trustedSha);
+    await run(
+      { github, context: { repo: context.repo, payload: { ...context.payload, pull_request: expected } } },
+      trustedSha,
+    );
     await status("success");
   } catch (error) {
     await status("failure");

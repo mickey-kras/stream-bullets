@@ -112,6 +112,8 @@ function harness({
   staleBase = false,
   staleTrusted = false,
   revoked = false,
+  dependabot = false,
+  actionUpdate = false,
 } = {}) {
   const repository = resolve(__dirname, "../..");
   const files = execFileSync("git", ["ls-files", "-z"], { cwd: repository, encoding: "utf8" })
@@ -128,11 +130,17 @@ function harness({
   policy.sha = "d".repeat(40);
   // All original required job names remain. The candidate policy inspector accepts
   // this no-op scanner; the independent trusted guard must reject its changed blob.
-  blobs[policy.sha] = blobs[tree.find((file) => file.path === policy.path).sha].replace(
-    /name: Semgrep\n\s+run: '[\s\S]*?(?=\n    - name: Trivy dependency report)/,
-    'name: Semgrep\n      run: "true"',
-  );
-  assert.match(blobs[policy.sha], /name: Semgrep\n      run: "true"/);
+  const originalPolicy = blobs[tree.find((file) => file.path === policy.path).sha];
+  blobs[policy.sha] = actionUpdate
+    ? originalPolicy.replace(
+        /step-security\/harden-runner@[a-f0-9]{40}/,
+        `step-security/harden-runner@${"e".repeat(40)}`,
+      )
+    : originalPolicy.replace(
+        /name: Semgrep\n\s+run: '[\s\S]*?(?=\n {4}- name: Trivy dependency report)/,
+        'name: Semgrep\n      run: "true"',
+      );
+  if (!actionUpdate) assert.match(blobs[policy.sha], /name: Semgrep\n {6}run: "true"/);
   const workflows = Object.fromEntries(
     candidate.filter((file) => file.path.startsWith(".github/workflows/")).map((file) => [file.path, blobs[file.sha]]),
   );
@@ -142,8 +150,12 @@ function harness({
   const pull = {
     number: 1,
     state: "open",
-    user: approvedReview ? { id: 1234 } : OWNER,
-    head: { sha: SHA, repo: { full_name: fork ? "attacker/repo" : "owner/repo" } },
+    user: dependabot ? { login: "dependabot[bot]", id: 49699333, type: "Bot" } : approvedReview ? { id: 1234 } : OWNER,
+    head: {
+      ref: dependabot ? "dependabot/github_actions/update" : "changes",
+      sha: SHA,
+      repo: { full_name: fork ? "attacker/repo" : "owner/repo" },
+    },
     base: { sha: BASE },
   };
   let reads = 0;
@@ -254,9 +266,49 @@ test("trusted workflow covers comment revocation and base retarget without execu
   const steps = workflow.jobs.guard.steps;
   assert.equal(steps[0].id, "pending");
   const checkout = steps.find((step) => step.uses?.startsWith("actions/checkout@"));
-  assert.equal(checkout.with.ref, "${{ github.workflow_sha }}");
+  assert.equal(checkout.with.ref, `\${{ github.workflow_sha }}`);
   assert.equal(checkout.with["persist-credentials"], false);
   assert.match(workflow.jobs.guard.if, /comment.user.id == 24433677/);
   assert.match(workflow.jobs.guard.if, /comment.user.login == 'mickey-kras'/);
   assert.ok(!steps.some((step) => String(step.run || "").includes("candidate")));
+});
+
+test("status entry point preserves the prototype repo getter used by actions/github-script", async () => {
+  const passing = harness({ admitted: true });
+  class GitHubContext {
+    constructor(payload) {
+      this.payload = payload;
+    }
+    get repo() {
+      return { owner: "owner", repo: "repo" };
+    }
+  }
+  const context = new GitHubContext(passing.context.payload);
+  assert.equal(Object.hasOwn(context, "repo"), false);
+  const getPull = passing.github.rest.pulls.get;
+  passing.github.rest.pulls.get = async (parameters) => {
+    assert.equal(parameters.owner, "owner");
+    assert.equal(parameters.repo, "repo");
+    return getPull(parameters);
+  };
+  await runWithStatus({ github: passing.github, context }, context.payload.pull_request, TRUSTED);
+  assert.deepEqual(
+    passing.statuses.map((status) => status.state),
+    ["pending", "success"],
+  );
+});
+
+test("live guard admits verified Dependabot action pin changes while owner rejection and weakening still block", async () => {
+  const passing = harness({ dependabot: true, actionUpdate: true });
+  await runWithStatus(passing, passing.context.payload.pull_request, TRUSTED);
+  assert.deepEqual(
+    passing.statuses.map((status) => status.state),
+    ["pending", "success"],
+  );
+  await assert.rejects(
+    run(harness({ dependabot: true, actionUpdate: true, rejectedComment: true }), TRUSTED),
+    /exact-head/,
+  );
+  await assert.rejects(run(harness({ dependabot: true }), TRUSTED), /exact-head/);
+  await assert.rejects(run(harness({ dependabot: true, actionUpdate: true, fork: true }), TRUSTED), /exact-head/);
 });

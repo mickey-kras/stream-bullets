@@ -35,7 +35,7 @@ jobs:
     - name: Install trusted policy tools
       run: npm ci --prefix trusted/.github/trusted-ci --ignore-scripts --no-audit --no-fund
     - name: Test policy and scanner boundaries
-      run: node --test trusted/.github/trusted-ci/policy.test.cjs trusted/.github/trusted-ci/safe-path.test.cjs trusted/.github/trusted-ci/scan-tree.test.cjs trusted/.github/trusted-ci/policy-guard.test.cjs trusted/.github/trusted-ci/docs-ste.test.cjs trusted/.github/trusted-ci/findings.test.cjs
+      run: node --test trusted/.github/trusted-ci/policy.test.cjs trusted/.github/trusted-ci/safe-path.test.cjs trusted/.github/trusted-ci/scan-tree.test.cjs trusted/.github/trusted-ci/policy-guard.test.cjs trusted/.github/trusted-ci/policy-dependabot.test.cjs trusted/.github/trusted-ci/docs-ste.test.cjs trusted/.github/trusted-ci/findings.test.cjs
     - name: Test Sonar response boundaries
       run: python -m unittest discover -s trusted/.github/scripts -p test_sync_sonar_findings.py -v
     - name: Check CI policy
