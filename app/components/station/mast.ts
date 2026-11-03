@@ -5,7 +5,7 @@ import type { Kit } from "./kit";
 import { add, mesh, box, ball, torus, rod, tube, lathe, rivets, TAU, profile } from "./shapes";
 
 /** Half-width of the tower at height y: splayed feet, tapering to the spire. */
-const half = (y: number): number => 0.06 + 0.6 * Math.pow(1 - Math.min(y, 2.95) / 3.0, 1.45);
+const half = (y: number): number => 0.06 + 0.6 * Math.pow(1 - Math.min(y, 2.95) / 3, 1.45);
 const corner = (i: number, y: number): THREE.Vector3 => {
   const a = (i / 4) * TAU + Math.PI / 4,
     r = half(y) * Math.SQRT2;
@@ -16,14 +16,21 @@ export const ringRadius = (y: number): number => half(y) * Math.SQRT2 + 0.1;
 
 function buildTower(k: Kit, mast: THREE.Group): void {
   const { brass, gold, beacon } = k;
-  const legSteel = M.wear(new THREE.MeshStandardMaterial({ color: "#cfcbc0", metalness: 0.85, roughness: 0.42 }), {
-    exposed: "#7a4a24",
-    edges: 0.35,
-    grime: 0,
-    streaks: 0,
-    exposedMetal: 0.3,
-    exposedRough: 0.85,
-  });
+  const legSteel = M.wear(
+    new THREE.MeshStandardMaterial({
+      color: "#cfcbc0",
+      metalness: 0.85,
+      roughness: 0.42,
+    }),
+    {
+      exposed: "#7a4a24",
+      edges: 0.35,
+      grime: 0,
+      streaks: 0,
+      exposedMetal: 0.3,
+      exposedRough: 0.85,
+    },
+  );
   const levels = [0, 0.5, 0.95, 1.35, 1.7, 2.02, 2.3, 2.55, 2.78];
   for (let i = 0; i < 4; i++) {
     tube(
@@ -49,8 +56,8 @@ function buildTower(k: Kit, mast: THREE.Group): void {
     );
   }
   for (let k = 0; k < levels.length - 1; k++) {
-    const ya = levels[k]!,
-      yb = levels[k + 1]!;
+    const ya = levels[k],
+      yb = levels[k + 1];
     for (let i = 0; i < 4; i++) {
       rod(corner(i, ya), corner((i + 1) % 4, yb), 0.011, gold, mast, 5);
       rod(corner((i + 1) % 4, ya), corner(i, yb), 0.011, gold, mast, 5);
@@ -62,7 +69,7 @@ function buildTower(k: Kit, mast: THREE.Group): void {
     torus([ringRadius(y), 0.034], [0, y, 0], gold, mast);
     for (let i = 0; i < 4; i++) rod(corner(i, y), corner(i, y).setLength(ringRadius(y)).setY(y), 0.012, brass, mast, 5);
   }
-  for (const y of [1.0, 1.95])
+  for (const y of [1, 1.95])
     for (const i of [0, 2]) {
       const p = corner(i, y);
       ball(0.03, [p.x * 1.12, y, p.z * 1.12], beacon, mast, 10);
@@ -82,7 +89,7 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
     emissiveIntensity: 0.35,
   });
   ball(0.16, [0, mastTop + 0.45, 0], orbMaterial, mast, 32);
-  halo([0, mastTop + 0.45, 0], 1.0, "#ffd08a", 0.35, mast);
+  halo([0, mastTop + 0.45, 0], 1, "#ffd08a", 0.35, mast);
   const orbLight = practical("#ffcf86", [5, 6], [0, mastTop + 0.45, 0], mast);
   // Radio waves: a shader disc of rings that ripple outward and fade, plus a pulsing shell.
   const waveMaterial = new THREE.ShaderMaterial({
@@ -91,7 +98,11 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
     blending: THREE.AdditiveBlending,
     side: THREE.DoubleSide,
     fog: false,
-    uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color("#ffc36a") }, uOn: { value: 1 } },
+    uniforms: {
+      uTime: { value: 0 },
+      uColor: { value: new THREE.Color("#ffc36a") },
+      uOn: { value: 1 },
+    },
     vertexShader:
       "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
     fragmentShader: `uniform float uTime; uniform vec3 uColor; uniform float uOn; varying vec2 vUv;
@@ -117,7 +128,10 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
   waves.rotation.x = -Math.PI / 2;
   waves.receiveShadow = false;
   waves.renderOrder = 3;
-  const ringGlow = new THREE.MeshBasicMaterial({ color: new THREE.Color("#ffc865").multiplyScalar(2.2), fog: false });
+  const ringGlow = new THREE.MeshBasicMaterial({
+    color: new THREE.Color("#ffc865").multiplyScalar(2.2),
+    fog: false,
+  });
   const signalRings: THREE.Mesh[] = [];
   for (let i = 0; i < 3; i++) {
     const ring = torus([0.7 + i * 0.62, 0.02], [0, 0, 0], ringGlow, tilt);
@@ -136,7 +150,10 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
     depthWrite: false,
     blending: THREE.AdditiveBlending,
     fog: false,
-    uniforms: { uFade: { value: 0 }, uColor: { value: new THREE.Color("#ffcf86") } },
+    uniforms: {
+      uFade: { value: 0 },
+      uColor: { value: new THREE.Color("#ffcf86") },
+    },
     vertexShader:
       "varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }",
     fragmentShader:
@@ -205,7 +222,7 @@ export function buildMast(k: Kit, hall: THREE.Group): THREE.Group {
   const mast = add(new THREE.Group(), hall);
   mast.position.set(0, 3.98, 0);
   mast.scale.setScalar(1.12);
-  const mastTop = 3.0;
+  const mastTop = 3;
   buildTower(k, mast);
   return buildSignal(k, mast, mastTop);
 }

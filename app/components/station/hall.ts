@@ -49,7 +49,7 @@ function hallServiceDoor(k: Kit, s: Pick<HallScope, "hall">): void {
   frame([0.92, 1.72, 0.12, 0.06, 0.06], [0, 0.81, 0.02], brass, g);
   rivets(
     [-0.33, 0.33].flatMap((x: number): THREE.Vector3[] =>
-      [0.2, 0.6, 1.0, 1.4].map((y: number): THREE.Vector3 => new THREE.Vector3(x, y, 0.07)),
+      [0.2, 0.6, 1, 1.4].map((y: number): THREE.Vector3 => new THREE.Vector3(x, y, 0.07)),
     ),
     0.02,
     gold,
@@ -75,14 +75,14 @@ function hallFuseBox(k: Kit, s: Pick<HallScope, "hall">): void {
   for (const x of [-0.12, 0, 0.12])
     rod(new THREE.Vector3(x, -0.31, 0.05), new THREE.Vector3(x, -0.85, 0.05), 0.022, iron, g, 8);
   for (const x of [-0.12, 0.12])
-    rod(new THREE.Vector3(x, 0.31, 0.05), new THREE.Vector3(x, 1.0, 0.05), 0.022, copper, g, 8);
+    rod(new THREE.Vector3(x, 0.31, 0.05), new THREE.Vector3(x, 1, 0.05), 0.022, copper, g, 8);
 }
 
 function hallOnAirSign(k: Kit, s: Pick<HallScope, "onAir">): void {
   const { gold, iron, warm, neon, signRed, halo, practical, label } = k;
   const { onAir } = s;
   const a = -0.14;
-  onAir.position.copy(plan(a, 0.36, 3.0));
+  onAir.position.copy(plan(a, 0.36, 3));
   onAir.rotation.y = facing(a);
   plaque([2.55, 0.98, 0.1, 0.22], [0, 0, -0.12], iron, onAir);
   frame([2.55, 0.98, 0.22, 0.13, 0.2], [0, 0, -0.06], gold, onAir);
@@ -158,7 +158,7 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   for (const a of [1.95, 4.2]) {
     const g = onWall(hall, a, 1.62, 0.02);
     torus([0.27, 0.05], [0, 0, 0.02], brass, g, false);
-    mesh(new THREE.CircleGeometry(0.25, 32), warmSoft, [0, 0, 0.0], g, false);
+    mesh(new THREE.CircleGeometry(0.25, 32), warmSoft, [0, 0, 0], g, false);
     rivets(
       ringPoints(0.36, 0, 10).map((p: THREE.Vector3): THREE.Vector3 => new THREE.Vector3(p.x, p.z, 0.03)),
       0.02,
@@ -167,7 +167,7 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
     );
   }
   for (const [a, y] of [
-    [2.5, 2.0],
+    [2.5, 2],
     [3.75, 1.95],
   ] as const) {
     const g = onWall(hall, a, y, 0.03);
@@ -177,7 +177,7 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   hallServiceDoor(k, { hall });
   hallFuseBox(k, { hall });
   // Copper service lines wrapping the back of the hall.
-  tube(loop(1.55, 4.4, 0.14, 1.0, 60), 0.05, copper, hall);
+  tube(loop(1.55, 4.4, 0.14, 1, 60), 0.05, copper, hall);
   tube(loop(1.85, 2.85, 0.14, 2.3, 30), 0.035, copper, hall);
   for (let i = 0; i < 10; i++) {
     const a = 1.6 + i * 0.3;

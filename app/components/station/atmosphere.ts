@@ -3,10 +3,8 @@ import * as T from "./textures";
 import type { Kit } from "./kit";
 import { add, TAU } from "./shapes";
 
-export function buildAtmosphere(k: Kit, scene: THREE.Scene, station: THREE.Group): void {
-  const { neon, signRed, animators, vents } = k;
-  const atmosphere = add(new THREE.Group(), scene);
-  const cloudTexture = T.cloud(77);
+function buildFog(k: Kit, atmosphere: THREE.Group, cloudTexture: THREE.Texture): void {
+  const { animators } = k;
   const fogRandom = T.random(4);
   const fogSprites: Array<{
     sprite: THREE.Sprite;
@@ -52,6 +50,13 @@ export function buildAtmosphere(k: Kit, scene: THREE.Scene, station: THREE.Group
       f.sprite.material.rotation += f.spin * 0.016;
     }
   });
+}
+
+export function buildAtmosphere(k: Kit, scene: THREE.Scene, station: THREE.Group): void {
+  const { neon, signRed, animators, vents } = k;
+  const atmosphere = add(new THREE.Group(), scene);
+  const cloudTexture = T.cloud(77);
+  buildFog(k, atmosphere, cloudTexture);
   const steamMaterial = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -131,6 +136,6 @@ export function buildAtmosphere(k: Kit, scene: THREE.Scene, station: THREE.Group
     if (!k.illuminated) return;
     const flick = Math.sin(t * 50) > 0.985 ? 0.55 : 1;
     neon.emissiveIntensity = 2.6 * flick;
-    signRed.emissiveIntensity = 1.0 * flick;
+    signRed.emissiveIntensity = 1 * flick;
   });
 }

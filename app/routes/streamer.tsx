@@ -233,148 +233,146 @@ export default function StreamerPage(): ReactNode {
 
   function renderTopics(): ReactNode {
     return (
-      <>
-        <main
-          ref={workspace}
-          id="main-content"
-          className={`topic-workspace ${searchParams.has("entry") ? "has-selection" : ""}`}
-          style={{ "--split": `${split}%` } as CSSProperties}
-        >
-          <section className="browse" aria-label="Browse topics">
-            <div className="intro">
-              <h1>Pick the next conversation</h1>
-              <p>{streamer.name} · Suggest topics. Vote. Chat.</p>
-            </div>
-            <form className="search" onSubmit={search}>
-              <label className="sr-only" htmlFor="topic-search">
-                Search topics
-              </label>
-              <input
-                key={query}
-                id="topic-search"
-                name="query"
-                type="search"
-                maxLength={100}
-                defaultValue={query}
-                placeholder="Search topics…"
-              />
-              <button type="submit" className="search-button" aria-label="Search topics">
-                Search
+      <main
+        ref={workspace}
+        id="main-content"
+        className={`topic-workspace ${searchParams.has("entry") ? "has-selection" : ""}`}
+        style={{ "--split": `${split}%` } as CSSProperties}
+      >
+        <section className="browse" aria-label="Browse topics">
+          <div className="intro">
+            <h1>Pick the next conversation</h1>
+            <p>{streamer.name} · Suggest topics. Vote. Chat.</p>
+          </div>
+          <form className="search" onSubmit={search}>
+            <label className="sr-only" htmlFor="topic-search">
+              Search topics
+            </label>
+            <input
+              key={query}
+              id="topic-search"
+              name="query"
+              type="search"
+              maxLength={100}
+              defaultValue={query}
+              placeholder="Search topics…"
+            />
+            <button type="submit" className="search-button" aria-label="Search topics">
+              Search
+            </button>
+          </form>
+          <div className="list-toolbar">
+            <div className="tabs" aria-label="Topic sorting">
+              <button
+                type="button"
+                className={sort === "top" ? "active" : ""}
+                aria-pressed={sort === "top"}
+                onClick={() => setSort("top")}
+              >
+                Top
               </button>
-            </form>
-            <div className="list-toolbar">
-              <div className="tabs" aria-label="Topic sorting">
-                <button
-                  type="button"
-                  className={sort === "top" ? "active" : ""}
-                  aria-pressed={sort === "top"}
-                  onClick={() => setSort("top")}
-                >
-                  Top
-                </button>
-                <button
-                  type="button"
-                  className={sort === "newest" ? "active" : ""}
-                  aria-pressed={sort === "newest"}
-                  onClick={() => setSort("newest")}
-                >
-                  New
-                </button>
-              </div>
-              <span className="list-count">
-                {entries.length} topics{cursor ? "+" : ""}
-              </span>
+              <button
+                type="button"
+                className={sort === "newest" ? "active" : ""}
+                aria-pressed={sort === "newest"}
+                onClick={() => setSort("newest")}
+              >
+                New
+              </button>
             </div>
-            <ScrollArea.Root className="topic-scroll-root">
-              <ScrollArea.Viewport asChild tabIndex={0} style={{ overflowY: "auto" }}>
-                <section id="topics" aria-label="Scrollable topic list">
-                  {entries.map((entry: Entry) => (
-                    <button
-                      type="button"
-                      key={entry.id}
-                      className={`topic ${selected?.id === entry.id ? "selected" : ""}`}
-                      aria-pressed={selected?.id === entry.id}
-                      onClick={() => navigate("topics", entry.id)}
-                    >
-                      <span className="topic-icon">
-                        <TopicIcon category={entry.category} />
-                      </span>
-                      <span className="topic-main">
-                        <span className="topic-title">{entry.title}</span>
-                        <span className="topic-meta">
-                          <span title="Likes">+ {entry.likes}</span>
-                          <span title="Dislikes">− {entry.dislikes}</span>
-                          <span title="Comments">▤ {entry.comments}</span>
-                        </span>
-                      </span>
-                      <span aria-hidden="true">›</span>
-                    </button>
-                  ))}
-                  {entries.length === 0 && (
-                    <p className="empty">
-                      {query ? "No topics match your search." : "No topics yet. Bring the first idea."}
-                    </p>
-                  )}
-                  {cursor && (
-                    <button
-                      className="load-more"
-                      type="button"
-                      disabled={loadingMore}
-                      onClick={() => {
-                        loadMore();
-                      }}
-                    >
-                      {loadingMore ? "Loading…" : "Load more topics"}
-                    </button>
-                  )}
-                </section>
-              </ScrollArea.Viewport>
-            </ScrollArea.Root>
-          </section>
-          <input
-            type="range"
-            min={25}
-            max={65}
-            step="any"
-            value={split}
-            onChange={(event) => setSplit(Number(event.currentTarget.value))}
-            id="splitter"
-            aria-label="Resize topic panels"
-            aria-controls="topics detail"
-            onKeyDown={(event) => {
-              if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-                event.preventDefault();
-                setSplit((value: number) => Math.max(25, Math.min(65, value + (event.key === "ArrowRight" ? 2 : -2))));
-              }
-            }}
-            onPointerDown={(event) => {
-              event.preventDefault();
-              event.currentTarget.focus();
-              pointerId.current = event.pointerId;
-              event.currentTarget.setPointerCapture(event.pointerId);
-            }}
-            onPointerMove={(event) => {
-              if (pointerId.current !== event.pointerId || !workspace.current) return;
-              const bounds: DOMRect = workspace.current.getBoundingClientRect();
-              setSplit(Math.max(25, Math.min(65, ((event.clientX - bounds.left) / bounds.width) * 100)));
-            }}
-            onPointerUp={() => {
-              pointerId.current = null;
-            }}
-            onPointerCancel={() => {
-              pointerId.current = null;
-            }}
-            onDoubleClick={() => setSplit(40)}
-          />
-          <ScrollArea.Root className="detail-scroll-root">
+            <span className="list-count">
+              {entries.length} topics{cursor ? "+" : ""}
+            </span>
+          </div>
+          <ScrollArea.Root className="topic-scroll-root">
             <ScrollArea.Viewport asChild tabIndex={0} style={{ overflowY: "auto" }}>
-              <section className="detail" id="detail" aria-label="Selected topic">
-                {renderTopicDetail()}
+              <section id="topics" aria-label="Scrollable topic list">
+                {entries.map((entry: Entry) => (
+                  <button
+                    type="button"
+                    key={entry.id}
+                    className={`topic ${selected?.id === entry.id ? "selected" : ""}`}
+                    aria-pressed={selected?.id === entry.id}
+                    onClick={() => navigate("topics", entry.id)}
+                  >
+                    <span className="topic-icon">
+                      <TopicIcon category={entry.category} />
+                    </span>
+                    <span className="topic-main">
+                      <span className="topic-title">{entry.title}</span>
+                      <span className="topic-meta">
+                        <span title="Likes">+ {entry.likes}</span>
+                        <span title="Dislikes">− {entry.dislikes}</span>
+                        <span title="Comments">▤ {entry.comments}</span>
+                      </span>
+                    </span>
+                    <span aria-hidden="true">›</span>
+                  </button>
+                ))}
+                {entries.length === 0 && (
+                  <p className="empty">
+                    {query ? "No topics match your search." : "No topics yet. Bring the first idea."}
+                  </p>
+                )}
+                {cursor && (
+                  <button
+                    className="load-more"
+                    type="button"
+                    disabled={loadingMore}
+                    onClick={() => {
+                      loadMore();
+                    }}
+                  >
+                    {loadingMore ? "Loading…" : "Load more topics"}
+                  </button>
+                )}
               </section>
             </ScrollArea.Viewport>
           </ScrollArea.Root>
-        </main>
-      </>
+        </section>
+        <input
+          type="range"
+          min={25}
+          max={65}
+          step="any"
+          value={split}
+          onChange={(event) => setSplit(Number(event.currentTarget.value))}
+          id="splitter"
+          aria-label="Resize topic panels"
+          aria-controls="topics detail"
+          onKeyDown={(event) => {
+            if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+              event.preventDefault();
+              setSplit((value: number) => Math.max(25, Math.min(65, value + (event.key === "ArrowRight" ? 2 : -2))));
+            }
+          }}
+          onPointerDown={(event) => {
+            event.preventDefault();
+            event.currentTarget.focus();
+            pointerId.current = event.pointerId;
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={(event) => {
+            if (pointerId.current !== event.pointerId || !workspace.current) return;
+            const bounds: DOMRect = workspace.current.getBoundingClientRect();
+            setSplit(Math.max(25, Math.min(65, ((event.clientX - bounds.left) / bounds.width) * 100)));
+          }}
+          onPointerUp={() => {
+            pointerId.current = null;
+          }}
+          onPointerCancel={() => {
+            pointerId.current = null;
+          }}
+          onDoubleClick={() => setSplit(40)}
+        />
+        <ScrollArea.Root className="detail-scroll-root">
+          <ScrollArea.Viewport asChild tabIndex={0} style={{ overflowY: "auto" }}>
+            <section className="detail" id="detail" aria-label="Selected topic">
+              {renderTopicDetail()}
+            </section>
+          </ScrollArea.Viewport>
+        </ScrollArea.Root>
+      </main>
     );
   }
 
@@ -459,108 +457,106 @@ export default function StreamerPage(): ReactNode {
   function renderPolls(): ReactNode {
     return (
       <>
-        <>
-          <div className="page-title">
-            <div>
-              <span className="eyebrow">YOUR VOICE, ON AIR</span>
-              <h1>Live polls</h1>
-              <p>One question. Everyone has a say.</p>
-            </div>
-            {owner && (
-              <button className="gold" type="button" onClick={() => setDialog("poll")}>
-                + Create poll
-              </button>
-            )}
+        <div className="page-title">
+          <div>
+            <span className="eyebrow">YOUR VOICE, ON AIR</span>
+            <h1>Live polls</h1>
+            <p>One question. Everyone has a say.</p>
           </div>
-          <div className="connection-status">
-            <output>{liveLabels[live.status]}</output>
-            {live.status === "offline" && (
-              <button type="button" onClick={live.reconnect}>
-                Reconnect
-              </button>
-            )}
+          {owner && (
+            <button className="gold" type="button" onClick={() => setDialog("poll")}>
+              + Create poll
+            </button>
+          )}
+        </div>
+        <div className="connection-status">
+          <output>{liveLabels[live.status]}</output>
+          {live.status === "offline" && (
+            <button type="button" onClick={live.reconnect}>
+              Reconnect
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={revalidator.state !== "idle"}
+            onClick={() => {
+              revalidator.revalidate();
+            }}
+          >
+            Refresh polls
+          </button>
+        </div>
+        <div className="poll-toolbar">
+          <div className="tabs" aria-label="Poll sorting">
             <button
               type="button"
-              disabled={revalidator.state !== "idle"}
+              aria-pressed={sort === "newest"}
+              className={sort === "newest" ? "active" : ""}
+              onClick={() => setSort("newest")}
+            >
+              Newest
+            </button>
+            <button
+              type="button"
+              aria-pressed={sort === "top"}
+              className={sort === "top" ? "active" : ""}
+              onClick={() => setSort("top")}
+            >
+              Top
+            </button>
+          </div>
+          {loadedSelected && (
+            <button type="button" onClick={() => navigate("polls")}>
+              ‹ All polls
+            </button>
+          )}
+          {owner && (
+            <Link className="text-link" to={overlayUrl}>
+              OBS overlay
+            </Link>
+          )}
+        </div>
+        {live.snapshot?.polls.some((poll) => !entries.some((entry: Entry) => entry.id === poll.id)) && (
+          <output>
+            More polls are available.{" "}
+            <button
+              type="button"
               onClick={() => {
                 revalidator.revalidate();
               }}
             >
-              Refresh polls
+              Load latest polls
             </button>
-          </div>
-          <div className="poll-toolbar">
-            <div className="tabs" aria-label="Poll sorting">
-              <button
-                type="button"
-                aria-pressed={sort === "newest"}
-                className={sort === "newest" ? "active" : ""}
-                onClick={() => setSort("newest")}
-              >
-                Newest
-              </button>
-              <button
-                type="button"
-                aria-pressed={sort === "top"}
-                className={sort === "top" ? "active" : ""}
-                onClick={() => setSort("top")}
-              >
-                Top
-              </button>
-            </div>
-            {loadedSelected && (
-              <button type="button" onClick={() => navigate("polls")}>
-                ‹ All polls
-              </button>
-            )}
-            {owner && (
-              <Link className="text-link" to={overlayUrl}>
-                OBS overlay
-              </Link>
-            )}
-          </div>
-          {live.snapshot?.polls.some((poll) => !entries.some((entry: Entry) => entry.id === poll.id)) && (
-            <output>
-              More polls are available.{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  revalidator.revalidate();
-                }}
-              >
-                Load latest polls
-              </button>
-            </output>
-          )}
-          {(loadedSelected && selected ? [selected] : entries).map((entry: Entry) => (
-            <PollCard
-              key={entry.id}
-              entry={entry}
-              now={now}
-              signedIn={Boolean(viewer)}
-              owner={owner}
-              pending={pending}
-              onAction={act}
-              onDiscuss={() => navigate("polls", entry.id)}
-            />
-          ))}
-          {entries.length === 0 && !loadedSelected && (
-            <EmptyState title="The mic is yours.">No polls yet. The next question starts here.</EmptyState>
-          )}
-          {cursor && !loadedSelected && (
-            <button
-              type="button"
-              className="load-more"
-              disabled={loadingMore}
-              onClick={() => {
-                loadMore();
-              }}
-            >
-              {loadingMore ? "Loading…" : "Load more polls"}
-            </button>
-          )}
-          {renderPollDiscussion()}
-        </>
+          </output>
+        )}
+        {(loadedSelected && selected ? [selected] : entries).map((entry: Entry) => (
+          <PollCard
+            key={entry.id}
+            entry={entry}
+            now={now}
+            signedIn={Boolean(viewer)}
+            owner={owner}
+            pending={pending}
+            onAction={act}
+            onDiscuss={() => navigate("polls", entry.id)}
+          />
+        ))}
+        {entries.length === 0 && !loadedSelected && (
+          <EmptyState title="The mic is yours.">No polls yet. The next question starts here.</EmptyState>
+        )}
+        {cursor && !loadedSelected && (
+          <button
+            type="button"
+            className="load-more"
+            disabled={loadingMore}
+            onClick={() => {
+              loadMore();
+            }}
+          >
+            {loadingMore ? "Loading…" : "Load more polls"}
+          </button>
+        )}
+        {renderPollDiscussion()}
       </>
     );
   }
@@ -590,14 +586,12 @@ export default function StreamerPage(): ReactNode {
   function renderAbout(): ReactNode {
     return (
       <>
-        <>
-          <span className="eyebrow">BEHIND THE MIC</span>
-          <h1>{streamer.name}</h1>
-          <section className="info-card">
-            <Avatar name={streamer.name} url={streamer.avatar} />
-            <p className="description">{streamer.about || "This streamer has not added an introduction yet."}</p>
-          </section>
-        </>
+        <span className="eyebrow">BEHIND THE MIC</span>
+        <h1>{streamer.name}</h1>
+        <section className="info-card">
+          <Avatar name={streamer.name} url={streamer.avatar} />
+          <p className="description">{streamer.about || "This streamer has not added an introduction yet."}</p>
+        </section>
       </>
     );
   }
@@ -605,14 +599,12 @@ export default function StreamerPage(): ReactNode {
   function renderSchedule(): ReactNode {
     return (
       <>
-        <>
-          <span className="eyebrow">WHAT&apos;S NEXT</span>
-          <h1>Stream schedule</h1>
-          <EmptyState title="Next stream to be announced.">In the meantime, help choose what we talk about.</EmptyState>
-          <button className="gold" type="button" onClick={() => navigate("topics")}>
-            Explore topics
-          </button>
-        </>
+        <span className="eyebrow">WHAT&apos;S NEXT</span>
+        <h1>Stream schedule</h1>
+        <EmptyState title="Next stream to be announced.">In the meantime, help choose what we talk about.</EmptyState>
+        <button className="gold" type="button" onClick={() => navigate("topics")}>
+          Explore topics
+        </button>
       </>
     );
   }
@@ -620,26 +612,24 @@ export default function StreamerPage(): ReactNode {
   function renderCommunity(): ReactNode {
     return (
       <>
-        <>
-          <span className="eyebrow">PART OF THE CONVERSATION</span>
-          <h1>{streamer.name}&apos;s community</h1>
-          <div className="community-grid">
-            <section className="info-card">
-              <h2>Bring an idea</h2>
-              <p>Suggest a topic, vote on your favorites, and discuss it with everyone.</p>
-              <button className="gold" type="button" onClick={() => navigate("topics")}>
-                Browse topics
-              </button>
-            </section>
-            <section className="info-card">
-              <h2>Have your say live</h2>
-              <p>Vote in live polls. Keep the conversation respectful and on topic.</p>
-              <button className="gold" type="button" onClick={() => navigate("polls")}>
-                Open polls
-              </button>
-            </section>
-          </div>
-        </>
+        <span className="eyebrow">PART OF THE CONVERSATION</span>
+        <h1>{streamer.name}&apos;s community</h1>
+        <div className="community-grid">
+          <section className="info-card">
+            <h2>Bring an idea</h2>
+            <p>Suggest a topic, vote on your favorites, and discuss it with everyone.</p>
+            <button className="gold" type="button" onClick={() => navigate("topics")}>
+              Browse topics
+            </button>
+          </section>
+          <section className="info-card">
+            <h2>Have your say live</h2>
+            <p>Vote in live polls. Keep the conversation respectful and on topic.</p>
+            <button className="gold" type="button" onClick={() => navigate("polls")}>
+              Open polls
+            </button>
+          </section>
+        </div>
       </>
     );
   }

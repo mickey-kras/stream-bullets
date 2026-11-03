@@ -10,7 +10,7 @@ export function buildDeck(k: Kit, station: THREE.Group): void {
   cyl([5.02, 5.22, 0.36], [0, 0.18, 0], brass, station, [96]);
   cyl([5.08, 5.08, 0.1], [0, 0.38, 0], gold, station, [96]);
   cyl([4.4, 3.4, 0.7], [0, -0.35, 0], iron, station, [64]);
-  torus([5.0, 0.05], [0, DECK_Y - 0.01, 0], gold, station);
+  torus([5, 0.05], [0, DECK_Y - 0.01, 0], gold, station);
   torus([3.9, 0.05], [0, -0.7, 0], brass, station);
   rivets(ringPoints(5.22, 0.1, 120), 0.03, gold, station);
   rivets(ringPoints(5.1, 0.37, 120), 0.024, gold, station);
@@ -72,7 +72,7 @@ export function buildDeck(k: Kit, station: THREE.Group): void {
     roughness: 0.6,
   });
   emissives.push([opal, 0.8]);
-  for (const a of [-0.55, 0.6, 2.0, -1.45, Math.PI]) {
+  for (const a of [-0.55, 0.6, 2, -1.45, Math.PI]) {
     const x = Math.sin(a) * 4.45,
       z = Math.cos(a) * 4.45;
     const lamp = add(new THREE.Group(), station);
@@ -125,7 +125,7 @@ export function buildDeck(k: Kit, station: THREE.Group): void {
         roughness: 0.55,
         side: THREE.DoubleSide,
       }),
-      [0, 1.0, 0],
+      [0, 1, 0],
       lamp,
       32,
     );
@@ -144,7 +144,7 @@ export function buildDeck(k: Kit, station: THREE.Group): void {
         lamp,
       );
     }
-    halo([0, 1.3, 0], 1.0, "#ffc070", 0.22, lamp);
+    halo([0, 1.3, 0], 1, "#ffc070", 0.22, lamp);
     if (Math.abs(a) < 1.1) practical("#ffc47a", [5, 3.2], [0, 1.45, 0], lamp);
   }
 }

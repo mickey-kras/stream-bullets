@@ -56,12 +56,16 @@ function worksBoiler(k: Kit, s: Pick<WorksScope, "works">): void {
   torus([0.26, 0.025], [0, 0, 0.03], brass, door, false);
   mesh(
     new THREE.CircleGeometry(0.08, 20),
-    new THREE.MeshStandardMaterial({ color: "#ff8a3a", emissive: "#ff5a10", emissiveIntensity: 2.4 }),
+    new THREE.MeshStandardMaterial({
+      color: "#ff8a3a",
+      emissive: "#ff5a10",
+      emissiveIntensity: 2.4,
+    }),
     [0, 0, 0.031],
     door,
     false,
   );
-  cyl([0.13, 0.16, 1.2], [-0.3, 2.0, 0], copper, g, [24]);
+  cyl([0.13, 0.16, 1.2], [-0.3, 2, 0], copper, g, [24]);
   cyl([0.22, 0.14, 0.14], [-0.3, 2.62, 0], brass, g, [24]);
   vents.push(g.localToWorld(new THREE.Vector3(-0.3, 2.7, 0)).clone());
   gauge([0.2, 1.62, 0], 0, 0.12, g);
@@ -74,7 +78,7 @@ function worksGenerator(k: Kit, s: Pick<WorksScope, "works">): void {
   const g = add(new THREE.Group(), works);
   g.position.copy(polar(3.95, 3.18));
   g.rotation.y = 3.18;
-  box([1.0, 0.9, 0.65], [0, 0.45, 0], tealDark, g, 0.05);
+  box([1, 0.9, 0.65], [0, 0.45, 0], tealDark, g, 0.05);
   for (let i = 0; i < 6; i++) box([0.7, 0.025, 0.03], [0, 0.25 + i * 0.07, 0.33], iron, g, 0.005);
   mesh(
     new THREE.PlaneGeometry(0.8, 0.12),
@@ -130,7 +134,7 @@ function worksGreyTank(k: Kit, s: Pick<WorksScope, "works">): void {
   for (const y of [0.3, 1.3]) torus([0.45, 0.025], [0, y, 0], brass, g);
   rivets(ringPoints(0.45, 0.8, 26), 0.016, brass, g);
   pipe(
-    [new THREE.Vector3(0, 1.6, 0), new THREE.Vector3(0, 2.0, 0), new THREE.Vector3(-0.75, 2.0, 0)],
+    [new THREE.Vector3(0, 1.6, 0), new THREE.Vector3(0, 2, 0), new THREE.Vector3(-0.75, 2, 0)],
     0.05,
     [copper, brass],
     g,
@@ -151,10 +155,10 @@ function worksPipework(k: Kit, s: Pick<WorksScope, "works">): void {
     [copper, brass],
     works,
   );
-  pipe([w(A.x, 2.55, A.z), w(A.x, 3.3, A.z), w(1.3, 3.3, -1.0), w(0.4, 3.95, -0.9)], 0.08, [brass, brass], works);
+  pipe([w(A.x, 2.55, A.z), w(A.x, 3.3, A.z), w(1.3, 3.3, -1), w(0.4, 3.95, -0.9)], 0.08, [brass, brass], works);
   const boiler = polar(3.88, -2.45);
   pipe(
-    [w(boiler.x + 0.3, 1.55, boiler.z + 0.35), w(boiler.x + 0.3, 2.0, boiler.z + 0.35), w(-1.6, 2.0, -2.0)],
+    [w(boiler.x + 0.3, 1.55, boiler.z + 0.35), w(boiler.x + 0.3, 2, boiler.z + 0.35), w(-1.6, 2, -2)],
     0.06,
     [copper, brass],
     works,
@@ -210,7 +214,7 @@ export function buildWorks(k: Kit, station: THREE.Group): void {
       ctx.fillText("HIGH PRESSURE", w / 2, h * 0.55, w * 0.9);
     },
     [0.7, 0.16],
-    [Math.sin(2.85) * 0.51, 1.0, Math.cos(2.85) * 0.51],
+    [Math.sin(2.85) * 0.51, 1, Math.cos(2.85) * 0.51],
     tankB,
     0.1,
     512,
