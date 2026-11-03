@@ -96,8 +96,9 @@ function decodeCursor(value: string | null, scope: string, sort: "newest" | "top
   if (!value) return null;
   let decoded: unknown;
   try {
-    const bytes = Uint8Array.from(atob(value.replaceAll("-", "+").replaceAll("_", "/")), (character: string): number =>
-      character.codePointAt(0)!,
+    const bytes = Uint8Array.from(
+      atob(value.replaceAll("-", "+").replaceAll("_", "/")),
+      (character: string): number => character.codePointAt(0)!,
     );
     decoded = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
   } catch {

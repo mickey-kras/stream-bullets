@@ -39,8 +39,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   let view: View = views.includes(requestedView as View) ? (requestedView as View) : "topics";
   const entryId: string | null = url.searchParams.get("entry");
   const selected: Entry | null = entryId ? await getEntry(app.env, entryId, viewer?.id || null) : null;
-  if (entryId && selected?.streamerId !== streamer.id)
-    throw new Response("Conversation not found.", { status: 404 });
+  if (entryId && selected?.streamerId !== streamer.id) throw new Response("Conversation not found.", { status: 404 });
   if (selected) view = selected.kind === "topic" ? "topics" : "polls";
   const requestedSort: string | null = url.searchParams.get("sort");
   let sort: SortOrder = view === "polls" ? "newest" : "top";
@@ -99,15 +98,7 @@ function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revi
 }
 
 export default function StreamerPage(): ReactNode {
-  const {
-    board,
-    selected: loadedSelected,
-    viewer,
-    providers,
-    view,
-    sort,
-    query,
-  } = useLoaderData<typeof loader>();
+  const { board, selected: loadedSelected, viewer, providers, view, sort, query } = useLoaderData<typeof loader>();
   const { streamer } = board;
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
@@ -168,10 +159,7 @@ export default function StreamerPage(): ReactNode {
     setPending(true);
     setError("");
     try {
-      const result = await postJson<{ id: string }>(
-        `/api/streamers/${encodeURIComponent(streamer.handle)}`,
-        body,
-      );
+      const result = await postJson<{ id: string }>(`/api/streamers/${encodeURIComponent(streamer.handle)}`, body);
       await revalidator.revalidate();
       return result;
     } finally {
@@ -356,9 +344,7 @@ export default function StreamerPage(): ReactNode {
             onKeyDown={(event) => {
               if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
                 event.preventDefault();
-                setSplit((value: number) =>
-                  Math.max(25, Math.min(65, value + (event.key === "ArrowRight" ? 2 : -2))),
-                );
+                setSplit((value: number) => Math.max(25, Math.min(65, value + (event.key === "ArrowRight" ? 2 : -2))));
               }
             }}
             onPointerDown={(event) => {
@@ -464,9 +450,7 @@ export default function StreamerPage(): ReactNode {
             />
           </>
         ) : (
-          <EmptyState title="Start a conversation.">
-            Suggest a topic for {streamer.name}&apos;s next stream.
-          </EmptyState>
+          <EmptyState title="Start a conversation.">Suggest a topic for {streamer.name}&apos;s next stream.</EmptyState>
         )}
       </>
     );
@@ -611,9 +595,7 @@ export default function StreamerPage(): ReactNode {
           <h1>{streamer.name}</h1>
           <section className="info-card">
             <Avatar name={streamer.name} url={streamer.avatar} />
-            <p className="description">
-              {streamer.about || "This streamer has not added an introduction yet."}
-            </p>
+            <p className="description">{streamer.about || "This streamer has not added an introduction yet."}</p>
           </section>
         </>
       </>
@@ -626,9 +608,7 @@ export default function StreamerPage(): ReactNode {
         <>
           <span className="eyebrow">WHAT&apos;S NEXT</span>
           <h1>Stream schedule</h1>
-          <EmptyState title="Next stream to be announced.">
-            In the meantime, help choose what we talk about.
-          </EmptyState>
+          <EmptyState title="Next stream to be announced.">In the meantime, help choose what we talk about.</EmptyState>
           <button className="gold" type="button" onClick={() => navigate("topics")}>
             Explore topics
           </button>

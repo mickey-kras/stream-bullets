@@ -113,7 +113,10 @@ export function SignIn({
   );
 }
 
-export function AccountControls({ viewer, providers }: Readonly<{ viewer: Viewer | null; providers: Provider[] }>): ReactNode {
+export function AccountControls({
+  viewer,
+  providers,
+}: Readonly<{ viewer: Viewer | null; providers: Provider[] }>): ReactNode {
   const [open, setOpen] = useState<boolean>(false);
   return viewer ? (
     <Link className="profile" to="/settings" aria-label={`Account settings for ${viewer.name}`}>
