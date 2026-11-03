@@ -58,7 +58,7 @@ export default function Home(): ReactNode {
           <div className="landing-topics">TOPICS / POLLS / DISCUSSIONS</div>
         </>}
         <section className="landing-directory directory-page" id="streamers" aria-labelledby="streamer-directory-title">
-        
+
         <h2 id="streamer-directory-title">Pick the next conversation</h2>
         <p>Find your streamer. Suggest topics. Vote. Join the discussion.</p>
         <Link className="button-link gold" to={ownStreamer ? `/@${ownStreamer.handle}` : "/settings"}>

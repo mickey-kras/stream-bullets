@@ -37,7 +37,7 @@ body:has(.landing-page)::before,body:has(.landing-page)::after{display:none}
 @media(max-width:700px){.landing-header{height:88px;min-height:88px;padding:16px 22px;gap:9px}.landing-brand{font-size:23px;gap:10px}.landing-brand i{width:21px;height:4px;box-shadow:6px -9px 0 -1px var(--gold),6px 9px 0 -1px var(--gold)}.landing-header nav{gap:9px}.landing-header button{font-size:16px;padding:10px 11px;min-height:44px}.landing-hero{height:auto;min-height:calc(100svh - 158px);display:flex;align-items:center}.landing-copy{position:relative;top:auto;left:auto;width:100%;padding:30px 24px 56px;pointer-events:auto}.landing-copy h1{font-size:clamp(48px,12.5vw,85px);margin-bottom:16px}.landing-copy p{white-space:normal;font-size:18px}.landing-actions{margin:24px 0 16px;gap:12px}.landing-actions button,.landing-actions .button-link{font-size:20px;padding:13px 19px}.landing-actions .landing-sage{min-width:110px}.landing-explore{font-size:18px}.landing-station{display:none}.landing-topics{font-size:14px;letter-spacing:2px;height:45px;gap:13px;margin-bottom:25px}.landing-topics:before,.landing-topics:after{width:8%}.landing-directory{padding:32px 24px 60px}}
 @media(prefers-reduced-motion:reduce){.landing-page{scroll-behavior:auto}}
 .landing-page{flex:1;min-height:0;width:100%}
-.landing-header{display:flex;flex-wrap:nowrap}
+.landing-header{position:relative;z-index:3;display:flex;flex-wrap:nowrap}
 .landing-header nav{flex-shrink:0;order:initial;width:auto;height:auto;overflow:visible}
 
 @media(max-width:380px){.landing-header{padding:16px 12px}.landing-brand{font-size:20px;gap:7px}.landing-brand i{width:16px}.landing-header nav{gap:4px}.landing-header button{padding:10px 8px}}
