@@ -1,5 +1,6 @@
 const { inspect, isPolicyPath, isApplicationPath } = require("./policy.cjs");
 
+const { DEPENDENCY_FILES, applicationDependenciesOnly } = require("./policy-dependencies.cjs");
 const { admittedDependabot } = require("./policy-dependabot.cjs");
 
 const OWNER = { login: "mickey-kras", id: 24433677 };
@@ -7,7 +8,7 @@ const SHA = /^[a-f0-9]{40}$/;
 
 // A repository owner cannot approve their own PR. An explicit comment is an
 // admission bound to the candidate, current base and trusted policy.
-function commentAdmission(comments, head, base, trusted) {
+function commentAdmission(comments, head, base, trusted, tree) {
   const prefix = /^(Approve|Reject) CI policy: /;
   const decisive = comments.filter(
     (comment) =>
@@ -19,24 +20,27 @@ function commentAdmission(comments, head, base, trusted) {
   );
   decisive.sort((a, b) => b.id - a.id);
   if (!decisive.length) return undefined;
-  return decisive[0].body === `Approve CI policy: head=${head} base=${base} trusted=${trusted}`;
+  return (
+    decisive[0].body === `Approve CI policy: head=${head} base=${base} trusted=${trusted}` ||
+    (SHA.test(tree || "") && decisive[0].body === `Approve CI policy: tree=${tree} base=${base} trusted=${trusted}`)
+  );
 }
 
-function validComment(comments, head, base, trusted) {
-  return commentAdmission(comments, head, base, trusted) === true;
+function validComment(comments, head, base, trusted, tree) {
+  return commentAdmission(comments, head, base, trusted, tree) === true;
 }
 
-function inspectChanges(base, head, admitted = false) {
+function inspectChanges(base, head, admitted = false, dependencyOnly = false) {
   const failures = [];
   const paths = new Set([...Object.keys(base), ...Object.keys(head)]);
   const changed = [...paths].filter(
     (name) => base[name]?.sha !== head[name]?.sha || base[name]?.mode !== head[name]?.mode,
   );
-  const policy = changed.filter(isPolicyPath);
+  const policy = changed.filter((name) => isPolicyPath(name) && !(dependencyOnly && DEPENDENCY_FILES.includes(name)));
   if (policy.length && changed.some(isApplicationPath)) {
     failures.push("Separate CI policy changes from application changes");
   }
-  if (policy.length && !admitted) failures.push("CI policy changes require independent exact-head owner approval");
+  if (policy.length && !admitted) failures.push("CI policy changes require exact-head or exact-tree owner approval");
   for (const [name, entry] of Object.entries(head)) {
     if (isPolicyPath(name) && (entry.type !== "blob" || !["100644", "100755"].includes(entry.mode))) {
       failures.push(`Policy input must be a regular file: ${name}`);
@@ -75,10 +79,31 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
     }
     return cache.get(entry.sha);
   };
+  let dependencyOnly = false;
+  if (
+    DEPENDENCY_FILES.some((name) => base[name]?.sha !== head[name]?.sha) &&
+    DEPENDENCY_FILES.every(
+      (name) =>
+        base[name]?.type === "blob" &&
+        head[name]?.type === "blob" &&
+        base[name].mode === "100644" &&
+        head[name].mode === "100644",
+    )
+  ) {
+    const sources = async (entries) =>
+      Object.fromEntries(await Promise.all(DEPENDENCY_FILES.map(async (name) => [name, await read(entries[name])])));
+    dependencyOnly = applicationDependenciesOnly(await sources(base), await sources(head));
+  }
+  const { data: headCommit } = await github.rest.git.getCommit({ ...context.repo, commit_sha: pull.head.sha });
+  const tree = headCommit.tree.sha;
+  if (!SHA.test(tree || "")) throw new Error("Invalid tree revision");
   const automated = await admittedDependabot(pull, `${context.repo.owner}/${context.repo.repo}`, base, head, read);
   let admitted = automated;
   const changedPolicy = [...new Set([...Object.keys(base), ...Object.keys(head)])].some(
-    (name) => isPolicyPath(name) && (base[name]?.sha !== head[name]?.sha || base[name]?.mode !== head[name]?.mode),
+    (name) =>
+      isPolicyPath(name) &&
+      !(dependencyOnly && DEPENDENCY_FILES.includes(name)) &&
+      (base[name]?.sha !== head[name]?.sha || base[name]?.mode !== head[name]?.mode),
   );
   if (changedPolicy && pull.head.repo?.full_name === `${context.repo.owner}/${context.repo.repo}`) {
     const comments = await github.paginate(github.rest.issues.listComments, {
@@ -86,10 +111,10 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
       issue_number: pull.number,
       per_page: 100,
     });
-    const decision = commentAdmission(comments, pull.head.sha, pull.base.sha, trustedSha);
+    const decision = commentAdmission(comments, pull.head.sha, pull.base.sha, trustedSha, tree);
     if (decision !== undefined) admitted = decision;
   }
-  const failures = inspectChanges(base, head, admitted);
+  const failures = inspectChanges(base, head, admitted, dependencyOnly);
   const workflows = {};
   for (const [name, entry] of Object.entries(head)) {
     if (!/^\.github\/workflows\/.*\.ya?ml$/.test(name)) continue;
@@ -105,7 +130,7 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
       issue_number: pull.number,
       per_page: 100,
     });
-    const decision = commentAdmission(comments, pull.head.sha, pull.base.sha, trustedSha);
+    const decision = commentAdmission(comments, pull.head.sha, pull.base.sha, trustedSha, tree);
     if (!(decision ?? automated)) {
       failures.push("Owner policy admission changed during validation");
     }
