@@ -68,6 +68,7 @@ jobs:
       - run: pnpm build:production
       - name: Check current main revision
         id: revision
+        shell: bash
         run: |
           latest_sha=$(git ls-remote --exit-code origin refs/heads/main | cut -f1)
           if [ "$latest_sha" = "$GITHUB_SHA" ]; then
