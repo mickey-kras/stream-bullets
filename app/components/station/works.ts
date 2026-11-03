@@ -1,7 +1,14 @@
 import * as THREE from "three";
 import * as T from "./textures";
 import type { Kit } from "./kit";
+import { wallEntry, HALL_AT } from "./plan";
 import { add, mesh, box, cyl, ball, torus, rod, pipe, polar, rivets, ringPoints, TAU, DECK_Y } from "./shapes";
+
+/** The hall's position in the works group, which already sits at deck height. */
+const HALL_IN_WORKS = HALL_AT.clone().setY(0);
+
+/** The grey receiver by the wing; its outlet pipe is run by the wing, down the wing's side wall. */
+export const GREY_TANK = polar(4.05, 2.1);
 
 interface WorksScope {
   works: THREE.Group;
@@ -30,7 +37,7 @@ function worksLadder(k: Kit, s: Pick<WorksScope, "tankB">): void {
 }
 
 function worksBoiler(k: Kit, s: Pick<WorksScope, "works">): void {
-  const { vents, brass, copper, iron, cream, red, gauge, valve } = k;
+  const { brass, copper, iron, cream, red, gauge, valve } = k;
   const { works } = s;
   const a = -2.45;
   const g = add(new THREE.Group(), works);
@@ -67,7 +74,6 @@ function worksBoiler(k: Kit, s: Pick<WorksScope, "works">): void {
   );
   cyl([0.13, 0.16, 1.2], [-0.3, 2, 0], copper, g, [24]);
   cyl([0.22, 0.14, 0.14], [-0.3, 2.62, 0], brass, g, [24]);
-  vents.push(g.localToWorld(new THREE.Vector3(-0.3, 2.7, 0)).clone());
   gauge([0.2, 1.62, 0], 0, 0.12, g);
   valve([0.55, 1.7, 0], new THREE.Euler(0, 0, 0), 0.12, g);
 }
@@ -76,8 +82,9 @@ function worksGenerator(k: Kit, s: Pick<WorksScope, "works">): void {
   const { copper, iron, tealDark, red, beacon } = k;
   const { works } = s;
   const g = add(new THREE.Group(), works);
-  g.position.copy(polar(3.95, 3.18));
-  g.rotation.y = 3.18;
+  // Set between the rear lamp standard and the boiler, clear of both.
+  g.position.copy(polar(3.95, 3.38));
+  g.rotation.y = 3.38;
   box([1, 0.9, 0.65], [0, 0.45, 0], tealDark, g, 0.05);
   for (let i = 0; i < 6; i++) box([0.7, 0.025, 0.03], [0, 0.25 + i * 0.07, 0.33], iron, g, 0.005);
   mesh(
@@ -127,18 +134,12 @@ function worksGreyTank(k: Kit, s: Pick<WorksScope, "works">): void {
   const { brass, copper, iron, steel, gauge } = k;
   const { works } = s;
   const g = add(new THREE.Group(), works);
-  g.position.copy(polar(4.05, 2.1));
+  g.position.copy(GREY_TANK);
   cyl([0.48, 0.5, 0.12], [0, 0.06, 0], iron, g, [32]);
   cyl([0.44, 0.44, 1.35], [0, 0.8, 0], steel, g, [40]);
   ball(0.44, [0, 1.48, 0], steel, g, 40).scale.y = 0.35;
   for (const y of [0.3, 1.3]) torus([0.45, 0.025], [0, y, 0], brass, g);
   rivets(ringPoints(0.45, 0.8, 26), 0.016, brass, g);
-  pipe(
-    [new THREE.Vector3(0, 1.6, 0), new THREE.Vector3(0, 2, 0), new THREE.Vector3(-0.75, 2, 0)],
-    0.05,
-    [copper, brass],
-    g,
-  );
   gauge([0, 0.95, 0.45], 0, 0.1, g);
 }
 
@@ -148,7 +149,8 @@ function worksPipework(k: Kit, s: Pick<WorksScope, "works">): void {
   const w = (x: number, y: number, z: number): THREE.Vector3 => new THREE.Vector3(x, y, z);
   const A = polar(3.2, 2.5),
     B = polar(3.55, 2.85);
-  pipe([w(A.x - 0.45, 1.6, A.z + 0.3), w(A.x - 0.9, 1.6, A.z + 0.6), w(1.1, 1.6, -1.65)], 0.07, [copper, brass], works);
+  const feed = w(A.x - 0.9, 1.6, A.z + 0.6);
+  pipe([w(A.x - 0.45, 1.6, A.z + 0.3), feed, ...wallEntry(feed, HALL_IN_WORKS, 0.15)], 0.07, [copper, brass], works);
   pipe(
     [w(B.x + 0.2, 2.4, B.z + 0.4), w(B.x + 0.2, 2.4, A.z - 0.1), w(A.x - 0.3, 2.4, A.z - 0.1)],
     0.055,
@@ -158,7 +160,7 @@ function worksPipework(k: Kit, s: Pick<WorksScope, "works">): void {
   pipe([w(A.x, 2.55, A.z), w(A.x, 3.3, A.z), w(1.3, 3.3, -1), w(0.4, 3.95, -0.9)], 0.08, [brass, brass], works);
   const boiler = polar(3.88, -2.45);
   pipe(
-    [w(boiler.x + 0.3, 1.55, boiler.z + 0.35), w(boiler.x + 0.3, 2, boiler.z + 0.35), w(-1.6, 2, -2)],
+    [w(boiler.x + 0.3, 1.3, boiler.z + 0.35), w(boiler.x + 0.3, 2, boiler.z + 0.35), ...wallEntry(w(-1.6, 2, -2), HALL_IN_WORKS)],
     0.06,
     [copper, brass],
     works,
@@ -176,7 +178,7 @@ function worksPipework(k: Kit, s: Pick<WorksScope, "works">): void {
 }
 
 export function buildWorks(k: Kit, station: THREE.Group): void {
-  const { vents, brass, gold, iron, cream, red, label, gauge } = k;
+  const { brass, gold, iron, cream, red, label, gauge } = k;
   const works = add(new THREE.Group(), station);
   works.position.y = DECK_Y;
   function tank(at: THREE.Vector3, r: number, h: number, stripes: number[]): THREE.Group {
@@ -194,7 +196,6 @@ export function buildWorks(k: Kit, station: THREE.Group): void {
     for (const s of [0.04, 0.5, 0.98]) rivets(ringPoints(r + 0.01, 0.2 + h * s, 36), 0.02, brass, g);
     cyl([0.07, 0.09, 0.25], [0, 0.2 + h + r * 0.62, 0], brass, g, [16]);
     ball(0.08, [0, 0.32 + h + r * 0.62, 0], gold, g, 12);
-    vents.push(at.clone().add(new THREE.Vector3(0, DECK_Y + 0.4 + h + r * 0.62, 0)));
     return g;
   }
   const tankA = tank(polar(3.2, 2.5), 0.62, 1.9, [0.62, 0.78]);

@@ -609,39 +609,7 @@ export function reel(): THREE.CanvasTexture {
   return t;
 }
 
-/** Studio poster and clock faces. */
-export function poster(family: string): HTMLCanvasElement {
-  const [c, a] = layer(256, 360);
-  a.fillStyle = "#e8d8b0";
-  a.fillRect(0, 0, 256, 360);
-  a.save();
-  a.translate(128, 150);
-  for (let i = 0; i < 18; i++) {
-    a.rotate(Math.PI / 9);
-    a.fillStyle = i % 2 ? "#c8452c" : "#e8a43a";
-    a.beginPath();
-    a.moveTo(0, 0);
-    a.lineTo(-20, -200);
-    a.lineTo(20, -200);
-    a.fill();
-  }
-  a.restore();
-  a.fillStyle = "#1d4446";
-  a.beginPath();
-  a.arc(128, 150, 54, 0, 7);
-  a.fill();
-  a.fillStyle = "#e8d8b0";
-  a.font = `800 40px ${family}`;
-  a.textAlign = "center";
-  a.fillText("104.8", 128, 165);
-  a.fillStyle = "#1d4446";
-  a.fillRect(0, 280, 256, 80);
-  a.fillStyle = "#e8d8b0";
-  a.font = `800 46px ${family}`;
-  a.fillText("TUNE IN", 128, 338);
-  return c;
-}
-
+/** Studio clock face. */
 export function clockFace(): THREE.CanvasTexture {
   const [c, a] = layer(256, 256);
   a.fillStyle = "#efe4c6";

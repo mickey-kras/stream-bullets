@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import * as T from "./textures";
 import type { Kit } from "./kit";
+import { poster, posterTexture } from "./poster";
 import { add, mesh, box, cyl, ball, torus, rod, tube, plaque, frame, lathe, rivets, TAU, profile } from "./shapes";
 import { plan, facing, facingIn, loop, band, planShape, planSector, GLASS_FROM, GLASS_TO } from "./plan";
 
@@ -304,6 +305,27 @@ function studioClock(k: Kit, s: Pick<StudioScope, "studio">): void {
   box([0.009, 0.12, 0.004], [0, 0.045, 0.033], iron, g, 0.002).rotation.z = 1.1;
 }
 
+function studioPoster(k: Kit, s: Pick<StudioScope, "studio">): void {
+  const { brass, repaints } = k;
+  const { studio } = s;
+  const art = posterTexture(k.family);
+  repaints.push((): void => {
+    art.image = poster(k.family);
+    art.needsUpdate = true;
+  });
+  const g = add(new THREE.Group(), studio);
+  g.position.copy(plan(3.32, -0.12, 1.78));
+  g.rotation.y = facingIn(3.32);
+  box([0.5, 0.67, 0.02], [0, 0, 0], brass, g, 0.006);
+  mesh(
+    new THREE.PlaneGeometry(0.46, 0.63),
+    new THREE.MeshStandardMaterial({ map: art, roughness: 0.62 }),
+    [0, 0, 0.012],
+    g,
+    false,
+  );
+}
+
 function studioPendants(k: Kit, s: Pick<StudioScope, "studio">): void {
   const { brassSurface, brass, warm, halo, practical } = k;
   const { studio } = s;
@@ -499,6 +521,7 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
   studioLocker(k, { studio, floorY });
   studioDoor(k, { studio, floorY });
   studioClock(k, { studio });
+  studioPoster(k, { studio });
   // Brass dome pendants over the desk and the counter.
   studioPendants(k, { studio });
   // Swivel chair in tufted tan leather behind the desk, facing the window.

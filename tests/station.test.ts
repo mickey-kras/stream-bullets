@@ -14,6 +14,7 @@ import { buildMast } from "../app/components/station/mast";
 import { buildSigns } from "../app/components/station/signs";
 import { buildAtom } from "../app/components/station/atom";
 import { buildAtmosphere } from "../app/components/station/atmosphere";
+import { poster } from "../app/components/station/poster";
 import { installRecordingCanvas, RecordingCanvas } from "./helpers/recording-canvas";
 
 beforeEach((): void => {
@@ -123,7 +124,6 @@ it.each([true, false])(
       meshes,
       geometry: hash.digest("hex"),
       animators: kit.animators.length,
-      vents: kit.vents.length,
     }).toMatchSnapshot();
     for (const animate of kit.animators) animate(1, 0.016);
     expect(kit.neon.emissiveIntensity).toBeGreaterThan(0);
@@ -149,7 +149,7 @@ it.each([true, false])(
 
 it("paints the clock, poster and backdrop", (): void => {
   expect(textureRecord(T.clockFace())).toMatchSnapshot();
-  expect((T.poster("sans-serif") as unknown as RecordingCanvas).digest()).toMatchSnapshot();
+  expect((poster("sans-serif") as unknown as RecordingCanvas).digest()).toMatchSnapshot();
   expect(textureRecord(T.backdrop())).toMatchSnapshot();
 });
 

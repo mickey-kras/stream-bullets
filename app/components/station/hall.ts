@@ -9,6 +9,7 @@ import {
   ball,
   torus,
   rod,
+  pipe,
   tube,
   rounded,
   plaque,
@@ -18,7 +19,7 @@ import {
   TAU,
   DECK_Y,
 } from "./shapes";
-import { plan, facing, loop, band, capSlab, dome, onWall, GLASS_FROM, GLASS_TO } from "./plan";
+import { plan, facing, loop, band, capSlab, dome, onWall, GLASS_FROM, GLASS_TO, HALL_AT } from "./plan";
 
 interface HallScope {
   hall: THREE.Group;
@@ -109,14 +110,15 @@ function hallOnAirSign(k: Kit, s: Pick<HallScope, "onAir">): void {
     ball(0.028, [p.x, p.y, 0.15], warm, onAir, 10);
   }
   for (const x of [-0.9, 0.9]) box([0.08, 0.3, 0.3], [x, -0.45, -0.2], iron, onAir, 0.02);
-  halo([0, 0, 0.5], 3.2, "#ff5a30", 0.3, onAir);
-  practical("#ff5534", [4, 3.5], [0, -0.2, 0.7], onAir);
+  // A steady red backlight: the panel glows, the lettering stays crisp and warm on top of it.
+  halo([0, 0, 0.3], 3.6, "#ff1a0a", 0.45, onAir);
+  practical("#ff2010", [6, 4], [0, -0.2, 0.7], onAir);
 }
 
 export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   const { brass, gold, copper, iron, cream, hallTeal, hallCream, hallDark, steel, warmSoft, glass } = k;
   const hall = add(new THREE.Group(), station);
-  hall.position.set(-0.7, DECK_Y, -0.25);
+  hall.position.copy(HALL_AT);
   // Plinth: iron footing, cream enamel skirt, riveted brass trim.
   capSlab(0.3, 0, 0.1, iron, hall);
   band([0, TAU], [0.1, 0.6], 0.2, hallCream, hall);
@@ -155,7 +157,7 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   }
   hallRoofTanks(k, { hall });
   // Rear portholes with warm light leaking from the studio.
-  for (const a of [1.95, 4.2]) {
+  for (const a of [1.95, 3.83]) {
     const g = onWall(hall, a, 1.62, 0.02);
     torus([0.27, 0.05], [0, 0, 0.02], brass, g, false);
     mesh(new THREE.CircleGeometry(0.25, 32), warmSoft, [0, 0, 0], g, false);
@@ -168,7 +170,7 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   }
   for (const [a, y] of [
     [2.5, 2],
-    [3.75, 1.95],
+    [3.22, 1.95],
   ] as const) {
     const g = onWall(hall, a, y, 0.03);
     box([0.82, 0.5, 0.06], [0, 0, 0], steel, g, 0.03);
@@ -176,14 +178,15 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   }
   hallServiceDoor(k, { hall });
   hallFuseBox(k, { hall });
-  // Copper service lines wrapping the back of the hall.
-  tube(loop(1.55, 4.4, 0.14, 1, 60), 0.05, copper, hall);
-  tube(loop(1.85, 2.85, 0.14, 2.3, 30), 0.035, copper, hall);
-  for (let i = 0; i < 10; i++) {
-    const a = 1.6 + i * 0.3;
-    if (Math.abs(a - 3.1) < 0.3) continue;
-    box([0.06, 1.45, 0.06], [0, 0, 0], iron, onWall(hall, a, 1.62, 0.1), 0.01);
+  // Copper service lines wrapping the back of the hall; each end turns into the wall.
+  for (const [a0, a1, y, r] of [
+    [1.55, 4.12, 1, 0.05],
+    [1.85, 2.85, 2.3, 0.035],
+  ] as const) {
+    pipe([plan(a0, -0.04, y), ...loop(a0, a1, 0.14, y, 60), plan(a1, -0.04, y)], r, [copper, brass], hall);
   }
+  // Iron ribs only in the clear stretches between portholes, vents, the door and the fuse box.
+  for (const a of [1.63, 2.87]) box([0.06, 1.45, 0.06], [0, 0, 0], iron, onWall(hall, a, 1.62, 0.1), 0.01);
 
   // ON AIR marquee, mounted proud of the fascia.
   const onAir = add(new THREE.Group(), hall);

@@ -28,8 +28,6 @@ export function createKit(compact: boolean, family: string) {
     practicals: [] as Array<[THREE.PointLight, number]>,
     /** Extra work for the lights switch, registered by the parts that own it. */
     onLights: [] as Array<(on: boolean) => void>,
-    /** Where steam leaves the tanks and boiler, in station coordinates. */
-    vents: [] as THREE.Vector3[],
 
     /** Soft additive glow around a light source. */
     halo(at: P, size: number, color: string, opacity: number, parent: THREE.Object3D): THREE.Sprite {

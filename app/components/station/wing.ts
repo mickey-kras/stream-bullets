@@ -19,6 +19,8 @@ import {
   DECK_Y,
 } from "./shapes";
 import { enamel } from "./palette";
+import { wallEntry, HALL_AT } from "./plan";
+import { GREY_TANK } from "./works";
 
 interface WingScope {
   wing: THREE.Group;
@@ -146,7 +148,7 @@ function wingPlanterSoil(_k: Kit, s: Pick<WingScope, "wing">): void {
 }
 
 function wingSideWall(k: Kit, s: Pick<WingScope, "wing" | "station">): void {
-  const { brass, iron } = k;
+  const { brass, copper, iron } = k;
   const { wing, station } = s;
   const vent = add(new THREE.Group(), wing);
   vent.position.set(0.96, 1.75, -0.75);
@@ -156,13 +158,13 @@ function wingSideWall(k: Kit, s: Pick<WingScope, "wing" | "station">): void {
     box([0.42, 0.025, 0.06], [0, -0.15 + i * 0.06, 0.03], brass, vent, 0.006).rotation.x = -0.5;
   const w = (x: number, y: number, z: number): THREE.Vector3 =>
     new THREE.Vector3(x, y - DECK_Y, z).applyAxisAngle(new THREE.Vector3(0, 1, 0), wing.rotation.y).add(wing.position);
-  pipe(
-    [w(1.02, 0.5, -0.4), w(1.02, 3, -0.4), new THREE.Vector3(1.25, 3, -1.3), new THREE.Vector3(1.25, 4.55, -1.3)],
-    0.055,
-    [brass, brass],
-    station,
-  );
-  pipe([w(1.02, 0.3, -0.95), w(1.02, 2.6, -0.95)], 0.04, [brass, brass], station);
+  // The tall riser climbs the side wall, then turns and runs square into the hall.
+  const riser = w(1.02, 3, -0.4);
+  pipe([w(1.02, 0.3, -0.4), riser, ...wallEntry(riser, HALL_AT)], 0.055, [brass, brass], station);
+  // The grey receiver's outlet rises off its dome, crosses to the wall and drops down it into the deck.
+  const outlet = GREY_TANK.clone().setY(DECK_Y + 1.6);
+  const head = w(1.02, 2.6, -0.95);
+  pipe([outlet, outlet.clone().setY(head.y), head, w(1.02, 0.3, -0.95)], 0.05, [copper, brass], station);
   for (const y of [1, 2]) box([0.1, 0.05, 0.12], [1, y, -0.4], iron, wing, 0.01);
 }
 

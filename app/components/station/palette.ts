@@ -149,14 +149,14 @@ function lamps() {
       emissiveIntensity: 1.1,
     }),
     neon: new THREE.MeshStandardMaterial({
-      color: "#ff8a64",
-      emissive: "#ff3d1e",
+      color: "#ff6a50",
+      emissive: "#ff2410",
       emissiveIntensity: 3.2,
     }),
     signRed: new THREE.MeshStandardMaterial({
-      color: "#5e0f09",
-      emissive: "#c42a17",
-      emissiveIntensity: 1.2,
+      color: "#3a0503",
+      emissive: "#e80c02",
+      emissiveIntensity: 0.9,
       roughness: 0.35,
       metalness: 0.1,
     }),
@@ -243,7 +243,7 @@ export function createPalette(compact: boolean) {
       [lit.warm, 2.2],
       [lit.warmSoft, 1.1],
       [lit.neon, 2.6],
-      [lit.signRed, 1],
+      [lit.signRed, 0.9],
       [lit.beacon, 2.5],
     ] as Array<[THREE.MeshStandardMaterial, number]>,
   };
