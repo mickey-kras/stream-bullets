@@ -2,6 +2,7 @@ const { readFileSync } = require("node:fs");
 const { execFileSync } = require("node:child_process");
 const path = require("node:path");
 const YAML = require("yaml");
+const { DEPENDENCY_FILES, applicationDependenciesOnly } = require("./policy-dependencies.cjs");
 
 // Treat every gate input as policy, including additions and package/tool configuration.
 function isPolicyPath(name) {
@@ -83,7 +84,16 @@ function run(directory) {
   if (process.env.BASE_SHA) {
     if (!/^[a-f0-9]{40}$/.test(process.env.BASE_SHA)) throw new Error("Invalid base revision");
     const changed = git("diff", "--name-only", "-z", process.env.BASE_SHA, "HEAD").split("\0").filter(Boolean);
-    if (changed.some(isPolicyPath) && changed.some(isApplicationPath))
+    let dependencyOnly = false;
+    if (changed.some((name) => DEPENDENCY_FILES.includes(name))) {
+      const sources = (ref) =>
+        Object.fromEntries(DEPENDENCY_FILES.map((name) => [name, git("show", `${ref}:${name}`)]));
+      dependencyOnly = applicationDependenciesOnly(sources(process.env.BASE_SHA), sources("HEAD"));
+    }
+    if (
+      changed.some((name) => isPolicyPath(name) && !(dependencyOnly && DEPENDENCY_FILES.includes(name))) &&
+      changed.some(isApplicationPath)
+    )
       failures.push("Separate CI policy changes from application changes");
   }
   if (failures.length) throw new Error(failures.join("\n"));

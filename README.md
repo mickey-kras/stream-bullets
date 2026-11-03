@@ -168,13 +168,17 @@ Scanner tools use the immutable `PINNED` revision in the quality workflow. Candi
 
 The independent `policy` workflow uses `pull_request_target` and owner comment events. It executes trusted code from `github.workflow_sha` and reads candidate Git blobs as data. It compares protected files against that exact trusted revision. This guard activates after the workflow merges into the default branch.
 
-A PR with only policy changes needs approval for its exact head, current base, and trusted workflow revision. The repository owner can post this exact comment:
+Application dependency changes can accompany application code. They must use exact registry versions and preserve install settings. Type packages can change with their matching application dependency. Packages with commands, build and test tools, their dependency graphs, scripts, and CI controls still need policy approval.
+
+A PR with policy changes needs approval for its file tree, current base, and trusted workflow revision. Get the tree SHA with `git rev-parse HEAD^{tree}`. The repository owner can post this exact comment:
 
 ```text
-Approve CI policy: head=<HEAD_SHA> base=<CURRENT_PR_BASE_SHA> trusted=<GITHUB_WORKFLOW_SHA>
+Approve CI policy: tree=<TREE_SHA> base=<CURRENT_PR_BASE_SHA> trusted=<GITHUB_WORKFLOW_SHA>
 ```
 
-Owner comments trigger a fresh check of `Trusted CI policy`. Comment edits and deletions also trigger the check. A rejection removes approval. New commits or a changed base need new approval.
+Owner comments trigger a fresh check of `Trusted CI policy`. Comment edits and deletions also trigger the check. A rejection removes approval. Changed files, base, or trusted policy need new approval.
+
+A metadata-only commit rewrite preserves tree approval. The previous `head=<HEAD_SHA>` format remains valid only for that exact commit. Owner comments identify the account. They do not prove that a human posted them.
 
 The configuration for Aislop preserves globals in Cloudflare Workers and the virtual module through narrow compatibility settings. The application uses valid nickname autofill, focusable scroll panels, and a native slider to resize the topic panels. The required `pnpm audit` check owns dependency auditing. Aislop does not repeat that check.
 

@@ -115,6 +115,7 @@ function harness({
   dependabot = false,
   actionUpdate = false,
   maliciousLock = false,
+  applicationDependency = false,
 } = {}) {
   const repository = resolve(__dirname, "../..");
   const files = execFileSync("git", ["ls-files", "-z"], { cwd: repository, encoding: "utf8" })
@@ -151,6 +152,22 @@ function harness({
     Object.values(contents.packages)[0].resolution = { tarball: "https://example.invalid/payload.tgz" };
     lock.sha = "f".repeat(40);
     blobs[lock.sha] = YAML.stringify(contents);
+  }
+  if (applicationDependency) {
+    policy.sha = tree.find((file) => file.path === policy.path).sha;
+    const manifest = candidate.find((file) => file.path === "package.json");
+    const contents = JSON.parse(blobs[manifest.sha]);
+    contents.dependencies["test-application-package"] = "1.0.0";
+    manifest.sha = "1".repeat(40);
+    blobs[manifest.sha] = JSON.stringify(contents);
+    const lock = candidate.find((file) => file.path === "pnpm-lock.yaml");
+    const YAML = require("yaml");
+    const data = YAML.parse(blobs[lock.sha]);
+    data.importers["."].dependencies["test-application-package"] = { specifier: "1.0.0", version: "1.0.0" };
+    data.packages["test-application-package@1.0.0"] = { resolution: { integrity: "sha512-YWJj" } };
+    data.snapshots["test-application-package@1.0.0"] = {};
+    lock.sha = "2".repeat(40);
+    blobs[lock.sha] = YAML.stringify(data);
   }
   const workflows = Object.fromEntries(
     candidate.filter((file) => file.path.startsWith(".github/workflows/")).map((file) => [file.path, blobs[file.sha]]),
@@ -330,5 +347,66 @@ test("live guard denies a verified bot lock-only tarball replacement", async () 
   assert.deepEqual(
     candidate.statuses.map((status) => status.state),
     ["pending", "failure"],
+  );
+});
+
+test("tree approval survives metadata-only rewrites but not content or policy context changes", () => {
+  const tree = "d".repeat(40);
+  const comment = { id: 1, user: OWNER, body: `Approve CI policy: tree=${tree} base=${BASE} trusted=${TRUSTED}` };
+  assert.equal(validComment([comment], SHA, BASE, TRUSTED, tree), true);
+  assert.equal(validComment([comment], "e".repeat(40), BASE, TRUSTED, tree), true);
+  assert.equal(validComment([comment], SHA, BASE, TRUSTED, SHA), false);
+  assert.equal(validComment([comment], SHA, SHA, TRUSTED, tree), false);
+  assert.equal(validComment([comment], SHA, BASE, SHA, tree), false);
+  assert.equal(validComment([comment], SHA, BASE, TRUSTED), false);
+  assert.equal(validComment([{ ...comment, body: `${comment.body}\nextra` }], SHA, BASE, TRUSTED, tree), false);
+  assert.equal(
+    validComment([comment, { id: 2, user: OWNER, body: "Reject CI policy: revoked" }], SHA, BASE, TRUSTED, tree),
+    false,
+  );
+  assert.equal(validComment([], SHA, BASE, TRUSTED, tree), false);
+});
+
+test("dependency exemption permits application code but never exempts other policy inputs", () => {
+  const base = { "package.json": entry(BASE), "pnpm-lock.yaml": entry(BASE), "app/main.tsx": entry(BASE) };
+  const head = { "package.json": entry(), "pnpm-lock.yaml": entry(), "app/main.tsx": entry() };
+  assert.deepEqual(inspectChanges(base, head, false, true), []);
+  assert.ok(
+    inspectChanges(base, { ...head, "eslint.config.mjs": entry() }, false, true).some((message) =>
+      message.includes("exact-head"),
+    ),
+  );
+  assert.ok(
+    inspectChanges(base, { ...head, "eslint.config.mjs": entry() }, true, true).includes(
+      "Separate CI policy changes from application changes",
+    ),
+  );
+});
+
+test("live guard uses tree admission and rechecks revocation and head races", async () => {
+  const passing = harness();
+  passing.github.paginate = async () => [
+    { id: 1, user: OWNER, body: `Approve CI policy: tree=${SHA} base=${BASE} trusted=${TRUSTED}` },
+  ];
+  await run(passing, TRUSTED);
+  let reads = 0;
+  passing.github.paginate = async () =>
+    ++reads === 1
+      ? [{ id: 1, user: OWNER, body: `Approve CI policy: tree=${SHA} base=${BASE} trusted=${TRUSTED}` }]
+      : [];
+  await assert.rejects(run(passing, TRUSTED), /admission changed/);
+  const racing = harness({ mutate: true });
+  racing.github.paginate = async () => [
+    { id: 1, user: OWNER, body: `Approve CI policy: tree=${SHA} base=${BASE} trusted=${TRUSTED}` },
+  ];
+  await assert.rejects(run(racing, TRUSTED), /revision changed/);
+});
+
+test("live guard admits ordinary dependency additions with application changes without a comment", async () => {
+  const fixture = harness({ applicationDependency: true, mixed: true });
+  await runWithStatus(fixture, fixture.context.payload.pull_request, TRUSTED);
+  assert.deepEqual(
+    fixture.statuses.map((status) => status.state),
+    ["pending", "success"],
   );
 });
