@@ -2,7 +2,7 @@ import * as THREE from "three";
 import * as M from "./materials";
 import * as T from "./textures";
 import type { Kit } from "./kit";
-import { add, mesh, box, ball, torus, rod, tube, lathe, rivets, TAU, profile } from "./shapes";
+import { add, box, ball, torus, rod, tube, lathe, rivets, TAU, profile } from "./shapes";
 
 /** Half-width of the tower at height y: splayed feet, tapering to the spire. */
 const half = (y: number): number => 0.06 + 0.6 * Math.pow(1 - Math.min(y, 2.95) / 3, 1.45);

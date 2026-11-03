@@ -106,7 +106,7 @@ it.each([true, false])(
     buildMast(kit, hall);
     buildSigns(kit, station);
     buildAtom(kit, station);
-    buildAtmosphere(kit, scene, station);
+    buildAtmosphere(kit, scene);
     const hash = createHash("sha256");
     let meshes = 0;
     scene.traverse((object: THREE.Object3D): void => {

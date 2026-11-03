@@ -206,7 +206,7 @@ function worksFanUnit(k: Kit, s: Pick<WorksScope, "works">): void {
 }
 
 function worksGreyTank(k: Kit, s: Pick<WorksScope, "works">): void {
-  const { brass, copper, iron, steel, gauge } = k;
+  const { brass, iron, steel, gauge } = k;
   const { works } = s;
   const g = add(new THREE.Group(), works);
   g.position.copy(GREY_TANK);

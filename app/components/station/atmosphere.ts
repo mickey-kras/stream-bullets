@@ -52,7 +52,7 @@ function buildFog(k: Kit, atmosphere: THREE.Group, cloudTexture: THREE.Texture):
   });
 }
 
-export function buildAtmosphere(k: Kit, scene: THREE.Scene, station: THREE.Group): void {
+export function buildAtmosphere(k: Kit, scene: THREE.Scene): void {
   const { animators } = k;
   const atmosphere = add(new THREE.Group(), scene);
   const cloudTexture = T.cloud(77);

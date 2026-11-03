@@ -17,7 +17,6 @@ import {
   rivets,
   ringPoints,
   TAU,
-  DECK_Y,
 } from "./shapes";
 import { plan, facing, loop, band, capSlab, dome, onWall, GLASS_FROM, GLASS_TO, HALL_AT } from "./plan";
 
