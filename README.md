@@ -83,7 +83,20 @@ Vitest requires 90% line, statement, function, and branch coverage for server mo
 
 Production uses `https://streambullets.com`. The `production` environment in `wrangler.jsonc` contains its account, database, bucket, and custom domain. Local development retains its separate configuration. Cloudflare redirects `streambullets.app` and `streambullets.live` to the primary domain with the path and query string preserved.
 
-Authenticate Wrangler on your deployment machine. CI does not receive production credentials or deploy pull requests.
+GitHub Actions deploys each push to `main` after `Verify application` passes. Pull requests run verification and a production build dry run without production credentials. Runs queue without interrupting an active deployment.
+
+One-time setup:
+
+- Create the GitHub `production` environment. Restrict its deployment branches to `main`; omit required reviewers for automatic deployment.
+- Add `CLOUDFLARE_API_TOKEN` as an environment secret. Use a Cloudflare token restricted to this account and the `streambullets.com` zone, with Workers Scripts Edit, D1 Edit, Workers R2 Storage Edit, Workers Routes Edit, and Zone Read permissions. Do not put the token in a file or workflow.
+- Configure `BETTER_AUTH_SECRET`, Google credentials, and Twitch credentials as Worker secrets, as described below. Wrangler preserves existing secrets during deployment. The production smoke check fails if required runtime configuration is missing.
+- Require `Verify application` before merging to `main` and prevent direct pushes in the repository ruleset.
+
+The deployment records the current D1 Time Travel bookmark before applying pending migrations, uploads the production Worker and assets, then checks the homepage and stylesheet. A migration failure stops deployment. A failed smoke check marks the run as failed; it does not automatically roll back the schema. Keep migrations compatible with the currently deployed Worker until the new version is live. Time Travel retention is 7 days on Workers Free and 30 days on Workers Paid.
+
+After changing a missing secret, rerun the failed deployment job. For a code rollback, revert the change through a PR; check schema compatibility first. Do not rerun an old successful deployment after newer code is live.
+
+For a manual deployment, authenticate Wrangler on your deployment machine:
 
 1. The production D1 database and private R2 bucket are provisioned. For a new account, create replacements:
 
