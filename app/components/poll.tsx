@@ -10,14 +10,14 @@ export function PollResults({
   canVote = false,
   pending = false,
   onVote,
-}: {
+}: Readonly<{
   poll: PublicPoll;
   now: number;
   myVote?: number | null;
   canVote?: boolean;
   pending?: boolean;
   onVote?: (choice: number) => void;
-}): ReactNode {
+}>): ReactNode {
   const closed: boolean = poll.revealed || (poll.endsAt !== null && poll.endsAt <= now);
   return (
     <div className={poll.kind === "binary" ? "poll-choices binary-votes" : "poll-choices"}>
@@ -62,31 +62,25 @@ export function PollResults({
   );
 }
 
-export function PollStatus({ poll, now }: { poll: PublicPoll; now: number }): ReactNode {
+export function PollStatus({ poll, now }: Readonly<{ poll: PublicPoll; now: number }>): ReactNode {
   const remaining: number | null = poll.endsAt === null ? null : Math.max(0, Math.ceil((poll.endsAt - now) / 1000));
+  let badge: ReactNode = (
+    <>
+      <span className="live-dot" />
+      <span>Voting live</span>
+    </>
+  );
+  if (poll.revealed) badge = "Results revealed";
+  else if (remaining === 0) badge = "Voting closed";
+  let countdown: string;
+  if (poll.revealed) countdown = "Final";
+  else if (remaining === null) countdown = "No time limit";
+  else if (remaining === 0) countdown = "Time is up";
+  else countdown = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")} remaining`;
   return (
     <div className="poll-topline">
-      <span className="poll-badge">
-        {poll.revealed ? (
-          "Results revealed"
-        ) : remaining === 0 ? (
-          "Voting closed"
-        ) : (
-          <>
-            <span className="live-dot" />
-            Voting live
-          </>
-        )}
-      </span>
-      <span className="poll-countdown">
-        {poll.revealed
-          ? "Final"
-          : remaining === null
-            ? "No time limit"
-            : remaining === 0
-              ? "Time is up"
-              : `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")} remaining`}
-      </span>
+      <span className="poll-badge">{badge}</span>
+      <span className="poll-countdown">{countdown}</span>
     </div>
   );
 }
@@ -99,7 +93,7 @@ export function PollCard({
   pending,
   onAction,
   onDiscuss,
-}: {
+}: Readonly<{
   entry: Entry;
   now: number;
   signedIn: boolean;
@@ -107,7 +101,12 @@ export function PollCard({
   pending: boolean;
   onAction: (body: unknown) => void;
   onDiscuss: () => void;
-}): ReactNode {
+}>): ReactNode {
+  let votingMessage: string;
+  if (entry.kind === "binary" && !entry.revealed) votingMessage = "Results stay private until the host reveals them.";
+  else if (entry.revealed) votingMessage = "Final results";
+  else if (signedIn) votingMessage = "You can change your vote until voting closes.";
+  else votingMessage = "Sign in to vote.";
   return (
     <article className="poll-card">
       <PollStatus poll={entry} now={now} />
@@ -125,13 +124,7 @@ export function PollCard({
           {entry.total} {entry.total === 1 ? "vote" : "votes"}
           {entry.myVote !== null && " · Your vote is in"}
           <br />
-          {entry.kind === "binary" && !entry.revealed
-            ? "Results stay private until the host reveals them."
-            : entry.revealed
-              ? "Final results"
-              : !signedIn
-                ? "Sign in to vote."
-                : "You can change your vote until voting closes."}
+          {votingMessage}
         </p>
         {owner && !entry.revealed && (
           <button type="button" disabled={pending} onClick={() => onAction({ action: "reveal", id: entry.id })}>

@@ -77,13 +77,8 @@ export class PollRoom extends DurableObject<AppEnv> {
     if (request.method !== (url.pathname === "/subscribe" ? "GET" : "POST")) return response("Method not allowed", 405);
     const clientKey = request.headers.get("X-Stream-Bullets-Client") ?? "";
     if (url.pathname === "/subscribe") {
-      if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return response("WebSocket required", 426);
-      const origin = request.headers.get("Origin");
-      if (origin !== null && origin !== this.env.APP_ORIGIN) return response("Origin not allowed", 403);
-      if (!CLIENT_KEY.test(clientKey)) return response("Invalid client", 400);
-      this.expireConnections();
-      const limit = this.connectionLimit(clientKey);
-      if (limit) return limit;
+      const invalidSubscription = this.validateSubscription(request, clientKey);
+      if (invalidSubscription) return invalidSubscription;
     }
 
     try {
@@ -92,13 +87,7 @@ export class PollRoom extends DurableObject<AppEnv> {
         await this.ctx.storage.put("streamerId", streamerId);
       }
       if (url.pathname === "/refresh") {
-        this.expireConnections();
-        if (this.activeSockets().length > 0) {
-          const snapshot = await this.snapshot();
-          this.broadcast(snapshot);
-          await this.scheduleResync();
-        }
-        return new Response(null, { status: 204 });
+        return await this.refresh();
       }
 
       const snapshot = await this.snapshot();
@@ -117,6 +106,25 @@ export class PollRoom extends DurableObject<AppEnv> {
       this.disconnect();
       return response("Live updates unavailable", 503);
     }
+  }
+
+  private validateSubscription(request: Request, clientKey: string): Response | undefined {
+    if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return response("WebSocket required", 426);
+    const origin = request.headers.get("Origin");
+    if (origin !== null && origin !== this.env.APP_ORIGIN) return response("Origin not allowed", 403);
+    if (!CLIENT_KEY.test(clientKey)) return response("Invalid client", 400);
+    this.expireConnections();
+    return this.connectionLimit(clientKey);
+  }
+
+  private async refresh(): Promise<Response> {
+    this.expireConnections();
+    if (this.activeSockets().length > 0) {
+      const snapshot = await this.snapshot();
+      this.broadcast(snapshot);
+      await this.scheduleResync();
+    }
+    return new Response(null, { status: 204 });
   }
 
   webSocketMessage(socket: WebSocket, _message: string | ArrayBuffer): void {

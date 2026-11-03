@@ -21,7 +21,7 @@ export default {
     await cleanExpiredData(env, controller.scheduledTime);
   },
   async fetch(request: Request, env: AppEnv): Promise<Response> {
-    const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(18))));
+    const nonce = btoa(String.fromCodePoint(...crypto.getRandomValues(new Uint8Array(18))));
     const responseHeaders = new Headers();
     let response: Response;
     let origin: string;

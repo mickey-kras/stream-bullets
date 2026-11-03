@@ -472,7 +472,7 @@ describe("bounded reads and writes", (): void => {
         (): D1PreparedStatement =>
           env.DB.prepare(
             "INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at) VALUES (?,?,?,'topic',?,'[]',1)",
-          ).bind(crypto.randomUUID(), streamer.id, "owner", "кофе 100%"),
+          ).bind(crypto.randomUUID(), streamer.id, "owner", "кофе 😀a 100%"),
       ),
     );
     await seedEntry("topic", streamer.id, "other");
@@ -488,6 +488,35 @@ describe("bounded reads and writes", (): void => {
       query: "кофе",
       cursor: first.nextCursor,
     });
+    for (const query of ["кофе", "кофе 😀", "кофе 😀a 100"]) {
+      const page = await listEntries(env, streamer, null, {
+        kind: "topics",
+        sort: "newest",
+        query,
+        cursor: null,
+      });
+      const last = page.entries.at(-1)!;
+      const legacyCursor = Buffer.from(
+        JSON.stringify({
+          scope: `${streamer.id}:topics`,
+          sort: "newest",
+          query,
+          score: 0,
+          time: last.createdAt,
+          id: last.id,
+        }),
+        "utf8",
+      ).toString("base64url");
+      expect(page.nextCursor).toBe(legacyCursor);
+      expect(page.nextCursor).not.toMatch(/[=+/]/u);
+      const continuation = await listEntries(env, streamer, null, {
+        kind: "topics",
+        sort: "newest",
+        query,
+        cursor: legacyCursor,
+      });
+      expect(continuation.entries).toHaveLength(1);
+    }
     expect(first.entries).toHaveLength(50);
     expect(next.entries).toHaveLength(1);
     expect(new Set([...first.entries, ...next.entries].map((entry): string => entry.id)).size).toBe(51);

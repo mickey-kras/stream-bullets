@@ -43,11 +43,11 @@ async function notifyRoom(app: AppContext, streamerId: string): Promise<void> {
       method: "POST",
     });
     if (!result.ok) console.error("live_refresh_failed", { status: result.status });
-  } catch (cause: unknown) {
+  } catch (error_: unknown) {
     // The mutation is committed; the room alarm resynchronizes disconnected clients.
     // Classify the failure without logging exception messages that may contain credentials.
     console.error("live_refresh_failed", {
-      cause: cause instanceof TypeError ? "transport_error" : "unexpected_error",
+      cause: error_ instanceof TypeError ? "transport_error" : "unexpected_error",
     });
   }
 }

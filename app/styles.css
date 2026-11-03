@@ -153,3 +153,12 @@ html:has(.overlay-screen) { background: transparent; }
 @media(prefers-reduced-motion:reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
+
+/* Keep the scroll viewports in the existing pane layout and retain native scrollbars. */
+.topic-scroll-root,.detail-scroll-root{display:contents}
+#topics[data-radix-scroll-area-viewport],#detail[data-radix-scroll-area-viewport]{scrollbar-width:thin!important}
+#topics[data-radix-scroll-area-viewport]::-webkit-scrollbar,#detail[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:initial!important}
+input#splitter{appearance:none;width:18px;height:100%;min-width:0;margin:0;padding:0;border:0;border-radius:0;background:linear-gradient(#607476,#607476) center/3px 42px no-repeat;outline-offset:-2px}
+input#splitter::-webkit-slider-thumb{appearance:none;width:3px;height:42px;border:0;border-radius:3px;background:transparent}
+input#splitter::-moz-range-thumb{width:3px;height:42px;border:0;border-radius:3px;background:transparent}
+input#splitter:hover,input#splitter:focus-visible{background-image:linear-gradient(var(--gold),var(--gold))}

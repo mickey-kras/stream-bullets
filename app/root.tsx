@@ -2,7 +2,7 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, 
 import type { ReactNode } from "react";
 import "./styles.css";
 
-export function Layout({ children }: { children: ReactNode }): ReactNode {
+export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNode {
   return (
     <html lang="en">
       <head>
