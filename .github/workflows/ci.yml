@@ -66,7 +66,17 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:production
+      - name: Check current main revision
+        id: revision
+        run: |
+          latest_sha=$(git ls-remote --exit-code origin refs/heads/main | cut -f1)
+          if [ "$latest_sha" = "$GITHUB_SHA" ]; then
+            echo 'deploy=true' >> "$GITHUB_OUTPUT"
+          else
+            echo '::notice::This commit was superseded on main; deployment skipped.'
+          fi
       - name: Migrate and deploy
+        if: steps.revision.outputs.deploy == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: 4c8f932bbf73d6901fbb40f559f6e1f4
@@ -76,6 +86,7 @@ jobs:
           pnpm exec wrangler d1 migrations apply DB --env production --remote
           pnpm exec wrangler deploy --config build/server/wrangler.json
       - name: Check production response and assets
+        if: steps.revision.outputs.deploy == 'true'
         run: |
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/ --output /tmp/streambullets.html
           grep -q 'Pick the next conversation' /tmp/streambullets.html
