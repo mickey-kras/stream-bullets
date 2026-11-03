@@ -176,7 +176,9 @@ A PR with policy changes needs approval for its file tree, current base, and tru
 Approve CI policy: tree=<TREE_SHA> base=<CURRENT_PR_BASE_SHA> trusted=<GITHUB_WORKFLOW_SHA>
 ```
 
-Owner comments trigger a fresh check of `Trusted CI policy`. Comment edits and deletions also trigger the check. A rejection removes approval. Changed files, base, or trusted policy need new approval. A metadata-only commit rewrite preserves tree approval. The previous `head=<HEAD_SHA>` format remains valid only for that exact commit. Owner comments identify the account; they do not prove that a human posted them.
+Owner comments trigger a fresh check of `Trusted CI policy`. Comment edits and deletions also trigger the check. A rejection removes approval. Changed files, base, or trusted policy need new approval.
+
+A metadata-only commit rewrite preserves tree approval. The previous `head=<HEAD_SHA>` format remains valid only for that exact commit. Owner comments identify the account. They do not prove that a human posted them.
 
 The configuration for Aislop preserves globals in Cloudflare Workers and the virtual module through narrow compatibility settings. The application uses valid nickname autofill, focusable scroll panels, and a native slider to resize the topic panels. The required `pnpm audit` check owns dependency auditing. Aislop does not repeat that check.
 
