@@ -1,8 +1,10 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useLoaderData, type LoaderFunctionArgs } from "react-router";
 import { configuredProviders, getViewer } from "../server/auth.server";
 import { getOwnStreamer, listStreamers } from "../server/data.server";
-import { Avatar, EmptyState, SiteHeader } from "../components/common";
+import { AccountControls, Avatar, EmptyState, Modal, SignIn } from "../components/common";
+import { Station } from "../components/station/station";
+import "../components/station/landing.css";
 import type { Streamer } from "../types";
 import { appContext } from "../env";
 import { HttpError, queryParams } from "../server/http.server";
@@ -25,12 +27,39 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 export default function Home(): ReactNode {
   const { viewer, streamers, nextCursor, cursor, ownStreamer, providers } = useLoaderData<typeof loader>();
+  const [signInOpen, setSignInOpen] = useState<boolean>(false);
   return (
-    <>
-      <SiteHeader viewer={viewer} providers={providers} />
-      <main className="page-panel directory-page" id="main-content">
-        <span className="eyebrow">YOUR VOICE, ON AIR</span>
-        <h1>Pick the next conversation</h1>
+    <div className="landing-page">
+      <header className="landing-header">
+        <Link className="landing-brand" to="/" aria-label="StreamBullets home"><i aria-hidden="true" /><span>STREAM<br />BULLETS</span><i aria-hidden="true" /></Link>
+        <nav aria-label="Account">
+          {viewer ? <AccountControls viewer={viewer} providers={providers} /> : <>
+            <button type="button" onClick={() => setSignInOpen(true)}>Log in</button>
+            <button type="button" className="gold" onClick={() => setSignInOpen(true)}>Register</button>
+          </>}
+        </nav>
+      </header>
+      <main className="landing-main" id="main-content">
+        {!cursor && <>
+          <section className="landing-hero" aria-labelledby="landing-title">
+            <div className="landing-copy">
+              <h1 id="landing-title">YOUR VOICE,<br />ON AIR.</h1>
+              <p>Suggest topics. Vote. Shape the stream.</p>
+              <div className="landing-actions">
+                {viewer ? <Link className="button-link gold" to={ownStreamer ? `/@${ownStreamer.handle}` : "/settings"}>{ownStreamer ? "Open your community" : "Create a streamer profile"}</Link> : <>
+                  <button type="button" className="gold" onClick={() => setSignInOpen(true)}>Create account</button>
+                  <button type="button" className="landing-sage" onClick={() => setSignInOpen(true)}>Log in</button>
+                </>}
+              </div>
+              <a className="landing-explore" href="#streamers">Explore streamers</a>
+            </div>
+            <Station />
+          </section>
+          <div className="landing-topics">TOPICS / POLLS / DISCUSSIONS</div>
+        </>}
+        <section className="landing-directory directory-page" id="streamers" aria-labelledby="streamer-directory-title">
+        
+        <h2 id="streamer-directory-title">Pick the next conversation</h2>
         <p>Find your streamer. Suggest topics. Vote. Join the discussion.</p>
         <Link className="button-link gold" to={ownStreamer ? `/@${ownStreamer.handle}` : "/settings"}>
           {ownStreamer ? "Open your community" : "Create a streamer profile"}
@@ -69,7 +98,9 @@ export default function Home(): ReactNode {
             )}
           </nav>
         )}
+        </section>
       </main>
-    </>
+      <Modal open={signInOpen} onOpenChange={setSignInOpen} title="Join the conversation" description="Sign in to suggest topics, vote, and comment."><SignIn providers={providers} /></Modal>
+    </div>
   );
 }

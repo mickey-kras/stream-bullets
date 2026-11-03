@@ -31,7 +31,8 @@
     "radix-ui": "1.8.1",
     "lucide-react": "1.61.0",
     "zod": "4.6.7",
-    "image-size": "2.0.4"
+    "image-size": "2.0.4",
+    "three": "0.186.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.65.0",
@@ -54,6 +55,7 @@
     "@playwright/test": "1.64.1",
     "miniflare": "4.20260730.0",
     "esbuild": "0.28.2",
-    "react-server-dom-webpack": "19.3.1"
+    "react-server-dom-webpack": "19.3.1",
+    "@types/three": "0.186.0"
   }
 }
