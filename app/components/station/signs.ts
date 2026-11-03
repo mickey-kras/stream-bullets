@@ -58,7 +58,6 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
   }
   const signs = add(new THREE.Group(), station);
   const mastWorld = (y: number): THREE.Vector3 => new THREE.Vector3(-0.7, DECK_Y + 3.98 + y * 1.12, -0.25);
-  const boards: THREE.Group[] = [];
   for (const [text, icon, x, y, z, yaw, roll, joint] of [
     ["SUGGEST\nA TOPIC", "chat", -3.35, 7.2, 0.5, 0.22, -0.03, 2.2, 1],
     ["VOTE\nIN A POLL", "poll", -3.55, 5.6, 0.75, 0.2, 0.02, 1.25, 1],
@@ -68,16 +67,15 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
     board.position.set(x, y, z);
     board.rotation.set(0, yaw, roll);
     board.scale.setScalar(1.12);
-    boards.push(board);
     plaque([2.36, 1.05, 0.12, 0.22], [0, 0, -0.1], gold, board);
     plaque([2.22, 0.92, 0.07, 0.18], [0, 0, 0.025], signCream, board);
     label(signFace(text, icon), [2.05, 0.82], [0, 0, 0.13], board, 0.12);
     rivets(
       [
-        [-1.0, -0.35],
-        [1.0, -0.35],
-        [-1.0, 0.35],
-        [1.0, 0.35],
+        [-1, -0.35],
+        [1, -0.35],
+        [-1, 0.35],
+        [1, 0.35],
       ].map(([bx, by]: number[]): THREE.Vector3 => new THREE.Vector3(bx!, by!, 0.135)),
       0.028,
       brass,

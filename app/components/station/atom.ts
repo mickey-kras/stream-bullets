@@ -28,7 +28,7 @@ export function buildAtom(k: Kit, station: THREE.Group): void {
     torus([0.405, 0.018], [0, 0.18, 0], gold, atom);
     torus([0.395, 0.018], [0, 0.335, 0], gold, atom);
     lathe(profile(0, 0, 0.4, 0, 0.4, 0.04, 0.35, 0.05, 0, 0.05), brass, [0, 0.34, 0], atom, 48);
-    lathe(profile(0, 0, 0.25, 0, 0.21, 0.2, 0.12, 0.65, 0.05, 1.0, 0.035, 1.05, 0, 1.05), gold, [0, 0.39, 0], atom, 40);
+    lathe(profile(0, 0, 0.25, 0, 0.21, 0.2, 0.12, 0.65, 0.05, 1, 0.035, 1.05, 0, 1.05), gold, [0, 0.39, 0], atom, 40);
     for (let i = 0; i < 4; i++) {
       const t = (i / 4) * TAU + Math.PI / 4;
       const spike = mesh(

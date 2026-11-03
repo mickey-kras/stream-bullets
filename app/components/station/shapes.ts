@@ -102,11 +102,11 @@ export function pipe(
   const [mat, flangeMat] = mats;
   const path = new THREE.CurvePath<THREE.Vector3>();
   const bend = r * 3;
-  let from = points[0]!.clone();
+  let from = points[0].clone();
   for (let i = 1; i < points.length - 1; i++) {
-    const p = points[i]!;
-    const a = points[i - 1]!;
-    const b = points[i + 1]!;
+    const p = points[i];
+    const a = points[i - 1];
+    const b = points[i + 1];
     const inPoint = p.clone().add(
       a
         .clone()
@@ -125,10 +125,10 @@ export function pipe(
     path.add(new THREE.QuadraticBezierCurve3(inPoint, p.clone(), outPoint));
     from = outPoint;
   }
-  path.add(new THREE.LineCurve3(from, points[points.length - 1]!.clone()));
+  path.add(new THREE.LineCurve3(from, points.at(-1)!.clone()));
   const m = mesh(new THREE.TubeGeometry(path, points.length * 24, r, 14, false), mat, [0, 0, 0], parent);
-  for (const p of [points[0]!, points[points.length - 1]!]) {
-    const dir = p === points[0] ? points[1]!.clone().sub(p) : p.clone().sub(points[points.length - 2]!);
+  for (const p of [points[0], points.at(-1)!]) {
+    const dir = p === points[0] ? points[1].clone().sub(p) : p.clone().sub(points.at(-2)!);
     const flange = mesh(new THREE.CylinderGeometry(r * 1.6, r * 1.6, r * 0.8, 16), flangeMat, [p.x, p.y, p.z], parent);
     flange.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
   }
@@ -312,6 +312,6 @@ export function frond(
 /** Lathe profile from flat [radius, height] pairs: profile(r0, h0, r1, h1, ...). */
 export function profile(...pairs: number[]): Array<[number, number]> {
   const out: Array<[number, number]> = [];
-  for (let i = 0; i + 1 < pairs.length; i += 2) out.push([pairs[i]!, pairs[i + 1]!]);
+  for (let i = 0; i + 1 < pairs.length; i += 2) out.push([pairs[i], pairs[i + 1]]);
   return out;
 }
