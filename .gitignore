@@ -57,3 +57,9 @@ yarn-error.log*
 *.db
 *.log
 *.tar.gz
+
+**/node_modules/
+/.vale/styles/STE/
+/.scannerwork/
+
+__pycache__/

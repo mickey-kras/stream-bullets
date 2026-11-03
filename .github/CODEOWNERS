@@ -1,0 +1,7 @@
+/.github/ @mickey-kras
+/.ste.yml @mickey-kras
+/.vale.ini @mickey-kras
+/.vale/ @mickey-kras
+/sonar-project.properties @mickey-kras
+/vitest.config.ts @mickey-kras
+/eslint.config.mjs @mickey-kras

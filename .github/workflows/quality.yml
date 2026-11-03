@@ -1,0 +1,207 @@
+name: Quality controls
+'on':
+  workflow_call: {}
+  schedule:
+  - cron: 31 3 * * 1
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+env:
+  PINNED: 795bdd2f836cea2be131ffbb18ecaea6e3bcc443
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ env.PINNED }}
+        path: trusted
+        persist-credentials: false
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        path: candidate
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+      with:
+        node-version: 24
+        package-manager-cache: false
+    - name: Install trusted policy tools
+      run: npm ci --prefix trusted/.github/trusted-ci --ignore-scripts --no-audit --no-fund
+    - name: Test policy and scanner boundaries
+      run: node --test trusted/.github/trusted-ci/policy.test.cjs trusted/.github/trusted-ci/safe-path.test.cjs trusted/.github/trusted-ci/scan-tree.test.cjs trusted/.github/trusted-ci/policy-guard.test.cjs trusted/.github/trusted-ci/docs-ste.test.cjs trusted/.github/trusted-ci/findings.test.cjs
+    - name: Test Sonar response boundaries
+      run: python -m unittest discover -s trusted/.github/scripts -p test_sync_sonar_findings.py -v
+    - name: Check CI policy
+      run: node trusted/.github/trusted-ci/policy.cjs candidate
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ env.PINNED }}
+        path: trusted
+        persist-credentials: false
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        path: candidate
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+      with:
+        node-version: 24
+        package-manager-cache: false
+    - name: Prepare confined scanner inputs
+      run: 'node trusted/.github/trusted-ci/scan-tree.cjs candidate "$RUNNER_TEMP/scan"
+
+        mkdir -p "$RUNNER_TEMP/reports"'
+    - name: Scan Git history for secrets
+      run: 'curl --fail --location --silent --show-error https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz
+        -o "$RUNNER_TEMP/gitleaks.tar.gz"
+
+        printf ''%s  %s\n'' 9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c "$RUNNER_TEMP/gitleaks.tar.gz"
+        | sha256sum --check
+
+        mkdir "$RUNNER_TEMP/gitleaks"
+
+        tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
+
+        GITLEAKS_BINARY="$RUNNER_TEMP/gitleaks/gitleaks" node --test trusted/.github/trusted-ci/gitleaks.test.cjs
+
+        bash trusted/.github/trusted-ci/gitleaks.sh'
+    - name: Retain redacted secret report
+      if: '!cancelled()'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      with:
+        name: gitleaks-${{ github.sha }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/reports/gitleaks.sarif
+        retention-days: 7
+    - name: Semgrep
+      run: 'image=semgrep/semgrep:1.172.0@sha256:65dcd4408adda7c183a6b4550cb1e9b19f7f627a6fbb7e0559bd466bedc44d7b
+
+        docker pull "$image"
+
+        docker run --rm -v "$RUNNER_TEMP/scan:/src:ro" -v "$GITHUB_WORKSPACE/trusted/.github/trusted-ci:/trusted:ro" -w /src
+        "$image" semgrep scan --config /trusted/.semgrep.yml --no-git-ignore --disable-nosem --exclude .semgrep.yml --error
+        --metrics off'
+    - name: Trivy dependency report
+      id: trivy
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+      with:
+        scan-type: fs
+        scan-ref: ${{ runner.temp }}/scan
+        scanners: vuln
+        format: sarif
+        output: ${{ runner.temp }}/reports/trivy.sarif
+        severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+        ignore-unfixed: false
+        exit-code: '0'
+        limit-severities-for-sarif: true
+        version: v0.71.2
+        cache: false
+        cache-dir: ${{ runner.temp }}/trivy-cache
+        trivy-config: trusted/.github/trusted-ci/trivy.yaml
+        trivyignores: trusted/.github/trusted-ci/trivyignore
+    - name: Upload Trivy findings
+      uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370
+      if: '!cancelled() && steps.trivy.outcome == ''success'' && (github.event_name != ''pull_request'' || github.event.pull_request.head.repo.full_name
+        == github.repository)'
+      with:
+        sarif_file: ${{ runner.temp }}/reports/trivy.sarif
+        checkout_path: ${{ runner.temp }}/scan
+        category: trivy
+    - name: Trivy dependency gate
+      run: trivy fs --config trusted/.github/trusted-ci/trivy.yaml --ignorefile trusted/.github/trusted-ci/trivyignore --cache-dir
+        "$RUNNER_TEMP/trivy-cache" --scanners vuln --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed "$RUNNER_TEMP/scan"
+    permissions:
+      contents: read
+      security-events: write
+  aislop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ env.PINNED }}
+        path: trusted
+        persist-credentials: false
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        path: candidate
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+      with:
+        node-version: 24
+        package-manager-cache: false
+    - name: Install trusted scanner
+      run: npm ci --prefix trusted/.github/trusted-ci --ignore-scripts --no-audit --no-fund
+    - name: Prepare confined scanner inputs
+      run: node trusted/.github/trusted-ci/scan-tree.cjs candidate "$RUNNER_TEMP/scan"
+    - name: Aislop score gate
+      run: node trusted/.github/trusted-ci/aislop.mjs "$RUNNER_TEMP/scan" sarif > "$RUNNER_TEMP/aislop.sarif"
+    - name: Aislop findings gate
+      run: node trusted/.github/trusted-ci/findings.cjs "$RUNNER_TEMP/aislop.sarif"
+      if: always()
+    - name: Retain Aislop findings
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      if: '!cancelled()'
+      with:
+        name: aislop-${{ github.sha }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/aislop.sarif
+        retention-days: 7
+  codeql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+    - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370
+      with:
+        languages: javascript-typescript
+        build-mode: none
+    - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370
+      with:
+        category: javascript-typescript
+    permissions:
+      contents: read
+      security-events: write
+  docs:
+    uses: ./.github/workflows/docs-ste.yml
+  branch:
+    uses: ./.github/workflows/branch-policy.yml
+  dependencies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ env.PINNED }}
+        path: trusted
+        persist-credentials: false
+    - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+      with:
+        config-file: ./trusted/.github/dependency-review-config.yml
+    if: github.event_name == 'pull_request'
