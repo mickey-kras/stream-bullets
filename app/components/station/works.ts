@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import * as T from "./textures";
 import type { Kit } from "./kit";
-import { wallEntry, HALL_AT } from "./plan";
-import { add, mesh, box, cyl, ball, torus, rod, pipe, polar, rivets, ringPoints, TAU, DECK_Y } from "./shapes";
+import { plan, facing, wallEntry, HALL_AT } from "./plan";
+import { add, mesh, box, cyl, ball, torus, rod, tube, pipe, polar, rivets, ringPoints, TAU, DECK_Y } from "./shapes";
 
 /** The hall's position in the works group, which already sits at deck height. */
 const HALL_IN_WORKS = HALL_AT.clone().setY(0);
@@ -16,6 +16,73 @@ interface WorksScope {
   tankA: THREE.Group;
 }
 
+/** Draws a warning plate: a yellow hazard triangle with a bursting-gauge pictogram, then two lines of text. */
+function drawPressurePlate(ctx: CanvasRenderingContext2D, w: number, h: number, family: string): void {
+  ctx.fillStyle = "#efe3c4";
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "#2b2116";
+  ctx.lineWidth = h * 0.05;
+  ctx.strokeRect(h * 0.04, h * 0.04, w - h * 0.08, h - h * 0.08);
+  // Hazard triangle.
+  const cx = h * 0.56;
+  const top = h * 0.14;
+  const base = h * 0.86;
+  const half = (base - top) * 0.62;
+  ctx.beginPath();
+  ctx.moveTo(cx, top);
+  ctx.lineTo(cx + half, base);
+  ctx.lineTo(cx - half, base);
+  ctx.closePath();
+  ctx.fillStyle = "#f2c230";
+  ctx.fill();
+  ctx.lineJoin = "round";
+  ctx.lineWidth = h * 0.06;
+  ctx.stroke();
+  // Pictogram: a gauge with the needle hard over and burst lines.
+  const gy = h * 0.6;
+  const gr = h * 0.13;
+  ctx.lineWidth = h * 0.035;
+  ctx.beginPath();
+  ctx.arc(cx, gy, gr, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx, gy);
+  ctx.lineTo(cx + gr * 0.75, gy - gr * 0.55);
+  ctx.stroke();
+  for (const ang of [-2.4, -1.57, -0.74]) {
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(ang) * gr * 1.3, gy + Math.sin(ang) * gr * 1.3);
+    ctx.lineTo(cx + Math.cos(ang) * gr * 1.75, gy + Math.sin(ang) * gr * 1.75);
+    ctx.stroke();
+  }
+  // Two lines of lettering.
+  ctx.fillStyle = "#a5352a";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `700 ${Math.round(h * 0.34)}px ${family}`;
+  const tx = (cx + half + w) / 2;
+  const room = w - (cx + half) - h * 0.14;
+  ctx.fillText("HIGH", tx, h * 0.31, room);
+  ctx.fillText("PRESSURE", tx, h * 0.69, room);
+}
+
+/** The warning plate wraps the tall tank between its rivet ring and the upper red band. */
+function worksPressureSign(k: Kit, s: Pick<WorksScope, "tankB">): void {
+  const { tankB } = s;
+  const [w, h, r, facing] = [0.6, 0.34, 0.515, 2.85];
+  const plate = k.label(
+    (ctx: CanvasRenderingContext2D, cw: number, ch: number): void => drawPressurePlate(ctx, cw, ch, k.family),
+    [w, h],
+    [0, 1.7, 0],
+    tankB,
+    0.1,
+    512,
+  );
+  // Bend the plate around the tank so its edges sit on the shell instead of standing off it.
+  plate.geometry.dispose();
+  plate.geometry = new THREE.CylinderGeometry(r, r, h, 24, 1, true, facing - w / r / 2, w / r);
+}
+
 function worksLadder(k: Kit, s: Pick<WorksScope, "tankB">): void {
   const { brass } = k;
   const { tankB } = s;
@@ -23,8 +90,18 @@ function worksLadder(k: Kit, s: Pick<WorksScope, "tankB">): void {
   const ladder = add(new THREE.Group(), tankB);
   ladder.position.set(Math.sin(a) * 0.58, 0, Math.cos(a) * 0.58);
   ladder.rotation.y = a;
-  for (const x of [-0.13, 0.13])
+  // Each rail climbs past the shoulder, then hooks 180° over onto the dome like an upturned J.
+  const hook = 0.12;
+  for (const x of [-0.13, 0.13]) {
     rod(new THREE.Vector3(x, 0.2, 0), new THREE.Vector3(x, 2.85, 0), 0.016, brass, ladder, 6);
+    const bend: THREE.Vector3[] = [];
+    for (let i = 0; i <= 12; i++) {
+      const t = (i / 12) * Math.PI;
+      bend.push(new THREE.Vector3(x, 2.85 + Math.sin(t) * hook, -hook + Math.cos(t) * hook));
+    }
+    bend.push(new THREE.Vector3(x, 2.78, -hook * 2));
+    tube(bend, 0.016, brass, ladder);
+  }
   for (let i = 0; i < 11; i++)
     rod(
       new THREE.Vector3(-0.13, 0.35 + i * 0.24, 0),
@@ -104,8 +181,9 @@ function worksFanUnit(k: Kit, s: Pick<WorksScope, "works">): void {
   const { brass, copper, chrome, iron, steel, animators } = k;
   const { works } = s;
   const g = add(new THREE.Group(), works);
-  g.position.copy(polar(4.05, -1.88));
-  g.rotation.y = -1.88;
+  // Stands on the deck against the back of the hall, its duct climbing over the plinth into the wall.
+  g.position.copy(plan(3.1, 0.57).add(HALL_IN_WORKS));
+  g.rotation.y = facing(3.1);
   box([0.95, 0.85, 0.5], [0, 0.45, 0], steel, g, 0.05);
   const fan = add(new THREE.Group(), g);
   fan.position.set(0, 0.47, 0.26);
@@ -123,7 +201,7 @@ function worksFanUnit(k: Kit, s: Pick<WorksScope, "works">): void {
   });
   for (const x of [-0.4, 0.4]) box([0.08, 0.1, 0.55], [x, 0.05, 0], iron, g, 0.02);
   pipe(
-    [new THREE.Vector3(0.35, 0.85, -0.1), new THREE.Vector3(0.35, 1.4, -0.1), new THREE.Vector3(0.35, 1.4, -0.5)],
+    [new THREE.Vector3(0.35, 0.85, -0.1), new THREE.Vector3(0.35, 1.4, -0.1), new THREE.Vector3(0.35, 1.4, -0.62)],
     0.045,
     [copper, brass],
     g,
@@ -174,11 +252,13 @@ function worksPipework(k: Kit, s: Pick<WorksScope, "works">): void {
   valve([B.x + 0.2, 2.4, (B.z + A.z) / 2 + 0.2], new THREE.Euler(0, 0, Math.PI / 2), 0.13, works);
   valve([A.x - 0.7, 1.6, A.z + 0.47], new THREE.Euler(Math.PI / 2, 0, 0), 0.12, works);
   valve([-0.6, 0.5, -3.33], new THREE.Euler(Math.PI / 2, 0, 0), 0.1, works);
-  gauge([-0.2, 0.75, -3.35], Math.PI, 0.1, works);
+  // The gauge stands on a short stem tapped into the pipe below it.
+  rod(new THREE.Vector3(-0.2, 0.5, -3.4), new THREE.Vector3(-0.2, 0.7, -3.4), 0.018, brass, works, 8);
+  gauge([-0.2, 0.83, -3.4], Math.PI, 0.13, works, false, true);
 }
 
 export function buildWorks(k: Kit, station: THREE.Group): void {
-  const { brass, gold, iron, cream, red, label, gauge } = k;
+  const { brass, gold, iron, cream, red, gauge } = k;
   const works = add(new THREE.Group(), station);
   works.position.y = DECK_Y;
   function tank(at: THREE.Vector3, r: number, h: number, stripes: number[]): THREE.Group {
@@ -200,26 +280,10 @@ export function buildWorks(k: Kit, station: THREE.Group): void {
   }
   const tankA = tank(polar(3.2, 2.5), 0.62, 1.9, [0.62, 0.78]);
   const tankB = tank(polar(3.55, 2.85), 0.5, 2.5, [0.3, 0.7]);
-  gauge([Math.sin(2.5) * 0.63, 1.25, Math.cos(2.5) * 0.63], 2.5, 0.14, tankA);
-  label(
-    (ctx: CanvasRenderingContext2D, w: number, h: number): void => {
-      ctx.fillStyle = "#efe3c4";
-      ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = "#2b2116";
-      ctx.lineWidth = 8;
-      ctx.strokeRect(6, 6, w - 12, h - 12);
-      ctx.fillStyle = "#a5352a";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = `800 ${Math.round(h * 0.5)}px ${k.family}`;
-      ctx.fillText("HIGH PRESSURE", w / 2, h * 0.55, w * 0.9);
-    },
-    [0.7, 0.16],
-    [Math.sin(2.85) * 0.51, 1, Math.cos(2.85) * 0.51],
-    tankB,
-    0.1,
-    512,
-  ).rotation.y = 2.85;
+  // A big dial bolted to the tank on a brass boss, needle straining at the red.
+  box([0.16, 0.16, 0.12], [Math.sin(2.5) * 0.6, 1.25, Math.cos(2.5) * 0.6], brass, tankA, 0.02).rotation.y = 2.5;
+  gauge([Math.sin(2.5) * 0.69, 1.25, Math.cos(2.5) * 0.69], 2.5, 0.24, tankA, false, true);
+  worksPressureSign(k, { tankB });
   // Ladder up the tall tank.
   worksLadder(k, { tankB });
   // Horizontal boiler on cradles, with a riveted firebox door and a smokestack.

@@ -250,8 +250,9 @@ function studioDoor(k: Kit, s: Pick<StudioScope, "studio" | "floorY">): void {
   const { brass, gold, warmSoft } = k;
   const { studio, floorY } = s;
   const g = add(new THREE.Group(), studio);
-  g.position.copy(plan(1.62, -0.07, floorY));
-  g.rotation.y = facingIn(1.62);
+  // Lines up with the porch door outside: the corridor through the wing meets the hall here.
+  g.position.copy(plan(1.5, -0.07, floorY));
+  g.rotation.y = facingIn(1.5);
   plaque([0.78, 1.7, 0.05, 0.1], [0, 0.87, 0], gold, g);
   frame([0.9, 1.82, 0.14, 0.07, 0.06], [0, 0.9, 0.02], brass, g);
   const oval = new THREE.Shape();
@@ -404,7 +405,8 @@ function studioPlanters(k: Kit, s: Pick<StudioScope, "hall">): void {
   const { gold, hallCream, soil, plant } = k;
   const { hall } = s;
   for (const [a0, a1, seed] of [
-    [-1.5, -0.55, 17],
+    // Stops short of the atom statue's plinth.
+    [-1.5, -1.0, 17],
     [0.25, 0.62, 19],
   ] as const) {
     planSector([a0, a1], [0.25, 0.7], 0.36, hallCream, 0, hall);

@@ -170,7 +170,7 @@ export function onWall(hall: THREE.Object3D, a: number, y: number, out = 0): THR
 }
 
 /** Where a pipe leaving point p (in a frame where the hall sits at `hall`) meets the hall wall square-on:
-    a point `stand` metres off the wall, then the wall itself, both at p's height. */
+    a point `stand` metres off the wall, then the wall face itself (where the flange shows), both at p's height. */
 export function wallEntry(p: THREE.Vector3, hall: THREE.Vector3, stand = 0.3): [THREE.Vector3, THREE.Vector3] {
   let best = 0;
   let bestDistance = Infinity;
@@ -184,5 +184,5 @@ export function wallEntry(p: THREE.Vector3, hall: THREE.Vector3, stand = 0.3): [
     }
   }
   const y = p.y - hall.y;
-  return [plan(best, stand, y).add(hall), plan(best, -0.04, y).add(hall)];
+  return [plan(best, stand, y).add(hall), plan(best, 0.01, y).add(hall)];
 }

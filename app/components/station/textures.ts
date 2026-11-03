@@ -565,6 +565,31 @@ export function dial(amber: boolean): THREE.CanvasTexture {
   return t;
 }
 
+/** Glow mask for a dial's red zone: the red ticks and arc on black, for an emissive map. */
+export function dialRedZone(): THREE.CanvasTexture {
+  const [c, a] = layer(256, 256);
+  a.fillStyle = "#000000";
+  a.fillRect(0, 0, 256, 256);
+  a.strokeStyle = "#ffffff";
+  a.lineCap = "round";
+  for (let i = 16; i <= 20; i++) {
+    const ang = Math.PI * (1.15 + (i / 20) * 0.7);
+    const r0 = i % 5 ? 92 : 80;
+    a.lineWidth = i % 5 ? 3 : 6;
+    a.beginPath();
+    a.moveTo(128 + Math.cos(ang) * r0, 150 + Math.sin(ang) * r0);
+    a.lineTo(128 + Math.cos(ang) * 108, 150 + Math.sin(ang) * 108);
+    a.stroke();
+  }
+  a.lineWidth = 10;
+  a.beginPath();
+  a.arc(128, 150, 118, Math.PI * 1.71, Math.PI * 1.85);
+  a.stroke();
+  const t = texture(c, false);
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  return t;
+}
+
 /** Horizontal slot grille for the classic desk microphone. */
 export function grille(): THREE.CanvasTexture {
   const [c, a] = layer(64, 512);

@@ -151,11 +151,12 @@ function wingSideWall(k: Kit, s: Pick<WingScope, "wing" | "station">): void {
   const { brass, copper, iron } = k;
   const { wing, station } = s;
   const vent = add(new THREE.Group(), wing);
-  vent.position.set(0.96, 1.75, -0.75);
+  // Sits in the gap between the two risers.
+  vent.position.set(0.96, 1.75, -0.675);
   vent.rotation.y = Math.PI / 2;
-  box([0.5, 0.42, 0.05], [0, 0, 0], iron, vent, 0.02);
+  box([0.34, 0.42, 0.05], [0, 0, 0], iron, vent, 0.02);
   for (let i = 0; i < 6; i++)
-    box([0.42, 0.025, 0.06], [0, -0.15 + i * 0.06, 0.03], brass, vent, 0.006).rotation.x = -0.5;
+    box([0.28, 0.025, 0.06], [0, -0.15 + i * 0.06, 0.03], brass, vent, 0.006).rotation.x = -0.5;
   const w = (x: number, y: number, z: number): THREE.Vector3 =>
     new THREE.Vector3(x, y - DECK_Y, z).applyAxisAngle(new THREE.Vector3(0, 1, 0), wing.rotation.y).add(wing.position);
   // The tall riser climbs the side wall, then turns and runs square into the hall.
