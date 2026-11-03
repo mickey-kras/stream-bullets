@@ -168,16 +168,17 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
     for (let i = 0; i < 6; i++) box([0.7, 0.03, 0.07], [0, -0.17 + i * 0.068, 0.03], iron, g, 0.008).rotation.x = -0.5;
   }
   hallFuseBox(k, { hall });
-  // Copper service lines wrapping the back of the hall; each end turns into the wall.
-  for (const [a0, a1, y, r] of [
-    [1.55, 4.0, 1, 0.05],
-    [1.85, 2.85, 2.4, 0.035],
+  // Copper service lines round the back. The lower one runs from a junction box behind the tanks into
+  // the side of the fuse box; the upper one runs between two junction boxes above the porthole.
+  for (const [a0, a1, y, r, boxEnd] of [
+    [2.65, 3.39, 1.2, 0.05, false],
+    [1.85, 2.85, 2.4, 0.035, true],
   ] as const) {
     pipe([plan(a0, 0.05, y), ...loop(a0, a1, 0.14, y, 60), plan(a1, 0.05, y)], r, [copper, brass], hall);
-    for (const a of [a0, a1]) box([0.2, 0.24, 0.12], [0, 0, 0], brass, onWall(hall, a, y, 0.06), 0.02);
+    for (const a of boxEnd ? [a0, a1] : [a0]) box([0.2, 0.24, 0.12], [0, 0, 0], brass, onWall(hall, a, y, 0.06), 0.02);
   }
   // Iron ribs only in the clear stretches between portholes, vents, the door and the fuse box.
-  for (const a of [1.63, 2.87]) box([0.06, 1.45, 0.06], [0, 0, 0], iron, onWall(hall, a, 1.62, 0.1), 0.01);
+  for (const a of [1.63, 2.87]) box([0.06, 1.45, 0.06], [0, 0, 0], iron, onWall(hall, a, 1.62, 0.04), 0.01);
 
   // ON AIR marquee, mounted proud of the fascia.
   const onAir = add(new THREE.Group(), hall);

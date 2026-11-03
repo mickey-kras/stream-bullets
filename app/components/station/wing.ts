@@ -19,7 +19,6 @@ import {
   DECK_Y,
 } from "./shapes";
 import { enamel } from "./palette";
-import { wallEntry, HALL_AT } from "./plan";
 import { GREY_TANK } from "./works";
 
 interface WingScope {
@@ -159,9 +158,8 @@ function wingSideWall(k: Kit, s: Pick<WingScope, "wing" | "station">): void {
     box([0.28, 0.025, 0.06], [0, -0.15 + i * 0.06, 0.03], brass, vent, 0.006).rotation.x = -0.5;
   const w = (x: number, y: number, z: number): THREE.Vector3 =>
     new THREE.Vector3(x, y - DECK_Y, z).applyAxisAngle(new THREE.Vector3(0, 1, 0), wing.rotation.y).add(wing.position);
-  // The tall riser climbs the side wall, then turns and runs square into the hall.
-  const riser = w(1.02, 3, -0.4);
-  pipe([w(1.02, 0.3, -0.4), riser, ...wallEntry(riser, HALL_AT)], 0.055, [brass, brass], station);
+  // The tall riser climbs the side wall, then turns into the side of the porch's upper block.
+  pipe([w(1.02, 0.3, -0.4), w(1.02, 3.05, -0.4), w(0.8, 3.05, -0.4)], 0.055, [brass, brass], station);
   // The grey receiver's outlet rises off its dome, crosses to the wall and drops down it into the deck.
   const outlet = GREY_TANK.clone().setY(DECK_Y + 1.6);
   const head = w(1.02, 2.6, -0.95);
@@ -205,8 +203,8 @@ function wingSteps(k: Kit, { wing, stepSteel }: Pick<WingScope, "wing" | "stepSt
 /** Where the porch stands and how it is turned; the studio uses these to line its inner door up. */
 export const WING_AT = new THREE.Vector3(2.35, DECK_Y, 0.3);
 export const WING_YAW = Math.PI / 4;
-/** The porch block's side face (local x) that juts into the studio, facing the glazing. */
-export const WING_SIDE_X = -0.95;
+/** The porch block's back face (local z) that juts into the studio, facing the locker. */
+export const WING_BACK_Z = -1.2;
 
 export function buildWing(k: Kit, station: THREE.Group): THREE.Group {
   const { tiles, ivoryWear, brass, gold, teal, tealDark, cream, plant } = k;

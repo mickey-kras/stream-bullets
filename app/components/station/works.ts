@@ -146,7 +146,10 @@ function worksBoiler(k: Kit, s: Pick<WorksScope, "works">): void {
   cyl([0.12, 0.15, 1], [0, 2.3, 0], copper, g, [24]);
   cyl([0.2, 0.13, 0.13], [0, 2.86, 0], brass, g, [24]);
   gauge([Math.sin(0.6) * 0.57, 1.2, Math.cos(0.6) * 0.57], 0.6, 0.12, g);
-  valve([Math.sin(-0.7) * 0.66, 1.05, Math.cos(-0.7) * 0.66], new THREE.Euler(Math.PI / 2, -0.7, 0), 0.12, g);
+  // The valve's stem points straight into the shell, so the wheel stands just proud of it.
+  const inward = new THREE.Vector3(-Math.sin(-0.7), 0, -Math.cos(-0.7));
+  const seat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), inward);
+  valve([Math.sin(-0.7) * 0.63, 0.6, Math.cos(-0.7) * 0.63], new THREE.Euler().setFromQuaternion(seat), 0.12, g);
 }
 
 function worksGenerator(k: Kit, s: Pick<WorksScope, "works">): void {
@@ -221,18 +224,26 @@ function worksPipework(k: Kit, s: Pick<WorksScope, "works">): void {
   const w = (x: number, y: number, z: number): THREE.Vector3 => new THREE.Vector3(x, y, z);
   const A = polar(3.2, 2.5),
     B = polar(3.55, 2.85);
-  const feed = w(A.x - 0.9, 1.6, A.z + 0.6);
-  pipe([w(A.x - 0.45, 1.6, A.z + 0.3), feed, ...wallEntry(feed, HALL_IN_WORKS, 0.15)], 0.07, [copper, brass], works);
+  // Tank A feeds the hall wall square-on, starting inside the tank on its hall side.
+  const towardHall = HALL_IN_WORKS.clone().sub(A).setY(0).normalize();
+  const feed = A.clone().addScaledVector(towardHall, 0.45).setY(1.6);
+  const [feedStand, feedWall] = wallEntry(feed, HALL_IN_WORKS, 0.2);
+  pipe([feed, feedStand, feedWall], 0.07, [copper, brass], works);
+  const feedValve = feed.clone().lerp(feedStand, 0.6);
   pipe(
     [w(B.x + 0.2, 2.4, B.z + 0.4), w(B.x + 0.2, 2.4, A.z - 0.1), w(A.x - 0.3, 2.4, A.z - 0.1)],
     0.055,
     [copper, brass],
     works,
   );
-  pipe([w(A.x, 2.55, A.z), w(A.x, 3.3, A.z), w(1.3, 3.3, -1), w(0.4, 3.95, -0.9)], 0.08, [brass, brass], works);
+  // Tank A's crown pipe climbs, then enters the upper fascia between its hoops, clear of the mast feet.
+  const crown = w(A.x, 3.25, A.z);
+  pipe([w(A.x, 2.55, A.z), crown, ...wallEntry(crown, HALL_IN_WORKS, 0.2, 0.23)], 0.08, [brass, brass], works);
   const boiler = BOILER_AT;
+  // Tapped off the dome beside the smokestack, on the hall side.
+  const boilerTap = boiler.clone().addScaledVector(HALL_IN_WORKS.clone().sub(boiler).setY(0).normalize(), 0.3);
   pipe(
-    [w(boiler.x, 1.75, boiler.z), w(boiler.x, 2, boiler.z), ...wallEntry(w(-1.6, 2, -2), HALL_IN_WORKS)],
+    [w(boilerTap.x, 1.75, boilerTap.z), w(boilerTap.x, 2, boilerTap.z), ...wallEntry(w(-1.6, 2, -2), HALL_IN_WORKS)],
     0.06,
     [copper, brass],
     works,
@@ -244,7 +255,7 @@ function worksPipework(k: Kit, s: Pick<WorksScope, "works">): void {
     works,
   );
   valve([B.x + 0.2, 2.4, (B.z + A.z) / 2 + 0.2], new THREE.Euler(0, 0, Math.PI / 2), 0.13, works);
-  valve([A.x - 0.7, 1.6, A.z + 0.47], new THREE.Euler(Math.PI / 2, 0, 0), 0.12, works);
+  valve([feedValve.x, 1.6 + 0.07 + 0.08, feedValve.z], new THREE.Euler(0, 0, 0), 0.12, works);
   valve([-0.6, 0.5, -3.33], new THREE.Euler(Math.PI / 2, 0, 0), 0.1, works);
   // The gauge stands on a short stem tapped into the pipe below it.
   rod(new THREE.Vector3(-0.2, 0.5, -3.4), new THREE.Vector3(-0.2, 0.7, -3.4), 0.018, brass, works, 8);

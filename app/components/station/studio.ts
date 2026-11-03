@@ -2,7 +2,7 @@ import * as THREE from "three";
 import * as T from "./textures";
 import type { Kit } from "./kit";
 import { poster, posterTexture } from "./poster";
-import { WING_AT, WING_YAW, WING_SIDE_X } from "./wing";
+import { WING_AT, WING_YAW, WING_BACK_Z } from "./wing";
 import { add, mesh, box, cyl, ball, torus, rod, tube, plaque, frame, lathe, rivets, TAU, profile } from "./shapes";
 import { plan, facing, facingIn, loop, band, planShape, planSector, GLASS_FROM, GLASS_TO, HALL_AT } from "./plan";
 
@@ -255,14 +255,14 @@ function studioDoor(k: Kit, s: Pick<StudioScope, "studio" | "floorY">): void {
   const { brass, gold, warmSoft } = k;
   const { studio, floorY } = s;
   const g = add(new THREE.Group(), studio);
-  // The porch block juts into the studio; its inner door sits on the block's side, facing the desk and
-  // the glazing, so the front door outside opens through a short vestibule into the studio.
-  const at = new THREE.Vector3(WING_SIDE_X - 0.012, 0, -0.45)
+  // The porch block juts into the studio; its inner door sits on the block's back face beside the
+  // locker, clear of the desk, so the front door outside opens through a short vestibule.
+  const at = new THREE.Vector3(-0.3, 0, WING_BACK_Z - 0.012)
     .applyAxisAngle(new THREE.Vector3(0, 1, 0), WING_YAW)
     .add(WING_AT)
     .sub(HALL_AT);
   g.position.set(at.x, floorY, at.z);
-  g.rotation.y = WING_YAW - Math.PI / 2;
+  g.rotation.y = WING_YAW + Math.PI;
   plaque([0.78, 1.7, 0.05, 0.1], [0, 0.87, 0], gold, g);
   frame([0.9, 1.82, 0.14, 0.07, 0.06], [0, 0.9, 0.02], brass, g);
   const oval = new THREE.Shape();
