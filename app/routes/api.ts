@@ -24,9 +24,19 @@ import {
   entryActionSchema,
   entryQuerySchema,
   streamerSchema,
+  applicationQuerySchema,
+  applicationReviewSchema,
+  applicationSchema,
 } from "../server/validation";
 import { HttpError, errorResponse, json, queryParams, readJson, requireSameOrigin } from "../server/http.server";
 import { uploadImage } from "../server/images.server";
+import {
+  getStreamerAccess,
+  listApplications,
+  requireAdmin,
+  reviewApplication,
+  submitApplication,
+} from "../server/access.server";
 
 const accountSchema = z.object({ name: displayNameSchema }).strict();
 
@@ -62,8 +72,14 @@ export async function loader({ request, context, params }: LoaderFunctionArgs): 
       return json({
         viewer,
         streamer: viewer ? await getOwnStreamer(app.env, viewer.id) : null,
+        access: viewer ? await getStreamerAccess(app.env, viewer.id) : null,
         providers: configuredProviders(app.env),
       });
+    }
+    if (path === "admin/applications") {
+      if (!viewer) throw new HttpError(401, "Sign in to continue.");
+      await requireAdmin(app.env, viewer.id);
+      return json(await listApplications(app.env, parsedQuery(request, ["status", "cursor"], applicationQuerySchema)));
     }
     if (path === "streamers") {
       const cursor = queryParams(request, ["cursor"]).get("cursor");
@@ -117,6 +133,17 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
         .set({ name: input.name, updatedAt: new Date() })
         .where(eq(user.id, viewer.id));
       return json({ viewer: { ...viewer, name: input.name } });
+    }
+    if (path === "application") {
+      const input = await readJson(request, applicationSchema);
+      await consumeMutationQuota(app.env, viewer.id);
+      return json({ application: await submitApplication(app.env, viewer.id, input) });
+    }
+    if (path === "admin/applications") {
+      const input = await readJson(request, applicationReviewSchema);
+      await requireAdmin(app.env, viewer.id);
+      await consumeMutationQuota(app.env, viewer.id);
+      return json({ application: await reviewApplication(app.env, viewer.id, input) });
     }
     if (path === "comments")
       return json(await mutateComment(app.env, viewer.id, await readJson(request, commentActionSchema)));

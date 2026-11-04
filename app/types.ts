@@ -78,3 +78,32 @@ export interface LiveSnapshot {
   serverNow: number;
   polls: Pick<Entry, "id" | "title" | "kind" | "options" | "endsAt" | "revealed" | "counts" | "total">[];
 }
+
+export type ApplicationStatus = "pending" | "approved" | "rejected";
+
+export interface StreamerApplication {
+  id: string;
+  links: string[];
+  note: string;
+  status: ApplicationStatus;
+  createdAt: number;
+  updatedAt: number;
+  reviewedAt: number | null;
+}
+
+export interface StreamerAccess {
+  admin: boolean;
+  canCreateStreamer: boolean;
+  application: StreamerApplication | null;
+}
+
+export interface ApplicationReviewItem extends StreamerApplication {
+  userId: string;
+  name: string;
+  email: string;
+}
+
+export interface ApplicationQueue {
+  applications: ApplicationReviewItem[];
+  nextCursor: string | null;
+}

@@ -162,3 +162,40 @@ input#splitter{appearance:none;width:18px;height:100%;min-width:0;margin:0;paddi
 input#splitter::-webkit-slider-thumb{appearance:none;width:3px;height:42px;border:0;border-radius:3px;background:transparent}
 input#splitter::-moz-range-thumb{width:3px;height:42px;border:0;border-radius:3px;background:transparent}
 input#splitter:hover,input#splitter:focus-visible{background-image:linear-gradient(var(--gold),var(--gold))}
+
+/* Streamer waitlist and admin review queue. */
+.application-status { max-width: 600px; margin: 18px 0; padding: 14px 18px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 8px; background: #0f2a30; }
+.application-status.rejected { border-left-color: #ffbeaa; }
+.application-status p { margin: 6px 0 0; }
+.settings-page fieldset { border: 0; margin: 18px 0 0; padding: 0; min-width: 0; }
+.settings-page legend { font: 600 20px var(--heading); text-transform: uppercase; letter-spacing: .5px; padding: 0; }
+.link-rows { list-style: none; margin: 0 0 12px; padding: 0; }
+.link-rows li { display: flex; align-items: flex-end; gap: 10px; }
+.link-rows label { flex: 1; min-width: 0; margin: 10px 0; }
+.link-rows .remove-link { margin: 10px 0; min-height: 44px; padding: 8px 12px; font-size: 15px; }
+.status-tabs { margin: 22px 0 6px; flex-wrap: wrap; }
+.status-tabs a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 32px; border: 1px solid #31494c; background: #1b3438; font: 600 19px/1 var(--heading); text-transform: uppercase; }
+.status-tabs a:first-child { border-radius: 7px 0 0 7px; }
+.status-tabs a:last-child { border-radius: 0 7px 7px 0; }
+.status-tabs a:hover { border-color: var(--gold); }
+.status-tabs a.active { background: linear-gradient(110deg,#f3ca68,#e8b44b); color: #092228; border-color: #e8b44b; }
+.admin-notice { display: block; min-height: 1.45em; margin: 8px 0; color: var(--muted); font-size: 15px; }
+.application-list { list-style: none; margin: 0; padding: 0; }
+.admin-page .application-card { margin-top: 16px; }
+.application-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; }
+.application-card h2 { margin: 0 0 4px; overflow-wrap: anywhere; }
+.application-card .text-link { white-space: normal; overflow-wrap: anywhere; font-size: 15px; }
+.application-card h3.eyebrow { margin: 20px 0 8px; }
+.application-dates { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; font-size: 15px; }
+.application-dates dt { color: var(--muted); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+.application-dates dd { margin: 0; }
+.application-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.application-links a { color: var(--gold); text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
+.application-links a .muted { text-decoration: none; }
+.application-note { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.application-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.application-actions button { min-height: 44px; min-width: 120px; }
+@media(max-width:560px) {
+  .status-tabs a { flex: 1; padding: 8px 10px; font-size: 16px; }
+  .application-actions button { flex: 1; }
+}

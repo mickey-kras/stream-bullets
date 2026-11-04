@@ -215,3 +215,36 @@ export const comments = sqliteTable(
     index("poll_comments_rate_idx").on(table.pollId, table.userId, table.createdAt),
   ],
 );
+
+export const streamerApplications = sqliteTable(
+  "streamer_applications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: "cascade" }),
+    links: text("links", { mode: "json" }).$type<string[]>().notNull(),
+    note: text("note").notNull().default(""),
+    status: text("status", { enum: ["pending", "approved", "rejected"] })
+      .notNull()
+      .default("pending"),
+    createdAt: integer("created_at").notNull(),
+    updatedAt: integer("updated_at").notNull(),
+    reviewedAt: integer("reviewed_at"),
+    reviewedBy: text("reviewed_by").references(() => user.id, { onDelete: "set null" }),
+  },
+  (table) => [
+    index("streamer_applications_queue_idx").on(table.status, table.updatedAt, table.id),
+    check("streamer_applications_status_check", sql`${table.status} IN ('pending', 'approved', 'rejected')`),
+    check(
+      "streamer_applications_links_check",
+      sql`json_valid(${table.links}) AND json_type(${table.links}) = 'array' AND json_array_length(${table.links}) BETWEEN 1 AND 5`,
+    ),
+    check("streamer_applications_note_check", sql`length(${table.note}) <= 1000`),
+    check(
+      "streamer_applications_review_check",
+      sql`(${table.status} = 'pending' AND ${table.reviewedAt} IS NULL) OR (${table.status} <> 'pending' AND ${table.reviewedAt} IS NOT NULL)`,
+    ),
+  ],
+);

@@ -27,7 +27,7 @@ const config: BuildConfig = {
   ...(build.assets
     ? { assets: { ...build.assets, directory: resolve(dirname(buildPath), build.assets.directory) } }
     : {}),
-  vars: { APP_ORIGIN: "http://localhost:5173" },
+  vars: { APP_ORIGIN: "http://localhost:5173", ADMIN_EMAILS: "admin@example.test" },
   d1_databases: build.d1_databases.map((database) => ({
     ...database,
     database_id: databaseId,
@@ -52,7 +52,7 @@ execute(["d1", "migrations", "apply", "DB", "--local", "--persist-to", statePath
 const now: number = Date.now();
 const users: Record<string, { id: string; cookie: string }> = {};
 const statements: string[] = [];
-for (const role of ["owner", "viewer", "newcomer", "otherowner", "paginationowner"]) {
+for (const role of ["owner", "viewer", "newcomer", "otherowner", "paginationowner", "admin"]) {
   const id: string = randomUUID();
   const token: string = randomBytes(24).toString("hex");
   users[role] = { id, cookie: encodeURIComponent(`${token}.${await makeSignature(token, secret)}`) };
