@@ -14,7 +14,7 @@ import type {
   Streamer,
   StreamerDirectory,
 } from "../types";
-import { canCreateStreamer } from "./access.server";
+import { canCreateStreamer, isAdmin } from "./access.server";
 import { HttpError } from "./http.server";
 import {
   commentActionSchema,
@@ -431,6 +431,51 @@ async function entryPermission(env: AppEnv, id: string, streamerId: string): Pro
   return row;
 }
 
+/**
+ * Authors and the streamer may remove their content. Administrators may remove anything for moderation.
+ * Returns whether the removal relies on administrator rights.
+ */
+async function removalByAdmin(
+  env: AppEnv,
+  viewerId: string,
+  authorId: string,
+  ownerId: string,
+  denied: string,
+): Promise<boolean> {
+  if (authorId === viewerId || ownerId === viewerId) return false;
+  if (await isAdmin(env, viewerId)) return true;
+  throw new HttpError(403, denied);
+}
+
+async function removeEntry(env: AppEnv, viewerId: string, permission: PermissionRow): Promise<void> {
+  const admin = await removalByAdmin(
+    env,
+    viewerId,
+    permission.author_id,
+    permission.owner_id,
+    "Only the author or streamer can remove this item.",
+  );
+  await applyMutation(
+    env,
+    permission.streamer_id,
+    env.DB.prepare(`DELETE FROM entries WHERE id=? AND streamer_id=?
+    AND (?=1 OR author_id=? OR EXISTS(SELECT 1 FROM streamers s WHERE s.id=entries.streamer_id AND s.owner_id=?))`).bind(
+      permission.id,
+      permission.streamer_id,
+      admin ? 1 : 0,
+      viewerId,
+      viewerId,
+    ),
+    404,
+    "Topic or poll not found.",
+  );
+}
+
+/** Removes a topic or poll with the same rules as a delete action, without consuming the caller's quota. */
+export async function deleteEntry(env: AppEnv, viewerId: string, streamerId: string, id: string): Promise<void> {
+  await removeEntry(env, viewerId, await entryPermission(env, id, streamerId));
+}
+
 async function createEntry(
   env: AppEnv,
   userId: string,
@@ -529,21 +574,7 @@ export async function mutateEntry(
       break;
     }
     case "delete": {
-      if (permission.author_id !== viewerId && permission.owner_id !== viewerId)
-        throw new HttpError(403, "Only the author or streamer can remove this item.");
-      await applyMutation(
-        env,
-        streamerId,
-        env.DB.prepare(`DELETE FROM entries WHERE id=? AND streamer_id=?
-        AND (author_id=? OR EXISTS(SELECT 1 FROM streamers s WHERE s.id=entries.streamer_id AND s.owner_id=?))`).bind(
-          action.id,
-          streamerId,
-          viewerId,
-          viewerId,
-        ),
-        404,
-        "Topic or poll not found.",
-      );
+      await removeEntry(env, viewerId, permission);
       break;
     }
     case "comment": {
@@ -576,14 +607,52 @@ export async function mutateEntry(
   return { id: action.id };
 }
 
+interface CommentPermission {
+  author_id: string;
+  streamer_id: string;
+  owner_id: string;
+}
+
+async function commentPermission(env: AppEnv, id: string): Promise<CommentPermission> {
+  const comment = await env.DB.prepare(`SELECT c.author_id,e.streamer_id,s.owner_id FROM entry_comments c
+    JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=?`)
+    .bind(id)
+    .first<CommentPermission>();
+  if (!comment) throw new HttpError(404, "Comment not found.");
+  return comment;
+}
+
+/** Deletes a comment and keeps its replies as top-level comments. */
+async function removeComment(env: AppEnv, viewerId: string, id: string, comment: CommentPermission): Promise<void> {
+  const admin = await removalByAdmin(
+    env,
+    viewerId,
+    comment.author_id,
+    comment.owner_id,
+    "Only the author or streamer can remove this comment.",
+  );
+  const ownership =
+    "SELECT c.id FROM entry_comments c JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=? AND (?=1 OR c.author_id=? OR s.owner_id=?)";
+  const scope = [id, admin ? 1 : 0, viewerId, viewerId];
+  const result = await env.DB.batch([
+    env.DB.prepare(`UPDATE entry_comments SET parent_id=NULL WHERE parent_id IN (${ownership})`).bind(...scope),
+    env.DB.prepare(`DELETE FROM entry_comments WHERE id IN (${ownership})`).bind(...scope),
+    env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
+  ]);
+  if (result[1].meta.changes === 0) throw new HttpError(404, "Comment not found.");
+}
+
+/** Removes a comment with the same rules as a delete action. Returns the streamer page it belonged to. */
+export async function deleteComment(env: AppEnv, viewerId: string, id: string): Promise<{ streamerId: string }> {
+  const comment = await commentPermission(env, id);
+  await removeComment(env, viewerId, id, comment);
+  return { streamerId: comment.streamer_id };
+}
+
 export async function mutateComment(env: AppEnv, viewerId: string, input: unknown): Promise<{ id: string }> {
   const action = parsed(commentActionSchema, input);
   await consumeMutationQuota(env, viewerId);
-  const comment = await env.DB.prepare(`SELECT c.author_id,e.streamer_id,s.owner_id FROM entry_comments c
-    JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=?`)
-    .bind(action.id)
-    .first<{ author_id: string; streamer_id: string; owner_id: string }>();
-  if (!comment) throw new HttpError(404, "Comment not found.");
+  const comment = await commentPermission(env, action.id);
   if (action.action === "like") {
     const statement = action.liked
       ? env.DB.prepare(
@@ -592,20 +661,7 @@ export async function mutateComment(env: AppEnv, viewerId: string, input: unknow
       : env.DB.prepare("DELETE FROM comment_likes WHERE comment_id=? AND user_id=?").bind(action.id, viewerId);
     await applyMutation(env, comment.streamer_id, statement, 404, "Comment not found.", true);
   } else {
-    if (comment.author_id !== viewerId && comment.owner_id !== viewerId)
-      throw new HttpError(403, "Only the author or streamer can remove this comment.");
-    const ownership =
-      "SELECT c.id FROM entry_comments c JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=? AND (c.author_id=? OR s.owner_id=?)";
-    const result = await env.DB.batch([
-      env.DB.prepare(`UPDATE entry_comments SET parent_id=NULL WHERE parent_id IN (${ownership})`).bind(
-        action.id,
-        viewerId,
-        viewerId,
-      ),
-      env.DB.prepare(`DELETE FROM entry_comments WHERE id IN (${ownership})`).bind(action.id, viewerId, viewerId),
-      env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
-    ]);
-    if (result[1].meta.changes === 0) throw new HttpError(404, "Comment not found.");
+    await removeComment(env, viewerId, action.id, comment);
   }
   return { id: action.id };
 }

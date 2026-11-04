@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 import type { Comment, DiscussionSnapshot, SortOrder, Viewer } from "../types";
 import { Avatar, Modal } from "./common";
 import { errorMessage, postJson, requestJson } from "./api";
+import { ReportButton } from "./report";
 
 type CommentChange = { action: "like"; id: string; liked: boolean } | { action: "delete"; id: string };
 
@@ -84,6 +85,7 @@ export function Discussion({
   handle,
   viewer,
   ownerId,
+  moderator = false,
   refreshKey,
   onChanged,
 }: Readonly<{
@@ -91,6 +93,8 @@ export function Discussion({
   handle: string;
   viewer: Viewer | null;
   ownerId: string;
+  /** The viewer is an administrator and may remove any comment. */
+  moderator?: boolean;
   refreshKey: number;
   onChanged: () => void;
 }>): ReactNode {
@@ -319,11 +323,19 @@ export function Discussion({
               >
                 Reply
               </button>
-              {viewer && (comment.authorId === viewer.id || ownerId === viewer.id) && (
+              {viewer && (comment.authorId === viewer.id || ownerId === viewer.id || moderator) && (
                 <DeleteButton
                   label="Delete comment"
                   disabled={busy}
                   onDelete={() => changeComment({ action: "delete", id: comment.id })}
+                />
+              )}
+              {viewer && comment.authorId !== viewer.id && (
+                <ReportButton
+                  targetKind="comment"
+                  targetId={comment.id}
+                  label={`Report comment by ${comment.author}`}
+                  description={`Tell us what is wrong with this comment by ${comment.author}.`}
                 />
               )}
             </div>

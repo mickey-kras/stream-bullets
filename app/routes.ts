@@ -4,6 +4,8 @@ export default [
   index("routes/home.tsx"),
   route("settings", "routes/settings.tsx"),
   route("admin", "routes/admin.tsx"),
+  route("privacy", "routes/privacy.tsx"),
+  route("terms", "routes/terms.tsx"),
   route("api/auth/*", "routes/auth.ts"),
   route("api/*", "routes/api.ts"),
   route(":handle/overlay", "routes/overlay.tsx"),

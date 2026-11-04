@@ -1,6 +1,19 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useRouteError } from "react-router";
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  isRouteErrorResponse,
+  useMatches,
+  useRouteError,
+} from "react-router";
 import type { ReactNode } from "react";
+import { SiteFooter } from "./components/common";
 import "./styles.css";
+
+/** Routes without site chrome. The OBS overlay is a browser source, so it shows only the poll. */
+const bareRoutes: ReadonlySet<string> = new Set(["routes/overlay"]);
 
 export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNode {
   return (
@@ -40,17 +53,26 @@ export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNo
 }
 
 export default function App(): ReactNode {
-  return <Outlet />;
+  const bare: boolean = useMatches().some((match) => bareRoutes.has(match.id));
+  return (
+    <>
+      <Outlet />
+      {!bare && <SiteFooter />}
+    </>
+  );
 }
 
 export function ErrorBoundary(): ReactNode {
   const error: unknown = useRouteError();
   const missing = isRouteErrorResponse(error) && error.status === 404;
   return (
-    <main className="page-panel">
-      <h1>{missing ? "Page not found" : "Something went wrong"}</h1>
-      <p>{missing ? "This page does not exist." : "Please reload the page and try again."}</p>
-      <a href="/">StreamBullets home</a>
-    </main>
+    <>
+      <main className="page-panel">
+        <h1>{missing ? "Page not found" : "Something went wrong"}</h1>
+        <p>{missing ? "This page does not exist." : "Please reload the page and try again."}</p>
+        <a href="/">StreamBullets home</a>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

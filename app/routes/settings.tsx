@@ -8,6 +8,7 @@ import { getStreamerAccess } from "../server/access.server";
 import { Avatar, SignIn, SiteHeader } from "../components/common";
 import { errorMessage, postJson, requestJson } from "../components/api";
 import { StreamerWaitlist } from "../components/waitlist";
+import { AccountData } from "../components/account-data";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const app = context.get(appContext);
@@ -262,6 +263,7 @@ export default function Settings(): ReactNode {
                 </>
               )}
             </section>
+            <AccountData />
             <div className="settings-footer">
               <Link to="/">Back to streamers</Link>
               <button

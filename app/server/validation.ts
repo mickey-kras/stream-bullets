@@ -127,6 +127,38 @@ export const applicationQuerySchema = z
 
 export const applicationReviewSchema = z.object({ id, decision: z.enum(["approved", "rejected"]) }).strict();
 
+export const reportReasons = ["illegal", "harassment", "spam", "privacy", "other"] as const;
+
+export const reportSchema = z
+  .object({
+    targetKind: z.enum(["entry", "comment"]),
+    targetId: id,
+    reason: z.enum(reportReasons),
+    details: z
+      .string()
+      .trim()
+      .max(1000, "Keep the details under 1000 characters.")
+      .regex(/^(?:[^\p{Cc}]|[\t\n\r])*$/u)
+      .default(""),
+  })
+  .strict()
+  .refine(
+    (value): boolean => !["illegal", "other"].includes(value.reason) || value.details.length > 0,
+    "Explain why this content breaks the law or the community rules.",
+  );
+
+export const reportQuerySchema = z
+  .object({
+    status: z.enum(["open", "actioned", "dismissed"]).default("open"),
+    cursor: z.string().max(1024).nullable().default(null),
+  })
+  .strict();
+
+export const reportResolutionSchema = z.object({ id, action: z.enum(["remove", "dismiss"]) }).strict();
+
+export type ReportInput = z.input<typeof reportSchema>;
+export type ReportQuery = z.input<typeof reportQuerySchema>;
+export type ReportResolution = z.infer<typeof reportResolutionSchema>;
 export type ApplicationInput = z.infer<typeof applicationSchema>;
 export type ApplicationQuery = z.infer<typeof applicationQuerySchema>;
 export type ApplicationReview = z.infer<typeof applicationReviewSchema>;
@@ -135,3 +167,7 @@ export type EntryAction = z.infer<typeof entryActionSchema>;
 export type CommentAction = z.infer<typeof commentActionSchema>;
 export type EntryQuery = z.infer<typeof entryQuerySchema>;
 export type CommentQuery = z.infer<typeof commentQuerySchema>;
+
+export const accountDeletionSchema = z
+  .object({ confirm: z.literal("DELETE", { error: "Type DELETE to confirm." }) })
+  .strict();

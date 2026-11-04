@@ -53,6 +53,15 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
 
 export async function serveImage(env: AppEnv, path: string, method: string): Promise<Response> {
   if (!/^(avatar|background)\/[a-zA-Z0-9_-]{1,128}$/.test(path)) throw new HttpError(404, "Image not found.");
+  // Serve only images a live account or streamer page still references. An object left in R2 after an
+  // account deletion (for example, when the storage delete failed) is then never public again.
+  const [kind, userId] = path.split("/");
+  const url = `/images/${path}`;
+  const reference =
+    kind === "avatar"
+      ? env.DB.prepare("SELECT 1 AS live FROM user WHERE id=? AND image=?").bind(userId, url)
+      : env.DB.prepare("SELECT 1 AS live FROM streamers WHERE owner_id=? AND background=?").bind(userId, url);
+  if (!(await reference.first<{ live: number }>())) throw new HttpError(404, "Image not found.");
   const object = await env.IMAGES.get(path);
   if (!object) throw new HttpError(404, "Image not found.");
   const headers = new Headers({

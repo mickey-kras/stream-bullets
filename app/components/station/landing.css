@@ -17,7 +17,6 @@ body:has(.landing-page)::after {
 
 .landing-page {
   --ink: #061a1e;
-  --sage: #a9bdaa;
   --display: Oswald, "Arial Narrow", sans-serif;
   position: relative;
   display: flex;
@@ -116,11 +115,6 @@ body:has(.landing-page)::after {
   box-shadow:
     0 5px 0 #a27a25,
     0 14px 30px #eebd4e2a;
-}
-.landing-actions .landing-sage {
-  background: var(--sage);
-  color: #0b282c;
-  box-shadow: 0 5px 0 #6d8472;
 }
 
 /* Stage */

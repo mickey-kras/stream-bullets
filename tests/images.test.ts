@@ -65,6 +65,20 @@ describe("owned image storage", () => {
       await env.DB.prepare("SELECT background FROM streamers WHERE owner_id=?").bind("viewer").first("background"),
     ).toBe("/images/background/viewer");
   });
+  it("stops serving images that no live account or page references, even if R2 still has them", async () => {
+    await env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES (?,?,?,?)")
+      .bind(crypto.randomUUID(), "viewer", "viewer", "Viewer")
+      .run();
+    await uploadImage(upload(), env, "viewer", "avatar");
+    await uploadImage(upload(), env, "viewer", "background");
+    expect((await serveImage(env, "background/viewer", "GET")).status).toBe(200);
+    // Simulate an account deletion whose R2 cleanup failed: the rows are gone, the objects remain.
+    await env.DB.prepare("DELETE FROM user WHERE id=?").bind("viewer").run();
+    expect(await env.IMAGES.head("avatar/viewer")).not.toBeNull();
+    expect(await env.IMAGES.head("background/viewer")).not.toBeNull();
+    await expect(serveImage(env, "avatar/viewer", "GET")).rejects.toMatchObject({ status: 404 });
+    await expect(serveImage(env, "background/viewer", "GET")).rejects.toMatchObject({ status: 404 });
+  });
   it("rejects path traversal, unsupported slots, and absent objects", async () => {
     await expect(uploadImage(upload(), env, "viewer", "other")).rejects.toMatchObject({ status: 404 });
     await expect(serveImage(env, "../avatar/viewer", "GET")).rejects.toMatchObject({ status: 404 });

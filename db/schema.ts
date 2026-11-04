@@ -248,3 +248,53 @@ export const streamerApplications = sqliteTable(
     ),
   ],
 );
+
+/**
+ * Notices about potentially illegal or rule-breaking content (EU Digital Services Act, Article 16).
+ * Targets and streamers are plain identifiers, not foreign keys, so the audit trail survives when
+ * the reported content or the whole streamer page is removed. The snapshot keeps the reported text.
+ */
+export const contentReports = sqliteTable(
+  "content_reports",
+  {
+    id: text("id").primaryKey(),
+    targetKind: text("target_kind", { enum: ["entry", "comment"] }).notNull(),
+    targetId: text("target_id").notNull(),
+    streamerId: text("streamer_id").notNull(),
+    reporterId: text("reporter_id").references(() => user.id, { onDelete: "set null" }),
+    // Author of the reported content, kept even after the content is removed, so account deletion can
+    // still find and scrub the copied text. Cleared when that account is deleted.
+    targetAuthorId: text("target_author_id").references(() => user.id, { onDelete: "set null" }),
+    reason: text("reason", { enum: ["illegal", "harassment", "spam", "privacy", "other"] }).notNull(),
+    details: text("details").notNull().default(""),
+    snapshot: text("snapshot").notNull(),
+    status: text("status", { enum: ["open", "actioned", "dismissed"] })
+      .notNull()
+      .default("open"),
+    createdAt: integer("created_at").notNull(),
+    resolvedAt: integer("resolved_at"),
+    resolvedBy: text("resolved_by").references(() => user.id, { onDelete: "set null" }),
+  },
+  (table) => [
+    index("content_reports_queue_idx").on(table.status, table.createdAt, table.id),
+    index("content_reports_target_idx").on(table.targetKind, table.targetId, table.status),
+    index("content_reports_reporter_idx").on(table.reporterId),
+    index("content_reports_resolver_idx").on(table.resolvedBy),
+    index("content_reports_target_author_idx").on(table.targetAuthorId),
+    uniqueIndex("content_reports_open_unique")
+      .on(table.reporterId, table.targetKind, table.targetId)
+      .where(sql`${table.status} = 'open'`),
+    check("content_reports_target_kind_check", sql`${table.targetKind} IN ('entry', 'comment')`),
+    check(
+      "content_reports_reason_check",
+      sql`${table.reason} IN ('illegal', 'harassment', 'spam', 'privacy', 'other')`,
+    ),
+    check("content_reports_status_check", sql`${table.status} IN ('open', 'actioned', 'dismissed')`),
+    check("content_reports_details_check", sql`length(${table.details}) <= 1000`),
+    check("content_reports_snapshot_check", sql`length(${table.snapshot}) BETWEEN 1 AND 2000`),
+    check(
+      "content_reports_resolution_check",
+      sql`(${table.status} = 'open' AND ${table.resolvedAt} IS NULL) OR (${table.status} <> 'open' AND ${table.resolvedAt} IS NOT NULL)`,
+    ),
+  ],
+);

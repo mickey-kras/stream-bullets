@@ -27,6 +27,10 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 - Only the page owner can create, end, or reveal its polls. Polls can have a time limit or stay open until the owner ends them.
 - Binary poll counts and percentages stay private until reveal. Multiple-choice results update live.
 - Authors and page owners can remove content. Replies remain when an author or page owner removes a parent comment.
+- Signed-in users can report a topic or comment with **Report**. Administrators review reports at `/admin`. The hourly task deletes resolved reports after one year.
+- In **Settings > Your data**, a user can download a JSON copy of their data. The user can also delete the account. Deletion removes the account and all of its data. This includes content, votes, reactions, images, the streamer profile, the application, sessions, and reports.
+- Sign-up and sign-in are one step. The home page shows one **Sign in** button. The sign-in dialog tells the user to be 16 or older and links the Terms and the Privacy Policy.
+- `/privacy` and `/terms` show the Privacy Policy and the Terms of Service. A footer on each page links to them, the contact address, and the reporting rules. The overlay has no footer.
 - Newest uses stable cursor pagination. Top uses likes minus dislikes. New votes can move items between Top pages. Refresh to see the new order.
 - `/@handle/overlay` shows the latest active poll. Add `?poll=<id>` to select one poll. The overlay is public and cannot submit votes.
 - Schedule shows an empty state until the app supports scheduling. It does not imply an event exists.
@@ -51,6 +55,8 @@ pnpm dev
 Open `http://localhost:5173`. The checked-in D1 ID is an explicit local placeholder. Local D1, R2, and Durable Object state stays under `.wrangler/`.
 
 Add Google or Twitch credentials to `.dev.vars` to test sign-in. A provider needs both its client ID and secret. An incomplete pair fails closed. With no providers configured, public pages work but sign-in is unavailable. Do not commit `.dev.vars` or database exports.
+
+The production site shows no sign-in buttons until you set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, or `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`, as Worker secrets.
 
 | Setting | Purpose |
 | --- | --- |
@@ -156,7 +162,20 @@ Migrations `0000`–`0002` and their legacy poll tables remain intact. The platf
 - The app does not send email about review decisions in this version. Applicants see the status of their application in **Settings**.
 - Migration `0004` adds the `streamer_applications` table. When you delete a user, the database also deletes the application of that user.
 - An hourly task removes expired sessions, OAuth state, and old rate-limit records in bounded batches.
-- Content moderation lets authors and streamers delete content. There is no report queue, account ban workflow, provider linking, or self-service account deletion in this version. Operators must handle deletion and abuse requests directly.
+- Authors and streamers can delete content. Users can report content, and administrators review the reports at `/admin`. There is no account ban workflow or provider linking in this version.
+- Users can export or delete their own data in **Settings > Your data**. Account deletion is permanent. Deleted rows stay in D1 Time Travel for up to 30 days. Do not restore a deleted account from Time Travel.
+- The app sets only necessary cookies: the session cookie and the OAuth state cookie, with the `stream-bullets` prefix. It has no analytics, advertisements, or trackers. Thus, it shows no cookie banner. Get consent before you add a cookie that is not necessary, and update the Privacy Policy.
+- The general rate limiter uses a SHA-256 hash of the client IP address as its key. Better Auth keeps the IP address and user agent on each session. Its database rate limit also uses the IP address.
+
+## Legal pages
+
+The Privacy Policy and the Terms of Service get the details of the operator from `app/legal.ts`. Replace each value in square brackets before launch:
+
+- `operatorName`: the legal name of the operator.
+- `operatorCountry`: the country of residence of the operator. The Terms also use it as the governing law.
+- `policyEffectiveDate`: the date that the policy starts.
+
+`contactEmail` and `minimumAge` have production values. Make sure that the contact mailbox receives email. While a placeholder remains, both pages show a draft notice at the top. Get a legal review of the text before launch. Update the pages when you add a data processor, a cookie, or a new use of data.
 
 Make the `Verify application` check mandatory in the repository ruleset. Keep squash-only merges and branch deletion in the repository settings. The workflow cannot enforce those settings itself.
 
