@@ -43,6 +43,13 @@ async function seedEntry(
   return id;
 }
 
+async function approveStreamer(userId: string): Promise<void> {
+  await env.DB.prepare(`INSERT INTO streamer_applications (id,user_id,links,status,created_at,updated_at,reviewed_at)
+    VALUES (?,?,'["https://example.test/channel"]','approved',1,1,1)`)
+    .bind(crypto.randomUUID(), userId)
+    .run();
+}
+
 async function seedComment(entryId: string, authorId = "viewer", parentId: string | null = null): Promise<string> {
   const id = crypto.randomUUID();
   await env.DB.prepare(
@@ -75,6 +82,8 @@ beforeEach(async (): Promise<void> => {
         ),
     ),
   ]);
+  await approveStreamer("owner");
+  await approveStreamer("other");
   streamer = await saveStreamer(env, "owner", { handle: "misha", name: "Misha", about: "Games and tech" });
   otherStreamer = await saveStreamer(env, "other", { handle: "other", name: "Other", about: "" });
 });
@@ -87,6 +96,11 @@ describe("streamer profiles", (): void => {
       "other",
     ]);
     await env.DB.prepare("UPDATE user SET image='/images/avatar/viewer' WHERE id='viewer'").run();
+    await expect(saveStreamer(env, "viewer", { handle: "viewer", name: "Viewer", about: "" })).rejects.toMatchObject({
+      status: 403,
+    });
+    expect(await getOwnStreamer(env, "viewer")).toBeNull();
+    await approveStreamer("viewer");
     const profile = await saveStreamer(env, "viewer", { handle: "viewer", name: "Viewer", about: "" });
     expect(profile.avatar).toBe("/images/avatar/viewer");
     expect(await getStreamer(env, "viewer")).toEqual(profile);

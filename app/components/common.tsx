@@ -143,11 +143,14 @@ export function SiteHeader({
   viewer,
   providers,
   streamer,
+  admin = false,
   children,
 }: Readonly<{
   viewer: Viewer | null;
   providers: Provider[];
   streamer?: Streamer;
+  /** Shows the review queue link. Pass it only from loaders that already know the viewer's access. */
+  admin?: boolean;
   children?: ReactNode;
 }>): ReactNode {
   return (
@@ -171,6 +174,7 @@ export function SiteHeader({
         <nav aria-label="Main navigation">
           <Link to="/">Streamers</Link>
           <Link to="/settings">Your profile</Link>
+          {admin && <Link to="/admin">Admin</Link>}
         </nav>
       )}
       <div className="header-end">

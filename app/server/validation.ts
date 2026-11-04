@@ -94,8 +94,9 @@ const applicationLink = z
   .max(200)
   .url()
   .refine((value: string): boolean => {
-    const url = new URL(value);
-    return url.protocol === "https:" && !url.username && !url.password;
+    // Zod still runs refinements after a failed url() check, so parse defensively.
+    const url = URL.canParse(value) ? new URL(value) : null;
+    return url?.protocol === "https:" && !url.username && !url.password;
   }, "Use HTTPS links to your public channel pages.");
 
 export const applicationSchema = z
