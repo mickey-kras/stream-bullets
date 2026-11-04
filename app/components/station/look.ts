@@ -13,8 +13,6 @@ const FULL_TILT = 25;
 const MOUSE_YAW = 0.12;
 const MOUSE_PITCH = 0.06;
 
-type Orientation = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<PermissionState> };
-
 const clamp = (v: number): number => Math.max(-1, Math.min(1, v));
 
 export interface Look {
@@ -72,19 +70,7 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
     { signal },
   );
 
-  // iOS only reports motion after the person allows it, and only shows the prompt from a gesture WebKit
-  // counts as one: touchend or click (not pointerup). Ask on the first of either, then stop listening.
-  const orientation = (globalThis as { DeviceOrientationEvent?: Orientation }).DeviceOrientationEvent;
-  const page = globalThis.document;
-  if (typeof orientation?.requestPermission === "function" && page) {
-    const ask = (): void => {
-      page.removeEventListener("touchend", ask);
-      page.removeEventListener("click", ask);
-      orientation.requestPermission?.().catch((): PermissionState => "denied");
-    };
-    page.addEventListener("touchend", ask, { signal, passive: true });
-    page.addEventListener("click", ask, { signal, passive: true });
-  }
+  // On iOS motion arrives only once the person allows it from the station's tilt button (tilt.ts).
 
   return {
     step: (dt: number, enabled: boolean): boolean => {
