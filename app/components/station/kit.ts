@@ -134,9 +134,7 @@ export function createKit(compact: boolean, family: string) {
       const pressureMotion: readonly [number, number, number, number] = high
         ? [2.6, 0.14, 0.07, -1]
         : [0.7, 0.12, 0.02, -0.3];
-      const [speed, swing, jitter, rest] = amber
-        ? [5.3, 0.45, 0.2, 0]
-        : pressureMotion;
+      const [speed, swing, jitter, rest] = amber ? [5.3, 0.45, 0.2, 0] : pressureMotion;
       needle.rotation.z = rest;
       kit.animators.push((t: number): void => {
         needle.rotation.z = Math.sin(t * speed + seed) * swing + Math.sin(t * 11.7 + seed) * jitter + rest;
