@@ -12,13 +12,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   try {
     const app = context.get(appContext);
     const viewer = await getViewer(request, app);
-    const ownStreamer = viewer
-      ? await getOwnStreamer(app.env, viewer.id)
-      : null;
+    const ownStreamer = viewer ? await getOwnStreamer(app.env, viewer.id) : null;
     return { viewer, ownStreamer, providers: configuredProviders(app.env) };
   } catch (error: unknown) {
-    if (error instanceof HttpError)
-      throw new Response(error.message, { status: error.status });
+    if (error instanceof HttpError) throw new Response(error.message, { status: error.status });
     throw error;
   }
 }
@@ -30,20 +27,8 @@ export default function Home(): ReactNode {
     <div className="landing-page">
       <header className="landing-header">
         <Link className="landing-brand" to="/" aria-label="StreamBullets home">
-          <img
-            className="landing-logo"
-            src="/brand/stream-bullets.svg"
-            alt=""
-            width="305"
-            height="84"
-          />
-          <img
-            className="landing-icon"
-            src="/brand/stream-bullets-icon.svg"
-            alt=""
-            width="128"
-            height="136"
-          />
+          <img className="landing-logo" src="/brand/stream-bullets.svg" alt="" width="305" height="84" />
+          <img className="landing-icon" src="/brand/stream-bullets-icon.svg" alt="" width="128" height="136" />
         </Link>
         <nav aria-label="Account">
           {viewer ? (
@@ -53,11 +38,7 @@ export default function Home(): ReactNode {
               <button type="button" onClick={() => setSignInOpen(true)}>
                 Log in
               </button>
-              <button
-                type="button"
-                className="gold"
-                onClick={() => setSignInOpen(true)}
-              >
+              <button type="button" className="gold" onClick={() => setSignInOpen(true)}>
                 Register
               </button>
             </>
@@ -77,40 +58,23 @@ export default function Home(): ReactNode {
             <p>Suggest topics. Vote. Shape the stream.</p>
             <div className="landing-actions">
               {viewer ? (
-                <Link
-                  className="button-link gold"
-                  to={ownStreamer ? `/@${ownStreamer.handle}` : "/settings"}
-                >
-                  {ownStreamer
-                    ? "Open your community"
-                    : "Create a streamer profile"}
+                <Link className="button-link gold" to={ownStreamer ? `/@${ownStreamer.handle}` : "/settings"}>
+                  {ownStreamer ? "Open your community" : "Create a streamer profile"}
                 </Link>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    className="gold"
-                    onClick={() => setSignInOpen(true)}
-                  >
+                  <button type="button" className="gold" onClick={() => setSignInOpen(true)}>
                     Create account
                   </button>
-                  <button
-                    type="button"
-                    className="landing-sage"
-                    onClick={() => setSignInOpen(true)}
-                  >
+                  <button type="button" className="landing-sage" onClick={() => setSignInOpen(true)}>
                     Log in
                   </button>
                 </>
               )}
             </div>
           </div>
-          <p
-            className="landing-topics"
-            aria-label="Topics, polls and discussions"
-          >
-            Topics <em aria-hidden="true">/</em> Polls{" "}
-            <em aria-hidden="true">/</em> Discussions
+          <p className="landing-topics" aria-label="Topics, polls and discussions">
+            Topics <em aria-hidden="true">/</em> Polls <em aria-hidden="true">/</em> Discussions
           </p>
         </section>
       </main>

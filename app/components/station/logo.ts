@@ -47,10 +47,7 @@ function walk(a: number, s: number, grow: number): number {
 
 /** The brand SVG's translate(78 0) skewX(-10), applied to a glyph point. */
 const SKEW = Math.tan((-10 * Math.PI) / 180);
-const place = (x: number, y: number): [number, number] => [
-  x + y * SKEW + SVG_LEFT_SHIFT,
-  y,
-];
+const place = (x: number, y: number): [number, number] => [x + y * SKEW + SVG_LEFT_SHIFT, y];
 const SVG_LEFT_SHIFT = 78;
 
 /** Parse the wordmark's absolute M/L/H/V/Q/Z path data into shapes, without needing a DOM. */
@@ -111,19 +108,10 @@ function letters(scale: number): THREE.BufferGeometry {
 }
 
 /** Bend a flat sign (x along the wall, y up, z out) onto the hall plan around angle a, at height y. */
-function wrap(
-  g: THREE.BufferGeometry,
-  a: number,
-  grow: number,
-  y: number,
-): void {
+function wrap(g: THREE.BufferGeometry, a: number, grow: number, y: number): void {
   const pos = g.attributes.position;
   for (let i = 0; i < pos.count; i++) {
-    const p = plan(
-      walk(a, pos.getX(i), grow),
-      grow + pos.getZ(i),
-      y + pos.getY(i),
-    );
+    const p = plan(walk(a, pos.getX(i), grow), grow + pos.getZ(i), y + pos.getY(i));
     pos.setXYZ(i, p.x, p.y, p.z);
   }
   g.computeVertexNormals();
@@ -136,13 +124,7 @@ export function buildLogo(k: Kit, hall: THREE.Group): void {
     edges: 0.4,
     streaks: 0.3,
   });
-  const face = enamel(
-    tiles.ivory,
-    null,
-    "#fffaf0",
-    { ...ivoryWear, edges: 0.3, grime: 0.25, streaks: 0.2 },
-    1.4,
-  );
+  const face = enamel(tiles.ivory, null, "#fffaf0", { ...ivoryWear, edges: 0.3, grime: 0.25, streaks: 0.2 }, 1.4);
   const scale = LETTER_H / (SVG_BOTTOM - SVG_TOP);
   const centreY = STRIPE_Y[1];
   const g = letters(scale);
@@ -153,22 +135,11 @@ export function buildLogo(k: Kit, hall: THREE.Group): void {
   const halfW = ((SVG_RIGHT - SVG_LEFT) / 2) * scale;
   STRIPE_Y.forEach((y: number, i: number): void => {
     // Each stripe runs from just right of the letters, round the back, to just left of them.
-    const from = walk(
-      LOGO_AT,
-      halfW + RIGHT_GAP[i] * scale + 0.02,
-      STRIPE_GROW,
-    );
-    const to =
-      walk(LOGO_AT, -(halfW + LEFT_GAP[i] * scale + 0.02), STRIPE_GROW) + TAU;
+    const from = walk(LOGO_AT, halfW + RIGHT_GAP[i] * scale + 0.02, STRIPE_GROW);
+    const to = walk(LOGO_AT, -(halfW + LEFT_GAP[i] * scale + 0.02), STRIPE_GROW) + TAU;
     tube(loop(from, to, STRIPE_GROW, y, 160), STRIPE_R, stripe, hall, false);
     for (const a of [from, to])
-      ball(
-        STRIPE_R,
-        [...plan(a, STRIPE_GROW, y).toArray()] as [number, number, number],
-        stripe,
-        hall,
-        12,
-      );
+      ball(STRIPE_R, [...plan(a, STRIPE_GROW, y).toArray()] as [number, number, number], stripe, hall, 12);
   });
   // A warm wash from under the fascia lip lifts the letters off the teal at night.
   const c = plan(LOGO_AT, 0.9, centreY);
