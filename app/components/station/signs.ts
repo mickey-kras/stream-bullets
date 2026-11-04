@@ -3,7 +3,11 @@ import type { Kit } from "./kit";
 import { add, box, cyl, tube, plaque, rivets, TAU, DECK_Y } from "./shapes";
 import { ringRadius } from "./mast";
 
-export function buildSigns(k: Kit, station: THREE.Group): void {
+/** Depth of the arm's mount behind the sign face: the flip turns the sign about this point. */
+const MOUNT_Z = -0.16;
+
+/** Builds the three mast signs and returns their flip pivots, one per sign, each turning about its arm. */
+export function buildSigns(k: Kit, station: THREE.Group): THREE.Group[] {
   const { brass, gold, signCream, label } = k;
   const signFamily = (): string => k.family;
   function signFace(
@@ -57,6 +61,7 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
     };
   }
   const signs = add(new THREE.Group(), station);
+  const pivots: THREE.Group[] = [];
   const mastWorld = (y: number): THREE.Vector3 => new THREE.Vector3(-0.7, DECK_Y + 3.98 + y * 1.12, -0.25);
   for (const [text, icon, x, y, z, yaw, roll, joint] of [
     ["SUGGEST\nA TOPIC", "chat", -3.35, 7.2, 0.5, 0.22, -0.03, 2.2, 1],
@@ -67,9 +72,15 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
     board.position.set(x, y, z);
     board.rotation.set(0, yaw, roll);
     board.scale.setScalar(1.12);
-    plaque([2.36, 1.05, 0.12, 0.22], [0, 0, -0.1], gold, board);
-    plaque([2.22, 0.92, 0.07, 0.18], [0, 0, 0.025], signCream, board);
-    label(signFace(text, icon), [2.05, 0.82], [0, 0, 0.13], board, 0.12);
+    const pivot = add(new THREE.Group(), board);
+    pivot.position.z = MOUNT_Z;
+    pivot.name = "sign-pivot";
+    pivots.push(pivot);
+    const face = add(new THREE.Group(), pivot);
+    face.position.z = -MOUNT_Z;
+    plaque([2.36, 1.05, 0.12, 0.22], [0, 0, -0.1], gold, face);
+    plaque([2.22, 0.92, 0.07, 0.18], [0, 0, 0.025], signCream, face);
+    label(signFace(text, icon), [2.05, 0.82], [0, 0, 0.13], face, 0.12);
     rivets(
       [
         [-1, -0.35],
@@ -79,12 +90,12 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
       ].map(([bx, by]: number[]): THREE.Vector3 => new THREE.Vector3(bx, by, 0.135)),
       0.028,
       brass,
-      board,
+      face,
     );
-    box([1.9, 0.06, 0.02], [0, -0.52, -0.04], gold, board, 0.01);
+    box([1.9, 0.06, 0.02], [0, -0.52, -0.04], gold, face, 0.01);
     // Back of the sign: aged enamel plate with a bolted brass mount where the arm enters.
-    plaque([2.2, 0.9, 0.012, 0.18], [0, 0, -0.124], signCream, board);
-    box([0.32, 0.32, 0.04], [0, 0, -0.14], gold, board, 0.02);
+    plaque([2.2, 0.9, 0.012, 0.18], [0, 0, -0.124], signCream, face);
+    box([0.32, 0.32, 0.04], [0, 0, -0.14], gold, face, 0.02);
     rivets(
       [
         [-0.11, -0.11],
@@ -94,11 +105,11 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
       ].map(([bx, by]: number[]): THREE.Vector3 => new THREE.Vector3(bx, by, -0.165)),
       0.02,
       brass,
-      board,
+      face,
     );
     board.updateMatrixWorld();
     const centre = mastWorld(joint);
-    const mount = new THREE.Vector3(0, 0, -0.16).applyMatrix4(board.matrix);
+    const mount = new THREE.Vector3(0, 0, MOUNT_Z).applyMatrix4(board.matrix);
     const back = new THREE.Vector3(0, 0, -1).applyEuler(board.rotation);
     const out = new THREE.Vector3(mount.x - centre.x, 0, mount.z - centre.z).normalize();
     const start = centre.clone().add(out.clone().multiplyScalar(ringRadius(joint) * 1.12));
@@ -121,4 +132,5 @@ export function buildSigns(k: Kit, station: THREE.Group): void {
     );
     cyl([0.065, 0.065, 0.1], [start.x, start.y, start.z], brass, signs, [12]);
   }
+  return pivots;
 }

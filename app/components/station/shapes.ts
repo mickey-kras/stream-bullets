@@ -10,6 +10,31 @@ export const TAU = Math.PI * 2;
 /** Height of the deck plate above the platform origin. */
 export const DECK_Y = 0.45;
 
+/** Sides for a round section of radius r: thin rails need far fewer than thick pipes to look round. */
+export function sides(r: number, most = 12): number {
+  return Math.min(most, Math.max(5, Math.round(5 + r * 90)));
+}
+
+/** Sides for a lathe or cylinder of radius r seen whole: a 5 cm cap needs 16, a 1 m tank 48. */
+function roundSides(r: number): number {
+  return Math.max(12, Math.round(12 + r * 40));
+}
+
+/** Segments along a curve: enough to keep bends smooth without cutting straight runs finely. */
+function runSegments(curve: THREE.Curve<THREE.Vector3>, closed: boolean): number {
+  const length = curve.getLength();
+  let turn = 0;
+  const n = 48;
+  let prev = curve.getTangentAt(0);
+  for (let i = 1; i <= n; i++) {
+    const t = curve.getTangentAt(Math.min(i / n, 1));
+    turn += prev.angleTo(t);
+    prev = t;
+  }
+  // About one segment per 9 degrees of turn, and at least one per half metre of run.
+  return Math.min(closed ? 160 : 120, Math.max(4, Math.ceil(turn / 0.16), Math.ceil(length * 2)));
+}
+
 export function add<O extends THREE.Object3D>(obj: O, parent: THREE.Object3D): O {
   parent.add(obj);
   return obj;
@@ -33,7 +58,9 @@ export function mesh(
 /** Rounded box: size is [width, height, depth]. */
 export function box(size: P, at: P, mat: THREE.Material, parent: THREE.Object3D, radius = 0.03): THREE.Mesh {
   const [w, h, d] = size;
-  return mesh(new RoundedBoxGeometry(w, h, d, 2, Math.min(radius, w / 2, h / 2, d / 2)), mat, at, parent);
+  // Small parts read the same with a single bevel step.
+  const steps = Math.max(w, h, d) < 0.35 ? 1 : 2;
+  return mesh(new RoundedBoxGeometry(w, h, d, steps, Math.min(radius, w / 2, h / 2, d / 2)), mat, at, parent);
 }
 
 /** Cylinder: dims is [radiusTop, radiusBottom, height]; extra is [segments, openEnded, thetaStart, thetaLength]. */
@@ -45,11 +72,18 @@ export function cyl(
   extra: readonly [number?, boolean?, number?, number?] = [],
 ): THREE.Mesh {
   const [seg = 48, open = false, start = 0, length = TAU] = extra;
-  return mesh(new THREE.CylinderGeometry(dims[0], dims[1], dims[2], seg, 1, open, start, length), mat, at, parent);
+  const around = Math.min(seg, roundSides(Math.max(dims[0], dims[1])) * (length / TAU) + 4);
+  return mesh(
+    new THREE.CylinderGeometry(dims[0], dims[1], dims[2], Math.round(around), 1, open, start, length),
+    mat,
+    at,
+    parent,
+  );
 }
 
 export function ball(r: number, at: P, mat: THREE.Material, parent: THREE.Object3D, seg = 24): THREE.Mesh {
-  return mesh(new THREE.SphereGeometry(r, seg, Math.max(8, seg * 0.66)), mat, at, parent);
+  const around = Math.min(seg, Math.max(8, Math.round(8 + r * 44)));
+  return mesh(new THREE.SphereGeometry(r, around, Math.max(6, Math.round(around * 0.66))), mat, at, parent);
 }
 
 /** Torus: ring is [radius, tube]; flat rings lie in the horizontal plane. */
@@ -61,7 +95,8 @@ export function torus(
   flat = true,
 ): THREE.Mesh {
   const [r, tubeRadius] = ring;
-  const m = mesh(new THREE.TorusGeometry(r, tubeRadius, 12, Math.max(24, Math.round(r * 60))), mat, at, parent);
+  const around = Math.min(72, Math.max(24, Math.round(r * 30)));
+  const m = mesh(new THREE.TorusGeometry(r, tubeRadius, sides(tubeRadius, 10), around), mat, at, parent);
   if (flat) m.rotation.x = Math.PI / 2;
   return m;
 }
@@ -89,7 +124,7 @@ export function tube(
   tension = 0.5,
 ): THREE.Mesh {
   const curve = new THREE.CatmullRomCurve3(points, closed, "catmullrom", tension);
-  return mesh(new THREE.TubeGeometry(curve, Math.max(24, points.length * 12), r, 12, closed), mat, [0, 0, 0], parent);
+  return mesh(new THREE.TubeGeometry(curve, runSegments(curve, closed), r, sides(r), closed), mat, [0, 0, 0], parent);
 }
 
 /** Pipe through waypoints with tight, rounded elbows and a flange at each end. */
@@ -127,10 +162,20 @@ export function pipe(
   }
   const [previous, last] = points.slice(-2);
   path.add(new THREE.LineCurve3(from, last.clone()));
-  const m = mesh(new THREE.TubeGeometry(path, points.length * 24, r, 14, false), mat, [0, 0, 0], parent);
+  const m = mesh(
+    new THREE.TubeGeometry(path, runSegments(path, false), r, sides(r, 14), false),
+    mat,
+    [0, 0, 0],
+    parent,
+  );
   for (const p of [points[0], last]) {
     const dir = p === points[0] ? points[1].clone().sub(p) : p.clone().sub(previous);
-    const flange = mesh(new THREE.CylinderGeometry(r * 1.6, r * 1.6, r * 0.8, 16), flangeMat, [p.x, p.y, p.z], parent);
+    const flange = mesh(
+      new THREE.CylinderGeometry(r * 1.6, r * 1.6, r * 0.8, sides(r * 1.6, 16)),
+      flangeMat,
+      [p.x, p.y, p.z],
+      parent,
+    );
     flange.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
   }
   return m;
@@ -189,8 +234,8 @@ export function extrude(
     bevelEnabled: bevel > 0,
     bevelSize: bevel,
     bevelThickness: bevel,
-    bevelSegments: 3,
-    curveSegments: 32,
+    bevelSegments: 2,
+    curveSegments: 6,
   });
   return mesh(geometry, mat, at, parent);
 }
@@ -233,7 +278,7 @@ export function slab(
     bevelSize: 0.025,
     bevelThickness: 0.025,
     bevelSegments: 2,
-    curveSegments: 20,
+    curveSegments: 8,
   });
   g.rotateX(-Math.PI / 2);
   g.translate(0, -h / 2, 0);
@@ -248,7 +293,8 @@ export function lathe(
   seg = 40,
 ): THREE.Mesh {
   const points = profile.map(([r, h]: [number, number]): THREE.Vector2 => new THREE.Vector2(r, h));
-  return mesh(new THREE.LatheGeometry(points, seg), mat, at, parent);
+  const widest = Math.max(...profile.map(([r]: [number, number]): number => r));
+  return mesh(new THREE.LatheGeometry(points, Math.min(seg, roundSides(widest))), mat, at, parent);
 }
 
 export function rivets(
@@ -257,7 +303,7 @@ export function rivets(
   mat: THREE.Material,
   parent: THREE.Object3D,
 ): THREE.InstancedMesh {
-  const inst = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 8, 6), mat, points.length);
+  const inst = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 5, 3), mat, points.length);
   const m = new THREE.Matrix4();
   points.forEach((p: THREE.Vector3, i: number): void => {
     m.makeScale(r, r, r).setPosition(p);

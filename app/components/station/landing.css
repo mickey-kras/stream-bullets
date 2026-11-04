@@ -1,6 +1,6 @@
-/* ON AIR landing. A full-bleed broadcast stage: the 3D station fills the hero and sits right of centre,
-   copy floats on the left over a soft shade, a gold rule closes the stage, the streamer directory follows.
-   On phones the scene drops below the copy and fades into the page at both edges. */
+/* ON AIR landing. One screen, never scrolled: the 3D station fills the stage, copy floats over it on the
+   left behind a soft shade, and a gold rule closes the stage. On phones the copy sits on top and the
+   station fills the rest of the screen, its mast tucked just behind the buttons. */
 body:has(.landing-page) {
   padding: 0;
 }
@@ -14,18 +14,20 @@ body:has(.landing-page)::after {
   --sage: #a9bdaa;
   --display: Oswald, "Arial Narrow", sans-serif;
   position: relative;
+  display: flex;
+  flex-direction: column;
   flex: 1;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   background: var(--ink);
-  scroll-behavior: smooth;
 }
 
-/* Header floats over the stage on desktop; global header rules are neutralised here. */
+/* Header floats over the stage; global header rules are neutralised here. */
 .landing-page .landing-header {
-  position: relative;
+  position: absolute;
+  inset: 0 0 auto;
   z-index: 3;
   display: flex;
   flex-wrap: nowrap;
@@ -33,15 +35,10 @@ body:has(.landing-page)::after {
   gap: 24px;
   height: auto;
   min-height: 0;
-  flex: none;
   padding: 22px 32px;
   border: 0;
   background: none;
   pointer-events: none;
-}
-.landing-page:has(.landing-hero) .landing-header {
-  position: absolute;
-  inset: 0 0 auto;
 }
 .landing-header > * {
   pointer-events: auto;
@@ -49,45 +46,18 @@ body:has(.landing-page)::after {
 .landing-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
   text-decoration: none;
 }
-.landing-brand .landing-word {
-  font: 700 40px / 0.84 var(--display);
-  text-transform: uppercase;
-  letter-spacing: 0.005em;
-  transform: skewX(-10deg);
-  color: var(--cream);
-  text-shadow: 0 2px 0 #0006;
-}
-.landing-bars {
-  display: grid;
-  gap: 6px;
-  width: 66px;
-}
-.landing-bars b {
+/* The full logo needs room beside the account buttons; narrower headers use the antenna icon. */
+.landing-logo {
   display: block;
-  height: 7px;
-  border-radius: 7px;
-  background: var(--gold);
-  box-shadow: 0 2px 0 #0005;
+  width: auto;
+  height: 72px;
 }
-.landing-bars.left b:nth-child(1),
-.landing-bars.left b:nth-child(3) {
-  width: 90%;
-  margin-left: 10%;
-}
-.landing-bars.left b:nth-child(2) {
-  width: 62%;
-  margin-left: 20%;
-}
-.landing-bars.right b:nth-child(1),
-.landing-bars.right b:nth-child(3) {
-  width: 78%;
-}
-.landing-bars.right b:nth-child(2) {
-  width: 100%;
-  margin-left: 16%;
+.landing-icon {
+  display: none;
+  width: auto;
+  height: 52px;
 }
 .landing-page .landing-header nav {
   margin-left: auto;
@@ -104,8 +74,7 @@ body:has(.landing-page)::after {
 /* Buttons share the mockup's chunky, offset-shadow treatment. */
 .landing-page .landing-header nav > button,
 .landing-actions button,
-.landing-actions .button-link,
-.landing-directory > .button-link {
+.landing-actions .button-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -150,16 +119,18 @@ body:has(.landing-page)::after {
 
 /* Stage */
 .landing-main {
-  display: block;
-  padding: 0;
+  display: flex;
+  flex: 1;
   min-height: 0;
+  padding: 0;
 }
 .landing-hero {
   position: relative;
   isolation: isolate;
-  min-height: clamp(640px, 100svh, 980px);
   display: flex;
+  flex: 1;
   flex-direction: column;
+  min-height: 0;
 }
 .landing-station {
   position: absolute;
@@ -174,9 +145,15 @@ body:has(.landing-page)::after {
 .landing-canvas canvas {
   display: block;
   cursor: grab;
+  animation: station-in 0.7s ease-out;
 }
 .landing-canvas canvas:active {
   cursor: grabbing;
+}
+@keyframes station-in {
+  from {
+    opacity: 0;
+  }
 }
 .landing-shade {
   position: absolute;
@@ -187,26 +164,60 @@ body:has(.landing-page)::after {
     linear-gradient(90deg, #061a1ee6 0%, #061a1eb0 26%, #061a1e00 50%),
     linear-gradient(0deg, var(--ink) 0%, #061a1e00 16%);
 }
+
+/* Loading atom and the no-WebGL note, both centred where the station will stand. */
+.station-loader,
+.station-status {
+  position: absolute;
+  z-index: 2;
+}
+.station-loader {
+  top: 50%;
+  left: 62%;
+  width: 240px;
+  height: 240px;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.station-loader::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffc45766 0, #f2bf4926 36%, transparent 70%);
+  animation: loader-breathe 2.4s ease-in-out infinite;
+}
+.station-loader canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+@keyframes loader-breathe {
+  50% {
+    opacity: 0.7;
+    transform: scale(0.96);
+  }
+}
 .station-status {
   display: block;
-  position: absolute;
   right: 22%;
   top: 48%;
-  z-index: 2;
   max-width: 30ch;
   margin: 0;
   color: var(--muted);
   font-size: 15px;
 }
+
 .landing-copy {
   position: relative;
   z-index: 2;
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
-  padding: 120px 16px 90px max(64px, env(safe-area-inset-left, 0px));
   max-width: 760px;
+  padding: 120px 16px 90px max(64px, env(safe-area-inset-left, 0px));
   pointer-events: none;
 }
 .landing-copy > * {
@@ -232,63 +243,7 @@ body:has(.landing-page)::after {
   display: flex;
   flex-wrap: wrap;
   gap: 18px;
-  margin: 36px 0 24px;
-}
-.landing-explore {
-  align-self: flex-start;
-  font: 500 20px / 1 var(--body);
-  text-decoration: underline;
-  text-underline-offset: 6px;
-  text-decoration-thickness: 1.5px;
-}
-.landing-explore:hover {
-  color: var(--gold);
-}
-
-/* Tour of the station */
-.landing-tour {
-  min-width: 0;
-  margin: 0;
-  position: absolute;
-  z-index: 3;
-  right: max(28px, env(safe-area-inset-right, 0px));
-  bottom: 84px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 4px;
-  max-width: min(780px, calc(100% - 32px));
-  padding: 6px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #061a1ecc;
-  backdrop-filter: blur(8px);
-}
-.landing-tour button {
-  min-height: 40px;
-  margin: 0;
-  padding: 6px 12px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  font: 600 13px / 1 var(--body);
-  text-transform: none;
-}
-.landing-tour button:hover {
-  color: var(--cream);
-  background: transparent;
-}
-.landing-tour button[aria-pressed="true"] {
-  border-color: #eebd4e88;
-  color: var(--gold);
-  background: #eebd4e14;
-}
-.landing-tour .landing-sep {
-  width: 1px;
-  align-self: stretch;
-  margin: 4px;
-  background: var(--line);
+  margin: 36px 0 0;
 }
 
 .landing-topics {
@@ -320,32 +275,6 @@ body:has(.landing-page)::after {
   letter-spacing: 0;
 }
 
-/* Directory */
-.landing-directory {
-  padding: 72px 64px 110px;
-  scroll-margin-top: 20px;
-  min-height: 50vh;
-}
-.landing-page:not(:has(.landing-hero)) .landing-directory {
-  padding-top: 24px;
-}
-.landing-directory > h2 {
-  margin: 0 0 10px;
-  font: 700 clamp(40px, 4.4vw, 64px) / 1 var(--display);
-  text-transform: uppercase;
-  color: var(--cream);
-}
-.landing-directory > p {
-  color: var(--muted);
-}
-.landing-directory > .button-link {
-  margin: 18px 0 34px;
-}
-.landing-directory .streamer-card h2 {
-  font: 600 26px / 1.05 var(--display);
-  text-transform: uppercase;
-}
-
 @media (max-width: 1100px) {
   .landing-copy {
     padding-left: max(32px, env(safe-area-inset-left, 0px));
@@ -358,51 +287,38 @@ body:has(.landing-page)::after {
       linear-gradient(90deg, #061a1ef0 0%, #061a1ec0 34%, #061a1e00 60%),
       linear-gradient(0deg, var(--ink) 0%, #061a1e00 16%);
   }
-  .landing-directory {
-    padding-left: 32px;
-    padding-right: 32px;
-  }
 }
 
-/* Phones: copy first, then the live scene, which fades into the page at its top and bottom edges. */
+/* Phones: the copy on top, then the station filling the rest of the screen. */
 @media (max-width: 700px) {
-  .landing-page .landing-header,
-  .landing-page:has(.landing-hero) .landing-header {
-    position: relative;
-    padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px));
+  .landing-page .landing-header {
+    padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 16px
+      max(16px, env(safe-area-inset-left, 0px));
     gap: 8px;
-  }
-  .landing-brand {
-    gap: 7px;
-  }
-  .landing-brand .landing-word {
-    font-size: 26px;
-  }
-  .landing-bars {
-    width: 30px;
-    gap: 4px;
-  }
-  .landing-bars b {
-    height: 4.5px;
-  }
-  .landing-bars.right {
-    display: none;
   }
   .landing-page .landing-header nav {
     gap: 6px;
   }
   .landing-page .landing-header nav > button {
-    font-size: 17px;
-    padding: 8px 12px;
     min-height: 44px;
+    padding: 8px 12px;
+    font-size: 17px;
   }
-  .landing-hero {
-    min-height: 0;
-  }
+  /* The station comes first in the markup (it is the backdrop on wide screens); on phones it follows. */
   .landing-copy {
     order: 1;
     flex: none;
-    padding: 12px max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px));
+    padding: calc(78px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 8px
+      max(16px, env(safe-area-inset-left, 0px));
+  }
+  /* The copy fades into the stage so the mast can rise behind the buttons. */
+  .landing-copy::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 -40px;
+    z-index: -1;
+    background: linear-gradient(180deg, var(--ink) 70%, #061a1e00);
+    pointer-events: none;
   }
   .landing-copy h1 {
     font-size: clamp(50px, 15.5vw, 84px);
@@ -411,84 +327,61 @@ body:has(.landing-page)::after {
     font-size: 18px;
   }
   .landing-actions {
-    margin: 24px 0 18px;
     gap: 12px;
+    margin-top: 24px;
   }
   .landing-actions button,
   .landing-actions .button-link {
     flex: 1 1 140px;
-    font-size: 18px;
     padding-inline: 12px;
+    font-size: 18px;
     white-space: nowrap;
   }
   .landing-station {
+    order: 2;
     position: relative;
     inset: auto;
-    order: 2;
-    height: 112vw;
-    max-height: 560px;
-    margin-top: -8px;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16%, #000 84%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 16%, #000 84%, transparent 100%);
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+    margin-top: -14vh;
   }
-  .landing-shade {
+  .landing-shade,
+  .landing-topics {
     display: none;
+  }
+  .station-loader {
+    left: 50%;
   }
   .station-status {
     right: 16px;
     left: 16px;
     top: 45%;
   }
-  .landing-tour {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    order: 3;
-    margin: -40px 16px 0;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    justify-content: flex-start;
-  }
-  .landing-tour button {
-    flex: 0 0 auto;
-  }
-  .landing-tour .landing-wide {
+}
+@media (max-width: 560px) {
+  .landing-logo {
     display: none;
   }
-  .landing-topics {
-    order: 4;
-    font-size: 15px;
-    letter-spacing: 0.2em;
-    gap: 12px;
-    padding-top: 22px;
-  }
-  .landing-topics::before,
-  .landing-topics::after {
-    flex-basis: 8%;
-  }
-  .landing-directory {
-    padding: 40px max(16px, env(safe-area-inset-right, 0px)) 60px max(16px, env(safe-area-inset-left, 0px));
+  .landing-icon {
+    display: block;
+    height: 46px;
   }
 }
 @media (max-width: 380px) {
-  .landing-brand .landing-word {
-    font-size: 22px;
-  }
-  .landing-bars {
-    width: 22px;
-  }
   .landing-page .landing-header nav > button {
     padding: 8px;
     font-size: 16px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .landing-page {
-    scroll-behavior: auto;
-  }
   .landing-page .landing-header nav > button,
   .landing-actions button,
   .landing-actions .button-link {
     transition: none;
+  }
+  .landing-canvas canvas,
+  .station-loader::before {
+    animation: none;
   }
 }

@@ -128,6 +128,8 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
     }),
   );
   arcs.position.set(0, mastTop + 0.45, 0);
+  // Hidden until the animation first places them, so a still frame never shows stale arcs.
+  arcs.visible = false;
   mast.add(arcs);
   const arcRandom = T.random(99);
   let arcTimer = 0;

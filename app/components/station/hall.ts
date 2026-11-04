@@ -18,6 +18,7 @@ import {
   ringPoints,
   TAU,
 } from "./shapes";
+import { buildLogo } from "./logo";
 import { plan, facing, loop, band, capSlab, dome, onWall, GLASS_FROM, GLASS_TO, HALL_AT } from "./plan";
 
 interface HallScope {
@@ -106,7 +107,7 @@ function hallOnAirSign(k: Kit, s: Pick<HallScope, "onAir">): void {
 }
 
 export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
-  const { brass, gold, copper, iron, cream, hallTeal, hallCream, hallDark, steel, warmSoft, glass } = k;
+  const { brass, gold, copper, iron, hallTeal, hallCream, hallDark, steel, warmSoft, glass } = k;
   const hall = add(new THREE.Group(), station);
   hall.position.copy(HALL_AT);
   // Plinth: iron footing, cream enamel skirt, riveted brass trim.
@@ -132,7 +133,7 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   capSlab(0.22, 2.44, 0.04, hallDark, hall);
   band([0, TAU], [2.46, 3.46], 0.22, hallTeal, hall);
   tube(loop(0, TAU, 0.25, 2.48, 160, true), 0.055, gold, hall, true);
-  for (const y of [2.72, 2.88, 3.04]) tube(loop(0, TAU, 0.245, y, 160, true), 0.032, cream, hall, true);
+  buildLogo(k, hall);
   rivets(loop(0, TAU, 0.228, 3.3, 140, true), 0.016, brass, hall);
   band([0, TAU], [3.46, 3.62], 0.3, hallDark, hall);
   tube(loop(0, TAU, 0.31, 3.62, 160, true), 0.05, gold, hall, true);
