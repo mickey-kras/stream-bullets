@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { StreamerApplication } from "../types";
 
 const MAX_LINKS = 5;
 
 interface LinkRow {
-  key: number;
+  key: string;
   value: string;
 }
 
@@ -49,33 +49,27 @@ export function StreamerWaitlist({
   disabled: boolean;
   onSubmit: (input: { links: string[]; note: string }) => Promise<boolean>;
 }>): ReactNode {
-  const nextKey = useRef<number>(0);
-  const makeRow = (value: string): LinkRow => ({ key: nextKey.current++, value });
+  const makeRow = (value: string): LinkRow => ({ key: crypto.randomUUID(), value });
   const [rows, setRows] = useState<LinkRow[]>(() =>
     (application?.links.length ? application.links : [""]).map((value: string) => makeRow(value)),
   );
   const [note, setNote] = useState<string>(application?.note ?? "");
-  const [focusKey, setFocusKey] = useState<number | null>(null);
-  const inputs = useRef<Map<number, HTMLInputElement>>(new Map());
-
-  useEffect(() => {
-    if (focusKey === null) return;
-    inputs.current.get(focusKey)?.focus();
-    setFocusKey(null);
-  }, [focusKey]);
+  // Focus moves from event handlers: an added row focuses itself when it mounts.
+  const pendingFocus = useRef<string | null>(null);
+  const inputs = useRef<Map<string, HTMLInputElement>>(new Map());
 
   function addRow(): void {
     if (rows.length >= MAX_LINKS) return;
     const row = makeRow("");
+    pendingFocus.current = row.key;
     setRows([...rows, row]);
-    setFocusKey(row.key);
   }
 
   function removeRow(index: number): void {
     if (rows.length <= 1) return;
     const remaining = rows.filter((_row: LinkRow, position: number) => position !== index);
     setRows(remaining);
-    setFocusKey(remaining[Math.max(0, index - 1)].key);
+    inputs.current.get(remaining[Math.max(0, index - 1)].key)?.focus();
   }
 
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -114,8 +108,15 @@ export function StreamerWaitlist({
                   <span>Channel link {index + 1}</span>
                   <input
                     ref={(element: HTMLInputElement | null) => {
-                      if (element) inputs.current.set(row.key, element);
-                      else inputs.current.delete(row.key);
+                      if (!element) {
+                        inputs.current.delete(row.key);
+                        return;
+                      }
+                      inputs.current.set(row.key, element);
+                      if (pendingFocus.current === row.key) {
+                        pendingFocus.current = null;
+                        element.focus();
+                      }
                     }}
                     type="url"
                     name="links"

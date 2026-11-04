@@ -125,9 +125,7 @@ export const applicationQuerySchema = z
   })
   .strict();
 
-export const applicationReviewSchema = z
-  .object({ id, decision: z.enum(["approved", "rejected"]) })
-  .strict();
+export const applicationReviewSchema = z.object({ id, decision: z.enum(["approved", "rejected"]) }).strict();
 
 export type ApplicationInput = z.infer<typeof applicationSchema>;
 export type ApplicationQuery = z.infer<typeof applicationQuerySchema>;
