@@ -300,9 +300,10 @@ function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: T
 }
 
 /** Hand the main thread back to the browser for a moment, so taps, scrolling and paint keep up. */
-const pause = (): Promise<void> => new Promise((resolve: () => void): void => {
-  setTimeout(resolve, 0);
-});
+const pause = (): Promise<void> =>
+  new Promise((resolve: () => void): void => {
+    setTimeout(resolve, 0);
+  });
 
 /** Builds the model part by part, pausing between parts so the page stays responsive while it loads. */
 async function buildModel(
