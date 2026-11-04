@@ -9,6 +9,7 @@ import {
   ball,
   torus,
   rod,
+  pipe,
   tube,
   rounded,
   plaque,
@@ -16,9 +17,8 @@ import {
   rivets,
   ringPoints,
   TAU,
-  DECK_Y,
 } from "./shapes";
-import { plan, facing, loop, band, capSlab, dome, onWall, GLASS_FROM, GLASS_TO } from "./plan";
+import { plan, facing, loop, band, capSlab, dome, onWall, GLASS_FROM, GLASS_TO, HALL_AT } from "./plan";
 
 interface HallScope {
   hall: THREE.Group;
@@ -41,24 +41,6 @@ function hallRoofTanks(k: Kit, s: Pick<HallScope, "hall">): void {
   torus([0.6, 0.03], [-1.1, 3.78, -1.2], gold, hall);
 }
 
-function hallServiceDoor(k: Kit, s: Pick<HallScope, "hall">): void {
-  const { brass, gold, iron, steel } = k;
-  const { hall } = s;
-  const g = onWall(hall, 3.1, 0.62, 0.02);
-  plaque([0.82, 1.62, 0.06, 0.1], [0, 0.81, 0], steel, g);
-  frame([0.92, 1.72, 0.12, 0.06, 0.06], [0, 0.81, 0.02], brass, g);
-  rivets(
-    [-0.33, 0.33].flatMap((x: number): THREE.Vector3[] =>
-      [0.2, 0.6, 1, 1.4].map((y: number): THREE.Vector3 => new THREE.Vector3(x, y, 0.07)),
-    ),
-    0.02,
-    gold,
-    g,
-  );
-  box([0.06, 0.26, 0.06], [0.3, 0.85, 0.1], iron, g, 0.01);
-  box([0.5, 0.04, 0.05], [0, 1.15, 0.08], iron, g, 0.01);
-}
-
 function hallFuseBox(k: Kit, s: Pick<HallScope, "hall">): void {
   const { copper, iron, steel, beacon } = k;
   const { hall } = s;
@@ -79,17 +61,18 @@ function hallFuseBox(k: Kit, s: Pick<HallScope, "hall">): void {
 }
 
 function hallOnAirSign(k: Kit, s: Pick<HallScope, "onAir">): void {
-  const { gold, iron, warm, neon, signRed, halo, practical, label } = k;
+  const { gold, iron, warm, neon, signRed, halo, practical, label, animators } = k;
   const { onAir } = s;
   const a = -0.14;
   onAir.position.copy(plan(a, 0.36, 3));
   onAir.rotation.y = facing(a);
   plaque([2.55, 0.98, 0.1, 0.22], [0, 0, -0.12], iron, onAir);
   frame([2.55, 0.98, 0.22, 0.13, 0.2], [0, 0, -0.06], gold, onAir);
-  plaque([2.32, 0.76, 0.02, 0.14], [0, 0, -0.04], signRed, onAir);
+  // The red panel stands just proud of the iron backing so the two faces never fight for depth.
+  plaque([2.32, 0.76, 0.02, 0.14], [0, 0, 0], signRed, onAir);
   const outline = rounded(2.12, 0.6, 0.1)
     .getPoints(24)
-    .map((p: THREE.Vector2): THREE.Vector3 => new THREE.Vector3(p.x, p.y, 0.03));
+    .map((p: THREE.Vector2): THREE.Vector3 => new THREE.Vector3(p.x, p.y, 0.05));
   tube(outline, 0.016, neon, onAir, true, 0.2).castShadow = false;
   label(
     (ctx: CanvasRenderingContext2D, w: number, h: number): void => {
@@ -100,7 +83,7 @@ function hallOnAirSign(k: Kit, s: Pick<HallScope, "onAir">): void {
       ctx.fillText("ON AIR", w / 2, h * 0.54, w * 0.9);
     },
     [1.9, 0.52],
-    [0, 0, 0.05],
+    [0, 0, 0.06],
     onAir,
     0.4,
   );
@@ -109,14 +92,23 @@ function hallOnAirSign(k: Kit, s: Pick<HallScope, "onAir">): void {
     ball(0.028, [p.x, p.y, 0.15], warm, onAir, 10);
   }
   for (const x of [-0.9, 0.9]) box([0.08, 0.3, 0.3], [x, -0.45, -0.2], iron, onAir, 0.02);
-  halo([0, 0, 0.5], 3.2, "#ff5a30", 0.3, onAir);
-  practical("#ff5534", [4, 3.5], [0, -0.2, 0.7], onAir);
+  // The red panel breathes slowly behind lettering that stays steady and crisp; the glow sits behind
+  // the sign so it does not haze over the letters.
+  const glow = halo([0, 0, -0.3], 3, "#ff1a0a", 0.3, onAir);
+  const light = practical("#ff2010", [3, 3.5], [0, -0.2, 0.7], onAir);
+  animators.push((t: number): void => {
+    if (!k.illuminated) return;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
+    signRed.emissiveIntensity = 0.3 + 0.9 * pulse;
+    glow.material.opacity = 0.06 + 0.2 * pulse;
+    light.intensity = 1.2 + 2.4 * pulse;
+  });
 }
 
 export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   const { brass, gold, copper, iron, cream, hallTeal, hallCream, hallDark, steel, warmSoft, glass } = k;
   const hall = add(new THREE.Group(), station);
-  hall.position.set(-0.7, DECK_Y, -0.25);
+  hall.position.copy(HALL_AT);
   // Plinth: iron footing, cream enamel skirt, riveted brass trim.
   capSlab(0.3, 0, 0.1, iron, hall);
   band([0, TAU], [0.1, 0.6], 0.2, hallCream, hall);
@@ -155,7 +147,7 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   }
   hallRoofTanks(k, { hall });
   // Rear portholes with warm light leaking from the studio.
-  for (const a of [1.95, 4.2]) {
+  for (const a of [2.06, 3.83]) {
     const g = onWall(hall, a, 1.62, 0.02);
     torus([0.27, 0.05], [0, 0, 0.02], brass, g, false);
     mesh(new THREE.CircleGeometry(0.25, 32), warmSoft, [0, 0, 0], g, false);
@@ -167,23 +159,25 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
     );
   }
   for (const [a, y] of [
-    [2.5, 2],
-    [3.75, 1.95],
+    [2.58, 2],
+    [3.22, 1.95],
   ] as const) {
     const g = onWall(hall, a, y, 0.03);
     box([0.82, 0.5, 0.06], [0, 0, 0], steel, g, 0.03);
     for (let i = 0; i < 6; i++) box([0.7, 0.03, 0.07], [0, -0.17 + i * 0.068, 0.03], iron, g, 0.008).rotation.x = -0.5;
   }
-  hallServiceDoor(k, { hall });
   hallFuseBox(k, { hall });
-  // Copper service lines wrapping the back of the hall.
-  tube(loop(1.55, 4.4, 0.14, 1, 60), 0.05, copper, hall);
-  tube(loop(1.85, 2.85, 0.14, 2.3, 30), 0.035, copper, hall);
-  for (let i = 0; i < 10; i++) {
-    const a = 1.6 + i * 0.3;
-    if (Math.abs(a - 3.1) < 0.3) continue;
-    box([0.06, 1.45, 0.06], [0, 0, 0], iron, onWall(hall, a, 1.62, 0.1), 0.01);
+  // Copper service lines round the back. The lower one runs from a junction box behind the tanks into
+  // the side of the fuse box; the upper one runs between two junction boxes above the porthole.
+  for (const [a0, a1, y, r, boxEnd] of [
+    [2.65, 3.39, 1.2, 0.05, false],
+    [1.85, 2.85, 2.4, 0.035, true],
+  ] as const) {
+    pipe([plan(a0, 0.05, y), ...loop(a0, a1, 0.14, y, 60), plan(a1, 0.05, y)], r, [copper, brass], hall);
+    for (const a of boxEnd ? [a0, a1] : [a0]) box([0.2, 0.24, 0.12], [0, 0, 0], brass, onWall(hall, a, y, 0.06), 0.02);
   }
+  // Iron ribs only in the clear stretches between portholes, vents, the door and the fuse box.
+  for (const a of [1.63, 2.87]) box([0.06, 1.45, 0.06], [0, 0, 0], iron, onWall(hall, a, 1.62, 0.04), 0.01);
 
   // ON AIR marquee, mounted proud of the fascia.
   const onAir = add(new THREE.Group(), hall);

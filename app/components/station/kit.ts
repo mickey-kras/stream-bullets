@@ -16,6 +16,7 @@ export function createKit(compact: boolean, family: string) {
   const glowTexture = T.glow();
   const psiFace = T.dial(false);
   const vuFace = T.dial(true);
+  const redZone = T.dialRedZone();
   const kit = {
     ...palette,
     compact,
@@ -28,8 +29,6 @@ export function createKit(compact: boolean, family: string) {
     practicals: [] as Array<[THREE.PointLight, number]>,
     /** Extra work for the lights switch, registered by the parts that own it. */
     onLights: [] as Array<(on: boolean) => void>,
-    /** Where steam leaves the tanks and boiler, in station coordinates. */
-    vents: [] as THREE.Vector3[],
 
     /** Soft additive glow around a light source. */
     halo(at: P, size: number, color: string, opacity: number, parent: THREE.Object3D): THREE.Sprite {
@@ -103,7 +102,7 @@ export function createKit(compact: boolean, family: string) {
       }
     },
     /** Round instrument with a twitching needle; amber gauges are backlit VU meters. */
-    gauge(at: P, rot: number, size: number, parent: THREE.Object3D, amber = false): void {
+    gauge(at: P, rot: number, size: number, parent: THREE.Object3D, amber = false, high = false): void {
       const g = add(new THREE.Group(), parent);
       g.position.set(at[0], at[1], at[2]);
       g.rotation.y = rot;
@@ -112,9 +111,9 @@ export function createKit(compact: boolean, family: string) {
       const faceMaterial = new THREE.MeshStandardMaterial({
         map: amber ? vuFace : psiFace,
         roughness: 0.4,
-        emissive: amber ? "#ffb24a" : "#000000",
-        emissiveMap: amber ? vuFace : null,
-        emissiveIntensity: amber ? 1.2 : 0,
+        emissive: amber ? "#ffb24a" : high ? "#ff1405" : "#000000",
+        emissiveMap: amber ? vuFace : high ? redZone : null,
+        emissiveIntensity: amber ? 1.2 : high ? 2 : 0,
       });
       mesh(new THREE.CircleGeometry(size, 32), faceMaterial, [0, 0, 0.032], g, false);
       if (amber) kit.emissives.push([faceMaterial, 1.2]);
@@ -128,9 +127,17 @@ export function createKit(compact: boolean, family: string) {
         0.002,
       );
       const seed = Math.random() * 10;
-      const [speed, swing, jitter, rest] = amber ? [5.3, 0.45, 0.2, 0] : [0.7, 0.12, 0.02, -0.3];
+      // VU meters dance; pressure dials idle near the middle, or strain against the red when running high.
+      const [speed, swing, jitter, rest] = amber
+        ? [5.3, 0.45, 0.2, 0]
+        : high
+          ? [2.6, 0.14, 0.07, -1.0]
+          : [0.7, 0.12, 0.02, -0.3];
+      needle.rotation.z = rest;
       kit.animators.push((t: number): void => {
         needle.rotation.z = Math.sin(t * speed + seed) * swing + Math.sin(t * 11.7 + seed) * jitter + rest;
+        // A high-pressure dial's red zone throbs like a warning lamp.
+        if (high) faceMaterial.emissiveIntensity = kit.illuminated ? 1.2 + 0.7 * Math.sin(t * 5 + seed) : 0;
       });
     },
     /** Red hand-wheel valve. */

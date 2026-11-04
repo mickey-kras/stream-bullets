@@ -2,7 +2,7 @@ import * as THREE from "three";
 import * as M from "./materials";
 import * as T from "./textures";
 import type { Kit } from "./kit";
-import { add, mesh, box, ball, torus, rod, tube, lathe, rivets, TAU, profile } from "./shapes";
+import { add, box, ball, torus, rod, tube, lathe, rivets, TAU, profile } from "./shapes";
 
 /** Half-width of the tower at height y: splayed feet, tapering to the spire. */
 const half = (y: number): number => 0.06 + 0.6 * Math.pow(1 - Math.min(y, 2.95) / 3, 1.45);
@@ -77,7 +77,7 @@ function buildTower(k: Kit, mast: THREE.Group): void {
   lathe(profile(0, 0, 0.07, 0, 0.05, 0.1, 0.025, 0.35, 0.015, 0.42, 0, 0.42), gold, [0, 2.86, 0], mast, 20);
 }
 
-/** Brass orb, the glowing signal rings that lean toward the viewer, the outward ripple, a pulsing shell and arcs. */
+/** Brass orb, the three glowing signal rings that lean toward the viewer, and arcs. */
 function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
   const { tiles, animators, onLights, halo, practical } = k;
   const orbMaterial = new THREE.MeshStandardMaterial({
@@ -91,76 +91,29 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
   ball(0.16, [0, mastTop + 0.45, 0], orbMaterial, mast, 32);
   halo([0, mastTop + 0.45, 0], 1, "#ffd08a", 0.35, mast);
   const orbLight = practical("#ffcf86", [5, 6], [0, mastTop + 0.45, 0], mast);
-  // Radio waves: a shader disc of rings that ripple outward and fade, plus a pulsing shell.
-  const waveMaterial = new THREE.ShaderMaterial({
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    side: THREE.DoubleSide,
-    fog: false,
-    uniforms: {
-      uTime: { value: 0 },
-      uColor: { value: new THREE.Color("#ffc36a") },
-      uOn: { value: 1 },
-    },
-    vertexShader:
-      "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
-    fragmentShader: `uniform float uTime; uniform vec3 uColor; uniform float uOn; varying vec2 vUv;
-            void main(){
-                vec2 p = vUv * 2.0 - 1.0; float d = length(p); float a = atan(p.y, p.x);
-                float sum = 0.0;
-                for (int i = 0; i < 4; i++) {
-                    float r = fract(uTime * 0.22 + float(i) * 0.25);
-                    float wobble = 0.012 * sin(a * 6.0 + uTime * 2.0 + float(i));
-                    float band = exp(-pow((d - r - wobble) * 55.0, 2.0));
-                    float soft = exp(-pow((d - r) * 12.0, 2.0)) * 0.25;
-                    sum += (band + soft) * pow(1.0 - r, 1.6) * smoothstep(0.0, 0.08, r);
-                }
-                float dash = 0.75 + 0.25 * sin(a * 24.0 - uTime * 3.0);
-                gl_FragColor = vec4(uColor * sum * dash * 1.1 * uOn, 1.0);
-            }`,
-  });
   // The ring set leans toward whoever is looking, so it always reads as open ellipses.
   const tilt = add(new THREE.Group(), mast);
   tilt.position.set(0, mastTop + 0.45, 0);
   tilt.rotation.order = "YXZ";
-  const waves = mesh(new THREE.PlaneGeometry(9, 9), waveMaterial, [0, 0, 0], tilt, false);
-  waves.rotation.x = -Math.PI / 2;
-  waves.receiveShadow = false;
-  waves.renderOrder = 3;
-  const ringGlow = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#ffc865").multiplyScalar(2.2),
-    fog: false,
-  });
-  const signalRings: THREE.Mesh[] = [];
+  // Three rings that pulse outward in turn, swelling and flaring like a broadcast going out.
+  const lit = new THREE.Color("#ffc865");
+  const dim = new THREE.Color("#6d5a35");
+  const signalRings: Array<[THREE.Mesh, THREE.MeshBasicMaterial]> = [];
   for (let i = 0; i < 3; i++) {
-    const ring = torus([0.7 + i * 0.62, 0.02], [0, 0, 0], ringGlow, tilt);
+    const glow = new THREE.MeshBasicMaterial({ color: lit.clone().multiplyScalar(2.2), fog: false });
+    const ring = torus([0.7 + i * 0.62, 0.02], [0, 0, 0], glow, tilt);
     ring.castShadow = false;
-    signalRings.push(ring);
+    signalRings.push([ring, glow]);
   }
   animators.push((t: number): void =>
-    signalRings.forEach((ring: THREE.Mesh, i: number): void => {
-      const pulse = Math.max(0, Math.sin(t * 2.4 - i * 0.9));
-      ring.scale.setScalar(1 + pulse * 0.04);
+    signalRings.forEach(([ring, glow]: [THREE.Mesh, THREE.MeshBasicMaterial], i: number): void => {
+      const pulse = Math.pow(0.5 + 0.5 * Math.sin(t * 3 - i * 1.15), 3);
+      ring.scale.setScalar(1 + pulse * 0.2);
       ring.position.y = Math.sin(t * 1.1 + i) * 0.03;
+      if (k.illuminated) glow.color.copy(lit).multiplyScalar(1.3 + pulse * 2.6);
+      else glow.color.copy(dim);
     }),
   );
-  const shellMaterial = new THREE.ShaderMaterial({
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    fog: false,
-    uniforms: {
-      uFade: { value: 0 },
-      uColor: { value: new THREE.Color("#ffcf86") },
-    },
-    vertexShader:
-      "varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }",
-    fragmentShader:
-      "uniform float uFade; uniform vec3 uColor; varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1.0 - abs(dot(vN, vV)), 3.0); gl_FragColor = vec4(uColor * f * uFade * 1.5, 1.0); }",
-  });
-  const shell = mesh(new THREE.SphereGeometry(1, 40, 24), shellMaterial, [0, mastTop + 0.45, 0], mast, false);
-  shell.receiveShadow = false;
   // Electric arcs flicking off the orb.
   const arcGeometry = new THREE.BufferGeometry();
   const arcPositions = new Float32Array(3 * 2 * 3 * 8);
@@ -179,10 +132,6 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
   const arcRandom = T.random(99);
   let arcTimer = 0;
   animators.push((t: number, dt: number): void => {
-    waveMaterial.uniforms.uTime!.value = t;
-    const cycle = (t * 0.42) % 1;
-    shell.scale.setScalar(0.25 + cycle * 3.2);
-    shellMaterial.uniforms.uFade!.value = Math.pow(1 - cycle, 2) * (k.illuminated ? 0.55 : 0);
     const flicker = 0.85 + Math.sin(t * 13) * 0.08 + Math.sin(t * 31) * 0.07;
     orbMaterial.emissiveIntensity = k.illuminated ? 0.35 * flicker : 0;
     orbLight.intensity = k.illuminated ? 5 * flicker : 0;
@@ -209,8 +158,7 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
     }
   });
   onLights.push((on: boolean): void => {
-    waveMaterial.uniforms.uOn!.value = on ? 1 : 0;
-    ringGlow.color.set(on ? "#ffc865" : "#6d5a35").multiplyScalar(on ? 2.2 : 1);
+    for (const [, glow] of signalRings) glow.color.copy(on ? lit : dim).multiplyScalar(on ? 2.2 : 1);
     arcs.visible = false;
   });
   return tilt;

@@ -52,62 +52,11 @@ function buildFog(k: Kit, atmosphere: THREE.Group, cloudTexture: THREE.Texture):
   });
 }
 
-export function buildAtmosphere(k: Kit, scene: THREE.Scene, station: THREE.Group): void {
-  const { neon, signRed, animators, vents } = k;
+export function buildAtmosphere(k: Kit, scene: THREE.Scene): void {
+  const { animators } = k;
   const atmosphere = add(new THREE.Group(), scene);
   const cloudTexture = T.cloud(77);
   buildFog(k, atmosphere, cloudTexture);
-  const steamMaterial = new THREE.ShaderMaterial({
-    transparent: true,
-    depthWrite: false,
-    uniforms: {
-      uTime: { value: 0 },
-      uMap: { value: cloudTexture },
-      uScale: { value: 1 },
-      uColor: { value: new THREE.Color("#d8e4de") },
-    },
-    vertexShader: `attribute float aSeed; uniform float uTime; uniform float uScale; varying float vAlpha; varying float vSpin;
-            void main(){
-                float t = fract(uTime * 0.16 + aSeed);
-                vec3 p = position;
-                p.y += t * 2.4;
-                p.x += t * t * 0.9 + sin(aSeed * 40.0 + t * 4.0) * 0.18 * t;
-                p.z += cos(aSeed * 23.0 + t * 3.0) * 0.18 * t;
-                vec4 mv = modelViewMatrix * vec4(p, 1.0);
-                gl_Position = projectionMatrix * mv;
-                gl_PointSize = uScale * (0.25 + t * 1.5) * 260.0 / -mv.z;
-                vAlpha = smoothstep(0.0, 0.1, t) * pow(1.0 - t, 1.4);
-                vSpin = aSeed * 6.28 + t;
-            }`,
-    fragmentShader: `uniform sampler2D uMap; uniform vec3 uColor; varying float vAlpha; varying float vSpin;
-            void main(){
-                vec2 c = gl_PointCoord - 0.5; float s = sin(vSpin), k = cos(vSpin);
-                vec2 uv = vec2(c.x * k - c.y * s, c.x * s + c.y * k) + 0.5;
-                float a = texture2D(uMap, uv).a * vAlpha * 0.55;
-                gl_FragColor = vec4(uColor, a);
-            }`,
-  });
-  {
-    const perVent = k.compact ? 16 : 28;
-    const pos: number[] = [],
-      seeds: number[] = [];
-    const rnd = T.random(55);
-    for (const v of vents)
-      for (let i = 0; i < perVent; i++) {
-        pos.push(v.x, v.y, v.z);
-        seeds.push(rnd());
-      }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-    g.setAttribute("aSeed", new THREE.Float32BufferAttribute(seeds, 1));
-    const steam = new THREE.Points(g, steamMaterial);
-    steam.frustumCulled = false;
-    steam.renderOrder = 4;
-    station.add(steam);
-    animators.push((t: number): void => {
-      steamMaterial.uniforms.uTime!.value = t;
-    });
-  }
   {
     const pos: number[] = [];
     const rnd = T.random(8);
@@ -131,11 +80,4 @@ export function buildAtmosphere(k: Kit, scene: THREE.Scene, station: THREE.Group
       dust.position.y = Math.sin(t * 0.15) * 0.1;
     });
   }
-  // ON AIR neon flicker and marquee chase.
-  animators.push((t: number): void => {
-    if (!k.illuminated) return;
-    const flick = Math.sin(t * 50) > 0.985 ? 0.55 : 1;
-    neon.emissiveIntensity = 2.6 * flick;
-    signRed.emissiveIntensity = 1 * flick;
-  });
 }

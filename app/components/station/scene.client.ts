@@ -272,7 +272,7 @@ function buildModel(k: Kit, scene: THREE.Scene, station: THREE.Group): THREE.Gro
   const tilt = buildMast(k, hall);
   buildSigns(k, station);
   buildAtom(k, station);
-  buildAtmosphere(k, scene, station);
+  buildAtmosphere(k, scene);
   return tilt;
 }
 

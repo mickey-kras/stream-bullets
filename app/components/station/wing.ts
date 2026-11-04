@@ -19,6 +19,7 @@ import {
   DECK_Y,
 } from "./shapes";
 import { enamel } from "./palette";
+import { GREY_TANK } from "./works";
 
 interface WingScope {
   wing: THREE.Group;
@@ -146,23 +147,23 @@ function wingPlanterSoil(_k: Kit, s: Pick<WingScope, "wing">): void {
 }
 
 function wingSideWall(k: Kit, s: Pick<WingScope, "wing" | "station">): void {
-  const { brass, iron } = k;
+  const { brass, copper, iron } = k;
   const { wing, station } = s;
   const vent = add(new THREE.Group(), wing);
-  vent.position.set(0.96, 1.75, -0.75);
+  // Sits in the gap between the two risers.
+  vent.position.set(0.96, 1.75, -0.675);
   vent.rotation.y = Math.PI / 2;
-  box([0.5, 0.42, 0.05], [0, 0, 0], iron, vent, 0.02);
+  box([0.34, 0.42, 0.05], [0, 0, 0], iron, vent, 0.02);
   for (let i = 0; i < 6; i++)
-    box([0.42, 0.025, 0.06], [0, -0.15 + i * 0.06, 0.03], brass, vent, 0.006).rotation.x = -0.5;
+    box([0.28, 0.025, 0.06], [0, -0.15 + i * 0.06, 0.03], brass, vent, 0.006).rotation.x = -0.5;
   const w = (x: number, y: number, z: number): THREE.Vector3 =>
     new THREE.Vector3(x, y - DECK_Y, z).applyAxisAngle(new THREE.Vector3(0, 1, 0), wing.rotation.y).add(wing.position);
-  pipe(
-    [w(1.02, 0.5, -0.4), w(1.02, 3, -0.4), new THREE.Vector3(1.25, 3, -1.3), new THREE.Vector3(1.25, 4.55, -1.3)],
-    0.055,
-    [brass, brass],
-    station,
-  );
-  pipe([w(1.02, 0.3, -0.95), w(1.02, 2.6, -0.95)], 0.04, [brass, brass], station);
+  // The tall riser climbs the side wall, then turns into the side of the porch's upper block.
+  pipe([w(1.02, 0.3, -0.4), w(1.02, 3.05, -0.4), w(0.8, 3.05, -0.4)], 0.055, [brass, brass], station);
+  // The grey receiver's outlet rises off its dome, crosses to the wall and drops down it into the deck.
+  const outlet = GREY_TANK.clone().setY(DECK_Y + 1.6);
+  const head = w(1.02, 2.6, -0.95);
+  pipe([outlet, outlet.clone().setY(head.y), head, w(1.02, 0.3, -0.95)], 0.05, [copper, brass], station);
   for (const y of [1, 2]) box([0.1, 0.05, 0.12], [1, y, -0.4], iron, wing, 0.01);
 }
 
@@ -199,14 +200,20 @@ function wingSteps(k: Kit, { wing, stepSteel }: Pick<WingScope, "wing" | "stepSt
   }
 }
 
+/** Where the porch stands and how it is turned; the studio uses these to line its inner door up. */
+export const WING_AT = new THREE.Vector3(2.35, DECK_Y, 0.3);
+export const WING_YAW = Math.PI / 4;
+/** The porch block's back face (local z) that juts into the studio, facing the locker. */
+export const WING_BACK_Z = -1.2;
+
 export function buildWing(k: Kit, station: THREE.Group): THREE.Group {
   const { tiles, ivoryWear, brass, gold, teal, tealDark, cream, plant } = k;
   // Teal block with a round tower beside the door, a finned pylon, a cream cantilevered canopy on a
   // grooved pillar, a brass door, three curved steel steps with brass nosing and brass handrails.
   const wing = add(new THREE.Group(), station);
   // The porch is tucked against the end of the hall, opening toward the front-right corner.
-  wing.position.set(2.35, DECK_Y, 0.3);
-  wing.rotation.y = Math.PI / 4;
+  wing.position.copy(WING_AT);
+  wing.rotation.y = WING_YAW;
   const creamShade = enamel(tiles.ivory, null, "#b9a888", ivoryWear);
   const stepSteel = M.wear(
     new THREE.MeshStandardMaterial({

@@ -14,6 +14,7 @@ import { buildMast } from "../app/components/station/mast";
 import { buildSigns } from "../app/components/station/signs";
 import { buildAtom } from "../app/components/station/atom";
 import { buildAtmosphere } from "../app/components/station/atmosphere";
+import { poster } from "../app/components/station/poster";
 import { installRecordingCanvas, RecordingCanvas } from "./helpers/recording-canvas";
 
 beforeEach((): void => {
@@ -105,25 +106,34 @@ it.each([true, false])(
     buildMast(kit, hall);
     buildSigns(kit, station);
     buildAtom(kit, station);
-    buildAtmosphere(kit, scene, station);
+    buildAtmosphere(kit, scene);
     const hash = createHash("sha256");
     let meshes = 0;
+    // Values are rounded to 0.01 mm so the hash tracks the model, not last-bit Math differences between
+    // V8 releases.
+    const round = (values: ArrayLike<number>): number[] =>
+      Array.from(values, (value: number): number => Math.round(value * 1e5) || 0);
     scene.traverse((object: THREE.Object3D): void => {
+      const { position, rotation, scale } = object;
       hash.update(
-        JSON.stringify([object.type, object.position.toArray(), object.rotation.toArray(), object.scale.toArray()]),
+        JSON.stringify([
+          object.type,
+          round(position.toArray()),
+          round([rotation.x, rotation.y, rotation.z]),
+          round(scale.toArray()),
+        ]),
       );
       if (object instanceof THREE.Mesh) {
         meshes++;
         const positions = object.geometry.getAttribute("position");
         expect(Array.from(positions.array).every(Number.isFinite)).toBe(true);
-        hash.update(Buffer.from(positions.array.buffer, positions.array.byteOffset, positions.array.byteLength));
+        hash.update(JSON.stringify(round(positions.array)));
       }
     });
     expect({
       meshes,
       geometry: hash.digest("hex"),
       animators: kit.animators.length,
-      vents: kit.vents.length,
     }).toMatchSnapshot();
     for (const animate of kit.animators) animate(1, 0.016);
     expect(kit.neon.emissiveIntensity).toBeGreaterThan(0);
@@ -149,7 +159,7 @@ it.each([true, false])(
 
 it("paints the clock, poster and backdrop", (): void => {
   expect(textureRecord(T.clockFace())).toMatchSnapshot();
-  expect((T.poster("sans-serif") as unknown as RecordingCanvas).digest()).toMatchSnapshot();
+  expect((poster("sans-serif") as unknown as RecordingCanvas).digest()).toMatchSnapshot();
   expect(textureRecord(T.backdrop())).toMatchSnapshot();
 });
 
