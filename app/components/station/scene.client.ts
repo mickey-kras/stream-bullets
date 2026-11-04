@@ -9,9 +9,12 @@ import { buildAtmosphere } from "./atmosphere";
 import { buildAtom } from "./atom";
 import { buildDeck } from "./deck";
 import { buildDecals } from "./decals";
+import { createFlips } from "./flips";
 import { buildHall } from "./hall";
 import { createKit, type Kit } from "./kit";
+import { createLook } from "./look";
 import { buildMast } from "./mast";
+import { batchStatic } from "./merge";
 import * as M from "./materials";
 import { DECK_Y, mesh, polar } from "./shapes";
 import { buildSigns } from "./signs";
@@ -47,6 +50,8 @@ export interface StationOptions {
   family?: string;
   /** Fraction of the canvas width to push the model right, leaving room for page copy. */
   shift?: (width: number, height: number) => number;
+  /** Pixels at the top of the canvas covered by page content (phones), so the model is framed below it. */
+  overlap?: () => number;
 }
 
 interface Shot {
@@ -55,6 +60,32 @@ interface Shot {
   phi: number;
   radius: number;
   shift: number;
+}
+
+/** On phones the station stands under the copy. This is the closest the camera comes; `fitPhone` pulls
+    it back and re-aims it so the whole model fits the part of the canvas the copy leaves uncovered. */
+const PHONE_HERO: Shot = {
+  target: new THREE.Vector3(0, 4.25, 0),
+  theta: 0.16,
+  phi: 1.33,
+  radius: 17.5,
+  shift: 0,
+};
+/** Height of the model on screen from the hero angle, in world units: the deck's near edge to the top of
+    the signal rings, with the lean of the view folded in. */
+const MODEL_LOW = -1.6;
+const MODEL_HIGH = 9.6;
+
+/** Phone hero shot for a canvas whose top `hidden` fraction is covered by the page. */
+export function fitPhone(fovDegrees: number, hidden: number): Shot {
+  const tanHalf = Math.tan(THREE.MathUtils.degToRad(fovDegrees / 2));
+  const covered = Math.min(0.6, Math.max(0, hidden));
+  const span = MODEL_HIGH - MODEL_LOW;
+  const radius = Math.max(PHONE_HERO.radius, span / ((1 - covered) * 2 * tanHalf));
+  const visible = 2 * tanHalf * radius;
+  // Centre the model in the uncovered part of the frame.
+  const y = (MODEL_LOW + MODEL_HIGH) / 2 + (covered * visible) / 2;
+  return { ...PHONE_HERO, radius, target: new THREE.Vector3(0, y, 0) };
 }
 
 const turnaround = (theta: number): Shot => ({
@@ -128,6 +159,9 @@ const SHOTS: Record<StationView, Shot> = {
   },
 };
 
+/** How long the station waits after an orbit drag before easing back to its hero angle. */
+const RETURN_AFTER_MS = 4000;
+
 function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -136,6 +170,9 @@ function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRend
   renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio, compact ? 1.25 : 1.6));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  // The light and almost all of the model are fixed, so the shadow map is drawn on demand, not per frame.
+  renderer.shadowMap.autoUpdate = false;
+  renderer.shadowMap.needsUpdate = true;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
   wrap.appendChild(renderer.domElement);
@@ -144,7 +181,8 @@ function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRend
     "aria-label",
     "3D model of a round teal and brass radio station with a broadcast mast, steam tanks and a studio inside. Drag to turn it.",
   );
-  renderer.domElement.style.touchAction = "pan-y";
+  // The landing never scrolls, so every drag on the canvas turns the station.
+  renderer.domElement.style.touchAction = "none";
   return renderer;
 }
 
@@ -262,7 +300,7 @@ function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: T
   return { composer, bloom, finish };
 }
 
-function buildModel(k: Kit, scene: THREE.Scene, station: THREE.Group): THREE.Group {
+function buildModel(k: Kit, scene: THREE.Scene, station: THREE.Group): { tilt: THREE.Group; signs: THREE.Group[] } {
   buildDeck(k, station);
   const hall = buildHall(k, station);
   buildStudio(k, hall);
@@ -270,17 +308,27 @@ function buildModel(k: Kit, scene: THREE.Scene, station: THREE.Group): THREE.Gro
   buildDecals(k, station, { hall, wing });
   buildWorks(k, station);
   const tilt = buildMast(k, hall);
-  buildSigns(k, station);
+  const signs = buildSigns(k, station);
   buildAtom(k, station);
+  // Merge everything that never moves; the camera-facing mast head and the flipping signs stay live.
+  const moving = batchStatic(station, k.animators, [tilt, ...signs]);
+  // Shadows render once (see the loop), so parts that move on their own do not cast stale ones.
+  for (const m of moving) m.castShadow = false;
+  // The drifting haze lives outside the station, so it joins after the merge has sampled the animators.
   buildAtmosphere(k, scene);
-  return tilt;
+  return { tilt, signs };
 }
 
 /** Camera rig: smooth spherical moves between shots, plus a horizontal view offset for page copy. */
-function createRig(camera: THREE.PerspectiveCamera, controls: OrbitControls, shift: StationOptions["shift"]) {
+function createRig(
+  camera: THREE.PerspectiveCamera,
+  controls: OrbitControls,
+  shift: StationOptions["shift"],
+  start: Shot,
+) {
   const spherical = new THREE.Spherical();
   const rig = {
-    goal: SHOTS.hero,
+    goal: start,
     current: 1,
     moving: false,
     width: 1,
@@ -372,6 +420,7 @@ export function createStation(
   const reduced = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
   const compact = globalThis.matchMedia("(max-width: 700px)").matches;
   const k = createKit(compact, options.family ?? "Oswald, sans-serif");
+  const shots: Record<StationView, Shot> = compact ? { ...SHOTS, hero: PHONE_HERO } : SHOTS;
   const state = {
     playing: !reduced.matches,
     dragging: false,
@@ -380,8 +429,10 @@ export function createStation(
     last: performance.now(),
     visible: true,
     view: "hero" as StationView,
+    /** When the last orbit drag ended, or -1 when the camera has not been dragged away. */
+    idleSince: -1,
+    shadowTilt: Number.NaN,
   };
-  const pointer = new THREE.Vector2();
 
   const renderer = createRenderer(wrap, compact);
   const scene = new THREE.Scene();
@@ -393,18 +444,20 @@ export function createStation(
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 140);
   const station = new THREE.Group();
   scene.add(station);
-  const tilt = buildModel(k, scene, station);
+  const { tilt, signs } = buildModel(k, scene, station);
   const key = addLights(scene, compact);
   const { composer, bloom, finish } = createPost(renderer, scene, camera);
 
   const controls = createControls(camera, renderer.domElement);
-  const { rig, place, step, applyShift } = createRig(camera, controls, options.shift);
+  const { rig, place, step, applyShift } = createRig(camera, controls, options.shift, shots.hero);
   controls.addEventListener("start", (): void => {
     state.dragging = true;
     rig.moving = false;
   });
   controls.addEventListener("end", (): void => {
     state.dragging = false;
+    // After a drag the station drifts back to its hero angle once it has been left alone for a while.
+    state.idleSince = performance.now();
   });
   controls.addEventListener("change", (): void => {
     state.dirty = true;
@@ -420,6 +473,11 @@ export function createStation(
     renderer.setSize(rig.width, rig.height);
     composer.setSize(rig.width, rig.height);
     bloom.resolution.set(rig.width / 2, rig.height / 2);
+    if (compact) {
+      shots.hero = fitPhone(camera.fov, (options.overlap?.() ?? 0) / rig.height);
+      // Re-frame straight away unless the person has turned the station themselves.
+      if (state.view === "hero" && !state.dragging && state.idleSince < 0) place(shots.hero);
+    }
     applyShift();
     state.dirty = true;
   });
@@ -428,22 +486,8 @@ export function createStation(
     state.visible = entries[0].isIntersecting;
   });
   visibility.observe(wrap);
-  wrap.addEventListener(
-    "pointermove",
-    (e: PointerEvent): void => {
-      if (e.pointerType !== "mouse" || state.dragging) return;
-      const r = wrap.getBoundingClientRect();
-      pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, ((e.clientY - r.top) / r.height) * 2 - 1);
-    },
-    listen,
-  );
-  wrap.addEventListener(
-    "pointerleave",
-    (): void => {
-      pointer.set(0, 0);
-    },
-    listen,
-  );
+  const look = createLook(wrap, lifecycle.signal);
+  const flips = createFlips(signs, wrap, renderer.domElement, lifecycle.signal);
   reduced.addEventListener(
     "change",
     (): void => {
@@ -465,24 +509,38 @@ export function createStation(
       for (const a of k.animators) a(state.clock, dt);
       finish.uniforms.uTime!.value = state.clock;
     }
+    if (state.idleSince >= 0 && !state.dragging && now - state.idleSince > RETURN_AFTER_MS) {
+      state.idleSince = -1;
+      if (state.view === "hero") {
+        rig.goal = shots.hero;
+        rig.moving = state.playing;
+        if (!rig.moving) place(rig.goal);
+      }
+    }
     if (rig.moving && !state.dragging) step(dt);
-    const swaying = state.playing && state.view === "hero" && !state.dragging && !rig.moving;
-    if (swaying || state.view !== "hero")
-      station.rotation.y = THREE.MathUtils.lerp(station.rotation.y, swaying ? pointer.x * 0.1 : 0, dt * 3);
     controls.update(dt);
     station.updateMatrixWorld();
     M.frameInverse.value.copy(station.matrixWorld);
     M.frame.value.copy(station.matrixWorld).invert();
+    const leaning = look.step(dt, state.playing);
+    look.apply(camera, controls.target);
     const mp = tilt.getWorldPosition(tiltProbe);
     tilt.rotation.set(
       state.view === "top" ? 0 : 0.3,
-      Math.atan2(camera.position.x - mp.x, camera.position.z - mp.z) - station.rotation.y,
+      Math.atan2(camera.position.x - mp.x, camera.position.z - mp.z),
       0,
     );
-    if (state.playing || state.dirty || rig.moving || state.dragging) {
+    const turning = flips.update(camera, dt, state.playing);
+    // Redraw shadows only when something that casts them has moved: a turning sign or the mast head.
+    if (turning || !(Math.abs(tilt.rotation.y - state.shadowTilt) < 0.04)) {
+      renderer.shadowMap.needsUpdate = true;
+      state.shadowTilt = tilt.rotation.y;
+    }
+    if (state.playing || state.dirty || rig.moving || state.dragging || leaning || turning) {
       composer.render(dt);
       state.dirty = false;
     }
+    look.restore(camera, controls.target);
   };
   frameId = requestAnimationFrame(animate);
   renderer.domElement.addEventListener(
@@ -498,7 +556,7 @@ export function createStation(
   return {
     view: (name: StationView): void => {
       state.view = name;
-      rig.goal = SHOTS[name];
+      rig.goal = shots[name];
       controls.autoRotate = name === "orbit";
       controls.minPolarAngle = name === "top" ? 0 : 0.45;
       rig.moving = state.playing && !reduced.matches;
