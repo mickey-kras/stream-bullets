@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 /** Furthest lean, in radians: about 20 degrees sideways and 10 degrees up and down. */
 const MAX_YAW = 0.35;
-const MAX_PITCH = 0.17;
+const MAX_PITCH = 0.35;
 /** Device tilt, in degrees, that gives the full lean. */
 const FULL_TILT = 25;
 /** Mouse lean is gentler: it is always there while the pointer is over the page. */
@@ -86,7 +86,8 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
         base.beta += (reading.beta - base.beta) * drift;
         base.gamma += (reading.gamma - base.gamma) * drift;
         goal.yaw = -clamp((reading.gamma - base.gamma) / FULL_TILT) * MAX_YAW;
-        goal.pitch = clamp((reading.beta - base.beta) / FULL_TILT) * MAX_PITCH;
+        // Tipping the top of the phone away lifts the view over the station, like peering down into it.
+        goal.pitch = -clamp((reading.beta - base.beta) / FULL_TILT) * MAX_PITCH;
       }
       const k = 1 - Math.exp(-dt * 6);
       const dy = goal.yaw - now.yaw;

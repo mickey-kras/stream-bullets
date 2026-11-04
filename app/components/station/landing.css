@@ -4,6 +4,12 @@
 body:has(.landing-page) {
   padding: 0;
 }
+/* Safari tints its status bar and toolbar from the page background behind them, so the page itself is
+   painted in the landing ink (the app pages keep their lighter gradient). */
+html:has(.landing-page),
+body:has(.landing-page) {
+  background: #061a1e;
+}
 body:has(.landing-page)::before,
 body:has(.landing-page)::after {
   display: none;
@@ -532,6 +538,17 @@ body:has(.landing-page)::after {
     padding-inline: 12px;
     font-size: 18px;
     white-space: nowrap;
+  }
+  /* The scene's vignette darkens its bottom edge; fade it into the page ink so it meets Safari's toolbar
+     without a seam. */
+  .landing-station::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 1;
+    height: 64px;
+    background: linear-gradient(180deg, #061a1e00, var(--ink));
+    pointer-events: none;
   }
   .landing-station {
     order: 2;
