@@ -116,7 +116,7 @@ jobs:
         if: steps.revision.outputs.deploy == 'true'
         run: |
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/ --output /tmp/streambullets.html
-          grep -q 'Pick the next conversation' /tmp/streambullets.html
+          grep -Fq 'id="landing-title"' /tmp/streambullets.html
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/fonts.css --output /dev/null
 
   checks:
