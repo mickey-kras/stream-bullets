@@ -128,12 +128,17 @@ const SHOTS: Record<StationView, Shot> = {
   },
 };
 
-function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRenderer {
+function createRenderer(
+  wrap: HTMLDivElement,
+  compact: boolean,
+): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
     powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio, compact ? 1.25 : 1.6));
+  renderer.setPixelRatio(
+    Math.min(globalThis.devicePixelRatio, compact ? 1.25 : 1.6),
+  );
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -149,7 +154,9 @@ function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRend
 }
 
 /** Image-based lighting: teal sky, warm horizon and a few softboxes so brass has something to reflect. */
-function createEnvironment(renderer: THREE.WebGLRenderer): THREE.WebGLRenderTarget {
+function createEnvironment(
+  renderer: THREE.WebGLRenderer,
+): THREE.WebGLRenderTarget {
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envScene = new THREE.Scene();
   const sky = new THREE.ShaderMaterial({
@@ -195,7 +202,10 @@ function createEnvironment(renderer: THREE.WebGLRenderer): THREE.WebGLRenderTarg
   return target;
 }
 
-function addLights(scene: THREE.Scene, compact: boolean): THREE.DirectionalLight {
+function addLights(
+  scene: THREE.Scene,
+  compact: boolean,
+): THREE.DirectionalLight {
   scene.add(new THREE.HemisphereLight("#b4c6bb", "#3a2814", 0.95));
   const key = new THREE.DirectionalLight("#ffdcaa", 3);
   key.position.set(-7, 12, 9);
@@ -231,7 +241,11 @@ function addLights(scene: THREE.Scene, compact: boolean): THREE.DirectionalLight
 }
 
 /** Bloom for the lamps and neon, then a soft vignette and film grain. */
-function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
+function createPost(
+  renderer: THREE.WebGLRenderer,
+  scene: THREE.Scene,
+  camera: THREE.Camera,
+) {
   const composer = new EffectComposer(
     renderer,
     new THREE.WebGLRenderTarget(1, 1, {
@@ -240,7 +254,12 @@ function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: T
     }),
   );
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.3, 0.25, 1.3);
+  const bloom = new UnrealBloomPass(
+    new THREE.Vector2(256, 256),
+    0.3,
+    0.25,
+    1.3,
+  );
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
   const finish = new ShaderPass({
@@ -262,7 +281,11 @@ function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: T
   return { composer, bloom, finish };
 }
 
-function buildModel(k: Kit, scene: THREE.Scene, station: THREE.Group): THREE.Group {
+function buildModel(
+  k: Kit,
+  scene: THREE.Scene,
+  station: THREE.Group,
+): THREE.Group {
   buildDeck(k, station);
   const hall = buildHall(k, station);
   buildStudio(k, hall);
@@ -277,7 +300,11 @@ function buildModel(k: Kit, scene: THREE.Scene, station: THREE.Group): THREE.Gro
 }
 
 /** Camera rig: smooth spherical moves between shots, plus a horizontal view offset for page copy. */
-function createRig(camera: THREE.PerspectiveCamera, controls: OrbitControls, shift: StationOptions["shift"]) {
+function createRig(
+  camera: THREE.PerspectiveCamera,
+  controls: OrbitControls,
+  shift: StationOptions["shift"],
+) {
   const spherical = new THREE.Spherical();
   const rig = {
     goal: SHOTS.hero,
@@ -289,7 +316,15 @@ function createRig(camera: THREE.PerspectiveCamera, controls: OrbitControls, shi
   const applyShift = (): void => {
     const s = (shift ? shift(rig.width, rig.height) : 0) * rig.current;
     if (Math.abs(s) < 1e-4) camera.clearViewOffset();
-    else camera.setViewOffset(rig.width, rig.height, -s * rig.width, 0, rig.width, rig.height);
+    else
+      camera.setViewOffset(
+        rig.width,
+        rig.height,
+        -s * rig.width,
+        0,
+        rig.width,
+        rig.height,
+      );
     camera.updateProjectionMatrix();
   };
   const place = (shot: Shot): void => {
@@ -304,7 +339,10 @@ function createRig(camera: THREE.PerspectiveCamera, controls: OrbitControls, shi
     const k = 1 - Math.exp(-dt * 3.2);
     controls.target.lerp(goal.target, k);
     spherical.setFromVector3(camera.position.clone().sub(controls.target));
-    const dTheta = Math.atan2(Math.sin(goal.theta - spherical.theta), Math.cos(goal.theta - spherical.theta));
+    const dTheta = Math.atan2(
+      Math.sin(goal.theta - spherical.theta),
+      Math.cos(goal.theta - spherical.theta),
+    );
     spherical.theta += dTheta * k;
     spherical.phi += (goal.phi - spherical.phi) * k;
     spherical.radius += (goal.radius - spherical.radius) * k;
@@ -321,7 +359,10 @@ function createRig(camera: THREE.PerspectiveCamera, controls: OrbitControls, shi
   return { rig, place, step, applyShift };
 }
 
-function createControls(camera: THREE.PerspectiveCamera, element: HTMLElement): OrbitControls {
+function createControls(
+  camera: THREE.PerspectiveCamera,
+  element: HTMLElement,
+): OrbitControls {
   const controls = new OrbitControls(camera, element);
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
@@ -334,10 +375,15 @@ function createControls(camera: THREE.PerspectiveCamera, element: HTMLElement): 
   return controls;
 }
 
-function collectMaterialTextures(m: THREE.Material, textures: Set<THREE.Texture>): void {
-  for (const v of Object.values(m)) if (v instanceof THREE.Texture) textures.add(v);
+function collectMaterialTextures(
+  m: THREE.Material,
+  textures: Set<THREE.Texture>,
+): void {
+  for (const v of Object.values(m))
+    if (v instanceof THREE.Texture) textures.add(v);
   if (m instanceof THREE.ShaderMaterial)
-    for (const u of Object.values(m.uniforms)) if (u.value instanceof THREE.Texture) textures.add(u.value);
+    for (const u of Object.values(m.uniforms))
+      if (u.value instanceof THREE.Texture) textures.add(u.value);
 }
 
 function disposeScene(scene: THREE.Scene, k: Kit): void {
@@ -350,13 +396,18 @@ function disposeScene(scene: THREE.Scene, k: Kit): void {
       material?: THREE.Material | THREE.Material[];
     };
     if (node.geometry) geometries.add(node.geometry);
-    if (node.material) for (const m of Array.isArray(node.material) ? node.material : [node.material]) materials.add(m);
+    if (node.material)
+      for (const m of Array.isArray(node.material)
+        ? node.material
+        : [node.material])
+        materials.add(m);
   });
   for (const m of materials) {
     collectMaterialTextures(m, textures);
     m.dispose();
   }
-  for (const tile of Object.values(k.tiles)) for (const t of [tile.map, tile.normal, tile.rough]) textures.add(t);
+  for (const tile of Object.values(k.tiles))
+    for (const t of [tile.map, tile.normal, tile.rough]) textures.add(t);
   for (const g of geometries) g.dispose();
   for (const t of textures) t.dispose();
   if (scene.background instanceof THREE.Texture) scene.background.dispose();
@@ -372,7 +423,13 @@ export function createStation(
   const reduced = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
   const compact = globalThis.matchMedia("(max-width: 700px)").matches;
   const k = createKit(compact, options.family ?? "Oswald, sans-serif");
-  if (compact) SHOTS.hero = { ...SHOTS.hero, target: new THREE.Vector3(0, 4.25, 0), radius: 17.5, phi: 1.33 };
+  if (compact)
+    SHOTS.hero = {
+      ...SHOTS.hero,
+      target: new THREE.Vector3(0, 4.25, 0),
+      radius: 17.5,
+      phi: 1.33,
+    };
   const state = {
     playing: !reduced.matches,
     dragging: false,
@@ -399,7 +456,11 @@ export function createStation(
   const { composer, bloom, finish } = createPost(renderer, scene, camera);
 
   const controls = createControls(camera, renderer.domElement);
-  const { rig, place, step, applyShift } = createRig(camera, controls, options.shift);
+  const { rig, place, step, applyShift } = createRig(
+    camera,
+    controls,
+    options.shift,
+  );
   controls.addEventListener("start", (): void => {
     state.dragging = true;
     rig.moving = false;
@@ -416,7 +477,11 @@ export function createStation(
     rig.height = Math.max(1, wrap.clientHeight);
     camera.aspect = rig.width / rig.height;
     camera.fov = THREE.MathUtils.radToDeg(
-      2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(15)) * Math.max(1, 1.25 / camera.aspect)),
+      2 *
+        Math.atan(
+          Math.tan(THREE.MathUtils.degToRad(15)) *
+            Math.max(1, 1.25 / camera.aspect),
+        ),
     );
     renderer.setSize(rig.width, rig.height);
     composer.setSize(rig.width, rig.height);
@@ -425,16 +490,21 @@ export function createStation(
     state.dirty = true;
   });
   resize.observe(wrap);
-  const visibility = new IntersectionObserver((entries: IntersectionObserverEntry[]): void => {
-    state.visible = entries[0].isIntersecting;
-  });
+  const visibility = new IntersectionObserver(
+    (entries: IntersectionObserverEntry[]): void => {
+      state.visible = entries[0].isIntersecting;
+    },
+  );
   visibility.observe(wrap);
   wrap.addEventListener(
     "pointermove",
     (e: PointerEvent): void => {
       if (e.pointerType !== "mouse" || state.dragging) return;
       const r = wrap.getBoundingClientRect();
-      pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, ((e.clientY - r.top) / r.height) * 2 - 1);
+      pointer.set(
+        ((e.clientX - r.left) / r.width) * 2 - 1,
+        ((e.clientY - r.top) / r.height) * 2 - 1,
+      );
     },
     listen,
   );
@@ -467,9 +537,14 @@ export function createStation(
       finish.uniforms.uTime!.value = state.clock;
     }
     if (rig.moving && !state.dragging) step(dt);
-    const swaying = state.playing && state.view === "hero" && !state.dragging && !rig.moving;
+    const swaying =
+      state.playing && state.view === "hero" && !state.dragging && !rig.moving;
     if (swaying || state.view !== "hero")
-      station.rotation.y = THREE.MathUtils.lerp(station.rotation.y, swaying ? pointer.x * 0.1 : 0, dt * 3);
+      station.rotation.y = THREE.MathUtils.lerp(
+        station.rotation.y,
+        swaying ? pointer.x * 0.1 : 0,
+        dt * 3,
+      );
     controls.update(dt);
     station.updateMatrixWorld();
     M.frameInverse.value.copy(station.matrixWorld);
@@ -477,7 +552,8 @@ export function createStation(
     const mp = tilt.getWorldPosition(tiltProbe);
     tilt.rotation.set(
       state.view === "top" ? 0 : 0.3,
-      Math.atan2(camera.position.x - mp.x, camera.position.z - mp.z) - station.rotation.y,
+      Math.atan2(camera.position.x - mp.x, camera.position.z - mp.z) -
+        station.rotation.y,
       0,
     );
     if (state.playing || state.dirty || rig.moving || state.dragging) {

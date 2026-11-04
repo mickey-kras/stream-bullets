@@ -26,7 +26,7 @@ export const STRIPE_Y = [3.04, 2.88, 2.72] as const;
 const STRIPE_R = 0.032;
 const STRIPE_GROW = 0.245;
 /** Where the sign is centred on the hall plan, and how tall the letters stand. */
-export const LOGO_AT = 0.31;
+export const LOGO_AT = 0.39;
 const LETTER_H = 0.66;
 const LETTER_GROW = 0.275;
 const LETTER_DEPTH = 0.055;
