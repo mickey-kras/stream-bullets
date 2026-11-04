@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { user } from "../../db/schema";
 import { appContext, type AppContext, type AppEnv } from "../env";
 import { configuredProviders, createAuth, getViewer } from "../server/auth.server";
-import { deleteAccount, exportAccount, type AccountExport } from "../server/account.server";
+import { deleteAccount, exportAccount } from "../server/account.server";
 import { notifyRoom } from "../server/live.server";
 import {
   consumeMutationQuota,
@@ -53,7 +53,13 @@ function parsedQuery<T>(request: Request, keys: string[], schema: z.ZodType<T>):
   return result.data;
 }
 
-function exportResponse(data: AccountExport): Response {
+async function exportResponse(request: Request, env: AppEnv, viewerId: string | null): Promise<Response> {
+  queryParams(request, []);
+  if (request.headers.get("Sec-Fetch-Site") === "cross-site")
+    throw new HttpError(403, "Use this site to download your data.");
+  if (!viewerId) throw new HttpError(401, "Sign in to continue.");
+  await consumeMutationQuota(env, viewerId, true);
+  const data = await exportAccount(env, viewerId);
   return new Response(JSON.stringify(data, null, 2), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
@@ -93,35 +99,33 @@ export async function loader({ request, context, params }: LoaderFunctionArgs): 
     const app = context.get(appContext);
     const path = params["*"] ?? "";
     const viewer = await getViewer(request, app);
-    if (path === "me") {
-      queryParams(request, []);
-      return json({
-        viewer,
-        streamer: viewer ? await getOwnStreamer(app.env, viewer.id) : null,
-        access: viewer ? await getStreamerAccess(app.env, viewer.id) : null,
-        providers: configuredProviders(app.env),
-      });
-    }
-    if (path === "account/export") {
-      queryParams(request, []);
-      if (request.headers.get("Sec-Fetch-Site") === "cross-site")
-        throw new HttpError(403, "Use this site to download your data.");
-      if (!viewer) throw new HttpError(401, "Sign in to continue.");
-      await consumeMutationQuota(app.env, viewer.id, true);
-      return exportResponse(await exportAccount(app.env, viewer.id));
-    }
-    if (path === "admin/applications") {
-      if (!viewer) throw new HttpError(401, "Sign in to continue.");
-      await requireAdmin(app.env, viewer.id);
-      return json(await listApplications(app.env, parsedQuery(request, ["status", "cursor"], applicationQuerySchema)));
-    }
-    if (path === "admin/reports") {
-      if (!viewer) throw new HttpError(401, "Sign in to continue.");
-      return json(await listReports(app.env, viewer.id, parsedQuery(request, ["status", "cursor"], reportQuerySchema)));
-    }
-    if (path === "streamers") {
-      const cursor = queryParams(request, ["cursor"]).get("cursor");
-      return json(await listStreamers(app.env, cursor));
+    switch (path) {
+      case "me": {
+        queryParams(request, []);
+        return json({
+          viewer,
+          streamer: viewer ? await getOwnStreamer(app.env, viewer.id) : null,
+          access: viewer ? await getStreamerAccess(app.env, viewer.id) : null,
+          providers: configuredProviders(app.env),
+        });
+      }
+      case "account/export":
+        return await exportResponse(request, app.env, viewer?.id ?? null);
+      case "admin/applications": {
+        if (!viewer) throw new HttpError(401, "Sign in to continue.");
+        await requireAdmin(app.env, viewer.id);
+        return json(await listApplications(app.env, parsedQuery(request, ["status", "cursor"], applicationQuerySchema)));
+      }
+      case "admin/reports": {
+        if (!viewer) throw new HttpError(401, "Sign in to continue.");
+        return json(await listReports(app.env, viewer.id, parsedQuery(request, ["status", "cursor"], reportQuerySchema)));
+      }
+      case "streamers": {
+        const cursor = queryParams(request, ["cursor"]).get("cursor");
+        return json(await listStreamers(app.env, cursor));
+      }
+      default:
+        break;
     }
     const board = /^streamers\/([a-z0-9_]{3,30})$/.exec(path);
     if (board) {
@@ -154,47 +158,51 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
       return json({ url: await uploadImage(request, app.env, viewer.id, upload[1]) });
     }
     if (request.method !== "POST") throw new HttpError(405, "Method not allowed.");
-    if (path === "profile")
-      return json({ streamer: await saveStreamer(app.env, viewer.id, await readJson(request, streamerSchema)) });
-    if (path === "account") {
-      const input = await readJson(request, accountSchema);
-      await consumeMutationQuota(app.env, viewer.id);
-      await drizzle(app.env.DB)
-        .update(user)
-        .set({ name: input.name, updatedAt: new Date() })
-        .where(eq(user.id, viewer.id));
-      return json({ viewer: { ...viewer, name: input.name } });
+    switch (path) {
+      case "profile":
+        return json({ streamer: await saveStreamer(app.env, viewer.id, await readJson(request, streamerSchema)) });
+      case "account": {
+        const input = await readJson(request, accountSchema);
+        await consumeMutationQuota(app.env, viewer.id);
+        await drizzle(app.env.DB)
+          .update(user)
+          .set({ name: input.name, updatedAt: new Date() })
+          .where(eq(user.id, viewer.id));
+        return json({ viewer: { ...viewer, name: input.name } });
+      }
+      case "account/delete": {
+        await readJson(request, accountDeletionSchema);
+        await consumeMutationQuota(app.env, viewer.id);
+        await deleteAccount(app.env, viewer.id);
+        await endSession(request, app);
+        return json({ deleted: true });
+      }
+      case "application": {
+        const input = await readJson(request, applicationSchema);
+        await consumeMutationQuota(app.env, viewer.id);
+        return json({ application: await submitApplication(app.env, viewer.id, input) });
+      }
+      case "admin/applications": {
+        const input = await readJson(request, applicationReviewSchema);
+        await requireAdmin(app.env, viewer.id);
+        await consumeMutationQuota(app.env, viewer.id);
+        return json({ application: await reviewApplication(app.env, viewer.id, input) });
+      }
+      case "reports":
+        return json({ report: await submitReport(app.env, viewer.id, await readJson(request, reportSchema)) });
+      case "admin/reports": {
+        const input = await readJson(request, reportResolutionSchema);
+        await requireAdmin(app.env, viewer.id);
+        await consumeMutationQuota(app.env, viewer.id);
+        const result = await resolveReport(app.env, viewer.id, input);
+        if (result.streamerId) await notifyRoom(app.env, result.streamerId);
+        return json({ status: result.status, resolved: result.resolved });
+      }
+      case "comments":
+        return json(await mutateComment(app.env, viewer.id, await readJson(request, commentActionSchema)));
+      default:
+        break;
     }
-    if (path === "account/delete") {
-      await readJson(request, accountDeletionSchema);
-      await consumeMutationQuota(app.env, viewer.id);
-      await deleteAccount(app.env, viewer.id);
-      await endSession(request, app);
-      return json({ deleted: true });
-    }
-    if (path === "application") {
-      const input = await readJson(request, applicationSchema);
-      await consumeMutationQuota(app.env, viewer.id);
-      return json({ application: await submitApplication(app.env, viewer.id, input) });
-    }
-    if (path === "admin/applications") {
-      const input = await readJson(request, applicationReviewSchema);
-      await requireAdmin(app.env, viewer.id);
-      await consumeMutationQuota(app.env, viewer.id);
-      return json({ application: await reviewApplication(app.env, viewer.id, input) });
-    }
-    if (path === "reports")
-      return json({ report: await submitReport(app.env, viewer.id, await readJson(request, reportSchema)) });
-    if (path === "admin/reports") {
-      const input = await readJson(request, reportResolutionSchema);
-      await requireAdmin(app.env, viewer.id);
-      await consumeMutationQuota(app.env, viewer.id);
-      const result = await resolveReport(app.env, viewer.id, input);
-      if (result.streamerId) await notifyRoom(app.env, result.streamerId);
-      return json({ status: result.status, resolved: result.resolved });
-    }
-    if (path === "comments")
-      return json(await mutateComment(app.env, viewer.id, await readJson(request, commentActionSchema)));
     const board = /^streamers\/([a-z0-9_]{3,30})$/.exec(path);
     if (board) {
       const input = await readJson(request, entryActionSchema);
