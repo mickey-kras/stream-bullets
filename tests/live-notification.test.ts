@@ -63,4 +63,11 @@ describe("live notification failure recovery", () => {
     expect(response.status).toBe(200);
     expect(log.mock.calls).toEqual([["live_refresh_failed", { status: 503 }]]);
   });
+
+  it("classifies other room failures without their message", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const response = await mutate(() => Promise.reject(new Error("secret credential")));
+    expect(response.status).toBe(200);
+    expect(log.mock.calls).toEqual([["live_refresh_failed", { cause: "unexpected_error" }]]);
+  });
 });

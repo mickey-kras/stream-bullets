@@ -52,7 +52,7 @@ execute(["d1", "migrations", "apply", "DB", "--local", "--persist-to", statePath
 const now: number = Date.now();
 const users: Record<string, { id: string; cookie: string }> = {};
 const statements: string[] = [];
-for (const role of ["owner", "viewer", "newcomer", "otherowner", "paginationowner", "admin"]) {
+for (const role of ["owner", "viewer", "newcomer", "otherowner", "paginationowner", "admin", "leaver", "reporter"]) {
   const id: string = randomUUID();
   const token: string = randomBytes(24).toString("hex");
   users[role] = { id, cookie: encodeURIComponent(`${token}.${await makeSignature(token, secret)}`) };
@@ -79,6 +79,14 @@ for (let index: number = 1; index <= 55; index += 1) {
     `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${randomUUID()}','${paginationStreamId}','${users.paginationowner.id}','topic','Archive topic ${String(index).padStart(2, "0")}','An older conversation.','Tech & setups','[]',${now + index},0);`,
   );
 }
+// The leaver deletes their account in the browser tests: a page they own, and a comment with someone else's reply.
+const leaverCommentId: string = randomUUID();
+statements.push(
+  `INSERT INTO streamers(id,owner_id,handle,name,about,revision) VALUES ('${randomUUID()}','${users.leaver.id}','leaver_host','Leaver host','A community that is closing.',0);`,
+  `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) SELECT '${randomUUID()}',id,'${users.otherowner.id}','topic','Leaver discussion','','','[]',${now},0 FROM streamers WHERE handle='other_host';`,
+  `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at) SELECT '${leaverCommentId}',id,'${users.leaver.id}','Leaver comment',${now} FROM entries WHERE title='Leaver discussion';`,
+  `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id) SELECT '${randomUUID()}',id,'${users.viewer.id}','Reply that stays',${now + 1},'${leaverCommentId}' FROM entries WHERE title='Leaver discussion';`,
+);
 const seedPath: string = resolve(directory, "seed.sql");
 await writeFile(seedPath, statements.join("\n"), { mode: 0o600 });
 execute(["d1", "execute", "DB", "--local", "--persist-to", statePath, "--file", seedPath]);

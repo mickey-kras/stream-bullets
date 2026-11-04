@@ -4,12 +4,14 @@ import { Link, useLoaderData, useRevalidator, useSearchParams, type LoaderFuncti
 import { appContext } from "../env";
 import { configuredProviders, getViewer } from "../server/auth.server";
 import { getEntry, getStreamer, listEntries } from "../server/data.server";
+import { isAdmin } from "../server/access.server";
 import { AccountControls, Avatar, EmptyState } from "../components/common";
 import { errorMessage, postJson, requestJson } from "../components/api";
 import { CreateEntry } from "../components/create-entry";
 import { DeleteButton, Discussion } from "../components/discussion";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { PollCard } from "../components/poll";
+import { ReportButton } from "../components/report";
 import type { BoardSnapshot, Entry, LiveSnapshot, SortOrder } from "../types";
 
 type View = "topics" | "polls" | "schedule" | "about" | "community";
@@ -55,6 +57,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
     board,
     selected,
     viewer,
+    moderator: viewer ? await isAdmin(app.env, viewer.id) : false,
     providers: configuredProviders(app.env),
     view,
     sort,
@@ -98,7 +101,16 @@ function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revi
 }
 
 export default function StreamerPage(): ReactNode {
-  const { board, selected: loadedSelected, viewer, providers, view, sort, query } = useLoaderData<typeof loader>();
+  const {
+    board,
+    selected: loadedSelected,
+    viewer,
+    moderator,
+    providers,
+    view,
+    sort,
+    query,
+  } = useLoaderData<typeof loader>();
   const { streamer } = board;
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
@@ -376,6 +388,43 @@ export default function StreamerPage(): ReactNode {
     );
   }
 
+  /** Delete for the author, the streamer, and administrators; report for everyone else who is signed in. */
+  function renderEntryActions(entry: Entry): ReactNode {
+    if (!viewer) return null;
+    const noun: string = entry.kind === "topic" ? "topic" : "poll";
+    const author: boolean = entry.authorId === viewer.id;
+    return (
+      <div className="content-actions">
+        {(owner || moderator || author) && (
+          <DeleteButton label={`Delete ${noun}`} onDelete={removeSelected} disabled={pending} />
+        )}
+        {!author && (
+          <ReportButton
+            targetKind="entry"
+            targetId={entry.id}
+            label={`Report ${noun}`}
+            description={`Tell us what is wrong with the ${noun} “${entry.title}”.`}
+          />
+        )}
+      </div>
+    );
+  }
+
+  function renderDiscussion(entry: Entry): ReactNode {
+    return (
+      <Discussion
+        key={entry.id}
+        entryId={entry.id}
+        handle={streamer.handle}
+        viewer={viewer}
+        ownerId={streamer.ownerId}
+        moderator={moderator}
+        refreshKey={board.revision}
+        onChanged={changed}
+      />
+    );
+  }
+
   function renderTopicDetail(): ReactNode {
     return (
       <>
@@ -431,21 +480,9 @@ export default function StreamerPage(): ReactNode {
                 </button>
               </div>
               {!viewer && <p className="muted">Sign in to vote or suggest a topic.</p>}
-              {viewer && (owner || selected.authorId === viewer.id) && (
-                <div className="content-actions">
-                  <DeleteButton label="Delete topic" onDelete={removeSelected} disabled={pending} />
-                </div>
-              )}
+              {renderEntryActions(selected)}
             </div>
-            <Discussion
-              key={selected.id}
-              entryId={selected.id}
-              handle={streamer.handle}
-              viewer={viewer}
-              ownerId={streamer.ownerId}
-              refreshKey={board.revision}
-              onChanged={changed}
-            />
+            {renderDiscussion(selected)}
           </>
         ) : (
           <EmptyState title="Start a conversation.">Suggest a topic for {streamer.name}&apos;s next stream.</EmptyState>
@@ -567,16 +604,8 @@ export default function StreamerPage(): ReactNode {
         {loadedSelected && selected && (
           <div className="poll-card poll-discussion">
             <h2>{selected.title}</h2>
-            {owner && <DeleteButton label="Delete poll" onDelete={removeSelected} disabled={pending} />}
-            <Discussion
-              key={selected.id}
-              entryId={selected.id}
-              handle={streamer.handle}
-              viewer={viewer}
-              ownerId={streamer.ownerId}
-              refreshKey={board.revision}
-              onChanged={changed}
-            />
+            {renderEntryActions(selected)}
+            {renderDiscussion(selected)}
           </div>
         )}
       </>

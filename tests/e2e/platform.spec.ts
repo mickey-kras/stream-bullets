@@ -13,7 +13,7 @@ async function signedIn(browser: Browser, role: string): Promise<BrowserContext>
   const sessions = sessionSchema.parse(JSON.parse(await readFile(".wrangler/e2e/sessions.json", "utf8")));
   const session = sessions[role];
   if (!session) throw new Error("Unknown test account.");
-  const roleIndex: number = ["owner", "viewer", "newcomer", "otherowner", "admin"].indexOf(role);
+  const roleIndex: number = ["owner", "viewer", "newcomer", "otherowner", "admin", "reporter"].indexOf(role);
   const context = await browser.newContext({
     baseURL: origin,
     extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${roleIndex + 10}` },
@@ -295,6 +295,93 @@ test("only administrators can open the review queue and its API", async ({ brows
   const me = (await (await context.request.get("/api/me")).json()) as { access: { admin: boolean } };
   expect(me.access.admin).toBe(false);
   await context.close();
+});
+
+test("a viewer reports a topic and an admin removes it", async ({ browser, page, request }) => {
+  const title = "Buy followers cheap at example.test";
+  const owner = await signedIn(browser, "owner");
+  const created = await owner.request.post("/api/streamers/test_host", {
+    headers: { Origin: origin },
+    data: { action: "create", kind: "topic", title, body: "Limited offer, click now.", category: "Just chatting" },
+  });
+  expect(created.status()).toBe(200);
+  const { id } = (await created.json()) as { id: string };
+  const ownerPage = await owner.newPage();
+  await ownerPage.goto(`/@test_host?entry=${id}`);
+  await expect(ownerPage.getByRole("heading", { name: title })).toBeVisible();
+  await expect(ownerPage.getByRole("button", { name: "Report topic" })).toHaveCount(0);
+  await owner.close();
+
+  await page.goto(`/@test_host?entry=${id}`);
+  await expect(page.getByRole("heading", { name: title })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Report/ })).toHaveCount(0);
+  const anonymous = await request.post("/api/reports", {
+    headers: { Origin: origin },
+    data: { targetKind: "entry", targetId: id, reason: "spam" },
+  });
+  expect(anonymous.status()).toBe(401);
+
+  const viewerContext = await signedIn(browser, "reporter");
+  const viewer = await viewerContext.newPage();
+  await assertNoScriptErrors(viewer, async () => {
+    await viewer.goto(`/@test_host?entry=${id}`);
+    await viewer.getByRole("button", { name: "Report topic" }).click();
+    const dialog = viewer.getByRole("dialog", { name: "Report content" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("radio", { name: /Illegal content/ }).check();
+    await expect(dialog.getByRole("button", { name: "Send report" })).toBeDisabled();
+    await dialog.getByRole("radio", { name: /Spam or scam/ }).check();
+    await dialog.getByLabel(/^Details/).fill("Advertising unrelated to the stream.");
+    await dialog.getByRole("button", { name: "Send report" }).click();
+    await expect(viewer.getByRole("dialog", { name: "Report sent" })).toBeVisible();
+    await viewer.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(viewer.getByRole("dialog")).toHaveCount(0);
+    await expect(viewer.getByRole("button", { name: "Report topic" })).toBeFocused();
+  });
+  const forbidden = await viewerContext.request.get("/api/admin/reports");
+  expect(forbidden.status()).toBe(403);
+  const forbiddenResolve = await viewerContext.request.post("/api/admin/reports", {
+    headers: { Origin: origin },
+    data: { id: "00000000-0000-4000-8000-000000000000", action: "remove" },
+  });
+  expect(forbiddenResolve.status()).toBe(403);
+
+  const adminContext = await signedIn(browser, "admin");
+  const admin = await adminContext.newPage();
+  await assertNoScriptErrors(admin, async () => {
+    await admin.goto("/admin");
+    await admin.getByRole("navigation", { name: "Admin sections" }).getByRole("link", { name: "Reports" }).click();
+    await expect(admin).toHaveURL(/view=reports/);
+    await expect(admin.getByRole("heading", { name: "Content reports" })).toBeVisible();
+    await expect(admin.getByRole("link", { name: "Open", exact: true })).toHaveAttribute("aria-current", "page");
+    const card = admin.getByRole("article").filter({ hasText: title });
+    await expect(card.getByRole("heading", { name: "Spam or scam" })).toBeVisible();
+    await expect(card).toContainText("by reporter");
+    await expect(card).toContainText("Limited offer, click now.");
+    await expect(card).toContainText("Advertising unrelated to the stream.");
+    await expect(card.getByRole("link", { name: "Open the conversation" })).toHaveAttribute(
+      "href",
+      `/@test_host?entry=${id}`,
+    );
+    await card.getByRole("button", { name: "Remove content" }).click();
+    const confirm = admin.getByRole("dialog", { name: "Remove content?" });
+    await confirm.getByRole("button", { name: "Remove content" }).click();
+    await expect(admin.getByRole("status")).toHaveText("Removed the content and closed 1 report.");
+    await expect(admin.getByRole("article").filter({ hasText: title })).toHaveCount(0);
+    await admin.getByRole("link", { name: "Removed", exact: true }).click();
+    await expect(admin).toHaveURL(/status=actioned/);
+    const resolved = admin.getByRole("article").filter({ hasText: title });
+    await expect(resolved).toContainText("This content is no longer available.");
+    await expect(resolved.getByRole("button")).toHaveCount(0);
+  });
+  await adminContext.close();
+
+  await viewer.goto("/@test_host?view=topics&sort=newest");
+  await expect(viewer.getByRole("heading", { name: "Pick the next conversation" })).toBeVisible();
+  await expect(viewer.getByText(title)).toHaveCount(0);
+  const gone = await viewerContext.request.get(`/api/entries/${id}`);
+  expect(gone.status()).toBe(404);
+  await viewerContext.close();
 });
 
 test("topic panes and the resize control remain keyboard accessible", async ({ page }) => {

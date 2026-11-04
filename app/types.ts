@@ -107,3 +107,30 @@ export interface ApplicationQueue {
   applications: ApplicationReviewItem[];
   nextCursor: string | null;
 }
+
+export type ReportReason = "illegal" | "harassment" | "spam" | "privacy" | "other";
+export type ReportStatus = "open" | "actioned" | "dismissed";
+export type ReportTargetKind = "entry" | "comment";
+
+export interface ContentReport {
+  id: string;
+  targetKind: ReportTargetKind;
+  targetId: string;
+  reason: ReportReason;
+  details: string;
+  snapshot: string;
+  status: ReportStatus;
+  createdAt: number;
+  resolvedAt: number | null;
+  /** Null when the reporter deleted their account. */
+  reporterName: string | null;
+  /** Null when the streamer page no longer exists. */
+  streamerHandle: string | null;
+  /** The topic or poll that holds the reported content, or null once the content is gone. */
+  entryId: string | null;
+}
+
+export interface ReportQueue {
+  reports: ContentReport[];
+  nextCursor: string | null;
+}

@@ -4,7 +4,9 @@ import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import { user } from "../../db/schema";
 import { appContext, type AppContext, type AppEnv } from "../env";
-import { configuredProviders, getViewer } from "../server/auth.server";
+import { configuredProviders, createAuth, getViewer } from "../server/auth.server";
+import { deleteAccount, exportAccount, type AccountExport } from "../server/account.server";
+import { notifyRoom } from "../server/live.server";
 import {
   consumeMutationQuota,
   getEntry,
@@ -27,7 +29,12 @@ import {
   applicationQuerySchema,
   applicationReviewSchema,
   applicationSchema,
+  accountDeletionSchema,
+  reportQuerySchema,
+  reportResolutionSchema,
+  reportSchema,
 } from "../server/validation";
+import { listReports, resolveReport, submitReport } from "../server/reports.server";
 import { HttpError, errorResponse, json, queryParams, readJson, requireSameOrigin } from "../server/http.server";
 import { uploadImage } from "../server/images.server";
 import {
@@ -46,20 +53,22 @@ function parsedQuery<T>(request: Request, keys: string[], schema: z.ZodType<T>):
   return result.data;
 }
 
-async function notifyRoom(app: AppContext, streamerId: string): Promise<void> {
-  try {
-    const room = app.env.POLL_ROOMS.get(app.env.POLL_ROOMS.idFromName(streamerId));
-    const result = await room.fetch(`https://poll-room.internal/refresh?streamerId=${encodeURIComponent(streamerId)}`, {
-      method: "POST",
-    });
-    if (!result.ok) console.error("live_refresh_failed", { status: result.status });
-  } catch (error_: unknown) {
-    // The mutation is committed; the room alarm resynchronizes disconnected clients.
-    // Classify the failure without logging exception messages that may contain credentials.
-    console.error("live_refresh_failed", {
-      cause: error_ instanceof TypeError ? "transport_error" : "unexpected_error",
-    });
-  }
+function exportResponse(data: AccountExport): Response {
+  return new Response(JSON.stringify(data, null, 2), {
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Content-Disposition": `attachment; filename="streambullets-data-${data.exportedAt.slice(0, 10)}.json"`,
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+/** Ends the deleted account's browser session. Better Auth expires its cookies with their original attributes. */
+async function endSession(request: Request, app: AppContext): Promise<void> {
+  const { headers } = await createAuth(app.env).api.signOut({ headers: request.headers, returnHeaders: true });
+  // Drop any refreshed session cookie that was queued while reading the viewer.
+  app.responseHeaders.delete("Set-Cookie");
+  for (const cookie of headers.getSetCookie()) app.responseHeaders.append("Set-Cookie", cookie);
 }
 
 async function entryResponse(
@@ -93,10 +102,22 @@ export async function loader({ request, context, params }: LoaderFunctionArgs): 
         providers: configuredProviders(app.env),
       });
     }
+    if (path === "account/export") {
+      queryParams(request, []);
+      if (request.headers.get("Sec-Fetch-Site") === "cross-site")
+        throw new HttpError(403, "Use this site to download your data.");
+      if (!viewer) throw new HttpError(401, "Sign in to continue.");
+      await consumeMutationQuota(app.env, viewer.id, true);
+      return exportResponse(await exportAccount(app.env, viewer.id));
+    }
     if (path === "admin/applications") {
       if (!viewer) throw new HttpError(401, "Sign in to continue.");
       await requireAdmin(app.env, viewer.id);
       return json(await listApplications(app.env, parsedQuery(request, ["status", "cursor"], applicationQuerySchema)));
+    }
+    if (path === "admin/reports") {
+      if (!viewer) throw new HttpError(401, "Sign in to continue.");
+      return json(await listReports(app.env, viewer.id, parsedQuery(request, ["status", "cursor"], reportQuerySchema)));
     }
     if (path === "streamers") {
       const cursor = queryParams(request, ["cursor"]).get("cursor");
@@ -144,6 +165,13 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
         .where(eq(user.id, viewer.id));
       return json({ viewer: { ...viewer, name: input.name } });
     }
+    if (path === "account/delete") {
+      await readJson(request, accountDeletionSchema);
+      await consumeMutationQuota(app.env, viewer.id);
+      await deleteAccount(app.env, viewer.id);
+      await endSession(request, app);
+      return json({ deleted: true });
+    }
     if (path === "application") {
       const input = await readJson(request, applicationSchema);
       await consumeMutationQuota(app.env, viewer.id);
@@ -155,6 +183,16 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
       await consumeMutationQuota(app.env, viewer.id);
       return json({ application: await reviewApplication(app.env, viewer.id, input) });
     }
+    if (path === "reports")
+      return json({ report: await submitReport(app.env, viewer.id, await readJson(request, reportSchema)) });
+    if (path === "admin/reports") {
+      const input = await readJson(request, reportResolutionSchema);
+      await requireAdmin(app.env, viewer.id);
+      await consumeMutationQuota(app.env, viewer.id);
+      const result = await resolveReport(app.env, viewer.id, input);
+      if (result.streamerId) await notifyRoom(app.env, result.streamerId);
+      return json({ status: result.status, resolved: result.resolved });
+    }
     if (path === "comments")
       return json(await mutateComment(app.env, viewer.id, await readJson(request, commentActionSchema)));
     const board = /^streamers\/([a-z0-9_]{3,30})$/.exec(path);
@@ -163,7 +201,7 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
       const streamer = await getStreamer(app.env, board[1]);
       if (!streamer) throw new HttpError(404, "Streamer not found.");
       const result = await mutateEntry(app.env, viewer.id, streamer.id, input);
-      await notifyRoom(app, streamer.id);
+      await notifyRoom(app.env, streamer.id);
       return json(result);
     }
     throw new HttpError(404, "Endpoint not found.");

@@ -3,10 +3,12 @@ import { Link, useLoaderData, useRevalidator, type LoaderFunctionArgs } from "re
 import { appContext } from "../env";
 import { configuredProviders, getViewer } from "../server/auth.server";
 import { isAdmin, listApplications } from "../server/access.server";
+import { listReports } from "../server/reports.server";
 import { SignIn, SiteHeader, EmptyState } from "../components/common";
 import { errorMessage, postJson, requestJson } from "../components/api";
 import { DateTime } from "../components/waitlist";
-import type { ApplicationQueue, ApplicationReviewItem, ApplicationStatus } from "../types";
+import { ReportReviewQueue, reportStatuses } from "../components/report-queue";
+import type { ApplicationQueue, ApplicationReviewItem, ApplicationStatus, ReportQueue, ReportStatus } from "../types";
 
 const statuses: { value: ApplicationStatus; label: string }[] = [
   { value: "pending", label: "Pending" },
@@ -14,22 +16,43 @@ const statuses: { value: ApplicationStatus; label: string }[] = [
   { value: "rejected", label: "Rejected" },
 ];
 
+type AdminView = "requests" | "reports";
+
+const views: { value: AdminView; label: string; to: string }[] = [
+  { value: "requests", label: "Streamer requests", to: "/admin" },
+  { value: "reports", label: "Reports", to: "/admin?view=reports" },
+];
+
 function statusParam(value: string | null): ApplicationStatus {
   return value === "approved" || value === "rejected" ? value : "pending";
 }
 
+function reportStatusParam(value: string | null): ReportStatus {
+  return value === "actioned" || value === "dismissed" ? value : "open";
+}
+
 export function meta() {
-  return [{ title: "Streamer requests · StreamBullets" }, { name: "robots", content: "noindex" }];
+  return [{ title: "Admin · StreamBullets" }, { name: "robots", content: "noindex" }];
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const app = context.get(appContext);
   const viewer = await getViewer(request, app);
   const providers = configuredProviders(app.env);
-  const status = statusParam(new URL(request.url).searchParams.get("status"));
-  if (!viewer) return { viewer: null, providers, status, queue: null };
+  const params = new URL(request.url).searchParams;
+  const view: AdminView = params.get("view") === "reports" ? "reports" : "requests";
+  const status = statusParam(params.get("status"));
+  const reportStatus = reportStatusParam(params.get("status"));
+  const empty = { viewer: null, providers, view, status, reportStatus, queue: null, reports: null };
+  if (!viewer) return empty;
   if (!(await isAdmin(app.env, viewer.id))) throw new Response("Page not found.", { status: 404 });
-  return { viewer, providers, status, queue: await listApplications(app.env, { status, cursor: null }) };
+  if (view === "reports")
+    return {
+      ...empty,
+      viewer,
+      reports: await listReports(app.env, viewer.id, { status: reportStatus, cursor: null }),
+    };
+  return { ...empty, viewer, queue: await listApplications(app.env, { status, cursor: null }) };
 }
 
 function linkParts(link: string): { host: string; rest: string } {
@@ -232,37 +255,96 @@ function ReviewQueue({ status, queue }: Readonly<{ status: ApplicationStatus; qu
   );
 }
 
-export default function Admin(): ReactNode {
-  const { viewer, providers, status, queue } = useLoaderData<typeof loader>();
+function StatusTabs<T extends string>({
+  label,
+  current,
+  tabs,
+  className = "",
+}: Readonly<{
+  label: string;
+  current: T;
+  tabs: { value: T; label: string; to: string }[];
+  className?: string;
+}>): ReactNode {
+  return (
+    <nav className={`tabs status-tabs ${className}`.trim()} aria-label={label}>
+      {tabs.map((item) => (
+        <Link
+          key={item.value}
+          to={item.to}
+          className={item.value === current ? "active" : ""}
+          aria-current={item.value === current ? "page" : undefined}
+          preventScrollReset
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function RequestsView({ status, queue }: Readonly<{ status: ApplicationStatus; queue: ApplicationQueue }>): ReactNode {
   return (
     <>
-      <SiteHeader viewer={viewer} providers={providers} admin={Boolean(queue)} />
+      <p>Review who can create a public streamer page. Approved viewers can claim a handle from their profile.</p>
+      <StatusTabs
+        label="Request status"
+        current={status}
+        tabs={statuses.map((item) => ({
+          ...item,
+          to: item.value === "pending" ? "/admin" : `/admin?status=${item.value}`,
+        }))}
+      />
+      <ReviewQueue key={status} status={status} queue={queue} />
+    </>
+  );
+}
+
+function ReportsView({ status, reports }: Readonly<{ status: ReportStatus; reports: ReportQueue }>): ReactNode {
+  return (
+    <>
+      <p>
+        Review reports about topics, polls, and comments. Remove content that is illegal or breaks the community rules.
+      </p>
+      <StatusTabs
+        label="Report status"
+        current={status}
+        tabs={reportStatuses.map((item) => ({
+          ...item,
+          to: item.value === "open" ? "/admin?view=reports" : `/admin?view=reports&status=${item.value}`,
+        }))}
+      />
+      <ReportReviewQueue key={status} status={status} queue={reports} />
+    </>
+  );
+}
+
+function AdminContent({ data }: Readonly<{ data: ReturnType<typeof useLoaderData<typeof loader>> }>): ReactNode {
+  if (data.reports) return <ReportsView status={data.reportStatus} reports={data.reports} />;
+  if (data.queue) return <RequestsView status={data.status} queue={data.queue} />;
+  return null;
+}
+
+export default function Admin(): ReactNode {
+  const data = useLoaderData<typeof loader>();
+  const { viewer, providers, view } = data;
+  const signedIn = Boolean(viewer && (data.queue || data.reports));
+  return (
+    <>
+      <SiteHeader viewer={viewer} providers={providers} admin={signedIn} />
       <main className="page-panel settings-page admin-page" id="main-content">
         <span className="eyebrow">ADMIN</span>
-        <h1>Streamer requests</h1>
-        {viewer && queue ? (
+        <h1>{view === "reports" ? "Content reports" : "Streamer requests"}</h1>
+        {signedIn ? (
           <>
-            <p>Review who can create a public streamer page. Approved viewers can claim a handle from their profile.</p>
-            <nav className="tabs status-tabs" aria-label="Request status">
-              {statuses.map((item) => (
-                <Link
-                  key={item.value}
-                  to={item.value === "pending" ? "/admin" : `/admin?status=${item.value}`}
-                  className={item.value === status ? "active" : ""}
-                  aria-current={item.value === status ? "page" : undefined}
-                  preventScrollReset
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <ReviewQueue key={status} status={status} queue={queue} />
+            <StatusTabs label="Admin sections" current={view} tabs={views} className="view-tabs" />
+            <AdminContent data={data} />
           </>
         ) : (
           <section className="info-card">
             <h2>Sign in to continue</h2>
             <p>The review queue is only available to administrators.</p>
-            <SignIn providers={providers} callbackURL="/admin" />
+            <SignIn providers={providers} callbackURL={view === "reports" ? "/admin?view=reports" : "/admin"} />
           </section>
         )}
       </main>

@@ -34,14 +34,9 @@ export default function Home(): ReactNode {
           {viewer ? (
             <AccountControls viewer={viewer} providers={providers} />
           ) : (
-            <>
-              <button type="button" onClick={() => setSignInOpen(true)}>
-                Log in
-              </button>
-              <button type="button" className="gold" onClick={() => setSignInOpen(true)}>
-                Register
-              </button>
-            </>
+            <button type="button" onClick={() => setSignInOpen(true)}>
+              Sign in
+            </button>
           )}
         </nav>
       </header>
@@ -62,14 +57,9 @@ export default function Home(): ReactNode {
                   {ownStreamer ? "Open your community" : "Create a streamer profile"}
                 </Link>
               ) : (
-                <>
-                  <button type="button" className="gold" onClick={() => setSignInOpen(true)}>
-                    Create account
-                  </button>
-                  <button type="button" className="landing-sage" onClick={() => setSignInOpen(true)}>
-                    Log in
-                  </button>
-                </>
+                <button type="button" className="gold" onClick={() => setSignInOpen(true)}>
+                  Sign in
+                </button>
               )}
             </div>
           </div>
@@ -82,7 +72,7 @@ export default function Home(): ReactNode {
         open={signInOpen}
         onOpenChange={setSignInOpen}
         title="Join the conversation"
-        description="Sign in to suggest topics, vote, and comment."
+        description="Sign in to suggest topics, vote, and comment. Your first sign-in creates your account."
       >
         <SignIn providers={providers} />
       </Modal>

@@ -1,0 +1,606 @@
+import { makeSignature } from "better-auth/crypto";
+import { RouterContextProvider } from "react-router";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { appContext, type AppEnv } from "../app/env";
+import { action, loader } from "../app/routes/api";
+import { DELETED_AUTHOR_SNAPSHOT, deleteAccount, EXPORT_PAGE_SIZE, exportAccount } from "../app/server/account.server";
+import { createTestDatabase, type TestDatabase } from "./helpers/database";
+
+const origin = "https://stream.example.test";
+const secret = "test-only-secret-1f0c3f1e9a2b4c5d8e7f6a5b4c3d2e1f";
+const sessionToken = "leaver-session-token-private";
+const now = Date.now();
+const day = 86_400_000;
+
+const ids = {
+  leaverPage: "11111111-1111-4111-8111-111111111111",
+  hostPage: "22222222-2222-4222-8222-222222222222",
+  onLeaverPage: "33333333-3333-4333-8333-333333333333",
+  hostPoll: "44444444-4444-4444-8444-444444444444",
+  hostTopic: "55555555-5555-4555-8555-555555555555",
+  leaverTopic: "66666666-6666-4666-8666-666666666666",
+};
+
+let database: TestDatabase;
+let env: AppEnv;
+let rooms: string[];
+
+/** Users and every kind of row the account can own, written in one batch. */
+async function seed(): Promise<void> {
+  const run = (sql: string, ...values: (string | number | null)[]): D1PreparedStatement =>
+    env.DB.prepare(sql).bind(...values);
+  await env.DB.batch([
+    run(
+      `INSERT INTO user (id,name,email,email_verified,image,created_at,updated_at)
+        SELECT value, 'Name '||value, value||'@example.test', 1, '/images/avatar/'||value, ?, ? FROM json_each(?)`,
+      now - day,
+      now,
+      JSON.stringify(["leaver", "other", "host", "admin"]),
+    ),
+    run(
+      `INSERT INTO session (id,token,user_id,expires_at,created_at,updated_at,ip_address,user_agent) VALUES
+        ('s1',?,'leaver',?,?,?,'192.0.2.7','leaver-agent'),
+        ('s2','leaver-expired-token','leaver',?,?,?,'192.0.2.8','old-agent'),
+        ('s3','other-session-token','other',?,?,?,NULL,NULL)`,
+      sessionToken,
+      now + day,
+      now - 1000,
+      now,
+      now - 1000,
+      now - day,
+      now - day,
+      now + day,
+      now,
+      now,
+    ),
+    run(
+      `INSERT INTO account (id,account_id,provider_id,user_id,access_token,refresh_token,id_token,scope,password,created_at,updated_at)
+        VALUES ('a1','twitch-123','twitch','leaver','secret-access-token','secret-refresh-token','secret-id-token','openid','secret-password',?,?),
+               ('a2','google-456','google','other','other-access-token',NULL,NULL,NULL,NULL,?,?)`,
+      now,
+      now,
+      now,
+      now,
+    ),
+    run(
+      `INSERT INTO streamers (id,owner_id,handle,name,about,avatar,background,revision) VALUES
+        (?,'leaver','leaver_page','Leaver','Leaving soon','/images/avatar/leaver','/images/background/leaver',3),
+        (?,'host','host_page','Host','Staying',NULL,NULL,5)`,
+      ids.leaverPage,
+      ids.hostPage,
+    ),
+    run(
+      `INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed) VALUES
+        (?,?,'other','topic','Other on leaver page','','','[]',?,NULL,0),
+        (?,?,'host','choice','Host poll','','','["Red","Blue"]',?,?,1),
+        (?,?,'host','topic','Host topic','Body','Gaming','[]',?,NULL,0),
+        (?,?,'leaver','topic','Leaver topic','Mine','Chat','[]',?,NULL,0)`,
+      ids.onLeaverPage,
+      ids.leaverPage,
+      now,
+      ids.hostPoll,
+      ids.hostPage,
+      now,
+      now + day,
+      ids.hostTopic,
+      ids.hostPage,
+      now,
+      ids.leaverTopic,
+      ids.hostPage,
+      now,
+    ),
+    run(
+      `INSERT INTO entry_votes (entry_id,user_id,choice) VALUES (?,'leaver',1),(?,'other',0),(?,'other',0)`,
+      ids.hostPoll,
+      ids.hostPoll,
+      ids.onLeaverPage,
+    ),
+    run(
+      `INSERT INTO entry_reactions (entry_id,user_id,value) VALUES (?,'leaver',-1),(?,'other',1),(?,'other',1)`,
+      ids.hostTopic,
+      ids.leaverTopic,
+      ids.hostTopic,
+    ),
+    // A reply chain: leaver -> other -> leaver -> other, plus unrelated comments.
+    run(
+      `INSERT INTO entry_comments (id,entry_id,author_id,text,created_at,parent_id) VALUES
+        ('c-leaver',?,'leaver','Leaver says hi',?,NULL),
+        ('c-reply',?,'other','Other replies',?,'c-leaver'),
+        ('c-leaver-2',?,'leaver','Leaver again',?,'c-reply'),
+        ('c-reply-2',?,'other','Other again',?,'c-leaver-2'),
+        ('c-other',?,'other','Unrelated',?,NULL),
+        ('c-on-leaver-topic',?,'other','On leaver topic',?,NULL),
+        ('c-on-leaver-page',?,'other','On leaver page',?,NULL)`,
+      ids.hostTopic,
+      now,
+      ids.hostTopic,
+      now + 1,
+      ids.hostTopic,
+      now + 2,
+      ids.hostTopic,
+      now + 3,
+      ids.hostTopic,
+      now,
+      ids.leaverTopic,
+      now,
+      ids.onLeaverPage,
+      now,
+    ),
+    run(
+      `INSERT INTO comment_likes (comment_id,user_id) VALUES ('c-other','leaver'),('c-leaver','other'),('c-reply','host')`,
+    ),
+    run(
+      `INSERT INTO streamer_applications (id,user_id,links,note,status,created_at,updated_at,reviewed_at,reviewed_by) VALUES
+        ('app-leaver','leaver','["https://www.twitch.tv/leaver"]','Please','approved',?,?,?,'admin'),
+        ('app-other','other','["https://www.twitch.tv/other"]','','rejected',?,?,?,'leaver')`,
+      now,
+      now,
+      now,
+      now,
+      now,
+      now,
+    ),
+    run(
+      `INSERT INTO app_rate_limits (key,count,window_start) VALUES ('write:leaver',1,?),('content:leaver',1,?),('write:other',1,?)`,
+      now,
+      now,
+      now,
+    ),
+    run(
+      `INSERT INTO verification (id,identifier,value,expires_at,created_at,updated_at) VALUES
+        ('v1','leaver@example.test','code',?,?,?),
+        ('v2','oauth-state','{"link":{"userId":"leaver"}}',?,?,?),
+        ('v3','other-state','{"link":{"userId":"other"}}',?,?,?)`,
+      now + day,
+      now,
+      now,
+      now + day,
+      now,
+      now,
+      now + day,
+      now,
+      now,
+    ),
+    run(`INSERT INTO rate_limit (id,key,count,last_request) VALUES ('r1','192.0.2.7|/sign-in/social',1,?)`, now),
+    run(`INSERT INTO polls (id,question,kind,options,created_at,ends_at) VALUES ('p1','Old','choice','[]',1,2)`),
+    run(`INSERT INTO poll_votes (poll_id,user_id,choice) VALUES ('p1','leaver',0),('p1','other',1)`),
+    run(`INSERT INTO poll_reactions (poll_id,user_id,value) VALUES ('p1','leaver',1)`),
+    run(`INSERT INTO poll_comments (id,poll_id,user_id,text,created_at) VALUES ('pc1','p1','leaver','Legacy',?)`, now),
+  ]);
+  for (const key of ["avatar/leaver", "background/leaver", "avatar/other"]) {
+    await env.IMAGES.put(key, new Uint8Array([1, 2, 3]), { httpMetadata: { contentType: "image/png" } });
+  }
+}
+
+/** Counts rows linked to a user in every table that can hold them. */
+async function linkedRows(userId: string): Promise<Record<string, number>> {
+  const queries: Record<string, string> = {
+    user: "SELECT count(*) AS n FROM user WHERE id=?1",
+    session: "SELECT count(*) AS n FROM session WHERE user_id=?1",
+    account: "SELECT count(*) AS n FROM account WHERE user_id=?1",
+    streamers: "SELECT count(*) AS n FROM streamers WHERE owner_id=?1",
+    entries: "SELECT count(*) AS n FROM entries WHERE author_id=?1",
+    entry_votes: "SELECT count(*) AS n FROM entry_votes WHERE user_id=?1",
+    entry_reactions: "SELECT count(*) AS n FROM entry_reactions WHERE user_id=?1",
+    entry_comments: "SELECT count(*) AS n FROM entry_comments WHERE author_id=?1",
+    comment_likes: "SELECT count(*) AS n FROM comment_likes WHERE user_id=?1",
+    streamer_applications: "SELECT count(*) AS n FROM streamer_applications WHERE user_id=?1 OR reviewed_by=?1",
+    app_rate_limits: "SELECT count(*) AS n FROM app_rate_limits WHERE key LIKE '%:'||?1",
+    verification: `SELECT count(*) AS n FROM verification WHERE identifier=?1||'@example.test' OR value LIKE '%"'||?1||'"%'`,
+    poll_votes: "SELECT count(*) AS n FROM poll_votes WHERE user_id=?1",
+    poll_reactions: "SELECT count(*) AS n FROM poll_reactions WHERE user_id=?1",
+    poll_comments: "SELECT count(*) AS n FROM poll_comments WHERE user_id=?1",
+  };
+  const names = Object.keys(queries);
+  const results = await env.DB.batch(names.map((name: string) => env.DB.prepare(queries[name]).bind(userId)));
+  return Object.fromEntries(
+    names.map((name: string, index: number) => [name, (results[index].results[0] as { n: number }).n]),
+  );
+}
+
+function zeroes(): Record<string, number> {
+  return {
+    user: 0,
+    session: 0,
+    account: 0,
+    streamers: 0,
+    entries: 0,
+    entry_votes: 0,
+    entry_reactions: 0,
+    entry_comments: 0,
+    comment_likes: 0,
+    streamer_applications: 0,
+    app_rate_limits: 0,
+    verification: 0,
+    poll_votes: 0,
+    poll_reactions: 0,
+    poll_comments: 0,
+  };
+}
+
+async function cookie(): Promise<string> {
+  return `__Secure-stream-bullets.session_token=${encodeURIComponent(`${sessionToken}.${await makeSignature(sessionToken, secret)}`)}`;
+}
+
+function routeContext(): RouterContextProvider {
+  const context = new RouterContextProvider();
+  context.set(appContext, { env, nonce: "nonce", responseHeaders: new Headers() });
+  return context;
+}
+
+async function callExport(headers: Record<string, string> = {}): Promise<Response> {
+  const url = `${origin}/api/account/export`;
+  return loader({
+    request: new Request(url, { headers: { cookie: await cookie(), ...headers } }),
+    params: { "*": "account/export" },
+    context: routeContext(),
+    url: new URL(url),
+    pattern: "/api/*",
+  });
+}
+
+async function callDelete(body: unknown): Promise<{ response: Response; cookies: string[] }> {
+  const url = `${origin}/api/account/delete`;
+  const context = routeContext();
+  const response = await action({
+    request: new Request(url, {
+      method: "POST",
+      headers: { cookie: await cookie(), Origin: origin, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+    params: { "*": "account/delete" },
+    context,
+    url: new URL(url),
+    pattern: "/api/*",
+  });
+  return { response, cookies: context.get(appContext).responseHeaders.getSetCookie() };
+}
+
+beforeAll(async (): Promise<void> => {
+  database = await createTestDatabase();
+  env = {
+    DB: database.db,
+    IMAGES: database.bucket,
+    POLL_ROOMS: {
+      idFromName: (name: string) => name,
+      get: (name: string) => ({
+        fetch: async (): Promise<Response> => {
+          rooms.push(name);
+          return new Response(null, { status: 204 });
+        },
+      }),
+    } as unknown as DurableObjectNamespace,
+    REQUEST_LIMITER: {} as RateLimit,
+    APP_ORIGIN: origin,
+    BETTER_AUTH_SECRET: secret,
+  };
+});
+
+afterAll(async (): Promise<void> => database.dispose());
+
+beforeEach(async (): Promise<void> => {
+  vi.restoreAllMocks();
+  rooms = [];
+  await env.DB.batch(
+    [
+      "DELETE FROM user",
+      "DELETE FROM app_rate_limits",
+      "DELETE FROM verification",
+      "DELETE FROM rate_limit",
+      "DELETE FROM poll_votes",
+      "DELETE FROM poll_reactions",
+      "DELETE FROM poll_comments",
+      "DELETE FROM polls",
+    ].map((sql: string) => env.DB.prepare(sql)),
+  );
+  await env.IMAGES.delete(["avatar/leaver", "background/leaver", "avatar/other"]);
+  await seed();
+});
+
+describe("account export", (): void => {
+  it("includes everything held about the account", async (): Promise<void> => {
+    const data = await exportAccount(env, "leaver");
+    expect(Date.parse(data.exportedAt)).toBeGreaterThanOrEqual(now);
+    expect(data.notes).toContain("not included");
+    expect(data.account).toEqual({
+      id: "leaver",
+      name: "Name leaver",
+      email: "leaver@example.test",
+      emailVerified: true,
+      image: "/images/avatar/leaver",
+      createdAt: new Date(now - day).toISOString(),
+      updatedAt: new Date(now).toISOString(),
+    });
+    expect(data.signInMethods).toEqual([
+      {
+        providerId: "twitch",
+        accountId: "twitch-123",
+        createdAt: new Date(now).toISOString(),
+        updatedAt: new Date(now).toISOString(),
+      },
+    ]);
+    expect(data.activeSessions).toEqual([
+      {
+        createdAt: new Date(now - 1000).toISOString(),
+        expiresAt: new Date(now + day).toISOString(),
+        ipAddress: "192.0.2.7",
+        userAgent: "leaver-agent",
+      },
+    ]);
+    expect(data.streamerPage).toEqual({
+      handle: "leaver_page",
+      name: "Leaver",
+      about: "Leaving soon",
+      url: `${origin}/@leaver_page`,
+    });
+    expect(data.streamerApplication).toMatchObject({
+      links: ["https://www.twitch.tv/leaver"],
+      note: "Please",
+      status: "approved",
+      reviewedAt: new Date(now).toISOString(),
+    });
+    expect(data.entries).toEqual([
+      {
+        id: ids.leaverTopic,
+        streamerHandle: "host_page",
+        kind: "topic",
+        title: "Leaver topic",
+        body: "Mine",
+        category: "Chat",
+        options: [],
+        createdAt: new Date(now).toISOString(),
+        endsAt: null,
+        revealed: false,
+        url: `${origin}/@host_page`,
+      },
+    ]);
+    expect(data.comments.map((comment) => [comment.id, comment.parentId, comment.entryTitle])).toEqual([
+      ["c-leaver", null, "Host topic"],
+      ["c-leaver-2", "c-reply", "Host topic"],
+    ]);
+    expect(data.reactions).toEqual([
+      { entryId: ids.hostTopic, entryTitle: "Host topic", streamerHandle: "host_page", reaction: "dislike" },
+    ]);
+    expect(data.votes).toEqual([
+      { entryId: ids.hostPoll, entryTitle: "Host poll", streamerHandle: "host_page", choice: 1, option: "Blue" },
+    ]);
+    expect(data.commentLikes).toEqual([
+      { commentId: "c-other", entryId: ids.hostTopic, entryTitle: "Host topic", streamerHandle: "host_page" },
+    ]);
+    expect(data.images.map((image) => [image.kind, image.url, image.contentType, image.bytes])).toEqual([
+      ["avatar", `${origin}/images/avatar/leaver`, "image/png", 3],
+      ["background", `${origin}/images/background/leaver`, "image/png", 3],
+    ]);
+    expect(data.legacyPolls).toEqual({
+      votes: [{ pollId: "p1", choice: 0 }],
+      reactions: [{ pollId: "p1", value: 1 }],
+      comments: [{ id: "pc1", pollId: "p1", text: "Legacy", createdAt: new Date(now).toISOString() }],
+    });
+  });
+
+  it("never includes credentials or other people's private data", async (): Promise<void> => {
+    const text = JSON.stringify(await exportAccount(env, "leaver"));
+    for (const secretValue of [
+      sessionToken,
+      "leaver-expired-token",
+      "secret-access-token",
+      "secret-refresh-token",
+      "secret-id-token",
+      "secret-password",
+      "other@example.test",
+      "other-access-token",
+      "Other replies",
+    ]) {
+      expect(text).not.toContain(secretValue);
+    }
+  });
+
+  it("reads large histories in bounded pages", async (): Promise<void> => {
+    const count = EXPORT_PAGE_SIZE * 2 + 3;
+    await env.DB.prepare(
+      `INSERT INTO entry_comments (id,entry_id,author_id,text,created_at)
+        SELECT 'bulk-'||value, ?, 'leaver', 'Bulk '||value, ? FROM json_each(?)`,
+    )
+      .bind(
+        ids.hostTopic,
+        now,
+        JSON.stringify(Array.from({ length: count }, (_value: unknown, index: number) => index)),
+      )
+      .run();
+    const queries: string[] = [];
+    const recording = {
+      batch: (statements: D1PreparedStatement[]) => env.DB.batch(statements),
+      prepare: (sql: string): D1PreparedStatement => {
+        queries.push(sql);
+        return env.DB.prepare(sql);
+      },
+    } as unknown as D1Database;
+    const data = await exportAccount({ ...env, DB: recording }, "leaver");
+    expect(data.comments).toHaveLength(count + 2);
+    expect(new Set(data.comments.map((comment) => comment.id)).size).toBe(count + 2);
+    expect(queries.filter((sql: string) => sql.includes("FROM entry_comments x"))).toHaveLength(3);
+  });
+
+  it("exports likes and images stored without a content type", async (): Promise<void> => {
+    await env.IMAGES.put("avatar/other", new Uint8Array([1]));
+    const data = await exportAccount(env, "other");
+    expect(data.reactions.map((reaction) => [reaction.entryId, reaction.reaction])).toEqual([
+      [ids.leaverTopic, "like"],
+      [ids.hostTopic, "like"],
+    ]);
+    expect(data.images).toMatchObject([{ kind: "avatar", contentType: null, bytes: 1 }]);
+    expect(data.activeSessions).toEqual([
+      {
+        createdAt: new Date(now).toISOString(),
+        expiresAt: new Date(now + day).toISOString(),
+        ipAddress: null,
+        userAgent: null,
+      },
+    ]);
+  });
+
+  it("handles accounts without optional data and missing accounts", async (): Promise<void> => {
+    await env.IMAGES.delete("avatar/other");
+    const data = await exportAccount(env, "admin");
+    expect(data).toMatchObject({
+      streamerPage: null,
+      streamerApplication: null,
+      signInMethods: [],
+      activeSessions: [],
+      entries: [],
+      images: [],
+    });
+    await expect(exportAccount(env, "missing")).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("serves the export as a dated attachment that is never cached", async (): Promise<void> => {
+    const response = await callExport();
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Disposition")).toMatch(
+      /^attachment; filename="streambullets-data-\d{4}-\d{2}-\d{2}\.json"$/,
+    );
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(response.headers.get("Content-Type")).toBe("application/json; charset=utf-8");
+    const body = (await response.json()) as { account: { email: string } };
+    expect(body.account.email).toBe("leaver@example.test");
+    expect((await callExport({ "Sec-Fetch-Site": "cross-site" })).status).toBe(403);
+  });
+});
+
+describe("account deletion", (): void => {
+  it("removes every row linked to the account and keeps other people's data", async (): Promise<void> => {
+    const otherBefore = await linkedRows("other");
+    await deleteAccount(env, "leaver");
+    expect(await linkedRows("leaver")).toEqual(zeroes());
+    const comments = await env.DB.prepare("SELECT id,parent_id FROM entry_comments ORDER BY id").all<{
+      id: string;
+      parent_id: string | null;
+    }>();
+    // Replies under the leaver's comments stay as top-level comments; discussions under deleted entries go.
+    expect(comments.results).toEqual([
+      { id: "c-other", parent_id: null },
+      { id: "c-reply", parent_id: null },
+      { id: "c-reply-2", parent_id: null },
+    ]);
+    expect(await linkedRows("other")).toEqual({
+      ...otherBefore,
+      entries: 0,
+      entry_votes: otherBefore.entry_votes - 1,
+      entry_reactions: otherBefore.entry_reactions - 1,
+      entry_comments: otherBefore.entry_comments - 2,
+      comment_likes: 0,
+      streamer_applications: 1,
+    });
+    const application = await env.DB.prepare(
+      "SELECT status,reviewed_by FROM streamer_applications WHERE user_id='other'",
+    ).first<{ status: string; reviewed_by: string | null }>();
+    expect(application).toEqual({ status: "rejected", reviewed_by: null });
+    expect(await env.DB.prepare("SELECT key FROM rate_limit").all()).toMatchObject({
+      results: [{ key: "192.0.2.7|/sign-in/social" }],
+    });
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM comment_likes WHERE user_id='host'").first()).toEqual({
+      n: 1,
+    });
+    expect(await linkedRows("host")).toMatchObject({ user: 1, streamers: 1, entries: 2 });
+  });
+
+  it("deletes the user's reports and strips copied text from reports about their content", async (): Promise<void> => {
+    const report = (
+      id: string,
+      kind: string,
+      target: string,
+      reporter: string,
+      author: string,
+      snapshot: string,
+    ): D1PreparedStatement =>
+      env.DB.prepare(
+        `INSERT INTO content_reports (id,target_kind,target_id,streamer_id,reporter_id,target_author_id,reason,details,snapshot,status,created_at)
+          VALUES (?,?,?,'page',?,?,'spam','',?,'open',1)`,
+      ).bind(id, kind, target, reporter, author, snapshot);
+    await env.DB.batch([
+      report("r-by-leaver", "comment", "c-other", "leaver", "other", "Other's comment"),
+      report("r-about-leaver-topic", "entry", ids.leaverTopic, "other", "leaver", "Leaver topic text"),
+      report("r-about-leaver-comment", "comment", "c-leaver", "other", "leaver", "Leaver comment text"),
+      report("r-unrelated", "comment", "c-other", "host", "other", "Other's comment"),
+    ]);
+    const exported = await exportAccount(env, "leaver");
+    expect(exported.reports).toEqual([
+      expect.objectContaining({ targetKind: "comment", targetId: "c-other", reason: "spam", status: "open" }),
+    ]);
+    await deleteAccount(env, "leaver");
+    const rows = await env.DB.prepare("SELECT id,snapshot FROM content_reports ORDER BY id").all<{
+      id: string;
+      snapshot: string;
+    }>();
+    expect(rows.results).toEqual([
+      { id: "r-about-leaver-comment", snapshot: DELETED_AUTHOR_SNAPSHOT },
+      { id: "r-about-leaver-topic", snapshot: DELETED_AUTHOR_SNAPSHOT },
+      { id: "r-unrelated", snapshot: "Other's comment" },
+    ]);
+  });
+
+  it("strips copied text from reports about the user's content even after that content was removed", async (): Promise<void> => {
+    // The reported topic is already gone (removed by its author or an administrator) before the account is deleted.
+    await env.DB.prepare(
+      `INSERT INTO content_reports (id,target_kind,target_id,streamer_id,reporter_id,target_author_id,reason,details,snapshot,status,created_at,resolved_at)
+        VALUES ('r-removed','entry','00000000-0000-4000-8000-00000000dead','page','other','leaver','spam','','Removed topic text','actioned',1,2)`,
+    ).run();
+    await deleteAccount(env, "leaver");
+    expect(
+      await env.DB.prepare("SELECT snapshot,target_author_id FROM content_reports WHERE id='r-removed'").first(),
+    ).toEqual({ snapshot: DELETED_AUTHOR_SNAPSHOT, target_author_id: null });
+  });
+
+  it("cascades the streamer page, removes images, and refreshes affected live rooms", async (): Promise<void> => {
+    await deleteAccount(env, "leaver");
+    const pages = await env.DB.prepare("SELECT id,revision FROM streamers ORDER BY handle").all();
+    expect(pages.results).toEqual([{ id: ids.hostPage, revision: 6 }]);
+    expect(await env.DB.prepare("SELECT id FROM entries ORDER BY title").all()).toMatchObject({
+      results: [{ id: ids.hostPoll }, { id: ids.hostTopic }],
+    });
+    expect(await env.IMAGES.head("avatar/leaver")).toBeNull();
+    expect(await env.IMAGES.head("background/leaver")).toBeNull();
+    expect(await env.IMAGES.head("avatar/other")).not.toBeNull();
+    expect(rooms.sort()).toEqual([ids.leaverPage, ids.hostPage].sort());
+  });
+
+  it("commits the deletion when image cleanup fails", async (): Promise<void> => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const failing = { delete: () => Promise.reject(new Error("bucket secret")) } as unknown as R2Bucket;
+    await deleteAccount({ ...env, IMAGES: failing }, "admin");
+    expect(await linkedRows("admin")).toEqual(zeroes());
+    expect(log.mock.calls).toEqual([["account_image_delete_failed", { cause: "Error" }]]);
+    expect(rooms).toEqual([]);
+  });
+
+  it("rejects an account that does not exist", async (): Promise<void> => {
+    await expect(deleteAccount(env, "missing")).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("requires the exact confirmation, then signs the browser out", async (): Promise<void> => {
+    for (const body of [{}, { confirm: "delete" }, { confirm: "DELETE ", extra: true }, { confirm: "DELETE", x: 1 }]) {
+      const { response } = await callDelete(body);
+      expect(response.status).toBe(400);
+    }
+    const rejected = await callDelete({ confirm: "yes" });
+    expect(await rejected.response.json()).toEqual({ error: "Type DELETE to confirm." });
+    expect((await linkedRows("leaver")).user).toBe(1);
+
+    const { response, cookies } = await callDelete({ confirm: "DELETE" });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ deleted: true });
+    expect(await linkedRows("leaver")).toEqual(zeroes());
+    const expired = cookies.find((value: string) => value.startsWith("__Secure-stream-bullets.session_token="));
+    expect(expired).toMatch(/Max-Age=0/i);
+
+    const me = await loader({
+      request: new Request(`${origin}/api/me`, { headers: { cookie: await cookie() } }),
+      params: { "*": "me" },
+      context: routeContext(),
+      url: new URL(`${origin}/api/me`),
+      pattern: "/api/*",
+    });
+    expect(((await me.json()) as { viewer: unknown }).viewer).toBeNull();
+    expect((await callExport()).status).toBe(401);
+  });
+});
