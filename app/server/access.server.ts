@@ -58,7 +58,7 @@ export async function isAdmin(env: AppEnv, userId: string): Promise<boolean> {
   const row = await env.DB.prepare("SELECT email, email_verified FROM user WHERE id=?")
     .bind(userId)
     .first<{ email: string; email_verified: number }>();
-  return Boolean(row && row.email_verified === 1 && admins.has(row.email.toLowerCase()));
+  return Boolean(row?.email_verified === 1 && admins.has(row.email.toLowerCase()));
 }
 
 export async function requireAdmin(env: AppEnv, userId: string): Promise<void> {
