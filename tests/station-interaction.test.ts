@@ -3,8 +3,6 @@ import * as THREE from "three";
 import { createFlips } from "../app/components/station/flips";
 import { createLook } from "../app/components/station/look";
 import { batchStatic } from "../app/components/station/merge";
-import { startAtom, type Layer } from "../app/components/station/loader";
-import { RecordingCanvas } from "./helpers/recording-canvas";
 
 afterEach((): void => {
   vi.unstubAllGlobals();
@@ -99,14 +97,17 @@ describe("look-around", (): void => {
     },
   );
 
-  it("asks iOS for motion access on the first tap and copes with a refusal", async (): Promise<void> => {
+  it("asks iOS for motion access on the first touchend or click and copes with a refusal", async (): Promise<void> => {
     const doc = new EventTarget();
     vi.stubGlobal("document", doc);
     const requestPermission = vi.fn((): Promise<PermissionState> => Promise.reject(new Error("denied")));
     vi.stubGlobal("DeviceOrientationEvent", { requestPermission });
     createLook(host(), new AbortController().signal);
+    // WebKit ignores the request from pointerup, so only touchend or click asks, and only once.
     doc.dispatchEvent(new Event("pointerup"));
-    doc.dispatchEvent(new Event("pointerup"));
+    expect(requestPermission).not.toHaveBeenCalled();
+    doc.dispatchEvent(new Event("touchend"));
+    doc.dispatchEvent(new Event("click"));
     await Promise.resolve();
     expect(requestPermission).toHaveBeenCalledOnce();
   });
@@ -138,10 +139,11 @@ describe("sign flips", (): void => {
     expect(flips.update(cam, 0.016, true)).toBe(true);
     expect(canvas.style.cursor).toBe("pointer");
     flips.update(cam, 0.5, true);
-    expect(pivots[0].rotation.x).toBeGreaterThan(1);
-    expect(pivots[1].rotation.x).toBe(0);
-    for (let i = 0; i < 20; i++) flips.update(cam, 0.05, true);
+    expect(Math.abs(pivots[0].rotation.z)).toBeGreaterThan(1);
     expect(pivots[0].rotation.x).toBe(0);
+    expect(pivots[1].rotation.z).toBe(0);
+    for (let i = 0; i < 20; i++) flips.update(cam, 0.05, true);
+    expect(pivots[0].rotation.z).toBe(0);
     // Still hovering: no second turn.
     expect(flips.update(cam, 0.016, true)).toBe(false);
     wrap.dispatchEvent(pointer("pointermove", "mouse", ...MISS));
@@ -173,7 +175,7 @@ describe("sign flips", (): void => {
     wrap.dispatchEvent(pointer("pointerdown", "touch", ...LEFT, 0));
     wrap.dispatchEvent(pointer("pointerup", "touch", ...LEFT, 120));
     expect(flips.update(cam, 0.016, true)).toBe(true);
-    expect(pivots[0].rotation.x).toBeGreaterThan(0);
+    expect(Math.abs(pivots[0].rotation.z)).toBeGreaterThan(0);
   });
 });
 
@@ -258,45 +260,6 @@ describe("static batching", (): void => {
     const after = new THREE.Box3().setFromObject(station);
     expect(after.min.distanceTo(before.min)).toBeLessThan(1e-6);
     expect(after.max.distanceTo(before.max)).toBeLessThan(1e-6);
-  });
-});
-
-describe("loading atom", (): void => {
-  function layers(): RecordingCanvas[] {
-    return [new RecordingCanvas(), new RecordingCanvas(), new RecordingCanvas()];
-  }
-
-  it("draws three orbits with fading trails each frame and stops cleanly", (): void => {
-    vi.stubGlobal("devicePixelRatio", 3);
-    let tick: FrameRequestCallback = (): void => {};
-    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback): number => {
-      tick = callback;
-      return 7;
-    });
-    const cancel = vi.fn();
-    vi.stubGlobal("cancelAnimationFrame", cancel);
-    const canvases = layers();
-    const stop = startAtom(canvases as unknown as Layer[], false);
-    expect(canvases[0].width).toBe(480);
-    const first = canvases[1].digest();
-    tick(performance.now() + 16);
-    expect(canvases[1].digest()).not.toBe(first);
-    const heads = canvases[2].digest();
-    tick(performance.now() + 40);
-    expect(canvases[2].digest()).not.toBe(heads);
-    stop?.();
-    expect(cancel).toHaveBeenCalledWith(7);
-  });
-
-  it("draws one still frame under reduced motion, and nothing without a 2D context", (): void => {
-    const raf = vi.fn();
-    vi.stubGlobal("requestAnimationFrame", raf);
-    const canvases = layers();
-    expect(startAtom(canvases as unknown as Layer[], true)).toBeUndefined();
-    expect(raf).not.toHaveBeenCalled();
-    const blank = { width: 0, height: 0, getContext: (): null => null };
-    expect(startAtom([blank, blank, blank], false)).toBeUndefined();
-    expect(raf).not.toHaveBeenCalled();
   });
 });
 

@@ -72,13 +72,18 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
     { signal },
   );
 
-  // iOS only reports motion after the person allows it, and only asks from inside a tap.
+  // iOS only reports motion after the person allows it, and only shows the prompt from a gesture WebKit
+  // counts as one: touchend or click (not pointerup). Ask on the first of either, then stop listening.
   const orientation = (globalThis as { DeviceOrientationEvent?: Orientation }).DeviceOrientationEvent;
-  if (typeof orientation?.requestPermission === "function") {
+  const page = globalThis.document;
+  if (typeof orientation?.requestPermission === "function" && page) {
     const ask = (): void => {
+      page.removeEventListener("touchend", ask);
+      page.removeEventListener("click", ask);
       orientation.requestPermission?.().catch((): PermissionState => "denied");
     };
-    globalThis.document?.addEventListener("pointerup", ask, { once: true, signal });
+    page.addEventListener("touchend", ask, { signal, passive: true });
+    page.addEventListener("click", ask, { signal, passive: true });
   }
 
   return {

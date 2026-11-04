@@ -28,17 +28,23 @@ export function Station(): ReactNode {
           document.fonts.load(`700 80px ${DISPLAY_FONT}`).catch((): FontFace[] => []),
         ]);
         if (disposed || !host.current) return;
-        controller.current = scene.createStation(host.current, fail, {
+        const station = await scene.createStation(host.current, fail, {
           family: DISPLAY_FONT,
           shift: (width: number): number => (wide.matches && width > 900 ? 0.24 : 0),
-          // On phones the copy overlaps the top of the stage; the mast may rise to the middle of the buttons.
+          // On phones the copy overlaps the top of the stage; the mast may rise behind the buttons.
           overlap: (): number => {
             const actions = document.querySelector(".landing-actions")?.getBoundingClientRect();
             const stage = host.current?.getBoundingClientRect();
-            return actions && stage ? Math.max(0, (actions.top + actions.bottom) / 2 - stage.top) : 0;
+            return actions && stage ? Math.max(0, actions.top - stage.top) : 0;
           },
         });
-        controller.current.motion(!reduced.matches);
+        // The page may have moved on while the station was building.
+        if (disposed) {
+          station.dispose();
+          return;
+        }
+        controller.current = station;
+        station.motion(!reduced.matches);
         setStatus("ready");
       } catch {
         if (!disposed) fail();

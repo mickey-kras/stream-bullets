@@ -71,7 +71,7 @@ afterEach((): void => {
 
 it.each([true, false])(
   "runs and disposes the station controller (reduced=%s)",
-  (reduced: boolean): void => {
+  async (reduced: boolean): Promise<void> => {
     installRecordingCanvas();
     const media = Object.assign(new EventTarget(), { matches: reduced });
     vi.stubGlobal("matchMedia", (): EventTarget => media);
@@ -114,7 +114,7 @@ it.each([true, false])(
       getBoundingClientRect: (): object => ({ left: 0, top: 0, width: 1200, height: 800 }),
     });
     const fail = vi.fn();
-    const controller = createStation(
+    const controller = await createStation(
       host as unknown as HTMLDivElement,
       fail,
       reduced ? {} : { shift: (): number => 0.2, family: "sans-serif" },
