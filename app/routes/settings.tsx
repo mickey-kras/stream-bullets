@@ -4,14 +4,18 @@ import { appContext } from "../env";
 import { authClient } from "../auth-client";
 import { configuredProviders, getViewer } from "../server/auth.server";
 import { getOwnStreamer } from "../server/data.server";
+import { getStreamerAccess } from "../server/access.server";
 import { Avatar, SignIn, SiteHeader } from "../components/common";
 import { errorMessage, postJson, requestJson } from "../components/api";
+import { StreamerWaitlist } from "../components/waitlist";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const app = context.get(appContext);
   const viewer = await getViewer(request, app);
-  const streamer = viewer ? await getOwnStreamer(app.env, viewer.id) : null;
-  return { viewer, streamer, providers: configuredProviders(app.env) };
+  const [streamer, access] = viewer
+    ? await Promise.all([getOwnStreamer(app.env, viewer.id), getStreamerAccess(app.env, viewer.id)])
+    : [null, null];
+  return { viewer, streamer, access, providers: configuredProviders(app.env) };
 }
 
 function ImageUpload({
@@ -40,7 +44,7 @@ function ImageUpload({
 }
 
 export default function Settings(): ReactNode {
-  const { viewer, streamer, providers } = useLoaderData<typeof loader>();
+  const { viewer, streamer, access, providers } = useLoaderData<typeof loader>();
   const revalidator = useRevalidator();
   const [pending, setPending] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -62,6 +66,24 @@ export default function Settings(): ReactNode {
       await revalidator.revalidate();
     } catch (error_: unknown) {
       setError(errorMessage(error_));
+    } finally {
+      setPending("");
+    }
+  }
+
+  async function apply(input: { links: string[]; note: string }): Promise<boolean> {
+    if (pending) return false;
+    setPending("/api/application");
+    setError("");
+    setNotice("");
+    try {
+      await postJson<unknown>("/api/application", input);
+      setNotice("Your request is saved. We'll review it soon.");
+      await revalidator.revalidate();
+      return true;
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
+      return false;
     } finally {
       setPending("");
     }
@@ -107,7 +129,7 @@ export default function Settings(): ReactNode {
 
   return (
     <>
-      <SiteHeader viewer={viewer} providers={providers} />
+      <SiteHeader viewer={viewer} providers={providers} admin={access?.admin} />
       <main className="page-panel settings-page" id="main-content">
         <span className="eyebrow">MAKE YOURSELF AT HOME</span>
         <h1>Your profile</h1>
@@ -156,57 +178,71 @@ export default function Settings(): ReactNode {
             </section>
             <section className="info-card" aria-labelledby="streamer-heading">
               <h2 id="streamer-heading">{streamer ? "Your streamer page" : "Host a community"}</h2>
-              <p>
-                {streamer
-                  ? "Edit the name and details on your public page."
-                  : "Your account starts as a viewer. Create a streamer profile to claim a public page and run polls."}
-              </p>
               {streamer && (
+                <>
+                  <p>Edit the name and details on your public page.</p>
+                  <p>
+                    <Link className="text-link" to={`/@${streamer.handle}`}>
+                      Open /@{streamer.handle}
+                    </Link>{" "}
+                    ·{" "}
+                    <Link className="text-link" to={`/@${streamer.handle}/overlay`}>
+                      Open OBS overlay
+                    </Link>
+                  </p>
+                </>
+              )}
+              {!streamer && access?.canCreateStreamer && (
                 <p>
-                  <Link className="text-link" to={`/@${streamer.handle}`}>
-                    Open /@{streamer.handle}
-                  </Link>{" "}
-                  ·{" "}
-                  <Link className="text-link" to={`/@${streamer.handle}/overlay`}>
-                    Open OBS overlay
-                  </Link>
+                  {access.application?.status === "approved"
+                    ? "You're approved to host a community. Claim your handle to create your public page and run polls."
+                    : "As an administrator, you can create a streamer profile. Claim your handle to create your public page."}
                 </p>
               )}
-              <form
-                key={streamer?.id || "new"}
-                onSubmit={(event: FormEvent<HTMLFormElement>) => {
-                  void save(event, "/api/profile");
-                }}
-              >
-                <label>
-                  <span>Handle</span>
-                  <input
-                    name="handle"
-                    defaultValue={streamer?.handle || ""}
-                    required
-                    minLength={3}
-                    maxLength={30}
-                    pattern="[a-z0-9_]{3,30}"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    aria-describedby="handle-help"
-                  />
-                </label>
-                <p className="muted" id="handle-help">
-                  3–30 lowercase letters, numbers, or underscores. Your page uses /@handle.
-                </p>
-                <label>
-                  <span>Streamer name</span>
-                  <input name="name" defaultValue={streamer?.name || viewer.name} required maxLength={40} />
-                </label>
-                <label>
-                  <span>About your stream</span>
-                  <textarea name="about" defaultValue={streamer?.about || ""} maxLength={2000} rows={5} />
-                </label>
-                <button className="gold" type="submit" disabled={Boolean(pending)}>
-                  {streamer ? "Save streamer profile" : "Create public streamer profile"}
-                </button>
-              </form>
+              {!streamer && !access?.canCreateStreamer && (
+                <StreamerWaitlist
+                  application={access?.application ?? null}
+                  disabled={Boolean(pending)}
+                  onSubmit={apply}
+                />
+              )}
+              {(streamer || access?.canCreateStreamer) && (
+                <form
+                  key={streamer?.id || "new"}
+                  onSubmit={(event: FormEvent<HTMLFormElement>) => {
+                    void save(event, "/api/profile");
+                  }}
+                >
+                  <label>
+                    <span>Handle</span>
+                    <input
+                      name="handle"
+                      defaultValue={streamer?.handle || ""}
+                      required
+                      minLength={3}
+                      maxLength={30}
+                      pattern="[a-z0-9_]{3,30}"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      aria-describedby="handle-help"
+                    />
+                  </label>
+                  <p className="muted" id="handle-help">
+                    3–30 lowercase letters, numbers, or underscores. Your page uses /@handle.
+                  </p>
+                  <label>
+                    <span>Streamer name</span>
+                    <input name="name" defaultValue={streamer?.name || viewer.name} required maxLength={40} />
+                  </label>
+                  <label>
+                    <span>About your stream</span>
+                    <textarea name="about" defaultValue={streamer?.about || ""} maxLength={2000} rows={5} />
+                  </label>
+                  <button className="gold" type="submit" disabled={Boolean(pending)}>
+                    {streamer ? "Save streamer profile" : "Create public streamer profile"}
+                  </button>
+                </form>
+              )}
               {streamer && (
                 <>
                   <ImageUpload

@@ -14,6 +14,7 @@ import type {
   Streamer,
   StreamerDirectory,
 } from "../types";
+import { canCreateStreamer } from "./access.server";
 import { HttpError } from "./http.server";
 import {
   commentActionSchema,
@@ -177,6 +178,8 @@ export async function saveStreamer(env: AppEnv, userId: string, input: StreamerI
   await consumeMutationQuota(env, userId);
   const [account] = await drizzle(env.DB).select({ image: user.image }).from(user).where(eq(user.id, userId)).limit(1);
   if (!account) throw new HttpError(401, "Sign in to create a streamer profile.");
+  if (!(await getOwnStreamer(env, userId)) && !(await canCreateStreamer(env, userId)))
+    throw new HttpError(403, "Streamer profiles need approval. Join the streamer waitlist first.");
   const avatar = publicAvatar(userId, account.image);
   try {
     const [row] = await drizzle(env.DB)

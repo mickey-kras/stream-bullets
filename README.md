@@ -15,7 +15,12 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 
 ## Behavior
 
-- Accounts start as viewers. A viewer must create a streamer profile to claim `/@handle`.
+- Accounts start as viewers. In this version, a streamer profile needs approval.
+- A viewer joins the waitlist in **Settings**. The application contains 1 to 5 HTTPS links to the channels of the viewer. It can also contain a note of up to 1,000 characters.
+- The viewer can change a pending or rejected application. When the viewer sends a rejected application again, it becomes pending. An approved application cannot change.
+- Administrators review applications at `/admin`. The page shows pending, approved, and rejected applications. Administrators can see the name and email address of each applicant.
+- After approval, the account can create one streamer profile and claim `/@handle`. Administrators can create a streamer profile without an application.
+- Existing streamer profiles continue to work. A rejection does not remove an existing profile.
 - Display names use 1 to 40 characters on one line. If your provider name does not meet this limit, change it before you sign in.
 - Topics, comments, replies, likes, dislikes, and profile changes persist in D1.
 - Each account has one reaction per topic or poll, one like per comment, and one vote per poll. A poll vote can change until voting closes.
@@ -53,6 +58,11 @@ Add Google or Twitch credentials to `.dev.vars` to test sign-in. A provider need
 | `BETTER_AUTH_SECRET` | Random secret of at least 32 characters. Keep it stable across deployments. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Credentials for the Google OAuth application. |
 | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | Credentials for the Twitch OAuth application. |
+| `ADMIN_EMAILS` | Email addresses of administrators. Use commas or spaces between the addresses. Letter case is not important. |
+
+An administrator is an account with a verified email address in `ADMIN_EMAILS`. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
+
+For local testing, add `ADMIN_EMAILS` to `.dev.vars`. For production, store it as a Worker secret. Use `pnpm exec wrangler secret put ADMIN_EMAILS --env production` or the Cloudflare dashboard. Do not use a plain variable in the dashboard. Each deployment replaces plain variables with the `vars` in `wrangler.jsonc`.
 
 Register these exact callback URLs with each enabled provider:
 
@@ -90,6 +100,7 @@ One-time setup:
 - Create the GitHub `production` environment. Restrict its deployment branches to `main`. Omit required reviewers for automatic deployment.
 - Add `CLOUDFLARE_API_TOKEN` as an environment secret. Restrict the Cloudflare token to this account and the `streambullets.com` zone. Give it these permissions: **Workers Scripts Edit**, **D1 Edit**, **Workers R2 Storage Edit**, **Workers Routes Edit**, and **Zone Read**. Do not put the token in a file or workflow.
 - Configure `BETTER_AUTH_SECRET`, Google credentials, and Twitch credentials as Worker secrets, as described below. Wrangler preserves existing secrets during deployment. The production smoke check fails if `BETTER_AUTH_SECRET` is missing or invalid. It does not check OAuth sign-in. Test both providers after setup.
+- Store `ADMIN_EMAILS` as a Worker secret, as described above. Without it, nobody can approve streamer applications.
 - Make `Verify application` mandatory before merging to `main` and prevent direct pushes in the repository ruleset.
 
 The deployment records the current bookmark for D1 Time Travel before applying pending migrations. It uploads the production Worker and assets, then checks the homepage and stylesheet. A migration failure stops deployment. A failed smoke check marks the run as failed. It does not automatically roll back the schema. Keep migrations compatible with the currently deployed Worker until the new version is live.
@@ -108,7 +119,7 @@ For a manual deployment, authenticate Wrangler on your deployment machine:
    ```
 
 2. For a replacement account, update `env.production` with its account and D1 IDs, bucket, HTTPS `APP_ORIGIN`, and custom domain. Keep the binding names `DB`, `IMAGES`, `POLL_ROOMS`, and `REQUEST_LIMITER`.
-3. Register the OAuth callback URLs for production. Store `BETTER_AUTH_SECRET` and provider credentials as Worker secrets through the Cloudflare dashboard or `pnpm exec wrangler secret put <NAME> --env production`. Never put secrets in `vars`, the repository, or a browser bundle. A new Worker returns an error until you configure its authentication secret.
+3. Register the OAuth callback URLs for production. Store `BETTER_AUTH_SECRET`, `ADMIN_EMAILS`, and provider credentials as Worker secrets through the Cloudflare dashboard or `pnpm exec wrangler secret put <NAME> --env production`. Never put secrets in `vars`, the repository, or a browser bundle. A new Worker returns an error until you configure its authentication secret.
 4. Make a backup of an existing D1 database before applying migrations:
 
    ```sh
@@ -124,6 +135,7 @@ For a manual deployment, authenticate Wrangler on your deployment machine:
    ```
 
 6. Check Google and Twitch sign-in, sign-out, two-account authorization, image upload, and poll voting on the production origin. Check an OBS browser source. Confirm failed requests do not expose secrets or account data.
+7. Send a waitlist application from a test account. Approve it at `/admin` with an administrator account. Make sure that the test account can then create a streamer profile.
 
 The Durable Object `v1` migration runs with the Worker deployment. Make a backup of D1 before later schema changes. Roll back Worker code only to a version that supports the current schema. Do not remove migration records or apply old schema files over live data.
 
@@ -140,6 +152,9 @@ Migrations `0000`–`0002` and their legacy poll tables remain intact. The platf
 - A page can contain up to 1,000 topics and polls. A discussion can contain up to 10,000 comments. The app limits the bodies of HTTP requests and page sizes.
 - Uploads accept PNG, JPEG, and WebP only, up to 5 MB, 16 million pixels, and 8,192 pixels per side. Each account has one avatar and each streamer has one background. Uploaded images are public through their application URLs. The app keeps image metadata.
 - Public responses omit email, tokens, provider credentials, and session details. The app does not log the bodies of HTTP requests or identities. Cloudflare observability is off by default. Review platform retention and redaction before enabling it.
+- Administrators can see the email address of each applicant. Give administrator access only to trusted accounts.
+- The app does not send email about review decisions in this version. Applicants see the status of their application in **Settings**.
+- Migration `0004` adds the `streamer_applications` table. When you delete a user, the database also deletes the application of that user.
 - An hourly task removes expired sessions, OAuth state, and old rate-limit records in bounded batches.
 - Content moderation lets authors and streamers delete content. There is no report queue, account ban workflow, provider linking, or self-service account deletion in this version. Operators must handle deletion and abuse requests directly.
 
