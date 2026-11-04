@@ -169,8 +169,6 @@ body:has(.landing-page)::after {
 .station-status {
   position: absolute;
   z-index: 2;
-}
-.station-status {
   display: block;
   right: 22%;
   top: 48%;
