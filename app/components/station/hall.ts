@@ -107,7 +107,7 @@ function hallOnAirSign(k: Kit, s: Pick<HallScope, "onAir">): void {
 }
 
 export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
-  const { brass, gold, copper, iron, hallTeal, hallCream, hallDark, steel, warmSoft, glass } = k;
+  const { brass, gold, copper, iron, hallTeal, hallFascia, hallCream, hallDark, steel, warmSoft, glass } = k;
   const hall = add(new THREE.Group(), station);
   hall.position.copy(HALL_AT);
   // Plinth: iron footing, cream enamel skirt, riveted brass trim.
@@ -131,7 +131,7 @@ export function buildHall(k: Kit, station: THREE.Group): THREE.Group {
   tube(loop(GLASS_FROM, GLASS_TO, 0.04, 2.42, 90), 0.04, gold, hall);
   // Streamline fascia with three enamel speed stripes, overhanging the glass.
   capSlab(0.22, 2.44, 0.04, hallDark, hall);
-  band([0, TAU], [2.46, 3.46], 0.22, hallTeal, hall);
+  band([0, TAU], [2.46, 3.46], 0.22, hallFascia, hall);
   tube(loop(0, TAU, 0.25, 2.48, 160, true), 0.055, gold, hall, true);
   buildLogo(k, hall);
   rivets(loop(0, TAU, 0.228, 3.3, 140, true), 0.016, brass, hall);
