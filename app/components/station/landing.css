@@ -165,13 +165,28 @@ body:has(.landing-page)::after {
     linear-gradient(0deg, var(--ink) 0%, #061a1e00 16%);
 }
 
-/* Loading atom and the no-WebGL note, both centred where the station will stand. */
-.station-loader,
+/* The no-WebGL note, centred where the station will stand. */
 .station-status {
   position: absolute;
   z-index: 2;
 }
+.station-status {
+  display: block;
+  right: 22%;
+  top: 48%;
+  max-width: 30ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* Loading atom, in CSS only. Each orbit is a circle squashed into an ellipse; a fading conic trail spins
+   round it with the particle at its head. Transforms run on the compositor, so the atom keeps moving
+   while the main thread builds the station. The spin is warped (fast through the middle of the orbit,
+   slow round its ends); the head counter-rotates and un-squashes on the same timing, so it stays round. */
 .station-loader {
+  position: absolute;
+  z-index: 2;
   top: 50%;
   left: 62%;
   width: 240px;
@@ -187,26 +202,183 @@ body:has(.landing-page)::after {
   background: radial-gradient(circle, #ffc45766 0, #f2bf4926 36%, transparent 70%);
   animation: loader-breathe 2.4s ease-in-out infinite;
 }
-.station-loader canvas {
+.atom-orbit {
+  position: absolute;
+  top: 36px;
+  left: 36px;
+  width: 168px;
+  height: 168px;
+  transform: rotate(var(--tilt)) scaleY(0.32);
+}
+.atom-orbit::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 2.5px solid #ffcd6e4d;
+  border-radius: 50%;
+}
+.atom-spin {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  filter: drop-shadow(0 0 3px #f2b440) drop-shadow(0 0 8px #f2b44099);
+  animation: atom-spin var(--period) linear var(--phase) infinite;
+}
+.atom-trail {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 90deg,
+    transparent 0deg 225deg,
+    #ffd6820d 270deg,
+    #ffd68259 325deg,
+    #ffe6a8 359deg,
+    transparent 360deg
+  );
+  mask: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+}
+.atom-head {
+  position: absolute;
+  top: 50%;
+  left: calc(100% - 3px);
+  width: 0;
+  height: 0;
+  animation: atom-unspin var(--period) linear var(--phase) infinite;
+}
+.atom-head::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffcec 0 18%, #ffe296f2 30%, #f2b03c73 55%, transparent 72%);
+  box-shadow: 0 0 14px 4px #f2b44066;
+}
+.atom-orbit:nth-child(1) {
+  --tilt: 90deg;
+  --period: 1.25s;
+  --phase: -0.2s;
+}
+.atom-orbit:nth-child(2) {
+  --tilt: 30deg;
+  --period: 1.45s;
+  --phase: -0.95s;
+}
+.atom-orbit:nth-child(3) {
+  --tilt: -30deg;
+  --period: 1.35s;
+  --phase: -0.55s;
+}
+@keyframes atom-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  6.25% {
+    transform: rotate(9.5deg);
+  }
+  12.5% {
+    transform: rotate(26.7deg);
+  }
+  18.75% {
+    transform: rotate(54.5deg);
+  }
+  25% {
+    transform: rotate(90deg);
+  }
+  31.25% {
+    transform: rotate(125.5deg);
+  }
+  37.5% {
+    transform: rotate(153.3deg);
+  }
+  43.75% {
+    transform: rotate(170.5deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  56.25% {
+    transform: rotate(189.5deg);
+  }
+  62.5% {
+    transform: rotate(206.7deg);
+  }
+  68.75% {
+    transform: rotate(234.5deg);
+  }
+  75% {
+    transform: rotate(270deg);
+  }
+  81.25% {
+    transform: rotate(305.5deg);
+  }
+  87.5% {
+    transform: rotate(333.3deg);
+  }
+  93.75% {
+    transform: rotate(350.5deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes atom-unspin {
+  0% {
+    transform: rotate(-0deg) scaleY(3.125);
+  }
+  6.25% {
+    transform: rotate(-9.5deg) scaleY(3.125);
+  }
+  12.5% {
+    transform: rotate(-26.7deg) scaleY(3.125);
+  }
+  18.75% {
+    transform: rotate(-54.5deg) scaleY(3.125);
+  }
+  25% {
+    transform: rotate(-90deg) scaleY(3.125);
+  }
+  31.25% {
+    transform: rotate(-125.5deg) scaleY(3.125);
+  }
+  37.5% {
+    transform: rotate(-153.3deg) scaleY(3.125);
+  }
+  43.75% {
+    transform: rotate(-170.5deg) scaleY(3.125);
+  }
+  50% {
+    transform: rotate(-180deg) scaleY(3.125);
+  }
+  56.25% {
+    transform: rotate(-189.5deg) scaleY(3.125);
+  }
+  62.5% {
+    transform: rotate(-206.7deg) scaleY(3.125);
+  }
+  68.75% {
+    transform: rotate(-234.5deg) scaleY(3.125);
+  }
+  75% {
+    transform: rotate(-270deg) scaleY(3.125);
+  }
+  81.25% {
+    transform: rotate(-305.5deg) scaleY(3.125);
+  }
+  87.5% {
+    transform: rotate(-333.3deg) scaleY(3.125);
+  }
+  93.75% {
+    transform: rotate(-350.5deg) scaleY(3.125);
+  }
+  100% {
+    transform: rotate(-360deg) scaleY(3.125);
+  }
 }
 @keyframes loader-breathe {
   50% {
     opacity: 0.7;
     transform: scale(0.96);
   }
-}
-.station-status {
-  display: block;
-  right: 22%;
-  top: 48%;
-  max-width: 30ch;
-  margin: 0;
-  color: var(--muted);
-  font-size: 15px;
 }
 
 .landing-copy {
@@ -383,5 +555,10 @@ body:has(.landing-page)::after {
   .landing-canvas canvas,
   .station-loader::before {
     animation: none;
+  }
+  /* A still atom: each particle rests where its phase puts it, trail behind it. */
+  .atom-spin,
+  .atom-head {
+    animation-play-state: paused;
   }
 }

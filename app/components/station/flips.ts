@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-/* The mast signs turn over once when the pointer moves onto them, or when one is tapped. Each sign turns
+/* The mast signs spin once on their arms when the pointer moves onto them, or when one is tapped. Each sign turns
    on its own, finishes its turn before it can start another, and only turns again after the pointer
    has left it and come back. */
 
@@ -29,10 +29,10 @@ function advanceTurns(signs: readonly Sign[], dt: number): boolean {
     if (s.turn < 0) continue;
     s.turn += dt;
     const t = Math.min(s.turn / FLIP_SECONDS, 1);
-    // Positive turn about the sign's own x axis rolls its top edge toward the viewer.
-    s.pivot.rotation.x = ease(t) * Math.PI * 2;
+    // The sign turns on its arm, like a wheel on an axle: the arm meets the back square-on, along z.
+    s.pivot.rotation.z = -ease(t) * Math.PI * 2;
     if (t >= 1) {
-      s.pivot.rotation.x = 0;
+      s.pivot.rotation.z = 0;
       s.turn = -1;
     } else turning = true;
   }

@@ -73,7 +73,7 @@ const PHONE_HERO: Shot = {
 };
 /** Height of the model on screen from the hero angle, in world units: the deck's near edge to the top of
     the signal rings, with the lean of the view folded in. */
-const MODEL_LOW = -1.6;
+const MODEL_LOW = -2.6;
 const MODEL_HIGH = 9.6;
 
 /** Phone hero shot for a canvas whose top `hidden` fraction is covered by the page. */
@@ -101,7 +101,7 @@ const SHOTS: Record<StationView, Shot> = {
     target: new THREE.Vector3(-0.1, 3.4, 0),
     theta: 0.16,
     phi: 1.37,
-    radius: 21.5,
+    radius: 25,
     shift: 1,
   },
   studio: {
@@ -175,7 +175,6 @@ function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRend
   renderer.shadowMap.needsUpdate = true;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
-  wrap.appendChild(renderer.domElement);
   renderer.domElement.setAttribute("role", "img");
   renderer.domElement.setAttribute(
     "aria-label",
@@ -300,16 +299,30 @@ function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: T
   return { composer, bloom, finish };
 }
 
-function buildModel(k: Kit, scene: THREE.Scene, station: THREE.Group): { tilt: THREE.Group; signs: THREE.Group[] } {
+/** Hand the main thread back to the browser for a moment, so taps, scrolling and paint keep up. */
+const pause = (): Promise<void> => new Promise((resolve: () => void): void => void setTimeout(resolve, 0));
+
+/** Builds the model part by part, pausing between parts so the page stays responsive while it loads. */
+async function buildModel(
+  k: Kit,
+  scene: THREE.Scene,
+  station: THREE.Group,
+): Promise<{ tilt: THREE.Group; signs: THREE.Group[] }> {
   buildDeck(k, station);
+  await pause();
   const hall = buildHall(k, station);
+  await pause();
   buildStudio(k, hall);
+  await pause();
   const wing = buildWing(k, station);
   buildDecals(k, station, { hall, wing });
+  await pause();
   buildWorks(k, station);
+  await pause();
   const tilt = buildMast(k, hall);
   const signs = buildSigns(k, station);
   buildAtom(k, station);
+  await pause();
   // Merge everything that never moves; the camera-facing mast head and the flipping signs stay live.
   const moving = batchStatic(station, k.animators, [tilt, ...signs]);
   // Shadows render once (see the loop), so parts that move on their own do not cast stale ones.
@@ -410,16 +423,19 @@ function disposeScene(scene: THREE.Scene, k: Kit): void {
   if (scene.background instanceof THREE.Texture) scene.background.dispose();
 }
 
-export function createStation(
+/** Builds the station into `wrap`. The build runs in steps (see `buildModel`), so it resolves once the
+    first frame is ready; the canvas joins the page only then. */
+export async function createStation(
   wrap: HTMLDivElement,
   onFailure: () => void,
   options: StationOptions = {},
-): StationController {
+): Promise<StationController> {
   const lifecycle = new AbortController();
   const listen = { signal: lifecycle.signal };
   const reduced = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
   const compact = globalThis.matchMedia("(max-width: 700px)").matches;
   const k = createKit(compact, options.family ?? "Oswald, sans-serif");
+  await pause();
   const shots: Record<StationView, Shot> = compact ? { ...SHOTS, hero: PHONE_HERO } : SHOTS;
   const state = {
     playing: !reduced.matches,
@@ -444,9 +460,13 @@ export function createStation(
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 140);
   const station = new THREE.Group();
   scene.add(station);
-  const { tilt, signs } = buildModel(k, scene, station);
+  const { tilt, signs } = await buildModel(k, scene, station);
   const key = addLights(scene, compact);
   const { composer, bloom, finish } = createPost(renderer, scene, camera);
+  // Compile shaders off the critical path where the browser can (parallel shader compile), instead of
+  // stalling the first frame.
+  await renderer.compileAsync?.(scene, camera);
+  wrap.appendChild(renderer.domElement);
 
   const controls = createControls(camera, renderer.domElement);
   const { rig, place, step, applyShift } = createRig(camera, controls, options.shift, shots.hero);

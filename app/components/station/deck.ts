@@ -68,10 +68,10 @@ export function buildDeck(k: Kit, station: THREE.Group): void {
   const opal = new THREE.MeshStandardMaterial({
     color: "#ffe9c2",
     emissive: "#ffc070",
-    emissiveIntensity: 0.8,
+    emissiveIntensity: 1.05,
     roughness: 0.6,
   });
-  emissives.push([opal, 0.8]);
+  emissives.push([opal, 1.05]);
   for (const a of [-0.55, 0.6, 2, -1.45, Math.PI]) {
     const x = Math.sin(a) * 4.45,
       z = Math.cos(a) * 4.45;
@@ -144,7 +144,7 @@ export function buildDeck(k: Kit, station: THREE.Group): void {
         lamp,
       );
     }
-    halo([0, 1.3, 0], 1, "#ffc070", 0.22, lamp);
+    halo([0, 1.3, 0], 1, "#ffc070", 0.27, lamp);
     if (Math.abs(a) < 1.1) practical("#ffc47a", [5, 3.2], [0, 1.45, 0], lamp);
   }
 }
