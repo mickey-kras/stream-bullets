@@ -372,6 +372,7 @@ export function createStation(
   const reduced = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
   const compact = globalThis.matchMedia("(max-width: 700px)").matches;
   const k = createKit(compact, options.family ?? "Oswald, sans-serif");
+  if (compact) SHOTS.hero = { ...SHOTS.hero, target: new THREE.Vector3(0, 4.25, 0), radius: 17.5, phi: 1.33 };
   const state = {
     playing: !reduced.matches,
     dragging: false,

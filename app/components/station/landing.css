@@ -492,3 +492,25 @@ body:has(.landing-page)::after {
     transition: none;
   }
 }
+
+/* ---- PROTOTYPE: single adaptive screen ---- */
+.landing-tour { display: none !important; }
+.landing-page { overflow: hidden; height: 100dvh; display: flex; flex-direction: column; }
+.landing-main { flex: 1; min-height: 0; display: flex; }
+.landing-hero { flex: 1; min-height: 0; }
+.landing-logo { display: block; height: 72px; width: auto; }
+.landing-icon { display: none; height: 52px; width: auto; }
+@media (max-width: 560px) {
+  .landing-logo { display: none; }
+  .landing-icon { display: block; height: 46px; }
+}
+@media (max-width: 700px) {
+  .landing-page:has(.landing-hero) .landing-header { position: absolute; inset: 0 0 auto; }
+  .landing-hero { display: flex; flex-direction: column; }
+  .landing-copy { padding-top: calc(78px + env(safe-area-inset-top, 0px)); position: relative; z-index: 2; }
+  .landing-copy::before { content: ""; position: absolute; inset: 0 0 -40px; z-index: -1; background: linear-gradient(180deg, var(--ink) 70%, #061a1e00); pointer-events: none; }
+  .landing-station { position: relative; flex: 1; min-height: 0; height: auto; max-height: none; margin-top: -14vh; z-index: 1;
+    -webkit-mask-image: none; mask-image: none; }
+  .landing-copy { z-index: 2; }
+  .landing-topics { display: none; }
+}

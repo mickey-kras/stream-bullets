@@ -27,16 +27,16 @@ exports[`paints the clock, poster and backdrop 3`] = `
 exports[`preserves model geometry and animations (compact=false) 1`] = `
 {
   "animators": 19,
-  "geometry": "bfe80d7eb8b624d6250afd7cb7f40aacfefde66a43310d03151f741115cf9b43",
-  "meshes": 1068,
+  "geometry": "88356f1e67c65c66ca78df15ece949af02230f97400a4fb874d4223ed46fed71",
+  "meshes": 1075,
 }
 `;
 
 exports[`preserves model geometry and animations (compact=true) 1`] = `
 {
   "animators": 19,
-  "geometry": "38a5956abfb751aa5b53edcdc6ef1800574b998d3e775eeea30be8c2c5245f97",
-  "meshes": 1068,
+  "geometry": "71a4bf01325d4af351f56cbe67bb6de29f1158bd406eb025bbb1be58521037b6",
+  "meshes": 1075,
 }
 `;
 
