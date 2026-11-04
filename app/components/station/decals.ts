@@ -57,6 +57,8 @@ export function buildDecals(k: Kit, station: THREE.Group, parts: { hall: THREE.G
     for (let i = 0; i < 14; i++) {
       const a = rnd() * TAU,
         y = 2.55 + rnd() * 0.8;
+      // Keep the front of the fascia, where ON AIR and the wordmark hang, free of flaked paint.
+      if (front(a)) continue;
       conform(chipsSet[i % 3], a - 0.09, a + 0.09, y, y + 0.28, 0.238);
     }
     for (let i = 0; i < 8; i++) {

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as THREE from "three";
 import { createFlips } from "../app/components/station/flips";
 import { createLook } from "../app/components/station/look";
+import { askForTilt, onFirstMotion, tiltNeedsAsking } from "../app/components/station/tilt";
 import { batchStatic } from "../app/components/station/merge";
 
 afterEach((): void => {
@@ -96,21 +97,6 @@ describe("look-around", (): void => {
       look.restore(cam, new THREE.Vector3());
     },
   );
-
-  it("asks iOS for motion access on the first touchend or click and copes with a refusal", async (): Promise<void> => {
-    const doc = new EventTarget();
-    vi.stubGlobal("document", doc);
-    const requestPermission = vi.fn((): Promise<PermissionState> => Promise.reject(new Error("denied")));
-    vi.stubGlobal("DeviceOrientationEvent", { requestPermission });
-    createLook(host(), new AbortController().signal);
-    // WebKit ignores the request from pointerup, so only touchend or click asks, and only once.
-    doc.dispatchEvent(new Event("pointerup"));
-    expect(requestPermission).not.toHaveBeenCalled();
-    doc.dispatchEvent(new Event("touchend"));
-    doc.dispatchEvent(new Event("click"));
-    await Promise.resolve();
-    expect(requestPermission).toHaveBeenCalledOnce();
-  });
 });
 
 describe("sign flips", (): void => {
@@ -139,11 +125,10 @@ describe("sign flips", (): void => {
     expect(flips.update(cam, 0.016, true)).toBe(true);
     expect(canvas.style.cursor).toBe("pointer");
     flips.update(cam, 0.5, true);
-    expect(Math.abs(pivots[0].rotation.z)).toBeGreaterThan(1);
-    expect(pivots[0].rotation.x).toBe(0);
-    expect(pivots[1].rotation.z).toBe(0);
+    expect(pivots[0].rotation.x).toBeGreaterThan(1);
+    expect(pivots[1].rotation.x).toBe(0);
     for (let i = 0; i < 20; i++) flips.update(cam, 0.05, true);
-    expect(pivots[0].rotation.z).toBe(0);
+    expect(pivots[0].rotation.x).toBe(0);
     // Still hovering: no second turn.
     expect(flips.update(cam, 0.016, true)).toBe(false);
     wrap.dispatchEvent(pointer("pointermove", "mouse", ...MISS));
@@ -175,7 +160,7 @@ describe("sign flips", (): void => {
     wrap.dispatchEvent(pointer("pointerdown", "touch", ...LEFT, 0));
     wrap.dispatchEvent(pointer("pointerup", "touch", ...LEFT, 120));
     expect(flips.update(cam, 0.016, true)).toBe(true);
-    expect(Math.abs(pivots[0].rotation.z)).toBeGreaterThan(0);
+    expect(pivots[0].rotation.x).toBeGreaterThan(0);
   });
 });
 
@@ -275,5 +260,70 @@ describe("phone framing", (): void => {
     // Coverage is clamped, so a broken measurement cannot push the model off the stage.
     expect(fitPhone(40, 5).radius).toBe(fitPhone(40, 0.6).radius);
     expect(fitPhone(40, -1).radius).toBe(open.radius);
+  });
+});
+
+describe("tilt access", (): void => {
+  function storage(initial: Record<string, string> = {}): Storage {
+    const data = new Map<string, string>(Object.entries(initial));
+    return {
+      getItem: (k: string): string | null => data.get(k) ?? null,
+      setItem: (k: string, v: string): void => void data.set(k, v),
+    } as unknown as Storage;
+  }
+
+  it("needs no tap where the browser reports motion freely", async (): Promise<void> => {
+    vi.stubGlobal("DeviceOrientationEvent", {});
+    expect(tiltNeedsAsking()).toBe(false);
+    await expect(askForTilt()).resolves.toBe("granted");
+  });
+
+  it("asks on iOS, and remembers a refusal on this device", async (): Promise<void> => {
+    const answers: PermissionState[] = ["granted", "denied"];
+    const requestPermission = vi.fn((): Promise<PermissionState> => Promise.resolve(answers.shift() ?? "prompt"));
+    vi.stubGlobal("DeviceOrientationEvent", { requestPermission });
+    vi.stubGlobal("localStorage", storage());
+    expect(tiltNeedsAsking()).toBe(true);
+    await expect(askForTilt()).resolves.toBe("granted");
+    expect(tiltNeedsAsking()).toBe(true);
+    await expect(askForTilt()).resolves.toBe("denied");
+    expect(tiltNeedsAsking()).toBe(false);
+  });
+
+  it("still offers the tap when storage is blocked", async (): Promise<void> => {
+    vi.stubGlobal("DeviceOrientationEvent", {
+      requestPermission: (): Promise<PermissionState> => Promise.resolve("denied"),
+    });
+    const blocked = {
+      getItem: (): never => {
+        throw new Error("blocked");
+      },
+      setItem: (): never => {
+        throw new Error("blocked");
+      },
+    };
+    vi.stubGlobal("localStorage", blocked);
+    expect(tiltNeedsAsking()).toBe(true);
+    await expect(askForTilt()).resolves.toBe("denied");
+  });
+
+  it("reports the first real orientation reading once, and can be cancelled", (): void => {
+    const page = new EventTarget();
+    vi.stubGlobal("addEventListener", page.addEventListener.bind(page));
+    vi.stubGlobal("removeEventListener", page.removeEventListener.bind(page));
+    const seen = vi.fn();
+    onFirstMotion(seen);
+    const tilt = (beta: number | null): void => {
+      page.dispatchEvent(Object.assign(new Event("deviceorientation"), { beta, gamma: beta }));
+    };
+    tilt(null);
+    expect(seen).not.toHaveBeenCalled();
+    tilt(10);
+    tilt(20);
+    expect(seen).toHaveBeenCalledOnce();
+    const later = vi.fn();
+    onFirstMotion(later)();
+    tilt(30);
+    expect(later).not.toHaveBeenCalled();
   });
 });

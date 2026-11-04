@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AtomLoader } from "./loader";
+import { askForTilt, onFirstMotion, tiltNeedsAsking } from "./tilt";
 import type { StationController } from "./scene.client";
 
 const DISPLAY_FONT = "Oswald, 'Arial Narrow', sans-serif";
@@ -10,6 +11,11 @@ export function Station(): ReactNode {
   const host = useRef<HTMLDivElement>(null);
   const controller = useRef<StationController | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  /** Set once the tilt button is no longer wanted: motion arrived, or the person answered. */
+  const [tiltDone, setTiltDone] = useState<boolean>(false);
+
+  // Motion arriving on its own means access is already allowed, so the button can go.
+  useEffect(() => onFirstMotion((): void => setTiltDone(true)), []);
 
   useEffect(() => {
     if (!host.current) return;
@@ -67,6 +73,30 @@ export function Station(): ReactNode {
     <div className="landing-station" aria-label="Interactive broadcast station" data-status={status}>
       <div className="landing-canvas" ref={host} />
       {status === "loading" && <AtomLoader label="Tuning the signal…" />}
+      {/* Only after the station is ready (which happens in the browser), so server and client agree. */}
+      {status === "ready" && !tiltDone && tiltNeedsAsking() && (
+        <button
+          type="button"
+          className="station-tilt"
+          onClick={(): void => {
+            askForTilt()
+              .then((answer: PermissionState): void => setTiltDone(answer !== "prompt"))
+              .catch((): void => setTiltDone(false));
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <rect x="7" y="3" width="10" height="18" rx="2.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+            <path
+              d="M3 9c-1 2-1 4 0 6M21 9c1 2 1 4 0 6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
+          Tilt to look around
+        </button>
+      )}
       {status === "unavailable" && (
         <output className="station-status">
           The station preview is unavailable. You can still sign in and join the conversation.

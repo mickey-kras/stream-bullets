@@ -165,6 +165,32 @@ body:has(.landing-page)::after {
     linear-gradient(0deg, var(--ink) 0%, #061a1e00 16%);
 }
 
+/* Shown on iPhones until motion access is allowed: a tap here is what lets Safari ask. */
+.station-tilt {
+  position: absolute;
+  z-index: 3;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 16px;
+  border: 1px solid #eebd4e88;
+  border-radius: 999px;
+  background: #061a1ecc;
+  color: var(--cream);
+  font: 600 15px / 1 var(--body);
+  text-transform: none;
+  backdrop-filter: blur(8px);
+}
+.station-tilt:hover,
+.station-tilt:focus-visible {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
 /* The no-WebGL note, centred where the station will stand. */
 .station-status {
   position: absolute;

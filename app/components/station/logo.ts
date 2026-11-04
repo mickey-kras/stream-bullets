@@ -22,7 +22,8 @@ const SVG_RIGHT = 218.1;
 const LEFT_GAP = [12, 23.9, 12] as const;
 const RIGHT_GAP = [0, 10.6, 0] as const;
 
-export const STRIPE_Y = [3.04, 2.88, 2.72] as const;
+/** The three fascia stripes, set level with the ON AIR sign beside them (its centre is 3 m up the hall). */
+export const STRIPE_Y = [3.22, 3.06, 2.9] as const;
 const STRIPE_R = 0.032;
 const STRIPE_GROW = 0.245;
 /** Where the sign is centred on the hall plan, and how tall the letters stand. */
