@@ -62,28 +62,39 @@ export function glyphShapes(): THREE.Shape[] {
     const num = (): number => Number(tokens[i++]);
     while (i < tokens.length) {
       if (/[A-Z]/i.test(tokens[i])) cmd = tokens[i++];
-      if (cmd === "Z") {
-        path.currentPath?.closePath();
-        continue;
-      }
-      if (cmd === "M" || cmd === "L") {
-        x = num();
-        y = num();
-        const [px, py] = place(x, y);
-        if (cmd === "M") {
-          path.moveTo(px, py);
+      switch (cmd) {
+        case "Z":
+          path.currentPath?.closePath();
+          break;
+        case "M":
+          x = num();
+          y = num();
+          path.moveTo(...place(x, y));
           cmd = "L";
-        } else path.lineTo(px, py);
-      } else if (cmd === "H" || cmd === "V") {
-        if (cmd === "H") x = num();
-        else y = num();
-        path.lineTo(...place(x, y));
-      } else if (cmd === "Q") {
-        const [cx, cy] = place(num(), num());
-        x = num();
-        y = num();
-        path.quadraticCurveTo(cx, cy, ...place(x, y));
-      } else i++;
+          break;
+        case "L":
+          x = num();
+          y = num();
+          path.lineTo(...place(x, y));
+          break;
+        case "H":
+          x = num();
+          path.lineTo(...place(x, y));
+          break;
+        case "V":
+          y = num();
+          path.lineTo(...place(x, y));
+          break;
+        case "Q": {
+          const [cx, cy] = place(num(), num());
+          x = num();
+          y = num();
+          path.quadraticCurveTo(cx, cy, ...place(x, y));
+          break;
+        }
+        default:
+          i++;
+      }
     }
   }
   return path.toShapes();

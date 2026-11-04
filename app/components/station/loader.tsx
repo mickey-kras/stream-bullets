@@ -142,6 +142,7 @@ export function AtomLoader({ label }: Readonly<{ label: string }>): ReactNode {
           <canvas
             key={i}
             aria-hidden="true"
+            tabIndex={-1}
             ref={(c: HTMLCanvasElement | null): void => {
               layers.current[i] = c;
             }}
