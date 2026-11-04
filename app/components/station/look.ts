@@ -4,16 +4,28 @@ import * as THREE from "three";
    on top of wherever orbit drag has put it. The lean is applied just for the render and then undone,
    so OrbitControls never sees it and nothing accumulates. */
 
-/** Furthest lean, in radians: about 20 degrees sideways and 10 degrees up and down. */
-const MAX_YAW = 0.35;
-const MAX_PITCH = 0.35;
-/** Device tilt, in degrees, that gives the full lean. */
-const FULL_TILT = 25;
+/** Gyroscope lean follows the phone one to one, so the station feels like a real object held in the
+    hand: turn the phone 30 degrees and the view swings 30 degrees around it. The lean only eases off
+    softly near these limits, in radians (about 80 degrees sideways and 70 degrees up and down). */
+const GYRO_YAW = 1.4;
+const GYRO_PITCH = 1.2;
+/** Seconds for the resting grip to catch up with how the phone is held. Slow, so a held tilt stays put
+    while you look, yet lying down or changing hands re-centres the view within a few breaths. */
+const GRIP_SETTLE = 15;
+/** How quickly the lean catches up, per second: quick for the gyroscope so it feels attached. */
+const GYRO_FOLLOW = 14;
+const MOUSE_FOLLOW = 6;
 /** Mouse lean is gentler: it is always there while the pointer is over the page. */
 const MOUSE_YAW = 0.12;
 const MOUSE_PITCH = 0.06;
+/** Keep the camera just off the poles, as orbit drag does, so it never flips over the top. */
+const POLE = 0.05;
+const DEG = Math.PI / 180;
 
-const clamp = (v: number): number => Math.max(-1, Math.min(1, v));
+/** Linear near zero, easing to at most `max`. */
+const soften = (v: number, max: number): number => max * Math.tanh(v / max);
+/** Shortest signed difference between two angles in degrees, so wrapping past 180 does not jump. */
+const turn = (a: number, b: number): number => ((((a - b + 180) % 360) + 360) % 360) - 180;
 
 export interface Look {
   /** Ease toward the latest tilt or pointer; returns true while the lean is still moving. With motion
@@ -82,14 +94,14 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
       }
       if (gyro && base) {
         // The resting angle drifts slowly toward however the phone is held, so any grip feels neutral.
-        const drift = 1 - Math.exp(-dt / 4);
-        base.beta += (reading.beta - base.beta) * drift;
-        base.gamma += (reading.gamma - base.gamma) * drift;
-        goal.yaw = -clamp((reading.gamma - base.gamma) / FULL_TILT) * MAX_YAW;
+        const drift = 1 - Math.exp(-dt / GRIP_SETTLE);
+        base.beta += turn(reading.beta, base.beta) * drift;
+        base.gamma += turn(reading.gamma, base.gamma) * drift;
+        goal.yaw = -soften(turn(reading.gamma, base.gamma) * DEG, GYRO_YAW);
         // Tipping the top of the phone away lifts the view over the station, like peering down into it.
-        goal.pitch = -clamp((reading.beta - base.beta) / FULL_TILT) * MAX_PITCH;
+        goal.pitch = -soften(turn(reading.beta, base.beta) * DEG, GYRO_PITCH);
       }
-      const k = 1 - Math.exp(-dt * 6);
+      const k = 1 - Math.exp(-dt * (gyro ? GYRO_FOLLOW : MOUSE_FOLLOW));
       const dy = goal.yaw - now.yaw;
       const dp = goal.pitch - now.pitch;
       now.yaw += dy * k;
@@ -100,7 +112,11 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
       saved.copy(camera.position);
       offset.copy(camera.position).sub(target);
       right.crossVectors(up, offset).normalize();
-      offset.applyAxisAngle(up, now.yaw).applyAxisAngle(right.applyAxisAngle(up, now.yaw), now.pitch);
+      // A positive pitch lowers the camera; stop the lean short of either pole so it never tips over.
+      // The bounds always include zero, so a view already near a pole (the top preset) stays put.
+      const polar = Math.acos(Math.max(-1, Math.min(1, offset.y / offset.length())));
+      const pitch = Math.max(Math.min(0, POLE - polar), Math.min(Math.max(0, Math.PI - POLE - polar), now.pitch));
+      offset.applyAxisAngle(up, now.yaw).applyAxisAngle(right.applyAxisAngle(up, now.yaw), pitch);
       camera.position.copy(target).add(offset);
       camera.lookAt(target);
       camera.updateMatrixWorld();

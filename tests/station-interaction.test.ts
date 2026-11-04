@@ -97,6 +97,44 @@ describe("look-around", (): void => {
       look.restore(cam, new THREE.Vector3());
     },
   );
+  it("turns the view with the phone one to one, well past a small lean, without tipping over the top", (): void => {
+    const page = new EventTarget();
+    vi.stubGlobal("addEventListener", page.addEventListener.bind(page));
+    vi.stubGlobal("screen", { orientation: { angle: 0 } });
+    const look = createLook(host(), new AbortController().signal);
+    const tilt = (beta: number, gamma: number): void => {
+      page.dispatchEvent(Object.assign(new Event("deviceorientation"), { beta, gamma }));
+    };
+    tilt(40, 0);
+    look.step(0.016, true);
+    tilt(40, 45);
+    for (let i = 0; i < 60; i++) look.step(0.016, true);
+    const cam = camera();
+    const target = new THREE.Vector3();
+    look.apply(cam, target);
+    const swing = Math.abs(Math.atan2(cam.position.x, cam.position.z)) / (Math.PI / 180);
+    expect(swing).toBeGreaterThan(35);
+    expect(swing).toBeLessThan(46);
+    look.restore(cam, target);
+    // Tipping the phone right over cannot carry the camera past the pole.
+    tilt(40 - 170, 0);
+    for (let i = 0; i < 60; i++) look.step(0.016, true);
+    look.apply(cam, target);
+    expect(cam.position.length()).toBeCloseTo(10, 3);
+    expect(Number.isFinite(cam.position.y)).toBe(true);
+    look.restore(cam, target);
+  });
+
+  it("leaves an overhead view where it is when there is no lean", (): void => {
+    const look = createLook(host(), new AbortController().signal);
+    look.step(0.016, true);
+    const cam = camera();
+    cam.position.setFromSphericalCoords(10, 0.001, 0);
+    const before = cam.position.clone();
+    look.apply(cam, new THREE.Vector3());
+    expect(cam.position.distanceTo(before)).toBeLessThan(1e-6);
+    look.restore(cam, new THREE.Vector3());
+  });
 });
 
 describe("sign flips", (): void => {
