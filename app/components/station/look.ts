@@ -112,9 +112,10 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
       saved.copy(camera.position);
       offset.copy(camera.position).sub(target);
       right.crossVectors(up, offset).normalize();
-      // A positive pitch lowers the camera; stop it short of either pole so it never tips over.
+      // A positive pitch lowers the camera; stop the lean short of either pole so it never tips over.
+      // The bounds always include zero, so a view already near a pole (the top preset) stays put.
       const polar = Math.acos(Math.max(-1, Math.min(1, offset.y / offset.length())));
-      const pitch = Math.max(POLE - polar, Math.min(Math.PI - POLE - polar, now.pitch));
+      const pitch = Math.max(Math.min(0, POLE - polar), Math.min(Math.max(0, Math.PI - POLE - polar), now.pitch));
       offset.applyAxisAngle(up, now.yaw).applyAxisAngle(right.applyAxisAngle(up, now.yaw), pitch);
       camera.position.copy(target).add(offset);
       camera.lookAt(target);

@@ -124,6 +124,17 @@ describe("look-around", (): void => {
     expect(Number.isFinite(cam.position.y)).toBe(true);
     look.restore(cam, target);
   });
+
+  it("leaves an overhead view where it is when there is no lean", (): void => {
+    const look = createLook(host(), new AbortController().signal);
+    look.step(0.016, true);
+    const cam = camera();
+    cam.position.setFromSphericalCoords(10, 0.001, 0);
+    const before = cam.position.clone();
+    look.apply(cam, new THREE.Vector3());
+    expect(cam.position.distanceTo(before)).toBeLessThan(1e-6);
+    look.restore(cam, new THREE.Vector3());
+  });
 });
 
 describe("sign flips", (): void => {
