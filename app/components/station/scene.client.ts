@@ -385,14 +385,18 @@ function createRig(
   return { rig, place, step, applyShift };
 }
 
+/** Vertical orbit limits (polar angle from straight above): from almost overhead to below the deck. */
+const MIN_POLAR = 0.05;
+const MAX_POLAR = Math.PI - 0.05;
+
 function createControls(camera: THREE.PerspectiveCamera, element: HTMLElement): OrbitControls {
   const controls = new OrbitControls(camera, element);
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
   controls.enablePan = false;
   controls.enableZoom = false;
-  controls.minPolarAngle = 0.45;
-  controls.maxPolarAngle = 1.52;
+  controls.minPolarAngle = MIN_POLAR;
+  controls.maxPolarAngle = MAX_POLAR;
   controls.rotateSpeed = 0.5;
   controls.autoRotateSpeed = 0.7;
   return controls;
@@ -585,7 +589,7 @@ export async function createStation(
       state.view = name;
       rig.goal = shots[name];
       controls.autoRotate = name === "orbit";
-      controls.minPolarAngle = name === "top" ? 0 : 0.45;
+      controls.minPolarAngle = name === "top" ? 0 : MIN_POLAR;
       rig.moving = state.playing && !reduced.matches;
       if (!rig.moving) place(rig.goal);
       state.dirty = true;
