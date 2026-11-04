@@ -416,7 +416,7 @@ function studioPlanters(k: Kit, s: Pick<StudioScope, "hall">): void {
   const { hall } = s;
   for (const [a0, a1, seed] of [
     // Stops short of the atom statue's plinth.
-    [-1.5, -1.0, 17],
+    [-1.5, -1, 17],
     [0.25, 0.62, 19],
   ] as const) {
     planSector([a0, a1], [0.25, 0.7], 0.36, hallCream, 0, hall);

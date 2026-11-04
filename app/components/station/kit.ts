@@ -108,12 +108,15 @@ export function createKit(compact: boolean, family: string) {
       g.rotation.y = rot;
       cyl([size * 1.1, size * 1.15, 0.06], [0, 0, 0], brass, g, [32]).rotation.x = Math.PI / 2;
       torus([size * 1.08, size * 0.1], [0, 0, 0.035], gold, g, false);
+      const pressureEmissive: string = high ? "#ff1405" : "#000000";
+      const pressureEmissiveMap: THREE.Texture | null = high ? redZone : null;
+      const pressureEmissiveIntensity: number = high ? 2 : 0;
       const faceMaterial = new THREE.MeshStandardMaterial({
         map: amber ? vuFace : psiFace,
         roughness: 0.4,
-        emissive: amber ? "#ffb24a" : high ? "#ff1405" : "#000000",
-        emissiveMap: amber ? vuFace : high ? redZone : null,
-        emissiveIntensity: amber ? 1.2 : high ? 2 : 0,
+        emissive: amber ? "#ffb24a" : pressureEmissive,
+        emissiveMap: amber ? vuFace : pressureEmissiveMap,
+        emissiveIntensity: amber ? 1.2 : pressureEmissiveIntensity,
       });
       mesh(new THREE.CircleGeometry(size, 32), faceMaterial, [0, 0, 0.032], g, false);
       if (amber) kit.emissives.push([faceMaterial, 1.2]);
@@ -128,11 +131,10 @@ export function createKit(compact: boolean, family: string) {
       );
       const seed = Math.random() * 10;
       // VU meters dance; pressure dials idle near the middle, or strain against the red when running high.
-      const [speed, swing, jitter, rest] = amber
-        ? [5.3, 0.45, 0.2, 0]
-        : high
-          ? [2.6, 0.14, 0.07, -1.0]
-          : [0.7, 0.12, 0.02, -0.3];
+      const pressureMotion: readonly [number, number, number, number] = high
+        ? [2.6, 0.14, 0.07, -1]
+        : [0.7, 0.12, 0.02, -0.3];
+      const [speed, swing, jitter, rest] = amber ? [5.3, 0.45, 0.2, 0] : pressureMotion;
       needle.rotation.z = rest;
       kit.animators.push((t: number): void => {
         needle.rotation.z = Math.sin(t * speed + seed) * swing + Math.sin(t * 11.7 + seed) * jitter + rest;
