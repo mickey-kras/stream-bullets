@@ -136,7 +136,9 @@ function flipWinding(g: THREE.BufferGeometry): void {
 
 function batchKey(m: THREE.Mesh): string {
   const g = m.geometry;
-  const attributes = Object.keys(g.attributes).sort().join(",");
+  const attributes = Object.keys(g.attributes)
+    .sort((a: string, b: string): number => a.localeCompare(b))
+    .join(",");
   const material = m.material as THREE.Material;
   return [material.uuid, m.castShadow, m.receiveShadow, m.renderOrder, g.index ? "i" : "n", attributes].join("|");
 }
@@ -147,9 +149,7 @@ function batchInstances(station: THREE.Object3D, moving: Set<THREE.Mesh>, pins: 
   station.traverse((o: THREE.Object3D): void => {
     if (!(o instanceof THREE.InstancedMesh) || moving.has(o) || Array.isArray(o.material) || !shown(o)) return;
     for (let p: THREE.Object3D | null = o; p; p = p.parent) if (pins.has(p)) return;
-    const shape = JSON.stringify(
-      (o.geometry as THREE.BufferGeometry & { parameters?: object }).parameters ?? o.geometry.uuid,
-    );
+    const shape = JSON.stringify(o.geometry.parameters ?? o.geometry.uuid);
     const key = [o.material.uuid, o.geometry.type, shape, o.castShadow, o.receiveShadow, o.renderOrder].join("|");
     const list = groups.get(key) ?? [];
     list.push(o);

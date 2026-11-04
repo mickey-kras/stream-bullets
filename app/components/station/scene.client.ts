@@ -497,6 +497,17 @@ export function createStation(
     listen,
   );
 
+  const returnToHero = (now: number): void => {
+    if (state.idleSince >= 0 && !state.dragging && now - state.idleSince > RETURN_AFTER_MS) {
+      state.idleSince = -1;
+      if (state.view === "hero") {
+        rig.goal = shots.hero;
+        rig.moving = state.playing;
+        if (!rig.moving) place(rig.goal);
+      }
+    }
+  };
+
   const tiltProbe = new THREE.Vector3();
   let frameId = 0;
   const animate = (now: number): void => {
@@ -509,14 +520,7 @@ export function createStation(
       for (const a of k.animators) a(state.clock, dt);
       finish.uniforms.uTime!.value = state.clock;
     }
-    if (state.idleSince >= 0 && !state.dragging && now - state.idleSince > RETURN_AFTER_MS) {
-      state.idleSince = -1;
-      if (state.view === "hero") {
-        rig.goal = shots.hero;
-        rig.moving = state.playing;
-        if (!rig.moving) place(rig.goal);
-      }
-    }
+    returnToHero(now);
     if (rig.moving && !state.dragging) step(dt);
     controls.update(dt);
     station.updateMatrixWorld();
@@ -532,7 +536,7 @@ export function createStation(
     );
     const turning = flips.update(camera, dt, state.playing);
     // Redraw shadows only when something that casts them has moved: a turning sign or the mast head.
-    if (turning || !(Math.abs(tilt.rotation.y - state.shadowTilt) < 0.04)) {
+    if (turning || Math.abs(tilt.rotation.y - state.shadowTilt) >= 0.04) {
       renderer.shadowMap.needsUpdate = true;
       state.shadowTilt = tilt.rotation.y;
     }

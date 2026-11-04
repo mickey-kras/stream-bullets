@@ -23,6 +23,22 @@ export interface Flips {
   update: (camera: THREE.Camera, dt: number, enabled: boolean) => boolean;
 }
 
+function advanceTurns(signs: readonly Sign[], dt: number): boolean {
+  let turning = false;
+  for (const s of signs) {
+    if (s.turn < 0) continue;
+    s.turn += dt;
+    const t = Math.min(s.turn / FLIP_SECONDS, 1);
+    // Positive turn about the sign's own x axis rolls its top edge toward the viewer.
+    s.pivot.rotation.x = ease(t) * Math.PI * 2;
+    if (t >= 1) {
+      s.pivot.rotation.x = 0;
+      s.turn = -1;
+    } else turning = true;
+  }
+  return turning;
+}
+
 export function createFlips(
   pivots: readonly THREE.Group[],
   wrap: HTMLElement,
@@ -98,19 +114,7 @@ export function createFlips(
         if (tap) start(signAt(camera, tap));
       }
       tap = null;
-      let turning = false;
-      for (const s of signs) {
-        if (s.turn < 0) continue;
-        s.turn += dt;
-        const t = Math.min(s.turn / FLIP_SECONDS, 1);
-        // Positive turn about the sign's own x axis rolls its top edge toward the viewer.
-        s.pivot.rotation.x = ease(t) * Math.PI * 2;
-        if (t >= 1) {
-          s.pivot.rotation.x = 0;
-          s.turn = -1;
-        } else turning = true;
-      }
-      return turning;
+      return advanceTurns(signs, dt);
     },
   };
 }
