@@ -29,6 +29,13 @@
       "when": 1793586280557,
       "tag": "0003_secure_application",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793780543311,
+      "tag": "0004_streamer_waitlist",
+      "breakpoints": true
     }
   ]
 }

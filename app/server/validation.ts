@@ -88,6 +88,49 @@ export const commentQuerySchema = z
   })
   .strict();
 
+const applicationLink = z
+  .string()
+  .trim()
+  .max(200)
+  .url()
+  .refine((value: string): boolean => {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password;
+  }, "Use HTTPS links to your public channel pages.");
+
+export const applicationSchema = z
+  .object({
+    links: z
+      .array(applicationLink)
+      .min(1, "Add at least one link to a channel you stream on.")
+      .max(5, "Add up to 5 links.")
+      .refine(
+        (links: string[]): boolean => new Set(links.map((link: string) => link.toLowerCase())).size === links.length,
+        "Remove duplicate links.",
+      ),
+    note: z
+      .string()
+      .trim()
+      .max(1000)
+      .regex(/^(?:[^\p{Cc}]|[\t\n\r])*$/u)
+      .default(""),
+  })
+  .strict();
+
+export const applicationQuerySchema = z
+  .object({
+    status: z.enum(["pending", "approved", "rejected"]).default("pending"),
+    cursor: z.string().max(1024).nullable().default(null),
+  })
+  .strict();
+
+export const applicationReviewSchema = z
+  .object({ id, decision: z.enum(["approved", "rejected"]) })
+  .strict();
+
+export type ApplicationInput = z.infer<typeof applicationSchema>;
+export type ApplicationQuery = z.infer<typeof applicationQuerySchema>;
+export type ApplicationReview = z.infer<typeof applicationReviewSchema>;
 export type StreamerInput = z.infer<typeof streamerSchema>;
 export type EntryAction = z.infer<typeof entryActionSchema>;
 export type CommentAction = z.infer<typeof commentActionSchema>;
