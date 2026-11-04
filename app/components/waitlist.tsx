@@ -72,6 +72,10 @@ export function StreamerWaitlist({
     inputs.current.get(remaining[Math.max(0, index - 1)].key)?.focus();
   }
 
+  function updateRow(key: string, value: string): void {
+    setRows((current: LinkRow[]) => current.map((item: LinkRow) => (item.key === key ? { ...item, value } : item)));
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     const links = rows.map((row: LinkRow) => row.value.trim()).filter(Boolean);
@@ -132,10 +136,7 @@ export function StreamerWaitlist({
                     aria-describedby="channel-links-help"
                     value={row.value}
                     onChange={(event) => {
-                      const value = event.currentTarget.value;
-                      setRows((current: LinkRow[]) =>
-                        current.map((item: LinkRow) => (item.key === row.key ? { ...item, value } : item)),
-                      );
+                      updateRow(row.key, event.currentTarget.value);
                     }}
                   />
                 </label>

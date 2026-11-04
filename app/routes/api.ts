@@ -3,7 +3,7 @@ import { z } from "zod";
 import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import { user } from "../../db/schema";
-import { appContext, type AppContext } from "../env";
+import { appContext, type AppContext, type AppEnv } from "../env";
 import { configuredProviders, getViewer } from "../server/auth.server";
 import {
   consumeMutationQuota,
@@ -62,6 +62,23 @@ async function notifyRoom(app: AppContext, streamerId: string): Promise<void> {
   }
 }
 
+async function entryResponse(
+  request: Request,
+  env: AppEnv,
+  entryId: string,
+  viewerId: string | null,
+  comments: boolean,
+): Promise<Response> {
+  const current = await getEntry(env, entryId, viewerId);
+  if (!current) throw new HttpError(404, "Topic or poll not found.");
+  if (comments) {
+    const input = parsedQuery(request, ["sort", "cursor"], commentQuerySchema);
+    return json(await listComments(env, current.id, viewerId, input));
+  }
+  queryParams(request, []);
+  return json({ entry: current });
+}
+
 export async function loader({ request, context, params }: LoaderFunctionArgs): Promise<Response> {
   try {
     const app = context.get(appContext);
@@ -94,14 +111,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs): 
     }
     const entry = /^entries\/([a-f0-9-]{36})(\/comments)?$/.exec(path);
     if (entry && z.string().uuid().safeParse(entry[1]).success) {
-      const current = await getEntry(app.env, entry[1], viewer?.id ?? null);
-      if (!current) throw new HttpError(404, "Topic or poll not found.");
-      if (entry[2]) {
-        const input = parsedQuery(request, ["sort", "cursor"], commentQuerySchema);
-        return json(await listComments(app.env, current.id, viewer?.id ?? null, input));
-      }
-      queryParams(request, []);
-      return json({ entry: current });
+      return await entryResponse(request, app.env, entry[1], viewer?.id ?? null, Boolean(entry[2]));
     }
     throw new HttpError(404, "Endpoint not found.");
   } catch (error) {
