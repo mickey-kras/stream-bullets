@@ -114,11 +114,15 @@ export async function loader({ request, context, params }: LoaderFunctionArgs): 
       case "admin/applications": {
         if (!viewer) throw new HttpError(401, "Sign in to continue.");
         await requireAdmin(app.env, viewer.id);
-        return json(await listApplications(app.env, parsedQuery(request, ["status", "cursor"], applicationQuerySchema)));
+        return json(
+          await listApplications(app.env, parsedQuery(request, ["status", "cursor"], applicationQuerySchema)),
+        );
       }
       case "admin/reports": {
         if (!viewer) throw new HttpError(401, "Sign in to continue.");
-        return json(await listReports(app.env, viewer.id, parsedQuery(request, ["status", "cursor"], reportQuerySchema)));
+        return json(
+          await listReports(app.env, viewer.id, parsedQuery(request, ["status", "cursor"], reportQuerySchema)),
+        );
       }
       case "streamers": {
         const cursor = queryParams(request, ["cursor"]).get("cursor");
