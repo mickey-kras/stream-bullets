@@ -9,11 +9,7 @@ import { ReportButton } from "../report";
 import { TopicIcon } from "../topic-icon";
 import { Icon } from "../ui/icon";
 
-/**
- * Delete (author, streamer, admins) and Report (everyone else signed in) for a topic, poll or idea. Once the viewer
- * reports it, one "Reported" marker replaces the button. On the Ideas board an author may delete only while the idea
- * is under review.
- */
+/** Delete for the author (ideas: only while under review), the streamer and admins. Report, or "Reported", for others. */
 export function EntryActions({
   entry,
   viewer,

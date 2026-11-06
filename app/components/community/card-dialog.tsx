@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { CARD_ICONS } from "../../../db/enums";
 import { t } from "../../i18n";
 import type { CardIcon, CardTab, CommunityCard } from "../../types";
@@ -16,36 +16,22 @@ function IconPicker({
   onChange,
 }: Readonly<{ value: CardIcon | null; onChange: (icon: CardIcon | null) => void }>): ReactNode {
   const id = useId();
-  const buttons = useRef<(HTMLButtonElement | null)[]>([]);
-  function move(event: KeyboardEvent<HTMLButtonElement>, index: number): void {
-    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
-    if (!step) return;
-    event.preventDefault();
-    const next = (index + step + iconChoices.length) % iconChoices.length;
-    onChange(iconChoices[next]);
-    buttons.current[next]?.focus();
-  }
   return (
     <fieldset className="icon-field">
-      <legend id={`${id}-legend`}>{t("community.form.icon")}</legend>
-      <div className="icon-grid" role="radiogroup" aria-labelledby={`${id}-legend`}>
-        {iconChoices.map((icon: CardIcon | null, index: number) => (
-          <button
-            key={icon ?? "none"}
-            ref={(element) => {
-              buttons.current[index] = element;
-            }}
-            type="button"
-            role="radio"
-            className="icon-choice"
-            aria-checked={value === icon}
-            tabIndex={value === icon ? 0 : -1}
-            aria-label={t(`community.icon.${icon ?? "none"}`)}
-            onClick={() => onChange(icon)}
-            onKeyDown={(event) => move(event, index)}
-          >
-            {icon ? <Icon name={cardIcons[icon]} size={20} /> : "∅"}
-          </button>
+      <legend>{t("community.form.icon")}</legend>
+      <div className="icon-grid">
+        {iconChoices.map((icon: CardIcon | null) => (
+          <label key={icon ?? "none"} className="icon-choice" title={t(`community.icon.${icon ?? "none"}`)}>
+            <input
+              className="sr-only"
+              type="radio"
+              name={`${id}-icon`}
+              checked={value === icon}
+              onChange={() => onChange(icon)}
+            />
+            {icon ? <Icon name={cardIcons[icon]} size={20} /> : <span aria-hidden="true">∅</span>}
+            <span className="sr-only">{t(`community.icon.${icon ?? "none"}`)}</span>
+          </label>
         ))}
       </div>
     </fieldset>

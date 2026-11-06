@@ -232,7 +232,8 @@ export function ScheduleView({
       ) : (
         <>
           <div className="sched-toolbar">
-            <div className="tabs sched-switch" role="group" aria-label={t("schedule.viewLabel")}>
+            <fieldset className="tabs sched-switch">
+              <legend className="sr-only">{t("schedule.viewLabel")}</legend>
               {scheduleModes.map((value: ScheduleMode) => (
                 <button
                   key={value}
@@ -244,7 +245,7 @@ export function ScheduleView({
                   {t(modeLabel[value] as "schedule.mode.feed")}
                 </button>
               ))}
-            </div>
+            </fieldset>
             {owner && (
               <button type="button" className="gold" onClick={() => onCreating(true)}>
                 <Icon name="plus" size={18} />

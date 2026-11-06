@@ -44,11 +44,8 @@ function CardTools({
   onDragStart: () => void;
 }>): ReactNode {
   return (
-    <div
-      className="card-tools"
-      role="group"
-      aria-label={t("community.cardOf", { n: index + 1, count, title: card.title })}
-    >
+    <fieldset className="card-tools">
+      <legend className="sr-only">{t("community.cardOf", { n: index + 1, count, title: card.title })}</legend>
       <span
         className="drag-handle"
         draggable
@@ -94,7 +91,7 @@ function CardTools({
         <Icon name="trash" size={16} />
         {t("common.delete")}
       </button>
-    </div>
+    </fieldset>
   );
 }
 

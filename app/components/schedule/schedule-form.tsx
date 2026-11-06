@@ -114,7 +114,8 @@ function RepeatFields({
       </label>
       {repeat && (
         <div className="repeat-options">
-          <div className="day-toggles" role="group" aria-label={t("schedule.form.repeatOn")}>
+          <fieldset className="day-toggles">
+            <legend className="sr-only">{t("schedule.form.repeatOn")}</legend>
             {[0, 1, 2, 3, 4, 5, 6].map((day: number) => (
               <button
                 key={day}
@@ -126,7 +127,7 @@ function RepeatFields({
                 {weekdayShort(Date.UTC(2026, 10, 1 + day, 12), "UTC")}
               </button>
             ))}
-          </div>
+          </fieldset>
           <label>
             <span>{t("schedule.form.endsOn")}</span>
             <input
@@ -155,7 +156,7 @@ function TopicPicker({
       <span className="field-label" id={`${id}-topics`}>
         {t("schedule.linkedTopics")}
       </span>
-      <div className="topic-chips" role="group" aria-labelledby={`${id}-topics`}>
+      <fieldset className="topic-chips" aria-labelledby={`${id}-topics`}>
         {topics.map((topic: EventTopic) => {
           const on = selected.includes(topic.id);
           return (
@@ -175,7 +176,7 @@ function TopicPicker({
             </button>
           );
         })}
-      </div>
+      </fieldset>
     </div>
   );
 }

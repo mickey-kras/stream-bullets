@@ -47,13 +47,10 @@ export function StreamerHeader({
   current: StreamerView | null;
   action?: ReactNode;
   tabHref?: (view: StreamerView) => string;
-  /** The tabs to show; the official Ideas page shows Ideas, About and Community only. */
   views?: readonly StreamerView[];
   labels?: Partial<Record<StreamerView, string>>;
   icons?: Partial<Record<StreamerView, IconName>>;
-  /** Replaces the picture and name in the home link (the Ideas page's logo and subtitle). */
   brand?: ReactNode;
-  /** After the home link, for example the LIVE pill. */
   badge?: ReactNode;
   className?: string;
 }>): ReactNode {
