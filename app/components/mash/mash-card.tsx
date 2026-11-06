@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { useRevalidator } from "react-router";
+import { useMatches, useRevalidator } from "react-router";
 import { t } from "../../i18n";
 import { MASH_NAME, mashWinner } from "../../lib/mash";
 import { useShell } from "../../lib/shell";
@@ -13,6 +13,16 @@ import { formatCount, MashBars, MashRing, MashWinner, sideStyle } from "./mash-p
 import { useMashTapper, useMashView, type MashAssist, type MashView } from "./use-mash";
 
 type Action = (body: unknown) => void;
+
+/** The host's first name from the streamer page loader, or "the host" elsewhere. */
+function useLoaderHost(): string {
+  for (const match of useMatches()) {
+    const data = match.loaderData as { board?: { streamer?: { name?: string } } } | undefined;
+    const name = data?.board?.streamer?.name;
+    if (name) return name.split(" ")[0];
+  }
+  return t("mash.theHost");
+}
 
 function phaseClass(view: MashView): string {
   return view.current === "setup" ? "waiting" : view.current;

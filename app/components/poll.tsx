@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import { largestRemainder } from "../lib/percent";
 import type { Entry, LiveSnapshot } from "../types";
+import { MashCard } from "./mash/mash-card";
 
 type PublicPoll = LiveSnapshot["polls"][number];
 
@@ -19,11 +21,13 @@ export function PollResults({
   onVote?: (choice: number) => void;
 }>): ReactNode {
   const closed: boolean = poll.revealed || (poll.endsAt !== null && poll.endsAt <= now);
+  // Largest-remainder shares always total exactly 100 (item 49).
+  const shares: number[] = largestRemainder(poll.counts ?? []);
   return (
     <div className={poll.kind === "binary" ? "poll-choices binary-votes" : "poll-choices"}>
       {poll.options.map((option: string, index: number) => {
         const count: number | undefined = poll.counts?.[index];
-        const percentage: number = count === undefined || poll.total === 0 ? 0 : Math.round((count / poll.total) * 100);
+        const percentage: number = shares[index] ?? 0;
         const content: ReactNode = (
           <>
             {count !== undefined && <span className="fill" style={{ width: `${percentage}%` }} />}
@@ -102,6 +106,8 @@ export function PollCard({
   onAction: (body: unknown) => void;
   onDiscuss: () => void;
 }>): ReactNode {
+  if (entry.kind === "mash")
+    return <MashCard entry={entry} now={now} signedIn={signedIn} owner={owner} pending={pending} onAction={onAction} />;
   let votingMessage: string;
   if (entry.kind === "binary" && !entry.revealed) votingMessage = "Results stay private until the host reveals them.";
   else if (entry.revealed) votingMessage = "Final results";
