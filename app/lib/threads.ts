@@ -9,10 +9,7 @@ export function orderReplies(replies: readonly Comment[]): Comment[] {
 }
 
 /** The replies to render: the first two unless the thread is expanded, and how many stay hidden. */
-export function visibleReplies(
-  replies: readonly Comment[],
-  expanded: boolean,
-): { shown: Comment[]; hidden: number } {
+export function visibleReplies(replies: readonly Comment[], expanded: boolean): { shown: Comment[]; hidden: number } {
   const ordered = orderReplies(replies);
   const shown = expanded ? ordered : ordered.slice(0, VISIBLE_REPLIES);
   return { shown, hidden: ordered.length - shown.length };

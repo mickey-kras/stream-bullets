@@ -434,7 +434,9 @@ describe("public poll updates", (): void => {
           name: "isolate-live-worker-dependencies",
           setup(plugin: PluginBuild): void {
             plugin.onResolve(
-              { filter: /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup|schedule)\.server$/ },
+              {
+                filter: /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup|schedule)\.server$/,
+              },
               (args) => ({ path: args.path, namespace: "live-worker-test" }),
             );
             plugin.onLoad({ filter: /.*/, namespace: "live-worker-test" }, (args) => {

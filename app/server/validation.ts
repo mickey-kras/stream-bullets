@@ -340,7 +340,13 @@ export const communityCardSchema = z
     title: line(60),
     body: text(280),
     buttonLabel: line(30).nullable().default(null),
-    buttonTarget: z.string().trim().max(500).refine(isCardTarget, "A button goes to a tab or an https link.").nullable().default(null),
+    buttonTarget: z
+      .string()
+      .trim()
+      .max(500)
+      .refine(isCardTarget, "A button goes to a tab or an https link.")
+      .nullable()
+      .default(null),
   })
   .strict()
   .refine(

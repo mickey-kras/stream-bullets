@@ -53,7 +53,10 @@ export function foldLine(line: string): string {
 
 /** `20261105T180000Z` */
 export function icsTime(time: number): string {
-  return new Date(time).toISOString().replaceAll(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return new Date(time)
+    .toISOString()
+    .replaceAll(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
 }
 
 export function buildCalendar(

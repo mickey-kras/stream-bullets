@@ -115,13 +115,9 @@ describe("cards, links and the Ideas board in storage", (): void => {
       env.DB.prepare("DELETE FROM user"),
       env.DB.prepare("DELETE FROM app_rate_limits"),
       ...["owner", "viewer", "team", "admin"].map((id: string) =>
-        env.DB.prepare("INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES (?,?,?,1,?,?)").bind(
-          id,
-          id,
-          `${id}@example.test`,
-          now,
-          now,
-        ),
+        env.DB.prepare(
+          "INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES (?,?,?,1,?,?)",
+        ).bind(id, id, `${id}@example.test`, now, now),
       ),
       env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES (?,'owner','nova','Nova')").bind(page),
       env.DB.prepare(
@@ -147,10 +143,14 @@ describe("cards, links and the Ideas board in storage", (): void => {
     expect(saved?.map((value) => value.title)).toEqual(["One", "Two"]);
     await saveCards(env, "owner", { cards: [card("Two"), card("One")] });
     expect((await listCards(env, page))?.map((value) => value.title)).toEqual(["Two", "One"]);
-    await expect(saveCards(env, "owner", { cards: Array.from({ length: 9 }, (_, i) => card(`C${i}`)) })).rejects.toMatchObject({
+    await expect(
+      saveCards(env, "owner", { cards: Array.from({ length: 9 }, (_, i) => card(`C${i}`)) }),
+    ).rejects.toMatchObject({
       status: 400,
     });
-    await expect(saveCards(env, "owner", { cards: [card("Bad", { buttonLabel: "Go", buttonTarget: "javascript:x" })] })).rejects.toMatchObject({
+    await expect(
+      saveCards(env, "owner", { cards: [card("Bad", { buttonLabel: "Go", buttonTarget: "javascript:x" })] }),
+    ).rejects.toMatchObject({
       status: 400,
     });
     await expect(saveCards(env, "viewer", { cards: [] })).rejects.toMatchObject({ status: 403 });
@@ -175,25 +175,53 @@ describe("cards, links and the Ideas board in storage", (): void => {
     ]);
     expect(saved.card).toBe(true);
     await expect(
-      saveSupport(env, "owner", { links: [{ kind: "patreon", label: null, url: "https://ko-fi.com/nova" }], visible: true, card: false }),
+      saveSupport(env, "owner", {
+        links: [{ kind: "patreon", label: null, url: "https://ko-fi.com/nova" }],
+        visible: true,
+        card: false,
+      }),
     ).rejects.toMatchObject({ status: 400, message: expect.stringContaining("Patreon") });
     await expect(
-      saveSupport(env, "owner", { links: [{ kind: "other", label: null, url: "https://merch.example/x" }], visible: true, card: false }),
+      saveSupport(env, "owner", {
+        links: [{ kind: "other", label: null, url: "https://merch.example/x" }],
+        visible: true,
+        card: false,
+      }),
     ).rejects.toMatchObject({ status: 400 });
     const five = Array.from({ length: 5 }, () => ({ kind: "kofi", label: null, url: "https://ko-fi.com/nova" }));
-    await expect(saveSupport(env, "owner", { links: five, visible: true, card: false })).rejects.toMatchObject({ status: 400 });
+    await expect(saveSupport(env, "owner", { links: five, visible: true, card: false })).rejects.toMatchObject({
+      status: 400,
+    });
   });
 
   it("files new ideas under review, checks categories and the bug template, and limits author deletes", async (): Promise<void> => {
     const officialPage = { id: official, handle: "streambullets" } as Streamer;
     await expect(
-      mutateEntry(env, "viewer", official, { action: "create", kind: "topic", title: "Idea", body: "Body", category: "Gaming" }),
+      mutateEntry(env, "viewer", official, {
+        action: "create",
+        kind: "topic",
+        title: "Idea",
+        body: "Body",
+        category: "Gaming",
+      }),
     ).rejects.toMatchObject({ status: 400 });
     await expect(
-      mutateEntry(env, "viewer", page, { action: "create", kind: "topic", title: "Topic", body: "Body", category: "feature" }),
+      mutateEntry(env, "viewer", page, {
+        action: "create",
+        kind: "topic",
+        title: "Topic",
+        body: "Body",
+        category: "feature",
+      }),
     ).rejects.toMatchObject({ status: 400 });
     await expect(
-      mutateEntry(env, "viewer", official, { action: "create", kind: "topic", title: "Bug", body: BUG_TEMPLATE, category: "bug" }),
+      mutateEntry(env, "viewer", official, {
+        action: "create",
+        kind: "topic",
+        title: "Bug",
+        body: BUG_TEMPLATE,
+        category: "bug",
+      }),
     ).rejects.toMatchObject({ status: 400 });
     const { id } = await mutateEntry(env, "viewer", official, {
       action: "create",
@@ -211,7 +239,13 @@ describe("cards, links and the Ideas board in storage", (): void => {
       category: "design",
     });
     await env.DB.prepare("UPDATE entries SET status='planned' WHERE id=?").bind(second.id).run();
-    const filtered = await listEntries(env, officialPage, null, { kind: "topics", sort: "top", query: "", cursor: null, status: "planned" });
+    const filtered = await listEntries(env, officialPage, null, {
+      kind: "topics",
+      sort: "top",
+      query: "",
+      cursor: null,
+      status: "planned",
+    });
     expect(filtered.entries.map((entry) => entry.title)).toEqual(["Light theme"]);
     await expect(mutateEntry(env, "viewer", official, { action: "delete", id: second.id })).rejects.toMatchObject({
       status: 403,

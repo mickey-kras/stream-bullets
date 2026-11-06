@@ -36,7 +36,8 @@ export function isAllowedSupportLink(kind: SupportLinkKind, url: string): boolea
   }
   if (!provider.hosts.some((allowed: string): boolean => host === allowed || host === `www.${allowed}`)) return false;
   const path = parsed.pathname;
-  if (provider.pathPrefix) return path.toLowerCase().startsWith(provider.pathPrefix) && path.length > provider.pathPrefix.length;
+  if (provider.pathPrefix)
+    return path.toLowerCase().startsWith(provider.pathPrefix) && path.length > provider.pathPrefix.length;
   return path.length > 1;
 }
 

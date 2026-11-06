@@ -7,13 +7,7 @@ import { assertStreamerWritable } from "./access.server";
 import { consumeMutationQuota } from "./data.server";
 import { HttpError } from "./http.server";
 import { buildCalendar, type IcsEvent } from "./ics";
-import {
-  eventDeleteSchema,
-  eventInputSchema,
-  eventPatchSchema,
-  type EventInput,
-  type EventPatch,
-} from "./validation";
+import { eventDeleteSchema, eventInputSchema, eventPatchSchema, type EventInput, type EventPatch } from "./validation";
 
 /** Upcoming streams a page may hold at once (a few series plus one-offs). */
 export const MAX_UPCOMING_EVENTS = 400;
@@ -106,9 +100,7 @@ export function defaultRange(now: number): { from: number; to: number } {
 }
 
 async function ownStreamerId(env: AppEnv, viewerId: string): Promise<string> {
-  const row = await env.DB.prepare("SELECT id FROM streamers WHERE owner_id=?")
-    .bind(viewerId)
-    .first<{ id: string }>();
+  const row = await env.DB.prepare("SELECT id FROM streamers WHERE owner_id=?").bind(viewerId).first<{ id: string }>();
   if (!row) throw new HttpError(403, "Only streamers can schedule streams.");
   return row.id;
 }
@@ -153,7 +145,10 @@ export function planEvents(input: EventInput, now: number, seriesId: string | nu
   if (input.repeatDays === 0) return { starts: [start], seriesId: null, repeatDays: 0, repeatUntil: null };
   const days = input.repeatDays | (1 << weekdayOf(first));
   const until: LocalDate | null = input.repeatUntil ? parseDate(input.repeatUntil) : null;
-  if (until && until.year * 10_000 + until.month * 100 + until.day < first.year * 10_000 + first.month * 100 + first.day)
+  if (
+    until &&
+    until.year * 10_000 + until.month * 100 + until.day < first.year * 10_000 + first.month * 100 + first.day
+  )
     throw new HttpError(400, "The end date is before the first stream.");
   const repeatUntil = until ? zonedTime(addDays(until, 1), 0, 0, input.tz) - 1 : null;
   const starts = expandSeries(
@@ -408,10 +403,11 @@ export async function scheduleCalendar(
   origin: string,
   now: number = Date.now(),
 ): Promise<string> {
-  const { results } = await env.DB.prepare(`SELECT * FROM stream_events WHERE streamer_id=? AND starts_at >= ? AND starts_at < ?
+  const { results } =
+    await env.DB.prepare(`SELECT * FROM stream_events WHERE streamer_id=? AND starts_at >= ? AND starts_at < ?
     ORDER BY starts_at, id LIMIT 500`)
-    .bind(streamer.id, now - 30 * 86_400_000, now + SERIES_HORIZON_MS + 7 * 86_400_000)
-    .all<EventRow>();
+      .bind(streamer.id, now - 30 * 86_400_000, now + SERIES_HORIZON_MS + 7 * 86_400_000)
+      .all<EventRow>();
   const events: IcsEvent[] = results.map(
     (row: EventRow): IcsEvent => ({
       id: row.id,
