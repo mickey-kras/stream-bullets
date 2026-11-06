@@ -11,6 +11,22 @@ import {
   type AnySQLiteColumn,
 } from "drizzle-orm/sqlite-core";
 import { user } from "./auth-schema";
+import {
+  CARD_ICONS,
+  CARD_TABS,
+  ENTRY_STATUSES,
+  MASH_PHASES,
+  MODERATION_TARGETS,
+  OVERLAY_MESSAGE_STYLES,
+  OVERLAY_POSITIONS,
+  OVERLAY_SIZES,
+  OVERLAY_SOURCES,
+  STREAM_EVENT_STATUSES,
+  STREAM_PLATFORMS,
+  STREAMER_STATUSES,
+  SUPPORT_LINK_KINDS,
+  sqlList,
+} from "./enums";
 export * from "./auth-schema";
 
 export const streamers = sqliteTable(
@@ -27,9 +43,29 @@ export const streamers = sqliteTable(
     avatar: text("avatar"),
     background: text("background"),
     revision: integer("revision").notNull().default(0),
+    /** Page logo (`/images/logo/{ownerId}`). Null falls back to the owner's picture, then the default. */
+    logo: text("logo"),
+    /** The official StreamBullets page, pinned first in the directory. Set by an admin, never seeded. */
+    isOfficial: integer("is_official", { mode: "boolean" }).notNull().default(false),
+    /** Last handle change. A handle can change once every 30 days; null until the first change. */
+    handleChangedAt: integer("handle_changed_at"),
+    /** Moderation state: frozen pages are public and read-only; suspended pages are hidden. */
+    status: text("status", { enum: STREAMER_STATUSES }).notNull().default("active"),
+    statusReason: text("status_reason"),
+    statusChangedAt: integer("status_changed_at"),
+    /** Admin who last changed the status. A plain id; cleared when that account is deleted. */
+    statusChangedBy: text("status_changed_by"),
+    /** Support links show in About (item 34) and, optionally, as a Community card. */
+    supportVisible: integer("support_visible", { mode: "boolean" }).notNull().default(true),
+    supportCard: integer("support_card", { mode: "boolean" }).notNull().default(false),
   },
   (table) => [
     check("streamers_revision_check", sql`${table.revision} >= 0`),
+    check("streamers_is_official_check", sql`${table.isOfficial} IN (0, 1)`),
+    check("streamers_status_check", sql`${table.status} IN (${sql.raw(sqlList(STREAMER_STATUSES))})`),
+    check("streamers_support_visible_check", sql`${table.supportVisible} IN (0, 1)`),
+    check("streamers_support_card_check", sql`${table.supportCard} IN (0, 1)`),
+    check("streamers_status_reason_check", sql`${table.statusReason} IS NULL OR length(${table.statusReason}) <= 500`),
     check(
       "streamers_handle_check",
       sql`length(${table.handle}) BETWEEN 3 AND 30 AND ${table.handle} NOT GLOB '*[^a-z0-9_]*'`,
@@ -57,8 +93,14 @@ export const entries = sqliteTable(
     createdAt: integer("created_at").notNull(),
     endsAt: integer("ends_at"),
     revealed: integer("revealed", { mode: "boolean" }).notNull().default(false),
+    /** Ideas board status, set by admins on the official page. Null everywhere else. */
+    status: text("status", { enum: ENTRY_STATUSES }),
+    statusReason: text("status_reason"),
+    statusChangedAt: integer("status_changed_at"),
   },
   (table) => [
+    check("entries_status_check", sql`${table.status} IS NULL OR ${table.status} IN (${sql.raw(sqlList(ENTRY_STATUSES))})`),
+    check("entries_status_reason_check", sql`${table.statusReason} IS NULL OR length(${table.statusReason}) <= 500`),
     index("entries_history_idx").on(table.streamerId, table.createdAt, table.id),
     index("entries_kind_history_idx").on(table.streamerId, table.kind, table.createdAt, table.id),
     index("entries_author_idx").on(table.authorId),
@@ -124,9 +166,12 @@ export const entryComments = sqliteTable(
     text: text("text").notNull(),
     createdAt: integer("created_at").notNull(),
     parentId: text("parent_id"),
+    /** Set when a comment that has replies is deleted: the row stays as a "Comment removed" placeholder. */
+    removedAt: integer("removed_at"),
   },
   (table) => [
     index("entry_comments_history_idx").on(table.entryId, table.createdAt, table.id),
+    index("entry_comments_parent_idx").on(table.parentId),
     index("entry_comments_author_idx").on(table.authorId),
     uniqueIndex("entry_comments_parent_scope_idx").on(table.id, table.entryId),
     foreignKey({
@@ -281,6 +326,7 @@ export const contentReports = sqliteTable(
     index("content_reports_reporter_idx").on(table.reporterId),
     index("content_reports_resolver_idx").on(table.resolvedBy),
     index("content_reports_target_author_idx").on(table.targetAuthorId),
+    index("content_reports_streamer_idx").on(table.streamerId, table.status),
     uniqueIndex("content_reports_open_unique")
       .on(table.reporterId, table.targetKind, table.targetId)
       .where(sql`${table.status} = 'open'`),
@@ -296,5 +342,279 @@ export const contentReports = sqliteTable(
       "content_reports_resolution_check",
       sql`(${table.status} = 'open' AND ${table.resolvedAt} IS NULL) OR (${table.status} <> 'open' AND ${table.resolvedAt} IS NOT NULL)`,
     ),
+  ],
+);
+
+/**
+ * Admin decisions and security events (item 25, and the audit log of item 29). `streamer_id` and
+ * `target_id` are plain identifiers, not foreign keys, so the record survives when the page or the
+ * content is deleted. The actor is cleared when that admin account is deleted.
+ */
+export const moderationActions = sqliteTable(
+  "moderation_actions",
+  {
+    id: text("id").primaryKey(),
+    targetKind: text("target_kind", { enum: MODERATION_TARGETS }).notNull(),
+    targetId: text("target_id").notNull(),
+    streamerId: text("streamer_id"),
+    action: text("action").notNull(),
+    reason: text("reason").notNull().default(""),
+    note: text("note").notNull().default(""),
+    notifyOwner: integer("notify_owner", { mode: "boolean" }).notNull().default(false),
+    actorId: text("actor_id").references(() => user.id, { onDelete: "set null" }),
+    metadata: text("metadata", { mode: "json" }).$type<Record<string, unknown>>(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    index("moderation_actions_streamer_idx").on(table.streamerId, table.createdAt),
+    index("moderation_actions_actor_idx").on(table.actorId),
+    check(
+      "moderation_actions_target_kind_check",
+      sql`${table.targetKind} IN (${sql.raw(sqlList(MODERATION_TARGETS))})`,
+    ),
+    check("moderation_actions_action_check", sql`length(${table.action}) BETWEEN 1 AND 40`),
+    check("moderation_actions_reason_check", sql`length(${table.reason}) <= 500`),
+    check("moderation_actions_note_check", sql`length(${table.note}) <= 1000`),
+    check("moderation_actions_notify_check", sql`${table.notifyOwner} IN (0, 1)`),
+    check(
+      "moderation_actions_metadata_check",
+      sql`${table.metadata} IS NULL OR (json_valid(${table.metadata}) AND length(${table.metadata}) <= 4096)`,
+    ),
+  ],
+);
+/**
+ * Scheduled streams (item 23). A weekly series is stored as one row per occurrence, generated
+ * 12 weeks ahead and topped up by the cron; rows of one series share `series_id`, `repeat_days`
+ * (bit 0 = Sunday … bit 6 = Saturday, in `tz`) and `repeat_until`.
+ */
+export const streamEvents = sqliteTable(
+  "stream_events",
+  {
+    id: text("id").primaryKey(),
+    streamerId: text("streamer_id")
+      .notNull()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    seriesId: text("series_id"),
+    title: text("title").notNull(),
+    notes: text("notes").notNull().default(""),
+    startsAt: integer("starts_at").notNull(),
+    durationMin: integer("duration_min").notNull(),
+    platform: text("platform", { enum: STREAM_PLATFORMS }).notNull(),
+    url: text("url").notNull(),
+    status: text("status", { enum: STREAM_EVENT_STATUSES }).notNull().default("scheduled"),
+    vodUrl: text("vod_url"),
+    repeatDays: integer("repeat_days").notNull().default(0),
+    repeatUntil: integer("repeat_until"),
+    tz: text("tz").notNull(),
+    createdAt: integer("created_at").notNull(),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    index("stream_events_schedule_idx").on(table.streamerId, table.startsAt),
+    index("stream_events_series_idx").on(table.seriesId, table.startsAt),
+    check("stream_events_title_check", sql`length(${table.title}) BETWEEN 1 AND 100`),
+    check("stream_events_notes_check", sql`length(${table.notes}) <= 1000`),
+    check("stream_events_duration_check", sql`${table.durationMin} BETWEEN 15 AND 1440`),
+    check("stream_events_platform_check", sql`${table.platform} IN (${sql.raw(sqlList(STREAM_PLATFORMS))})`),
+    check(
+      "stream_events_url_check",
+      sql`${table.url} LIKE 'https://_%' AND length(${table.url}) <= 500`,
+    ),
+    check("stream_events_status_check", sql`${table.status} IN (${sql.raw(sqlList(STREAM_EVENT_STATUSES))})`),
+    check(
+      "stream_events_vod_check",
+      sql`${table.vodUrl} IS NULL OR (${table.vodUrl} LIKE 'https://_%' AND length(${table.vodUrl}) <= 500)`,
+    ),
+    check("stream_events_repeat_check", sql`${table.repeatDays} BETWEEN 0 AND 127`),
+    check(
+      "stream_events_series_check",
+      sql`(${table.seriesId} IS NULL AND ${table.repeatDays} = 0) OR (${table.seriesId} IS NOT NULL AND ${table.repeatDays} > 0)`,
+    ),
+    check("stream_events_tz_check", sql`length(${table.tz}) BETWEEN 1 AND 64`),
+  ],
+);
+
+export const streamEventTopics = sqliteTable(
+  "stream_event_topics",
+  {
+    eventId: text("event_id")
+      .notNull()
+      .references(() => streamEvents.id, { onDelete: "cascade" }),
+    entryId: text("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.eventId, table.entryId] }),
+    index("stream_event_topics_entry_idx").on(table.entryId),
+  ],
+);
+const cardTargets = CARD_TABS.map((tab: string): string => `'tab:${tab}'`).join(", ");
+
+/**
+ * Owner-editable Community cards (item 24), at most 8 per page. No rows means the page shows the
+ * two default cards; the owner's first save writes them as rows (R18). Saves replace the whole list.
+ */
+export const communityCards = sqliteTable(
+  "community_cards",
+  {
+    id: text("id").primaryKey(),
+    streamerId: text("streamer_id")
+      .notNull()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    icon: text("icon", { enum: CARD_ICONS }),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    buttonLabel: text("button_label"),
+    buttonTarget: text("button_target"),
+  },
+  (table) => [
+    uniqueIndex("community_cards_position_idx").on(table.streamerId, table.position),
+    check("community_cards_position_check", sql`${table.position} BETWEEN 0 AND 7`),
+    check("community_cards_icon_check", sql`${table.icon} IS NULL OR ${table.icon} IN (${sql.raw(sqlList(CARD_ICONS))})`),
+    check("community_cards_title_check", sql`length(${table.title}) BETWEEN 1 AND 60`),
+    check("community_cards_body_check", sql`length(${table.body}) BETWEEN 1 AND 280`),
+    check(
+      "community_cards_button_check",
+      sql`(${table.buttonLabel} IS NULL AND ${table.buttonTarget} IS NULL) OR (length(${table.buttonLabel}) BETWEEN 1 AND 30 AND (${table.buttonTarget} IN (${sql.raw(cardTargets)}) OR (${table.buttonTarget} LIKE 'https://_%' AND length(${table.buttonTarget}) <= 500)))`,
+    ),
+  ],
+);
+
+/** Support and donation link-outs (item 34), at most 4 per page. StreamBullets never handles money. */
+export const streamerLinks = sqliteTable(
+  "streamer_links",
+  {
+    id: text("id").primaryKey(),
+    streamerId: text("streamer_id")
+      .notNull()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    kind: text("kind", { enum: SUPPORT_LINK_KINDS }).notNull(),
+    label: text("label"),
+    url: text("url").notNull(),
+  },
+  (table) => [
+    uniqueIndex("streamer_links_position_idx").on(table.streamerId, table.position),
+    check("streamer_links_position_check", sql`${table.position} BETWEEN 0 AND 3`),
+    check("streamer_links_kind_check", sql`${table.kind} IN (${sql.raw(sqlList(SUPPORT_LINK_KINDS))})`),
+    check("streamer_links_label_check", sql`${table.label} IS NULL OR length(${table.label}) BETWEEN 1 AND 30`),
+    check("streamer_links_url_check", sql`${table.url} LIKE 'https://_%' AND length(${table.url}) <= 500`),
+  ],
+);
+const overlaySourceCheck = (column: unknown) =>
+  sql`json_valid(${column}) AND json_type(${column}) = 'object' AND json_extract(${column}, '$.type') IN (${sql.raw(sqlList(OVERLAY_SOURCES))}) AND length(${column}) <= 200`;
+
+/**
+ * What the one OBS overlay URL shows (item 33). `air` and `preview` are `{type, ref}`, where `ref`
+ * names the poll, topic or card for the sources that need one. A missing row means `auto`.
+ */
+export const overlayState = sqliteTable(
+  "overlay_state",
+  {
+    streamerId: text("streamer_id")
+      .primaryKey()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    air: text("air", { mode: "json" })
+      .$type<{ type: (typeof OVERLAY_SOURCES)[number]; ref: string | null }>()
+      .notNull()
+      .default({ type: "auto", ref: null }),
+    preview: text("preview", { mode: "json" })
+      .$type<{ type: (typeof OVERLAY_SOURCES)[number]; ref: string | null }>()
+      .notNull()
+      .default({ type: "auto", ref: null }),
+    position: text("position", { enum: OVERLAY_POSITIONS }).notNull().default("lower"),
+    size: text("size", { enum: OVERLAY_SIZES }).notNull().default("m"),
+    instant: integer("instant", { mode: "boolean" }).notNull().default(false),
+    showResults: integer("show_results", { mode: "boolean" }).notNull().default(true),
+    message: text("message").notNull().default(""),
+    messageStyle: text("message_style", { enum: OVERLAY_MESSAGE_STYLES }).notNull().default("info"),
+    revision: integer("revision").notNull().default(0),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    check("overlay_state_air_check", overlaySourceCheck(table.air)),
+    check("overlay_state_preview_check", overlaySourceCheck(table.preview)),
+    check("overlay_state_position_check", sql`${table.position} IN (${sql.raw(sqlList(OVERLAY_POSITIONS))})`),
+    check("overlay_state_size_check", sql`${table.size} IN (${sql.raw(sqlList(OVERLAY_SIZES))})`),
+    check("overlay_state_flags_check", sql`${table.instant} IN (0, 1) AND ${table.showResults} IN (0, 1)`),
+    check("overlay_state_message_check", sql`length(${table.message}) <= 120`),
+    check(
+      "overlay_state_message_style_check",
+      sql`${table.messageStyle} IN (${sql.raw(sqlList(OVERLAY_MESSAGE_STYLES))})`,
+    ),
+    check("overlay_state_revision_check", sql`${table.revision} >= 0`),
+  ],
+);
+
+/**
+ * Mash Battle data for an entry of kind `choice` with 2 to 4 options (item 31, risk R1: `entries`
+ * is never rebuilt to add a kind). The API exposes such an entry as `kind: "mash"`. A viewer's side
+ * is their `entry_votes` row. `winner` is the side index, -1 for a draw, or null until finished.
+ */
+export const entryMash = sqliteTable(
+  "entry_mash",
+  {
+    entryId: text("entry_id")
+      .primaryKey()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    durationS: integer("duration_s").notNull(),
+    phase: text("phase", { enum: MASH_PHASES }).notNull().default("setup"),
+    startsAt: integer("starts_at"),
+    endsAt: integer("ends_at"),
+    winner: integer("winner"),
+  },
+  (table) => [
+    check("entry_mash_duration_check", sql`${table.durationS} BETWEEN 10 AND 120`),
+    check("entry_mash_phase_check", sql`${table.phase} IN (${sql.raw(sqlList(MASH_PHASES))})`),
+    check("entry_mash_winner_check", sql`${table.winner} IS NULL OR ${table.winner} BETWEEN -1 AND 3`),
+    check(
+      "entry_mash_window_check",
+      sql`${table.endsAt} IS NULL OR (${table.startsAt} IS NOT NULL AND ${table.endsAt} > ${table.startsAt})`,
+    ),
+  ],
+);
+
+export const mashTaps = sqliteTable(
+  "mash_taps",
+  {
+    entryId: text("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    side: integer("side").notNull(),
+    taps: integer("taps").notNull().default(0),
+    assistedTaps: integer("assisted_taps").notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.entryId, table.userId] }),
+    index("mash_taps_user_idx").on(table.userId),
+    check("mash_taps_side_check", sql`${table.side} BETWEEN 0 AND 3`),
+    check(
+      "mash_taps_count_check",
+      sql`${table.taps} >= 0 AND ${table.assistedTaps} >= 0 AND ${table.assistedTaps} <= ${table.taps}`,
+    ),
+  ],
+);
+/**
+ * The /ai page's like/dislike counter (item 45). `ip_hash` is an HMAC of the IP and the day with a
+ * secret key, so raw IPs are never stored and rows cannot be linked across days. The hourly cron
+ * prunes rows older than 30 days. Not linked to accounts, so it is outside account export/delete.
+ */
+export const aiInterest = sqliteTable(
+  "ai_interest",
+  {
+    day: text("day").notNull(),
+    ipHash: text("ip_hash").notNull(),
+    value: integer("value").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.day, table.ipHash] }),
+    check("ai_interest_day_check", sql`${table.day} GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'`),
+    check("ai_interest_hash_check", sql`length(${table.ipHash}) BETWEEN 16 AND 128`),
+    check("ai_interest_value_check", sql`${table.value} IN (-1, 1)`),
   ],
 );

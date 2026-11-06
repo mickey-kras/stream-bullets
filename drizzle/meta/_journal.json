@@ -43,6 +43,55 @@
       "when": 1793827212699,
       "tag": "0005_content_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793922226727,
+      "tag": "0006_profile_i18n",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793922274183,
+      "tag": "0007_moderation",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793922305054,
+      "tag": "0008_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793922325834,
+      "tag": "0009_community",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793922374550,
+      "tag": "0010_live",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1793922384758,
+      "tag": "0011_admin_security",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1793922393670,
+      "tag": "0012_ai_interest",
+      "breakpoints": true
     }
   ]
 }
