@@ -434,7 +434,7 @@ describe("public poll updates", (): void => {
           name: "isolate-live-worker-dependencies",
           setup(plugin: PluginBuild): void {
             plugin.onResolve(
-              { filter: /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup)\.server$/ },
+              { filter: /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup|schedule)\.server$/ },
               (args) => ({ path: args.path, namespace: "live-worker-test" }),
             );
             plugin.onLoad({ filter: /.*/, namespace: "live-worker-test" }, (args) => {
@@ -449,6 +449,10 @@ describe("public poll updates", (): void => {
                 return { contents: "export const serveImage = () => new Response(null, {status: 404});" };
               if (args.path.endsWith("cleanup.server"))
                 return { contents: "export const cleanExpiredData = async () => {};" };
+              if (args.path.endsWith("schedule.server"))
+                return {
+                  contents: "export const scheduleCalendar = async () => ''; export const topUpSeries = async () => 0;",
+                };
               return { contents: "export default {};" };
             });
           },

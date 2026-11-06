@@ -120,7 +120,7 @@ statements.push(
 const officialStreamId: string = randomUUID();
 statements.push(
   `INSERT INTO streamers(id,owner_id,handle,name,about,revision,is_official) VALUES ('${officialStreamId}','${users.officialowner.id}','streambullets','StreamBullets','Ideas and bug reports for StreamBullets.',0,1);`,
-  `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed,status,status_reason,status_changed_at) VALUES ('${randomUUID()}','${officialStreamId}','${users.viewer.id}','topic','Dark mode for the overlay','Please.','Gaming','[]',${now},0,'planned',NULL,${now});`,
+  `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed,status,status_reason,status_changed_at) VALUES ('${randomUUID()}','${officialStreamId}','${users.viewer.id}','topic','Dark mode for the overlay','Please.','design','[]',${now},0,'planned',NULL,${now});`,
 );
 // A page that uses every feature table from migrations 0008–0010, kept apart from the pages other specs count.
 const featureStreamId: string = randomUUID();

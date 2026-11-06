@@ -28,6 +28,7 @@ import {
   isStreamerVisible,
   streamerRole,
 } from "./access.server";
+import { IDEA_CATEGORIES, isUntouchedTemplate, NEW_IDEA_STATUS } from "../lib/ideas";
 import { HttpError } from "./http.server";
 import {
   commentActionSchema,
@@ -90,6 +91,7 @@ interface EntryRow {
   score: number;
   status: EntryStatus | null;
   status_reason: string | null;
+  reported: number;
 }
 interface CommentRow {
   id: string;
@@ -103,6 +105,7 @@ interface CommentRow {
   avatar: string | null;
   likes: number;
   liked: number;
+  reported: number;
 }
 interface PermissionRow {
   id: string;
@@ -403,7 +406,9 @@ const entrySelect = `
       (SELECT choice,count(*) AS n FROM entry_votes v WHERE v.entry_id=e.id GROUP BY choice)) AS vote_counts,
     COALESCE((SELECT value FROM entry_reactions r WHERE r.entry_id=e.id AND r.user_id=?),0) AS reaction,
     (SELECT choice FROM entry_votes v WHERE v.entry_id=e.id AND v.user_id=?) AS my_vote,
-    COALESCE((SELECT sum(value) FROM entry_reactions r WHERE r.entry_id=e.id),0) AS score
+    COALESCE((SELECT sum(value) FROM entry_reactions r WHERE r.entry_id=e.id),0) AS score,
+    EXISTS(SELECT 1 FROM content_reports cr WHERE cr.target_kind='entry' AND cr.target_id=e.id
+      AND cr.reporter_id=? AND cr.status='open') AS reported
   FROM entries e JOIN user u ON u.id=e.author_id
 `;
 
@@ -439,12 +444,13 @@ function entryValue(row: EntryRow): Entry {
     myVote: row.my_vote,
     status: row.status ?? null,
     statusReason: row.status_reason ?? null,
+    reported: row.reported === 1,
   };
 }
 
 export async function getEntry(env: AppEnv, id: string, viewerId: string | null): Promise<Entry | null> {
   const row = await env.DB.prepare(`${entrySelect} WHERE e.id=?`)
-    .bind(viewerId ?? "", viewerId ?? "", id)
+    .bind(viewerId ?? "", viewerId ?? "", viewerId ?? "", id)
     .first<EntryRow>();
   return row ? entryValue(row) : null;
 }
@@ -475,7 +481,7 @@ export async function getOverlaySnapshot(
   )`
       : "?";
   const parameters: string[] =
-    pollId === null ? ["", "", streamerId, streamerId, streamerId] : ["", "", pollId, streamerId];
+    pollId === null ? ["", "", "", streamerId, streamerId, streamerId] : ["", "", "", pollId, streamerId];
   const results = await env.DB.batch([
     env.DB.prepare("SELECT revision, status FROM streamers WHERE id=?").bind(streamerId),
     env.DB.prepare(`${entrySelect} WHERE e.id=${selection} AND e.streamer_id=? AND e.kind!='topic'`).bind(
@@ -514,10 +520,18 @@ export async function listEntries(
   input: EntryQuery,
 ): Promise<BoardSnapshot> {
   const query = parsed(entryQuerySchema, input);
-  const scope = `${streamer.id}:${query.kind}`;
+  const scope = `${streamer.id}:${query.kind}${query.status ? `:${query.status}` : ""}`;
   const cursor = decodeCursor(query.cursor, scope, query.sort, query.query);
   const escapedQuery = query.query.replaceAll(/[\\%_]/gu, String.raw`\$&`);
-  const parameters: (string | number)[] = [viewerId ?? "", viewerId ?? "", streamer.id, `%${escapedQuery}%`];
+  const parameters: (string | number)[] = [
+    viewerId ?? "",
+    viewerId ?? "",
+    viewerId ?? "",
+    streamer.id,
+    `%${escapedQuery}%`,
+    query.status ?? "",
+    query.status ?? "",
+  ];
   let where = "";
   if (cursor) {
     where = query.sort === "top" ? "WHERE (score,created_at,id) < (?,?,?)" : "WHERE (created_at,id) < (?,?)";
@@ -526,7 +540,7 @@ export async function listEntries(
   }
   const entriesQuery = env.DB.prepare(String.raw`SELECT * FROM (${entrySelect}
     WHERE e.streamer_id=? AND e.kind ${query.kind === "topics" ? "= 'topic'" : "!= 'topic'"}
-      AND e.title LIKE ? ESCAPE '\') ${where}
+      AND e.title LIKE ? ESCAPE '\' AND (?='' OR e.status=?)) ${where}
     ORDER BY ${query.sort === "top" ? "score DESC," : ""}created_at DESC,id DESC LIMIT ${PAGE_SIZE + 1}
   `).bind(...parameters);
   const results = await env.DB.batch([
@@ -559,7 +573,9 @@ export async function listEntries(
 
 const commentColumns = `c.*, u.name AS author, u.image AS avatar,
       (SELECT count(*) FROM comment_likes l WHERE l.comment_id=c.id) AS likes,
-      EXISTS(SELECT 1 FROM comment_likes l WHERE l.comment_id=c.id AND l.user_id=?) AS liked`;
+      EXISTS(SELECT 1 FROM comment_likes l WHERE l.comment_id=c.id AND l.user_id=?) AS liked,
+      EXISTS(SELECT 1 FROM content_reports cr WHERE cr.target_kind='comment' AND cr.target_id=c.id
+        AND cr.reporter_id=? AND cr.status='open') AS reported`;
 
 /** A removed comment keeps its place in the thread but shows no author, text or likes (R2). */
 function commentValue(row: CommentRow): Comment {
@@ -576,6 +592,7 @@ function commentValue(row: CommentRow): Comment {
     likes: removed ? 0 : row.likes,
     liked: !removed && row.liked === 1,
     removed,
+    reported: !removed && row.reported === 1,
   };
 }
 
@@ -596,7 +613,7 @@ async function threadReplies(
     FROM thread t JOIN entry_comments c ON c.id=t.id JOIN user u ON u.id=c.author_id
     WHERE t.id<>t.root ORDER BY t.root, c.created_at, c.id
   `)
-    .bind(JSON.stringify(rootIds), viewerId ?? "")
+    .bind(JSON.stringify(rootIds), viewerId ?? "", viewerId ?? "")
     .all<CommentRow & { root: string }>();
   for (const row of results) replies.get(row.root)?.push(commentValue(row));
   return replies;
@@ -617,7 +634,7 @@ export async function listComments(
   const threaded = query.view === "thread";
   const scope = threaded ? `${entryId}:thread` : entryId;
   const cursor = decodeCursor(query.cursor, scope, query.sort);
-  const parameters: (string | number)[] = [viewerId ?? "", entryId];
+  const parameters: (string | number)[] = [viewerId ?? "", viewerId ?? "", entryId];
   let where = "";
   if (cursor) {
     where = query.sort === "top" ? "WHERE (likes,created_at,id) < (?,?,?)" : "WHERE (created_at,id) < (?,?)";
@@ -699,6 +716,16 @@ async function removeEntry(env: AppEnv, viewerId: string, permission: Permission
     permission.owner_id,
     "Only the author or streamer can remove this item.",
   );
+  if (!admin && permission.owner_id !== viewerId) {
+    // Ideas board: the author may delete their idea only while it is still under review.
+    const idea = await env.DB.prepare(
+      "SELECT s.is_official, e.status FROM entries e JOIN streamers s ON s.id=e.streamer_id WHERE e.id=?",
+    )
+      .bind(permission.id)
+      .first<{ is_official: number; status: EntryStatus | null }>();
+    if (idea?.is_official === 1 && idea.status !== null && idea.status !== NEW_IDEA_STATUS)
+      throw new HttpError(403, "You can delete your idea only while it is under review.");
+  }
   await applyMutation(
     env,
     permission.streamer_id,
@@ -729,12 +756,26 @@ async function createEntry(
   const id = crypto.randomUUID();
   const options = action.kind === "binary" ? ["Yes", "No"] : (action.options ?? []);
   const now = Date.now();
+  let status: EntryStatus | null = null;
+  if (action.kind === "topic") {
+    const page = await env.DB.prepare("SELECT is_official FROM streamers WHERE id=?")
+      .bind(streamerId)
+      .first<{ is_official: number }>();
+    const official = page?.is_official === 1;
+    const category = action.category ?? "";
+    // The official page is the Ideas board (item 46): its own categories, and every new idea starts under review.
+    if (official !== (IDEA_CATEGORIES as readonly string[]).includes(category))
+      throw new HttpError(400, official ? "Pick a category for your idea." : "Pick a topic category.");
+    if (official && category === "bug" && isUntouchedTemplate(action.body ?? ""))
+      throw new HttpError(400, "Describe the bug: fill in what happened and how to reproduce it.");
+    if (official) status = NEW_IDEA_STATUS;
+  }
   await applyMutation(
     env,
     streamerId,
     env.DB.prepare(`
-    INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed)
-    SELECT ?,s.id,?,?,?,?,?,?,?,?,0 FROM streamers s WHERE s.id=? AND (?='topic' OR s.owner_id=?)
+    INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed,status)
+    SELECT ?,s.id,?,?,?,?,?,?,?,?,0,? FROM streamers s WHERE s.id=? AND (?='topic' OR s.owner_id=?)
       AND (SELECT count(*) FROM entries e WHERE e.streamer_id=s.id) < ?
   `).bind(
       id,
@@ -746,6 +787,7 @@ async function createEntry(
       JSON.stringify(action.kind === "topic" ? [] : options),
       now,
       action.kind !== "topic" && action.duration > 0 ? now + action.duration * 1000 : null,
+      status,
       streamerId,
       action.kind,
       userId,
