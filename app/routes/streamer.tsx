@@ -132,10 +132,12 @@ export default function StreamerPage(): ReactNode {
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
   const toast = useToast();
-  // A directory card can ask for an action (P3 `?intent=`): suggest opens Suggest a topic, or sign-in when signed out.
-  const [dialog, setDialog] = useState<Dialog>(() =>
-    data.intent === "suggest" && viewer && streamer.status === "active" ? "topic" : null,
-  );
+  // A directory card can ask for an action (P3 `?intent=`): suggest opens Suggest a topic (Suggest an improvement on
+  // the official page), or sign-in when signed out.
+  const [dialog, setDialog] = useState<Dialog>(() => {
+    if (data.intent !== "suggest" || !viewer || streamer.status !== "active") return null;
+    return streamer.isOfficial ? "idea" : "topic";
+  });
   const [signIn, setSignIn] = useState<boolean>(data.intent === "suggest" && !viewer);
   const { providers } = useShell();
   const [pending, setPending] = useState<boolean>(false);
@@ -717,7 +719,10 @@ export default function StreamerPage(): ReactNode {
         <IdeaDialog
           key={dialog === "idea" ? "open" : "closed"}
           open={dialog === "idea"}
-          onOpenChange={(open: boolean) => setDialog(open ? "idea" : null)}
+          onOpenChange={(open: boolean) => {
+            setDialog(open ? "idea" : null);
+            if (!open && searchParams.has("intent")) setParam("intent", null);
+          }}
           onCreate={async (body) => {
             const result = await mutate({ action: "create", kind: "topic", ...body });
             toast(t("ideas.thanks"));

@@ -9,7 +9,8 @@ import { ContactDialog } from "./contact-dialog";
 /**
  * The footer: legal links on the gold bottom band of the frame (42px desktop, 34px phones) in dark ink; the
  * landing page keeps its own dark strip. Phones show Privacy, Terms and More; More opens a sheet with the rest.
- * Later phases add Accessibility, Suggest an improvement, AI agents and the language switch here.
+ * Suggest an improvement opens the official Ideas board with its dialog. Later phases add Accessibility, AI agents
+ * and the language switch here.
  */
 export function SiteFooter(): ReactNode {
   const { pathname } = useLocation();
@@ -31,6 +32,10 @@ export function SiteFooter(): ReactNode {
           {t("footer.contact")}
         </button>
         <Link to={paths.reporting}>{t("footer.report")}</Link>
+        <Link to={paths.ideas}>
+          <Icon name="idea" size={16} />
+          {t("ideas.suggest")}
+        </Link>
       </nav>
       <nav aria-label={t("footer.nav")} className="footer-compact">
         <Link to={paths.privacy} aria-current={current(paths.privacy)}>
@@ -63,6 +68,12 @@ export function SiteFooter(): ReactNode {
             <Link to={paths.reporting} onClick={() => setDialog(null)}>
               <Icon name="flag" size={18} />
               {t("footer.report")}
+            </Link>
+          </li>
+          <li>
+            <Link to={paths.ideas} onClick={() => setDialog(null)}>
+              <Icon name="idea" size={18} />
+              {t("ideas.suggest")}
             </Link>
           </li>
           <li>

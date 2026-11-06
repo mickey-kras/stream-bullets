@@ -35,5 +35,7 @@ export const paths = {
   privacy: "/privacy",
   terms: "/terms",
   reporting: "/terms#reporting",
+  /** The official Ideas board, with Suggest an improvement open (item 46). */
+  ideas: "/@streambullets?intent=suggest",
   streamer: (handle: string): string => `/@${handle}`,
 } as const;

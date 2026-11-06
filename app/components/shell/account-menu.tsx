@@ -20,8 +20,8 @@ interface MenuRow {
 /**
  * The rows for this person, in the approved order (item 35): own page tools, then account, then Admin, then
  * Streamers (streamer header only). Your profile, Host a community, Your data and Edit your page open dialogs
- * over the current page (item 17). Rows for later phases (Overlay control, Language, Accessibility & display,
- * Suggest an improvement) are added by those phases.
+ * over the current page (item 17). Suggest an improvement opens the official Ideas board with its dialog (item 46).
+ * Rows for later phases (Overlay control, Language, Accessibility & display) are added by those phases.
  */
 export function accountMenuRows(
   shell: ShellData,
@@ -51,6 +51,7 @@ export function accountMenuRows(
   account.push(dialog("data", "account.yourData", "data"));
   if (shell.admin)
     account.push({ to: paths.admin, label: "account.admin", icon: "admin", current: pathname.startsWith(paths.admin) });
+  account.push({ to: paths.ideas, label: "ideas.suggest", icon: "idea" });
   if (streamerHeader) account.push({ to: paths.streamers, label: "nav.streamers", icon: "streamers" });
   groups.push(account);
   return groups;
