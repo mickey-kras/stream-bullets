@@ -29,6 +29,12 @@ export interface CropperHandle {
   exportBlob: () => Promise<Blob>;
 }
 
+/** Preview size in CSS pixels, with its caption for a profile picture and for a page logo. */
+const PREVIEWS: readonly (readonly [number, "crop.comments" | "crop.header", "crop.pageHeader" | "crop.streamersList"])[] = [
+  [48, "crop.comments", "crop.pageHeader"],
+  [32, "crop.header", "crop.streamersList"],
+];
+
 const NUDGE: readonly (readonly [string, IconName, number, number] | null)[] = [
   null,
   ["crop.moveUp", "chevron-up", 0, -10],
@@ -52,7 +58,7 @@ function coarsePointer(): boolean {
  */
 export const Cropper = forwardRef<CropperHandle, { src: string; kind: "profile" | "page"; onError: (message: string) => void }>(
   function Cropper({ src, kind, onError }, ref): ReactNode {
-    const stage = useRef<HTMLDivElement | null>(null);
+    const stage = useRef<HTMLButtonElement | null>(null);
     const image = useRef<HTMLImageElement | null>(null);
     const previews = useRef<(HTMLCanvasElement | null)[]>([]);
     const pointers = useRef<Map<number, [number, number]>>(new Map());
@@ -60,9 +66,8 @@ export const Cropper = forwardRef<CropperHandle, { src: string; kind: "profile" 
     const [size, setSize] = useState<number>(0);
     const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
     const [crop, setCrop] = useState<CropState>(initialCrop);
-    const [nudgeOpen, setNudgeOpen] = useState<boolean>(true);
-
-    useEffect(() => setNudgeOpen(!coarsePointer()), []);
+    // The cropper only renders in the browser (inside a dialog), so reading the pointer type here is safe.
+    const [nudgeOpen, setNudgeOpen] = useState<boolean>(() => !coarsePointer());
 
     useEffect(() => {
       const element = stage.current;
@@ -133,7 +138,7 @@ export const Cropper = forwardRef<CropperHandle, { src: string; kind: "profile" 
       setCrop((current: CropState) => zoomTo(current, value));
     }
 
-    function pointerMove(event: PointerEvent<HTMLDivElement>): void {
+    function pointerMove(event: PointerEvent<HTMLButtonElement>): void {
       const previous = pointers.current.get(event.pointerId);
       if (!previous) return;
       pointers.current.set(event.pointerId, [event.clientX, event.clientY]);
@@ -150,12 +155,12 @@ export const Cropper = forwardRef<CropperHandle, { src: string; kind: "profile" 
       move(event.clientX - previous[0], event.clientY - previous[1]);
     }
 
-    function pointerEnd(event: PointerEvent<HTMLDivElement>): void {
+    function pointerEnd(event: PointerEvent<HTMLButtonElement>): void {
       pointers.current.delete(event.pointerId);
       pinch.current = 0;
     }
 
-    function keyDown(event: KeyboardEvent<HTMLDivElement>): void {
+    function keyDown(event: KeyboardEvent<HTMLButtonElement>): void {
       const step: number = event.shiftKey ? 40 : 10;
       const moves: Record<string, [number, number]> = {
         ArrowLeft: [-step, 0],
@@ -180,14 +185,13 @@ export const Cropper = forwardRef<CropperHandle, { src: string; kind: "profile" 
     return (
       <>
         <div className="crop-layout">
-          <div
+          <button
+            type="button"
             className="crop-stage"
             ref={stage}
-            tabIndex={0}
-            role="group"
             aria-label={t("crop.position")}
             aria-describedby="crop-keys"
-            onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
+            onPointerDown={(event: PointerEvent<HTMLButtonElement>) => {
               event.currentTarget.setPointerCapture?.(event.pointerId);
               pointers.current.set(event.pointerId, [event.clientX, event.clientY]);
               pinch.current = 0;
@@ -221,38 +225,25 @@ export const Cropper = forwardRef<CropperHandle, { src: string; kind: "profile" 
               }
             />
             <span className="crop-mask" aria-hidden="true" />
-          </div>
+          </button>
           <div className="crop-side">
             <p className="crop-side-title">{page ? t("crop.previewPage") : t("crop.previewProfile")}</p>
             <div className="crop-previews">
-              <figure>
-                <canvas
-                  className="crop-preview"
-                  width={96}
-                  height={96}
-                  data-size="48"
-                  role="img"
-                  aria-label={t("crop.previewLarge")}
-                  ref={(element: HTMLCanvasElement | null) => {
-                    previews.current[0] = element;
-                  }}
-                />
-                <figcaption>{page ? t("crop.pageHeader") : t("crop.comments")}</figcaption>
-              </figure>
-              <figure>
-                <canvas
-                  className="crop-preview"
-                  width={64}
-                  height={64}
-                  data-size="32"
-                  role="img"
-                  aria-label={t("crop.previewSmall")}
-                  ref={(element: HTMLCanvasElement | null) => {
-                    previews.current[1] = element;
-                  }}
-                />
-                <figcaption>{page ? t("crop.streamersList") : t("crop.header")}</figcaption>
-              </figure>
+              {PREVIEWS.map(([pixels, profileCaption, pageCaption], index: number) => (
+                <figure key={pixels}>
+                  <canvas
+                    className="crop-preview"
+                    width={pixels * 2}
+                    height={pixels * 2}
+                    data-size={pixels}
+                    aria-hidden="true"
+                    ref={(element: HTMLCanvasElement | null) => {
+                      previews.current[index] = element;
+                    }}
+                  />
+                  <figcaption>{t(page ? pageCaption : profileCaption)}</figcaption>
+                </figure>
+              ))}
             </div>
           </div>
         </div>
@@ -265,7 +256,8 @@ export const Cropper = forwardRef<CropperHandle, { src: string; kind: "profile" 
           onToggle={(event) => setNudgeOpen(event.currentTarget.open)}
         >
           <summary>{t("crop.fineTune")}</summary>
-          <div className="nudge-pad" role="group" aria-label={t("crop.movePicture")}>
+          <fieldset className="nudge-pad">
+            <legend className="sr-only">{t("crop.movePicture")}</legend>
             {NUDGE.map((cell, index: number) =>
               cell ? (
                 <IconButton
@@ -281,7 +273,7 @@ export const Cropper = forwardRef<CropperHandle, { src: string; kind: "profile" 
                 <span key={`gap-${index}`} aria-hidden="true" />
               ),
             )}
-          </div>
+          </fieldset>
         </details>
         <div className="crop-zoom">
           <IconButton

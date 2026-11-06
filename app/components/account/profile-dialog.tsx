@@ -151,7 +151,7 @@ export function ProfileDialog({
       setCropSource(null);
       setError("");
       // Back on the profile step, focus the photo option the crop selected.
-      requestAnimationFrame(() => document.querySelector<HTMLElement>('.avatar-grid [data-avatar="photo"]')?.focus());
+      requestAnimationFrame(() => document.querySelector<HTMLElement>('.avatar-grid [data-avatar="photo"] input')?.focus());
     } catch (error_: unknown) {
       setError(errorMessage(error_));
     }
@@ -217,7 +217,6 @@ export function ProfileDialog({
               required
               minLength={1}
               maxLength={40}
-              autoComplete="nickname"
             />
           </label>
           <AvatarPicker

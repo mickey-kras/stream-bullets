@@ -26,6 +26,11 @@ export function nextHandleChange(handleChangedAt: number | null, now: number): n
   return next > now ? next : null;
 }
 
+const LOGO_CHOICES: readonly (readonly ["profile" | "logo", "page.useProfile" | "page.uploadLogo"])[] = [
+  ["profile", "page.useProfile"],
+  ["logo", "page.uploadLogo"],
+];
+
 interface Draft {
   blob: Blob;
   url: string;
@@ -199,14 +204,14 @@ export function EditPageDialog({
               ? t("page.handleHelp")
               : t("page.handleLocked", { date: formatDate(locked) })}
           </p>
-          <p className="handle-warn" id="handle-warn" role="status">
+          <output className="handle-warn" id="handle-warn">
             {handleChanged && (
               <>
                 <Icon name="warning" size={16} />
                 {t("page.handleWarning")}
               </>
             )}
-          </p>
+          </output>
           <label>
             <span>{t("page.about")}</span>
             <textarea name="about" value={about} onChange={(e) => setAbout(e.currentTarget.value)} maxLength={2000} rows={4} />
@@ -218,26 +223,18 @@ export function EditPageDialog({
                 <Picture source={preview} />
               </div>
               <div className="choice-list" role="radiogroup" aria-label={t("page.logoSource")}>
-                <label className="choice">
-                  <input
-                    type="radio"
-                    name="logo-choice"
-                    value="profile"
-                    checked={logoChoice === "profile"}
-                    onChange={() => setLogoChoice("profile")}
-                  />
-                  <span>{t("page.useProfile")}</span>
-                </label>
-                <label className="choice">
-                  <input
-                    type="radio"
-                    name="logo-choice"
-                    value="logo"
-                    checked={logoChoice === "logo"}
-                    onChange={() => setLogoChoice("logo")}
-                  />
-                  <span>{t("page.uploadLogo")}</span>
-                </label>
+                {LOGO_CHOICES.map(([value, label]) => (
+                  <label className="choice" key={value}>
+                    <input
+                      type="radio"
+                      name="logo-choice"
+                      value={value}
+                      checked={logoChoice === value}
+                      onChange={() => setLogoChoice(value)}
+                    />
+                    <span>{t(label)}</span>
+                  </label>
+                ))}
               </div>
             </div>
             {logoChoice === "logo" && (

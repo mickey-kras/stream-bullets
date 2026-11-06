@@ -3,7 +3,7 @@ import { t } from "../../i18n";
 
 /**
  * "Discard changes?" over a dialog with unsaved edits (review m1, round 3): it names what would be lost.
- * Keep editing has focus; Escape keeps editing.
+ * Keep editing has focus. Escape keeps editing (useDiscardGuard turns the dialog's close request into that).
  */
 export function DiscardConfirm({
   changes,
@@ -19,13 +19,6 @@ export function DiscardConfirm({
       aria-modal="true"
       aria-labelledby="discard-title"
       aria-describedby="discard-desc"
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          event.stopPropagation();
-          event.preventDefault();
-          onKeep();
-        }
-      }}
     >
       <div className="discard-box">
         <h3 id="discard-title">{t("discard.title")}</h3>
@@ -65,7 +58,8 @@ export function useDiscardGuard(
 ): { onOpenChange: (open: boolean) => void; confirm: ReactNode; requestClose: () => void } {
   const [asking, setAsking] = useState<boolean>(false);
   const requestClose = (): void => {
-    if (changes.length > 0) setAsking(true);
+    if (asking) setAsking(false);
+    else if (changes.length > 0) setAsking(true);
     else close();
   };
   return {

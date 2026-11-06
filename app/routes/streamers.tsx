@@ -110,9 +110,11 @@ export default function Streamers(): ReactNode {
   const streamers: Streamer[] = [...data.streamers, ...(more?.streamers ?? [])];
   const nextCursor: string | null = more ? more.nextCursor : data.nextCursor;
   // Follow the URL (Back, Clear search), but never overwrite what someone is still typing.
-  useEffect(() => {
-    if (document.activeElement?.id !== "streamer-search") setText(data.query);
-  }, [data.query]);
+  const [shownQuery, setShownQuery] = useState<string>(data.query);
+  if (shownQuery !== data.query) {
+    setShownQuery(data.query);
+    if (typeof document === "undefined" || document.activeElement?.id !== "streamer-search") setText(data.query);
+  }
   useEffect(() => () => window.clearTimeout(typing.current), []);
 
   function search(value: string, replace: boolean): void {
@@ -189,7 +191,7 @@ export default function Streamers(): ReactNode {
           </div>
         </div>
         {data.intent && (
-          <p className="intent-prompt" role="status">
+          <output className="intent-prompt">
             <span>
               <Icon name={intentIcon[data.intent]} size={18} />
               {t(intentPrompt[data.intent])}
@@ -202,7 +204,7 @@ export default function Streamers(): ReactNode {
             >
               <Icon name="close" size={16} />
             </Link>
-          </p>
+          </output>
         )}
         {hostCta}
         {data.total === 0 && !data.query ? (
@@ -211,9 +213,8 @@ export default function Streamers(): ReactNode {
           </EmptyState>
         ) : (
           <>
+            <search className="search directory-search">
             <form
-              className="search directory-search"
-              role="search"
               action="/streamers"
               onSubmit={(event: FormEvent<HTMLFormElement>) => {
                 event.preventDefault();
@@ -248,6 +249,7 @@ export default function Streamers(): ReactNode {
                 <span className="sr-only"> {t("streamers.searchSuffix")}</span>
               </button>
             </form>
+            </search>
             <div className="list-toolbar">
               <span className="list-count" aria-live="polite">
                 {count}

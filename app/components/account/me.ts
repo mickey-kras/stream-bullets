@@ -24,13 +24,23 @@ export function useMe(active: boolean): { me: Me | null; error: string; reload: 
     }
   }, []);
   useEffect(() => {
-    if (!active) {
-      setMe(null);
-      return;
-    }
-    void reload();
-  }, [active, reload]);
-  return { me, error, reload };
+    if (!active) return;
+    let current = true;
+    requestJson<Me>("/api/me").then(
+      (value: Me) => {
+        if (!current) return;
+        setMe(value);
+        setError("");
+      },
+      (error_: unknown) => {
+        if (current) setError(errorMessage(error_));
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [active]);
+  return { me: active ? me : null, error, reload };
 }
 
 export const IMAGE_TYPES: readonly string[] = ["image/png", "image/jpeg", "image/webp"];
