@@ -43,8 +43,9 @@ export function cropGeometry(
   const height: number = image.height * scale;
   const limitX: number = Math.max(0, (width - stage) / 2);
   const limitY: number = Math.max(0, (height - stage) / 2);
-  const x: number = Math.max(-limitX, Math.min(limitX, state.x));
-  const y: number = Math.max(-limitY, Math.min(limitY, state.y));
+  // `|| 0` turns a clamped -0 into 0.
+  const x: number = Math.max(-limitX, Math.min(limitX, state.x)) || 0;
+  const y: number = Math.max(-limitY, Math.min(limitY, state.y)) || 0;
   const side: number = stage / scale;
   return {
     zoom,
