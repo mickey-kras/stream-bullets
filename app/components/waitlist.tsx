@@ -1,5 +1,6 @@
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { StreamerApplication } from "../types";
+import { Icon } from "./ui/icon";
 
 const MAX_LINKS = 5;
 
@@ -21,7 +22,10 @@ function ApplicationStatusNote({ application }: Readonly<{ application: Streamer
   if (application.status === "rejected")
     return (
       <div className="application-status rejected">
-        <strong>Not approved this time.</strong>
+        <strong>
+          <Icon name="rejected" size={18} />
+          Not approved this time.
+        </strong>
         <p>
           Your request from <DateTime time={application.updatedAt} /> was not approved. You can update your links or
           note and send it again.
@@ -30,7 +34,10 @@ function ApplicationStatusNote({ application }: Readonly<{ application: Streamer
     );
   return (
     <div className="application-status pending">
-      <strong>Request received.</strong>
+      <strong>
+        <Icon name="pending" size={18} />
+        Request received.
+      </strong>
       <p>
         We&apos;ll review your request. Submitted <DateTime time={application.updatedAt} />. You can still update it
         while you wait.
@@ -82,20 +89,20 @@ export function StreamerWaitlist({
     await onSubmit({ links, note: note.trim() });
   }
 
-  let submitLabel = "Request streamer access";
+  let submitLabel = "Request to host";
   if (application?.status === "pending") submitLabel = "Update request";
   if (application?.status === "rejected") submitLabel = "Send request again";
 
   return (
     <>
       <p>
-        Streamer pages are invite-only for now. Tell us where you stream and we&apos;ll let you know when you can claim
-        your page. You can keep voting and commenting as a viewer in the meantime.
+        Hosting a community is invite-only for now. Tell us where you stream and we&apos;ll let you know when you can
+        claim your page. You can keep voting and commenting as a viewer in the meantime.
       </p>
       {application && <ApplicationStatusNote application={application} />}
       <form
         className="waitlist-form"
-        aria-label="Streamer access request"
+        aria-label="Host a community request"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
           void submit(event);
         }}
@@ -147,7 +154,8 @@ export function StreamerWaitlist({
                     aria-label={`Remove channel link ${index + 1}`}
                     onClick={() => removeRow(index)}
                   >
-                    Remove
+                    <Icon name="close" size={16} />
+                    <span className="remove-text">Remove</span>
                   </button>
                 )}
               </li>
@@ -155,7 +163,8 @@ export function StreamerWaitlist({
           </ul>
           {rows.length < MAX_LINKS ? (
             <button type="button" onClick={addRow}>
-              + Add another link
+              <Icon name="plus" size={16} />
+              Add another link
             </button>
           ) : (
             <p className="muted">You can add up to {MAX_LINKS} links.</p>
@@ -176,6 +185,7 @@ export function StreamerWaitlist({
           For example, your schedule or the community you want to host. Up to 1000 characters.
         </p>
         <button className="gold" type="submit" disabled={disabled}>
+          <Icon name="send" size={18} />
           {submitLabel}
         </button>
       </form>

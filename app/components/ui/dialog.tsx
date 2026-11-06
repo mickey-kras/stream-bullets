@@ -15,7 +15,11 @@ export function useReturnFocus(): {
     },
     onCloseAutoFocus: (event: Event) => {
       event.preventDefault();
-      if (opener.current?.isConnected) opener.current.focus();
+      const target: HTMLElement | null = opener.current;
+      // An account dialog opens from a menu row that is hidden by then: go back to the avatar button.
+      const visible: boolean = Boolean(target?.isConnected && target.getClientRects().length > 0);
+      const fallback: HTMLElement | null = document.querySelector<HTMLElement>(".account-menu-wrap > button.profile");
+      (visible ? target : fallback)?.focus();
     },
   };
 }

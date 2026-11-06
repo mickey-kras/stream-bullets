@@ -122,6 +122,17 @@ statements.push(
   `INSERT INTO streamers(id,owner_id,handle,name,about,revision,is_official) VALUES ('${officialStreamId}','${users.officialowner.id}','streambullets','StreamBullets','Ideas and bug reports for StreamBullets.',0,1);`,
   `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed,status,status_reason,status_changed_at) VALUES ('${randomUUID()}','${officialStreamId}','${users.viewer.id}','topic','Dark mode for the overlay','Please.','design','[]',${now},0,'planned',NULL,${now});`,
 );
+// Enough pages for the Streamers directory to need "Load more" (50 per page). Their handles sort after every
+// other seeded page, so the first page still holds those.
+for (let index = 1; index <= 48; index++) {
+  const number: string = String(index).padStart(2, "0");
+  const ownerId: string = randomUUID();
+  statements.push(
+    `INSERT INTO user(id,name,email,email_verified,created_at,updated_at) VALUES ('${ownerId}','Room ${number} owner','room${number}@example.test',1,${now},${now});`,
+    `INSERT INTO streamers(id,owner_id,handle,name,about,revision) VALUES ('${randomUUID()}','${ownerId}','zz_room_${number}','Room ${number}','',0);`,
+  );
+}
+
 // A page that uses every feature table from migrations 0008–0010, kept apart from the pages other specs count.
 const featureStreamId: string = randomUUID();
 const featureTopicId: string = randomUUID();

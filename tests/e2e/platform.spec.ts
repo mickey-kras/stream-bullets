@@ -188,39 +188,40 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
 test("a viewer joins the waitlist, an admin approves, and the viewer creates a streamer page", async ({ browser }) => {
   const context = await signedIn(browser, "newcomer");
   const page = await context.newPage();
-  await page.goto("/settings");
-  await expect(page.getByRole("heading", { name: "Host a community" })).toBeVisible();
-  await expect(page.getByText("Streamer pages are invite-only for now.", { exact: false })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Create public streamer profile" })).toHaveCount(0);
+  await page.goto("/streamers");
   await expect(page.getByRole("link", { name: "Admin", exact: true })).toHaveCount(0);
-  const blocked = await context.request.post("/api/profile", {
+  await page.getByRole("link", { name: "Host a community", exact: true }).click();
+  const host = page.getByRole("dialog", { name: "Host a community" });
+  await expect(host.getByText("Hosting a community is invite-only for now.", { exact: false })).toBeVisible();
+  await expect(host.getByRole("button", { name: "Create your community page" })).toHaveCount(0);
+  const blocked = await context.request.post("/api/streamer", {
     headers: { Origin: origin },
     data: { handle: "early_host", name: "Too early", about: "" },
   });
   expect(blocked.status()).toBe(403);
-  await page.getByLabel("Channel link 1", { exact: true }).fill("https://www.twitch.tv/new_host");
-  await page.getByRole("button", { name: "+ Add another link" }).click();
-  await expect(page.getByLabel("Channel link 2", { exact: true })).toBeFocused();
-  await page.getByLabel("Channel link 2", { exact: true }).fill("https://example.test/not-needed");
-  await page.getByRole("button", { name: "+ Add another link" }).click();
-  await page.getByLabel("Channel link 3", { exact: true }).fill("https://www.youtube.com/@newhost");
-  await page.getByRole("button", { name: "Remove channel link 2" }).click();
-  await expect(page.getByLabel("Channel link 3", { exact: true })).toHaveCount(0);
-  await expect(page.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
-  await page.getByLabel("Anything else we should know? (optional)").fill("I stream games and tech twice a week.");
-  await page.getByRole("button", { name: "Request streamer access" }).click();
-  await expect(page.getByRole("status")).toHaveText("Your request is saved. We'll review it soon.");
-  await expect(page.getByText("We'll review your request.", { exact: false })).toBeVisible();
+  await host.getByLabel("Channel link 1", { exact: true }).fill("https://www.twitch.tv/new_host");
+  await host.getByRole("button", { name: "Add another link" }).click();
+  await expect(host.getByLabel("Channel link 2", { exact: true })).toBeFocused();
+  await host.getByLabel("Channel link 2", { exact: true }).fill("https://example.test/not-needed");
+  await host.getByRole("button", { name: "Add another link" }).click();
+  await host.getByLabel("Channel link 3", { exact: true }).fill("https://www.youtube.com/@newhost");
+  await host.getByRole("button", { name: "Remove channel link 2" }).click();
+  await expect(host.getByLabel("Channel link 3", { exact: true })).toHaveCount(0);
+  await expect(host.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
+  await host.getByLabel("Anything else we should know? (optional)").fill("I stream games and tech twice a week.");
+  await host.getByRole("button", { name: "Request to host" }).click();
+  await expect(page.getByText("Request sent. We'll let you know.").first()).toBeVisible();
+  await expect(host.getByText("We'll review your request.", { exact: false })).toBeVisible();
   await page.reload();
-  await expect(page.getByText("Request received.")).toBeVisible();
-  await expect(page.getByLabel("Channel link 1", { exact: true })).toHaveValue("https://www.twitch.tv/new_host");
-  await expect(page.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
-  await expect(page.getByRole("button", { name: "Update request" })).toBeVisible();
+  await expect(host.getByText("Request received.")).toBeVisible();
+  await expect(host.getByLabel("Channel link 1", { exact: true })).toHaveValue("https://www.twitch.tv/new_host");
+  await expect(host.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
+  await expect(host.getByRole("button", { name: "Update request" })).toBeVisible();
 
   const adminContext = await signedIn(browser, "admin");
   const admin = await adminContext.newPage();
   await assertNoScriptErrors(admin, async () => {
-    await admin.goto("/settings");
+    await admin.goto("/streamers");
     await admin.getByRole("link", { name: "Admin", exact: true }).click();
     await expect(admin).toHaveURL(/\/admin$/);
     await expect(admin.getByRole("heading", { name: "Streamer requests" })).toBeVisible();
@@ -244,19 +245,27 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   await adminContext.close();
 
   await page.reload();
-  await expect(page.getByText("You're approved to host a community.", { exact: false })).toBeVisible();
-  await page.getByLabel("Handle", { exact: true }).fill("new_host");
-  await page.getByLabel("Streamer name", { exact: true }).fill("New community");
-  await page.getByLabel("About your stream").fill("Games and technology.");
-  await page.getByRole("button", { name: "Create public streamer profile" }).click();
-  await expect(page.getByRole("heading", { name: "Your streamer page" })).toBeVisible();
-  await page.getByLabel("Profile picture").setInputFiles({ name: "avatar.png", mimeType: "image/png", buffer: png });
-  await expect(page.getByRole("status")).toHaveText("Your avatar is saved.");
-  await page
-    .getByLabel("Page background")
+  await expect(host.getByText("You're approved to host a community.", { exact: false })).toBeVisible();
+  await host.getByLabel("Handle", { exact: true }).fill("new_host");
+  await host.getByLabel("Streamer name", { exact: true }).fill("New community");
+  await host.getByLabel("About your stream").fill("Games and technology.");
+  await host.getByRole("button", { name: "Create your community page" }).click();
+  await expect(page.getByText("Your page /@new_host is live.").first()).toBeVisible();
+  await expect(host).toBeHidden();
+  // Edit your page: a page background, saved with the page.
+  await page.goto("/streamers?dialog=page");
+  const edit = page.getByRole("dialog", { name: "Edit your page" });
+  await edit
+    .getByLabel("Background image")
     .setInputFiles({ name: "background.png", mimeType: "image/png", buffer: png });
-  await expect(page.getByRole("status")).toHaveText("Your background is saved.");
-  await page.getByRole("link", { name: "Open /@new_host" }).click();
+  await edit.getByRole("button", { name: "Save page" }).click();
+  await expect(page.getByText("Streamer page saved.").first()).toBeVisible();
+  const avatar = await context.request.put("/api/images/avatar", {
+    headers: { Origin: origin, "Content-Type": "image/png" },
+    data: png,
+  });
+  expect(avatar.status()).toBe(200);
+  await page.getByRole("link", { name: "Your page", exact: true }).first().click();
   await expect(page.getByText("New community · Suggest topics. Vote. Chat.")).toBeVisible();
   const profile = await context.request.get("/api/me");
   const identity = (await profile.json()) as { viewer: { avatar: string }; streamer: { background: string } };
@@ -292,7 +301,7 @@ test("only administrators can open the review queue and its API", async ({ brows
   expect(response?.status()).toBe(404);
   await expect(viewer.getByRole("heading", { name: "Page not found" })).toBeVisible();
   await expect(viewer.getByText("newcomer@example.test")).toHaveCount(0);
-  await viewer.goto("/settings");
+  await viewer.goto("/streamers");
   await expect(viewer.getByRole("link", { name: "Admin", exact: true })).toHaveCount(0);
   for (const status of ["pending", "approved", "rejected"]) {
     const list = await context.request.get(`/api/admin/applications?status=${status}`);

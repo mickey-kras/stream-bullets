@@ -9,7 +9,11 @@ import { isAdmin } from "../server/access.server";
 import { listCards } from "../server/community.server";
 import { defaultRange, listEvents, listTopicChoices } from "../server/schedule.server";
 import { getSupport } from "../server/support.server";
-import { Avatar, EmptyState } from "../components/common";
+import { EmptyState } from "../components/common";
+import { SignInDialog } from "../components/shell/sign-in-dialog";
+import { StreamerLogo } from "../components/ui/avatar";
+import { readIntent } from "../lib/directory";
+import { useShell } from "../lib/shell";
 import { CommunityView } from "../components/community/community-view";
 import { IdeaDialog } from "../components/ideas/idea-dialog";
 import { ScheduleView, scheduleModes, type ScheduleMode } from "../components/schedule/schedule-view";
@@ -99,6 +103,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
     cards: view === "community" && !official ? await listCards(app.env, streamer.id) : null,
     support: await getSupport(app.env, streamer.id),
     topicChoices: owner && view === "schedule" ? await listTopicChoices(app.env, streamer.id) : [],
+    intent: readIntent(url.searchParams.get("intent")),
   };
 }
 
@@ -127,7 +132,12 @@ export default function StreamerPage(): ReactNode {
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
   const toast = useToast();
-  const [dialog, setDialog] = useState<Dialog>(null);
+  // A directory card can ask for an action (P3 `?intent=`): suggest opens Suggest a topic, or sign-in when signed out.
+  const [dialog, setDialog] = useState<Dialog>(() =>
+    data.intent === "suggest" && viewer && streamer.status === "active" ? "topic" : null,
+  );
+  const [signIn, setSignIn] = useState<boolean>(data.intent === "suggest" && !viewer);
+  const { providers } = useShell();
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [extra, setExtra] = useState<Entry[]>([]);
@@ -345,7 +355,7 @@ export default function StreamerPage(): ReactNode {
         name={streamer.name}
         entries={entries}
         selected={selected}
-        hasSelection={searchParams.has("entry")}
+        hasSelection={searchParams.has("entry") || (data.intent === "discuss" && selected !== null)}
         official={official}
         status={status}
         sort={sort}
@@ -509,7 +519,7 @@ export default function StreamerPage(): ReactNode {
         <h1>{streamer.name}</h1>
         <section className="info-card about-card">
           <div className="about-id">
-            <Avatar className="avatar-48" name={streamer.name} url={streamer.logo ?? streamer.avatar} />
+            <StreamerLogo className="avatar-48" streamer={streamer} />
             <div>
               <strong>{streamer.name}</strong>
               <span className="muted">@{streamer.handle}</span>
@@ -686,12 +696,22 @@ export default function StreamerPage(): ReactNode {
         mode={dialog === "poll" ? "poll" : "topic"}
         open={dialog === "topic" || dialog === "poll"}
         onOpenChange={(open: boolean) => {
-          if (!open) setDialog(null);
+          if (open) return;
+          setDialog(null);
+          if (searchParams.has("intent")) setParam("intent", null);
         }}
         onCreate={async (body: unknown) => {
           const result = await mutate(body);
           navigate(dialog === "poll" ? "polls" : "topics", result.id);
         }}
+      />
+      <SignInDialog
+        open={signIn}
+        onOpenChange={(open: boolean) => {
+          setSignIn(open);
+          if (!open && searchParams.has("intent")) setParam("intent", null);
+        }}
+        providers={providers}
       />
       {official && (
         <IdeaDialog

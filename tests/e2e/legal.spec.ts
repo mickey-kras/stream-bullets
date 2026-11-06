@@ -31,7 +31,7 @@ test("privacy policy and terms render with contents and a draft notice", async (
 });
 
 test("the footer links to the legal pages, contact, and the reporting rules", async ({ page }) => {
-  await page.goto("/settings");
+  await page.goto("/streamers");
   const footer = page.getByRole("contentinfo");
   await footer.getByRole("button", { name: "Contact" }).click();
   const contact = page.getByRole("dialog", { name: "Contact us" });

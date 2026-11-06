@@ -1,7 +1,7 @@
 import { useRouteLoaderData } from "react-router";
-import type { Viewer } from "../types";
+import type { Provider, Viewer } from "../types";
 
-export type Provider = "google" | "twitch";
+export type { Provider } from "../types";
 
 /** The root loader's data: everything the headers, account menu and footer need on every page. */
 export interface ShellData {
@@ -26,14 +26,11 @@ export function shellRole(shell: ShellData): ShellRole {
   return shell.ownStreamer ? "owner" : "viewer";
 }
 
-/**
- * App paths the shell links to. The Streamers directory is the landing page until P3 adds /streamers;
- * change it here and every header, menu, footer and back link follows.
- */
+/** App paths the shell links to. Account settings are dialogs (`?dialog=profile`); /settings redirects there. */
 export const paths = {
   home: "/",
-  streamers: "/",
-  settings: "/settings",
+  streamers: "/streamers",
+  profile: "/streamers?dialog=profile",
   admin: "/admin",
   privacy: "/privacy",
   terms: "/terms",

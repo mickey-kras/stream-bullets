@@ -66,6 +66,19 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
   return url;
 }
 
+/**
+ * `DELETE /api/images/avatar`: drops the uploaded profile picture (the profile dialog does this when a preset is
+ * chosen, because an upload wins over a preset). The page keeps working: its logo falls back to the preset.
+ */
+export async function deleteAvatar(env: AppEnv, userId: string): Promise<void> {
+  const url = `/images/avatar/${userId}`;
+  await env.DB.batch([
+    env.DB.prepare("UPDATE user SET image = NULL, updated_at = ? WHERE id = ? AND image = ?").bind(Date.now(), userId, url),
+    env.DB.prepare("UPDATE streamers SET avatar = NULL WHERE owner_id = ? AND avatar = ?").bind(userId, url),
+  ]);
+  await env.IMAGES.delete(`avatar/${userId}`);
+}
+
 /** `DELETE /api/images/logo`: the page goes back to the owner's profile picture. */
 export async function deleteLogo(env: AppEnv, userId: string): Promise<void> {
   const db = drizzle(env.DB);

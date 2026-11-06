@@ -1,21 +1,23 @@
-import { z } from "zod";
 import type { AppContext, AppEnv } from "../../env";
+import type { Provider } from "../../types";
 import { getStreamerAccess } from "../access.server";
 import { deleteAccount, exportAccount } from "../account.server";
 import { configuredProviders, createAuth } from "../auth.server";
 import { consumeMutationQuota, getOwnStreamer, setDisplayPrefs, setLocale, updateProfile } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
-import {
-  accountDeletionSchema,
-  displayNameSchema,
-  displayPrefsSchema,
-  localeSchema,
-  profileSchema,
-} from "../validation";
+import { accountDeletionSchema, displayPrefsSchema, localeSchema, profileSchema } from "../validation";
 import { get, write, type ApiRoute } from "./router";
 
-/** The original settings form's name change. `PATCH /api/profile` replaces it. */
-const accountSchema = z.object({ name: displayNameSchema }).strict();
+/** The provider this account signs in with ("Signed in with TikTok" in Your profile and Your data). */
+async function signInProvider(env: AppEnv, userId: string): Promise<Provider | null> {
+  const row = await env.DB.prepare("SELECT provider_id FROM account WHERE user_id=? ORDER BY created_at LIMIT 1")
+    .bind(userId)
+    .first<{ provider_id: string }>();
+  const provider = row?.provider_id;
+  return provider === "google" || provider === "tiktok" || provider === "twitch" || provider === "instagram"
+    ? provider
+    : null;
+}
 
 async function exportResponse(request: Request, env: AppEnv, viewerId: string | null): Promise<Response> {
   queryParams(request, []);
@@ -50,6 +52,7 @@ export const accountRoutes: ApiRoute[] = [
       streamer: viewer ? await getOwnStreamer(env, viewer.id) : null,
       access: viewer ? await getStreamerAccess(env, viewer.id) : null,
       providers: configuredProviders(env),
+      signInProvider: viewer ? await signInProvider(env, viewer.id) : null,
     });
   }),
   get(/account\/export/, async ({ request, env, viewer }) => exportResponse(request, env, viewer?.id ?? null)),
@@ -67,12 +70,6 @@ export const accountRoutes: ApiRoute[] = [
   write("PATCH", /me\/preferences/, async ({ request, env, viewer }) =>
     json({ preferences: await setDisplayPrefs(env, viewer.id, await readJson(request, displayPrefsSchema)) }),
   ),
-  // POST /api/account {name} → {viewer}. Kept for the settings page until the profile dialog replaces it.
-  write("POST", /account/, async ({ request, env, viewer }) => {
-    const input = await readJson(request, accountSchema);
-    const profile = await updateProfile(env, viewer.id, { name: input.name });
-    return json({ viewer: { ...viewer, ...profile } });
-  }),
   write("POST", /account\/delete/, async ({ request, app, env, viewer }) => {
     await readJson(request, accountDeletionSchema);
     await consumeMutationQuota(env, viewer.id);

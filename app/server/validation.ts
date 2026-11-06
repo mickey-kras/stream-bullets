@@ -380,3 +380,8 @@ export type EventInput = z.infer<typeof eventInputSchema>;
 export type EventPatch = z.infer<typeof eventPatchSchema>;
 export type CommunityCardInput = z.infer<typeof communityCardSchema>;
 export type SupportLinkInput = z.infer<typeof supportLinkInputSchema>;
+
+/** The non-routable addresses TikTok and Instagram accounts get (R5). Never shown or mailed. */
+export function isPlaceholderEmail(email: string): boolean {
+  return /@(?:[a-z0-9-]+\.)?(?:tiktok|instagram)(?:\.placeholder)?\.invalid$/iu.test(email);
+}

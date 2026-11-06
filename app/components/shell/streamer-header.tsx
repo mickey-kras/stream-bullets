@@ -2,7 +2,7 @@ import { useRef, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t, type MessageId } from "../../i18n";
 import { paths } from "../../lib/shell";
-import { Avatar } from "../ui/avatar";
+import { StreamerLogo } from "../ui/avatar";
 import { Icon, type IconName } from "../ui/icon";
 import { AccountMenu } from "./account-menu";
 import { useFitHeader } from "./fit-header";
@@ -43,7 +43,13 @@ export function StreamerHeader({
   badge,
   className = "",
 }: Readonly<{
-  streamer: { handle: string; name: string; avatar: string | null };
+  streamer: {
+    handle: string;
+    name: string;
+    avatar: string | null;
+    logo?: string | null;
+    ownerAvatarPreset?: number | null;
+  };
   current: StreamerView | null;
   action?: ReactNode;
   tabHref?: (view: StreamerView) => string;
@@ -70,7 +76,7 @@ export function StreamerHeader({
         >
           {brand ?? (
             <>
-              <Avatar className="brand-avatar" name={streamer.name} url={streamer.avatar} />
+              <StreamerLogo className="brand-avatar" streamer={streamer} />
               <span className="streamer-name" aria-hidden="true">
                 {streamer.name}
               </span>
