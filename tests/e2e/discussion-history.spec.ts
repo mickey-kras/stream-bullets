@@ -147,8 +147,11 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     await page.getByRole("button", { name: "Refresh", exact: true }).click();
     await expect(remoteParent).toHaveCount(0);
     await expect(remoteReply).toBeVisible();
-    await expect(remoteReply.locator(".replying")).toHaveCount(0);
+    // R2: a deleted comment with replies stays as a "Comment removed" placeholder, so the reply keeps its parent.
+    await expect(remoteReply.locator(".replying")).toContainText("an earlier comment");
     await expect(reply).toBeVisible();
+    // The placeholder is still a valid reply target, so the open reply stays until the viewer cancels it.
+    await page.getByRole("button", { name: "Cancel reply", exact: true }).click();
     await expect(page.getByRole("button", { name: "Cancel reply", exact: true })).toHaveCount(0);
     await expect(page.getByRole("textbox", { name: "Write a comment" })).toHaveValue("Keep this unsent draft.");
     await page.getByRole("button", { name: "Post", exact: true }).click();
