@@ -68,7 +68,14 @@ test("public access rejects forged identities and unsafe mutations", async ({ br
   expect(unauthorized.status()).toBe(403);
   const me = await owner.request.get("/api/me");
   const identity = (await me.json()) as { viewer: Record<string, unknown> };
-  expect(Object.keys(identity.viewer).sort()).toEqual(["avatar", "avatarPreset", "displayPrefs", "id", "locale", "name"]);
+  expect(Object.keys(identity.viewer).sort()).toEqual([
+    "avatar",
+    "avatarPreset",
+    "displayPrefs",
+    "id",
+    "locale",
+    "name",
+  ]);
   expect(me.headers()["cache-control"]).toBe("no-store");
   expect(me.headers()["x-content-type-options"]).toBe("nosniff");
   await owner.close();
@@ -100,8 +107,9 @@ test("viewer topics, reactions, replies, and comment likes survive reload", asyn
       "true",
     );
     await comment.getByRole("button", { name: "Reply", exact: true }).click();
-    await page.getByRole("textbox", { name: "Write a comment" }).fill("A larger case can also help.");
-    await page.getByRole("button", { name: "Post", exact: true }).click();
+    const replyBox = page.locator(".inline-reply");
+    await replyBox.getByRole("textbox", { name: "Write a reply to viewer" }).fill("A larger case can also help.");
+    await replyBox.getByRole("button", { name: "Post", exact: true }).click();
     await expect(page.getByText("A larger case can also help.", { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByRole("heading", { name: "How should we build a quiet PC?" })).toBeVisible();
@@ -130,7 +138,8 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   const dialog = owner.getByRole("dialog");
   await dialog.getByLabel("Question", { exact: true }).fill("Should we stream on Friday?");
   await dialog.getByRole("radio", { name: "Yes / No" }).check();
-  await dialog.getByLabel("Voting time").selectOption("0");
+  await dialog.getByRole("combobox", { name: "Voting time" }).click();
+  await owner.getByRole("option", { name: "Unlimited — until I end it" }).click();
   await dialog.getByRole("button", { name: "Start poll" }).click();
   await expect(dialog).not.toBeVisible();
   await expect(owner).toHaveURL(/entry=/);
@@ -260,12 +269,14 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
     data: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script></svg>',
   });
   expect(rejected.status()).toBe(415);
-  await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Suggest a topic", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.getByRole("button", { name: "Suggest a topic", exact: true })).toBeFocused();
+  // On a phone the owner's empty list offers the page link instead of the header action.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("button", { name: "Copy page link" })).toBeVisible();
   await context.close();
 });
 
@@ -336,7 +347,9 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
     await expect(viewer.getByRole("dialog", { name: "Report sent" })).toBeVisible();
     await viewer.getByRole("button", { name: "Close", exact: true }).click();
     await expect(viewer.getByRole("dialog")).toHaveCount(0);
-    await expect(viewer.getByRole("button", { name: "Report topic" })).toBeFocused();
+    // Once reported, one "Reported" marker replaces the button.
+    await expect(viewer.getByRole("button", { name: "Report topic" })).toHaveCount(0);
+    await expect(viewer.locator(".content-actions .reported-chip")).toHaveText("Reported");
   });
   const forbidden = await viewerContext.request.get("/api/admin/reports");
   expect(forbidden.status()).toBe(403);

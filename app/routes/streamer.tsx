@@ -273,11 +273,35 @@ export default function StreamerPage(): ReactNode {
     );
   }
 
-  function renderEmptyDetail(): ReactNode {
+  function copyPageLink(): void {
+    const url = `${location.origin}/@${streamer.handle}`;
+    void navigator.clipboard
+      ?.writeText(url)
+      .then(() => toast(t("entry.linkCopied")))
+      .catch(() => toast(url));
+  }
+
+  /** The empty Topics state: the owner shares the page; viewers suggest the first topic. */
+  function renderEmptyTopics(): ReactNode {
     if (official)
       return (
         <EmptyState title={t("ideas.emptyTitle")} icon="idea">
           {t("ideas.emptyBody")}
+        </EmptyState>
+      );
+    if (owner)
+      return (
+        <EmptyState
+          title={t("entry.ownerEmptyTitle")}
+          icon="link"
+          action={
+            <button type="button" className="gold" onClick={copyPageLink}>
+              <Icon name="copy" size={18} />
+              {t("entry.copyPageLink")}
+            </button>
+          }
+        >
+          {t("entry.ownerEmptyBody")}
         </EmptyState>
       );
     return (
@@ -299,6 +323,22 @@ export default function StreamerPage(): ReactNode {
     );
   }
 
+  function renderEmptyList(): ReactNode {
+    if (query)
+      return (
+        <p className="empty">
+          <Icon name="search-none" size={20} />
+          {t("entry.noMatch")}
+        </p>
+      );
+    return (
+      <>
+        <p className="empty desk-empty">{t(official ? "ideas.noneYet" : "entry.noneYet")}</p>
+        <div className={`list-empty${owner ? " owner-empty" : ""}`}>{renderEmptyTopics()}</div>
+      </>
+    );
+  }
+
   function renderTopics(): ReactNode {
     return (
       <TopicBoard
@@ -313,9 +353,7 @@ export default function StreamerPage(): ReactNode {
         more={Boolean(cursor)}
         loadingMore={loadingMore}
         live={liveEvent}
-        emptyList={
-          <p className="empty">{query ? t("entry.noMatch") : t(official ? "ideas.noneYet" : "entry.noneYet")}</p>
-        }
+        emptyList={renderEmptyList()}
         detail={
           selected ? (
             <>
@@ -333,7 +371,7 @@ export default function StreamerPage(): ReactNode {
               {renderDiscussion(selected)}
             </>
           ) : (
-            renderEmptyDetail()
+            renderEmptyTopics()
           )
         }
         onSelect={(id: string) => navigate("topics", id)}
