@@ -1853,6 +1853,7 @@ input[type="checkbox"], input[type="radio"], .modal-content .choice input { widt
 .avatar-grid .avatar-option:has(input:checked)::after { content: "✓"; position: absolute; right: 0; bottom: 0; width: 21px; height: 21px; border-radius: 50%; background: var(--gold); color: var(--on-gold-badge); font: 700 15px/21px Figtree,Onest,sans-serif; text-align: center; }
 .avatar-grid .avatar-option:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 2px; }
 button.crop-stage { display: block; padding: 0; border: 0; border-radius: 8px; font: inherit; }
-fieldset.nudge-pad { min-width: 0; padding: 0; border: 0; }
+.sheet-body fieldset.nudge-pad, fieldset.nudge-pad { display: grid; min-width: 0; padding: 0; border: 0; }
 search.directory-search > form { display: contents; }
 output.intent-prompt, output.handle-warn { color: inherit; }
+.modal-content .avatar-grid label.avatar-option { display: grid; margin: 0; }
