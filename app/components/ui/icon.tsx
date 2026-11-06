@@ -53,6 +53,9 @@ import {
   Wifi,
   WifiOff,
   X,
+  Zap,
+  Heart,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 import { localIcons, type LocalIconName } from "./icon-paths";
@@ -112,6 +115,9 @@ const lucideIcons = {
   compass: Compass,
   privacy: LockKeyhole,
   terms: FileText,
+  zap: Zap,
+  heart: Heart,
+  megaphone: Megaphone,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof lucideIcons | LocalIconName;
