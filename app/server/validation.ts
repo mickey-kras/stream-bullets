@@ -2,7 +2,7 @@ import { z } from "zod";
 import { AVATAR_PRESET_COUNT, LOCALES } from "../../db/enums";
 
 const id = z.string().uuid();
-const line = (max: number): z.ZodString =>
+export const line = (max: number): z.ZodString =>
   z
     .string()
     .trim()

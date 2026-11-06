@@ -281,3 +281,21 @@ export interface ReportQueue {
   reports: ContentReport[];
   nextCursor: string | null;
 }
+
+/** Content the overlay sources other than polls show. Every field is already public on the streamer page. */
+export interface OverlayData {
+  topics: {
+    id: string;
+    title: string;
+    category: string;
+    author: string;
+    avatar: string | null;
+    avatarPreset: number | null;
+    likes: number;
+  }[];
+  cards: { id: string; icon: CardIcon | null; title: string; body: string; label: string | null; target: string | null }[];
+  /** The next scheduled stream, or null. */
+  next: { title: string; startsAt: number } | null;
+  /** The first support link, or null. */
+  support: { kind: SupportLinkKind; label: string | null; url: string } | null;
+}
