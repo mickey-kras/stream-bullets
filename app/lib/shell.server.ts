@@ -1,23 +1,29 @@
 import type { AppContext } from "../env";
 import { isAdmin } from "../server/access.server";
-import { configuredProviders, getViewer } from "../server/auth.server";
+import { configuredProviders, getViewerSession } from "../server/auth.server";
 import { getOwnStreamer } from "../server/data.server";
 import type { Viewer } from "../types";
 import type { ShellData } from "./shell";
 
-/**
- * The signed-in viewer, looked up once per request. The root loader (shell) and the route loader run in the same
- * request with the same AppContext, so they share one session lookup and one Set-Cookie.
- */
-const viewers = new WeakMap<AppContext, Promise<Viewer | null>>();
+export type ViewerSession = Awaited<ReturnType<typeof getViewerSession>>;
 
-export function requestViewer(request: Request, app: AppContext): Promise<Viewer | null> {
-  let viewer: Promise<Viewer | null> | undefined = viewers.get(app);
-  if (!viewer) {
-    viewer = getViewer(request, app);
-    viewers.set(app, viewer);
+/**
+ * The signed-in viewer and their session, looked up once per request. The root loader (shell) and the route loader
+ * run in the same request with the same AppContext, so they share one session lookup and one Set-Cookie.
+ */
+const sessions = new WeakMap<AppContext, Promise<ViewerSession>>();
+
+export function requestSession(request: Request, app: AppContext): Promise<ViewerSession> {
+  let session: Promise<ViewerSession> | undefined = sessions.get(app);
+  if (!session) {
+    session = getViewerSession(request, app);
+    sessions.set(app, session);
   }
-  return viewer;
+  return session;
+}
+
+export async function requestViewer(request: Request, app: AppContext): Promise<Viewer | null> {
+  return (await requestSession(request, app))?.viewer ?? null;
 }
 
 /** What every header and the account menu need: who is signed in, their role and their own page. */
