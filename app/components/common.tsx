@@ -35,16 +35,19 @@ export function Modal({
   );
 }
 
+/** An empty list or page. `action` (a button or link) sits inside the panel, under the text. */
 export function EmptyState({
   title,
   icon,
   children,
-}: Readonly<{ title: string; icon?: IconName; children: ReactNode }>): ReactNode {
+  action,
+}: Readonly<{ title: string; icon?: IconName; children: ReactNode; action?: ReactNode }>): ReactNode {
   return (
-    <div className="empty-state">
+    <div className={action ? "empty-state has-cta" : "empty-state"}>
       {icon && <Icon name={icon} size={40} />}
       <h2>{title}</h2>
       <p>{children}</p>
+      {action && <p className="empty-cta">{action}</p>}
     </div>
   );
 }
