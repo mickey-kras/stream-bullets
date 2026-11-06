@@ -94,6 +94,16 @@ export async function listEvents(
   return results.map((row: EventRow): StreamEvent => eventValue(row, topics.get(row.id) ?? [], now));
 }
 
+/** Topics the owner can link to a stream: the 30 newest. */
+export async function listTopicChoices(env: AppEnv, streamerId: string): Promise<EventTopic[]> {
+  const { results } = await env.DB.prepare(
+    "SELECT id, title, category FROM entries WHERE streamer_id=? AND kind='topic' ORDER BY created_at DESC, id DESC LIMIT 30",
+  )
+    .bind(streamerId)
+    .all<EventTopic>();
+  return results;
+}
+
 /** The range the streamer page loads first: 90 days back (past streams) and the 12 weeks a series covers. */
 export function defaultRange(now: number): { from: number; to: number } {
   return { from: now - 90 * 86_400_000, to: now + SERIES_HORIZON_MS + 7 * 86_400_000 };

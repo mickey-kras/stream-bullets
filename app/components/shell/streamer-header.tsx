@@ -36,16 +36,31 @@ export function StreamerHeader({
   current,
   action,
   tabHref = (view: StreamerView): string => `?view=${view}`,
+  views = streamerViews,
+  labels = {},
+  icons = {},
+  brand,
+  badge,
+  className = "",
 }: Readonly<{
   streamer: { handle: string; name: string; avatar: string | null };
   current: StreamerView | null;
   action?: ReactNode;
   tabHref?: (view: StreamerView) => string;
+  /** The tabs to show; the official Ideas page shows Ideas, About and Community only. */
+  views?: readonly StreamerView[];
+  labels?: Partial<Record<StreamerView, string>>;
+  icons?: Partial<Record<StreamerView, IconName>>;
+  /** Replaces the picture and name in the home link (the Ideas page's logo and subtitle). */
+  brand?: ReactNode;
+  /** After the home link, for example the LIVE pill. */
+  badge?: ReactNode;
+  className?: string;
 }>): ReactNode {
   const header = useRef<HTMLElement | null>(null);
   useFitHeader(header);
   return (
-    <header className="site-header streamer-header" ref={header}>
+    <header className={`site-header streamer-header ${className}`.trim()} ref={header}>
       <div className="brand streamer-brand">
         <Link className="sb-mark" to={paths.home} aria-label={t("nav.home")}>
           <img src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
@@ -56,18 +71,23 @@ export function StreamerHeader({
           to={paths.streamer(streamer.handle)}
           aria-label={t("streamer.home", { name: streamer.name })}
         >
-          <Avatar className="brand-avatar" name={streamer.name} url={streamer.avatar} />
-          <span className="streamer-name" aria-hidden="true">
-            {streamer.name}
-          </span>
+          {brand ?? (
+            <>
+              <Avatar className="brand-avatar" name={streamer.name} url={streamer.avatar} />
+              <span className="streamer-name" aria-hidden="true">
+                {streamer.name}
+              </span>
+            </>
+          )}
         </Link>
+        {badge}
       </div>
       <nav aria-label={t("nav.main")}>
-        {streamerViews.map((view: StreamerView) => (
+        {views.map((view: StreamerView) => (
           <Link key={view} className="nav-tab" to={tabHref(view)} aria-current={current === view ? "page" : undefined}>
-            <Icon name={viewIcon[view]} size={20} />
-            <span className="nav-label">{t(viewLabel[view])}</span>
-            <span className="compact-nav-label">{t(viewLabel[view])}</span>
+            <Icon name={icons[view] ?? viewIcon[view]} size={20} />
+            <span className="nav-label">{labels[view] ?? t(viewLabel[view])}</span>
+            <span className="compact-nav-label">{labels[view] ?? t(viewLabel[view])}</span>
           </Link>
         ))}
       </nav>
