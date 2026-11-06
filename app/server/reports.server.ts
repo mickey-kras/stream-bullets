@@ -69,7 +69,7 @@ async function reportTarget(env: AppEnv, kind: ReportTargetKind, id: string): Pr
             (SELECT group_concat(value, ' · ') FROM json_each(options)) ELSE '' END AS snapshot
         FROM entries WHERE id=?`)
       : env.DB.prepare(`SELECT e.streamer_id, c.author_id, c.text AS snapshot
-        FROM entry_comments c JOIN entries e ON e.id=c.entry_id WHERE c.id=?`);
+        FROM entry_comments c JOIN entries e ON e.id=c.entry_id WHERE c.id=? AND c.removed_at IS NULL`);
   const row = await statement.bind(id).first<TargetRow>();
   if (!row) throw new HttpError(404, kind === "entry" ? "Topic or poll not found." : "Comment not found.");
   return row;
@@ -189,7 +189,7 @@ async function removeTarget(env: AppEnv, adminId: string, report: ReportRow): Pr
 
 /**
  * Records an administrator decision. Removal deletes the content with the usual deletion rules
- * (replies to a removed comment stay as top-level comments). Either decision closes every open
+ * (a removed comment with replies stays as a "Comment removed" placeholder). Either decision closes every open
  * report about the same content.
  */
 export async function resolveReport(env: AppEnv, adminId: string, input: ReportResolution): Promise<ReportResult> {

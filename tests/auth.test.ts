@@ -206,6 +206,9 @@ describe("server identity", () => {
       id: "viewer-public",
       name: "Viewer",
       avatar: null,
+      avatarPreset: null,
+      locale: null,
+      displayPrefs: null,
     });
   });
 
@@ -244,6 +247,9 @@ describe("server identity", () => {
       id: "viewer-refresh",
       name: "Viewer",
       avatar: null,
+      avatarPreset: null,
+      locale: null,
+      displayPrefs: null,
     });
     const cookies: string[] = ctx.responseHeaders.getSetCookie();
     expect(
@@ -377,6 +383,9 @@ describe("OAuth boundary", () => {
         id: record?.user_id,
         name: "Google viewer",
         avatar: null,
+        avatarPreset: null,
+        locale: null,
+        displayPrefs: null,
       });
     } finally {
       restore();

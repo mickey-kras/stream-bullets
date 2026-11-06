@@ -1,18 +1,33 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
-import type { ApplicationReviewItem } from "../app/types";
+import type { ApplicationReviewItem, StreamerStatus } from "../app/types";
 import {
   adminEmails,
+  assertStreamerWritable,
   canCreateStreamer,
+  canViewStreamer,
   getApplication,
   getStreamerAccess,
   isAdmin,
+  isStreamerListed,
+  isStreamerVisible,
+  isStreamerWritable,
   listApplications,
   requireAdmin,
   reviewApplication,
   submitApplication,
 } from "../app/server/access.server";
-import { getOwnStreamer, saveStreamer } from "../app/server/data.server";
+import {
+  getOverlaySnapshot,
+  getOwnStreamer,
+  getVisibleEntry,
+  getVisibleStreamer,
+  listStreamers,
+  mutateComment,
+  mutateEntry,
+  saveStreamer,
+  updateStreamer,
+} from "../app/server/data.server";
 import type { ApplicationInput } from "../app/server/validation";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
@@ -376,5 +391,135 @@ describe("database constraints", (): void => {
     expect(row).toEqual({ status: "approved", reviewed_by: null });
     await env.DB.prepare("DELETE FROM user WHERE id='applicant'").run();
     expect(await getApplication(env, "applicant")).toBeNull();
+  });
+});
+
+describe("page moderation status", (): void => {
+  const pageId = "00000000-0000-4000-8000-0000000000aa";
+  const topicId = "00000000-0000-4000-8000-0000000000bb";
+  const commentId = "00000000-0000-4000-8000-0000000000cc";
+  const anonymous = { owner: false, admin: false };
+
+  /** The applicant owns a page with one topic and one comment by the viewer. */
+  async function seedPage(status: StreamerStatus): Promise<void> {
+    await env.DB.batch([
+      env.DB.prepare(
+        "INSERT INTO streamers (id,owner_id,handle,name,status,status_reason) VALUES (?,'applicant','mod_page','Moderated',?,?)",
+      ).bind(pageId, status, status === "active" ? null : "Repeated spam"),
+      env.DB.prepare(
+        "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,created_at) VALUES (?,?,'viewer','topic','Topic','Body','Gaming',1)",
+      ).bind(topicId, pageId),
+      env.DB.prepare(
+        "INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'viewer','Hello',1)",
+      ).bind(commentId, topicId),
+    ]);
+  }
+
+  it("decides writes, visibility and listing from the status alone", (): void => {
+    expect(isStreamerWritable("active")).toBe(true);
+    expect(isStreamerWritable("frozen")).toBe(false);
+    expect(isStreamerWritable("suspended")).toBe(false);
+    for (const status of ["active", "frozen"] as const) {
+      expect(isStreamerVisible(status, anonymous)).toBe(true);
+      expect(isStreamerListed(status)).toBe(true);
+    }
+    expect(isStreamerVisible("suspended", anonymous)).toBe(false);
+    expect(isStreamerVisible("suspended", { owner: true, admin: false })).toBe(true);
+    expect(isStreamerVisible("suspended", { owner: false, admin: true })).toBe(true);
+    expect(isStreamerListed("suspended")).toBe(false);
+  });
+
+  it("active: public and writable for everyone signed in", async (): Promise<void> => {
+    await seedPage("active");
+    for (const viewer of [null, "viewer", "applicant", "admin"]) {
+      await expect(assertStreamerWritable(env, pageId, viewer)).resolves.toMatchObject({ status: "active" });
+      expect(await canViewStreamer(env, { ownerId: "applicant", status: "active" }, viewer)).toBe(true);
+    }
+    expect(await getVisibleStreamer(env, "mod_page", null)).toMatchObject({
+      status: "active",
+      statusReason: null,
+      handleChangedAt: null,
+    });
+    await expect(
+      mutateEntry(env, "viewer", pageId, { action: "react", id: topicId, value: 1 }),
+    ).resolves.toEqual({ id: topicId });
+    expect((await listStreamers(env)).streamers.map((page) => page.handle)).toEqual(["mod_page"]);
+  });
+
+  it("frozen: public and read-only, the owner included; admins may still remove content", async (): Promise<void> => {
+    await seedPage("frozen");
+    for (const viewer of [null, "viewer", "applicant", "admin"]) {
+      await expect(assertStreamerWritable(env, pageId, viewer)).rejects.toMatchObject({ status: 423 });
+    }
+    await expect(assertStreamerWritable(env, pageId, "admin", { moderation: true })).resolves.toMatchObject({
+      status: "frozen",
+    });
+    await expect(assertStreamerWritable(env, pageId, "viewer", { moderation: true })).rejects.toMatchObject({
+      status: 423,
+    });
+    // Visible to everyone; only the owner and admins see the reason.
+    expect(await getVisibleStreamer(env, "mod_page", null)).toMatchObject({ status: "frozen", statusReason: null });
+    expect(await getVisibleStreamer(env, "mod_page", "applicant")).toMatchObject({ statusReason: "Repeated spam" });
+    expect(await getVisibleStreamer(env, "mod_page", "admin")).toMatchObject({ statusReason: "Repeated spam" });
+    expect(await getVisibleEntry(env, topicId, null)).toMatchObject({ id: topicId });
+    expect((await listStreamers(env)).streamers.map((page) => page.handle)).toEqual(["mod_page"]);
+    // Every kind of write is refused.
+    for (const [user, action] of [
+      ["viewer", { action: "react", id: topicId, value: 1 }],
+      ["viewer", { action: "comment", id: topicId, text: "Hi" }],
+      ["applicant", { action: "create", kind: "choice", title: "Poll", options: ["A", "B"] }],
+      ["viewer", { action: "delete", id: topicId }],
+    ] as const) {
+      await expect(mutateEntry(env, user, pageId, action)).rejects.toMatchObject({ status: 423 });
+    }
+    await expect(mutateComment(env, "viewer", { action: "like", id: commentId, liked: true })).rejects.toMatchObject({
+      status: 423,
+    });
+    await expect(updateStreamer(env, "applicant", { about: "New" })).rejects.toMatchObject({ status: 423 });
+    await expect(
+      saveStreamer(env, "applicant", { handle: "mod_page", name: "Moderated", about: "Changed" }),
+    ).rejects.toMatchObject({ status: 423 });
+    // An admin can still remove the comment and the topic.
+    await mutateComment(env, "admin", { action: "delete", id: commentId });
+    await mutateEntry(env, "admin", pageId, { action: "delete", id: topicId });
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM entries").first("n")).toBe(0);
+  });
+
+  it("suspended: hidden from everyone but the owner and admins, and read-only for all", async (): Promise<void> => {
+    await seedPage("suspended");
+    await expect(assertStreamerWritable(env, pageId, null)).rejects.toMatchObject({ status: 404 });
+    await expect(assertStreamerWritable(env, pageId, "viewer")).rejects.toMatchObject({ status: 404 });
+    await expect(assertStreamerWritable(env, pageId, "applicant")).rejects.toMatchObject({ status: 423 });
+    await expect(assertStreamerWritable(env, pageId, "admin")).rejects.toMatchObject({ status: 423 });
+    await expect(assertStreamerWritable(env, pageId, "admin", { moderation: true })).resolves.toBeDefined();
+    expect(await canViewStreamer(env, { ownerId: "applicant", status: "suspended" }, null)).toBe(false);
+    expect(await canViewStreamer(env, { ownerId: "applicant", status: "suspended" }, "viewer")).toBe(false);
+    expect(await canViewStreamer(env, { ownerId: "applicant", status: "suspended" }, "applicant")).toBe(true);
+    expect(await canViewStreamer(env, { ownerId: "applicant", status: "suspended" }, "admin")).toBe(true);
+    expect(await getVisibleStreamer(env, "mod_page", null)).toBeNull();
+    expect(await getVisibleStreamer(env, "mod_page", "viewer")).toBeNull();
+    expect(await getVisibleStreamer(env, "mod_page", "applicant")).toMatchObject({ statusReason: "Repeated spam" });
+    expect(await getVisibleStreamer(env, "mod_page", "admin")).toMatchObject({ status: "suspended" });
+    expect(await getOwnStreamer(env, "applicant")).toMatchObject({ status: "suspended", statusReason: "Repeated spam" });
+    expect(await getVisibleEntry(env, topicId, "viewer")).toBeNull();
+    expect(await getVisibleEntry(env, topicId, "applicant")).toMatchObject({ id: topicId });
+    // Dropped from the directory, empty in the overlay.
+    expect((await listStreamers(env)).streamers).toEqual([]);
+    expect((await getOverlaySnapshot(env, pageId, null)).polls).toEqual([]);
+    await expect(
+      mutateEntry(env, "viewer", pageId, { action: "comment", id: topicId, text: "Hi" }),
+    ).rejects.toMatchObject({ status: 404 });
+    await expect(mutateEntry(env, "applicant", pageId, { action: "delete", id: topicId })).rejects.toMatchObject({
+      status: 423,
+    });
+  });
+
+  it("treats a missing page as not found", async (): Promise<void> => {
+    await expect(assertStreamerWritable(env, pageId, "admin", { moderation: true })).rejects.toMatchObject({
+      status: 404,
+    });
+    expect(await getVisibleStreamer(env, "no_such_page", "admin")).toBeNull();
+    expect(await getVisibleStreamer(env, "Bad Handle", "admin")).toBeNull();
+    expect(await getVisibleEntry(env, topicId, "admin")).toBeNull();
   });
 });

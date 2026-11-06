@@ -3,9 +3,10 @@ import { APIError, betterAuth, type BetterAuthOptions, type User } from "better-
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../../db/auth-schema";
 import type { AppContext, AppEnv } from "../env";
-import type { Viewer } from "../types";
+import { LOCALES } from "../../db/enums";
+import type { Locale, Viewer } from "../types";
 import { getOrigin, HttpError } from "./http.server";
-import { displayNameSchema } from "./validation";
+import { displayNameSchema, readDisplayPrefs } from "./validation";
 
 type Provider = "google" | "twitch";
 
@@ -36,6 +37,15 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: [origin],
     database: drizzleAdapter(drizzle(env.DB), { provider: "sqlite", schema, transaction: false }),
+    user: {
+      // Read with the session, never accepted from sign-up or Better Auth's own endpoints (input: false).
+      // Our endpoints write them: PATCH /api/profile, /api/me/locale and /api/me/preferences.
+      additionalFields: {
+        avatarPreset: { type: "number", required: false, input: false },
+        locale: { type: "string", required: false, input: false },
+        displayPrefs: { type: "string", required: false, input: false },
+      },
+    },
     databaseHooks: {
       user: {
         create: {
@@ -101,10 +111,20 @@ export async function getViewer(request: Request, context: AppContext): Promise<
     context.responseHeaders.append("Set-Cookie", cookie);
   }
   if (!response) return null;
-  const avatar: string = `/images/avatar/${encodeURIComponent(response.user.id)}`;
+  return viewerValue(response.user as User & Record<string, unknown>);
+}
+
+/** Shapes the signed-in account for the client. */
+export function viewerValue(account: User & Record<string, unknown>): Viewer {
+  const avatar: string = `/images/avatar/${encodeURIComponent(account.id)}`;
+  const preset = account.avatarPreset;
+  const locale = account.locale;
   return {
-    id: response.user.id,
-    name: response.user.name,
-    avatar: response.user.image === avatar ? avatar : null,
+    id: account.id,
+    name: account.name,
+    avatar: account.image === avatar ? avatar : null,
+    avatarPreset: typeof preset === "number" && Number.isInteger(preset) && preset >= 0 && preset <= 17 ? preset : null,
+    locale: typeof locale === "string" && (LOCALES as readonly string[]).includes(locale) ? (locale as Locale) : null,
+    displayPrefs: readDisplayPrefs(account.displayPrefs),
   };
 }

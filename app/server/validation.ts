@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AVATAR_PRESET_COUNT, LOCALES } from "../../db/enums";
 
 const id = z.string().uuid();
 const line = (max: number): z.ZodString =>
@@ -85,6 +86,20 @@ export const commentQuerySchema = z
   .object({
     sort: z.enum(["newest", "top"]).default("newest"),
     cursor: z.string().max(1024).nullable().default(null),
+    /** `flat` (default) lists every comment; `thread` pages top-level comments with their replies. */
+    view: z.enum(["flat", "thread"]).default("flat"),
+  })
+  .strict();
+
+/** `GET /api/streamers`: official pages first, then by handle. `query` matches the name or handle. */
+export const directoryQuerySchema = z
+  .object({
+    cursor: z
+      .string()
+      .regex(/^(?:[01]\.)?[a-z0-9_]{3,30}$/u)
+      .nullable()
+      .default(null),
+    query: z.string().trim().max(60).default(""),
   })
   .strict();
 
@@ -166,7 +181,78 @@ export type StreamerInput = z.infer<typeof streamerSchema>;
 export type EntryAction = z.infer<typeof entryActionSchema>;
 export type CommentAction = z.infer<typeof commentActionSchema>;
 export type EntryQuery = z.infer<typeof entryQuerySchema>;
-export type CommentQuery = z.infer<typeof commentQuerySchema>;
+export type CommentQuery = z.input<typeof commentQuerySchema>;
+export type DirectoryQuery = z.input<typeof directoryQuerySchema>;
+
+export const handleSchema = z.string().regex(/^[a-z0-9_]{3,30}$/u, "Use 3 to 30 lowercase letters, numbers or underscores.");
+
+/** `PATCH /api/profile`: the account's display name and preset avatar (null clears the preset). */
+export const profileSchema = z
+  .object({
+    name: displayNameSchema.optional(),
+    avatarPreset: z
+      .number()
+      .int()
+      .min(0)
+      .max(AVATAR_PRESET_COUNT - 1)
+      .nullable()
+      .optional(),
+  })
+  .strict()
+  .refine((value): boolean => value.name !== undefined || value.avatarPreset !== undefined, "Nothing to save.");
+
+/** `PATCH /api/me/locale`. Null forgets the saved language. */
+export const localeSchema = z.object({ locale: z.enum(LOCALES).nullable() }).strict();
+
+/** `PATCH /api/me/preferences`: the whole preferences object, replacing what was saved. */
+export const displayPrefsSchema = z
+  .object({
+    cvd: z.enum(["default", "pd", "tri"]),
+    contrast: z.enum(["default", "high"]),
+    motion: z.enum(["system", "reduce", "full"]),
+    text: z.enum(["100", "115", "130"]),
+    underline: z.boolean(),
+    font: z.enum(["default", "readable"]),
+    mashAssist: z.enum(["off", "hold", "toggle"]),
+    srInterval: z.enum(["2", "5", "10", "off"]),
+    shortcuts: z.boolean(),
+  })
+  .partial()
+  .strict();
+
+/** Reads saved preferences. Keys or values a later release no longer knows are dropped one by one. */
+export function readDisplayPrefs(value: unknown): z.infer<typeof displayPrefsSchema> | null {
+  if (typeof value !== "string") return null;
+  let saved: unknown;
+  try {
+    saved = JSON.parse(value);
+  } catch {
+    return null;
+  }
+  if (typeof saved !== "object" || saved === null || Array.isArray(saved)) return null;
+  const shape = displayPrefsSchema.shape;
+  const result: Record<string, unknown> = {};
+  for (const [key, field] of Object.entries(saved)) {
+    const schema = shape[key as keyof typeof shape];
+    const parsed = schema?.safeParse(field);
+    if (parsed?.success && parsed.data !== undefined) result[key] = parsed.data;
+  }
+  return result as z.infer<typeof displayPrefsSchema>;
+}
+
+/** `PATCH /api/streamer`: edit your page. `logoMode: "profile"` drops the uploaded logo. */
+export const streamerEditSchema = z
+  .object({
+    name: displayNameSchema.optional(),
+    about: z.string().trim().max(2000).optional(),
+    handle: handleSchema.optional(),
+    logoMode: z.enum(["profile", "logo"]).optional(),
+  })
+  .strict()
+  .refine((value): boolean => Object.values(value).some((field) => field !== undefined), "Nothing to save.");
+
+export type ProfileInput = z.infer<typeof profileSchema>;
+export type StreamerEdit = z.infer<typeof streamerEditSchema>;
 
 export const accountDeletionSchema = z
   .object({ confirm: z.literal("DELETE", { error: "Type DELETE to confirm." }) })

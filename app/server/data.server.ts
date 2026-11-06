@@ -1,4 +1,4 @@
-import { eq, gt } from "drizzle-orm";
+import { and, asc, desc, eq, gt, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
 import { streamers, user } from "../../db/schema";
@@ -6,24 +6,50 @@ import type { AppEnv } from "../env";
 import type {
   BoardSnapshot,
   Comment,
+  CommentThread,
   DiscussionSnapshot,
+  DisplayPrefs,
   Entry,
   EntryKind,
+  EntryStatus,
   LiveSnapshot,
+  Locale,
   Reaction,
   Streamer,
   StreamerDirectory,
+  StreamerStatus,
+  ThreadSnapshot,
 } from "../types";
-import { canCreateStreamer, isAdmin } from "./access.server";
+import {
+  assertStreamerWritable,
+  canCreateStreamer,
+  canViewStreamer,
+  isAdmin,
+  isStreamerVisible,
+  streamerRole,
+} from "./access.server";
 import { HttpError } from "./http.server";
 import {
   commentActionSchema,
   commentQuerySchema,
+  directoryQuerySchema,
+  displayPrefsSchema,
   entryActionSchema,
   entryQuerySchema,
+  localeSchema,
+  profileSchema,
+  streamerEditSchema,
   streamerSchema,
 } from "./validation";
-import type { CommentQuery, EntryAction, EntryQuery, StreamerInput } from "./validation";
+import type {
+  CommentQuery,
+  DirectoryQuery,
+  EntryAction,
+  EntryQuery,
+  ProfileInput,
+  StreamerEdit,
+  StreamerInput,
+} from "./validation";
 
 const PAGE_SIZE = 50;
 const COMMENT_PAGE_SIZE = 100;
@@ -62,6 +88,8 @@ interface EntryRow {
   reaction: Reaction;
   my_vote: number | null;
   score: number;
+  status: EntryStatus | null;
+  status_reason: string | null;
 }
 interface CommentRow {
   id: string;
@@ -70,6 +98,7 @@ interface CommentRow {
   text: string;
   created_at: number;
   parent_id: string | null;
+  removed_at: number | null;
   author: string;
   avatar: string | null;
   likes: number;
@@ -119,7 +148,17 @@ function encodeCursor(cursor: Cursor): string {
     .replaceAll("=", "");
 }
 
-function streamerValue(row: typeof streamers.$inferSelect): Streamer {
+const HANDLE_CHANGE_INTERVAL = 30 * 86_400_000;
+
+function ownedImage(kind: "background" | "logo", ownerId: string, value: string | null): string | null {
+  return value === `/images/${kind}/${encodeURIComponent(ownerId)}` ? value : null;
+}
+
+/**
+ * Shapes a page for the API. `privileged` (the owner, or an admin on a moderated page) adds the
+ * moderation reason and the last handle change.
+ */
+function streamerValue(row: typeof streamers.$inferSelect, privileged = false): Streamer {
   return {
     id: row.id,
     ownerId: row.ownerId,
@@ -127,34 +166,91 @@ function streamerValue(row: typeof streamers.$inferSelect): Streamer {
     name: row.name,
     about: row.about,
     avatar: publicAvatar(row.ownerId, row.avatar),
-    background: row.background === `/images/background/${encodeURIComponent(row.ownerId)}` ? row.background : null,
+    background: ownedImage("background", row.ownerId, row.background),
+    logo: ownedImage("logo", row.ownerId, row.logo),
+    isOfficial: row.isOfficial,
+    status: row.status,
+    statusReason: privileged ? row.statusReason : null,
+    handleChangedAt: privileged ? row.handleChangedAt : null,
   };
 }
 
-export async function listStreamers(env: AppEnv, cursor: string | null = null): Promise<StreamerDirectory> {
-  const handle = cursor === null ? null : parsed(streamerSchema.shape.handle, cursor);
+function directoryCursor(value: string | null): { official: boolean; handle: string } | null {
+  if (value === null) return null;
+  // Plain handles are cursors from before official pages existed; they always sit after official pages.
+  const match = /^(?:([01])\.)?([a-z0-9_]{3,30})$/u.exec(value);
+  if (!match) throw new HttpError(400, "Invalid page cursor.");
+  return { official: match[1] === "1", handle: match[2] };
+}
+
+/**
+ * The public directory: official pages first, then by handle. Suspended pages are left out.
+ * `query` matches the page name or handle. The cursor is the last handle, prefixed `1.` while the
+ * page is still in the official group.
+ */
+export async function listStreamers(
+  env: AppEnv,
+  cursor: string | null = null,
+  query: DirectoryQuery["query"] = "",
+): Promise<StreamerDirectory> {
+  const input = parsed(directoryQuerySchema, { cursor, query });
+  const after = directoryCursor(input.cursor);
+  const pattern = `%${input.query.replaceAll(/[\\%_]/gu, String.raw`\$&`)}%`;
   const rows = await drizzle(env.DB)
     .select()
     .from(streamers)
-    .where(handle === null ? undefined : gt(streamers.handle, handle))
-    .orderBy(streamers.handle)
+    .where(
+      and(
+        ne(streamers.status, "suspended"),
+        input.query
+          ? sql`(${streamers.name} LIKE ${pattern} ESCAPE '\\' OR ${streamers.handle} LIKE ${pattern} ESCAPE '\\')`
+          : undefined,
+        after === null
+          ? undefined
+          : after.official
+            ? or(eq(streamers.isOfficial, false), and(eq(streamers.isOfficial, true), gt(streamers.handle, after.handle)))
+            : and(eq(streamers.isOfficial, false), gt(streamers.handle, after.handle)),
+      ),
+    )
+    .orderBy(desc(streamers.isOfficial), asc(streamers.handle))
     .limit(PAGE_SIZE + 1);
   const page = rows.slice(0, PAGE_SIZE);
+  const last = page.at(-1);
   return {
-    streamers: page.map(streamerValue),
-    nextCursor: rows.length > PAGE_SIZE ? (page.at(-1)?.handle ?? null) : null,
+    streamers: page.map((row) => streamerValue(row)),
+    nextCursor: rows.length > PAGE_SIZE && last ? `${last.isOfficial ? "1." : ""}${last.handle}` : null,
   };
 }
 
-export async function getStreamer(env: AppEnv, handle: string): Promise<Streamer | null> {
+async function streamerRow(env: AppEnv, handle: string): Promise<typeof streamers.$inferSelect | null> {
   if (!/^[a-z0-9_]{3,30}$/u.test(handle)) return null;
   const [row] = await drizzle(env.DB).select().from(streamers).where(eq(streamers.handle, handle)).limit(1);
+  return row ?? null;
+}
+
+/**
+ * Any page by handle, whatever its status. Use it only where status is enforced separately
+ * (writes go through assertStreamerWritable); everything a viewer reads goes through getVisibleStreamer.
+ */
+export async function getStreamer(env: AppEnv, handle: string): Promise<Streamer | null> {
+  const row = await streamerRow(env, handle);
   return row ? streamerValue(row) : null;
+}
+
+/** A page as the viewer may see it: null when it does not exist or is suspended and the viewer is not its owner or an admin. */
+export async function getVisibleStreamer(env: AppEnv, handle: string, viewerId: string | null): Promise<Streamer | null> {
+  const row = await streamerRow(env, handle);
+  if (!row) return null;
+  const owner = viewerId !== null && row.ownerId === viewerId;
+  if (row.status === "active") return streamerValue(row, owner);
+  const role = await streamerRole(env, row, viewerId);
+  if (!isStreamerVisible(row.status, role)) return null;
+  return streamerValue(row, role.owner || role.admin);
 }
 
 export async function getOwnStreamer(env: AppEnv, userId: string): Promise<Streamer | null> {
   const [row] = await drizzle(env.DB).select().from(streamers).where(eq(streamers.ownerId, userId)).limit(1);
-  return row ? streamerValue(row) : null;
+  return row ? streamerValue(row, true) : null;
 }
 
 export async function consumeMutationQuota(env: AppEnv, userId: string, content = false): Promise<void> {
@@ -173,42 +269,136 @@ export async function consumeMutationQuota(env: AppEnv, userId: string, content 
   if (!result) throw new HttpError(429, "Too many requests. Wait one minute and try again.");
 }
 
+function handleConflict(error: unknown): never {
+  let message = "";
+  if (error instanceof Error) {
+    const causeMessage = error.cause instanceof Error ? error.cause.message : "";
+    message = `${error.message} ${causeMessage}`;
+  }
+  if (message.includes("UNIQUE constraint failed: streamers.handle"))
+    throw new HttpError(409, "This handle is already in use.");
+  throw error;
+}
+
+/**
+ * A handle can change once every 30 days (R11). Old links and the overlay URL stop working; there
+ * are no redirects. Returns the new `handle_changed_at`, or the current one when the handle is unchanged.
+ */
+function handleChange(current: typeof streamers.$inferSelect, handle: string | undefined, now: number): number | null {
+  if (handle === undefined || handle === current.handle) return current.handleChangedAt;
+  if (current.handleChangedAt !== null && now - current.handleChangedAt < HANDLE_CHANGE_INTERVAL) {
+    const next = new Date(current.handleChangedAt + HANDLE_CHANGE_INTERVAL).toISOString().slice(0, 10);
+    throw new HttpError(409, `You can change your handle once every 30 days. Try again on ${next}.`);
+  }
+  return now;
+}
+
+async function ownStreamerRow(env: AppEnv, userId: string): Promise<typeof streamers.$inferSelect | null> {
+  const [row] = await drizzle(env.DB).select().from(streamers).where(eq(streamers.ownerId, userId)).limit(1);
+  return row ?? null;
+}
+
+/** Creates the account's page, or replaces its handle, name and about (the original settings form). */
 export async function saveStreamer(env: AppEnv, userId: string, input: StreamerInput): Promise<Streamer> {
   const value = parsed(streamerSchema, input);
   await consumeMutationQuota(env, userId);
   const [account] = await drizzle(env.DB).select({ image: user.image }).from(user).where(eq(user.id, userId)).limit(1);
   if (!account) throw new HttpError(401, "Sign in to create a streamer profile.");
-  if (!(await getOwnStreamer(env, userId)) && !(await canCreateStreamer(env, userId)))
+  const current = await ownStreamerRow(env, userId);
+  if (current) await assertStreamerWritable(env, current.id, userId);
+  else if (!(await canCreateStreamer(env, userId)))
     throw new HttpError(403, "Streamer profiles need approval. Join the streamer waitlist first.");
   const avatar = publicAvatar(userId, account.image);
+  const handleChangedAt = current ? handleChange(current, value.handle, Date.now()) : null;
   try {
     const [row] = await drizzle(env.DB)
       .insert(streamers)
       .values({ id: crypto.randomUUID(), ownerId: userId, ...value, avatar })
       .onConflictDoUpdate({
         target: streamers.ownerId,
-        set: { ...value, avatar },
+        set: { ...value, avatar, handleChangedAt },
       })
       .returning();
     if (!row) throw new Error("Streamer profile was not saved.");
-    return streamerValue(row);
+    return streamerValue(row, true);
   } catch (error: unknown) {
-    let message = "";
-    if (error instanceof Error) {
-      const causeMessage = error.cause instanceof Error ? error.cause.message : "";
-      message = `${error.message} ${causeMessage}`;
-    }
-    if (message.includes("UNIQUE constraint failed: streamers.handle"))
-      throw new HttpError(409, "This handle is already in use.");
-    throw error;
+    return handleConflict(error);
   }
+}
+
+/**
+ * `PATCH /api/streamer` ("Edit your page", item 18): changes only the fields sent.
+ * `logoMode: "profile"` drops the uploaded logo so the page shows the owner's picture again;
+ * `logoMode: "logo"` keeps the uploaded logo and needs one (upload it with `PUT /api/images/logo`).
+ */
+export async function updateStreamer(env: AppEnv, userId: string, input: StreamerEdit): Promise<Streamer> {
+  const value = parsed(streamerEditSchema, input);
+  const current = await ownStreamerRow(env, userId);
+  if (!current) throw new HttpError(404, "Create your streamer page first.");
+  await assertStreamerWritable(env, current.id, userId);
+  await consumeMutationQuota(env, userId);
+  if (value.logoMode === "logo" && !current.logo) throw new HttpError(400, "Upload a logo first.");
+  const handleChangedAt = handleChange(current, value.handle, Date.now());
+  const set: Partial<typeof streamers.$inferInsert> = { handleChangedAt };
+  if (value.name !== undefined) set.name = value.name;
+  if (value.about !== undefined) set.about = value.about;
+  if (value.handle !== undefined) set.handle = value.handle;
+  if (value.logoMode === "profile") set.logo = null;
+  let row: typeof streamers.$inferSelect | undefined;
+  try {
+    [row] = await drizzle(env.DB).update(streamers).set(set).where(eq(streamers.id, current.id)).returning();
+  } catch (error: unknown) {
+    handleConflict(error);
+  }
+  if (!row) throw new HttpError(404, "Create your streamer page first.");
+  if (value.logoMode === "profile" && current.logo) await env.IMAGES.delete(`logo/${userId}`);
+  return streamerValue(row, true);
+}
+
+/** `PATCH /api/profile`: the display name and preset avatar. A preset does not remove an uploaded picture. */
+export async function updateProfile(
+  env: AppEnv,
+  userId: string,
+  input: ProfileInput,
+): Promise<{ name: string; avatarPreset: number | null }> {
+  const value = parsed(profileSchema, input);
+  await consumeMutationQuota(env, userId);
+  const set: Partial<typeof user.$inferInsert> = { updatedAt: new Date() };
+  if (value.name !== undefined) set.name = value.name;
+  if (value.avatarPreset !== undefined) set.avatarPreset = value.avatarPreset;
+  const [row] = await drizzle(env.DB)
+    .update(user)
+    .set(set)
+    .where(eq(user.id, userId))
+    .returning({ name: user.name, avatarPreset: user.avatarPreset });
+  if (!row) throw new HttpError(401, "Sign in to continue.");
+  return row;
+}
+
+/** `PATCH /api/me/locale`. Null forgets the saved language. */
+export async function setLocale(env: AppEnv, userId: string, input: unknown): Promise<Locale | null> {
+  const { locale } = parsed(localeSchema, input);
+  await consumeMutationQuota(env, userId);
+  await drizzle(env.DB).update(user).set({ locale, updatedAt: new Date() }).where(eq(user.id, userId));
+  return locale;
+}
+
+/** `PATCH /api/me/preferences`. Replaces the saved preferences; the client debounces by one second. */
+export async function setDisplayPrefs(env: AppEnv, userId: string, input: unknown): Promise<DisplayPrefs> {
+  const preferences = parsed(displayPrefsSchema, input);
+  await consumeMutationQuota(env, userId);
+  await drizzle(env.DB)
+    .update(user)
+    .set({ displayPrefs: JSON.stringify(preferences), updatedAt: new Date() })
+    .where(eq(user.id, userId));
+  return preferences;
 }
 
 const entrySelect = `
   SELECT e.*, u.name AS author, u.image AS avatar,
     (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=1) AS likes,
     (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=-1) AS dislikes,
-    (SELECT count(*) FROM entry_comments c WHERE c.entry_id=e.id) AS comments,
+    (SELECT count(*) FROM entry_comments c WHERE c.entry_id=e.id AND c.removed_at IS NULL) AS comments,
     (SELECT json_group_array(json_object('choice',choice,'count',n)) FROM
       (SELECT choice,count(*) AS n FROM entry_votes v WHERE v.entry_id=e.id GROUP BY choice)) AS vote_counts,
     COALESCE((SELECT value FROM entry_reactions r WHERE r.entry_id=e.id AND r.user_id=?),0) AS reaction,
@@ -247,6 +437,8 @@ function entryValue(row: EntryRow): Entry {
     comments: row.comments,
     reaction: row.reaction,
     myVote: row.my_vote,
+    status: row.status ?? null,
+    statusReason: row.status_reason ?? null,
   };
 }
 
@@ -255,6 +447,17 @@ export async function getEntry(env: AppEnv, id: string, viewerId: string | null)
     .bind(viewerId ?? "", viewerId ?? "", id)
     .first<EntryRow>();
   return row ? entryValue(row) : null;
+}
+
+/** A topic or poll, or null when it does not exist or its page is suspended and hidden from the viewer. */
+export async function getVisibleEntry(env: AppEnv, id: string, viewerId: string | null): Promise<Entry | null> {
+  const entry = await getEntry(env, id, viewerId);
+  if (!entry) return null;
+  const page = await env.DB.prepare("SELECT owner_id, status FROM streamers WHERE id=?")
+    .bind(entry.streamerId)
+    .first<{ owner_id: string; status: StreamerStatus }>();
+  if (!page) return null;
+  return (await canViewStreamer(env, { ownerId: page.owner_id, status: page.status }, viewerId)) ? entry : null;
 }
 
 export async function getOverlaySnapshot(
@@ -274,14 +477,16 @@ export async function getOverlaySnapshot(
   const parameters: string[] =
     pollId === null ? ["", "", streamerId, streamerId, streamerId] : ["", "", pollId, streamerId];
   const results = await env.DB.batch([
-    env.DB.prepare("SELECT revision FROM streamers WHERE id=?").bind(streamerId),
+    env.DB.prepare("SELECT revision, status FROM streamers WHERE id=?").bind(streamerId),
     env.DB.prepare(`${entrySelect} WHERE e.id=${selection} AND e.streamer_id=? AND e.kind!='topic'`).bind(
       ...parameters,
     ),
   ]);
-  const revision = (results[0]?.results[0] as { revision: number } | undefined)?.revision;
-  if (revision === undefined) throw new HttpError(404, "Streamer not found.");
-  const rows = results[1].results as unknown as EntryRow[];
+  const page = results[0]?.results[0] as { revision: number; status: string } | undefined;
+  if (page === undefined) throw new HttpError(404, "Streamer not found.");
+  const { revision } = page;
+  // A suspended page shows nothing in the overlay.
+  const rows = page.status === "suspended" ? [] : (results[1].results as unknown as EntryRow[]);
   return {
     type: "snapshot",
     revision,
@@ -352,14 +557,66 @@ export async function listEntries(
   };
 }
 
+const commentColumns = `c.*, u.name AS author, u.image AS avatar,
+      (SELECT count(*) FROM comment_likes l WHERE l.comment_id=c.id) AS likes,
+      EXISTS(SELECT 1 FROM comment_likes l WHERE l.comment_id=c.id AND l.user_id=?) AS liked`;
+
+/** A removed comment keeps its place in the thread but shows no author, text or likes (R2). */
+function commentValue(row: CommentRow): Comment {
+  const removed = row.removed_at !== null;
+  return {
+    id: row.id,
+    entryId: row.entry_id,
+    authorId: removed ? "" : row.author_id,
+    author: removed ? "" : row.author,
+    avatar: removed ? null : publicAvatar(row.author_id, row.avatar),
+    text: removed ? "" : row.text,
+    createdAt: row.created_at,
+    parentId: row.parent_id,
+    likes: removed ? 0 : row.likes,
+    liked: !removed && row.liked === 1,
+    removed,
+  };
+}
+
+/** Every reply under the given top-level comments, any depth, oldest first within each thread. */
+async function threadReplies(
+  env: AppEnv,
+  rootIds: string[],
+  viewerId: string | null,
+): Promise<Map<string, Comment[]>> {
+  const replies = new Map<string, Comment[]>(rootIds.map((id: string): [string, Comment[]] => [id, []]));
+  if (rootIds.length === 0) return replies;
+  const { results } = await env.DB.prepare(`
+    WITH RECURSIVE thread(root, id) AS (
+      SELECT c.id, c.id FROM entry_comments c WHERE c.id IN (SELECT value FROM json_each(?))
+      UNION ALL SELECT t.root, c.id FROM entry_comments c JOIN thread t ON c.parent_id=t.id
+    )
+    SELECT t.root, ${commentColumns}
+    FROM thread t JOIN entry_comments c ON c.id=t.id JOIN user u ON u.id=c.author_id
+    WHERE t.id<>t.root ORDER BY t.root, c.created_at, c.id
+  `)
+    .bind(JSON.stringify(rootIds), viewerId ?? "")
+    .all<CommentRow & { root: string }>();
+  for (const row of results) replies.get(row.root)?.push(commentValue(row));
+  return replies;
+}
+
+/**
+ * Lists a discussion. The default `flat` view pages every comment newest or most liked first.
+ * The `thread` view pages top-level comments the same way and attaches each one's replies, oldest
+ * first (item 40). Removed comments with replies come back as placeholders in both views.
+ */
 export async function listComments(
   env: AppEnv,
   entryId: string,
   viewerId: string | null,
   input: CommentQuery,
-): Promise<DiscussionSnapshot> {
+): Promise<DiscussionSnapshot | ThreadSnapshot> {
   const query = parsed(commentQuerySchema, input);
-  const cursor = decodeCursor(query.cursor, entryId, query.sort);
+  const threaded = query.view === "thread";
+  const scope = threaded ? `${entryId}:thread` : entryId;
+  const cursor = decodeCursor(query.cursor, scope, query.sort);
   const parameters: (string | number)[] = [viewerId ?? "", entryId];
   let where = "";
   if (cursor) {
@@ -368,41 +625,28 @@ export async function listComments(
     parameters.push(cursor.time, cursor.id);
   }
   const result = await env.DB.prepare(`SELECT * FROM (
-    SELECT c.*, u.name AS author, u.image AS avatar,
-      (SELECT count(*) FROM comment_likes l WHERE l.comment_id=c.id) AS likes,
-      EXISTS(SELECT 1 FROM comment_likes l WHERE l.comment_id=c.id AND l.user_id=?) AS liked
-    FROM entry_comments c JOIN user u ON u.id=c.author_id WHERE c.entry_id=?
+    SELECT ${commentColumns}
+    FROM entry_comments c JOIN user u ON u.id=c.author_id WHERE c.entry_id=?${threaded ? " AND c.parent_id IS NULL" : ""}
   ) ${where} ORDER BY ${query.sort === "top" ? "likes DESC," : ""}created_at DESC,id DESC LIMIT ${COMMENT_PAGE_SIZE + 1}`)
     .bind(...parameters)
     .all<CommentRow>();
   const rows = result.results.slice(0, COMMENT_PAGE_SIZE);
   const last = rows.at(-1);
+  const nextCursor =
+    result.results.length > COMMENT_PAGE_SIZE && last
+      ? encodeCursor({ scope, sort: query.sort, query: "", score: last.likes, time: last.created_at, id: last.id })
+      : null;
+  if (!threaded) return { comments: rows.map(commentValue), nextCursor };
+  const replies = await threadReplies(
+    env,
+    rows.map((row: CommentRow): string => row.id),
+    viewerId,
+  );
   return {
     comments: rows.map(
-      (row: CommentRow): Comment => ({
-        id: row.id,
-        entryId: row.entry_id,
-        authorId: row.author_id,
-        author: row.author,
-        avatar: publicAvatar(row.author_id, row.avatar),
-        text: row.text,
-        createdAt: row.created_at,
-        parentId: row.parent_id,
-        likes: row.likes,
-        liked: row.liked === 1,
-      }),
+      (row: CommentRow): CommentThread => ({ ...commentValue(row), replies: replies.get(row.id) ?? [] }),
     ),
-    nextCursor:
-      result.results.length > COMMENT_PAGE_SIZE && last
-        ? encodeCursor({
-            scope: entryId,
-            sort: query.sort,
-            query: "",
-            score: last.likes,
-            time: last.created_at,
-            id: last.id,
-          })
-        : null,
+    nextCursor,
   };
 }
 
@@ -520,6 +764,7 @@ export async function mutateEntry(
   input: unknown,
 ): Promise<{ id: string }> {
   const action = parsed(entryActionSchema, input);
+  await assertStreamerWritable(env, streamerId, viewerId, { moderation: action.action === "delete" });
   await consumeMutationQuota(env, viewerId);
   if (action.action === "create" || action.action === "comment") await consumeMutationQuota(env, viewerId, true);
   if (action.action === "create") return createEntry(env, viewerId, streamerId, action);
@@ -611,10 +856,11 @@ interface CommentPermission {
   author_id: string;
   streamer_id: string;
   owner_id: string;
+  parent_id: string | null;
 }
 
 async function commentPermission(env: AppEnv, id: string): Promise<CommentPermission> {
-  const comment = await env.DB.prepare(`SELECT c.author_id,e.streamer_id,s.owner_id FROM entry_comments c
+  const comment = await env.DB.prepare(`SELECT c.author_id,c.parent_id,e.streamer_id,s.owner_id FROM entry_comments c
     JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=?`)
     .bind(id)
     .first<CommentPermission>();
@@ -622,7 +868,15 @@ async function commentPermission(env: AppEnv, id: string): Promise<CommentPermis
   return comment;
 }
 
-/** Deletes a comment and keeps its replies as top-level comments. */
+/** Text kept in a removed comment's row; the API never shows it. */
+export const REMOVED_COMMENT_TEXT = "[removed]";
+
+/**
+ * Deletes a comment (R2). A comment with replies becomes a "Comment removed" placeholder: its text
+ * is erased, its likes go, and the thread keeps its shape. A comment without replies is deleted, and
+ * a placeholder parent left with no replies is deleted with it. Account deletion still removes the
+ * account's comments outright; replies under them become top-level comments.
+ */
 async function removeComment(env: AppEnv, viewerId: string, id: string, comment: CommentPermission): Promise<void> {
   const admin = await removalByAdmin(
     env,
@@ -634,12 +888,21 @@ async function removeComment(env: AppEnv, viewerId: string, id: string, comment:
   const ownership =
     "SELECT c.id FROM entry_comments c JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=? AND (?=1 OR c.author_id=? OR s.owner_id=?)";
   const scope = [id, admin ? 1 : 0, viewerId, viewerId];
+  const hasReplies = "EXISTS(SELECT 1 FROM entry_comments r WHERE r.parent_id=entry_comments.id)";
   const result = await env.DB.batch([
-    env.DB.prepare(`UPDATE entry_comments SET parent_id=NULL WHERE parent_id IN (${ownership})`).bind(...scope),
-    env.DB.prepare(`DELETE FROM entry_comments WHERE id IN (${ownership})`).bind(...scope),
+    env.DB.prepare(
+      `UPDATE entry_comments SET removed_at=?, text=? WHERE id IN (${ownership}) AND removed_at IS NULL AND ${hasReplies}`,
+    ).bind(Date.now(), REMOVED_COMMENT_TEXT, ...scope),
+    env.DB.prepare(
+      "DELETE FROM comment_likes WHERE comment_id=? AND EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND removed_at IS NOT NULL)",
+    ).bind(id, id),
+    env.DB.prepare(`DELETE FROM entry_comments WHERE id IN (${ownership}) AND NOT ${hasReplies}`).bind(...scope),
+    env.DB.prepare(`DELETE FROM entry_comments WHERE id=? AND removed_at IS NOT NULL AND NOT ${hasReplies}`).bind(
+      comment.parent_id,
+    ),
     env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
   ]);
-  if (result[1].meta.changes === 0) throw new HttpError(404, "Comment not found.");
+  if (result[0].meta.changes === 0 && result[2].meta.changes === 0) throw new HttpError(404, "Comment not found.");
 }
 
 /** Removes a comment with the same rules as a delete action. Returns the streamer page it belonged to. */
@@ -653,10 +916,11 @@ export async function mutateComment(env: AppEnv, viewerId: string, input: unknow
   const action = parsed(commentActionSchema, input);
   await consumeMutationQuota(env, viewerId);
   const comment = await commentPermission(env, action.id);
+  await assertStreamerWritable(env, comment.streamer_id, viewerId, { moderation: action.action === "delete" });
   if (action.action === "like") {
     const statement = action.liked
       ? env.DB.prepare(
-          "INSERT INTO comment_likes (comment_id,user_id) SELECT id,? FROM entry_comments WHERE id=? ON CONFLICT(comment_id,user_id) DO NOTHING",
+          "INSERT INTO comment_likes (comment_id,user_id) SELECT id,? FROM entry_comments WHERE id=? AND removed_at IS NULL ON CONFLICT(comment_id,user_id) DO NOTHING",
         ).bind(viewerId, action.id)
       : env.DB.prepare("DELETE FROM comment_likes WHERE comment_id=? AND user_id=?").bind(action.id, viewerId);
     await applyMutation(env, comment.streamer_id, statement, 404, "Comment not found.", true);

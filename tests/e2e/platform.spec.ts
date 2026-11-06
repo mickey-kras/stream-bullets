@@ -68,7 +68,7 @@ test("public access rejects forged identities and unsafe mutations", async ({ br
   expect(unauthorized.status()).toBe(403);
   const me = await owner.request.get("/api/me");
   const identity = (await me.json()) as { viewer: Record<string, unknown> };
-  expect(Object.keys(identity.viewer).sort()).toEqual(["avatar", "id", "name"]);
+  expect(Object.keys(identity.viewer).sort()).toEqual(["avatar", "avatarPreset", "displayPrefs", "id", "locale", "name"]);
   expect(me.headers()["cache-control"]).toBe("no-store");
   expect(me.headers()["x-content-type-options"]).toBe("nosniff");
   await owner.close();
