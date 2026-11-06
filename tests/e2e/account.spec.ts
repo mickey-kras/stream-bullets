@@ -30,12 +30,12 @@ test("a member downloads their data, deletes their account, and is signed out", 
   await expect(page).toHaveURL(/\/streamers\?dialog=profile$/);
   await expect(page.getByRole("dialog", { name: "Your profile" })).toBeVisible();
   await page.goto("/streamers?dialog=data");
-  const data = page.getByRole("dialog", { name: "Your data" });
-  await expect(data).toBeVisible();
+  const dataDialog = page.getByRole("dialog", { name: "Your data" });
+  await expect(dataDialog).toBeVisible();
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
-    data.getByRole("link", { name: "Download my data" }).click(),
+    dataDialog.getByRole("link", { name: "Download my data" }).click(),
   ]);
   expect(download.suggestedFilename()).toMatch(/^streambullets-data-\d{4}-\d{2}-\d{2}\.json$/);
   const exported = await readFile(await download.path(), "utf8");
@@ -49,7 +49,7 @@ test("a member downloads their data, deletes their account, and is signed out", 
   expect(data.comments.map((comment) => comment.text)).toEqual(["Leaver comment"]);
   expect(exported).not.toContain(decodeURIComponent(leaver.cookie).split(".")[0]);
 
-  await data.getByRole("button", { name: "Delete my account" }).click();
+  await dataDialog.getByRole("button", { name: "Delete my account" }).click();
   const dialog = page.getByRole("dialog", { name: "Delete your account?" });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("button", { name: "Keep my account" })).toBeVisible();
