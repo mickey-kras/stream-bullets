@@ -54,9 +54,9 @@ pnpm dev
 
 Open `http://localhost:5173`. The checked-in D1 ID is an explicit local placeholder. Local D1, R2, and Durable Object state stays under `.wrangler/`.
 
-Add Google or Twitch credentials to `.dev.vars` to test sign-in. A provider needs both its client ID and secret. An incomplete pair fails closed. With no providers configured, public pages work but sign-in is unavailable. Do not commit `.dev.vars` or database exports.
+Add Google, TikTok, Twitch or Instagram credentials to `.dev.vars` to test sign-in. A provider needs both values of its credential pair. An incomplete pair fails closed. With no providers configured, public pages work but sign-in is unavailable. Do not commit `.dev.vars` or database exports.
 
-The production site shows no sign-in buttons until you set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, or `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`, as Worker secrets.
+The production site shows no sign-in buttons until you set at least one credential pair as Worker secrets. The sign-in dialog shows a button for each provider with a complete pair.
 
 | Setting | Purpose |
 | --- | --- |
@@ -64,15 +64,19 @@ The production site shows no sign-in buttons until you set `GOOGLE_CLIENT_ID` an
 | `BETTER_AUTH_SECRET` | Random secret of at least 32 characters. Keep it stable across deployments. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Credentials for the Google OAuth application. |
 | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | Credentials for the Twitch OAuth application. |
+| `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | Credentials for the TikTok Login Kit application. TikTok gives no email address. |
+| `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Credentials for an Instagram API with Instagram Login application. Only creator and business accounts can sign in. Meta must review the application first. Instagram gives no email address. |
 | `ADMIN_EMAILS` | Email addresses of administrators. Use commas or spaces between the addresses. Letter case is not important. |
 
-An administrator is an account with a verified email address in `ADMIN_EMAILS`. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
+An administrator is an account with a verified email address in `ADMIN_EMAILS`. TikTok and Instagram accounts get a placeholder address that is not verified, so they cannot be administrators. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
 
 For local testing, add `ADMIN_EMAILS` to `.dev.vars`. For production, store it as a Worker secret. Use `pnpm exec wrangler secret put ADMIN_EMAILS --env production` or the Cloudflare dashboard. Do not use a plain variable in the dashboard. Each deployment replaces plain variables with the `vars` in `wrangler.jsonc`.
 
 Register these exact callback URLs with each enabled provider:
 
 - `<APP_ORIGIN>/api/auth/callback/google`
+- `<APP_ORIGIN>/api/auth/callback/tiktok`
+- `<APP_ORIGIN>/api/auth/callback/instagram`
 - `<APP_ORIGIN>/api/auth/callback/twitch`
 
 Use a separate provider application for local testing where supported. Twitch accounts must have an email address. The app does not automatically link provider accounts with matching email addresses.
