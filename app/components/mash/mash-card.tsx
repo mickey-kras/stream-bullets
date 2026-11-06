@@ -264,7 +264,7 @@ function TapButton({
     plus.textContent = "+1";
     plus.setAttribute("aria-hidden", "true");
     plus.style.left = `${20 + Math.random() * 60}%`;
-    target.append(plus);
+    target.appendChild(plus);
     setTimeout(() => plus.remove(), 600);
   }
   function readScore(): void {
