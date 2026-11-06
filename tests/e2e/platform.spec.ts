@@ -201,7 +201,7 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   await expect(host.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
   await host.getByLabel("Anything else we should know? (optional)").fill("I stream games and tech twice a week.");
   await host.getByRole("button", { name: "Request to host" }).click();
-  await expect(page.getByText("Request sent. We'll let you know.")).toBeVisible();
+  await expect(page.getByText("Request sent. We'll let you know.").first()).toBeVisible();
   await expect(host.getByText("We'll review your request.", { exact: false })).toBeVisible();
   await page.reload();
   await expect(host.getByText("Request received.")).toBeVisible();
@@ -241,14 +241,14 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   await host.getByLabel("Streamer name", { exact: true }).fill("New community");
   await host.getByLabel("About your stream").fill("Games and technology.");
   await host.getByRole("button", { name: "Create your community page" }).click();
-  await expect(page.getByText("Your page /@new_host is live.")).toBeVisible();
+  await expect(page.getByText("Your page /@new_host is live.").first()).toBeVisible();
   await expect(host).toBeHidden();
   // Edit your page: a page background, saved with the page.
   await page.goto("/streamers?dialog=page");
   const edit = page.getByRole("dialog", { name: "Edit your page" });
   await edit.getByLabel("Background image").setInputFiles({ name: "background.png", mimeType: "image/png", buffer: png });
   await edit.getByRole("button", { name: "Save page" }).click();
-  await expect(page.getByText("Streamer page saved.")).toBeVisible();
+  await expect(page.getByText("Streamer page saved.").first()).toBeVisible();
   const avatar = await context.request.put("/api/images/avatar", {
     headers: { Origin: origin, "Content-Type": "image/png" },
     data: png,

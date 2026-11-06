@@ -93,7 +93,7 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
   const context = await signedIn(browser, "viewer");
   const viewer = await context.newPage();
   await viewer.goto("/streamers");
-  await expect(viewer.getByRole("main").getByRole("link", { name: "Host a community" })).toBeVisible();
+  await expect(viewer.getByRole("main").getByRole("link", { name: "Host a community", exact: true })).toBeVisible();
   const response = await viewer.request.get("/settings", { maxRedirects: 0 });
   expect(response.status()).toBe(302);
   expect(response.headers().location).toBe("/streamers?dialog=profile");

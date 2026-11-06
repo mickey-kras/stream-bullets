@@ -103,6 +103,7 @@ export default function Streamers(): ReactNode {
   const [text, setText] = useState<string>(data.query);
   const grid = useRef<HTMLDivElement | null>(null);
   const typing = useRef<number>(0);
+  const focusCard = useRef<number | null>(null);
   useRememberContentRoute("/streamers", t("nav.streamers"));
 
   // A new search (or a new intent) starts again from the first page.
@@ -117,6 +118,12 @@ export default function Streamers(): ReactNode {
     if (typeof document === "undefined" || document.activeElement?.id !== "streamer-search") setText(data.query);
   }
   useEffect(() => () => window.clearTimeout(typing.current), []);
+  useEffect(() => {
+    const index: number | null = focusCard.current;
+    if (index === null) return;
+    focusCard.current = null;
+    grid.current?.querySelectorAll<HTMLElement>(".streamer-card")[index]?.focus();
+  }, [streamers.length]);
 
   function search(value: string, replace: boolean): void {
     const params = new URLSearchParams(location.search);
@@ -137,8 +144,8 @@ export default function Streamers(): ReactNode {
       if (data.query) params.set("query", data.query);
       const page = await requestJson<StreamerDirectory>(`/api/streamers?${params.toString()}`);
       setExtra({ key, streamers: [...(more?.streamers ?? []), ...page.streamers], nextCursor: page.nextCursor });
-      // Keyboard users continue from the first new card.
-      requestAnimationFrame(() => grid.current?.querySelectorAll<HTMLElement>(".streamer-card")[shown]?.focus());
+      // Keyboard users continue from the first new card once it renders.
+      focusCard.current = shown;
     } catch (error_: unknown) {
       setError(errorMessage(error_));
     } finally {

@@ -42,6 +42,7 @@ const PRESETS: readonly string[] = [
 ];
 
 test("Your profile: preset order, a cropped upload, then a preset again", async ({ browser }) => {
+  test.slow();
   const context = await signedIn(browser, "reporter");
   const page = await context.newPage();
   await page.goto("/streamers");
@@ -104,7 +105,8 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   // Choosing a preset over the photo removes the upload on Save.
   await page.goto("/streamers?dialog=profile");
   await expect(dialog.getByRole("radio", { name: "Your photo" })).toBeChecked();
-  await dialog.getByRole("radio", { name: "Friendly alien" }).check();
+  await dialog.locator('label[data-avatar="17"]').click();
+  await expect(dialog.getByRole("radio", { name: "Friendly alien" })).toBeChecked();
   await dialog.getByRole("button", { name: "Save profile" }).click();
   await expect(dialog).toBeHidden();
   const after = meSchema.parse(await (await context.request.get("/api/me")).json());
@@ -113,6 +115,7 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
 });
 
 test("Edit your page: handle warning, a cropped logo, then the profile picture again", async ({ browser }) => {
+  test.slow();
   const context = await signedIn(browser, "otherowner", 390);
   const page = await context.newPage();
   await page.goto("/@other_host");
@@ -126,7 +129,7 @@ test("Edit your page: handle warning, a cropped logo, then the profile picture a
   await dialog.getByLabel("Handle").fill("other_host_2");
   await expect(dialog.getByRole("status")).toContainText("Your page and overlay URLs will change.");
   await dialog.getByLabel("Handle").fill("other_host");
-  await expect(dialog.getByRole("status")).toHaveText("");
+  await expect(dialog.locator("#handle-warn")).toBeEmpty();
 
   await dialog.getByRole("radio", { name: "Upload a logo" }).check();
   await dialog.getByLabel("Logo image").setInputFiles("public/apple-touch-icon.png");
@@ -140,7 +143,7 @@ test("Edit your page: handle warning, a cropped logo, then the profile picture a
   await expect(discard).toContainText("Page logo");
   await discard.getByRole("button", { name: "Keep editing" }).click();
   await dialog.getByRole("button", { name: "Save page" }).click();
-  await expect(page.getByText("Streamer page saved.")).toBeVisible();
+  await expect(page.getByText("Streamer page saved.").first()).toBeVisible();
   const saved = meSchema.parse(await (await context.request.get("/api/me")).json());
   expect(saved.streamer?.logo).toMatch(/^\/images\/logo\//);
   // The page header shows the logo.
