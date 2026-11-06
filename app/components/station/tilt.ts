@@ -49,3 +49,14 @@ export function onFirstMotion(onMotion: () => void): () => void {
   globalThis.addEventListener?.("deviceorientation", listener);
   return (): void => globalThis.removeEventListener?.("deviceorientation", listener);
 }
+
+/**
+ * Whether to offer the "Tilt to look around" pill (approved item 3, R12): only on touch-first devices
+ * (`(hover: none) and (pointer: coarse)`) whose browser needs the tap (DeviceOrientationEvent.requestPermission,
+ * iOS Safari), and not after a refusal here. Desktops and Android never see it.
+ */
+export function tiltPillWanted(): boolean {
+  const touch: boolean =
+    typeof globalThis.matchMedia === "function" && globalThis.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  return touch && tiltNeedsAsking();
+}

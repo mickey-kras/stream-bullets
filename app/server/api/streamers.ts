@@ -1,5 +1,6 @@
 import { notifyRoom } from "../live.server";
 import {
+  getOwnStreamer,
   getStreamer,
   getVisibleStreamer,
   listEntries,
@@ -38,8 +39,11 @@ export const streamerRoutes: ApiRoute[] = [
   write("PATCH", /streamer/, async ({ request, env, viewer }) =>
     json({ streamer: await updateStreamer(env, viewer.id, await readJson(request, streamerEditSchema)) }),
   ),
-  // POST /api/profile {handle, name, about} → {streamer}. Creates the page; kept for the settings page.
-  write("POST", /profile/, async ({ request, env, viewer }) =>
-    json({ streamer: await saveStreamer(env, viewer.id, await readJson(request, streamerSchema)) }),
-  ),
+  // POST /api/streamer {handle, name, about} → {streamer}: claims the handle and creates the page (approved
+  // accounts and admins). Later edits go through PATCH /api/streamer.
+  write("POST", /streamer/, async ({ request, env, viewer }) => {
+    const input = await readJson(request, streamerSchema);
+    if (await getOwnStreamer(env, viewer.id)) throw new HttpError(409, "You already have a streamer page.");
+    return json({ streamer: await saveStreamer(env, viewer.id, input) });
+  }),
 ];

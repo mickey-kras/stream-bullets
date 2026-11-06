@@ -52,6 +52,8 @@ export interface StationOptions {
   shift?: (width: number, height: number) => number;
   /** Pixels at the top of the canvas covered by page content (phones), so the model is framed below it. */
   overlap?: () => number;
+  /** A sign was clicked or tapped (0 Suggest a topic, 1 Vote in a poll, 2 Discuss the stream); its flip is done. */
+  onSign?: (index: number) => void;
 }
 
 interface Shot {
@@ -514,7 +516,7 @@ export async function createStation(
   });
   visibility.observe(wrap);
   const look = createLook(wrap, lifecycle.signal);
-  const flips = createFlips(signs, wrap, renderer.domElement, lifecycle.signal);
+  const flips = createFlips(signs, wrap, renderer.domElement, lifecycle.signal, options.onSign);
   reduced.addEventListener(
     "change",
     (): void => {

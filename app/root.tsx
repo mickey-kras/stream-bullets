@@ -12,6 +12,7 @@ import {
   type ShouldRevalidateFunctionArgs,
 } from "react-router";
 import type { ReactNode } from "react";
+import { AccountDialogs } from "./components/account/account-dialogs";
 import { BackLink } from "./components/shell/back-link";
 import { SiteFooter } from "./components/shell/footer";
 import { SiteHeader } from "./components/shell/site-header";
@@ -104,6 +105,7 @@ export default function App(): ReactNode {
       <SkipLink />
       <Outlet />
       <SiteFooter />
+      <AccountDialogs />
     </ToastProvider>
   );
 }

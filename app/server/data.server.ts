@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, ne, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, getTableColumns, gt, ne, or, sql, type SQL } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
 import { streamers, user } from "../../db/schema";
@@ -158,7 +158,17 @@ function ownedImage(kind: "background" | "logo", ownerId: string, value: string 
  * Shapes a page for the API. `privileged` (the owner, or an admin on a moderated page) adds the
  * moderation reason and the last handle change.
  */
-function streamerValue(row: typeof streamers.$inferSelect, privileged = false): Streamer {
+/** A streamers row with the owner's preset avatar, which the page logo falls back to (item 18). */
+type StreamerRow = typeof streamers.$inferSelect & { ownerAvatarPreset?: number | null };
+
+/** Every streamers column plus the owner's `avatar_preset`. */
+const streamerColumns = {
+  ...getTableColumns(streamers),
+  ownerAvatarPreset: sql<number | null>`(SELECT avatar_preset FROM user WHERE user.id = ${streamers.ownerId})`,
+};
+
+function streamerValue(row: StreamerRow, privileged = false): Streamer {
+  const preset = row.ownerAvatarPreset;
   return {
     id: row.id,
     ownerId: row.ownerId,
@@ -168,6 +178,7 @@ function streamerValue(row: typeof streamers.$inferSelect, privileged = false): 
     avatar: publicAvatar(row.ownerId, row.avatar),
     background: ownedImage("background", row.ownerId, row.background),
     logo: ownedImage("logo", row.ownerId, row.logo),
+    ownerAvatarPreset: typeof preset === "number" && preset >= 0 && preset <= 17 ? preset : null,
     isOfficial: row.isOfficial,
     status: row.status,
     statusReason: privileged ? row.statusReason : null,
@@ -183,6 +194,24 @@ function directoryCursor(value: string | null): { official: boolean; handle: str
   return { official: match[1] === "1", handle: match[2] };
 }
 
+/** Pages the public directory lists: not suspended, and matching `query` by name or handle. */
+function directoryFilter(query: string): SQL | undefined {
+  const pattern = `%${query.replaceAll(/[\\%_]/gu, String.raw`\$&`)}%`;
+  return and(
+    ne(streamers.status, "suspended"),
+    query
+      ? sql`(${streamers.name} LIKE ${pattern} ESCAPE '\\' OR ${streamers.handle} LIKE ${pattern} ESCAPE '\\')`
+      : undefined,
+  );
+}
+
+/** How many pages the directory lists for `query` ("Showing 8 of 10 pages"). */
+export async function countStreamers(env: AppEnv, query: DirectoryQuery["query"] = ""): Promise<number> {
+  const input = parsed(directoryQuerySchema, { query });
+  const [row] = await drizzle(env.DB).select({ total: count() }).from(streamers).where(directoryFilter(input.query));
+  return row?.total ?? 0;
+}
+
 /**
  * The public directory: official pages first, then by handle. Suspended pages are left out.
  * `query` matches the page name or handle. The cursor is the last handle, prefixed `1.` while the
@@ -195,16 +224,12 @@ export async function listStreamers(
 ): Promise<StreamerDirectory> {
   const input = parsed(directoryQuerySchema, { cursor, query });
   const after = directoryCursor(input.cursor);
-  const pattern = `%${input.query.replaceAll(/[\\%_]/gu, String.raw`\$&`)}%`;
   const rows = await drizzle(env.DB)
-    .select()
+    .select(streamerColumns)
     .from(streamers)
     .where(
       and(
-        ne(streamers.status, "suspended"),
-        input.query
-          ? sql`(${streamers.name} LIKE ${pattern} ESCAPE '\\' OR ${streamers.handle} LIKE ${pattern} ESCAPE '\\')`
-          : undefined,
+        directoryFilter(input.query),
         after === null
           ? undefined
           : after.official
@@ -222,9 +247,9 @@ export async function listStreamers(
   };
 }
 
-async function streamerRow(env: AppEnv, handle: string): Promise<typeof streamers.$inferSelect | null> {
+async function streamerRow(env: AppEnv, handle: string): Promise<StreamerRow | null> {
   if (!/^[a-z0-9_]{3,30}$/u.test(handle)) return null;
-  const [row] = await drizzle(env.DB).select().from(streamers).where(eq(streamers.handle, handle)).limit(1);
+  const [row] = await drizzle(env.DB).select(streamerColumns).from(streamers).where(eq(streamers.handle, handle)).limit(1);
   return row ?? null;
 }
 
@@ -249,7 +274,11 @@ export async function getVisibleStreamer(env: AppEnv, handle: string, viewerId: 
 }
 
 export async function getOwnStreamer(env: AppEnv, userId: string): Promise<Streamer | null> {
-  const [row] = await drizzle(env.DB).select().from(streamers).where(eq(streamers.ownerId, userId)).limit(1);
+  const [row] = await drizzle(env.DB)
+    .select(streamerColumns)
+    .from(streamers)
+    .where(eq(streamers.ownerId, userId))
+    .limit(1);
   return row ? streamerValue(row, true) : null;
 }
 
@@ -293,6 +322,15 @@ function handleChange(current: typeof streamers.$inferSelect, handle: string | u
   return now;
 }
 
+async function ownerAvatarPreset(env: AppEnv, userId: string): Promise<number | null> {
+  const [row] = await drizzle(env.DB)
+    .select({ preset: user.avatarPreset })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1);
+  return row?.preset ?? null;
+}
+
 async function ownStreamerRow(env: AppEnv, userId: string): Promise<typeof streamers.$inferSelect | null> {
   const [row] = await drizzle(env.DB).select().from(streamers).where(eq(streamers.ownerId, userId)).limit(1);
   return row ?? null;
@@ -320,7 +358,7 @@ export async function saveStreamer(env: AppEnv, userId: string, input: StreamerI
       })
       .returning();
     if (!row) throw new Error("Streamer profile was not saved.");
-    return streamerValue(row, true);
+    return streamerValue({ ...row, ownerAvatarPreset: await ownerAvatarPreset(env, userId) }, true);
   } catch (error: unknown) {
     return handleConflict(error);
   }
@@ -352,7 +390,7 @@ export async function updateStreamer(env: AppEnv, userId: string, input: Streame
   }
   if (!row) throw new HttpError(404, "Create your streamer page first.");
   if (value.logoMode === "profile" && current.logo) await env.IMAGES.delete(`logo/${userId}`);
-  return streamerValue(row, true);
+  return streamerValue({ ...row, ownerAvatarPreset: await ownerAvatarPreset(env, userId) }, true);
 }
 
 /** `PATCH /api/profile`: the display name and preset avatar. A preset does not remove an uploaded picture. */

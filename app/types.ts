@@ -14,6 +14,9 @@ import type {
   SUPPORT_LINK_KINDS,
 } from "../db/enums";
 
+/** Sign-in providers, in the order the sign-in dialog lists them. */
+export type Provider = "google" | "tiktok" | "twitch" | "instagram";
+
 export type EntryKind = "topic" | "choice" | "binary";
 export type SortOrder = "newest" | "top";
 export type Reaction = -1 | 0 | 1;
@@ -67,8 +70,10 @@ export interface Streamer {
   avatar: string | null;
   background: string | null;
   ownerId: string;
-  /** Page logo. The client falls back to `avatar`, then the default spaceman. */
+  /** Page logo. The client falls back to `avatar`, then `ownerAvatarPreset`, then the default spaceman. */
   logo: string | null;
+  /** The owner's preset picture (0..17), part of "the owner's profile picture" when there is no upload. */
+  ownerAvatarPreset: number | null;
   /** The official StreamBullets page, pinned first in the directory. */
   isOfficial: boolean;
   /** `frozen` pages are public and read-only. `suspended` pages reach only their owner and admins. */

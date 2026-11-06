@@ -380,7 +380,6 @@ button.danger:hover { background: var(--danger-hover); border-color: var(--error
 .streamers-page .directory-search { max-width: 600px; margin-top: 18px; }
 .streamers-page .page-title + .muted { margin: 0 0 4px; }
 .streamer-card[hidden] { display: none; }
-.station-tilt { display: none; }
 .intent-prompt { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 600px; margin: 14px 0 6px; padding: 6px 6px 6px 14px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 8px; background: var(--c-0f2a30); color: var(--cream); font-size: 16px; }
 .intent-clear { display: inline-grid; place-items: center; flex: 0 0 auto; width: 32px; height: 32px; border: 1px solid var(--btn-border); border-radius: 7px; font-size: 20px; line-height: 1; }
 .intent-clear:hover { border-color: var(--gold); color: var(--gold); }
@@ -1312,7 +1311,6 @@ button.fab.fab { display: none; }
 .discard-box p { margin: 0 0 16px; color: var(--muted); }
 .handle-warn:not(:empty) { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 12px; border-left: 4px solid var(--gold); border-radius: 6px; background: var(--c-0f2a30); color: var(--cream); }
 .handle-warn:empty { display: none; }
-.landing-station .station-tilt { display: none !important; }
 html[data-reduced="true"] .landing-station .station-tilt { display: none !important; }
 @media (max-width: 43.75em) {
   .discussion > .composer > .user-avatar { display: none; }

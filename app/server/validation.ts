@@ -257,3 +257,8 @@ export type StreamerEdit = z.infer<typeof streamerEditSchema>;
 export const accountDeletionSchema = z
   .object({ confirm: z.literal("DELETE", { error: "Type DELETE to confirm." }) })
   .strict();
+
+/** The non-routable addresses TikTok and Instagram accounts get (R5). Never shown or mailed. */
+export function isPlaceholderEmail(email: string): boolean {
+  return /@(?:[a-z0-9-]+\.)?(?:tiktok|instagram)(?:\.placeholder)?\.invalid$/iu.test(email);
+}
