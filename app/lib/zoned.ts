@@ -1,7 +1,4 @@
-/**
- * Time-zone maths without a date library. Times are UTC milliseconds; a "local date" is a calendar day in an IANA
- * zone. Used by the schedule on the server (series expansion, ICS) and in the browser (grids in the viewer's zone).
- */
+// Times are UTC milliseconds. A local date is a calendar day in an IANA zone.
 
 export interface LocalDate {
   year: number;

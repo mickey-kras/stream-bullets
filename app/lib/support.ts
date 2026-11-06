@@ -32,7 +32,7 @@ export function isAllowedSupportLink(kind: SupportLinkKind, url: string): boolea
   const provider = SUPPORT_PROVIDERS[kind];
   if (provider.hosts.length === 0) {
     // Any public host name: a dot, letters somewhere, and not an IP address.
-    return host.includes(".") && /[a-z]/.test(host) && !/^\[/.test(host) && !/^[\d.]+$/.test(host);
+    return host.includes(".") && /[a-z]/.test(host) && !host.startsWith("[") && !/^[\d.]+$/.test(host);
   }
   if (!provider.hosts.some((allowed: string): boolean => host === allowed || host === `www.${allowed}`)) return false;
   const path = parsed.pathname;

@@ -14,15 +14,16 @@ interface LinkRow {
 }
 
 export async function getSupport(env: AppEnv, streamerId: string): Promise<SupportSettings> {
-  const [links, page] = await env.DB.batch([
-    env.DB.prepare("SELECT id,kind,label,url FROM streamer_links WHERE streamer_id=? ORDER BY position").bind(
-      streamerId,
-    ),
-    env.DB.prepare("SELECT support_visible, support_card FROM streamers WHERE id=?").bind(streamerId),
+  const [links, settings] = await Promise.all([
+    env.DB.prepare("SELECT id,kind,label,url FROM streamer_links WHERE streamer_id=? ORDER BY position")
+      .bind(streamerId)
+      .all<LinkRow>(),
+    env.DB.prepare("SELECT support_visible, support_card FROM streamers WHERE id=?")
+      .bind(streamerId)
+      .first<{ support_visible: number; support_card: number }>(),
   ]);
-  const settings = page.results[0] as { support_visible: number; support_card: number } | undefined;
   return {
-    links: (links.results as unknown as LinkRow[]).map(
+    links: links.results.map(
       (row: LinkRow): SupportLink => ({ id: row.id, kind: row.kind, label: row.label, url: row.url }),
     ),
     visible: settings?.support_visible === 1,
