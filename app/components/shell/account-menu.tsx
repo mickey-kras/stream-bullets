@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation, type Location } from "react-router";
 import { authClient } from "../../auth-client";
 import { t, type MessageId } from "../../i18n";
@@ -63,35 +63,47 @@ export function accountMenuRows(
  */
 export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeader?: boolean }>): ReactNode {
   const shell: ShellData = useShell();
-  const location = useLocation();
-  const { pathname, search, hash } = location;
-  const [open, setOpen] = useState<boolean>(false);
+  const here = useLocation();
+  const { pathname, search, hash } = here;
+  // The menu remembers the location it opened at, so a route change closes it without an effect.
+  const location = `${pathname}${search}${hash}`;
+  const [openAt, setOpenAt] = useState<string | null>(null);
+  const open: boolean = openAt === location;
   const [signingOut, setSigningOut] = useState<boolean>(false);
   const wrap = useRef<HTMLDivElement | null>(null);
   const button = useRef<HTMLButtonElement | null>(null);
   const panel = useRef<HTMLDivElement | null>(null);
   const menuId: string = useId();
 
-  useEffect(() => setOpen(false), [pathname, search, hash]);
-
   useEffect(() => {
-    if (!open) return;
+    const root: HTMLDivElement | null = wrap.current;
+    if (!open || !root) return;
     const first: HTMLElement | null | undefined = panel.current?.querySelector<HTMLElement>("a, button");
     (first ?? panel.current)?.focus({ preventScroll: true });
     const outside = (event: PointerEvent): void => {
-      if (wrap.current && !wrap.current.contains(event.target as Node)) setOpen(false);
+      if (!root.contains(event.target as Node)) setOpenAt(null);
+    };
+    const escape = (event: KeyboardEvent): void => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      setOpenAt(null);
+      button.current?.focus();
+    };
+    const leave = (event: FocusEvent): void => {
+      if (event.relatedTarget && !root.contains(event.relatedTarget as Node)) setOpenAt(null);
     };
     document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
+    root.addEventListener("keydown", escape);
+    root.addEventListener("focusout", leave);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      root.removeEventListener("keydown", escape);
+      root.removeEventListener("focusout", leave);
+    };
   }, [open]);
 
   if (!shell.viewer) return <SignInButton providers={shell.providers} />;
   const viewer = shell.viewer;
-
-  function close(returnFocus: boolean): void {
-    setOpen(false);
-    if (returnFocus) button.current?.focus();
-  }
 
   async function signOut(): Promise<void> {
     setSigningOut(true);
@@ -107,19 +119,7 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
   if (shell.admin) roleLine = t("account.roleAdmin");
 
   return (
-    <div
-      className="account-menu-wrap"
-      ref={wrap}
-      onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === "Escape" && open) {
-          event.stopPropagation();
-          close(true);
-        }
-      }}
-      onBlur={(event) => {
-        if (open && event.relatedTarget && !wrap.current?.contains(event.relatedTarget as Node)) close(false);
-      }}
-    >
+    <div className="account-menu-wrap" ref={wrap}>
       <button
         ref={button}
         type="button"
@@ -127,7 +127,7 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
         aria-expanded={open}
         aria-controls={menuId}
         aria-label={t("account.menuFor", { name: viewer.name })}
-        onClick={() => setOpen((value: boolean) => !value)}
+        onClick={() => setOpenAt((value: string | null) => (value === location ? null : location))}
       >
         <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
       </button>
@@ -141,7 +141,7 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
         </div>
         <nav aria-label={t("account.nav")}>
           <ul>
-            {accountMenuRows(shell, location, streamerHeader).map((group: MenuRow[], index: number) => [
+            {accountMenuRows(shell, here, streamerHeader).map((group: MenuRow[], index: number) => [
               index > 0 && <li key={`divider-${index}`} className="account-menu-divider" aria-hidden="true" />,
               ...group.map((row: MenuRow) => (
                 <li key={row.label}>

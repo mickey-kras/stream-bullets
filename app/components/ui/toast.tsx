@@ -51,7 +51,8 @@ export function useToast(): ShowToast {
  * Keeps a slot for the visible toast in the page layout, just above the footer band, so the toast never
  * covers content: the page's scroll area shrinks by the toast's height while it shows.
  */
-function useReservedSlot(viewport: RefObject<HTMLOListElement | null>, visible: boolean): void {
+function useReservedSlot(visible: boolean): RefObject<HTMLOListElement | null> {
+  const viewport = useRef<HTMLOListElement | null>(null);
   useEffect(() => {
     const root: HTMLElement = document.documentElement;
     const element: HTMLOListElement | null = viewport.current;
@@ -77,7 +78,8 @@ function useReservedSlot(viewport: RefObject<HTMLOListElement | null>, visible: 
       root.classList.remove("toast-on", "toast-nofoot");
       root.style.removeProperty("--toast-slot");
     };
-  }, [viewport, visible]);
+  }, [visible]);
+  return viewport;
 }
 
 /**
@@ -86,13 +88,12 @@ function useReservedSlot(viewport: RefObject<HTMLOListElement | null>, visible: 
  */
 export function ToastProvider({ children }: Readonly<{ children: ReactNode }>): ReactNode {
   const [toast, setToast] = useState<ToastState | null>(null);
-  const viewport = useRef<HTMLOListElement | null>(null);
   const sequence = useRef<number>(0);
   const show: ShowToast = useCallback((message: string, options: ToastOptions = {}) => {
     sequence.current += 1;
     setToast({ id: sequence.current, message, open: true, ...options });
   }, []);
-  useReservedSlot(viewport, Boolean(toast?.open));
+  const viewport = useReservedSlot(Boolean(toast?.open));
   return (
     <ToastContext.Provider value={show}>
       <RadixToast.Provider label={t("toast.region")} swipeDirection="down">

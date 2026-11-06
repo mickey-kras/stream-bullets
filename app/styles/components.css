@@ -1604,10 +1604,10 @@ textarea.url-field { resize: none; min-height: 44px; overflow: hidden; field-siz
 @media (max-width: 43.75em) {
   .streamers-page .ideas-link { display: flex; width: fit-content; margin-top: 4px; }
 }
-.dialog-notice { margin: 8px 20px 0; padding: 8px 12px; border-radius: 8px; background: var(--cream); color: var(--bg); font: 600 .9375rem/1.3 var(--body); }
+.dialog-notice { display: block; margin: 8px 20px 0; padding: 8px 12px; border-radius: 8px; background: var(--cream); color: var(--bg); font: 600 .9375rem/1.3 var(--body); }
 .modal-content:not(.sheet) .dialog-notice { margin: 0 0 12px; }
-[role="dialog"] p.dialog-notice, .modal-content p.dialog-notice { margin: 10px 20px 0; padding: 10px 12px; border: 1px solid var(--gold); border-left-width: 4px; border-radius: 8px; background: var(--modal); color: var(--cream) !important; font: 600 .9375rem/1.35 var(--body); }
-.modal-content:not(.sheet) p.dialog-notice { margin: 0 0 12px; }
+[role="dialog"] output.dialog-notice, .modal-content output.dialog-notice { margin: 10px 20px 0; padding: 10px 12px; border: 1px solid var(--gold); border-left-width: 4px; border-radius: 8px; background: var(--modal); color: var(--cream) !important; font: 600 .9375rem/1.35 var(--body); }
+.modal-content:not(.sheet) output.dialog-notice { margin: 0 0 12px; }
 .mash-sides-readonly { display: grid; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
 .mash-sides-readonly li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 10px; font: 600 1.125rem var(--heading); color: var(--cream); }
 @media (max-width: 56.25em) {
@@ -1828,9 +1828,9 @@ input[type="checkbox"], input[type="radio"], .modal-content .choice input { widt
 .mash-page .poll-toolbar { align-items: flex-start; }
 .mash-page .poll-toolbar > a.text-link { display: inline-flex; align-items: center; min-height: 44px; margin-left: auto; }
 .mash-page .poll-toolbar :is(.back, .mash-next > *) { min-height: 44px; }
-.modal-content.sheet > p.dialog-notice { margin: 12px 32px 0; }
+.modal-content.sheet > output.dialog-notice { margin: 12px 32px 0; }
 @media (max-width: 43.75em) {
-  .modal-content.sheet > p.dialog-notice { margin: 10px 20px 0; }
+  .modal-content.sheet > output.dialog-notice { margin: 10px 20px 0; }
 }
 .signed-in-with { width: fit-content; }
 /* ---- App adaptations ---- */
