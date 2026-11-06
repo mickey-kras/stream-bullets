@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
 import { paths } from "../../lib/shell";
@@ -25,9 +25,23 @@ export function useRememberContentRoute(href: string, label: string): void {
   }, [href, label]);
 }
 
-function lastContentRoute(): ContentRoute | null {
+/** The stored JSON string. A string snapshot stays stable between renders, unlike a parsed object. */
+function storedContentRoute(): string | null {
   try {
-    const value: unknown = JSON.parse(sessionStorage.getItem(storageKey) ?? "null");
+    return sessionStorage.getItem(storageKey);
+  } catch {
+    return null;
+  }
+}
+
+/** The back link reads storage once at mount, so it does not subscribe to changes. */
+function noSubscription(): () => void {
+  return () => undefined;
+}
+
+function parseContentRoute(stored: string | null): ContentRoute | null {
+  try {
+    const value: unknown = JSON.parse(stored ?? "null");
     if (
       value &&
       typeof value === "object" &&
@@ -45,8 +59,9 @@ function lastContentRoute(): ContentRoute | null {
 
 /** "‹ Back to {name}": the first element of the page column on Settings, Admin, the legal pages and 404. */
 export function BackLink(): ReactNode {
-  const [target, setTarget] = useState<ContentRoute | null>(null);
-  useEffect(() => setTarget(lastContentRoute()), []);
+  // The server snapshot is null, so the hydrated markup matches and the stored route appears after hydration.
+  const stored: string | null = useSyncExternalStore(noSubscription, storedContentRoute, () => null);
+  const target: ContentRoute | null = parseContentRoute(stored);
   return (
     <Link className="back-link" to={target?.href ?? paths.streamers}>
       <Icon name="chevron-left" size={16} />

@@ -59,5 +59,7 @@ export const MASH_PHASES = ["setup", "countdown", "live", "finished"] as const;
 
 /** Renders a value list as the inside of an SQL `IN (...)`. Values are constants, never user input. */
 export function sqlList(values: readonly (string | number)[]): string {
-  return values.map((value: string | number): string => (typeof value === "number" ? String(value) : `'${value}'`)).join(", ");
+  return values
+    .map((value: string | number): string => (typeof value === "number" ? String(value) : `'${value}'`))
+    .join(", ");
 }

@@ -68,10 +68,7 @@ export const passkey = sqliteTable(
     createdAt: integer("created_at", { mode: "timestamp_ms" }),
     aaguid: text("aaguid"),
   },
-  (table) => [
-    index("passkey_user_idx").on(table.userId),
-    uniqueIndex("passkey_credential_idx").on(table.credentialID),
-  ],
+  (table) => [index("passkey_user_idx").on(table.userId), uniqueIndex("passkey_credential_idx").on(table.credentialID)],
 );
 
 export const account = sqliteTable(

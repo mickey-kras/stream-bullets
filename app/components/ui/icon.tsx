@@ -143,8 +143,9 @@ export function Icon({
         strokeLinejoin="round"
         aria-hidden="true"
         focusable="false"
-        dangerouslySetInnerHTML={{ __html: localIcons[name as LocalIconName] }}
-      />
+      >
+        {localIcons[name as LocalIconName]}
+      </svg>
     );
   const Lucide: LucideIcon = lucideIcons[name as keyof typeof lucideIcons];
   return <Lucide className={classes} size={size} strokeWidth={1.8} aria-hidden="true" focusable="false" />;
