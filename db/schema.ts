@@ -29,6 +29,11 @@ import {
 } from "./enums";
 export * from "./auth-schema";
 
+/** A CHECK that keeps a column inside its enum list, so SQLite enforces the same values as the TypeScript type. */
+function enumCheck(name: string, column: AnySQLiteColumn, values: readonly (string | number)[]) {
+  return check(name, sql`${column} IN (${sql.raw(sqlList(values))})`);
+}
+
 export const streamers = sqliteTable(
   "streamers",
   {
@@ -62,7 +67,7 @@ export const streamers = sqliteTable(
   (table) => [
     check("streamers_revision_check", sql`${table.revision} >= 0`),
     check("streamers_is_official_check", sql`${table.isOfficial} IN (0, 1)`),
-    check("streamers_status_check", sql`${table.status} IN (${sql.raw(sqlList(STREAMER_STATUSES))})`),
+    enumCheck("streamers_status_check", table.status, STREAMER_STATUSES),
     check("streamers_support_visible_check", sql`${table.supportVisible} IN (0, 1)`),
     check("streamers_support_card_check", sql`${table.supportCard} IN (0, 1)`),
     check("streamers_status_reason_check", sql`${table.statusReason} IS NULL OR length(${table.statusReason}) <= 500`),
@@ -99,7 +104,10 @@ export const entries = sqliteTable(
     statusChangedAt: integer("status_changed_at"),
   },
   (table) => [
-    check("entries_status_check", sql`${table.status} IS NULL OR ${table.status} IN (${sql.raw(sqlList(ENTRY_STATUSES))})`),
+    check(
+      "entries_status_check",
+      sql`${table.status} IS NULL OR ${table.status} IN (${sql.raw(sqlList(ENTRY_STATUSES))})`,
+    ),
     check("entries_status_reason_check", sql`${table.statusReason} IS NULL OR length(${table.statusReason}) <= 500`),
     index("entries_history_idx").on(table.streamerId, table.createdAt, table.id),
     index("entries_kind_history_idx").on(table.streamerId, table.kind, table.createdAt, table.id),
@@ -368,10 +376,7 @@ export const moderationActions = sqliteTable(
   (table) => [
     index("moderation_actions_streamer_idx").on(table.streamerId, table.createdAt),
     index("moderation_actions_actor_idx").on(table.actorId),
-    check(
-      "moderation_actions_target_kind_check",
-      sql`${table.targetKind} IN (${sql.raw(sqlList(MODERATION_TARGETS))})`,
-    ),
+    enumCheck("moderation_actions_target_kind_check", table.targetKind, MODERATION_TARGETS),
     check("moderation_actions_action_check", sql`length(${table.action}) BETWEEN 1 AND 40`),
     check("moderation_actions_reason_check", sql`length(${table.reason}) <= 500`),
     check("moderation_actions_note_check", sql`length(${table.note}) <= 1000`),
@@ -415,12 +420,9 @@ export const streamEvents = sqliteTable(
     check("stream_events_title_check", sql`length(${table.title}) BETWEEN 1 AND 100`),
     check("stream_events_notes_check", sql`length(${table.notes}) <= 1000`),
     check("stream_events_duration_check", sql`${table.durationMin} BETWEEN 15 AND 1440`),
-    check("stream_events_platform_check", sql`${table.platform} IN (${sql.raw(sqlList(STREAM_PLATFORMS))})`),
-    check(
-      "stream_events_url_check",
-      sql`${table.url} LIKE 'https://_%' AND length(${table.url}) <= 500`,
-    ),
-    check("stream_events_status_check", sql`${table.status} IN (${sql.raw(sqlList(STREAM_EVENT_STATUSES))})`),
+    enumCheck("stream_events_platform_check", table.platform, STREAM_PLATFORMS),
+    check("stream_events_url_check", sql`${table.url} LIKE 'https://_%' AND length(${table.url}) <= 500`),
+    enumCheck("stream_events_status_check", table.status, STREAM_EVENT_STATUSES),
     check(
       "stream_events_vod_check",
       sql`${table.vodUrl} IS NULL OR (${table.vodUrl} LIKE 'https://_%' AND length(${table.vodUrl}) <= 500)`,
@@ -472,7 +474,10 @@ export const communityCards = sqliteTable(
   (table) => [
     uniqueIndex("community_cards_position_idx").on(table.streamerId, table.position),
     check("community_cards_position_check", sql`${table.position} BETWEEN 0 AND 7`),
-    check("community_cards_icon_check", sql`${table.icon} IS NULL OR ${table.icon} IN (${sql.raw(sqlList(CARD_ICONS))})`),
+    check(
+      "community_cards_icon_check",
+      sql`${table.icon} IS NULL OR ${table.icon} IN (${sql.raw(sqlList(CARD_ICONS))})`,
+    ),
     check("community_cards_title_check", sql`length(${table.title}) BETWEEN 1 AND 60`),
     check("community_cards_body_check", sql`length(${table.body}) BETWEEN 1 AND 280`),
     check(
@@ -498,7 +503,7 @@ export const streamerLinks = sqliteTable(
   (table) => [
     uniqueIndex("streamer_links_position_idx").on(table.streamerId, table.position),
     check("streamer_links_position_check", sql`${table.position} BETWEEN 0 AND 3`),
-    check("streamer_links_kind_check", sql`${table.kind} IN (${sql.raw(sqlList(SUPPORT_LINK_KINDS))})`),
+    enumCheck("streamer_links_kind_check", table.kind, SUPPORT_LINK_KINDS),
     check("streamer_links_label_check", sql`${table.label} IS NULL OR length(${table.label}) BETWEEN 1 AND 30`),
     check("streamer_links_url_check", sql`${table.url} LIKE 'https://_%' AND length(${table.url}) <= 500`),
   ],
@@ -536,14 +541,11 @@ export const overlayState = sqliteTable(
   (table) => [
     check("overlay_state_air_check", overlaySourceCheck(table.air)),
     check("overlay_state_preview_check", overlaySourceCheck(table.preview)),
-    check("overlay_state_position_check", sql`${table.position} IN (${sql.raw(sqlList(OVERLAY_POSITIONS))})`),
-    check("overlay_state_size_check", sql`${table.size} IN (${sql.raw(sqlList(OVERLAY_SIZES))})`),
+    enumCheck("overlay_state_position_check", table.position, OVERLAY_POSITIONS),
+    enumCheck("overlay_state_size_check", table.size, OVERLAY_SIZES),
     check("overlay_state_flags_check", sql`${table.instant} IN (0, 1) AND ${table.showResults} IN (0, 1)`),
     check("overlay_state_message_check", sql`length(${table.message}) <= 120`),
-    check(
-      "overlay_state_message_style_check",
-      sql`${table.messageStyle} IN (${sql.raw(sqlList(OVERLAY_MESSAGE_STYLES))})`,
-    ),
+    enumCheck("overlay_state_message_style_check", table.messageStyle, OVERLAY_MESSAGE_STYLES),
     check("overlay_state_revision_check", sql`${table.revision} >= 0`),
   ],
 );
@@ -567,7 +569,7 @@ export const entryMash = sqliteTable(
   },
   (table) => [
     check("entry_mash_duration_check", sql`${table.durationS} BETWEEN 10 AND 120`),
-    check("entry_mash_phase_check", sql`${table.phase} IN (${sql.raw(sqlList(MASH_PHASES))})`),
+    enumCheck("entry_mash_phase_check", table.phase, MASH_PHASES),
     check("entry_mash_winner_check", sql`${table.winner} IS NULL OR ${table.winner} BETWEEN -1 AND 3`),
     check(
       "entry_mash_window_check",

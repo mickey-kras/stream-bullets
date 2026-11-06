@@ -198,7 +198,9 @@ export type EntryQuery = z.input<typeof entryQuerySchema>;
 export type CommentQuery = z.input<typeof commentQuerySchema>;
 export type DirectoryQuery = z.input<typeof directoryQuerySchema>;
 
-export const handleSchema = z.string().regex(/^[a-z0-9_]{3,30}$/u, "Use 3 to 30 lowercase letters, numbers or underscores.");
+export const handleSchema = z
+  .string()
+  .regex(/^[a-z0-9_]{3,30}$/u, "Use 3 to 30 lowercase letters, numbers or underscores.");
 
 /** `PATCH /api/profile`: the account's display name and preset avatar (null clears the preset). */
 export const profileSchema = z

@@ -28,9 +28,12 @@ export function ContactDialog({
 }: Readonly<{ open: boolean; onOpenChange: (open: boolean) => void }>): ReactNode {
   const address = useRef<HTMLSpanElement | null>(null);
   const [notice, setNotice] = useState<string>("");
-  useEffect(() => {
+  // Clear the notice when the dialog closes. React allows this state update during render.
+  const [wasOpen, setWasOpen] = useState<boolean>(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
     if (!open) setNotice("");
-  }, [open]);
+  }
   useEffect(() => {
     if (!notice) return;
     const timer = setTimeout(() => setNotice(""), 6000);
@@ -49,11 +52,7 @@ export function ContactDialog({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange} title={t("contact.title")} name="contact" short>
-      {notice && (
-        <p className="dialog-notice" role="status">
-          {notice}
-        </p>
-      )}
+      {notice && <output className="dialog-notice">{notice}</output>}
       <p>{t("contact.body")}</p>
       <div className="contact-address">
         <span className="contact-email" ref={address}>

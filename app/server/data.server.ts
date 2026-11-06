@@ -211,7 +211,10 @@ export async function listStreamers(
         after === null
           ? undefined
           : after.official
-            ? or(eq(streamers.isOfficial, false), and(eq(streamers.isOfficial, true), gt(streamers.handle, after.handle)))
+            ? or(
+                eq(streamers.isOfficial, false),
+                and(eq(streamers.isOfficial, true), gt(streamers.handle, after.handle)),
+              )
             : and(eq(streamers.isOfficial, false), gt(streamers.handle, after.handle)),
       ),
     )
@@ -241,7 +244,11 @@ export async function getStreamer(env: AppEnv, handle: string): Promise<Streamer
 }
 
 /** A page as the viewer may see it: null when it does not exist or is suspended and the viewer is not its owner or an admin. */
-export async function getVisibleStreamer(env: AppEnv, handle: string, viewerId: string | null): Promise<Streamer | null> {
+export async function getVisibleStreamer(
+  env: AppEnv,
+  handle: string,
+  viewerId: string | null,
+): Promise<Streamer | null> {
   const row = await streamerRow(env, handle);
   if (!row) return null;
   const owner = viewerId !== null && row.ownerId === viewerId;
@@ -597,11 +604,7 @@ function commentValue(row: CommentRow): Comment {
 }
 
 /** Every reply under the given top-level comments, any depth, oldest first within each thread. */
-async function threadReplies(
-  env: AppEnv,
-  rootIds: string[],
-  viewerId: string | null,
-): Promise<Map<string, Comment[]>> {
+async function threadReplies(env: AppEnv, rootIds: string[], viewerId: string | null): Promise<Map<string, Comment[]>> {
   const replies = new Map<string, Comment[]>(rootIds.map((id: string): [string, Comment[]] => [id, []]));
   if (rootIds.length === 0) return replies;
   const { results } = await env.DB.prepare(`

@@ -5,7 +5,13 @@ import { deleteAccount, exportAccount } from "../account.server";
 import { configuredProviders, createAuth } from "../auth.server";
 import { consumeMutationQuota, getOwnStreamer, setDisplayPrefs, setLocale, updateProfile } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
-import { accountDeletionSchema, displayNameSchema, displayPrefsSchema, localeSchema, profileSchema } from "../validation";
+import {
+  accountDeletionSchema,
+  displayNameSchema,
+  displayPrefsSchema,
+  localeSchema,
+  profileSchema,
+} from "../validation";
 import { get, write, type ApiRoute } from "./router";
 
 /** The original settings form's name change. `PATCH /api/profile` replaces it. */
