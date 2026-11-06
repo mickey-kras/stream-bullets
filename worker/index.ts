@@ -1,5 +1,6 @@
 import { createRequestHandler, RouterContextProvider } from "react-router";
 import { appContext, type AppEnv } from "../app/env";
+import { isStreamerListed } from "../app/server/access.server";
 import { getStreamer } from "../app/server/data.server";
 import {
   HttpError,
@@ -43,7 +44,8 @@ export default {
         if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
           throw new HttpError(426, "Use a WebSocket connection.");
         const streamer = await getStreamer(env, live[1]);
-        if (!streamer) throw new HttpError(404, "Streamer not found.");
+        // Suspended pages refuse live connections, the owner's included.
+        if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
         const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
         response = await room.fetch(
           `https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`,

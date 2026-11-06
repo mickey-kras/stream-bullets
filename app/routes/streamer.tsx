@@ -3,7 +3,7 @@ import { ScrollArea } from "radix-ui";
 import { Link, useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
 import { configuredProviders, getViewer } from "../server/auth.server";
-import { getEntry, getStreamer, listEntries } from "../server/data.server";
+import { getEntry, getVisibleStreamer, listEntries } from "../server/data.server";
 import { isAdmin } from "../server/access.server";
 import { AccountControls, Avatar, EmptyState } from "../components/common";
 import { errorMessage, postJson, requestJson } from "../components/api";
@@ -33,9 +33,10 @@ const views: View[] = ["topics", "polls", "schedule", "about", "community"];
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
-  const streamer = await getStreamer(app.env, params.handle.slice(1));
-  if (!streamer) throw new Response("Streamer not found.", { status: 404 });
   const viewer = await getViewer(request, app);
+  // Suspended pages are 404 for everyone but the owner and admins.
+  const streamer = await getVisibleStreamer(app.env, params.handle.slice(1), viewer?.id ?? null);
+  if (!streamer) throw new Response("Streamer not found.", { status: 404 });
   const url: URL = new URL(request.url);
   const requestedView: string = url.searchParams.get("view") || "topics";
   let view: View = views.includes(requestedView as View) ? (requestedView as View) : "topics";

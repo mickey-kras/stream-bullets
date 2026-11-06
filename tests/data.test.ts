@@ -342,7 +342,7 @@ describe("topics and polls", (): void => {
 });
 
 describe("discussion", (): void => {
-  it("enforces reply scope and preserves replies when an authorized author removes a parent", async (): Promise<void> => {
+  it("enforces reply scope and keeps the thread when an authorized author removes a parent", async (): Promise<void> => {
     const id = await seedEntry();
     const foreignEntry = await seedEntry();
     const foreignParent = await seedComment(foreignEntry);
@@ -360,9 +360,19 @@ describe("discussion", (): void => {
       status: 403,
     });
     await mutateComment(env, "viewer", { action: "delete", id: parent.id });
+    // The parent becomes a "Comment removed" placeholder: no author, text or likes, and the reply stays under it.
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toMatchObject([
-      { id: reply.id, parentId: null, text: "Reply" },
+      { id: reply.id, parentId: parent.id, text: "Reply", removed: false },
+      { id: parent.id, parentId: null, text: "", author: "", authorId: "", avatar: null, likes: 0, removed: true },
     ]);
+    expect(await env.DB.prepare("SELECT text FROM entry_comments WHERE id=?").bind(parent.id).first("text")).toBe(
+      "[removed]",
+    );
+    expect((await getEntry(env, id, null))?.comments).toBe(1);
+    await expect(mutateComment(env, "viewer", { action: "delete", id: parent.id })).rejects.toMatchObject({
+      status: 404,
+    });
+    // Removing the last reply removes the placeholder too.
     await mutateComment(env, "owner", { action: "delete", id: reply.id });
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toEqual([]);
   });

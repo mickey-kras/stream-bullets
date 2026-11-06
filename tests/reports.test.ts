@@ -315,7 +315,7 @@ describe("reviewing reports", (): void => {
     expect(item).toMatchObject({ entryId: null, snapshot: "Reported topic\n\nTopic details" });
   });
 
-  it("removes a reported comment and keeps its replies", async (): Promise<void> => {
+  it("removes a reported comment and keeps its replies under a placeholder", async (): Promise<void> => {
     const topic = await seedEntry();
     const parent = await seedComment(topic);
     const reply = await seedComment(topic, "second", parent);
@@ -327,7 +327,14 @@ describe("reviewing reports", (): void => {
     });
     expect(await revision()).toBe(before + 1);
     const { comments } = await listComments(env, topic, null, { sort: "newest", cursor: null });
-    expect(comments.map((comment) => [comment.id, comment.parentId])).toEqual([[reply, null]]);
+    expect(comments.map((comment) => [comment.id, comment.parentId, comment.removed])).toEqual([
+      [reply, parent, false],
+      [parent, null, true],
+    ]);
+    // A placeholder cannot be reported again.
+    await expect(
+      report("reporter", { targetKind: "comment", targetId: parent, reason: "spam" }),
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it("closes the report when the content is already gone", async (): Promise<void> => {
@@ -374,8 +381,12 @@ describe("moderation rights", (): void => {
     const reply = await seedComment(topic, "second", parent);
     await mutateComment(env, "admin", { action: "delete", id: parent });
     const { comments } = await listComments(env, topic, null, { sort: "newest", cursor: null });
-    expect(comments.map((comment) => [comment.id, comment.parentId])).toEqual([[reply, null]]);
+    expect(comments.map((comment) => [comment.id, comment.parentId, comment.removed])).toEqual([
+      [reply, parent, false],
+      [parent, null, true],
+    ]);
     expect(await deleteComment(env, "admin", reply)).toEqual({ streamerId: streamer.id });
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM entry_comments").first("n")).toBe(0);
     await mutateEntry(env, "admin", streamer.id, { action: "delete", id: poll });
     await deleteEntry(env, "admin", streamer.id, topic);
     expect(await env.DB.prepare("SELECT count(*) AS n FROM entries").first("n")).toBe(0);

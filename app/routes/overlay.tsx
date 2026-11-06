@@ -10,7 +10,8 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
   const streamer = await getStreamer(app.env, params.handle.slice(1));
-  if (!streamer) throw new Response("Streamer not found.", { status: 404 });
+  // A suspended page shows nothing in the overlay.
+  if (!streamer || streamer.status === "suspended") throw new Response("Streamer not found.", { status: 404 });
   const pollId: string | null = new URL(request.url).searchParams.get("poll") || null;
   const initial: LiveSnapshot = await getOverlaySnapshot(app.env, streamer.id, pollId);
   if (pollId && initial.polls.length === 0) throw new Response("Poll not found.", { status: 404 });
