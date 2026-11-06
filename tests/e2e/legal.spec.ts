@@ -19,8 +19,9 @@ test("privacy policy and terms render with contents and a draft notice", async (
   await contents.getByRole("link", { name: "Cookies and local storage" }).click();
   await expect(page).toHaveURL(/\/privacy#cookies$/);
   await expect(page.getByRole("heading", { name: "Cookies and local storage" })).toBeInViewport();
-  // Legal pages need no sign-in controls.
-  await expect(page.getByRole("banner").getByRole("button", { name: "Sign in" })).toHaveCount(0);
+  // Legal pages use the generic header with the real account control and a way back.
+  await expect(page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up" })).toHaveCount(1);
+  await expect(page.getByRole("link", { name: "Back to Streamers" })).toBeVisible();
 
   await page.goto("/terms");
   await expect(page).toHaveTitle("Terms of Service · StreamBullets");
@@ -32,10 +33,14 @@ test("privacy policy and terms render with contents and a draft notice", async (
 test("the footer links to the legal pages, contact, and the reporting rules", async ({ page }) => {
   await page.goto("/settings");
   const footer = page.getByRole("contentinfo");
-  await expect(footer.getByRole("link", { name: "Contact" })).toHaveAttribute(
+  await footer.getByRole("button", { name: "Contact" }).click();
+  const contact = page.getByRole("dialog", { name: "Contact us" });
+  await expect(contact).toContainText("support@streambullets.com");
+  await expect(contact.getByRole("link", { name: "Open email app" })).toHaveAttribute(
     "href",
-    "mailto:privacy@streambullets.com",
+    "mailto:support@streambullets.com",
   );
+  await contact.getByRole("button", { name: "Close dialog" }).click();
   await footer.getByRole("link", { name: "Privacy" }).click();
   await expect(page).toHaveURL(/\/privacy$/);
   await expect(page.getByRole("heading", { level: 1, name: "Privacy Policy" })).toBeVisible();
@@ -49,8 +54,8 @@ test("the footer links to the legal pages, contact, and the reporting rules", as
 test("the sign-in dialog links to the terms and privacy policy", async ({ page }) => {
   // A streamer page uses the same dialog as the landing page without the CPU-heavy 3D scene.
   await page.goto("/@test_host");
-  await page.getByRole("banner").getByRole("button", { name: "Sign in", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "Join the conversation" });
+  await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Sign in or sign up" });
   await expect(dialog).toBeVisible();
   // The test server has no OAuth providers, so the dialog shows the neutral empty state.
   await expect(dialog.getByRole("status")).toHaveText(
@@ -60,7 +65,7 @@ test("the sign-in dialog links to the terms and privacy policy", async ({ page }
   await expect(page).toHaveURL(/\/privacy$/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.goBack();
-  await page.getByRole("banner").getByRole("button", { name: "Sign in", exact: true }).click();
+  await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
   await page.getByRole("dialog").getByRole("link", { name: "Terms" }).click();
   await expect(page).toHaveURL(/\/terms$/);
 });

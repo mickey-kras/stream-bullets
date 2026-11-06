@@ -126,7 +126,7 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   const viewerContext = await signedIn(browser, "viewer");
   const owner = await ownerContext.newPage();
   await owner.goto("/@test_host?view=polls");
-  await owner.getByRole("button", { name: "+ Create poll", exact: true }).click();
+  await owner.getByRole("button", { name: "Create poll", exact: true }).click();
   const dialog = owner.getByRole("dialog");
   await dialog.getByLabel("Question", { exact: true }).fill("Should we stream on Friday?");
   await dialog.getByRole("radio", { name: "Yes / No" }).check();
@@ -138,7 +138,7 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   if (!pollId) throw new Error("Created poll link is missing.");
   const viewer = await viewerContext.newPage();
   await viewer.goto(`/@test_host?view=polls&entry=${pollId}`);
-  await expect(viewer.getByRole("button", { name: "+ Create poll", exact: true })).toHaveCount(0);
+  await expect(viewer.getByRole("button", { name: "Create poll", exact: true })).toHaveCount(0);
   const overlayContext = await browser.newContext({ baseURL: origin });
   const overlay = await overlayContext.newPage();
   await overlay.goto(`/@test_host/overlay?poll=${pollId}`);

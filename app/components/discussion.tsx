@@ -3,6 +3,9 @@ import type { Comment, DiscussionSnapshot, SortOrder, Viewer } from "../types";
 import { Avatar, Modal } from "./common";
 import { errorMessage, postJson, requestJson } from "./api";
 import { ReportButton } from "./report";
+import { Icon } from "./ui/icon";
+import { IconButton } from "./ui/icon-button";
+import { Select } from "./ui/select";
 
 type CommentChange = { action: "like"; id: string; liked: boolean } | { action: "delete"; id: string };
 
@@ -47,6 +50,7 @@ export function DeleteButton({
   return (
     <>
       <button type="button" disabled={disabled} onClick={() => setOpen(true)}>
+        <Icon name="trash" size={16} />
         {label}
       </button>
       <Modal
@@ -264,21 +268,23 @@ export function Discussion({
     <section className="discussion" aria-labelledby={`discussion-${entryId}`}>
       <div className="discussion-head">
         <h3 id={`discussion-${entryId}`}>Discussion</h3>
-        <label className="comment-sort">
-          <span className="sr-only">Sort comments</span>
-          <select value={sort} onChange={(event) => setSort(event.currentTarget.value as SortOrder)}>
-            <option value="newest">Newest</option>
-            <option value="top">Top</option>
-          </select>
-        </label>
-        <button
-          type="button"
-          className="small-button"
+        <Select
+          className="comment-sort"
+          label="Sort comments"
+          value={sort}
+          onValueChange={(value: string) => setSort(value as SortOrder)}
+          options={[
+            { value: "newest", label: "Newest" },
+            { value: "top", label: "Top" },
+          ]}
+        />
+        <IconButton
+          label="Refresh"
+          icon="refresh"
+          spin={revision}
           disabled={loading}
           onClick={() => setRevision((value: number) => value + 1)}
-        >
-          Refresh
-        </button>
+        />
       </div>
       {loading && <output className="muted">Loading comments…</output>}
       {!loading && comments.length === 0 && <p className="empty">Start the conversation. What do you think?</p>}
@@ -311,6 +317,7 @@ export function Discussion({
                   );
                 }}
               >
+                <Icon name={comment.liked ? "thumbs-up-filled" : "thumbs-up"} size={16} />
                 Like {comment.likes}
               </button>
               <button
@@ -321,6 +328,7 @@ export function Discussion({
                   textarea.current?.focus();
                 }}
               >
+                <Icon name="reply" size={16} />
                 Reply
               </button>
               {viewer && (comment.authorId === viewer.id || ownerId === viewer.id || moderator) && (
@@ -382,6 +390,7 @@ export function Discussion({
               placeholder="Write a comment…"
             />
             <button className="gold" type="submit" disabled={busy || !text.trim()}>
+              <Icon name="send" size={18} />
               {busy ? "Posting…" : "Post"}
             </button>
           </form>

@@ -1,6 +1,7 @@
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import type { ReportReason, ReportTargetKind } from "../types";
 import { Modal } from "./common";
+import { Icon } from "./ui/icon";
 import { errorMessage, postJson } from "./api";
 
 export const reportReasons: { value: ReportReason; label: string; hint: string }[] = [
@@ -62,6 +63,7 @@ export function ReportButton({
   return (
     <>
       <button type="button" aria-label={label} onClick={show}>
+        <Icon name="flag" size={16} />
         Report
       </button>
       <Modal

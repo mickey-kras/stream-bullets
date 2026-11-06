@@ -1,6 +1,15 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Modal } from "./common";
 import { errorMessage } from "./api";
+import { DialogActions } from "./ui/dialog";
+import { Select, type SelectOption } from "./ui/select";
+
+const categories: readonly SelectOption[] = [
+  { value: "Tech & setups", label: "Tech & setups", icon: "cat-tech" },
+  { value: "Gaming", label: "Gaming", icon: "cat-gaming" },
+  { value: "Creative", label: "Creative", icon: "cat-creative" },
+  { value: "Just chatting", label: "Just chatting", icon: "cat-chatting" },
+];
 
 export function CreateEntry({
   mode,
@@ -88,15 +97,18 @@ export function CreateEntry({
               <span>Details</span>
               <textarea name="body" required maxLength={2000} rows={5} />
             </label>
-            <label>
-              <span>Category</span>
-              <select name="category">
-                <option>Tech &amp; setups</option>
-                <option>Gaming</option>
-                <option>Creative</option>
-                <option>Just chatting</option>
-              </select>
-            </label>
+            <div className="field">
+              <span className="field-label" id="topic-category-label">
+                Category
+              </span>
+              <Select
+                id="topic-category"
+                name="category"
+                labelledBy="topic-category-label"
+                defaultValue="Tech & setups"
+                options={categories}
+              />
+            </div>
           </>
         ) : (
           <>
@@ -148,9 +160,11 @@ export function CreateEntry({
         <p className="form-error" role="alert">
           {error}
         </p>
-        <button className="gold" type="submit" disabled={pending}>
-          {pending ? "Saving…" : submitLabel}
-        </button>
+        <DialogActions>
+          <button className="gold" type="submit" disabled={pending}>
+            {pending ? "Saving…" : submitLabel}
+          </button>
+        </DialogActions>
       </form>
     </Modal>
   );

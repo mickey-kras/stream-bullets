@@ -1,8 +1,13 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLoaderData, type LoaderFunctionArgs } from "react-router";
-import { configuredProviders, getViewer } from "../server/auth.server";
+import { configuredProviders } from "../server/auth.server";
 import { getOwnStreamer } from "../server/data.server";
-import { AccountControls, Modal, SignIn } from "../components/common";
+import { requestViewer } from "../lib/shell.server";
+import { paths } from "../lib/shell";
+import { t } from "../i18n";
+import { AccountMenu } from "../components/shell/account-menu";
+import { SignInDialog } from "../components/shell/sign-in-dialog";
+import { Icon } from "../components/ui/icon";
 import { Station } from "../components/station/station";
 import "../components/station/landing.css";
 import { appContext } from "../env";
@@ -11,7 +16,7 @@ import { HttpError } from "../server/http.server";
 export async function loader({ request, context }: LoaderFunctionArgs) {
   try {
     const app = context.get(appContext);
-    const viewer = await getViewer(request, app);
+    const viewer = await requestViewer(request, app);
     const ownStreamer = viewer ? await getOwnStreamer(app.env, viewer.id) : null;
     return { viewer, ownStreamer, providers: configuredProviders(app.env) };
   } catch (error: unknown) {
@@ -26,16 +31,17 @@ export default function Home(): ReactNode {
   return (
     <div className="landing-page">
       <header className="landing-header">
-        <Link className="landing-brand" to="/" aria-label="StreamBullets home">
-          <img className="landing-logo" src="/brand/stream-bullets.svg" alt="" width="305" height="84" />
-          <img className="landing-icon" src="/brand/stream-bullets-icon.svg" alt="" width="128" height="136" />
+        <Link className="landing-brand" to={paths.home} aria-label={t("nav.home")}>
+          <img className="landing-logo" src="/assets/stream-bullets.svg" alt="" width="305" height="84" />
+          <img className="landing-icon" src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
         </Link>
-        <nav aria-label="Account">
+        <nav aria-label={t("account.nav")}>
           {viewer ? (
-            <AccountControls viewer={viewer} providers={providers} />
+            <AccountMenu />
           ) : (
             <button type="button" onClick={() => setSignInOpen(true)}>
-              Sign in
+              <Icon name="sign-in" size={18} />
+              {t("signIn.trigger")}
             </button>
           )}
         </nav>
@@ -58,7 +64,8 @@ export default function Home(): ReactNode {
                 </Link>
               ) : (
                 <button type="button" className="gold" onClick={() => setSignInOpen(true)}>
-                  Sign in
+                  <Icon name="sign-in" size={18} />
+                  {t("signIn.trigger")}
                 </button>
               )}
             </div>
@@ -68,14 +75,7 @@ export default function Home(): ReactNode {
           </p>
         </section>
       </main>
-      <Modal
-        open={signInOpen}
-        onOpenChange={setSignInOpen}
-        title="Join the conversation"
-        description="Sign in to suggest topics, vote, and comment. Your first sign-in creates your account."
-      >
-        <SignIn providers={providers} />
-      </Modal>
+      <SignInDialog open={signInOpen} onOpenChange={setSignInOpen} providers={providers} />
     </div>
   );
 }

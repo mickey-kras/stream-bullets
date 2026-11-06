@@ -19,13 +19,13 @@ test("mobile landing is one screen with sign-in and the scene under the copy", a
   const stationBox = (await station.boundingBox())!;
   expect(stationBox.y).toBeGreaterThan(headingBox.y + headingBox.height);
   expect(stationBox.y + stationBox.height).toBeLessThanOrEqual(844 + 1);
-  // Sign-up and sign-in are one OAuth step, so each place offers a single "Sign in" button.
-  const heroSignIn = page.getByRole("main").getByRole("button", { name: "Sign in", exact: true });
-  await expect(page.getByRole("banner").getByRole("button", { name: "Sign in", exact: true })).toHaveCount(1);
+  // Sign-up and sign-in are one OAuth step, so each place offers a single "Sign in / Sign up" button.
+  const heroSignIn = page.getByRole("main").getByRole("button", { name: "Sign in / Sign up", exact: true });
+  await expect(page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true })).toHaveCount(1);
   await expect(heroSignIn).toHaveCount(1);
   await expect(page.getByRole("button", { name: /^(Log in|Register|Create account)$/ })).toHaveCount(0);
   await heroSignIn.click();
-  await expect(page.getByRole("dialog", { name: "Join the conversation" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toBeVisible();
   await page.getByRole("button", { name: "Close dialog" }).click();
   await expect(heroSignIn).toBeFocused();
   // The legal footer stays on the one screen.
@@ -56,8 +56,8 @@ test("desktop landing remains usable when WebGL is unavailable", async ({ page }
   });
   await page.goto("/");
   await expect(page.getByRole("status")).toContainText("station preview is unavailable");
-  await page.getByRole("banner").getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Join the conversation" })).toBeVisible();
+  await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toBeVisible();
   await page.getByRole("button", { name: "Close dialog" }).click();
   await expect(page.getByRole("link", { name: "Explore streamers" })).toHaveCount(0);
 });

@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLoaderData, useRevalidator, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
-import { configuredProviders, getViewer } from "../server/auth.server";
+import { configuredProviders } from "../server/auth.server";
+import { requestViewer } from "../lib/shell.server";
 import { isAdmin, listApplications } from "../server/access.server";
 import { listReports } from "../server/reports.server";
 import { SignIn, SiteHeader, EmptyState } from "../components/common";
+import { BackLink } from "../components/shell/back-link";
 import { errorMessage, postJson, requestJson } from "../components/api";
 import { DateTime } from "../components/waitlist";
 import { ReportReviewQueue, reportStatuses } from "../components/report-queue";
@@ -37,7 +39,7 @@ export function meta() {
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const app = context.get(appContext);
-  const viewer = await getViewer(request, app);
+  const viewer = await requestViewer(request, app);
   const providers = configuredProviders(app.env);
   const params = new URL(request.url).searchParams;
   const view: AdminView = params.get("view") === "reports" ? "reports" : "requests";
@@ -331,22 +333,25 @@ export default function Admin(): ReactNode {
   const signedIn = Boolean(viewer && (data.queue || data.reports));
   return (
     <>
-      <SiteHeader viewer={viewer} providers={providers} admin={signedIn} />
+      <SiteHeader />
       <main className="page-panel settings-page admin-page" id="main-content">
-        <span className="eyebrow">ADMIN</span>
-        <h1>{view === "reports" ? "Content reports" : "Streamer requests"}</h1>
-        {signedIn ? (
-          <>
-            <StatusTabs label="Admin sections" current={view} tabs={views} className="view-tabs" />
-            <AdminContent data={data} />
-          </>
-        ) : (
-          <section className="info-card">
-            <h2>Sign in to continue</h2>
-            <p>The review queue is only available to administrators.</p>
-            <SignIn providers={providers} callbackURL={view === "reports" ? "/admin?view=reports" : "/admin"} />
-          </section>
-        )}
+        <div className="page-column">
+          <BackLink />
+          <span className="eyebrow">ADMIN</span>
+          <h1>{view === "reports" ? "Content reports" : "Streamer requests"}</h1>
+          {signedIn ? (
+            <>
+              <StatusTabs label="Admin sections" current={view} tabs={views} className="view-tabs" />
+              <AdminContent data={data} />
+            </>
+          ) : (
+            <section className="info-card">
+              <h2>Sign in to continue</h2>
+              <p>The review queue is only available to administrators.</p>
+              <SignIn providers={providers} callbackURL={view === "reports" ? "/admin?view=reports" : "/admin"} />
+            </section>
+          )}
+        </div>
       </main>
     </>
   );

@@ -1,31 +1,20 @@
-import { useRef, useState, type ReactNode } from "react";
-import { Link } from "react-router";
-import { Dialog } from "radix-ui";
-import { authClient } from "../auth-client";
-import type { Streamer, Viewer } from "../types";
+import type { ReactNode } from "react";
+import { t } from "../i18n";
 import { legal, legalPlaceholdersRemain } from "../legal";
-import { errorMessage } from "./api";
+import { BackLink } from "./shell/back-link";
+import { SiteHeader } from "./shell/site-header";
+import { Dialog } from "./ui/dialog";
+import { Icon, type IconName } from "./ui/icon";
 
-export type Provider = "google" | "twitch";
+/* Shared pieces now live in ./ui (primitives) and ./shell (headers, menu, footer). These re-exports keep the
+   existing imports working; new code imports from ./ui and ./shell directly. */
+export { Avatar } from "./ui/avatar";
+export { SignIn, SignInDialog } from "./shell/sign-in-dialog";
+export { SiteHeader } from "./shell/site-header";
+export { SiteFooter } from "./shell/footer";
+export type { Provider } from "../lib/shell";
 
-export function Avatar({
-  name,
-  url,
-  className = "",
-}: Readonly<{
-  name: string;
-  url: string | null;
-  className?: string;
-}>): ReactNode {
-  return url ? (
-    <img className={`user-avatar ${className}`} src={url} alt="" loading="lazy" />
-  ) : (
-    <span className={`user-avatar avatar-initial ${className}`} aria-hidden="true">
-      {name.trim().slice(0, 1).toUpperCase() || "S"}
-    </span>
-  );
-}
-
+/** A plain dialog with a title, a description and free-form content. New code uses <Dialog> from ./ui/dialog. */
 export function Modal({
   open,
   onOpenChange,
@@ -39,187 +28,24 @@ export function Modal({
   description: string;
   children: ReactNode;
 }>): ReactNode {
-  const returnFocus = useRef<HTMLElement | null>(null);
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="modal-backdrop" />
-        <Dialog.Content
-          className="modal-content"
-          onOpenAutoFocus={() => {
-            returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-          }}
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            if (returnFocus.current?.isConnected) returnFocus.current.focus();
-          }}
-        >
-          <Dialog.Close className="modal-close" aria-label="Close dialog">
-            ×
-          </Dialog.Close>
-          <Dialog.Title>{title}</Dialog.Title>
-          <Dialog.Description>{description}</Dialog.Description>
-          {children}
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+    <Dialog open={open} onOpenChange={onOpenChange} title={title} description={description}>
+      {children}
+    </Dialog>
   );
 }
 
-export function SignIn({
-  providers,
-  callbackURL = "/settings",
-}: Readonly<{
-  providers: Provider[];
-  callbackURL?: string;
-}>): ReactNode {
-  const [pending, setPending] = useState<Provider | null>(null);
-  const [error, setError] = useState<string>("");
-  async function signIn(provider: Provider): Promise<void> {
-    setError("");
-    setPending(provider);
-    try {
-      const result = await authClient.signIn.social({ provider, callbackURL });
-      if (result.error) throw new Error(result.error.message || "Sign-in failed. Please try again.");
-    } catch (error_: unknown) {
-      setError(errorMessage(error_));
-    } finally {
-      setPending(null);
-    }
-  }
-  return (
-    <div className="sign-in-options">
-      {providers.map((provider: Provider) => {
-        const providerName: string = provider === "google" ? "Google" : "Twitch";
-        const label: string = pending === provider ? "Connecting…" : `Continue with ${providerName}`;
-        return (
-          <button
-            type="button"
-            className="gold"
-            disabled={pending !== null}
-            key={provider}
-            onClick={() => {
-              void signIn(provider);
-            }}
-          >
-            {label}
-          </button>
-        );
-      })}
-      {providers.length === 0 && <output>Sign-in is turned off on this site for now. Public pages still work.</output>}
-      <p className="form-error" role="alert">
-        {error}
-      </p>
-      <p className="sign-in-legal">
-        {providers.length > 0 ? (
-          <>
-            By continuing, you confirm you are {legal.minimumAge} or older and agree to the{" "}
-            <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link>.
-          </>
-        ) : (
-          <>
-            Read the <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link>.
-          </>
-        )}
-      </p>
-    </div>
-  );
-}
-
-export function AccountControls({
-  viewer,
-  providers,
-}: Readonly<{ viewer: Viewer | null; providers: Provider[] }>): ReactNode {
-  const [open, setOpen] = useState<boolean>(false);
-  return viewer ? (
-    <Link className="profile" to="/settings" aria-label={`Account settings for ${viewer.name}`}>
-      <Avatar name={viewer.name} url={viewer.avatar} />
-    </Link>
-  ) : (
-    <>
-      <button type="button" onClick={() => setOpen(true)}>
-        Sign in
-      </button>
-      <Modal
-        open={open}
-        onOpenChange={setOpen}
-        title="Join the conversation"
-        description="Sign in to suggest topics, vote, and comment. Your first sign-in creates your account."
-      >
-        <SignIn providers={providers} />
-      </Modal>
-    </>
-  );
-}
-
-export function SiteHeader({
-  viewer,
-  providers,
-  streamer,
-  admin = false,
-  account = true,
+export function EmptyState({
+  title,
+  icon,
   children,
-}: Readonly<{
-  viewer: Viewer | null;
-  providers: Provider[];
-  streamer?: Streamer;
-  /** Shows the review queue link. Pass it only from loaders that already know the viewer's access. */
-  admin?: boolean;
-  /** Hides the sign-in button and avatar on pages without a viewer, such as the legal pages. */
-  account?: boolean;
-  children?: ReactNode;
-}>): ReactNode {
-  return (
-    <header className="site-header">
-      <Link
-        className="brand"
-        to={streamer ? `/@${streamer.handle}` : "/"}
-        aria-label={streamer ? `${streamer.name} home` : "StreamBullets home"}
-      >
-        {streamer ? (
-          <Avatar className="brand-avatar" name={streamer.name} url={streamer.avatar} />
-        ) : (
-          <span className="brand-name">
-            Stream
-            <br />
-            Bullets
-          </span>
-        )}
-      </Link>
-      {children || (
-        <nav aria-label="Main navigation">
-          <Link to="/">Streamers</Link>
-          <Link to="/settings">Your profile</Link>
-          {admin && <Link to="/admin">Admin</Link>}
-        </nav>
-      )}
-      <div className="header-end">{account && <AccountControls viewer={viewer} providers={providers} />}</div>
-    </header>
-  );
-}
-
-export function EmptyState({ title, children }: Readonly<{ title: string; children: ReactNode }>): ReactNode {
+}: Readonly<{ title: string; icon?: IconName; children: ReactNode }>): ReactNode {
   return (
     <div className="empty-state">
+      {icon && <Icon name={icon} size={40} />}
       <h2>{title}</h2>
       <p>{children}</p>
     </div>
-  );
-}
-
-export function SiteFooter(): ReactNode {
-  return (
-    <footer className="site-footer">
-      <nav aria-label="Legal">
-        <Link to="/privacy">Privacy</Link>
-        <span aria-hidden="true">·</span>
-        <Link to="/terms">Terms</Link>
-        <span aria-hidden="true">·</span>
-        <a href={`mailto:${legal.contactEmail}`}>Contact</a>
-        <span aria-hidden="true">·</span>
-        <Link to="/terms#reporting">Report content</Link>
-      </nav>
-    </footer>
   );
 }
 
@@ -229,7 +55,7 @@ export interface LegalSection {
   body: ReactNode;
 }
 
-/** Shared layout for the privacy policy and terms: header, draft notice, contents, and sections. */
+/** Shared layout for the privacy policy and terms: header, back link, draft notice, contents, and sections. */
 export function LegalDocument({
   title,
   summary,
@@ -237,9 +63,10 @@ export function LegalDocument({
 }: Readonly<{ title: string; summary: ReactNode; sections: readonly LegalSection[] }>): ReactNode {
   return (
     <>
-      <SiteHeader viewer={null} providers={[]} account={false} />
+      <SiteHeader />
       <main className="page-panel legal-page" id="main-content">
         <article aria-labelledby="legal-title">
+          <BackLink />
           {legalPlaceholdersRemain && (
             <p className="legal-draft" role="note">
               <strong>Draft — operator details pending.</strong> Values in square brackets are placeholders. This text
@@ -251,7 +78,7 @@ export function LegalDocument({
           <p className="legal-meta">Effective date: {legal.policyEffectiveDate}</p>
           <div className="legal-summary">{summary}</div>
           <nav className="info-card legal-toc" aria-labelledby="legal-toc-title">
-            <h2 id="legal-toc-title">Contents</h2>
+            <h2 id="legal-toc-title">{t("legal.contents")}</h2>
             <ol>
               {sections.map((section: LegalSection) => (
                 <li key={section.id}>

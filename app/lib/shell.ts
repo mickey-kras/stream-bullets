@@ -1,0 +1,42 @@
+import { useRouteLoaderData } from "react-router";
+import type { Viewer } from "../types";
+
+export type Provider = "google" | "twitch";
+
+/** The root loader's data: everything the headers, account menu and footer need on every page. */
+export interface ShellData {
+  viewer: Viewer | null;
+  providers: Provider[];
+  admin: boolean;
+  ownStreamer: { handle: string; name: string } | null;
+}
+
+export type ShellRole = "signed-out" | "viewer" | "owner" | "admin";
+
+const signedOut: ShellData = { viewer: null, providers: [], admin: false, ownStreamer: null };
+
+/** Shell data from the root loader. Falls back to signed out where the root loader did not run (some 404s). */
+export function useShell(): ShellData {
+  return useRouteLoaderData<ShellData>("root") ?? signedOut;
+}
+
+export function shellRole(shell: ShellData): ShellRole {
+  if (!shell.viewer) return "signed-out";
+  if (shell.admin) return "admin";
+  return shell.ownStreamer ? "owner" : "viewer";
+}
+
+/**
+ * App paths the shell links to. The Streamers directory is the landing page until P3 adds /streamers;
+ * change it here and every header, menu, footer and back link follows.
+ */
+export const paths = {
+  home: "/",
+  streamers: "/",
+  settings: "/settings",
+  admin: "/admin",
+  privacy: "/privacy",
+  terms: "/terms",
+  reporting: "/terms#reporting",
+  streamer: (handle: string): string => `/@${handle}`,
+} as const;

@@ -2,10 +2,15 @@ import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type R
 import { ScrollArea } from "radix-ui";
 import { Link, useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
-import { configuredProviders, getViewer } from "../server/auth.server";
+import { configuredProviders } from "../server/auth.server";
+import { requestViewer } from "../lib/shell.server";
 import { getEntry, getStreamer, listEntries } from "../server/data.server";
 import { isAdmin } from "../server/access.server";
-import { AccountControls, Avatar, EmptyState } from "../components/common";
+import { Avatar, EmptyState } from "../components/common";
+import { useRememberContentRoute } from "../components/shell/back-link";
+import { StreamerHeader, streamerViews, type StreamerView } from "../components/shell/streamer-header";
+import { Icon, type IconName } from "../components/ui/icon";
+import { t } from "../i18n";
 import { errorMessage, postJson, requestJson } from "../components/api";
 import { CreateEntry } from "../components/create-entry";
 import { DeleteButton, Discussion } from "../components/discussion";
@@ -14,28 +19,21 @@ import { PollCard } from "../components/poll";
 import { ReportButton } from "../components/report";
 import type { BoardSnapshot, Entry, LiveSnapshot, SortOrder } from "../types";
 
-type View = "topics" | "polls" | "schedule" | "about" | "community";
-const compactLabels: Record<View, string> = {
-  topics: "Topics",
-  polls: "Polls",
-  schedule: "Plan",
-  about: "About",
-  community: "People",
-};
+type View = StreamerView;
 const liveLabels: Record<string, string> = {
   live: "Live updates connected",
   connecting: "Connecting to live updates…",
   reconnecting: "Connection lost. Reconnecting…",
   offline: "Live updates are offline.",
 };
-const views: View[] = ["topics", "polls", "schedule", "about", "community"];
+const views: readonly View[] = streamerViews;
 
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
   const streamer = await getStreamer(app.env, params.handle.slice(1));
   if (!streamer) throw new Response("Streamer not found.", { status: 404 });
-  const viewer = await getViewer(request, app);
+  const viewer = await requestViewer(request, app);
   const url: URL = new URL(request.url);
   const requestedView: string = url.searchParams.get("view") || "topics";
   let view: View = views.includes(requestedView as View) ? (requestedView as View) : "topics";
@@ -65,33 +63,15 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   };
 }
 
+const categoryIcon: Record<string, IconName> = {
+  "Tech & setups": "cat-tech",
+  Gaming: "cat-gaming",
+  Creative: "cat-creative",
+  "Just chatting": "cat-chatting",
+};
+
 function TopicIcon({ category }: Readonly<{ category: string }>): ReactNode {
-  let icon: ReactNode = (
-    <>
-      <rect x="2" y="3" width="20" height="14" rx="1" />
-      <path d="M8 21h8M12 17v4" />
-    </>
-  );
-  if (category === "Gaming")
-    icon = (
-      <>
-        <path d="M7 7h10c3 0 5 10 3 11-2 1-4-3-5-3H9c-1 0-3 4-5 3C2 17 4 7 7 7Z" />
-        <path d="M8 10v5M5.5 12.5h5M16 11h.1M18 14h.1" />
-      </>
-    );
-  if (category === "Creative")
-    icon = (
-      <>
-        <path d="M4 3h7l1 2 1-2h7v17h-7l-1 1-1-1H4Z" />
-        <path d="M12 5v16" />
-      </>
-    );
-  if (category === "Just chatting") icon = <path d="M3 4h18v13H9l-6 4Z" />;
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-      {icon}
-    </svg>
-  );
+  return <Icon name={categoryIcon[category] ?? "cat-tech"} size={24} />;
 }
 
 function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revision: number): Entry | null {
@@ -101,17 +81,9 @@ function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revi
 }
 
 export default function StreamerPage(): ReactNode {
-  const {
-    board,
-    selected: loadedSelected,
-    viewer,
-    moderator,
-    providers,
-    view,
-    sort,
-    query,
-  } = useLoaderData<typeof loader>();
+  const { board, selected: loadedSelected, viewer, moderator, view, sort, query } = useLoaderData<typeof loader>();
   const { streamer } = board;
+  useRememberContentRoute(`/@${streamer.handle}`, streamer.name);
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
   const [dialog, setDialog] = useState<"topic" | "poll" | null>(null);
@@ -270,7 +242,8 @@ export default function StreamerPage(): ReactNode {
               placeholder="Search topics…"
             />
             <button type="submit" className="search-button" aria-label="Search topics">
-              Search
+              <Icon name="search" size={18} />
+              <span className="search-text">Search</span>
             </button>
           </form>
           <div className="list-toolbar">
@@ -313,12 +286,26 @@ export default function StreamerPage(): ReactNode {
                     <span className="topic-main">
                       <span className="topic-title">{entry.title}</span>
                       <span className="topic-meta">
-                        <span title="Likes">+ {entry.likes}</span>
-                        <span title="Dislikes">− {entry.dislikes}</span>
-                        <span title="Comments">▤ {entry.comments}</span>
+                        <span className="sr-only">
+                          {`${entry.likes} ${entry.likes === 1 ? "like" : "likes"}, ${entry.dislikes} ${entry.dislikes === 1 ? "dislike" : "dislikes"}, ${entry.comments} ${entry.comments === 1 ? "comment" : "comments"}`}
+                        </span>
+                        <span aria-hidden="true">
+                          <Icon name="thumbs-up" size={16} />
+                          {entry.likes}
+                        </span>
+                        <span aria-hidden="true">
+                          <Icon name="thumbs-down" size={16} />
+                          {entry.dislikes}
+                        </span>
+                        <span aria-hidden="true">
+                          <Icon name="comment" size={16} />
+                          {entry.comments}
+                        </span>
                       </span>
                     </span>
-                    <span aria-hidden="true">›</span>
+                    <span className="topic-chevron" aria-hidden="true">
+                      <Icon name="chevron-right" size={18} />
+                    </span>
                   </button>
                 ))}
                 {entries.length === 0 && (
@@ -432,7 +419,8 @@ export default function StreamerPage(): ReactNode {
           <>
             <div className="topic-content">
               <button type="button" className="back" onClick={() => navigate("topics")}>
-                ‹ All topics
+                <Icon name="chevron-left" size={16} />
+                All topics
               </button>
               <div className="detail-top">
                 <span className="category">
@@ -440,6 +428,7 @@ export default function StreamerPage(): ReactNode {
                   {selected.category}
                 </span>
                 <Link className="text-link" to={`?view=topics&entry=${selected.id}`}>
+                  <Icon name="link" size={16} />
                   Topic link
                 </Link>
               </div>
@@ -462,7 +451,8 @@ export default function StreamerPage(): ReactNode {
                     })
                   }
                 >
-                  Like <b>{selected.likes}</b>
+                  <Icon name={selected.reaction === 1 ? "thumbs-up-filled" : "thumbs-up"} size={24} />
+                  <span className="vote-word">Like</span> <b>{selected.likes}</b>
                 </button>
                 <button
                   type="button"
@@ -476,7 +466,8 @@ export default function StreamerPage(): ReactNode {
                     })
                   }
                 >
-                  Dislike <b>{selected.dislikes}</b>
+                  <Icon name={selected.reaction === -1 ? "thumbs-down-filled" : "thumbs-down"} size={24} />
+                  <span className="vote-word">Dislike</span> <b>{selected.dislikes}</b>
                 </button>
               </div>
               {!viewer && <p className="muted">Sign in to vote or suggest a topic.</p>}
@@ -502,7 +493,8 @@ export default function StreamerPage(): ReactNode {
           </div>
           {owner && (
             <button className="gold" type="button" onClick={() => setDialog("poll")}>
-              + Create poll
+              <Icon name="plus" size={18} />
+              Create poll
             </button>
           )}
         </div>
@@ -544,7 +536,8 @@ export default function StreamerPage(): ReactNode {
           </div>
           {loadedSelected && (
             <button type="button" onClick={() => navigate("polls")}>
-              ‹ All polls
+              <Icon name="chevron-left" size={16} />
+              All polls
             </button>
           )}
           {owner && (
@@ -671,7 +664,7 @@ export default function StreamerPage(): ReactNode {
     if (view === "schedule") content = renderSchedule();
     return (
       <main className="page-panel" id="main-content">
-        {content}
+        <div className="page-column">{content}</div>
       </main>
     );
   }
@@ -686,47 +679,38 @@ export default function StreamerPage(): ReactNode {
           : undefined
       }
     >
-      <header className="site-header">
-        <Link className="brand" to="/" aria-label="StreamBullets home">
-          <Avatar className="brand-avatar" name={streamer.name} url={streamer.avatar} />
-        </Link>
-        <nav aria-label="Main navigation">
-          {views.map((tab: View) => (
-            <button
-              type="button"
-              key={tab}
-              aria-current={view === tab ? "page" : undefined}
-              onClick={() => navigate(tab)}
-            >
-              <span className="nav-label">{tab}</span>
-              <span className="compact-nav-label">{compactLabels[tab]}</span>
-            </button>
-          ))}
-        </nav>
-        <div className="header-end">
-          {viewer && (
+      <StreamerHeader
+        streamer={streamer}
+        current={view}
+        action={
+          viewer && (
             <button
               className="gold"
               id="suggest"
               type="button"
-              aria-label="Suggest a topic"
+              aria-label={t("streamer.suggest")}
               onClick={() => setDialog("topic")}
             >
               <span className="suggest-plus" aria-hidden="true">
-                +
+                <Icon name="plus" size={18} />
               </span>
-              <span className="suggest-label">Suggest a topic</span>
+              <span className="suggest-label">{t("streamer.suggest")}</span>
             </button>
-          )}
-          <AccountControls viewer={viewer} providers={providers} />
-        </div>
-      </header>
+          )
+        }
+      />
       {error && (
         <p className="page-error form-error" role="alert">
           {error}
         </p>
       )}
       {renderPage()}
+      {viewer && view === "topics" && (
+        <button type="button" className="fab gold" onClick={() => setDialog("topic")}>
+          <Icon name="plus" size={20} />
+          {t("streamer.suggest")}
+        </button>
+      )}
       <CreateEntry
         key={dialog || "closed"}
         mode={dialog || "topic"}
