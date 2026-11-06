@@ -25,7 +25,8 @@ export function meta() {
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const app = context.get(appContext);
   const url = new URL(request.url);
-  const query: string = (url.searchParams.get("query") ?? "").trim().slice(0, 60);
+  // "@handle" searches the handle: the @ is how people write it, not part of it.
+  const query: string = (url.searchParams.get("query") ?? "").trim().replace(/^@/u, "").slice(0, 60);
   try {
     const [page, total] = await Promise.all([listStreamers(app.env, null, query), countStreamers(app.env, query)]);
     return { ...page, total, query, intent: readIntent(url.searchParams.get("then")) };

@@ -48,7 +48,7 @@ async function headerLabelsDoNotWrap(page: Page): Promise<void> {
 test("the account menu is a keyboard-operable disclosure of links", async ({ browser }) => {
   const context = await signedIn(browser, "owner");
   const page = await context.newPage();
-  await page.goto("/settings");
+  await page.goto("/streamers");
   const toggle = page.getByRole("button", { name: "Account menu for owner" });
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   const menu = page.getByRole("navigation", { name: "Account" });
@@ -61,9 +61,11 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   // Focus moves to the first link; the owner's own page comes first, then the account rows.
   const links = menu.getByRole("link");
   await expect(links.first()).toBeFocused();
-  await expect(links).toHaveText(["Your page", "Your profile", "Your data"]);
+  await expect(links).toHaveText(["Your page", "Edit your page", "Your profile", "Your data"]);
   await expect(menu.getByRole("link", { name: "Your page" })).toHaveAttribute("href", "/@test_host");
-  await expect(menu.getByRole("link", { name: "Your profile" })).toHaveAttribute("aria-current", "page");
+  // Account rows open dialogs over the current page (item 17).
+  await expect(menu.getByRole("link", { name: "Your profile" })).toHaveAttribute("href", "/streamers?dialog=profile");
+  await expect(menu.getByRole("link", { name: "Edit your page" })).toHaveAttribute("aria-haspopup", "dialog");
   await expect(menu.getByRole("button", { name: "Sign out" })).toBeVisible();
   await expect(page.locator(".account-id")).toContainText("Streamer · @test_host");
 
@@ -80,6 +82,16 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   await expect(menu).toBeVisible();
   await page.locator("main h1").click();
   await expect(menu).toBeHidden();
+  // A dialog row opens the dialog; closing it goes back to the page and the avatar gets focus.
+  await toggle.click();
+  await menu.getByRole("link", { name: "Your profile" }).click();
+  const profile = page.getByRole("dialog", { name: "Your profile" });
+  await expect(profile).toBeVisible();
+  await expect(page).toHaveURL(/\/streamers\?dialog=profile$/);
+  await profile.getByRole("button", { name: "Close dialog" }).click();
+  await expect(profile).toBeHidden();
+  await expect(page).toHaveURL(/\/streamers$/);
+  await expect(toggle).toBeFocused();
   await toggle.click();
   await menu.getByRole("link", { name: "Your page" }).click();
   await expect(page).toHaveURL(/\/@test_host$/);
@@ -124,7 +136,7 @@ test("logos go home, the streamer picture goes to its topics, and navigation mar
 test("headers keep every label on one line at 390px", async ({ browser }) => {
   const context = await signedIn(browser, "admin", { width: 390 });
   const page = await context.newPage();
-  for (const path of ["/@test_host", "/settings", "/admin", "/privacy", "/missing/page"]) {
+  for (const path of ["/@test_host", "/streamers", "/admin", "/privacy", "/missing/page"]) {
     await page.goto(path);
     await expect(page.getByRole("banner")).toBeVisible();
     await headerLabelsDoNotWrap(page);
@@ -161,7 +173,10 @@ test("the 404 page has the site header, a back link and a way on", async ({ page
   await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
   await expect(page.getByRole("banner").getByRole("link", { name: "StreamBullets home" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Back to Streamers" })).toBeVisible();
-  await expect(page.getByRole("main").getByRole("link", { name: "Browse streamers" })).toHaveAttribute("href", "/");
+  await expect(page.getByRole("main").getByRole("link", { name: "Browse streamers" })).toHaveAttribute(
+    "href",
+    "/streamers",
+  );
   await expect(page.getByRole("contentinfo")).toBeVisible();
 });
 
