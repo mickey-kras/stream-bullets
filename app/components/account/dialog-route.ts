@@ -36,6 +36,12 @@ export function useAccountDialog(): { name: AccountDialogName | null; close: () 
   const close = useCallback((): void => {
     if (fromApp) void navigate(-1);
     else void navigate(dialogHref(location, null), { replace: true, preventScrollReset: true });
+    // The dialog unmounts with the route change, so focus can land on the page body. The account dialogs open
+    // from the account menu, so give focus back to its avatar button then.
+    globalThis.setTimeout(() => {
+      if (document.activeElement && document.activeElement !== document.body) return;
+      document.querySelector<HTMLElement>(".account-menu-wrap > button.profile")?.focus();
+    }, 60);
   }, [fromApp, location, navigate]);
   return { name, close };
 }

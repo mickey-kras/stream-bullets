@@ -151,6 +151,7 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
                     aria-haspopup={row.dialog ? "dialog" : undefined}
                     state={row.dialog ? ({ dialogFrom: pathname } satisfies DialogState) : undefined}
                     preventScrollReset={Boolean(row.dialog)}
+                    onClick={() => setOpenAt(null)}
                   >
                     <span className="icon-muted">
                       <Icon name={row.icon} size={18} />

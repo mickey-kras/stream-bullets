@@ -62,7 +62,7 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   const links = menu.getByRole("link");
   await expect(links.first()).toBeFocused();
   await expect(links).toHaveText(["Your page", "Edit your page", "Your profile", "Your data"]);
-  await expect(menu.getByRole("link", { name: "Your page" })).toHaveAttribute("href", "/@test_host");
+  await expect(menu.getByRole("link", { name: "Your page", exact: true })).toHaveAttribute("href", "/@test_host");
   // Account rows open dialogs over the current page (item 17).
   await expect(menu.getByRole("link", { name: "Your profile" })).toHaveAttribute("href", "/streamers?dialog=profile");
   await expect(menu.getByRole("link", { name: "Edit your page" })).toHaveAttribute("aria-haspopup", "dialog");
@@ -93,7 +93,7 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   await expect(page).toHaveURL(/\/streamers$/);
   await expect(toggle).toBeFocused();
   await toggle.click();
-  await menu.getByRole("link", { name: "Your page" }).click();
+  await menu.getByRole("link", { name: "Your page", exact: true }).click();
   await expect(page).toHaveURL(/\/@test_host$/);
   await expect(page.getByRole("navigation", { name: "Account" })).toBeHidden();
 

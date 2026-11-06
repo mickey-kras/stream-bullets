@@ -181,7 +181,7 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   const page = await context.newPage();
   await page.goto("/streamers");
   await expect(page.getByRole("link", { name: "Admin", exact: true })).toHaveCount(0);
-  await page.getByRole("link", { name: "Host a community" }).click();
+  await page.getByRole("link", { name: "Host a community", exact: true }).click();
   const host = page.getByRole("dialog", { name: "Host a community" });
   await expect(host.getByText("Hosting a community is invite-only for now.", { exact: false })).toBeVisible();
   await expect(host.getByRole("button", { name: "Create your community page" })).toHaveCount(0);
