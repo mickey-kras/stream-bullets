@@ -53,6 +53,10 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   const planned = await context.request.get("/api/streamers/streambullets?status=planned");
   const ideas = (await planned.json()) as { entries: { title: string; status: string }[] };
   expect(ideas.entries.map((entry) => entry.status)).toEqual(["planned"]);
+  // The author may delete an idea while it is under review.
+  await detail.getByRole("button", { name: "Delete idea" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Delete idea" }).click();
+  await expect(page.locator("#topics .idea-row")).toHaveCount(1);
   await context.close();
 });
 
