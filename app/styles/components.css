@@ -728,7 +728,8 @@ a.topic-chip:hover, .topic-chip.toggle:hover { border-color: var(--gold); }
 .card-form { display: flex; flex-direction: column; gap: 16px; }
 .icon-choice svg { width: 22px; height: 22px; }
 .icon-choice[aria-checked="true"], .icon-choice:has(input:checked) { border-color: var(--gold); color: var(--gold); background: var(--c-edbd5326); box-shadow: inset 0 0 0 1px var(--gold); }
-label.icon-choice { margin: 0; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+label.icon-choice { position: relative; display: grid; place-items: center; margin: 0; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.icon-choice > .icon-choice-input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
 label.icon-choice:hover { color: var(--cream); border-color: var(--gold); }
 label.icon-choice:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 2px; }
 fieldset:is(.day-toggles, .topic-chips, .sched-switch, .card-tools) { min-width: 0; margin: 0; padding: 0; border: 0; }

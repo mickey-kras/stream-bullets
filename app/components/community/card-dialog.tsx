@@ -23,7 +23,7 @@ function IconPicker({
         {iconChoices.map((icon: CardIcon | null) => (
           <label key={icon ?? "none"} className="icon-choice" title={t(`community.icon.${icon ?? "none"}`)}>
             <input
-              className="sr-only"
+              className="icon-choice-input"
               type="radio"
               name={`${id}-icon`}
               checked={value === icon}

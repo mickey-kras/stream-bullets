@@ -13,10 +13,10 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   await expect(tabs.first()).toHaveAttribute("aria-current", "page");
   await expect(tabs.first()).toContainText("Ideas");
   const filters = page.getByRole("navigation", { name: "Filter by status" });
-  await filters.getByRole("link", { name: "Planned" }).click();
+  await filters.getByRole("link", { name: "Planned", exact: true }).click();
   await expect(page.locator("#topics .idea-row")).toHaveCount(1);
   await expect(page.locator("#topics .idea-row")).toContainText("Planned");
-  await filters.getByRole("link", { name: "Shipped" }).click();
+  await filters.getByRole("link", { name: "Shipped", exact: true }).click();
   await expect(page.locator(".changelog-note")).toBeVisible();
   await expect(page.locator("#topics .idea-row")).toHaveCount(0);
 

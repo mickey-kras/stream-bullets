@@ -70,10 +70,10 @@ test("About shows support links and the owner edits them within the allow-list",
   await editor.getByRole("button", { name: "Add support link" }).click();
   await editor.getByRole("combobox", { name: "Provider for link 3" }).click();
   await owner.getByRole("option", { name: "Patreon" }).click();
-  await editor.getByLabel("Link 3").fill("https://ko-fi.com/not-patreon");
+  await editor.getByRole("textbox", { name: "Link 3" }).fill("https://ko-fi.com/not-patreon");
   await editor.getByRole("button", { name: "Save support links" }).click();
   await expect(editor.getByRole("alert")).toHaveText("Link 3: use an https link on Patreon's own domain.");
-  await editor.getByLabel("Link 3").fill("https://www.patreon.com/feature_host");
+  await editor.getByRole("textbox", { name: "Link 3" }).fill("https://www.patreon.com/feature_host");
   await editor.getByRole("button", { name: "Save support links" }).click();
   await expect(editor).toBeHidden();
   await expect(owner.locator("#sec-support").getByRole("link", { name: /Patreon/ })).toBeVisible();
