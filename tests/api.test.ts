@@ -1,12 +1,11 @@
-import { makeSignature } from "better-auth/crypto";
-import { RouterContextProvider } from "react-router";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { appContext, type AppEnv } from "../app/env";
-import { action, loader } from "../app/routes/api";
+import type { AppEnv } from "../app/env";
+import { action } from "../app/routes/api";
 import { apiRoutes } from "../app/server/api";
 import { readDisplayPrefs } from "../app/server/validation";
 import { serveImage } from "../app/server/images.server";
 import type { CommentThread, Streamer, StreamerDirectory, ThreadSnapshot, Viewer } from "../app/types";
+import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 const origin = "https://stream.example.test";
@@ -24,42 +23,7 @@ const ids = {
 let database: TestDatabase;
 let env: AppEnv;
 
-function context(): RouterContextProvider {
-  const provider = new RouterContextProvider();
-  provider.set(appContext, { env, nonce: "nonce", responseHeaders: new Headers() });
-  return provider;
-}
-
-async function cookie(user: string): Promise<string> {
-  const token = `${user}-session-token`;
-  return `__Secure-stream-bullets.session_token=${encodeURIComponent(`${token}.${await makeSignature(token, secret)}`)}`;
-}
-
-/** Calls `/api/{path}` the way React Router does: GET and HEAD go to the loader, everything else to the action. */
-async function call(
-  method: string,
-  path: string,
-  options: { user?: string; body?: unknown; raw?: BodyInit; type?: string } = {},
-): Promise<Response> {
-  const url = `${origin}/api/${path}`;
-  const headers: Record<string, string> = {};
-  if (options.user) headers.cookie = await cookie(options.user);
-  if (method !== "GET" && method !== "HEAD") headers.Origin = origin;
-  let body: BodyInit | undefined = options.raw;
-  if (options.body !== undefined) {
-    body = JSON.stringify(options.body);
-    headers["Content-Type"] = "application/json";
-  }
-  if (options.type) headers["Content-Type"] = options.type;
-  const args = {
-    request: new Request(url, { method, headers, body }),
-    params: { "*": path.split("?")[0] },
-    context: context(),
-    url: new URL(url),
-    pattern: "/api/*",
-  };
-  return method === "GET" || method === "HEAD" ? loader(args) : action(args);
-}
+const { call, cookie, context } = apiCaller(() => env, origin, secret);
 
 async function seed(): Promise<void> {
   const now = Date.now();
