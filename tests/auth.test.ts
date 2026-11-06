@@ -2,7 +2,13 @@ import { generateKeyPairSync, sign } from "node:crypto";
 import { makeSignature, symmetricDecrypt } from "better-auth/crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { AppContext, AppEnv } from "../app/env";
-import { configuredProviders, createAuth, getViewer } from "../app/server/auth.server";
+import {
+  configuredProviders,
+  createAuth,
+  getViewer,
+  isPlaceholderEmail,
+  placeholderEmail,
+} from "../app/server/auth.server";
 import { createTestDatabase } from "./helpers/database";
 
 const secret: string = "test-only-secret-71cbbad72594467d8bcd83e4e0f42d04";
@@ -539,5 +545,53 @@ describe("OAuth boundary", () => {
       "Both twitch OAuth credentials",
     );
     expect(configuredProviders(env)).toEqual(["google", "twitch"]);
+  });
+
+  it("adds TikTok and Instagram only with both values of their credential pair, in button order", async () => {
+    const all: AppEnv = {
+      ...env,
+      TIKTOK_CLIENT_KEY: "test-tiktok-key",
+      TIKTOK_CLIENT_SECRET: "test-tiktok-secret",
+      INSTAGRAM_CLIENT_ID: "test-instagram-client",
+      INSTAGRAM_CLIENT_SECRET: "test-instagram-secret",
+    };
+    expect(configuredProviders(all)).toEqual(["google", "tiktok", "twitch", "instagram"]);
+    expect(configuredProviders({ ...all, GOOGLE_CLIENT_ID: undefined, GOOGLE_CLIENT_SECRET: undefined })).toEqual([
+      "tiktok",
+      "twitch",
+      "instagram",
+    ]);
+    expect(() => configuredProviders({ ...all, TIKTOK_CLIENT_SECRET: undefined })).toThrow(
+      "Both tiktok OAuth credentials",
+    );
+    expect(() => configuredProviders({ ...all, INSTAGRAM_CLIENT_ID: undefined })).toThrow(
+      "Both instagram OAuth credentials",
+    );
+    expect(() => createAuth({ ...all, INSTAGRAM_CLIENT_SECRET: undefined })).toThrow();
+    // Both providers start an OAuth redirect through the social sign-in endpoint.
+    const auth = createAuth(all);
+    for (const [provider, host] of [
+      ["tiktok", "www.tiktok.com"],
+      ["instagram", "www.instagram.com"],
+    ] as const) {
+      const response = await auth.handler(
+        new Request(`${env.APP_ORIGIN}/api/auth/sign-in/social`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Origin: env.APP_ORIGIN },
+          body: JSON.stringify({ provider, callbackURL: "/streamers" }),
+        }),
+      );
+      expect(response.status).toBe(200);
+      const { url } = (await response.json()) as { url: string };
+      expect(new URL(url).host).toBe(host);
+    }
+  });
+
+  it("recognises the placeholder addresses of accounts without an email", () => {
+    expect(placeholderEmail("instagram", "17841")).toBe("17841@instagram.invalid");
+    expect(placeholderEmail("tiktok", "abc")).toBe("abc@tiktok.invalid");
+    expect(isPlaceholderEmail("17841@instagram.invalid")).toBe(true);
+    expect(isPlaceholderEmail("open_id@tiktok.placeholder.invalid")).toBe(true);
+    expect(isPlaceholderEmail("person@example.test")).toBe(false);
   });
 });

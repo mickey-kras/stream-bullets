@@ -16,6 +16,7 @@ import {
   type ApplicationInput,
   type ApplicationQuery,
   type ApplicationReview,
+  isPlaceholderEmail,
 } from "./validation";
 
 const QUEUE_PAGE_SIZE = 50;
@@ -246,7 +247,7 @@ export async function listApplications(env: AppEnv, query: ApplicationQuery): Pr
         ...applicationValue(row),
         userId: row.user_id,
         name: row.name,
-        email: row.email,
+        email: isPlaceholderEmail(row.email) ? "" : row.email,
       }),
     ),
     nextCursor: results.length > QUEUE_PAGE_SIZE && last ? `${last.updated_at}.${last.id}` : null,

@@ -11,6 +11,10 @@ export interface AppEnv {
   GOOGLE_CLIENT_SECRET?: string;
   TWITCH_CLIENT_ID?: string;
   TWITCH_CLIENT_SECRET?: string;
+  TIKTOK_CLIENT_KEY?: string;
+  TIKTOK_CLIENT_SECRET?: string;
+  INSTAGRAM_CLIENT_ID?: string;
+  INSTAGRAM_CLIENT_SECRET?: string;
   ADMIN_EMAILS?: string;
 }
 

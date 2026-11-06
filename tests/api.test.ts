@@ -160,9 +160,13 @@ describe("profile, language and preferences", (): void => {
     for (const body of [{}, { avatarPreset: 18 }, { avatarPreset: 1.5 }, { name: "" }, { image: "/x" }]) {
       expect((await call("PATCH", "profile", { user: "viewer", body })).status).toBe(400);
     }
-    // The original settings form still renames through POST /api/account.
-    const legacy = await call("POST", "account", { user: "viewer", body: { name: "Legacy" } });
-    expect(((await legacy.json()) as { viewer: Viewer }).viewer.name).toBe("Legacy");
+    // The settings page's endpoints are retired with it: the dialogs use PATCH /api/profile and /api/streamer.
+    expect((await call("POST", "account", { user: "viewer", body: { name: "Legacy" } })).status).toBe(404);
+    expect((await call("POST", "profile", { user: "viewer", body: { handle: "x_page", name: "X" } })).status).toBe(
+      405,
+    );
+    // Removing an uploaded picture (a preset was chosen) is idempotent for an account without one.
+    expect(await (await call("DELETE", "images/avatar", { user: "viewer" })).json()).toEqual({ avatar: null });
   });
 
   it("saves the language and display preferences, which the session then reads", async (): Promise<void> => {
@@ -355,11 +359,20 @@ describe("waitlist and reports through the handler table", (): void => {
       body: { id: application.id, decision: "approved" },
     });
     expect(((await reviewed.json()) as { application: { status: string } }).application.status).toBe("approved");
-    const created = await call("POST", "profile", {
+    const created = await call("POST", "streamer", {
       user: "applicant",
       body: { handle: "applicant_page", name: "Applicant", about: "" },
     });
-    expect(((await created.json()) as { streamer: Streamer }).streamer.handle).toBe("applicant_page");
+    expect(((await created.json()) as { streamer: Streamer }).streamer).toMatchObject({
+      handle: "applicant_page",
+      logo: null,
+      ownerAvatarPreset: null,
+    });
+    const again = await call("POST", "streamer", {
+      user: "applicant",
+      body: { handle: "applicant_two", name: "Applicant", about: "" },
+    });
+    expect(again.status).toBe(409);
 
     const reported = await call("POST", "reports", {
       user: "owner",

@@ -132,7 +132,8 @@ export const localIcons = {
       <path d="m6 9 6 6 6-6" />
     </>
   ),
-  "thumbs-up": thumb(THUMB_UP, false),
+  "chevron-up": <path d="m6 15 6-6 6 6" />,
+  "thumbs-up":thumb(THUMB_UP, false),
   "thumbs-up-filled": thumb(THUMB_UP, true),
   "thumbs-down": thumb(THUMB_DOWN, false),
   "thumbs-down-filled": thumb(THUMB_DOWN, true),

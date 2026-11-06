@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, type Location } from "react-router";
 import { authClient } from "../../auth-client";
 import { t, type MessageId } from "../../i18n";
 import { paths, useShell, type ShellData } from "../../lib/shell";
+import { dialogHref, type AccountDialogName, type DialogState } from "../account/dialog-route";
 import { Avatar } from "../ui/avatar";
 import { Icon, type IconName } from "../ui/icon";
 import { SignInButton } from "./sign-in-dialog";
@@ -12,14 +13,28 @@ interface MenuRow {
   label: MessageId;
   icon: IconName;
   current?: boolean;
+  /** Opens an account dialog over this page (history state marks it, so closing steps back). */
+  dialog?: AccountDialogName;
 }
 
 /**
  * The rows for this person, in the approved order (item 35): own page tools, then account, then Admin, then
- * Streamers (streamer header only). Rows for later phases (Overlay control, Edit your page, Language,
- * Accessibility & display, Suggest an improvement) are added by those phases.
+ * Streamers (streamer header only). Your profile, Host a community, Your data and Edit your page open dialogs
+ * over the current page (item 17). Rows for later phases (Overlay control, Language, Accessibility & display,
+ * Suggest an improvement) are added by those phases.
  */
-export function accountMenuRows(shell: ShellData, pathname: string, streamerHeader: boolean): MenuRow[][] {
+export function accountMenuRows(
+  shell: ShellData,
+  location: Pick<Location, "pathname" | "search" | "hash">,
+  streamerHeader: boolean,
+): MenuRow[][] {
+  const { pathname } = location;
+  const dialog = (name: AccountDialogName, label: MessageId, icon: IconName): MenuRow => ({
+    to: dialogHref(location, name),
+    label,
+    icon,
+    dialog: name,
+  });
   const groups: MenuRow[][] = [];
   if (shell.ownStreamer)
     groups.push([
@@ -29,13 +44,11 @@ export function accountMenuRows(shell: ShellData, pathname: string, streamerHead
         icon: "your-page",
         current: pathname === paths.streamer(shell.ownStreamer.handle),
       },
+      dialog("page", "account.editPage", "pencil"),
     ]);
-  const account: MenuRow[] = [
-    { to: paths.settings, label: "account.yourProfile", icon: "user", current: pathname === paths.settings },
-  ];
-  if (!shell.ownStreamer)
-    account.push({ to: `${paths.settings}#streamer-heading`, label: "account.hostCommunity", icon: "mic" });
-  account.push({ to: `${paths.settings}#data-heading`, label: "account.yourData", icon: "data" });
+  const account: MenuRow[] = [dialog("profile", "account.yourProfile", "user")];
+  if (!shell.ownStreamer) account.push(dialog("host", "account.hostCommunity", "mic"));
+  account.push(dialog("data", "account.yourData", "data"));
   if (shell.admin)
     account.push({ to: paths.admin, label: "account.admin", icon: "admin", current: pathname.startsWith(paths.admin) });
   if (streamerHeader) account.push({ to: paths.streamers, label: "nav.streamers", icon: "streamers" });
@@ -50,7 +63,8 @@ export function accountMenuRows(shell: ShellData, pathname: string, streamerHead
  */
 export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeader?: boolean }>): ReactNode {
   const shell: ShellData = useShell();
-  const { pathname, search, hash } = useLocation();
+  const here = useLocation();
+  const { pathname, search, hash } = here;
   // The menu remembers the location it opened at, so a route change closes it without an effect.
   const location = `${pathname}${search}${hash}`;
   const [openAt, setOpenAt] = useState<string | null>(null);
@@ -115,11 +129,11 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
         aria-label={t("account.menuFor", { name: viewer.name })}
         onClick={() => setOpenAt((value: string | null) => (value === location ? null : location))}
       >
-        <Avatar name={viewer.name} url={viewer.avatar} />
+        <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
       </button>
       <div className="account-menu" id={menuId} ref={panel} tabIndex={-1} hidden={!open}>
         <div className="account-id">
-          <Avatar name={viewer.name} url={viewer.avatar} />
+          <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
           <div>
             <strong>{viewer.name}</strong>
             <span>{roleLine}</span>
@@ -127,11 +141,18 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
         </div>
         <nav aria-label={t("account.nav")}>
           <ul>
-            {accountMenuRows(shell, pathname, streamerHeader).map((group: MenuRow[], index: number) => [
+            {accountMenuRows(shell, here, streamerHeader).map((group: MenuRow[], index: number) => [
               index > 0 && <li key={`divider-${index}`} className="account-menu-divider" aria-hidden="true" />,
               ...group.map((row: MenuRow) => (
                 <li key={row.label}>
-                  <Link to={row.to} aria-current={row.current ? "page" : undefined}>
+                  <Link
+                    to={row.to}
+                    aria-current={row.current ? "page" : undefined}
+                    aria-haspopup={row.dialog ? "dialog" : undefined}
+                    state={row.dialog ? ({ dialogFrom: pathname } satisfies DialogState) : undefined}
+                    preventScrollReset={Boolean(row.dialog)}
+                    onClick={() => setOpenAt(null)}
+                  >
                     <span className="icon-muted">
                       <Icon name={row.icon} size={18} />
                     </span>

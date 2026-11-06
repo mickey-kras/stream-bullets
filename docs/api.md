@@ -37,14 +37,29 @@ Notes:
   needs an uploaded logo (`400` otherwise).
 - A preset avatar does not remove an uploaded picture: `avatar` wins when the viewer has both. The profile
   dialog decides which one to keep.
-- `POST /api/profile` (create or replace your page) and `POST /api/account` (rename) still work for
-  the current settings page. Use `PATCH /api/streamer` and `PATCH /api/profile` in the new dialogs.
+
+## Phase 3 changes
+
+| Endpoint | Body | Response |
+|---|---|---|
+| `POST /api/streamer` | `{handle, name, about}` | `{streamer}`. It creates the page for an approved account or an admin. A second page gets `409`. |
+| `DELETE /api/images/avatar` | none | `{avatar: null}`. The account then shows its preset, or the default. |
+| `GET /api/me` | none | Adds `signInProvider`: `"google"`, `"tiktok"`, `"twitch"`, `"instagram"` or null. |
+
+- Phase 3 removes `POST /api/profile` and `POST /api/account`. The settings page used them. Use
+  `POST /api/streamer`, `PATCH /api/streamer` and `PATCH /api/profile`.
+- `Streamer` adds `ownerAvatarPreset: number | null`. The page logo falls back to the uploaded logo,
+  then the uploaded owner picture, then this preset, then preset 14.
+- `/settings` answers `302` to `/streamers?dialog=profile`.
+- Each account dialog opens over the current page with `?dialog=profile`, `host`, `data` or `page`.
+- The directory card links carry the landing intent. `?intent=suggest` asks the streamer page to open
+  Suggest a topic, or the sign-in dialog for a signed-out visitor. `?intent=discuss` asks it to open
+  the discussion of the top topic. The streamer page (Phase 4) reads these parameters.
+- The application queue shows an empty email for TikTok and Instagram accounts. These accounts have
+  a placeholder address (`{id}@tiktok.invalid` or `{id}@instagram.invalid`) that is not real.
 
 ## Not done in Phase 2
 
-- `/settings` still renders the settings page. The redirect to `/streamers?dialog=profile` lands
-  with the `/streamers` route and the profile dialog (Phase 3). Before then it would point at a
-  missing page.
 - Schedule, Community cards, support links, overlay control, Mash Battle, admin moderation,
   step-up and the AI-interest counter have tables (migrations 0008–0012) but no endpoints yet. Each
   later phase adds one `app/server/api/<feature>.ts` and one line in `app/server/api/index.ts`.
