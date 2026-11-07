@@ -60,7 +60,10 @@ export function eventsJsonLd(
   limit = 5,
 ): JsonLd[] {
   return events
-    .filter((event: StreamEvent) => (event.status === "scheduled" || event.status === "live") && event.startsAt >= now - 86_400_000)
+    .filter(
+      (event: StreamEvent) =>
+        (event.status === "scheduled" || event.status === "live") && event.startsAt >= now - 86_400_000,
+    )
     .slice(0, limit)
     .map(
       (event: StreamEvent): JsonLd => ({
@@ -99,7 +102,11 @@ export function postingJsonLd(
         interactionType: "https://schema.org/CommentAction",
         userInteractionCount: entry.comments,
       },
-      { "@type": "InteractionCounter", interactionType: "https://schema.org/LikeAction", userInteractionCount: entry.likes },
+      {
+        "@type": "InteractionCounter",
+        interactionType: "https://schema.org/LikeAction",
+        userInteractionCount: entry.likes,
+      },
     ],
   };
 }

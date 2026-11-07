@@ -58,7 +58,10 @@ export function meta({ loaderData: data, matches }: Route.MetaArgs) {
   if (!data) return [{ title: "StreamBullets" }];
   const { streamer } = data.board;
   const origin: string = shellFromMatches(matches)?.origin ?? "";
-  const structured: JsonLd[] = [personJsonLd(streamer, origin), ...eventsJsonLd(data.events, streamer, origin, data.serverNow)];
+  const structured: JsonLd[] = [
+    personJsonLd(streamer, origin),
+    ...eventsJsonLd(data.events, streamer, origin, data.serverNow),
+  ];
   if (data.selected) structured.push(postingJsonLd(data.selected, streamer, origin));
   const title: string = data.selected ? `${data.selected.title} · ${streamer.name}` : streamer.name;
   return [

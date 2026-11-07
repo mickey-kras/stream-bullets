@@ -69,7 +69,9 @@ export async function aiInterestStatus(env: AppEnv, request: Request, now: numbe
   const hash: string = await visitorHash(secret, visitorIp(request), day);
   const [totals, row] = await Promise.all([
     aiInterestTotals(env),
-    env.DB.prepare("SELECT value FROM ai_interest WHERE day=? AND ip_hash=?").bind(day, hash).first<{ value: number }>(),
+    env.DB.prepare("SELECT value FROM ai_interest WHERE day=? AND ip_hash=?")
+      .bind(day, hash)
+      .first<{ value: number }>(),
   ]);
   let mine: AiInterestStatus["mine"] = null;
   if (row) mine = row.value === 1 ? "up" : "down";

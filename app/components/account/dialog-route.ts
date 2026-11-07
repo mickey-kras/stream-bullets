@@ -10,7 +10,10 @@ export function isAccountDialog(value: string | null): value is AccountDialogNam
 }
 
 /** The current URL with `?dialog=` set (or removed with null), keeping every other parameter and the hash. */
-export function dialogHref(location: Pick<Location, "pathname" | "search" | "hash">, name: AccountDialogName | null): string {
+export function dialogHref(
+  location: Pick<Location, "pathname" | "search" | "hash">,
+  name: AccountDialogName | null,
+): string {
   const params = new URLSearchParams(location.search);
   if (name) params.set("dialog", name);
   else params.delete("dialog");

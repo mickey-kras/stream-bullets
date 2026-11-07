@@ -12,9 +12,7 @@ const pending = new Map<string, ReturnType<typeof setTimeout>>();
  * so the same text twice is announced twice. Use `assertive` only for time-critical news (a battle starting).
  */
 export function announce(message: string, options: Readonly<{ assertive?: boolean; key?: string }> = {}): void {
-  const region: HTMLElement | null = globalThis.document?.getElementById(
-    options.assertive ? ASSERTIVE_ID : POLITE_ID,
-  );
+  const region: HTMLElement | null = globalThis.document?.getElementById(options.assertive ? ASSERTIVE_ID : POLITE_ID);
   if (!region) return;
   const key: string = options.key ?? "";
   if (key) clearTimeout(pending.get(key));

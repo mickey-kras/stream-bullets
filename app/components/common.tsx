@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { t } from "../i18n";
+import { getLocale, t } from "../i18n";
 import { legal, legalPlaceholdersRemain } from "../legal";
 import { BackLink } from "./shell/back-link";
 import { SiteHeader } from "./shell/site-header";
@@ -70,19 +70,31 @@ export function LegalDocument({
       <main className="page-panel legal-page" id="main-content">
         <article aria-labelledby="legal-title">
           <BackLink />
+          {getLocale() !== "en" && (
+            <p className="legal-draft legal-translation" role="note">
+              <Icon name="globe" size={18} />
+              <span>{t("legal.englishOnly")}</span>
+            </p>
+          )}
           {legalPlaceholdersRemain && (
-            <p className="legal-draft" role="note">
+            <p className="legal-draft" role="note" lang="en">
               <strong>Draft — operator details pending.</strong> Values in square brackets are placeholders. This text
               is not final until the operator replaces them.
             </p>
           )}
           <span className="eyebrow">StreamBullets</span>
-          <h1 id="legal-title">{title}</h1>
-          <p className="legal-meta">Effective date: {legal.policyEffectiveDate}</p>
-          <div className="legal-summary">{summary}</div>
+          <h1 id="legal-title" lang="en">
+            {title}
+          </h1>
+          <p className="legal-meta" lang="en">
+            Effective date: {legal.policyEffectiveDate}
+          </p>
+          <div className="legal-summary" lang="en">
+            {summary}
+          </div>
           <nav className="info-card legal-toc" aria-labelledby="legal-toc-title">
             <h2 id="legal-toc-title">{t("legal.contents")}</h2>
-            <ol>
+            <ol lang="en">
               {sections.map((section: LegalSection) => (
                 <li key={section.id}>
                   <a href={`#${section.id}`}>{section.title}</a>
@@ -91,7 +103,13 @@ export function LegalDocument({
             </ol>
           </nav>
           {sections.map((section: LegalSection, index: number) => (
-            <section key={section.id} id={section.id} className="legal-section" aria-labelledby={`${section.id}-title`}>
+            <section
+              key={section.id}
+              id={section.id}
+              className="legal-section"
+              lang="en"
+              aria-labelledby={`${section.id}-title`}
+            >
               <h2 id={`${section.id}-title`}>
                 {index + 1}. {section.title}
               </h2>

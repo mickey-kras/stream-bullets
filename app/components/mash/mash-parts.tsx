@@ -6,7 +6,6 @@ import { Icon } from "../ui/icon";
 
 const MASH_COLORS = ["mash-a", "mash-b", "mash-c", "mash-d"] as const;
 
-
 /** The side colour as a CSS variable, plus a pattern class so colour is never the only cue. */
 export function sideStyle(side: number): CSSProperties {
   return { "--c": `var(--${MASH_COLORS[side] ?? MASH_COLORS[0]})` } as CSSProperties;
@@ -98,7 +97,8 @@ export function MashWinner({
         <>
           <Icon name="success" size={40} />
           <h3 className="mash-winner-title" tabIndex={-1}>
-            <span>{draw ? t("mash.final") : t("mash.winner")}</span> <strong>{draw ? t("mash.draw") : sides[winner]}</strong>
+            <span>{draw ? t("mash.final") : t("mash.winner")}</span>{" "}
+            <strong>{draw ? t("mash.draw") : sides[winner]}</strong>
           </h3>
         </>
       )}

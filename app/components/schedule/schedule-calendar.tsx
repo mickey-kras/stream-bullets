@@ -267,7 +267,9 @@ export function MonthGrid({
 }>): ReactNode {
   const today = dayStart(localDateOf(now, zone), zone);
   const month = zonedParts(days[15], zone).month;
-  const title = new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, month: "long", year: "numeric" }).format(days[15]);
+  const title = new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, month: "long", year: "numeric" }).format(
+    days[15],
+  );
   return (
     <table className="month-grid">
       <caption className="sr-only">{title}</caption>

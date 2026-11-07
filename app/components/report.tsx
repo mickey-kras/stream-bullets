@@ -81,9 +81,7 @@ export function ReportButton({
       >
         {sent ? (
           <>
-            <output className="report-confirmation">
-              {t("report.received")}
-            </output>
+            <output className="report-confirmation">{t("report.received")}</output>
             <div className="modal-actions">
               <button
                 className="gold"
@@ -136,9 +134,7 @@ export function ReportButton({
                 {required ? t("report.detailsRequiredHelp") : t("report.detailsHelp")} {t("report.limit")}
               </small>
             </label>
-            <p className="muted">
-              {t("report.goodFaith")}
-            </p>
+            <p className="muted">{t("report.goodFaith")}</p>
             <p role="alert" className="form-error">
               {error}
             </p>

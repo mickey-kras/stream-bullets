@@ -24,7 +24,6 @@ const durations: readonly [string, MessageId][] = [
   ["600", "create.minutes10"],
 ];
 
-
 export function CreateEntry({
   mode,
   open,

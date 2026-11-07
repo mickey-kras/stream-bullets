@@ -57,7 +57,9 @@ function Interest({ status }: Readonly<{ status: AiInterestStatus }>): ReactNode
   async function vote(value: "up" | "down"): Promise<void> {
     setBusy(true);
     try {
-      const result = await postJson<{ counted: boolean; totals: AiInterestTotals }>("/api/ai-interest", { vote: value });
+      const result = await postJson<{ counted: boolean; totals: AiInterestTotals }>("/api/ai-interest", {
+        vote: value,
+      });
       setTotals(result.totals);
       if (result.counted) setMine(value);
       const message: string = result.counted ? t(value === "up" ? "ai.countedUp" : "ai.countedDown") : t("ai.already");
@@ -83,7 +85,12 @@ function Interest({ status }: Readonly<{ status: AiInterestStatus }>): ReactNode
         </span>
       </p>
       <div className="sched-actions">
-        <button type="button" disabled={busy || mine !== null} aria-pressed={mine === "up"} onClick={() => void vote("up")}>
+        <button
+          type="button"
+          disabled={busy || mine !== null}
+          aria-pressed={mine === "up"}
+          onClick={() => void vote("up")}
+        >
           <Icon name="thumbs-up" size={18} />
           {t("ai.voteUp")}
         </button>

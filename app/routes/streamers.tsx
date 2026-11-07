@@ -37,11 +37,12 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 const intentIcon: Record<Intent, IconName> = { suggest: "plus", vote: "polls", discuss: "comment" };
-const intentPrompt: Record<Intent, "streamers.intent.suggest" | "streamers.intent.vote" | "streamers.intent.discuss"> = {
-  suggest: "streamers.intent.suggest",
-  vote: "streamers.intent.vote",
-  discuss: "streamers.intent.discuss",
-};
+const intentPrompt: Record<Intent, "streamers.intent.suggest" | "streamers.intent.vote" | "streamers.intent.discuss"> =
+  {
+    suggest: "streamers.intent.suggest",
+    vote: "streamers.intent.vote",
+    discuss: "streamers.intent.discuss",
+  };
 
 function StreamerCard({ streamer, intent }: Readonly<{ streamer: Streamer; intent: Intent | null }>): ReactNode {
   if (streamer.isOfficial)
@@ -222,41 +223,41 @@ export default function Streamers(): ReactNode {
         ) : (
           <>
             <search className="search directory-search">
-            <form
-              action="/streamers"
-              onSubmit={(event: FormEvent<HTMLFormElement>) => {
-                event.preventDefault();
-                window.clearTimeout(typing.current);
-                search(text, false);
-              }}
-            >
-              <label className="sr-only" htmlFor="streamer-search">
-                {t("streamers.searchLabel")}
-              </label>
-              <input
-                id="streamer-search"
-                name="query"
-                type="search"
-                maxLength={60}
-                value={text}
-                placeholder={t("streamers.searchPlaceholder")}
-                onChange={(event) => {
-                  const value: string = event.currentTarget.value;
-                  setText(value);
+              <form
+                action="/streamers"
+                onSubmit={(event: FormEvent<HTMLFormElement>) => {
+                  event.preventDefault();
                   window.clearTimeout(typing.current);
-                  typing.current = window.setTimeout(() => search(value, true), 350);
+                  search(text, false);
                 }}
-              />
-              {data.intent && <input type="hidden" name="then" value={data.intent} />}
-              <span className="search-lead" aria-hidden="true">
-                <Icon name="search" size={18} />
-              </span>
-              <button type="submit" className="search-button">
-                <Icon name="search" size={18} />
-                <span className="search-text">{t("streamers.search")}</span>
-                <span className="sr-only"> {t("streamers.searchSuffix")}</span>
-              </button>
-            </form>
+              >
+                <label className="sr-only" htmlFor="streamer-search">
+                  {t("streamers.searchLabel")}
+                </label>
+                <input
+                  id="streamer-search"
+                  name="query"
+                  type="search"
+                  maxLength={60}
+                  value={text}
+                  placeholder={t("streamers.searchPlaceholder")}
+                  onChange={(event) => {
+                    const value: string = event.currentTarget.value;
+                    setText(value);
+                    window.clearTimeout(typing.current);
+                    typing.current = window.setTimeout(() => search(value, true), 350);
+                  }}
+                />
+                {data.intent && <input type="hidden" name="then" value={data.intent} />}
+                <span className="search-lead" aria-hidden="true">
+                  <Icon name="search" size={18} />
+                </span>
+                <button type="submit" className="search-button">
+                  <Icon name="search" size={18} />
+                  <span className="search-text">{t("streamers.search")}</span>
+                  <span className="sr-only"> {t("streamers.searchSuffix")}</span>
+                </button>
+              </form>
             </search>
             <div className="list-toolbar">
               <span className="list-count" aria-live="polite">

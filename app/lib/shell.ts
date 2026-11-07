@@ -36,7 +36,9 @@ export function useShell(): ShellData {
 }
 
 /** The root loader's data inside a route's `meta` function. */
-export function shellFromMatches(matches: readonly ({ id: string; loaderData?: unknown } | undefined)[]): ShellData | null {
+export function shellFromMatches(
+  matches: readonly ({ id: string; loaderData?: unknown } | undefined)[],
+): ShellData | null {
   const root = matches.find((match) => match?.id === "root");
   return (root?.loaderData as ShellData | undefined) ?? null;
 }

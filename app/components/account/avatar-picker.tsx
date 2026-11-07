@@ -9,7 +9,9 @@ export type AvatarChoice = number | "photo";
 
 function optionLabel(choice: AvatarChoice): string {
   if (choice === "photo") return t("profile.yourPhoto");
-  return choice === DEFAULT_AVATAR_PRESET ? t("profile.defaultPreset", { name: avatarName(choice) }) : avatarName(choice);
+  return choice === DEFAULT_AVATAR_PRESET
+    ? t("profile.defaultPreset", { name: avatarName(choice) })
+    : avatarName(choice);
 }
 
 /**

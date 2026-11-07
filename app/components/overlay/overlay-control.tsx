@@ -469,7 +469,9 @@ export function OverlayControl({
                     </span>
                     {onAir && <span className="onair-badge">{t("overlay.onAir")}</span>}
                   </label>
-                  {selected && <SourcePicker type={source.type} state={state} data={scene.data} busy={busy} run={run} />}
+                  {selected && (
+                    <SourcePicker type={source.type} state={state} data={scene.data} busy={busy} run={run} />
+                  )}
                 </li>
               );
             })}

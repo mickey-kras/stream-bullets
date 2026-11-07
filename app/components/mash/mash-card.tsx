@@ -262,9 +262,7 @@ function SetupBody({
       </p>
       <p className="muted mash-pick-help" hidden={chosen}>
         {signedIn && t("mash.pickHelp")}
-        {signedIn && shortcuts && (
-          <span className="kbd-hint"> {t("mash.pickKeys", { n: entry.options.length })}</span>
-        )}
+        {signedIn && shortcuts && <span className="kbd-hint"> {t("mash.pickKeys", { n: entry.options.length })}</span>}
       </p>
       <p className="mash-chosen" aria-live="polite" hidden={!chosen}>
         <Icon name="check" size={18} />
@@ -436,14 +434,7 @@ export function MashCard({
   let body: ReactNode = null;
   if (view.current === "setup")
     body = (
-      <SetupBody
-        entry={entry}
-        host={host}
-        owner={owner}
-        signedIn={signedIn}
-        pending={pending}
-        onAction={onAction}
-      />
+      <SetupBody entry={entry} host={host} owner={owner} signedIn={signedIn} pending={pending} onAction={onAction} />
     );
   if (view.current === "countdown")
     body = (
@@ -482,14 +473,15 @@ export function MashCard({
         <MashWinner sides={entry.options} winner={view.winner ?? mashWinner(view.totals)} />
         <MashBars sides={entry.options} totals={view.totals} mySide={side} />
         {side !== null && view.mine !== null && (
-          <p className="mash-mine">
-            {t("mash.youTapped", { n: formatCount(view.mine), side: entry.options[side] })}
-          </p>
+          <p className="mash-mine">{t("mash.youTapped", { n: formatCount(view.mine), side: entry.options[side] })}</p>
         )}
       </>
     );
   return (
-    <article className={`poll-card mash-card phase-${phaseClass(view)}${owner ? " is-host" : ""}`} aria-labelledby={titleId}>
+    <article
+      className={`poll-card mash-card phase-${phaseClass(view)}${owner ? " is-host" : ""}`}
+      aria-labelledby={titleId}
+    >
       {owner && <HostBar entry={entry} view={view} onAction={onAction} />}
       <Headline view={view} title={entry.title} titleId={titleId} />
       {body}

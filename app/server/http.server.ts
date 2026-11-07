@@ -110,7 +110,10 @@ export function json(value: unknown, status = 200): Response {
 
 export function errorResponse(error: unknown): Response {
   if (error instanceof HttpError) {
-    const response = json(error.code ? { error: error.message, code: error.code } : { error: error.message }, error.status);
+    const response = json(
+      error.code ? { error: error.message, code: error.code } : { error: error.message },
+      error.status,
+    );
     if (error.status === 429) response.headers.set("Retry-After", "60");
     return response;
   }
