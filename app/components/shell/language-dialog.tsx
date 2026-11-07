@@ -22,7 +22,10 @@ const ORDERED: readonly Locale[] = [
 export async function chooseLocale(locale: Locale, signedIn: boolean): Promise<void> {
   if (signedIn) await sendJson("PATCH", "/api/me/locale", { locale });
   setCookie(LOCALE_COOKIE, locale);
-  globalThis.location.reload();
+  // Reload the same page without `?dialog=language`, so the list does not open again.
+  const url = new URL(globalThis.location.href);
+  url.searchParams.delete("dialog");
+  globalThis.location.replace(url.href);
 }
 
 /** The language list (item 38). Each name shows in its own language and script. */
