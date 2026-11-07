@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { z } from "zod";
+import { clientAddress } from "./client-ips";
 
 const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -16,7 +17,7 @@ async function signedIn(browser: Browser, role: string): Promise<BrowserContext>
   const roleIndex: number = ["owner", "viewer", "newcomer", "otherowner", "admin", "reporter"].indexOf(role);
   const context = await browser.newContext({
     baseURL: origin,
-    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${roleIndex + 10}` },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("platform", roleIndex + 10) },
   });
   await context.addCookies([
     {

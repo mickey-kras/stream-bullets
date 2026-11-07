@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { shots, signedIn } from "./live-helpers";
+import { clientIp } from "./client-ips";
 
 test("the owner previews, takes and switches what the one OBS URL shows", async ({ browser }) => {
-  const owner = await signedIn(browser, "featureowner", 90);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 90));
   const control = await owner.newPage();
   await control.setViewportSize({ width: 1440, height: 1000 });
   const obs = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
@@ -55,12 +56,12 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
 test("overlay control is for the page owner only", async ({ browser, page }) => {
   await page.goto("/overlay-control");
   await expect(page).toHaveURL(/\/streamers$/);
-  const viewer = await signedIn(browser, "viewer", 91);
+  const viewer = await signedIn(browser, "viewer", clientIp("overlay-control", 91));
   const viewerPage = await viewer.newPage();
   expect((await viewerPage.goto("/overlay-control"))?.status()).toBe(404);
   expect((await viewer.request.post("/api/overlay", { data: { action: "take" } })).status()).toBe(404);
   const long = "x".repeat(121);
-  const owner = await signedIn(browser, "featureowner", 92);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 92));
   const tooLong = await owner.request.post("/api/overlay", { data: { action: "message", text: long, style: "info" } });
   expect(tooLong.status()).toBe(400);
   await Promise.all([viewer.close(), owner.close()]);

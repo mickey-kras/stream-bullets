@@ -4,6 +4,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { expect, test, type BrowserContext } from "@playwright/test";
 import { z } from "zod";
+import { clientAddress } from "./client-ips";
 
 const origin = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -56,11 +57,11 @@ test("historical comment mutations stay visible and accurate after refresh", asy
   const { entryId, remoteParentId } = await seedHistory(viewer.id);
   const context: BrowserContext = await browser.newContext({
     baseURL: origin,
-    extraHTTPHeaders: { "CF-Connecting-IP": "192.0.2.75" },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("discussion-history", 75) },
   });
   const ownerContext: BrowserContext = await browser.newContext({
     baseURL: origin,
-    extraHTTPHeaders: { "CF-Connecting-IP": "192.0.2.76" },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("discussion-history", 76) },
   });
   await context.addCookies([
     {

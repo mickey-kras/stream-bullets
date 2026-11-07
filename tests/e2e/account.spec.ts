@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 import { z } from "zod";
+import { clientAddress } from "./client-ips";
 
 const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -13,7 +14,10 @@ test("a member downloads their data, deletes their account, and is signed out", 
   const sessions = sessionSchema.parse(JSON.parse(await readFile(".wrangler/e2e/sessions.json", "utf8")));
   const leaver = sessions.leaver;
   if (!leaver) throw new Error("Unknown test account.");
-  const context = await browser.newContext({ baseURL: origin, extraHTTPHeaders: { "CF-Connecting-IP": "192.0.2.40" } });
+  const context = await browser.newContext({
+    baseURL: origin,
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("account", 40) },
+  });
   await context.addCookies([
     {
       name: "stream-bullets.session_token",

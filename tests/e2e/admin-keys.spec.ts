@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { test, expect, type Browser, type BrowserContext, type CDPSession, type Page } from "@playwright/test";
 import { z } from "zod";
+import { clientIp } from "./client-ips";
 
 const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -51,7 +52,7 @@ async function shot(page: Page, name: string): Promise<void> {
 test("only administrators reach the admin and security-key API", async ({ browser, request }) => {
   for (const path of ["/api/admin/stepup", "/api/admin/keys", "/api/admin/streamers", "/api/admin/report-groups"])
     expect((await request.get(path)).status()).toBe(401);
-  const viewer = await signedIn(browser, "viewer", 80);
+  const viewer = await signedIn(browser, "viewer", clientIp("admin-keys", 120));
   for (const path of ["/api/admin/stepup", "/api/admin/keys", "/api/admin/streamers", "/api/admin/report-groups"])
     expect((await viewer.request.get(path)).status()).toBe(403);
   const options = await viewer.request.post("/api/admin/stepup/options", { data: {}, headers: { Origin: origin } });
@@ -61,7 +62,7 @@ test("only administrators reach the admin and security-key API", async ({ browse
 
 test("an admin sets up two keys, confirms with a key in another session, and moderates", async ({ browser }) => {
   test.setTimeout(90_000);
-  const context = await signedIn(browser, "keyadmin", 81);
+  const context = await signedIn(browser, "keyadmin", clientIp("admin-keys", 121));
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   await cdp.send("WebAuthn.enable");
@@ -100,7 +101,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await shot(page, "keys-tab");
 
   // A second session of the same account has no key check yet: Admin asks for a key first.
-  const other = await signedIn(browser, "keyadmin2", 82);
+  const other = await signedIn(browser, "keyadmin2", clientIp("admin-keys", 122));
   const second = await other.newPage();
   const otherCdp = await other.newCDPSession(second);
   await otherCdp.send("WebAuthn.enable");
@@ -144,7 +145,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
 });
 
 test("reports are grouped by page and resolved per item", async ({ browser }) => {
-  const reporter = await signedIn(browser, "reporter", 83);
+  const reporter = await signedIn(browser, "reporter", clientIp("admin-keys", 123));
   const board = boardSchema.parse(await (await reporter.request.get("/api/streamers/pagination_host")).json());
   const entry = board.entries.find((item) => item.title === "Archive topic 55") ?? board.entries[0];
   for (const reason of ["spam", "other"]) {
@@ -157,7 +158,7 @@ test("reports are grouped by page and resolved per item", async ({ browser }) =>
   await reporter.close();
 
   // The key admin's first session has a fresh key check from the previous test, or the report-mode gate.
-  const context = await signedIn(browser, "keyadmin", 84, true);
+  const context = await signedIn(browser, "keyadmin", clientIp("admin-keys", 124), true);
   const page = await context.newPage();
   await page.goto("/admin?view=reports");
   const skip = page.getByRole("button", { name: "Continue without a key" });

@@ -1,5 +1,6 @@
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { origin, signedIn } from "./fixtures";
+import { clientIp } from "./client-ips";
 
 /**
  * The cross-phase role matrix (P8): what each kind of account can see and do on the key routes and APIs.
@@ -57,7 +58,7 @@ const matrix: {
 }[] = [
   {
     role: "signed-out",
-    ip: 200,
+    ip: clientIp("roles", 200),
     admin: [401, 401, 401, 401],
     overlayControl: 200,
     adminPage: "sign-in",
@@ -65,7 +66,7 @@ const matrix: {
   },
   {
     role: "viewer",
-    ip: 201,
+    ip: clientIp("roles", 201),
     admin: [403, 403, 403, 403],
     overlayControl: 404,
     adminPage: "404",
@@ -73,7 +74,7 @@ const matrix: {
   },
   {
     role: "owner",
-    ip: 202,
+    ip: clientIp("roles", 202),
     admin: [403, 403, 403, 403],
     overlayControl: 200,
     adminPage: "404",
@@ -82,7 +83,7 @@ const matrix: {
   },
   {
     role: "admin",
-    ip: 203,
+    ip: clientIp("roles", 203),
     admin: [200, 200, 404, 404],
     overlayControl: 404,
     adminPage: "admin",
@@ -151,7 +152,7 @@ test("role matrix: the streamer page header action and content tools", async ({ 
     admin: { signedIn: true, remove: true },
   };
   for (const [index, role] of (["signed-out", "viewer", "owner", "admin"] as const).entries()) {
-    const context = await contextFor(browser, role, 204 + index);
+    const context = await contextFor(browser, role, clientIp("roles", 204 + index));
     const page = await context.newPage();
     const want = tools[role];
     await page.goto(`/@pagination_host?entry=${topic.id}`);
@@ -176,7 +177,7 @@ test("role matrix: the streamer page header action and content tools", async ({ 
   }
 
   // The owner's own page offers New poll on the Polls tab.
-  const owner = await signedIn(browser, "owner", 208);
+  const owner = await signedIn(browser, "owner", clientIp("roles", 208));
   const page = await owner.newPage();
   await page.goto("/@test_host?view=polls");
   await expect(page.getByRole("button", { name: "New poll" }).first()).toBeVisible();
@@ -191,7 +192,7 @@ test("role matrix: Ideas status is for admins only", async ({ browser }) => {
   if (!idea) throw new Error("The seeded idea is missing.");
   await anonymous.close();
   for (const [index, role] of (["signed-out", "viewer", "owner", "admin"] as const).entries()) {
-    const context = await contextFor(browser, role, 210 + index);
+    const context = await contextFor(browser, role, clientIp("roles", 210 + index));
     const page = await context.newPage();
     await page.goto(`/@streambullets?entry=${idea.id}`);
     await expect(page.locator("#detail .idea-status")).toBeVisible();
@@ -209,13 +210,13 @@ const moderated: {
   {
     role: "frozenowner",
     handle: "frozen_host",
-    ip: 214,
+    ip: clientIp("roles", 214),
     notice: "Your page is frozen. Your content stays visible, but no one can post or vote. Reason: Under review.",
   },
   {
     role: "suspendedowner",
     handle: "suspended_host",
-    ip: 215,
+    ip: clientIp("roles", 215),
     notice:
       "Your page is suspended. It's hidden from the public until the suspension is lifted. Reason: Repeated spam.",
   },
@@ -251,7 +252,7 @@ for (const row of moderated) {
 
 test("role matrix: frozen and suspended pages for everyone else", async ({ browser }) => {
   for (const [index, role] of (["signed-out", "viewer", "owner", "admin"] as const).entries()) {
-    const context = await contextFor(browser, role, 216 + index);
+    const context = await contextFor(browser, role, clientIp("roles", 216 + index));
     const page = await context.newPage();
     // Frozen: public and read-only.
     expect((await page.goto("/@frozen_host"))?.status(), role).toBe(200);

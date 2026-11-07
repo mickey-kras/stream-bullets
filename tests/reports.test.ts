@@ -7,6 +7,7 @@ import { listReports, resolveReport, submitReport } from "../app/server/reports.
 import type { ReportInput } from "../app/server/validation";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
+import { startOfQuotaWindow } from "./helpers/quota";
 
 let database: TestDatabase;
 let env: AppEnv;
@@ -204,6 +205,7 @@ describe("submitting reports", (): void => {
   });
 
   it("limits how often an account can report", async (): Promise<void> => {
+    await startOfQuotaWindow(env.DB);
     const topics = await Promise.all(Array.from({ length: 7 }, () => seedEntry()));
     for (const topic of topics.slice(0, 6)) await report("reporter", { targetKind: "entry", targetId: topic });
     await expect(report("reporter", { targetKind: "entry", targetId: topics[6] })).rejects.toMatchObject({

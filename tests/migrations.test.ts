@@ -3,6 +3,7 @@ import { applyMigrations, createTestDatabase, migrationFiles, type TestDatabase 
 
 /**
  * Applies 0000–0005, writes data the way the released app did, then applies 0006 onwards.
+ * 0000–0005 are the migrations on main (7bf63c1, byte for byte the same files); 0006 is the first new one.
  * A migration that rebuilt `user`, `streamers`, `entries` or `entry_comments` would drop the old
  * table and fire ON DELETE CASCADE, so every count below would fall to zero (risk R1).
  */

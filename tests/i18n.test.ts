@@ -132,6 +132,27 @@ describe("locale resolution", () => {
     expect(acceptedLocale("")).toBeNull();
   });
 
+  it("skips ranges whose quality is not a number from 0 to 1", () => {
+    expect(acceptedLocale("de;q=abc, fr;q=0.5")).toBe("fr");
+    expect(acceptedLocale("de;q=, fr;q=0.5")).toBe("fr");
+    expect(acceptedLocale("de;q=-1, fr;q=0.5")).toBe("fr");
+    expect(acceptedLocale("de;q=NaN, ja;q=Infinity")).toBeNull();
+  });
+
+  it("reads only the first 20 ranges of Accept-Language", () => {
+    const unsupported: string[] = Array.from({ length: 19 }, (_, index: number): string => `x${index}`);
+    expect(acceptedLocale([...unsupported, "de"].join(", "))).toBe("de");
+    expect(acceptedLocale([...unsupported, "ko", "de"].join(", "))).toBeNull();
+  });
+
+  it("takes the cookie only in the exact spelling the language picker writes", () => {
+    const fallback = { saved: null, acceptLanguage: "de" };
+    expect(resolveLocale({ ...fallback, cookie: "pt-BR" })).toBe("pt-BR");
+    expect(resolveLocale({ ...fallback, cookie: "pt-br" })).toBe("de");
+    expect(resolveLocale({ ...fallback, cookie: "FR" })).toBe("de");
+    expect(resolveLocale({ ...fallback, cookie: " fr" })).toBe("de");
+  });
+
   it("maps regional tags to the supported languages", () => {
     expect(matchLocale("pt-PT")).toBe("pt-BR");
     expect(matchLocale("zh-Hans-CN")).toBe("zh-CN");

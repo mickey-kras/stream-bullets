@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { z } from "zod";
+import { clientAddress } from "./client-ips";
 
 const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -12,7 +13,7 @@ async function signedIn(browser: Browser, role: string, options: { width?: numbe
   const context = await browser.newContext({
     baseURL: origin,
     viewport: options.width ? { width: options.width, height: 844 } : undefined,
-    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${60 + role.length}` },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("shell", role === "admin" ? 67 : 66) },
   });
   await context.addCookies([
     {

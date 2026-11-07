@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { signedIn } from "./fixtures";
+import { clientIp } from "./client-ips";
 
 test("a page without saved cards shows the two defaults", async ({ page }) => {
   await page.goto("/@test_host?view=community");
@@ -12,7 +13,7 @@ test("a page without saved cards shows the two defaults", async ({ page }) => {
 });
 
 test("the owner adds, reorders and deletes cards; the support card follows the links", async ({ browser }) => {
-  const context = await signedIn(browser, "featureowner", 95);
+  const context = await signedIn(browser, "featureowner", clientIp("community", 95));
   const page = await context.newPage();
   await page.goto("/@feature_host?view=community");
   const titles = page.locator(".community-grid .community-card h2");
@@ -62,7 +63,7 @@ test("About shows support links and the owner edits them within the allow-list",
   await expect(section.getByRole("link", { name: /Ko-fi/ })).toHaveAttribute("href", "https://ko-fi.com/feature_host");
   await expect(section.getByRole("link", { name: /Merch tips/ })).toHaveAttribute("rel", "noopener noreferrer");
   await expect(section).toContainText("StreamBullets doesn't process or receive payments.");
-  const context = await signedIn(browser, "featureowner", 96);
+  const context = await signedIn(browser, "featureowner", clientIp("community", 96));
   const owner = await context.newPage();
   await owner.goto("/@feature_host?view=about");
   await owner.getByRole("link", { name: "Edit support links" }).click();

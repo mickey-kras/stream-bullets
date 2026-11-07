@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { accounts, runSql, signedIn } from "./fixtures";
+import { clientIp } from "./client-ips";
 
 async function seedThreads(): Promise<string> {
   const users = await accounts();
@@ -22,7 +23,7 @@ async function seedThreads(): Promise<string> {
 
 test("replies collapse after two, removed comments keep their thread, one reply box", async ({ browser }) => {
   const entryId = await seedThreads();
-  const context = await signedIn(browser, "viewer", 100);
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
   const page = await context.newPage();
   await page.goto(`/@other_host?entry=${entryId}`);
   const thread = page.locator("li.thread").filter({ has: page.getByText("Root comment", { exact: true }) });
