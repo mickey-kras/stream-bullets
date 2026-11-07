@@ -196,7 +196,7 @@ export function StreamerPages({
           </span>
         </Form>
       </search>
-      <nav className="tabs status-tabs" aria-label={t("admin.pages.statusLabel")}>
+      <nav className="tabs status-tabs level-2" aria-label={t("admin.pages.statusLabel")}>
         {pageFilters.map((item) => (
           <Link
             key={item.value}

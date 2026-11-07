@@ -186,7 +186,8 @@ export function TopicBoard({
               </button>
             </form>
             <div className="list-toolbar">
-              <div className="tabs" aria-label={t("entry.sorting")}>
+              <fieldset className="tabs sort-switch">
+                <legend className="sr-only">{t("entry.sorting")}</legend>
                 {(["top", "newest"] as const).map((value: SortOrder) => (
                   <button
                     key={value}
@@ -198,7 +199,7 @@ export function TopicBoard({
                     {t(value === "top" ? "entry.sortTop" : "entry.sortNew")}
                   </button>
                 ))}
-              </div>
+              </fieldset>
               <span className="list-count">
                 {tn("entry.count", entries.length)}
                 {more ? "+" : ""}

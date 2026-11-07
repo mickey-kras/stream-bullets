@@ -518,7 +518,7 @@ export function ReportGroups({
           <Icon name="search" size={18} />
         </span>
       </search>
-      <nav className="tabs status-tabs" aria-label={t("admin.reports.statusLabel")}>
+      <nav className="tabs status-tabs level-2" aria-label={t("admin.reports.statusLabel")}>
         {reportFilters.map((item) => (
           <Link
             key={item.value}
