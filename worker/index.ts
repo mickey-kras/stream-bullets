@@ -17,6 +17,39 @@ import { scheduleCalendar, topUpSeries } from "../app/server/schedule.server";
 
 export { PollRoom } from "../app/server/poll-room";
 
+/** The hex SHA-256 of a string. */
+async function sha256(value: string): Promise<string> {
+  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(bytes), (byte: number) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * The network a live connection comes from: an IPv4 address as is, an IPv6 address cut to its /64. One host usually
+ * holds a whole IPv6 /64, so the per-client socket cap counts the /64, not each address in it.
+ */
+function clientNetwork(ip: string): string {
+  if (!ip.includes(":")) return ip;
+  const address: string = ip.split("%")[0].toLowerCase();
+  const [head, tail] = address.split("::");
+  const groups = (part: string | undefined): string[] => (part ? part.split(":") : []);
+  const front: string[] = groups(head);
+  // An IPv4 tail (::ffff:192.0.2.1) is two groups, and only the last 32 bits, so it never changes the /64.
+  const back: string[] = groups(tail).flatMap((group: string): string[] =>
+    group.includes(".") ? ["0", "0"] : [group],
+  );
+  const missing: number = tail === undefined ? 0 : Math.max(0, 8 - front.length - back.length);
+  const full: string[] = [...front, ...Array.from({ length: missing }, (): string => "0"), ...back];
+  return `${full
+    .slice(0, 4)
+    .map((group: string): string => Number.parseInt(group || "0", 16).toString(16))
+    .join(":")}::/64`;
+}
+
+/** The key the live room counts sockets by: the hashed client network. */
+async function liveClientKey(ip: string): Promise<string> {
+  return sha256(clientNetwork(ip));
+}
+
 const handler = createRequestHandler(() => import("virtual:react-router/server-build"), import.meta.env.MODE);
 
 export default {
@@ -65,10 +98,15 @@ export default {
         const streamer = await getStreamer(env, live[1]);
         // Suspended pages refuse live connections, the owner's included.
         if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
-        // The room trusts only this header for who taps in a Mash Battle; a client-sent copy never reaches it.
+        // The room trusts only these headers for who taps in a Mash Battle and who owns the page; a client-sent copy
+        // never reaches it.
         const viewer = await getViewer(request, { env, nonce, responseHeaders });
-        const headers = new Headers({ Upgrade: "websocket", "X-Stream-Bullets-Client": key });
+        const headers = new Headers({
+          Upgrade: "websocket",
+          "X-Stream-Bullets-Client": await liveClientKey(request.headers.get("CF-Connecting-IP") ?? "local"),
+        });
         if (viewer) headers.set("X-SB-User", viewer.id);
+        if (viewer && viewer.id === streamer.ownerId) headers.set("X-SB-Owner", "1");
         const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
         response = await room.fetch(
           `https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`,

@@ -34,15 +34,17 @@ export interface TokenBucket {
   at: number;
 }
 
-/** The burst one account may spend at once: one batch at the full rate, plus one for rounding. */
+/**
+ * The burst one account may spend at once: one second at the full rate. Batches that network jitter delays and then
+ * delivers together still count, and the long-run rate stays at 15 (or 6) a second.
+ */
 export function bucketCapacity(assisted: boolean): number {
-  const rate: number = assisted ? MASH_ASSISTED_RATE : MASH_RATE;
-  return (rate * MASH_BATCH_MS) / 1_000 + 1;
+  return assisted ? MASH_ASSISTED_RATE : MASH_RATE;
 }
 
 /**
  * Spends up to `requested` taps from the bucket and returns how many count. The bucket refills at
- * 15 taps a second (6 when `assisted`) up to one batch. Sockets of one account share one bucket.
+ * 15 taps a second (6 when `assisted`) up to one second of taps. Sockets of one account share one bucket.
  */
 export function takeTaps(
   bucket: TokenBucket | undefined,
@@ -91,35 +93,42 @@ export interface TapDelta {
   assisted: number;
 }
 
-/** D1 binds at most 100 parameters per statement, and each row takes 5. */
-export const TAP_ROWS_PER_STATEMENT = 20;
+/** D1 binds at most 100 parameters per statement. Each row takes 5, and the run's start takes 1. */
+export const TAP_ROWS_PER_STATEMENT = 19;
 
 /**
- * The statements that add the deltas to `mash_taps`, at most 20 rows each. Rows for an account or
- * battle deleted since the tap are skipped (the joins), so one deletion never fails the batch.
+ * The statements that add the deltas to `mash_taps`, at most 19 rows each. Rows for an account or
+ * battle deleted since the tap are skipped (the joins), so one deletion never fails the batch. So are rows
+ * for a run that is over: `startsAt` must still be the battle's start, and the battle must still be running,
+ * so a late write from an ended run never lands in a restarted one.
  */
 export function tapUpserts(
   entryId: string,
+  startsAt: number | null,
   deltas: readonly TapDelta[],
-): { sql: string; params: (string | number)[] }[] {
+): { sql: string; params: (string | number | null)[] }[] {
   const rows: TapDelta[] = deltas.filter((delta: TapDelta): boolean => delta.taps > 0);
-  const statements: { sql: string; params: (string | number)[] }[] = [];
+  const statements: { sql: string; params: (string | number | null)[] }[] = [];
   for (let start = 0; start < rows.length; start += TAP_ROWS_PER_STATEMENT) {
     const chunk: TapDelta[] = rows.slice(start, start + TAP_ROWS_PER_STATEMENT);
     statements.push({
       sql: `INSERT INTO mash_taps (entry_id,user_id,side,taps,assisted_taps)
         SELECT v.column1,v.column2,v.column3,v.column4,v.column5
         FROM (VALUES ${chunk.map((): string => "(?,?,?,?,?)").join(",")}) v
-        JOIN user u ON u.id=v.column2 JOIN entries e ON e.id=v.column1 WHERE true
+        JOIN user u ON u.id=v.column2 JOIN entries e ON e.id=v.column1
+        JOIN entry_mash m ON m.entry_id=v.column1 AND m.starts_at IS ? AND m.phase IN ('countdown','live') WHERE true
         ON CONFLICT(entry_id,user_id) DO UPDATE SET taps=mash_taps.taps+excluded.taps,
           assisted_taps=mash_taps.assisted_taps+excluded.assisted_taps`,
-      params: chunk.flatMap((delta: TapDelta): (string | number)[] => [
-        entryId,
-        delta.userId,
-        delta.side,
-        delta.taps,
-        Math.min(delta.assisted, delta.taps),
-      ]),
+      params: [
+        ...chunk.flatMap((delta: TapDelta): (string | number)[] => [
+          entryId,
+          delta.userId,
+          delta.side,
+          delta.taps,
+          Math.min(delta.assisted, delta.taps),
+        ]),
+        startsAt,
+      ],
     });
   }
   return statements;
