@@ -1,5 +1,6 @@
 import { t, type MessageId } from "../i18n";
 import type { SupportLinkKind } from "../types";
+import { isPlainUrlText } from "./url-text";
 
 export interface SupportProvider {
   /** Shown on the button (except `other`, which uses the owner's label). */
@@ -26,7 +27,7 @@ export const SUPPORT_PROVIDERS: Readonly<Record<SupportLinkKind, SupportProvider
 
 /** True when `url` is an https link on the provider's own domain, with a page path (not just the home page). */
 export function isAllowedSupportLink(kind: SupportLinkKind, url: string): boolean {
-  if (url.length > 500 || !URL.canParse(url)) return false;
+  if (url.length > 500 || !isPlainUrlText(url) || !URL.canParse(url)) return false;
   const parsed = new URL(url);
   if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.port) return false;
   const host = parsed.hostname.toLowerCase();

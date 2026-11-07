@@ -312,6 +312,8 @@ export interface StreamEvent {
   /** The zone the owner scheduled it in. Viewers see it in their own zone. */
   tz: string;
   topics: EventTopic[];
+  /** Last change. "Add to calendar" uses it for DTSTAMP and SEQUENCE, the same as the .ics feed. */
+  updatedAt: number;
 }
 
 export interface ScheduleSnapshot {

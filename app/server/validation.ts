@@ -11,6 +11,7 @@ import {
   SUPPORT_LINK_KINDS,
 } from "../../db/enums";
 import { IDEA_CATEGORIES, TOPIC_CATEGORIES } from "../lib/ideas";
+import { isPlainUrlText } from "../lib/url-text";
 import { isValidZone, parseDate } from "../lib/zoned";
 
 const id = z.string().uuid();
@@ -274,14 +275,21 @@ export const accountDeletionSchema = z
   .object({ confirm: z.literal("DELETE", { error: "Type DELETE to confirm." }) })
   .strict();
 
-/** An https link with no credentials or port, at most 500 characters. */
+/** An https link with no credentials, port, control characters or whitespace, at most 500 characters. */
 export function isHttpsLink(value: string): boolean {
-  if (value.length > 500 || !URL.canParse(value)) return false;
+  if (value.length > 500 || !isPlainUrlText(value) || !URL.canParse(value)) return false;
   const url = new URL(value);
   return url.protocol === "https:" && !url.username && !url.password && !url.port && url.hostname.includes(".");
 }
 
-const httpsLink = z.string().trim().max(500).refine(isHttpsLink, "Use an https link.");
+/** Stores the parsed form, so what is saved is exactly what a browser or calendar app reads. */
+const httpsLink = z
+  .string()
+  .trim()
+  .max(500)
+  .refine(isHttpsLink, "Use an https link.")
+  .transform((value: string): string => new URL(value).href)
+  .refine((value: string): boolean => value.length <= 500, "Use an https link.");
 
 const localDate = z.string().refine((value: string): boolean => parseDate(value) !== null, "Pick a valid date.");
 
@@ -345,6 +353,8 @@ export const communityCardSchema = z
       .trim()
       .max(500)
       .refine(isCardTarget, "A button goes to a tab or an https link.")
+      .transform((value: string): string => (cardTabTargets.includes(value) ? value : new URL(value).href))
+      .refine((value: string): boolean => value.length <= 500, "A button goes to a tab or an https link.")
       .nullable()
       .default(null),
   })

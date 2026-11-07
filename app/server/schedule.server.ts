@@ -72,6 +72,7 @@ function eventValue(row: EventRow, topics: EventTopic[], now: number): StreamEve
     repeatUntil: row.repeat_until,
     tz: row.tz,
     topics,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -455,18 +456,32 @@ export async function topUpSeries(env: AppEnv, now: number, maxSeries = 50): Pro
   return added;
 }
 
-/** The `.ics` feed: 30 days back and the 12 weeks ahead, cancelled streams included as `STATUS:CANCELLED`. */
+/** The feed's caps: every upcoming stream a page can hold (`topUpSeries` may pass 400), then recent past ones. */
+export const FEED_UPCOMING_LIMIT = 500;
+export const FEED_PAST_LIMIT = 100;
+
+/**
+ * The `.ics` feed: 30 days back and the 12 weeks ahead, cancelled streams included as `STATUS:CANCELLED`. Upcoming
+ * and past streams are read apart, so old streams never push the furthest upcoming ones out of the feed (review m12).
+ */
 export async function scheduleCalendar(
   env: AppEnv,
   streamer: { id: string; name: string; handle: string },
   origin: string,
   now: number = Date.now(),
 ): Promise<string> {
-  const { results } =
-    await env.DB.prepare(`SELECT * FROM stream_events WHERE streamer_id=? AND starts_at >= ? AND starts_at < ?
-    ORDER BY starts_at, id LIMIT 500`)
-      .bind(streamer.id, now - 30 * 86_400_000, now + SERIES_HORIZON_MS + 7 * 86_400_000)
-      .all<EventRow>();
+  const [upcoming, past] = await env.DB.batch<EventRow>([
+    env.DB.prepare(`SELECT * FROM stream_events WHERE streamer_id=? AND starts_at >= ? AND starts_at < ?
+      ORDER BY starts_at, id LIMIT ?`).bind(
+      streamer.id,
+      now,
+      now + SERIES_HORIZON_MS + 7 * 86_400_000,
+      FEED_UPCOMING_LIMIT,
+    ),
+    env.DB.prepare(`SELECT * FROM stream_events WHERE streamer_id=? AND starts_at >= ? AND starts_at < ?
+      ORDER BY starts_at DESC, id DESC LIMIT ?`).bind(streamer.id, now - 30 * 86_400_000, now, FEED_PAST_LIMIT),
+  ]);
+  const results: EventRow[] = [...past.results].reverse().concat(upcoming.results);
   const events: IcsEvent[] = results.map(
     (row: EventRow): IcsEvent => ({
       id: row.id,
