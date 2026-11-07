@@ -5,6 +5,7 @@ import { deleteAccount, exportAccount } from "../account.server";
 import { configuredProviders, createAuth } from "../auth.server";
 import { consumeMutationQuota, getOwnStreamer, setDisplayPrefs, setLocale, updateProfile } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
+import { getSupport } from "../support.server";
 import { accountDeletionSchema, displayPrefsSchema, localeSchema, profileSchema } from "../validation";
 import { get, write, type ApiRoute } from "./router";
 
@@ -47,9 +48,11 @@ async function endSession(request: Request, app: AppContext): Promise<void> {
 export const accountRoutes: ApiRoute[] = [
   get(/me/, async ({ request, env, viewer }) => {
     queryParams(request, []);
+    const streamer = viewer ? await getOwnStreamer(env, viewer.id) : null;
     return json({
       viewer,
-      streamer: viewer ? await getOwnStreamer(env, viewer.id) : null,
+      streamer,
+      support: streamer ? await getSupport(env, streamer.id) : null,
       access: viewer ? await getStreamerAccess(env, viewer.id) : null,
       providers: configuredProviders(env),
       signInProvider: viewer ? await signInProvider(env, viewer.id) : null,

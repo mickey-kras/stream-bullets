@@ -1,14 +1,11 @@
-import { useId, useState, type FormEvent, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { MAX_SUPPORT_LINKS, SUPPORT_LINK_KINDS } from "../../../db/enums";
 import { t } from "../../i18n";
 import { isAllowedSupportLink, SUPPORT_PROVIDERS, supportLabel } from "../../lib/support";
 import type { SupportLink, SupportLinkKind, SupportSettings } from "../../types";
-import { errorMessage, sendJson } from "../api";
-import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { IconButton } from "../ui/icon-button";
 import { Select, type SelectOption } from "../ui/select";
-import { Sheet } from "../ui/sheet";
 
 /** "Support {name}" in About (item 34): up to four link-outs. StreamBullets never handles the payment. */
 export function SupportSection({ name, support }: Readonly<{ name: string; support: SupportSettings }>): ReactNode {
@@ -40,7 +37,7 @@ export function SupportSection({ name, support }: Readonly<{ name: string; suppo
   );
 }
 
-type Row = Omit<SupportLink, "id"> & { key: string };
+export type Row = Omit<SupportLink, "id"> & { key: string };
 
 function rowError(row: Row, index: number): string {
   if (!isAllowedSupportLink(row.kind, row.url.trim()))
@@ -132,20 +129,58 @@ function LinkRow({
   );
 }
 
-/**
- * The support links editor: up to 4 links, https only, each on its provider's own domain (checked again on the
- * server), plus whether they show in About and as a Community card. It saves on its own, so the Edit your page
- * dialog can include it as a section.
- */
-export function SupportEditor({
-  support,
-  onSaved,
-}: Readonly<{ support: SupportSettings; onSaved: (support: SupportSettings) => void }>): ReactNode {
+/** The editor's working copy of the support settings. */
+export interface SupportDraft {
+  rows: Row[];
+  visible: boolean;
+  card: boolean;
+  setRows: (rows: Row[]) => void;
+  setVisible: (visible: boolean) => void;
+  setCard: (card: boolean) => void;
+}
+
+export function useSupportDraft(support: SupportSettings): SupportDraft {
   const [rows, setRows] = useState<Row[]>(support.links.map((link: SupportLink) => ({ ...link, key: link.id })));
   const [visible, setVisible] = useState<boolean>(support.visible);
   const [card, setCard] = useState<boolean>(support.card);
-  const [error, setError] = useState<string>("");
-  const [pending, setPending] = useState<boolean>(false);
+  return { rows, visible, card, setRows, setVisible, setCard };
+}
+
+/** The `PUT /api/support-links` body for a draft. */
+export function supportPayload(draft: SupportDraft): {
+  links: { kind: SupportLinkKind; label: string | null; url: string }[];
+  visible: boolean;
+  card: boolean;
+} {
+  const links = draft.rows.map((row: Row) => ({
+    kind: row.kind,
+    label: row.kind === "other" ? row.label?.trim() || null : null,
+    url: row.url.trim(),
+  }));
+  return { links, visible: draft.visible, card: draft.card };
+}
+
+/** The first problem in a draft, or an empty string. The server checks the same rules again. */
+export function supportDraftError(draft: SupportDraft): string {
+  return draft.rows.map(rowError).find(Boolean) ?? "";
+}
+
+/** Whether a draft differs from the saved settings. */
+export function supportChanged(draft: SupportDraft, support: SupportSettings): boolean {
+  const saved = JSON.stringify({
+    links: support.links.map(({ kind, label, url }) => ({ kind, label: kind === "other" ? label : null, url })),
+    visible: support.visible,
+    card: support.card,
+  });
+  return JSON.stringify(supportPayload(draft)) !== saved;
+}
+
+/**
+ * The Support links section of Edit your page (item 34): up to 4 links, https only, each on its provider's own
+ * domain (checked again on the server), plus whether they show in About and as a Community card.
+ */
+export function SupportFields({ draft }: Readonly<{ draft: SupportDraft }>): ReactNode {
+  const { rows, setRows } = draft;
 
   function move(index: number, direction: number): void {
     const next = [...rows];
@@ -154,95 +189,47 @@ export function SupportEditor({
     setRows(next);
   }
 
-  async function save(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
-    const problem = rows.map(rowError).find(Boolean);
-    if (problem) {
-      setError(problem);
-      return;
-    }
-    setPending(true);
-    setError("");
-    try {
-      const links = rows.map((row: Row) => ({
-        kind: row.kind,
-        label: row.kind === "other" ? row.label?.trim() || null : null,
-        url: row.url.trim(),
-      }));
-      onSaved(await sendJson<SupportSettings>("PUT", "/api/support-links", { links, visible, card }));
-    } catch (error_: unknown) {
-      setError(errorMessage(error_));
-    } finally {
-      setPending(false);
-    }
-  }
-
   return (
-    <form onSubmit={(event) => void save(event)}>
-      <fieldset className="support-editor" id="sec-support-editor">
-        <legend>{t("support.editorTitle")}</legend>
-        <p className="muted">{t("support.editorHint")}</p>
-        <ol className="support-rows">
-          {rows.map((row: Row, index: number) => (
-            <LinkRow
-              key={row.key}
-              row={row}
-              index={index}
-              count={rows.length}
-              onChange={(next: Row) => setRows(rows.map((value: Row, i: number) => (i === index ? next : value)))}
-              onMove={(direction: number) => move(index, direction)}
-              onRemove={() => setRows(rows.filter((_: Row, i: number) => i !== index))}
-            />
-          ))}
-        </ol>
-        {rows.length < MAX_SUPPORT_LINKS ? (
-          <button
-            type="button"
-            className="small-button"
-            onClick={() => setRows([...rows, { key: crypto.randomUUID(), kind: "kofi", label: null, url: "" }])}
-          >
-            <Icon name="plus" size={16} />
-            {t("support.add")}
-          </button>
-        ) : (
-          <p className="muted">{t("support.max")}</p>
-        )}
-        <label className="choice">
-          <input type="checkbox" checked={visible} onChange={(event) => setVisible(event.currentTarget.checked)} />
-          <span>{t("support.showAbout")}</span>
-        </label>
-        <label className="choice">
-          <input type="checkbox" checked={card} onChange={(event) => setCard(event.currentTarget.checked)} />
-          <span>{t("support.showCard")}</span>
-        </label>
-      </fieldset>
-      <p className="form-error" role="alert">
-        {error}
-      </p>
-      <DialogActions>
-        <button className="gold" type="submit" disabled={pending}>
-          {pending ? t("common.saving") : t("support.save")}
+    <fieldset className="support-editor" id="sec-support-editor">
+      <legend>{t("support.editorTitle")}</legend>
+      <p className="muted">{t("support.editorHint")}</p>
+      <ol className="support-rows">
+        {rows.map((row: Row, index: number) => (
+          <LinkRow
+            key={row.key}
+            row={row}
+            index={index}
+            count={rows.length}
+            onChange={(next: Row) => setRows(rows.map((value: Row, i: number) => (i === index ? next : value)))}
+            onMove={(direction: number) => move(index, direction)}
+            onRemove={() => setRows(rows.filter((_: Row, i: number) => i !== index))}
+          />
+        ))}
+      </ol>
+      {rows.length < MAX_SUPPORT_LINKS ? (
+        <button
+          type="button"
+          className="small-button"
+          onClick={() => setRows([...rows, { key: crypto.randomUUID(), kind: "kofi", label: null, url: "" }])}
+        >
+          <Icon name="plus" size={16} />
+          {t("support.add")}
         </button>
-      </DialogActions>
-    </form>
-  );
-}
-
-/** The owner's way into the editor from About, until the Edit your page dialog carries it. */
-export function SupportEditorSheet({
-  open,
-  support,
-  onOpenChange,
-  onSaved,
-}: Readonly<{
-  open: boolean;
-  support: SupportSettings;
-  onOpenChange: (open: boolean) => void;
-  onSaved: (support: SupportSettings) => void;
-}>): ReactNode {
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={t("support.editorTitle")} name="support">
-      <SupportEditor support={support} onSaved={onSaved} />
-    </Sheet>
+      ) : (
+        <p className="muted">{t("support.max")}</p>
+      )}
+      <label className="choice">
+        <input
+          type="checkbox"
+          checked={draft.visible}
+          onChange={(event) => draft.setVisible(event.currentTarget.checked)}
+        />
+        <span>{t("support.showAbout")}</span>
+      </label>
+      <label className="choice">
+        <input type="checkbox" checked={draft.card} onChange={(event) => draft.setCard(event.currentTarget.checked)} />
+        <span>{t("support.showCard")}</span>
+      </label>
+    </fieldset>
   );
 }

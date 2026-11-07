@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
+import {
+  Link,
+  useLoaderData,
+  useLocation,
+  useRevalidator,
+  useSearchParams,
+  type LoaderFunctionArgs,
+} from "react-router";
 import { ENTRY_STATUSES } from "../../db/enums";
 import { appContext } from "../env";
 import { configuredProviders } from "../server/auth.server";
@@ -22,7 +29,8 @@ import { StreamerHeader, streamerViews, type StreamerView } from "../components/
 import { EntryActions, EntryDetail } from "../components/streamer/entry-detail";
 import { PageBanner } from "../components/streamer/page-banner";
 import { TopicBoard } from "../components/streamer/topic-board";
-import { SupportEditorSheet, SupportSection } from "../components/support/support";
+import { SupportSection } from "../components/support/support";
+import { dialogHref, type DialogState } from "../components/account/dialog-route";
 import { Icon } from "../components/ui/icon";
 import { useToast } from "../components/ui/toast";
 import { t } from "../i18n";
@@ -31,18 +39,10 @@ import { CreateEntry } from "../components/create-entry";
 import { Discussion } from "../components/discussion";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { PollCard } from "../components/poll";
-import type {
-  BoardSnapshot,
-  Entry,
-  EntryStatus,
-  LiveSnapshot,
-  SortOrder,
-  StreamEvent,
-  SupportSettings,
-} from "../types";
+import type { BoardSnapshot, Entry, EntryStatus, LiveSnapshot, SortOrder, StreamEvent } from "../types";
 
 type View = StreamerView;
-type Dialog = "topic" | "poll" | "idea" | "event" | "card" | "support" | null;
+type Dialog = "topic" | "poll" | "idea" | "event" | "card" | null;
 const liveLabels: Record<string, string> = {
   live: "Live updates connected",
   connecting: "Connecting to live updates…",
@@ -130,6 +130,7 @@ export default function StreamerPage(): ReactNode {
   const { streamer } = board;
   useRememberContentRoute(`/@${streamer.handle}`, streamer.name);
   const [searchParams, setSearchParams] = useSearchParams();
+  const here = useLocation();
   const revalidator = useRevalidator();
   const toast = useToast();
   // A directory card can ask for an action (P3 `?intent=`): suggest opens Suggest a topic (Suggest an improvement on
@@ -145,12 +146,6 @@ export default function StreamerPage(): ReactNode {
   const [extra, setExtra] = useState<Entry[]>([]);
   const [cursor, setCursor] = useState<string | null>(board.nextCursor);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [supportState, setSupportState] = useState<SupportSettings>(support);
-  const [supportSource, setSupportSource] = useState<SupportSettings>(support);
-  if (supportSource !== support) {
-    setSupportSource(support);
-    setSupportState(support);
-  }
   const generation = useRef<number>(0);
   const official = streamer.isOfficial;
   const live = useLivePolls(streamer.handle, view === "polls");
@@ -529,13 +524,19 @@ export default function StreamerPage(): ReactNode {
           </div>
           <p className="description">{streamer.about || t("about.empty")}</p>
         </section>
-        <SupportSection name={streamer.name} support={supportState} />
+        <SupportSection name={streamer.name} support={support} />
         {owner && writable && (
           <p>
-            <button type="button" className="small-button" onClick={() => setDialog("support")}>
+            <Link
+              className="button-link small-button"
+              to={dialogHref(here, "page")}
+              aria-haspopup="dialog"
+              state={{ dialogFrom: here.pathname } satisfies DialogState}
+              preventScrollReset
+            >
               <Icon name="heart" size={16} />
               {t("support.edit")}
-            </button>
+            </Link>
           </p>
         )}
       </>
@@ -601,7 +602,7 @@ export default function StreamerPage(): ReactNode {
         <CommunityView
           name={streamer.name}
           cards={data.cards}
-          support={supportState}
+          support={support}
           owner={owner}
           writable={writable}
           adding={dialog === "card"}
@@ -727,18 +728,6 @@ export default function StreamerPage(): ReactNode {
             const result = await mutate({ action: "create", kind: "topic", ...body });
             toast(t("ideas.thanks"));
             setSearchParams(new URLSearchParams({ view: "topics", entry: result.id }));
-          }}
-        />
-      )}
-      {owner && (
-        <SupportEditorSheet
-          open={dialog === "support"}
-          support={supportState}
-          onOpenChange={(open: boolean) => setDialog(open ? "support" : null)}
-          onSaved={(next: SupportSettings) => {
-            setSupportState(next);
-            setDialog(null);
-            toast(t("support.saved"));
           }}
         />
       )}

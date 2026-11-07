@@ -44,7 +44,7 @@ Notes:
 |---|---|---|
 | `POST /api/streamer` | `{handle, name, about}` | `{streamer}`. It creates the page for an approved account or an admin. A second page gets `409`. |
 | `DELETE /api/images/avatar` | none | `{avatar: null}`. The account then shows its preset, or the default. |
-| `GET /api/me` | none | Adds `signInProvider`: `"google"`, `"tiktok"`, `"twitch"`, `"instagram"` or null. |
+| `GET /api/me` | none | Adds `signInProvider`: `"google"`, `"tiktok"`, `"twitch"`, `"instagram"` or null. Adds `support`: the owner's `{links, visible, card}` for Edit your page, or null without a page. |
 
 - Phase 3 removes `POST /api/profile` and `POST /api/account`. The settings page used them. Use
   `POST /api/streamer`, `PATCH /api/streamer` and `PATCH /api/profile`.

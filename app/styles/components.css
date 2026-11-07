@@ -251,6 +251,7 @@ button.gold:hover { background:var(--gold-hover); }
 .detail .text-link { font-size: 0.75rem; white-space: nowrap; }
 .content-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
 .content-actions button, .small-button { font-size: 0.8125rem; padding: 6px 10px; min-height: 32px; }
+.button-link.small-button { gap: 6px; margin: 0; }
 .comment-sort { margin-left: auto; }
 .comment-sort select { width: 125px; }
 .comment-meta time { font-size: 0.6875rem; color: var(--muted); }

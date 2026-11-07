@@ -65,16 +65,18 @@ test("About shows support links and the owner edits them within the allow-list",
   const context = await signedIn(browser, "featureowner", 96);
   const owner = await context.newPage();
   await owner.goto("/@feature_host?view=about");
-  await owner.getByRole("button", { name: "Edit support links" }).click();
-  const editor = owner.getByRole("dialog", { name: "Support links" });
+  await owner.getByRole("link", { name: "Edit support links" }).click();
+  await expect(owner).toHaveURL(/dialog=page/);
+  const editor = owner.getByRole("dialog", { name: "Edit your page" });
+  await expect(editor.getByRole("group", { name: "Support links" })).toBeVisible();
   await editor.getByRole("button", { name: "Add support link" }).click();
   await editor.getByRole("combobox", { name: "Provider for link 3" }).click();
   await owner.getByRole("option", { name: "Patreon" }).click();
   await editor.getByRole("textbox", { name: "Link 3" }).fill("https://ko-fi.com/not-patreon");
-  await editor.getByRole("button", { name: "Save support links" }).click();
+  await editor.getByRole("button", { name: "Save page" }).click();
   await expect(editor.getByRole("alert")).toHaveText("Link 3: use an https link on Patreon's own domain.");
   await editor.getByRole("textbox", { name: "Link 3" }).fill("https://www.patreon.com/feature_host");
-  await editor.getByRole("button", { name: "Save support links" }).click();
+  await editor.getByRole("button", { name: "Save page" }).click();
   await expect(editor).toBeHidden();
   await expect(owner.locator("#sec-support").getByRole("link", { name: /Patreon/ })).toBeVisible();
   const forged = await context.request.put("/api/support-links", {

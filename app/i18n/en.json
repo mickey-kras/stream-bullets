@@ -509,8 +509,6 @@
   "support.moveUp": "Move link {n} up",
   "support.provider": "Provider for link {n}",
   "support.remove": "Remove link {n}",
-  "support.save": "Save support links",
-  "support.saved": "Support links saved.",
   "support.showAbout": "Show on About page",
   "support.showCard": "Also add a Support card to Community",
   "support.title": "Support {name}",
