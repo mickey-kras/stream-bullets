@@ -769,6 +769,12 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 @media (max-width:43.75em) {
   .page-banner { margin: 8px 10px 0; font-size: 14px; }
 }
+.owner-notice { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 8px; padding: 8px 12px; border-left: 4px solid var(--frozen); border-radius: 6px; background: var(--c-0f2a30); color: var(--cream); font: 400 14px/1.4 var(--body); overflow-wrap: anywhere; }
+.owner-notice.suspended { border-left-color: var(--error); }
+.owner-notice svg { flex: none; margin-top: 2px; color: var(--frozen); }
+.owner-notice.suspended svg { color: var(--error); }
+.profile { position: relative; }
+.notice-dot { position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; border: 2px solid var(--bg); border-radius: 50%; background: var(--error); }
 .sheet-body .person p { margin: 0; }
 .group-stats { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 16px 0 10px; }
 .group-stats dt { color: var(--muted); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }

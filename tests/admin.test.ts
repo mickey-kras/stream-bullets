@@ -452,6 +452,7 @@ describe("page moderation and the reports queue", (): void => {
     });
     expect(await body<{ page: unknown }>(freeze)).toEqual({
       page: { id: ids.page, handle: "zed_page", status: "frozen" },
+      emailed: false,
     });
     const write = await call("POST", "streamers/zed_page", {
       user: "owner",
@@ -695,5 +696,95 @@ describe("admin edge cases", (): void => {
     const { reports } = await body<{ reports: { id: string }[] }>(await asAdmin("GET", "admin/reports"));
     const dismissed = await asAdmin("POST", "admin/reports", { body: { id: reports[0].id, action: "dismiss" } });
     expect(await body<unknown>(dismissed)).toEqual({ status: "dismissed", resolved: 1 });
+  });
+});
+
+describe("owner notice email (R13)", (): void => {
+  const sent: EmailMessageBuilder[] = [];
+  const binding = {
+    send: async (message: EmailMessageBuilder): Promise<EmailSendResult> => {
+      sent.push(message);
+      return { messageId: "test" } as EmailSendResult;
+    },
+  } as unknown as SendEmail;
+  const freeze = { body: { action: "freeze", reason: "spam", note: "Bot wave", notify: true } };
+
+  beforeEach((): void => {
+    sent.length = 0;
+    env.NOTIFY_EMAIL = binding;
+    env.NOTIFY_FROM = "notices@streambullets.example";
+  });
+
+  afterAll((): void => {
+    env.NOTIFY_EMAIL = undefined;
+    env.NOTIFY_FROM = undefined;
+  });
+
+  it("emails the owner in their language when the admin asks and email is configured", async (): Promise<void> => {
+    await env.DB.prepare("UPDATE user SET locale='de' WHERE id='owner'").run();
+    const response = await asAdmin("POST", `admin/streamers/${ids.page}`, freeze);
+    expect(await body<{ emailed: boolean }>(response)).toMatchObject({ emailed: true });
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatchObject({
+      from: "notices@streambullets.example",
+      to: "owner@example.test",
+      subject: "Deine StreamBullets-Seite @zed_page ist eingefroren",
+    });
+    expect(sent[0].text).toContain("Grund: Spam");
+    expect(sent[0].text).toContain(`${origin}/@zed_page`);
+    expect(sent[0].text).toContain("support@streambullets.com");
+  });
+
+  it("tells the owner when a suspension is lifted", async (): Promise<void> => {
+    await asAdmin("POST", `admin/streamers/${ids.page}`, { body: { action: "suspend", reason: "illegal" } });
+    const lifted = await asAdmin("POST", `admin/streamers/${ids.page}`, {
+      body: { action: "unsuspend", reason: "other", notify: true },
+    });
+    expect(await body<{ emailed: boolean }>(lifted)).toMatchObject({ emailed: true });
+    expect(sent.map((message) => message.subject)).toEqual(["Your StreamBullets page @zed_page is active again"]);
+  });
+
+  it("sends nothing unless the admin ticks Notify the owner", async (): Promise<void> => {
+    const response = await asAdmin("POST", `admin/streamers/${ids.page}`, {
+      body: { action: "freeze", reason: "spam" },
+    });
+    expect(await body<{ emailed: boolean }>(response)).toMatchObject({ emailed: false });
+    expect(sent).toHaveLength(0);
+  });
+
+  it.each([
+    ["the binding", "NOTIFY_EMAIL"],
+    ["the sender address", "NOTIFY_FROM"],
+  ] as const)("shows only the in-app notice without %s", async (_name, key): Promise<void> => {
+    env[key] = undefined;
+    const response = await asAdmin("POST", `admin/streamers/${ids.page}`, freeze);
+    expect(response.status).toBe(200);
+    expect(await body<{ emailed: boolean }>(response)).toMatchObject({ emailed: false });
+    expect(sent).toHaveLength(0);
+    const own = await body<{ streamer: { status: string } }>(
+      await call("GET", "streamers/zed_page", { user: "owner" }),
+    );
+    expect(own.streamer.status).toBe("frozen");
+  });
+
+  it("never writes to a placeholder address from TikTok or Instagram", async (): Promise<void> => {
+    await env.DB.prepare("UPDATE user SET email='123@tiktok.invalid' WHERE id='owner'").run();
+    const response = await asAdmin("POST", `admin/streamers/${ids.page}`, freeze);
+    expect(await body<{ emailed: boolean }>(response)).toMatchObject({ emailed: false });
+    expect(sent).toHaveLength(0);
+  });
+
+  it("keeps the freeze when the email fails", async (): Promise<void> => {
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    env.NOTIFY_EMAIL = {
+      send: async (): Promise<never> => Promise.reject(new Error("mail relay down")),
+    } as unknown as SendEmail;
+    const response = await asAdmin("POST", `admin/streamers/${ids.page}`, freeze);
+    expect(response.status).toBe(200);
+    expect(await body<{ page: { status: string }; emailed: boolean }>(response)).toMatchObject({
+      page: { status: "frozen" },
+      emailed: false,
+    });
+    expect(logged).toHaveBeenCalledWith("owner_notify_failed", { action: "freeze", cause: "Error" });
   });
 });

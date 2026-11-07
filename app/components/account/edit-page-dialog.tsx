@@ -4,6 +4,7 @@ import { t } from "../../i18n";
 import { personPicture } from "../../lib/avatars";
 import type { Streamer, SupportSettings, Viewer } from "../../types";
 import { errorMessage } from "../api";
+import { OwnerNotice } from "../streamer/page-banner";
 import { SupportFields, supportChanged, supportDraftError, supportPayload, useSupportDraft } from "../support/support";
 import { formatDate } from "../waitlist";
 import { bumpImage, Picture, useImageUrl } from "../ui/avatar";
@@ -196,6 +197,7 @@ export function EditPageDialog({
         </>
       ) : (
         <form id="page-form" onSubmit={(event: FormEvent<HTMLFormElement>) => void save(event)}>
+          <OwnerNotice status={streamer.status} reason={streamer.statusReason} />
           <label>
             <span>{t("page.name")}</span>
             <input name="name" value={name} onChange={(e) => setName(e.currentTarget.value)} required maxLength={40} />

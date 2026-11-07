@@ -12,6 +12,7 @@ import {
   entryStatusSchema,
   setEntryStatus,
 } from "../moderation.server";
+import { notifyOwner } from "../notify.server";
 import {
   listReportGroups,
   listReportItems,
@@ -101,7 +102,8 @@ export const adminRoutes: ApiRoute[] = [
     await consumeMutationQuota(app.env, admin.viewer.id);
     const page = await moderatePage(app.env, admin, match[1], input);
     await notifyRoom(app.env, page.id);
-    return json({ page });
+    const emailed: boolean = input.notify ? await notifyOwner(app.env, page.id, input.action) : false;
+    return json({ page, emailed });
   }),
   get(/admin\/report-groups/u, async ({ request, app }) => {
     const admin = await requireAdminSession(request, app);

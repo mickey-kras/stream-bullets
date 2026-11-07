@@ -2,12 +2,13 @@ import { useState, type ReactNode } from "react";
 import { Form, Link, useRevalidator } from "react-router";
 import type { AdminPage, AdminPageList, ModerationEvent, PageAction } from "../../admin-types";
 import { t, tn } from "../../i18n";
+import { reasonText } from "../../lib/moderation";
 import type { StreamerStatus } from "../../types";
 import { EmptyState } from "../common";
 import { Avatar, StreamerLogo } from "../ui/avatar";
 import { Icon } from "../ui/icon";
 import { DateTime } from "../waitlist";
-import { actionIcon, actionLabel, ModerateSheet, pageActions, reasonText, type ModeratedPage } from "./moderate-sheet";
+import { actionIcon, actionLabel, ModerateSheet, pageActions, type ModeratedPage } from "./moderate-sheet";
 import { adminRequest, errorText } from "./webauthn";
 
 export type PageFilter = "all" | StreamerStatus;

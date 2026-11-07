@@ -21,6 +21,10 @@ export interface AppEnv {
   ADMIN_STEP_UP?: string;
   /** Secret key for the AI interest counter's daily visitor hashes. Without it the counter is off. */
   AI_INTEREST_SALT?: string;
+  /** Optional send_email binding for owner notices (R13). Email goes out only with NOTIFY_FROM set too. */
+  NOTIFY_EMAIL?: SendEmail;
+  /** The sender address for owner notices, on a domain with Cloudflare Email Routing. */
+  NOTIFY_FROM?: string;
 }
 
 export interface AppContext {

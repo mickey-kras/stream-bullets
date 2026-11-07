@@ -1,6 +1,6 @@
 import { useRouteLoaderData } from "react-router";
 import { getLocale, type Locale } from "../i18n";
-import type { DisplayPrefs, Provider, Viewer } from "../types";
+import type { DisplayPrefs, Provider, StreamerStatus, Viewer } from "../types";
 
 export type { Provider } from "../types";
 
@@ -9,7 +9,8 @@ export interface ShellData {
   viewer: Viewer | null;
   providers: Provider[];
   admin: boolean;
-  ownStreamer: { handle: string; name: string } | null;
+  /** The viewer's own page. A frozen or suspended page shows its owner a notice in the account menu (R13). */
+  ownStreamer: { handle: string; name: string; status: StreamerStatus; statusReason: string | null } | null;
   /** The page's language: the account's, then the cookie's, then the browser's, then English. */
   locale: Locale;
   /** Display preferences: the account's when signed in and saved, else this browser's cookie. */
