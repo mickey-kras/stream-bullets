@@ -125,11 +125,7 @@ function isFresh(verifiedAt: number | null, window: number, now: number): boolea
   return verifiedAt !== null && verifiedAt <= now && now - verifiedAt < window;
 }
 
-function registerBlock(
-  keys: number,
-  session: SessionRow,
-  now: number,
-): StepUpStatus["registerBlock"] {
+function registerBlock(keys: number, session: SessionRow, now: number): StepUpStatus["registerBlock"] {
   if (keys >= MAX_KEYS) return "limit";
   if (keys === 0) return now - session.created_at < ONBOARDING_WINDOW_MS ? "none" : "sign_in_again";
   return isFresh(session.admin_verified_at, SENSITIVE_WINDOW_MS, now) ? "none" : "step_up";
@@ -150,7 +146,8 @@ async function status(env: AppEnv, userId: string, sessionId: string, now: numbe
     keys,
     requiredKeys: REQUIRED_KEYS,
     verifiedAt,
-    freshUntil: isFresh(verifiedAt, STEP_UP_WINDOW_MS, now) && verifiedAt !== null ? verifiedAt + STEP_UP_WINDOW_MS : null,
+    freshUntil:
+      isFresh(verifiedAt, STEP_UP_WINDOW_MS, now) && verifiedAt !== null ? verifiedAt + STEP_UP_WINDOW_MS : null,
     canRegister: block === "none",
     registerBlock: block,
     need: need(stepUpMode(env), keys, verifiedAt, now),
@@ -242,7 +239,10 @@ function expected(env: AppEnv, challenge: string): Expected {
 
 /* ---------- Step-up ---------- */
 
-const base64url = z.string().regex(/^[\w-]+$/u).max(8192);
+const base64url = z
+  .string()
+  .regex(/^[\w-]+$/u)
+  .max(8192);
 
 export const assertionSchema = z
   .object({
@@ -269,7 +269,10 @@ export const registrationSchema = z
           .object({
             clientDataJSON: base64url,
             attestationObject: base64url,
-            transports: z.array(z.string().regex(/^[a-z-]{1,20}$/u)).max(8).optional(),
+            transports: z
+              .array(z.string().regex(/^[a-z-]{1,20}$/u))
+              .max(8)
+              .optional(),
           })
           .strip(),
       })
@@ -310,7 +313,11 @@ export async function stepUpOptions(
     rpId: relyingParty(env).rpId,
     timeout: CEREMONY_TIMEOUT_MS,
     userVerification: "required",
-    allowCredentials: keys.map((key) => ({ type: "public-key", id: key.credential_id, transports: transports(key.transports) })),
+    allowCredentials: keys.map((key) => ({
+      type: "public-key",
+      id: key.credential_id,
+      transports: transports(key.transports),
+    })),
   };
 }
 
@@ -348,7 +355,8 @@ export async function verifyStepUp(
       counter: key.counter,
     }));
   } catch (error: unknown) {
-    if (error instanceof WebAuthnError) return failed("The security key check failed. Try again.", "key_failed", key.id);
+    if (error instanceof WebAuthnError)
+      return failed("The security key check failed. Try again.", "key_failed", key.id);
     throw error;
   }
   const [updated] = await env.DB.batch([
@@ -374,11 +382,7 @@ export async function verifyStepUp(
 function registrationRefused(block: StepUpStatus["registerBlock"]): HttpError {
   if (block === "limit") return new HttpError(409, `You can register up to ${MAX_KEYS} keys.`, "key_limit");
   if (block === "sign_in_again")
-    return new HttpError(
-      403,
-      "Sign out, sign in again, and add your first key within 5 minutes.",
-      "sign_in_again",
-    );
+    return new HttpError(403, "Sign out, sign in again, and add your first key within 5 minutes.", "sign_in_again");
   return new HttpError(403, "Confirm with a key you already registered, then add the new key.", "step_up_required");
 }
 
@@ -408,7 +412,11 @@ export async function registrationOptions(
       requireResidentKey: false,
       userVerification: "required",
     },
-    excludeCredentials: keys.map((key) => ({ type: "public-key", id: key.credential_id, transports: transports(key.transports) })),
+    excludeCredentials: keys.map((key) => ({
+      type: "public-key",
+      id: key.credential_id,
+      transports: transports(key.transports),
+    })),
   };
 }
 
@@ -433,7 +441,8 @@ export async function registerKey(
     if (error instanceof WebAuthnError) throw new HttpError(400, "That key couldn't be registered.", "key_failed");
     throw error;
   }
-  if (key.credentialId !== input.credential.id) throw new HttpError(400, "That key couldn't be registered.", "key_failed");
+  if (key.credentialId !== input.credential.id)
+    throw new HttpError(400, "That key couldn't be registered.", "key_failed");
   const id = crypto.randomUUID();
   const keyTransports = (input.credential.response.transports ?? []).join(",") || null;
   const label = await sessionLabel(admin.sessionId);
@@ -468,7 +477,11 @@ export async function registerKey(
     `).bind(crypto.randomUUID(), id, admin.viewer.id, JSON.stringify({ session: label, name: input.name }), now, id),
   ]);
   if (inserted.meta.changes !== 1)
-    throw new HttpError(409, "That key is already registered, or your keys changed. Reload and try again.", "key_conflict");
+    throw new HttpError(
+      409,
+      "That key is already registered, or your keys changed. Reload and try again.",
+      "key_conflict",
+    );
   return {
     id,
     name: input.name,
@@ -496,7 +509,15 @@ export async function renameKey(env: AppEnv, admin: AdminSession, id: string, na
     env.DB.prepare(`
       INSERT INTO moderation_actions (id, target_kind, target_id, action, actor_id, metadata, created_at)
       SELECT ?, 'passkey', ?, 'key_renamed', ?, ?, ? WHERE EXISTS (SELECT 1 FROM passkey WHERE id=? AND user_id=?)
-    `).bind(crypto.randomUUID(), id, admin.viewer.id, JSON.stringify({ name, stepUp: admin.stepUp }), Date.now(), id, admin.viewer.id),
+    `).bind(
+      crypto.randomUUID(),
+      id,
+      admin.viewer.id,
+      JSON.stringify({ name, stepUp: admin.stepUp }),
+      Date.now(),
+      id,
+      admin.viewer.id,
+    ),
   ]);
   if (updated.meta.changes !== 1) throw new HttpError(404, "Key not found.");
 }
@@ -520,7 +541,11 @@ export async function removeKey(
     .bind(label, admin.viewer.id)
     .first<{ key_id: string | null; created_at: number }>();
   const session = await sessionRow(env, admin.sessionId);
-  if (!last || !isFresh(session.admin_verified_at, SENSITIVE_WINDOW_MS, now) || now - last.created_at >= SENSITIVE_WINDOW_MS)
+  if (
+    !last ||
+    !isFresh(session.admin_verified_at, SENSITIVE_WINDOW_MS, now) ||
+    now - last.created_at >= SENSITIVE_WINDOW_MS
+  )
     throw new HttpError(403, "Confirm with another registered key to remove this one.", "step_up_required");
   if (last.key_id === id)
     throw new HttpError(403, "Confirm with a different key than the one you remove.", "other_key_required");

@@ -62,7 +62,15 @@ export function fromBase64(value: string): Uint8Array<ArrayBuffer> {
 
 /* ---------- CBOR: the definite-length subset that authenticators send (RFC 8949, CTAP2 canonical) ---------- */
 
-export type CborValue = number | bigint | string | boolean | null | Uint8Array | CborValue[] | Map<CborValue, CborValue>;
+export type CborValue =
+  | number
+  | bigint
+  | string
+  | boolean
+  | null
+  | Uint8Array
+  | CborValue[]
+  | Map<CborValue, CborValue>;
 
 class CborReader {
   offset = 0;
@@ -284,7 +292,10 @@ function checkClientData(bytes: Uint8Array, type: "webauthn.create" | "webauthn.
   if (typeof data !== "object" || data === null) fail("Invalid client data.");
   const value = data as Record<string, unknown>;
   if (value.type !== type) fail("Wrong ceremony type.");
-  if (typeof value.challenge !== "string" || !equalBytes(fromBase64Url(value.challenge), fromBase64Url(expected.challenge)))
+  if (
+    typeof value.challenge !== "string" ||
+    !equalBytes(fromBase64Url(value.challenge), fromBase64Url(expected.challenge))
+  )
     fail("The challenge does not match.");
   if (value.origin !== expected.origin) fail("The origin does not match.");
   if (value.crossOrigin === true) fail("Cross-origin requests are not allowed.");

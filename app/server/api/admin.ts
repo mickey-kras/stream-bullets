@@ -42,7 +42,7 @@ import { get, parsedQuery, write, type ApiRoute } from "./router";
  * need an admin; everything else goes through requireAdminSession (admin + the ADMIN_STEP_UP policy).
  */
 
-const ID = String.raw`([0-9a-f-]{36})`;
+const ID = "([0-9a-f-]{36})";
 const path = (pattern: string): RegExp => new RegExp(pattern, "u");
 
 export const adminRoutes: ApiRoute[] = [

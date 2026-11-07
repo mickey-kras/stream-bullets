@@ -156,7 +156,9 @@ interface ItemReportRow {
 
 function itemStatus(reports: ItemReportRow[]): { status: ReportStatus; resolvedAt: number | null } {
   if (reports.some((report) => report.status === "open")) return { status: "open", resolvedAt: null };
-  const latest = reports.reduce((best, report) => ((report.resolved_at ?? 0) > (best.resolved_at ?? 0) ? report : best));
+  const latest = reports.reduce((best, report) =>
+    (report.resolved_at ?? 0) > (best.resolved_at ?? 0) ? report : best,
+  );
   return { status: latest.status, resolvedAt: latest.resolved_at };
 }
 

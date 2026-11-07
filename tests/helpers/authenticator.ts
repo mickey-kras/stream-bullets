@@ -159,7 +159,12 @@ export class SoftKey {
   private async authData(rpId: string, flags: number, counter: number, attested?: Uint8Array): Promise<Uint8Array> {
     const count = new Uint8Array(4);
     new DataView(count.buffer).setUint32(0, counter);
-    return concat(await sha256(new TextEncoder().encode(rpId)), Uint8Array.of(flags), count, attested ?? new Uint8Array());
+    return concat(
+      await sha256(new TextEncoder().encode(rpId)),
+      Uint8Array.of(flags),
+      count,
+      attested ?? new Uint8Array(),
+    );
   }
 
   async register(

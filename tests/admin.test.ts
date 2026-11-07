@@ -153,7 +153,11 @@ async function seedReport(targetKind: "entry" | "comment", targetId: string, rep
 const endpoints: [string, string, unknown?][] = [
   ["GET", "admin/stepup"],
   ["POST", "admin/stepup/options", {}],
-  ["POST", "admin/stepup/verify", { id: "abc", response: { clientDataJSON: "a", authenticatorData: "a", signature: "a" } }],
+  [
+    "POST",
+    "admin/stepup/verify",
+    { id: "abc", response: { clientDataJSON: "a", authenticatorData: "a", signature: "a" } },
+  ],
   ["GET", "admin/keys"],
   ["POST", "admin/keys/options", {}],
   [
@@ -391,7 +395,9 @@ describe("security-key ceremonies", (): void => {
   it("asks for a challenge that has not expired", async (): Promise<void> => {
     const [first] = await twoKeys();
     const request = await body<RequestOptions>(await asAdmin("POST", "admin/stepup/options", { body: {} }));
-    await env.DB.prepare("UPDATE verification SET expires_at=?").bind(Date.now() - 1).run();
+    await env.DB.prepare("UPDATE verification SET expires_at=?")
+      .bind(Date.now() - 1)
+      .run();
     const response = await asAdmin("POST", "admin/stepup/verify", { body: await first.assert(request, origin) });
     expect(await body<{ code: string }>(response)).toMatchObject({ code: "challenge_expired" });
   });
@@ -434,7 +440,9 @@ describe("page moderation and the reports queue", (): void => {
     const freeze = await asAdmin("POST", `admin/streamers/${ids.page}`, {
       body: { action: "freeze", reason: "spam", note: "Bot wave", notify: true },
     });
-    expect(await body<{ page: unknown }>(freeze)).toEqual({ page: { id: ids.page, handle: "zed_page", status: "frozen" } });
+    expect(await body<{ page: unknown }>(freeze)).toEqual({
+      page: { id: ids.page, handle: "zed_page", status: "frozen" },
+    });
     const write = await call("POST", "streamers/zed_page", {
       user: "owner",
       body: { action: "create", kind: "topic", title: "New", body: "Details", category: "Gaming" },
@@ -512,8 +520,9 @@ describe("page moderation and the reports queue", (): void => {
     });
     expect(await body<unknown>(removed)).toEqual({ removed: ids.topic, resolved: 1 });
     expect(await env.DB.prepare("SELECT id FROM entries WHERE id=?").bind(ids.topic).first()).toBeNull();
-    const row = await env.DB.prepare("SELECT reason, note, metadata FROM moderation_actions WHERE action='entry_removed'")
-      .first<{ reason: string; note: string; metadata: string }>();
+    const row = await env.DB.prepare(
+      "SELECT reason, note, metadata FROM moderation_actions WHERE action='entry_removed'",
+    ).first<{ reason: string; note: string; metadata: string }>();
     expect(row).toMatchObject({ reason: "spam", note: "Link farm" });
     expect(JSON.parse(row?.metadata ?? "{}")).toMatchObject({ title: "Spam topic" });
 

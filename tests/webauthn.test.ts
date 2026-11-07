@@ -101,17 +101,22 @@ describe("authenticator data", (): void => {
 });
 
 describe("registration", (): void => {
-  it.each(["es256", "ed25519", "rs256"] as const)("accepts a %s key with attestation none", async (kind): Promise<void> => {
-    const key = await SoftKey.create(kind);
-    const credential = await key.register({ challenge, rp: { id: rpId } }, origin);
-    const result = await verifyRegistration(credential.response, expected);
-    expect(result).toMatchObject({ credentialId: key.id, counter: 0, backedUp: false, deviceType: "singleDevice" });
-    expect(result.aaguid).toBe("00000000-0000-0000-0000-000000000000");
-  });
+  it.each(["es256", "ed25519", "rs256"] as const)(
+    "accepts a %s key with attestation none",
+    async (kind): Promise<void> => {
+      const key = await SoftKey.create(kind);
+      const credential = await key.register({ challenge, rp: { id: rpId } }, origin);
+      const result = await verifyRegistration(credential.response, expected);
+      expect(result).toMatchObject({ credentialId: key.id, counter: 0, backedUp: false, deviceType: "singleDevice" });
+      expect(result.aaguid).toBe("00000000-0000-0000-0000-000000000000");
+    },
+  );
 
   it("reads the backup flags", async (): Promise<void> => {
     const key = await SoftKey.create();
-    const credential = await key.register({ challenge, rp: { id: rpId } }, origin, { flags: UP | UV | AT | 0x08 | 0x10 });
+    const credential = await key.register({ challenge, rp: { id: rpId } }, origin, {
+      flags: UP | UV | AT | 0x08 | 0x10,
+    });
     expect(await verifyRegistration(credential.response, expected)).toMatchObject({
       backedUp: true,
       deviceType: "multiDevice",
@@ -157,7 +162,12 @@ describe("registration", (): void => {
       header.set(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rpId))));
       header[32] = UP | UV | AT;
       const authData = Uint8Array.from([...header, ...new Uint8Array(16), 0, 1, 7, ...encodeCbor(cose)]);
-      const attestation = encodeCbor(new Map<CborInput, CborInput>([["fmt", "none"], ["authData", authData]]));
+      const attestation = encodeCbor(
+        new Map<CborInput, CborInput>([
+          ["fmt", "none"],
+          ["authData", authData],
+        ]),
+      );
       const clientData = { type: "webauthn.create", challenge, origin };
       return verifyRegistration(
         {
@@ -168,15 +178,52 @@ describe("registration", (): void => {
       );
     };
     const map = (entries: [CborInput, CborInput][]) => new Map<CborInput, CborInput>(entries);
-    await expect(attest(map([[1, 1], [3, -7]]))).rejects.toThrow("Invalid COSE key.");
-    await expect(attest(map([[1, 2], [3, -7], [-1, 1], [-2, new Uint8Array(31)], [-3, new Uint8Array(32)]]))).rejects.toThrow(
-      "Invalid COSE key.",
-    );
-    await expect(attest(map([[1, 2], [3, -8], [-1, 6]]))).rejects.toThrow("Invalid COSE key.");
-    await expect(attest(map([[1, 1], [3, -257]]))).rejects.toThrow("Invalid COSE key.");
-    await expect(attest(map([[1, 3], [3, -257], [-1, new Uint8Array(128)], [-2, Uint8Array.of(1, 0, 1)]]))).rejects.toThrow(
-      "too short",
-    );
+    await expect(
+      attest(
+        map([
+          [1, 1],
+          [3, -7],
+        ]),
+      ),
+    ).rejects.toThrow("Invalid COSE key.");
+    await expect(
+      attest(
+        map([
+          [1, 2],
+          [3, -7],
+          [-1, 1],
+          [-2, new Uint8Array(31)],
+          [-3, new Uint8Array(32)],
+        ]),
+      ),
+    ).rejects.toThrow("Invalid COSE key.");
+    await expect(
+      attest(
+        map([
+          [1, 2],
+          [3, -8],
+          [-1, 6],
+        ]),
+      ),
+    ).rejects.toThrow("Invalid COSE key.");
+    await expect(
+      attest(
+        map([
+          [1, 1],
+          [3, -257],
+        ]),
+      ),
+    ).rejects.toThrow("Invalid COSE key.");
+    await expect(
+      attest(
+        map([
+          [1, 3],
+          [3, -257],
+          [-1, new Uint8Array(128)],
+          [-2, Uint8Array.of(1, 0, 1)],
+        ]),
+      ),
+    ).rejects.toThrow("too short");
   });
 });
 
@@ -211,7 +258,9 @@ describe("authentication", (): void => {
   ])("refuses %o", async (overrides, message): Promise<void> => {
     const { key, publicKey } = await registered();
     const assertion = await key.assert({ challenge, rpId }, origin, overrides);
-    await expect(verifyAuthentication(assertion.response, expected, { publicKey, counter: 0 })).rejects.toThrow(message);
+    await expect(verifyAuthentication(assertion.response, expected, { publicKey, counter: 0 })).rejects.toThrow(
+      message,
+    );
   });
 
   it("refuses a signature from another key", async (): Promise<void> => {
