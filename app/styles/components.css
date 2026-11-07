@@ -788,7 +788,7 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .gate-column { max-width: 560px; }
 .key-gate { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
 .key-gate.info-card { margin-top: 20px; padding: 36px 30px; }
-.key-gate h2 { color: var(--gold); }
+.key-gate :is(h1, h2) { color: var(--gold); }
 .key-gate p { margin: 0; }
 .key-badge { display: inline-grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--c-edbd5326); color: var(--gold); }
 .key-badge.small { width: 48px; height: 48px; }

@@ -87,7 +87,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await expect(page.getByRole("article", { name: "YubiKey – safe" })).toBeVisible();
   await expect(page.getByRole("article", { name: "YubiKey – desk" })).toBeVisible();
   await page.getByRole("link", { name: "Streamer requests" }).click();
-  await expect(page.getByRole("heading", { name: "Admin: Streamer requests" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Admin\s*:\s*Streamer requests$/ })).toBeVisible();
   await expect(page.getByText("Security keys aren't set up yet.")).toHaveCount(0);
   await page.getByRole("link", { name: "Security keys" }).click();
   await page.getByRole("button", { name: "Rename YubiKey – desk" }).click();
@@ -109,7 +109,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await expect(second.getByRole("article", { name: "Room 48" })).toHaveCount(0);
   await shot(second, "stepup-gate");
   await second.getByRole("button", { name: "Use security key" }).click();
-  await expect(second.getByRole("heading", { name: "Admin: Streamer pages" })).toBeVisible();
+  await expect(second.getByRole("heading", { name: /^Admin\s*:\s*Streamer pages$/ })).toBeVisible();
 
   // Freeze a page with a reason and a note, then lift it.
   await second.getByLabel("Search streamer pages").fill("zz_room_48");

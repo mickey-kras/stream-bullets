@@ -20,10 +20,13 @@ export function LostKeys(): ReactNode {
 export function KeyConfirm({
   onConfirmed,
   inDialog = false,
+  pageHeading = false,
   label,
 }: Readonly<{
   onConfirmed: () => Promise<void> | void;
   inDialog?: boolean;
+  /** The card title is the page's h1 (the gate screen). */
+  pageHeading?: boolean;
   /** The button text; "Use security key" by default. */
   label?: string;
 }>): ReactNode {
@@ -53,7 +56,12 @@ export function KeyConfirm({
       <span className="key-badge">
         <Icon name="shield-check" size={40} />
       </span>
-      {!inDialog && <h2 id="gate-title">{t("keys.confirmTitle")}</h2>}
+      {!inDialog &&
+        (pageHeading ? (
+          <h1 id="gate-title">{t("keys.confirmTitle")}</h1>
+        ) : (
+          <h2 id="gate-title">{t("keys.confirmTitle")}</h2>
+        ))}
       <p className="key-hint">{t("keys.hint")}</p>
       {phase === "waiting" ? (
         <output className="key-wait">

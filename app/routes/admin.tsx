@@ -409,8 +409,8 @@ function Gate({ onSkip }: Readonly<{ onSkip?: () => void }>): ReactNode {
   return (
     <>
       <span className="eyebrow">{t("account.admin")}</span>
-      <h1 className="sr-only">{t("keys.confirmTitle")}</h1>
       <KeyConfirm
+        pageHeading
         onConfirmed={async () => {
           await revalidator.revalidate();
         }}
