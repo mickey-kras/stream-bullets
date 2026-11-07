@@ -32,6 +32,16 @@ function fail(message: string): never {
   throw new WebAuthnError(message);
 }
 
+/** Callers write the failure audit row only for a WebAuthnError, so no other error may leave a ceremony. */
+async function asWebAuthnError<T>(check: () => Promise<T>): Promise<T> {
+  try {
+    return await check();
+  } catch (error: unknown) {
+    if (error instanceof WebAuthnError) throw error;
+    throw new WebAuthnError("The key response could not be read.", { cause: error });
+  }
+}
+
 export function toBase64Url(bytes: Uint8Array): string {
   let text = "";
   for (const byte of bytes) text += String.fromCodePoint(byte);
@@ -111,8 +121,14 @@ class CborReader {
         return -1 - value;
       case 2:
         return this.take(value).slice();
-      case 3:
-        return new TextDecoder("utf-8", { fatal: true }).decode(this.take(value));
+      case 3: {
+        const text = this.take(value);
+        try {
+          return new TextDecoder("utf-8", { fatal: true }).decode(text);
+        } catch {
+          return fail("Invalid CBOR text.");
+        }
+      }
       case 4:
         return Array.from({ length: value }, (): CborValue => this.read(depth + 1));
       case 5: {
@@ -328,6 +344,10 @@ export async function verifyRegistration(
   response: RegistrationResponse,
   expected: Expected,
 ): Promise<VerifiedRegistration> {
+  return asWebAuthnError(() => registrationOf(response, expected));
+}
+
+async function registrationOf(response: RegistrationResponse, expected: Expected): Promise<VerifiedRegistration> {
   checkClientData(fromBase64Url(response.clientDataJSON), "webauthn.create", expected);
   const { value, length } = decodeCbor(fromBase64Url(response.attestationObject));
   const attestationBytes = fromBase64Url(response.attestationObject);
@@ -360,6 +380,14 @@ export interface AuthenticationResponse {
  * grow (while either value is non-zero) means a cloned key or a replay, so the assertion is refused.
  */
 export async function verifyAuthentication(
+  response: AuthenticationResponse,
+  expected: Expected,
+  stored: { publicKey: string; counter: number },
+): Promise<{ counter: number }> {
+  return asWebAuthnError(() => authenticationOf(response, expected, stored));
+}
+
+async function authenticationOf(
   response: AuthenticationResponse,
   expected: Expected,
   stored: { publicKey: string; counter: number },

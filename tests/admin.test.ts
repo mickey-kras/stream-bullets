@@ -13,6 +13,7 @@ import {
 } from "../app/server/moderation.server";
 import { listReportGroups, listReportItems } from "../app/server/report-groups.server";
 import { stepUpMode, type AdminSession } from "../app/server/stepup.server";
+import { fromBase64Url, toBase64Url } from "../app/server/webauthn.server";
 import type { StreamerDirectory } from "../app/types";
 import { apiCaller, type CallOptions } from "./helpers/api";
 import { AT, SoftKey, UP, UV } from "./helpers/authenticator";
@@ -448,6 +449,27 @@ describe("security-key ceremonies", (): void => {
       "SELECT count(*) AS total FROM moderation_actions WHERE action='step_up_failed'",
     ).first<{ total: number }>();
     expect(failures?.total).toBe(3);
+  });
+
+  it("audits a malformed assertion as a failed check instead of answering 500", async (): Promise<void> => {
+    const [first] = await twoKeys();
+    const request = await body<RequestOptions>(await asAdmin("POST", "admin/stepup/options", { body: {} }));
+    const assertion = await first.assert(request, origin);
+    // Extension data holding a CBOR text string that is not valid UTF-8.
+    const bytes = fromBase64Url(assertion.response.authenticatorData);
+    const tampered = new Uint8Array(bytes.length + 2);
+    tampered.set(bytes);
+    tampered[32] |= 0x80;
+    tampered.set([0x61, 0xff], bytes.length);
+    const response = await asAdmin("POST", "admin/stepup/verify", {
+      body: { ...assertion, response: { ...assertion.response, authenticatorData: toBase64Url(tampered) } },
+    });
+    expect(response.status).toBe(400);
+    expect(await body<{ code: string }>(response)).toMatchObject({ code: "key_failed" });
+    const failed = await env.DB.prepare(
+      "SELECT count(*) AS total FROM moderation_actions WHERE action='step_up_failed'",
+    ).first<{ total: number }>();
+    expect(failed?.total).toBe(1);
   });
 
   it("asks for a challenge that has not expired", async (): Promise<void> => {
