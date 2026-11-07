@@ -12,9 +12,17 @@ import {
   validPreset,
 } from "../app/server/moderation.server";
 import { listReportGroups, listReportItems } from "../app/server/report-groups.server";
-import { stepUpMode, type AdminSession } from "../app/server/stepup.server";
+import { apiRoutes } from "../app/server/api";
+import type { ApiRoute } from "../app/server/api/router";
+import {
+  CHALLENGE_TTL_MS,
+  stepUpMode,
+  stepUpOptions,
+  verifyStepUp,
+  type AdminSession,
+} from "../app/server/stepup.server";
 import { fromBase64Url, toBase64Url } from "../app/server/webauthn.server";
-import type { StreamerDirectory } from "../app/types";
+import type { StreamerDirectory, Viewer } from "../app/types";
 import { apiCaller, type CallOptions } from "./helpers/api";
 import { AT, SoftKey, UP, UV } from "./helpers/authenticator";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -551,6 +559,152 @@ describe("security-key ceremonies", (): void => {
     expect(response.status).toBe(403);
     expect(await body<{ code: string }>(response)).toMatchObject({ code: "other_key_required" });
     expect((await asAdmin("GET", "admin/keys")).status).toBe(200);
+  });
+});
+
+describe("step-up binding (test review gaps)", (): void => {
+  const adminSession = (sessionId = "s-admin"): { viewer: Viewer; sessionId: string } => ({
+    viewer: { id: "admin", name: "Name admin" } as Viewer,
+    sessionId,
+  });
+
+  async function stamp(session = "s-admin"): Promise<number | null> {
+    const row = await env.DB.prepare("SELECT admin_verified_at FROM session WHERE id=?")
+      .bind(session)
+      .first<{ admin_verified_at: number | null }>();
+    return row?.admin_verified_at ?? null;
+  }
+
+  it("refuses an assertion signed over another challenge", async (): Promise<void> => {
+    const [first] = await twoKeys();
+    const before = await stamp();
+    const request = await body<RequestOptions>(await asAdmin("POST", "admin/stepup/options", { body: {} }));
+    const other = { ...request, challenge: toBase64Url(crypto.getRandomValues(new Uint8Array(32))) };
+    const response = await asAdmin("POST", "admin/stepup/verify", { body: await first.assert(other, origin) });
+    expect(response.status).toBe(400);
+    expect(await body<{ code: string }>(response)).toMatchObject({ code: "key_failed" });
+    expect(await stamp()).toBe(before);
+  });
+
+  it("refuses a key that another admin registered", async (): Promise<void> => {
+    const now = Date.now();
+    env.ADMIN_EMAILS = "admin@example.test, deputy@example.test";
+    try {
+      await env.DB.batch([
+        env.DB.prepare(
+          "INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES ('deputy','Deputy','deputy@example.test',1,?1,?1)",
+        ).bind(now),
+        env.DB.prepare(
+          "INSERT INTO session (id,token,user_id,expires_at,created_at,updated_at) VALUES ('s-deputy','deputy-session-token','deputy',?1,?2,?2)",
+        ).bind(now + 86_400_000, now),
+      ]);
+      const deputyKey = await SoftKey.create();
+      expect((await addKey(deputyKey, "Deputy key", "deputy")).status).toBe(201);
+      await twoKeys();
+      const before = await stamp();
+      const request = await body<RequestOptions>(await asAdmin("POST", "admin/stepup/options", { body: {} }));
+      const response = await asAdmin("POST", "admin/stepup/verify", { body: await deputyKey.assert(request, origin) });
+      expect(response.status).toBe(400);
+      expect(await body<{ code: string }>(response)).toMatchObject({ code: "key_unknown" });
+      expect(await stamp()).toBe(before);
+    } finally {
+      env.ADMIN_EMAILS = "admin@example.test";
+    }
+  });
+
+  it("binds each challenge to its session and to its purpose", async (): Promise<void> => {
+    const [first] = await twoKeys();
+    const other = await body<RequestOptions>(await call("POST", "admin/stepup/options", { user: "admin2", body: {} }));
+    const stolen = await asAdmin("POST", "admin/stepup/verify", { body: await first.assert(other, origin) });
+    expect(await body<{ code: string }>(stolen)).toMatchObject({ code: "challenge_expired" });
+    // The other session's challenge is still there for that session.
+    const own = await call("POST", "admin/stepup/verify", { user: "admin2", body: await first.assert(other, origin) });
+    expect(own.status).toBe(200);
+    const register = await body<CreationOptions>(await asAdmin("POST", "admin/keys/options", { body: {} }));
+    const assertion = await first.assert({ challenge: register.challenge, rpId: register.rp.id }, origin);
+    const wrongPurpose = await asAdmin("POST", "admin/stepup/verify", { body: assertion });
+    expect(await body<{ code: string }>(wrongPurpose)).toMatchObject({ code: "challenge_expired" });
+  });
+
+  it("lets exactly one of two racing uses of one assertion through", async (): Promise<void> => {
+    const [first] = await twoKeys();
+    const options = await body<RequestOptions>(await asAdmin("POST", "admin/stepup/options", { body: {} }));
+    expect((await call("POST", "admin/stepup/options", { user: "admin2", body: {} })).status).toBe(200);
+    // Both sessions hold the same challenge, so only the counter's compare-and-set can stop the second use.
+    await env.DB.prepare("UPDATE verification SET value=? WHERE identifier LIKE 'admin-webauthn:stepup:%'")
+      .bind(options.challenge)
+      .run();
+    const assertion = await first.assert(options, origin);
+    // Hold the first batch until the second arrives, so both have read the key before either writes.
+    let release: (() => void) | null = null;
+    const raced = {
+      ...env,
+      DB: new Proxy(env.DB, {
+        get(target: D1Database, key: string | symbol): unknown {
+          if (key === "batch")
+            return async (statements: D1PreparedStatement[]): Promise<D1Result[]> => {
+              if (release) release();
+              else
+                await new Promise<void>((resolve) => {
+                  release = resolve;
+                });
+              return target.batch(statements);
+            };
+          const value: unknown = Reflect.get(target, key);
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      }),
+    } as AppEnv;
+    const results = await Promise.allSettled([
+      verifyStepUp(raced, adminSession("s-admin"), assertion),
+      verifyStepUp(raced, adminSession("s-admin2"), assertion),
+    ]);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    const refused = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
+    expect(refused?.reason).toMatchObject({ code: "key_failed" });
+    const key = await env.DB.prepare("SELECT counter FROM passkey WHERE credential_id=?")
+      .bind(first.id)
+      .first<{ counter: number }>();
+    expect(key?.counter).toBe(first.counter);
+  });
+
+  it("never removes the last key, even when two sessions each remove the other's key", async (): Promise<void> => {
+    const [first, second] = await twoKeys();
+    const { keys } = await body<{ keys: SecurityKey[] }>(await asAdmin("GET", "admin/keys"));
+    const [firstId, secondId] = keys.map((key) => key.id);
+    expect((await stepUp(first, "admin")).status).toBe(200);
+    expect((await stepUp(second, "admin2")).status).toBe(200);
+    expect((await asAdmin("DELETE", `admin/keys/${secondId}`)).status).toBe(200);
+    const last = await call("DELETE", `admin/keys/${firstId}`, { user: "admin2" });
+    expect(last.status).toBe(409);
+    expect(await body<{ code: string }>(last)).toMatchObject({ code: "last_key" });
+    expect((await body<{ keys: SecurityKey[] }>(await asAdmin("GET", "admin/keys"))).keys).toHaveLength(1);
+  });
+
+  it("accepts a challenge up to the moment it expires and not after", async (): Promise<void> => {
+    const [first] = await twoKeys();
+    const issued = Date.now();
+    const onTime = await stepUpOptions(env, adminSession(), issued);
+    const deadline = issued + CHALLENGE_TTL_MS;
+    await expect(
+      verifyStepUp(env, adminSession(), await first.assert(onTime, origin), deadline),
+    ).resolves.toMatchObject({ verifiedAt: deadline });
+    const late = await stepUpOptions(env, adminSession(), issued);
+    await expect(
+      verifyStepUp(env, adminSession(), await first.assert(late, origin), deadline + 1),
+    ).rejects.toMatchObject({ code: "challenge_expired" });
+  });
+
+  it("lists every registered admin route in the authorization matrix", (): void => {
+    const listed = (route: ApiRoute): boolean =>
+      endpoints.some(([method, path]) => {
+        const match = route.path.exec(path);
+        return method === route.method && match?.index === 0 && match[0].length === path.length;
+      });
+    const admin = apiRoutes.filter((route: ApiRoute): boolean => route.path.source.startsWith("admin"));
+    expect(admin.length).toBeGreaterThanOrEqual(19);
+    for (const route of admin)
+      expect([route.method, route.path.source, listed(route)]).toEqual([route.method, route.path.source, true]);
   });
 });
 
