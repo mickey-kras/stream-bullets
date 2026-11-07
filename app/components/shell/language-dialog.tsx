@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { DEFAULT_LOCALE, getLocale, LOCALE_NAMES, LOCALES, t, type Locale } from "../../i18n";
-import { LOCALE_COOKIE } from "../../i18n/resolve";
-import { setCookie } from "../../lib/prefs";
+import { saveLocaleCookie } from "../../lib/prefs";
 import { useShell } from "../../lib/shell";
 import { sendJson, errorMessage } from "../api";
 import { Icon } from "../ui/icon";
@@ -21,7 +20,7 @@ const ORDERED: readonly Locale[] = [
  */
 export async function chooseLocale(locale: Locale, signedIn: boolean): Promise<void> {
   if (signedIn) await sendJson("PATCH", "/api/me/locale", { locale });
-  await setCookie(LOCALE_COOKIE, locale);
+  await saveLocaleCookie(locale);
   // Reload the same page without `?dialog=language`, so the list does not open again.
   const url = new URL(globalThis.location.href);
   url.searchParams.delete("dialog");

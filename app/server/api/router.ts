@@ -72,8 +72,8 @@ function anchored(path: RegExp, value: string): RegExpExecArray | null {
 }
 
 /**
- * Runs the endpoint for `path` (the part after `/api/`). Unknown paths answer 404; a known path
- * with another method answers 405.
+ * Runs the endpoint for `path` (the part after `/api/`). Unknown paths answer 404 before any sign-in check;
+ * a known path with another method answers 405.
  */
 export async function dispatch(
   routes: readonly ApiRoute[],
@@ -83,6 +83,8 @@ export async function dispatch(
 ): Promise<Response> {
   try {
     const method = request.method === "HEAD" ? "GET" : request.method;
+    if (!routes.some((route: ApiRoute) => anchored(route.path, path) !== null))
+      throw new HttpError(404, "Endpoint not found.");
     const open: boolean = routes.some(
       (route: ApiRoute) => "open" in route && route.method === method && anchored(route.path, path) !== null,
     );
@@ -98,17 +100,14 @@ export async function dispatch(
       queryParams(request, []);
       viewer = requireViewer(await getViewer(request, app));
     }
-    let known = false;
     for (const route of routes) {
       const match = anchored(route.path, path);
-      if (!match) continue;
-      known = true;
-      if (route.method !== method) continue;
+      if (!match || route.method !== method) continue;
       const context = { request, app, env: app.env, match };
       if (route.method === "GET" || "open" in route) return await route.handler({ ...context, viewer });
       return await route.handler({ ...context, viewer: requireViewer(viewer) });
     }
-    throw new HttpError(known ? 405 : 404, known ? "Method not allowed." : "Endpoint not found.");
+    throw new HttpError(405, "Method not allowed.");
   } catch (error) {
     return errorResponse(error);
   }
