@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { LegalDocument, type LegalSection } from "../components/common";
-import { legal } from "../legal";
+import { contactEmails, legal } from "../legal";
+import { paths } from "../lib/shell";
 
 export function meta() {
   return [
@@ -40,11 +41,13 @@ const sections: readonly LegalSection[] = [
     body: (
       <ul>
         <li>
-          You sign in with Google or Twitch. Your first sign-in creates your account, so there is no separate
-          registration.
+          You sign in with Google, Twitch, TikTok, or Instagram (creator and business accounts). Your first sign-in
+          creates your account, so there is no separate registration.
         </li>
+        <li>Keep your sign-in account secure. You are responsible for what happens in your StreamBullets account.</li>
         <li>
-          Keep your Google or Twitch account secure. You are responsible for what happens in your StreamBullets account.
+          Accounts made with TikTok or Instagram have no email address. We cannot email you about them, and they cannot
+          be administrator accounts.
         </li>
         <li>Use a display name that follows these terms and does not pretend to be someone else.</li>
         <li>One person, one account. Do not sell, share, or transfer accounts.</li>
@@ -55,12 +58,21 @@ const sections: readonly LegalSection[] = [
     id: "streamers",
     title: "Streamer profiles",
     body: (
-      <p>
-        Streamer profiles are invite-only. You can join the waitlist in Settings. Administrators decide whether to
-        approve or reject an application, and do not have to give a reason. Administrators can also create, change, or
-        remove a streamer profile, or remove streamer access, for example if a profile breaks these terms or pretends to
-        be someone else. A streamer controls the polls on their page and can remove content posted there.
-      </p>
+      <>
+        <p>
+          Streamer profiles are invite-only. You can ask to host from Host a community in the account menu.
+          Administrators decide whether to approve or reject an application, and do not have to give a reason.
+          Administrators can also create, change, or remove a streamer profile, or remove streamer access, for example
+          if a profile breaks these terms or pretends to be someone else. A streamer controls the polls on their page
+          and can remove content posted there.
+        </p>
+        <p>
+          Administrators can <strong>freeze</strong> a streamer page: it stays public but nobody can post, vote, or
+          change it. They can also <strong>suspend</strong> a page: it is hidden from everyone except its owner and
+          administrators, and nothing is deleted. The owner sees a notice on the page with the reason. If email notices
+          are turned on, the owner also gets an email. Either step can be reversed. To appeal, write to {mail}.
+        </p>
+      </>
     ),
   },
   {
@@ -77,7 +89,7 @@ const sections: readonly LegalSection[] = [
           <li>shares someone else’s private information without permission;</li>
           <li>infringes copyright, trademark, or other rights;</li>
           <li>is spam, scams, malware, or misleading impersonation;</li>
-          <li>manipulates votes or polls, for example with several accounts or automation;</li>
+          <li>manipulates votes, polls, or Mash Battle taps, for example with several accounts or automation;</li>
           <li>attacks, overloads, scrapes at scale, or tries to get around the security of the service.</li>
         </ul>
       </>
@@ -96,13 +108,37 @@ const sections: readonly LegalSection[] = [
     ),
   },
   {
+    id: "support-links",
+    title: "Support links",
+    body: (
+      <p>
+        Streamers can add up to four links to tip, donation, or membership pages on providers such as Ko-fi, Patreon, or
+        Twitch. These are links only: StreamBullets never handles money and is not part of any payment. The provider’s
+        own terms apply to what you do there. Each link must stay on its provider’s own domain. We may remove links that
+        break these terms.
+      </p>
+    ),
+  },
+  {
+    id: "ai-agents",
+    title: "Automated agents and AI",
+    body: (
+      <p>
+        AI agents and other automated tools may read public pages if they respect robots.txt and our rate limits. They
+        may not create accounts, post, comment, vote, suggest topics, tap in a Mash Battle, or send reports. The one
+        exception is the counter on the <Link to={paths.ai}>For AI agents</Link> page: an agent may send one vote a day.
+        These rules may change as we add ways for declared AI agents to take part.
+      </p>
+    ),
+  },
+  {
     id: "reporting",
     title: "Reporting content and moderation",
     body: (
       <>
         <p>
-          If you see content that is illegal or breaks these terms, use the <strong>Report</strong> button on the topic
-          or comment. You can also email {mail}. Please include:
+          If you see content that is illegal or breaks these terms, use the <strong>Report</strong> button on the topic,
+          poll, or comment. You can also email {mail}. Please include:
         </p>
         <ul>
           <li>a link to the content, or the streamer page and a description of where it is;</li>
@@ -114,8 +150,8 @@ const sections: readonly LegalSection[] = [
         <ul>
           <li>An administrator reviews the report in the admin area, without delay and without bias.</li>
           <li>
-            We may remove the content, limit it, remove streamer access, or close the account. We may also do nothing if
-            the content is allowed.
+            We may remove the content, limit it, freeze or suspend a streamer page, remove streamer access, or close the
+            account. We may also do nothing if the content is allowed.
           </li>
           <li>If you gave an email, we tell you our decision.</li>
           <li>
@@ -139,7 +175,7 @@ const sections: readonly LegalSection[] = [
       <>
         <p>
           You can stop using StreamBullets at any time. To delete your account and everything linked to it, use{" "}
-          <strong>Settings → Your data → Delete my account</strong>. You can download your data first.
+          <strong>account menu → Your data → Delete my account</strong>. You can download your data first.
         </p>
         <p>
           We can suspend or close your account, or remove content, if you break these terms, if the law requires it, or
@@ -197,7 +233,12 @@ const sections: readonly LegalSection[] = [
   {
     id: "contact",
     title: "Contact",
-    body: <p>Email {mail} with questions about these terms, reports, or appeals.</p>,
+    body: (
+      <p>
+        Email {mail} with questions about these terms, reports, or appeals. For general questions, write to{" "}
+        <a href={`mailto:${contactEmails.support}`}>{contactEmails.support}</a>.
+      </p>
+    ),
   },
 ];
 

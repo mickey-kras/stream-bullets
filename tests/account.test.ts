@@ -172,6 +172,78 @@ async function seed(): Promise<void> {
   }
 }
 
+/** Rows in the tables added by migrations 0006–0012, for the leaver and, to check they survive, for others. */
+async function seedNewTables(): Promise<void> {
+  const run = (sql: string, ...values: (string | number | null)[]): D1PreparedStatement =>
+    env.DB.prepare(sql).bind(...values);
+  await env.DB.batch([
+    run(`UPDATE user SET avatar_preset=3, locale='de', display_prefs='{"contrast":"high"}' WHERE id='leaver'`),
+    run("UPDATE session SET admin_verified_at=? WHERE id='s1'", now),
+    run(
+      `UPDATE streamers SET logo='/images/logo/leaver', is_official=1, handle_changed_at=?1, status='frozen',
+        status_reason='Spam links', status_changed_at=?1, status_changed_by='admin', support_card=1 WHERE id=?2`,
+      now,
+      ids.leaverPage,
+    ),
+    // The leaver changed the status of the host page as an admin once; the record keeps no actor afterwards.
+    run("UPDATE streamers SET status_changed_by='leaver' WHERE id=?", ids.hostPage),
+    run(
+      `INSERT INTO passkey (id,name,public_key,user_id,credential_id,counter,device_type,backed_up,transports,created_at,aaguid)
+        VALUES ('pk1','YubiKey A','PUBLIC-KEY-SECRET','leaver','CREDENTIAL-ID-SECRET',4,'singleDevice',0,'usb,nfc',?1,'aaguid-1'),
+               ('pk2','Other key','other-public-key','other','other-credential',0,'singleDevice',0,NULL,?1,NULL)`,
+      now,
+    ),
+    run(
+      `INSERT INTO stream_events (id,streamer_id,series_id,title,notes,starts_at,duration_min,platform,url,status,vod_url,repeat_days,repeat_until,tz,created_at,updated_at)
+        VALUES ('ev1',?1,'series-1','Variety night','Bring games',?2,120,'twitch','https://twitch.tv/leaver','ended','https://twitch.tv/videos/1',20,?3,'Europe/Berlin',?2,?2),
+               ('ev2',?4,NULL,'Host show','',?2,60,'youtube','https://youtube.com/@host','scheduled',NULL,0,NULL,'UTC',?2,?2)`,
+      ids.leaverPage,
+      now,
+      now + day * 84,
+      ids.hostPage,
+    ),
+    run("INSERT INTO stream_event_topics (event_id,entry_id) VALUES ('ev1',?)", ids.onLeaverPage),
+    run(
+      `INSERT INTO community_cards (id,streamer_id,position,icon,title,body,button_label,button_target) VALUES
+        ('card1',?1,0,'discord','Join the Discord','Come say hi.','Join','https://discord.gg/leaver'),
+        ('card2',?1,1,NULL,'Bring an idea','Suggest a topic.',NULL,NULL),
+        ('card3',?2,0,NULL,'Host card','Stays.','Topics','tab:topics')`,
+      ids.leaverPage,
+      ids.hostPage,
+    ),
+    run(
+      `INSERT INTO streamer_links (id,streamer_id,position,kind,label,url) VALUES
+        ('link1',?1,0,'kofi',NULL,'https://ko-fi.com/leaver'),('link2',?2,0,'other','Merch','https://merch.example.test')`,
+      ids.leaverPage,
+      ids.hostPage,
+    ),
+    run(
+      `INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,show_results,message,message_style,revision,updated_at)
+        VALUES (?1,'{"type":"message","ref":null}','{"type":"auto","ref":null}','top','l',1,0,'BRB 5 min','hype',3,?2),
+               (?3,'{"type":"auto","ref":null}','{"type":"hidden","ref":null}','lower','m',0,1,'',  'info',0,?2)`,
+      ids.leaverPage,
+      now,
+      ids.hostPage,
+    ),
+    run("INSERT INTO entry_mash (entry_id,duration_s,phase,starts_at,ends_at,winner) VALUES (?,30,'finished',?,?,1)", ids.hostPoll, now, now + 30_000),
+    run(
+      "INSERT INTO mash_taps (entry_id,user_id,side,taps,assisted_taps) VALUES (?1,'leaver',1,42,6),(?1,'other',0,10,0)",
+      ids.hostPoll,
+    ),
+    run(
+      `INSERT INTO moderation_actions (id,target_kind,target_id,streamer_id,action,reason,note,notify_owner,actor_id,metadata,created_at) VALUES
+        ('ma1','streamer',?1,?1,'freeze','Spam links','INTERNAL-ADMIN-NOTE',1,'admin',NULL,?2),
+        ('ma2','report','r-x',?3,'dismiss','','',0,'leaver','{"count":2}',?2)`,
+      ids.leaverPage,
+      now,
+      ids.hostPage,
+    ),
+  ]);
+  await env.IMAGES.put("logo/leaver", new Uint8Array([1, 2]), { httpMetadata: { contentType: "image/webp" } });
+}
+
+const ownPage = "JOIN streamers s ON s.id=x.streamer_id WHERE s.owner_id=?1";
+
 /** Counts rows linked to a user in every table that can hold them. */
 async function linkedRows(userId: string): Promise<Record<string, number>> {
   const queries: Record<string, string> = {
@@ -190,6 +262,14 @@ async function linkedRows(userId: string): Promise<Record<string, number>> {
     poll_votes: "SELECT count(*) AS n FROM poll_votes WHERE user_id=?1",
     poll_reactions: "SELECT count(*) AS n FROM poll_reactions WHERE user_id=?1",
     poll_comments: "SELECT count(*) AS n FROM poll_comments WHERE user_id=?1",
+    passkey: "SELECT count(*) AS n FROM passkey WHERE user_id=?1",
+    mash_taps: "SELECT count(*) AS n FROM mash_taps WHERE user_id=?1",
+    stream_events: `SELECT count(*) AS n FROM stream_events x ${ownPage}`,
+    community_cards: `SELECT count(*) AS n FROM community_cards x ${ownPage}`,
+    streamer_links: `SELECT count(*) AS n FROM streamer_links x ${ownPage}`,
+    overlay_state: `SELECT count(*) AS n FROM overlay_state x ${ownPage}`,
+    moderation_actions: "SELECT count(*) AS n FROM moderation_actions WHERE actor_id=?1",
+    status_changed_by: "SELECT count(*) AS n FROM streamers WHERE status_changed_by=?1",
   };
   const names = Object.keys(queries);
   const results = await env.DB.batch(names.map((name: string) => env.DB.prepare(queries[name]).bind(userId)));
@@ -215,6 +295,14 @@ function zeroes(): Record<string, number> {
     poll_votes: 0,
     poll_reactions: 0,
     poll_comments: 0,
+    passkey: 0,
+    mash_taps: 0,
+    stream_events: 0,
+    community_cards: 0,
+    streamer_links: 0,
+    overlay_state: 0,
+    moderation_actions: 0,
+    status_changed_by: 0,
   };
 }
 
@@ -291,9 +379,10 @@ beforeEach(async (): Promise<void> => {
       "DELETE FROM poll_reactions",
       "DELETE FROM poll_comments",
       "DELETE FROM polls",
+      "DELETE FROM moderation_actions",
     ].map((sql: string) => env.DB.prepare(sql)),
   );
-  await env.IMAGES.delete(["avatar/leaver", "background/leaver", "avatar/other"]);
+  await env.IMAGES.delete(["avatar/leaver", "background/leaver", "logo/leaver", "avatar/other"]);
   await seed();
 });
 
@@ -310,6 +399,9 @@ describe("account export", (): void => {
       image: "/images/avatar/leaver",
       createdAt: new Date(now - day).toISOString(),
       updatedAt: new Date(now).toISOString(),
+      avatarPreset: null,
+      locale: null,
+      displayPreferences: null,
     });
     expect(data.signInMethods).toEqual([
       {
@@ -325,6 +417,7 @@ describe("account export", (): void => {
         expiresAt: new Date(now + day).toISOString(),
         ipAddress: "192.0.2.7",
         userAgent: "leaver-agent",
+        adminVerifiedAt: null,
       },
     ]);
     expect(data.streamerPage).toEqual({
@@ -332,6 +425,20 @@ describe("account export", (): void => {
       name: "Leaver",
       about: "Leaving soon",
       url: `${origin}/@leaver_page`,
+      logo: null,
+      background: `${origin}/images/background/leaver`,
+      isOfficial: false,
+      handleChangedAt: null,
+      status: "active",
+      statusReason: null,
+      statusChangedAt: null,
+      showSupportLinks: true,
+      supportCard: false,
+      moderation: [],
+      scheduledStreams: [],
+      communityCards: [],
+      supportLinks: [],
+      overlay: null,
     });
     expect(data.streamerApplication).toMatchObject({
       links: ["https://www.twitch.tv/leaver"],
@@ -435,6 +542,7 @@ describe("account export", (): void => {
         expiresAt: new Date(now + day).toISOString(),
         ipAddress: null,
         userAgent: null,
+        adminVerifiedAt: null,
       },
     ]);
   });
@@ -464,6 +572,130 @@ describe("account export", (): void => {
     const body = (await response.json()) as { account: { email: string } };
     expect(body.account.email).toBe("leaver@example.test");
     expect((await callExport({ "Sec-Fetch-Site": "cross-site" })).status).toBe(403);
+  });
+});
+
+describe("tables added by migrations 0006–0012", (): void => {
+  it("are part of the export, without credentials or admin notes", async (): Promise<void> => {
+    await seedNewTables();
+    const data = await exportAccount(env, "leaver");
+    expect(data.account).toMatchObject({ avatarPreset: 3, locale: "de", displayPreferences: { contrast: "high" } });
+    expect(data.activeSessions[0].adminVerifiedAt).toBe(new Date(now).toISOString());
+    expect(data.securityKeys).toEqual([
+      {
+        name: "YubiKey A",
+        deviceType: "singleDevice",
+        backedUp: false,
+        transports: "usb,nfc",
+        aaguid: "aaguid-1",
+        createdAt: new Date(now).toISOString(),
+      },
+    ]);
+    expect(data.streamerPage).toMatchObject({
+      logo: `${origin}/images/logo/leaver`,
+      isOfficial: true,
+      handleChangedAt: new Date(now).toISOString(),
+      status: "frozen",
+      statusReason: "Spam links",
+      statusChangedAt: new Date(now).toISOString(),
+      showSupportLinks: true,
+      supportCard: true,
+      moderation: [{ action: "freeze", reason: "Spam links", createdAt: new Date(now).toISOString() }],
+      scheduledStreams: [
+        {
+          id: "ev1",
+          seriesId: "series-1",
+          title: "Variety night",
+          notes: "Bring games",
+          startsAt: new Date(now).toISOString(),
+          durationMinutes: 120,
+          platform: "twitch",
+          url: "https://twitch.tv/leaver",
+          status: "ended",
+          replayUrl: "https://twitch.tv/videos/1",
+          repeatDays: 20,
+          repeatUntil: new Date(now + day * 84).toISOString(),
+          timeZone: "Europe/Berlin",
+          linkedTopicIds: [ids.onLeaverPage],
+          createdAt: new Date(now).toISOString(),
+          updatedAt: new Date(now).toISOString(),
+        },
+      ],
+      communityCards: [
+        {
+          position: 0,
+          icon: "discord",
+          title: "Join the Discord",
+          body: "Come say hi.",
+          buttonLabel: "Join",
+          buttonTarget: "https://discord.gg/leaver",
+        },
+        { position: 1, icon: null, title: "Bring an idea", body: "Suggest a topic.", buttonLabel: null, buttonTarget: null },
+      ],
+      supportLinks: [{ position: 0, kind: "kofi", label: null, url: "https://ko-fi.com/leaver" }],
+      overlay: {
+        onAir: { type: "message", ref: null },
+        preview: { type: "auto", ref: null },
+        position: "top",
+        size: "l",
+        instant: true,
+        showResults: false,
+        message: "BRB 5 min",
+        messageStyle: "hype",
+        updatedAt: new Date(now).toISOString(),
+      },
+    });
+    expect(data.mashBattleTaps).toEqual([
+      {
+        entryId: ids.hostPoll,
+        entryTitle: "Host poll",
+        streamerHandle: "host_page",
+        side: 1,
+        option: "Blue",
+        taps: 42,
+        assistedTaps: 6,
+      },
+    ]);
+    expect(data.moderationActions).toEqual([
+      { targetKind: "report", targetId: "r-x", action: "dismiss", reason: "", createdAt: new Date(now).toISOString() },
+    ]);
+    expect(data.images.map((image) => [image.kind, image.contentType, image.bytes])).toEqual([
+      ["avatar", "image/png", 3],
+      ["background", "image/png", 3],
+      ["logo", "image/webp", 2],
+    ]);
+    const text = JSON.stringify(data);
+    for (const hidden of ["PUBLIC-KEY-SECRET", "CREDENTIAL-ID-SECRET", "INTERNAL-ADMIN-NOTE", "other-public-key", "Host show"]) {
+      expect(text).not.toContain(hidden);
+    }
+  });
+
+  it("are erased with the account, while other people's rows and the audit trail stay", async (): Promise<void> => {
+    await seedNewTables();
+    const otherBefore = await linkedRows("other");
+    const hostBefore = await linkedRows("host");
+    await deleteAccount(env, "leaver");
+    expect(await linkedRows("leaver")).toEqual(zeroes());
+    expect(await linkedRows("other")).toMatchObject({ passkey: 1, mash_taps: otherBefore.mash_taps });
+    expect(await linkedRows("host")).toMatchObject({
+      stream_events: hostBefore.stream_events,
+      community_cards: 1,
+      streamer_links: 1,
+      overlay_state: 1,
+    });
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM stream_event_topics").first()).toEqual({ n: 0 });
+    expect(await env.DB.prepare("SELECT status_changed_by FROM streamers WHERE id=?").bind(ids.hostPage).first()).toEqual(
+      { status_changed_by: null },
+    );
+    // Moderation records keep the plain page id; the deleted admin is no longer named as the actor.
+    const actions = await env.DB.prepare("SELECT id,streamer_id,actor_id FROM moderation_actions ORDER BY id").all();
+    expect(actions.results).toEqual([
+      { id: "ma1", streamer_id: ids.leaverPage, actor_id: "admin" },
+      { id: "ma2", streamer_id: ids.hostPage, actor_id: null },
+    ]);
+    expect(await env.IMAGES.head("logo/leaver")).toBeNull();
+    // The leaver's taps changed the host page's Mash Battle totals, so its live room refreshes.
+    expect(rooms.sort()).toEqual([ids.leaverPage, ids.hostPage].sort());
   });
 });
 

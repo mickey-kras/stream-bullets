@@ -1,4 +1,5 @@
 import {
+  Link,
   Links,
   Meta,
   Outlet,
@@ -7,20 +8,77 @@ import {
   isRouteErrorResponse,
   useMatches,
   useRouteError,
+  useRouteLoaderData,
+  type LoaderFunctionArgs,
+  type ShouldRevalidateFunctionArgs,
 } from "react-router";
 import type { ReactNode } from "react";
-import { SiteFooter } from "./components/common";
+import { Announcer } from "./components/a11y/announcer";
+import { AccountDialogs } from "./components/account/account-dialogs";
+import { BackLink } from "./components/shell/back-link";
+import { SiteFooter } from "./components/shell/footer";
+import { SiteHeader } from "./components/shell/site-header";
+import { Icon } from "./components/ui/icon";
+import { ToastProvider } from "./components/ui/toast";
+import { appContext } from "./env";
+import { HttpError } from "./server/http.server";
+import { getLocale, t } from "./i18n";
+import { useNonce } from "./lib/nonce";
+import { PREFS_SCRIPT } from "./lib/prefs";
+import { loadShell } from "./lib/shell.server";
+import { paths, type ShellData } from "./lib/shell";
 import "./styles.css";
 
 /** Routes without site chrome. The OBS overlay is a browser source, so it shows only the poll. */
 const bareRoutes: ReadonlySet<string> = new Set(["routes/overlay"]);
 
-export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+/** Shell data for every header, the account menu and the footer (see app/lib/shell.ts). */
+export async function loader({ request, context }: LoaderFunctionArgs): Promise<ShellData> {
+  try {
+    return await loadShell(request, context.get(appContext));
+  } catch (error: unknown) {
+    if (error instanceof HttpError) throw new Response(error.message, { status: error.status });
+    throw error;
+  }
+}
+
+/**
+ * The shell changes only when the session or the person's role changes: after a form submission, an explicit
+ * revalidate() (same URL) or a full reload. Plain navigations reuse it.
+ */
+export function shouldRevalidate({
+  formMethod,
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs): boolean {
+  if (formMethod || currentUrl.href === nextUrl.href) return defaultShouldRevalidate;
+  return false;
+}
+
+/**
+ * Applies the saved display preferences (text size, contrast, colour vision, motion, links, font) to <html>
+ * before first paint. It is the one inline script; it carries the request's CSP nonce, and its code is a fixed
+ * string (app/lib/prefs.ts) that reads the preferences from `data-prefs`, so no request data becomes code.
+ */
+function PrefsScript(): ReactNode {
+  const nonce: string | undefined = useNonce();
+  const shell = useRouteLoaderData<ShellData>("root");
   return (
-    <html lang="en">
+    <script nonce={nonce} data-prefs={JSON.stringify(shell?.prefs ?? {})} suppressHydrationWarning>
+      {PREFS_SCRIPT}
+    </script>
+  );
+}
+
+export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+  // The head script sets the preference attributes on <html> before React hydrates, so they never match.
+  return (
+    <html lang={getLocale()} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <PrefsScript />
         <meta name="theme-color" content="#061a1e" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -52,27 +110,51 @@ export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNo
   );
 }
 
-export default function App(): ReactNode {
-  const bare: boolean = useMatches().some((match) => bareRoutes.has(match.id));
+function SkipLink(): ReactNode {
   return (
-    <>
-      <Outlet />
-      {!bare && <SiteFooter />}
-    </>
+    <a className="skip-link" href="#main-content">
+      {t("shell.skip")}
+    </a>
   );
 }
 
+export default function App(): ReactNode {
+  const bare: boolean = useMatches().some((match) => bareRoutes.has(match.id));
+  if (bare) return <Outlet />;
+  return (
+    <ToastProvider>
+      <SkipLink />
+      <Outlet />
+      <SiteFooter />
+      <AccountDialogs />
+      <Announcer />
+    </ToastProvider>
+  );
+}
+
+/** The 404 page and the error page: the generic header, a back link and a way on. */
 export function ErrorBoundary(): ReactNode {
   const error: unknown = useRouteError();
   const missing = isRouteErrorResponse(error) && error.status === 404;
   return (
-    <>
-      <main className="page-panel">
-        <h1>{missing ? "Page not found" : "Something went wrong"}</h1>
-        <p>{missing ? "This page does not exist." : "Please reload the page and try again."}</p>
-        <a href="/">StreamBullets home</a>
+    <ToastProvider>
+      <SkipLink />
+      <SiteHeader />
+      <main className="page-panel not-found-page" id="main-content">
+        <div className="page-column">
+          <BackLink />
+          <Icon name={missing ? "compass" : "warning"} size={40} />
+          <h1>{missing ? t("error.notFoundTitle") : t("error.title")}</h1>
+          <p>{missing ? t("error.notFoundBody") : t("error.body")}</p>
+          <div className="not-found-actions">
+            <Link className="button-link gold" to={paths.streamers}>
+              <Icon name="streamers" size={18} />
+              {t("error.browseStreamers")}
+            </Link>
+          </div>
+        </div>
       </main>
       <SiteFooter />
-    </>
+    </ToastProvider>
   );
 }

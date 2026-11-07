@@ -7,15 +7,15 @@ import {
   getOverlaySnapshot,
   getOwnStreamer,
   getStreamer,
-  listComments,
   listEntries,
   listStreamers,
-  mutateComment,
   mutateEntry,
   saveStreamer,
 } from "../app/server/data.server";
+import { listComments, mutateComment } from "../app/server/comments.server";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
+import { startOfQuotaWindow } from "./helpers/quota";
 
 let database: TestDatabase;
 let env: AppEnv;
@@ -154,6 +154,7 @@ describe("topics and polls", (): void => {
       "endsAt",
       "id",
       "kind",
+      "mash",
       "options",
       "revealed",
       "title",
@@ -342,7 +343,7 @@ describe("topics and polls", (): void => {
 });
 
 describe("discussion", (): void => {
-  it("enforces reply scope and preserves replies when an authorized author removes a parent", async (): Promise<void> => {
+  it("enforces reply scope and keeps the thread when an authorized author removes a parent", async (): Promise<void> => {
     const id = await seedEntry();
     const foreignEntry = await seedEntry();
     const foreignParent = await seedComment(foreignEntry);
@@ -360,11 +361,37 @@ describe("discussion", (): void => {
       status: 403,
     });
     await mutateComment(env, "viewer", { action: "delete", id: parent.id });
+    // The parent becomes a "Comment removed" placeholder: no author, text or likes, and the reply stays under it.
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toMatchObject([
-      { id: reply.id, parentId: null, text: "Reply" },
+      { id: reply.id, parentId: parent.id, text: "Reply", removed: false },
+      { id: parent.id, parentId: null, text: "", author: "", authorId: "", avatar: null, likes: 0, removed: true },
     ]);
+    expect(await env.DB.prepare("SELECT text FROM entry_comments WHERE id=?").bind(parent.id).first("text")).toBe(
+      "[removed]",
+    );
+    expect((await getEntry(env, id, null))?.comments).toBe(1);
+    await expect(mutateComment(env, "viewer", { action: "delete", id: parent.id })).rejects.toMatchObject({
+      status: 404,
+    });
+    // Removing the last reply removes the placeholder too.
     await mutateComment(env, "owner", { action: "delete", id: reply.id });
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toEqual([]);
+  });
+
+  it("removes every placeholder above the last reply, at any depth", async (): Promise<void> => {
+    const id = await seedEntry();
+    const a = await seedComment(id);
+    const b = await seedComment(id, "other", a);
+    const c = await seedComment(id, "viewer", b);
+    const kept = await seedComment(id, "other");
+    const sibling = await seedComment(id, "viewer", kept);
+    await mutateComment(env, "viewer", { action: "delete", id: a });
+    await mutateComment(env, "other", { action: "delete", id: b });
+    await mutateComment(env, "other", { action: "delete", id: kept });
+    expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toHaveLength(5);
+    await mutateComment(env, "viewer", { action: "delete", id: c });
+    const left = await env.DB.prepare("SELECT id FROM entry_comments WHERE entry_id=? ORDER BY id").bind(id).all();
+    expect(left.results).toEqual([{ id: kept }, { id: sibling }].sort((x, y) => x.id.localeCompare(y.id)));
   });
 
   it("makes comment likes idempotent and strips provider avatar URLs", async (): Promise<void> => {
@@ -552,6 +579,7 @@ describe("bounded reads and writes", (): void => {
   });
 
   it("shares mutation quotas across targets and rejects concurrent excess writes atomically", async (): Promise<void> => {
+    await startOfQuotaWindow(env.DB);
     await env.DB.prepare(
       "INSERT INTO app_rate_limits (key,count,window_start) VALUES ('write:viewer',59,CAST(strftime('%s','now') AS INTEGER)/60*60000)",
     ).run();

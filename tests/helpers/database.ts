@@ -7,7 +7,28 @@ export interface TestDatabase {
   dispose: () => Promise<void>;
 }
 
-export async function createTestDatabase(): Promise<TestDatabase> {
+/** Migration file names in the order wrangler applies them. */
+export async function migrationFiles(): Promise<string[]> {
+  return (await readdir(new URL("../../drizzle/", import.meta.url)))
+    .filter((file: string): boolean => file.endsWith(".sql"))
+    .sort();
+}
+
+/** Runs the given migration files, one statement at a time, like `wrangler d1 migrations apply`. */
+export async function applyMigrations(db: D1Database, files: string[]): Promise<void> {
+  for (const file of files) {
+    const sql = await readFile(new URL(`../../drizzle/${file}`, import.meta.url), "utf8");
+    for (const statement of sql
+      .split("--> statement-breakpoint")
+      .map((value: string): string => value.trim())
+      .filter(Boolean)) {
+      await db.prepare(statement).run();
+    }
+  }
+}
+
+/** Starts an isolated D1 and R2 pair. `migrate: false` leaves the database empty. */
+export async function createTestDatabase(options: { migrate?: boolean } = {}): Promise<TestDatabase> {
   const runtime = new Miniflare({
     modules: true,
     script: 'export default { fetch() { return new Response("test"); } };',
@@ -17,18 +38,7 @@ export async function createTestDatabase(): Promise<TestDatabase> {
   });
   const db = (await runtime.getD1Database("DB")) as unknown as D1Database;
   try {
-    const files = (await readdir(new URL("../../drizzle/", import.meta.url)))
-      .filter((file: string): boolean => file.endsWith(".sql"))
-      .sort();
-    for (const file of files) {
-      const sql = await readFile(new URL(`../../drizzle/${file}`, import.meta.url), "utf8");
-      for (const statement of sql
-        .split("--> statement-breakpoint")
-        .map((value: string): string => value.trim())
-        .filter(Boolean)) {
-        await db.prepare(statement).run();
-      }
-    }
+    if (options.migrate !== false) await applyMigrations(db, await migrationFiles());
   } catch (error: unknown) {
     await runtime.dispose();
     throw error;

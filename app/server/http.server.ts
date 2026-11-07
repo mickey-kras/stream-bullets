@@ -2,9 +2,11 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 
 export class HttpError extends Error {
+  /** `code` is a stable, machine-readable reason (for example `step_up_required`) sent next to the message. */
   constructor(
     public readonly status: number,
     message: string,
+    public readonly code?: string,
   ) {
     super(message);
   }
@@ -31,6 +33,17 @@ export function getOrigin(env: AppEnv): string {
 
 export function requireSameOrigin(request: Request, env: AppEnv): void {
   if (request.headers.get("Origin") !== getOrigin(env) || request.headers.get("Sec-Fetch-Site") === "cross-site") {
+    throw new HttpError(403, "Use this site to submit changes.");
+  }
+}
+
+/**
+ * Refuses browser requests from other sites. Requests without an Origin header (curl, scripts, agents) pass:
+ * they carry no visitor's cookies by accident, so they cannot act in someone else's name.
+ */
+export function requireNotCrossSite(request: Request, env: AppEnv): void {
+  const origin: string | null = request.headers.get("Origin");
+  if ((origin !== null && origin !== getOrigin(env)) || request.headers.get("Sec-Fetch-Site") === "cross-site") {
     throw new HttpError(403, "Use this site to submit changes.");
   }
 }
@@ -97,7 +110,10 @@ export function json(value: unknown, status = 200): Response {
 
 export function errorResponse(error: unknown): Response {
   if (error instanceof HttpError) {
-    const response = json({ error: error.message }, error.status);
+    const response = json(
+      error.code ? { error: error.message, code: error.code } : { error: error.message },
+      error.status,
+    );
     if (error.status === 429) response.headers.set("Retry-After", "60");
     return response;
   }

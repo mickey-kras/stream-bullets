@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { z } from "zod";
+import { clientAddress } from "./client-ips";
 
 const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -16,7 +17,7 @@ async function signedIn(browser: Browser, role: string): Promise<BrowserContext>
   const roleIndex: number = ["owner", "viewer", "newcomer", "otherowner", "admin", "reporter"].indexOf(role);
   const context = await browser.newContext({
     baseURL: origin,
-    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${roleIndex + 10}` },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("platform", roleIndex + 10) },
   });
   await context.addCookies([
     {
@@ -68,7 +69,14 @@ test("public access rejects forged identities and unsafe mutations", async ({ br
   expect(unauthorized.status()).toBe(403);
   const me = await owner.request.get("/api/me");
   const identity = (await me.json()) as { viewer: Record<string, unknown> };
-  expect(Object.keys(identity.viewer).sort()).toEqual(["avatar", "id", "name"]);
+  expect(Object.keys(identity.viewer).sort()).toEqual([
+    "avatar",
+    "avatarPreset",
+    "displayPrefs",
+    "id",
+    "locale",
+    "name",
+  ]);
   expect(me.headers()["cache-control"]).toBe("no-store");
   expect(me.headers()["x-content-type-options"]).toBe("nosniff");
   await owner.close();
@@ -100,8 +108,9 @@ test("viewer topics, reactions, replies, and comment likes survive reload", asyn
       "true",
     );
     await comment.getByRole("button", { name: "Reply", exact: true }).click();
-    await page.getByRole("textbox", { name: "Write a comment" }).fill("A larger case can also help.");
-    await page.getByRole("button", { name: "Post", exact: true }).click();
+    const replyBox = page.locator(".inline-reply");
+    await replyBox.getByRole("textbox", { name: "Write a reply to viewer" }).fill("A larger case can also help.");
+    await replyBox.getByRole("button", { name: "Post", exact: true }).click();
     await expect(page.getByText("A larger case can also help.", { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByRole("heading", { name: "How should we build a quiet PC?" })).toBeVisible();
@@ -126,11 +135,12 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   const viewerContext = await signedIn(browser, "viewer");
   const owner = await ownerContext.newPage();
   await owner.goto("/@test_host?view=polls");
-  await owner.getByRole("button", { name: "+ Create poll", exact: true }).click();
+  await owner.getByRole("button", { name: "Create poll", exact: true }).click();
   const dialog = owner.getByRole("dialog");
   await dialog.getByLabel("Question", { exact: true }).fill("Should we stream on Friday?");
   await dialog.getByRole("radio", { name: "Yes / No" }).check();
-  await dialog.getByLabel("Voting time").selectOption("0");
+  await dialog.getByRole("combobox", { name: "Voting time" }).click();
+  await owner.getByRole("option", { name: "Unlimited — until I end it" }).click();
   await dialog.getByRole("button", { name: "Start poll" }).click();
   await expect(dialog).not.toBeVisible();
   await expect(owner).toHaveURL(/entry=/);
@@ -138,7 +148,7 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   if (!pollId) throw new Error("Created poll link is missing.");
   const viewer = await viewerContext.newPage();
   await viewer.goto(`/@test_host?view=polls&entry=${pollId}`);
-  await expect(viewer.getByRole("button", { name: "+ Create poll", exact: true })).toHaveCount(0);
+  await expect(viewer.getByRole("button", { name: "Create poll", exact: true })).toHaveCount(0);
   const overlayContext = await browser.newContext({ baseURL: origin });
   const overlay = await overlayContext.newPage();
   await overlay.goto(`/@test_host/overlay?poll=${pollId}`);
@@ -179,39 +189,40 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
 test("a viewer joins the waitlist, an admin approves, and the viewer creates a streamer page", async ({ browser }) => {
   const context = await signedIn(browser, "newcomer");
   const page = await context.newPage();
-  await page.goto("/settings");
-  await expect(page.getByRole("heading", { name: "Host a community" })).toBeVisible();
-  await expect(page.getByText("Streamer pages are invite-only for now.", { exact: false })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Create public streamer profile" })).toHaveCount(0);
+  await page.goto("/streamers");
   await expect(page.getByRole("link", { name: "Admin", exact: true })).toHaveCount(0);
-  const blocked = await context.request.post("/api/profile", {
+  await page.getByRole("link", { name: "Host a community", exact: true }).click();
+  const host = page.getByRole("dialog", { name: "Host a community" });
+  await expect(host.getByText("Hosting a community is invite-only for now.", { exact: false })).toBeVisible();
+  await expect(host.getByRole("button", { name: "Create your community page" })).toHaveCount(0);
+  const blocked = await context.request.post("/api/streamer", {
     headers: { Origin: origin },
     data: { handle: "early_host", name: "Too early", about: "" },
   });
   expect(blocked.status()).toBe(403);
-  await page.getByLabel("Channel link 1", { exact: true }).fill("https://www.twitch.tv/new_host");
-  await page.getByRole("button", { name: "+ Add another link" }).click();
-  await expect(page.getByLabel("Channel link 2", { exact: true })).toBeFocused();
-  await page.getByLabel("Channel link 2", { exact: true }).fill("https://example.test/not-needed");
-  await page.getByRole("button", { name: "+ Add another link" }).click();
-  await page.getByLabel("Channel link 3", { exact: true }).fill("https://www.youtube.com/@newhost");
-  await page.getByRole("button", { name: "Remove channel link 2" }).click();
-  await expect(page.getByLabel("Channel link 3", { exact: true })).toHaveCount(0);
-  await expect(page.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
-  await page.getByLabel("Anything else we should know? (optional)").fill("I stream games and tech twice a week.");
-  await page.getByRole("button", { name: "Request streamer access" }).click();
-  await expect(page.getByRole("status")).toHaveText("Your request is saved. We'll review it soon.");
-  await expect(page.getByText("We'll review your request.", { exact: false })).toBeVisible();
+  await host.getByLabel("Channel link 1", { exact: true }).fill("https://www.twitch.tv/new_host");
+  await host.getByRole("button", { name: "Add another link" }).click();
+  await expect(host.getByLabel("Channel link 2", { exact: true })).toBeFocused();
+  await host.getByLabel("Channel link 2", { exact: true }).fill("https://example.test/not-needed");
+  await host.getByRole("button", { name: "Add another link" }).click();
+  await host.getByLabel("Channel link 3", { exact: true }).fill("https://www.youtube.com/@newhost");
+  await host.getByRole("button", { name: "Remove channel link 2" }).click();
+  await expect(host.getByLabel("Channel link 3", { exact: true })).toHaveCount(0);
+  await expect(host.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
+  await host.getByLabel("Anything else we should know? (optional)").fill("I stream games and tech twice a week.");
+  await host.getByRole("button", { name: "Request to host" }).click();
+  await expect(page.getByText("Request sent. We'll let you know.").first()).toBeVisible();
+  await expect(host.getByText("We'll review your request.", { exact: false })).toBeVisible();
   await page.reload();
-  await expect(page.getByText("Request received.")).toBeVisible();
-  await expect(page.getByLabel("Channel link 1", { exact: true })).toHaveValue("https://www.twitch.tv/new_host");
-  await expect(page.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
-  await expect(page.getByRole("button", { name: "Update request" })).toBeVisible();
+  await expect(host.getByText("Request received.")).toBeVisible();
+  await expect(host.getByLabel("Channel link 1", { exact: true })).toHaveValue("https://www.twitch.tv/new_host");
+  await expect(host.getByLabel("Channel link 2", { exact: true })).toHaveValue("https://www.youtube.com/@newhost");
+  await expect(host.getByRole("button", { name: "Update request" })).toBeVisible();
 
   const adminContext = await signedIn(browser, "admin");
   const admin = await adminContext.newPage();
   await assertNoScriptErrors(admin, async () => {
-    await admin.goto("/settings");
+    await admin.goto("/streamers");
     await admin.getByRole("link", { name: "Admin", exact: true }).click();
     await expect(admin).toHaveURL(/\/admin$/);
     await expect(admin.getByRole("heading", { name: "Streamer requests" })).toBeVisible();
@@ -235,19 +246,27 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   await adminContext.close();
 
   await page.reload();
-  await expect(page.getByText("You're approved to host a community.", { exact: false })).toBeVisible();
-  await page.getByLabel("Handle", { exact: true }).fill("new_host");
-  await page.getByLabel("Streamer name", { exact: true }).fill("New community");
-  await page.getByLabel("About your stream").fill("Games and technology.");
-  await page.getByRole("button", { name: "Create public streamer profile" }).click();
-  await expect(page.getByRole("heading", { name: "Your streamer page" })).toBeVisible();
-  await page.getByLabel("Profile picture").setInputFiles({ name: "avatar.png", mimeType: "image/png", buffer: png });
-  await expect(page.getByRole("status")).toHaveText("Your avatar is saved.");
-  await page
-    .getByLabel("Page background")
+  await expect(host.getByText("You're approved to host a community.", { exact: false })).toBeVisible();
+  await host.getByLabel("Handle", { exact: true }).fill("new_host");
+  await host.getByLabel("Streamer name", { exact: true }).fill("New community");
+  await host.getByLabel("About your stream").fill("Games and technology.");
+  await host.getByRole("button", { name: "Create your community page" }).click();
+  await expect(page.getByText("Your page /@new_host is live.").first()).toBeVisible();
+  await expect(host).toBeHidden();
+  // Edit your page: a page background, saved with the page.
+  await page.goto("/streamers?dialog=page");
+  const edit = page.getByRole("dialog", { name: "Edit your page" });
+  await edit
+    .getByLabel("Background image")
     .setInputFiles({ name: "background.png", mimeType: "image/png", buffer: png });
-  await expect(page.getByRole("status")).toHaveText("Your background is saved.");
-  await page.getByRole("link", { name: "Open /@new_host" }).click();
+  await edit.getByRole("button", { name: "Save page" }).click();
+  await expect(page.getByText("Streamer page saved.").first()).toBeVisible();
+  const avatar = await context.request.put("/api/images/avatar", {
+    headers: { Origin: origin, "Content-Type": "image/png" },
+    data: png,
+  });
+  expect(avatar.status()).toBe(200);
+  await page.getByRole("link", { name: "Your page", exact: true }).first().click();
   await expect(page.getByText("New community · Suggest topics. Vote. Chat.")).toBeVisible();
   const profile = await context.request.get("/api/me");
   const identity = (await profile.json()) as { viewer: { avatar: string }; streamer: { background: string } };
@@ -260,12 +279,14 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
     data: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script></svg>',
   });
   expect(rejected.status()).toBe(415);
-  await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Suggest a topic", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.getByRole("button", { name: "Suggest a topic", exact: true })).toBeFocused();
+  // On a phone the owner's empty list offers the page link instead of the header action.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("button", { name: "Copy page link" })).toBeVisible();
   await context.close();
 });
 
@@ -281,7 +302,7 @@ test("only administrators can open the review queue and its API", async ({ brows
   expect(response?.status()).toBe(404);
   await expect(viewer.getByRole("heading", { name: "Page not found" })).toBeVisible();
   await expect(viewer.getByText("newcomer@example.test")).toHaveCount(0);
-  await viewer.goto("/settings");
+  await viewer.goto("/streamers");
   await expect(viewer.getByRole("link", { name: "Admin", exact: true })).toHaveCount(0);
   for (const status of ["pending", "approved", "rejected"]) {
     const list = await context.request.get(`/api/admin/applications?status=${status}`);
@@ -336,7 +357,9 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
     await expect(viewer.getByRole("dialog", { name: "Report sent" })).toBeVisible();
     await viewer.getByRole("button", { name: "Close", exact: true }).click();
     await expect(viewer.getByRole("dialog")).toHaveCount(0);
-    await expect(viewer.getByRole("button", { name: "Report topic" })).toBeFocused();
+    // Once reported, one "Reported" marker replaces the button.
+    await expect(viewer.getByRole("button", { name: "Report topic" })).toHaveCount(0);
+    await expect(viewer.locator(".content-actions .reported-chip")).toHaveText("Reported");
   });
   const forbidden = await viewerContext.request.get("/api/admin/reports");
   expect(forbidden.status()).toBe(403);
@@ -350,29 +373,38 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
   const admin = await adminContext.newPage();
   await assertNoScriptErrors(admin, async () => {
     await admin.goto("/admin");
-    await admin.getByRole("navigation", { name: "Admin sections" }).getByRole("link", { name: "Reports" }).click();
+    await admin
+      .getByRole("navigation", { name: "Admin sections" })
+      .getByRole("link", { name: "Content reports" })
+      .click();
     await expect(admin).toHaveURL(/view=reports/);
-    await expect(admin.getByRole("heading", { name: "Content reports" })).toBeVisible();
+    await expect(admin.getByRole("heading", { name: /Content reports/ })).toBeVisible();
     await expect(admin.getByRole("link", { name: "Open", exact: true })).toHaveAttribute("aria-current", "page");
-    const card = admin.getByRole("article").filter({ hasText: title });
-    await expect(card.getByRole("heading", { name: "Spam or scam" })).toBeVisible();
-    await expect(card).toContainText("by reporter");
-    await expect(card).toContainText("Limited offer, click now.");
-    await expect(card).toContainText("Advertising unrelated to the stream.");
-    await expect(card.getByRole("link", { name: "Open the conversation" })).toHaveAttribute(
+    // Reports are grouped by page, then by reported item.
+    const group = admin.getByRole("article", { name: "Test host" });
+    await group.getByRole("button", { name: /Show \d+ reported items?/ }).click();
+    const item = group.getByRole("listitem").filter({ hasText: "Limited offer, click now." });
+    await expect(item).toContainText("Reported by 1 person");
+    await expect(item).toContainText("reporter (Spam)");
+    await expect(item).toContainText("Advertising unrelated to the stream.");
+    await expect(item.getByRole("link", { name: "Open in context" })).toHaveAttribute(
       "href",
       `/@test_host?entry=${id}`,
     );
-    await card.getByRole("button", { name: "Remove content" }).click();
-    const confirm = admin.getByRole("dialog", { name: "Remove content?" });
+    await item.getByRole("button", { name: "Remove content" }).click();
+    const confirm = admin.getByRole("dialog", { name: "Remove this content?" });
     await confirm.getByRole("button", { name: "Remove content" }).click();
-    await expect(admin.getByRole("status")).toHaveText("Removed the content and closed 1 report.");
-    await expect(admin.getByRole("article").filter({ hasText: title })).toHaveCount(0);
-    await admin.getByRole("link", { name: "Removed", exact: true }).click();
-    await expect(admin).toHaveURL(/status=actioned/);
-    const resolved = admin.getByRole("article").filter({ hasText: title });
-    await expect(resolved).toContainText("This content is no longer available.");
-    await expect(resolved.getByRole("button")).toHaveCount(0);
+    await expect(admin.getByRole("status").filter({ hasText: "removed" })).toHaveText(
+      "Content removed and its reports closed.",
+    );
+    await expect(admin.getByRole("listitem").filter({ hasText: "Limited offer, click now." })).toHaveCount(0);
+    await admin.getByRole("link", { name: "Resolved", exact: true }).click();
+    await expect(admin).toHaveURL(/status=resolved/);
+    const resolved = admin.getByRole("article", { name: "Test host" });
+    await resolved.getByRole("button", { name: /Show \d+ reported items?/ }).click();
+    const removed = resolved.getByRole("listitem").filter({ hasText: "Limited offer, click now." });
+    await expect(removed.locator(".resolved-line")).toContainText("Removed");
+    await expect(removed.getByRole("button")).toHaveCount(0);
   });
   await adminContext.close();
 

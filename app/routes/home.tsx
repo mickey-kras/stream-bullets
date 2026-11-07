@@ -1,81 +1,111 @@
-import { useState, type ReactNode } from "react";
-import { Link, useLoaderData, type LoaderFunctionArgs } from "react-router";
-import { configuredProviders, getViewer } from "../server/auth.server";
-import { getOwnStreamer } from "../server/data.server";
-import { AccountControls, Modal, SignIn } from "../components/common";
+import { useCallback, useState, type ReactNode } from "react";
+import { Link, useNavigate, type MetaArgs } from "react-router";
+import { directoryHref, SIGN_INTENTS, type Intent } from "../lib/directory";
+import { paths, shellFromMatches, useShell } from "../lib/shell";
+import { siteJsonLd } from "../lib/structured-data";
+import { t } from "../i18n";
+import { AccountMenu } from "../components/shell/account-menu";
+import { SignInDialog } from "../components/shell/sign-in-dialog";
+import { Icon, type IconName } from "../components/ui/icon";
 import { Station } from "../components/station/station";
 import "../components/station/landing.css";
-import { appContext } from "../env";
-import { HttpError } from "../server/http.server";
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
-  try {
-    const app = context.get(appContext);
-    const viewer = await getViewer(request, app);
-    const ownStreamer = viewer ? await getOwnStreamer(app.env, viewer.id) : null;
-    return { viewer, ownStreamer, providers: configuredProviders(app.env) };
-  } catch (error: unknown) {
-    if (error instanceof HttpError) throw new Response(error.message, { status: error.status });
-    throw error;
-  }
+const signIcon: Record<Intent, IconName> = { suggest: "plus", vote: "polls", discuss: "comment" };
+const signLabel: Record<Intent, "landing.suggest" | "landing.vote" | "landing.discuss"> = {
+  suggest: "landing.suggest",
+  vote: "landing.vote",
+  discuss: "landing.discuss",
+};
+
+export function meta({ matches }: MetaArgs) {
+  const origin: string = shellFromMatches(matches)?.origin ?? "";
+  return [
+    { title: t("meta.homeTitle") },
+    { name: "description", content: t("meta.homeDescription") },
+    { "script:ld+json": siteJsonLd(origin) },
+  ];
 }
 
 export default function Home(): ReactNode {
-  const { viewer, ownStreamer, providers } = useLoaderData<typeof loader>();
+  const shell = useShell();
+  const navigate = useNavigate();
   const [signInOpen, setSignInOpen] = useState<boolean>(false);
+  // A sign on the station (item 4): it flips, then the Streamers list opens with that intent.
+  const openSign = useCallback(
+    (index: number): void => {
+      const intent: Intent | undefined = SIGN_INTENTS[index];
+      if (intent) void navigate(directoryHref(intent));
+    },
+    [navigate],
+  );
+  const browse = (className: string): ReactNode => (
+    <Link className={`button-link ${className}`} to={paths.streamers}>
+      {t("landing.browse")}
+      <Icon name="arrow-right" size={18} />
+    </Link>
+  );
   return (
     <div className="landing-page">
       <header className="landing-header">
-        <Link className="landing-brand" to="/" aria-label="StreamBullets home">
-          <img className="landing-logo" src="/brand/stream-bullets.svg" alt="" width="305" height="84" />
-          <img className="landing-icon" src="/brand/stream-bullets-icon.svg" alt="" width="128" height="136" />
+        <Link className="landing-brand" to={paths.home} aria-label={t("nav.home")}>
+          <img className="landing-logo" src="/assets/stream-bullets.svg" alt="" width="305" height="84" />
+          <img className="landing-icon" src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
         </Link>
-        <nav aria-label="Account">
-          {viewer ? (
-            <AccountControls viewer={viewer} providers={providers} />
+        <nav aria-label={t("account.nav")}>
+          {shell.viewer ? (
+            <AccountMenu />
           ) : (
             <button type="button" onClick={() => setSignInOpen(true)}>
-              Sign in
+              <Icon name="sign-in" size={18} />
+              {t("signIn.trigger")}
             </button>
           )}
         </nav>
       </header>
       <main className="landing-main" id="main-content">
         <section className="landing-hero" aria-labelledby="landing-title">
-          <Station />
+          <Station onSign={openSign} />
           <div className="landing-shade" aria-hidden="true" />
           <div className="landing-copy">
             <h1 id="landing-title">
-              YOUR VOICE,
-              <br />
-              ON AIR.
+              <span className="title-line">{t("landing.title1")}</span>{" "}
+              <span className="title-line">{t("landing.title2")}</span>
             </h1>
-            <p>Suggest topics. Vote. Shape the stream.</p>
+            <p>{t("landing.tagline")}</p>
             <div className="landing-actions">
-              {viewer ? (
-                <Link className="button-link gold" to={ownStreamer ? `/@${ownStreamer.handle}` : "/settings"}>
-                  {ownStreamer ? "Open your community" : "Create a streamer profile"}
-                </Link>
+              {shell.ownStreamer ? (
+                <>
+                  <Link className="button-link gold" to={paths.streamer(shell.ownStreamer.handle)}>
+                    <Icon name="your-page" size={18} />
+                    {t("nav.yourPage")}
+                  </Link>
+                  {browse("secondary")}
+                </>
               ) : (
-                <button type="button" className="gold" onClick={() => setSignInOpen(true)}>
-                  Sign in
-                </button>
+                browse("gold")
               )}
             </div>
+            {/* The station's signs as plain links, for keyboards, screen readers and anyone without WebGL. */}
+            <ul className="landing-start" aria-label={t("landing.getStarted")}>
+              {SIGN_INTENTS.map((intent: Intent) => (
+                <li key={intent}>
+                  <Link to={directoryHref(intent)}>
+                    <Icon name={signIcon[intent]} size={16} />
+                    {t(signLabel[intent])}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-          <p className="landing-topics" aria-label="Topics, polls and discussions">
-            Topics <em aria-hidden="true">/</em> Polls <em aria-hidden="true">/</em> Discussions
+          <p className="landing-topics">
+            <span className="sr-only">{t("landing.topicsLabel")}</span>
+            <span aria-hidden="true">
+              {t("streamer.nav.topics")} <em>/</em> {t("streamer.nav.polls")} <em>/</em> {t("landing.discussions")}
+            </span>
           </p>
         </section>
       </main>
-      <Modal
-        open={signInOpen}
-        onOpenChange={setSignInOpen}
-        title="Join the conversation"
-        description="Sign in to suggest topics, vote, and comment. Your first sign-in creates your account."
-      >
-        <SignIn providers={providers} />
-      </Modal>
+      <SignInDialog open={signInOpen} onOpenChange={setSignInOpen} providers={shell.providers} />
     </div>
   );
 }
