@@ -7,7 +7,7 @@ import { DeleteButton } from "../discussion";
 import { IdeaStatusControl } from "../ideas/idea-status-control";
 import { IdeaCategoryTag, IdeaOutcome, IdeaStatus } from "../ideas/ideas";
 import { ReportButton } from "../report";
-import { TopicIcon } from "../topic-icon";
+import { TopicIcon, topicCategoryLabel } from "../topic-icon";
 import { Icon } from "../ui/icon";
 
 /** Delete for the author (ideas: only while under review), the streamer and admins. Report, or "Reported", for others. */
@@ -98,7 +98,7 @@ export function EntryDetail({
           <>
             <span className="category">
               <TopicIcon category={entry.category} />
-              {entry.category}
+              {topicCategoryLabel(entry.category)}
             </span>
             <Link className="text-link" to={`?view=topics&entry=${entry.id}`}>
               <Icon name="link" size={16} />

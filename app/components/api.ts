@@ -1,3 +1,5 @@
+import { t } from "../i18n";
+
 export async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response: Response = await fetch(url, { ...init, credentials: "same-origin" });
   const body: unknown = await response.json();
@@ -5,7 +7,7 @@ export async function requestJson<T>(url: string, init?: RequestInit): Promise<T
     const message: string =
       typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
         ? body.error
-        : "The request failed. Please try again.";
+        : t("common.failed");
     throw new Error(message);
   }
   return body as T;
@@ -27,5 +29,5 @@ export async function sendJson<T>(method: "PUT" | "PATCH" | "DELETE", url: strin
 }
 
 export function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "The request failed. Please try again.";
+  return error instanceof Error ? error.message : t("common.failed");
 }

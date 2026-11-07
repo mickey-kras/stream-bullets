@@ -1,3 +1,4 @@
+import { t, type MessageId } from "../i18n";
 import type { SupportLinkKind } from "../types";
 
 export interface SupportProvider {
@@ -41,7 +42,22 @@ export function isAllowedSupportLink(kind: SupportLinkKind, url: string): boolea
   return path.length > 1;
 }
 
+/** Provider names that are words rather than brands, in the page language. */
+const PROVIDER_WORDS: Partial<Record<SupportLinkKind, MessageId>> = {
+  streamlabs: "support.provider.streamlabs",
+  streamelements: "support.provider.streamelements",
+  twitch: "support.provider.twitch",
+  youtube: "support.provider.youtube",
+  other: "support.provider.other",
+};
+
+/** A provider's name for buttons and lists. */
+export function providerLabel(kind: SupportLinkKind): string {
+  const id: MessageId | undefined = PROVIDER_WORDS[kind];
+  return id ? t(id) : SUPPORT_PROVIDERS[kind].label;
+}
+
 /** The button text for a link. */
 export function supportLabel(link: { kind: SupportLinkKind; label: string | null }): string {
-  return link.kind === "other" ? link.label || "Support" : SUPPORT_PROVIDERS[link.kind].label;
+  return link.kind === "other" ? link.label || t("support.fallbackLabel") : providerLabel(link.kind);
 }

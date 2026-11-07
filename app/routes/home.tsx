@@ -58,7 +58,8 @@ export default function Home(): ReactNode {
           <div className="landing-shade" aria-hidden="true" />
           <div className="landing-copy">
             <h1 id="landing-title">
-              <span className="title-line">YOUR VOICE,</span> <span className="title-line">ON AIR.</span>
+              <span className="title-line">{t("landing.title1")}</span>{" "}
+              <span className="title-line">{t("landing.title2")}</span>
             </h1>
             <p>{t("landing.tagline")}</p>
             <div className="landing-actions">
@@ -89,7 +90,7 @@ export default function Home(): ReactNode {
           <p className="landing-topics">
             <span className="sr-only">{t("landing.topicsLabel")}</span>
             <span aria-hidden="true">
-              Topics <em>/</em> Polls <em>/</em> Discussions
+              {t("streamer.nav.topics")} <em>/</em> {t("streamer.nav.polls")} <em>/</em> {t("landing.discussions")}
             </span>
           </p>
         </section>

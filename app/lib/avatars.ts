@@ -1,29 +1,13 @@
 import type { CSSProperties } from "react";
+import { t, type MessageId } from "../i18n";
 import { AVATAR_PRESET_COUNT, DEFAULT_AVATAR_PRESET } from "../../db/enums";
 
 export { AVATAR_PRESET_COUNT, DEFAULT_AVATAR_PRESET };
 
-/** Accessible names of the 18 preset pictures, by preset number. */
-export const AVATAR_NAMES: readonly string[] = [
-  "Dark hair & beard",
-  "Natural curls",
-  "Classic bob",
-  "Dark hair & glasses",
-  "Silver pixie",
-  "Close crop & beard",
-  "Short curls",
-  "Teal headscarf",
-  "Silver side part",
-  "Red hair & freckles",
-  "Waves & glasses",
-  "Plum undercut",
-  "Friendly robot",
-  "Bookish cat",
-  "Space explorer",
-  "Night owl",
-  "Jack Russell terrier",
-  "Friendly alien",
-];
+/** The accessible name of a preset picture (0..17) in the page language. */
+export function avatarName(preset: number): string {
+  return t(`avatar.${preset}` as MessageId);
+}
 
 /** The picker's order (item 9): the default Space explorer first, then three rows of six. */
 export const AVATAR_ORDER: readonly number[] = [14, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16, 17, 15];

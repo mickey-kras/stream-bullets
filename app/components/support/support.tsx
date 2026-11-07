@@ -1,7 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { MAX_SUPPORT_LINKS, SUPPORT_LINK_KINDS } from "../../../db/enums";
 import { t } from "../../i18n";
-import { isAllowedSupportLink, SUPPORT_PROVIDERS, supportLabel } from "../../lib/support";
+import { isAllowedSupportLink, providerLabel, SUPPORT_PROVIDERS, supportLabel } from "../../lib/support";
 import type { SupportLink, SupportLinkKind, SupportSettings } from "../../types";
 import { Icon } from "../ui/icon";
 import { IconButton } from "../ui/icon-button";
@@ -43,14 +43,14 @@ function rowError(row: Row, index: number): string {
   if (!isAllowedSupportLink(row.kind, row.url.trim()))
     return row.kind === "other"
       ? t("support.errorOther", { n: index + 1 })
-      : t("support.errorDomain", { n: index + 1, provider: SUPPORT_PROVIDERS[row.kind].label });
+      : t("support.errorDomain", { n: index + 1, provider: providerLabel(row.kind) });
   if (row.kind === "other" && !row.label?.trim()) return t("support.errorLabel", { n: index + 1 });
   return "";
 }
 
 const providerOptions: SelectOption[] = SUPPORT_LINK_KINDS.map((kind: SupportLinkKind) => ({
   value: kind,
-  label: SUPPORT_PROVIDERS[kind].label,
+  label: providerLabel(kind),
   icon: SUPPORT_PROVIDERS[kind].icon,
 }));
 
