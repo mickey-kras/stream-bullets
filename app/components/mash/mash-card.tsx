@@ -1,10 +1,13 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useMatches, useRevalidator } from "react-router";
 import { t } from "../../i18n";
-import { MASH_NAME, mashWinner } from "../../lib/mash";
+import { MASH_DRAW, MASH_NAME, mashWinner } from "../../lib/mash";
 import { useShell } from "../../lib/shell";
+import { usePrefs } from "../../lib/use-prefs";
 import type { Entry } from "../../types";
+import { announce } from "../a11y/announcer";
 import { errorMessage, postJson } from "../api";
+import { DialogLink } from "../shell/dialog-link";
 import { SignInButton } from "../shell/sign-in-dialog";
 import { useToast } from "../ui/toast";
 import { Dialog, DialogActions } from "../ui/dialog";
@@ -13,6 +16,63 @@ import { formatCount, MashBars, MashRing, MashWinner, sideStyle } from "./mash-p
 import { useMashTapper, useMashView, type MashAssist, type MashView } from "./use-mash";
 
 type Action = (body: unknown) => void;
+
+/** The score read out to screen readers: your side first, then the others, then the time left. */
+export function scoreText(sides: readonly string[], totals: readonly number[], mine: number | null, left: number) {
+  const order: number[] = sides.map((_side: string, index: number) => index);
+  if (mine !== null) order.sort((a: number, b: number) => Number(b === mine) - Number(a === mine));
+  const parts: string[] = order.map((index: number): string => {
+    const side: string = index === mine ? `${sides[index]} ${t("mash.yourSide")}` : sides[index];
+    return `${side} ${formatCount(totals[index] ?? 0)}`;
+  });
+  return `${parts.join(", ")}. ${t("mash.secondsLeft", { n: left })}.`;
+}
+
+/**
+ * Timed screen-reader updates while a battle runs (item 39): "Go" at the start, the score every 2, 5 or 10 seconds
+ * (the viewer's choice, or never), 10 and 5 seconds left, and the result. Messages go through the shared live
+ * regions, so they survive the card re-rendering 5 times a second.
+ */
+function useMashAnnouncements(entry: Entry, view: MashView | null, side: number | null): void {
+  const { srInterval } = usePrefs();
+  const phase = useRef<string | null>(null);
+  const lastScore = useRef<number>(0);
+  const spokenLeft = useRef<number>(0);
+  const current: string | null = view?.current ?? null;
+  const left: number = view?.left ?? 0;
+  const totals: readonly number[] = view?.totals ?? [];
+  const winner: number | null = view ? (view.winner ?? mashWinner(view.totals)) : null;
+  useEffect(() => {
+    const before: string | null = phase.current;
+    phase.current = current;
+    if (before === null || current === null) return;
+    if (current === "live" && before !== "live") {
+      lastScore.current = Date.now();
+      announce(side === null ? t("mash.sayStarted") : t("mash.sayGo", { side: entry.options[side] }), {
+        assertive: true,
+      });
+      return;
+    }
+    if (current === "finished" && before !== "finished") {
+      announce(
+        winner === MASH_DRAW || winner === null
+          ? t("mash.sayDraw")
+          : t("mash.sayWinner", { side: entry.options[winner], n: formatCount(totals[winner] ?? 0) }),
+        { assertive: true },
+      );
+      return;
+    }
+    if (current !== "live") return;
+    if ((left === 10 || left === 5) && spokenLeft.current !== left) {
+      spokenLeft.current = left;
+      announce(t("mash.sayLeft", { n: left }), { key: "mash-time" });
+      return;
+    }
+    if (srInterval === "off" || Date.now() - lastScore.current < Number(srInterval) * 1_000) return;
+    lastScore.current = Date.now();
+    announce(scoreText(entry.options, totals, side, left), { key: "mash-score" });
+  }, [current, left, srInterval, entry.options, side, totals, winner]);
+}
 
 /** The host's first name from the streamer page loader, or "the host" elsewhere. */
 function useLoaderHost(): string {
@@ -159,13 +219,14 @@ function SetupBody({
   onAction,
 }: Readonly<{ entry: Entry; host: string; owner: boolean; signedIn: boolean; pending: boolean; onAction: Action }>) {
   const [changing, setChanging] = useState<boolean>(false);
+  const { shortcuts } = usePrefs();
   const chosen: boolean = signedIn && entry.myVote !== null && !changing;
   function pick(side: number): void {
     setChanging(false);
     onAction({ action: "vote", id: entry.id, choice: side });
   }
   useEffect(() => {
-    if (!signedIn || owner) return;
+    if (!signedIn || owner || !shortcuts) return;
     const keys = (event: globalThis.KeyboardEvent): void => {
       const target = event.target as HTMLElement | null;
       if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
@@ -201,7 +262,9 @@ function SetupBody({
       </p>
       <p className="muted mash-pick-help" hidden={chosen}>
         {signedIn && t("mash.pickHelp")}
-        {signedIn && <span className="kbd-hint"> {t("mash.pickKeys", { n: entry.options.length })}</span>}
+        {signedIn && shortcuts && (
+          <span className="kbd-hint"> {t("mash.pickKeys", { n: entry.options.length })}</span>
+        )}
       </p>
       <p className="mash-chosen" aria-live="polite" hidden={!chosen}>
         <Icon name="check" size={18} />
@@ -250,7 +313,7 @@ function TapButton({
   const assisted: boolean = assist !== "off";
   const tapper = useMashTapper(entry.id, view.current === "live", assisted);
   const button = useRef<HTMLButtonElement | null>(null);
-  const [score, setScore] = useState<string>("");
+  const { shortcuts } = usePrefs();
   const mine: number = Math.max(tapper.taps, view.mine ?? 0);
   function hit(): void {
     if (assisted || !tapper.tap() || !button.current) return;
@@ -268,13 +331,10 @@ function TapButton({
     setTimeout(() => plus.remove(), 600);
   }
   function readScore(): void {
-    const parts: string[] = entry.options.map(
-      (name: string, index: number): string => `${name} ${formatCount(view.totals[index] ?? 0)}`,
-    );
-    setScore(`${parts.join(", ")}. ${t("mash.secondsLeft", { n: view.left })}.`);
+    announce(scoreText(entry.options, view.totals, side, view.left), { key: "mash-score" });
   }
   function keyDown(event: KeyboardEvent<HTMLButtonElement>): void {
-    if (event.key === "s" || event.key === "S") {
+    if (shortcuts && (event.key === "s" || event.key === "S")) {
       readScore();
       return;
     }
@@ -331,12 +391,13 @@ function TapButton({
       <div className="mash-tools">
         <button type="button" className="small-button" onClick={readScore}>
           <Icon name="eye" size={16} />
-          {t("mash.readScore")} <kbd aria-hidden="true">S</kbd>
+          {t("mash.readScore")}
+          {shortcuts && <kbd aria-hidden="true">S</kbd>}
         </button>
+        <DialogLink name="a11y" className="text-link">
+          {t("mash.assistLink")}
+        </DialogLink>
       </div>
-      <p className="sr-only" aria-live="polite">
-        {score}
-      </p>
       {view.denied === "pick" && <p className="form-error">{t("mash.noSide")}</p>}
     </>
   );
@@ -363,12 +424,14 @@ export function MashCard({
 }>): ReactNode {
   const view = useMashView(entry, now);
   const shell = useShell();
+  const prefs = usePrefs();
   const host: string = useLoaderHost();
   const titleId: string = useId();
   const helpId: string = useId();
-  const assist: MashAssist = shell.viewer?.displayPrefs?.mashAssist ?? "off";
-  if (!view) return null;
+  const assist: MashAssist = prefs.mashAssist;
   const side: number | null = signedIn && !owner ? entry.myVote : null;
+  useMashAnnouncements(entry, view, side);
+  if (!view) return null;
   const countdown: number = Math.max(1, Math.ceil(((view.startsAt ?? now) - now) / 1_000));
   let body: ReactNode = null;
   if (view.current === "setup")

@@ -33,7 +33,7 @@ import { SupportSection } from "../components/support/support";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
 import { Icon } from "../components/ui/icon";
 import { useToast } from "../components/ui/toast";
-import { t } from "../i18n";
+import { t, type MessageId } from "../i18n";
 import { errorMessage, postJson, requestJson } from "../components/api";
 import { CreateEntry } from "../components/create-entry";
 import { Discussion } from "../components/discussion";
@@ -43,11 +43,11 @@ import type { BoardSnapshot, Entry, EntryStatus, LiveSnapshot, SortOrder, Stream
 
 type View = StreamerView;
 type Dialog = "topic" | "poll" | "idea" | "event" | "card" | null;
-const liveLabels: Record<string, string> = {
-  live: "Live updates connected",
-  connecting: "Connecting to live updates…",
-  reconnecting: "Connection lost. Reconnecting…",
-  offline: "Live updates are offline.",
+const liveLabels: Record<string, MessageId> = {
+  live: "live.connected",
+  connecting: "live.connecting",
+  reconnecting: "live.reconnecting",
+  offline: "live.offline",
 };
 /** The official StreamBullets page is the Ideas board: Ideas, About and Community. */
 const officialViews: readonly View[] = ["topics", "about", "community"];
@@ -417,22 +417,22 @@ export default function StreamerPage(): ReactNode {
       <>
         <div className="page-title">
           <div>
-            <span className="eyebrow">YOUR VOICE, ON AIR</span>
-            <h1>Live polls</h1>
-            <p>One question. Everyone has a say.</p>
+            <span className="eyebrow">{t("polls.eyebrow")}</span>
+            <h1>{t("polls.title")}</h1>
+            <p>{t("polls.lead")}</p>
           </div>
           {owner && writable && (
             <button className="gold" type="button" onClick={() => setDialog("poll")}>
               <Icon name="plus" size={18} />
-              Create poll
+              {t("polls.create")}
             </button>
           )}
         </div>
         <div className="connection-status">
-          <output>{liveLabels[live.status]}</output>
+          <output>{t(liveLabels[live.status])}</output>
           {live.status === "offline" && (
             <button type="button" onClick={live.reconnect}>
-              Reconnect
+              {t("live.reconnect")}
             </button>
           )}
           <button
@@ -442,11 +442,11 @@ export default function StreamerPage(): ReactNode {
               revalidator.revalidate();
             }}
           >
-            Refresh polls
+            {t("polls.refresh")}
           </button>
         </div>
         <div className="poll-toolbar">
-          <div className="tabs" aria-label="Poll sorting">
+          <div className="tabs" aria-label={t("polls.sorting")}>
             {(["newest", "top"] as const).map((value: SortOrder) => (
               <button
                 key={value}
@@ -455,32 +455,32 @@ export default function StreamerPage(): ReactNode {
                 className={sort === value ? "active" : ""}
                 onClick={() => changeBoard("sort", value)}
               >
-                {value === "newest" ? "Newest" : "Top"}
+                {value === "newest" ? t("polls.newest") : t("entry.sortTop")}
               </button>
             ))}
           </div>
           {loadedSelected && (
             <button type="button" onClick={() => navigate("polls")}>
               <Icon name="chevron-left" size={16} />
-              All polls
+              {t("polls.all")}
             </button>
           )}
           {owner && (
             <Link className="text-link" to={overlayUrl}>
-              OBS overlay
+              {t("polls.obsOverlay")}
             </Link>
           )}
         </div>
         {live.snapshot?.polls.some((poll) => !entries.some((entry: Entry) => entry.id === poll.id)) && (
           <output>
-            More polls are available.{" "}
+            {t("polls.more")}{" "}
             <button
               type="button"
               onClick={() => {
                 revalidator.revalidate();
               }}
             >
-              Load latest polls
+              {t("polls.loadLatest")}
             </button>
           </output>
         )}
@@ -497,11 +497,11 @@ export default function StreamerPage(): ReactNode {
           />
         ))}
         {entries.length === 0 && !loadedSelected && (
-          <EmptyState title="The mic is yours.">No polls yet. The next question starts here.</EmptyState>
+          <EmptyState title={t("polls.emptyTitle")}>{t("polls.emptyBody")}</EmptyState>
         )}
         {cursor && !loadedSelected && (
           <button type="button" className="load-more" disabled={loadingMore} onClick={() => void loadMore()}>
-            {loadingMore ? "Loading…" : "Load more polls"}
+            {loadingMore ? t("entry.loading") : t("polls.loadMore")}
           </button>
         )}
         {loadedSelected && selected && (
@@ -681,7 +681,7 @@ export default function StreamerPage(): ReactNode {
           liveEvent && (
             <Link className="live-pill" to="?view=schedule">
               <span className="live-dot" aria-hidden="true" />
-              LIVE
+              {t("live.badge")}
               <span className="sr-only">: {liveEvent.title}</span>
             </Link>
           )

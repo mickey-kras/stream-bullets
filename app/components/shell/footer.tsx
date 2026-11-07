@@ -2,34 +2,10 @@ import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { getLocale, LOCALE_NAMES, t, type Locale } from "../../i18n";
 import { paths } from "../../lib/shell";
-import { dialogHref, type AccountDialogName, type DialogState } from "../account/dialog-route";
 import { Icon, type IconName } from "../ui/icon";
 import { Sheet } from "../ui/sheet";
 import { ContactDialog } from "./contact-dialog";
-
-/** A link that opens Language or Accessibility & display over this page (`?dialog=`). */
-function DialogLink({
-  name,
-  children,
-  label,
-  className,
-  onClick,
-}: Readonly<{ name: AccountDialogName; children: ReactNode; label?: string; className?: string; onClick?: () => void }>) {
-  const location = useLocation();
-  return (
-    <Link
-      to={dialogHref(location, name)}
-      state={{ dialogFrom: location.pathname } satisfies DialogState}
-      preventScrollReset
-      aria-haspopup="dialog"
-      aria-label={label}
-      className={className}
-      onClick={onClick}
-    >
-      {children}
-    </Link>
-  );
-}
+import { DialogLink } from "./dialog-link";
 
 function MoreRow({ icon, children }: Readonly<{ icon: IconName; children: ReactNode }>): ReactNode {
   return (

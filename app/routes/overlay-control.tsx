@@ -62,6 +62,7 @@ export default function OverlayControlPage(): ReactNode {
         <OverlayControl
           initial={loaded.state}
           overlayUrl={loaded.overlayUrl}
+          connected={status === "live" || status === "connecting"}
           scene={{ name: loaded.name, handle: loaded.handle, host: loaded.host, polls, data: loaded.data, now }}
         />
       </main>
