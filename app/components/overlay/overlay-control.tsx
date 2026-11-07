@@ -411,7 +411,7 @@ export function OverlayControl({
           </ul>
         </section>
         <div className="ov-extra">
-          <details className="ov-layout-wrap">
+          <details className="ov-layout-wrap" open>
             <summary>
               <Icon name="overlay" size={16} />
               {t("overlay.positionAndSize")}

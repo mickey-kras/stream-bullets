@@ -34,9 +34,6 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await expect(obs.locator('[data-overlay-source="message"]')).toContainText("Back in 5 minutes 4");
   await expect(obs.locator(".ov-message.style-hype")).toBeVisible();
 
-  // Wide screens always show the layout presets. Narrow screens fold them into "Position and size".
-  const fold = control.getByText("Position and size");
-  if (await fold.isVisible()) await fold.click();
   await control.getByRole("button", { name: "Top bar" }).click();
   await expect(obs.locator(".ov-stage.pos-top")).toBeVisible();
   // The box follows the saved state, so it changes once the server answers.
