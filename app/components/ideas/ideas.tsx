@@ -7,7 +7,7 @@ import type { Entry, EntryStatus } from "../../types";
 import { categoryIcon } from "../topic-icon";
 import { Icon, type IconName } from "../ui/icon";
 
-const statusIcons: Record<EntryStatus, IconName> = {
+export const statusIcons: Record<EntryStatus, IconName> = {
   review: "pending",
   planned: "schedule",
   progress: "timer",

@@ -393,6 +393,10 @@ export default function StreamerPage(): ReactNode {
                 onBack={() => navigate("topics")}
                 onReact={(value) => act({ action: "react", id: selected.id, value })}
                 onDelete={removeSelected}
+                onStatusSaved={async () => {
+                  await revalidator.revalidate();
+                  toast(t("ideas.admin.saved"));
+                }}
               />
               {renderDiscussion(selected)}
             </>

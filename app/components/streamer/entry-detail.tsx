@@ -4,6 +4,7 @@ import { t } from "../../i18n";
 import type { Entry, Viewer } from "../../types";
 import { Avatar } from "../common";
 import { DeleteButton } from "../discussion";
+import { IdeaStatusControl } from "../ideas/idea-status-control";
 import { IdeaCategoryTag, IdeaOutcome, IdeaStatus } from "../ideas/ideas";
 import { ReportButton } from "../report";
 import { TopicIcon } from "../topic-icon";
@@ -65,6 +66,7 @@ export function EntryDetail({
   onBack,
   onReact,
   onDelete,
+  onStatusSaved,
 }: Readonly<{
   entry: Entry;
   viewer: Viewer | null;
@@ -75,6 +77,8 @@ export function EntryDetail({
   onBack: () => void;
   onReact: (value: -1 | 0 | 1) => void;
   onDelete: () => Promise<void>;
+  /** Reloads the board after an admin sets an idea's status. */
+  onStatusSaved: () => Promise<void>;
 }>): ReactNode {
   const idea = entry.status !== null;
   const canVote = Boolean(viewer) && writable && !pending;
@@ -141,6 +145,9 @@ export function EntryDetail({
         pending={pending}
         onDelete={onDelete}
       />
+      {idea && moderator && (
+        <IdeaStatusControl key={`${entry.id}:${entry.status}`} entry={entry} onSaved={onStatusSaved} />
+      )}
     </div>
   );
 }

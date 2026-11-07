@@ -83,7 +83,10 @@ for (const role of [
 statements.push(`UPDATE session SET created_at=${now + 3_600_000} WHERE user_id='${users.keyadmin.id}';`);
 {
   const token: string = randomBytes(24).toString("hex");
-  users.keyadmin2 = { id: users.keyadmin.id, cookie: encodeURIComponent(`${token}.${await makeSignature(token, secret)}`) };
+  users.keyadmin2 = {
+    id: users.keyadmin.id,
+    cookie: encodeURIComponent(`${token}.${await makeSignature(token, secret)}`),
+  };
   statements.push(
     `INSERT INTO session(id,token,user_id,expires_at,created_at,updated_at) VALUES ('${randomUUID()}','${token}','${users.keyadmin.id}',${now + 86_400_000},${now},${now});`,
   );

@@ -372,7 +372,10 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
   const admin = await adminContext.newPage();
   await assertNoScriptErrors(admin, async () => {
     await admin.goto("/admin");
-    await admin.getByRole("navigation", { name: "Admin sections" }).getByRole("link", { name: "Content reports" }).click();
+    await admin
+      .getByRole("navigation", { name: "Admin sections" })
+      .getByRole("link", { name: "Content reports" })
+      .click();
     await expect(admin).toHaveURL(/view=reports/);
     await expect(admin.getByRole("heading", { name: /Content reports/ })).toBeVisible();
     await expect(admin.getByRole("link", { name: "Open", exact: true })).toHaveAttribute("aria-current", "page");
