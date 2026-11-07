@@ -10,6 +10,8 @@ export default [
   route("terms", "routes/terms.tsx"),
   route("api/auth/*", "routes/auth.ts"),
   route("api/*", "routes/api.ts"),
+  // ":handle/overlay" would otherwise win over the splat for /api/overlay.
+  route("api/overlay", "routes/api.ts", { id: "api-overlay" }),
   route(":handle/overlay", "routes/overlay.tsx"),
   route(":handle", "routes/streamer.tsx"),
 ] satisfies RouteConfig;
