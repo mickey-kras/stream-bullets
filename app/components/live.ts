@@ -73,16 +73,41 @@ export interface MashLive {
   ticks: Readonly<Record<string, MashTick>>;
   mine: Readonly<Record<string, number>>;
   denied: Readonly<Record<string, MashDenial>>;
+  /** The start of the run `mine` and `denied` belong to, as the last snapshot showed it (null before a start). */
+  runs: Readonly<Record<string, number | null>>;
 }
 
-const emptyMash: MashLive = { ticks: {}, mine: {}, denied: {} };
+const emptyMash: MashLive = { ticks: {}, mine: {}, denied: {}, runs: {} };
+/** The client pings this often, so the room knows the socket is in use and does not close it as idle. */
+const PING_INTERVAL_MS = 20_000;
 let mashLive: MashLive = emptyMash;
 let liveSocket: WebSocket | null = null;
 const mashListeners = new Set<() => void>();
 
 function setMashLive(change: (current: MashLive) => MashLive): void {
-  mashLive = change(mashLive);
+  const next: MashLive = change(mashLive);
+  if (next === mashLive) return;
+  mashLive = next;
   for (const listener of mashListeners) listener();
+}
+
+/**
+ * Forgets your taps and refusals for a battle whose run changed in this snapshot (a restart sets it back to setup,
+ * and a new start gives it a new start time), so "Your taps" never carries over from the last round.
+ */
+export function withSnapshotRuns(current: MashLive, snapshot: Pick<LiveSnapshot, "polls">): MashLive {
+  let next: MashLive = current;
+  for (const poll of snapshot.polls) {
+    if (!poll.mash) continue;
+    const startsAt: number | null = poll.mash.phase === "setup" ? null : poll.mash.startsAt;
+    if (next.runs[poll.id] === startsAt) continue;
+    const mine: Record<string, number> = { ...next.mine };
+    const denied: Record<string, MashDenial> = { ...next.denied };
+    delete mine[poll.id];
+    delete denied[poll.id];
+    next = { ...next, mine, denied, runs: { ...next.runs, [poll.id]: startsAt } };
+  }
+  return next;
 }
 
 function subscribeMash(listener: () => void): () => void {
@@ -156,6 +181,7 @@ export function useLivePolls(
     let socket: WebSocket | null = null;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let watchdog: ReturnType<typeof setTimeout> | undefined;
+    let pinger: ReturnType<typeof setInterval> | undefined;
     let attempts: number = 0;
     function armWatchdog(current: WebSocket): void {
       if (watchdog) clearTimeout(watchdog);
@@ -177,6 +203,7 @@ export function useLivePolls(
       setSnapshot((previous: LiveSnapshot | null) => (previous ? { ...previous, overlay } : previous));
     }
     function receive(current: WebSocket, data: string): void {
+      if (data === "pong") return;
       const message: unknown = JSON.parse(data);
       if (typeof message === "object" && message !== null && "type" in message && message.type === "unavailable") {
         setStatus("reconnecting");
@@ -192,6 +219,7 @@ export function useLivePolls(
       attempts = 0;
       setStatus("live");
       armWatchdog(current);
+      setMashLive((mash: MashLive) => withSnapshotRuns(mash, parsed.data));
       updateSnapshot(parsed.data);
     }
     function connect(): void {
@@ -205,6 +233,10 @@ export function useLivePolls(
         if (!active) return;
         liveSocket = current;
         setStatus("connecting");
+        if (pinger) clearInterval(pinger);
+        pinger = setInterval(() => {
+          if (current.readyState === WebSocket.OPEN) current.send("ping");
+        }, PING_INTERVAL_MS);
       };
       current.onmessage = (event: MessageEvent<unknown>): void => {
         if (!active || typeof event.data !== "string" || event.data.length > 128 * 1024) return;
@@ -219,6 +251,7 @@ export function useLivePolls(
       };
       current.onclose = (): void => {
         if (liveSocket === current) liveSocket = null;
+        if (pinger) clearInterval(pinger);
         if (!active) return;
         if (watchdog) clearTimeout(watchdog);
         attempts = Math.min(9, attempts + 1);
@@ -235,6 +268,7 @@ export function useLivePolls(
       active = false;
       if (timer) clearTimeout(timer);
       if (watchdog) clearTimeout(watchdog);
+      if (pinger) clearInterval(pinger);
       socket?.close();
     };
   }, [handle, enabled, retry]);

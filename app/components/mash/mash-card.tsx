@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useMatches, useRevalidator } from "react-router";
 import { t } from "../../i18n";
-import { MASH_DRAW, MASH_NAME, mashWinner } from "../../lib/mash";
+import { MASH_BATCH_MS, MASH_DRAW, MASH_NAME, mashWinner } from "../../lib/mash";
 import { useShell } from "../../lib/shell";
 import { usePrefs } from "../../lib/use-prefs";
 import type { Entry } from "../../types";
@@ -313,7 +313,12 @@ function TapButton({
   helpId,
 }: Readonly<{ entry: Entry; view: MashView; side: number; assist: MashAssist; helpId: string }>): ReactNode {
   const assisted: boolean = assist !== "off";
-  const tapper = useMashTapper(entry.id, view.current === "live", assisted);
+  const tapper = useMashTapper(
+    entry.id,
+    view.current === "live",
+    assisted,
+    view.current === "live" && view.msLeft <= MASH_BATCH_MS,
+  );
   const button = useRef<HTMLButtonElement | null>(null);
   const { shortcuts } = usePrefs();
   const mine: number = Math.max(tapper.taps, view.mine ?? 0);

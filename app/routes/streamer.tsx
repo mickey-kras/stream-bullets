@@ -39,7 +39,8 @@ import { t, type MessageId } from "../i18n";
 import { errorMessage, postJson, requestJson } from "../components/api";
 import { CreateEntry } from "../components/create-entry";
 import { Discussion } from "../components/discussion";
-import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
+import { useLivePolls, useLiveRevalidation } from "../components/live";
+import { battleMarks, useBattleClock } from "../components/mash/use-mash";
 import { PollCard } from "../components/poll";
 import type { BoardSnapshot, Entry, EntryStatus, LiveSnapshot, SortOrder, StreamEvent } from "../types";
 import type { Route } from "./+types/streamer";
@@ -182,7 +183,6 @@ export default function StreamerPage(): ReactNode {
   const official = streamer.isOfficial;
   const live = useLivePolls(streamer.handle, view === "polls");
   useLiveRevalidation(live.status, live.snapshot?.revision, revalidator.revalidate, view === "polls");
-  const now: number = useServerTime(live.snapshot?.serverNow || board.serverNow);
   const owner: boolean = viewer?.id === streamer.ownerId;
   const writable: boolean = streamer.status === "active";
   const liveEvent: StreamEvent | null =
@@ -201,6 +201,8 @@ export default function StreamerPage(): ReactNode {
   });
   const selectedBase: Entry | null = loadedSelected || entries[0] || null;
   const selected: Entry | null = mergeLiveEntry(selectedBase, live.snapshot, board.revision);
+  // Wakes exactly at a running battle's start and end, so every viewer sees them on time.
+  const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
 
   const boardKey: string = JSON.stringify([streamer.id, view, sort, query, status, board.nextCursor, board.revision]);
   const [previousBoard, setPreviousBoard] = useState<string>(boardKey);

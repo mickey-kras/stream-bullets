@@ -1,5 +1,23 @@
 import { test, expect } from "@playwright/test";
+import { accounts, runSql } from "./fixtures";
 import { mashId, shots, signedIn } from "./live-helpers";
+
+/** The seeded battle on the feature page, by its seeded title. */
+const battle =
+  "(SELECT e.id FROM entries e JOIN streamers s ON s.id=e.streamer_id WHERE s.handle='feature_host' AND e.title='Which boss first?')";
+
+// The first test starts, ends and restarts the seeded battle. Put it back as seeded (in setup, the viewer on Radahn
+// with 25 taps), so a retry starts from the same state.
+test.beforeEach(async () => {
+  const viewer: string = (await accounts()).viewer.id;
+  await runSql("mash-reset", [
+    `UPDATE entry_mash SET phase='setup',starts_at=NULL,ends_at=NULL,winner=NULL WHERE entry_id=${battle};`,
+    `DELETE FROM mash_taps WHERE entry_id=${battle};`,
+    `INSERT INTO mash_taps(entry_id,user_id,side,taps,assisted_taps) VALUES (${battle},'${viewer}',1,25,0);`,
+    `INSERT OR REPLACE INTO entry_votes(entry_id,user_id,choice) VALUES (${battle},'${viewer}',1);`,
+    "UPDATE streamers SET revision=revision+1 WHERE handle='feature_host';",
+  ]);
+});
 
 test("a Mash Battle counts one tap per key press and updates the overlay live", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", 80);
@@ -23,13 +41,15 @@ test("a Mash Battle counts one tap per key press and updates the overlay live", 
   for (let index = 0; index < 6; index += 1) await page.keyboard.down(" ");
   await page.keyboard.up(" ");
   await expect(mine).toHaveText("26");
-  for (let index = 0; index < 3; index += 1) {
+  const total = obs.locator('[data-mash-total="1"]');
+  // The overlay bar follows the 5 Hz totals without a reload. Waiting for it also spaces the presses wider than the
+  // client's 15 a second limit, so each press counts.
+  await expect(total).toHaveText("26");
+  for (let count = 27; count <= 29; count += 1) {
     await page.keyboard.press("Enter");
-    await page.waitForTimeout(120);
+    await expect(mine).toHaveText(String(count));
+    await expect(total).toHaveText(String(count));
   }
-  await expect(mine).toHaveText("29");
-  // The overlay bar follows the 5 Hz totals without a reload.
-  await expect(obs.locator('[data-mash-total="1"]')).toHaveText("29");
   await expect(obs.locator('[data-mash-pct="1"]')).toHaveText("100%");
   if (shots) {
     await page.locator(".mash-card").screenshot({ path: `${shots}/mash-card-live.png` });
