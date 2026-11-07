@@ -21,7 +21,7 @@ interface MenuRow {
  * The rows for this person, in the approved order (item 35): own page tools, then account, then Admin, then
  * Streamers (streamer header only). Your profile, Host a community, Your data and Edit your page open dialogs
  * over the current page (item 17). Suggest an improvement opens the official Ideas board with its dialog (item 46).
- * Rows for later phases (Overlay control, Language, Accessibility & display) are added by those phases.
+ * Rows for later phases (Language, Accessibility & display) are added by those phases.
  */
 export function accountMenuRows(
   shell: ShellData,
@@ -43,6 +43,12 @@ export function accountMenuRows(
         label: "account.yourPage",
         icon: "your-page",
         current: pathname === paths.streamer(shell.ownStreamer.handle),
+      },
+      {
+        to: paths.overlayControl,
+        label: "account.overlayControl",
+        icon: "overlay",
+        current: pathname === paths.overlayControl,
       },
       dialog("page", "account.editPage", "pencil"),
     ]);

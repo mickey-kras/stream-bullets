@@ -63,6 +63,7 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   await expect(links.first()).toBeFocused();
   await expect(links).toHaveText([
     "Your page",
+    "Overlay control",
     "Edit your page",
     "Your profile",
     "Your data",

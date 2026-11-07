@@ -14,7 +14,7 @@ import { IDEA_CATEGORIES, TOPIC_CATEGORIES } from "../lib/ideas";
 import { isValidZone, parseDate } from "../lib/zoned";
 
 const id = z.string().uuid();
-const line = (max: number): z.ZodString =>
+export const line = (max: number): z.ZodString =>
   z
     .string()
     .trim()

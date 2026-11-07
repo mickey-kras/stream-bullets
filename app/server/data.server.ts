@@ -30,6 +30,7 @@ import {
 } from "./access.server";
 import { IDEA_CATEGORIES, isUntouchedTemplate, NEW_IDEA_STATUS } from "../lib/ideas";
 import { HttpError } from "./http.server";
+import { MASH_COLUMN, mashValue } from "./mash-sql";
 import {
   commentActionSchema,
   commentQuerySchema,
@@ -92,6 +93,7 @@ interface EntryRow {
   status: EntryStatus | null;
   status_reason: string | null;
   reported: number;
+  mash: string | null;
 }
 interface CommentRow {
   id: string;
@@ -457,7 +459,8 @@ const entrySelect = `
     (SELECT choice FROM entry_votes v WHERE v.entry_id=e.id AND v.user_id=?) AS my_vote,
     COALESCE((SELECT sum(value) FROM entry_reactions r WHERE r.entry_id=e.id),0) AS score,
     EXISTS(SELECT 1 FROM content_reports cr WHERE cr.target_kind='entry' AND cr.target_id=e.id
-      AND cr.reporter_id=? AND cr.status='open') AS reported
+      AND cr.reporter_id=? AND cr.status='open') AS reported,
+    ${MASH_COLUMN}
   FROM entries e JOIN user u ON u.id=e.author_id
 `;
 
@@ -470,13 +473,14 @@ function entryValue(row: EntryRow): Entry {
     (_option: string, index: number): number =>
       grouped.find((value: { choice: number; count: number }) => value.choice === index)?.count ?? 0,
   );
+  const mash = mashValue(row.mash, options.length);
   return {
     id: row.id,
     streamerId: row.streamer_id,
     authorId: row.author_id,
     author: row.author,
     avatar: publicAvatar(row.author_id, row.avatar),
-    kind: row.kind,
+    kind: mash ? "mash" : row.kind,
     title: row.title,
     body: row.body,
     category: row.category,
@@ -494,6 +498,7 @@ function entryValue(row: EntryRow): Entry {
     status: row.status ?? null,
     statusReason: row.status_reason ?? null,
     reported: row.reported === 1,
+    mash,
   };
 }
 
@@ -557,6 +562,7 @@ export async function getOverlaySnapshot(
         revealed: entry.revealed,
         counts: entry.counts,
         total: entry.total,
+        mash: entry.mash,
       };
     }),
   };
@@ -864,6 +870,7 @@ export async function mutateEntry(
         env.DB.prepare(`
         INSERT INTO entry_votes (entry_id,user_id,choice)
         SELECT id,?,? FROM entries WHERE id=? AND streamer_id=? AND kind!='topic' AND revealed=0
+          AND NOT EXISTS(SELECT 1 FROM entry_mash m WHERE m.entry_id=entries.id AND m.phase!='setup')
           AND (ends_at IS NULL OR ends_at>CAST(strftime('%s','now') AS INTEGER)*1000+CAST(substr(strftime('%f','now'),4,3) AS INTEGER)) AND ?<json_array_length(options)
         ON CONFLICT(entry_id,user_id) DO UPDATE SET choice=excluded.choice
       `).bind(viewerId, action.choice, action.id, streamerId, action.choice),

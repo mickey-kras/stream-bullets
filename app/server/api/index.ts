@@ -3,6 +3,7 @@ import { adminRoutes } from "./admin";
 import { communityRoutes } from "./community";
 import { entryRoutes } from "./entries";
 import { imageRoutes } from "./images";
+import { liveRoutes } from "./live";
 import { moderationRoutes } from "./moderation";
 import type { ApiRoute } from "./router";
 import { scheduleRoutes } from "./schedule";
@@ -25,6 +26,7 @@ export const apiRoutes: readonly ApiRoute[] = [
   ...moderationRoutes,
   ...scheduleRoutes,
   ...communityRoutes,
+  ...liveRoutes,
   ...adminRoutes,
 ];
 

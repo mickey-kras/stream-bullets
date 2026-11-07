@@ -1,6 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Modal } from "./common";
 import { errorMessage } from "./api";
+import { MASH_NAME } from "../lib/mash";
+import { MashFields } from "./mash/mash-fields";
 import { DialogActions } from "./ui/dialog";
 import { Select, type SelectOption } from "./ui/select";
 
@@ -31,7 +33,7 @@ export function CreateEntry({
   onOpenChange: (open: boolean) => void;
   onCreate: (body: unknown) => Promise<void>;
 }>): ReactNode {
-  const [kind, setKind] = useState<"choice" | "binary">("choice");
+  const [kind, setKind] = useState<"choice" | "binary" | "mash">("choice");
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -46,28 +48,37 @@ export function CreateEntry({
         if (typeof value !== "string") throw new TypeError(`${name} must be text.`);
         return value;
       }
+      const mash = {
+        action: "create",
+        kind: "mash",
+        title: textField("title"),
+        options: form.getAll("side").map((side: FormDataEntryValue) => String(side).trim()),
+        durationS: Number(textField("durationS")),
+      };
       const body: unknown =
-        mode === "topic"
-          ? {
-              action: "create",
-              kind: "topic",
-              title: textField("title"),
-              body: textField("body"),
-              category: textField("category"),
-            }
-          : {
-              action: "create",
-              kind,
-              title: textField("title"),
-              options:
-                kind === "binary"
-                  ? ["Yes", "No"]
-                  : textField("options")
-                      .split("\n")
-                      .map((option: string) => option.trim())
-                      .filter(Boolean),
-              duration: Number(textField("duration")),
-            };
+        mode === "poll" && kind === "mash"
+          ? mash
+          : mode === "topic"
+            ? {
+                action: "create",
+                kind: "topic",
+                title: textField("title"),
+                body: textField("body"),
+                category: textField("category"),
+              }
+            : {
+                action: "create",
+                kind,
+                title: textField("title"),
+                options:
+                  kind === "binary"
+                    ? ["Yes", "No"]
+                    : textField("options")
+                        .split("\n")
+                        .map((option: string) => option.trim())
+                        .filter(Boolean),
+                duration: Number(textField("duration")),
+              };
       await onCreate(body);
       onOpenChange(false);
     } catch (error_: unknown) {
@@ -143,8 +154,19 @@ export function CreateEntry({
                 />
                 <span>Yes / No</span>
               </label>
+              <label>
+                <input
+                  type="radio"
+                  name="kind"
+                  value="mash"
+                  checked={kind === "mash"}
+                  onChange={() => setKind("mash")}
+                />
+                <span>{MASH_NAME}</span>
+              </label>
             </fieldset>
-            {kind === "choice" ? (
+            {kind === "mash" && <MashFields />}
+            {kind === "mash" ? null : kind === "choice" ? (
               <label>
                 <span>Options, one per line</span>
                 <textarea name="options" rows={4} required maxLength={486} aria-describedby="options-help" />
@@ -153,7 +175,7 @@ export function CreateEntry({
             ) : (
               <p className="muted">Yes / No results stay private until you reveal them.</p>
             )}
-            <div className="field">
+            <div className="field" hidden={kind === "mash"}>
               <span className="field-label" id="poll-duration-label">
                 Voting time
               </span>

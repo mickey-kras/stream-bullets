@@ -1,6 +1,7 @@
 import { createRequestHandler, RouterContextProvider } from "react-router";
 import { appContext, type AppEnv } from "../app/env";
 import { isStreamerListed } from "../app/server/access.server";
+import { getViewer } from "../app/server/auth.server";
 import { getStreamer } from "../app/server/data.server";
 import {
   HttpError,
@@ -64,10 +65,14 @@ export default {
         const streamer = await getStreamer(env, live[1]);
         // Suspended pages refuse live connections, the owner's included.
         if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
+        // The room trusts only this header for who taps in a Mash Battle; a client-sent copy never reaches it.
+        const viewer = await getViewer(request, { env, nonce, responseHeaders });
+        const headers = new Headers({ Upgrade: "websocket", "X-Stream-Bullets-Client": key });
+        if (viewer) headers.set("X-SB-User", viewer.id);
         const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
         response = await room.fetch(
           `https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`,
-          { headers: { Upgrade: "websocket", "X-Stream-Bullets-Client": key } },
+          { headers },
         );
       } else if (path.startsWith("/images/")) {
         if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");

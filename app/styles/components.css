@@ -973,7 +973,7 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .seg button { min-height: 40px; padding: 6px 14px; border-radius: 0; margin-left: -1px; background: var(--tab); border-color: var(--tab-border); font-weight: 600; }
 .seg button:first-child { border-radius: 7px 0 0 7px; margin-left: 0; }
 .seg button:last-child { border-radius: 0 7px 7px 0; }
-.seg button[aria-checked="true"] { background: linear-gradient(110deg, var(--gold-hi), var(--gold-lo)); color: var(--on-gold-2); border-color: var(--gold-lo); }
+.seg button[aria-checked="true"], .seg button[aria-pressed="true"] { background: linear-gradient(110deg, var(--gold-hi), var(--gold-lo)); color: var(--on-gold-2); border-color: var(--gold-lo); }
 .ov-sources h2 { font-size: 28px; margin: 0 0 10px; }
 .ov-sources ul { display: grid; gap: 8px; }
 .ov-source { border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
@@ -992,13 +992,16 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .ov-sub .choice { display: inline-flex; grid-template-columns: none; align-items: center; gap: 8px; }
 .ov-url { margin-top: 16px; display: grid; gap: 10px; }
 .ov-url p { margin: 0; }
+.ov-seg-field { border: 0; padding: 0; min-width: 0; }
+.ov-seg-field legend { padding: 0; margin-bottom: 6px; }
+.ov-message-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 16px; }
 @media (max-width:56.25em) {
   .ov-grid { grid-template-columns: 1fr; }
   .ov-source-main { min-height: 64px; }
   .ov-take-btn { flex: 1; justify-content: center; }
 }
 .ov-stage { position: absolute; inset: 0; padding: 48px; display: flex; pointer-events: none; }
-.ov-screen { position: relative; height: 100%; padding: 0; }
+.ov-screen { position: relative; height: 100vh; min-height: 100vh; padding: 0; }
 .ov-screen .ov-stage { padding: 24px; }
 .ov-stage.pos-full { align-items: flex-start; }
 .ov-stage.pos-full > * { width: 100%; }
