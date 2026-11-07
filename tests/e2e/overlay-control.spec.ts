@@ -36,7 +36,9 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
 
   await control.getByRole("button", { name: "Top bar" }).click();
   await expect(obs.locator(".ov-stage.pos-top")).toBeVisible();
-  await control.getByLabel("Instant switch (skip preview)").check();
+  // The box follows the saved state, so it changes once the server answers.
+  await control.getByLabel("Instant switch (skip preview)").click();
+  await expect(control.getByLabel("Instant switch (skip preview)")).toBeChecked();
   await expect(control.locator('[data-ov-monitor="prev"]')).toHaveCount(0);
   await control.locator("body").press("8");
   await expect(obs.locator('[data-overlay-type="hidden"]')).toBeEmpty();
@@ -45,7 +47,8 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   // Back to Auto so the page ends as it started: the newest open poll.
   await control.locator("body").press("1");
   await expect(obs.locator('[data-overlay-type="auto"]')).toBeVisible();
-  await control.getByLabel("Instant switch (skip preview)").uncheck();
+  await control.getByLabel("Instant switch (skip preview)").click();
+  await expect(control.getByLabel("Instant switch (skip preview)")).not.toBeChecked();
   await Promise.all([owner.close(), obs.close()]);
 });
 
