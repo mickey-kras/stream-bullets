@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import * as THREE from "three";
 import * as M from "../app/components/station/materials";
 import * as T from "../app/components/station/textures";
@@ -15,6 +17,7 @@ import { buildSigns } from "../app/components/station/signs";
 import { buildAtom } from "../app/components/station/atom";
 import { buildAtmosphere } from "../app/components/station/atmosphere";
 import { poster } from "../app/components/station/poster";
+import { Station } from "../app/components/station/station";
 import { installRecordingCanvas, RecordingCanvas } from "./helpers/recording-canvas";
 
 beforeEach((): void => {
@@ -188,4 +191,11 @@ it.each([true, false])("injects wear uniforms and shader hooks (tiled=%s)", (til
   expect(shader.fragmentShader.includes("normal = normalize(normal + delta")).toBe(tiled);
   expect(material.customProgramCacheKey()).toContain(String(tiled));
   material.dispose();
+});
+
+it("names the landing station with a native section, not a role", (): void => {
+  vi.unstubAllGlobals();
+  const html: string = renderToStaticMarkup(createElement(Station));
+  expect(html).toMatch(/^<section class="landing-station" aria-label="[^"]+" data-status="loading">/);
+  expect(html).not.toContain("role=");
 });

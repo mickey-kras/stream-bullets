@@ -77,7 +77,7 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
   }, []);
 
   return (
-    <div className="landing-station" aria-label={t("landing.station")} data-status={status}>
+    <section className="landing-station" aria-label={t("landing.station")} data-status={status}>
       <div className="landing-canvas" ref={host} />
       {status === "loading" && <AtomLoader label={t("landing.tuning")} />}
       {/* Only after the station is ready (which happens in the browser), so server and client agree. */}
@@ -109,6 +109,6 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
           The station preview is unavailable. You can still sign in and join the conversation.
         </output>
       )}
-    </div>
+    </section>
   );
 }
