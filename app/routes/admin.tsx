@@ -66,7 +66,7 @@ function reportFilterParam(value: string | null): ReportGroupFilter {
 }
 
 export function meta() {
-  return [{ title: "Admin · StreamBullets" }, { name: "robots", content: "noindex" }];
+  return [{ title: `${t("account.admin")} · StreamBullets` }, { name: "robots", content: "noindex" }];
 }
 
 /**

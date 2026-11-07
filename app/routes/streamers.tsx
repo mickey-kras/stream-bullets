@@ -17,8 +17,8 @@ import { Icon, type IconName } from "../components/ui/icon";
 
 export function meta() {
   return [
-    { title: "Streamers · StreamBullets" },
-    { name: "description", content: "Find a streamer's community on StreamBullets. Suggest topics, vote and discuss the stream." },
+    { title: `${t("nav.streamers")} · StreamBullets` },
+    { name: "description", content: t("meta.streamersDescription") },
   ];
 }
 

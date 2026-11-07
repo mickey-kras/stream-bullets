@@ -37,6 +37,17 @@ export function requireSameOrigin(request: Request, env: AppEnv): void {
   }
 }
 
+/**
+ * Refuses browser requests from other sites. Requests without an Origin header (curl, scripts, agents) pass:
+ * they carry no visitor's cookies by accident, so they cannot act in someone else's name.
+ */
+export function requireNotCrossSite(request: Request, env: AppEnv): void {
+  const origin: string | null = request.headers.get("Origin");
+  if ((origin !== null && origin !== getOrigin(env)) || request.headers.get("Sec-Fetch-Site") === "cross-site") {
+    throw new HttpError(403, "Use this site to submit changes.");
+  }
+}
+
 export async function readBody(request: Request, maxBytes: number): Promise<Uint8Array<ArrayBuffer>> {
   const length = request.headers.get("Content-Length");
   if (length !== null && (!/^\d+$/.test(length) || Number(length) > maxBytes))

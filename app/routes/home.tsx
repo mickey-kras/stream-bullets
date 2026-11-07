@@ -1,7 +1,8 @@
 import { useCallback, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, type MetaArgs } from "react-router";
 import { directoryHref, SIGN_INTENTS, type Intent } from "../lib/directory";
-import { paths, useShell } from "../lib/shell";
+import { paths, shellFromMatches, useShell } from "../lib/shell";
+import { siteJsonLd } from "../lib/structured-data";
 import { t } from "../i18n";
 import { AccountMenu } from "../components/shell/account-menu";
 import { SignInDialog } from "../components/shell/sign-in-dialog";
@@ -15,6 +16,15 @@ const signLabel: Record<Intent, "landing.suggest" | "landing.vote" | "landing.di
   vote: "landing.vote",
   discuss: "landing.discuss",
 };
+
+export function meta({ matches }: MetaArgs) {
+  const origin: string = shellFromMatches(matches)?.origin ?? "";
+  return [
+    { title: t("meta.homeTitle") },
+    { name: "description", content: t("meta.homeDescription") },
+    { "script:ld+json": siteJsonLd(origin) },
+  ];
+}
 
 export default function Home(): ReactNode {
   const shell = useShell();

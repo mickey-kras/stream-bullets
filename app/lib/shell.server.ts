@@ -38,7 +38,8 @@ export async function loadShell(request: Request, app: AppContext): Promise<Shel
   app.locale = locale;
   const prefs: DisplayPrefs =
     viewer?.displayPrefs ?? readDisplayPrefs(readCookie(request.headers.get("Cookie"), PREFS_COOKIE)) ?? {};
-  if (!viewer) return { viewer: null, providers, admin: false, ownStreamer: null, locale, prefs };
+  const page = { providers, locale, prefs, origin: app.env.APP_ORIGIN };
+  if (!viewer) return { viewer: null, admin: false, ownStreamer: null, ...page };
   const [admin, own] = await Promise.all([isAdmin(app.env, viewer.id), getOwnStreamer(app.env, viewer.id)]);
-  return { viewer, providers, admin, ownStreamer: own ? { handle: own.handle, name: own.name } : null, locale, prefs };
+  return { viewer, admin, ownStreamer: own ? { handle: own.handle, name: own.name } : null, ...page };
 }

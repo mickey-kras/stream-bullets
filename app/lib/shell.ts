@@ -14,6 +14,8 @@ export interface ShellData {
   locale: Locale;
   /** Display preferences: the account's when signed in and saved, else this browser's cookie. */
   prefs: DisplayPrefs;
+  /** The site's origin (APP_ORIGIN), for absolute links in structured data. */
+  origin: string;
 }
 
 export type ShellRole = "signed-out" | "viewer" | "owner" | "admin";
@@ -28,8 +30,15 @@ export function useShell(): ShellData {
       ownStreamer: null,
       locale: getLocale(),
       prefs: {},
+      origin: "",
     }
   );
+}
+
+/** The root loader's data inside a route's `meta` function. */
+export function shellFromMatches(matches: readonly ({ id: string; loaderData?: unknown } | undefined)[]): ShellData | null {
+  const root = matches.find((match) => match?.id === "root");
+  return (root?.loaderData as ShellData | undefined) ?? null;
 }
 
 export function shellRole(shell: ShellData): ShellRole {

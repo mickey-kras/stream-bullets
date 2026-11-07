@@ -19,6 +19,8 @@ export interface AppEnv {
   ADMIN_EMAILS?: string;
   /** Admin security-key step-up: `off`, `report` (the default) or `enforce`. See README and SECURITY.md. */
   ADMIN_STEP_UP?: string;
+  /** Secret key for the AI interest counter's daily visitor hashes. Without it the counter is off. */
+  AI_INTEREST_SALT?: string;
 }
 
 export interface AppContext {

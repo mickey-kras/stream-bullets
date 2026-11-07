@@ -20,7 +20,8 @@ import { EmptyState } from "../components/common";
 import { SignInDialog } from "../components/shell/sign-in-dialog";
 import { StreamerLogo } from "../components/ui/avatar";
 import { readIntent } from "../lib/directory";
-import { useShell } from "../lib/shell";
+import { shellFromMatches, useShell } from "../lib/shell";
+import { eventsJsonLd, personJsonLd, postingJsonLd, type JsonLd } from "../lib/structured-data";
 import { CommunityView } from "../components/community/community-view";
 import { IdeaDialog } from "../components/ideas/idea-dialog";
 import { ScheduleView, scheduleModes, type ScheduleMode } from "../components/schedule/schedule-view";
@@ -40,6 +41,7 @@ import { Discussion } from "../components/discussion";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { PollCard } from "../components/poll";
 import type { BoardSnapshot, Entry, EntryStatus, LiveSnapshot, SortOrder, StreamEvent } from "../types";
+import type { Route } from "./+types/streamer";
 
 type View = StreamerView;
 type Dialog = "topic" | "poll" | "idea" | "event" | "card" | null;
@@ -51,6 +53,20 @@ const liveLabels: Record<string, MessageId> = {
 };
 /** The official StreamBullets page is the Ideas board: Ideas, About and Community. */
 const officialViews: readonly View[] = ["topics", "about", "community"];
+
+export function meta({ loaderData: data, matches }: Route.MetaArgs) {
+  if (!data) return [{ title: "StreamBullets" }];
+  const { streamer } = data.board;
+  const origin: string = shellFromMatches(matches)?.origin ?? "";
+  const structured: JsonLd[] = [personJsonLd(streamer, origin), ...eventsJsonLd(data.events, streamer, origin, data.serverNow)];
+  if (data.selected) structured.push(postingJsonLd(data.selected, streamer, origin));
+  const title: string = data.selected ? `${data.selected.title} · ${streamer.name}` : streamer.name;
+  return [
+    { title: `${title} · StreamBullets` },
+    { name: "description", content: streamer.about.slice(0, 160) || t("entry.tagline", { name: streamer.name }) },
+    ...structured.map((item: JsonLd) => ({ "script:ld+json": item })),
+  ];
+}
 
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const app = context.get(appContext);

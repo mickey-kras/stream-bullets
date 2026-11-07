@@ -1,0 +1,21 @@
+# StreamBullets
+
+> StreamBullets lets live-stream audiences suggest topics, vote in polls and discuss the stream on each streamer's page.
+
+## Key pages
+- /streamers: directory of streamer pages
+- /@{handle}: a streamer's topics, polls, schedule, about and community
+- /@{handle}?view=schedule: upcoming and past streams
+- /@{handle}/schedule.ics: the streamer's schedule as an iCalendar feed
+- /@{handle}/overlay: OBS browser source (video graphic, not for reading)
+- /@streambullets: the official Ideas board, where people suggest improvements to StreamBullets
+
+## Policy for AI agents
+- Reading public pages is welcome. Respect rate limits and robots.txt.
+- Posting, voting, sign-ups, comments, topic suggestions, Mash Battle and reports are for humans only for now.
+- The full policy: /ai
+
+## AI interest counter
+- POST /api/ai-interest {"vote":"up"|"down","agent":"<name/version>"}
+- One vote per visitor per day. Unverified signal.
+- GET /api/ai-interest returns the totals for the last 30 days.
