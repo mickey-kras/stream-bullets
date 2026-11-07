@@ -11,7 +11,10 @@ async function shot(page: Page, name: string): Promise<void> {
   if (!shots) return;
   // Wait for the page to settle; a capture during a layout change can fail in headless Chromium.
   await page.waitForLoadState("networkidle");
-  await page.screenshot({ path: `${shots}/${name}.png`, animations: "disabled" });
+  // Screenshots are review artefacts, not assertions: a second try covers a busy GPU process.
+  await page
+    .screenshot({ path: `${shots}/${name}.png`, animations: "disabled" })
+    .catch(() => page.screenshot({ path: `${shots}/${name}.png`, animations: "disabled", timeout: 10_000 }));
 }
 
 test("Accept-Language picks the page language and Intl follows it", async ({ browser }) => {
@@ -48,7 +51,7 @@ test("the language switcher saves the choice and reloads in it", async ({ page, 
 });
 
 test("a signed-in choice is saved to the account and wins over the cookie", async ({ browser }) => {
-  const viewer = await signedIn(browser, "viewer", 180);
+  const viewer = await signedIn(browser, "prefsviewer", 180);
   const page = await viewer.newPage();
   await page.goto("/streamers?dialog=language");
   const saved = page.waitForResponse((response) => response.url().endsWith("/api/me/locale"));
@@ -56,7 +59,7 @@ test("a signed-in choice is saved to the account and wins over the cookie", asyn
   expect((await saved).status()).toBe(200);
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   // Another browser with the same account and a different cookie still gets French.
-  const other = await signedIn(browser, "viewer", 181);
+  const other = await signedIn(browser, "prefsviewer", 181);
   await inLanguage(other, "pl");
   const second = await other.newPage();
   await second.goto("/streamers");

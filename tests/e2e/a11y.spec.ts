@@ -114,7 +114,7 @@ test("display preferences apply before the first paint and persist", async ({ pa
 });
 
 test("signed in, display preferences save to the account", async ({ browser }) => {
-  const viewer = await signedIn(browser, "viewer", 177);
+  const viewer = await signedIn(browser, "prefsviewer", 177);
   const page = await viewer.newPage();
   await page.goto("/streamers?dialog=a11y");
   const dialog = page.getByRole("dialog", { name: "Accessibility & display" });
@@ -125,7 +125,7 @@ test("signed in, display preferences save to the account", async ({ browser }) =
   await dialog.getByRole("checkbox", { name: "Underline all links" }).check();
   expect((await saved).status()).toBe(200);
   // A fresh browser with only the session (no preference cookie) gets the saved settings.
-  const other = await signedIn(browser, "viewer", 178);
+  const other = await signedIn(browser, "prefsviewer", 178);
   const second = await other.newPage();
   await second.goto("/streamers");
   await expect(second.locator("html")).toHaveAttribute("data-underline", "true");

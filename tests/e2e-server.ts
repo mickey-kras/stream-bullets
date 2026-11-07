@@ -71,6 +71,7 @@ for (const role of [
   "officialowner",
   "featureowner",
   "keyadmin",
+  "prefsviewer",
 ]) {
   const id: string = randomUUID();
   const token: string = randomBytes(24).toString("hex");
