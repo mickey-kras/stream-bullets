@@ -76,7 +76,8 @@ function openOnWideScreens(element: HTMLDetailsElement | null): void {
 }
 
 /**
- * A 1920 by 1080 stage scaled to the width of its frame. The scale is a CSS variable, not React state.
+ * A 1920 by 1080 stage scaled to the width of its frame. The scale is a CSS variable, not React state. The stage
+ * stays hidden until it is scaled, so it never shows at a wrong size and spills out of the frame.
  * On narrow screens the enlarge button gives the monitor the full width.
  */
 function Monitor({
@@ -96,7 +97,10 @@ function Monitor({
   useEffect(() => {
     const element: HTMLDivElement | null = frame.current;
     if (!element) return;
-    const scale = (): void => element.style.setProperty("--ov-scale", String(element.clientWidth / 1920));
+    const scale = (): void => {
+      element.style.setProperty("--ov-scale", String(element.clientWidth / 1920));
+      element.dataset.scaled = "true";
+    };
     scale();
     const observer = new ResizeObserver(scale);
     observer.observe(element);

@@ -42,8 +42,8 @@ export function useMashView(entry: Pick<Entry, "id" | "mash">, now: number): Mas
 }
 
 /**
- * The instants a running battle's display changes: its start, its end, and the start of its last batch window
- * (see useMashTapper). The clock also wakes each whole second before them, so the countdown and the seconds
+ * The instants a running battle's display changes: its start, its end, and the start of its last batch window.
+ * The clock also wakes each whole second before them, so the countdown and the seconds
  * left change on time too.
  */
 export function battleMarks(entries: readonly (Pick<Entry, "mash"> | null)[]): number[] {

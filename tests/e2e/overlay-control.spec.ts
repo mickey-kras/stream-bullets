@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { signedIn as fixtureSignedIn } from "./fixtures";
 import { shots, signedIn } from "./live-helpers";
 
 test("the owner previews, takes and switches what the one OBS URL shows", async ({ browser }) => {
@@ -64,4 +65,19 @@ test("overlay control is for the page owner only", async ({ browser, page }) => 
   const tooLong = await owner.request.post("/api/overlay", { data: { action: "message", text: long, style: "info" } });
   expect(tooLong.status()).toBe(400);
   await Promise.all([viewer.close(), owner.close()]);
+});
+
+test("a monitor shows its stage only once it is scaled to the frame", async ({ browser }) => {
+  const phone = { viewport: { width: 390, height: 844 } };
+  // Without script the stage is never scaled, as before hydration. At its default size it would spill out.
+  const still = await fixtureSignedIn(browser, "featureowner", 92, { ...phone, javaScriptEnabled: false });
+  const before = await still.newPage();
+  await before.goto("/overlay-control");
+  await expect(before.locator('[data-ov-monitor="air"] .ov-scaler')).toBeHidden();
+  await still.close();
+  const owner = await fixtureSignedIn(browser, "featureowner", 92, phone);
+  const page = await owner.newPage();
+  await page.goto("/overlay-control");
+  await expect(page.locator('[data-ov-monitor="air"] .ov-scaler')).toBeVisible();
+  await owner.close();
 });

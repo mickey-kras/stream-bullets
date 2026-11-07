@@ -201,7 +201,7 @@ export default function StreamerPage(): ReactNode {
   });
   const selectedBase: Entry | null = loadedSelected || entries[0] || null;
   const selected: Entry | null = mergeLiveEntry(selectedBase, live.snapshot, board.revision);
-  // Exact while a Mash Battle runs: the clock wakes at its start and end, not on a one-second tick.
+  // Wakes exactly at a running battle's start and end, so every viewer sees them on time.
   const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
 
   const boardKey: string = JSON.stringify([streamer.id, view, sort, query, status, board.nextCursor, board.revision]);
