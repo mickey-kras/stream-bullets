@@ -284,6 +284,61 @@ describe("schedule storage", (): void => {
     expect((await list()).map((event) => event.title)).toEqual(["Special"]);
   });
 
+  async function weekly(): Promise<StreamEvent[]> {
+    const start = new Date(Date.now() + day);
+    await createEvents(env, "owner", input(start, { repeatDays: 1 << start.getUTCDay() }));
+    return listEvents(env, streamerId, Date.now() - day, Date.now() + 120 * day);
+  }
+
+  async function seriesRows(): Promise<{ title: string; starts_at: number; series_id: string | null }[]> {
+    const { results } = await env.DB.prepare(
+      "SELECT title, starts_at, series_id FROM stream_events WHERE streamer_id=? ORDER BY starts_at",
+    )
+      .bind(streamerId)
+      .all<{ title: string; starts_at: number; series_id: string | null }>();
+    return results;
+  }
+
+  it("never writes back streams deleted with this and the following ones", async (): Promise<void> => {
+    const all = await weekly();
+    await deleteEvent(env, "owner", all[4].id, { scope: "following" });
+    expect(await topUpSeries(env, Date.now() + 30 * day)).toBe(0);
+    expect((await seriesRows()).map((row) => row.starts_at)).toEqual(all.slice(0, 4).map((event) => event.startsAt));
+  });
+
+  it("stops the old series when the rest of it becomes a one-off", async (): Promise<void> => {
+    const all = await weekly();
+    await patchEvent(env, "owner", all[3].id, {
+      action: "edit",
+      scope: "following",
+      ...input(new Date(all[3].startsAt)),
+      title: "Finale",
+      repeatDays: 0,
+    });
+    expect(await topUpSeries(env, Date.now() + 30 * day)).toBe(0);
+    const rows = await seriesRows();
+    expect(rows.map((row) => row.title)).toEqual(["Variety night", "Variety night", "Variety night", "Finale"]);
+    expect(rows[3].series_id).toBeNull();
+  });
+
+  it("does not copy a stream edited or cancelled on its own into later ones", async (): Promise<void> => {
+    const all = await weekly();
+    const newest = all.at(-1)!;
+    await patchEvent(env, "owner", newest.id, {
+      action: "edit",
+      scope: "one",
+      ...input(new Date(newest.startsAt)),
+      title: "Special",
+      time: "21:00",
+    });
+    await patchEvent(env, "owner", all.at(-2)!.id, { action: "cancel" });
+    expect(await topUpSeries(env, Date.now() + 7 * day)).toBe(1);
+    const added = (await seriesRows()).at(-1)!;
+    expect(added.title).toBe("Variety night");
+    expect(new Date(added.starts_at).getUTCHours()).toBe(18);
+    expect(added.starts_at - all.at(-1)!.startsAt).toBe(7 * day);
+  });
+
   it("refuses writes on a frozen page and from viewers", async (): Promise<void> => {
     await expect(createEvents(env, "viewer", input(new Date(Date.now() + day)))).rejects.toMatchObject({ status: 403 });
     await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(streamerId).run();

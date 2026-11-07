@@ -29,6 +29,7 @@ interface EventRow {
   repeat_days: number;
   repeat_until: number | null;
   tz: string;
+  is_exception: number;
   created_at: number;
   updated_at: number;
 }
@@ -223,6 +224,21 @@ function insertStatements(
   return { statements, ids };
 }
 
+/**
+ * Ends a series on the day before `row`: the occurrences that stay get that end date (like one picked in the form),
+ * so the cron never writes the deleted or replaced ones again.
+ */
+function endSeriesBefore(env: AppEnv, seriesId: string, row: { starts_at: number; tz: string }): D1PreparedStatement {
+  const until = zonedTime(localDateOf(row.starts_at, row.tz), 0, 0, row.tz) - 1;
+  return env.DB.prepare(`UPDATE stream_events SET repeat_until=?
+    WHERE series_id=? AND starts_at < ? AND (repeat_until IS NULL OR repeat_until > ?)`).bind(
+    until,
+    seriesId,
+    row.starts_at,
+    until,
+  );
+}
+
 async function assertRoom(env: AppEnv, streamerId: string, adding: number, now: number, freed = 0): Promise<void> {
   const row = await env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE streamer_id=? AND starts_at >= ?")
     .bind(streamerId, now)
@@ -294,7 +310,8 @@ export async function patchEvent(env: AppEnv, viewerId: string, id: string, valu
     const start = zonedTime(first, hour, minute, patch.tz);
     await env.DB.batch([
       env.DB.prepare(`UPDATE stream_events SET title=?, notes=?, starts_at=?, duration_min=?, platform=?, url=?, tz=?,
-        status=CASE WHEN status='cancelled' THEN 'cancelled' ELSE 'scheduled' END, updated_at=? WHERE id=?`).bind(
+        status=CASE WHEN status='cancelled' THEN 'cancelled' ELSE 'scheduled' END, is_exception=1, updated_at=?
+        WHERE id=?`).bind(
         patch.title,
         patch.notes,
         start,
@@ -330,7 +347,8 @@ export async function patchEvent(env: AppEnv, viewerId: string, id: string, valu
     .first<{ n: number }>();
   await assertRoom(env, row.streamer_id, plan.starts.length, now, freed?.n ?? 0);
   const { statements, ids } = insertStatements(env, row.streamer_id, templateOf(patch), plan, topics, now);
-  await env.DB.batch([removal, ...statements]);
+  const ending = row.series_id === null ? [] : [endSeriesBefore(env, row.series_id, row)];
+  await env.DB.batch([removal, ...ending, ...statements]);
   return (await getEvent(env, ids[0], now))!;
 }
 
@@ -341,57 +359,69 @@ export async function deleteEvent(env: AppEnv, viewerId: string, id: string, val
   await assertStreamerWritable(env, row.streamer_id, viewerId);
   await consumeMutationQuota(env, viewerId);
   if (scope === "following" && row.series_id) {
-    await env.DB.prepare("DELETE FROM stream_events WHERE series_id=? AND starts_at >= ?")
-      .bind(row.series_id, row.starts_at)
-      .run();
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM stream_events WHERE series_id=? AND starts_at >= ?").bind(
+        row.series_id,
+        row.starts_at,
+      ),
+      endSeriesBefore(env, row.series_id, row),
+    ]);
   } else {
     await env.DB.prepare("DELETE FROM stream_events WHERE id=?").bind(id).run();
   }
 }
 
 /**
- * Hourly cron: keeps every open-ended or not-yet-finished series written 12 weeks ahead, using its latest
- * occurrence as the template (same wall-clock time in its zone), and deletes streams past the retention window.
+ * Hourly cron: keeps every open-ended or not-yet-finished series written 12 weeks ahead and deletes streams past
+ * the retention window. New occurrences follow the day after the series' latest one; the template (title, wall-clock
+ * time in its zone, end date) is its latest occurrence that was neither edited on its own nor cancelled.
  * Returns how many occurrences were added.
  */
 export async function topUpSeries(env: AppEnv, now: number, maxSeries = 50): Promise<number> {
   const horizon = now + SERIES_HORIZON_MS;
-  const { results } = await env.DB.prepare(`SELECT x.* FROM stream_events x
+  const { results } = await env.DB.prepare(`SELECT x.*, s.last FROM stream_events x
     JOIN (SELECT series_id, max(starts_at) AS last FROM stream_events WHERE series_id IS NOT NULL GROUP BY series_id) s
-      ON s.series_id=x.series_id AND s.last=x.starts_at
+      ON s.series_id=x.series_id
     WHERE s.last < ? AND (x.repeat_until IS NULL OR x.repeat_until > s.last)
+      AND x.starts_at=(SELECT max(y.starts_at) FROM stream_events y
+        WHERE y.series_id=x.series_id AND y.is_exception=0 AND y.status<>'cancelled')
     LIMIT ?`)
     .bind(horizon - 86_400_000, maxSeries)
-    .all<EventRow>();
+    .all<EventRow & { last: number }>();
   let added = 0;
-  for (const last of results) {
-    const local = zonedParts(last.starts_at, last.tz);
-    const until = last.repeat_until === null ? null : localDateOf(last.repeat_until, last.tz);
+  for (const template of results) {
+    const local = zonedParts(template.starts_at, template.tz);
+    const until = template.repeat_until === null ? null : localDateOf(template.repeat_until, template.tz);
     const starts = expandSeries(
       {
-        first: addDays(localDateOf(last.starts_at, last.tz), 1),
+        first: addDays(localDateOf(template.last, template.tz), 1),
         hour: local.hour,
         minute: local.minute,
-        zone: last.tz,
-        days: last.repeat_days,
+        zone: template.tz,
+        days: template.repeat_days,
         until,
       },
       horizon,
-    ).filter((start: number): boolean => start > last.starts_at);
+    ).filter((start: number): boolean => start > template.last);
     if (starts.length === 0) continue;
-    const topics = (await topicsFor(env, [last.id])).get(last.id) ?? [];
+    const topics = (await topicsFor(env, [template.id])).get(template.id) ?? [];
     const { statements } = insertStatements(
       env,
-      last.streamer_id,
+      template.streamer_id,
       {
-        title: last.title,
-        notes: last.notes,
-        durationMin: last.duration_min,
-        platform: last.platform,
-        url: last.url,
-        tz: last.tz,
+        title: template.title,
+        notes: template.notes,
+        durationMin: template.duration_min,
+        platform: template.platform,
+        url: template.url,
+        tz: template.tz,
       },
-      { starts, seriesId: last.series_id, repeatDays: last.repeat_days, repeatUntil: last.repeat_until },
+      {
+        starts,
+        seriesId: template.series_id,
+        repeatDays: template.repeat_days,
+        repeatUntil: template.repeat_until,
+      },
       topics.map((topic: EventTopic): string => topic.id),
       now,
     );

@@ -101,7 +101,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0012", (): void => {
+  it("covers 0006 to 0013", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -110,6 +110,7 @@ describe("migrations 0006 onwards", (): void => {
       "0010",
       "0011",
       "0012",
+      "0013",
     ]);
   });
 
@@ -162,6 +163,8 @@ describe("migrations 0006 onwards", (): void => {
       db.prepare("INSERT INTO entry_mash (entry_id,duration_s) VALUES ('poll',30)"),
       db.prepare("INSERT INTO mash_taps (entry_id,user_id,side,taps) VALUES ('poll','fan',2,10)"),
     ]);
+    expect(await db.prepare("SELECT is_exception FROM stream_events WHERE id='ev'").first()).toEqual({ is_exception: 0 });
+    await expect(db.prepare("UPDATE stream_events SET is_exception=2 WHERE id='ev'").run()).rejects.toThrow(/CHECK/);
     await db.prepare("DELETE FROM entries WHERE id='poll'").run();
     const left = await db.batch([
       db.prepare("SELECT count(*) AS n FROM entry_mash"),
