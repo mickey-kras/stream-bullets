@@ -767,10 +767,11 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .reason-chip { padding: 3px 10px; border-radius: 999px; background: var(--c-edbd5326); color: var(--gold); font: 600 13px/1.4 var(--body); }
 .group-toggle { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: var(--gold); font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
 .group-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
-.group-mode a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 18px; border: 1px solid var(--tab-border); background: var(--tab); font: 600 17px/1 var(--heading); }
-.group-mode a:first-child { border-radius: 7px 0 0 7px; }
-.group-mode a:last-child { border-radius: 0 7px 7px 0; }
-.group-mode a.active { background: linear-gradient(110deg, var(--gold-hi), var(--gold-lo)); color: var(--on-gold-2); border-color: var(--gold-lo); }
+.group-mode { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
+.group-mode :is(a, button) { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 18px; border: 1px solid var(--tab-border); background: var(--tab); font: 600 17px/1 var(--heading); }
+.group-mode :is(a, button):first-of-type { border-radius: 7px 0 0 7px; }
+.group-mode :is(a, button):last-of-type { border-radius: 0 7px 7px 0; }
+.group-mode :is(a, button).active { background: linear-gradient(110deg, var(--gold-hi), var(--gold-lo)); color: var(--on-gold-2); border-color: var(--gold-lo); }
 .report-items { display: grid; gap: 12px; }
 .report-item { display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); }
 .report-item p { margin: 0; }
@@ -787,7 +788,7 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .gate-column { max-width: 560px; }
 .key-gate { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
 .key-gate.info-card { margin-top: 20px; padding: 36px 30px; }
-.key-gate h2 { color: var(--gold); }
+.key-gate :is(h1, h2) { color: var(--gold); }
 .key-gate p { margin: 0; }
 .key-badge { display: inline-grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--c-edbd5326); color: var(--gold); }
 .key-badge.small { width: 48px; height: 48px; }

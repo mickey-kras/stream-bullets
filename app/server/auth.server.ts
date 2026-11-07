@@ -202,7 +202,11 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
   return betterAuth(options);
 }
 
-export async function getViewer(request: Request, context: AppContext): Promise<Viewer | null> {
+/** The signed-in viewer and the id of their session (for the per-session admin step-up). Server only. */
+export async function getViewerSession(
+  request: Request,
+  context: AppContext,
+): Promise<{ viewer: Viewer; sessionId: string } | null> {
   const { response, headers } = await createAuth(context.env).api.getSession({
     headers: request.headers,
     query: { disableCookieCache: true },
@@ -212,7 +216,11 @@ export async function getViewer(request: Request, context: AppContext): Promise<
     context.responseHeaders.append("Set-Cookie", cookie);
   }
   if (!response) return null;
-  return viewerValue(response.user as User & Record<string, unknown>);
+  return { viewer: viewerValue(response.user as User & Record<string, unknown>), sessionId: response.session.id };
+}
+
+export async function getViewer(request: Request, context: AppContext): Promise<Viewer | null> {
+  return (await getViewerSession(request, context))?.viewer ?? null;
 }
 
 /** Shapes the signed-in account for the client. */
