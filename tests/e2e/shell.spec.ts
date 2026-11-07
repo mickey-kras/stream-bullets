@@ -67,6 +67,8 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
     "Edit your page",
     "Your profile",
     "Your data",
+    "Language",
+    "Accessibility & display",
     "Suggest an improvement",
   ]);
   await expect(menu.getByRole("link", { name: "Suggest an improvement" })).toHaveAttribute(

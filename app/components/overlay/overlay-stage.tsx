@@ -1,5 +1,5 @@
 import { useSyncExternalStore, type ReactNode } from "react";
-import { t } from "../../i18n";
+import { intlLocale, t } from "../../i18n";
 import { MASH_NAME, mashWinner } from "../../lib/mash";
 import type { LiveSnapshot, OverlayData, OverlayPublic, OverlaySourceRef } from "../../types";
 import { MashBars, MashRing, MashWinner } from "../mash/mash-parts";
@@ -113,7 +113,9 @@ function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
   const next = scene.data.next;
   if (!next) return null;
   const when: string = hydrated
-    ? new Intl.DateTimeFormat(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" }).format(next.startsAt)
+    ? new Intl.DateTimeFormat(intlLocale(), { weekday: "short", hour: "numeric", minute: "2-digit" }).format(
+        next.startsAt,
+      )
     : "";
   return (
     <article className="ov-card" data-overlay-source="next">
@@ -135,7 +137,11 @@ function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source
   const { data, overlay } = scene;
   if (source.type === "auto" || source.type === "poll") {
     const poll = overlayPoll(source, scene.polls, scene.now);
-    return poll ? <PollOverlay scene={scene} poll={poll} /> : <div className="overlay-empty">{t("overlay.waiting")}</div>;
+    return poll ? (
+      <PollOverlay scene={scene} poll={poll} />
+    ) : (
+      <div className="overlay-empty">{t("overlay.waiting")}</div>
+    );
   }
   if (source.type === "topic") {
     const topic = data.topics.find((item) => item.id === source.ref);
@@ -199,8 +205,7 @@ function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source
       <article className="ov-card ov-support" data-overlay-source="support">
         <h1>
           <Icon name="heart" size={40} />
-          {t("overlay.supportStream")}{" "}
-          <span>{link ? link.url.replace(/^https:\/\//, "") : t("overlay.addLink")}</span>
+          {t("overlay.supportStream")} <span>{link ? link.url.replace(/^https:\/\//, "") : t("overlay.addLink")}</span>
         </h1>
       </article>
     );

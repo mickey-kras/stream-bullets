@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { locale, t, tn } from "../../i18n";
+import { intlLocale, t, tn } from "../../i18n";
 import { addDays, localDateOf, weekdayOf, zonedParts, zonedTime, type LocalDate } from "../../lib/zoned";
 import type { StreamEvent } from "../../types";
 import { EmptyState } from "../common";
@@ -26,7 +26,7 @@ const LAST_HOUR = 24;
 
 /** 0 = Sunday. English starts the week on Sunday; Intl week info covers other locales where available. */
 function firstWeekday(): number {
-  const info = (new Intl.Locale(locale) as Intl.Locale & { weekInfo?: { firstDay: number } }).weekInfo;
+  const info = (new Intl.Locale(intlLocale()) as Intl.Locale & { weekInfo?: { firstDay: number } }).weekInfo;
   return info ? info.firstDay % 7 : 0;
 }
 
@@ -78,10 +78,10 @@ export function CalendarNav({
   let title = longDay(days[0], zone);
   if (mode === "week") {
     const end = days[6];
-    title = `${new Intl.DateTimeFormat(locale, { timeZone: zone, month: "short", day: "numeric" }).format(days[0])} – ${new Intl.DateTimeFormat(locale, { timeZone: zone, month: "short", day: "numeric", year: "numeric" }).format(end)}`;
+    title = `${new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, month: "short", day: "numeric" }).format(days[0])} – ${new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, month: "short", day: "numeric", year: "numeric" }).format(end)}`;
   }
   if (mode === "month")
-    title = new Intl.DateTimeFormat(locale, { timeZone: zone, month: "long", year: "numeric" }).format(days[15]);
+    title = new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, month: "long", year: "numeric" }).format(days[15]);
   return (
     <div className="cal-nav">
       <div className="cal-nav-buttons">
@@ -267,7 +267,9 @@ export function MonthGrid({
 }>): ReactNode {
   const today = dayStart(localDateOf(now, zone), zone);
   const month = zonedParts(days[15], zone).month;
-  const title = new Intl.DateTimeFormat(locale, { timeZone: zone, month: "long", year: "numeric" }).format(days[15]);
+  const title = new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, month: "long", year: "numeric" }).format(
+    days[15],
+  );
   return (
     <table className="month-grid">
       <caption className="sr-only">{title}</caption>
@@ -275,7 +277,7 @@ export function MonthGrid({
         <tr>
           {days.slice(0, 7).map((day: number) => (
             <th scope="col" key={day}>
-              <abbr title={new Intl.DateTimeFormat(locale, { timeZone: zone, weekday: "long" }).format(day)}>
+              <abbr title={new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, weekday: "long" }).format(day)}>
                 {weekdayShort(day, zone)}
               </abbr>
             </th>

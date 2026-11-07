@@ -1,21 +1,34 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
-import { t } from "../../i18n";
+import { getLocale, LOCALE_NAMES, t, type Locale } from "../../i18n";
 import { paths } from "../../lib/shell";
-import { Icon } from "../ui/icon";
+import { Icon, type IconName } from "../ui/icon";
 import { Sheet } from "../ui/sheet";
 import { ContactDialog } from "./contact-dialog";
+import { DialogLink } from "./dialog-link";
+
+function MoreRow({ icon, children }: Readonly<{ icon: IconName; children: ReactNode }>): ReactNode {
+  return (
+    <>
+      <Icon name={icon} size={18} />
+      {children}
+    </>
+  );
+}
 
 /**
  * The footer: legal links on the gold bottom band of the frame (42px desktop, 34px phones) in dark ink; the
  * landing page keeps its own dark strip. Phones show Privacy, Terms and More; More opens a sheet with the rest.
- * Suggest an improvement opens the official Ideas board with its dialog. Later phases add Accessibility, AI agents
- * and the language switch here.
+ * Suggest an improvement opens the official Ideas board with its dialog. The language switch shows the current
+ * language in its own script.
  */
 export function SiteFooter(): ReactNode {
   const { pathname } = useLocation();
   const [dialog, setDialog] = useState<"contact" | "more" | null>(null);
   const current = (path: string): "page" | undefined => (pathname === path ? "page" : undefined);
+  const locale: Locale = getLocale();
+  const languageLabel: string = t("language.current", { name: LOCALE_NAMES[locale] });
+  const close = (): void => setDialog(null);
   return (
     <footer className="site-footer">
       <nav aria-label={t("footer.nav")} className="footer-full">
@@ -32,10 +45,18 @@ export function SiteFooter(): ReactNode {
           {t("footer.contact")}
         </button>
         <Link to={paths.reporting}>{t("footer.report")}</Link>
+        <DialogLink name="a11y">{t("footer.accessibility")}</DialogLink>
         <Link to={paths.ideas}>
           <Icon name="idea" size={16} />
           {t("ideas.suggest")}
         </Link>
+        <Link to={paths.ai} className="footer-muted" aria-current={current(paths.ai)}>
+          {t("footer.ai")}
+        </Link>
+        <DialogLink name="language" className="lang-switch" label={languageLabel}>
+          <Icon name="globe" size={16} />
+          <span lang={locale}>{LOCALE_NAMES[locale]}</span>
+        </DialogLink>
       </nav>
       <nav aria-label={t("footer.nav")} className="footer-compact">
         <Link to={paths.privacy} aria-current={current(paths.privacy)}>
@@ -60,26 +81,37 @@ export function SiteFooter(): ReactNode {
         <ul className="more-list">
           <li>
             <button type="button" onClick={() => setDialog("contact")}>
-              <Icon name="mail" size={18} />
-              {t("footer.contact")}
+              <MoreRow icon="mail">{t("footer.contact")}</MoreRow>
             </button>
           </li>
           <li>
-            <Link to={paths.reporting} onClick={() => setDialog(null)}>
-              <Icon name="flag" size={18} />
-              {t("footer.report")}
+            <Link to={paths.reporting} onClick={close}>
+              <MoreRow icon="flag">{t("footer.report")}</MoreRow>
             </Link>
           </li>
           <li>
-            <Link to={paths.ideas} onClick={() => setDialog(null)}>
-              <Icon name="idea" size={18} />
-              {t("ideas.suggest")}
+            <DialogLink name="a11y" onClick={close}>
+              <MoreRow icon="eye">{t("footer.accessibility")}</MoreRow>
+            </DialogLink>
+          </li>
+          <li>
+            <DialogLink name="language" onClick={close}>
+              <MoreRow icon="globe">{languageLabel}</MoreRow>
+            </DialogLink>
+          </li>
+          <li>
+            <Link to={paths.ai} onClick={close}>
+              <MoreRow icon="about">{t("footer.ai")}</MoreRow>
             </Link>
           </li>
           <li>
-            <Link to={paths.streamers} onClick={() => setDialog(null)}>
-              <Icon name="streamers" size={18} />
-              {t("nav.streamers")}
+            <Link to={paths.ideas} onClick={close}>
+              <MoreRow icon="idea">{t("ideas.suggest")}</MoreRow>
+            </Link>
+          </li>
+          <li>
+            <Link to={paths.streamers} onClick={close}>
+              <MoreRow icon="streamers">{t("nav.streamers")}</MoreRow>
             </Link>
           </li>
         </ul>

@@ -16,7 +16,7 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 ## Behavior
 
 - Accounts start as viewers. In this version, a streamer profile needs approval.
-- A viewer joins the waitlist in **Settings**. The application contains 1 to 5 HTTPS links to the channels of the viewer. It can also contain a note of up to 1,000 characters.
+- A viewer joins the waitlist from **Host a community** in the account menu. The application contains 1 to 5 HTTPS links to the channels of the viewer. It can also contain a note of up to 1,000 characters.
 - The viewer can change a pending or rejected application. When the viewer sends a rejected application again, it becomes pending. An approved application cannot change.
 - Administrators review applications at `/admin`. The page shows pending, approved, and rejected applications. Administrators can see the name and email address of each applicant.
 - After approval, the account can create one streamer profile and claim `/@handle`. Administrators can create a streamer profile without an application.
@@ -28,7 +28,7 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 - Binary poll counts and percentages stay private until reveal. Multiple-choice results update live.
 - Authors and page owners can remove content. Replies remain when an author or page owner removes a parent comment.
 - Signed-in users can report a topic or comment with **Report**. Administrators review reports at `/admin`. The hourly task deletes resolved reports after one year.
-- In **Settings > Your data**, a user can download a JSON copy of their data. The user can also delete the account. Deletion removes the account and all of its data. This includes content, votes, reactions, images, the streamer profile, the application, sessions, and reports.
+- In **Your data** in the account menu, a user can download a JSON copy of their data. The user can also delete the account. Deletion removes the account and all of its data. This includes content, votes, reactions, images, the streamer profile, the application, sessions, and reports.
 - Sign-up and sign-in are one step. The home page shows one **Sign in** button. The sign-in dialog tells the user to be 16 or older and links the Terms and the Privacy Policy.
 - `/privacy` and `/terms` show the Privacy Policy and the Terms of Service. A footer on each page links to them, the contact address, and the reporting rules. The overlay has no footer.
 - Newest uses stable cursor pagination. Top uses likes minus dislikes. New votes can move items between Top pages. Refresh to see the new order.
@@ -37,6 +37,9 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 - `/@handle/schedule.ics` serves the schedule as a calendar feed. Calendar apps can subscribe to it.
 - The owner edits up to 8 cards on the **Community** tab and up to 4 support links in **Edit your page**. Support links open the provider site. StreamBullets takes no payments.
 - The official `@streambullets` page is the Ideas board. Signed-in users suggest improvements and report bugs there, and everyone can vote. **Suggest an improvement** in the footer and the account menu opens it.
+- The interface is in 11 languages: English, Spanish, Brazilian Portuguese, German, Polish, Ukrainian, Russian, Japanese, Simplified Chinese, French, and Hindi. The page language comes from the account setting, then the `sb_locale` cookie, then the browser `Accept-Language` header, then English. The catalogs are in `app/i18n/`. Add each new message id to all 11 files: `tests/i18n.test.ts` fails when a catalog is missing an id, a plural form, or a `{placeholder}`. The footer and the account menu open the language list. Posts by users stay in their own language. The Privacy Policy and the Terms stay in English, with a translated note that the English text is binding.
+- **Accessibility & display** in the footer and the account menu sets colour-vision palettes, high contrast, text size, a readable font, link underlines, motion, and the Mash Battle options: screen-reader score updates, keyboard shortcuts, and assisted tapping. Signed-in accounts keep the settings. A cookie keeps them for each browser. An inline script with the request nonce applies them before the first paint.
+- `/ai` describes the policy for AI agents. Agents can read public pages but cannot post, vote, or sign up. The page has an unverified like and dislike counter at `POST /api/ai-interest`. The counter allows one vote per visitor per day and keeps votes for 30 days. `/robots.txt` and `/llms.txt` give the same policy. Pages carry JSON-LD for the site, streamers, upcoming streams, and open topics.
 
 ## Local use
 
@@ -70,6 +73,7 @@ The production site shows no sign-in buttons until you set at least one credenti
 | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | Credentials for the TikTok Login Kit application. TikTok gives no email address. |
 | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Credentials for an Instagram API with Instagram Login application. Only creator and business accounts can sign in. Meta must review the application first. Instagram gives no email address. |
 | `ADMIN_EMAILS` | Email addresses of administrators. Use commas or spaces between the addresses. Letter case is not important. |
+| `AI_INTEREST_SALT` | Random secret of at least 16 characters for the AI interest counter. The counter stores a keyed hash of the IP address and the day, never the IP address. Without this secret the counter is off and `/ai` hides its buttons. Store it as a Worker secret. |
 | `ADMIN_STEP_UP` | Security-key check for Admin: `off`, `report` or `enforce`. If you leave it empty, the value is `report`. An unknown value acts as `enforce`. See [Admin security keys](#admin-security-keys). |
 
 An administrator is an account with a verified email address in `ADMIN_EMAILS`. TikTok and Instagram accounts get a placeholder address that is not verified, so they cannot be administrators. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
@@ -203,7 +207,7 @@ The Privacy Policy and the Terms of Service get the details of the operator from
 - `operatorCountry`: the country of residence of the operator. The Terms also use it as the governing law.
 - `policyEffectiveDate`: the date that the policy starts.
 
-`contactEmail` and `minimumAge` have production values. Make sure that the contact mailbox receives email. While a placeholder remains, both pages show a draft notice at the top. Get a legal review of the text before launch. Update the pages when you add a data processor, a cookie, or a new use of data.
+`contactEmail` and `minimumAge` have production values. Make sure that the contact mailbox receives email. While a placeholder remains, both pages show a draft notice at the top. Get a legal review of the text before launch. Update the pages when you add a data processor, a cookie, or a new use of data. The legal text is English only. Other languages show a translated note that the English version is binding.
 
 Make the `Verify application` check mandatory in the repository ruleset. Keep squash-only merges and branch deletion in the repository settings. The workflow cannot enforce those settings itself.
 

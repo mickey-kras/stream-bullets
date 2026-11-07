@@ -66,7 +66,7 @@ function reportFilterParam(value: string | null): ReportGroupFilter {
 }
 
 export function meta() {
-  return [{ title: "Admin · StreamBullets" }, { name: "robots", content: "noindex" }];
+  return [{ title: `${t("account.admin")} · StreamBullets` }, { name: "robots", content: "noindex" }];
 }
 
 /**
@@ -158,14 +158,14 @@ function ApplicationCard({
           </div>
           <dl className="application-dates">
             <div>
-              <dt>Requested</dt>
+              <dt>{t("admin.requests.requested")}</dt>
               <dd>
                 <DateTime time={application.createdAt} />
               </dd>
             </div>
             {resubmitted && application.status === "pending" && (
               <div>
-                <dt>Updated</dt>
+                <dt>{t("admin.requests.updated")}</dt>
                 <dd>
                   <DateTime time={application.updatedAt} />
                 </dd>
@@ -173,7 +173,7 @@ function ApplicationCard({
             )}
             {application.reviewedAt !== null && (
               <div>
-                <dt>Reviewed</dt>
+                <dt>{t("admin.requests.reviewed")}</dt>
                 <dd>
                   <DateTime time={application.reviewedAt} />
                 </dd>
@@ -181,7 +181,7 @@ function ApplicationCard({
             )}
           </dl>
         </div>
-        <h3 className="eyebrow">Channels</h3>
+        <h3 className="eyebrow">{t("admin.requests.channels")}</h3>
         <ul className="application-links">
           {application.links.map((link: string) => {
             const { host, rest } = linkParts(link);
@@ -190,7 +190,7 @@ function ApplicationCard({
                 <a href={link} target="_blank" rel="noopener noreferrer nofollow">
                   <strong>{host}</strong>
                   {rest && <span className="muted">{rest}</span>}
-                  <span className="sr-only"> (opens in a new tab)</span>
+                  <span className="sr-only"> {t("common.newTab")}</span>
                 </a>
               </li>
             );
@@ -198,7 +198,7 @@ function ApplicationCard({
         </ul>
         {application.note && (
           <>
-            <h3 className="eyebrow">Note</h3>
+            <h3 className="eyebrow">{t("admin.requests.note")}</h3>
             <p className="application-note">{application.note}</p>
           </>
         )}
@@ -208,21 +208,21 @@ function ApplicationCard({
               type="button"
               className="gold"
               disabled={busy}
-              aria-label={`Approve ${application.name}`}
+              aria-label={t("admin.requests.approveName", { name: application.name })}
               onClick={() => onDecide(application, "approved")}
             >
               <Icon name="approve" size={18} />
-              Approve
+              {t("admin.requests.approve")}
             </button>
             {application.status === "pending" && (
               <button
                 type="button"
                 disabled={busy}
-                aria-label={`Reject ${application.name}`}
+                aria-label={t("admin.requests.rejectName", { name: application.name })}
                 onClick={() => onDecide(application, "rejected")}
               >
                 <Icon name="reject" size={18} />
-                Reject
+                {t("admin.requests.reject")}
               </button>
             )}
           </div>

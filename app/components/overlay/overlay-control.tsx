@@ -10,6 +10,7 @@ import type {
   OverlaySourceRef,
   OverlayState,
 } from "../../types";
+import { announce } from "../a11y/announcer";
 import { errorMessage, postJson } from "../api";
 import { IconButton } from "../ui/icon-button";
 import { Icon, type IconName } from "../ui/icon";
@@ -64,12 +65,33 @@ export function defaultRef(type: OverlaySource, data: OverlayData): string | nul
   return null;
 }
 
-/** A 1920 by 1080 stage scaled to the width of its frame. The scale is a CSS variable, not React state. */
+type MonitorKind = "prev" | "air";
+
+/**
+ * Opens "Position and size" on wide screens. Phones start with it closed, under the sources. The <details>
+ * element keeps its own open state, so this runs once when it mounts and never fights the person's toggle.
+ */
+function openOnWideScreens(element: HTMLDetailsElement | null): void {
+  if (element && globalThis.matchMedia?.("(min-width: 43.75em)").matches) element.open = true;
+}
+
+/**
+ * A 1920 by 1080 stage scaled to the width of its frame. The scale is a CSS variable, not React state.
+ * On narrow screens the enlarge button gives the monitor the full width.
+ */
 function Monitor({
   kind,
   source,
   scene,
-}: Readonly<{ kind: "prev" | "air"; source: OverlaySourceRef; scene: OverlayScene }>): ReactNode {
+  enlarged,
+  onEnlarge,
+}: Readonly<{
+  kind: MonitorKind;
+  source: OverlaySourceRef;
+  scene: OverlayScene;
+  enlarged: boolean;
+  onEnlarge: () => void;
+}>): ReactNode {
   const frame = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const element: HTMLDivElement | null = frame.current;
@@ -95,6 +117,15 @@ function Monitor({
         <div className="ov-scaler">
           <OverlayStage scene={scene} source={source} />
         </div>
+        <IconButton
+          className="ov-enlarge-btn"
+          label={t(kind === "air" ? "overlay.enlargeAir" : "overlay.enlargePreview")}
+          icon={enlarged ? "zoom-out" : "zoom-in"}
+          iconSize={16}
+          aria-pressed={enlarged}
+          onClick={onEnlarge}
+          data-ov-enlarge={kind}
+        />
       </div>
     </figure>
   );
@@ -270,10 +301,22 @@ export function OverlayControl({
   initial,
   scene,
   overlayUrl,
-}: Readonly<{ initial: OverlayState; scene: Omit<OverlayScene, "overlay">; overlayUrl: string }>): ReactNode {
+  connected = true,
+}: Readonly<{
+  initial: OverlayState;
+  scene: Omit<OverlayScene, "overlay">;
+  overlayUrl: string;
+  /** False while the live connection is down: changes still save, but the OBS page hears of them later. */
+  connected?: boolean;
+}>): ReactNode {
   const toast = useToast();
   const [state, setState] = useState<OverlayState>(initial);
   const [busy, setBusy] = useState<boolean>(false);
+  const [enlarged, setEnlarged] = useState<MonitorKind | null>(null);
+  const enlarge = (kind: MonitorKind): void => setEnlarged((value) => (value === kind ? null : kind));
+  useEffect(() => {
+    if (!connected) announce(t("overlay.disconnected"));
+  }, [connected]);
   const titleId: string = useId();
   const same: boolean = sameSource(state.preview, state.air);
   const view: OverlayScene = { ...scene, overlay: state };
@@ -372,10 +415,32 @@ export function OverlayControl({
           {t("overlay.shortcutsTake")}
         </p>
       </div>
-      <div className={state.instant ? "ov-grid is-instant" : "ov-grid"}>
-        {!state.instant && <Monitor kind="prev" source={state.preview} scene={view} />}
+      {!connected && (
+        <p className="ov-conn">
+          <Icon name="wifi-off" size={18} />
+          <span>
+            <strong>{t("overlay.disconnected")}</strong> {t("overlay.disconnectedBody")}
+          </span>
+        </p>
+      )}
+      <div className={`ov-grid${state.instant ? " is-instant" : ""}${enlarged ? ` enlarge-${enlarged}` : ""}`}>
+        {!state.instant && (
+          <Monitor
+            kind="prev"
+            source={state.preview}
+            scene={view}
+            enlarged={enlarged === "prev"}
+            onEnlarge={() => enlarge("prev")}
+          />
+        )}
         {take}
-        <Monitor kind="air" source={state.air} scene={view} />
+        <Monitor
+          kind="air"
+          source={state.air}
+          scene={view}
+          enlarged={enlarged === "air"}
+          onEnlarge={() => enlarge("air")}
+        />
         <section className="ov-sources" aria-labelledby={titleId}>
           <h2 id={titleId}>{t("overlay.sources")}</h2>
           <ul>
@@ -404,14 +469,16 @@ export function OverlayControl({
                     </span>
                     {onAir && <span className="onair-badge">{t("overlay.onAir")}</span>}
                   </label>
-                  {selected && <SourcePicker type={source.type} state={state} data={scene.data} busy={busy} run={run} />}
+                  {selected && (
+                    <SourcePicker type={source.type} state={state} data={scene.data} busy={busy} run={run} />
+                  )}
                 </li>
               );
             })}
           </ul>
         </section>
         <div className="ov-extra">
-          <details className="ov-layout-wrap" open>
+          <details className="ov-layout-wrap" ref={openOnWideScreens}>
             <summary>
               <Icon name="overlay" size={16} />
               {t("overlay.positionAndSize")}

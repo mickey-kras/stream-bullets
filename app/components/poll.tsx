@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { t, tn } from "../i18n";
 import { largestRemainder } from "../lib/percent";
 import type { Entry, LiveSnapshot } from "../types";
 import { MashCard } from "./mash/mash-card";
@@ -37,9 +38,7 @@ export function PollResults({
             </span>
             {count !== undefined && (
               <span className="option-score">
-                <small>
-                  {count} {count === 1 ? "vote" : "votes"}
-                </small>
+                <small>{tn("poll.votes", count)}</small>
                 {percentage}%
               </span>
             )}
@@ -71,16 +70,19 @@ export function PollStatus({ poll, now }: Readonly<{ poll: PublicPoll; now: numb
   let badge: ReactNode = (
     <>
       <span className="live-dot" />
-      <span>Voting live</span>
+      <span>{t("poll.votingLive")}</span>
     </>
   );
-  if (poll.revealed) badge = "Results revealed";
-  else if (remaining === 0) badge = "Voting closed";
+  if (poll.revealed) badge = t("poll.revealed");
+  else if (remaining === 0) badge = t("poll.closed");
   let countdown: string;
-  if (poll.revealed) countdown = "Final";
-  else if (remaining === null) countdown = "No time limit";
-  else if (remaining === 0) countdown = "Time is up";
-  else countdown = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")} remaining`;
+  if (poll.revealed) countdown = t("poll.final");
+  else if (remaining === null) countdown = t("poll.noLimit");
+  else if (remaining === 0) countdown = t("poll.timeUp");
+  else
+    countdown = t("poll.remaining", {
+      time: `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`,
+    });
   return (
     <div className="poll-topline">
       <span className="poll-badge">{badge}</span>
@@ -109,10 +111,10 @@ export function PollCard({
   if (entry.kind === "mash")
     return <MashCard entry={entry} now={now} signedIn={signedIn} owner={owner} pending={pending} onAction={onAction} />;
   let votingMessage: string;
-  if (entry.kind === "binary" && !entry.revealed) votingMessage = "Results stay private until the host reveals them.";
-  else if (entry.revealed) votingMessage = "Final results";
-  else if (signedIn) votingMessage = "You can change your vote until voting closes.";
-  else votingMessage = "Sign in to vote.";
+  if (entry.kind === "binary" && !entry.revealed) votingMessage = t("poll.privateUntilReveal");
+  else if (entry.revealed) votingMessage = t("poll.finalResults");
+  else if (signedIn) votingMessage = t("poll.canChange");
+  else votingMessage = t("poll.signInToVote");
   return (
     <article className="poll-card">
       <PollStatus poll={entry} now={now} />
@@ -127,14 +129,14 @@ export function PollCard({
       />
       <div className="poll-footer">
         <p>
-          {entry.total} {entry.total === 1 ? "vote" : "votes"}
-          {entry.myVote !== null && " · Your vote is in"}
+          {tn("poll.votes", entry.total)}
+          {entry.myVote !== null && ` · ${t("poll.voteIn")}`}
           <br />
           {votingMessage}
         </p>
         {owner && !entry.revealed && (
           <button type="button" disabled={pending} onClick={() => onAction({ action: "reveal", id: entry.id })}>
-            End &amp; reveal
+            {t("poll.endReveal")}
           </button>
         )}
       </div>
@@ -142,25 +144,25 @@ export function PollCard({
         <button
           type="button"
           disabled={!signedIn || pending}
-          aria-label="Like poll"
+          aria-label={t("poll.like")}
           aria-pressed={entry.reaction === 1}
           onClick={() => onAction({ action: "react", id: entry.id, value: entry.reaction === 1 ? 0 : 1 })}
         >
-          Like {entry.likes}
+          {t("entry.like")} {entry.likes}
         </button>
         <button
           type="button"
           disabled={!signedIn || pending}
-          aria-label="Dislike poll"
+          aria-label={t("poll.dislike")}
           aria-pressed={entry.reaction === -1}
           onClick={() => onAction({ action: "react", id: entry.id, value: entry.reaction === -1 ? 0 : -1 })}
         >
-          Dislike {entry.dislikes}
+          {t("entry.dislike")} {entry.dislikes}
         </button>
         <button type="button" className="discuss-link" onClick={onDiscuss}>
-          Discuss · {entry.comments}
+          {t("poll.discuss", { count: entry.comments })}
         </button>
-        <a href={`?view=polls&entry=${entry.id}`}>Poll link</a>
+        <a href={`?view=polls&entry=${entry.id}`}>{t("poll.link")}</a>
       </div>
     </article>
   );

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { LegalDocument, type LegalSection } from "../components/common";
-import { legal } from "../legal";
+import { contactEmails, legal } from "../legal";
+import { paths } from "../lib/shell";
 
 export function meta() {
   return [
@@ -11,6 +12,7 @@ export function meta() {
 }
 
 const mail: ReactNode = <a href={`mailto:${legal.contactEmail}`}>{legal.contactEmail}</a>;
+const support: ReactNode = <a href={`mailto:${contactEmails.support}`}>{contactEmails.support}</a>;
 
 const sections: readonly LegalSection[] = [
   {
@@ -34,24 +36,41 @@ const sections: readonly LegalSection[] = [
     title: "Data we collect",
     body: (
       <>
-        <h3>From your sign-in provider (Google or Twitch)</h3>
+        <h3>From your sign-in provider (Google, Twitch, TikTok or Instagram)</h3>
         <ul>
-          <li>Your display name and email address, and whether the provider verified the email.</li>
+          <li>Your display name, and your email address and whether the provider verified it.</li>
+          <li>
+            TikTok and Instagram do not share an email address. An account made with them has no contact email: we store
+            an internal placeholder that is never shown and never receives mail. Such an account cannot be an
+            administrator account.
+          </li>
           <li>Your provider account ID and a link to your provider profile picture.</li>
           <li>
             Sign-in tokens from the provider. We store them encrypted and use them only to complete sign-in. We do not
-            post to, or read anything else from, your Google or Twitch account.
+            post to, or read anything else from, your Google, Twitch, TikTok or Instagram account.
           </li>
         </ul>
         <p>
-          We do not download or show your provider profile picture. Your avatar on StreamBullets is empty until you
-          upload one.
+          We do not download or show your provider profile picture. Until you pick a preset picture or upload a photo,
+          your avatar on StreamBullets is the default Space explorer picture.
         </p>
         <h3>What you give us</h3>
         <ul>
-          <li>Your display name if you change it, and any avatar image you upload.</li>
+          <li>Your display name if you change it, the preset picture you pick, and any avatar image you upload.</li>
+          <li>
+            Your language and your Accessibility &amp; display settings, if you choose them. Signed in, we keep them
+            with your account; signed out, they stay in cookies in your browser.
+          </li>
           <li>Topics, polls, comments, replies, votes, reactions, and likes.</li>
-          <li>For streamers: your handle, page name, about text, avatar, and page background.</li>
+          <li>Mash Battle taps: how many times you tapped for your side, and whether you used assisted tapping.</li>
+          <li>
+            For streamers: your handle, page name, about text, page logo, avatar, page background, stream schedule,
+            community cards, support links, and overlay settings.
+          </li>
+          <li>
+            Ideas and bug reports on the official StreamBullets page. Browser and page details go with a bug report only
+            if you tick the box to include them. They never include personal data.
+          </li>
           <li>
             For the streamer waitlist: the channel links and note you send. Administrators see these with your name and
             email.
@@ -73,6 +92,19 @@ const sections: readonly LegalSection[] = [
             address in memory. It does not store them.
           </li>
           <li>Technical metadata for uploaded images, such as type, size, and upload time.</li>
+          <li>
+            Votes on the <Link to={paths.ai}>For AI agents</Link> page: the vote, the day, and a keyed one-way hash
+            (HMAC) of your IP address and that day. We never store the IP address itself, and hashes from different days
+            cannot be linked to each other.
+          </li>
+          <li>
+            Moderation records: when an administrator freezes or suspends a streamer page, or resolves reports, we
+            record the action, the reason, an optional note, whether the owner was told, and which administrator acted.
+          </li>
+          <li>
+            For administrators only: the security keys they register (public key, name, usage counter) and when each
+            session last confirmed a key.
+          </li>
         </ul>
         <p>
           We do not use analytics, advertising, or tracking tools, and we do not build profiles about you. We do not ask
@@ -108,7 +140,10 @@ const sections: readonly LegalSection[] = [
                 <td>Legitimate interests in a safe, working service (Art. 6(1)(f)).</td>
               </tr>
               <tr>
-                <td>Handle reports, moderate content, and enforce the Terms.</td>
+                <td>
+                  Handle reports, moderate content and streamer pages (freeze or suspend them), tell page owners about
+                  decisions, and enforce the Terms.
+                </td>
                 <td>
                   Legitimate interests in protecting users and the service (Art. 6(1)(f)), and legal obligations where
                   they apply.
@@ -140,7 +175,9 @@ const sections: readonly LegalSection[] = [
         Your display name, avatar, and the content you post are public on the streamer page where you post them.
         Streamer pages and overlays are public. Your email address, sign-in tokens, IP address, and session details are
         never shown publicly. Administrators can see the email address of people who apply to the streamer waitlist and
-        the details of reports.
+        the details of reports. A frozen streamer page stays public but read-only. A suspended page is hidden from
+        everyone except its owner and administrators. Support links a streamer adds are public on their page. The AI
+        interest counter shows only totals.
       </p>
     ),
   },
@@ -156,8 +193,18 @@ const sections: readonly LegalSection[] = [
             database (D1), image storage (R2), live updates (Durable Objects), and the network that protects the site.
           </li>
           <li>
-            <strong>Google</strong> and <strong>Twitch</strong> handle sign-in. When you sign in, they learn that you
-            use StreamBullets. Their own privacy policies apply to what they do.
+            <strong>Google</strong>, <strong>Twitch</strong>, <strong>TikTok</strong> and <strong>Instagram</strong>{" "}
+            (Meta) handle sign-in. When you sign in, the provider you chose learns that you use StreamBullets. Their own
+            privacy policies apply to what they do.
+          </li>
+          <li>
+            Cloudflare Email Routing forwards mail you send to {contactEmails.support} or {legal.contactEmail}. If email
+            notices are turned on, Cloudflare also sends a streamer an email when an administrator freezes or suspends
+            their page.
+          </li>
+          <li>
+            Support links take you to the provider’s own site, such as Ko-fi or Patreon. We send them nothing. What you
+            do there is between you and that provider. StreamBullets never handles payments.
           </li>
           <li>Authorities, courts, or advisers, only when the law requires it or to protect rights and safety.</li>
           <li>A successor, if the service is ever transferred. We will tell you before that happens.</li>
@@ -194,13 +241,21 @@ const sections: readonly LegalSection[] = [
           <strong>Rate-limit records</strong> are deleted about 24 hours after their last use.
         </li>
         <li>
+          <strong>AI interest votes</strong> are deleted after 30 days by the hourly task.
+        </li>
+        <li>
+          <strong>Moderation records</strong> stay as an audit log so we can answer appeals and lawful requests. They
+          hold the decision and its reason, not copies of your content.
+        </li>
+        <li>
           <strong>Your content</strong> stays until you, the page owner, or an administrator deletes it, or until you
           delete your account.
         </li>
         <li>
           <strong>Your account</strong> and everything linked to it stay until you delete the account. Deletion removes
-          your profile, sessions, sign-in links, content, votes, reactions, uploaded images, streamer page, waitlist
-          application, and reports.
+          your profile, preferences, sessions, sign-in links, content, votes, reactions, Mash Battle taps, uploaded
+          images, streamer page with its logo, schedule, community cards and support links, waitlist application,
+          security keys, and reports.
         </li>
         <li>
           <strong>Reports</strong> stay open until an administrator decides. We keep a resolved report for one year as a
@@ -223,14 +278,15 @@ const sections: readonly LegalSection[] = [
         <ul>
           <li>
             <strong>Access and portability:</strong> get a copy of your data. Use{" "}
-            <strong>Settings → Your data → Download my data</strong> for a machine-readable JSON file.
+            <strong>account menu → Your data → Download my data</strong> for a machine-readable JSON file.
           </li>
           <li>
-            <strong>Rectification:</strong> change your display name, avatar, and streamer page in{" "}
-            <Link to="/settings">Settings</Link>. Ask us to fix anything else.
+            <strong>Rectification:</strong> change your display name and picture in{" "}
+            <Link to={paths.profile}>Your profile</Link>, and your streamer page in Edit your page. Ask us to fix
+            anything else.
           </li>
           <li>
-            <strong>Erasure:</strong> use <strong>Settings → Your data → Delete my account</strong>. Deletion is
+            <strong>Erasure:</strong> use <strong>account menu → Your data → Delete my account</strong>. Deletion is
             immediate and cannot be undone. You can also delete single posts at any time.
           </li>
           <li>
@@ -248,9 +304,10 @@ const sections: readonly LegalSection[] = [
           </li>
         </ul>
         <p>
-          For anything you cannot do yourself in Settings, email {mail} from the address on your account. We answer
-          within one month. For complex requests we can extend this by two more months, and we will tell you why. We may
-          ask you to confirm your identity.
+          For anything you cannot do yourself in your account, email {mail} from the address on your account. If your
+          account has no email address (TikTok or Instagram sign-in), tell us your display name and we will check it
+          another way. We answer within one month. For complex requests we can extend this by two more months, and we
+          will tell you why. We may ask you to confirm your identity.
         </p>
         <p>We do not make decisions about you based solely on automated processing, and we do not profile you.</p>
       </>
@@ -281,7 +338,7 @@ const sections: readonly LegalSection[] = [
           have not done so in the last 12 months. We do not knowingly sell or share data of people under 16.
         </p>
         <p>
-          You can ask to know what we collect, use, and disclose; to delete it; and to correct it. Use Settings, or
+          You can ask to know what we collect, use, and disclose; to delete it; and to correct it. Use Your data, or
           email {mail}. An authorized agent can act for you with your signed permission. We verify requests by matching
           them to your account email and answer within 45 days. We will not treat you differently, charge you more, or
           give you a worse service because you used these rights.
@@ -307,10 +364,10 @@ const sections: readonly LegalSection[] = [
     body: (
       <>
         <p>
-          We use only cookies that are strictly necessary to sign you in and keep your account secure. We do not use
-          analytics, advertising, or third-party tracking cookies. Because of this, the site does not show a cookie
-          consent banner. If we ever want to add a cookie that is not strictly necessary, we will ask for your consent
-          first.
+          We use only cookies that are strictly necessary to sign you in, keep your account secure, and remember the
+          language and display settings you choose. We do not use analytics, advertising, or third-party tracking
+          cookies. Because of this, the site does not show a cookie consent banner. If we ever want to add a cookie that
+          is not strictly necessary, we will ask for your consent first.
         </p>
         <div className="legal-table">
           <table>
@@ -346,14 +403,32 @@ const sections: readonly LegalSection[] = [
                 <td>Set by Cloudflare only if its bot protection is active, to tell people from bots.</td>
                 <td>Up to 30 minutes.</td>
               </tr>
+              <tr>
+                <td>
+                  <code>sb_locale</code>
+                </td>
+                <td>Remembers the language you picked. Set only when you pick one.</td>
+                <td>1 year.</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>sb_prefs</code>
+                </td>
+                <td>
+                  Remembers your Accessibility &amp; display settings, so text size and contrast apply before the page
+                  shows. Set only when you change a setting.
+                </td>
+                <td>1 year.</td>
+              </tr>
             </tbody>
           </table>
         </div>
         <p>
           On local development servers the cookie names have no <code>__Secure-</code> prefix. On phones that ask for
           motion access, the home page stores <code>stream-bullets:tilt-declined</code> in your browser’s local storage
-          if you refuse, so it does not ask again. It never leaves your device. You can clear it with your browser’s
-          site data settings.
+          if you refuse, so it does not ask again. Pages also keep <code>sb.lastContent</code> in session storage, the
+          last streamer page you visited, for the back link. Neither leaves your device. You can clear them with your
+          browser’s site data settings.
         </p>
       </>
     ),
@@ -387,8 +462,8 @@ const sections: readonly LegalSection[] = [
     title: "Contact",
     body: (
       <p>
-        Email {mail} for privacy questions, requests, or complaints. You can also read the{" "}
-        <Link to="/terms">Terms of Service</Link>.
+        Email {mail} for privacy questions, requests, or complaints. For anything else, write to {support}. You can also
+        read the <Link to="/terms">Terms of Service</Link>.
       </p>
     ),
   },
@@ -401,7 +476,7 @@ export default function Privacy(): ReactNode {
       summary={
         <p>
           The short version: we collect what we need to run StreamBullets, we use only strictly necessary cookies, we
-          never sell your data, and you can download or delete everything from Settings.
+          never sell your data, and you can download or delete everything from Your data in the account menu.
         </p>
       }
       sections={sections}

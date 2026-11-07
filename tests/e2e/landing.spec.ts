@@ -97,6 +97,11 @@ test("the tilt pill shows only on touch devices that ask for motion access", asy
     reducedMotion: "reduce",
   });
   await phone.addInitScript(stubPermission);
+  // Reduced motion hides the pill (tilting is motion). The system asks for less motion here to keep the CPU
+  // scene still, so the Accessibility & display setting "Full motion" brings the pill back.
+  await phone.addCookies([
+    { name: "sb_prefs", value: encodeURIComponent('{"motion":"full"}'), domain: "localhost", path: "/" },
+  ]);
   const mobile = await phone.newPage();
   await mobile.goto("/");
   const ready = mobile.locator('.landing-station[data-status="ready"]');

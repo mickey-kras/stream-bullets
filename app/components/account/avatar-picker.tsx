@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { t } from "../../i18n";
-import { AVATAR_NAMES, AVATAR_ORDER, DEFAULT_AVATAR_PRESET } from "../../lib/avatars";
+import { AVATAR_ORDER, avatarName, DEFAULT_AVATAR_PRESET } from "../../lib/avatars";
 import { Picture } from "../ui/avatar";
 import { Icon } from "../ui/icon";
 
@@ -9,7 +9,9 @@ export type AvatarChoice = number | "photo";
 
 function optionLabel(choice: AvatarChoice): string {
   if (choice === "photo") return t("profile.yourPhoto");
-  return choice === DEFAULT_AVATAR_PRESET ? t("profile.defaultPreset", { name: AVATAR_NAMES[choice] }) : AVATAR_NAMES[choice];
+  return choice === DEFAULT_AVATAR_PRESET
+    ? t("profile.defaultPreset", { name: avatarName(choice) })
+    : avatarName(choice);
 }
 
 /**

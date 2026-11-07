@@ -1,7 +1,8 @@
 import { useCallback, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, type MetaArgs } from "react-router";
 import { directoryHref, SIGN_INTENTS, type Intent } from "../lib/directory";
-import { paths, useShell } from "../lib/shell";
+import { paths, shellFromMatches, useShell } from "../lib/shell";
+import { siteJsonLd } from "../lib/structured-data";
 import { t } from "../i18n";
 import { AccountMenu } from "../components/shell/account-menu";
 import { SignInDialog } from "../components/shell/sign-in-dialog";
@@ -15,6 +16,15 @@ const signLabel: Record<Intent, "landing.suggest" | "landing.vote" | "landing.di
   vote: "landing.vote",
   discuss: "landing.discuss",
 };
+
+export function meta({ matches }: MetaArgs) {
+  const origin: string = shellFromMatches(matches)?.origin ?? "";
+  return [
+    { title: t("meta.homeTitle") },
+    { name: "description", content: t("meta.homeDescription") },
+    { "script:ld+json": siteJsonLd(origin) },
+  ];
+}
 
 export default function Home(): ReactNode {
   const shell = useShell();
@@ -58,7 +68,8 @@ export default function Home(): ReactNode {
           <div className="landing-shade" aria-hidden="true" />
           <div className="landing-copy">
             <h1 id="landing-title">
-              <span className="title-line">YOUR VOICE,</span> <span className="title-line">ON AIR.</span>
+              <span className="title-line">{t("landing.title1")}</span>{" "}
+              <span className="title-line">{t("landing.title2")}</span>
             </h1>
             <p>{t("landing.tagline")}</p>
             <div className="landing-actions">
@@ -89,7 +100,7 @@ export default function Home(): ReactNode {
           <p className="landing-topics">
             <span className="sr-only">{t("landing.topicsLabel")}</span>
             <span aria-hidden="true">
-              Topics <em>/</em> Polls <em>/</em> Discussions
+              {t("streamer.nav.topics")} <em>/</em> {t("streamer.nav.polls")} <em>/</em> {t("landing.discussions")}
             </span>
           </p>
         </section>

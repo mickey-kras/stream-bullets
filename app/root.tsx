@@ -8,10 +8,12 @@ import {
   isRouteErrorResponse,
   useMatches,
   useRouteError,
+  useRouteLoaderData,
   type LoaderFunctionArgs,
   type ShouldRevalidateFunctionArgs,
 } from "react-router";
 import type { ReactNode } from "react";
+import { Announcer } from "./components/a11y/announcer";
 import { AccountDialogs } from "./components/account/account-dialogs";
 import { BackLink } from "./components/shell/back-link";
 import { SiteFooter } from "./components/shell/footer";
@@ -20,7 +22,9 @@ import { Icon } from "./components/ui/icon";
 import { ToastProvider } from "./components/ui/toast";
 import { appContext } from "./env";
 import { HttpError } from "./server/http.server";
-import { locale, t } from "./i18n";
+import { getLocale, t } from "./i18n";
+import { useNonce } from "./lib/nonce";
+import { PREFS_SCRIPT } from "./lib/prefs";
 import { loadShell } from "./lib/shell.server";
 import { paths, type ShellData } from "./lib/shell";
 import "./styles.css";
@@ -52,12 +56,29 @@ export function shouldRevalidate({
   return false;
 }
 
-export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+/**
+ * Applies the saved display preferences (text size, contrast, colour vision, motion, links, font) to <html>
+ * before first paint. It is the one inline script; it carries the request's CSP nonce, and its code is a fixed
+ * string (app/lib/prefs.ts) that reads the preferences from `data-prefs`, so no request data becomes code.
+ */
+function PrefsScript(): ReactNode {
+  const nonce: string | undefined = useNonce();
+  const shell = useRouteLoaderData<ShellData>("root");
   return (
-    <html lang={locale}>
+    <script nonce={nonce} data-prefs={JSON.stringify(shell?.prefs ?? {})} suppressHydrationWarning>
+      {PREFS_SCRIPT}
+    </script>
+  );
+}
+
+export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+  // The head script sets the preference attributes on <html> before React hydrates, so they never match.
+  return (
+    <html lang={getLocale()} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <PrefsScript />
         <meta name="theme-color" content="#061a1e" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -106,6 +127,7 @@ export default function App(): ReactNode {
       <Outlet />
       <SiteFooter />
       <AccountDialogs />
+      <Announcer />
     </ToastProvider>
   );
 }

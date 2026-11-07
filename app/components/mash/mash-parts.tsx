@@ -1,11 +1,10 @@
 import type { CSSProperties, ReactNode } from "react";
-import { t } from "../../i18n";
+import { intlLocale, t } from "../../i18n";
 import { MASH_DRAW } from "../../lib/mash";
 import { largestRemainder } from "../../lib/percent";
 import { Icon } from "../ui/icon";
 
 const MASH_COLORS = ["mash-a", "mash-b", "mash-c", "mash-d"] as const;
-const numbers = new Intl.NumberFormat("en-US");
 
 /** The side colour as a CSS variable, plus a pattern class so colour is never the only cue. */
 export function sideStyle(side: number): CSSProperties {
@@ -13,7 +12,7 @@ export function sideStyle(side: number): CSSProperties {
 }
 
 export function formatCount(value: number): string {
-  return numbers.format(value);
+  return new Intl.NumberFormat(intlLocale()).format(value);
 }
 
 /** The tug-of-war bar and the per-side totals. Shares use largest-remainder rounding, so they total 100. */
@@ -98,7 +97,8 @@ export function MashWinner({
         <>
           <Icon name="success" size={40} />
           <h3 className="mash-winner-title" tabIndex={-1}>
-            <span>{draw ? t("mash.final") : t("mash.winner")}</span> <strong>{draw ? t("mash.draw") : sides[winner]}</strong>
+            <span>{draw ? t("mash.final") : t("mash.winner")}</span>{" "}
+            <strong>{draw ? t("mash.draw") : sides[winner]}</strong>
           </h3>
         </>
       )}

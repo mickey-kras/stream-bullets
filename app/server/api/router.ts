@@ -2,7 +2,7 @@ import type { z } from "zod";
 import type { AppContext, AppEnv } from "../../env";
 import type { Viewer } from "../../types";
 import { getViewer } from "../auth.server";
-import { HttpError, errorResponse, queryParams, requireSameOrigin } from "../http.server";
+import { HttpError, errorResponse, queryParams, requireNotCrossSite, requireSameOrigin } from "../http.server";
 
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -27,7 +27,8 @@ export interface WriteContext extends ApiContext {
  */
 export type ApiRoute =
   | { method: "GET"; path: RegExp; handler: (context: ApiContext) => Promise<Response> }
-  | { method: Exclude<Method, "GET">; path: RegExp; handler: (context: WriteContext) => Promise<Response> };
+  | { method: Exclude<Method, "GET">; path: RegExp; handler: (context: WriteContext) => Promise<Response> }
+  | { method: Exclude<Method, "GET">; path: RegExp; open: true; handler: (context: ApiContext) => Promise<Response> };
 
 export function get(path: RegExp, handler: (context: ApiContext) => Promise<Response>): ApiRoute {
   return { method: "GET", path, handler };
@@ -39,6 +40,18 @@ export function write(
   handler: (context: WriteContext) => Promise<Response>,
 ): ApiRoute {
   return { method, path, handler };
+}
+
+/**
+ * A write anyone may send, signed in or not, from this site or from a non-browser client (the AI interest
+ * counter). Browsers on other sites are refused, so no other page can send it in a visitor's name.
+ */
+export function openWrite(
+  method: Exclude<Method, "GET">,
+  path: RegExp,
+  handler: (context: ApiContext) => Promise<Response>,
+): ApiRoute {
+  return { method, path, open: true, handler };
 }
 
 /** Parses the query string with a schema. Unknown or repeated keys are rejected. */
@@ -70,8 +83,15 @@ export async function dispatch(
 ): Promise<Response> {
   try {
     const method = request.method === "HEAD" ? "GET" : request.method;
+    const open: boolean = routes.some(
+      (route: ApiRoute) => "open" in route && route.method === method && anchored(route.path, path) !== null,
+    );
     let viewer: Viewer | null;
     if (method === "GET") {
+      viewer = await getViewer(request, app);
+    } else if (open) {
+      requireNotCrossSite(request, app.env);
+      queryParams(request, []);
       viewer = await getViewer(request, app);
     } else {
       requireSameOrigin(request, app.env);
@@ -85,7 +105,7 @@ export async function dispatch(
       known = true;
       if (route.method !== method) continue;
       const context = { request, app, env: app.env, match };
-      if (route.method === "GET") return await route.handler({ ...context, viewer });
+      if (route.method === "GET" || "open" in route) return await route.handler({ ...context, viewer });
       return await route.handler({ ...context, viewer: requireViewer(viewer) });
     }
     throw new HttpError(known ? 405 : 404, known ? "Method not allowed." : "Endpoint not found.");

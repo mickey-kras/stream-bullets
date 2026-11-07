@@ -21,7 +21,7 @@ interface MenuRow {
  * The rows for this person, in the approved order (item 35): own page tools, then account, then Admin, then
  * Streamers (streamer header only). Your profile, Host a community, Your data and Edit your page open dialogs
  * over the current page (item 17). Suggest an improvement opens the official Ideas board with its dialog (item 46).
- * Rows for later phases (Language, Accessibility & display) are added by those phases.
+ * Language and Accessibility & display open their dialogs too.
  */
 export function accountMenuRows(
   shell: ShellData,
@@ -54,7 +54,11 @@ export function accountMenuRows(
     ]);
   const account: MenuRow[] = [dialog("profile", "account.yourProfile", "user")];
   if (!shell.ownStreamer) account.push(dialog("host", "account.hostCommunity", "mic"));
-  account.push(dialog("data", "account.yourData", "data"));
+  account.push(
+    dialog("data", "account.yourData", "data"),
+    dialog("language", "language.title", "globe"),
+    dialog("a11y", "prefs.title", "eye"),
+  );
   if (shell.admin)
     account.push({ to: paths.admin, label: "account.admin", icon: "admin", current: pathname.startsWith(paths.admin) });
   account.push({ to: paths.ideas, label: "ideas.suggest", icon: "idea" });

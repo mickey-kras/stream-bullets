@@ -37,7 +37,12 @@ const config: BuildConfig = {
 const configPath: string = resolve(directory, "wrangler.json");
 const statePath: string = resolve(directory, "state");
 await writeFile(configPath, JSON.stringify(config), { mode: 0o600 });
-await writeFile(resolve(directory, ".env"), `BETTER_AUTH_SECRET=${secret}\n`, { mode: 0o600 });
+// A random salt per run turns on the AI interest counter on /ai.
+await writeFile(
+  resolve(directory, ".env"),
+  `BETTER_AUTH_SECRET=${secret}\nAI_INTEREST_SALT=${randomBytes(24).toString("hex")}\n`,
+  { mode: 0o600 },
+);
 const wrangler: string = resolve(root, "node_modules/wrangler/bin/wrangler.js");
 const common: string[] = ["--config", configPath, "--env-file", resolve(directory, ".env")];
 function execute(args: string[]): void {
@@ -66,6 +71,7 @@ for (const role of [
   "officialowner",
   "featureowner",
   "keyadmin",
+  "prefsviewer",
 ]) {
   const id: string = randomUUID();
   const token: string = randomBytes(24).toString("hex");
