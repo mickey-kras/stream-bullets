@@ -101,7 +101,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0013", (): void => {
+  it("covers 0006 to 0014", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -111,6 +111,7 @@ describe("migrations 0006 onwards", (): void => {
       "0011",
       "0012",
       "0013",
+      "0014",
     ]);
   });
 
@@ -160,6 +161,7 @@ describe("migrations 0006 onwards", (): void => {
         "INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,created_at,updated_at) VALUES ('ev','page','Show',1,60,'twitch','https://twitch.tv/host','UTC',1,1)",
       ),
       db.prepare("INSERT INTO stream_event_topics (event_id,entry_id) VALUES ('ev','topic')"),
+      db.prepare("INSERT INTO stream_series (id,streamer_id,written_through) VALUES ('series','page',1)"),
       db.prepare("INSERT INTO entry_mash (entry_id,duration_s) VALUES ('poll',30)"),
       db.prepare("INSERT INTO mash_taps (entry_id,user_id,side,taps) VALUES ('poll','fan',2,10)"),
     ]);
@@ -176,6 +178,7 @@ describe("migrations 0006 onwards", (): void => {
     expect(left.map((result) => (result.results[0] as { n: number }).n)).toEqual([0, 0, 0]);
     await db.prepare("DELETE FROM user WHERE id='host'").run();
     expect(await db.prepare("SELECT count(*) AS n FROM stream_events").first()).toEqual({ n: 0 });
+    expect(await db.prepare("SELECT count(*) AS n FROM stream_series").first()).toEqual({ n: 0 });
     expect(await db.prepare("SELECT count(*) AS n FROM entries").first()).toEqual({ n: 0 });
   });
 

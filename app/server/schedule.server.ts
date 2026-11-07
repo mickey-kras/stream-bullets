@@ -180,6 +180,10 @@ interface Template {
   vodUrl?: string | null;
 }
 
+/**
+ * Inserts the plan's streams and, for a series, records how far it is written (`stream_series`). `replace` is for
+ * a series rewritten from one of its streams onwards; otherwise the mark only moves forward.
+ */
 function insertStatements(
   env: AppEnv,
   streamerId: string,
@@ -187,6 +191,7 @@ function insertStatements(
   plan: Plan,
   topicIds: string[],
   now: number,
+  through: "extend" | "replace" = "extend",
 ): { statements: D1PreparedStatement[]; ids: string[] } {
   const statements: D1PreparedStatement[] = [];
   const ids: string[] = [];
@@ -221,6 +226,13 @@ function insertStatements(
         ).bind(id, JSON.stringify(topicIds)),
       );
   }
+  if (plan.seriesId !== null && plan.starts.length > 0)
+    statements.push(
+      env.DB.prepare(`INSERT INTO stream_series (id,streamer_id,written_through) VALUES (?,?,?)
+        ON CONFLICT(id) DO UPDATE SET written_through=${
+          through === "replace" ? "excluded.written_through" : "max(written_through, excluded.written_through)"
+        }`).bind(plan.seriesId, streamerId, Math.max(...plan.starts)),
+    );
   return { statements, ids };
 }
 
@@ -346,7 +358,7 @@ export async function patchEvent(env: AppEnv, viewerId: string, id: string, valu
     .bind(...(row.series_id === null ? [id, now] : [row.series_id, row.starts_at, now]))
     .first<{ n: number }>();
   await assertRoom(env, row.streamer_id, plan.starts.length, now, freed?.n ?? 0);
-  const { statements, ids } = insertStatements(env, row.streamer_id, templateOf(patch), plan, topics, now);
+  const { statements, ids } = insertStatements(env, row.streamer_id, templateOf(patch), plan, topics, now, "replace");
   const ending = row.series_id === null ? [] : [endSeriesBefore(env, row.series_id, row)];
   await env.DB.batch([removal, ...ending, ...statements]);
   return (await getEvent(env, ids[0], now))!;
@@ -373,14 +385,18 @@ export async function deleteEvent(env: AppEnv, viewerId: string, id: string, val
 
 /**
  * Hourly cron: keeps every open-ended or not-yet-finished series written 12 weeks ahead and deletes streams past
- * the retention window. New occurrences follow the day after the series' latest one; the template (title, wall-clock
- * time in its zone, end date) is its latest occurrence that was neither edited on its own nor cancelled.
+ * the retention window. New occurrences follow the day after the series is written through (its latest occurrence,
+ * or a later one deleted on its own); the template (title, wall-clock time in its zone, end date) is its latest
+ * occurrence that was neither edited on its own nor cancelled.
  * Returns how many occurrences were added.
  */
 export async function topUpSeries(env: AppEnv, now: number, maxSeries = 50): Promise<number> {
   const horizon = now + SERIES_HORIZON_MS;
   const { results } = await env.DB.prepare(`SELECT x.*, s.last FROM stream_events x
-    JOIN (SELECT series_id, max(starts_at) AS last FROM stream_events WHERE series_id IS NOT NULL GROUP BY series_id) s
+    JOIN (SELECT g.series_id, max(g.last, coalesce(w.written_through, 0)) AS last
+      FROM (SELECT series_id, max(starts_at) AS last FROM stream_events
+        WHERE series_id IS NOT NULL GROUP BY series_id) g
+      LEFT JOIN stream_series w ON w.id=g.series_id) s
       ON s.series_id=x.series_id
     WHERE s.last < ? AND (x.repeat_until IS NULL OR x.repeat_until > s.last)
       AND x.starts_at=(SELECT max(y.starts_at) FROM stream_events y
@@ -428,11 +444,14 @@ export async function topUpSeries(env: AppEnv, now: number, maxSeries = 50): Pro
     await env.DB.batch(statements);
     added += starts.length;
   }
-  await env.DB.prepare(
-    "DELETE FROM stream_events WHERE id IN (SELECT id FROM stream_events WHERE starts_at < ? LIMIT 5000)",
-  )
-    .bind(now - EVENT_RETENTION_MS)
-    .run();
+  await env.DB.batch([
+    env.DB.prepare(
+      "DELETE FROM stream_events WHERE id IN (SELECT id FROM stream_events WHERE starts_at < ? LIMIT 5000)",
+    ).bind(now - EVENT_RETENTION_MS),
+    env.DB.prepare(
+      "DELETE FROM stream_series WHERE NOT EXISTS(SELECT 1 FROM stream_events e WHERE e.series_id=stream_series.id)",
+    ),
+  ]);
   return added;
 }
 

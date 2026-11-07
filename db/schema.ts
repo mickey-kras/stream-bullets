@@ -439,6 +439,18 @@ export const streamEvents = sqliteTable(
   ],
 );
 
+/**
+ * How far each weekly series is written. The cron continues after this, not after the latest stream left, so a
+ * stream deleted on its own never comes back. A series written before this table starts from its latest stream.
+ */
+export const streamSeries = sqliteTable("stream_series", {
+  id: text("id").primaryKey(),
+  streamerId: text("streamer_id")
+    .notNull()
+    .references(() => streamers.id, { onDelete: "cascade" }),
+  writtenThrough: integer("written_through").notNull(),
+});
+
 export const streamEventTopics = sqliteTable(
   "stream_event_topics",
   {
