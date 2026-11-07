@@ -595,3 +595,112 @@ describe("OAuth boundary", () => {
     expect(isPlaceholderEmail("person@example.test")).toBe(false);
   });
 });
+
+describe("provider adapters", () => {
+  interface InstagramConfig {
+    getToken: (input: { code: string; redirectURI: string }) => Promise<{ accessToken: string; tokenType: string }>;
+    getUserInfo: (tokens: { accessToken?: string }) => Promise<Record<string, unknown> | null>;
+  }
+  interface TikTokConfig {
+    mapProfileToUser: (profile: { data: { user: { open_id: string } } }) => Record<string, unknown>;
+  }
+  const withProviders = (): AppEnv => ({
+    ...env,
+    TIKTOK_CLIENT_KEY: "test-tiktok-key",
+    TIKTOK_CLIENT_SECRET: "test-tiktok-secret",
+    INSTAGRAM_CLIENT_ID: "test-instagram-client",
+    INSTAGRAM_CLIENT_SECRET: "test-instagram-secret",
+  });
+
+  /** The Instagram provider exactly as `createAuth` hands it to the generic OAuth plugin. */
+  function instagram(): InstagramConfig {
+    const plugins = createAuth(withProviders()).options.plugins as unknown as { options: { config: InstagramConfig[] } }[];
+    return plugins[0].options.config[0];
+  }
+
+  /** Answers each fetch with the next body in the queue. A Response is sent as it is. */
+  function answer(...bodies: unknown[]) {
+    const queue = [...bodies];
+    return vi.spyOn(globalThis, "fetch").mockImplementation(async (): Promise<Response> => {
+      const next = queue.shift();
+      return next instanceof Response ? next : Response.json(next);
+    });
+  }
+
+  it("refuses a short authentication secret", () => {
+    expect(() => createAuth({ ...env, BETTER_AUTH_SECRET: "too-short" })).toThrow(
+      "Authentication secret is not configured.",
+    );
+  });
+
+  it("gives TikTok accounts the placeholder address, never a verified email", () => {
+    const tiktok = createAuth(withProviders()).options.socialProviders?.tiktok as unknown as TikTokConfig;
+    expect(tiktok.mapProfileToUser({ data: { user: { open_id: "open-1" } } })).toEqual({
+      email: "open-1@tiktok.invalid",
+      emailVerified: false,
+    });
+  });
+
+  it("posts the Instagram code as a form and reads a plain or a data-wrapped token", async () => {
+    const fetchMock = answer({ access_token: "plain-token" }, { data: [{ access_token: "wrapped-token", user_id: 7 }] });
+    try {
+      const config = instagram();
+      const plain = await config.getToken({ code: "code-1", redirectURI: "https://stream.example.test/cb" });
+      expect(plain).toEqual({ accessToken: "plain-token", tokenType: "bearer" });
+      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(url).toBe("https://api.instagram.com/oauth/access_token");
+      expect(init.method).toBe("POST");
+      expect(Object.fromEntries(new URLSearchParams(String(init.body)))).toEqual({
+        client_id: "test-instagram-client",
+        client_secret: "test-instagram-secret",
+        grant_type: "authorization_code",
+        redirect_uri: "https://stream.example.test/cb",
+        code: "code-1",
+      });
+      expect(await config.getToken({ code: "code-2", redirectURI: "x" })).toMatchObject({
+        accessToken: "wrapped-token",
+      });
+    } finally {
+      fetchMock.mockRestore();
+    }
+  });
+
+  it("fails the Instagram sign-in when the token exchange fails or answers an unknown shape", async () => {
+    const fetchMock = answer(new Response("no", { status: 400 }), { data: [] });
+    try {
+      const config = instagram();
+      await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toThrow("Instagram sign-in failed.");
+      await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toThrow();
+    } finally {
+      fetchMock.mockRestore();
+    }
+  });
+
+  it("maps the Instagram profile to a placeholder account and rejects incomplete profiles", async () => {
+    const fetchMock = answer(
+      { user_id: "1784", username: "nova_handle", name: "Nova" },
+      { id: 99, username: "only_handle" },
+      { id: 98 },
+      { username: "no_id" },
+      new Response("no", { status: 401 }),
+    );
+    try {
+      const config = instagram();
+      expect(await config.getUserInfo({})).toBeNull();
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(await config.getUserInfo({ accessToken: "t" })).toEqual({
+        id: "1784",
+        name: "Nova",
+        email: "1784@instagram.invalid",
+        emailVerified: false,
+      });
+      expect((fetchMock.mock.calls[0][1] as RequestInit).headers).toEqual({ Authorization: "Bearer t" });
+      expect(await config.getUserInfo({ accessToken: "t" })).toMatchObject({ id: "99", name: "only_handle" });
+      expect(await config.getUserInfo({ accessToken: "t" })).toMatchObject({ id: "98", name: "" });
+      expect(await config.getUserInfo({ accessToken: "t" })).toBeNull();
+      expect(await config.getUserInfo({ accessToken: "t" })).toBeNull();
+    } finally {
+      fetchMock.mockRestore();
+    }
+  });
+});
