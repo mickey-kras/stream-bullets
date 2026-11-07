@@ -3,7 +3,8 @@ import { shots, signedIn } from "./live-helpers";
 
 test("the owner previews, takes and switches what the one OBS URL shows", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", 90);
-  const control = await owner.newPage({ viewport: { width: 1440, height: 1000 } });
+  const control = await owner.newPage();
+  await control.setViewportSize({ width: 1440, height: 1000 });
   const obs = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   await obs.goto("/@feature_host/overlay");
   await expect(obs.locator("[data-overlay-mash]")).toBeVisible();
