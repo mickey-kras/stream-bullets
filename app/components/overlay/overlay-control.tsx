@@ -89,7 +89,7 @@ function Monitor({
         ) : (
           <span className="preview-badge">{t("overlay.preview")}</span>
         )}
-        {label}
+        {t(kind === "air" ? "overlay.onAirIs" : "overlay.previewIs", { source: label })}
       </figcaption>
       <div className="ov-frame" ref={frame}>
         <div className="ov-scaler">
@@ -325,6 +325,40 @@ export function OverlayControl({
     }
   }
 
+  const sourceLabel = (source: OverlaySourceRef): string =>
+    t(SOURCES.find((item) => item.type === source.type)?.label ?? "overlay.src.auto");
+  const take: ReactNode = (
+    <div className="ov-take">
+      <p className="ov-take-label">
+        <span className="preview-badge">{t("overlay.preview")}</span>
+        <strong>{sourceLabel(state.preview)}</strong>
+      </p>
+      <p className="ov-take-onair">
+        <span className="onair-dot" aria-hidden="true" />
+        <span>{t("overlay.onAirIs", { source: sourceLabel(state.air) })}</span>
+      </p>
+      <button
+        type="button"
+        className="gold ov-take-btn"
+        disabled={busy || same || state.instant}
+        onClick={() => run({ action: "take" })}
+        data-ov-take
+      >
+        <Icon name="live" size={20} />
+        {t("overlay.take")} <kbd aria-hidden="true">T</kbd>
+      </button>
+      <label className="choice">
+        <input
+          type="checkbox"
+          checked={state.instant}
+          disabled={busy}
+          onChange={(event) => run({ action: "layout", instant: event.currentTarget.checked })}
+        />
+        <span>{t("overlay.instant")}</span>
+      </label>
+    </div>
+  );
+
   return (
     <>
       <div className="ov-head">
@@ -338,48 +372,10 @@ export function OverlayControl({
           {t("overlay.shortcutsTake")}
         </p>
       </div>
-      <div className="ov-grid">
-        <section className="ov-monitors" aria-label={t("overlay.monitors")}>
-          {!state.instant && <Monitor kind="prev" source={state.preview} scene={view} />}
-          <Monitor kind="air" source={state.air} scene={view} />
-          <div className="ov-take">
-            <button
-              type="button"
-              className="gold ov-take-btn"
-              disabled={busy || same || state.instant}
-              onClick={() => run({ action: "take" })}
-              data-ov-take
-            >
-              <Icon name="live" size={20} />
-              {t("overlay.take")} <kbd aria-hidden="true">T</kbd>
-            </button>
-            <label className="choice">
-              <input
-                type="checkbox"
-                checked={state.instant}
-                disabled={busy}
-                onChange={(event) => run({ action: "layout", instant: event.currentTarget.checked })}
-              />
-              <span>{t("overlay.instant")}</span>
-            </label>
-          </div>
-          <div className="ov-layout">
-            <Segmented
-              label={t("overlay.position")}
-              value={state.position}
-              options={POSITIONS.map(([position, id]) => [position, t(id)] as const)}
-              disabled={busy}
-              onChange={(position: OverlayPosition) => run({ action: "layout", position })}
-            />
-            <Segmented
-              label={t("overlay.size")}
-              value={state.size}
-              options={SIZES}
-              disabled={busy}
-              onChange={(size: OverlaySize) => run({ action: "layout", size })}
-            />
-          </div>
-        </section>
+      <div className={state.instant ? "ov-grid is-instant" : "ov-grid"}>
+        {!state.instant && <Monitor kind="prev" source={state.preview} scene={view} />}
+        {take}
+        <Monitor kind="air" source={state.air} scene={view} />
         <section className="ov-sources" aria-labelledby={titleId}>
           <h2 id={titleId}>{t("overlay.sources")}</h2>
           <ul>
@@ -413,20 +409,51 @@ export function OverlayControl({
               );
             })}
           </ul>
-          <div className="ov-url info-card">
-            <p>
-              <strong>{t("overlay.url")}</strong>
-            </p>
-            <div className="contact-address">
-              <span className="contact-email" data-ov-url>
-                {overlayUrl.replace(/^https?:\/\//, "")}
-              </span>
-              <IconButton label={t("overlay.copyUrl")} icon="copy" iconSize={18} onClick={() => void copyUrl()} />
-            </div>
-            <p className="muted">{t("overlay.obsHelp")}</p>
-          </div>
         </section>
+        <div className="ov-extra">
+          <details className="ov-layout-wrap">
+            <summary>
+              <Icon name="overlay" size={16} />
+              {t("overlay.positionAndSize")}
+            </summary>
+            <div className="ov-layout">
+              <Segmented
+                label={t("overlay.position")}
+                value={state.position}
+                options={POSITIONS.map(([position, id]) => [position, t(id)] as const)}
+                disabled={busy}
+                onChange={(position: OverlayPosition) => run({ action: "layout", position })}
+              />
+              <Segmented
+                label={t("overlay.size")}
+                value={state.size}
+                options={SIZES}
+                disabled={busy}
+                onChange={(size: OverlaySize) => run({ action: "layout", size })}
+              />
+            </div>
+          </details>
+          <details className="ov-setup">
+            <summary>
+              <Icon name="link" size={16} />
+              {t("overlay.setup")}
+            </summary>
+            <div className="ov-url">
+              <p>
+                <strong>{t("overlay.url")}</strong>
+              </p>
+              <div className="contact-address">
+                <span className="contact-email" data-ov-url>
+                  {overlayUrl.replace(/^https?:\/\//, "")}
+                </span>
+                <IconButton label={t("overlay.copyUrl")} icon="copy" iconSize={18} onClick={() => void copyUrl()} />
+              </div>
+              <p className="muted">{t("overlay.obsHelp")}</p>
+            </div>
+          </details>
+        </div>
       </div>
+      <div className="ov-take-dock">{take}</div>
     </>
   );
 }

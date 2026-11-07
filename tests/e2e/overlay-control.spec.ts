@@ -34,11 +34,14 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await expect(obs.locator('[data-overlay-source="message"]')).toContainText("Back in 5 minutes 4");
   await expect(obs.locator(".ov-message.style-hype")).toBeVisible();
 
+  // Wide screens always show the layout presets. Narrow screens fold them into "Position and size".
+  const fold = control.getByText("Position and size");
+  if (await fold.isVisible()) await fold.click();
   await control.getByRole("button", { name: "Top bar" }).click();
   await expect(obs.locator(".ov-stage.pos-top")).toBeVisible();
   // The box follows the saved state, so it changes once the server answers.
-  await control.getByLabel("Instant switch (skip preview)").click();
-  await expect(control.getByLabel("Instant switch (skip preview)")).toBeChecked();
+  await control.getByRole("checkbox", { name: "Instant switch (skip preview)" }).click();
+  await expect(control.getByRole("checkbox", { name: "Instant switch (skip preview)" })).toBeChecked();
   await expect(control.locator('[data-ov-monitor="prev"]')).toHaveCount(0);
   await control.locator("body").press("8");
   await expect(obs.locator('[data-overlay-type="hidden"]')).toBeEmpty();
@@ -47,8 +50,8 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   // Back to Auto so the page ends as it started: the newest open poll.
   await control.locator("body").press("1");
   await expect(obs.locator('[data-overlay-type="auto"]')).toBeVisible();
-  await control.getByLabel("Instant switch (skip preview)").click();
-  await expect(control.getByLabel("Instant switch (skip preview)")).not.toBeChecked();
+  await control.getByRole("checkbox", { name: "Instant switch (skip preview)" }).click();
+  await expect(control.getByRole("checkbox", { name: "Instant switch (skip preview)" })).not.toBeChecked();
   await Promise.all([owner.close(), obs.close()]);
 });
 
