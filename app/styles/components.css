@@ -938,7 +938,8 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .ov-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 10px; border: 2px solid var(--line); background: repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0 / 24px 24px; }
 .ov-monitor.air .ov-frame { border-color: var(--live); }
 .ov-monitor.prev .ov-frame { border-color: var(--gold); }
-.ov-scaler { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform: scale(var(--ov-scale, .3)); transform-origin: 0 0; container-type: inline-size; }
+.ov-scaler { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform: scale(var(--ov-scale, .3)); transform-origin: 0 0; container-type: inline-size; visibility: hidden; }
+.ov-frame[data-scaled] .ov-scaler { visibility: visible; }
 .ov-take { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
 .ov-take-btn { display: inline-flex; align-items: center; gap: 8px; font: 600 22px/1 var(--heading); padding: 14px 26px; }
 .ov-take-btn kbd { color: var(--on-gold); border-color: var(--on-gold); }

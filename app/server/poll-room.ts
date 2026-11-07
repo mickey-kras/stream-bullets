@@ -16,9 +16,17 @@ import type { LiveSnapshot, MashPhase, MashTick, OverlayPublic } from "../types"
 import { MASH_COLUMN, mashValue } from "./mash-sql";
 import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from "./overlay-state";
 
+/** The most sockets one room holds. */
 const MAX_CONNECTIONS = 200;
+/** Signed-out sockets may fill at most half the room, so signed-in viewers always find a seat. */
+const MAX_ANONYMOUS_CONNECTIONS = 100;
+/** Sockets per client address (an IPv4 address or an IPv6 /64, hashed by the Worker). */
 const MAX_CLIENT_CONNECTIONS = 10;
+/** The page owner is always admitted. Past this many owner sockets, the owner's oldest one makes way. */
+const MAX_OWNER_CONNECTIONS = 10;
 const CONNECTION_LEASE_MS = 60 * 60 * 1_000;
+/** A socket that has not pinged for this long is closed. Clients ping every 20 seconds. */
+const IDLE_TIMEOUT_MS = 60_000;
 const CLIENT_KEY = /^[0-9a-f]{64}$/;
 const USER_ID = /^[\w-]{1,100}$/;
 const ENTRY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -34,11 +42,18 @@ const ROOM_PATHS: Readonly<Record<string, "GET" | "POST">> = {
   "/overlay": "POST",
 };
 
-/** The socket attachment: when the lease ends, and the signed-in account the Worker vouched for. */
+/** The socket attachment: when the lease ends, the signed-in account the Worker vouched for, and when it opened. */
 interface ConnectionLease {
   expiresAt: number;
   userId: string | null;
+  openedAt: number;
 }
+
+/** Who holds a socket. The owner is always admitted; signed-out sockets are the first to make way. */
+type SocketRole = "owner" | "member" | "anonymous";
+
+/** A page that is suspended: its room closes every socket and shows nothing. */
+class PageSuspended extends Error {}
 
 interface TapMessage {
   t: "tap";
@@ -48,7 +63,12 @@ interface TapMessage {
   seq: number;
 }
 
-/** A battle in countdown or live, held in memory so taps never wait on D1. */
+/**
+ * A battle in countdown or live, held in memory so taps never wait on D1. Accepted taps wait in `pending` for up
+ * to one second (MASH_FLUSH_MS) before they are written. If the runtime evicts or restarts the room in that second
+ * (a deploy, for example), those taps are lost even though they were acknowledged. This is a known limit: the
+ * room keeps them in memory only, so taps never wait on storage.
+ */
 interface Battle {
   id: string;
   sides: number;
@@ -137,14 +157,22 @@ function tapMessage(raw: string | ArrayBuffer): TapMessage | null {
     typeof n !== "number" ||
     !Number.isSafeInteger(n) ||
     n < 1 ||
-    n > MASH_MAX_BATCH ||
     typeof assisted !== "boolean" ||
     typeof seq !== "number" ||
     !Number.isSafeInteger(seq) ||
     seq < 0
   )
     return null;
-  return { t, id, n, assisted, seq };
+  // A larger batch (taps that piled up while the socket reconnected) is cut to one message's worth. The token
+  // bucket then decides how many count.
+  return { t, id, n: Math.min(n, MASH_MAX_BATCH), assisted, seq };
+}
+
+/** The socket that opened first, or null for none. */
+function oldest(sockets: readonly WebSocket[], openedAt: (socket: WebSocket) => number): WebSocket | null {
+  let found: WebSocket | null = null;
+  for (const socket of sockets) if (found === null || openedAt(socket) < openedAt(found)) found = socket;
+  return found;
 }
 
 export class PollRoom extends DurableObject<AppEnv> {
@@ -186,8 +214,10 @@ export class PollRoom extends DurableObject<AppEnv> {
     if (request.method !== method) return response("Method not allowed", 405);
     const clientKey = request.headers.get("X-Stream-Bullets-Client") ?? "";
     const userId = request.headers.get("X-SB-User");
+    let role: SocketRole = userId === null ? "anonymous" : "member";
+    if (userId !== null && request.headers.get("X-SB-Owner") === "1") role = "owner";
     if (url.pathname === "/subscribe") {
-      const invalidSubscription = this.validateSubscription(request, clientKey, userId);
+      const invalidSubscription = this.validateSubscription(request, clientKey, userId, role);
       if (invalidSubscription) return invalidSubscription;
     }
 
@@ -202,30 +232,39 @@ export class PollRoom extends DurableObject<AppEnv> {
 
       const snapshot = await this.snapshot();
       this.expireConnections();
-      const limit = this.connectionLimit(clientKey);
-      if (limit) return limit;
+      // Checked again after the await: other subscriptions may have taken seats meanwhile.
+      const admission = this.admission(clientKey, role);
+      if (admission.refusal) return admission.refusal;
+      if (admission.evict) this.evict(admission.evict);
       const pair = new WebSocketPair();
       const [client, server] = Object.values(pair);
-      this.ctx.acceptWebSocket(server, [`client:${clientKey}`]);
-      const lease: ConnectionLease = { expiresAt: Date.now() + CONNECTION_LEASE_MS, userId: userId ?? null };
+      this.ctx.acceptWebSocket(server, role === "owner" ? ["role:owner"] : [`client:${clientKey}`, `role:${role}`]);
+      const now = Date.now();
+      const lease: ConnectionLease = { expiresAt: now + CONNECTION_LEASE_MS, userId: userId ?? null, openedAt: now };
       server.serializeAttachment(lease);
       this.send(server, JSON.stringify(this.withBattles(snapshot)));
       await this.scheduleResync();
       return new Response(null, { status: 101, webSocket: client });
-    } catch {
+    } catch (error: unknown) {
       this.disconnect();
-      return response("Live updates unavailable", 503);
+      if (!(error instanceof PageSuspended)) return response("Live updates unavailable", 503);
+      return url.pathname === "/subscribe" ? response("Stream not found", 404) : new Response(null, { status: 204 });
     }
   }
 
-  private validateSubscription(request: Request, clientKey: string, userId: string | null): Response | undefined {
+  private validateSubscription(
+    request: Request,
+    clientKey: string,
+    userId: string | null,
+    role: SocketRole,
+  ): Response | undefined {
     if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") return response("WebSocket required", 426);
     const origin = request.headers.get("Origin");
     if (origin !== null && origin !== this.env.APP_ORIGIN) return response("Origin not allowed", 403);
     if (!CLIENT_KEY.test(clientKey)) return response("Invalid client", 400);
     if (userId !== null && !USER_ID.test(userId)) return response("Invalid account", 400);
     this.expireConnections();
-    return this.connectionLimit(clientKey);
+    return this.admission(clientKey, role).refusal ?? undefined;
   }
 
   private async refresh(): Promise<Response> {
@@ -292,7 +331,8 @@ export class PollRoom extends DurableObject<AppEnv> {
       await this.scheduleResync();
     } catch (error: unknown) {
       this.disconnect();
-      throw error;
+      if (!(error instanceof PageSuspended)) throw error;
+      await this.scheduleResync();
     }
   }
 
@@ -307,12 +347,9 @@ export class PollRoom extends DurableObject<AppEnv> {
     // Each socket numbers its batches; a batch seen before (a resend) never counts twice.
     if (message.seq <= (battle.seqs.get(socket) ?? -1)) return null;
     battle.seqs.set(socket, message.seq);
-    let side = battle.sideOf.get(userId);
-    if (!side) {
-      side = this.lookupSide(battle.id, userId);
-      battle.sideOf.set(userId, side);
-    }
-    const pick = await side;
+    const pick = await this.sideFor(battle, userId);
+    // The lookup failed (a D1 error). Nothing is cached, so the next batch looks again.
+    if (pick === undefined) return null;
     if (pick === null || pick >= battle.sides) return { type: "mash-denied", id: message.id, reason: "pick" };
     const now = Date.now();
     if (battle.finishing || mashPhaseAt(battle, now) !== "live") return null;
@@ -331,6 +368,22 @@ export class PollRoom extends DurableObject<AppEnv> {
       battle.dirty = true;
     }
     return { type: "mash-ack", id: battle.id, mine: battle.mine.get(userId) ?? 0, accepted };
+  }
+
+  /** The side this account picked, cached for the battle. Undefined when the lookup failed; a failure is not cached. */
+  private async sideFor(battle: Battle, userId: string): Promise<number | null | undefined> {
+    let side = battle.sideOf.get(userId);
+    if (!side) {
+      side = this.lookupSide(battle.id, userId);
+      battle.sideOf.set(userId, side);
+    }
+    try {
+      return await side;
+    } catch {
+      if (battle.sideOf.get(userId) === side) battle.sideOf.delete(userId);
+      console.error("mash_side_lookup_failed");
+      return undefined;
+    }
   }
 
   private async lookupSide(entryId: string, userId: string): Promise<number | null> {
@@ -469,8 +522,10 @@ export class PollRoom extends DurableObject<AppEnv> {
       if (phase === "live" && battle.phase === "countdown") {
         battle.phase = "live";
         battle.dirty = true;
-        await this.env.DB.prepare("UPDATE entry_mash SET phase='live' WHERE entry_id=? AND phase='countdown'")
-          .bind(battle.id)
+        await this.env.DB.prepare(
+          "UPDATE entry_mash SET phase='live' WHERE entry_id=? AND phase='countdown' AND starts_at IS ?",
+        )
+          .bind(battle.id, battle.startsAt)
           .run();
       }
       if (battle.dirty || this.ticks % 5 === 0) {
@@ -505,7 +560,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     const deltas = [...battle.pending.values()];
     battle.pending = new Map();
     try {
-      const statements = tapUpserts(battle.id, deltas).map(({ sql, params }) =>
+      const statements = tapUpserts(battle.id, battle.startsAt, deltas).map(({ sql, params }) =>
         this.env.DB.prepare(sql).bind(...params),
       );
       await this.env.DB.batch(statements);
@@ -523,13 +578,21 @@ export class PollRoom extends DurableObject<AppEnv> {
     }
   }
 
-  /** Ends a battle: last flush, winner from D1, then a fresh snapshot for everyone. */
+  /**
+   * Ends a battle: last flush, winner from D1, then a fresh snapshot for everyone. While taps are still unwritten
+   * (D1 failed), the battle stays open and the next tick or alarm tries again, so the winner never comes from
+   * partial counts. The updates match this run's start only, so a late finish never ends a restarted battle.
+   */
   private async finish(battle: Battle): Promise<void> {
     if (battle.finishing) return;
     battle.finishing = true;
     try {
       await this.flush(battle);
       if (battle.pending.size > 0) await this.flush(battle);
+      if (battle.pending.size > 0) {
+        battle.finishing = false;
+        return;
+      }
       const sums = await this.env.DB.prepare(
         "SELECT side, sum(taps) AS taps FROM mash_taps WHERE entry_id=? GROUP BY side",
       )
@@ -540,8 +603,9 @@ export class PollRoom extends DurableObject<AppEnv> {
       });
       await this.env.DB.batch([
         this.env.DB.prepare(
-          "UPDATE entry_mash SET phase='finished', winner=? WHERE entry_id=? AND phase IN ('countdown','live')",
-        ).bind(mashWinner(totals), battle.id),
+          `UPDATE entry_mash SET phase='finished', winner=?
+            WHERE entry_id=? AND phase IN ('countdown','live') AND starts_at IS ?`,
+        ).bind(mashWinner(totals), battle.id, battle.startsAt),
         this.env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(this.streamerId),
       ]);
       this.battles.delete(battle.id);
@@ -575,7 +639,7 @@ export class PollRoom extends DurableObject<AppEnv> {
   private async loadSnapshot(): Promise<LiveSnapshot> {
     if (this.streamerId === undefined) throw new Error("Unbound poll room");
     const [streamer, polls, overlay] = await this.env.DB.batch([
-      this.env.DB.prepare("SELECT revision FROM streamers WHERE id = ?").bind(this.streamerId),
+      this.env.DB.prepare("SELECT revision, status FROM streamers WHERE id = ?").bind(this.streamerId),
       this.env.DB.prepare(`
         WITH recent AS (
           SELECT id, title, kind, options, ends_at, revealed, created_at
@@ -604,10 +668,12 @@ export class PollRoom extends DurableObject<AppEnv> {
       `).bind(this.streamerId, this.streamerId),
       this.env.DB.prepare(`SELECT ${OVERLAY_COLUMNS} FROM overlay_state WHERE streamer_id=?`).bind(this.streamerId),
     ]);
-    const revisionRow = streamer.results[0] as { revision: number } | undefined;
+    const revisionRow = streamer.results[0] as { revision: number; status: string } | undefined;
     if (!revisionRow || !Number.isSafeInteger(revisionRow.revision) || revisionRow.revision < 0) {
       throw new Error("Stream unavailable");
     }
+    // A suspended page shows nothing live, also on sockets that opened before the suspension.
+    if (revisionRow.status === "suspended") throw new PageSuspended("Stream suspended");
     this.overlay = overlayPublic(overlayValue(overlay.results[0] as OverlayRow | undefined));
     if (this.latestSnapshot && revisionRow.revision < this.latestSnapshot.revision)
       return { ...this.latestSnapshot, overlay: this.overlay };
@@ -685,19 +751,41 @@ export class PollRoom extends DurableObject<AppEnv> {
     }
   }
 
-  private activeSockets(): WebSocket[] {
-    return this.ctx.getWebSockets().filter((socket: WebSocket): boolean => socket.readyState === WebSocket.OPEN);
+  /** The open sockets, all or those with one tag (`role:owner`, `role:anonymous`, `client:<key>`). */
+  private activeSockets(tag?: string): WebSocket[] {
+    return this.ctx.getWebSockets(tag).filter((socket: WebSocket): boolean => socket.readyState === WebSocket.OPEN);
   }
 
-  private connectionLimit(clientKey: string): Response | undefined {
-    if (this.ctx.getWebSockets(`client:${clientKey}`).length >= MAX_CLIENT_CONNECTIONS) {
-      return response("Too many live connections from this client", 429);
+  /**
+   * Whether a new socket may join, and which socket makes way for it. The owner always gets in. Signed-out sockets
+   * fill at most half the room, and when the room is full a signed-in viewer or the owner takes the seat of the
+   * oldest signed-out socket.
+   */
+  private admission(clientKey: string, role: SocketRole): { refusal: Response | null; evict: WebSocket | null } {
+    const openedAt = (socket: WebSocket): number => this.lease(socket).openedAt;
+    const anonymous = this.activeSockets("role:anonymous");
+    const full = this.activeSockets().length >= MAX_CONNECTIONS;
+    if (role === "owner") {
+      const owners = this.activeSockets("role:owner");
+      if (owners.length >= MAX_OWNER_CONNECTIONS) return { refusal: null, evict: oldest(owners, openedAt) };
+      if (!full) return { refusal: null, evict: null };
+      const evict = oldest(anonymous, openedAt) ?? oldest(this.activeSockets("role:member"), openedAt);
+      return { refusal: null, evict };
     }
-    if (this.ctx.getWebSockets().length >= MAX_CONNECTIONS) {
+    if (this.activeSockets(`client:${clientKey}`).length >= MAX_CLIENT_CONNECTIONS) {
+      return { refusal: response("Too many live connections from this client", 429), evict: null };
+    }
+    const evict = role === "member" && full ? oldest(anonymous, openedAt) : null;
+    if ((role === "anonymous" && anonymous.length >= MAX_ANONYMOUS_CONNECTIONS) || (full && evict === null)) {
       console.warn("live_room_full");
-      return response("Stream is full", 503);
+      return { refusal: response("Stream is full", 503), evict: null };
     }
-    return undefined;
+    return { refusal: null, evict };
+  }
+
+  private evict(socket: WebSocket): void {
+    this.send(socket, JSON.stringify({ type: "unavailable" }));
+    if (socket.readyState === WebSocket.OPEN) socket.close(1013, "Live room is full");
   }
 
   private lease(socket: WebSocket): ConnectionLease {
@@ -709,17 +797,23 @@ export class PollRoom extends DurableObject<AppEnv> {
       typeof lease.expiresAt !== "number" ||
       !Number.isSafeInteger(lease.expiresAt)
     )
-      return { expiresAt: 0, userId: null };
+      return { expiresAt: 0, userId: null, openedAt: 0 };
     const userId = "userId" in lease && typeof lease.userId === "string" ? lease.userId : null;
-    return { expiresAt: lease.expiresAt, userId };
+    const openedAt = "openedAt" in lease && typeof lease.openedAt === "number" ? lease.openedAt : 0;
+    return { expiresAt: lease.expiresAt, userId, openedAt };
   }
 
+  /** Closes sockets whose lease ran out, and sockets that have not pinged for IDLE_TIMEOUT_MS. */
   private expireConnections(): void {
     const now = Date.now();
     for (const socket of this.activeSockets()) {
-      if (this.lease(socket).expiresAt > now) continue;
+      const lease = this.lease(socket);
+      const pinged = this.ctx.getWebSocketAutoResponseTimestamp(socket)?.getTime() ?? 0;
+      const idle = now - Math.max(lease.openedAt, pinged) >= IDLE_TIMEOUT_MS;
+      if (lease.expiresAt > now && !idle) continue;
       this.send(socket, JSON.stringify({ type: "unavailable" }));
-      if (socket.readyState === WebSocket.OPEN) socket.close(1001, "Live connection lease expired");
+      if (socket.readyState === WebSocket.OPEN)
+        socket.close(1001, idle ? "Live connection idle" : "Live connection lease expired");
     }
   }
 
