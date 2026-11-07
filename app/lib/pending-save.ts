@@ -1,8 +1,6 @@
 /** A save that waits for the last change, and that can be sent at once when the dialog closes or the page goes. */
 export interface PendingSave<T> {
-  /** Replaces the waiting value and restarts the delay. */
   schedule: (value: T) => void;
-  /** Sends the waiting value now, if there is one. `keepalive` lets the request outlive the page. */
   flush: () => void;
 }
 
