@@ -4,6 +4,7 @@ import { authClient } from "../../auth-client";
 import { t, type MessageId } from "../../i18n";
 import { paths, useShell, type ShellData } from "../../lib/shell";
 import { dialogHref, type AccountDialogName, type DialogState } from "../account/dialog-route";
+import { OwnerNotice } from "../streamer/page-banner";
 import { Avatar } from "../ui/avatar";
 import { Icon, type IconName } from "../ui/icon";
 import { SignInButton } from "./sign-in-dialog";
@@ -94,7 +95,7 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
     const outside = (event: PointerEvent): void => {
       if (!root.contains(event.target as Node)) setOpenAt(null);
     };
-    const escape = (event: KeyboardEvent): void => {
+    const onEscape = (event: KeyboardEvent): void => {
       if (event.key !== "Escape") return;
       event.stopPropagation();
       setOpenAt(null);
@@ -104,11 +105,11 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
       if (event.relatedTarget && !root.contains(event.relatedTarget as Node)) setOpenAt(null);
     };
     document.addEventListener("pointerdown", outside);
-    root.addEventListener("keydown", escape);
+    root.addEventListener("keydown", onEscape);
     root.addEventListener("focusout", leave);
     return () => {
       document.removeEventListener("pointerdown", outside);
-      root.removeEventListener("keydown", escape);
+      root.removeEventListener("keydown", onEscape);
       root.removeEventListener("focusout", leave);
     };
   }, [open]);
@@ -128,6 +129,7 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
   let roleLine: string = t("account.roleViewer");
   if (shell.ownStreamer) roleLine = t("account.roleStreamer", { handle: shell.ownStreamer.handle });
   if (shell.admin) roleLine = t("account.roleAdmin");
+  const moderated: boolean = Boolean(shell.ownStreamer && shell.ownStreamer.status !== "active");
 
   return (
     <div className="account-menu-wrap" ref={wrap}>
@@ -137,10 +139,11 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
         className="profile"
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label={t("account.menuFor", { name: viewer.name })}
+        aria-label={t(moderated ? "account.menuForNotice" : "account.menuFor", { name: viewer.name })}
         onClick={() => setOpenAt((value: string | null) => (value === location ? null : location))}
       >
         <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
+        {moderated && <span className="notice-dot" aria-hidden="true" />}
       </button>
       <div className="account-menu" id={menuId} ref={panel} tabIndex={-1} hidden={!open}>
         <div className="account-id">
@@ -150,6 +153,7 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
             <span>{roleLine}</span>
           </div>
         </div>
+        {shell.ownStreamer && <OwnerNotice status={shell.ownStreamer.status} reason={shell.ownStreamer.statusReason} />}
         <nav aria-label={t("account.nav")}>
           <ul>
             {accountMenuRows(shell, here, streamerHeader).map((group: MenuRow[], index: number) => [

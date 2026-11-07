@@ -98,7 +98,10 @@ export const TAP_ROWS_PER_STATEMENT = 20;
  * The statements that add the deltas to `mash_taps`, at most 20 rows each. Rows for an account or
  * battle deleted since the tap are skipped (the joins), so one deletion never fails the batch.
  */
-export function tapUpserts(entryId: string, deltas: readonly TapDelta[]): { sql: string; params: (string | number)[] }[] {
+export function tapUpserts(
+  entryId: string,
+  deltas: readonly TapDelta[],
+): { sql: string; params: (string | number)[] }[] {
   const rows: TapDelta[] = deltas.filter((delta: TapDelta): boolean => delta.taps > 0);
   const statements: { sql: string; params: (string | number)[] }[] = [];
   for (let start = 0; start < rows.length; start += TAP_ROWS_PER_STATEMENT) {

@@ -41,5 +41,8 @@ export async function loadShell(request: Request, app: AppContext): Promise<Shel
   const page = { providers, locale, prefs, origin: app.env.APP_ORIGIN };
   if (!viewer) return { viewer: null, admin: false, ownStreamer: null, ...page };
   const [admin, own] = await Promise.all([isAdmin(app.env, viewer.id), getOwnStreamer(app.env, viewer.id)]);
-  return { viewer, admin, ownStreamer: own ? { handle: own.handle, name: own.name } : null, ...page };
+  const ownStreamer = own
+    ? { handle: own.handle, name: own.name, status: own.status, statusReason: own.statusReason }
+    : null;
+  return { viewer, admin, ownStreamer, ...page };
 }

@@ -28,6 +28,9 @@ export function scoreText(sides: readonly string[], totals: readonly number[], m
   return `${parts.join(", ")}. ${t("mash.secondsLeft", { n: left })}.`;
 }
 
+/** One empty list, so the announcement effect does not run again on each render before a battle loads. */
+const NO_TOTALS: readonly number[] = [];
+
 /**
  * Timed screen-reader updates while a battle runs (item 39): "Go" at the start, the score every 2, 5 or 10 seconds
  * (the viewer's choice, or never), 10 and 5 seconds left, and the result. Messages go through the shared live
@@ -40,7 +43,7 @@ function useMashAnnouncements(entry: Entry, view: MashView | null, side: number 
   const spokenLeft = useRef<number>(0);
   const current: string | null = view?.current ?? null;
   const left: number = view?.left ?? 0;
-  const totals: readonly number[] = view?.totals ?? [];
+  const totals: readonly number[] = view?.totals ?? NO_TOTALS;
   const winner: number | null = view ? (view.winner ?? mashWinner(view.totals)) : null;
   useEffect(() => {
     const before: string | null = phase.current;
@@ -271,7 +274,8 @@ function SetupBody({
           {t("mash.changeSide")}
         </button>
       </p>
-      <div className={chosen ? "mash-picks has-choice" : "mash-picks"} role="group" aria-label={t("mash.pickSide")}>
+      <fieldset className={chosen ? "mash-picks has-choice" : "mash-picks"}>
+        <legend className="sr-only">{t("mash.pickSide")}</legend>
         {entry.options.map((side: string, index: number) => (
           <button
             key={`${index}:${side}`}
@@ -295,7 +299,7 @@ function SetupBody({
             </span>
           </button>
         ))}
-      </div>
+      </fieldset>
     </>
   );
 }

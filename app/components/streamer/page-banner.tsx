@@ -1,10 +1,28 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
+import { ownerNotice } from "../../lib/moderation";
 import { paths } from "../../lib/shell";
 import type { StreamerStatus } from "../../types";
 import { ContactDialog } from "../shell/contact-dialog";
 import { Icon } from "../ui/icon";
+
+/**
+ * The owner's notice for a frozen or suspended page outside the page itself (R13): in the account menu and the
+ * Edit your page dialog, so the owner learns about it wherever they are. Renders nothing for an active page.
+ */
+export function OwnerNotice({
+  status,
+  reason,
+}: Readonly<{ status: StreamerStatus; reason: string | null }>): ReactNode {
+  if (status === "active") return null;
+  return (
+    <p className={`owner-notice ${status}`}>
+      <Icon name={status === "frozen" ? "lock" : "eye-off"} size={16} />
+      <span>{ownerNotice(status, reason)}</span>
+    </p>
+  );
+}
 
 /**
  * The frozen or suspended notice above a moderated page (item 25). Viewers of a frozen page learn it is read-only.
@@ -40,10 +58,7 @@ export function PageBanner({
   return (
     <div className={`page-banner ${frozen ? "frozen " : ""}suspended`} id="page-banner">
       {icon}
-      <span>
-        {t(frozen ? "moderation.frozenOwner" : "moderation.suspendedOwner")}
-        {reason && ` ${t("moderation.reasonLine", { reason })}`}
-      </span>
+      <span>{ownerNotice(status, reason)}</span>
       <button type="button" className="text-button banner-link" onClick={() => setContact(true)}>
         <Icon name="mail" size={16} />
         {t("moderation.appeal")}

@@ -157,7 +157,9 @@ interface CardRow {
 export async function getOverlayData(env: AppEnv, streamerId: string, topicId: string | null): Promise<OverlayData> {
   const [polls, topics, cards, next, support] = await env.DB.batch([
     env.DB.prepare(`SELECT e.id,e.title,EXISTS(SELECT 1 FROM entry_mash m WHERE m.entry_id=e.id) AS mash FROM entries e
-      WHERE e.streamer_id=? AND e.kind!='topic' ORDER BY e.created_at DESC,e.id DESC LIMIT ${LIST_LIMIT}`).bind(streamerId),
+      WHERE e.streamer_id=? AND e.kind!='topic' ORDER BY e.created_at DESC,e.id DESC LIMIT ${LIST_LIMIT}`).bind(
+      streamerId,
+    ),
     env.DB.prepare(`SELECT e.id,e.title,e.category,e.author_id,u.name AS author,u.image,u.avatar_preset,
         (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=1) AS likes
       FROM entries e JOIN user u ON u.id=e.author_id

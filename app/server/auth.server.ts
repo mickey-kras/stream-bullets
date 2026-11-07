@@ -5,7 +5,8 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../../db/auth-schema";
 import type { AppContext, AppEnv } from "../env";
 import { LOCALES } from "../../db/enums";
-import type { Locale, Provider, Viewer } from "../types";
+import type { Locale } from "../i18n";
+import type { Provider, Viewer } from "../types";
 import { z } from "zod";
 import { getOrigin, HttpError } from "./http.server";
 import { displayNameSchema, readDisplayPrefs } from "./validation";
@@ -63,7 +64,10 @@ const instagramProfileSchema = z.object({
  * "Continue with Instagram": Instagram API with Instagram Login (professional accounts only, needs Meta app
  * review). It is plain OAuth 2 with a form-post token exchange whose answer may be wrapped in `data[]`.
  */
-function instagramProvider(clientId: string, clientSecret: string): Parameters<typeof genericOAuth>[0]["config"][number] {
+function instagramProvider(
+  clientId: string,
+  clientSecret: string,
+): Parameters<typeof genericOAuth>[0]["config"][number] {
   return {
     providerId: "instagram",
     name: "Instagram",

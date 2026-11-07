@@ -125,7 +125,10 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await sheet.getByLabel("Internal note (optional)").fill("Test freeze from the browser suite.");
   await shot(second, "moderate-sheet");
   await sheet.getByRole("button", { name: "Freeze", exact: true }).click();
-  await expect(second.getByRole("status").filter({ hasText: "Froze" })).toHaveText("Froze @zz_room_48.");
+  // "Notify the owner" is on by default for a freeze. The e2e server has no NOTIFY_EMAIL binding, so no email.
+  await expect(second.getByRole("status").filter({ hasText: "Froze" })).toHaveText(
+    "Froze @zz_room_48. The owner sees a notice on their page. No email went out.",
+  );
   await expect(row.locator(".mod-badge")).toHaveText("Frozen");
   await row.getByText("Moderation history (1)").click();
   await expect(row.getByText("Test freeze from the browser suite.")).toBeVisible();

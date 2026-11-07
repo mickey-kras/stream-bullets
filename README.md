@@ -75,6 +75,7 @@ The production site shows no sign-in buttons until you set at least one credenti
 | `ADMIN_EMAILS` | Email addresses of administrators. Use commas or spaces between the addresses. Letter case is not important. |
 | `AI_INTEREST_SALT` | Random secret of at least 16 characters for the AI interest counter. The counter stores a keyed hash of the IP address and the day, never the IP address. Without this secret the counter is off and `/ai` hides its buttons. Store it as a Worker secret. |
 | `ADMIN_STEP_UP` | Security-key check for Admin: `off`, `report` or `enforce`. If you leave it empty, the value is `report`. An unknown value acts as `enforce`. See [Admin security keys](#admin-security-keys). |
+| `NOTIFY_EMAIL`, `NOTIFY_FROM` | Optional. `NOTIFY_EMAIL` is a `send_email` binding and `NOTIFY_FROM` is the sender address. When an administrator freezes, suspends or restores a page and selects "Notify the owner", the app sends the owner an email. The app sends email only when both are set. The owner always sees a notice on the page, in the account menu and in Edit your page. |
 
 An administrator is an account with a verified email address in `ADMIN_EMAILS`. TikTok and Instagram accounts get a placeholder address that is not verified, so they cannot be administrators. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
 

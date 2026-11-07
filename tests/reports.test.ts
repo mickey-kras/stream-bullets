@@ -1,14 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import type { ContentReport, ReportStatus, Streamer } from "../app/types";
-import {
-  deleteComment,
-  deleteEntry,
-  listComments,
-  mutateComment,
-  mutateEntry,
-  saveStreamer,
-} from "../app/server/data.server";
+import { deleteComment, listComments, mutateComment } from "../app/server/comments.server";
+import { deleteEntry, mutateEntry, saveStreamer } from "../app/server/data.server";
 import { listReports, resolveReport, submitReport } from "../app/server/reports.server";
 import type { ReportInput } from "../app/server/validation";
 import { createTestDatabase } from "./helpers/database";
@@ -332,9 +326,9 @@ describe("reviewing reports", (): void => {
       [parent, null, true],
     ]);
     // A placeholder cannot be reported again.
-    await expect(
-      report("reporter", { targetKind: "comment", targetId: parent, reason: "spam" }),
-    ).rejects.toMatchObject({ status: 404 });
+    await expect(report("reporter", { targetKind: "comment", targetId: parent, reason: "spam" })).rejects.toMatchObject(
+      { status: 404 },
+    );
   });
 
   it("closes the report when the content is already gone", async (): Promise<void> => {

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { getVisibleEntry, listComments, mutateComment } from "../data.server";
+import { listComments, mutateComment } from "../comments.server";
+import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
 import { commentActionSchema, commentQuerySchema } from "../validation";
 import { get, parsedQuery, write, type ApiRoute } from "./router";

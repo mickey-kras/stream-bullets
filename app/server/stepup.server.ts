@@ -421,9 +421,8 @@ export async function registrationOptions(
 }
 
 /**
- * Stores a new key. Allowed only for an admin who either has no keys and signed in less than 5 minutes ago, or
- * confirmed with an existing key in the last 2 minutes. A new key also stamps the session: the user just
- * verified with it.
+ * Stores a new key. The admin needs no keys and a sign-in from the last 5 minutes, or a key check from the last
+ * 2 minutes. Adding the key counts as a key check for this session.
  */
 export async function registerKey(
   env: AppEnv,

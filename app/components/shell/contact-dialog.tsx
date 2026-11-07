@@ -56,7 +56,9 @@ export function ContactDialog({
       <p>{t("contact.body")}</p>
       <div className="contact-address">
         <span className="contact-email" ref={address}>
-          {contactEmails.support}
+          {/* On a narrow screen the address breaks after the @, not inside the domain. */}
+          {contactEmails.support.split("@")[0]}@<wbr />
+          {contactEmails.support.split("@")[1]}
         </span>
         <IconButton
           label={t("contact.copy")}

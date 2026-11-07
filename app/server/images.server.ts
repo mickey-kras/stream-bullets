@@ -73,7 +73,11 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
 export async function deleteAvatar(env: AppEnv, userId: string): Promise<void> {
   const url = `/images/avatar/${userId}`;
   await env.DB.batch([
-    env.DB.prepare("UPDATE user SET image = NULL, updated_at = ? WHERE id = ? AND image = ?").bind(Date.now(), userId, url),
+    env.DB.prepare("UPDATE user SET image = NULL, updated_at = ? WHERE id = ? AND image = ?").bind(
+      Date.now(),
+      userId,
+      url,
+    ),
     env.DB.prepare("UPDATE streamers SET avatar = NULL WHERE owner_id = ? AND avatar = ?").bind(userId, url),
   ]);
   await env.IMAGES.delete(`avatar/${userId}`);

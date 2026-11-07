@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { MODERATION_REASONS, type ModerationReason, type PageAction } from "../../admin-types";
 import { t, type MessageId } from "../../i18n";
+import { reasonLabels } from "../../lib/moderation";
 import type { StreamerStatus } from "../../types";
 import { StreamerLogo } from "../ui/avatar";
 import { DialogActions } from "../ui/dialog";
@@ -19,20 +20,6 @@ export interface ModeratedPage {
   avatar: string | null;
   ownerAvatarPreset: number | null;
   status: StreamerStatus;
-}
-
-export const reasonLabels: Record<ModerationReason, MessageId> = {
-  illegal: "moderation.reason.illegal",
-  harassment: "moderation.reason.harassment",
-  spam: "moderation.reason.spam",
-  privacy: "moderation.reason.privacy",
-  impersonation: "moderation.reason.impersonation",
-  other: "moderation.reason.other",
-};
-
-/** A stored reason in words. Older rows may hold free text, which shows as written. */
-export function reasonText(reason: string): string {
-  return reason in reasonLabels ? t(reasonLabels[reason as ModerationReason]) : reason;
 }
 
 const actionCopy: Record<PageAction, { verb: MessageId; title: MessageId; body: MessageId; done: MessageId }> = {
@@ -114,8 +101,10 @@ export function ModerateSheet({
     setBusy(true);
     setError("");
     try {
-      await adminRequest<unknown>(`/api/admin/streamers/${page.id}`, "POST", input);
-      await onDone(t(copy.done, { handle: page.handle }));
+      const result = await adminRequest<{ emailed?: boolean }>(`/api/admin/streamers/${page.id}`, "POST", input);
+      const done: string = t(copy.done, { handle: page.handle });
+      if (!input.notify) await onDone(done);
+      else await onDone(`${done} ${t(result.emailed ? "moderation.emailed" : "moderation.inAppOnly")}`);
     } catch (error_: unknown) {
       if (needsStepUp(error_)) setPending(input);
       else setError(errorText(error_));

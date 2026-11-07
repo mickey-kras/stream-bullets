@@ -20,7 +20,7 @@ import { EmptyState } from "../components/common";
 import { SignInDialog } from "../components/shell/sign-in-dialog";
 import { StreamerLogo } from "../components/ui/avatar";
 import { readIntent } from "../lib/directory";
-import { shellFromMatches, useShell } from "../lib/shell";
+import { paths, shellFromMatches, useShell } from "../lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, type JsonLd } from "../lib/structured-data";
 import { CommunityView } from "../components/community/community-view";
 import { IdeaDialog } from "../components/ideas/idea-dialog";
@@ -33,6 +33,7 @@ import { TopicBoard } from "../components/streamer/topic-board";
 import { SupportSection } from "../components/support/support";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
 import { Icon } from "../components/ui/icon";
+import { IconButton } from "../components/ui/icon-button";
 import { useToast } from "../components/ui/toast";
 import { t, type MessageId } from "../i18n";
 import { errorMessage, postJson, requestJson } from "../components/api";
@@ -173,6 +174,8 @@ export default function StreamerPage(): ReactNode {
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [extra, setExtra] = useState<Entry[]>([]);
+  /** Spins the polls refresh icon once per click (item 20). */
+  const [refreshes, setRefreshes] = useState<number>(0);
   const [cursor, setCursor] = useState<string | null>(board.nextCursor);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const generation = useRef<number>(0);
@@ -298,9 +301,6 @@ export default function StreamerPage(): ReactNode {
     setExtra([]);
     navigate(view);
   }
-
-  const overlayQuery: string = loadedSelected ? `?poll=${loadedSelected.id}` : "";
-  const overlayUrl: string = `/@${streamer.handle}/overlay${overlayQuery}`;
 
   function renderDiscussion(entry: Entry): ReactNode {
     return (
@@ -440,7 +440,7 @@ export default function StreamerPage(): ReactNode {
             <h1>{t("polls.title")}</h1>
             <p>{t("polls.lead")}</p>
           </div>
-          {owner && writable && (
+          {owner && writable && !loadedSelected && (
             <button className="gold" type="button" onClick={() => setDialog("poll")}>
               <Icon name="plus" size={18} />
               {t("polls.create")}
@@ -454,39 +454,43 @@ export default function StreamerPage(): ReactNode {
               {t("live.reconnect")}
             </button>
           )}
-          <button
-            type="button"
+          <IconButton
+            label={t("polls.refresh")}
+            icon="refresh"
+            spin={refreshes}
             disabled={revalidator.state !== "idle"}
             onClick={() => {
+              setRefreshes((value: number) => value + 1);
               revalidator.revalidate();
             }}
-          >
-            {t("polls.refresh")}
-          </button>
+          />
         </div>
         <div className="poll-toolbar">
-          <div className="tabs" aria-label={t("polls.sorting")}>
-            {(["newest", "top"] as const).map((value: SortOrder) => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={sort === value}
-                className={sort === value ? "active" : ""}
-                onClick={() => changeBoard("sort", value)}
-              >
-                {value === "newest" ? t("polls.newest") : t("entry.sortTop")}
-              </button>
-            ))}
-          </div>
-          {loadedSelected && (
+          {loadedSelected ? (
             <button type="button" onClick={() => navigate("polls")}>
               <Icon name="chevron-left" size={16} />
               {t("polls.all")}
             </button>
+          ) : (
+            <fieldset className="tabs sort-switch">
+              <legend className="sr-only">{t("polls.sorting")}</legend>
+              {(["newest", "top"] as const).map((value: SortOrder) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={sort === value}
+                  className={sort === value ? "active" : ""}
+                  onClick={() => changeBoard("sort", value)}
+                >
+                  {value === "newest" ? t("polls.newest") : t("entry.sortTop")}
+                </button>
+              ))}
+            </fieldset>
           )}
           {owner && (
-            <Link className="text-link" to={overlayUrl}>
-              {t("polls.obsOverlay")}
+            <Link className="text-link" to={paths.overlayControl}>
+              <Icon name="overlay" size={16} />
+              {t("account.overlayControl")}
             </Link>
           )}
         </div>

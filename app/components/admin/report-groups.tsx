@@ -190,13 +190,27 @@ function ItemList({
   );
 }
 
+/** A confirm button's state: busy while `onConfirm` runs, and the error text when it fails. */
+function useConfirm(onConfirm: () => Promise<void>): { busy: boolean; error: string; run: () => void } {
+  const [busy, setBusy] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const run = (): void => {
+    setBusy(true);
+    setError("");
+    onConfirm().catch((error_: unknown) => {
+      setError(errorText(error_));
+      setBusy(false);
+    });
+  };
+  return { busy, error, run };
+}
+
 function ResolveSheet({
   pending,
   onClose,
   onConfirm,
 }: Readonly<{ pending: NonNullable<Pending>; onClose: () => void; onConfirm: () => Promise<void> }>): ReactNode {
-  const [busy, setBusy] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const { busy, error, run } = useConfirm(onConfirm);
   const remove = pending.action === "remove";
   const count = pending.item.reports.filter((report) => report.status === "open").length;
   return (
@@ -208,19 +222,7 @@ function ResolveSheet({
       name="resolve-report"
       actions={
         <DialogActions>
-          <button
-            type="button"
-            className={remove ? "danger" : "gold"}
-            disabled={busy}
-            onClick={() => {
-              setBusy(true);
-              setError("");
-              onConfirm().catch((error_: unknown) => {
-                setError(errorText(error_));
-                setBusy(false);
-              });
-            }}
-          >
+          <button type="button" className={remove ? "danger" : "gold"} disabled={busy} onClick={run}>
             <Icon name={remove ? "trash" : "check"} size={18} />
             {t(remove ? "admin.reports.remove" : "admin.reports.dismiss")}
           </button>
@@ -241,8 +243,7 @@ function DismissAllSheet({
   onClose,
   onConfirm,
 }: Readonly<{ group: ReportGroup; onClose: () => void; onConfirm: () => Promise<void> }>): ReactNode {
-  const [busy, setBusy] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const { busy, error, run } = useConfirm(onConfirm);
   const handle = group.streamer?.handle ?? "";
   return (
     <Sheet
@@ -253,19 +254,7 @@ function DismissAllSheet({
       name="dismiss-all"
       actions={
         <DialogActions>
-          <button
-            type="button"
-            className="gold"
-            disabled={busy}
-            onClick={() => {
-              setBusy(true);
-              setError("");
-              onConfirm().catch((error_: unknown) => {
-                setError(errorText(error_));
-                setBusy(false);
-              });
-            }}
-          >
+          <button type="button" className="gold" disabled={busy} onClick={run}>
             <Icon name="check" size={18} />
             {t("admin.reports.dismissAll")}
           </button>
@@ -518,7 +507,7 @@ export function ReportGroups({
           <Icon name="search" size={18} />
         </span>
       </search>
-      <nav className="tabs status-tabs" aria-label={t("admin.reports.statusLabel")}>
+      <nav className="tabs status-tabs level-2" aria-label={t("admin.reports.statusLabel")}>
         {reportFilters.map((item) => (
           <Link
             key={item.value}

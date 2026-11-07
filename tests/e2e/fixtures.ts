@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import type { Browser, BrowserContext } from "@playwright/test";
+import type { Browser, BrowserContext, BrowserContextOptions } from "@playwright/test";
 import { z } from "zod";
 
 export const origin: string = "http://localhost:5173";
@@ -13,10 +13,16 @@ export async function accounts(): Promise<Record<string, { id: string; cookie: s
 }
 
 /** A browser context signed in as a seeded role. Each spec uses its own IP block for the rate limiter. */
-export async function signedIn(browser: Browser, role: string, ip: number): Promise<BrowserContext> {
+export async function signedIn(
+  browser: Browser,
+  role: string,
+  ip: number,
+  options: BrowserContextOptions = {},
+): Promise<BrowserContext> {
   const session = (await accounts())[role];
   if (!session) throw new Error("Unknown test account.");
   const context = await browser.newContext({
+    ...options,
     baseURL: origin,
     extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${ip}`, Origin: origin },
   });

@@ -331,7 +331,7 @@ function RequestsView({ status, queue }: Readonly<{ status: ApplicationStatus; q
   return (
     <>
       <p>{t("admin.requests.intro")}</p>
-      <nav className="tabs status-tabs" aria-label={t("admin.requests.statusLabel")}>
+      <nav className="tabs status-tabs level-2" aria-label={t("admin.requests.statusLabel")}>
         {statuses.map((item) => (
           <Link
             key={item.value}

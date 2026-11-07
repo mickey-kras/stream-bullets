@@ -2,7 +2,8 @@ import type { z } from "zod";
 import type { AppEnv } from "../env";
 import type { ContentReport, ReportQueue, ReportReason, ReportStatus, ReportTargetKind } from "../types";
 import { requireAdmin } from "./access.server";
-import { consumeMutationQuota, deleteComment, deleteEntry } from "./data.server";
+import { deleteComment } from "./comments.server";
+import { consumeMutationQuota, deleteEntry } from "./data.server";
 import { auditStatement } from "./audit.server";
 import { HttpError } from "./http.server";
 import {

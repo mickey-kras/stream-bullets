@@ -131,26 +131,158 @@ test("streamer pages carry JSON-LD for search engines and agents", async ({ page
   expect(site["@graph"].map((node: { "@type": string }) => node["@type"])).toEqual(["WebSite", "Organization"]);
 });
 
-test("German and Russian fit a 390 px phone", async ({ browser }) => {
-  for (const locale of ["de", "ru"]) {
-    const context = await browser.newContext({ baseURL: origin, viewport: { width: 390, height: 844 } });
-    await inLanguage(context, locale);
-    const page = await context.newPage();
-    for (const [name, path] of [
-      ["streamers", "/streamers"],
-      ["streamer", "/@test_host"],
-      ["polls", "/@test_host?view=polls"],
-      ["ai", "/ai"],
-    ] as const) {
-      await page.goto(path);
-      await expect(page.locator("html")).toHaveAttribute("lang", locale);
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-      expect(overflow, `${locale} ${path}`).toBeLessThanOrEqual(0);
-      await shot(page, `${locale}-390-${name}`);
+/**
+ * What does not fit a phone: sideways page scroll, and visible text cut off sideways by its own box, a clipping
+ * ancestor or the screen edge. Chip rows and tab strips scroll sideways by design, and visually hidden text is
+ * for screen readers, so neither counts.
+ */
+async function phoneProblems(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const found: string[] = [];
+    const sideways: number = document.documentElement.scrollWidth - window.innerWidth;
+    if (sideways > 0) found.push(`the page scrolls sideways by ${sideways}px`);
+    const clipper = (element: Element): Element | "scrolls" | null => {
+      for (let node = element.parentElement; node && node !== document.body; node = node.parentElement) {
+        if (getComputedStyle(node).overflowX === "visible") continue;
+        if (node.matches(".filter-chips, .reason-chips, .topic-chips, .tabs, .status-tabs")) return "scrolls";
+        return node;
+      }
+      return null;
+    };
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const text: string = node.textContent?.trim() ?? "";
+      const element: HTMLElement | null = node.parentElement;
+      if (!text || !element?.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
+      if (getComputedStyle(element).textOverflow === "ellipsis" || element.getBoundingClientRect().width <= 2) continue;
+      const clip = clipper(element);
+      if (clip === "scrolls") continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const rects = [...range.getClientRects()].filter((rect: DOMRect) => rect.width > 0 && rect.height > 0);
+      if (rects.length === 0) continue;
+      const box = clip?.getBoundingClientRect();
+      const left: number = Math.max(0, box?.left ?? 0) - 1;
+      const right: number = Math.min(window.innerWidth, box?.right ?? window.innerWidth) + 1;
+      if (rects.some((rect: DOMRect) => rect.left < left || rect.right > right))
+        found.push(`"${text.slice(0, 40)}" is cut off`);
     }
-    await page.goto("/streamers?dialog=a11y");
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await shot(page, `${locale}-390-preferences`);
-    await context.close();
-  }
-});
+    return found;
+  });
+}
+
+/** One phone screen: who looks at it, where, and what to open there first. */
+interface PhoneScreen {
+  name: string;
+  path: string;
+  open?: (page: Page) => Promise<void>;
+}
+
+/** Opens the tab's primary action (New poll, Add event, Add card): the header button, the FAB or the add tile. */
+const headerAction = async (page: Page): Promise<void> =>
+  page.locator("#suggest:visible, button.fab:visible, button.add-card-tile").first().click();
+
+const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[] = [
+  {
+    role: null,
+    ip: 232,
+    screens: [
+      { name: "home", path: "/" },
+      { name: "streamers", path: "/streamers" },
+      { name: "streamer", path: "/@test_host" },
+      { name: "polls", path: "/@test_host?view=polls" },
+      { name: "schedule", path: "/@feature_host?view=schedule" },
+      { name: "community", path: "/@feature_host?view=community" },
+      { name: "about", path: "/@feature_host?view=about" },
+      { name: "ideas", path: "/@streambullets" },
+      { name: "frozen", path: "/@frozen_host" },
+      { name: "privacy", path: "/privacy" },
+      { name: "terms", path: "/terms" },
+      { name: "ai", path: "/ai" },
+      { name: "preferences", path: "/streamers?dialog=a11y" },
+      { name: "language", path: "/streamers?dialog=language" },
+      { name: "sign-in", path: "/streamers?dialog=profile" },
+      {
+        name: "contact",
+        path: "/streamers",
+        open: async (page) => {
+          await page.locator(".footer-compact .footer-link").click();
+          await page.locator(".more-list li").first().getByRole("button").click();
+        },
+      },
+    ],
+  },
+  {
+    role: "reporter",
+    ip: 233,
+    screens: [
+      { name: "account-menu", path: "/streamers", open: (page) => page.locator("button.profile").click() },
+      { name: "profile", path: "/streamers?dialog=profile" },
+      { name: "data", path: "/streamers?dialog=data" },
+      { name: "host", path: "/streamers?dialog=host" },
+      { name: "suggest-topic", path: "/@test_host?intent=suggest" },
+      { name: "suggest-idea", path: "/@streambullets?intent=suggest" },
+      {
+        name: "report",
+        path: "/@feature_host?view=topics",
+        open: async (page) => {
+          await page.locator("#topics a, #topics button").filter({ hasText: "Mic shootout" }).first().click();
+          await page.locator("#detail .content-actions button").last().click();
+        },
+      },
+    ],
+  },
+  {
+    role: "featureowner",
+    ip: 234,
+    screens: [
+      { name: "edit-page", path: "/@feature_host?dialog=page" },
+      { name: "overlay-control", path: "/overlay-control" },
+      { name: "create-poll", path: "/@feature_host?view=polls", open: headerAction },
+      { name: "add-event", path: "/@feature_host?view=schedule", open: headerAction },
+      { name: "add-card", path: "/@feature_host?view=community", open: headerAction },
+    ],
+  },
+  {
+    role: "admin",
+    ip: 235,
+    screens: [
+      { name: "admin-requests", path: "/admin" },
+      { name: "admin-reports", path: "/admin?view=reports" },
+      { name: "admin-keys", path: "/admin?view=keys" },
+      {
+        name: "admin-moderate",
+        path: "/admin?view=pages",
+        open: (page) => page.locator("article button.danger").first().click(),
+      },
+    ],
+  },
+];
+
+for (const locale of ["de", "ru"])
+  for (const group of phoneScreens)
+    test(`${locale === "de" ? "German" : "Russian"} fits a 390 px phone: ${group.role ?? "signed out"}`, async ({
+      browser,
+    }) => {
+      test.setTimeout(90_000);
+      const options = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
+      const phone = group.role
+        ? await signedIn(browser, group.role, group.ip, options)
+        : await browser.newContext({
+            baseURL: origin,
+            ...options,
+            extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${group.ip}` },
+          });
+      await inLanguage(phone, locale);
+      const page = await phone.newPage();
+      for (const screen of group.screens) {
+        await page.goto(screen.path);
+        await expect(page.locator("html")).toHaveAttribute("lang", locale);
+        await screen.open?.(page);
+        if (screen.path.includes("dialog=") || screen.path.includes("intent=") || screen.open)
+          await expect(page.locator("[role=dialog], .account-menu:not([hidden])").last()).toBeVisible();
+        expect(await phoneProblems(page), `${locale} ${screen.name}`).toEqual([]);
+        await shot(page, `${locale}-390-${screen.name}`);
+      }
+      await phone.close();
+    });

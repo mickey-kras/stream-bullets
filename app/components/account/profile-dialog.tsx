@@ -140,7 +140,6 @@ export function ProfileDialog({
     }
   }
 
-
   async function applyCrop(): Promise<void> {
     const handle: CropperHandle | null = cropper.current;
     if (!handle) return;
@@ -151,7 +150,9 @@ export function ProfileDialog({
       setCropSource(null);
       setError("");
       // Back on the profile step, focus the photo option the crop selected.
-      requestAnimationFrame(() => document.querySelector<HTMLElement>('.avatar-grid [data-avatar="photo"] input')?.focus());
+      requestAnimationFrame(() =>
+        document.querySelector<HTMLElement>('.avatar-grid [data-avatar="photo"] input')?.focus(),
+      );
     } catch (error_: unknown) {
       setError(errorMessage(error_));
     }

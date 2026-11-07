@@ -81,7 +81,6 @@ input[type="file"]::file-selector-button { margin-right: 12px; padding: 8px 14px
 input[type="file"]:hover::file-selector-button { background: var(--btn-hover); }
 :root, body { overflow: clip; }
 [lang="en"] { hyphens: manual; -webkit-hyphens: manual; }
-[data-confirm-submit]:disabled { opacity: 1; background: var(--tab); color: var(--muted); border: 1px dashed var(--line); }
 [data-ov-enlarge] { cursor: zoom-in; }
 [data-ov-enlarge][aria-pressed="true"] { cursor: zoom-out; }
 main [id] { scroll-margin-top: 24px; }
