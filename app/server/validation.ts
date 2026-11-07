@@ -250,9 +250,10 @@ export function readDisplayPrefs(value: unknown): z.infer<typeof displayPrefsSch
   const shape = displayPrefsSchema.shape;
   const result: Record<string, unknown> = {};
   for (const [key, field] of Object.entries(saved)) {
-    const schema = shape[key as keyof typeof shape];
-    const parsed = schema?.safeParse(field);
-    if (parsed?.success && parsed.data !== undefined) result[key] = parsed.data;
+    // `constructor` or `__proto__` would find Object.prototype members, which have no safeParse.
+    if (!Object.hasOwn(shape, key)) continue;
+    const parsed = shape[key as keyof typeof shape].safeParse(field);
+    if (parsed.success && parsed.data !== undefined) result[key] = parsed.data;
   }
   return result as z.infer<typeof displayPrefsSchema>;
 }

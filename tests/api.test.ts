@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import type { AppEnv } from "../app/env";
 import { action } from "../app/routes/api";
 import { apiRoutes } from "../app/server/api";
+import { loadShell } from "../app/lib/shell.server";
 import { preferenceCookies } from "../app/server/api/cookies";
 import { readDisplayPrefs } from "../app/server/validation";
 import { serveImage } from "../app/server/images.server";
@@ -123,15 +124,16 @@ describe("profile, language and preferences", (): void => {
     expect(saved.status).toBe(200);
     expect(((await saved.json()) as { viewer: Viewer }).viewer).toMatchObject({ name: "New name", avatarPreset: 17 });
     const cleared = await call("PATCH", "profile", { user: "viewer", body: { avatarPreset: null } });
-    expect(((await cleared.json()) as { viewer: Viewer }).viewer).toMatchObject({ name: "New name", avatarPreset: null });
+    expect(((await cleared.json()) as { viewer: Viewer }).viewer).toMatchObject({
+      name: "New name",
+      avatarPreset: null,
+    });
     for (const body of [{}, { avatarPreset: 18 }, { avatarPreset: 1.5 }, { name: "" }, { image: "/x" }]) {
       expect((await call("PATCH", "profile", { user: "viewer", body })).status).toBe(400);
     }
     // The settings page's endpoints are retired with it: the dialogs use PATCH /api/profile and /api/streamer.
     expect((await call("POST", "account", { user: "viewer", body: { name: "Legacy" } })).status).toBe(404);
-    expect((await call("POST", "profile", { user: "viewer", body: { handle: "x_page", name: "X" } })).status).toBe(
-      405,
-    );
+    expect((await call("POST", "profile", { user: "viewer", body: { handle: "x_page", name: "X" } })).status).toBe(405);
     // Removing an uploaded picture (a preset was chosen) is idempotent for an account without one.
     expect(await (await call("DELETE", "images/avatar", { user: "viewer" })).json()).toEqual({ avatar: null });
   });
@@ -187,15 +189,27 @@ describe("profile, language and preferences", (): void => {
     expect((await call("POST", "preference-cookies", { body: { prefs: { text: "999" } } })).status).toBe(400);
     expect((await call("POST", "preference-cookies", { body: { theme: "dark" } })).status).toBe(400);
   });
+
+  it("skips prototype keys in a crafted prefs cookie instead of failing the page (security review finding 5)", async (): Promise<void> => {
+    for (const key of ["constructor", "__proto__", "toString", "hasOwnProperty", "valueOf"])
+      expect([key, readDisplayPrefs(`{"${key}":1,"contrast":"high"}`)]).toEqual([key, { contrast: "high" }]);
+    expect(readDisplayPrefs('{"__proto__":{"contrast":"high"}}')).toEqual({});
+    const crafted = encodeURIComponent('{"constructor":1,"toString":"x","contrast":"high"}');
+    const request = new Request(`${origin}/`, { headers: { Cookie: `sb_prefs=${crafted}` } });
+    const shell = await loadShell(request, { env, nonce: "nonce", responseHeaders: new Headers() });
+    expect(shell.prefs).toEqual({ contrast: "high" });
+  });
 });
 
 describe("directory", (): void => {
   it("pins official pages first, hides suspended pages, and searches names and handles", async (): Promise<void> => {
     const page = (await (await call("GET", "streamers")).json()) as StreamerDirectory;
-    expect(page.streamers.map((streamer: Streamer) => [streamer.handle, streamer.isOfficial, streamer.status])).toEqual([
-      ["streambullets", true, "active"],
-      ["zed_page", false, "active"],
-    ]);
+    expect(page.streamers.map((streamer: Streamer) => [streamer.handle, streamer.isOfficial, streamer.status])).toEqual(
+      [
+        ["streambullets", true, "active"],
+        ["zed_page", false, "active"],
+      ],
+    );
     expect(page.streamers[1]).toMatchObject({ logo: null, statusReason: null, handleChangedAt: null });
     const search = (await (await call("GET", "streamers?query=ZED")).json()) as StreamerDirectory;
     expect(search.streamers.map((streamer: Streamer) => streamer.handle)).toEqual(["zed_page"]);
@@ -305,7 +319,9 @@ describe("threads", (): void => {
     const reply = await post("owner", "Reply", first);
     const deeper = await post("viewer", "Deeper", reply);
     const second = await post("owner", "Second");
-    expect((await call("POST", "comments", { user: "viewer", body: { action: "delete", id: first } })).status).toBe(200);
+    expect((await call("POST", "comments", { user: "viewer", body: { action: "delete", id: first } })).status).toBe(
+      200,
+    );
     const response = await call("GET", `entries/${ids.topic}/comments?view=thread`);
     const { comments, nextCursor } = (await response.json()) as ThreadSnapshot;
     expect(nextCursor).toBeNull();
