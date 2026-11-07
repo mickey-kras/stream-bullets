@@ -321,6 +321,36 @@ describe("schedule storage", (): void => {
     expect(rows[3].series_id).toBeNull();
   });
 
+  it("never writes back the newest stream when only that one is deleted", async (): Promise<void> => {
+    const all = await weekly();
+    await deleteEvent(env, "owner", all.at(-1)!.id, { scope: "one" });
+    expect(await topUpSeries(env, Date.now())).toBe(0);
+    expect(await topUpSeries(env, Date.now() + 7 * day)).toBe(1);
+    const starts = (await seriesRows()).map((row) => row.starts_at);
+    expect(starts).toEqual([...all.slice(0, -1).map((event) => event.startsAt), all.at(-1)!.startsAt + 7 * day]);
+    // A series with no streams left loses its mark on the next run.
+    const marks = async (): Promise<unknown> =>
+      env.DB.prepare("SELECT count(*) AS n FROM stream_series WHERE streamer_id=?").bind(streamerId).first("n");
+    expect(await marks()).toBe(1);
+    await deleteEvent(env, "owner", all[0].id, { scope: "following" });
+    await topUpSeries(env, Date.now());
+    expect(await marks()).toBe(0);
+  });
+
+  it("follows the new days after this and the following ones are edited", async (): Promise<void> => {
+    const all = await weekly();
+    const moved = new Date(all[2].startsAt + day);
+    await patchEvent(env, "owner", all[2].id, {
+      action: "edit",
+      scope: "following",
+      ...input(moved),
+      repeatDays: 1 << moved.getUTCDay(),
+    });
+    const before = (await seriesRows()).at(-1)!.starts_at;
+    expect(await topUpSeries(env, Date.now() + 7 * day)).toBe(1);
+    expect((await seriesRows()).at(-1)!.starts_at).toBe(before + 7 * day);
+  });
+
   it("does not copy a stream edited or cancelled on its own into later ones", async (): Promise<void> => {
     const all = await weekly();
     const newest = all.at(-1)!;
