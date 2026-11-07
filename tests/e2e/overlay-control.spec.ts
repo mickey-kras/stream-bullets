@@ -26,7 +26,10 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await message.fill("Back in 5 minutes 4");
   await expect(control.getByRole("radio", { name: /Message banner/ })).toBeChecked();
   await control.getByRole("button", { name: "Save message" }).click();
+  await expect(control.getByRole("button", { name: "Save message" })).toBeDisabled();
   await control.getByRole("button", { name: "Hype" }).click();
+  await expect(control.getByRole("button", { name: "Hype" })).toHaveAttribute("aria-pressed", "true");
+  await expect(control.getByRole("button", { name: /Take/ })).toBeEnabled();
   await control.locator("body").press("t");
   await expect(obs.locator('[data-overlay-source="message"]')).toContainText("Back in 5 minutes 4");
   await expect(obs.locator(".ov-message.style-hype")).toBeVisible();
