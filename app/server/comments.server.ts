@@ -146,7 +146,7 @@ export const REMOVED_COMMENT_TEXT = "[removed]";
 /**
  * Deletes a comment (R2). A comment with replies becomes a "Comment removed" placeholder: its text
  * is erased, its likes go, and the thread keeps its shape. A comment without replies is deleted, and
- * a placeholder parent left with no replies is deleted with it. Account deletion still removes the
+ * every placeholder above it left with no replies is deleted with it. Account deletion still removes the
  * account's comments outright; replies under them become top-level comments.
  */
 async function removeComment(env: AppEnv, viewerId: string, id: string, comment: CommentPermission): Promise<void> {
@@ -169,9 +169,15 @@ async function removeComment(env: AppEnv, viewerId: string, id: string, comment:
       "DELETE FROM comment_likes WHERE comment_id=? AND EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND removed_at IS NOT NULL)",
     ).bind(id, id),
     env.DB.prepare(`DELETE FROM entry_comments WHERE id IN (${ownership}) AND NOT ${hasReplies}`).bind(...scope),
-    env.DB.prepare(`DELETE FROM entry_comments WHERE id=? AND removed_at IS NOT NULL AND NOT ${hasReplies}`).bind(
-      comment.parent_id,
-    ),
+    // Placeholders up the chain whose only reply is the next one being deleted: A(removed) → B(removed) → C.
+    env.DB.prepare(`WITH RECURSIVE gone(id, parent_id) AS (
+        SELECT id, parent_id FROM entry_comments WHERE id=? AND removed_at IS NOT NULL AND NOT ${hasReplies}
+        UNION ALL
+        SELECT c.id, c.parent_id FROM entry_comments c JOIN gone g ON c.id=g.parent_id
+          WHERE c.removed_at IS NOT NULL
+            AND NOT EXISTS(SELECT 1 FROM entry_comments r WHERE r.parent_id=c.id AND r.id<>g.id)
+      )
+      DELETE FROM entry_comments WHERE id IN (SELECT id FROM gone)`).bind(comment.parent_id),
     env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
   ]);
   if (result[0].meta.changes === 0 && result[2].meta.changes === 0) throw new HttpError(404, "Comment not found.");
