@@ -205,6 +205,15 @@ export default function StreamerPage(): ReactNode {
     setSearchParams(params);
   }
 
+  // A create navigates to the new entry, then its dialog closes. That close must not rewrite the URL from the
+  // pre-navigation search params, or the entry would drop out of it.
+  const created = useRef<boolean>(false);
+  function closeIntentDialog(): void {
+    setDialog(null);
+    if (created.current) created.current = false;
+    else if (searchParams.has("intent")) setParam("intent", null);
+  }
+
   function setParam(name: string, value: string | null): void {
     const params = new URLSearchParams(searchParams);
     if (value === null) params.delete(name);
@@ -709,12 +718,11 @@ export default function StreamerPage(): ReactNode {
         mode={dialog === "poll" ? "poll" : "topic"}
         open={dialog === "topic" || dialog === "poll"}
         onOpenChange={(open: boolean) => {
-          if (open) return;
-          setDialog(null);
-          if (searchParams.has("intent")) setParam("intent", null);
+          if (!open) closeIntentDialog();
         }}
         onCreate={async (body: unknown) => {
           const result = await mutate(body);
+          created.current = true;
           navigate(dialog === "poll" ? "polls" : "topics", result.id);
         }}
       />
@@ -731,11 +739,12 @@ export default function StreamerPage(): ReactNode {
           key={dialog === "idea" ? "open" : "closed"}
           open={dialog === "idea"}
           onOpenChange={(open: boolean) => {
-            setDialog(open ? "idea" : null);
-            if (!open && searchParams.has("intent")) setParam("intent", null);
+            if (open) setDialog("idea");
+            else closeIntentDialog();
           }}
           onCreate={async (body) => {
             const result = await mutate({ action: "create", kind: "topic", ...body });
+            created.current = true;
             toast(t("ideas.thanks"));
             setSearchParams(new URLSearchParams({ view: "topics", entry: result.id }));
           }}
