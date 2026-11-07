@@ -63,6 +63,42 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   await context.close();
 });
 
+test("an admin sets an idea's status from the detail view", async ({ browser }) => {
+  const viewer = await signedIn(browser, "viewer", 110);
+  const board = await viewer.request.get("/api/streamers/streambullets");
+  const { entries } = (await board.json()) as { entries: { id: string; title: string }[] };
+  const idea = entries.find((entry) => entry.title === "Dark mode for the overlay");
+  if (!idea) throw new Error("The seeded idea is missing.");
+  const viewerPage = await viewer.newPage();
+  await viewerPage.goto(`/@streambullets?entry=${idea.id}`);
+  await expect(viewerPage.locator("#detail .idea-status")).toHaveText("Planned");
+  await expect(viewerPage.getByText("Status (admins only)")).toHaveCount(0);
+  expect(
+    (await viewer.request.post(`/api/admin/entries/${idea.id}/status`, { data: { status: "shipped" } })).status(),
+  ).toBe(403);
+
+  const admin = await signedIn(browser, "admin", 111);
+  const page = await admin.newPage();
+  await page.goto(`/@streambullets?entry=${idea.id}`);
+  const detail = page.locator("#detail");
+  const status = detail.getByRole("combobox", { name: "Status (admins only)" });
+  await expect(status).toBeVisible();
+  await expect(detail.getByRole("button", { name: "Save status" })).toBeDisabled();
+  await status.click();
+  await page.getByRole("option", { name: "Not planned" }).click();
+  await detail.getByLabel("Reason shown to everyone").fill("It clashes with OBS themes.");
+  await detail.getByRole("button", { name: "Save status" }).click();
+  await expect(detail.locator(".idea-status")).toHaveText("Not planned");
+  await expect(detail.locator(".idea-reason")).toContainText("It clashes with OBS themes.");
+  await status.click();
+  await page.getByRole("option", { name: "Planned", exact: true }).click();
+  await expect(detail.getByLabel("Reason shown to everyone")).toHaveCount(0);
+  await detail.getByRole("button", { name: "Save status" }).click();
+  await expect(detail.locator(".idea-status")).toHaveText("Planned");
+  await viewer.close();
+  await admin.close();
+});
+
 test("frozen and suspended pages show banners and keep writes off", async ({ browser }) => {
   const viewer = await signedIn(browser, "viewer", 106);
   const page = await viewer.newPage();
