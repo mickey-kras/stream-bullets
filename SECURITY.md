@@ -8,6 +8,8 @@ Admin actions need an administrator account (a verified address in `ADMIN_EMAILS
 
 An administrator can also remove a topic, poll or comment from a streamer page. That removal uses the same check, and it writes a row to `moderation_actions`. Authors and page owners remove their own content without a key.
 
+Without an `ADMIN_STEP_UP` value, the mode is `report`. In that mode, an admin can act without a key check. The server then writes a `step_up_missing` row with the admin and the route.
+
 - Each assertion uses a random 32-byte challenge. The server stores the challenge per session and purpose for 2 minutes. It deletes the challenge on first use, so an attacker cannot use a response again.
 - The server checks the origin against `APP_ORIGIN` and the relying party ID hash against its host name. The key must report user presence and user verification (PIN or biometrics).
 - The signature counter must increase when the key reports one. A compare-and-set update stops two parallel uses of one assertion.

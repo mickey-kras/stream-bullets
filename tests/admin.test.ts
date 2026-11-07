@@ -229,14 +229,53 @@ describe("admin authorisation", (): void => {
     const status = await body<StepUpStatus>(await asAdmin("GET", "admin/stepup"));
     expect(status).toMatchObject({ mode: "report", keys: 0, need: "none", canRegister: true, verifiedAt: null });
     expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
-    expect(console.warn).toHaveBeenCalledWith("admin_step_up_missing");
+    expect(console.warn).toHaveBeenCalledWith(
+      JSON.stringify({ event: "admin_step_up_missing", route: "GET /api/admin/streamers", need: "keys" }),
+    );
     const frozen = await asAdmin("POST", `admin/streamers/${ids.page}`, { body: { action: "freeze", reason: "spam" } });
     expect(frozen.status).toBe(200);
-    const audit = await env.DB.prepare("SELECT action, metadata FROM moderation_actions").first<{
+    const audit = await env.DB.prepare("SELECT action, metadata FROM moderation_actions WHERE action='freeze'").first<{
       action: string;
       metadata: string;
     }>();
     expect(audit).toEqual({ action: "freeze", metadata: JSON.stringify({ stepUp: "missing" }) });
+  });
+
+  it("writes an audit row with the actor and the route when report mode lets an admin through (security review finding 7)", async (): Promise<void> => {
+    const missing = async (): Promise<{ target_id: string; actor_id: string; metadata: string }[]> =>
+      (
+        await env.DB.prepare(
+          "SELECT target_id, actor_id, metadata FROM moderation_actions WHERE target_kind='admin_session' AND action='step_up_missing' ORDER BY created_at, metadata",
+        ).all<{ target_id: string; actor_id: string; metadata: string }>()
+      ).results;
+    // No keys yet: enforce would ask for keys.
+    expect((await asAdmin("GET", "admin/report-groups?status=open")).status).toBe(200);
+    expect(
+      (await asAdmin("POST", `admin/streamers/${ids.page}`, { body: { action: "freeze", reason: "spam" } })).status,
+    ).toBe(200);
+    const rows = await missing();
+    expect(rows.map((row) => [row.actor_id, JSON.parse(row.metadata)])).toEqual([
+      ["admin", { route: "GET /api/admin/report-groups", need: "keys", sensitive: false }],
+      ["admin", { route: `POST /api/admin/streamers/${ids.page}`, need: "keys", sensitive: true }],
+    ]);
+    // The session is a hash, never the raw id.
+    expect(rows[0].target_id).toMatch(/^[0-9a-f]{64}$/u);
+    expect(rows[0].target_id).not.toContain("s-admin");
+    // With two keys and a stale step-up, enforce would ask for a key check.
+    const [first] = await twoKeys();
+    await age(16 * minute);
+    expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
+    expect(JSON.parse((await missing()).at(-1)?.metadata ?? "{}")).toMatchObject({ need: "step_up" });
+    // A fresh step-up, the off mode, and a refused non-admin write nothing.
+    expect((await stepUp(first)).status).toBe(200);
+    const before = (await missing()).length;
+    expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
+    env.ADMIN_STEP_UP = "off";
+    await age(16 * minute);
+    expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
+    env.ADMIN_STEP_UP = undefined;
+    expect((await call("GET", "admin/streamers", { user: "viewer" })).status).toBe(403);
+    expect(await missing()).toHaveLength(before);
   });
 
   it("skips the step-up check entirely when it is off", async (): Promise<void> => {

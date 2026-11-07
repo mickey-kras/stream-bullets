@@ -199,7 +199,20 @@ export async function requireAdminSession(
         "step_up_required",
       );
   }
-  if (!fresh) console.warn("admin_step_up_missing");
+  const wouldBlock: StepUpNeed = current.keys < REQUIRED_KEYS ? "keys" : fresh ? "none" : "step_up";
+  if (wouldBlock !== "none") {
+    // A log line alone is easy to miss, so report mode also writes an audit row with the actor and the route.
+    const route = `${request.method} ${new URL(request.url).pathname}`;
+    console.warn(JSON.stringify({ event: "admin_step_up_missing", route, need: wouldBlock }));
+    await recordAudit(app.env, {
+      targetKind: "admin_session",
+      targetId: await sessionLabel(sessionId),
+      action: "step_up_missing",
+      actorId: viewer.id,
+      metadata: { route, need: wouldBlock, sensitive: options.sensitive === true },
+      createdAt: now,
+    });
+  }
   return { viewer, sessionId, stepUp: fresh ? "fresh" : "missing" };
 }
 
