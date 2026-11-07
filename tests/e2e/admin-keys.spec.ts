@@ -93,7 +93,9 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await page.getByRole("button", { name: "Rename YubiKey – desk" }).click();
   await page.getByRole("dialog").getByLabel("Key name").fill("YubiKey – keyring");
   await page.getByRole("dialog").getByRole("button", { name: "Save" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Renamed" })).toHaveText("Renamed the key to YubiKey – keyring.");
+  await expect(page.getByRole("status").filter({ hasText: "Renamed" })).toHaveText(
+    "Renamed the key to YubiKey – keyring.",
+  );
   await expect(page.getByRole("article", { name: "YubiKey – keyring" })).toBeVisible();
   await shot(page, "keys-tab");
 

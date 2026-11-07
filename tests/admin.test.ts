@@ -2,10 +2,20 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import type { AdminPageList, ReportGroup, ReportItemList, SecurityKey, StepUpStatus } from "../app/admin-types";
 import type { AppEnv } from "../app/env";
 import type { CreationOptions, RequestOptions } from "../app/server/stepup.server";
-import { stepUpMode } from "../app/server/stepup.server";
+import { auditStatement } from "../app/server/audit.server";
+import {
+  adminPerson,
+  adminPicture,
+  listModerationPages,
+  moderatePage,
+  setEntryStatus,
+  validPreset,
+} from "../app/server/moderation.server";
+import { listReportGroups, listReportItems } from "../app/server/report-groups.server";
+import { stepUpMode, type AdminSession } from "../app/server/stepup.server";
 import type { StreamerDirectory } from "../app/types";
 import { apiCaller, type CallOptions } from "./helpers/api";
-import { SoftKey } from "./helpers/authenticator";
+import { AT, SoftKey, UP, UV } from "./helpers/authenticator";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 const origin = "https://stream.example.test";
@@ -543,5 +553,147 @@ describe("page moderation and the reports queue", (): void => {
     expect((await asAdmin("POST", `admin/entries/${ids.missing}/remove`, { body: { reason: "spam" } })).status).toBe(
       404,
     );
+  });
+});
+
+describe("admin edge cases", (): void => {
+  const admin: AdminSession = {
+    viewer: { id: "admin", name: "Name admin" } as AdminSession["viewer"],
+    sessionId: "s-admin",
+    stepUp: "off",
+  };
+
+  async function insertKey(id: string, name: string | null, transports: string | null): Promise<void> {
+    await env.DB.prepare(
+      `INSERT INTO passkey (id,name,public_key,user_id,credential_id,counter,device_type,backed_up,transports,created_at)
+        VALUES (?,?,'AA','admin',?,0,'singleDevice',0,?,1)`,
+    )
+      .bind(id, name, `cred-${id}`, transports)
+      .run();
+  }
+
+  it("shapes people and pictures only from values it trusts", (): void => {
+    expect(adminPicture(null, "/images/avatar/x")).toBeNull();
+    expect(adminPicture("x", "https://cdn.example/x.png")).toBeNull();
+    expect(adminPicture("x", "/images/avatar/x")).toBe("/images/avatar/x");
+    expect([validPreset(null), validPreset(-1), validPreset(18), validPreset(4)]).toEqual([null, null, null, 4]);
+    expect(adminPerson(null, "A", null, null)).toBeNull();
+    expect(adminPerson("a", null, null, null)).toBeNull();
+    expect(adminPerson("a", "A", null, 99)).toEqual({ id: "a", name: "A", avatar: null, avatarPreset: null });
+  });
+
+  it("writes audit rows with defaults", async (): Promise<void> => {
+    await auditStatement(env, { targetKind: "streamer", targetId: ids.page, action: "test", actorId: "admin" }).run();
+    const row = await env.DB.prepare(
+      "SELECT reason, note, notify_owner, metadata, streamer_id FROM moderation_actions",
+    ).first<Record<string, unknown>>();
+    expect(row).toEqual({ reason: "", note: "", notify_owner: 0, metadata: null, streamer_id: null });
+  });
+
+  it("validates moderation input and pages through many streamer pages", async (): Promise<void> => {
+    await expect(
+      moderatePage(env, admin, ids.page, { action: "freeze", reason: "nope" as "spam" }),
+    ).rejects.toMatchObject({ status: 400 });
+    await expect(moderatePage(env, admin, "not-a-uuid", { action: "freeze", reason: "spam" })).rejects.toMatchObject({
+      status: 400,
+    });
+    await expect(setEntryStatus(env, admin, ids.missing, { status: "planned" })).rejects.toMatchObject({ status: 404 });
+    expect((await listModerationPages(env, "admin", { status: "frozen" })).pages).toEqual([]);
+
+    const statements = Array.from({ length: 31 }, (_, index) => {
+      const owner = `owner_${index}`;
+      return [
+        env.DB.prepare(
+          "INSERT INTO user (id,name,email,email_verified,image,created_at,updated_at) VALUES (?,?,?,0,?,1,1)",
+        ).bind(owner, `Owner ${index}`, `${index}@tiktok.invalid`, `/images/avatar/${owner}`),
+        env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name,about,logo) VALUES (?,?,?,?,'',?)").bind(
+          crypto.randomUUID(),
+          owner,
+          `page_${String(index).padStart(2, "0")}`,
+          `Page ${index}`,
+          `/images/logo/${owner}`,
+        ),
+      ];
+    });
+    await env.DB.batch(statements.flat());
+    const first = await listModerationPages(env, "admin", { query: "page_" });
+    expect(first.pages).toHaveLength(30);
+    expect(first.nextCursor).toBe("page_29");
+    expect(first.pages[0]).toMatchObject({
+      logo: "/images/logo/owner_0",
+      owner: { email: "", avatar: "/images/avatar/owner_0" },
+    });
+    const second = await listModerationPages(env, "admin", { query: "page_", cursor: first.nextCursor });
+    expect(second).toMatchObject({ nextCursor: null });
+    expect(second.pages.map((page) => page.handle)).toEqual(["page_30"]);
+  });
+
+  it("groups reports of deleted pages and resolved items", async (): Promise<void> => {
+    const gone = crypto.randomUUID();
+    const insert = (status: string, resolvedAt: number | null, streamer: string, target: string): D1PreparedStatement =>
+      env.DB.prepare(
+        `INSERT INTO content_reports (id,target_kind,target_id,streamer_id,reporter_id,reason,snapshot,status,created_at,resolved_at)
+          VALUES (?, 'entry', ?, ?, 'reporter', 'spam', 'Snapshot', ?, ?, ?)`,
+      ).bind(crypto.randomUUID(), target, streamer, status, Date.now(), resolvedAt);
+    await env.DB.batch([
+      insert("dismissed", 5, gone, ids.missing),
+      insert("actioned", 9, ids.page, ids.topic),
+      insert("dismissed", 3, ids.page, ids.topic),
+      env.DB.prepare("UPDATE streamers SET logo='/images/logo/owner' WHERE id=?").bind(ids.page),
+    ]);
+    const resolved = await listReportGroups(env, "admin", { group: "streamer", status: "resolved" });
+    expect(resolved.map((group) => group.streamer?.handle ?? null).sort()).toEqual([null, "zed_page"].sort());
+    expect(resolved.find((group) => group.streamerId === ids.page)?.streamer?.logo).toBe("/images/logo/owner");
+    expect(await listReportGroups(env, "admin", { group: "streamer", status: "all" })).toHaveLength(2);
+    await expect(
+      listReportGroups(env, "admin", { group: "streamer", status: "closed" as "open" }),
+    ).rejects.toMatchObject({ status: 400 });
+    const items = await listReportItems(env, "admin", { streamer: ids.page, status: "resolved" });
+    expect(items.items[0]).toMatchObject({ status: "actioned", resolvedAt: expect.any(Number) });
+    expect((await listReportItems(env, "admin", { streamer: gone, status: "all" })).streamer).toBeNull();
+  });
+
+  it("covers key limits, stored rows without names or transports, and a missing key", async (): Promise<void> => {
+    const refused = await asAdmin("POST", "admin/stepup/options", { body: {} });
+    expect(await body<{ code: string }>(refused)).toMatchObject({ code: "keys_required" });
+    for (let index = 0; index < 10; index++) await insertKey(`k${index}`, index === 0 ? null : `Key ${index}`, null);
+    expect(await body<StepUpStatus>(await asAdmin("GET", "admin/stepup"))).toMatchObject({ registerBlock: "limit" });
+    const limit = await asAdmin("POST", "admin/keys/options", { body: {} });
+    expect(await body<{ code: string }>(limit)).toMatchObject({ code: "key_limit" });
+    const { keys } = await body<{ keys: SecurityKey[] }>(await asAdmin("GET", "admin/keys"));
+    expect(keys[0]).toMatchObject({ name: "Security key", transports: [] });
+    await env.DB.prepare("DELETE FROM passkey").run();
+
+    const first = await SoftKey.create();
+    expect((await addKey(first, "One")).status).toBe(201);
+    expect((await stepUp(first)).status).toBe(200);
+    expect((await asAdmin("DELETE", `admin/keys/${ids.missing}`)).status).toBe(404);
+  });
+
+  it("stores backup flags and refuses a credential id that does not match", async (): Promise<void> => {
+    const key = await SoftKey.create();
+    const options = await body<CreationOptions>(await asAdmin("POST", "admin/keys/options", { body: {} }));
+    const credential = await key.register(options, origin, { flags: UP | UV | AT | 0x08 | 0x10 });
+    const swapped = await asAdmin("POST", "admin/keys", {
+      body: { name: "Swapped", credential: { ...credential, id: "AAAA" } },
+    });
+    expect(swapped.status).toBe(400);
+    const again = await body<CreationOptions>(await asAdmin("POST", "admin/keys/options", { body: {} }));
+    const synced = await key.register(again, origin, { flags: UP | UV | AT | 0x08 | 0x10 });
+    const response = {
+      clientDataJSON: synced.response.clientDataJSON,
+      attestationObject: synced.response.attestationObject,
+    };
+    const added = await asAdmin("POST", "admin/keys", {
+      body: { name: "Synced", credential: { ...synced, response } },
+    });
+    expect(await body<{ key: SecurityKey }>(added)).toMatchObject({ key: { backedUp: true, transports: [] } });
+  });
+
+  it("dismisses a single report through the older endpoint", async (): Promise<void> => {
+    await seedReport("entry", ids.topic, "reporter");
+    const { reports } = await body<{ reports: { id: string }[] }>(await asAdmin("GET", "admin/reports"));
+    const dismissed = await asAdmin("POST", "admin/reports", { body: { id: reports[0].id, action: "dismiss" } });
+    expect(await body<unknown>(dismissed)).toEqual({ status: "dismissed", resolved: 1 });
   });
 });

@@ -48,6 +48,7 @@
   "admin.reports.byItem": "By item",
   "admin.reports.context": "Open in context",
   "admin.reports.deletedPage": "Deleted page",
+  "admin.reports.details": "{name}: “{details}”",
   "admin.reports.dismiss": "Dismiss",
   "admin.reports.dismissAll": "Dismiss all open",
   "admin.reports.dismissAllBody.one": "This closes {count} open report on this page. Nothing is removed.",

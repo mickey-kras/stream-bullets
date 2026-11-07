@@ -95,6 +95,13 @@ function ItemRow({
         {" · "}
         {t("admin.reports.newest")} <DateTime time={newest} />
       </p>
+      {item.reports
+        .filter((report) => report.details)
+        .map((report) => (
+          <p key={report.id} className="application-note">
+            {t("admin.reports.details", { name: personName(report.reporter), details: report.details })}
+          </p>
+        ))}
       {item.entryId && handle && (
         <Link className="text-link" to={`/@${handle}?entry=${item.entryId}`}>
           <Icon name="external" size={16} />
