@@ -1,8 +1,9 @@
-import { listApplications, requireAdmin, reviewApplication, submitApplication } from "../access.server";
+import { listApplications, reviewApplication, submitApplication } from "../access.server";
 import { consumeMutationQuota } from "../data.server";
 import { json, readJson } from "../http.server";
 import { notifyRoom } from "../live.server";
 import { listReports, resolveReport, submitReport } from "../reports.server";
+import { requireAdminSession } from "../stepup.server";
 import {
   applicationQuerySchema,
   applicationReviewSchema,
@@ -11,7 +12,7 @@ import {
   reportResolutionSchema,
   reportSchema,
 } from "../validation";
-import { get, parsedQuery, requireViewer, write, type ApiRoute } from "./router";
+import { get, parsedQuery, write, type ApiRoute } from "./router";
 
 /** The streamer waitlist and content reports, for applicants, reporters and admins. */
 export const moderationRoutes: ApiRoute[] = [
@@ -20,29 +21,28 @@ export const moderationRoutes: ApiRoute[] = [
     await consumeMutationQuota(env, viewer.id);
     return json({ application: await submitApplication(env, viewer.id, input) });
   }),
-  get(/admin\/applications/, async ({ request, env, viewer }) => {
-    const admin = requireViewer(viewer);
-    await requireAdmin(env, admin.id);
+  get(/admin\/applications/, async ({ request, app, env }) => {
+    await requireAdminSession(request, app);
     return json(await listApplications(env, parsedQuery(request, ["status", "cursor"], applicationQuerySchema)));
   }),
-  write("POST", /admin\/applications/, async ({ request, env, viewer }) => {
+  write("POST", /admin\/applications/, async ({ request, app, env }) => {
     const input = await readJson(request, applicationReviewSchema);
-    await requireAdmin(env, viewer.id);
-    await consumeMutationQuota(env, viewer.id);
-    return json({ application: await reviewApplication(env, viewer.id, input) });
+    const admin = await requireAdminSession(request, app);
+    await consumeMutationQuota(env, admin.viewer.id);
+    return json({ application: await reviewApplication(env, admin.viewer.id, input) });
   }),
   write("POST", /reports/, async ({ request, env, viewer }) =>
     json({ report: await submitReport(env, viewer.id, await readJson(request, reportSchema)) }),
   ),
-  get(/admin\/reports/, async ({ request, env, viewer }) => {
-    const admin = requireViewer(viewer);
-    return json(await listReports(env, admin.id, parsedQuery(request, ["status", "cursor"], reportQuerySchema)));
+  get(/admin\/reports/, async ({ request, app, env }) => {
+    const admin = await requireAdminSession(request, app);
+    return json(await listReports(env, admin.viewer.id, parsedQuery(request, ["status", "cursor"], reportQuerySchema)));
   }),
-  write("POST", /admin\/reports/, async ({ request, env, viewer }) => {
+  write("POST", /admin\/reports/, async ({ request, app, env }) => {
     const input = await readJson(request, reportResolutionSchema);
-    await requireAdmin(env, viewer.id);
-    await consumeMutationQuota(env, viewer.id);
-    const result = await resolveReport(env, viewer.id, input);
+    const admin = await requireAdminSession(request, app);
+    await consumeMutationQuota(env, admin.viewer.id);
+    const result = await resolveReport(env, admin.viewer.id, input, admin.stepUp);
     if (result.streamerId) await notifyRoom(env, result.streamerId);
     return json({ status: result.status, resolved: result.resolved });
   }),
