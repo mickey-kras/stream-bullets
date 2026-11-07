@@ -1,5 +1,6 @@
 import { useRouteLoaderData } from "react-router";
-import type { Provider, Viewer } from "../types";
+import { getLocale, type Locale } from "../i18n";
+import type { DisplayPrefs, Provider, Viewer } from "../types";
 
 export type { Provider } from "../types";
 
@@ -9,15 +10,26 @@ export interface ShellData {
   providers: Provider[];
   admin: boolean;
   ownStreamer: { handle: string; name: string } | null;
+  /** The page's language: the account's, then the cookie's, then the browser's, then English. */
+  locale: Locale;
+  /** Display preferences: the account's when signed in and saved, else this browser's cookie. */
+  prefs: DisplayPrefs;
 }
 
 export type ShellRole = "signed-out" | "viewer" | "owner" | "admin";
 
-const signedOut: ShellData = { viewer: null, providers: [], admin: false, ownStreamer: null };
-
 /** Shell data from the root loader. Falls back to signed out where the root loader did not run (some 404s). */
 export function useShell(): ShellData {
-  return useRouteLoaderData<ShellData>("root") ?? signedOut;
+  return (
+    useRouteLoaderData<ShellData>("root") ?? {
+      viewer: null,
+      providers: [],
+      admin: false,
+      ownStreamer: null,
+      locale: getLocale(),
+      prefs: {},
+    }
+  );
 }
 
 export function shellRole(shell: ShellData): ShellRole {
@@ -38,5 +50,6 @@ export const paths = {
   reporting: "/terms#reporting",
   /** The official Ideas board, with Suggest an improvement open (item 46). */
   ideas: "/@streambullets?intent=suggest",
+  ai: "/ai",
   streamer: (handle: string): string => `/@${handle}`,
 } as const;

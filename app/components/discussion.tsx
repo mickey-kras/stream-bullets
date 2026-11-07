@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { locale, t } from "../i18n";
+import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
 import { orderThreads, replyParent, visibleReplies } from "../lib/threads";
 import type { Comment, CommentThread, SortOrder, StreamerStatus, ThreadSnapshot, Viewer } from "../types";
@@ -87,7 +87,7 @@ const timeUnits: [number, number, Intl.RelativeTimeFormatUnit][] = [
 function relativeTime(time: number): string {
   const seconds = Math.round((time - Date.now()) / 1000);
   const [, size, unit] = timeUnits.find(([limit]) => Math.abs(seconds) < limit) ?? timeUnits[5];
-  return new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(Math.round(seconds / size), unit);
+  return new Intl.RelativeTimeFormat(intlLocale(), { numeric: "auto" }).format(Math.round(seconds / size), unit);
 }
 
 function Composer({
@@ -242,7 +242,7 @@ function CommentArticle({
           <strong>{comment.author}</strong>
           <time
             dateTime={new Date(comment.createdAt).toISOString()}
-            title={new Date(comment.createdAt).toLocaleString(locale)}
+            title={new Date(comment.createdAt).toLocaleString(intlLocale())}
           >
             {relativeTime(comment.createdAt)}
           </time>

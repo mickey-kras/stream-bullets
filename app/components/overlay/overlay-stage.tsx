@@ -1,5 +1,5 @@
 import { useSyncExternalStore, type ReactNode } from "react";
-import { t } from "../../i18n";
+import { intlLocale, t } from "../../i18n";
 import { MASH_NAME, mashWinner } from "../../lib/mash";
 import type { LiveSnapshot, OverlayData, OverlayPublic, OverlaySourceRef } from "../../types";
 import { MashBars, MashRing, MashWinner } from "../mash/mash-parts";
@@ -113,7 +113,7 @@ function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
   const next = scene.data.next;
   if (!next) return null;
   const when: string = hydrated
-    ? new Intl.DateTimeFormat(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" }).format(next.startsAt)
+    ? new Intl.DateTimeFormat(intlLocale(), { weekday: "short", hour: "numeric", minute: "2-digit" }).format(next.startsAt)
     : "";
   return (
     <article className="ov-card" data-overlay-source="next">

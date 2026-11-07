@@ -1,5 +1,6 @@
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { StreamerApplication } from "../types";
+import { intlLocale } from "../i18n";
 import { Icon } from "./ui/icon";
 
 const MAX_LINKS = 5;
@@ -11,7 +12,7 @@ interface LinkRow {
 
 /** Formats a timestamp the same way on the server and in the browser, so hydration matches. */
 export function formatDate(time: number): string {
-  return new Date(time).toLocaleDateString("en-US", { timeZone: "UTC", dateStyle: "medium" });
+  return new Date(time).toLocaleDateString(intlLocale(), { timeZone: "UTC", dateStyle: "medium" });
 }
 
 export function DateTime({ time }: Readonly<{ time: number }>): ReactNode {

@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { locale, t } from "../../i18n";
+import { intlLocale, t } from "../../i18n";
 import { hasWeekday } from "../../lib/schedule";
 import type { StreamEvent, StreamEventStatus, StreamPlatform } from "../../types";
 import type { IconName } from "../ui/icon";
@@ -63,7 +63,7 @@ export function statusWord(status: StreamEventStatus): string {
 }
 
 function format(time: number, zone: string, options: Intl.DateTimeFormatOptions): string {
-  return new Intl.DateTimeFormat(locale, { timeZone: zone, ...options }).format(new Date(time));
+  return new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, ...options }).format(new Date(time));
 }
 
 export function timeOf(time: number, zone: string): string {
@@ -88,7 +88,7 @@ export function weekdayShort(time: number, zone: string): string {
 
 export function zoneLabel(time: number, zone: string): string {
   return (
-    new Intl.DateTimeFormat(locale, { timeZone: zone, timeZoneName: "short" })
+    new Intl.DateTimeFormat(intlLocale(), { timeZone: zone, timeZoneName: "short" })
       .formatToParts(new Date(time))
       .find((part: Intl.DateTimeFormatPart) => part.type === "timeZoneName")?.value ?? zone
   );
@@ -100,7 +100,7 @@ export function whenLine(event: StreamEvent, zone: string): string {
 }
 
 function unit(value: number, name: "hour" | "minute"): string {
-  return new Intl.NumberFormat(locale, { style: "unit", unit: name, unitDisplay: "short" }).format(value);
+  return new Intl.NumberFormat(intlLocale(), { style: "unit", unit: name, unitDisplay: "short" }).format(value);
 }
 
 export function durationLabel(minutes: number): string {
@@ -114,13 +114,13 @@ export function repeatLabel(mask: number): string {
   const names: string[] = [];
   for (let day = 0; day < 7; day += 1)
     if (hasWeekday(mask, day)) names.push(format(Date.UTC(2026, 10, 1 + day, 12), "UTC", { weekday: "short" }));
-  return new Intl.ListFormat(locale, { style: "short", type: "conjunction" }).format(names);
+  return new Intl.ListFormat(intlLocale(), { style: "short", type: "conjunction" }).format(names);
 }
 
 /** "Starts in 2 days", "Starts in 3 hours", "Starts in 20 minutes". */
 export function countdown(start: number, now: number): string {
   const diff = Math.max(0, start - now);
-  const relative = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  const relative = new Intl.RelativeTimeFormat(intlLocale(), { numeric: "auto" });
   let text = relative.format(Math.round(diff / 60_000), "minute");
   if (diff >= 86_400_000) text = relative.format(Math.round(diff / 86_400_000), "day");
   else if (diff >= 3_600_000) text = relative.format(Math.round(diff / 3_600_000), "hour");

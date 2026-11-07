@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { useLocation, useNavigate, type Location } from "react-router";
 
-/** The account dialogs (item 17). Each opens over the current page as `?dialog=<name>`. */
-export const ACCOUNT_DIALOGS = ["profile", "host", "data", "page"] as const;
+/** The account dialogs (item 17), Language and Accessibility & display. Each opens as `?dialog=<name>`. */
+export const ACCOUNT_DIALOGS = ["profile", "host", "data", "page", "language", "a11y"] as const;
 export type AccountDialogName = (typeof ACCOUNT_DIALOGS)[number];
 
 export function isAccountDialog(value: string | null): value is AccountDialogName {

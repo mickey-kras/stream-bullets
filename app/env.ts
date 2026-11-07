@@ -1,4 +1,5 @@
 import { createContext } from "react-router";
+import type { Locale } from "./i18n";
 
 export interface AppEnv {
   DB: D1Database;
@@ -24,6 +25,8 @@ export interface AppContext {
   env: AppEnv;
   nonce: string;
   responseHeaders: Headers;
+  /** The request's language, set by the root loader (app/lib/shell.server.ts) for entry.server.tsx. */
+  locale?: Locale;
 }
 
 export const appContext = createContext<AppContext>();

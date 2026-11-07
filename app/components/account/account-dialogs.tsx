@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { t } from "../../i18n";
 import { useShell } from "../../lib/shell";
+import { PreferencesDialog } from "../a11y/preferences-dialog";
+import { LanguageDialog } from "../shell/language-dialog";
 import { SignInDialog } from "../shell/sign-in-dialog";
 import { Sheet } from "../ui/sheet";
 import { DataDialog } from "./data-dialog";
@@ -11,7 +13,7 @@ import { useMe } from "./me";
 import { ProfileDialog } from "./profile-dialog";
 
 const titles: Record<
-  AccountDialogName,
+  Exclude<AccountDialogName, "language" | "a11y">,
   "account.yourProfile" | "account.hostCommunity" | "account.yourData" | "account.editPage"
 > = {
   profile: "account.yourProfile",
@@ -23,12 +25,16 @@ const titles: Record<
 /**
  * The account dialogs over any page (item 17): Your profile, Host a community, Your data and Edit your page,
  * opened by `?dialog=<name>` (the account menu links there, and /settings redirects to
- * /streamers?dialog=profile). Signed out, they ask to sign in and come back here.
+ * /streamers?dialog=profile). Signed out, they ask to sign in and come back here. Language and Accessibility &
+ * display work signed out too.
  */
 export function AccountDialogs(): ReactNode {
   const shell = useShell();
   const { name, close } = useAccountDialog();
-  const { me, error, reload } = useMe(Boolean(name && shell.viewer));
+  const account: boolean = name !== null && name !== "language" && name !== "a11y";
+  const { me, error, reload } = useMe(account && Boolean(shell.viewer));
+  if (name === "language") return <LanguageDialog onClose={close} />;
+  if (name === "a11y") return <PreferencesDialog onClose={close} />;
   if (!name) return null;
   if (!shell.viewer)
     return (
