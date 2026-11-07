@@ -10,6 +10,7 @@ import {
   updateStreamer,
 } from "../data.server";
 import { HttpError, json, readJson } from "../http.server";
+import { createMash, mashCreateSchema } from "../mash.server";
 import {
   directoryQuerySchema,
   entryActionSchema,
@@ -33,11 +34,14 @@ export const streamerRoutes: ApiRoute[] = [
     return json(await listEntries(env, streamer, viewer?.id ?? null, input));
   }),
   write("POST", /streamers\/([a-z0-9_]{3,30})/, async ({ request, env, match, viewer }) => {
-    const input = await readJson(request, entryActionSchema);
+    const input = await readJson(request, mashCreateSchema.or(entryActionSchema));
     const streamer = await getStreamer(env, match[1]);
     if (!streamer) throw new HttpError(404, "Streamer not found.");
-    // mutateEntry checks the page status (assertStreamerWritable).
-    const result = await mutateEntry(env, viewer.id, streamer.id, input);
+    // Both check the page status (assertStreamerWritable). A Mash Battle is a choice entry plus a side table (R1).
+    const result =
+      input.action === "create" && input.kind === "mash"
+        ? await createMash(env, viewer.id, streamer.id, input)
+        : await mutateEntry(env, viewer.id, streamer.id, input);
     await notifyRoom(env, streamer.id);
     return json(result);
   }),

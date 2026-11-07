@@ -71,6 +71,91 @@ async function connect(key: string = clientKey): Promise<{ socket: LiveSocket; s
   return { socket, snapshot: await first };
 }
 
+/** Waits for the next message that matches, skipping snapshots and ticks it does not want. */
+function nextMessage<T extends { type: string }>(
+  socket: LiveSocket,
+  match: (message: T) => boolean,
+  timeoutMs: number = 5_000,
+): Promise<T> {
+  return new Promise((resolve, reject): void => {
+    const listener = (event: { data: unknown }): void => {
+      const message = JSON.parse(String(event.data)) as T;
+      if (!match(message)) return;
+      clearTimeout(timeout);
+      socket.removeEventListener("message", listener);
+      resolve(message);
+    };
+    const timeout = setTimeout((): void => {
+      socket.removeEventListener("message", listener);
+      reject(new Error("Message timed out"));
+    }, timeoutMs);
+    socket.addEventListener("message", listener);
+  });
+}
+
+type MashReply = { type: string; id: string; mine?: number; accepted?: number; reason?: string };
+
+function mashReply(socket: LiveSocket): Promise<MashReply> {
+  return nextMessage<MashReply>(socket, (message) => message.type === "mash-ack" || message.type === "mash-denied");
+}
+
+async function connectAs(
+  userId: string | null,
+  key: string = clientKey,
+): Promise<{ socket: LiveSocket; snapshot: LiveSnapshot }> {
+  const headers: Record<string, string> = { Upgrade: "websocket", Origin: origin, "X-Stream-Bullets-Client": key };
+  if (userId) headers["X-SB-User"] = userId;
+  const result = await runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, { headers });
+  expect(result.status).toBe(101);
+  const socket = result.webSocket;
+  if (!socket) throw new Error("Missing WebSocket");
+  sockets.push(socket);
+  const first = nextSnapshot(socket);
+  socket.accept();
+  return { socket, snapshot: await first };
+}
+
+/** A Mash Battle that is already live and ends after `ms`, with viewers on their sides. */
+async function addBattle(picks: Record<string, number>, ms: number = 10_000): Promise<string> {
+  const id = await addPoll();
+  const now = Date.now();
+  const statements = [
+    database
+      .prepare("INSERT INTO entry_mash (entry_id, duration_s, phase, starts_at, ends_at) VALUES (?, 10, 'live', ?, ?)")
+      .bind(id, now, now + ms),
+  ];
+  for (const [user, side] of Object.entries(picks)) {
+    statements.push(database.prepare("INSERT OR IGNORE INTO user (id) VALUES (?)").bind(user));
+    statements.push(
+      database.prepare("INSERT INTO entry_votes (entry_id, user_id, choice) VALUES (?, ?, ?)").bind(id, user, side),
+    );
+  }
+  await database.batch(statements);
+  return id;
+}
+
+function tap(socket: LiveSocket, id: string, n: number, seq: number, assisted: boolean = false): void {
+  socket.send(JSON.stringify({ t: "tap", id, n, assisted, seq }));
+}
+
+function mashNotify(id: string): ReturnType<Miniflare["dispatchFetch"]> {
+  return runtime.dispatchFetch(`${origin}/${streamerId}/mash?streamerId=${streamerId}`, {
+    method: "POST",
+    body: JSON.stringify({ id }),
+  });
+}
+
+async function waitFor<T>(read: () => Promise<T>, done: (value: T) => boolean, timeoutMs: number = 5_000): Promise<T> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const value = await read();
+    if (done(value) || Date.now() > deadline) return value;
+    await new Promise((resolve): void => {
+      setTimeout(resolve, 100);
+    });
+  }
+}
+
 async function addPoll(kind: "choice" | "binary" = "choice", endsAt: number | null = null): Promise<string> {
   const id = crypto.randomUUID();
   await database
@@ -150,7 +235,11 @@ beforeAll(async (): Promise<void> => {
   });
   database = await runtime.getD1Database("DB");
   await database.exec(`
-    CREATE TABLE streamers (id TEXT PRIMARY KEY, revision INTEGER NOT NULL DEFAULT 0);
+    CREATE TABLE streamers (id TEXT PRIMARY KEY, revision INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'active');
+    CREATE TABLE user (id TEXT PRIMARY KEY);
+    CREATE TABLE entry_mash (entry_id TEXT PRIMARY KEY, duration_s INTEGER NOT NULL, phase TEXT NOT NULL DEFAULT 'setup', starts_at INTEGER, ends_at INTEGER, winner INTEGER);
+    CREATE TABLE mash_taps (entry_id TEXT NOT NULL, user_id TEXT NOT NULL, side INTEGER NOT NULL, taps INTEGER NOT NULL DEFAULT 0, assisted_taps INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(entry_id, user_id));
+    CREATE TABLE overlay_state (streamer_id TEXT PRIMARY KEY, air TEXT NOT NULL, preview TEXT NOT NULL, position TEXT NOT NULL, size TEXT NOT NULL, instant INTEGER NOT NULL, show_results INTEGER NOT NULL, message TEXT NOT NULL, message_style TEXT NOT NULL, revision INTEGER NOT NULL);
     CREATE TABLE entries (id TEXT PRIMARY KEY, streamer_id TEXT NOT NULL, title TEXT NOT NULL, kind TEXT NOT NULL, options TEXT NOT NULL, ends_at INTEGER, revealed INTEGER NOT NULL, created_at INTEGER NOT NULL);
     CREATE TABLE entry_votes (entry_id TEXT NOT NULL, user_id TEXT NOT NULL, choice INTEGER NOT NULL, PRIMARY KEY(entry_id, user_id));
     CREATE INDEX entries_streamer ON entries(streamer_id, created_at, id);
@@ -202,6 +291,7 @@ describe("public poll updates", (): void => {
       "endsAt",
       "id",
       "kind",
+      "mash",
       "options",
       "revealed",
       "title",
@@ -411,7 +501,9 @@ describe("public poll updates", (): void => {
           import worker from ${JSON.stringify(workerPath)};
           import { DurableObject } from 'cloudflare:workers';
           export class CaptureRoom extends DurableObject {
-            fetch(request) { return Response.json({ key: request.headers.get('X-Stream-Bullets-Client') }); }
+            fetch(request) {
+              return Response.json({ key: request.headers.get('X-Stream-Bullets-Client'), user: request.headers.get('X-SB-User') });
+            }
           }
           export default {
             fetch(request, env) {
@@ -434,7 +526,7 @@ describe("public poll updates", (): void => {
           name: "isolate-live-worker-dependencies",
           setup(plugin: PluginBuild): void {
             plugin.onResolve(
-              { filter: /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup)\.server$/ },
+              { filter: /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup|auth)\.server$/ },
               (args) => ({ path: args.path, namespace: "live-worker-test" }),
             );
             plugin.onLoad({ filter: /.*/, namespace: "live-worker-test" }, (args) => {
@@ -447,6 +539,11 @@ describe("public poll updates", (): void => {
                 return { contents: "export const getStreamer = async env => ({ id: env.TEST_STREAMER });" };
               if (args.path.endsWith("images.server"))
                 return { contents: "export const serveImage = () => new Response(null, {status: 404});" };
+              if (args.path.endsWith("auth.server"))
+                return {
+                  contents:
+                    "export const getViewer = async request => request.headers.get('Cookie') === 'session=ok' ? { id: 'viewer-1' } : null;",
+                };
               if (args.path.endsWith("cleanup.server"))
                 return { contents: "export const cleanExpiredData = async () => {};" };
               return { contents: "export default {};" };
@@ -473,8 +570,17 @@ describe("public poll updates", (): void => {
           headers: { Origin: origin, Upgrade: "websocket", "CF-Connecting-IP": ip, "X-Stream-Bullets-Client": spoofed },
         });
         expect(result.status).toBe(200);
-        expect(await result.json()).toEqual({ key: expected });
+        expect(await result.json()).toEqual({ key: expected, user: null });
       }
+      // A client-sent account header never reaches the room: only the signed-in session sets it.
+      const spoofedUser = await worker.dispatchFetch(`${origin}/api/live/test_host`, {
+        headers: { Origin: origin, Upgrade: "websocket", "CF-Connecting-IP": ip, "X-SB-User": "admin" },
+      });
+      expect(await spoofedUser.json()).toEqual({ key: expected, user: null });
+      const signedIn = await worker.dispatchFetch(`${origin}/api/live/test_host`, {
+        headers: { Origin: origin, Upgrade: "websocket", "CF-Connecting-IP": ip, "X-SB-User": "admin", Cookie: "session=ok" },
+      });
+      expect(await signedIn.json()).toEqual({ key: expected, user: "viewer-1" });
     } finally {
       await worker.dispose();
     }
@@ -544,5 +650,174 @@ describe("public poll updates", (): void => {
       { headers: { Upgrade: "websocket", "X-Stream-Bullets-Client": clientKey } },
     );
     expect(repeated.status).toBe(400);
+  });
+});
+
+describe("Mash Battle taps", (): void => {
+  it("refuses taps from signed-out sockets", async (): Promise<void> => {
+    const id = await addBattle({});
+    const { socket } = await connectAs(null);
+    const reply = mashReply(socket);
+    tap(socket, id, 3, 1);
+    expect(await reply).toMatchObject({ type: "mash-denied", id, reason: "sign-in" });
+  });
+
+  it("refuses taps from an account with no side", async (): Promise<void> => {
+    const id = await addBattle({});
+    const { socket } = await connectAs("nobody");
+    const reply = mashReply(socket);
+    tap(socket, id, 3, 1);
+    expect(await reply).toMatchObject({ type: "mash-denied", reason: "pick" });
+  });
+
+  it("caps two sockets of one account with one token bucket", async (): Promise<void> => {
+    const id = await addBattle({ "player-1": 0 });
+    const first = await connectAs("player-1");
+    const second = await connectAs("player-1", "b".repeat(64));
+    const firstReply = mashReply(first.socket);
+    tap(first.socket, id, 20, 1);
+    const firstAck = await firstReply;
+    const secondReply = mashReply(second.socket);
+    tap(second.socket, id, 20, 1);
+    const secondAck = await secondReply;
+    // One batch at 15 a second is 3 taps, plus 1 for rounding. The second socket finds the bucket empty.
+    expect(firstAck).toMatchObject({ type: "mash-ack", accepted: 4, mine: 4 });
+    expect(secondAck.accepted).toBeLessThanOrEqual(1);
+    expect(secondAck.mine).toBeLessThanOrEqual(5);
+  });
+
+  it("caps assisted tapping lower than manual tapping", async (): Promise<void> => {
+    const id = await addBattle({ "player-1": 1 });
+    const { socket } = await connectAs("player-1");
+    const reply = mashReply(socket);
+    tap(socket, id, 20, 1, true);
+    expect(await reply).toMatchObject({ type: "mash-ack", accepted: 2 });
+  });
+
+  it("ignores a batch number the socket already sent", async (): Promise<void> => {
+    const id = await addBattle({ "player-1": 0 });
+    const { socket } = await connectAs("player-1");
+    const firstReply = mashReply(socket);
+    tap(socket, id, 2, 5);
+    expect(await firstReply).toMatchObject({ accepted: 2, mine: 2 });
+    await new Promise((resolve): void => {
+      setTimeout(resolve, 300);
+    });
+    const nextReply = mashReply(socket);
+    tap(socket, id, 2, 5);
+    tap(socket, id, 1, 6);
+    // The resend gets no reply, so the next reply answers batch 6.
+    expect(await nextReply).toMatchObject({ accepted: 1, mine: 3 });
+  });
+
+  it("broadcasts live totals, writes taps to D1 and stores the winner", async (): Promise<void> => {
+    const id = await addBattle({ "player-1": 0, "player-2": 1 }, 1_500);
+    const one = await connectAs("player-1");
+    const two = await connectAs("player-2", "b".repeat(64));
+    const ackOne = mashReply(one.socket);
+    tap(one.socket, id, 3, 1);
+    await ackOne;
+    const ackTwo = mashReply(two.socket);
+    tap(two.socket, id, 1, 1);
+    await ackTwo;
+    const tick = await nextMessage<{ type: string; totals: number[] }>(
+      two.socket,
+      (message) => message.type === "mash" && message.totals[0] === 3,
+    );
+    expect(tick.totals).toEqual([3, 1]);
+    const winner = await waitFor(
+      () =>
+        database
+          .prepare("SELECT phase, winner FROM entry_mash WHERE entry_id = ?")
+          .bind(id)
+          .first<{ phase: string; winner: number | null }>(),
+      (row) => row?.phase === "finished",
+    );
+    expect(winner).toEqual({ phase: "finished", winner: 0 });
+    const rows = await database
+      .prepare("SELECT user_id, side, taps FROM mash_taps WHERE entry_id = ? ORDER BY user_id")
+      .bind(id)
+      .all();
+    expect(rows.results).toEqual([
+      { user_id: "player-1", side: 0, taps: 3 },
+      { user_id: "player-2", side: 1, taps: 1 },
+    ]);
+  });
+
+  it("stores a draw when the sides tie", async (): Promise<void> => {
+    const id = await addBattle({}, 600);
+    await connectAs(null);
+    expect((await mashNotify(id)).status).toBe(204);
+    const row = await waitFor(
+      () => database.prepare("SELECT phase, winner FROM entry_mash WHERE entry_id = ?").bind(id).first(),
+      (value) => value?.phase === "finished",
+    );
+    expect(row).toEqual({ phase: "finished", winner: -1 });
+  });
+
+  it("drops a restarted battle and refuses its taps", async (): Promise<void> => {
+    const id = await addBattle({ "player-1": 0 });
+    const { socket } = await connectAs("player-1");
+    const ack = mashReply(socket);
+    tap(socket, id, 2, 1);
+    expect(await ack).toMatchObject({ type: "mash-ack" });
+    await database.batch([
+      database.prepare("DELETE FROM mash_taps WHERE entry_id = ?").bind(id),
+      database
+        .prepare("UPDATE entry_mash SET phase = 'setup', starts_at = NULL, ends_at = NULL WHERE entry_id = ?")
+        .bind(id),
+    ]);
+    expect((await mashNotify(id)).status).toBe(204);
+    const denied = mashReply(socket);
+    tap(socket, id, 2, 2);
+    expect(await denied).toMatchObject({ type: "mash-denied", reason: "closed" });
+    expect(await database.prepare("SELECT COUNT(*) AS n FROM mash_taps WHERE entry_id = ?").bind(id).first("n")).toBe(0);
+  });
+
+  it("closes sockets that send anything but a well-formed tap", async (): Promise<void> => {
+    const id = await addBattle({ "player-1": 0 });
+    const { socket } = await connectAs("player-1");
+    const closed = nextClose(socket);
+    socket.send(JSON.stringify({ t: "tap", id, n: 500, assisted: false, seq: 1 }));
+    expect(await closed).toBe(1008);
+  });
+});
+
+describe("overlay updates", (): void => {
+  it("reaches only the room of the page that changed", async (): Promise<void> => {
+    const { socket } = await connect();
+    const otherId = streamerId;
+    streamerId = crypto.randomUUID();
+    await database.prepare("INSERT INTO streamers (id) VALUES (?)").bind(streamerId).run();
+    const other = await connect("c".repeat(64));
+    let leaked = false;
+    socket.addEventListener("message", (event): void => {
+      if (String(event.data).includes('"type":"overlay"')) leaked = true;
+    });
+    await database
+      .prepare(
+        `INSERT INTO overlay_state (streamer_id, air, preview, position, size, instant, show_results, message, message_style, revision)
+        VALUES (?, '{"type":"message","ref":null}', '{"type":"message","ref":null}', 'top', 'l', 0, 1, 'BRB 5 min', 'info', 3)`,
+      )
+      .bind(streamerId)
+      .run();
+    const update = nextMessage<{ type: string; overlay: Record<string, unknown> }>(
+      other.socket,
+      (message) => message.type === "overlay",
+    );
+    expect((await request("overlay")).status).toBe(204);
+    expect((await update).overlay).toMatchObject({
+      air: { type: "message", ref: null },
+      position: "top",
+      size: "l",
+      message: "BRB 5 min",
+      revision: 3,
+    });
+    expect((await update).overlay).not.toHaveProperty("preview");
+    await new Promise((resolve): void => {
+      setTimeout(resolve, 200);
+    });
+    expect(leaked).toBe(false);
+    expect(otherId).not.toBe(streamerId);
   });
 });

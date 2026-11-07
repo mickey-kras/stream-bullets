@@ -17,7 +17,8 @@ import type {
 /** Sign-in providers, in the order the sign-in dialog lists them. */
 export type Provider = "google" | "tiktok" | "twitch" | "instagram";
 
-export type EntryKind = "topic" | "choice" | "binary";
+/** `mash` is a `choice` entry with an `entry_mash` row (R1). The API reports it as its own kind. */
+export type EntryKind = "topic" | "choice" | "binary" | "mash";
 export type SortOrder = "newest" | "top";
 export type Reaction = -1 | 0 | 1;
 
@@ -114,6 +115,25 @@ export interface Entry {
   status: EntryStatus | null;
   /** Shown with `declined` ("Not planned"). */
   statusReason: string | null;
+  /** Mash Battle state when `kind` is `mash`, else null. `counts` then holds the players on each side. */
+  mash: MashState | null;
+}
+
+/** A Mash Battle (item 31). Sides are the entry's `options`; a viewer's side is their vote. */
+export interface MashState {
+  durationS: number;
+  /** As stored. Use `mashPhaseAt()` from app/lib/mash.ts for the phase at a given time. */
+  phase: MashPhase;
+  startsAt: number | null;
+  endsAt: number | null;
+  /** Winning side, -1 for a draw, or null until the battle ends. */
+  winner: number | null;
+  /** Taps per side. */
+  totals: number[];
+  /** Accounts with at least one tap. */
+  players: number;
+  /** Accounts that used assisted tapping. */
+  assisted: number;
 }
 
 export interface Comment {
@@ -162,8 +182,49 @@ export interface LiveSnapshot {
   type: "snapshot";
   revision: number;
   serverNow: number;
-  polls: Pick<Entry, "id" | "title" | "kind" | "options" | "endsAt" | "revealed" | "counts" | "total">[];
+  polls: Pick<Entry, "id" | "title" | "kind" | "options" | "endsAt" | "revealed" | "counts" | "total" | "mash">[];
+  /** What the OBS overlay shows. The live room always sends it; loaders may leave it out. */
+  overlay?: OverlayPublic | null;
 }
+
+/** `{type:"mash"}`: live totals, 5 times a second while a battle runs. */
+export interface MashTick {
+  type: "mash";
+  id: string;
+  phase: MashPhase;
+  totals: number[];
+  /** Whole seconds left. */
+  left: number;
+  endsAt: number | null;
+  players: number;
+  assisted: number;
+  /** Taps a second across all players, for the host. */
+  tps: number;
+  serverNow: number;
+}
+
+/** One overlay source: `ref` is a poll or topic id, a Community card id, or null. */
+export interface OverlaySourceRef {
+  type: OverlaySource;
+  ref: string | null;
+}
+
+/** The owner's overlay control state (`GET /api/overlay`). */
+export interface OverlayState {
+  air: OverlaySourceRef;
+  preview: OverlaySourceRef;
+  position: OverlayPosition;
+  size: OverlaySize;
+  /** Instant switch: every preview change goes on air at once. */
+  instant: boolean;
+  showResults: boolean;
+  message: string;
+  messageStyle: OverlayMessageStyle;
+  revision: number;
+}
+
+/** The overlay state anyone may see. `message` is empty unless the message banner is on air. */
+export type OverlayPublic = Omit<OverlayState, "preview" | "instant">;
 
 export type ApplicationStatus = "pending" | "approved" | "rejected";
 
@@ -219,4 +280,24 @@ export interface ContentReport {
 export interface ReportQueue {
   reports: ContentReport[];
   nextCursor: string | null;
+}
+
+/** Content the overlay sources other than polls show. Every field is already public on the streamer page. */
+export interface OverlayData {
+  /** The newest polls and Mash Battles, for the poll picker. */
+  polls: { id: string; title: string; mash: boolean }[];
+  topics: {
+    id: string;
+    title: string;
+    category: string;
+    author: string;
+    avatar: string | null;
+    avatarPreset: number | null;
+    likes: number;
+  }[];
+  cards: { id: string; icon: CardIcon | null; title: string; body: string; label: string | null; target: string | null }[];
+  /** The next scheduled stream, or null. */
+  next: { title: string; startsAt: number } | null;
+  /** The first support link, or null. */
+  support: { kind: SupportLinkKind; label: string | null; url: string } | null;
 }

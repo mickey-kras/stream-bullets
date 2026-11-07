@@ -154,6 +154,7 @@ describe("topics and polls", (): void => {
       "endsAt",
       "id",
       "kind",
+      "mash",
       "options",
       "revealed",
       "title",

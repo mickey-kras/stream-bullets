@@ -32,6 +32,7 @@ export const paths = {
   streamers: "/streamers",
   profile: "/streamers?dialog=profile",
   admin: "/admin",
+  overlayControl: "/overlay-control",
   privacy: "/privacy",
   terms: "/terms",
   reporting: "/terms#reporting",
