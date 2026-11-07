@@ -37,14 +37,14 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && (LOCALES as readonly string[]).includes(value);
 }
 
-const loaders = import.meta.glob<Catalog>(["./*.json", "!./en.json"], { import: "default" });
+const loaders = import.meta.glob<{ default: Catalog }>("./*.json");
 const catalogs = new Map<Locale, Catalog>([["en", en]]);
 
 /** Loads a language's catalog once. English is always loaded. */
 export async function loadCatalog(locale: Locale): Promise<void> {
   if (catalogs.has(locale)) return;
   const load = loaders[`./${locale}.json`];
-  catalogs.set(locale, load ? await load() : {});
+  catalogs.set(locale, load ? (await load()).default : {});
 }
 
 function documentLocale(): Locale {
