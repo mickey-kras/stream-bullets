@@ -411,6 +411,8 @@ export const streamEvents = sqliteTable(
     repeatDays: integer("repeat_days").notNull().default(0),
     repeatUntil: integer("repeat_until"),
     tz: text("tz").notNull(),
+    /** Set on an occurrence edited on its own; the cron never copies it into later occurrences. */
+    isException: integer("is_exception", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull(),
     updatedAt: integer("updated_at").notNull(),
   },
@@ -433,6 +435,7 @@ export const streamEvents = sqliteTable(
       sql`(${table.seriesId} IS NULL AND ${table.repeatDays} = 0) OR (${table.seriesId} IS NOT NULL AND ${table.repeatDays} > 0)`,
     ),
     check("stream_events_tz_check", sql`length(${table.tz}) BETWEEN 1 AND 64`),
+    check("stream_events_exception_check", sql`${table.isException} IN (0, 1)`),
   ],
 );
 

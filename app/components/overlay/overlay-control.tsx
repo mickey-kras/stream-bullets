@@ -5,6 +5,7 @@ import type {
   OverlayData,
   OverlayMessageStyle,
   OverlayPosition,
+  OverlayPublic,
   OverlaySize,
   OverlaySource,
   OverlaySourceRef,
@@ -63,6 +64,30 @@ export function defaultRef(type: OverlaySource, data: OverlayData): string | nul
   if (type === "topic") return data.topics[0]?.id ?? null;
   if (type === "card") return data.cards[0]?.id ?? null;
   return null;
+}
+
+/**
+ * What the control shows: the newer of what this tab saved and what the loader read, with a newer live `overlay`
+ * message (another control tab, or the phone) on top. That message has no preview or message draft, so those
+ * stay until the loader catches up.
+ */
+export function controlState(
+  saved: OverlayState,
+  loaded: OverlayState,
+  live: OverlayPublic | null | undefined,
+): OverlayState {
+  const base: OverlayState = loaded.revision > saved.revision ? loaded : saved;
+  if (!live || live.revision <= base.revision) return base;
+  return {
+    ...base,
+    air: live.air,
+    position: live.position,
+    size: live.size,
+    showResults: live.showResults,
+    message: live.air.type === "message" ? live.message : base.message,
+    messageStyle: live.messageStyle,
+    revision: live.revision,
+  };
 }
 
 type MonitorKind = "prev" | "air";
@@ -299,18 +324,22 @@ function SourcePicker({
  */
 export function OverlayControl({
   initial,
+  live,
   scene,
   overlayUrl,
   connected = true,
 }: Readonly<{
   initial: OverlayState;
+  /** The overlay as the live room last sent it, so a change from another tab shows here too. */
+  live?: OverlayPublic | null;
   scene: Omit<OverlayScene, "overlay">;
   overlayUrl: string;
   /** False while the live connection is down: changes still save, but the OBS page hears of them later. */
   connected?: boolean;
 }>): ReactNode {
   const toast = useToast();
-  const [state, setState] = useState<OverlayState>(initial);
+  const [saved, setSaved] = useState<OverlayState>(initial);
+  const state: OverlayState = controlState(saved, initial, live);
   const [busy, setBusy] = useState<boolean>(false);
   const [enlarged, setEnlarged] = useState<MonitorKind | null>(null);
   const enlarge = (kind: MonitorKind): void => setEnlarged((value) => (value === kind ? null : kind));
@@ -325,7 +354,7 @@ export function OverlayControl({
     setBusy(true);
     try {
       const result = await postJson<{ overlay: OverlayState }>("/api/overlay", action);
-      setState(result.overlay);
+      setSaved(result.overlay);
     } catch (error: unknown) {
       toast(errorMessage(error), { tone: "error" });
     } finally {

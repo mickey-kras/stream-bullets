@@ -1,3 +1,4 @@
+import { LOCALE_COOKIE } from "../i18n/resolve";
 import type { DisplayPrefs } from "../types";
 
 /** Display preferences for signed-out visitors (and a copy for signed-in ones, so signing out keeps them). */
@@ -68,19 +69,43 @@ export function applyPrefs(prefs: DisplayPrefs): void {
 }
 
 /** Saves preferences in a cookie for this browser (one year, readable by the server for the first paint). */
-export function savePrefsCookie(prefs: DisplayPrefs): Promise<void> {
-  return setCookie(PREFS_COOKIE, JSON.stringify(prefs));
+export async function savePrefsCookie(prefs: DisplayPrefs): Promise<void> {
+  try {
+    await setPreferenceCookie(PREFS_COOKIE, JSON.stringify(prefs), { prefs });
+  } catch {
+    // The page already shows the change, and a signed-in account keeps it; the next change tries again.
+  }
 }
 
-/** Sets a first-party preference cookie for one year, through the Cookie Store API. */
-export async function setCookie(name: string, value: string): Promise<void> {
-  await globalThis.cookieStore?.set({
-    name,
-    value: encodeURIComponent(value),
-    path: "/",
-    sameSite: "lax",
-    expires: Date.now() + 31_536_000_000,
+/** Saves the visitor's language in a cookie for this browser. */
+export function saveLocaleCookie(locale: string): Promise<void> {
+  return setPreferenceCookie(LOCALE_COOKIE, locale, { locale });
+}
+
+/**
+ * Sets a first-party preference cookie for one year through the Cookie Store API. Browsers without it ask the
+ * server to set the cookie (`POST /api/preference-cookies`), since this code base never writes `document.cookie`.
+ */
+export async function setPreferenceCookie(name: string, value: string, fallback: object): Promise<void> {
+  const store = globalThis.cookieStore;
+  if (store) {
+    await store.set({
+      name,
+      value: encodeURIComponent(value),
+      path: "/",
+      sameSite: "lax",
+      expires: Date.now() + 31_536_000_000,
+    });
+    return;
+  }
+  const response: Response = await fetch("/api/preference-cookies", {
+    method: "POST",
+    credentials: "same-origin",
+    keepalive: true,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fallback),
   });
+  if (!response.ok) throw new Error(`The preference cookie was not saved (${response.status}).`);
 }
 
 /*

@@ -247,6 +247,20 @@ describe("cards, links and the Ideas board in storage", (): void => {
       status: "planned",
     });
     expect(filtered.entries.map((entry) => entry.title)).toEqual(["Light theme"]);
+    // An idea from before statuses existed has none, and is listed as new.
+    await env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,created_at) VALUES (?,?,'viewer','topic','Old idea','b','design',1)",
+    )
+      .bind(crypto.randomUUID(), official)
+      .run();
+    const review = await listEntries(env, officialPage, null, {
+      kind: "topics",
+      sort: "top",
+      query: "",
+      cursor: null,
+      status: "review",
+    });
+    expect(review.entries.map((entry) => entry.title).sort()).toEqual(["Old idea", "Week view bug"]);
     await expect(mutateEntry(env, "viewer", official, { action: "delete", id: second.id })).rejects.toMatchObject({
       status: 403,
     });

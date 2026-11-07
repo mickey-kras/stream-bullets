@@ -1,5 +1,6 @@
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
+import { pendingSave, type PendingSave } from "../../lib/pending-save";
 import { applyPrefs, DEFAULT_PREFS, savePrefsCookie, setChangedPrefs } from "../../lib/prefs";
 import { useShell } from "../../lib/shell";
 import { usePrefs } from "../../lib/use-prefs";
@@ -125,14 +126,21 @@ function Check({
  * "Accessibility & display" (item 39): colour-vision palettes, contrast, text size, a readable font, link
  * underlines, motion, and the Mash Battle options (screen-reader updates, shortcuts, assisted tapping).
  * A change applies at once through the head script's function and is kept in a cookie for this browser.
- * Signed in, it is also saved to the account, one second after the last change.
+ * Signed in, it is also saved to the account, one second after the last change, or at once when the dialog
+ * closes or the page goes away (the account value wins over the cookie on the next load).
  */
 export function PreferencesDialog({ onClose }: Readonly<{ onClose: () => void }>): ReactNode {
   const shell = useShell();
   const toast = useToast();
   const current: Prefs = usePrefs();
   const [prefs, setPrefs] = useState<Prefs>(current);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [account] = useState<PendingSave<Prefs>>(() =>
+    pendingSave((next: Prefs, keepalive: boolean) => {
+      sendJson("PATCH", "/api/me/preferences", next, { keepalive }).catch(() =>
+        toast(t("prefs.saveFailed"), { tone: "error" }),
+      );
+    }, 1_000),
+  );
   const srLabel: string = useId();
   const assistLabel: string = useId();
 
@@ -141,19 +149,28 @@ export function PreferencesDialog({ onClose }: Readonly<{ onClose: () => void }>
     setChangedPrefs(next);
     applyPrefs(next);
     void savePrefsCookie(next);
-    if (!shell.viewer) return;
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      sendJson("PATCH", "/api/me/preferences", next).catch(() => toast(t("prefs.saveFailed"), { tone: "error" }));
-    }, 1_000);
+    if (shell.viewer) account.schedule(next);
   }
+  const close = (): void => {
+    account.flush();
+    onClose();
+  };
+  // A reload or a link followed within the second still saves the last change. Unmounting sends it too.
+  useEffect(() => {
+    const flush = (): void => account.flush();
+    globalThis.addEventListener("pagehide", flush);
+    return (): void => {
+      globalThis.removeEventListener("pagehide", flush);
+      flush();
+    };
+  }, [account]);
   const set = <K extends keyof Prefs>(key: K, value: Prefs[K]): void => save({ ...prefs, [key]: value });
 
   return (
     <Sheet
       open
       onOpenChange={(open: boolean) => {
-        if (!open) onClose();
+        if (!open) close();
       }}
       title={t("prefs.title")}
       name="a11y"
@@ -169,7 +186,7 @@ export function PreferencesDialog({ onClose }: Readonly<{ onClose: () => void }>
             <Icon name="reset" size={18} />
             {t("prefs.reset")}
           </button>
-          <button type="button" className="gold" onClick={onClose}>
+          <button type="button" className="gold" onClick={close}>
             {t("prefs.done")}
           </button>
         </DialogActions>

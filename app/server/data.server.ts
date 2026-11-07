@@ -539,6 +539,10 @@ export async function getOverlaySnapshot(
   };
 }
 
+/** An entry's Ideas status. Ideas from before statuses existed have none: they count as new on the official page. */
+const IDEA_STATUS_SQL = `coalesce(e.status, CASE WHEN e.kind='topic'
+  AND EXISTS(SELECT 1 FROM streamers o WHERE o.id=e.streamer_id AND o.is_official=1) THEN ? END)`;
+
 export async function listEntries(
   env: AppEnv,
   streamer: Streamer,
@@ -556,6 +560,7 @@ export async function listEntries(
     streamer.id,
     `%${escapedQuery}%`,
     query.status ?? "",
+    NEW_IDEA_STATUS,
     query.status ?? "",
   ];
   let where = "";
@@ -566,7 +571,7 @@ export async function listEntries(
   }
   const entriesQuery = env.DB.prepare(String.raw`SELECT * FROM (${entrySelect}
     WHERE e.streamer_id=? AND e.kind ${query.kind === "topics" ? "= 'topic'" : "!= 'topic'"}
-      AND e.title LIKE ? ESCAPE '\' AND (?='' OR e.status=?)) ${where}
+      AND e.title LIKE ? ESCAPE '\' AND (?='' OR ${IDEA_STATUS_SQL}=?)) ${where}
     ORDER BY ${query.sort === "top" ? "score DESC," : ""}created_at DESC,id DESC LIMIT ${PAGE_SIZE + 1}
   `).bind(...parameters);
   const results = await env.DB.batch([

@@ -377,6 +377,22 @@ describe("discussion", (): void => {
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toEqual([]);
   });
 
+  it("removes every placeholder above the last reply, at any depth", async (): Promise<void> => {
+    const id = await seedEntry();
+    const a = await seedComment(id);
+    const b = await seedComment(id, "other", a);
+    const c = await seedComment(id, "viewer", b);
+    const kept = await seedComment(id, "other");
+    const sibling = await seedComment(id, "viewer", kept);
+    await mutateComment(env, "viewer", { action: "delete", id: a });
+    await mutateComment(env, "other", { action: "delete", id: b });
+    await mutateComment(env, "other", { action: "delete", id: kept });
+    expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toHaveLength(5);
+    await mutateComment(env, "viewer", { action: "delete", id: c });
+    const left = await env.DB.prepare("SELECT id FROM entry_comments WHERE entry_id=? ORDER BY id").bind(id).all();
+    expect(left.results).toEqual([{ id: kept }, { id: sibling }].sort((x, y) => x.id.localeCompare(y.id)));
+  });
+
   it("makes comment likes idempotent and strips provider avatar URLs", async (): Promise<void> => {
     const id = await seedEntry();
     const commentId = await seedComment(id);

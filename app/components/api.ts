@@ -21,8 +21,14 @@ export async function postJson<T>(url: string, body: unknown): Promise<T> {
   });
 }
 
-export async function sendJson<T>(method: "PUT" | "PATCH" | "DELETE", url: string, body?: unknown): Promise<T> {
+export async function sendJson<T>(
+  method: "PUT" | "PATCH" | "DELETE",
+  url: string,
+  body?: unknown,
+  init: Pick<RequestInit, "keepalive"> = {},
+): Promise<T> {
   return requestJson<T>(url, {
+    ...init,
     method,
     ...(body === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
   });

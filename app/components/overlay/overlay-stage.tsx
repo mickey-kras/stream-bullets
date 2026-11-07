@@ -1,5 +1,5 @@
 import { useSyncExternalStore, type ReactNode } from "react";
-import { intlLocale, t } from "../../i18n";
+import { intlLocale, t, tn } from "../../i18n";
 import { MASH_NAME, mashWinner } from "../../lib/mash";
 import type { LiveSnapshot, OverlayData, OverlayPublic, OverlaySourceRef } from "../../types";
 import { MashBars, MashRing, MashWinner } from "../mash/mash-parts";
@@ -93,7 +93,7 @@ function PollOverlay({ scene, poll }: Readonly<{ scene: OverlayScene; poll: Over
         <p className="ov-hidden-results">{t("overlay.resultsHidden")}</p>
       )}
       <p className="overlay-total">
-        {t(poll.total === 1 ? "overlay.vote" : "overlay.votes", { n: poll.total })}
+        {tn("poll.votes", poll.total)}
         {hiddenUntilReveal && ` · ${t("overlay.notRevealed")}`}
       </p>
     </article>
