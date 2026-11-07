@@ -1,21 +1,13 @@
 import type { SecurityKey } from "../../admin-types";
 import { t } from "../../i18n";
+import { ApiError, apiError } from "../api";
 
 /**
  * Browser side of the admin security-key ceremonies. The server sends WebAuthn options as JSON with base64url
  * fields; these helpers turn them into bytes for `navigator.credentials` and send the response back the same way.
  */
 
-/** An admin API failure with the server's stable `code` (for example `step_up_required`). */
-export class AdminRequestError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-    readonly code: string | null,
-  ) {
-    super(message);
-  }
-}
+export { ApiError as AdminRequestError, needsStepUp } from "../api";
 
 export async function adminRequest<T>(url: string, method = "GET", body?: unknown): Promise<T> {
   const response: Response = await fetch(url, {
@@ -24,16 +16,8 @@ export async function adminRequest<T>(url: string, method = "GET", body?: unknow
     ...(body === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
   });
   const value: unknown = await response.json().catch(() => null);
-  if (!response.ok) {
-    const record: Record<string, unknown> = typeof value === "object" && value !== null ? { ...value } : {};
-    const message: string = typeof record.error === "string" ? record.error : t("admin.requestFailed");
-    throw new AdminRequestError(message, response.status, typeof record.code === "string" ? record.code : null);
-  }
+  if (!response.ok) throw apiError(response.status, value, t("admin.requestFailed"));
   return value as T;
-}
-
-export function needsStepUp(error: unknown): boolean {
-  return error instanceof AdminRequestError && error.code === "step_up_required";
 }
 
 export function errorText(error: unknown): string {
@@ -89,7 +73,7 @@ function descriptors(list: Descriptor[]): PublicKeyCredentialDescriptor[] {
 
 /** Why a ceremony failed, as the gate says it. Cancelling and timing out look the same to the browser. */
 export function ceremonyError(error: unknown): string {
-  if (error instanceof AdminRequestError) return error.message;
+  if (error instanceof ApiError) return error.message;
   if (error instanceof DOMException) {
     if (error.name === "NotAllowedError" || error.name === "AbortError") return t("keys.cancelled");
     if (error.name === "InvalidStateError") return t("keys.alreadyRegistered");

@@ -11,6 +11,7 @@ import {
 } from "../data.server";
 import { HttpError, json, readJson } from "../http.server";
 import { createMash, mashCreateSchema } from "../mash.server";
+import { requireAdminSession } from "../stepup.server";
 import {
   directoryQuerySchema,
   entryActionSchema,
@@ -33,15 +34,16 @@ export const streamerRoutes: ApiRoute[] = [
     if (!streamer) throw new HttpError(404, "Streamer not found.");
     return json(await listEntries(env, streamer, viewer?.id ?? null, input));
   }),
-  write("POST", /streamers\/([a-z0-9_]{3,30})/, async ({ request, env, match, viewer }) => {
+  write("POST", /streamers\/([a-z0-9_]{3,30})/, async ({ request, app, env, match, viewer }) => {
     const input = await readJson(request, mashCreateSchema.or(entryActionSchema));
     const streamer = await getStreamer(env, match[1]);
     if (!streamer) throw new HttpError(404, "Streamer not found.");
     // Both check the page status (assertStreamerWritable). A Mash Battle is a choice entry plus a side table (R1).
+    // An admin removal of someone else's item passes the same step-up gate as the admin routes.
     const result =
       input.action === "create" && input.kind === "mash"
         ? await createMash(env, viewer.id, streamer.id, input)
-        : await mutateEntry(env, viewer.id, streamer.id, input);
+        : await mutateEntry(env, viewer.id, streamer.id, input, () => requireAdminSession(request, app));
     await notifyRoom(env, streamer.id);
     return json(result);
   }),

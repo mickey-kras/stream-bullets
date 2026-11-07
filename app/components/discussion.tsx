@@ -3,7 +3,8 @@ import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
 import { orderThreads, replyParent, visibleReplies } from "../lib/threads";
 import type { Comment, CommentThread, SortOrder, StreamerStatus, ThreadSnapshot, Viewer } from "../types";
-import { errorMessage, postJson, requestJson } from "./api";
+import { KeyConfirm } from "./admin/key-confirm";
+import { errorMessage, needsStepUp, postJson, requestJson } from "./api";
 import { Avatar, Modal } from "./common";
 import { ReportButton } from "./report";
 import { SignInDialog } from "./shell/sign-in-dialog";
@@ -26,14 +27,18 @@ export function DeleteButton({
   const [open, setOpen] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  // An admin who removes someone else's content may need a fresh security-key check first, as in the Admin tab.
+  const [stepUp, setStepUp] = useState<boolean>(false);
   async function remove(): Promise<void> {
     setPending(true);
     setError("");
     try {
       await onDelete();
+      setStepUp(false);
       setOpen(false);
     } catch (error_: unknown) {
-      setError(errorMessage(error_));
+      if (needsStepUp(error_)) setStepUp(true);
+      else setError(errorMessage(error_));
     } finally {
       setPending(false);
     }
@@ -55,13 +60,16 @@ export function DeleteButton({
         <p role="alert" className="form-error">
           {error}
         </p>
+        {stepUp && <KeyConfirm inDialog label={label} onConfirmed={remove} />}
         <div className="modal-actions">
           <button type="button" disabled={pending} onClick={() => setOpen(false)}>
             {t("dialog.cancel")}
           </button>
-          <button className="gold" type="button" disabled={pending} onClick={() => void remove()}>
-            {pending ? t("discussion.deleting") : label}
-          </button>
+          {!stepUp && (
+            <button className="gold" type="button" disabled={pending} onClick={() => void remove()}>
+              {pending ? t("discussion.deleting") : label}
+            </button>
+          )}
         </div>
       </Modal>
     </>
@@ -444,7 +452,8 @@ export function Discussion({
       setRevision((value: number) => value + 1);
       onChanged();
     } catch (error_: unknown) {
-      setError(errorMessage(error_));
+      // The delete dialog asks for the security key itself, so the step-up request is not a page error.
+      if (!needsStepUp(error_)) setError(errorMessage(error_));
       throw error_;
     } finally {
       setBusy(false);

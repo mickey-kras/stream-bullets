@@ -178,10 +178,10 @@ export async function listReports(env: AppEnv, adminId: string, query: ReportQue
 async function removeTarget(env: AppEnv, adminId: string, report: ReportRow): Promise<string | null> {
   try {
     if (report.target_kind === "entry") {
-      await deleteEntry(env, adminId, report.streamer_id, report.target_id);
+      await deleteEntry(env, adminId, report.streamer_id, report.target_id, "checked");
       return report.streamer_id;
     }
-    return (await deleteComment(env, adminId, report.target_id)).streamerId;
+    return (await deleteComment(env, adminId, report.target_id, "checked")).streamerId;
   } catch (error: unknown) {
     // The author or streamer may have removed the content already; the report can still be closed.
     if (error instanceof HttpError && error.status === 404) return null;

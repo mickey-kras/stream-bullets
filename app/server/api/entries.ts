@@ -2,6 +2,7 @@ import { z } from "zod";
 import { listComments, mutateComment } from "../comments.server";
 import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
+import { requireAdminSession } from "../stepup.server";
 import { commentActionSchema, commentQuerySchema } from "../validation";
 import { get, parsedQuery, write, type ApiRoute } from "./router";
 
@@ -22,7 +23,12 @@ export const entryRoutes: ApiRoute[] = [
     queryParams(request, []);
     return json({ entry });
   }),
-  write("POST", /comments/, async ({ request, env, viewer }) =>
-    json(await mutateComment(env, viewer.id, await readJson(request, commentActionSchema))),
+  // An admin removal of someone else's comment passes the same step-up gate as the admin routes.
+  write("POST", /comments/, async ({ request, app, env, viewer }) =>
+    json(
+      await mutateComment(env, viewer.id, await readJson(request, commentActionSchema), () =>
+        requireAdminSession(request, app),
+      ),
+    ),
   ),
 ];

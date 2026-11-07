@@ -25,6 +25,7 @@ import {
   streamerRole,
 } from "./access.server";
 import { IDEA_CATEGORIES, isUntouchedTemplate, NEW_IDEA_STATUS } from "../lib/ideas";
+import { auditStatement, type AuditEntry } from "./audit.server";
 import { HttpError } from "./http.server";
 import { MASH_COLUMN, mashValue } from "./mash-sql";
 import {
@@ -86,6 +87,7 @@ interface PermissionRow {
   author_id: string;
   owner_id: string;
   kind: EntryKind;
+  title: string;
 }
 
 export function parsed<T>(schema: z.ZodType<T>, value: unknown): T {
@@ -619,7 +621,7 @@ export async function applyMutation(
 
 async function entryPermission(env: AppEnv, id: string, streamerId: string): Promise<PermissionRow> {
   const row = await env.DB.prepare(
-    "SELECT e.id,e.streamer_id,e.author_id,e.kind,s.owner_id FROM entries e JOIN streamers s ON s.id=e.streamer_id WHERE e.id=? AND e.streamer_id=?",
+    "SELECT e.id,e.streamer_id,e.author_id,e.kind,e.title,s.owner_id FROM entries e JOIN streamers s ON s.id=e.streamer_id WHERE e.id=? AND e.streamer_id=?",
   )
     .bind(id, streamerId)
     .first<PermissionRow>();
@@ -628,29 +630,64 @@ async function entryPermission(env: AppEnv, id: string, streamerId: string): Pro
 }
 
 /**
- * Authors and the streamer may remove their content. Administrators may remove anything for moderation.
- * Returns whether the removal relies on administrator rights.
+ * The step-up gate for a removal that relies on administrator rights (security review finding 1).
+ * - A function: the generic delete endpoints pass `requireAdminSession`. It runs only for an admin removal, and the
+ *   removal then writes a `moderation_actions` row in the same batch.
+ * - `"checked"`: an admin route that already ran `requireAdminSession` and writes its own audit row.
+ * - Absent: an admin removal is refused, so no caller can skip the gate by accident.
  */
-export async function removalByAdmin(
+export type AdminRemovalGate = StepUpGate | "checked";
+
+/** Runs the admin step-up check and says how the request met the policy, for the audit row. */
+export type StepUpGate = () => Promise<{ stepUp: string }>;
+
+/** What an admin removal records: the audit row without its actor and step-up state. */
+export type RemovalAudit = Omit<AuditEntry, "actorId" | "createdAt">;
+
+/**
+ * Authors and the streamer may remove their content without a step-up. Administrators may remove anything for
+ * moderation, through the gate. Returns whether the removal relies on administrator rights, and the audit
+ * statement to batch right after the delete (it writes only when the delete changed a row).
+ */
+export async function adminRemoval(
   env: AppEnv,
   viewerId: string,
-  authorId: string,
-  ownerId: string,
-  denied: string,
-): Promise<boolean> {
-  if (authorId === viewerId || ownerId === viewerId) return false;
-  if (await isAdmin(env, viewerId)) return true;
-  throw new HttpError(403, denied);
+  owners: { authorId: string; ownerId: string; denied: string },
+  gate: AdminRemovalGate | undefined,
+  audit: RemovalAudit,
+): Promise<{ admin: boolean; audit: D1PreparedStatement | null }> {
+  if (owners.authorId === viewerId || owners.ownerId === viewerId) return { admin: false, audit: null };
+  if (!gate || !(await isAdmin(env, viewerId))) throw new HttpError(403, owners.denied);
+  if (gate === "checked") return { admin: true, audit: null };
+  const { stepUp } = await gate();
+  const entry = { ...audit, actorId: viewerId, metadata: { ...audit.metadata, stepUp } };
+  return { admin: true, audit: auditStatement(env, entry, { afterChange: true }) };
 }
 
-async function removeEntry(env: AppEnv, viewerId: string, permission: PermissionRow): Promise<void> {
-  const admin = await removalByAdmin(
+async function removeEntry(
+  env: AppEnv,
+  viewerId: string,
+  permission: PermissionRow,
+  gate: AdminRemovalGate | undefined,
+): Promise<void> {
+  const removal = await adminRemoval(
     env,
     viewerId,
-    permission.author_id,
-    permission.owner_id,
-    "Only the author or streamer can remove this item.",
+    {
+      authorId: permission.author_id,
+      ownerId: permission.owner_id,
+      denied: "Only the author or streamer can remove this item.",
+    },
+    gate,
+    {
+      targetKind: "entry",
+      targetId: permission.id,
+      streamerId: permission.streamer_id,
+      action: "entry_removed",
+      metadata: { title: permission.title.slice(0, 200), via: "page" },
+    },
   );
+  const admin = removal.admin;
   if (!admin && permission.owner_id !== viewerId) {
     // Ideas board: the author may delete their idea only while it is still under review.
     const idea = await env.DB.prepare(
@@ -661,9 +698,7 @@ async function removeEntry(env: AppEnv, viewerId: string, permission: Permission
     if (idea?.is_official === 1 && idea.status !== null && idea.status !== NEW_IDEA_STATUS)
       throw new HttpError(403, "You can delete your idea only while it is under review.");
   }
-  await applyMutation(
-    env,
-    permission.streamer_id,
+  const [removed] = await env.DB.batch([
     env.DB.prepare(`DELETE FROM entries WHERE id=? AND streamer_id=?
     AND (?=1 OR author_id=? OR EXISTS(SELECT 1 FROM streamers s WHERE s.id=entries.streamer_id AND s.owner_id=?))`).bind(
       permission.id,
@@ -672,14 +707,21 @@ async function removeEntry(env: AppEnv, viewerId: string, permission: Permission
       viewerId,
       viewerId,
     ),
-    404,
-    "Topic or poll not found.",
-  );
+    ...(removal.audit ? [removal.audit] : []),
+    env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(permission.streamer_id),
+  ]);
+  if (removed.meta.changes === 0) throw new HttpError(404, "Topic or poll not found.");
 }
 
 /** Removes a topic or poll with the same rules as a delete action, without consuming the caller's quota. */
-export async function deleteEntry(env: AppEnv, viewerId: string, streamerId: string, id: string): Promise<void> {
-  await removeEntry(env, viewerId, await entryPermission(env, id, streamerId));
+export async function deleteEntry(
+  env: AppEnv,
+  viewerId: string,
+  streamerId: string,
+  id: string,
+  gate?: AdminRemovalGate,
+): Promise<void> {
+  await removeEntry(env, viewerId, await entryPermission(env, id, streamerId), gate);
 }
 
 async function createEntry(
@@ -739,6 +781,7 @@ export async function mutateEntry(
   viewerId: string,
   streamerId: string,
   input: unknown,
+  stepUp?: StepUpGate,
 ): Promise<{ id: string }> {
   const action = parsed(entryActionSchema, input);
   await assertStreamerWritable(env, streamerId, viewerId, { moderation: action.action === "delete" });
@@ -797,7 +840,7 @@ export async function mutateEntry(
       break;
     }
     case "delete": {
-      await removeEntry(env, viewerId, permission);
+      await removeEntry(env, viewerId, permission, stepUp);
       break;
     }
     case "comment": {

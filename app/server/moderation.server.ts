@@ -287,7 +287,7 @@ export async function removeEntryAsAdmin(
     .bind(entryId)
     .first<{ streamer_id: string; title: string }>();
   if (!entry) throw new HttpError(404, "Topic or poll not found.");
-  await deleteEntry(env, admin.viewer.id, entry.streamer_id, entryId);
+  await deleteEntry(env, admin.viewer.id, entry.streamer_id, entryId, "checked");
   const [closed] = await env.DB.batch([
     env.DB.prepare(`
       UPDATE content_reports SET status='actioned', resolved_at=?, resolved_by=?

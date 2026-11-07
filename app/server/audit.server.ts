@@ -15,12 +15,19 @@ export interface AuditEntry {
   createdAt?: number;
 }
 
-/** The insert statement for one audit row, so callers can batch it with the change it records. */
-export function auditStatement(env: AppEnv, entry: AuditEntry): D1PreparedStatement {
+/**
+ * The insert statement for one audit row, so callers can batch it with the change it records. With `afterChange`,
+ * the row is written only when the statement just before it in the batch changed a row.
+ */
+export function auditStatement(
+  env: AppEnv,
+  entry: AuditEntry,
+  options: { afterChange?: boolean } = {},
+): D1PreparedStatement {
   return env.DB.prepare(`
     INSERT INTO moderation_actions
       (id, target_kind, target_id, streamer_id, action, reason, note, notify_owner, actor_id, metadata, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE ${options.afterChange ? "changes() > 0" : "1"}
   `).bind(
     crypto.randomUUID(),
     entry.targetKind,

@@ -327,6 +327,54 @@ describe("enforced step-up", (): void => {
     });
     expect(lifted.status).toBe(200);
   });
+
+  it("gates admin removals on the page endpoints, audits them, and leaves authors and owners alone", async (): Promise<void> => {
+    const [first] = await twoKeys();
+    await age(16 * minute);
+    const own = "20000000-0000-4000-8000-000000000006";
+    await env.DB.prepare(
+      "INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'viewer','My comment',3)",
+    )
+      .bind(own, ids.topic)
+      .run();
+    // The author and the page owner need no key.
+    expect((await call("POST", "comments", { user: "viewer", body: { action: "delete", id: own } })).status).toBe(200);
+    const removeTopic = { body: { action: "delete", id: ids.topic } };
+    const removeComment = { body: { action: "delete", id: ids.comment } };
+    for (const [path, options] of [
+      ["streamers/zed_page", removeTopic],
+      ["comments", removeComment],
+    ] as const) {
+      const refused = await asAdmin("POST", path, options);
+      expect([path, refused.status]).toEqual([path, 403]);
+      expect(await body<{ code: string }>(refused)).toMatchObject({ code: "step_up_required" });
+    }
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM entry_comments").first("n")).toBe(1);
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM entries WHERE id=?").bind(ids.topic).first("n")).toBe(1);
+
+    expect((await stepUp(first)).status).toBe(200);
+    expect((await asAdmin("POST", "comments", removeComment)).status).toBe(200);
+    expect((await asAdmin("POST", "streamers/zed_page", removeTopic)).status).toBe(200);
+    const { results } = await env.DB.prepare(
+      "SELECT action, target_id, actor_id, streamer_id, metadata FROM moderation_actions WHERE target_kind='entry' ORDER BY action",
+    ).all();
+    expect(results).toEqual([
+      {
+        action: "comment_removed",
+        target_id: ids.topic,
+        actor_id: "admin",
+        streamer_id: ids.page,
+        metadata: JSON.stringify({ commentId: ids.comment, via: "page", stepUp: "fresh" }),
+      },
+      {
+        action: "entry_removed",
+        target_id: ids.topic,
+        actor_id: "admin",
+        streamer_id: ids.page,
+        metadata: JSON.stringify({ title: "Spam topic", via: "page", stepUp: "fresh" }),
+      },
+    ]);
+  });
 });
 
 describe("security-key ceremonies", (): void => {

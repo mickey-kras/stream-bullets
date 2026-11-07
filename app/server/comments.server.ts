@@ -8,7 +8,9 @@ import {
   encodeCursor,
   parsed,
   publicAvatar,
-  removalByAdmin,
+  adminRemoval,
+  type AdminRemovalGate,
+  type StepUpGate,
 } from "./data.server";
 import { HttpError } from "./http.server";
 import { commentActionSchema, commentQuerySchema, type CommentQuery } from "./validation";
@@ -125,6 +127,7 @@ export async function listComments(
 }
 
 interface CommentPermission {
+  entry_id: string;
   author_id: string;
   streamer_id: string;
   owner_id: string;
@@ -132,10 +135,11 @@ interface CommentPermission {
 }
 
 async function commentPermission(env: AppEnv, id: string): Promise<CommentPermission> {
-  const comment = await env.DB.prepare(`SELECT c.author_id,c.parent_id,e.streamer_id,s.owner_id FROM entry_comments c
+  const comment =
+    await env.DB.prepare(`SELECT c.entry_id,c.author_id,c.parent_id,e.streamer_id,s.owner_id FROM entry_comments c
     JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=?`)
-    .bind(id)
-    .first<CommentPermission>();
+      .bind(id)
+      .first<CommentPermission>();
   if (!comment) throw new HttpError(404, "Comment not found.");
   return comment;
 }
@@ -149,26 +153,48 @@ export const REMOVED_COMMENT_TEXT = "[removed]";
  * every placeholder above it left with no replies is deleted with it. Account deletion still removes the
  * account's comments outright; replies under them become top-level comments.
  */
-async function removeComment(env: AppEnv, viewerId: string, id: string, comment: CommentPermission): Promise<void> {
-  const admin = await removalByAdmin(
+async function removeComment(
+  env: AppEnv,
+  viewerId: string,
+  id: string,
+  comment: CommentPermission,
+  gate: AdminRemovalGate | undefined,
+): Promise<void> {
+  // The audit target kinds stop at `entry`, so a comment removal is logged on its topic or poll.
+  const { admin, audit } = await adminRemoval(
     env,
     viewerId,
-    comment.author_id,
-    comment.owner_id,
-    "Only the author or streamer can remove this comment.",
+    {
+      authorId: comment.author_id,
+      ownerId: comment.owner_id,
+      denied: "Only the author or streamer can remove this comment.",
+    },
+    gate,
+    {
+      targetKind: "entry",
+      targetId: comment.entry_id,
+      streamerId: comment.streamer_id,
+      action: "comment_removed",
+      metadata: { commentId: id, via: "page" },
+    },
   );
   const ownership =
     "SELECT c.id FROM entry_comments c JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=? AND (?=1 OR c.author_id=? OR s.owner_id=?)";
   const scope = [id, admin ? 1 : 0, viewerId, viewerId];
   const hasReplies = "EXISTS(SELECT 1 FROM entry_comments r WHERE r.parent_id=entry_comments.id)";
-  const result = await env.DB.batch([
+  // Exactly one of the two changes below applies (a comment either has replies or not). The audit row after each
+  // one is written only when that change happened.
+  const audited = audit ? [audit] : [];
+  const statements = [
     env.DB.prepare(
       `UPDATE entry_comments SET removed_at=?, text=? WHERE id IN (${ownership}) AND removed_at IS NULL AND ${hasReplies}`,
     ).bind(Date.now(), REMOVED_COMMENT_TEXT, ...scope),
+    ...audited,
     env.DB.prepare(
       "DELETE FROM comment_likes WHERE comment_id=? AND EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND removed_at IS NOT NULL)",
     ).bind(id, id),
     env.DB.prepare(`DELETE FROM entry_comments WHERE id IN (${ownership}) AND NOT ${hasReplies}`).bind(...scope),
+    ...audited,
     // Placeholders up the chain whose only reply is the next one being deleted: A(removed) → B(removed) → C.
     env.DB.prepare(`WITH RECURSIVE gone(id, parent_id) AS (
         SELECT id, parent_id FROM entry_comments WHERE id=? AND removed_at IS NOT NULL AND NOT ${hasReplies}
@@ -179,18 +205,31 @@ async function removeComment(env: AppEnv, viewerId: string, id: string, comment:
       )
       DELETE FROM entry_comments WHERE id IN (SELECT id FROM gone)`).bind(comment.parent_id),
     env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
-  ]);
-  if (result[0].meta.changes === 0 && result[2].meta.changes === 0) throw new HttpError(404, "Comment not found.");
+  ];
+  const result = await env.DB.batch(statements);
+  const placeholder = result[0].meta.changes;
+  const deleted = result[2 + audited.length].meta.changes;
+  if (placeholder === 0 && deleted === 0) throw new HttpError(404, "Comment not found.");
 }
 
 /** Removes a comment with the same rules as a delete action. Returns the streamer page it belonged to. */
-export async function deleteComment(env: AppEnv, viewerId: string, id: string): Promise<{ streamerId: string }> {
+export async function deleteComment(
+  env: AppEnv,
+  viewerId: string,
+  id: string,
+  gate?: AdminRemovalGate,
+): Promise<{ streamerId: string }> {
   const comment = await commentPermission(env, id);
-  await removeComment(env, viewerId, id, comment);
+  await removeComment(env, viewerId, id, comment, gate);
   return { streamerId: comment.streamer_id };
 }
 
-export async function mutateComment(env: AppEnv, viewerId: string, input: unknown): Promise<{ id: string }> {
+export async function mutateComment(
+  env: AppEnv,
+  viewerId: string,
+  input: unknown,
+  stepUp?: StepUpGate,
+): Promise<{ id: string }> {
   const action = parsed(commentActionSchema, input);
   await consumeMutationQuota(env, viewerId);
   const comment = await commentPermission(env, action.id);
@@ -203,7 +242,7 @@ export async function mutateComment(env: AppEnv, viewerId: string, input: unknow
       : env.DB.prepare("DELETE FROM comment_likes WHERE comment_id=? AND user_id=?").bind(action.id, viewerId);
     await applyMutation(env, comment.streamer_id, statement, 404, "Comment not found.", true);
   } else {
-    await removeComment(env, viewerId, action.id, comment);
+    await removeComment(env, viewerId, action.id, comment, stepUp);
   }
   return { id: action.id };
 }
