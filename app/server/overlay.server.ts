@@ -97,7 +97,14 @@ export async function nextOverlayState(
   return next;
 }
 
-/** Applies an owner action and stores the result. The caller then tells the live room (`notifyOverlay`). */
+/** How many times an action is re-applied when another control tab saved in between. */
+const OVERLAY_WRITE_ATTEMPTS = 3;
+
+/**
+ * Applies an owner action and stores the result. The write only lands on the revision the action was applied to,
+ * so two control tabs never overwrite each other: on a lost race the action is applied again to the newer state.
+ * The caller then tells the live room (`notifyOverlay`).
+ */
 export async function updateOverlay(
   env: AppEnv,
   userId: string,
@@ -106,28 +113,33 @@ export async function updateOverlay(
 ): Promise<OverlayState> {
   const page = await assertStreamerWritable(env, streamerId, userId);
   if (page.ownerId !== userId) throw new HttpError(403, "Only the streamer can control the overlay.");
-  const current = await getOverlayState(env, streamerId);
-  const next = await nextOverlayState(env, streamerId, current, action);
-  await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,show_results,message,
-      message_style,revision,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)
-    ON CONFLICT(streamer_id) DO UPDATE SET air=excluded.air,preview=excluded.preview,position=excluded.position,
-      size=excluded.size,instant=excluded.instant,show_results=excluded.show_results,message=excluded.message,
-      message_style=excluded.message_style,revision=overlay_state.revision+1,updated_at=excluded.updated_at`)
-    .bind(
-      streamerId,
-      JSON.stringify(next.air),
-      JSON.stringify(next.preview),
-      next.position,
-      next.size,
-      next.instant ? 1 : 0,
-      next.showResults ? 1 : 0,
-      next.message,
-      next.messageStyle,
-      next.revision,
-      Date.now(),
-    )
-    .run();
-  return getOverlayState(env, streamerId);
+  for (let attempt = 0; attempt < OVERLAY_WRITE_ATTEMPTS; attempt++) {
+    const current = await getOverlayState(env, streamerId);
+    const next = await nextOverlayState(env, streamerId, current, action);
+    const result = await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,
+        show_results,message,message_style,revision,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+      ON CONFLICT(streamer_id) DO UPDATE SET air=excluded.air,preview=excluded.preview,position=excluded.position,
+        size=excluded.size,instant=excluded.instant,show_results=excluded.show_results,message=excluded.message,
+        message_style=excluded.message_style,revision=excluded.revision,updated_at=excluded.updated_at
+      WHERE overlay_state.revision=?`)
+      .bind(
+        streamerId,
+        JSON.stringify(next.air),
+        JSON.stringify(next.preview),
+        next.position,
+        next.size,
+        next.instant ? 1 : 0,
+        next.showResults ? 1 : 0,
+        next.message,
+        next.messageStyle,
+        next.revision,
+        Date.now(),
+        current.revision,
+      )
+      .run();
+    if (result.meta.changes > 0) return next;
+  }
+  throw new HttpError(409, "The overlay changed in another tab. Try again.");
 }
 
 interface TopicRow {

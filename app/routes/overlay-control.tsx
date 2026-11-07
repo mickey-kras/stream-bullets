@@ -51,6 +51,14 @@ export default function OverlayControlPage(): ReactNode {
   const { snapshot, status } = useLivePolls(loaded.handle);
   const revalidator = useRevalidator();
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
+  // Another control tab changed the overlay: reload the full state (the live message has no preview).
+  const liveOverlay = snapshot?.overlay ?? null;
+  useLiveRevalidation(
+    status,
+    liveOverlay?.revision,
+    revalidator.revalidate,
+    (liveOverlay?.revision ?? 0) > loaded.state.revision,
+  );
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const now: number = useServerTime(current.serverNow);
   const polls: OverlayPoll[] = [...current.polls];
@@ -61,6 +69,7 @@ export default function OverlayControlPage(): ReactNode {
       <main className="page-panel ov-control" id="main-content">
         <OverlayControl
           initial={loaded.state}
+          live={liveOverlay}
           overlayUrl={loaded.overlayUrl}
           connected={status === "live" || status === "connecting"}
           scene={{ name: loaded.name, handle: loaded.handle, host: loaded.host, polls, data: loaded.data, now }}

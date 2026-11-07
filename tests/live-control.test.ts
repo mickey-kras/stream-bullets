@@ -1,11 +1,16 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { OverlayStage } from "../app/components/overlay/overlay-stage";
 import type { AppEnv } from "../app/env";
+import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
 import { MASH_COUNTDOWN_MS } from "../app/lib/mash";
 import { mashValue } from "../app/server/mash-sql";
 import { runMashAction } from "../app/server/mash.server";
 import { DEFAULT_OVERLAY, overlayPublic, overlayValue, type OverlayRow } from "../app/server/overlay-state";
 import { getOverlayData, nextOverlayState, updateOverlay } from "../app/server/overlay.server";
 import type { OverlayData, OverlayState, StreamEvent } from "../app/types";
+import { controlState } from "../app/components/overlay/overlay-control";
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
@@ -172,6 +177,79 @@ describe("stored overlay and battle values", (): void => {
     expect(mashValue(raw, 3)).toMatchObject({ phase: "live", totals: [0, 0, 9], players: 3, assisted: 1 });
     expect(() => mashValue(JSON.stringify({ ...JSON.parse(raw), phase: "paused" }), 2)).toThrow();
     expect(() => mashValue(JSON.stringify({ ...JSON.parse(raw), totals: [{ side: 4, taps: 1 }] }), 2)).toThrow();
+  });
+});
+
+describe("overlay control state", (): void => {
+  const saved: OverlayState = { ...DEFAULT_OVERLAY, preview: { type: "topic", ref: "t" }, instant: true, revision: 4 };
+
+  it("shows the newer of the saved and the loaded state", (): void => {
+    const loaded: OverlayState = { ...DEFAULT_OVERLAY, size: "l", revision: 5 };
+    expect(controlState(saved, loaded, null)).toBe(loaded);
+    expect(controlState(saved, { ...loaded, revision: 3 }, undefined)).toBe(saved);
+    expect(controlState(saved, saved, overlayPublic({ ...saved, size: "s" }))).toBe(saved);
+  });
+
+  it("takes a newer live overlay from another tab and keeps the private fields", (): void => {
+    const other: OverlayState = {
+      ...saved,
+      air: { type: "message", ref: null },
+      position: "top",
+      size: "l",
+      showResults: false,
+      message: "Back soon",
+      messageStyle: "hype",
+      preview: { type: "auto", ref: null },
+      revision: 6,
+    };
+    expect(controlState(saved, saved, overlayPublic(other))).toEqual({ ...other, preview: saved.preview });
+    const air: OverlayState = { ...other, air: { type: "auto", ref: null }, message: "Draft", revision: 7 };
+    expect(controlState({ ...saved, message: "Mine" }, saved, overlayPublic(air))).toMatchObject({
+      air: { type: "auto" },
+      message: "Mine",
+      instant: true,
+      revision: 7,
+    });
+  });
+});
+
+describe("overlay poll card", (): void => {
+  afterEach((): void => {
+    setLocaleSource((): Locale => DEFAULT_LOCALE);
+  });
+
+  it("counts votes with the language's plural rules", async (): Promise<void> => {
+    await loadCatalog("ru");
+    setLocaleSource((): Locale => "ru");
+    const card = (total: number): string =>
+      renderToStaticMarkup(
+        createElement(OverlayStage, {
+          source: { type: "poll", ref: poll },
+          scene: {
+            name: "Nova",
+            handle: "nova",
+            host: "streambullets.com",
+            overlay: { position: "lower", size: "m", showResults: true, message: "", messageStyle: "info" },
+            polls: [
+              {
+                id: poll,
+                title: "Pick one",
+                kind: "choice",
+                options: ["A", "B"],
+                endsAt: null,
+                revealed: true,
+                counts: [total, 0],
+                total,
+                mash: null,
+              },
+            ],
+            data: { polls: [], topics: [], cards: [], next: null, support: null },
+            now: 0,
+          },
+        }),
+      );
+    const total = (count: number): string | undefined => /class="overlay-total">([^<]*)</.exec(card(count))?.[1];
+    expect([total(3), total(5), total(21)]).toEqual(["3 голоса", "5 голосов", "21 голос"]);
   });
 });
 
@@ -363,6 +441,55 @@ describe("overlay control", (): void => {
     await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(page).run();
     expect((await send({ action: "take" })).status).toBe(423);
     expect(roomCalls).toEqual([]);
+  });
+
+  /** A database where `race` runs right after each of the first `times` overlay reads, like a second tab saving. */
+  function racingEnv(race: () => Promise<unknown>, times: number): AppEnv {
+    let left = times;
+    const db = env.DB;
+    const prepare = (sql: string): D1PreparedStatement => {
+      const statement = db.prepare(sql);
+      if (!sql.startsWith("SELECT air,")) return statement;
+      return {
+        bind: (...values: unknown[]) => {
+          const bound = statement.bind(...values);
+          return {
+            first: async <T>(): Promise<T | null> => {
+              const row = await bound.first<T>();
+              if (left-- > 0) await race();
+              return row;
+            },
+          };
+        },
+      } as unknown as D1PreparedStatement;
+    };
+    return { ...env, DB: { prepare, batch: db.batch.bind(db) } as unknown as D1Database };
+  }
+
+  it("re-applies an action when another tab saved in between, so neither change is lost", async (): Promise<void> => {
+    await updateOverlay(env, "owner", page, { action: "message", text: "Hi", style: "info" });
+    const other = (): Promise<OverlayState> => updateOverlay(env, "owner", page, { action: "layout", position: "top" });
+    const raced = racingEnv(other, 1);
+    const state = await updateOverlay(raced, "owner", page, {
+      action: "message",
+      text: "Be right back",
+      style: "hype",
+    });
+    expect(state).toMatchObject({ position: "top", message: "Be right back", messageStyle: "hype", revision: 3 });
+    const stored = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
+    expect(stored.overlay).toEqual(state);
+  });
+
+  it("answers 409 when other tabs keep saving first", async (): Promise<void> => {
+    let size = 0;
+    const sizes = ["s", "m", "l"] as const;
+    const other = (): Promise<OverlayState> =>
+      updateOverlay(env, "owner", page, { action: "layout", size: sizes[size++ % 3] });
+    await expect(
+      updateOverlay(racingEnv(other, 3), "owner", page, { action: "layout", position: "center" }),
+    ).rejects.toMatchObject({ status: 409 });
+    const stored = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
+    expect(stored.overlay).toMatchObject({ position: "lower", size: "l", revision: 3 });
   });
 
   it("keeps each layout value the action leaves out", async (): Promise<void> => {
