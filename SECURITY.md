@@ -6,14 +6,14 @@ Use GitHub private vulnerability reporting for security issues. If that feature 
 
 Admin actions need an administrator account (a verified address in `ADMIN_EMAILS`). With `ADMIN_STEP_UP=enforce`, they also need a WebAuthn assertion from one of the account's security keys in the current session. The server checks this on every admin endpoint and in the Admin page loader. The browser never decides.
 
-- Each assertion uses a random 32-byte challenge. The server stores the challenge per session and purpose for 2 minutes and deletes it on first use, so a response cannot be replayed.
+- Each assertion uses a random 32-byte challenge. The server stores the challenge per session and purpose for 2 minutes. It deletes the challenge on first use, so an attacker cannot use a response again.
 - The server checks the origin against `APP_ORIGIN` and the relying party ID hash against its host name. The key must report user presence and user verification (PIN or biometrics).
 - The signature counter must increase when the key reports one. A compare-and-set update stops two parallel uses of one assertion.
-- The step-up time is stored on the session row, not on the user. Another session of the same account does not inherit it. Sign-out or session expiry ends it.
-- A first key is accepted only within 5 minutes of a new sign-in. Later keys need a key check from the last 2 minutes. Removing a key needs a key check with a different key, and the last key cannot be removed.
+- The server stores the step-up time on the session row, not on the user. Another session of the same account does not inherit it. Sign-out or session expiry ends it.
+- The server accepts a first key only within 5 minutes of a new sign-in. Later keys need a key check from the last 2 minutes. Removing a key needs a key check with a different key, and nobody can remove the last key.
 - The `moderation_actions` table records each key check, failed check, key change and moderation action. Audit rows store a hash of the session id, not the id.
 
-### Recovery when every key is lost
+### Recovery when the administrator loses every key
 
 Only the site operator can recover. The operator needs Cloudflare access to the production D1 database.
 

@@ -37,8 +37,8 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 - `/@handle/schedule.ics` serves the schedule as a calendar feed. Calendar apps can subscribe to it.
 - The owner edits up to 8 cards on the **Community** tab and up to 4 support links in **Edit your page**. Support links open the provider site. StreamBullets takes no payments.
 - The official `@streambullets` page is the Ideas board. Signed-in users suggest improvements and report bugs there, and everyone can vote. **Suggest an improvement** in the footer and the account menu opens it.
-- The interface is in 11 languages: English, Spanish, Brazilian Portuguese, German, Polish, Ukrainian, Russian, Japanese, Simplified Chinese, French, and Hindi. The page language comes from the account setting, then the `sb_locale` cookie, then the browser `Accept-Language` header, then English. The catalogs are in `app/i18n/`. Add each new message id to all 11 files: `tests/i18n.test.ts` fails when a catalog is missing an id, a plural form, or a `{placeholder}`. The footer and the account menu open the language list. Posts by users stay in their own language. The Privacy Policy and the Terms stay in English, with a translated note that the English text is binding.
-- **Accessibility & display** in the footer and the account menu sets colour-vision palettes, high contrast, text size, a readable font, link underlines, motion, and the Mash Battle options: screen-reader score updates, keyboard shortcuts, and assisted tapping. Signed-in accounts keep the settings. A cookie keeps them for each browser. An inline script with the request nonce applies them before the first paint.
+- The interface is in 11 languages: English, Spanish, Brazilian Portuguese, German, Polish, Ukrainian, Russian, Japanese, Simplified Chinese, French, and Hindi. The page language comes from the first of these sources that has a value: the account setting, the `sb_locale` cookie, and the browser `Accept-Language` header. If none has a value, the language is English. The catalogs are in `app/i18n/`. Add each new message id to all 11 files: `tests/i18n.test.ts` fails when a catalog is missing an id, a plural form, or a `{placeholder}`. The footer and the account menu open the language list. Posts by users stay in their own language. The Privacy Policy and the Terms stay in English. A translated note says that only the English text has legal effect.
+- **Accessibility & display** is in the footer and the account menu. It sets colour-vision palettes, high contrast, text size, a readable font, link underlines, and motion. It also sets the Mash Battle options: screen-reader score updates, keyboard shortcuts, and assisted tapping. Signed-in accounts keep the settings. A cookie keeps them for each browser. An inline script with the nonce of the response applies them before the first paint.
 - `/ai` describes the policy for AI agents. Agents can read public pages but cannot post, vote, or sign up. The page has an unverified like and dislike counter at `POST /api/ai-interest`. The counter allows one vote per visitor per day and keeps votes for 30 days. `/robots.txt` and `/llms.txt` give the same policy. Pages carry JSON-LD for the site, streamers, upcoming streams, and open topics.
 
 ## Local use
@@ -70,14 +70,14 @@ The production site shows no sign-in buttons until you set at least one credenti
 | `BETTER_AUTH_SECRET` | Random secret of at least 32 characters. Keep it stable across deployments. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Credentials for the Google OAuth application. |
 | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | Credentials for the Twitch OAuth application. |
-| `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | Credentials for the TikTok Login Kit application. TikTok gives no email address. |
+| `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | Credentials for the TikTok application that uses Login Kit. TikTok gives no email address. |
 | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Credentials for an Instagram API with Instagram Login application. Only creator and business accounts can sign in. Meta must review the application first. Instagram gives no email address. |
 | `ADMIN_EMAILS` | Email addresses of administrators. Use commas or spaces between the addresses. Letter case is not important. |
 | `AI_INTEREST_SALT` | Random secret of at least 16 characters for the AI interest counter. The counter stores a keyed hash of the IP address and the day, never the IP address. Without this secret the counter is off and `/ai` hides its buttons. Store it as a Worker secret. |
 | `ADMIN_STEP_UP` | Security-key check for Admin: `off`, `report` or `enforce`. If you leave it empty, the value is `report`. An unknown value acts as `enforce`. See [Admin security keys](#admin-security-keys). |
-| `NOTIFY_EMAIL`, `NOTIFY_FROM` | Optional. `NOTIFY_EMAIL` is a `send_email` binding and `NOTIFY_FROM` is the sender address. When an administrator freezes, suspends or restores a page and selects "Notify the owner", the app sends the owner an email. The app sends email only when both are set. The owner always sees a notice on the page, in the account menu and in Edit your page. |
+| `NOTIFY_EMAIL`, `NOTIFY_FROM` | Optional. `NOTIFY_EMAIL` is a `send_email` binding and `NOTIFY_FROM` is the sender address. When an administrator freezes, suspends or restores a page and selects "Notify the owner", the app sends the owner an email. The app sends email only when you set both. The owner always sees a notice on the page, in the account menu and in Edit your page. |
 
-An administrator is an account with a verified email address in `ADMIN_EMAILS`. TikTok and Instagram accounts get a placeholder address that is not verified, so they cannot be administrators. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
+An administrator is an account with a verified email address in `ADMIN_EMAILS`. TikTok and Instagram accounts get an unverified placeholder address, so they cannot be administrators. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
 
 For local testing, add `ADMIN_EMAILS` to `.dev.vars`. For production, store it as a Worker secret. Use `pnpm exec wrangler secret put ADMIN_EMAILS --env production` or the Cloudflare dashboard. Do not use a plain variable in the dashboard. Each deployment replaces plain variables with the `vars` in `wrangler.jsonc`.
 
@@ -87,15 +87,15 @@ Admin uses FIDO2 security keys (for example two YubiKeys) as a second check. A k
 
 `ADMIN_STEP_UP` sets the policy:
 
-- `report` (the default): Admin opens without a key. When two keys exist, Admin asks for a key first, and the administrator can continue without one. The server logs each admin request without a fresh key check.
-- `enforce`: Admin and every admin API refuse requests until the account has two keys and this session passed a key check in the last 15 minutes.
+- `report` (the default): Admin opens without a key. When two keys exist, Admin asks for a key first, and the administrator can continue without one. The server logs each admin API call that has no recent key check.
+- `enforce`: Admin and each admin endpoint of the API refuse access until the account has two keys. This session must also pass a key check in the last 15 minutes.
 - `off`: no key check. Use it only for local development.
 
 The default does not lock out the owner before the keys exist. Set it up in this order:
 
 1. Deploy with `ADMIN_STEP_UP` empty or set to `report`.
-2. Sign out, then sign in with the administrator account. The first key must be added within 5 minutes of that sign-in.
-3. Open `/admin?view=keys`. Add the first key, then the backup key. Admin asks you to touch each key.
+2. Sign out. Then sign in with the administrator account. You must add the first key within 5 minutes of that sign-in.
+3. Open `/admin?view=keys`. Add the first key. Then add the backup key. Admin asks you to touch each key.
 4. Sign in on a second session and confirm that Admin asks for a key and accepts each key.
 5. Set `ADMIN_STEP_UP` to `enforce` as a plain variable in `env.production.vars`, or as a Worker secret, and deploy.
 
@@ -208,7 +208,9 @@ The Privacy Policy and the Terms of Service get the details of the operator from
 - `operatorCountry`: the country of residence of the operator. The Terms also use it as the governing law.
 - `policyEffectiveDate`: the date that the policy starts.
 
-`contactEmail` and `minimumAge` have production values. Make sure that the contact mailbox receives email. While a placeholder remains, both pages show a draft notice at the top. Get a legal review of the text before launch. Update the pages when you add a data processor, a cookie, or a new use of data. The legal text is English only. Other languages show a translated note that the English version is binding.
+`contactEmail` and `minimumAge` have production values. Make sure that the contact mailbox receives email. While a placeholder remains, both pages show a draft notice at the top.
+
+Get a legal review of the text before launch. Update the pages when you add a data processor, a cookie, or a new use of data. The legal text is English only. Other languages show a translated note that only the English version has legal effect.
 
 Make the `Verify application` check mandatory in the repository ruleset. Keep squash-only merges and branch deletion in the repository settings. The workflow cannot enforce those settings itself.
 
