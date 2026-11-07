@@ -61,7 +61,17 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   // Focus moves to the first link; the owner's own page comes first, then the account rows.
   const links = menu.getByRole("link");
   await expect(links.first()).toBeFocused();
-  await expect(links).toHaveText(["Your page", "Edit your page", "Your profile", "Your data"]);
+  await expect(links).toHaveText([
+    "Your page",
+    "Edit your page",
+    "Your profile",
+    "Your data",
+    "Suggest an improvement",
+  ]);
+  await expect(menu.getByRole("link", { name: "Suggest an improvement" })).toHaveAttribute(
+    "href",
+    "/@streambullets?intent=suggest",
+  );
   await expect(menu.getByRole("link", { name: "Your page", exact: true })).toHaveAttribute("href", "/@test_host");
   // Account rows open dialogs over the current page (item 17).
   await expect(menu.getByRole("link", { name: "Your profile" })).toHaveAttribute("href", "/streamers?dialog=profile");

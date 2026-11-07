@@ -20,8 +20,11 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   await expect(page.locator(".changelog-note")).toBeVisible();
   await expect(page.locator("#topics .idea-row")).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Suggest an improvement" }).first().click();
+  // The footer link opens the board with Suggest an improvement open (`?intent=suggest`).
+  await page.locator(".site-footer .footer-full").getByRole("link", { name: "Suggest an improvement" }).click();
+  await expect(page).toHaveURL(/intent=suggest/);
   const dialog = page.getByRole("dialog", { name: "Suggest an improvement" });
+  await expect(dialog).toBeVisible();
   const details = dialog.getByLabel("Details");
   await dialog.getByLabel("Title").fill("Week view starts on Sunday");
   const category = dialog.getByRole("combobox", { name: "Category" });

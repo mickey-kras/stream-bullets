@@ -133,13 +133,23 @@ export default function StreamerPage(): ReactNode {
   const here = useLocation();
   const revalidator = useRevalidator();
   const toast = useToast();
-  // A directory card can ask for an action (P3 `?intent=`): suggest opens Suggest a topic (Suggest an improvement on
-  // the official page), or sign-in when signed out.
-  const [dialog, setDialog] = useState<Dialog>(() => {
+  // A directory card, the footer or the account menu can ask for an action (`?intent=`): suggest opens Suggest a
+  // topic (Suggest an improvement on the official page), or sign-in when signed out.
+  const intentDialog = (): Dialog => {
     if (data.intent !== "suggest" || !viewer || streamer.status !== "active") return null;
     return streamer.isOfficial ? "idea" : "topic";
-  });
+  };
+  const [dialog, setDialog] = useState<Dialog>(intentDialog);
   const [signIn, setSignIn] = useState<boolean>(data.intent === "suggest" && !viewer);
+  // The intent can also arrive by in-app navigation to this same page, which keeps the component mounted.
+  const [intentSeen, setIntentSeen] = useState<string | null>(data.intent);
+  if (intentSeen !== data.intent) {
+    setIntentSeen(data.intent);
+    if (data.intent === "suggest") {
+      setDialog(intentDialog());
+      setSignIn(!viewer);
+    }
+  }
   const { providers } = useShell();
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
