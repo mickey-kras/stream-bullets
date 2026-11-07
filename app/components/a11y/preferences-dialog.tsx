@@ -140,7 +140,7 @@ export function PreferencesDialog({ onClose }: Readonly<{ onClose: () => void }>
     setPrefs(next);
     setChangedPrefs(next);
     applyPrefs(next);
-    savePrefsCookie(next);
+    void savePrefsCookie(next);
     if (!shell.viewer) return;
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {

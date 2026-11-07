@@ -67,14 +67,19 @@ export function applyPrefs(prefs: DisplayPrefs): void {
 }
 
 /** Saves preferences in a cookie for this browser (one year, readable by the server for the first paint). */
-export function savePrefsCookie(prefs: DisplayPrefs): void {
-  setCookie(PREFS_COOKIE, JSON.stringify(prefs));
+export function savePrefsCookie(prefs: DisplayPrefs): Promise<void> {
+  return setCookie(PREFS_COOKIE, JSON.stringify(prefs));
 }
 
-/** Sets a first-party preference cookie for one year. */
-export function setCookie(name: string, value: string): void {
-  const secure: string = globalThis.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
+/** Sets a first-party preference cookie for one year, through the Cookie Store API. */
+export async function setCookie(name: string, value: string): Promise<void> {
+  await globalThis.cookieStore?.set({
+    name,
+    value: encodeURIComponent(value),
+    path: "/",
+    sameSite: "lax",
+    expires: Date.now() + 31_536_000_000,
+  });
 }
 
 /*

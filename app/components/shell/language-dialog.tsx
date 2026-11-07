@@ -21,7 +21,7 @@ const ORDERED: readonly Locale[] = [
  */
 export async function chooseLocale(locale: Locale, signedIn: boolean): Promise<void> {
   if (signedIn) await sendJson("PATCH", "/api/me/locale", { locale });
-  setCookie(LOCALE_COOKIE, locale);
+  await setCookie(LOCALE_COOKIE, locale);
   // Reload the same page without `?dialog=language`, so the list does not open again.
   const url = new URL(globalThis.location.href);
   url.searchParams.delete("dialog");
