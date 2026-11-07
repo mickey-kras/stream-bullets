@@ -20,6 +20,7 @@ export function ReportButton({
   targetId,
   label,
   description,
+  onReported,
 }: Readonly<{
   targetKind: ReportTargetKind;
   targetId: string;
@@ -27,6 +28,8 @@ export function ReportButton({
   label: string;
   /** What is being reported, shown in the dialog. */
   description: string;
+  /** Runs once the report is saved, so the page can show "Reported" instead of the button. */
+  onReported?: () => void;
 }>): ReactNode {
   const id = useId();
   const [open, setOpen] = useState<boolean>(false);
@@ -70,6 +73,7 @@ export function ReportButton({
         open={open}
         onOpenChange={(next: boolean) => {
           if (!pending) setOpen(next);
+          if (!next && sent) onReported?.();
         }}
         title={sent ? "Report sent" : "Report content"}
         description={sent ? "Thank you. An administrator will review it." : description}
@@ -80,7 +84,14 @@ export function ReportButton({
               We received your report. If the content breaks the law or the community rules, we will remove it.
             </output>
             <div className="modal-actions">
-              <button className="gold" type="button" onClick={() => setOpen(false)}>
+              <button
+                className="gold"
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onReported?.();
+                }}
+              >
                 Close
               </button>
             </div>

@@ -133,7 +133,7 @@ export const localIcons = {
     </>
   ),
   "chevron-up": <path d="m6 15 6-6 6 6" />,
-  "thumbs-up":thumb(THUMB_UP, false),
+  "thumbs-up": thumb(THUMB_UP, false),
   "thumbs-up-filled": thumb(THUMB_UP, true),
   "thumbs-down": thumb(THUMB_DOWN, false),
   "thumbs-down-filled": thumb(THUMB_DOWN, true),
@@ -177,6 +177,74 @@ export const localIcons = {
       <path d="M3 9c-1 2-1 4 0 6M21 9c1 2 1 4 0 6" />
     </>
   ),
+  /* Schedule platforms, Community card icons and reorder controls (the mockup's extra icons). */
+  play: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m10 8 6 4-6 4Z" />
+    </>
+  ),
+  youtube: (
+    <>
+      <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
+      <path d="m10 9.2 5 2.8-5 2.8Z" />
+    </>
+  ),
+  kick: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <path d="M8.5 7.5v9M8.5 12l4.5-4.5M8.5 12l4.5 4.5M13 7.5h2.5M13 16.5h2.5" />
+    </>
+  ),
+  discord: (
+    <>
+      <path d="M7.5 7.5c3-1.3 6-1.3 9 0 1.7 2.6 2.4 5.3 2.2 8.3-1.4 1-2.8 1.6-4.2 2l-.9-1.6M7.5 7.5C5.8 10.1 5.1 12.8 5.3 15.8c1.4 1 2.8 1.6 4.2 2l.9-1.6" />
+      <path d="M8 15.3c2.6 1.1 5.4 1.1 8 0" />
+      <circle cx="9.6" cy="12.3" r=".9" />
+      <circle cx="14.4" cy="12.3" r=".9" />
+    </>
+  ),
+  heart: <path d="M19.5 12.6 12 20l-7.5-7.4A4.6 4.6 0 0 1 12 6.3a4.6 4.6 0 0 1 7.5 6.3Z" />,
+  gift: (
+    <>
+      <rect x="3" y="8" width="18" height="4" rx="1" />
+      <path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5" />
+    </>
+  ),
+  star: <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9Z" />,
+  palette: (
+    <>
+      <path d="M12 3a9 9 0 0 0 0 18c1.1 0 1.6-.9 1.2-1.8-.5-1-.1-2.2 1.2-2.2H17a4 4 0 0 0 4-4c0-5.5-4-10-9-10Z" />
+      <circle cx="7.5" cy="11.5" r="1" />
+      <circle cx="10" cy="7.5" r="1" />
+      <circle cx="15" cy="7.5" r="1" />
+    </>
+  ),
+  megaphone: (
+    <>
+      <path d="M3 10v4h3l7 4V6L6 10Z" />
+      <path d="M16.5 9a4 4 0 0 1 0 6M6 14l1.5 5h2.5l-1-4.5" />
+    </>
+  ),
+  more: (
+    <>
+      <circle cx="5" cy="12" r="1.2" />
+      <circle cx="12" cy="12" r="1.2" />
+      <circle cx="19" cy="12" r="1.2" />
+    </>
+  ),
+  grip: (
+    <>
+      <circle cx="9" cy="6" r=".8" />
+      <circle cx="15" cy="6" r=".8" />
+      <circle cx="9" cy="12" r=".8" />
+      <circle cx="15" cy="12" r=".8" />
+      <circle cx="9" cy="18" r=".8" />
+      <circle cx="15" cy="18" r=".8" />
+    </>
+  ),
+  up: <path d="m6 15 6-6 6 6" />,
+  down: <path d="m6 9 6 6 6-6" />,
 } satisfies Record<string, ReactElement>;
 
 export type LocalIconName = keyof typeof localIcons;

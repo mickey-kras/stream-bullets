@@ -10,7 +10,10 @@ import { HostDialog } from "./host-dialog";
 import { useMe } from "./me";
 import { ProfileDialog } from "./profile-dialog";
 
-const titles: Record<AccountDialogName, "account.yourProfile" | "account.hostCommunity" | "account.yourData" | "account.editPage"> = {
+const titles: Record<
+  AccountDialogName,
+  "account.yourProfile" | "account.hostCommunity" | "account.yourData" | "account.editPage"
+> = {
   profile: "account.yourProfile",
   host: "account.hostCommunity",
   data: "account.yourData",
@@ -65,9 +68,10 @@ export function AccountDialogs(): ReactNode {
   const viewer = me.viewer;
   if (name === "host") {
     // Owners already host a page: send them to Edit your page instead.
-    if (me.streamer) return <EditPageDialog streamer={me.streamer} viewer={viewer} onClose={close} />;
+    if (me.streamer)
+      return <EditPageDialog streamer={me.streamer} support={me.support} viewer={viewer} onClose={close} />;
     return <HostDialog viewer={viewer} access={me.access} onSaved={reload} onClose={close} />;
   }
   if (!me.streamer) return <HostDialog viewer={viewer} access={me.access} onSaved={reload} onClose={close} />;
-  return <EditPageDialog streamer={me.streamer} viewer={viewer} onClose={close} />;
+  return <EditPageDialog streamer={me.streamer} support={me.support} viewer={viewer} onClose={close} />;
 }

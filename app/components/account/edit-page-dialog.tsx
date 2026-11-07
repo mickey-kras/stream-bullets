@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 import { useLocation, useNavigate, useRevalidator } from "react-router";
 import { t } from "../../i18n";
 import { personPicture } from "../../lib/avatars";
-import type { Streamer, Viewer } from "../../types";
+import type { Streamer, SupportSettings, Viewer } from "../../types";
 import { errorMessage } from "../api";
+import { SupportFields, supportChanged, supportDraftError, supportPayload, useSupportDraft } from "../support/support";
 import { formatDate } from "../waitlist";
 import { bumpImage, Picture, useImageUrl } from "../ui/avatar";
 import { DialogActions } from "../ui/dialog";
@@ -36,16 +37,20 @@ interface Draft {
   url: string;
 }
 
+const NO_SUPPORT: SupportSettings = { links: [], visible: true, card: false };
+
 /**
  * "Edit your page" (item 18): page name, handle (with the URL-change warning, once every 30 days), about,
- * the page logo (use my profile picture, or upload one through the circle cropper) and the page background.
+ * the page logo (use my profile picture, or upload one through the circle cropper), the support links (item 34)
+ * and the page background.
  * Everything, the cropped logo included, is a draft until Save; closing with changes asks first.
  */
 export function EditPageDialog({
   streamer,
+  support,
   viewer,
   onClose,
-}: Readonly<{ streamer: Streamer; viewer: Viewer; onClose: () => void }>): ReactNode {
+}: Readonly<{ streamer: Streamer; support: SupportSettings | null; viewer: Viewer; onClose: () => void }>): ReactNode {
   const toast = useToast();
   const revalidator = useRevalidator();
   const navigate = useNavigate();
@@ -64,6 +69,8 @@ export function EditPageDialog({
   const cropper = useRef<CropperHandle | null>(null);
   const urls = useRef<Set<string>>(new Set());
   const savedBackground: string | null = useImageUrl(streamer.background);
+  const savedSupport: SupportSettings = support ?? NO_SUPPORT;
+  const supportDraft = useSupportDraft(savedSupport);
 
   useEffect(() => {
     const created = urls.current;
@@ -86,6 +93,8 @@ export function EditPageDialog({
   if (about.trim() !== streamer.about.trim()) changes.push(t("page.about"));
   if (logoChoice !== initialLogo || logo) changes.push(t("page.logo"));
   if (background) changes.push(t("page.background"));
+  const supportEdited: boolean = supportChanged(supportDraft, savedSupport);
+  if (supportEdited) changes.push(t("support.editorTitle"));
   const guard = useDiscardGuard(changes, onClose);
 
   async function save(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -94,6 +103,11 @@ export function EditPageDialog({
     if (!event.currentTarget.reportValidity()) return;
     if (logoChoice === "logo" && !logoUrl) {
       setError(t("page.logoMissing"));
+      return;
+    }
+    const supportError: string = supportEdited ? supportDraftError(supportDraft) : "";
+    if (supportError) {
+      setError(supportError);
       return;
     }
     setPending(true);
@@ -109,6 +123,7 @@ export function EditPageDialog({
       let saved: Streamer = streamer;
       if (Object.keys(patch).length > 0)
         saved = (await sendJson<{ streamer: Streamer }>("PATCH", "/api/streamer", patch)).streamer;
+      if (supportEdited) await sendJson<SupportSettings>("PUT", "/api/support-links", supportPayload(supportDraft));
       toast(t("page.saved"));
       const oldPath = `/@${streamer.handle}`;
       if (saved.handle !== streamer.handle && location.pathname.startsWith(oldPath)) {
@@ -141,7 +156,9 @@ export function EditPageDialog({
   const cropping: boolean = cropSource !== null;
   const handleChanged: boolean = handle.trim() !== streamer.handle;
   const preview =
-    logoChoice === "logo" && logoUrl ? { kind: "photo" as const, url: logoUrl } : personPicture(viewer.avatar, viewer.avatarPreset);
+    logoChoice === "logo" && logoUrl
+      ? { kind: "photo" as const, url: logoUrl }
+      : personPicture(viewer.avatar, viewer.avatarPreset);
 
   return (
     <Sheet
@@ -200,9 +217,7 @@ export function EditPageDialog({
             />
           </label>
           <p className="muted" id="page-handle-help">
-            {locked === null
-              ? t("page.handleHelp")
-              : t("page.handleLocked", { date: formatDate(locked) })}
+            {locked === null ? t("page.handleHelp") : t("page.handleLocked", { date: formatDate(locked) })}
           </p>
           <output className="handle-warn" id="handle-warn">
             {handleChanged && (
@@ -214,7 +229,13 @@ export function EditPageDialog({
           </output>
           <label>
             <span>{t("page.about")}</span>
-            <textarea name="about" value={about} onChange={(e) => setAbout(e.currentTarget.value)} maxLength={2000} rows={4} />
+            <textarea
+              name="about"
+              value={about}
+              onChange={(e) => setAbout(e.currentTarget.value)}
+              maxLength={2000}
+              rows={4}
+            />
           </label>
           <fieldset className="logo-choice">
             <legend>{t("page.logo")}</legend>
@@ -257,6 +278,7 @@ export function EditPageDialog({
             )}
             <p className="muted">{t("page.logoHelp")}</p>
           </fieldset>
+          <SupportFields draft={supportDraft} />
           <fieldset>
             <legend>{t("page.background")}</legend>
             <UploadField
@@ -270,7 +292,11 @@ export function EditPageDialog({
             />
             <p className="muted">{t("page.backgroundHelp")}</p>
             {(background?.url ?? savedBackground) && (
-              <img className="background-preview" src={background?.url ?? savedBackground ?? ""} alt={t("page.backgroundAlt")} />
+              <img
+                className="background-preview"
+                src={background?.url ?? savedBackground ?? ""}
+                alt={t("page.backgroundAlt")}
+              />
             )}
           </fieldset>
           <p className="form-error" role="alert">

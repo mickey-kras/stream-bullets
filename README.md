@@ -33,7 +33,10 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 - `/privacy` and `/terms` show the Privacy Policy and the Terms of Service. A footer on each page links to them, the contact address, and the reporting rules. The overlay has no footer.
 - Newest uses stable cursor pagination. Top uses likes minus dislikes. New votes can move items between Top pages. Refresh to see the new order.
 - `/@handle/overlay` shows the latest active poll. Add `?poll=<id>` to select one poll. The overlay is public and cannot submit votes.
-- Schedule shows an empty state until the app supports scheduling. It does not imply an event exists.
+- The page owner schedules streams on the **Schedule** tab, as one-off or weekly streams. Each stream has a platform, a link, and optional linked topics. The owner can edit, cancel, or delete a stream and add a replay link. Viewers see a feed of upcoming and past streams, plus day, week, and month views on desktop, in their local time zone.
+- `/@handle/schedule.ics` serves the schedule as a calendar feed. Calendar apps can subscribe to it.
+- The owner edits up to 8 cards on the **Community** tab and up to 4 support links in **Edit your page**. Support links open the provider site. StreamBullets takes no payments.
+- The official `@streambullets` page is the Ideas board. Signed-in users suggest improvements and report bugs there, and everyone can vote. **Suggest an improvement** in the footer and the account menu opens it.
 
 ## Local use
 

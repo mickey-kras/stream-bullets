@@ -19,6 +19,13 @@ export async function postJson<T>(url: string, body: unknown): Promise<T> {
   });
 }
 
+export async function sendJson<T>(method: "PUT" | "PATCH" | "DELETE", url: string, body?: unknown): Promise<T> {
+  return requestJson<T>(url, {
+    method,
+    ...(body === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
+  });
+}
+
 export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "The request failed. Please try again.";
 }

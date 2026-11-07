@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Provider, Streamer, StreamerAccess, Viewer } from "../../types";
+import type { Provider, Streamer, StreamerAccess, SupportSettings, Viewer } from "../../types";
 import { errorMessage, requestJson } from "../api";
 
 /** `GET /api/me`: everything the account dialogs show. */
 export interface Me {
   viewer: Viewer | null;
   streamer: Streamer | null;
+  /** The owner's support links, for the Edit your page section. */
+  support: SupportSettings | null;
   access: StreamerAccess | null;
   providers: Provider[];
   signInProvider: Provider | null;
@@ -56,7 +58,11 @@ export async function uploadImage(kind: "avatar" | "logo" | "background", body: 
   return url;
 }
 
-export async function sendJson<T>(method: "PATCH" | "POST" | "DELETE", url: string, body?: unknown): Promise<T> {
+export async function sendJson<T>(
+  method: "PUT" | "PATCH" | "POST" | "DELETE",
+  url: string,
+  body?: unknown,
+): Promise<T> {
   return requestJson<T>(url, {
     method,
     headers: body === undefined ? undefined : { "Content-Type": "application/json" },

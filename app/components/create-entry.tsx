@@ -13,6 +13,15 @@ const categories: readonly SelectOption[] = [
   { value: "Just chatting", label: "Just chatting", icon: "cat-chatting" },
 ];
 
+const durations: readonly SelectOption[] = [
+  { value: "0", label: "Unlimited — until I end it" },
+  { value: "30", label: "30 seconds" },
+  { value: "60", label: "1 minute" },
+  { value: "120", label: "2 minutes" },
+  { value: "300", label: "5 minutes" },
+  { value: "600", label: "10 minutes" },
+];
+
 export function CreateEntry({
   mode,
   open,
@@ -50,26 +59,26 @@ export function CreateEntry({
         mode === "poll" && kind === "mash"
           ? mash
           : mode === "topic"
-          ? {
-              action: "create",
-              kind: "topic",
-              title: textField("title"),
-              body: textField("body"),
-              category: textField("category"),
-            }
-          : {
-              action: "create",
-              kind,
-              title: textField("title"),
-              options:
-                kind === "binary"
-                  ? ["Yes", "No"]
-                  : textField("options")
-                      .split("\n")
-                      .map((option: string) => option.trim())
-                      .filter(Boolean),
-              duration: Number(textField("duration")),
-            };
+            ? {
+                action: "create",
+                kind: "topic",
+                title: textField("title"),
+                body: textField("body"),
+                category: textField("category"),
+              }
+            : {
+                action: "create",
+                kind,
+                title: textField("title"),
+                options:
+                  kind === "binary"
+                    ? ["Yes", "No"]
+                    : textField("options")
+                        .split("\n")
+                        .map((option: string) => option.trim())
+                        .filter(Boolean),
+                duration: Number(textField("duration")),
+              };
       await onCreate(body);
       onOpenChange(false);
     } catch (error_: unknown) {
@@ -146,7 +155,13 @@ export function CreateEntry({
                 <span>Yes / No</span>
               </label>
               <label>
-                <input type="radio" name="kind" value="mash" checked={kind === "mash"} onChange={() => setKind("mash")} />
+                <input
+                  type="radio"
+                  name="kind"
+                  value="mash"
+                  checked={kind === "mash"}
+                  onChange={() => setKind("mash")}
+                />
                 <span>{MASH_NAME}</span>
               </label>
             </fieldset>
@@ -160,17 +175,18 @@ export function CreateEntry({
             ) : (
               <p className="muted">Yes / No results stay private until you reveal them.</p>
             )}
-            <label hidden={kind === "mash"}>
-              <span>Voting time</span>
-              <select name="duration" defaultValue="60">
-                <option value="0">Unlimited — until I end it</option>
-                <option value="30">30 seconds</option>
-                <option value="60">1 minute</option>
-                <option value="120">2 minutes</option>
-                <option value="300">5 minutes</option>
-                <option value="600">10 minutes</option>
-              </select>
-            </label>
+            <div className="field" hidden={kind === "mash"}>
+              <span className="field-label" id="poll-duration-label">
+                Voting time
+              </span>
+              <Select
+                id="poll-duration"
+                name="duration"
+                labelledBy="poll-duration-label"
+                defaultValue="60"
+                options={durations}
+              />
+            </div>
           </>
         )}
         <p className="form-error" role="alert">

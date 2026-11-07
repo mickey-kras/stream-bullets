@@ -115,6 +115,8 @@ export interface Entry {
   status: EntryStatus | null;
   /** Shown with `declined` ("Not planned"). */
   statusReason: string | null;
+  /** The viewer has an open report on this topic or poll. */
+  reported: boolean;
   /** Mash Battle state when `kind` is `mash`, else null. `counts` then holds the players on each side. */
   mash: MashState | null;
 }
@@ -152,6 +154,8 @@ export interface Comment {
   liked: boolean;
   /** A deleted comment that still has replies: render "Comment removed" and keep the thread. */
   removed: boolean;
+  /** The viewer has an open report on this comment: show "Reported" once and no Report action. */
+  reported: boolean;
 }
 
 /** A top-level comment with its whole reply tree, flattened oldest first (`?view=thread`). */
@@ -282,6 +286,71 @@ export interface ReportQueue {
   nextCursor: string | null;
 }
 
+/** A linked topic shown on a stream ("Linked topics"). */
+export interface EventTopic {
+  id: string;
+  title: string;
+  category: string;
+}
+
+/** One scheduled stream (item 23). A weekly series is one row per occurrence sharing `seriesId`. */
+export interface StreamEvent {
+  id: string;
+  seriesId: string | null;
+  title: string;
+  notes: string;
+  startsAt: number;
+  durationMin: number;
+  platform: StreamPlatform;
+  url: string;
+  /** What it shows as now: upcoming (`scheduled`), `live`, `ended` or `cancelled`. */
+  status: StreamEventStatus;
+  vodUrl: string | null;
+  /** Weekday bitmask (bit 0 = Sunday). 0 for a one-off stream. */
+  repeatDays: number;
+  /** Last moment a series may occur, or null. */
+  repeatUntil: number | null;
+  /** The zone the owner scheduled it in. Viewers see it in their own zone. */
+  tz: string;
+  topics: EventTopic[];
+}
+
+export interface ScheduleSnapshot {
+  events: StreamEvent[];
+  serverNow: number;
+}
+
+/** A Community card (item 24). `buttonTarget` is `tab:<view>` or an https link. */
+export interface CommunityCard {
+  id: string;
+  icon: CardIcon | null;
+  title: string;
+  body: string;
+  buttonLabel: string | null;
+  buttonTarget: string | null;
+}
+
+/** Null `cards` means the owner never saved: the page shows the two default cards (R18). */
+export interface CommunitySnapshot {
+  cards: CommunityCard[] | null;
+}
+
+/** A support or donation link-out (item 34). `label` is only set for `other`. */
+export interface SupportLink {
+  id: string;
+  kind: SupportLinkKind;
+  label: string | null;
+  url: string;
+}
+
+export interface SupportSettings {
+  links: SupportLink[];
+  /** Show the links in About. */
+  visible: boolean;
+  /** Also show a Support card in Community. */
+  card: boolean;
+}
+
 /** Content the overlay sources other than polls show. Every field is already public on the streamer page. */
 export interface OverlayData {
   /** The newest polls and Mash Battles, for the poll picker. */
@@ -295,7 +364,14 @@ export interface OverlayData {
     avatarPreset: number | null;
     likes: number;
   }[];
-  cards: { id: string; icon: CardIcon | null; title: string; body: string; label: string | null; target: string | null }[];
+  cards: {
+    id: string;
+    icon: CardIcon | null;
+    title: string;
+    body: string;
+    label: string | null;
+    target: string | null;
+  }[];
   /** The next scheduled stream, or null. */
   next: { title: string; startsAt: number } | null;
   /** The first support link, or null. */

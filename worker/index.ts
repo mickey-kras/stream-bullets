@@ -13,6 +13,7 @@ import {
 } from "../app/server/http.server";
 import { serveImage } from "../app/server/images.server";
 import { cleanExpiredData } from "../app/server/cleanup.server";
+import { scheduleCalendar, topUpSeries } from "../app/server/schedule.server";
 
 export { PollRoom } from "../app/server/poll-room";
 
@@ -21,6 +22,8 @@ const handler = createRequestHandler(() => import("virtual:react-router/server-b
 export default {
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
     await cleanExpiredData(env, controller.scheduledTime);
+    // Weekly series are written 12 weeks ahead; keep them topped up.
+    await topUpSeries(env, controller.scheduledTime);
   },
   async fetch(request: Request, env: AppEnv): Promise<Response> {
     const nonce = btoa(String.fromCodePoint(...crypto.getRandomValues(new Uint8Array(18))));
@@ -39,7 +42,22 @@ export default {
         throw new HttpError(429, "Too many requests. Please try again in a minute.");
       const path = new URL(request.url).pathname;
       const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
-      if (live) {
+      const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
+      if (calendar) {
+        if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
+        queryParams(request, []);
+        const streamer = await getStreamer(env, calendar[1]);
+        // Suspended pages have no public calendar, the owner's included.
+        if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
+        const body = await scheduleCalendar(env, streamer, origin);
+        response = new Response(request.method === "HEAD" ? null : body, {
+          headers: {
+            "Content-Type": "text/calendar; charset=utf-8",
+            "Content-Disposition": `inline; filename="${streamer.handle}-schedule.ics"`,
+            "Cache-Control": "public, max-age=300",
+          },
+        });
+      } else if (live) {
         requireSameOrigin(request, env);
         queryParams(request, []);
         if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")

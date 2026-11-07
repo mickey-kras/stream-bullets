@@ -526,7 +526,10 @@ describe("public poll updates", (): void => {
           name: "isolate-live-worker-dependencies",
           setup(plugin: PluginBuild): void {
             plugin.onResolve(
-              { filter: /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup|auth)\.server$/ },
+              {
+                filter:
+                  /^(react-router|virtual:react-router\/server-build)$|\/(data|images|cleanup|schedule|auth)\.server$/,
+              },
               (args) => ({ path: args.path, namespace: "live-worker-test" }),
             );
             plugin.onLoad({ filter: /.*/, namespace: "live-worker-test" }, (args) => {
@@ -546,6 +549,10 @@ describe("public poll updates", (): void => {
                 };
               if (args.path.endsWith("cleanup.server"))
                 return { contents: "export const cleanExpiredData = async () => {};" };
+              if (args.path.endsWith("schedule.server"))
+                return {
+                  contents: "export const scheduleCalendar = async () => ''; export const topUpSeries = async () => 0;",
+                };
               return { contents: "export default {};" };
             });
           },
@@ -578,7 +585,13 @@ describe("public poll updates", (): void => {
       });
       expect(await spoofedUser.json()).toEqual({ key: expected, user: null });
       const signedIn = await worker.dispatchFetch(`${origin}/api/live/test_host`, {
-        headers: { Origin: origin, Upgrade: "websocket", "CF-Connecting-IP": ip, "X-SB-User": "admin", Cookie: "session=ok" },
+        headers: {
+          Origin: origin,
+          Upgrade: "websocket",
+          "CF-Connecting-IP": ip,
+          "X-SB-User": "admin",
+          Cookie: "session=ok",
+        },
       });
       expect(await signedIn.json()).toEqual({ key: expected, user: "viewer-1" });
     } finally {
@@ -771,7 +784,9 @@ describe("Mash Battle taps", (): void => {
     const denied = mashReply(socket);
     tap(socket, id, 2, 2);
     expect(await denied).toMatchObject({ type: "mash-denied", reason: "closed" });
-    expect(await database.prepare("SELECT COUNT(*) AS n FROM mash_taps WHERE entry_id = ?").bind(id).first("n")).toBe(0);
+    expect(await database.prepare("SELECT COUNT(*) AS n FROM mash_taps WHERE entry_id = ?").bind(id).first("n")).toBe(
+      0,
+    );
   });
 
   it("closes sockets that send anything but a well-formed tap", async (): Promise<void> => {

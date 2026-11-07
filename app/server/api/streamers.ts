@@ -28,7 +28,7 @@ export const streamerRoutes: ApiRoute[] = [
     return json(await listStreamers(env, input.cursor, input.query));
   }),
   get(/streamers\/([a-z0-9_]{3,30})/, async ({ request, env, match, viewer }) => {
-    const input = parsedQuery(request, ["kind", "sort", "query", "cursor"], entryQuerySchema);
+    const input = parsedQuery(request, ["kind", "sort", "query", "cursor", "status"], entryQuerySchema);
     const streamer = await getVisibleStreamer(env, match[1], viewer?.id ?? null);
     if (!streamer) throw new HttpError(404, "Streamer not found.");
     return json(await listEntries(env, streamer, viewer?.id ?? null, input));

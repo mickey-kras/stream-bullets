@@ -1,5 +1,17 @@
 import { z } from "zod";
-import { AVATAR_PRESET_COUNT, LOCALES } from "../../db/enums";
+import {
+  AVATAR_PRESET_COUNT,
+  CARD_ICONS,
+  CARD_TABS,
+  ENTRY_STATUSES,
+  LOCALES,
+  MAX_COMMUNITY_CARDS,
+  MAX_SUPPORT_LINKS,
+  STREAM_PLATFORMS,
+  SUPPORT_LINK_KINDS,
+} from "../../db/enums";
+import { IDEA_CATEGORIES, TOPIC_CATEGORIES } from "../lib/ideas";
+import { isValidZone, parseDate } from "../lib/zoned";
 
 const id = z.string().uuid();
 export const line = (max: number): z.ZodString =>
@@ -40,7 +52,7 @@ export const entryActionSchema = z
         kind: z.enum(["topic", "choice", "binary"]),
         title: line(160),
         body: text(2000).optional(),
-        category: z.enum(["Tech & setups", "Gaming", "Creative", "Just chatting"]).optional(),
+        category: z.enum([...TOPIC_CATEGORIES, ...IDEA_CATEGORIES]).optional(),
         options: z.array(line(80)).min(2).max(6).optional(),
         duration: z.union([z.literal(0), z.number().int().min(15).max(3600)]).default(0),
       })
@@ -79,6 +91,8 @@ export const entryQuerySchema = z
     sort: z.enum(["newest", "top"]).default("newest"),
     query: z.string().trim().max(100).default(""),
     cursor: z.string().max(1024).nullable().default(null),
+    /** Ideas board filter (official page): only entries with this status. */
+    status: z.enum(ENTRY_STATUSES).nullable().default(null),
   })
   .strict();
 
@@ -180,7 +194,7 @@ export type ApplicationReview = z.infer<typeof applicationReviewSchema>;
 export type StreamerInput = z.infer<typeof streamerSchema>;
 export type EntryAction = z.infer<typeof entryActionSchema>;
 export type CommentAction = z.infer<typeof commentActionSchema>;
-export type EntryQuery = z.infer<typeof entryQuerySchema>;
+export type EntryQuery = z.input<typeof entryQuerySchema>;
 export type CommentQuery = z.input<typeof commentQuerySchema>;
 export type DirectoryQuery = z.input<typeof directoryQuerySchema>;
 
@@ -259,6 +273,113 @@ export type StreamerEdit = z.infer<typeof streamerEditSchema>;
 export const accountDeletionSchema = z
   .object({ confirm: z.literal("DELETE", { error: "Type DELETE to confirm." }) })
   .strict();
+
+/** An https link with no credentials or port, at most 500 characters. */
+export function isHttpsLink(value: string): boolean {
+  if (value.length > 500 || !URL.canParse(value)) return false;
+  const url = new URL(value);
+  return url.protocol === "https:" && !url.username && !url.password && !url.port && url.hostname.includes(".");
+}
+
+const httpsLink = z.string().trim().max(500).refine(isHttpsLink, "Use an https link.");
+
+const localDate = z.string().refine((value: string): boolean => parseDate(value) !== null, "Pick a valid date.");
+
+/** `POST /api/events` and the edit action: a stream in the owner's zone. `repeatDays` 0 means one-off. */
+export const eventInputSchema = z
+  .object({
+    title: line(100),
+    notes: z
+      .string()
+      .trim()
+      .max(1000)
+      .regex(/^(?:[^\p{Cc}]|[\t\n\r])*$/u)
+      .default(""),
+    date: localDate,
+    time: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/u, "Pick a valid start time."),
+    tz: z.string().refine(isValidZone, "Pick a valid time zone."),
+    durationMin: z.number().int().min(15).max(1440),
+    platform: z.enum(STREAM_PLATFORMS),
+    url: httpsLink,
+    repeatDays: z.number().int().min(0).max(127).default(0),
+    repeatUntil: localDate.nullable().default(null),
+    topicIds: z.array(id).max(5).default([]),
+  })
+  .strict();
+
+export const eventPatchSchema = z.discriminatedUnion("action", [
+  eventInputSchema.extend({ action: z.literal("edit"), scope: z.enum(["one", "following"]).default("one") }).strict(),
+  z.object({ action: z.literal("cancel") }).strict(),
+  z.object({ action: z.literal("replay"), vodUrl: httpsLink.nullable() }).strict(),
+]);
+
+export const eventDeleteSchema = z.object({ scope: z.enum(["one", "following"]).default("one") }).strict();
+
+/** `GET /api/streamers/:handle/events?from&to` (UTC ms, at most 200 days apart). */
+export const eventRangeSchema = z
+  .object({
+    from: z.coerce.number().int().min(0).max(8_640_000_000_000),
+    to: z.coerce.number().int().min(0).max(8_640_000_000_000),
+  })
+  .strict()
+  .refine(
+    (value): boolean => value.to > value.from && value.to - value.from <= 200 * 86_400_000,
+    "Pick a shorter range.",
+  );
+
+const cardTabTargets = CARD_TABS.map((tab): string => `tab:${tab}`);
+
+/** A card button goes to a tab of the page (`tab:topics`) or an https link. */
+export function isCardTarget(value: string): boolean {
+  return cardTabTargets.includes(value) || isHttpsLink(value);
+}
+
+export const communityCardSchema = z
+  .object({
+    icon: z.enum(CARD_ICONS).nullable().default(null),
+    title: line(60),
+    body: text(280),
+    buttonLabel: line(30).nullable().default(null),
+    buttonTarget: z
+      .string()
+      .trim()
+      .max(500)
+      .refine(isCardTarget, "A button goes to a tab or an https link.")
+      .nullable()
+      .default(null),
+  })
+  .strict()
+  .refine(
+    (value): boolean => (value.buttonLabel === null) === (value.buttonTarget === null),
+    "A button needs both a label and where it goes.",
+  );
+
+/** `PUT /api/community-cards`: the whole ordered list. */
+export const communityCardsSchema = z
+  .object({ cards: z.array(communityCardSchema).max(MAX_COMMUNITY_CARDS, "Use up to 8 cards.") })
+  .strict();
+
+export const supportLinkInputSchema = z
+  .object({
+    kind: z.enum(SUPPORT_LINK_KINDS),
+    label: line(30).nullable().default(null),
+    url: z.string().trim().max(500),
+  })
+  .strict();
+
+/** `PUT /api/support-links`: the whole ordered list plus where it shows. */
+export const supportSettingsSchema = z
+  .object({
+    links: z.array(supportLinkInputSchema).max(MAX_SUPPORT_LINKS, "Use up to 4 links."),
+    visible: z.boolean(),
+    card: z.boolean(),
+  })
+  .strict();
+
+export type EventInput = z.infer<typeof eventInputSchema>;
+export type EventPatch = z.infer<typeof eventPatchSchema>;
+export type CommunityCardInput = z.infer<typeof communityCardSchema>;
+export type SupportLinkInput = z.infer<typeof supportLinkInputSchema>;
 
 /** The non-routable addresses TikTok and Instagram accounts get (R5). Never shown or mailed. */
 export function isPlaceholderEmail(email: string): boolean {

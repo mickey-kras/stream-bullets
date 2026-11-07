@@ -83,7 +83,10 @@ for (const role of [
 statements.push(`UPDATE session SET created_at=${now + 3_600_000} WHERE user_id='${users.keyadmin.id}';`);
 {
   const token: string = randomBytes(24).toString("hex");
-  users.keyadmin2 = { id: users.keyadmin.id, cookie: encodeURIComponent(`${token}.${await makeSignature(token, secret)}`) };
+  users.keyadmin2 = {
+    id: users.keyadmin.id,
+    cookie: encodeURIComponent(`${token}.${await makeSignature(token, secret)}`),
+  };
   statements.push(
     `INSERT INTO session(id,token,user_id,expires_at,created_at,updated_at) VALUES ('${randomUUID()}','${token}','${users.keyadmin.id}',${now + 86_400_000},${now},${now});`,
   );
@@ -132,7 +135,7 @@ statements.push(
 const officialStreamId: string = randomUUID();
 statements.push(
   `INSERT INTO streamers(id,owner_id,handle,name,about,revision,is_official) VALUES ('${officialStreamId}','${users.officialowner.id}','streambullets','StreamBullets','Ideas and bug reports for StreamBullets.',0,1);`,
-  `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed,status,status_reason,status_changed_at) VALUES ('${randomUUID()}','${officialStreamId}','${users.viewer.id}','topic','Dark mode for the overlay','Please.','Gaming','[]',${now},0,'planned',NULL,${now});`,
+  `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed,status,status_reason,status_changed_at) VALUES ('${randomUUID()}','${officialStreamId}','${users.viewer.id}','topic','Dark mode for the overlay','Please.','design','[]',${now},0,'planned',NULL,${now});`,
 );
 // Enough pages for the Streamers directory to need "Load more" (50 per page). Their handles sort after every
 // other seeded page, so the first page still holds those.
