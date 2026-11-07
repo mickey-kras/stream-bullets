@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { dateFromToday, signedIn } from "./fixtures";
+import { clientIp } from "./client-ips";
 
 test("viewers see the feed, the calendar views on desktop only, and a stable column", async ({ page }) => {
   await page.goto("/@feature_host?view=schedule");
@@ -50,7 +51,7 @@ test("the event dialog shows the stream and the .ics feed serves the schedule", 
 });
 
 test("the owner schedules a weekly stream, edits, cancels and deletes it", async ({ browser }) => {
-  const context = await signedIn(browser, "featureowner", 90);
+  const context = await signedIn(browser, "featureowner", clientIp("schedule", 125));
   const page = await context.newPage();
   await page.goto("/@feature_host?view=schedule");
   // The header action matches the tab.
@@ -98,7 +99,7 @@ test("the owner schedules a weekly stream, edits, cancels and deletes it", async
 });
 
 test("schedule writes are owner-only and refused on frozen pages", async ({ browser }) => {
-  const viewer = await signedIn(browser, "viewer", 91);
+  const viewer = await signedIn(browser, "viewer", clientIp("schedule", 126));
   const body = {
     title: "Not mine",
     date: dateFromToday(2),
@@ -109,7 +110,7 @@ test("schedule writes are owner-only and refused on frozen pages", async ({ brow
     url: "https://twitch.tv/x",
   };
   expect((await viewer.request.post("/api/events", { data: body })).status()).toBe(403);
-  const frozen = await signedIn(browser, "frozenowner", 92);
+  const frozen = await signedIn(browser, "frozenowner", clientIp("schedule", 127));
   expect((await frozen.request.post("/api/events", { data: body })).status()).toBe(423);
   await viewer.close();
   await frozen.close();

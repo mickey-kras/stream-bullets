@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Browser, type BrowserContext } from "@playwright/test";
 import { z } from "zod";
+import { clientAddress } from "./client-ips";
 
 const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -13,7 +14,11 @@ async function signedIn(browser: Browser, role: string, width = 1280): Promise<B
   const sessions = sessionSchema.parse(JSON.parse(await readFile(".wrangler/e2e/sessions.json", "utf8")));
   const session = sessions[role];
   if (!session) throw new Error("Unknown test account.");
-  const context = await browser.newContext({ baseURL: origin, viewport: { width, height: 900 } });
+  const context = await browser.newContext({
+    baseURL: origin,
+    viewport: { width, height: 900 },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("profile", 130) },
+  });
   await context.addCookies([
     { name: "stream-bullets.session_token", value: session.cookie, domain: "localhost", path: "/", httpOnly: true },
   ]);

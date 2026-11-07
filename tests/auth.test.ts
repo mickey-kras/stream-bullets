@@ -1,7 +1,9 @@
 import { generateKeyPairSync, sign } from "node:crypto";
 import { makeSignature, symmetricDecrypt } from "better-auth/crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { ZodError } from "zod";
 import type { AppContext, AppEnv } from "../app/env";
+import { isAdmin } from "../app/server/access.server";
 import {
   configuredProviders,
   createAuth,
@@ -9,6 +11,7 @@ import {
   isPlaceholderEmail,
   placeholderEmail,
 } from "../app/server/auth.server";
+import type { Provider } from "../app/types";
 import { createTestDatabase } from "./helpers/database";
 
 const secret: string = "test-only-secret-71cbbad72594467d8bcd83e4e0f42d04";
@@ -53,9 +56,9 @@ async function seedSession(
   return token;
 }
 
-async function oauthCallback(provider: "google" | "twitch" = "twitch"): Promise<Request> {
+async function oauthCallback(provider: Provider = "twitch", authEnv: AppEnv = env): Promise<Request> {
   const clientAddress: string = `192.0.2.${oauthClient++}`;
-  const response: Response = await createAuth(env).handler(
+  const response: Response = await createAuth(authEnv).handler(
     new Request(`${env.APP_ORIGIN}/api/auth/sign-in/social`, {
       method: "POST",
       headers: { origin: env.APP_ORIGIN, "content-type": "application/json", "cf-connecting-ip": clientAddress },
@@ -567,7 +570,9 @@ describe("OAuth boundary", () => {
     expect(() => configuredProviders({ ...all, INSTAGRAM_CLIENT_ID: undefined })).toThrow(
       "Both instagram OAuth credentials",
     );
-    expect(() => createAuth({ ...all, INSTAGRAM_CLIENT_SECRET: undefined })).toThrow();
+    expect(() => createAuth({ ...all, INSTAGRAM_CLIENT_SECRET: undefined })).toThrow(
+      "Both instagram OAuth credentials",
+    );
     // Both providers start an OAuth redirect through the social sign-in endpoint.
     const auth = createAuth(all);
     for (const [provider, host] of [
@@ -612,10 +617,25 @@ describe("provider adapters", () => {
     INSTAGRAM_CLIENT_SECRET: "test-instagram-secret",
   });
 
-  /** The Instagram provider exactly as `createAuth` hands it to the generic OAuth plugin. */
+  /**
+   * The Instagram provider exactly as `createAuth` hands it to better-auth's generic OAuth plugin. That plugin's
+   * `options.config` is internal, so a library upgrade that reshapes it fails here by name, not with a TypeError.
+   */
   function instagram(): InstagramConfig {
-    const plugins = createAuth(withProviders()).options.plugins as unknown as { options: { config: InstagramConfig[] } }[];
-    return plugins[0].options.config[0];
+    const plugins: unknown = createAuth(withProviders()).options.plugins;
+    const plugin = Array.isArray(plugins)
+      ? (plugins as { id?: unknown; options?: { config?: unknown } }[]).find((item) => item?.id === "generic-oauth")
+      : undefined;
+    const configs: unknown = plugin?.options?.config;
+    const config = Array.isArray(configs)
+      ? (configs as { providerId?: unknown }[]).find((item) => item?.providerId === "instagram")
+      : undefined;
+    if (typeof (config as Partial<InstagramConfig> | undefined)?.getToken !== "function") {
+      throw new Error(
+        "Cannot find the Instagram provider in better-auth's generic-oauth plugin options; its internal shape changed.",
+      );
+    }
+    return config as unknown as InstagramConfig;
   }
 
   /** Answers each fetch with the next body in the queue. A Response is sent as it is. */
@@ -642,7 +662,10 @@ describe("provider adapters", () => {
   });
 
   it("posts the Instagram code as a form and reads a plain or a data-wrapped token", async () => {
-    const fetchMock = answer({ access_token: "plain-token" }, { data: [{ access_token: "wrapped-token", user_id: 7 }] });
+    const fetchMock = answer(
+      { access_token: "plain-token" },
+      { data: [{ access_token: "wrapped-token", user_id: 7 }] },
+    );
     try {
       const config = instagram();
       const plain = await config.getToken({ code: "code-1", redirectURI: "https://stream.example.test/cb" });
@@ -670,7 +693,8 @@ describe("provider adapters", () => {
     try {
       const config = instagram();
       await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toThrow("Instagram sign-in failed.");
-      await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toThrow();
+      // An unknown token shape is a parse error (no access_token), not the "sign-in failed" refusal.
+      await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toBeInstanceOf(ZodError);
     } finally {
       fetchMock.mockRestore();
     }
@@ -703,4 +727,70 @@ describe("provider adapters", () => {
       fetchMock.mockRestore();
     }
   });
+
+  it.each([
+    {
+      provider: "tiktok",
+      subject: "tiktok-open-1",
+      // The built-in TikTok provider sets its own placeholder domain.
+      email: "tiktok-open-1@tiktok.placeholder.invalid",
+      routes: {
+        "https://open.tiktokapis.com/v2/oauth/token/": {
+          access_token: "private-tiktok-access-token",
+          token_type: "Bearer",
+          expires_in: 3600,
+          open_id: "tiktok-open-1",
+        },
+        "https://open.tiktokapis.com/v2/user/info/": {
+          data: { user: { open_id: "tiktok-open-1", display_name: "TikTok viewer" } },
+        },
+      },
+    },
+    {
+      provider: "instagram",
+      subject: "17841",
+      email: "17841@instagram.invalid",
+      routes: {
+        "https://api.instagram.com/oauth/access_token": { access_token: "private-instagram-access-token" },
+        "https://graph.instagram.com/me": { user_id: "17841", username: "nova_handle", name: "Nova" },
+      },
+    },
+  ] as const)(
+    "stores a $provider sign-in with an unverified placeholder email that is never an admin",
+    async ({ provider, subject, email, routes }) => {
+      const authEnv: AppEnv = withProviders();
+      const callback: Request = await oauthCallback(provider, authEnv);
+      const providerUrls: string[] = [];
+      const originalFetch: typeof fetch = globalThis.fetch;
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init): Promise<Response> => {
+        const url: string = input instanceof Request ? input.url : String(input);
+        const route = Object.entries(routes).find(([prefix]) => url.startsWith(prefix));
+        if (!route) return originalFetch(input, init);
+        providerUrls.push(url);
+        return Response.json(route[1]);
+      });
+      try {
+        const response: Response = await createAuth(authEnv).handler(callback);
+        expect(response.status).toBe(302);
+        expect(new URL(response.headers.get("location") ?? "", env.APP_ORIGIN).searchParams.get("error")).toBeNull();
+        expect(providerUrls).toHaveLength(2);
+        const row = await env.DB.prepare(
+          "SELECT u.id,u.email,u.email_verified FROM user u JOIN account a ON a.user_id=u.id WHERE a.provider_id=? AND a.account_id=?",
+        )
+          .bind(provider, subject)
+          .first<{ id: string; email: string; email_verified: number }>();
+        expect(row).toMatchObject({ email, email_verified: 0 });
+        expect(isPlaceholderEmail(email)).toBe(true);
+        const listed: AppEnv = { ...authEnv, ADMIN_EMAILS: email };
+        expect(await isAdmin(listed, row?.id ?? "")).toBe(false);
+        // Only the unverified flag keeps the listed placeholder out: a verified row with that address would pass.
+        await env.DB.prepare("UPDATE user SET email_verified=1 WHERE id=?")
+          .bind(row?.id ?? "")
+          .run();
+        expect(await isAdmin(listed, row?.id ?? "")).toBe(true);
+      } finally {
+        fetchMock.mockRestore();
+      }
+    },
+  );
 });

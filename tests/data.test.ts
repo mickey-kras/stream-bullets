@@ -15,6 +15,7 @@ import {
 import { listComments, mutateComment } from "../app/server/comments.server";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
+import { startOfQuotaWindow } from "./helpers/quota";
 
 let database: TestDatabase;
 let env: AppEnv;
@@ -578,6 +579,7 @@ describe("bounded reads and writes", (): void => {
   });
 
   it("shares mutation quotas across targets and rejects concurrent excess writes atomically", async (): Promise<void> => {
+    await startOfQuotaWindow(env.DB);
     await env.DB.prepare(
       "INSERT INTO app_rate_limits (key,count,window_start) VALUES ('write:viewer',59,CAST(strftime('%s','now') AS INTEGER)/60*60000)",
     ).run();

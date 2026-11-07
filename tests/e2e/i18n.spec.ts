@@ -1,5 +1,6 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { origin, signedIn } from "./fixtures";
+import { clientIp } from "./client-ips";
 
 const shots: string | undefined = process.env.P7_SCREENSHOTS;
 
@@ -51,7 +52,7 @@ test("the language switcher saves the choice and reloads in it", async ({ page, 
 });
 
 test("a signed-in choice is saved to the account and wins over the cookie", async ({ browser }) => {
-  const viewer = await signedIn(browser, "prefsviewer", 180);
+  const viewer = await signedIn(browser, "prefsviewer", clientIp("i18n", 180));
   const page = await viewer.newPage();
   await page.goto("/streamers?dialog=language");
   const saved = page.waitForResponse((response) => response.url().endsWith("/api/me/locale"));
@@ -59,7 +60,7 @@ test("a signed-in choice is saved to the account and wins over the cookie", asyn
   expect((await saved).status()).toBe(200);
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   // Another browser with the same account and a different cookie still gets French.
-  const other = await signedIn(browser, "prefsviewer", 181);
+  const other = await signedIn(browser, "prefsviewer", clientIp("i18n", 181));
   await inLanguage(other, "pl");
   const second = await other.newPage();
   await second.goto("/streamers");
@@ -185,7 +186,7 @@ const headerAction = async (page: Page): Promise<void> =>
 const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[] = [
   {
     role: null,
-    ip: 232,
+    ip: clientIp("i18n", 232),
     screens: [
       { name: "home", path: "/" },
       { name: "streamers", path: "/streamers" },
@@ -214,7 +215,7 @@ const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[
   },
   {
     role: "reporter",
-    ip: 233,
+    ip: clientIp("i18n", 233),
     screens: [
       { name: "account-menu", path: "/streamers", open: (page) => page.locator("button.profile").click() },
       { name: "profile", path: "/streamers?dialog=profile" },
@@ -234,7 +235,7 @@ const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[
   },
   {
     role: "featureowner",
-    ip: 234,
+    ip: clientIp("i18n", 234),
     screens: [
       { name: "edit-page", path: "/@feature_host?dialog=page" },
       { name: "overlay-control", path: "/overlay-control" },
@@ -245,7 +246,7 @@ const phoneScreens: { role: string | null; ip: number; screens: PhoneScreen[] }[
   },
   {
     role: "admin",
-    ip: 235,
+    ip: clientIp("i18n", 235),
     screens: [
       { name: "admin-requests", path: "/admin" },
       { name: "admin-reports", path: "/admin?view=reports" },

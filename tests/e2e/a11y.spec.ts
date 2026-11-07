@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { signedIn } from "./fixtures";
+import { clientIp } from "./client-ips";
 
 /*
  * Accessibility checks on every page route. @axe-core/playwright is not a dependency, so these are structural
@@ -114,7 +115,7 @@ test("display preferences apply before the first paint and persist", async ({ pa
 });
 
 test("signed in, display preferences save to the account", async ({ browser }) => {
-  const viewer = await signedIn(browser, "prefsviewer", 177);
+  const viewer = await signedIn(browser, "prefsviewer", clientIp("a11y", 177));
   const page = await viewer.newPage();
   await page.goto("/streamers?dialog=a11y");
   const dialog = page.getByRole("dialog", { name: "Accessibility & display" });
@@ -125,7 +126,7 @@ test("signed in, display preferences save to the account", async ({ browser }) =
   await dialog.getByRole("checkbox", { name: "Underline all links" }).check();
   expect((await saved).status()).toBe(200);
   // A fresh browser with only the session (no preference cookie) gets the saved settings.
-  const other = await signedIn(browser, "prefsviewer", 178);
+  const other = await signedIn(browser, "prefsviewer", clientIp("a11y", 178));
   const second = await other.newPage();
   await second.goto("/streamers");
   await expect(second.locator("html")).toHaveAttribute("data-underline", "true");
@@ -138,7 +139,7 @@ test("signed in, display preferences save to the account", async ({ browser }) =
 });
 
 test("the overlay control page enlarges a monitor and collapses Position and size on phones", async ({ browser }) => {
-  const owner = await signedIn(browser, "owner", 179);
+  const owner = await signedIn(browser, "owner", clientIp("a11y", 179));
   const page = await owner.newPage();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/overlay-control");
