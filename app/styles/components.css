@@ -1257,6 +1257,9 @@ table.month-grid tr { display: table-row; }
 .idea-reason { margin: 0 0 18px; padding: 10px 14px; border-left: 4px solid var(--line); border-radius: 6px; background: var(--c-0f2a30); color: var(--cream); }
 .idea-reason.shipped { border-left-color: var(--mash-b); }
 .idea-admin { margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--line); }
+.idea-admin { display: flex; flex-direction: column; gap: 10px; }
+.idea-admin > .small-button { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; }
+.idea-admin > .form-error:empty { display: none; }
 .ideas-board { grid-template-columns: minmax(0, var(--split, 40%)) 18px minmax(0, 1fr); }
 .ai-page .lead { font-size: 1.1875rem; }
 .ai-list { display: grid; gap: 8px; list-style: none; padding: 0; }
