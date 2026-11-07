@@ -83,14 +83,13 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await addKey(cdp);
   await expect(page.getByLabel("Key name")).toHaveValue("YubiKey – safe");
   await page.getByRole("button", { name: "Register this key" }).click();
-  await expect(page.getByRole("heading", { name: "Both keys are set up" })).toBeVisible();
-  await shot(page, "keys-setup-done");
-  await page.getByRole("link", { name: "Open Admin" }).click();
+  // With both keys, the tab lists them.
+  await expect(page.getByRole("article", { name: "YubiKey – safe" })).toBeVisible();
+  await expect(page.getByRole("article", { name: "YubiKey – desk" })).toBeVisible();
+  await page.getByRole("link", { name: "Streamer requests" }).click();
   await expect(page.getByRole("heading", { name: "Admin: Streamer requests" })).toBeVisible();
   await expect(page.getByText("Security keys aren't set up yet.")).toHaveCount(0);
-
   await page.getByRole("link", { name: "Security keys" }).click();
-  await expect(page.getByRole("article", { name: "YubiKey – desk" })).toBeVisible();
   await page.getByRole("button", { name: "Rename YubiKey – desk" }).click();
   await page.getByRole("dialog").getByLabel("Key name").fill("YubiKey – keyring");
   await page.getByRole("dialog").getByRole("button", { name: "Save" }).click();
