@@ -635,3 +635,21 @@ export const aiInterest = sqliteTable(
     check("ai_interest_value_check", sql`${table.value} IN (-1, 1)`),
   ],
 );
+
+/**
+ * Running totals of `ai_interest`, one row per UTC day (security review finding 3). A vote adds to its day's row in
+ * the same batch, so the totals read at most 31 small rows instead of every vote. The cron prunes both tables to
+ * the same 30-day window.
+ */
+export const aiInterestDaily = sqliteTable(
+  "ai_interest_daily",
+  {
+    day: text("day").primaryKey(),
+    up: integer("up").notNull().default(0),
+    down: integer("down").notNull().default(0),
+  },
+  (table) => [
+    check("ai_interest_daily_day_check", sql`${table.day} GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'`),
+    check("ai_interest_daily_count_check", sql`${table.up} >= 0 AND ${table.down} >= 0`),
+  ],
+);

@@ -23,6 +23,6 @@ export async function cleanExpiredData(env: AppEnv, now: number): Promise<void> 
       "DELETE FROM content_reports WHERE id IN (SELECT id FROM content_reports WHERE status <> 'open' AND resolved_at < ? LIMIT 5000)",
     ).bind(now - REPORT_RETENTION_MS),
     // AI interest votes count for 30 days.
-    pruneAiInterest(env, now),
+    ...pruneAiInterest(env, now),
   ]);
 }

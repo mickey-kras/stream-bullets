@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { AppEnv } from "../env";
 import { HttpError } from "./http.server";
+import { visitorPrefix } from "./ip-prefix";
 
 /** Votes older than this are pruned by the hourly cron, so the totals cover the last 30 days. */
 export const AI_INTEREST_RETENTION_DAYS = 30;
@@ -34,8 +35,9 @@ function salt(env: AppEnv): string | null {
 }
 
 /**
- * The visitor's key for one day: an HMAC-SHA-256 of the day and the IP address, keyed with the AI_INTEREST_SALT
- * secret. The IP address itself is never stored, and keys from different days cannot be linked.
+ * The visitor's key for one day: an HMAC-SHA-256 of the day and the visitor's network (the IPv4 address, or the IPv6
+ * /64), keyed with the AI_INTEREST_SALT secret. The address itself is never stored, and keys from different days
+ * cannot be linked.
  */
 export async function visitorHash(secret: string, ip: string, day: string): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -45,7 +47,7 @@ export async function visitorHash(secret: string, ip: string, day: string): Prom
     false,
     ["sign"],
   );
-  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${day}\n${ip}`));
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${day}\n${visitorPrefix(ip)}`));
   return Array.from(new Uint8Array(mac), (byte: number) => byte.toString(16).padStart(2, "0")).join("");
 }
 
@@ -54,10 +56,18 @@ export function visitorIp(request: Request): string {
   return request.headers.get("CF-Connecting-IP") ?? "local";
 }
 
-export async function aiInterestTotals(env: AppEnv): Promise<AiInterestTotals> {
+/** The first day the counter still covers. Older days are pruned by the hourly cron. */
+function firstDay(now: number): string {
+  return interestDay(now - AI_INTEREST_RETENTION_DAYS * 86_400_000);
+}
+
+/** The totals from the running per-day counts: at most 31 rows, however many votes there are. */
+export async function aiInterestTotals(env: AppEnv, now: number): Promise<AiInterestTotals> {
   const row = await env.DB.prepare(
-    "SELECT COALESCE(SUM(value = 1), 0) AS up, COALESCE(SUM(value = -1), 0) AS down FROM ai_interest",
-  ).first<{ up: number; down: number }>();
+    "SELECT COALESCE(SUM(up), 0) AS up, COALESCE(SUM(down), 0) AS down FROM ai_interest_daily WHERE day >= ?",
+  )
+    .bind(firstDay(now))
+    .first<{ up: number; down: number }>();
   return { up: row?.up ?? 0, down: row?.down ?? 0 };
 }
 
@@ -68,7 +78,7 @@ export async function aiInterestStatus(env: AppEnv, request: Request, now: numbe
   const day: string = interestDay(now);
   const hash: string = await visitorHash(secret, visitorIp(request), day);
   const [totals, row] = await Promise.all([
-    aiInterestTotals(env),
+    aiInterestTotals(env, now),
     env.DB.prepare("SELECT value FROM ai_interest WHERE day=? AND ip_hash=?")
       .bind(day, hash)
       .first<{ value: number }>(),
@@ -78,9 +88,13 @@ export async function aiInterestStatus(env: AppEnv, request: Request, now: numbe
   return { available: true, totals, mine };
 }
 
+/** The REQUEST_LIMITER key prefix for votes. Each network gets its own key per day, with the binding's 120 a minute. */
+export const AI_INTEREST_LIMIT_KEY = "ai-interest";
+
 /**
- * Records one vote per visitor per day. A second vote on the same day changes nothing and reports
- * `counted: false`. This is an unverified signal: anyone can claim to be an agent.
+ * Records one vote per visitor network per day. A second vote on the same day changes nothing and reports
+ * `counted: false`. This is an unverified signal: anyone can claim to be an agent. Each network also has its own
+ * REQUEST_LIMITER key here, apart from the per-address key the worker uses for every request.
  */
 export async function recordAiInterest(
   env: AppEnv,
@@ -92,17 +106,26 @@ export async function recordAiInterest(
   if (!secret) throw new HttpError(503, "The AI interest counter is not available.");
   const day: string = interestDay(now);
   const hash: string = await visitorHash(secret, visitorIp(request), day);
-  const result = await env.DB.prepare(
-    "INSERT INTO ai_interest (day, ip_hash, value) VALUES (?, ?, ?) ON CONFLICT(day, ip_hash) DO NOTHING",
-  )
-    .bind(day, hash, vote === "up" ? 1 : -1)
-    .run();
-  return { counted: (result.meta.changes ?? 0) > 0, totals: await aiInterestTotals(env) };
+  if (!(await env.REQUEST_LIMITER.limit({ key: `${AI_INTEREST_LIMIT_KEY}:${hash}` })).success)
+    throw new HttpError(429, "Too many requests. Please try again in a minute.");
+  const up: number = vote === "up" ? 1 : 0;
+  // The day's running total grows only when the vote row was new (`changes()` is the previous statement's count).
+  const [result] = await env.DB.batch([
+    env.DB.prepare(
+      "INSERT INTO ai_interest (day, ip_hash, value) VALUES (?, ?, ?) ON CONFLICT(day, ip_hash) DO NOTHING",
+    ).bind(day, hash, up ? 1 : -1),
+    env.DB.prepare(`
+      INSERT INTO ai_interest_daily (day, up, down) SELECT ?, ?, ? WHERE changes() = 1
+      ON CONFLICT(day) DO UPDATE SET up = up + excluded.up, down = down + excluded.down
+    `).bind(day, up, 1 - up),
+  ]);
+  return { counted: (result.meta.changes ?? 0) > 0, totals: await aiInterestTotals(env, now) };
 }
 
-/** Deletes votes older than the retention window. Called by the hourly cron. */
-export function pruneAiInterest(env: AppEnv, now: number): D1PreparedStatement {
-  return env.DB.prepare("DELETE FROM ai_interest WHERE day < ?").bind(
-    interestDay(now - AI_INTEREST_RETENTION_DAYS * 86_400_000),
-  );
+/** Deletes votes and daily totals older than the retention window. Called by the hourly cron. */
+export function pruneAiInterest(env: AppEnv, now: number): D1PreparedStatement[] {
+  return [
+    env.DB.prepare("DELETE FROM ai_interest WHERE day < ?").bind(firstDay(now)),
+    env.DB.prepare("DELETE FROM ai_interest_daily WHERE day < ?").bind(firstDay(now)),
+  ];
 }
