@@ -828,7 +828,7 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .mash-card h2 { margin: 18px 0 14px; }
 .mash-status { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; color: var(--gold); font-weight: 600; }
 .mash-status.center { justify-content: center; color: var(--cream); }
-.mash-picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 12px; }
+.mash-picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; min-inline-size: 0; margin: 12px 0 0; padding: 0; border: 0; }
 .mash-pick { position: relative; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 16px; border: 2px solid var(--c); border-radius: 10px; background: transparent; color: var(--cream); font: 600 22px/1.1 var(--heading); text-align: left; }
 .mash-pick kbd { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; background: var(--c); color: var(--on-gold); font: 700 15px/1 var(--body); }
 .mash-pick[aria-pressed="true"] { background: var(--c); color: var(--on-gold); box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--c); }

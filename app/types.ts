@@ -1,8 +1,8 @@
+import type { Locale } from "./i18n";
 import type {
   CARD_ICONS,
   CARD_TABS,
   ENTRY_STATUSES,
-  LOCALES,
   MASH_PHASES,
   OVERLAY_MESSAGE_STYLES,
   OVERLAY_POSITIONS,
@@ -22,7 +22,6 @@ export type EntryKind = "topic" | "choice" | "binary" | "mash";
 export type SortOrder = "newest" | "top";
 export type Reaction = -1 | 0 | 1;
 
-export type Locale = (typeof LOCALES)[number];
 export type StreamerStatus = (typeof STREAMER_STATUSES)[number];
 export type EntryStatus = (typeof ENTRY_STATUSES)[number];
 export type StreamPlatform = (typeof STREAM_PLATFORMS)[number];

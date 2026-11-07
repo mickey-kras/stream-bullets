@@ -7,13 +7,12 @@ import {
   getOverlaySnapshot,
   getOwnStreamer,
   getStreamer,
-  listComments,
   listEntries,
   listStreamers,
-  mutateComment,
   mutateEntry,
   saveStreamer,
 } from "../app/server/data.server";
+import { listComments, mutateComment } from "../app/server/comments.server";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
 

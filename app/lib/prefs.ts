@@ -51,7 +51,8 @@ export const PREFS_SCRIPT: string = `(function () {
   window.sbApplyPrefs = apply;
   try { apply(JSON.parse((script && script.getAttribute("data-prefs")) || "{}")); } catch (error) { apply({}); }
   ["(prefers-contrast: more)", "(prefers-reduced-motion: reduce)"].forEach(function (query) {
-    try { window.matchMedia(query).addEventListener("change", function () { apply(current); }); } catch (error) {}
+    var list = window.matchMedia ? window.matchMedia(query) : null;
+    if (list && list.addEventListener) list.addEventListener("change", function () { apply(current); });
   });
 })();`;
 

@@ -28,11 +28,15 @@ export const mashCreateSchema = z
     durationS: z
       .number()
       .int()
-      .refine((value: number): boolean => (MASH_DURATIONS as readonly number[]).includes(value), "Pick a battle length."),
+      .refine(
+        (value: number): boolean => (MASH_DURATIONS as readonly number[]).includes(value),
+        "Pick a battle length.",
+      ),
   })
   .strict()
   .refine(
-    (value): boolean => new Set(value.options.map((option: string) => option.toLowerCase())).size === value.options.length,
+    (value): boolean =>
+      new Set(value.options.map((option: string) => option.toLowerCase())).size === value.options.length,
     "Give each side a different name.",
   );
 export type MashCreate = z.infer<typeof mashCreateSchema>;
@@ -115,10 +119,7 @@ export async function runMashAction(
 ): Promise<{ streamerId: string }> {
   const battle = await ownedBattle(env, userId, id);
   const now = Date.now();
-  const phase = mashPhaseAt(
-    { phase: battle.phase, startsAt: battle.starts_at, endsAt: battle.ends_at },
-    now,
-  );
+  const phase = mashPhaseAt({ phase: battle.phase, startsAt: battle.starts_at, endsAt: battle.ends_at }, now);
   const statements: D1PreparedStatement[] = [];
   if (action === "start") {
     if (phase !== "setup") throw new HttpError(409, "This battle has already started.");

@@ -87,7 +87,9 @@ export function HostDialog({
       </p>
       {access?.canCreateStreamer ? (
         <>
-          <p>{access.admin && access.application?.status !== "approved" ? t("host.adminBody") : t("host.approvedBody")}</p>
+          <p>
+            {access.admin && access.application?.status !== "approved" ? t("host.adminBody") : t("host.approvedBody")}
+          </p>
           <form onSubmit={(event: FormEvent<HTMLFormElement>) => void claim(event)}>
             <label>
               <span>{t("host.handle")}</span>

@@ -23,11 +23,11 @@ import {
   getVisibleEntry,
   getVisibleStreamer,
   listStreamers,
-  mutateComment,
   mutateEntry,
   saveStreamer,
   updateStreamer,
 } from "../app/server/data.server";
+import { mutateComment } from "../app/server/comments.server";
 import type { ApplicationInput } from "../app/server/validation";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
@@ -440,9 +440,9 @@ describe("page moderation status", (): void => {
       statusReason: null,
       handleChangedAt: null,
     });
-    await expect(
-      mutateEntry(env, "viewer", pageId, { action: "react", id: topicId, value: 1 }),
-    ).resolves.toEqual({ id: topicId });
+    await expect(mutateEntry(env, "viewer", pageId, { action: "react", id: topicId, value: 1 })).resolves.toEqual({
+      id: topicId,
+    });
     expect((await listStreamers(env)).streamers.map((page) => page.handle)).toEqual(["mod_page"]);
   });
 
@@ -500,7 +500,10 @@ describe("page moderation status", (): void => {
     expect(await getVisibleStreamer(env, "mod_page", "viewer")).toBeNull();
     expect(await getVisibleStreamer(env, "mod_page", "applicant")).toMatchObject({ statusReason: "Repeated spam" });
     expect(await getVisibleStreamer(env, "mod_page", "admin")).toMatchObject({ status: "suspended" });
-    expect(await getOwnStreamer(env, "applicant")).toMatchObject({ status: "suspended", statusReason: "Repeated spam" });
+    expect(await getOwnStreamer(env, "applicant")).toMatchObject({
+      status: "suspended",
+      statusReason: "Repeated spam",
+    });
     expect(await getVisibleEntry(env, topicId, "viewer")).toBeNull();
     expect(await getVisibleEntry(env, topicId, "applicant")).toMatchObject({ id: topicId });
     // Dropped from the directory, empty in the overlay.

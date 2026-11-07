@@ -32,11 +32,7 @@ export function clampZoom(zoom: number): number {
 }
 
 /** Where the image sits for `state`, with the pan clamped so no gap shows inside the stage. */
-export function cropGeometry(
-  stage: number,
-  image: { width: number; height: number },
-  state: CropState,
-): CropGeometry {
+export function cropGeometry(stage: number, image: { width: number; height: number }, state: CropState): CropGeometry {
   const zoom: number = clampZoom(state.zoom);
   const scale: number = Math.max(stage / image.width, stage / image.height) * zoom;
   const width: number = image.width * scale;

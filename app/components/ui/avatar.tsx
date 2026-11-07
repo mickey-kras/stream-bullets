@@ -21,7 +21,11 @@ function subscribe(listener: () => void): () => void {
 
 /** `url` with this tab's version of it, if it was replaced here. */
 export function useImageUrl(url: string | null): string | null {
-  const map = useSyncExternalStore(subscribe, () => versions, () => versions);
+  const map = useSyncExternalStore(
+    subscribe,
+    () => versions,
+    () => versions,
+  );
   if (!url || url.startsWith("blob:")) return url;
   const version: number | undefined = map.get(url.split("?")[0]);
   return version ? `${url}${url.includes("?") ? "&" : "?"}v=${version}` : url;
@@ -32,7 +36,10 @@ function Photo({ url, className }: Readonly<{ url: string; className: string }>)
 }
 
 /** One round picture: an uploaded image or a preset portrait. Always decorative (the name is next to it). */
-export function Picture({ source, className = "" }: Readonly<{ source: PictureSource; className?: string }>): ReactNode {
+export function Picture({
+  source,
+  className = "",
+}: Readonly<{ source: PictureSource; className?: string }>): ReactNode {
   if (source.kind === "photo") return <Photo url={source.url} className={className} />;
   return (
     <span

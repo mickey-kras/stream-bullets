@@ -8,6 +8,15 @@ import { topicCategoryLabel } from "./topic-icon";
 import { DialogActions } from "./ui/dialog";
 import { Select, type SelectOption } from "./ui/select";
 
+type PollKind = "choice" | "binary" | "mash";
+
+/** The poll types in the order the dialog lists them, with their labels. Mash Battle keeps its own name. */
+const POLL_KINDS: readonly (readonly [PollKind, "create.choice" | "create.binary" | "mash"])[] = [
+  ["choice", "create.choice"],
+  ["binary", "create.binary"],
+  ["mash", "mash"],
+];
+
 const categories: readonly Omit<SelectOption, "label">[] = [
   { value: "Tech & setups", icon: "cat-tech" },
   { value: "Gaming", icon: "cat-gaming" },
@@ -35,7 +44,7 @@ export function CreateEntry({
   onOpenChange: (open: boolean) => void;
   onCreate: (body: unknown) => Promise<void>;
 }>): ReactNode {
-  const [kind, setKind] = useState<"choice" | "binary" | "mash">("choice");
+  const [kind, setKind] = useState<PollKind>("choice");
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -134,36 +143,18 @@ export function CreateEntry({
           <>
             <fieldset className="poll-types">
               <legend>{t("create.pollType")}</legend>
-              <label>
-                <input
-                  type="radio"
-                  name="kind"
-                  value="choice"
-                  checked={kind === "choice"}
-                  onChange={() => setKind("choice")}
-                />
-                <span>{t("create.choice")}</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="kind"
-                  value="binary"
-                  checked={kind === "binary"}
-                  onChange={() => setKind("binary")}
-                />
-                <span>{t("create.binary")}</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="kind"
-                  value="mash"
-                  checked={kind === "mash"}
-                  onChange={() => setKind("mash")}
-                />
-                <span>{MASH_NAME}</span>
-              </label>
+              {POLL_KINDS.map(([value, label]) => (
+                <label key={value}>
+                  <input
+                    type="radio"
+                    name="kind"
+                    value={value}
+                    checked={kind === value}
+                    onChange={() => setKind(value)}
+                  />
+                  <span>{label === "mash" ? MASH_NAME : t(label)}</span>
+                </label>
+              ))}
             </fieldset>
             {kind === "mash" && <MashFields />}
             {kind === "mash" ? null : kind === "choice" ? (

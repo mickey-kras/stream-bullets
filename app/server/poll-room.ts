@@ -230,8 +230,10 @@ export class PollRoom extends DurableObject<AppEnv> {
 
   private async refresh(): Promise<Response> {
     this.expireConnections();
-    // A page status change (frozen, suspended) also stops its battles.
-    for (const id of [...this.battles.keys()]) await this.loadBattle(id);
+    // A page status change (frozen, suspended) also stops its battles. loadBattle can drop a battle, so the loop
+    // walks a copy of the ids.
+    const ids: string[] = [...this.battles.keys()];
+    for (const id of ids) await this.loadBattle(id);
     if (this.activeSockets().length > 0) {
       const snapshot = await this.snapshot();
       this.broadcast(snapshot);
@@ -454,7 +456,9 @@ export class PollRoom extends DurableObject<AppEnv> {
   private async tickBattles(): Promise<void> {
     this.ticks += 1;
     const now = Date.now();
-    for (const battle of [...this.battles.values()]) {
+    // finish() can drop a battle, so the loop walks a copy.
+    const battles: Battle[] = [...this.battles.values()];
+    for (const battle of battles) {
       const phase = mashPhaseAt(battle, now);
       battle.recent = [...battle.recent.slice(-4), battle.tickTaps];
       battle.tickTaps = 0;
