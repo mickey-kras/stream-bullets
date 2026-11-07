@@ -34,12 +34,35 @@ export function configuredProviders(env: AppEnv): Provider[] {
 }
 
 /**
- * TikTok and Instagram share no email address. Accounts from them get a stable, non-routable placeholder
- * (`{id}@tiktok.invalid`, `{id}@instagram.invalid`, R5) with emailVerified false, so they can never be admins
- * and the app never shows or mails the address.
+ * TikTok and Instagram share no email address. Accounts from them get a stable, non-routable placeholder with
+ * emailVerified false, so they can never be admins and the app never shows or mails the address (R5). Better Auth's
+ * TikTok provider writes its own `{open_id}@tiktok.placeholder.invalid`; the Instagram provider below writes
+ * `{id}@instagram.invalid`.
  */
-export function placeholderEmail(provider: "tiktok" | "instagram", id: string): string {
-  return `${id}@${provider}.invalid`;
+export const PLACEHOLDER_DOMAINS = {
+  tiktok: "tiktok.placeholder.invalid",
+  instagram: "instagram.invalid",
+} as const;
+
+export function placeholderEmail(provider: keyof typeof PLACEHOLDER_DOMAINS, id: string): string {
+  return `${id}@${PLACEHOLDER_DOMAINS[provider]}`;
+}
+
+/**
+ * Better Auth finds an existing user by email before it creates one. So an account from another provider that
+ * claims `{id}@instagram.invalid` would block the real Instagram user, who would get "account not linked"
+ * (security review finding 9). Only the provider that owns a placeholder domain may create an `.invalid` address.
+ */
+export function placeholderAllowed(email: string, provider: string | null): boolean {
+  const domain: string = email.toLowerCase().split("@").at(-1) ?? "";
+  if (!/\.invalid\.?$/u.test(domain)) return true;
+  return Object.entries(PLACEHOLDER_DOMAINS).some(([owner, owned]) => owner === provider && owned === domain);
+}
+
+/** The provider of the OAuth callback that is creating the user: `/callback/:id` or `/oauth2/callback/:providerId`. */
+function signInProvider(context: { params?: Record<string, unknown> } | null): string | null {
+  const value: unknown = context?.params?.id ?? context?.params?.providerId;
+  return typeof value === "string" ? value : null;
 }
 
 const INSTAGRAM_TOKEN_URL = "https://api.instagram.com/oauth/access_token";
@@ -137,7 +160,16 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
     databaseHooks: {
       user: {
         create: {
-          async before(user: User & Record<string, unknown>): Promise<{ data: User & Record<string, unknown> }> {
+          async before(
+            user: User & Record<string, unknown>,
+            context: { params?: Record<string, unknown> } | null,
+          ): Promise<{ data: User & Record<string, unknown> }> {
+            if (!placeholderAllowed(user.email, signInProvider(context))) {
+              throw new APIError("BAD_REQUEST", {
+                code: "PLACEHOLDER_EMAIL",
+                message: "This provider gave an address that StreamBullets cannot use. Sign in with another provider.",
+              });
+            }
             const name = displayNameSchema.safeParse(user.name);
             if (!name.success) {
               throw new APIError("BAD_REQUEST", {
@@ -163,15 +195,7 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
         : {}),
       ...(env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET
         ? {
-            tiktok: {
-              clientKey: env.TIKTOK_CLIENT_KEY,
-              clientSecret: env.TIKTOK_CLIENT_SECRET,
-              // TikTok shares no email: keep the same placeholder pattern as Instagram.
-              mapProfileToUser: (profile: { data: { user: { open_id: string } } }) => ({
-                email: placeholderEmail("tiktok", profile.data.user.open_id),
-                emailVerified: false,
-              }),
-            },
+            tiktok: { clientKey: env.TIKTOK_CLIENT_KEY, clientSecret: env.TIKTOK_CLIENT_SECRET },
           }
         : {}),
     },

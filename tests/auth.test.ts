@@ -9,6 +9,7 @@ import {
   createAuth,
   getViewer,
   isPlaceholderEmail,
+  placeholderAllowed,
   placeholderEmail,
 } from "../app/server/auth.server";
 import type { Provider } from "../app/types";
@@ -401,6 +402,23 @@ describe("OAuth boundary", () => {
     }
   });
 
+  it.each(["17841@instagram.invalid", "open-1@tiktok.placeholder.invalid", "open-1@tiktok.invalid"])(
+    "refuses a sign-up from another provider that claims the placeholder %s",
+    async (email: string) => {
+      const callback: Request = await oauthCallback();
+      const restore: () => void = stubTwitchIdentity(`squatter-${email}`, email);
+      try {
+        const response: Response = await createAuth(env).handler(callback);
+        expect(response.status).toBe(302);
+        const destination: URL = new URL(response.headers.get("location") ?? "", env.APP_ORIGIN);
+        expect(destination.searchParams.get("error")).toBe("PLACEHOLDER_EMAIL");
+        expect(await env.DB.prepare("SELECT id FROM user WHERE lower(email)=lower(?)").bind(email).first()).toBeNull();
+      } finally {
+        restore();
+      }
+    },
+  );
+
   it("does not create a Google account or session without a stable provider subject", async () => {
     const callback: Request = await oauthCallback("google");
     const email: string = "google-missing-subject@example.test";
@@ -594,7 +612,7 @@ describe("OAuth boundary", () => {
 
   it("recognises the placeholder addresses of accounts without an email", () => {
     expect(placeholderEmail("instagram", "17841")).toBe("17841@instagram.invalid");
-    expect(placeholderEmail("tiktok", "abc")).toBe("abc@tiktok.invalid");
+    expect(placeholderEmail("tiktok", "abc")).toBe("abc@tiktok.placeholder.invalid");
     expect(isPlaceholderEmail("17841@instagram.invalid")).toBe(true);
     expect(isPlaceholderEmail("open_id@tiktok.placeholder.invalid")).toBe(true);
     expect(isPlaceholderEmail("person@example.test")).toBe(false);
@@ -605,9 +623,6 @@ describe("provider adapters", () => {
   interface InstagramConfig {
     getToken: (input: { code: string; redirectURI: string }) => Promise<{ accessToken: string; tokenType: string }>;
     getUserInfo: (tokens: { accessToken?: string }) => Promise<Record<string, unknown> | null>;
-  }
-  interface TikTokConfig {
-    mapProfileToUser: (profile: { data: { user: { open_id: string } } }) => Record<string, unknown>;
   }
   const withProviders = (): AppEnv => ({
     ...env,
@@ -653,12 +668,21 @@ describe("provider adapters", () => {
     );
   });
 
-  it("gives TikTok accounts the placeholder address, never a verified email", () => {
-    const tiktok = createAuth(withProviders()).options.socialProviders?.tiktok as unknown as TikTokConfig;
-    expect(tiktok.mapProfileToUser({ data: { user: { open_id: "open-1" } } })).toEqual({
-      email: "open-1@tiktok.invalid",
-      emailVerified: false,
-    });
+  it("lets only the owning provider create a placeholder address (security review finding 9)", () => {
+    expect(placeholderAllowed("17841@instagram.invalid", "instagram")).toBe(true);
+    expect(placeholderAllowed("open-1@tiktok.placeholder.invalid", "tiktok")).toBe(true);
+    expect(placeholderAllowed("person@example.test", "twitch")).toBe(true);
+    expect(placeholderAllowed("person@example.test", null)).toBe(true);
+    for (const [email, provider] of [
+      ["17841@instagram.invalid", "twitch"],
+      ["17841@Instagram.INVALID", "google"],
+      ["open-1@tiktok.placeholder.invalid", "instagram"],
+      ["open-1@tiktok.invalid", "tiktok"],
+      ["17841@instagram.invalid", null],
+      ["someone@other.invalid", "twitch"],
+      ["17841@instagram.invalid.", "instagram"],
+    ] as const)
+      expect([email, provider, placeholderAllowed(email, provider)]).toEqual([email, provider, false]);
   });
 
   it("posts the Instagram code as a form and reads a plain or a data-wrapped token", async () => {
