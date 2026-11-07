@@ -138,7 +138,7 @@ function tap(socket: LiveSocket, id: string, n: number, seq: number, assisted: b
   socket.send(JSON.stringify({ t: "tap", id, n, assisted, seq }));
 }
 
-async function mashNotify(id: string): Promise<Response> {
+function mashNotify(id: string): ReturnType<Miniflare["dispatchFetch"]> {
   return runtime.dispatchFetch(`${origin}/${streamerId}/mash?streamerId=${streamerId}`, {
     method: "POST",
     body: JSON.stringify({ id }),

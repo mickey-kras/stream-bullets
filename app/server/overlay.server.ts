@@ -155,7 +155,9 @@ interface CardRow {
  * older than the newest 50 still resolves when it is on air.
  */
 export async function getOverlayData(env: AppEnv, streamerId: string, topicId: string | null): Promise<OverlayData> {
-  const [topics, cards, next, support] = await env.DB.batch([
+  const [polls, topics, cards, next, support] = await env.DB.batch([
+    env.DB.prepare(`SELECT e.id,e.title,EXISTS(SELECT 1 FROM entry_mash m WHERE m.entry_id=e.id) AS mash FROM entries e
+      WHERE e.streamer_id=? AND e.kind!='topic' ORDER BY e.created_at DESC,e.id DESC LIMIT ${LIST_LIMIT}`).bind(streamerId),
     env.DB.prepare(`SELECT e.id,e.title,e.category,e.author_id,u.name AS author,u.image,u.avatar_preset,
         (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=1) AS likes
       FROM entries e JOIN user u ON u.id=e.author_id
@@ -174,6 +176,11 @@ export async function getOverlayData(env: AppEnv, streamerId: string, topicId: s
   const event = next.results[0] as { title: string; starts_at: number } | undefined;
   const link = support.results[0] as { kind: SupportLinkKind; label: string | null; url: string } | undefined;
   return {
+    polls: (polls.results as { id: string; title: string; mash: number }[]).map((row) => ({
+      id: row.id,
+      title: row.title,
+      mash: row.mash === 1,
+    })),
     topics: (topics.results as TopicRow[]).map((row: TopicRow) => ({
       id: row.id,
       title: row.title,

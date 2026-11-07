@@ -284,6 +284,8 @@ export interface ReportQueue {
 
 /** Content the overlay sources other than polls show. Every field is already public on the streamer page. */
 export interface OverlayData {
+  /** The newest polls and Mash Battles, for the poll picker. */
+  polls: { id: string; title: string; mash: boolean }[];
   topics: {
     id: string;
     title: string;

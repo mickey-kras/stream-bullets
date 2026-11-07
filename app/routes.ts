@@ -5,6 +5,7 @@ export default [
   route("streamers", "routes/streamers.tsx"),
   route("settings", "routes/settings.tsx"),
   route("admin", "routes/admin.tsx"),
+  route("overlay-control", "routes/overlay-control.tsx"),
   route("privacy", "routes/privacy.tsx"),
   route("terms", "routes/terms.tsx"),
   route("api/auth/*", "routes/auth.ts"),
