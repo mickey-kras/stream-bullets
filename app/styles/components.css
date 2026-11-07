@@ -990,7 +990,7 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
   .ov-take-btn { flex: 1; justify-content: center; }
 }
 .ov-stage { position: absolute; inset: 0; padding: 48px; display: flex; pointer-events: none; }
-.ov-screen { position: relative; height: 100%; padding: 0; }
+.ov-screen { position: relative; height: 100vh; min-height: 100vh; padding: 0; }
 .ov-screen .ov-stage { padding: 24px; }
 .ov-stage.pos-full { align-items: flex-start; }
 .ov-stage.pos-full > * { width: 100%; }
