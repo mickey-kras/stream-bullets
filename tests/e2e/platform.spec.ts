@@ -372,29 +372,35 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
   const admin = await adminContext.newPage();
   await assertNoScriptErrors(admin, async () => {
     await admin.goto("/admin");
-    await admin.getByRole("navigation", { name: "Admin sections" }).getByRole("link", { name: "Reports" }).click();
+    await admin.getByRole("navigation", { name: "Admin sections" }).getByRole("link", { name: "Content reports" }).click();
     await expect(admin).toHaveURL(/view=reports/);
-    await expect(admin.getByRole("heading", { name: "Content reports" })).toBeVisible();
+    await expect(admin.getByRole("heading", { name: /Content reports/ })).toBeVisible();
     await expect(admin.getByRole("link", { name: "Open", exact: true })).toHaveAttribute("aria-current", "page");
-    const card = admin.getByRole("article").filter({ hasText: title });
-    await expect(card.getByRole("heading", { name: "Spam or scam" })).toBeVisible();
-    await expect(card).toContainText("by reporter");
-    await expect(card).toContainText("Limited offer, click now.");
-    await expect(card).toContainText("Advertising unrelated to the stream.");
-    await expect(card.getByRole("link", { name: "Open the conversation" })).toHaveAttribute(
+    // Reports are grouped by page, then by reported item.
+    const group = admin.getByRole("article", { name: "Test host" });
+    await group.getByRole("button", { name: /Show \d+ reported items?/ }).click();
+    const item = group.getByRole("listitem").filter({ hasText: "Limited offer, click now." });
+    await expect(item).toContainText("Reported by 1 person");
+    await expect(item).toContainText("reporter (Spam)");
+    await expect(item).toContainText("Advertising unrelated to the stream.");
+    await expect(item.getByRole("link", { name: "Open in context" })).toHaveAttribute(
       "href",
       `/@test_host?entry=${id}`,
     );
-    await card.getByRole("button", { name: "Remove content" }).click();
-    const confirm = admin.getByRole("dialog", { name: "Remove content?" });
+    await item.getByRole("button", { name: "Remove content" }).click();
+    const confirm = admin.getByRole("dialog", { name: "Remove this content?" });
     await confirm.getByRole("button", { name: "Remove content" }).click();
-    await expect(admin.getByRole("status")).toHaveText("Removed the content and closed 1 report.");
-    await expect(admin.getByRole("article").filter({ hasText: title })).toHaveCount(0);
-    await admin.getByRole("link", { name: "Removed", exact: true }).click();
-    await expect(admin).toHaveURL(/status=actioned/);
-    const resolved = admin.getByRole("article").filter({ hasText: title });
-    await expect(resolved).toContainText("This content is no longer available.");
-    await expect(resolved.getByRole("button")).toHaveCount(0);
+    await expect(admin.getByRole("status").filter({ hasText: "removed" })).toHaveText(
+      "Content removed and its reports closed.",
+    );
+    await expect(admin.getByRole("listitem").filter({ hasText: "Limited offer, click now." })).toHaveCount(0);
+    await admin.getByRole("link", { name: "Resolved", exact: true }).click();
+    await expect(admin).toHaveURL(/status=resolved/);
+    const resolved = admin.getByRole("article", { name: "Test host" });
+    await resolved.getByRole("button", { name: /Show \d+ reported items?/ }).click();
+    const removed = resolved.getByRole("listitem").filter({ hasText: "Limited offer, click now." });
+    await expect(removed.locator(".resolved-line")).toContainText("Removed");
+    await expect(removed.getByRole("button")).toHaveCount(0);
   });
   await adminContext.close();
 

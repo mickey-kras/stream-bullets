@@ -70,10 +70,31 @@ The production site shows no sign-in buttons until you set at least one credenti
 | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | Credentials for the TikTok Login Kit application. TikTok gives no email address. |
 | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Credentials for an Instagram API with Instagram Login application. Only creator and business accounts can sign in. Meta must review the application first. Instagram gives no email address. |
 | `ADMIN_EMAILS` | Email addresses of administrators. Use commas or spaces between the addresses. Letter case is not important. |
+| `ADMIN_STEP_UP` | Security-key check for Admin: `off`, `report` or `enforce`. If you leave it empty, the value is `report`. An unknown value acts as `enforce`. See [Admin security keys](#admin-security-keys). |
 
 An administrator is an account with a verified email address in `ADMIN_EMAILS`. TikTok and Instagram accounts get a placeholder address that is not verified, so they cannot be administrators. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
 
 For local testing, add `ADMIN_EMAILS` to `.dev.vars`. For production, store it as a Worker secret. Use `pnpm exec wrangler secret put ADMIN_EMAILS --env production` or the Cloudflare dashboard. Do not use a plain variable in the dashboard. Each deployment replaces plain variables with the `vars` in `wrangler.jsonc`.
+
+### Admin security keys
+
+Admin uses FIDO2 security keys (for example two YubiKeys) as a second check. A key check marks only the current session. It stays valid for 15 minutes. Freezing or suspending a page and adding or removing a key need a key check from the last 2 minutes.
+
+`ADMIN_STEP_UP` sets the policy:
+
+- `report` (the default): Admin opens without a key. When two keys exist, Admin asks for a key first, and the administrator can continue without one. The server logs each admin request without a fresh key check.
+- `enforce`: Admin and every admin API refuse requests until the account has two keys and this session passed a key check in the last 15 minutes.
+- `off`: no key check. Use it only for local development.
+
+The default does not lock out the owner before the keys exist. Set it up in this order:
+
+1. Deploy with `ADMIN_STEP_UP` empty or set to `report`.
+2. Sign out, then sign in with the administrator account. The first key must be added within 5 minutes of that sign-in.
+3. Open `/admin?view=keys`. Add the first key, then the backup key. Admin asks you to touch each key.
+4. Sign in on a second session and confirm that Admin asks for a key and accepts each key.
+5. Set `ADMIN_STEP_UP` to `enforce` as a plain variable in `env.production.vars`, or as a Worker secret, and deploy.
+
+Keys work only on the `APP_ORIGIN` host name, because the WebAuthn relying party ID is that host name. A key from `localhost` does not work in production. To recover after you lose every key, follow the operator steps in `SECURITY.md`.
 
 Register these exact callback URLs with each enabled provider:
 

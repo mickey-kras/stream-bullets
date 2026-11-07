@@ -42,7 +42,7 @@ export function PageBanner({
       {icon}
       <span>
         {t(frozen ? "moderation.frozenOwner" : "moderation.suspendedOwner")}
-        {reason && ` ${t("moderation.reason", { reason })}`}
+        {reason && ` ${t("moderation.reasonLine", { reason })}`}
       </span>
       <button type="button" className="text-button banner-link" onClick={() => setContact(true)}>
         <Icon name="mail" size={16} />

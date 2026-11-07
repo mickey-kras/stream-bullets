@@ -1,4 +1,5 @@
 import { accountRoutes } from "./account";
+import { adminRoutes } from "./admin";
 import { communityRoutes } from "./community";
 import { entryRoutes } from "./entries";
 import { imageRoutes } from "./images";
@@ -24,6 +25,7 @@ export const apiRoutes: readonly ApiRoute[] = [
   ...moderationRoutes,
   ...scheduleRoutes,
   ...communityRoutes,
+  ...adminRoutes,
 ];
 
 export { dispatch } from "./router";

@@ -16,6 +16,8 @@ export interface AppEnv {
   INSTAGRAM_CLIENT_ID?: string;
   INSTAGRAM_CLIENT_SECRET?: string;
   ADMIN_EMAILS?: string;
+  /** Admin security-key step-up: `off`, `report` (the default) or `enforce`. See README and SECURITY.md. */
+  ADMIN_STEP_UP?: string;
 }
 
 export interface AppContext {

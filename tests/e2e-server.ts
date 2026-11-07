@@ -27,7 +27,7 @@ const config: BuildConfig = {
   ...(build.assets
     ? { assets: { ...build.assets, directory: resolve(dirname(buildPath), build.assets.directory) } }
     : {}),
-  vars: { APP_ORIGIN: "http://localhost:5173", ADMIN_EMAILS: "admin@example.test" },
+  vars: { APP_ORIGIN: "http://localhost:5173", ADMIN_EMAILS: "admin@example.test keyadmin@example.test" },
   d1_databases: build.d1_databases.map((database) => ({
     ...database,
     database_id: databaseId,
@@ -65,6 +65,7 @@ for (const role of [
   "suspendedowner",
   "officialowner",
   "featureowner",
+  "keyadmin",
 ]) {
   const id: string = randomUUID();
   const token: string = randomBytes(24).toString("hex");
@@ -74,6 +75,17 @@ for (const role of [
   );
   statements.push(
     `INSERT INTO session(id,token,user_id,expires_at,created_at,updated_at) VALUES ('${randomUUID()}','${token}','${id}',${now + 86_400_000},${now},${now});`,
+  );
+}
+// The security-key admin (admin-keys.spec.ts). A first key may be added only within 5 minutes of sign-in, so
+// this session counts as new for the whole run. A second session of the same account checks that a key check
+// stays with the session that made it.
+statements.push(`UPDATE session SET created_at=${now + 3_600_000} WHERE user_id='${users.keyadmin.id}';`);
+{
+  const token: string = randomBytes(24).toString("hex");
+  users.keyadmin2 = { id: users.keyadmin.id, cookie: encodeURIComponent(`${token}.${await makeSignature(token, secret)}`) };
+  statements.push(
+    `INSERT INTO session(id,token,user_id,expires_at,created_at,updated_at) VALUES ('${randomUUID()}','${token}','${users.keyadmin.id}',${now + 86_400_000},${now},${now});`,
   );
 }
 const streamId: string = randomUUID();
