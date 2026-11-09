@@ -17,9 +17,9 @@ async function counts(entryId: string): Promise<Record<number, number>> {
 async function vote(entryId: string, userId: string, choice: number): Promise<void> {
   await db
     .prepare(
-      "INSERT INTO entry_votes (entry_id,user_id,choice) VALUES (?,?,?) ON CONFLICT(entry_id,user_id) DO UPDATE SET choice=excluded.choice",
+      "INSERT INTO entry_votes (entry_id,user_id,choice) SELECT id,?,? FROM entries WHERE id=? ON CONFLICT(entry_id,user_id) DO UPDATE SET choice=excluded.choice",
     )
-    .bind(entryId, userId, choice)
+    .bind(userId, choice, entryId)
     .run();
 }
 

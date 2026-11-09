@@ -39,6 +39,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm lint
+      - name: Check migrations match the schema
+        run: |
+          pnpm exec drizzle-kit generate --name schema_drift
+          if [ -n "$(git status --porcelain -- drizzle)" ]; then
+            git status --porcelain -- drizzle
+            echo '::error::db/schema.ts has changes without a migration. Run pnpm db:generate and commit the result.'
+            exit 1
+          fi
+      - name: Check third-party notices
+        run: node scripts/third-party-notices.ts --check
       - run: pnpm test:coverage
       - run: node --test scripts/browser-coverage.test.ts
       - run: pnpm audit --audit-level high

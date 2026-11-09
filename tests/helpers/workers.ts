@@ -1,14 +1,7 @@
 /**
- * Stands in for `cloudflare:workers` outside workerd (vitest.config.ts aliases the module here). `waitUntil` keeps
- * each background promise so a test can wait for it with `settleBackground()`.
+ * Stands in for `cloudflare:workers` outside workerd (vitest.config.ts aliases the module here). The background
+ * work starts at once, as in the runtime; tests observe its effects (for example a room fetch) directly.
  */
-const background: Promise<unknown>[] = [];
-
 export function waitUntil(promise: Promise<unknown>): void {
-  background.push(promise);
-}
-
-/** Waits for every promise passed to `waitUntil` so far. */
-export async function settleBackground(): Promise<void> {
-  while (background.length > 0) await Promise.allSettled(background.splice(0));
+  void promise;
 }

@@ -34,4 +34,6 @@ Only the site operator can recover. The operator needs Cloudflare access to the 
 
 Before a dependency ships, the maintainer must review its license and the licenses of its runtime dependencies. Record the review in the PR. Check the permitted use, distribution terms, attribution, license notices, and source disclosure requirements. Keep required notices with the release. Block the release if a license is unknown or its terms conflict with distribution of this application.
 
+CI keeps `THIRD_PARTY_NOTICES.md` equal to the runtime dependency closure (`node scripts/third-party-notices.ts --check`). A dependency change fails CI until you regenerate the file, so the PR diff shows each license that changed.
+
 The dependency review checks for vulnerabilities. It does not approve licenses. Repeat the manual review when an update changes a license or adds a runtime dependency.
