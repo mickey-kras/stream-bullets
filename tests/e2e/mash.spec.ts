@@ -43,10 +43,11 @@ test("a Mash Battle counts one tap per key press and updates the overlay live", 
   await page.keyboard.up(" ");
   await expect(mine).toHaveText("26");
   const total = obs.locator('[data-mash-total="1"]');
-  // The overlay bar follows the 5 Hz totals without a reload. Waiting for it also spaces the presses wider than the
-  // client's 15 a second limit, so each press counts.
+  // The overlay bar follows the 5 Hz totals without a reload.
   await expect(total).toHaveText("26");
   for (let count = 27; count <= 29; count += 1) {
+    // Pace intentional presses below the client limit of 15 taps per second.
+    await page.waitForTimeout(100);
     await page.keyboard.press("Enter");
     await expect(mine).toHaveText(String(count));
     await expect(total).toHaveText(String(count));
@@ -59,6 +60,8 @@ test("a Mash Battle counts one tap per key press and updates the overlay live", 
     [32, () => page.keyboard.press(" ")],
   ];
   for (const [count, press] of presses) {
+    // An overlay update can arrive immediately after a tap, so it is not a pacing clock.
+    await page.waitForTimeout(100);
     await press();
     await expect(mine).toHaveText(String(count));
     await expect(total).toHaveText(String(count));
