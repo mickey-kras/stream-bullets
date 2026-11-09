@@ -1,26 +1,138 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { APIError, betterAuth, type BetterAuthOptions, type User } from "better-auth";
+import { genericOAuth } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../../db/auth-schema";
 import type { AppContext, AppEnv } from "../env";
-import type { Viewer } from "../types";
+import { LOCALES } from "../../db/enums";
+import type { Locale } from "../i18n";
+import type { Provider, Viewer } from "../types";
+import { z } from "zod";
 import { getOrigin, HttpError } from "./http.server";
-import { displayNameSchema } from "./validation";
+import { displayNameSchema, readDisplayPrefs } from "./validation";
 
-type Provider = "google" | "twitch";
+export { isPlaceholderEmail } from "./validation";
 
+/** Sign-in providers in button order. Each needs both values of its credential pair (plan section 5). */
+const providerCredentials = (env: AppEnv): readonly (readonly [Provider, string | undefined, string | undefined])[] => [
+  ["google", env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET],
+  ["tiktok", env.TIKTOK_CLIENT_KEY, env.TIKTOK_CLIENT_SECRET],
+  ["twitch", env.TWITCH_CLIENT_ID, env.TWITCH_CLIENT_SECRET],
+  ["instagram", env.INSTAGRAM_CLIENT_ID, env.INSTAGRAM_CLIENT_SECRET],
+];
+
+/** The providers whose credential pair is set. A half-set pair is a configuration error (503). */
 export function configuredProviders(env: AppEnv): Provider[] {
   const providers: Provider[] = [];
-  for (const [provider, id, secret] of [
-    ["google", env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET],
-    ["twitch", env.TWITCH_CLIENT_ID, env.TWITCH_CLIENT_SECRET],
-  ] as const) {
+  for (const [provider, id, secret] of providerCredentials(env)) {
     if (Boolean(id) !== Boolean(secret)) {
       throw new HttpError(503, `Both ${provider} OAuth credentials must be configured.`);
     }
     if (id && secret) providers.push(provider);
   }
   return providers;
+}
+
+/**
+ * TikTok and Instagram share no email address. Accounts from them get a stable, non-routable placeholder with
+ * emailVerified false, so they can never be admins and the app never shows or mails the address (R5). Better Auth's
+ * TikTok provider writes its own `{open_id}@tiktok.placeholder.invalid`; the Instagram provider below writes
+ * `{id}@instagram.invalid`.
+ */
+export const PLACEHOLDER_DOMAINS = {
+  tiktok: "tiktok.placeholder.invalid",
+  instagram: "instagram.invalid",
+} as const;
+
+export function placeholderEmail(provider: keyof typeof PLACEHOLDER_DOMAINS, id: string): string {
+  return `${id}@${PLACEHOLDER_DOMAINS[provider]}`;
+}
+
+/**
+ * Better Auth finds an existing user by email before it creates one. So an account from another provider that
+ * claims `{id}@instagram.invalid` would block the real Instagram user, who would get "account not linked"
+ * (security review finding 9). Only the provider that owns a placeholder domain may create an `.invalid` address.
+ */
+export function placeholderAllowed(email: string, provider: string | null): boolean {
+  const domain: string = email.toLowerCase().split("@").at(-1) ?? "";
+  if (!/\.invalid\.?$/u.test(domain)) return true;
+  return Object.entries(PLACEHOLDER_DOMAINS).some(([owner, owned]) => owner === provider && owned === domain);
+}
+
+/** The provider of the OAuth callback that is creating the user: `/callback/:id` or `/oauth2/callback/:providerId`. */
+function signInProvider(context: { params?: Record<string, unknown> } | null): string | null {
+  const value: unknown = context?.params?.id ?? context?.params?.providerId;
+  return typeof value === "string" ? value : null;
+}
+
+const INSTAGRAM_TOKEN_URL = "https://api.instagram.com/oauth/access_token";
+const INSTAGRAM_ME_URL = "https://graph.instagram.com/me?fields=user_id,username,name";
+
+const instagramTokenSchema = z.union([
+  z.object({ access_token: z.string().min(1), user_id: z.union([z.string(), z.number()]).optional() }),
+  z.object({
+    data: z
+      .array(z.object({ access_token: z.string().min(1), user_id: z.union([z.string(), z.number()]).optional() }))
+      .min(1),
+  }),
+]);
+const instagramProfileSchema = z.object({
+  user_id: z.union([z.string(), z.number()]).optional(),
+  id: z.union([z.string(), z.number()]).optional(),
+  username: z.string().optional(),
+  name: z.string().optional(),
+});
+
+/**
+ * "Continue with Instagram": Instagram API with Instagram Login (professional accounts only, needs Meta app
+ * review). It is plain OAuth 2 with a form-post token exchange whose answer may be wrapped in `data[]`.
+ */
+function instagramProvider(
+  clientId: string,
+  clientSecret: string,
+): Parameters<typeof genericOAuth>[0]["config"][number] {
+  return {
+    providerId: "instagram",
+    name: "Instagram",
+    clientId,
+    clientSecret,
+    authorizationUrl: "https://www.instagram.com/oauth/authorize",
+    tokenUrl: INSTAGRAM_TOKEN_URL,
+    scopes: ["instagram_business_basic"],
+    pkce: false,
+    authentication: "post",
+    async getToken({ code, redirectURI }) {
+      const response = await fetch(INSTAGRAM_TOKEN_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: "authorization_code",
+          redirect_uri: redirectURI,
+          code,
+        }),
+      });
+      if (!response.ok) throw new APIError("UNAUTHORIZED", { message: "Instagram sign-in failed." });
+      const body = instagramTokenSchema.parse(await response.json());
+      const token = "data" in body ? body.data[0] : body;
+      return { accessToken: token.access_token, tokenType: "bearer" };
+    },
+    async getUserInfo(tokens) {
+      if (!tokens.accessToken) return null;
+      const response = await fetch(INSTAGRAM_ME_URL, { headers: { Authorization: `Bearer ${tokens.accessToken}` } });
+      if (!response.ok) return null;
+      const profile = instagramProfileSchema.parse(await response.json());
+      const id = String(profile.user_id ?? profile.id ?? "");
+      if (!id) return null;
+      return {
+        id,
+        name: profile.name || profile.username || "",
+        email: placeholderEmail("instagram", id),
+        emailVerified: false,
+      };
+    },
+  };
 }
 
 export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
@@ -36,10 +148,28 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: [origin],
     database: drizzleAdapter(drizzle(env.DB), { provider: "sqlite", schema, transaction: false }),
+    user: {
+      // Read with the session, never accepted from sign-up or Better Auth's own endpoints (input: false).
+      // Our endpoints write them: PATCH /api/profile, /api/me/locale and /api/me/preferences.
+      additionalFields: {
+        avatarPreset: { type: "number", required: false, input: false },
+        locale: { type: "string", required: false, input: false },
+        displayPrefs: { type: "string", required: false, input: false },
+      },
+    },
     databaseHooks: {
       user: {
         create: {
-          async before(user: User & Record<string, unknown>): Promise<{ data: User & Record<string, unknown> }> {
+          async before(
+            user: User & Record<string, unknown>,
+            context: { params?: Record<string, unknown> } | null,
+          ): Promise<{ data: User & Record<string, unknown> }> {
+            if (!placeholderAllowed(user.email, signInProvider(context))) {
+              throw new APIError("BAD_REQUEST", {
+                code: "PLACEHOLDER_EMAIL",
+                message: "This provider gave an address that StreamBullets cannot use. Sign in with another provider.",
+              });
+            }
             const name = displayNameSchema.safeParse(user.name);
             if (!name.success) {
               throw new APIError("BAD_REQUEST", {
@@ -63,7 +193,16 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
             twitch: { clientId: env.TWITCH_CLIENT_ID, clientSecret: env.TWITCH_CLIENT_SECRET },
           }
         : {}),
+      ...(env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET
+        ? {
+            tiktok: { clientKey: env.TIKTOK_CLIENT_KEY, clientSecret: env.TIKTOK_CLIENT_SECRET },
+          }
+        : {}),
     },
+    plugins:
+      env.INSTAGRAM_CLIENT_ID && env.INSTAGRAM_CLIENT_SECRET
+        ? [genericOAuth({ config: [instagramProvider(env.INSTAGRAM_CLIENT_ID, env.INSTAGRAM_CLIENT_SECRET)] })]
+        : [],
     account: {
       encryptOAuthTokens: true,
       accountLinking: { enabled: false },
@@ -91,7 +230,11 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
   return betterAuth(options);
 }
 
-export async function getViewer(request: Request, context: AppContext): Promise<Viewer | null> {
+/** The signed-in viewer and the id of their session (for the per-session admin step-up). Server only. */
+export async function getViewerSession(
+  request: Request,
+  context: AppContext,
+): Promise<{ viewer: Viewer; sessionId: string } | null> {
   const { response, headers } = await createAuth(context.env).api.getSession({
     headers: request.headers,
     query: { disableCookieCache: true },
@@ -101,10 +244,24 @@ export async function getViewer(request: Request, context: AppContext): Promise<
     context.responseHeaders.append("Set-Cookie", cookie);
   }
   if (!response) return null;
-  const avatar: string = `/images/avatar/${encodeURIComponent(response.user.id)}`;
+  return { viewer: viewerValue(response.user as User & Record<string, unknown>), sessionId: response.session.id };
+}
+
+export async function getViewer(request: Request, context: AppContext): Promise<Viewer | null> {
+  return (await getViewerSession(request, context))?.viewer ?? null;
+}
+
+/** Shapes the signed-in account for the client. */
+export function viewerValue(account: User & Record<string, unknown>): Viewer {
+  const avatar: string = `/images/avatar/${encodeURIComponent(account.id)}`;
+  const preset = account.avatarPreset;
+  const locale = account.locale;
   return {
-    id: response.user.id,
-    name: response.user.name,
-    avatar: response.user.image === avatar ? avatar : null,
+    id: account.id,
+    name: account.name,
+    avatar: account.image === avatar ? avatar : null,
+    avatarPreset: typeof preset === "number" && Number.isInteger(preset) && preset >= 0 && preset <= 17 ? preset : null,
+    locale: typeof locale === "string" && (LOCALES as readonly string[]).includes(locale) ? (locale as Locale) : null,
+    displayPrefs: readDisplayPrefs(account.displayPrefs),
   };
 }

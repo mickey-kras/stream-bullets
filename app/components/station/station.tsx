@@ -1,18 +1,24 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { t } from "../../i18n";
 import { AtomLoader } from "./loader";
-import { askForTilt, onFirstMotion, tiltNeedsAsking } from "./tilt";
+import { askForTilt, onFirstMotion, tiltPillWanted } from "./tilt";
 import type { StationController } from "./scene.client";
 
 const DISPLAY_FONT = "Oswald, 'Arial Narrow', sans-serif";
 
 /** The interactive ON AIR station. Loads the Three.js scene straight away (it fills the landing), shows
     the atom while it loads, and keeps the page usable when WebGL is missing. */
-export function Station(): ReactNode {
+export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void }> = {}): ReactNode {
   const host = useRef<HTMLDivElement>(null);
   const controller = useRef<StationController | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
   /** Set once the tilt button is no longer wanted: motion arrived, or the person answered. */
   const [tiltDone, setTiltDone] = useState<boolean>(false);
+  /** The latest sign handler, so the scene (built once) always calls the current one. */
+  const signHandler = useRef<typeof onSign>(onSign);
+  useEffect(() => {
+    signHandler.current = onSign;
+  }, [onSign]);
 
   // Motion arriving on its own means access is already allowed, so the button can go.
   useEffect(() => onFirstMotion((): void => setTiltDone(true)), []);
@@ -37,6 +43,7 @@ export function Station(): ReactNode {
         const station = await scene.createStation(host.current, fail, {
           family: DISPLAY_FONT,
           shift: (width: number): number => (wide.matches && width > 900 ? 0.24 : 0),
+          onSign: (index: number): void => signHandler.current?.(index),
           // On phones the copy overlaps the top of the stage; the mast may rise behind the buttons.
           overlap: (): number => {
             const actions = document.querySelector(".landing-actions")?.getBoundingClientRect();
@@ -70,11 +77,11 @@ export function Station(): ReactNode {
   }, []);
 
   return (
-    <div className="landing-station" aria-label="Interactive broadcast station" data-status={status}>
+    <section className="landing-station" aria-label={t("landing.station")} data-status={status}>
       <div className="landing-canvas" ref={host} />
-      {status === "loading" && <AtomLoader label="Tuning the signal…" />}
+      {status === "loading" && <AtomLoader label={t("landing.tuning")} />}
       {/* Only after the station is ready (which happens in the browser), so server and client agree. */}
-      {status === "ready" && !tiltDone && tiltNeedsAsking() && (
+      {status === "ready" && !tiltDone && tiltPillWanted() && (
         <button
           type="button"
           className="station-tilt"
@@ -102,6 +109,6 @@ export function Station(): ReactNode {
           The station preview is unavailable. You can still sign in and join the conversation.
         </output>
       )}
-    </div>
+    </section>
   );
 }

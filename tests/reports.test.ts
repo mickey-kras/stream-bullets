@@ -1,18 +1,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import type { ContentReport, ReportStatus, Streamer } from "../app/types";
-import {
-  deleteComment,
-  deleteEntry,
-  listComments,
-  mutateComment,
-  mutateEntry,
-  saveStreamer,
-} from "../app/server/data.server";
+import { deleteComment, listComments, mutateComment } from "../app/server/comments.server";
+import { deleteEntry, mutateEntry, saveStreamer } from "../app/server/data.server";
+import { HttpError } from "../app/server/http.server";
 import { listReports, resolveReport, submitReport } from "../app/server/reports.server";
 import type { ReportInput } from "../app/server/validation";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
+import { startOfQuotaWindow } from "./helpers/quota";
 
 let database: TestDatabase;
 let env: AppEnv;
@@ -210,6 +206,7 @@ describe("submitting reports", (): void => {
   });
 
   it("limits how often an account can report", async (): Promise<void> => {
+    await startOfQuotaWindow(env.DB);
     const topics = await Promise.all(Array.from({ length: 7 }, () => seedEntry()));
     for (const topic of topics.slice(0, 6)) await report("reporter", { targetKind: "entry", targetId: topic });
     await expect(report("reporter", { targetKind: "entry", targetId: topics[6] })).rejects.toMatchObject({
@@ -315,7 +312,7 @@ describe("reviewing reports", (): void => {
     expect(item).toMatchObject({ entryId: null, snapshot: "Reported topic\n\nTopic details" });
   });
 
-  it("removes a reported comment and keeps its replies", async (): Promise<void> => {
+  it("removes a reported comment and keeps its replies under a placeholder", async (): Promise<void> => {
     const topic = await seedEntry();
     const parent = await seedComment(topic);
     const reply = await seedComment(topic, "second", parent);
@@ -327,7 +324,14 @@ describe("reviewing reports", (): void => {
     });
     expect(await revision()).toBe(before + 1);
     const { comments } = await listComments(env, topic, null, { sort: "newest", cursor: null });
-    expect(comments.map((comment) => [comment.id, comment.parentId])).toEqual([[reply, null]]);
+    expect(comments.map((comment) => [comment.id, comment.parentId, comment.removed])).toEqual([
+      [reply, parent, false],
+      [parent, null, true],
+    ]);
+    // A placeholder cannot be reported again.
+    await expect(report("reporter", { targetKind: "comment", targetId: parent, reason: "spam" })).rejects.toMatchObject(
+      { status: 404 },
+    );
   });
 
   it("closes the report when the content is already gone", async (): Promise<void> => {
@@ -367,39 +371,134 @@ describe("reviewing reports", (): void => {
 });
 
 describe("moderation rights", (): void => {
-  it("lets administrators delete any topic, poll, or comment", async (): Promise<void> => {
+  /** A step-up gate that passes, as `requireAdminSession` does after a fresh key check. */
+  const fresh = (): ReturnType<typeof vi.fn<() => Promise<{ stepUp: string }>>> =>
+    vi.fn(async (): Promise<{ stepUp: string }> => ({ stepUp: "fresh" }));
+
+  async function auditRows(): Promise<{ target_id: string; action: string; actor_id: string; metadata: string }[]> {
+    const { results } = await env.DB.prepare(
+      "SELECT target_id, action, actor_id, metadata FROM moderation_actions ORDER BY action, created_at",
+    ).all<{ target_id: string; action: string; actor_id: string; metadata: string }>();
+    return results;
+  }
+
+  beforeEach(async (): Promise<void> => {
+    await env.DB.prepare("DELETE FROM moderation_actions").run();
+  });
+
+  it("lets administrators delete any topic, poll, or comment after the step-up gate, with an audit row", async (): Promise<void> => {
     const topic = await seedEntry();
-    const poll = await seedEntry("choice", "owner");
+    const poll = await seedEntry("choice", "owner", "Pick a colour");
     const parent = await seedComment(topic);
     const reply = await seedComment(topic, "second", parent);
-    await mutateComment(env, "admin", { action: "delete", id: parent });
+    const gate = fresh();
+    await mutateComment(env, "admin", { action: "delete", id: parent }, gate);
     const { comments } = await listComments(env, topic, null, { sort: "newest", cursor: null });
-    expect(comments.map((comment) => [comment.id, comment.parentId])).toEqual([[reply, null]]);
-    expect(await deleteComment(env, "admin", reply)).toEqual({ streamerId: streamer.id });
-    await mutateEntry(env, "admin", streamer.id, { action: "delete", id: poll });
-    await deleteEntry(env, "admin", streamer.id, topic);
+    expect(comments.map((comment) => [comment.id, comment.parentId, comment.removed])).toEqual([
+      [reply, parent, false],
+      [parent, null, true],
+    ]);
+    await mutateComment(env, "admin", { action: "delete", id: reply }, gate);
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM entry_comments").first("n")).toBe(0);
+    await mutateEntry(env, "admin", streamer.id, { action: "delete", id: poll }, gate);
+    expect(gate).toHaveBeenCalledTimes(3);
+    expect(await auditRows()).toEqual([
+      {
+        target_id: topic,
+        action: "comment_removed",
+        actor_id: "admin",
+        metadata: JSON.stringify({ commentId: parent, via: "page", stepUp: "fresh" }),
+      },
+      {
+        target_id: topic,
+        action: "comment_removed",
+        actor_id: "admin",
+        metadata: JSON.stringify({ commentId: reply, via: "page", stepUp: "fresh" }),
+      },
+      {
+        target_id: poll,
+        action: "entry_removed",
+        actor_id: "admin",
+        metadata: JSON.stringify({ title: "Pick a colour", via: "page", stepUp: "fresh" }),
+      },
+    ]);
+    // Admin routes run the gate themselves and write their own row.
+    await deleteEntry(env, "admin", streamer.id, topic, "checked");
     expect(await env.DB.prepare("SELECT count(*) AS n FROM entries").first("n")).toBe(0);
+    expect(await auditRows()).toHaveLength(3);
+  });
+
+  it("refuses an admin removal when the gate refuses or no gate is given, and writes no row", async (): Promise<void> => {
+    const topic = await seedEntry();
+    const comment = await seedComment(topic);
+    const refused = vi.fn(async (): Promise<{ stepUp: string }> => {
+      throw new HttpError(403, "Confirm with your security key to continue.", "step_up_required");
+    });
+    await expect(
+      mutateEntry(env, "admin", streamer.id, { action: "delete", id: topic }, refused),
+    ).rejects.toMatchObject({ status: 403, code: "step_up_required" });
+    await expect(mutateComment(env, "admin", { action: "delete", id: comment }, refused)).rejects.toMatchObject({
+      code: "step_up_required",
+    });
+    await expect(mutateEntry(env, "admin", streamer.id, { action: "delete", id: topic })).rejects.toMatchObject({
+      status: 403,
+    });
+    await expect(mutateComment(env, "admin", { action: "delete", id: comment })).rejects.toMatchObject({ status: 403 });
+    await expect(deleteEntry(env, "admin", streamer.id, topic)).rejects.toMatchObject({ status: 403 });
+    await expect(deleteComment(env, "admin", comment)).rejects.toMatchObject({ status: 403 });
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM entries").first("n")).toBe(1);
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM entry_comments").first("n")).toBe(1);
+    expect(await auditRows()).toEqual([]);
+  });
+
+  it("writes no audit row when an admin removal finds nothing to remove", async (): Promise<void> => {
+    const topic = await seedEntry();
+    const comment = await seedComment(topic);
+    const gate = fresh();
+    await mutateComment(env, "admin", { action: "delete", id: comment }, gate);
+    // The comment is gone, so a repeat finds nothing (404 from the lookup) and logs nothing new.
+    await expect(mutateComment(env, "admin", { action: "delete", id: comment }, gate)).rejects.toMatchObject({
+      status: 404,
+    });
+    expect(await auditRows()).toHaveLength(1);
+  });
+
+  it("lets authors and page owners remove their own content without the step-up gate", async (): Promise<void> => {
+    const topic = await seedEntry();
+    const own = await seedEntry("topic", "admin", "Admin's own topic");
+    const comment = await seedComment(topic);
+    const ownComment = await seedComment(topic, "admin");
+    const gate = fresh();
+    await mutateComment(env, "author", { action: "delete", id: comment }, gate);
+    await mutateComment(env, "admin", { action: "delete", id: ownComment }, gate);
+    await mutateEntry(env, "admin", streamer.id, { action: "delete", id: own }, gate);
+    await mutateEntry(env, "owner", streamer.id, { action: "delete", id: topic }, gate);
+    expect(gate).not.toHaveBeenCalled();
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM entries").first("n")).toBe(0);
+    expect(await auditRows()).toEqual([]);
   });
 
   it("keeps regular users limited to their own content and their own page", async (): Promise<void> => {
     const topic = await seedEntry();
     const comment = await seedComment(topic);
+    const gate = fresh();
     for (const user of ["reporter", "unverified"]) {
-      await expect(mutateEntry(env, user, streamer.id, { action: "delete", id: topic })).rejects.toMatchObject({
+      await expect(mutateEntry(env, user, streamer.id, { action: "delete", id: topic }, gate)).rejects.toMatchObject({
         status: 403,
         message: "Only the author or streamer can remove this item.",
       });
-      await expect(deleteEntry(env, user, streamer.id, topic)).rejects.toMatchObject({ status: 403 });
-      await expect(mutateComment(env, user, { action: "delete", id: comment })).rejects.toMatchObject({
+      await expect(deleteEntry(env, user, streamer.id, topic, "checked")).rejects.toMatchObject({ status: 403 });
+      await expect(mutateComment(env, user, { action: "delete", id: comment }, gate)).rejects.toMatchObject({
         status: 403,
         message: "Only the author or streamer can remove this comment.",
       });
-      await expect(deleteComment(env, user, comment)).rejects.toMatchObject({ status: 403 });
+      await expect(deleteComment(env, user, comment, "checked")).rejects.toMatchObject({ status: 403 });
     }
     await expect(
-      mutateEntry({ ...env, ADMIN_EMAILS: undefined }, "admin", streamer.id, { action: "delete", id: topic }),
+      mutateEntry({ ...env, ADMIN_EMAILS: undefined }, "admin", streamer.id, { action: "delete", id: topic }, gate),
     ).rejects.toMatchObject({ status: 403 });
-    await expect(deleteComment(env, "admin", crypto.randomUUID())).rejects.toMatchObject({ status: 404 });
+    expect(gate).not.toHaveBeenCalled();
+    await expect(deleteComment(env, "admin", crypto.randomUUID(), "checked")).rejects.toMatchObject({ status: 404 });
     await mutateComment(env, "owner", { action: "delete", id: comment });
     await deleteEntry(env, "author", streamer.id, topic);
     expect(await env.DB.prepare("SELECT count(*) AS n FROM entries").first("n")).toBe(0);

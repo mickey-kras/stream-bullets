@@ -1,14 +1,16 @@
 import { useId, useState, type FormEvent, type ReactNode } from "react";
+import { t, type MessageId } from "../i18n";
 import type { ReportReason, ReportTargetKind } from "../types";
 import { Modal } from "./common";
+import { Icon } from "./ui/icon";
 import { errorMessage, postJson } from "./api";
 
-export const reportReasons: { value: ReportReason; label: string; hint: string }[] = [
-  { value: "illegal", label: "Illegal content", hint: "For example threats, incitement, or copyright infringement." },
-  { value: "harassment", label: "Harassment or hate", hint: "Attacks on a person or group." },
-  { value: "spam", label: "Spam or scam", hint: "Advertising, repeated posts, or misleading links." },
-  { value: "privacy", label: "Private information", hint: "Someone's personal details shared without consent." },
-  { value: "other", label: "Something else", hint: "Another breach of the community rules." },
+export const reportReasons: readonly { value: ReportReason; label: MessageId; hint: MessageId }[] = [
+  { value: "illegal", label: "report.illegal", hint: "report.illegalHint" },
+  { value: "harassment", label: "report.harassment", hint: "report.harassmentHint" },
+  { value: "spam", label: "report.spam", hint: "report.spamHint" },
+  { value: "privacy", label: "report.privacy", hint: "report.privacyHint" },
+  { value: "other", label: "report.other", hint: "report.otherHint" },
 ];
 
 const needsDetails = new Set<ReportReason>(["illegal", "other"]);
@@ -19,6 +21,7 @@ export function ReportButton({
   targetId,
   label,
   description,
+  onReported,
 }: Readonly<{
   targetKind: ReportTargetKind;
   targetId: string;
@@ -26,6 +29,8 @@ export function ReportButton({
   label: string;
   /** What is being reported, shown in the dialog. */
   description: string;
+  /** Runs once the report is saved, so the page can show "Reported" instead of the button. */
+  onReported?: () => void;
 }>): ReactNode {
   const id = useId();
   const [open, setOpen] = useState<boolean>(false);
@@ -62,24 +67,31 @@ export function ReportButton({
   return (
     <>
       <button type="button" aria-label={label} onClick={show}>
-        Report
+        <Icon name="flag" size={16} />
+        {t("report.button")}
       </button>
       <Modal
         open={open}
         onOpenChange={(next: boolean) => {
           if (!pending) setOpen(next);
+          if (!next && sent) onReported?.();
         }}
-        title={sent ? "Report sent" : "Report content"}
-        description={sent ? "Thank you. An administrator will review it." : description}
+        title={sent ? t("report.sent") : t("report.title")}
+        description={sent ? t("report.thanks") : description}
       >
         {sent ? (
           <>
-            <output className="report-confirmation">
-              We received your report. If the content breaks the law or the community rules, we will remove it.
-            </output>
+            <output className="report-confirmation">{t("report.received")}</output>
             <div className="modal-actions">
-              <button className="gold" type="button" onClick={() => setOpen(false)}>
-                Close
+              <button
+                className="gold"
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onReported?.();
+                }}
+              >
+                {t("dialog.closeTitle")}
               </button>
             </div>
           </>
@@ -90,7 +102,7 @@ export function ReportButton({
             }}
           >
             <fieldset className="report-reasons">
-              <legend>Why are you reporting this?</legend>
+              <legend>{t("report.why")}</legend>
               {reportReasons.map((item) => (
                 <label key={item.value}>
                   <input
@@ -102,14 +114,14 @@ export function ReportButton({
                     aria-describedby={`${id}-${item.value}`}
                   />
                   <span>
-                    {item.label}
-                    <small id={`${id}-${item.value}`}>{item.hint}</small>
+                    {t(item.label)}
+                    <small id={`${id}-${item.value}`}>{t(item.hint)}</small>
                   </span>
                 </label>
               ))}
             </fieldset>
             <label>
-              <span>Details{required ? "" : " (optional)"}</span>
+              <span>{required ? t("report.details") : t("report.detailsOptional")}</span>
               <textarea
                 value={details}
                 onChange={(event) => setDetails(event.currentTarget.value)}
@@ -119,25 +131,19 @@ export function ReportButton({
                 aria-describedby={`${id}-details`}
               />
               <small id={`${id}-details`}>
-                {required
-                  ? "Explain why this content breaks the law or the community rules."
-                  : "Add anything that helps us review it."}{" "}
-                Up to 1000 characters.
+                {required ? t("report.detailsRequiredHelp") : t("report.detailsHelp")} {t("report.limit")}
               </small>
             </label>
-            <p className="muted">
-              By sending this report you confirm that it is accurate and made in good faith. Administrators see your
-              name with the report. The author does not.
-            </p>
+            <p className="muted">{t("report.goodFaith")}</p>
             <p role="alert" className="form-error">
               {error}
             </p>
             <div className="modal-actions">
               <button type="button" disabled={pending} onClick={() => setOpen(false)}>
-                Cancel
+                {t("dialog.cancel")}
               </button>
               <button className="gold" type="submit" disabled={pending || (required && !details.trim())}>
-                {pending ? "Sending…" : "Send report"}
+                {pending ? t("report.sending") : t("report.send")}
               </button>
             </div>
           </form>

@@ -1,14 +1,35 @@
-import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { AVATAR_PRESET_COUNT, LOCALES, sqlList } from "./enums";
 
-export const user = sqliteTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
-  image: text("image"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const user = sqliteTable(
+  "user",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+    image: text("image"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+    // Written only by our own endpoints; Better Auth reads them as additionalFields with input: false.
+    // A null preset renders the default preset, so there is no backfill.
+    avatarPreset: integer("avatar_preset"),
+    locale: text("locale", { enum: LOCALES }),
+    displayPrefs: text("display_prefs"),
+  },
+  (table) => [
+    check(
+      "user_avatar_preset_check",
+      sql`${table.avatarPreset} IS NULL OR ${table.avatarPreset} BETWEEN 0 AND ${sql.raw(String(AVATAR_PRESET_COUNT - 1))}`,
+    ),
+    check("user_locale_check", sql`${table.locale} IS NULL OR ${table.locale} IN (${sql.raw(sqlList(LOCALES))})`),
+    check(
+      "user_display_prefs_check",
+      sql`${table.displayPrefs} IS NULL OR (json_valid(${table.displayPrefs}) AND length(${table.displayPrefs}) <= 1024)`,
+    ),
+  ],
+);
 
 export const session = sqliteTable(
   "session",
@@ -23,8 +44,31 @@ export const session = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    /** Last security-key step-up in this session (item 29). Per session, never per user. */
+    adminVerifiedAt: integer("admin_verified_at", { mode: "timestamp_ms" }),
   },
   (table) => [index("session_user_idx").on(table.userId), index("session_expiry_idx").on(table.expiresAt)],
+);
+
+/** WebAuthn credentials, in the shape of Better Auth's passkey plugin (admin security keys). */
+export const passkey = sqliteTable(
+  "passkey",
+  {
+    id: text("id").primaryKey(),
+    name: text("name"),
+    publicKey: text("public_key").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    credentialID: text("credential_id").notNull(),
+    counter: integer("counter").notNull(),
+    deviceType: text("device_type").notNull(),
+    backedUp: integer("backed_up", { mode: "boolean" }).notNull(),
+    transports: text("transports"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }),
+    aaguid: text("aaguid"),
+  },
+  (table) => [index("passkey_user_idx").on(table.userId), uniqueIndex("passkey_credential_idx").on(table.credentialID)],
 );
 
 export const account = sqliteTable(

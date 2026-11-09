@@ -16,7 +16,7 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 ## Behavior
 
 - Accounts start as viewers. In this version, a streamer profile needs approval.
-- A viewer joins the waitlist in **Settings**. The application contains 1 to 5 HTTPS links to the channels of the viewer. It can also contain a note of up to 1,000 characters.
+- A viewer joins the waitlist from **Host a community** in the account menu. The application contains 1 to 5 HTTPS links to the channels of the viewer. It can also contain a note of up to 1,000 characters.
 - The viewer can change a pending or rejected application. When the viewer sends a rejected application again, it becomes pending. An approved application cannot change.
 - Administrators review applications at `/admin`. The page shows pending, approved, and rejected applications. Administrators can see the name and email address of each applicant.
 - After approval, the account can create one streamer profile and claim `/@handle`. Administrators can create a streamer profile without an application.
@@ -28,12 +28,19 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 - Binary poll counts and percentages stay private until reveal. Multiple-choice results update live.
 - Authors and page owners can remove content. Replies remain when an author or page owner removes a parent comment.
 - Signed-in users can report a topic or comment with **Report**. Administrators review reports at `/admin`. The hourly task deletes resolved reports after one year.
-- In **Settings > Your data**, a user can download a JSON copy of their data. The user can also delete the account. Deletion removes the account and all of its data. This includes content, votes, reactions, images, the streamer profile, the application, sessions, and reports.
+- In **Your data** in the account menu, a user can download a JSON copy of their data. The user can also delete the account. Deletion removes the account and all of its data. This includes content, votes, reactions, images, the streamer profile, the application, sessions, and reports.
 - Sign-up and sign-in are one step. The home page shows one **Sign in** button. The sign-in dialog tells the user to be 16 or older and links the Terms and the Privacy Policy.
 - `/privacy` and `/terms` show the Privacy Policy and the Terms of Service. A footer on each page links to them, the contact address, and the reporting rules. The overlay has no footer.
 - Newest uses stable cursor pagination. Top uses likes minus dislikes. New votes can move items between Top pages. Refresh to see the new order.
 - `/@handle/overlay` shows the latest active poll. Add `?poll=<id>` to select one poll. The overlay is public and cannot submit votes.
-- Schedule shows an empty state until the app supports scheduling. It does not imply an event exists.
+- In **Overlay control**, the owner makes a private overlay link for the OBS browser source. The link adds a secret `key` to the overlay URL. With the key, the overlay always gets a place in the live room, also when the room is full. The page shows the full link only once, when the owner makes it. The server keeps only a SHA-256 hash of the key. If the owner loses the link, **Regenerate link** makes a new key and stops the old key. Then the owner must put the new link in OBS.
+- The page owner schedules streams on the **Schedule** tab, as one-off or weekly streams. Each stream has a platform, a link, and optional linked topics. The owner can edit, cancel, or delete a stream and add a replay link. Viewers see a feed of upcoming and past streams, plus day, week, and month views on desktop, in their local time zone.
+- `/@handle/schedule.ics` serves the schedule as a calendar feed. Calendar apps can subscribe to it.
+- The owner edits up to 8 cards on the **Community** tab and up to 4 support links in **Edit your page**. Support links open the provider site. StreamBullets takes no payments.
+- The official `@streambullets` page is the Ideas board. Signed-in users suggest improvements and report bugs there, and everyone can vote. **Suggest an improvement** in the footer and the account menu opens it.
+- The interface is in 11 languages: English, Spanish, Brazilian Portuguese, German, Polish, Ukrainian, Russian, Japanese, Simplified Chinese, French, and Hindi. The page language comes from the first of these sources that has a value: the account setting, the `sb_locale` cookie, and the browser `Accept-Language` header. If none has a value, the language is English. The catalogs are in `app/i18n/`. Add each new message id to all 11 files: `tests/i18n.test.ts` fails when a catalog is missing an id, a plural form, or a `{placeholder}`. The footer and the account menu open the language list. Posts by users stay in their own language. The Privacy Policy and the Terms stay in English. A translated note says that only the English text has legal effect.
+- **Accessibility & display** is in the footer and the account menu. It sets colour-vision palettes, high contrast, text size, a readable font, link underlines, and motion. It also sets the Mash Battle options: screen-reader score updates, keyboard shortcuts, and assisted tapping. Signed-in accounts keep the settings. A cookie keeps them for each browser. An inline script with the nonce of the response applies them before the first paint.
+- `/ai` describes the policy for AI agents. Agents can read public pages but cannot post, vote, or sign up. The page has an unverified like and dislike counter at `POST /api/ai-interest`. The counter allows one vote per visitor per day and keeps votes for 30 days. `/robots.txt` and `/llms.txt` give the same policy. Pages carry JSON-LD for the site, streamers, upcoming streams, and open topics.
 
 ## Local use
 
@@ -54,9 +61,9 @@ pnpm dev
 
 Open `http://localhost:5173`. The checked-in D1 ID is an explicit local placeholder. Local D1, R2, and Durable Object state stays under `.wrangler/`.
 
-Add Google or Twitch credentials to `.dev.vars` to test sign-in. A provider needs both its client ID and secret. An incomplete pair fails closed. With no providers configured, public pages work but sign-in is unavailable. Do not commit `.dev.vars` or database exports.
+Add Google, TikTok, Twitch or Instagram credentials to `.dev.vars` to test sign-in. A provider needs both values of its credential pair. An incomplete pair fails closed. With no providers configured, public pages work but sign-in is unavailable. Do not commit `.dev.vars` or database exports.
 
-The production site shows no sign-in buttons until you set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, or `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`, as Worker secrets.
+The production site shows no sign-in buttons until you set at least one credential pair as Worker secrets. The sign-in dialog shows a button for each provider with a complete pair.
 
 | Setting | Purpose |
 | --- | --- |
@@ -64,15 +71,42 @@ The production site shows no sign-in buttons until you set `GOOGLE_CLIENT_ID` an
 | `BETTER_AUTH_SECRET` | Random secret of at least 32 characters. Keep it stable across deployments. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Credentials for the Google OAuth application. |
 | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | Credentials for the Twitch OAuth application. |
+| `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | Credentials for the TikTok application that uses Login Kit. TikTok gives no email address. |
+| `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Credentials for an Instagram API with Instagram Login application. Only creator and business accounts can sign in. Meta must review the application first. Instagram gives no email address. |
 | `ADMIN_EMAILS` | Email addresses of administrators. Use commas or spaces between the addresses. Letter case is not important. |
+| `AI_INTEREST_SALT` | Random secret of at least 16 characters for the AI interest counter. The counter stores a keyed hash of the IP address and the day, never the IP address. Without this secret the counter is off and `/ai` hides its buttons. Store it as a Worker secret. |
+| `ADMIN_STEP_UP` | Security-key check for Admin: `off`, `report` or `enforce`. If you leave it empty, the value is `report`. An unknown value acts as `enforce`. See [Admin security keys](#admin-security-keys). |
+| `NOTIFY_EMAIL`, `NOTIFY_FROM` | Optional. `NOTIFY_EMAIL` is a `send_email` binding and `NOTIFY_FROM` is the sender address. When an administrator freezes, suspends or restores a page and selects "Notify the owner", the app sends the owner an email. The app sends email only when you set both. The owner always sees a notice on the page, in the account menu and in Edit your page. |
 
-An administrator is an account with a verified email address in `ADMIN_EMAILS`. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
+An administrator is an account with a verified email address in `ADMIN_EMAILS`. TikTok and Instagram accounts get an unverified placeholder address, so they cannot be administrators. If `ADMIN_EMAILS` is empty, nobody can approve applications or create new streamer profiles.
 
 For local testing, add `ADMIN_EMAILS` to `.dev.vars`. For production, store it as a Worker secret. Use `pnpm exec wrangler secret put ADMIN_EMAILS --env production` or the Cloudflare dashboard. Do not use a plain variable in the dashboard. Each deployment replaces plain variables with the `vars` in `wrangler.jsonc`.
+
+### Admin security keys
+
+Admin uses FIDO2 security keys (for example two YubiKeys) as a second check. A key check marks only the current session. It stays valid for 15 minutes. Freezing or suspending a page and adding or removing a key need a key check from the last 2 minutes.
+
+`ADMIN_STEP_UP` sets the policy:
+
+- `report` (the default): Admin opens without a key. When two keys exist, Admin asks for a key first, and the administrator can continue without one. The server logs each admin API call that has no recent key check.
+- `enforce`: Admin and each admin endpoint of the API refuse access until the account has two keys. This session must also pass a key check in the last 15 minutes.
+- `off`: no key check. Use it only for local development.
+
+The default does not lock out the owner before the keys exist. Set it up in this order:
+
+1. Deploy with `ADMIN_STEP_UP` empty or set to `report`.
+2. Sign out. Then sign in with the administrator account. You must add the first key within 5 minutes of that sign-in.
+3. Open `/admin?view=keys`. Add the first key. Then add the backup key. Admin asks you to touch each key.
+4. Sign in on a second session and confirm that Admin asks for a key and accepts each key.
+5. Set `ADMIN_STEP_UP` to `enforce` as a plain variable in `env.production.vars`, or as a Worker secret, and deploy.
+
+Keys work only on the `APP_ORIGIN` host name, because the WebAuthn relying party ID is that host name. A key from `localhost` does not work in production. To recover after you lose every key, follow the operator steps in `SECURITY.md`.
 
 Register these exact callback URLs with each enabled provider:
 
 - `<APP_ORIGIN>/api/auth/callback/google`
+- `<APP_ORIGIN>/api/auth/callback/tiktok`
+- `<APP_ORIGIN>/api/auth/callback/instagram`
 - `<APP_ORIGIN>/api/auth/callback/twitch`
 
 Use a separate provider application for local testing where supported. Twitch accounts must have an email address. The app does not automatically link provider accounts with matching email addresses.
@@ -153,7 +187,7 @@ Migrations `0000`–`0002` and their legacy poll tables remain intact. The platf
 
 - All changes need a database session and an HTTP call from the exact same origin. Forwarded Sites identity headers grant no access. Production cookies use HTTPS, HTTP-only access, and host scope.
 - Owner checks and tenant constraints run on the server. Atomic database writes enforce vote uniqueness and the poll deadline. D1 is the source of truth.
-- WebSockets expose public poll data only. They do not accept application mutations. Each room accepts at most 200 connections, with at most 10 per trusted client IP. It returns at most 50 polls, including the newest active poll. Connections have a fixed one-hour lease. Active rooms resync every 15 seconds to recover a missed notification. Reconnect also loads current state. Disconnected views refresh over HTTP every 30 seconds and keep retrying WebSockets automatically.
+- WebSockets expose public poll data only. They do not accept application mutations. Each room accepts at most 200 connections, with at most 10 per client network (an IPv4 address or an IPv6 /64). Signed-out connections fill at most 100 of them. The page owner always gets in. This includes an OBS overlay that uses the private overlay link. The Worker compares the hash of its key with the stored hash in constant time. Only then does the Worker tell the room that the connection belongs to the owner. A wrong or old key gets a normal signed-out place. A new key closes the connections that use the old key. A frozen page keeps its overlay, read-only. A suspended page refuses its overlay. When the room is full, a signed-in viewer takes the place of the oldest signed-out connection. It returns at most 50 polls, including the newest active poll. Connections have a fixed one-hour lease. Clients ping every 20 seconds. The room closes a connection with no ping in 60 seconds. A suspended page closes its open connections. Mash Battle taps wait in memory for up to one second. Then the room writes them to D1. If the room stops in that second, it loses those taps. Active rooms resync every 15 seconds to recover a missed notification. Reconnect also loads current state. Disconnected views refresh over HTTP every 30 seconds and keep retrying WebSockets automatically.
 - The limiter for HTTP requests is approximate and local to a Cloudflare location. D1 mutation limits apply across targets for each account. These limits do not prevent coordinated abuse by many accounts.
 - A page can contain up to 1,000 topics and polls. A discussion can contain up to 10,000 comments. The app limits the bodies of HTTP requests and page sizes.
 - Uploads accept PNG, JPEG, and WebP only, up to 5 MB, 16 million pixels, and 8,192 pixels per side. Each account has one avatar and each streamer has one background. Uploaded images are public through their application URLs. The app keeps image metadata.
@@ -175,7 +209,9 @@ The Privacy Policy and the Terms of Service get the details of the operator from
 - `operatorCountry`: the country of residence of the operator. The Terms also use it as the governing law.
 - `policyEffectiveDate`: the date that the policy starts.
 
-`contactEmail` and `minimumAge` have production values. Make sure that the contact mailbox receives email. While a placeholder remains, both pages show a draft notice at the top. Get a legal review of the text before launch. Update the pages when you add a data processor, a cookie, or a new use of data.
+`contactEmail` and `minimumAge` have production values. Make sure that the contact mailbox receives email. While a placeholder remains, both pages show a draft notice at the top.
+
+Get a legal review of the text before launch. Update the pages when you add a data processor, a cookie, or a new use of data. The legal text is English only. Other languages show a translated note that only the English version has legal effect.
 
 Make the `Verify application` check mandatory in the repository ruleset. Keep squash-only merges and branch deletion in the repository settings. The workflow cannot enforce those settings itself.
 

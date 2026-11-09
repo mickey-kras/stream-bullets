@@ -7,15 +7,15 @@ import {
   getOverlaySnapshot,
   getOwnStreamer,
   getStreamer,
-  listComments,
   listEntries,
   listStreamers,
-  mutateComment,
   mutateEntry,
   saveStreamer,
 } from "../app/server/data.server";
+import { listComments, mutateComment } from "../app/server/comments.server";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
+import { startOfQuotaWindow } from "./helpers/quota";
 
 let database: TestDatabase;
 let env: AppEnv;
@@ -154,6 +154,7 @@ describe("topics and polls", (): void => {
       "endsAt",
       "id",
       "kind",
+      "mash",
       "options",
       "revealed",
       "title",
@@ -166,6 +167,35 @@ describe("topics and polls", (): void => {
     const pinned = await getOverlaySnapshot(env, streamer.id, activeId);
     expect(pinned.polls).toMatchObject([{ id: activeId, counts: [1, 0], revealed: true }]);
     expect((await getOverlaySnapshot(env, otherStreamer.id, activeId)).polls).toEqual([]);
+  });
+
+  it("skips a finished Mash Battle in automatic overlay selection, and keeps a running one", async (): Promise<void> => {
+    const openId = await seedEntry("choice");
+    const battleId = await seedEntry("choice");
+    const now = Date.now();
+    await env.DB.batch([
+      env.DB.prepare("UPDATE entries SET created_at=1 WHERE id=?").bind(openId),
+      env.DB.prepare("UPDATE entries SET created_at=2 WHERE id=?").bind(battleId),
+      // Finished battles keep ends_at=NULL and revealed=0 on the entry; only the battle row says it is over.
+      env.DB.prepare(
+        "INSERT INTO entry_mash (entry_id,duration_s,phase,starts_at,ends_at,winner) VALUES (?,30,'finished',?,?,0)",
+      ).bind(battleId, now - 60_000, now - 30_000),
+    ]);
+    const auto = async (): Promise<string[]> =>
+      (await getOverlaySnapshot(env, streamer.id, null)).polls.map((poll): string => poll.id);
+    expect(await auto()).toEqual([openId]);
+    // Past its end but not yet marked finished counts as finished too.
+    await env.DB.prepare("UPDATE entry_mash SET phase='live' WHERE entry_id=?").bind(battleId).run();
+    expect(await auto()).toEqual([openId]);
+    for (const [phase, startsAt] of [
+      ["live", now - 5_000],
+      ["countdown", now + 3_000],
+    ] as const) {
+      await env.DB.prepare("UPDATE entry_mash SET phase=?, starts_at=?, ends_at=? WHERE entry_id=?")
+        .bind(phase, startsAt, startsAt + 30_000, battleId)
+        .run();
+      expect(await auto()).toEqual([battleId]);
+    }
   });
 
   it("excludes expired polls and topics from automatic overlay selection", async (): Promise<void> => {
@@ -342,7 +372,7 @@ describe("topics and polls", (): void => {
 });
 
 describe("discussion", (): void => {
-  it("enforces reply scope and preserves replies when an authorized author removes a parent", async (): Promise<void> => {
+  it("enforces reply scope and keeps the thread when an authorized author removes a parent", async (): Promise<void> => {
     const id = await seedEntry();
     const foreignEntry = await seedEntry();
     const foreignParent = await seedComment(foreignEntry);
@@ -360,11 +390,63 @@ describe("discussion", (): void => {
       status: 403,
     });
     await mutateComment(env, "viewer", { action: "delete", id: parent.id });
+    // The parent becomes a "Comment removed" placeholder: no author, text or likes, and the reply stays under it.
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toMatchObject([
-      { id: reply.id, parentId: null, text: "Reply" },
+      { id: reply.id, parentId: parent.id, text: "Reply", removed: false },
+      { id: parent.id, parentId: null, text: "", author: "", authorId: "", avatar: null, likes: 0, removed: true },
     ]);
+    expect(await env.DB.prepare("SELECT text FROM entry_comments WHERE id=?").bind(parent.id).first("text")).toBe(
+      "[removed]",
+    );
+    expect((await getEntry(env, id, null))?.comments).toBe(1);
+    await expect(mutateComment(env, "viewer", { action: "delete", id: parent.id })).rejects.toMatchObject({
+      status: 404,
+    });
+    // Removing the last reply removes the placeholder too.
     await mutateComment(env, "owner", { action: "delete", id: reply.id });
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toEqual([]);
+  });
+
+  it("removes every placeholder above the last reply, at any depth", async (): Promise<void> => {
+    const id = await seedEntry();
+    const a = await seedComment(id);
+    const b = await seedComment(id, "other", a);
+    const c = await seedComment(id, "viewer", b);
+    const kept = await seedComment(id, "other");
+    const sibling = await seedComment(id, "viewer", kept);
+    await mutateComment(env, "viewer", { action: "delete", id: a });
+    await mutateComment(env, "other", { action: "delete", id: b });
+    await mutateComment(env, "other", { action: "delete", id: kept });
+    expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toHaveLength(5);
+    await mutateComment(env, "viewer", { action: "delete", id: c });
+    const left = await env.DB.prepare("SELECT id FROM entry_comments WHERE entry_id=? ORDER BY id").bind(id).all();
+    expect(left.results).toEqual([{ id: kept }, { id: sibling }].sort((x, y) => x.id.localeCompare(y.id)));
+  });
+
+  it("carries the author's preset picture on topics and comments", async (): Promise<void> => {
+    await env.DB.prepare("UPDATE user SET image=NULL, avatar_preset=17 WHERE id='viewer'").run();
+    const topic = await mutateEntry(env, "viewer", streamer.id, {
+      action: "create",
+      kind: "topic",
+      title: "Preset pictures",
+      body: "Do they show?",
+      category: "Creative",
+    });
+    const { id } = await mutateEntry(env, "viewer", streamer.id, { action: "comment", id: topic.id, text: "Hi" });
+    await mutateEntry(env, "other", streamer.id, { action: "comment", id: topic.id, text: "Reply", parentId: id });
+    expect(await getEntry(env, topic.id, null)).toMatchObject({ avatar: null, avatarPreset: 17 });
+    const board = await listEntries(env, streamer, null, { kind: "topics", sort: "newest", query: "", cursor: null });
+    expect(board.entries.find((entry) => entry.id === topic.id)).toMatchObject({ avatarPreset: 17 });
+    expect((await listComments(env, topic.id, null, { sort: "newest", cursor: null })).comments).toMatchObject([
+      { author: "other", avatarPreset: null },
+      { id, author: "viewer", avatar: null, avatarPreset: 17 },
+    ]);
+    const threads = await listComments(env, topic.id, null, { sort: "newest", cursor: null, view: "thread" });
+    expect(threads.comments).toMatchObject([{ id, avatarPreset: 17, replies: [{ author: "other", avatarPreset: null }] }]);
+    await mutateComment(env, "viewer", { action: "delete", id });
+    expect((await listComments(env, topic.id, null, { sort: "newest", cursor: null })).comments).toContainEqual(
+      expect.objectContaining({ id, removed: true, avatarPreset: null }),
+    );
   });
 
   it("makes comment likes idempotent and strips provider avatar URLs", async (): Promise<void> => {
@@ -552,6 +634,7 @@ describe("bounded reads and writes", (): void => {
   });
 
   it("shares mutation quotas across targets and rejects concurrent excess writes atomically", async (): Promise<void> => {
+    await startOfQuotaWindow(env.DB);
     await env.DB.prepare(
       "INSERT INTO app_rate_limits (key,count,window_start) VALUES ('write:viewer',59,CAST(strftime('%s','now') AS INTEGER)/60*60000)",
     ).run();

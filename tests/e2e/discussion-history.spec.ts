@@ -4,6 +4,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { expect, test, type BrowserContext } from "@playwright/test";
 import { z } from "zod";
+import { clientAddress } from "./client-ips";
 
 const origin = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -16,7 +17,8 @@ async function seedHistory(userId: string): Promise<{ entryId: string; remotePar
   const statements: string[] = [
     `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${entryId}',id,'${userId}','topic','Historical discussion','A discussion with more than one page.','Just chatting',${now} FROM streamers WHERE handle='test_host';`,
   ];
-  for (let index = 1; index <= 102; index += 1) {
+  // 110 top-level comments: the threaded view pages them 100 at a time.
+  for (let index = 1; index <= 112; index += 1) {
     const id: string = index === 1 ? parentId : index === 3 ? remoteParentId : randomUUID();
     const parent: string = index === 2 ? `'${parentId}'` : index === 4 ? `'${remoteParentId}'` : "NULL";
     statements.push(
@@ -55,11 +57,11 @@ test("historical comment mutations stay visible and accurate after refresh", asy
   const { entryId, remoteParentId } = await seedHistory(viewer.id);
   const context: BrowserContext = await browser.newContext({
     baseURL: origin,
-    extraHTTPHeaders: { "CF-Connecting-IP": "192.0.2.75" },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("discussion-history", 75) },
   });
   const ownerContext: BrowserContext = await browser.newContext({
     baseURL: origin,
-    extraHTTPHeaders: { "CF-Connecting-IP": "192.0.2.76" },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("discussion-history", 76) },
   });
   await context.addCookies([
     {
@@ -105,8 +107,10 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     await page.getByRole("dialog").getByRole("button", { name: "Delete comment", exact: true }).click();
     await expect(oldest).toHaveCount(0);
     await expect(reply).toBeVisible();
-    await expect(reply.locator(".replying")).toHaveCount(0);
-    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    // R2: the deleted parent stays as a "Comment removed" placeholder, so the reply keeps its thread.
+    await expect(page.getByRole("article", { name: "Comment removed" })).toHaveCount(1);
+    await expect(reply.locator(".replying")).toContainText("a removed comment");
+    await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
     await expect(page.getByText("Loading comments…", { exact: true })).toHaveCount(0);
     await expect(oldest).toHaveCount(0);
     await expect(reply).toBeVisible();
@@ -116,7 +120,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
       data: { action: "comment", id: entryId, text: "A newer comment arrives." },
     });
     expect(added.ok()).toBe(true);
-    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
     await expect(page.getByText("A newer comment arrives.", { exact: true })).toBeVisible();
     await expect(reply).toHaveCount(1);
     await expect(oldest).toHaveCount(0);
@@ -131,7 +135,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
       data: { action: "like", id: remoteParentId, liked: true },
     });
     expect(remoteLike.ok()).toBe(true);
-    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
     await expect(remoteParent.getByRole("button", { name: "Like comment by viewer" })).toHaveText("Like 1");
     await expect(remoteParent.getByRole("button", { name: "Like comment by viewer" })).toHaveAttribute(
       "aria-pressed",
@@ -144,11 +148,14 @@ test("historical comment mutations stay visible and accurate after refresh", asy
       data: { action: "delete", id: remoteParentId },
     });
     expect(remoteDelete.ok()).toBe(true);
-    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
     await expect(remoteParent).toHaveCount(0);
     await expect(remoteReply).toBeVisible();
-    await expect(remoteReply.locator(".replying")).toHaveCount(0);
+    // R2: a deleted comment with replies stays as a "Comment removed" placeholder, so the reply keeps its parent.
+    await expect(remoteReply.locator(".replying")).toContainText("a removed comment");
     await expect(reply).toBeVisible();
+    // The placeholder is still a valid reply target, so the open reply stays until the viewer cancels it.
+    await page.getByRole("button", { name: "Cancel reply", exact: true }).click();
     await expect(page.getByRole("button", { name: "Cancel reply", exact: true })).toHaveCount(0);
     await expect(page.getByRole("textbox", { name: "Write a comment" })).toHaveValue("Keep this unsent draft.");
     await page.getByRole("button", { name: "Post", exact: true }).click();
