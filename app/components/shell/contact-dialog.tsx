@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
+import { copyText } from "../../lib/clipboard";
 import { contactEmails } from "../../legal";
 import { paths } from "../../lib/shell";
 import { Icon } from "../ui/icon";
@@ -41,13 +42,12 @@ export function ContactDialog({
   }, [notice]);
 
   async function copy(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(contactEmails.support);
+    if (await copyText(contactEmails.support)) {
       setNotice(t("contact.copied"));
-    } catch {
-      selectText(address.current);
-      setNotice(t("contact.copyFallback"));
+      return;
     }
+    selectText(address.current);
+    setNotice(t("contact.copyFallback"));
   }
 
   return (

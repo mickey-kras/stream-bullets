@@ -1,10 +1,9 @@
-import type { PageAction } from "../admin-types";
+import type { PageAction, StreamerStatus } from "../types";
 import type { AppEnv } from "../env";
 import { DEFAULT_LOCALE, isLocale, t, type MessageId } from "../i18n";
 import { withLocale } from "../i18n/server";
 import { contactEmails } from "../legal";
 import { ownerNotice } from "../lib/moderation";
-import type { StreamerStatus } from "../types";
 import { isPlaceholderEmail } from "./validation";
 
 /**

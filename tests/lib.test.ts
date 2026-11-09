@@ -14,12 +14,12 @@ import {
   withDefaults,
 } from "../app/lib/prefs";
 import { effectiveStatus, expandSeries, upcomingRows } from "../app/lib/schedule";
-import { paths, renamedPath, shellFromMatches, shellRole, useShell, type ShellData } from "../app/lib/shell";
+import { paths, renamedPath, shellFromMatches, useShell, type ShellData } from "../app/lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, siteJsonLd } from "../app/lib/structured-data";
 import { supportLabel } from "../app/lib/support";
-import { countComments, replyParent, visibleReplies } from "../app/lib/threads";
+import { replyParent, visibleReplies } from "../app/lib/threads";
 import { usePrefs } from "../app/lib/use-prefs";
-import { formatDate, isValidZone, parseDate, startOfDay } from "../app/lib/zoned";
+import { formatDate, isValidZone, parseDate } from "../app/lib/zoned";
 import type { Comment, CommentThread, StreamEvent } from "../app/types";
 
 const origin = "https://streambullets.test";
@@ -160,21 +160,6 @@ describe("shell data", (): void => {
     expect(shellFromMatches([{ id: "routes/home", loaderData: data }])).toBeNull();
   });
 
-  it("gives the account menu a role: signed out, viewer, page owner or admin", (): void => {
-    const viewer = { id: "u1" } as ShellData["viewer"];
-    const ownStreamer = {
-      handle: "zed",
-      name: "Zed",
-      status: "active" as const,
-      statusReason: null,
-      statusChangedAt: null,
-    };
-    expect(shellRole(shell())).toBe("signed-out");
-    expect(shellRole(shell({ viewer }))).toBe("viewer");
-    expect(shellRole(shell({ viewer, ownStreamer }))).toBe("owner");
-    expect(shellRole(shell({ viewer, ownStreamer, admin: true }))).toBe("admin");
-    expect(shellRole(shell({ admin: true }))).toBe("signed-out");
-  });
 
   it("links to a streamer page by handle", (): void => {
     expect(paths.streamer("zed_page")).toBe("/@zed_page");
@@ -299,15 +284,6 @@ describe("comment threads", (): void => {
   const comment = (id: string, extra: Partial<Comment> = {}): Comment =>
     ({ id, createdAt: 0, parentId: null, removed: false, likes: 0, ...extra }) as Comment;
 
-  it("counts comments and replies but no removed placeholders", (): void => {
-    const threads = [
-      { ...comment("a"), replies: [comment("a1"), comment("a2", { removed: true })] },
-      { ...comment("b", { removed: true }), replies: [comment("b1")] },
-      { ...comment("c"), replies: [] },
-    ] as CommentThread[];
-    expect(countComments(threads)).toBe(4);
-    expect(countComments([])).toBe(0);
-  });
 
   it("shows two replies until the thread is expanded", (): void => {
     const replies = [comment("r3", { createdAt: 3 }), comment("r1", { createdAt: 1 }), comment("r2", { createdAt: 2 })];
@@ -351,13 +327,6 @@ describe("schedule and time helpers", (): void => {
     expect(isValidZone(`Europe/${"x".repeat(60)}`)).toBe(false);
   });
 
-  it("finds local midnight in a zone, also on a daylight-saving day", (): void => {
-    expect(startOfDay(Date.UTC(2026, 10, 7, 15, 30), "Europe/Berlin")).toBe(Date.UTC(2026, 10, 6, 23));
-    // Berlin moves to summer time at 02:00 on 29 March 2026; midnight is still UTC+1.
-    expect(startOfDay(Date.UTC(2026, 2, 29, 20), "Europe/Berlin")).toBe(Date.UTC(2026, 2, 28, 23));
-    // New York is back on standard time (UTC-5) after 1 November.
-    expect(startOfDay(Date.UTC(2026, 10, 7, 2), "America/New_York")).toBe(Date.UTC(2026, 10, 6, 5));
-  });
 
   it("formats and parses calendar days, and refuses days that do not exist", (): void => {
     expect(formatDate({ year: 26, month: 3, day: 9 })).toBe("0026-03-09");

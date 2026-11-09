@@ -4,7 +4,7 @@ import { t } from "../../i18n";
 import { personPicture, type PictureSource } from "../../lib/avatars";
 import { renamedPath } from "../../lib/shell";
 import type { Streamer, SupportSettings, Viewer } from "../../types";
-import { errorMessage } from "../api";
+import { errorMessage, sendJson } from "../api";
 import { OwnerNotice } from "../streamer/page-banner";
 import { SupportFields, supportChanged, supportDraftError, supportPayload, useSupportDraft } from "../support/support";
 import { formatDate } from "../waitlist";
@@ -15,7 +15,7 @@ import { Sheet } from "../ui/sheet";
 import { useToast } from "../ui/toast";
 import { Cropper, type CropperHandle } from "./cropper";
 import { useDiscardGuard } from "./discard";
-import { sendJson, uploadImage } from "./me";
+import { uploadImage } from "./me";
 import { UploadField } from "./profile-dialog";
 import { Req, RequiredNote } from "../ui/required";
 

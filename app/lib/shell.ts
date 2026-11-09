@@ -25,8 +25,6 @@ export interface ShellData {
   origin: string;
 }
 
-export type ShellRole = "signed-out" | "viewer" | "owner" | "admin";
-
 /** Shell data from the root loader. Falls back to signed out where the root loader did not run (some 404s). */
 export function useShell(): ShellData {
   return (
@@ -48,12 +46,6 @@ export function shellFromMatches(
 ): ShellData | null {
   const root = matches.find((match) => match?.id === "root");
   return (root?.loaderData as ShellData | undefined) ?? null;
-}
-
-export function shellRole(shell: ShellData): ShellRole {
-  if (!shell.viewer) return "signed-out";
-  if (shell.admin) return "admin";
-  return shell.ownStreamer ? "owner" : "viewer";
 }
 
 /** App paths the shell links to. Account settings are dialogs (`?dialog=profile`); /settings redirects there. */
