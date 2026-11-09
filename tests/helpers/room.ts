@@ -7,9 +7,9 @@ import { vi } from "vitest";
  */
 
 /**
- * `waitUntil` for code under test that tells the room something after the response. It cannot come from
- * ./workers: vitest.config.ts aliases `cloudflare:workers` to that file, so a test that mocks the module with this
- * one would import itself.
+ * `waitUntil` for code under test that tells the room something after the response. It cannot come from the
+ * vitest.workers-stub.config.ts stub: vitest.config.ts aliases `cloudflare:workers` to that file, so a test that
+ * mocks the module with this one would import itself.
  */
 export function waitUntil(promise: Promise<unknown>): void {
   void promise;
