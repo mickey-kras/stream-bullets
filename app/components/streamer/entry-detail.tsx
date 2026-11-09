@@ -33,7 +33,8 @@ export function EntryActions({
   // The entry reported from here: the panel stays mounted while the viewer selects other entries.
   const [reportedId, setReportedId] = useState<string | null>(null);
   if (!viewer) return null;
-  const noun = entry.status ? "idea" : entry.kind === "topic" ? "topic" : "poll";
+  let noun: "idea" | "topic" | "poll" = entry.kind === "topic" ? "topic" : "poll";
+  if (entry.status) noun = "idea";
   const author = entry.authorId === viewer.id;
   const canDelete =
     moderator || (writable && (owner || (author && (entry.status === null || entry.status === "review"))));

@@ -15,7 +15,7 @@ export type Locale = (typeof LOCALES)[number];
 export type MessageVars = Readonly<Record<string, string | number>>;
 export type Catalog = Readonly<Partial<Record<string, string>>>;
 
-export { LOCALES };
+export { LOCALES } from "../../db/enums";
 export const DEFAULT_LOCALE: Locale = "en";
 
 /** Each language's own name, for the language switcher. */

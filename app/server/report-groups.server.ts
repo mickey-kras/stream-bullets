@@ -118,8 +118,9 @@ export async function listReportGroups(
   await requireAdmin(env, adminId);
   const filter = statusFilter(value.status);
   const cursor = value.cursor ? GROUP_CURSOR.exec(value.cursor) : null;
-  const pattern = `%${value.query.toLowerCase().replaceAll(/[\\%_]/gu, String.raw`\$&`)}%`;
-  const { results: rows } = await env.DB.prepare(`
+  const escapedQuery: string = value.query.toLowerCase().replaceAll(/[\\%_]/gu, String.raw`\$&`);
+  const pattern: string = `%${escapedQuery}%`;
+  const { results: rows } = await env.DB.prepare(String.raw`
     SELECT g.*, ${streamerColumns} FROM (
       SELECT r.streamer_id,
         sum(CASE WHEN ${filter} THEN 1 ELSE 0 END) AS reports,
@@ -130,7 +131,7 @@ export async function listReportGroups(
       FROM content_reports r GROUP BY r.streamer_id
     ) g LEFT JOIN streamers s ON s.id = g.streamer_id
     WHERE g.reports > 0
-      AND (?2 = '' OR lower(s.name) LIKE ?3 ESCAPE '\\' OR s.handle LIKE ?3 ESCAPE '\\')
+      AND (?2 = '' OR lower(s.name) LIKE ?3 ESCAPE '\' OR s.handle LIKE ?3 ESCAPE '\')
       AND (?4 IS NULL OR (g.open, g.newest, g.streamer_id) < (?4, ?5, ?6))
     ORDER BY g.open DESC, g.newest DESC, g.streamer_id DESC LIMIT ?7
   `)

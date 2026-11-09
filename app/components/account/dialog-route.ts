@@ -18,7 +18,8 @@ export function dialogHref(
   if (name) params.set("dialog", name);
   else params.delete("dialog");
   const search: string = params.toString();
-  return `${location.pathname}${search ? `?${search}` : ""}${location.hash}`;
+  const query: string = search ? "?" + search : "";
+  return `${location.pathname}${query}${location.hash}`;
 }
 
 /** Marks a dialog opened from inside the app, so closing it can step back instead of adding history. */
@@ -37,8 +38,8 @@ export function useAccountDialog(): { name: AccountDialogName | null; close: () 
   const name: AccountDialogName | null = isAccountDialog(value) ? value : null;
   const fromApp: boolean = Boolean((location.state as DialogState | null)?.dialogFrom);
   const close = useCallback((): void => {
-    if (fromApp) void navigate(-1);
-    else void navigate(dialogHref(location, null), { replace: true, preventScrollReset: true });
+    if (fromApp) navigate(-1);
+    else navigate(dialogHref(location, null), { replace: true, preventScrollReset: true });
     // The dialog unmounts with the route change, so focus can land on the page body. The account dialogs open
     // from the account menu, so give focus back to its avatar button then.
     globalThis.setTimeout(() => {

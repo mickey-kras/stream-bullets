@@ -43,15 +43,14 @@ export function OfficialSheet({
     }
   }
 
+  const title: string = t(official ? "admin.pages.officialTitle" : "admin.pages.clearOfficialTitle", {
+    handle: page.handle,
+  });
   return (
     <Sheet
       open
       onOpenChange={(open) => !open && onClose()}
-      title={
-        stepUp
-          ? t("keys.confirmTitle")
-          : t(official ? "admin.pages.officialTitle" : "admin.pages.clearOfficialTitle", { handle: page.handle })
-      }
+      title={stepUp ? t("keys.confirmTitle") : title}
       name="official"
       actions={
         stepUp ? undefined : (

@@ -11,6 +11,9 @@ export function MashFields(): ReactNode {
   const [sides, setSides] = useState<number[]>([0, 1]);
   const [next, setNext] = useState<number>(2);
   const durationLabel: string = useId();
+  function removeSide(key: number): void {
+    setSides((current: number[]) => current.filter((item: number) => item !== key));
+  }
   return (
     <>
       <fieldset className="mash-fields">
@@ -30,7 +33,7 @@ export function MashFields(): ReactNode {
                   label={t("mash.create.removeSide", { n: index + 1 })}
                   icon="close"
                   iconSize={18}
-                  onClick={() => setSides((current: number[]) => current.filter((item: number) => item !== key))}
+                  onClick={() => removeSide(key)}
                 />
               )}
             </li>

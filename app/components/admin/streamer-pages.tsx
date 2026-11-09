@@ -23,7 +23,8 @@ export const pageFilters: { value: PageFilter; label: "admin.pages.all" | `admin
 
 /** Active, Frozen or Suspended, as a badge. */
 export function StatusBadge({ status }: Readonly<{ status: StreamerStatus }>): ReactNode {
-  const icon = status === "suspended" ? "eye-off" : status === "frozen" ? "lock" : "success";
+  const icons = { suspended: "eye-off", frozen: "lock", active: "success" } as const;
+  const icon = icons[status];
   return (
     <span className={`mod-badge ${status}`}>
       <Icon name={icon} size={16} />

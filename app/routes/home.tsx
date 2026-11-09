@@ -34,7 +34,7 @@ export default function Home(): ReactNode {
   const openSign = useCallback(
     (index: number): void => {
       const intent: Intent | undefined = SIGN_INTENTS[index];
-      if (intent) void navigate(directoryHref(intent));
+      if (intent) navigate(directoryHref(intent));
     },
     [navigate],
   );

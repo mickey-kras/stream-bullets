@@ -42,8 +42,8 @@ export function LanguageDialog({ onClose }: Readonly<{ onClose: () => void }>): 
     setError("");
     try {
       await chooseLocale(locale, Boolean(shell.viewer));
-    } catch (failure: unknown) {
-      setError(errorMessage(failure));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
       setBusy(false);
     }
   }

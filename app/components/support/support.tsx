@@ -169,7 +169,7 @@ export function supportPayload(draft: SupportDraft): {
 
 /** The first problem in a draft, or an empty string. The server checks the same rules again. */
 export function supportDraftError(draft: SupportDraft): string {
-  return draft.rows.map(rowError).find(Boolean) ?? "";
+  return draft.rows.map((row: Row, index: number) => rowError(row, index)).find(Boolean) ?? "";
 }
 
 /** Whether a draft differs from the saved settings. */

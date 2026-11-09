@@ -449,7 +449,11 @@ export function OverlayControl({
           </span>
         </p>
       )}
-      <div className={`ov-grid${state.instant ? " is-instant" : ""}${enlarged ? ` enlarge-${enlarged}` : ""}`}>
+      <div
+        className={["ov-grid", state.instant && "is-instant", enlarged && `enlarge-${enlarged}`]
+          .filter(Boolean)
+          .join(" ")}
+      >
         {!state.instant && (
           <Monitor
             kind="prev"

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode, type ComponentProps } from "react";
 import {
   Link,
   useLoaderData,
@@ -8,7 +8,7 @@ import {
   type LoaderFunctionArgs,
 } from "react-router";
 import { ENTRY_STATUSES } from "../../db/enums";
-import { appContext } from "../env";
+import { appContext, type AppEnv } from "../env";
 import { configuredProviders } from "../server/auth.server";
 import { requestViewer } from "../lib/shell.server";
 import { getEntry, getVisibleStreamer, listEntries } from "../server/data.server";
@@ -43,7 +43,16 @@ import { battleMarks, useBattleClock } from "../components/mash/use-mash";
 import { useScheduleClock } from "../components/use-clock";
 import { liveEventAt } from "../lib/schedule";
 import { PollsView, usePollsMainClass } from "../components/streamer/polls-view";
-import type { BoardSnapshot, Entry, EntryStatus, LiveSnapshot, SortOrder, StreamEvent } from "../types";
+import type {
+  BoardSnapshot,
+  Entry,
+  EntryStatus,
+  LiveSnapshot,
+  SortOrder,
+  StreamEvent,
+  Streamer,
+  Viewer,
+} from "../types";
 import type { Route } from "./+types/streamer";
 
 type View = StreamerView;
@@ -68,6 +77,58 @@ export function meta({ loaderData: data, matches }: Route.MetaArgs) {
   ];
 }
 
+function entryView(entry: Entry): View {
+  return entry.kind === "topic" ? "topics" : "polls";
+}
+
+function boardFilters(
+  params: URLSearchParams,
+  view: View,
+  official: boolean,
+): {
+  sort: SortOrder;
+  query: string;
+  status: EntryStatus | null;
+} {
+  const requestedSort: string | null = params.get("sort");
+  let sort: SortOrder = view === "polls" ? "newest" : "top";
+  if (requestedSort === "newest" || requestedSort === "top") sort = requestedSort;
+  const requestedStatus: string | null = params.get("status");
+  const status: EntryStatus | null =
+    official && ENTRY_STATUSES.includes(requestedStatus as EntryStatus) ? (requestedStatus as EntryStatus) : null;
+  return { sort, query: params.get("query") || "", status };
+}
+
+async function pageSchedule(
+  env: AppEnv,
+  streamer: Streamer,
+  params: URLSearchParams,
+  now: number,
+): Promise<{
+  events: StreamEvent[];
+  linkedEvent: StreamEvent | null;
+  mode: ScheduleMode;
+  openEvent: string | null;
+}> {
+  const range = defaultRange(now);
+  const requestedMode = params.get("mode") as ScheduleMode | null;
+  const events: StreamEvent[] = streamer.isOfficial
+    ? []
+    : await listEvents(env, streamer.id, range.from, range.to, now);
+  const openEvent: string | null = params.get("event");
+  // Shared links can open a stream outside the loaded range, but only on its own page.
+  const linkedEvent: StreamEvent | null =
+    openEvent && !streamer.isOfficial && !events.some((event: StreamEvent): boolean => event.id === openEvent)
+      ? await getEvent(env, openEvent, now, streamer.id)
+      : null;
+  return {
+    events,
+    linkedEvent,
+    openEvent,
+    mode: requestedMode && scheduleModes.includes(requestedMode) ? requestedMode : "feed",
+  };
+}
+
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
@@ -83,14 +144,8 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const entryId: string | null = url.searchParams.get("entry");
   const selected: Entry | null = entryId ? await getEntry(app.env, entryId, viewer?.id || null) : null;
   if (entryId && selected?.streamerId !== streamer.id) throw new Response("Conversation not found.", { status: 404 });
-  if (selected) view = selected.kind === "topic" ? "topics" : "polls";
-  const requestedSort: string | null = url.searchParams.get("sort");
-  let sort: SortOrder = view === "polls" ? "newest" : "top";
-  if (requestedSort === "newest" || requestedSort === "top") sort = requestedSort;
-  const query: string = url.searchParams.get("query") || "";
-  const requestedStatus = url.searchParams.get("status");
-  const status: EntryStatus | null =
-    official && ENTRY_STATUSES.includes(requestedStatus as EntryStatus) ? (requestedStatus as EntryStatus) : null;
+  if (selected) view = entryView(selected);
+  const { sort, query, status } = boardFilters(url.searchParams, view, official);
   const board: BoardSnapshot = await listEntries(app.env, streamer, viewer?.id || null, {
     kind: view === "polls" ? "polls" : "topics",
     sort,
@@ -100,15 +155,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   });
   const owner = viewer?.id === streamer.ownerId;
   const now = Date.now();
-  const range = defaultRange(now);
-  const requestedMode = url.searchParams.get("mode") as ScheduleMode | null;
-  const events: StreamEvent[] = official ? [] : await listEvents(app.env, streamer.id, range.from, range.to, now);
-  const openEvent: string | null = url.searchParams.get("event");
-  // A shared link can name a stream outside the loaded range; it opens when it belongs to this page.
-  const linkedEvent: StreamEvent | null =
-    openEvent && !official && !events.some((event: StreamEvent): boolean => event.id === openEvent)
-      ? await getEvent(app.env, openEvent, now, streamer.id)
-      : null;
+  const schedule = await pageSchedule(app.env, streamer, url.searchParams, now);
   return {
     board,
     selected,
@@ -119,11 +166,8 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
     sort,
     query,
     status,
-    events,
-    linkedEvent,
+    ...schedule,
     serverNow: now,
-    mode: requestedMode && scheduleModes.includes(requestedMode) ? requestedMode : "feed",
-    openEvent,
     cards: view === "community" && !official ? await listCards(app.env, streamer.id) : null,
     support: await getSupport(app.env, streamer.id),
     topicChoices: owner && view === "schedule" ? await listTopicChoices(app.env, streamer.id) : [],
@@ -148,6 +192,59 @@ function headerAction(view: View, owner: boolean, official: boolean): { dialog: 
   return null;
 }
 
+function floatingAction(view: View, owner: boolean, official: boolean): ReturnType<typeof headerAction> {
+  if (view === "topics" || (owner && (view === "polls" || view === "schedule")))
+    return headerAction(view, owner, official);
+  return null;
+}
+
+function useIntentDialog(intent: ReturnType<typeof readIntent>, viewer: Viewer | null, streamer: Streamer) {
+  const intentDialog = (): Dialog => {
+    if (intent !== "suggest" || !viewer || streamer.status !== "active") return null;
+    return streamer.isOfficial ? "idea" : "topic";
+  };
+  const [dialog, setDialog] = useState<Dialog>(intentDialog);
+  const [signIn, setSignIn] = useState<boolean>(intent === "suggest" && !viewer);
+  // The intent can also arrive by in-app navigation to this same page, which keeps the component mounted.
+  const [intentSeen, setIntentSeen] = useState<string | null>(intent);
+  if (intentSeen !== intent) {
+    setIntentSeen(intent);
+    if (intent === "suggest") {
+      setDialog(intentDialog());
+      setSignIn(!viewer);
+    }
+  }
+  return { dialog, setDialog, signIn, setSignIn };
+}
+
+function pageRole(owner: boolean, moderator: boolean): "owner" | "admin" | "viewer" {
+  if (owner) return "owner";
+  return moderator ? "admin" : "viewer";
+}
+
+function streamerHeaderAppearance(
+  streamer: Streamer,
+): Pick<ComponentProps<typeof StreamerHeader>, "className" | "views" | "labels" | "icons" | "brand"> {
+  if (!streamer.isOfficial) return { className: "", views: streamerViews, labels: {}, icons: {} };
+  return {
+    className: "ideas-header",
+    views: officialViews,
+    labels: { topics: t("ideas.tab") },
+    icons: { topics: "idea" },
+    brand: (
+      <>
+        <span className="ideas-logo" aria-hidden="true">
+          <img src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
+        </span>
+        <span className="streamer-name-wrap">
+          <span className="streamer-name">{streamer.name}</span>
+          <span className="ideas-sub">{t("ideas.subtitle")}</span>
+        </span>
+      </>
+    ),
+  };
+}
+
 export default function StreamerPage(): ReactNode {
   const data = useLoaderData<typeof loader>();
   const { board, selected: loadedSelected, viewer, moderator, view, sort, query, status, events, support } = data;
@@ -157,23 +254,7 @@ export default function StreamerPage(): ReactNode {
   const here = useLocation();
   const revalidator = useRevalidator();
   const toast = useToast();
-  // A directory card, the footer or the account menu can ask for an action (`?intent=`): suggest opens Suggest a
-  // topic (Suggest an improvement on the official page), or sign-in when signed out.
-  const intentDialog = (): Dialog => {
-    if (data.intent !== "suggest" || !viewer || streamer.status !== "active") return null;
-    return streamer.isOfficial ? "idea" : "topic";
-  };
-  const [dialog, setDialog] = useState<Dialog>(intentDialog);
-  const [signIn, setSignIn] = useState<boolean>(data.intent === "suggest" && !viewer);
-  // The intent can also arrive by in-app navigation to this same page, which keeps the component mounted.
-  const [intentSeen, setIntentSeen] = useState<string | null>(data.intent);
-  if (intentSeen !== data.intent) {
-    setIntentSeen(data.intent);
-    if (data.intent === "suggest") {
-      setDialog(intentDialog());
-      setSignIn(!viewer);
-    }
-  }
+  const { dialog, setDialog, signIn, setSignIn } = useIntentDialog(data.intent, viewer, streamer);
   const { providers } = useShell();
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -596,14 +677,9 @@ export default function StreamerPage(): ReactNode {
   }
 
   const action = viewer ? headerAction(view, owner, official) : null;
-  const fab =
-    viewer &&
-    writable &&
-    !pollsClass.includes("mash-page") &&
-    (view === "topics" || (owner && (view === "polls" || view === "schedule")))
-      ? headerAction(view, owner, official)
-      : null;
-  const role = owner ? "owner" : moderator ? "admin" : "viewer";
+  const showFab: boolean = Boolean(viewer && writable && !pollsClass.includes("mash-page"));
+  const fab = showFab ? floatingAction(view, owner, official) : null;
+  const role = pageRole(owner, moderator);
   return (
     <div
       className="streamer-shell"
@@ -618,23 +694,7 @@ export default function StreamerPage(): ReactNode {
       <StreamerHeader
         streamer={streamer}
         current={view}
-        className={official ? "ideas-header" : ""}
-        views={official ? officialViews : streamerViews}
-        labels={official ? { topics: t("ideas.tab") } : {}}
-        icons={official ? { topics: "idea" } : {}}
-        brand={
-          official ? (
-            <>
-              <span className="ideas-logo" aria-hidden="true">
-                <img src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
-              </span>
-              <span className="streamer-name-wrap">
-                <span className="streamer-name">{streamer.name}</span>
-                <span className="ideas-sub">{t("ideas.subtitle")}</span>
-              </span>
-            </>
-          ) : undefined
-        }
+        {...streamerHeaderAppearance(streamer)}
         badge={
           liveEvent && (
             <Link className="live-pill" to="?view=schedule">
@@ -707,8 +767,8 @@ export default function StreamerPage(): ReactNode {
           key={dialog === "idea" ? "open" : "closed"}
           open={dialog === "idea"}
           onOpenChange={(open: boolean) => {
-            if (open) setDialog("idea");
-            else closeIntentDialog();
+            setDialog(open ? "idea" : null);
+            if (!open) closeIntentDialog();
           }}
           onCreate={async (body) => {
             const result = await mutate({ action: "create", kind: "topic", ...body });

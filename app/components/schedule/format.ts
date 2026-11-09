@@ -106,7 +106,8 @@ function unit(value: number, name: "hour" | "minute"): string {
 export function durationLabel(minutes: number): string {
   if (minutes < 60) return unit(minutes, "minute");
   const rest = minutes % 60;
-  return `${unit(Math.floor(minutes / 60), "hour")}${rest ? ` ${unit(rest, "minute")}` : ""}`;
+  const remainder: string = rest ? ` ${unit(rest, "minute")}` : "";
+  return `${unit(Math.floor(minutes / 60), "hour")}${remainder}`;
 }
 
 /** "Tue & Thu" for a weekday bitmask, in the viewer's language. Sunday 1 Nov 2026 anchors the weekday names. */

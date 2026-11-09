@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { useRevalidator } from "react-router";
 import { t } from "../../i18n";
-import { DEFAULT_AVATAR_PRESET, isAvatarPreset } from "../../lib/avatars";
+import { DEFAULT_AVATAR_PRESET, isAvatarPreset, type PictureSource } from "../../lib/avatars";
 import type { Provider, Viewer } from "../../types";
 import { errorMessage } from "../api";
 import { providerName } from "../shell/sign-in-dialog";
@@ -75,6 +75,18 @@ function initialChoice(viewer: Viewer): AvatarChoice {
   return isAvatarPreset(viewer.avatarPreset) ? viewer.avatarPreset : DEFAULT_AVATAR_PRESET;
 }
 
+function profileChanges(viewer: Viewer, name: string, choice: AvatarChoice, photo: NewPhoto | null): string[] {
+  const changes: string[] = [];
+  if (name.trim() !== viewer.name) changes.push(t("profile.displayName"));
+  if (choice !== initialChoice(viewer) || photo) changes.push(t("profile.picture"));
+  return changes;
+}
+
+function profilePreview(choice: AvatarChoice, photoUrl: string | null): PictureSource {
+  if (choice === "photo" && photoUrl) return { kind: "photo", url: photoUrl };
+  return { kind: "preset", preset: choice === "photo" ? DEFAULT_AVATAR_PRESET : choice };
+}
+
 /**
  * "Your profile" (items 7, 9, 13, 17): display name and picture with a live preview. Nothing applies until
  * Save. Uploading opens the "Adjust your picture" step in the same dialog; the cropped 512px JPEG becomes the
@@ -110,9 +122,7 @@ export function ProfileDialog({
   }
 
   const photoUrl: string | null = photo?.url ?? viewer.avatar;
-  const changes: string[] = [];
-  if (name.trim() !== viewer.name) changes.push(t("profile.displayName"));
-  if (choice !== initialChoice(viewer) || photo) changes.push(t("profile.picture"));
+  const changes: string[] = profileChanges(viewer, name, choice, photo);
   const guard = useDiscardGuard(changes, onClose);
 
   async function save(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -202,13 +212,7 @@ export function ProfileDialog({
           <RequiredNote />
           <SignedInWith provider={provider} />
           <div className="avatar-preview">
-            <Picture
-              source={
-                choice === "photo" && photoUrl
-                  ? { kind: "photo", url: photoUrl }
-                  : { kind: "preset", preset: choice === "photo" ? DEFAULT_AVATAR_PRESET : choice }
-              }
-            />
+            <Picture source={profilePreview(choice, photoUrl)} />
             <span className="preview-name">{name.trim() || "…"}</span>
           </div>
           <label>

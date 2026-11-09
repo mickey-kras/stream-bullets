@@ -32,6 +32,52 @@ async function clientKey(request: Request): Promise<string> {
 
 const handler = createRequestHandler(() => import("virtual:react-router/server-build"), import.meta.env.MODE);
 
+async function calendarResponse(request: Request, env: AppEnv, handle: string, origin: string): Promise<Response> {
+  if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
+  queryParams(request, []);
+  const streamer = await getStreamer(env, handle);
+  // Suspended pages have no public calendar, the owner's included.
+  if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
+  const body = await scheduleCalendar(env, streamer, origin);
+  return new Response(request.method === "HEAD" ? null : body, {
+    headers: {
+      "Content-Type": "text/calendar; charset=utf-8",
+      "Content-Disposition": `inline; filename="${streamer.handle}-schedule.ics"`,
+      "Cache-Control": "public, max-age=300",
+    },
+  });
+}
+
+async function liveResponse(
+  request: Request,
+  env: AppEnv,
+  handle: string,
+  key: string,
+  nonce: string,
+  responseHeaders: Headers,
+): Promise<Response> {
+  requireSameOrigin(request, env);
+  const overlayKey: string | null = queryParams(request, ["key"]).get("key");
+  if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
+    throw new HttpError(426, "Use a WebSocket connection.");
+  const streamer = await getStreamer(env, handle);
+  // Suspended pages refuse live connections, the owner's included.
+  if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
+  // The room trusts only these headers for who taps in a Mash Battle and who owns the page; a client-sent copy
+  // never reaches it.
+  const viewer = await getViewer(request, { env, nonce, responseHeaders });
+  const headers = new Headers({
+    Upgrade: "websocket",
+    "X-Stream-Bullets-Client": key,
+  });
+  if (viewer) headers.set("X-SB-User", viewer.id);
+  if (viewer?.id === streamer.ownerId) headers.set("X-SB-Owner", "1");
+  // A wrong or revoked overlay key is no error: the OBS source then joins like any signed-out viewer.
+  else if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
+  const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
+  return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
+}
+
 export default {
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
     await cleanExpiredData(env, controller.scheduledTime);
@@ -53,43 +99,9 @@ export default {
       const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
       const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
       if (calendar) {
-        if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
-        queryParams(request, []);
-        const streamer = await getStreamer(env, calendar[1]);
-        // Suspended pages have no public calendar, the owner's included.
-        if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
-        const body = await scheduleCalendar(env, streamer, origin);
-        response = new Response(request.method === "HEAD" ? null : body, {
-          headers: {
-            "Content-Type": "text/calendar; charset=utf-8",
-            "Content-Disposition": `inline; filename="${streamer.handle}-schedule.ics"`,
-            "Cache-Control": "public, max-age=300",
-          },
-        });
+        response = await calendarResponse(request, env, calendar[1], origin);
       } else if (live) {
-        requireSameOrigin(request, env);
-        const overlayKey: string | null = queryParams(request, ["key"]).get("key");
-        if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
-          throw new HttpError(426, "Use a WebSocket connection.");
-        const streamer = await getStreamer(env, live[1]);
-        // Suspended pages refuse live connections, the owner's included.
-        if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
-        // The room trusts only these headers for who taps in a Mash Battle and who owns the page; a client-sent copy
-        // never reaches it.
-        const viewer = await getViewer(request, { env, nonce, responseHeaders });
-        const headers = new Headers({
-          Upgrade: "websocket",
-          "X-Stream-Bullets-Client": key,
-        });
-        if (viewer) headers.set("X-SB-User", viewer.id);
-        if (viewer && viewer.id === streamer.ownerId) headers.set("X-SB-Owner", "1");
-        // A wrong or revoked overlay key is no error: the OBS source then joins like any signed-out viewer.
-        else if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
-        const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
-        response = await room.fetch(
-          `https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`,
-          { headers },
-        );
+        response = await liveResponse(request, env, live[1], key, nonce, responseHeaders);
       } else if (path.startsWith("/images/")) {
         if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
         response = await serveImage(env, path.slice("/images/".length), request.method);

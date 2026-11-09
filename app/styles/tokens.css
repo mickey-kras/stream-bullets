@@ -103,7 +103,6 @@
   --on-gold-2: #092228;
   --on-gold-3: #0a2228;
   --tab: #1b3438;
-  --tab-border: #31494c;
   --portrait-border: #cfc8ad;
   --avatar-hover: #2c4649;
   --avatar-hover-border: #849291;
@@ -122,8 +121,6 @@
   /* The transparency checkerboard behind the overlay monitors (the OBS source is transparent). */
   --mock-check-a: #2a2d33;
   --mock-check-b: #1f2227;
-}
-:root {
   --tab-border:#6b8285;
   --status-live:#d9483b;
   --status-live-bg:#b3362b;
@@ -142,6 +139,16 @@
   --hc-black:#000000;
   --hc-white:#ffffff;
   --hc-black-80:#000000cc;
+  --frame-ink: var(--on-gold);
+  --frame-band: 42px;
+  --frame-band-rag: 13px;
+  --frame-pad-x: 16px;
+  --icon-xs: 16px;
+  --icon-sm: 18px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --icon-xl: 40px;
+  --icon-gap: .5em;
 }
 :root[data-cvd=pd] {
   --status-live:#9a7bff;
@@ -265,5 +272,3 @@
     --header-rule:#b8c9c6;
   }
 }
-:root { --frame-ink: var(--on-gold); --frame-band: 42px; --frame-band-rag: 13px; --frame-pad-x: 16px; }
-:root { --icon-xs: 16px; --icon-sm: 18px; --icon-md: 20px; --icon-lg: 24px; --icon-xl: 40px; --icon-gap: .5em; }

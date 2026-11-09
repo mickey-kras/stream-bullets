@@ -29,7 +29,8 @@ function RegisterForm({
       setError(t("keys.unsupported"));
       return;
     }
-    const name = String(new FormData(event.currentTarget).get("name") ?? "").trim();
+    const field = new FormData(event.currentTarget).get("name");
+    const name: string = typeof field === "string" ? field.trim() : "";
     setWaiting(true);
     setError("");
     try {
@@ -153,7 +154,9 @@ export function KeySetup({
       <ol className="key-steps">
         {steps.map((label: string, index: number) => {
           const number = index + 1;
-          const state = number < step ? "done" : number === step ? "current" : "";
+          let state: string = "";
+          if (number < step) state = "done";
+          else if (number === step) state = "current";
           return (
             <li key={label} className={state} aria-current={number === step ? "step" : undefined}>
               <span>{number < step ? <Icon name="check" size={16} /> : number}</span>
@@ -214,7 +217,8 @@ function RenameKeySheet({
 
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    const name = String(new FormData(event.currentTarget).get("name") ?? "").trim();
+    const field = new FormData(event.currentTarget).get("name");
+    const name: string = typeof field === "string" ? field.trim() : "";
     setBusy(true);
     setError("");
     try {

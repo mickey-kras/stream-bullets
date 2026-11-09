@@ -201,15 +201,7 @@ export class PollRoom extends DurableObject<AppEnv> {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const streamerId = url.searchParams.get("streamerId");
-    if (
-      url.searchParams.size !== 1 ||
-      !streamerId ||
-      !STREAMER_ID.test(streamerId) ||
-      this.ctx.id.toString() !== this.env.POLL_ROOMS.idFromName(streamerId).toString() ||
-      (this.streamerId !== undefined && this.streamerId !== streamerId)
-    ) {
-      return response("Invalid stream", 400);
-    }
+    if (!this.validStream(url, streamerId)) return response("Invalid stream", 400);
     const method = ROOM_PATHS[url.pathname];
     if (!method) return response("Not found", 404);
     if (request.method !== method) return response("Method not allowed", 405);
@@ -226,36 +218,67 @@ export class PollRoom extends DurableObject<AppEnv> {
     }
 
     try {
-      if (this.streamerId === undefined) {
-        this.streamerId = streamerId;
-        await this.ctx.storage.put("streamerId", streamerId);
-      }
-      if (url.pathname === "/refresh") return await this.refresh();
-      if (url.pathname === "/mash") return await this.mashChanged(request);
-      if (url.pathname === "/overlay") return await this.overlayChanged();
-      if (url.pathname === "/overlay-key") return this.overlayKeyRevoked();
-
-      const snapshot = await this.snapshot();
-      this.expireConnections();
-      // Checked again after the await: other subscriptions may have taken seats meanwhile.
-      const admission = this.admission(clientKey, role);
-      if (admission.refusal) return admission.refusal;
-      if (admission.evict) this.evict(admission.evict);
-      const pair = new WebSocketPair();
-      const [client, server] = Object.values(pair);
-      const tags = role === "owner" ? ["role:owner"] : [`client:${clientKey}`, `role:${role}`];
-      this.ctx.acceptWebSocket(server, overlayKey ? [...tags, "overlay-key"] : tags);
-      const now = Date.now();
-      const lease: ConnectionLease = { expiresAt: now + CONNECTION_LEASE_MS, userId: userId ?? null, openedAt: now };
-      server.serializeAttachment(lease);
-      this.send(server, JSON.stringify(this.withBattles(snapshot)));
-      await this.scheduleResync();
-      return new Response(null, { status: 101, webSocket: client });
+      return await this.handleRequest(request, url.pathname, streamerId, clientKey, userId, role, overlayKey);
     } catch (error: unknown) {
       this.disconnect();
       if (!(error instanceof PageSuspended)) return response("Live updates unavailable", 503);
       return url.pathname === "/subscribe" ? response("Stream not found", 404) : new Response(null, { status: 204 });
     }
+  }
+
+  private async handleRequest(
+    request: Request,
+    path: string,
+    streamerId: string,
+    clientKey: string,
+    userId: string | null,
+    role: SocketRole,
+    overlayKey: boolean,
+  ): Promise<Response> {
+    if (this.streamerId === undefined) {
+      this.streamerId = streamerId;
+      await this.ctx.storage.put("streamerId", streamerId);
+    }
+    if (path === "/refresh") return await this.refresh();
+    if (path === "/mash") return await this.mashChanged(request);
+    if (path === "/overlay") return await this.overlayChanged();
+    if (path === "/overlay-key") return this.overlayKeyRevoked();
+
+    return await this.subscribe(clientKey, userId, role, overlayKey);
+  }
+
+  private validStream(url: URL, streamerId: string | null): streamerId is string {
+    return (
+      url.searchParams.size === 1 &&
+      streamerId !== null &&
+      STREAMER_ID.test(streamerId) &&
+      this.ctx.id.toString() === this.env.POLL_ROOMS.idFromName(streamerId).toString() &&
+      (this.streamerId === undefined || this.streamerId === streamerId)
+    );
+  }
+
+  private async subscribe(
+    clientKey: string,
+    userId: string | null,
+    role: SocketRole,
+    overlayKey: boolean,
+  ): Promise<Response> {
+    const snapshot = await this.snapshot();
+    this.expireConnections();
+    // Checked again after the await: other subscriptions may have taken seats meanwhile.
+    const admission = this.admission(clientKey, role);
+    if (admission.refusal) return admission.refusal;
+    if (admission.evict) this.evict(admission.evict);
+    const pair = new WebSocketPair();
+    const [client, server] = Object.values(pair);
+    const tags = role === "owner" ? ["role:owner"] : [`client:${clientKey}`, `role:${role}`];
+    this.ctx.acceptWebSocket(server, overlayKey ? [...tags, "overlay-key"] : tags);
+    const now = Date.now();
+    const lease: ConnectionLease = { expiresAt: now + CONNECTION_LEASE_MS, userId: userId ?? null, openedAt: now };
+    server.serializeAttachment(lease);
+    this.send(server, JSON.stringify(this.withBattles(snapshot)));
+    await this.scheduleResync();
+    return new Response(null, { status: 101, webSocket: client });
   }
 
   private validateSubscription(
@@ -443,7 +466,7 @@ export class PollRoom extends DurableObject<AppEnv> {
       this.stopTickerIfIdle();
       return null;
     }
-    if (known && known.startsAt === row.starts_at) {
+    if (known?.startsAt === row.starts_at) {
       known.phase = row.phase;
       known.endsAt = row.ends_at;
       known.writable = row.status === "active";

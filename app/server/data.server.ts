@@ -176,7 +176,8 @@ function directoryCursor(value: string | null): { official: boolean; handle: str
 
 /** Pages the public directory lists: not suspended, and matching `query` by name or handle. */
 function directoryFilter(query: string): SQL | undefined {
-  const pattern = `%${query.replaceAll(/[\\%_]/gu, String.raw`\$&`)}%`;
+  const escapedQuery: string = query.replaceAll(/[\\%_]/gu, String.raw`\$&`);
+  const pattern: string = `%${escapedQuery}%`;
   return and(
     ne(streamers.status, "suspended"),
     query
@@ -204,29 +205,25 @@ export async function listStreamers(
 ): Promise<StreamerDirectory> {
   const input = parsed(directoryQuerySchema, { cursor, query });
   const after = directoryCursor(input.cursor);
+  let afterFilter: SQL | undefined;
+  if (after !== null) {
+    const following = and(eq(streamers.isOfficial, false), gt(streamers.handle, after.handle));
+    afterFilter = after.official
+      ? or(eq(streamers.isOfficial, false), and(eq(streamers.isOfficial, true), gt(streamers.handle, after.handle)))
+      : following;
+  }
   const rows = await drizzle(env.DB)
     .select(streamerColumns)
     .from(streamers)
-    .where(
-      and(
-        directoryFilter(input.query),
-        after === null
-          ? undefined
-          : after.official
-            ? or(
-                eq(streamers.isOfficial, false),
-                and(eq(streamers.isOfficial, true), gt(streamers.handle, after.handle)),
-              )
-            : and(eq(streamers.isOfficial, false), gt(streamers.handle, after.handle)),
-      ),
-    )
+    .where(and(directoryFilter(input.query), afterFilter))
     .orderBy(desc(streamers.isOfficial), asc(streamers.handle))
     .limit(PAGE_SIZE + 1);
   const page = rows.slice(0, PAGE_SIZE);
   const last = page.at(-1);
+  const cursorPrefix: string = last?.isOfficial ? "1." : "";
   return {
     streamers: page.map((row) => streamerValue(row)),
-    nextCursor: rows.length > PAGE_SIZE && last ? `${last.isOfficial ? "1." : ""}${last.handle}` : null,
+    nextCursor: rows.length > PAGE_SIZE && last ? `${cursorPrefix}${last.handle}` : null,
   };
 }
 
@@ -556,7 +553,8 @@ export async function listEntries(
   input: EntryQuery,
 ): Promise<BoardSnapshot> {
   const query = parsed(entryQuerySchema, input);
-  const scope = `${streamer.id}:${query.kind}${query.status ? `:${query.status}` : ""}`;
+  const statusScope: string = query.status ? `:${query.status}` : "";
+  const scope = `${streamer.id}:${query.kind}${statusScope}`;
   const cursor = decodeCursor(query.cursor, scope, query.sort, query.query);
   const escapedQuery = query.query.replaceAll(/[\\%_]/gu, String.raw`\$&`);
   const parameters: (string | number)[] = [
@@ -728,6 +726,25 @@ export async function deleteEntry(
   await removeEntry(env, viewerId, await entryPermission(env, id, streamerId), gate);
 }
 
+async function newEntryStatus(
+  env: AppEnv,
+  streamerId: string,
+  action: Extract<EntryAction, { action: "create" }>,
+): Promise<EntryStatus | null> {
+  if (action.kind !== "topic") return null;
+  const page = await env.DB.prepare("SELECT is_official FROM streamers WHERE id=?")
+    .bind(streamerId)
+    .first<{ is_official: number }>();
+  const official = page?.is_official === 1;
+  const category = action.category ?? "";
+  // Official pages use Ideas categories and start each new idea under review.
+  if (official !== (IDEA_CATEGORIES as readonly string[]).includes(category))
+    throw new HttpError(400, official ? "Pick a category for your idea." : "Pick a topic category.");
+  if (official && category === "bug" && isUntouchedTemplate(action.body ?? ""))
+    throw new HttpError(400, "Describe the bug: fill in what happened and how to reproduce it.");
+  return official ? NEW_IDEA_STATUS : null;
+}
+
 async function createEntry(
   env: AppEnv,
   userId: string,
@@ -737,20 +754,7 @@ async function createEntry(
   const id = crypto.randomUUID();
   const options = action.kind === "binary" ? ["Yes", "No"] : (action.options ?? []);
   const now = Date.now();
-  let status: EntryStatus | null = null;
-  if (action.kind === "topic") {
-    const page = await env.DB.prepare("SELECT is_official FROM streamers WHERE id=?")
-      .bind(streamerId)
-      .first<{ is_official: number }>();
-    const official = page?.is_official === 1;
-    const category = action.category ?? "";
-    // The official page is the Ideas board (item 46): its own categories, and every new idea starts under review.
-    if (official !== (IDEA_CATEGORIES as readonly string[]).includes(category))
-      throw new HttpError(400, official ? "Pick a category for your idea." : "Pick a topic category.");
-    if (official && category === "bug" && isUntouchedTemplate(action.body ?? ""))
-      throw new HttpError(400, "Describe the bug: fill in what happened and how to reproduce it.");
-    if (official) status = NEW_IDEA_STATUS;
-  }
+  const status = await newEntryStatus(env, streamerId, action);
   await applyMutation(
     env,
     streamerId,

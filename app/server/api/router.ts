@@ -68,7 +68,7 @@ export function requireViewer(viewer: Viewer | null): Viewer {
 
 function anchored(path: RegExp, value: string): RegExpExecArray | null {
   const match = path.exec(value);
-  return match && match.index === 0 && match[0].length === value.length ? match : null;
+  return match?.index === 0 && match[0].length === value.length ? match : null;
 }
 
 /**

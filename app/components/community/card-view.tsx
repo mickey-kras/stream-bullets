@@ -10,8 +10,9 @@ function CardButton({ card }: Readonly<{ card: CommunityCard }>): ReactNode {
   if (!card.buttonLabel || !card.buttonTarget) return null;
   if (card.buttonTarget.startsWith("tab:")) {
     const [tab, anchor] = card.buttonTarget.slice(4).split("#") as [CardTab, string | undefined];
+    const fragment: string = anchor ? `#${anchor}` : "";
     return (
-      <Link className="button-link gold" to={`?view=${tab}${anchor ? `#${anchor}` : ""}`}>
+      <Link className="button-link gold" to={`?view=${tab}${fragment}`}>
         <Icon name={anchor ? "heart" : tabIcons[tab]} size={18} />
         {card.buttonLabel}
       </Link>

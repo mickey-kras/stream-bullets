@@ -199,7 +199,8 @@ export async function requireAdminSession(
         "step_up_required",
       );
   }
-  const wouldBlock: StepUpNeed = current.keys < REQUIRED_KEYS ? "keys" : fresh ? "none" : "step_up";
+  let wouldBlock: StepUpNeed = fresh ? "none" : "step_up";
+  if (current.keys < REQUIRED_KEYS) wouldBlock = "keys";
   if (wouldBlock !== "none") {
     // A log line alone is easy to miss, so report mode also writes an audit row with the actor and the route.
     const route = `${request.method} ${new URL(request.url).pathname}`;

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useLocation, useNavigate, useRevalidator } from "react-router";
 import { t } from "../../i18n";
-import { personPicture } from "../../lib/avatars";
+import { personPicture, type PictureSource } from "../../lib/avatars";
 import { renamedPath } from "../../lib/shell";
 import type { Streamer, SupportSettings, Viewer } from "../../types";
 import { errorMessage } from "../api";
@@ -41,6 +41,75 @@ interface Draft {
 }
 
 const NO_SUPPORT: SupportSettings = { links: [], visible: true, card: false };
+
+type PagePatch = { name?: string; about?: string; handle?: string; logoMode?: "profile" | "logo" };
+
+function pagePatch(
+  streamer: Streamer,
+  name: string,
+  about: string,
+  handle: string,
+  logoChoice: "profile" | "logo",
+  initialLogo: "profile" | "logo",
+  logo: Draft | null,
+): PagePatch {
+  const patch: PagePatch = {};
+  if (name.trim() !== streamer.name) patch.name = name.trim();
+  if (about.trim() !== streamer.about.trim()) patch.about = about.trim();
+  if (handle.trim() !== streamer.handle) patch.handle = handle.trim();
+  if (logoChoice !== initialLogo || logo) patch.logoMode = logoChoice;
+  return patch;
+}
+
+function pageChanges(patch: PagePatch, background: Draft | null, supportEdited: boolean): string[] {
+  const changes: string[] = [];
+  if (patch.name !== undefined) changes.push(t("page.name"));
+  if (patch.handle !== undefined) changes.push(t("page.handle"));
+  if (patch.about !== undefined) changes.push(t("page.about"));
+  if (patch.logoMode !== undefined) changes.push(t("page.logo"));
+  if (background) changes.push(t("page.background"));
+  if (supportEdited) changes.push(t("support.editorTitle"));
+  return changes;
+}
+
+function BackgroundPreview({ draft, saved }: Readonly<{ draft: Draft | null; saved: string | null }>): ReactNode {
+  const url: string | null = draft?.url ?? saved;
+  return url ? <img className="background-preview" src={url} alt={t("page.backgroundAlt")} /> : null;
+}
+
+function pagePreview(logoChoice: "profile" | "logo", logoUrl: string | null, viewer: Viewer): PictureSource {
+  if (logoChoice === "logo" && logoUrl) return { kind: "photo", url: logoUrl };
+  return personPicture(viewer.avatar, viewer.avatarPreset);
+}
+
+function PageActions({
+  cropping,
+  pending,
+  onCrop,
+}: Readonly<{
+  cropping: boolean;
+  pending: boolean;
+  onCrop: () => Promise<void>;
+}>): ReactNode {
+  if (cropping) {
+    return (
+      <DialogActions cancel={false}>
+        <button className="gold" type="button" onClick={onCrop}>
+          <Icon name="check" size={18} />
+          {t("crop.use")}
+        </button>
+      </DialogActions>
+    );
+  }
+  return (
+    <DialogActions>
+      <button className="gold" type="submit" form="page-form" disabled={pending}>
+        <Icon name="check" size={18} />
+        {pending ? t("profile.saving") : t("page.save")}
+      </button>
+    </DialogActions>
+  );
+}
 
 /**
  * "Edit your page" (item 18): page name, handle (with the URL-change warning, once every 30 days), about,
@@ -90,15 +159,15 @@ export function EditPageDialog({
 
   const locked: number | null = nextHandleChange(streamer.handleChangedAt, now);
   const logoUrl: string | null = logo?.url ?? streamer.logo;
-  const changes: string[] = [];
-  if (name.trim() !== streamer.name) changes.push(t("page.name"));
-  if (handle.trim() !== streamer.handle) changes.push(t("page.handle"));
-  if (about.trim() !== streamer.about.trim()) changes.push(t("page.about"));
-  if (logoChoice !== initialLogo || logo) changes.push(t("page.logo"));
-  if (background) changes.push(t("page.background"));
+  const patch: PagePatch = pagePatch(streamer, name, about, handle, logoChoice, initialLogo, logo);
   const supportEdited: boolean = supportChanged(supportDraft, savedSupport);
-  if (supportEdited) changes.push(t("support.editorTitle"));
+  const changes: string[] = pageChanges(patch, background, supportEdited);
   const guard = useDiscardGuard(changes, onClose);
+
+  async function saveImages(): Promise<void> {
+    if (logoChoice === "logo" && logo) bumpImage(await uploadImage("logo", logo.blob));
+    if (background) bumpImage(await uploadImage("background", background.blob));
+  }
 
   async function save(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -116,13 +185,7 @@ export function EditPageDialog({
     setPending(true);
     setError("");
     try {
-      if (logoChoice === "logo" && logo) bumpImage(await uploadImage("logo", logo.blob));
-      if (background) bumpImage(await uploadImage("background", background.blob));
-      const patch: { name?: string; about?: string; handle?: string; logoMode?: "profile" | "logo" } = {};
-      if (name.trim() !== streamer.name) patch.name = name.trim();
-      if (about.trim() !== streamer.about.trim()) patch.about = about.trim();
-      if (handle.trim() !== streamer.handle) patch.handle = handle.trim();
-      if (logoChoice !== initialLogo || logo) patch.logoMode = logoChoice;
+      await saveImages();
       let saved: Streamer = streamer;
       if (Object.keys(patch).length > 0)
         saved = (await sendJson<{ streamer: Streamer }>("PATCH", "/api/streamer", patch)).streamer;
@@ -160,10 +223,7 @@ export function EditPageDialog({
 
   const cropping: boolean = cropSource !== null;
   const handleChanged: boolean = handle.trim() !== streamer.handle;
-  const preview =
-    logoChoice === "logo" && logoUrl
-      ? { kind: "photo" as const, url: logoUrl }
-      : personPicture(viewer.avatar, viewer.avatarPreset);
+  const preview: PictureSource = pagePreview(logoChoice, logoUrl, viewer);
 
   return (
     <Sheet
@@ -173,23 +233,7 @@ export function EditPageDialog({
       title={cropping ? t("page.cropTitle") : t("account.editPage")}
       description={cropping ? t("page.cropDescription") : undefined}
       onBack={cropping ? () => setCropSource(null) : undefined}
-      actions={
-        cropping ? (
-          <DialogActions cancel={false}>
-            <button className="gold" type="button" onClick={() => void applyCrop()}>
-              <Icon name="check" size={18} />
-              {t("crop.use")}
-            </button>
-          </DialogActions>
-        ) : (
-          <DialogActions>
-            <button className="gold" type="submit" form="page-form" disabled={pending}>
-              <Icon name="check" size={18} />
-              {pending ? t("profile.saving") : t("page.save")}
-            </button>
-          </DialogActions>
-        )
-      }
+      actions={<PageActions cropping={cropping} pending={pending} onCrop={applyCrop} />}
     >
       {cropping ? (
         <>
@@ -304,13 +348,7 @@ export function EditPageDialog({
               }}
             />
             <p className="muted">{t("page.backgroundHelp")}</p>
-            {(background?.url ?? savedBackground) && (
-              <img
-                className="background-preview"
-                src={background?.url ?? savedBackground ?? ""}
-                alt={t("page.backgroundAlt")}
-              />
-            )}
+            <BackgroundPreview draft={background} saved={savedBackground} />
           </fieldset>
           <p className="form-error" role="alert">
             {error}

@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -39,16 +40,16 @@ const PREVIEWS: readonly (readonly [
   [32, "crop.header", "crop.streamersList"],
 ];
 
-const NUDGE: readonly (readonly [string, IconName, number, number] | null)[] = [
-  null,
+const NUDGE: readonly (readonly [string, IconName, number, number] | string)[] = [
+  "top-left",
   ["crop.moveUp", "chevron-up", 0, -10],
-  null,
+  "top-right",
   ["crop.moveLeft", "chevron-left", -10, 0],
   ["crop.resetPosition", "reset", 0, 0],
   ["crop.moveRight", "chevron-right", 10, 0],
-  null,
+  "bottom-left",
   ["crop.moveDown", "chevron-down", 0, 10],
-  null,
+  "bottom-right",
 ];
 
 function coarsePointer(): boolean {
@@ -106,35 +107,32 @@ export const Cropper = forwardRef<
     }
   });
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      exportBlob: (): Promise<Blob> =>
-        new Promise<Blob>((resolve, reject) => {
-          const img = image.current;
-          if (!img || !natural || !size) {
-            reject(new Error(t("crop.notReady")));
-            return;
-          }
-          const g: CropGeometry = cropGeometry(size, natural, crop);
-          const canvas: HTMLCanvasElement = document.createElement("canvas");
-          canvas.width = OUTPUT_SIZE;
-          canvas.height = OUTPUT_SIZE;
-          const context = canvas.getContext("2d");
-          if (!context) {
-            reject(new Error(t("crop.notReady")));
-            return;
-          }
-          context.drawImage(img, g.sx, g.sy, g.side, g.side, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
-          canvas.toBlob(
-            (blob: Blob | null) => (blob ? resolve(blob) : reject(new Error(t("crop.notReady")))),
-            "image/jpeg",
-            0.9,
-          );
-        }),
-    }),
-    [crop, natural, size],
-  );
+  const exportBlob = useCallback((): Promise<Blob> => {
+    return new Promise<Blob>((resolve, reject) => {
+      const img = image.current;
+      if (!img || !natural || !size) {
+        reject(new Error(t("crop.notReady")));
+        return;
+      }
+      const g: CropGeometry = cropGeometry(size, natural, crop);
+      const canvas: HTMLCanvasElement = document.createElement("canvas");
+      canvas.width = OUTPUT_SIZE;
+      canvas.height = OUTPUT_SIZE;
+      const context = canvas.getContext("2d");
+      if (!context) {
+        reject(new Error(t("crop.notReady")));
+        return;
+      }
+      context.drawImage(img, g.sx, g.sy, g.side, g.side, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
+      canvas.toBlob(
+        (blob: Blob | null) => (blob ? resolve(blob) : reject(new Error(t("crop.notReady")))),
+        "image/jpeg",
+        0.9,
+      );
+    });
+  }, [crop, natural, size]);
+
+  useImperativeHandle(ref, () => ({ exportBlob }), [exportBlob]);
 
   function move(dx: number, dy: number): void {
     setCrop((current: CropState) => (natural && size ? settle(size, natural, panBy(current, dx, dy)) : current));
@@ -242,7 +240,7 @@ export const Cropper = forwardRef<
                   width={pixels * 2}
                   height={pixels * 2}
                   data-size={pixels}
-                  aria-hidden="true"
+                  aria-label={t(page ? pageCaption : profileCaption)}
                   ref={(element: HTMLCanvasElement | null) => {
                     previews.current[index] = element;
                   }}
@@ -260,8 +258,10 @@ export const Cropper = forwardRef<
         <summary>{t("crop.fineTune")}</summary>
         <fieldset className="nudge-pad">
           <legend className="sr-only">{t("crop.movePicture")}</legend>
-          {NUDGE.map((cell, index: number) =>
-            cell ? (
+          {NUDGE.map((cell) =>
+            typeof cell === "string" ? (
+              <span key={cell} aria-hidden="true" />
+            ) : (
               <IconButton
                 key={cell[0]}
                 className="nudge"
@@ -270,9 +270,6 @@ export const Cropper = forwardRef<
                 iconSize={18}
                 onClick={() => (cell[2] || cell[3] ? move(cell[2], cell[3]) : setCrop({ ...crop, x: 0, y: 0 }))}
               />
-            ) : (
-              // Empty corners of the 3 × 3 pad.
-              <span key={`gap-${index}`} aria-hidden="true" />
             ),
           )}
         </fieldset>
