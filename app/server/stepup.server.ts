@@ -364,7 +364,7 @@ export async function verifyStepUp(
   if (!key) return failed("That key isn't registered for this account.", "key_unknown", null);
   let counter: number;
   try {
-    ({ counter } = await verifyAuthentication(input.response, expected(env, challenge), {
+    ({ counter } = await verifyAuthentication(input, expected(env, challenge), {
       publicKey: key.public_key,
       counter: key.counter,
     }));
@@ -449,7 +449,7 @@ export async function registerKey(
   const challenge = await consumeChallenge(env, "register", admin.sessionId, now);
   let key;
   try {
-    key = await verifyRegistration(input.credential.response, expected(env, challenge));
+    key = await verifyRegistration(input.credential, expected(env, challenge));
   } catch (error: unknown) {
     if (error instanceof WebAuthnError) throw new HttpError(400, "That key couldn't be registered.", "key_failed");
     throw error;
