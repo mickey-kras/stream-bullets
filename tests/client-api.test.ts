@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { adminRequest } from "../app/components/admin/webauthn";
+import { adminRequest, webAuthnAvailable } from "../app/components/admin/webauthn";
 import { ApiError, needsStepUp, postJson } from "../app/components/api";
 
 /** The page's delete buttons and the Admin tab read the same `step_up_required` code (security review finding 1). */
@@ -37,5 +37,20 @@ describe("client API errors", (): void => {
     respond(403, { error: "Confirm with your security key to continue.", code: "step_up_required" });
     const error: unknown = await adminRequest("/api/admin/streamers").catch((value) => value);
     expect(needsStepUp(error)).toBe(true);
+  });
+});
+
+
+describe("WebAuthn availability", (): void => {
+  afterEach((): void => { vi.unstubAllGlobals(); });
+
+  it("requires both a browser window and a credential constructor", (): void => {
+    vi.stubGlobal("window", undefined);
+    vi.stubGlobal("PublicKeyCredential", class {});
+    expect(webAuthnAvailable()).toBe(false);
+    vi.stubGlobal("window", {});
+    expect(webAuthnAvailable()).toBe(true);
+    vi.stubGlobal("PublicKeyCredential", undefined);
+    expect(webAuthnAvailable()).toBe(false);
   });
 });
