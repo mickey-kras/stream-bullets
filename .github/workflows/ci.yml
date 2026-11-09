@@ -40,10 +40,22 @@ jobs:
       - run: pnpm check
       - run: pnpm lint
       - run: pnpm test:coverage
+      - run: node --test scripts/browser-coverage.test.ts
+      - run: pnpm audit --audit-level high
+      - run: pnpm build
+        env:
+          BROWSER_COVERAGE: "1"
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+        env:
+          BROWSER_COVERAGE: "1"
       - name: Bind coverage to this revision
         env:
           REVISION: ${{ github.sha }}
-        run: printf '%s\n' "$REVISION" > coverage/revision.txt
+        run: |
+          test -s coverage/lcov.info
+          test -s coverage/browser/lcov.info
+          printf '%s\n' "$REVISION" > coverage/revision.txt
       - name: Upload verified coverage
         id: coverage
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -51,13 +63,10 @@ jobs:
           name: coverage-${{ github.sha }}-${{ github.run_attempt }}
           path: |
             coverage/lcov.info
+            coverage/browser/lcov.info
             coverage/revision.txt
           if-no-files-found: error
           retention-days: 7
-      - run: pnpm audit --audit-level high
-      - run: pnpm build
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
       - run: pnpm build:production
       - run: pnpm exec wrangler deploy --config build/server/wrangler.json --dry-run
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -160,7 +169,7 @@ jobs:
           artifact-ids: ${{ needs.verify.outputs.coverage-id }}
           path: coverage/
       - name: Verify coverage revision
-        run: test "$(cat coverage/revision.txt)" = "$GITHUB_SHA" && test -s coverage/lcov.info
+        run: test "$(cat coverage/revision.txt)" = "$GITHUB_SHA" && test -s coverage/lcov.info && test -s coverage/browser/lcov.info
       - name: Mask configured SonarQube endpoint
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
