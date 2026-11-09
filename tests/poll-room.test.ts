@@ -280,7 +280,11 @@ describe("live room admission", (): void => {
     const overlay = await join({ key: KEY, overlay: true });
     expect(state().tagsOf(overlay)).toEqual(["role:owner", "overlay-key"]);
     expect(anonymous[0].closeCode).toBe(1013);
-    expect(state().getWebSockets().filter((socket) => socket.open)).toHaveLength(200);
+    expect(
+      state()
+        .getWebSockets()
+        .filter((socket) => socket.open),
+    ).toHaveLength(200);
   });
 
   it("drops only the sockets that came in with a revoked overlay key", async (): Promise<void> => {
@@ -499,7 +503,7 @@ describe("live room snapshots", (): void => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     faults.fail(/SELECT revision, status FROM streamers/);
     await alarmAfter(15_000);
-    expect(log.mock.calls).toContainEqual(["live_resync_failed"]);
+    expect(log.mock.calls).toContainEqual(["live_resync_failed", { cause: "Error" }]);
     expect(socket.ofType("unavailable")).toHaveLength(1);
     // A running battle still ends on time: the next alarm is set although this one failed.
     expect(state().storage.alarm).not.toBeNull();
@@ -802,7 +806,7 @@ describe("live room battles", (): void => {
     await tap(two, id, 4, 1);
     release();
     await flushing;
-    expect(errors).toHaveBeenCalledWith("mash_flush_failed");
+    expect(errors).toHaveBeenCalledWith("mash_flush_failed", { cause: "Error" });
     expect(await rows.storedTaps(id)).toEqual([]);
     faults.heal();
     await alarmAfter(MASH_FLUSH_MS);

@@ -28,10 +28,7 @@ async function asWebAuthnError<T>(check: () => Promise<T>): Promise<T> {
     return await check();
   } catch (error: unknown) {
     if (error instanceof WebAuthnError) throw error;
-    const message =
-      error instanceof Error
-        ? error.message
-        : "The key response could not be read.";
+    const message = error instanceof Error ? error.message : "The key response could not be read.";
     throw new WebAuthnError(message, { cause: error });
   }
 }
@@ -41,8 +38,7 @@ export function toBase64Url(bytes: Uint8Array): string {
 }
 
 export function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
-  if (!isoBase64URL.isBase64URL(value) || value.length % 4 === 1)
-    throw new WebAuthnError("Invalid base64url value.");
+  if (!isoBase64URL.isBase64URL(value) || value.length % 4 === 1) throw new WebAuthnError("Invalid base64url value.");
   return Uint8Array.from(isoBase64URL.toBuffer(value));
 }
 
@@ -57,16 +53,13 @@ function refuseEmbedded(clientDataJSON: string): void {
   } catch {
     throw new WebAuthnError("Invalid client data.");
   }
-  if (typeof data !== "object" || data === null)
-    throw new WebAuthnError("Invalid client data.");
+  if (typeof data !== "object" || data === null) throw new WebAuthnError("Invalid client data.");
   const value = data as {
     crossOrigin?: unknown;
     tokenBinding?: { status?: unknown };
   };
-  if (value.crossOrigin === true)
-    throw new WebAuthnError("Cross-origin requests are not allowed.");
-  if (value.tokenBinding?.status === "present")
-    throw new WebAuthnError("Token binding is not supported.");
+  if (value.crossOrigin === true) throw new WebAuthnError("Cross-origin requests are not allowed.");
+  if (value.tokenBinding?.status === "present") throw new WebAuthnError("Token binding is not supported.");
 }
 
 export interface Expected {
@@ -112,8 +105,7 @@ export function verifyRegistration(
         response: {
           clientDataJSON: credential.response.clientDataJSON,
           attestationObject: credential.response.attestationObject,
-          transports: credential.response
-            .transports as RegistrationResponseJSON["response"]["transports"],
+          transports: credential.response.transports as RegistrationResponseJSON["response"]["transports"],
         },
       },
       expectedChallenge: expected.challenge,
@@ -123,8 +115,7 @@ export function verifyRegistration(
       requireUserVerification: true,
       supportedAlgorithmIDs: [...SUPPORTED_ALGORITHMS],
     });
-    if (!result.verified)
-      throw new WebAuthnError("The attestation is not valid.");
+    if (!result.verified) throw new WebAuthnError("The attestation is not valid.");
     const info = result.registrationInfo;
     return {
       credentialId: info.credential.id,
@@ -179,8 +170,7 @@ export function verifyAuthentication(
         counter: stored.counter,
       },
     });
-    if (!result.verified)
-      throw new WebAuthnError("The signature is not valid.");
+    if (!result.verified) throw new WebAuthnError("The signature is not valid.");
     return { counter: result.authenticationInfo.newCounter };
   });
 }

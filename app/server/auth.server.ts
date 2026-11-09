@@ -256,7 +256,10 @@ export const RECENT_SIGN_IN_MS = 10 * 60 * 1000;
  * `reauth_required`, so the client can offer to sign in again.
  */
 export async function requireRecentSignIn(request: Request, env: AppEnv, now: number = Date.now()): Promise<void> {
-  const result = await createAuth(env).api.getSession({ headers: request.headers, query: { disableCookieCache: true } });
+  const result = await createAuth(env).api.getSession({
+    headers: request.headers,
+    query: { disableCookieCache: true },
+  });
   if (!result) throw new HttpError(401, "Sign in to continue.");
   if (now - result.session.createdAt.getTime() > RECENT_SIGN_IN_MS)
     throw new HttpError(403, "Sign in again to delete your account.", "reauth_required");

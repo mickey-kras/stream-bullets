@@ -269,10 +269,7 @@ export const reactions = sqliteTable(
     userId: text("user_id").notNull(),
     value: integer("value").notNull(),
   },
-  (table) => [
-    primaryKey({ columns: [table.pollId, table.userId] }),
-    index("poll_reactions_user_idx").on(table.userId),
-  ],
+  (table) => [primaryKey({ columns: [table.pollId, table.userId] }), index("poll_reactions_user_idx").on(table.userId)],
 );
 export const comments = sqliteTable(
   "poll_comments",

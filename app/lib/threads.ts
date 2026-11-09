@@ -32,4 +32,3 @@ export function orderThreads(threads: readonly CommentThread[], sort: "newest" |
       (sort === "top" ? b.likes - a.likes : 0) || b.createdAt - a.createdAt || b.id.localeCompare(a.id),
   );
 }
-

@@ -1,7 +1,16 @@
 import { useState, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { Form, Link, useRevalidator } from "react-router";
-import type { AdminPerson, PageAction, ReportGroup, ReportGroupFilter, ReportGroupList, ReportItem, ReportItemList, ReportReason } from "../../types";
+import type {
+  AdminPerson,
+  PageAction,
+  ReportGroup,
+  ReportGroupFilter,
+  ReportGroupList,
+  ReportItem,
+  ReportItemList,
+  ReportReason,
+} from "../../types";
 import { t, tn, type MessageId } from "../../i18n";
 import { EmptyState } from "../common";
 import { Avatar, StreamerLogo } from "../ui/avatar";

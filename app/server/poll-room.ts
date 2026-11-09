@@ -403,7 +403,9 @@ export class PollRoom extends DurableObject<AppEnv> {
       if (this.activeSockets().length > 0) this.broadcast(await this.snapshot(true));
     } catch (error: unknown) {
       this.disconnect();
-      if (!(error instanceof PageSuspended)) console.error("live_resync_failed");
+      // The class only: a D1 message can quote stored values.
+      if (!(error instanceof PageSuspended))
+        console.error("live_resync_failed", { cause: error instanceof Error ? error.name : "unknown" });
     } finally {
       await this.scheduleResync();
     }
@@ -686,8 +688,8 @@ export class PollRoom extends DurableObject<AppEnv> {
         this.env.DB.prepare(sql).bind(...params),
       );
       await this.env.DB.batch(statements);
-    } catch {
-      console.error("mash_flush_failed");
+    } catch (error: unknown) {
+      console.error("mash_flush_failed", { cause: error instanceof Error ? error.name : "unknown" });
       for (const userId of users) battle.pending.add(userId);
     } finally {
       battle.flushing = false;

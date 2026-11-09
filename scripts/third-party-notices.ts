@@ -93,7 +93,9 @@ const expected: string = notices(await shippedPackages());
 if (process.argv.includes("--check")) {
   const current: string = await readFile(output, "utf8").catch((): string => "");
   if (current !== expected) {
-    console.error("THIRD_PARTY_NOTICES.md is out of date. Run `node scripts/third-party-notices.ts` and review the diff.");
+    console.error(
+      "THIRD_PARTY_NOTICES.md is out of date. Run `node scripts/third-party-notices.ts` and review the diff.",
+    );
     process.exitCode = 1;
   }
 } else {
