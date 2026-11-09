@@ -2,7 +2,9 @@ import type { z } from "zod";
 import type { AppEnv } from "../env";
 import type { ContentReport, ReportQueue, ReportReason, ReportStatus, ReportTargetKind } from "../types";
 import { requireAdmin } from "./access.server";
-import { consumeMutationQuota, deleteComment, deleteEntry } from "./data.server";
+import { deleteComment } from "./comments.server";
+import { consumeMutationQuota, deleteEntry } from "./data.server";
+import { auditStatement } from "./audit.server";
 import { HttpError } from "./http.server";
 import {
   reportQuerySchema,
@@ -69,7 +71,7 @@ async function reportTarget(env: AppEnv, kind: ReportTargetKind, id: string): Pr
             (SELECT group_concat(value, ' · ') FROM json_each(options)) ELSE '' END AS snapshot
         FROM entries WHERE id=?`)
       : env.DB.prepare(`SELECT e.streamer_id, c.author_id, c.text AS snapshot
-        FROM entry_comments c JOIN entries e ON e.id=c.entry_id WHERE c.id=?`);
+        FROM entry_comments c JOIN entries e ON e.id=c.entry_id WHERE c.id=? AND c.removed_at IS NULL`);
   const row = await statement.bind(id).first<TargetRow>();
   if (!row) throw new HttpError(404, kind === "entry" ? "Topic or poll not found." : "Comment not found.");
   return row;
@@ -176,10 +178,10 @@ export async function listReports(env: AppEnv, adminId: string, query: ReportQue
 async function removeTarget(env: AppEnv, adminId: string, report: ReportRow): Promise<string | null> {
   try {
     if (report.target_kind === "entry") {
-      await deleteEntry(env, adminId, report.streamer_id, report.target_id);
+      await deleteEntry(env, adminId, report.streamer_id, report.target_id, "checked");
       return report.streamer_id;
     }
-    return (await deleteComment(env, adminId, report.target_id)).streamerId;
+    return (await deleteComment(env, adminId, report.target_id, "checked")).streamerId;
   } catch (error: unknown) {
     // The author or streamer may have removed the content already; the report can still be closed.
     if (error instanceof HttpError && error.status === 404) return null;
@@ -187,24 +189,61 @@ async function removeTarget(env: AppEnv, adminId: string, report: ReportRow): Pr
   }
 }
 
+/** Who resolves, and how their request met the step-up policy (for the audit row). */
+export interface Resolver {
+  actorId: string;
+  stepUp: string;
+}
+
 /**
- * Records an administrator decision. Removal deletes the content with the usual deletion rules
- * (replies to a removed comment stay as top-level comments). Either decision closes every open
- * report about the same content.
+ * Closes every open report about one item. Removal deletes the content with the usual deletion rules (a removed
+ * comment with replies stays as a "Comment removed" placeholder). Writes one audit row.
  */
-export async function resolveReport(env: AppEnv, adminId: string, input: ReportResolution): Promise<ReportResult> {
+export async function resolveOpenReports(
+  env: AppEnv,
+  resolver: Resolver,
+  targetKind: ReportTargetKind,
+  targetId: string,
+  action: "remove" | "dismiss",
+  now = Date.now(),
+): Promise<ReportResult> {
+  const report = await env.DB.prepare(
+    "SELECT * FROM content_reports WHERE target_kind=? AND target_id=? AND status='open' ORDER BY created_at LIMIT 1",
+  )
+    .bind(targetKind, targetId)
+    .first<ReportRow>();
+  if (!report) throw new HttpError(409, "This report is already resolved.");
+  const streamerId = action === "remove" ? await removeTarget(env, resolver.actorId, report) : null;
+  const status: ReportStatus = action === "remove" ? "actioned" : "dismissed";
+  const [result] = await env.DB.batch([
+    env.DB.prepare(`
+      UPDATE content_reports SET status=?, resolved_at=?, resolved_by=?
+      WHERE target_kind=? AND target_id=? AND status='open'
+    `).bind(status, now, resolver.actorId, targetKind, targetId),
+    auditStatement(env, {
+      targetKind: "report",
+      targetId: `${targetKind}:${targetId}`,
+      streamerId: report.streamer_id,
+      action: action === "remove" ? "report_removed" : "report_dismissed",
+      actorId: resolver.actorId,
+      metadata: { stepUp: resolver.stepUp },
+      createdAt: now,
+    }),
+  ]);
+  return { status, resolved: result.meta.changes, streamerId };
+}
+
+/** Records an administrator decision on one report. Either decision closes every open report about the same content. */
+export async function resolveReport(
+  env: AppEnv,
+  adminId: string,
+  input: ReportResolution,
+  stepUp = "off",
+): Promise<ReportResult> {
   const value = parsed(reportResolutionSchema, input);
   await requireAdmin(env, adminId);
   const report = await env.DB.prepare("SELECT * FROM content_reports WHERE id=?").bind(value.id).first<ReportRow>();
   if (!report) throw new HttpError(404, "Report not found.");
   if (report.status !== "open") throw new HttpError(409, "This report is already resolved.");
-  const streamerId = value.action === "remove" ? await removeTarget(env, adminId, report) : null;
-  const status: ReportStatus = value.action === "remove" ? "actioned" : "dismissed";
-  const result = await env.DB.prepare(`
-    UPDATE content_reports SET status=?, resolved_at=?, resolved_by=?
-    WHERE target_kind=? AND target_id=? AND status='open'
-  `)
-    .bind(status, Date.now(), adminId, report.target_kind, report.target_id)
-    .run();
-  return { status, resolved: result.meta.changes, streamerId };
+  return resolveOpenReports(env, { actorId: adminId, stepUp }, report.target_kind, report.target_id, value.action);
 }

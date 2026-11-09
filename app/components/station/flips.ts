@@ -2,7 +2,8 @@ import * as THREE from "three";
 
 /* The mast signs turn over once when the pointer moves onto them, or when one is tapped. Each sign turns
    on its own, finishes its turn before it can start another, and only turns again after the pointer
-   has left it and come back. */
+   has left it and come back. A click or tap on a sign also activates it (item 4): it turns, and when the
+   turn ends `onActivate` gets its index, which the landing uses to open the Streamers list. */
 
 const FLIP_SECONDS = 1.1;
 /** A tap is a touch that lifts within this time and distance; anything longer is an orbit drag. */
@@ -16,6 +17,8 @@ interface Sign {
   /** Seconds into the current turn, or -1 at rest. */
   turn: number;
   hovered: boolean;
+  /** Clicked or tapped: activate when the current turn ends. */
+  pending: boolean;
 }
 
 export interface Flips {
@@ -23,7 +26,7 @@ export interface Flips {
   update: (camera: THREE.Camera, dt: number, enabled: boolean) => boolean;
 }
 
-function advanceTurns(signs: readonly Sign[], dt: number): boolean {
+function advanceTurns(signs: readonly Sign[], dt: number, done: (sign: Sign) => void): boolean {
   let turning = false;
   for (const s of signs) {
     if (s.turn < 0) continue;
@@ -34,6 +37,7 @@ function advanceTurns(signs: readonly Sign[], dt: number): boolean {
     if (t >= 1) {
       s.pivot.rotation.x = 0;
       s.turn = -1;
+      done(s);
     } else turning = true;
   }
   return turning;
@@ -44,8 +48,9 @@ export function createFlips(
   wrap: HTMLElement,
   canvas: HTMLElement,
   signal: AbortSignal,
+  onActivate?: (index: number) => void,
 ): Flips {
-  const signs: Sign[] = pivots.map((pivot: THREE.Group): Sign => ({ pivot, turn: -1, hovered: false }));
+  const signs: Sign[] = pivots.map((pivot: THREE.Group): Sign => ({ pivot, turn: -1, hovered: false, pending: false }));
   const ray = new THREE.Raycaster();
   let hover: THREE.Vector2 | null = null;
   let tap: THREE.Vector2 | null = null;
@@ -72,7 +77,8 @@ export function createFlips(
   wrap.addEventListener(
     "pointerdown",
     (e: PointerEvent): void => {
-      if (e.pointerType !== "mouse") down = { x: e.clientX, y: e.clientY, at: e.timeStamp };
+      // Mouse presses count too: a click activates a sign, and a drag still orbits.
+      if (e.pointerType !== "mouse" || e.button === 0) down = { x: e.clientX, y: e.clientY, at: e.timeStamp };
     },
     { signal },
   );
@@ -100,21 +106,35 @@ export function createFlips(
   const start = (s: Sign | undefined): void => {
     if (s && s.turn < 0) s.turn = 0;
   };
+  const activated = (s: Sign): void => {
+    if (!s.pending) return;
+    s.pending = false;
+    onActivate?.(signs.indexOf(s));
+  };
 
   return {
     update: (camera: THREE.Camera, dt: number, enabled: boolean): boolean => {
-      if (enabled) {
-        const over = hover ? signAt(camera, hover) : undefined;
-        for (const s of signs) {
-          const now = s === over;
-          if (now && !s.hovered) start(s);
-          s.hovered = now;
-        }
-        canvas.style.cursor = over ? "pointer" : "";
-        if (tap) start(signAt(camera, tap));
+      // The pointer cursor shows that a sign is a link, with motion on or off.
+      const over = hover ? signAt(camera, hover) : undefined;
+      for (const s of signs) {
+        const now = s === over;
+        if (enabled && now && !s.hovered) start(s);
+        s.hovered = now;
       }
+      canvas.style.cursor = over ? "pointer" : "";
+      const tapped: Sign | undefined = tap ? signAt(camera, tap) : undefined;
       tap = null;
-      return advanceTurns(signs, dt);
+      if (tapped) {
+        if (enabled) {
+          start(tapped);
+          tapped.pending = true;
+        } else {
+          // Motion off: no turn, go straight on.
+          tapped.pending = true;
+          activated(tapped);
+        }
+      }
+      return advanceTurns(signs, dt, activated);
     },
   };
 }

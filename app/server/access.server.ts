@@ -6,6 +6,7 @@ import type {
   ApplicationStatus,
   StreamerAccess,
   StreamerApplication,
+  StreamerStatus,
 } from "../types";
 import { HttpError } from "./http.server";
 import {
@@ -15,6 +16,7 @@ import {
   type ApplicationInput,
   type ApplicationQuery,
   type ApplicationReview,
+  isPlaceholderEmail,
 } from "./validation";
 
 const QUEUE_PAGE_SIZE = 50;
@@ -63,6 +65,93 @@ export async function isAdmin(env: AppEnv, userId: string): Promise<boolean> {
 
 export async function requireAdmin(env: AppEnv, userId: string): Promise<void> {
   if (!(await isAdmin(env, userId))) throw new HttpError(403, "Only administrators can review applications.");
+}
+
+/**
+ * Page moderation (item 25).
+ * - active: public and writable.
+ * - frozen: public and read-only for everyone, the owner included.
+ * - suspended: hidden. Anyone but the owner and admins gets 404, the directory drops it, the overlay
+ *   shows nothing and live connections are refused. The owner and admins can still read it.
+ * Admins may still remove content from a frozen or suspended page (moderation must keep working).
+ */
+export interface StreamerState {
+  id: string;
+  ownerId: string;
+  status: StreamerStatus;
+}
+
+export interface StreamerRole {
+  owner: boolean;
+  admin: boolean;
+}
+
+/** Whether a page in this status accepts writes at all. */
+export function isStreamerWritable(status: StreamerStatus): boolean {
+  return status === "active";
+}
+
+/** Whether someone in this role may see a page in this status. */
+export function isStreamerVisible(status: StreamerStatus, role: StreamerRole): boolean {
+  return status !== "suspended" || role.owner || role.admin;
+}
+
+/** Whether the page shows up in public lists (the directory) and public live surfaces (overlay, live room). */
+export function isStreamerListed(status: StreamerStatus): boolean {
+  return status !== "suspended";
+}
+
+async function streamerState(env: AppEnv, streamerId: string): Promise<StreamerState | null> {
+  const row = await env.DB.prepare("SELECT id, owner_id, status FROM streamers WHERE id=?")
+    .bind(streamerId)
+    .first<{ id: string; owner_id: string; status: StreamerStatus }>();
+  return row ? { id: row.id, ownerId: row.owner_id, status: row.status } : null;
+}
+
+/** The viewer's role on a page. Anonymous viewers are neither owner nor admin. */
+export async function streamerRole(
+  env: AppEnv,
+  streamer: Pick<StreamerState, "ownerId">,
+  viewerId: string | null,
+): Promise<StreamerRole> {
+  if (!viewerId) return { owner: false, admin: false };
+  return { owner: streamer.ownerId === viewerId, admin: await isAdmin(env, viewerId) };
+}
+
+/** Whether the viewer may see the page. Admin rights are only looked up for suspended pages. */
+export async function canViewStreamer(
+  env: AppEnv,
+  streamer: Pick<StreamerState, "ownerId" | "status">,
+  viewerId: string | null,
+): Promise<boolean> {
+  if (streamer.status !== "suspended") return true;
+  return isStreamerVisible(streamer.status, await streamerRole(env, streamer, viewerId));
+}
+
+/**
+ * The one gate for writes to a streamer page and everything on it: entries, votes, reactions,
+ * comments, likes, page settings and images, and the later schedule, cards, links, overlay and Mash
+ * writes. Throws 404 when the page does not exist or is hidden from the viewer, and 423 when it is
+ * frozen or suspended. `moderation: true` lets an admin through, for content removal only.
+ */
+export async function assertStreamerWritable(
+  env: AppEnv,
+  streamerId: string,
+  viewerId: string | null,
+  options: { moderation?: boolean } = {},
+): Promise<StreamerState> {
+  const state = await streamerState(env, streamerId);
+  if (!state) throw new HttpError(404, "Streamer not found.");
+  if (isStreamerWritable(state.status)) return state;
+  const role = await streamerRole(env, state, viewerId);
+  if (!isStreamerVisible(state.status, role)) throw new HttpError(404, "Streamer not found.");
+  if (options.moderation && role.admin) return state;
+  throw new HttpError(
+    423,
+    state.status === "frozen"
+      ? "This page is frozen. It stays visible, but nothing on it can change."
+      : "This page is suspended. Nothing on it can change.",
+  );
 }
 
 function applicationValue(row: ApplicationRow): StreamerApplication {
@@ -158,7 +247,7 @@ export async function listApplications(env: AppEnv, query: ApplicationQuery): Pr
         ...applicationValue(row),
         userId: row.user_id,
         name: row.name,
-        email: row.email,
+        email: isPlaceholderEmail(row.email) ? "" : row.email,
       }),
     ),
     nextCursor: results.length > QUEUE_PAGE_SIZE && last ? `${last.updated_at}.${last.id}` : null,

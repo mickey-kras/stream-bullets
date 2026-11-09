@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Browser, type BrowserContext } from "@playwright/test";
 import { z } from "zod";
+import { clientAddress } from "./client-ips";
 
 async function signedIn(browser: Browser): Promise<BrowserContext> {
   const sessions = z
@@ -10,7 +11,7 @@ async function signedIn(browser: Browser): Promise<BrowserContext> {
   if (!session) throw new Error("Pagination test account is missing.");
   const context = await browser.newContext({
     baseURL: "http://localhost:5173",
-    extraHTTPHeaders: { "CF-Connecting-IP": "192.0.2.50" },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("pagination", 50) },
   });
   await context.addCookies([
     {
@@ -86,7 +87,7 @@ test("the OBS overlay refreshes over HTTP and reconnects after a long WebSocket 
   const poll = z.object({ id: z.string().uuid() }).parse(await created.json());
   const context = await browser.newContext({
     baseURL: "http://localhost:5173",
-    extraHTTPHeaders: { "CF-Connecting-IP": "192.0.2.51" },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("pagination", 51) },
   });
   const page = await context.newPage();
   let blocked: boolean = true;

@@ -1,5 +1,8 @@
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { StreamerApplication } from "../types";
+import { intlLocale, t } from "../i18n";
+import { Icon } from "./ui/icon";
+import { Req, RequiredNote } from "./ui/required";
 
 const MAX_LINKS = 5;
 
@@ -10,7 +13,7 @@ interface LinkRow {
 
 /** Formats a timestamp the same way on the server and in the browser, so hydration matches. */
 export function formatDate(time: number): string {
-  return new Date(time).toLocaleDateString("en-US", { timeZone: "UTC", dateStyle: "medium" });
+  return new Date(time).toLocaleDateString(intlLocale(), { timeZone: "UTC", dateStyle: "medium" });
 }
 
 export function DateTime({ time }: Readonly<{ time: number }>): ReactNode {
@@ -21,20 +24,20 @@ function ApplicationStatusNote({ application }: Readonly<{ application: Streamer
   if (application.status === "rejected")
     return (
       <div className="application-status rejected">
-        <strong>Not approved this time.</strong>
-        <p>
-          Your request from <DateTime time={application.updatedAt} /> was not approved. You can update your links or
-          note and send it again.
-        </p>
+        <strong>
+          <Icon name="rejected" size={18} />
+          {t("waitlist.rejected")}
+        </strong>
+        <p>{t("waitlist.rejectedBody", { date: formatDate(application.updatedAt) })}</p>
       </div>
     );
   return (
     <div className="application-status pending">
-      <strong>Request received.</strong>
-      <p>
-        We&apos;ll review your request. Submitted <DateTime time={application.updatedAt} />. You can still update it
-        while you wait.
-      </p>
+      <strong>
+        <Icon name="pending" size={18} />
+        {t("waitlist.received")}
+      </strong>
+      <p>{t("waitlist.receivedBody", { date: formatDate(application.updatedAt) })}</p>
     </div>
   );
 }
@@ -82,34 +85,35 @@ export function StreamerWaitlist({
     await onSubmit({ links, note: note.trim() });
   }
 
-  let submitLabel = "Request streamer access";
-  if (application?.status === "pending") submitLabel = "Update request";
-  if (application?.status === "rejected") submitLabel = "Send request again";
+  let submitLabel: string = t("waitlist.request");
+  if (application?.status === "pending") submitLabel = t("waitlist.update");
+  if (application?.status === "rejected") submitLabel = t("waitlist.sendAgain");
 
   return (
     <>
-      <p>
-        Streamer pages are invite-only for now. Tell us where you stream and we&apos;ll let you know when you can claim
-        your page. You can keep voting and commenting as a viewer in the meantime.
-      </p>
+      <p>{t("waitlist.intro")}</p>
       {application && <ApplicationStatusNote application={application} />}
       <form
         className="waitlist-form"
-        aria-label="Streamer access request"
+        aria-label={t("waitlist.formLabel")}
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
           void submit(event);
         }}
       >
+        <RequiredNote />
         <fieldset>
-          <legend>Your channels</legend>
+          <legend>{t("waitlist.channels")}</legend>
           <p className="muted" id="channel-links-help">
-            Add 1–{MAX_LINKS} HTTPS links to channels you stream on, such as Twitch, YouTube, or Kick.
+            {t("waitlist.channelsHelp", { n: MAX_LINKS })}
           </p>
           <ul className="link-rows">
             {rows.map((row: LinkRow, index: number) => (
               <li key={row.key}>
                 <label>
-                  <span>Channel link {index + 1}</span>
+                  <span>
+                    {t("waitlist.channelLink", { n: index + 1 })}
+                    <Req />
+                  </span>
                   <input
                     ref={(element: HTMLInputElement | null) => {
                       if (!element) {
@@ -128,7 +132,7 @@ export function StreamerWaitlist({
                     autoComplete="url"
                     placeholder="https://twitch.tv/yourchannel"
                     pattern="https://.+"
-                    title="Use an HTTPS link, starting with https://"
+                    title={t("waitlist.httpsHint")}
                     maxLength={200}
                     required
                     spellCheck={false}
@@ -144,10 +148,11 @@ export function StreamerWaitlist({
                   <button
                     type="button"
                     className="remove-link"
-                    aria-label={`Remove channel link ${index + 1}`}
+                    aria-label={t("waitlist.removeLink", { n: index + 1 })}
                     onClick={() => removeRow(index)}
                   >
-                    Remove
+                    <Icon name="close" size={16} />
+                    <span className="remove-text">{t("waitlist.remove")}</span>
                   </button>
                 )}
               </li>
@@ -155,14 +160,15 @@ export function StreamerWaitlist({
           </ul>
           {rows.length < MAX_LINKS ? (
             <button type="button" onClick={addRow}>
-              + Add another link
+              <Icon name="plus" size={16} />
+              {t("waitlist.addLink")}
             </button>
           ) : (
-            <p className="muted">You can add up to {MAX_LINKS} links.</p>
+            <p className="muted">{t("waitlist.maxLinks", { n: MAX_LINKS })}</p>
           )}
         </fieldset>
         <label>
-          <span>Anything else we should know? (optional)</span>
+          <span>{t("waitlist.note")}</span>
           <textarea
             name="note"
             value={note}
@@ -173,9 +179,10 @@ export function StreamerWaitlist({
           />
         </label>
         <p className="muted" id="note-help">
-          For example, your schedule or the community you want to host. Up to 1000 characters.
+          {t("waitlist.noteHelp")}
         </p>
         <button className="gold" type="submit" disabled={disabled}>
+          <Icon name="send" size={18} />
           {submitLabel}
         </button>
       </form>

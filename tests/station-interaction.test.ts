@@ -22,6 +22,7 @@ function pointer(type: string, pointerType: string, x: number, y: number, timeSt
   const e = new Event(type);
   Object.defineProperties(e, {
     pointerType: { value: pointerType },
+    button: { value: 0 },
     clientX: { value: x },
     clientY: { value: y },
     timeStamp: { value: timeStamp },
@@ -138,7 +139,7 @@ describe("look-around", (): void => {
 });
 
 describe("sign flips", (): void => {
-  function scene() {
+  function scene(onActivate?: (index: number) => void) {
     const pivots = [0, 1].map((i: number): THREE.Group => {
       const pivot = new THREE.Group();
       pivot.position.x = i === 0 ? -2 : 2;
@@ -150,7 +151,7 @@ describe("sign flips", (): void => {
     const wrap = host();
     const canvas = host();
     const lifecycle = new AbortController();
-    const flips = createFlips(pivots, wrap, canvas, lifecycle.signal);
+    const flips = createFlips(pivots, wrap, canvas, lifecycle.signal, onActivate);
     return { pivots, wrap, canvas, flips, cam: camera(), lifecycle };
   }
   // Screen positions of the two signs in a 1000 x 500 view from z = 10.
@@ -180,25 +181,42 @@ describe("sign flips", (): void => {
   });
 
   it("turns a sign on a tap but not at the end of a drag, and never with motion off", (): void => {
-    const { pivots, wrap, flips, cam } = scene();
-    wrap.dispatchEvent(pointer("pointerdown", "mouse", ...LEFT, 0));
-    wrap.dispatchEvent(pointer("pointerup", "mouse", ...LEFT, 10));
+    const activated: number[] = [];
+    const { pivots, wrap, flips, cam } = scene((index: number) => activated.push(index));
     wrap.dispatchEvent(pointer("pointerdown", "touch", ...LEFT, 0));
     wrap.dispatchEvent(pointer("pointerup", "touch", LEFT[0] + 60, LEFT[1], 100));
     expect(flips.update(cam, 0.016, true)).toBe(false);
     wrap.dispatchEvent(pointer("pointerdown", "touch", ...LEFT, 0));
     wrap.dispatchEvent(pointer("pointerup", "touch", ...LEFT, 900));
     expect(flips.update(cam, 0.016, true)).toBe(false);
-    wrap.dispatchEvent(pointer("pointerdown", "touch", ...LEFT, 0));
-    wrap.dispatchEvent(pointer("pointerup", "touch", ...LEFT, 120));
-    expect(flips.update(cam, 0.016, false)).toBe(false);
     wrap.dispatchEvent(pointer("pointerdown", "touch", ...MISS, 0));
     wrap.dispatchEvent(pointer("pointerup", "touch", ...MISS, 120));
     expect(flips.update(cam, 0.016, true)).toBe(false);
+    expect(activated).toEqual([]);
     wrap.dispatchEvent(pointer("pointerdown", "touch", ...LEFT, 0));
     wrap.dispatchEvent(pointer("pointerup", "touch", ...LEFT, 120));
     expect(flips.update(cam, 0.016, true)).toBe(true);
     expect(pivots[0].rotation.x).toBeGreaterThan(0);
+    // The sign activates once its turn is over, not before.
+    expect(activated).toEqual([]);
+    for (let i = 0; i < 30; i++) flips.update(cam, 0.05, true);
+    expect(activated).toEqual([0]);
+  });
+
+  it("activates a clicked sign after it turns, and at once with motion off (item 4)", (): void => {
+    const activated: number[] = [];
+    const { flips, wrap, cam, pivots } = scene((index: number) => activated.push(index));
+    wrap.dispatchEvent(pointer("pointerdown", "mouse", ...LEFT, 0));
+    wrap.dispatchEvent(pointer("pointerup", "mouse", ...LEFT, 10));
+    expect(flips.update(cam, 0.016, true)).toBe(true);
+    for (let i = 0; i < 30; i++) flips.update(cam, 0.05, true);
+    expect(activated).toEqual([0]);
+    // Motion off: no turn, straight on.
+    wrap.dispatchEvent(pointer("pointerdown", "touch", ...LEFT, 0));
+    wrap.dispatchEvent(pointer("pointerup", "touch", ...LEFT, 120));
+    expect(flips.update(cam, 0.016, false)).toBe(false);
+    expect(pivots[0].rotation.x).toBe(0);
+    expect(activated).toEqual([0, 0]);
   });
 });
 

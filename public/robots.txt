@@ -1,0 +1,14 @@
+# StreamBullets
+#
+# Agent policy: AI agents and crawlers are welcome to read public pages.
+# Posting, voting, sign-ups, comments, topic suggestions, Mash Battle taps and reports are for humans only.
+# Respect the rate limits. A summary for language models: https://streambullets.com/llms.txt
+# The full policy: https://streambullets.com/ai
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /overlay-control
+Disallow: /*/overlay
+Disallow: /*?dialog=
