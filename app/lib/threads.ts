@@ -33,11 +33,3 @@ export function orderThreads(threads: readonly CommentThread[], sort: "newest" |
   );
 }
 
-/** Comments that count towards the discussion total: replies included, placeholders left out. */
-export function countComments(threads: readonly CommentThread[]): number {
-  return threads.reduce(
-    (sum: number, thread: CommentThread): number =>
-      sum + (thread.removed ? 0 : 1) + thread.replies.filter((reply: Comment): boolean => !reply.removed).length,
-    0,
-  );
-}

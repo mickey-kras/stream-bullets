@@ -18,10 +18,21 @@ export function apiError(status: number, body: unknown, fallback: string): ApiEr
   return new ApiError(message, status, typeof record.code === "string" ? record.code : null);
 }
 
-export async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+const NOT_JSON: unique symbol = Symbol("not JSON");
+
+/**
+ * Fetches same-origin JSON. A failed response, or a body that is not JSON (a proxy error page, for example),
+ * throws an ApiError with `fallback` as its message when the server sent none.
+ */
+export async function requestJson<T>(
+  url: string,
+  init?: RequestInit,
+  fallback: string = t("common.failed"),
+): Promise<T> {
   const response: Response = await fetch(url, { ...init, credentials: "same-origin" });
-  const body: unknown = await response.json();
-  if (!response.ok) throw apiError(response.status, body, t("common.failed"));
+  const body: unknown = await response.json().catch((): typeof NOT_JSON => NOT_JSON);
+  if (!response.ok) throw apiError(response.status, body, fallback);
+  if (body === NOT_JSON) throw new ApiError(fallback, response.status, null);
   return body as T;
 }
 
@@ -39,7 +50,7 @@ export async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 export async function sendJson<T>(
-  method: "PUT" | "PATCH" | "DELETE",
+  method: "POST" | "PUT" | "PATCH" | "DELETE",
   url: string,
   body?: unknown,
   init: Pick<RequestInit, "keepalive"> = {},

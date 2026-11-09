@@ -1,6 +1,6 @@
-import type { SecurityKey } from "../../admin-types";
+import type { SecurityKey } from "../../types";
 import { t } from "../../i18n";
-import { ApiError, apiError } from "../api";
+import { ApiError, requestJson } from "../api";
 
 /**
  * Browser side of the admin security-key ceremonies. The server sends WebAuthn options as JSON with base64url
@@ -10,14 +10,11 @@ import { ApiError, apiError } from "../api";
 export { ApiError as AdminRequestError, needsStepUp } from "../api";
 
 export async function adminRequest<T>(url: string, method = "GET", body?: unknown): Promise<T> {
-  const response: Response = await fetch(url, {
-    method,
-    credentials: "same-origin",
-    ...(body === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
-  });
-  const value: unknown = await response.json().catch(() => null);
-  if (!response.ok) throw apiError(response.status, value, t("admin.requestFailed"));
-  return value as T;
+  const init: RequestInit =
+    body === undefined
+      ? { method }
+      : { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  return requestJson<T>(url, init, t("admin.requestFailed"));
 }
 
 export function errorText(error: unknown): string {

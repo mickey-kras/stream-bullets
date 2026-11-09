@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AdminPageList, ReportGroup, ReportItemList, SecurityKey, StepUpStatus } from "../app/admin-types";
+import type { AdminPageList, ReportGroup, ReportItemList, SecurityKey, StepUpStatus, StreamerDirectory, Viewer } from "../app/types";
 import type { AppEnv } from "../app/env";
 import type { CreationOptions, RequestOptions } from "../app/server/stepup.server";
 import { auditStatement } from "../app/server/audit.server";
@@ -22,7 +22,6 @@ import {
   type AdminSession,
 } from "../app/server/stepup.server";
 import { fromBase64Url, toBase64Url } from "../app/server/webauthn.server";
-import type { StreamerDirectory, Viewer } from "../app/types";
 import { apiCaller, type CallOptions } from "./helpers/api";
 import { AT, SoftKey, UP, UV } from "./helpers/authenticator";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";

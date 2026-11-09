@@ -3,9 +3,6 @@ import { t } from "../../i18n";
 import type { CardIcon, CardTab, CommunityCard } from "../../types";
 import type { IconName } from "../ui/icon";
 
-/** A card being edited: no id yet for a new one. */
-export type CardDraft = Omit<CommunityCard, "id"> & { id: string };
-
 export const cardIcons: Record<CardIcon, IconName> = {
   chat: "comment",
   poll: "polls",

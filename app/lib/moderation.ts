@@ -1,6 +1,5 @@
-import type { ModerationReason } from "../admin-types";
+import type { ModerationReason, StreamerStatus } from "../types";
 import { intlLocale, t, type MessageId } from "../i18n";
-import type { StreamerStatus } from "../types";
 
 export const reasonLabels: Record<ModerationReason, MessageId> = {
   illegal: "moderation.reason.illegal",

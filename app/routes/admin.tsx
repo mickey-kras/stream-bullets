@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLoaderData, useRevalidator, type LoaderFunctionArgs } from "react-router";
-import type { ReportGroupFilter } from "../admin-types";
+import type { ApplicationQueue, ApplicationReviewItem, ApplicationStatus, ReportGroupFilter } from "../types";
 import { appContext } from "../env";
 import { t, type MessageId } from "../i18n";
 import { configuredProviders } from "../server/auth.server";
@@ -18,7 +18,6 @@ import { KeySetup, SecurityKeys } from "../components/admin/security-keys";
 import { ReportGroups } from "../components/admin/report-groups";
 import { StreamerPages, type PageFilter } from "../components/admin/streamer-pages";
 import { Icon, type IconName } from "../components/ui/icon";
-import type { ApplicationQueue, ApplicationReviewItem, ApplicationStatus } from "../types";
 
 const statuses: { value: ApplicationStatus; label: MessageId }[] = [
   { value: "pending", label: "admin.requests.pending" },

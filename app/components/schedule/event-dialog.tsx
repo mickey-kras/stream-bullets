@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { t } from "../../i18n";
+import { copyText } from "../../lib/clipboard";
 import { buildCalendar } from "../../server/ics";
 import type { EventTopic, StreamEvent } from "../../types";
 import { errorMessage, sendJson } from "../api";
@@ -114,10 +115,7 @@ function ViewStep({
           type="button"
           onClick={() => {
             const url = `${location.origin}/@${handle}?view=schedule&event=${event.id}`;
-            void navigator.clipboard
-              ?.writeText(url)
-              .then(() => toast(t("schedule.linkCopied")))
-              .catch(() => toast(url));
+            void copyText(url).then((copied: boolean) => toast(copied ? t("schedule.linkCopied") : url));
           }}
         >
           <Icon name="link" size={18} />
