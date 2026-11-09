@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { newPage, close } from "./coverage";
+import { expect, test, type Page } from "./coverage";
 import { signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
@@ -116,7 +117,7 @@ test("display preferences apply before the first paint and persist", async ({ pa
 
 test("signed in, display preferences save to the account", async ({ browser }) => {
   const viewer = await signedIn(browser, "prefsviewer", clientIp("a11y", 177));
-  const page = await viewer.newPage();
+  const page = await newPage(viewer);
   await page.goto("/streamers?dialog=a11y");
   const dialog = page.getByRole("dialog", { name: "Accessibility & display" });
   await expect(dialog).toContainText("saved to your account");
@@ -127,20 +128,20 @@ test("signed in, display preferences save to the account", async ({ browser }) =
   expect((await saved).status()).toBe(200);
   // A fresh browser with only the session (no preference cookie) gets the saved settings.
   const other = await signedIn(browser, "prefsviewer", clientIp("a11y", 178));
-  const second = await other.newPage();
+  const second = await newPage(other);
   await second.goto("/streamers");
   await expect(second.locator("html")).toHaveAttribute("data-underline", "true");
   await second.goto("/streamers?dialog=a11y");
   await second.getByRole("button", { name: "Reset to defaults" }).click();
   await expect(second.locator("html")).toHaveAttribute("data-underline", "false");
   await second.waitForResponse((response) => response.url().endsWith("/api/me/preferences"));
-  await other.close();
-  await viewer.close();
+  await close(other);
+  await close(viewer);
 });
 
 test("the overlay control page enlarges a monitor and collapses Position and size on phones", async ({ browser }) => {
   const owner = await signedIn(browser, "owner", clientIp("a11y", 179));
-  const page = await owner.newPage();
+  const page = await newPage(owner);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/overlay-control");
   await expect(page.locator(".ov-layout-wrap")).not.toHaveAttribute("open", "");
@@ -151,5 +152,5 @@ test("the overlay control page enlarges a monitor and collapses Position and siz
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.reload();
   await expect(page.locator(".ov-layout-wrap")).toHaveAttribute("open", "");
-  await owner.close();
+  await close(owner);
 });

@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { newPage, close } from "./coverage";
+import { expect, test } from "./coverage";
 import { signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
@@ -6,7 +7,7 @@ const template = "What happened?\n\nWhat did you expect?\n\nSteps to reproduce:\
 
 test("the Ideas board files a suggestion under review and handles the bug template", async ({ browser }) => {
   const context = await signedIn(browser, "viewer", clientIp("ideas", 105));
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@streambullets");
   await expect(page.getByRole("heading", { name: /Ideas for StreamBullets/ })).toBeVisible();
   const tabs = page.getByRole("navigation", { name: "Main navigation" }).getByRole("link");
@@ -61,7 +62,7 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   await detail.getByRole("button", { name: "Delete idea" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Delete idea" }).click();
   await expect(page.locator("#topics .idea-row")).toHaveCount(1);
-  await context.close();
+  await close(context);
 });
 
 test("an admin sets an idea's status from the detail view", async ({ browser }) => {
@@ -70,7 +71,7 @@ test("an admin sets an idea's status from the detail view", async ({ browser }) 
   const { entries } = (await board.json()) as { entries: { id: string; title: string }[] };
   const idea = entries.find((entry) => entry.title === "Dark mode for the overlay");
   if (!idea) throw new Error("The seeded idea is missing.");
-  const viewerPage = await viewer.newPage();
+  const viewerPage = await newPage(viewer);
   await viewerPage.goto(`/@streambullets?entry=${idea.id}`);
   await expect(viewerPage.locator("#detail .idea-status")).toHaveText("Planned");
   await expect(viewerPage.getByText("Status (admins only)")).toHaveCount(0);
@@ -79,7 +80,7 @@ test("an admin sets an idea's status from the detail view", async ({ browser }) 
   ).toBe(403);
 
   const admin = await signedIn(browser, "admin", clientIp("ideas", 111));
-  const page = await admin.newPage();
+  const page = await newPage(admin);
   await page.goto(`/@streambullets?entry=${idea.id}`);
   const detail = page.locator("#detail");
   const status = detail.getByRole("combobox", { name: "Status (admins only)" });
@@ -104,13 +105,13 @@ test("an admin sets an idea's status from the detail view", async ({ browser }) 
   await german.click();
   await expect(page.getByRole("option", { name: "Nicht geplant" })).toBeVisible();
   await page.keyboard.press("Escape");
-  await viewer.close();
-  await admin.close();
+  await close(viewer);
+  await close(admin);
 });
 
 test("frozen and suspended pages show banners and keep writes off", async ({ browser }) => {
   const viewer = await signedIn(browser, "viewer", clientIp("ideas", 106));
-  const page = await viewer.newPage();
+  const page = await newPage(viewer);
   await page.goto("/@frozen_host");
   await expect(page.locator("#page-banner")).toContainText("This page is frozen. Viewing only");
   await expect(page.getByRole("button", { name: /^Like/ }).first()).toBeDisabled();
@@ -121,16 +122,16 @@ test("frozen and suspended pages show banners and keep writes off", async ({ bro
   );
   await expect(page.locator("#suggest")).toBeDisabled();
   const owner = await signedIn(browser, "frozenowner", clientIp("ideas", 107));
-  const ownerPage = await owner.newPage();
+  const ownerPage = await newPage(owner);
   await ownerPage.goto("/@frozen_host?view=schedule");
   await expect(ownerPage.locator("#page-banner")).toContainText("Your page was frozen on ");
   await expect(ownerPage.locator("#page-banner")).toContainText("Reason: Under review.");
   await expect(ownerPage.getByRole("button", { name: "Appeal / contact us" })).toBeVisible();
   const suspended = await signedIn(browser, "suspendedowner", clientIp("ideas", 108));
-  const suspendedPage = await suspended.newPage();
+  const suspendedPage = await newPage(suspended);
   await suspendedPage.goto("/@suspended_host");
   await expect(suspendedPage.locator("#page-banner")).toContainText("Your page was suspended on ");
-  await viewer.close();
-  await owner.close();
-  await suspended.close();
+  await close(viewer);
+  await close(owner);
+  await close(suspended);
 });

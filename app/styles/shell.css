@@ -118,7 +118,7 @@ body:not(:has(.landing-page)) > .site-footer a:focus-visible { outline: 2px soli
 .not-found-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
 .not-found-actions .button-link { margin: 0; }
 .not-found-actions .button-link:not(.gold):hover { border-color: var(--gold); }
-.sb-mark { align-items: center; border-radius: 6px; min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; }
+.sb-mark { border-radius: 6px; min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; }
 .sb-mark img { width: auto; height: 32px; }
 .brand-divider { flex: 0 0 1px; height: 44px; background: var(--line); }
 .streamer-home { display: flex; align-items: center; gap: 12px; border-radius: 44px; }

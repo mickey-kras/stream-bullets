@@ -1,5 +1,6 @@
+import { newPage, close } from "./coverage";
 import { readFile } from "node:fs/promises";
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
 
@@ -28,7 +29,7 @@ test("a member downloads their data, deletes their account, and is signed out", 
       sameSite: "Lax",
     },
   ]);
-  const page = await context.newPage();
+  const page = await newPage(context);
   // The old settings page opens Your profile over the Streamers list; Your data is in the account menu.
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/streamers\?dialog=profile$/);
@@ -86,5 +87,5 @@ test("a member downloads their data, deletes their account, and is signed out", 
   if (!topic) throw new Error("The discussion should remain.");
   const discussion = commentsSchema.parse(await (await request.get(`/api/entries/${topic.id}/comments`)).json());
   expect(discussion.comments).toEqual([expect.objectContaining({ text: "Reply that stays", parentId: null })]);
-  await context.close();
+  await close(context);
 });

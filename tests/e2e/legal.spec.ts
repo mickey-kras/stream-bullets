@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./coverage";
 
 const draft: RegExp = /Draft — operator details pending/;
 

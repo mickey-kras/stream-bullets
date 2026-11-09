@@ -1,5 +1,6 @@
+import { newPage, close } from "./coverage";
 import { readFile } from "node:fs/promises";
-import { expect, test, type Browser, type BrowserContext } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
 
@@ -28,7 +29,7 @@ async function signedIn(browser: Browser): Promise<BrowserContext> {
 
 test("older topics show fresh reactions, retain drafts, and disappear after deletion", async ({ browser }) => {
   const context = await signedIn(browser);
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@pagination_host?sort=newest");
   await page.getByRole("button", { name: "Load more topics", exact: true }).click();
   const olderTopic = page.locator("#topics .topic").filter({ hasText: "Archive topic 03" });
@@ -50,7 +51,7 @@ test("older topics show fresh reactions, retain drafts, and disappear after dele
   await page.getByRole("button", { name: "Load more topics", exact: true }).click();
   await expect(page.locator("#topics .topic").filter({ hasText: "Archive topic 01" })).toBeVisible();
   await expect(olderTopic).toHaveCount(0);
-  await context.close();
+  await close(context);
 });
 
 test("poll discussion refreshes when a remote comment changes the board", async ({ browser }) => {
@@ -61,7 +62,7 @@ test("poll discussion refreshes when a remote comment changes the board", async 
   });
   expect(created.status()).toBe(200);
   const poll = z.object({ id: z.string().uuid() }).parse(await created.json());
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto(`/@pagination_host?view=polls&entry=${poll.id}`);
   await expect(page.getByText("Live updates connected", { exact: true })).toBeVisible();
   await page.getByRole("textbox", { name: "Write a comment" }).fill("My local draft survives remote updates.");
@@ -74,7 +75,7 @@ test("poll discussion refreshes when a remote comment changes the board", async 
   await expect(page.getByRole("textbox", { name: "Write a comment" })).toHaveValue(
     "My local draft survives remote updates.",
   );
-  await context.close();
+  await close(context);
 });
 
 test("the OBS overlay refreshes over HTTP and reconnects after a long WebSocket outage", async ({ browser }) => {
@@ -89,7 +90,7 @@ test("the OBS overlay refreshes over HTTP and reconnects after a long WebSocket 
     baseURL: "http://localhost:5173",
     extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("pagination", 51) },
   });
-  const page = await context.newPage();
+  const page = await newPage(context);
   let blocked: boolean = true;
   let attempts: number = 0;
   await page.routeWebSocket("**/api/live/pagination_host", async (socket) => {
@@ -118,6 +119,6 @@ test("the OBS overlay refreshes over HTTP and reconnects after a long WebSocket 
   blocked = false;
   await page.clock.fastForward(30_001);
   await expect(page.locator(".overlay-connection")).toHaveCount(0);
-  await context.close();
-  await owner.close();
+  await close(context);
+  await close(owner);
 });

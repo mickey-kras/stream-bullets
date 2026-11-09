@@ -1,5 +1,6 @@
+import { newPage, close } from "./coverage";
 import { readFile } from "node:fs/promises";
-import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext, type Page } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
 
@@ -48,7 +49,7 @@ async function headerLabelsDoNotWrap(page: Page): Promise<void> {
 
 test("the account menu is a keyboard-operable disclosure of links", async ({ browser }) => {
   const context = await signedIn(browser, "owner");
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/streamers");
   const toggle = page.getByRole("button", { name: "Account menu for owner" });
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
@@ -116,14 +117,14 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   await expect(
     page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Streamers" }),
   ).toBeVisible();
-  await context.close();
+  await close(context);
 });
 
 test("logos go home, the streamer picture goes to its topics, and navigation marks the current page", async ({
   browser,
 }) => {
   const context = await signedIn(browser, "admin");
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@test_host?view=polls");
   const banner = page.getByRole("banner");
   await expect(banner.getByRole("link", { name: "StreamBullets home" })).toHaveAttribute("href", "/");
@@ -144,19 +145,19 @@ test("logos go home, the streamer picture goes to its topics, and navigation mar
   await expect(main.getByRole("link", { name: "Streamers" })).not.toHaveAttribute("aria-current", "page");
   // The back link returns to the last streamer page.
   await expect(page.getByRole("link", { name: "Back to Test host" })).toHaveAttribute("href", "/@test_host");
-  await context.close();
+  await close(context);
 });
 
 test("headers keep every label on one line at 390px", async ({ browser }) => {
   const context = await signedIn(browser, "admin", { width: 390 });
-  const page = await context.newPage();
+  const page = await newPage(context);
   for (const path of ["/@test_host", "/streamers", "/admin", "/privacy", "/missing/page"]) {
     await page.goto(path);
     await expect(page.getByRole("banner")).toBeVisible();
     await headerLabelsDoNotWrap(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   }
-  await context.close();
+  await close(context);
 });
 
 test("the footer sits on the gold frame band: 42px on desktop, 34px on phones", async ({ page }) => {
@@ -201,7 +202,7 @@ test("the 404 page has the site header, a streamer search and a way on", async (
 
 test("the Contact dialog copies the support address", async ({ browser }) => {
   const context = await browser.newContext({ baseURL: origin, permissions: ["clipboard-read", "clipboard-write"] });
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/privacy");
   const opener = page.getByRole("contentinfo").getByRole("button", { name: "Contact" });
   await opener.click();
@@ -225,5 +226,5 @@ test("the Contact dialog copies the support address", async ({ browser }) => {
   await dialog.getByRole("button", { name: "Copy address" }).click();
   await expect(dialog.getByRole("status")).toHaveText("Press Ctrl+C or ⌘C to copy.");
   expect(await page.evaluate(() => getSelection()?.toString())).toBe("support@streambullets.com");
-  await context.close();
+  await close(context);
 });

@@ -1,5 +1,6 @@
+import { close } from "./coverage";
 import { readFile } from "node:fs/promises";
-import { test, expect, type Browser, type BrowserContext } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext } from "./coverage";
 import { z } from "zod";
 import { clientIp } from "./client-ips";
 
@@ -60,7 +61,7 @@ test("a suspended page is hidden from everyone but its owner and admins", async 
   expect(edit.status()).toBe(423);
   const admin = await signedIn(browser, "admin", clientIp("moderation", 62));
   expect((await admin.request.get("/api/streamers/suspended_host")).status()).toBe(200);
-  await Promise.all([viewer.close(), owner.close(), admin.close()]);
+  await Promise.all([close(viewer), close(owner), close(admin)]);
 });
 
 test("a frozen page stays public but refuses every write", async ({ browser, request }) => {
@@ -77,7 +78,7 @@ test("a frozen page stays public but refuses every write", async ({ browser, req
   const own = boardSchema.parse(await (await owner.request.get("/api/streamers/frozen_host")).json());
   expect(own.streamer.statusReason).toBe("Under review");
   expect((await owner.request.patch("/api/streamer", { data: { name: "Thawed" } })).status()).toBe(423);
-  await Promise.all([viewer.close(), owner.close()]);
+  await Promise.all([close(viewer), close(owner)]);
 });
 
 test("profile settings are saved per account", async ({ browser }) => {
@@ -99,7 +100,7 @@ test("profile settings are saved per account", async ({ browser }) => {
       (await viewer.request.patch("/api/me/locale", { data: { locale: "en" } })).status(),
       (await viewer.request.patch("/api/profile", { data: { avatarPreset: 3 } })).status(),
     ];
-    await viewer.close();
+    await close(viewer);
     expect(restored, "restores the shared viewer's locale and avatar").toEqual([200, 200]);
   }
 });

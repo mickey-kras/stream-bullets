@@ -1,8 +1,9 @@
+import { newPage, close } from "./coverage";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { expect, test, type BrowserContext } from "@playwright/test";
+import { expect, test, type BrowserContext } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
 
@@ -84,7 +85,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     },
   ]);
   try {
-    const page = await context.newPage();
+    const page = await newPage(context);
     await page.goto(`/@test_host?entry=${entryId}`);
     await page.getByRole("button", { name: "Load more comments" }).click();
     const oldest = page
@@ -165,7 +166,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     await expect(postedDraft).toBeVisible();
     await expect(postedDraft.locator(".replying")).toHaveCount(0);
   } finally {
-    await context.close();
-    await ownerContext.close();
+    await close(context);
+    await close(ownerContext);
   }
 });

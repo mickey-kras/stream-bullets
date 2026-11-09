@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { newPage, close } from "./coverage";
+import { expect, test } from "./coverage";
 
 test("mobile landing is one screen with Browse streamers and the scene under the copy", async ({ page }) => {
   test.slow(); // software WebGL in CI builds the scene on the CPU
@@ -82,12 +83,12 @@ test("the tilt pill shows only on touch devices that ask for motion access", asy
     });
   };
   await desktop.addInitScript(stubPermission);
-  const page = await desktop.newPage();
+  const page = await newPage(desktop);
   await page.goto("/");
   const station = page.locator(".landing-station");
   await expect(station).toHaveAttribute("data-status", /ready|unavailable/, { timeout: 60_000 });
   await expect(page.getByRole("button", { name: "Tilt to look around" })).toHaveCount(0);
-  await desktop.close();
+  await close(desktop);
 
   // A touch phone whose browser needs the tap (iOS Safari) gets the pill once the station is ready.
   const phone = await browser.newContext({
@@ -102,7 +103,7 @@ test("the tilt pill shows only on touch devices that ask for motion access", asy
   await phone.addCookies([
     { name: "sb_prefs", value: encodeURIComponent('{"motion":"full"}'), domain: "localhost", path: "/" },
   ]);
-  const mobile = await phone.newPage();
+  const mobile = await newPage(phone);
   await mobile.goto("/");
   const ready = mobile.locator('.landing-station[data-status="ready"]');
   const unavailable = mobile.locator('.landing-station[data-status="unavailable"]');
@@ -113,5 +114,5 @@ test("the tilt pill shows only on touch devices that ask for motion access", asy
     await pill.tap();
     await expect(pill).toHaveCount(0);
   }
-  await phone.close();
+  await close(phone);
 });

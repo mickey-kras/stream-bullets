@@ -1,6 +1,7 @@
+import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { expect, test, type Browser, type BrowserContext } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
 import { accounts, runSql } from "./fixtures";
@@ -51,7 +52,7 @@ const PRESETS: readonly string[] = [
 test("Your profile: preset order, a cropped upload, then a preset again", async ({ browser }) => {
   test.slow();
   const context = await signedIn(browser, "reporter");
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/streamers");
   await page.getByRole("button", { name: "Account menu for reporter" }).click();
   await page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Your profile" }).click();
@@ -132,13 +133,13 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   await composer.getByRole("button", { name: "Post", exact: true }).click();
   const posted = page.locator("article.comment").filter({ hasText: "Shown with my preset." });
   await expect(posted.locator(".user-avatar")).toHaveAttribute("data-preset", "17");
-  await context.close();
+  await close(context);
 });
 
 test("Edit your page: handle warning, a cropped logo, then the profile picture again", async ({ browser }) => {
   test.slow();
   const context = await signedIn(browser, "otherowner", 390);
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@other_host");
   await page.getByRole("button", { name: "Account menu for otherowner" }).click();
   await page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Edit your page" }).click();
@@ -193,5 +194,5 @@ test("Edit your page: handle warning, a cropped logo, then the profile picture a
   } finally {
     await runSql("rename-reset", [restore]);
   }
-  await context.close();
+  await close(context);
 });

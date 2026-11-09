@@ -1,4 +1,5 @@
-import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { newPage, close } from "./coverage";
+import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "./coverage";
 import { origin, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
@@ -94,7 +95,7 @@ const matrix: {
 for (const row of matrix) {
   test(`role matrix: ${row.role} on the shell routes and admin APIs`, async ({ browser }) => {
     const context = await contextFor(browser, row.role, row.ip);
-    const page = await context.newPage();
+    const page = await newPage(context);
 
     expect(await adminApiStatuses(context.request)).toEqual(row.admin);
 
@@ -132,7 +133,7 @@ for (const row of matrix) {
       await expect(dialog.getByLabel("Handle")).toHaveValue(row.ownPage);
       await expect(dialog.locator(".owner-notice")).toHaveCount(0);
     } else await expect(page.getByRole("dialog", { name: "Edit your page" })).toHaveCount(0);
-    await context.close();
+    await close(context);
   });
 }
 
@@ -142,7 +143,7 @@ test("role matrix: the streamer page header action and content tools", async ({ 
   const { entries } = (await board.json()) as { entries: { id: string; title: string }[] };
   const topic = entries.find((entry) => entry.title === "Archive topic 01") ?? entries.at(-1);
   if (!topic) throw new Error("The seeded topics are missing.");
-  await anonymous.close();
+  await close(anonymous);
 
   // Someone else's page (pagination_host): signed-in people suggest and report; admins also remove.
   const tools: Record<"signed-out" | "viewer" | "owner" | "admin", { signedIn: boolean; remove: boolean }> = {
@@ -153,7 +154,7 @@ test("role matrix: the streamer page header action and content tools", async ({ 
   };
   for (const [index, role] of (["signed-out", "viewer", "owner", "admin"] as const).entries()) {
     const context = await contextFor(browser, role, clientIp("roles", 204 + index));
-    const page = await context.newPage();
+    const page = await newPage(context);
     const want = tools[role];
     await page.goto(`/@pagination_host?entry=${topic.id}`);
     await expect(page.locator("#detail").getByRole("heading", { name: topic.title })).toBeVisible();
@@ -173,15 +174,15 @@ test("role matrix: the streamer page header action and content tools", async ({ 
     // Only a page owner may edit a page. The owner's edit keeps test_host's seeded text.
     const edit = await context.request.patch("/api/streamer", { data: { about: "A test community." } });
     expect(edit.status(), role).toBe({ "signed-out": 401, viewer: 404, owner: 200, admin: 404 }[role]);
-    await context.close();
+    await close(context);
   }
 
   // The owner's own page offers New poll on the Polls tab.
   const owner = await signedIn(browser, "owner", clientIp("roles", 208));
-  const page = await owner.newPage();
+  const page = await newPage(owner);
   await page.goto("/@test_host?view=polls");
   await expect(page.getByRole("button", { name: "New poll" }).first()).toBeVisible();
-  await owner.close();
+  await close(owner);
 });
 
 test("role matrix: Ideas status is for admins only", async ({ browser }) => {
@@ -190,14 +191,14 @@ test("role matrix: Ideas status is for admins only", async ({ browser }) => {
   const { entries } = (await board.json()) as { entries: { id: string; title: string }[] };
   const idea = entries.find((entry) => entry.title === "Dark mode for the overlay");
   if (!idea) throw new Error("The seeded idea is missing.");
-  await anonymous.close();
+  await close(anonymous);
   for (const [index, role] of (["signed-out", "viewer", "owner", "admin"] as const).entries()) {
     const context = await contextFor(browser, role, clientIp("roles", 210 + index));
-    const page = await context.newPage();
+    const page = await newPage(context);
     await page.goto(`/@streambullets?entry=${idea.id}`);
     await expect(page.locator("#detail .idea-status")).toBeVisible();
     await expect(page.getByText("Status (admins only)"), role).toHaveCount(role === "admin" ? 1 : 0);
-    await context.close();
+    await close(context);
   }
 });
 
@@ -229,7 +230,7 @@ for (const row of moderated) {
     browser,
   }) => {
     const context = await signedIn(browser, row.role, row.ip);
-    const page = await context.newPage();
+    const page = await newPage(context);
     expect((await page.goto(`/@${row.handle}`))?.status()).toBe(200);
     await expect(page.locator("#page-banner > span")).toHaveText(row.notice);
     await expect(page.locator("#page-banner").getByRole("button", { name: "Appeal / contact us" })).toBeVisible();
@@ -248,14 +249,14 @@ for (const row of moderated) {
     await page.goto(`/@${row.handle}?dialog=page`);
     const dialog = page.getByRole("dialog", { name: "Edit your page" });
     await expect(dialog.locator(".owner-notice")).toHaveText(row.notice);
-    await context.close();
+    await close(context);
   });
 }
 
 test("role matrix: frozen and suspended pages for everyone else", async ({ browser }) => {
   for (const [index, role] of (["signed-out", "viewer", "owner", "admin"] as const).entries()) {
     const context = await contextFor(browser, role, clientIp("roles", 216 + index));
-    const page = await context.newPage();
+    const page = await newPage(context);
     // Frozen: public and read-only.
     expect((await page.goto("/@frozen_host"))?.status(), role).toBe(200);
     const banner = page.locator("#page-banner");
@@ -276,6 +277,6 @@ test("role matrix: frozen and suspended pages for everyone else", async ({ brows
     // Nobody but the owner gets the owner's notice or the needs-attention avatar.
     if (role !== "signed-out")
       await expect(page.getByRole("button", { name: /Your page needs attention/ })).toHaveCount(0);
-    await context.close();
+    await close(context);
   }
 });
