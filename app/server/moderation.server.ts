@@ -258,15 +258,16 @@ function historyValue(row: HistoryRow): ModerationEvent {
 export async function listModerationPages(env: AppEnv, adminId: string, query: PageQuery): Promise<AdminPageList> {
   const value = parsed(pageQuerySchema, query);
   await requireAdmin(env, adminId);
-  const pattern = `%${value.query.toLowerCase().replaceAll(/[\\%_]/gu, String.raw`\$&`)}%`;
-  const { results } = await env.DB.prepare(`
+  const escapedQuery: string = value.query.toLowerCase().replaceAll(/[\\%_]/gu, String.raw`\$&`);
+  const pattern: string = `%${escapedQuery}%`;
+  const { results } = await env.DB.prepare(String.raw`
     SELECT s.id, s.handle, s.name, s.logo, s.avatar, s.is_official, s.status, s.status_reason, s.status_changed_at,
       s.owner_id, u.name AS owner_name, u.email AS owner_email, u.image AS owner_image, u.avatar_preset AS owner_preset,
       (SELECT count(*) FROM entries e WHERE e.streamer_id=s.id AND e.kind='topic') AS topics,
       (SELECT count(*) FROM entries e WHERE e.streamer_id=s.id AND e.kind<>'topic') AS polls
     FROM streamers s LEFT JOIN user u ON u.id=s.owner_id
     WHERE (?1='all' OR s.status=?1)
-      AND (?2='' OR lower(s.name) LIKE ?3 ESCAPE '\\' OR s.handle LIKE ?3 ESCAPE '\\')
+      AND (?2='' OR lower(s.name) LIKE ?3 ESCAPE '\' OR s.handle LIKE ?3 ESCAPE '\')
       AND (?4 IS NULL OR s.handle > ?4)
     ORDER BY s.handle LIMIT ?5
   `)

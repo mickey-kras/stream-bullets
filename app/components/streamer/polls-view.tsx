@@ -66,13 +66,12 @@ function useBattleFocus(on: boolean): void {
   }, [on]);
 }
 
-/** The Polls tab: the list, one poll with its discussion, or one Mash Battle on its own page. */
-export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
-  const { name, viewer, owner, writable, entries, selected, now, live } = props;
-  const battle: Entry | null = selected?.kind === "mash" ? selected : null;
-  const phase: string = useBattlePhase(battle, now);
-  useBattleFocus(battle !== null && (phase === "live" || phase === "countdown"));
-  const offline: boolean = live.status === "offline";
+function PollToolbarStart({ props, battle, phase }: Readonly<{
+  props: Readonly<PollsViewProps>;
+  battle: Entry | null;
+  phase: string;
+}>): ReactNode {
+  const { selected, entries, now } = props;
   let toolbarStart: ReactNode = null;
   if (selected && battle && phase === "finished") {
     const next: Entry | undefined = entries.find((entry: Entry) => isOpenPoll(entry, now));
@@ -114,6 +113,16 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
         ))}
       </fieldset>
     );
+  return toolbarStart;
+}
+
+/** The Polls tab: the list, one poll with its discussion, or one Mash Battle on its own page. */
+export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
+  const { name, viewer, owner, writable, entries, selected, now, live } = props;
+  const battle: Entry | null = selected?.kind === "mash" ? selected : null;
+  const phase: string = useBattlePhase(battle, now);
+  useBattleFocus(battle !== null && (phase === "live" || phase === "countdown"));
+  const offline: boolean = live.status === "offline";
   const card = (entry: Entry): ReactNode =>
     entry.kind === "mash" && !selected ? (
       <MashTeaser key={entry.id} entry={entry} now={now} />
@@ -204,7 +213,7 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
         </div>
       )}
       <div className={`poll-toolbar${selected ? " is-single" : ""}${battle && owner ? " owner-tools" : ""}`}>
-        {toolbarStart}
+        <PollToolbarStart props={props} battle={battle} phase={phase} />
         {owner && (
           <Link className="text-link" to={paths.overlayControl}>
             <Icon name="overlay" size={16} />

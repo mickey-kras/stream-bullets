@@ -224,6 +224,9 @@ export function useLivePolls(
       setMashLive((mash: MashLive) => withSnapshotRuns(mash, parsed.data));
       updateSnapshot(parsed.data);
     }
+    function ping(current: WebSocket): void {
+      if (current.readyState === WebSocket.OPEN) current.send("ping");
+    }
     function connect(): void {
       if (!active) return;
       const url: URL = new URL(`/api/live/${encodeURIComponent(handle)}`, globalThis.location.origin);
@@ -237,9 +240,7 @@ export function useLivePolls(
         liveSocket = current;
         setStatus("connecting");
         if (pinger) clearInterval(pinger);
-        pinger = setInterval(() => {
-          if (current.readyState === WebSocket.OPEN) current.send("ping");
-        }, PING_INTERVAL_MS);
+        pinger = setInterval(ping, PING_INTERVAL_MS, current);
       };
       current.onmessage = (event: MessageEvent<unknown>): void => {
         if (!active || typeof event.data !== "string" || event.data.length > 128 * 1024) return;

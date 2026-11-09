@@ -63,8 +63,8 @@ function commentValue(row: CommentRow): Comment {
 
 /** Every reply under the given top-level comments, any depth, oldest first within each thread. */
 async function threadReplies(env: AppEnv, rootIds: string[], viewerId: string | null): Promise<Map<string, Comment[]>> {
+  if (rootIds.length === 0) return new Map<string, Comment[]>();
   const replies = new Map<string, Comment[]>(rootIds.map((id: string): [string, Comment[]] => [id, []]));
-  if (rootIds.length === 0) return replies;
   const { results } = await env.DB.prepare(`
     WITH RECURSIVE thread(root, id) AS (
       SELECT c.id, c.id FROM entry_comments c WHERE c.id IN (SELECT value FROM json_each(?))

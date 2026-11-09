@@ -244,7 +244,7 @@ export async function getViewerSession(
     context.responseHeaders.append("Set-Cookie", cookie);
   }
   if (!response) return null;
-  return { viewer: viewerValue(response.user as User & Record<string, unknown>), sessionId: response.session.id };
+  return { viewer: viewerValue(response.user), sessionId: response.session.id };
 }
 
 export async function getViewer(request: Request, context: AppContext): Promise<Viewer | null> {

@@ -64,33 +64,36 @@ export function CreateEntry({
         action: "create",
         kind: "mash",
         title: textField("title"),
-        options: form.getAll("side").map((side: FormDataEntryValue) => String(side).trim()),
+        options: form.getAll("side").map((side: FormDataEntryValue): string => {
+          if (typeof side !== "string") throw new TypeError("side must be text.");
+          return side.trim();
+        }),
         durationS: Number(textField("durationS")),
       };
-      const body: unknown =
-        mode === "poll" && kind === "mash"
-          ? mash
-          : mode === "topic"
-            ? {
-                action: "create",
-                kind: "topic",
-                title: textField("title"),
-                body: textField("body"),
-                category: textField("category"),
-              }
-            : {
-                action: "create",
-                kind,
-                title: textField("title"),
-                options:
-                  kind === "binary"
-                    ? ["Yes", "No"]
-                    : textField("options")
-                        .split("\n")
-                        .map((option: string) => option.trim())
-                        .filter(Boolean),
-                duration: Number(textField("duration")),
-              };
+      let body: unknown = mash;
+      if (mode === "topic") {
+        body = {
+          action: "create",
+          kind: "topic",
+          title: textField("title"),
+          body: textField("body"),
+          category: textField("category"),
+        };
+      } else if (kind !== "mash") {
+        body = {
+          action: "create",
+          kind,
+          title: textField("title"),
+          options:
+            kind === "binary"
+              ? ["Yes", "No"]
+              : textField("options")
+                  .split("\n")
+                  .map((option: string) => option.trim())
+                  .filter(Boolean),
+          duration: Number(textField("duration")),
+        };
+      }
       await onCreate(body);
       onOpenChange(false);
     } catch (error_: unknown) {
@@ -166,7 +169,7 @@ export function CreateEntry({
               ))}
             </fieldset>
             {kind === "mash" && <MashFields />}
-            {kind === "mash" ? null : kind === "choice" ? (
+            {kind === "choice" && (
               <label>
                 <span>
                   {t("create.options")}
@@ -175,9 +178,8 @@ export function CreateEntry({
                 <textarea name="options" rows={4} required maxLength={486} aria-describedby="options-help" />
                 <small id="options-help">{t("create.optionsHelp")}</small>
               </label>
-            ) : (
-              <p className="muted">{t("create.binaryHelp")}</p>
             )}
+            {kind === "binary" && <p className="muted">{t("create.binaryHelp")}</p>}
             <div className="field" hidden={kind === "mash"}>
               <span className="field-label" id="poll-duration-label">
                 {t("create.votingTime")}

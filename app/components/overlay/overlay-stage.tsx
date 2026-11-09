@@ -156,6 +156,31 @@ function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
   );
 }
 
+function CommunityOverlay({ scene, source }: Readonly<{ scene: OverlayScene; source: OverlaySourceRef }>): ReactNode {
+  // No ref means the first card; a ref to a removed card shows nothing rather than another card.
+  const card = source.ref === null ? scene.data.cards[0] : scene.data.cards.find((item) => item.id === source.ref);
+  if (!card) return null;
+  let target: string = "";
+  if (card.target?.startsWith("tab:")) target = `${scene.host}/@${scene.handle}`;
+  else if (card.target) target = card.target.replace(/^https:\/\//, "");
+  return (
+    <article className="ov-card" data-overlay-source="card">
+      <span className="eyebrow">
+        <Icon name="community" size={16} />
+        {t("overlay.community", { name: scene.name })}
+      </span>
+      <h1>{card.title}</h1>
+      <p className="ov-body">{card.body}</p>
+      {card.label && (
+        <p className="ov-cta">
+          {card.label}
+          {target && ` · ${target}`}
+        </p>
+      )}
+    </article>
+  );
+}
+
 function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source: OverlaySourceRef }>): ReactNode {
   const { data, overlay } = scene;
   if (source.type === "auto" || source.type === "poll") {
@@ -199,30 +224,7 @@ function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source
         </h1>
       </article>
     );
-  if (source.type === "card") {
-    // No ref means the first card; a ref to a removed card shows nothing rather than another card.
-    const card = source.ref === null ? data.cards[0] : data.cards.find((item) => item.id === source.ref);
-    if (!card) return null;
-    let target: string = "";
-    if (card.target?.startsWith("tab:")) target = `${scene.host}/@${scene.handle}`;
-    else if (card.target) target = card.target.replace(/^https:\/\//, "");
-    return (
-      <article className="ov-card" data-overlay-source="card">
-        <span className="eyebrow">
-          <Icon name="community" size={16} />
-          {t("overlay.community", { name: scene.name })}
-        </span>
-        <h1>{card.title}</h1>
-        <p className="ov-body">{card.body}</p>
-        {card.label && (
-          <p className="ov-cta">
-            {card.label}
-            {target && ` · ${target}`}
-          </p>
-        )}
-      </article>
-    );
-  }
+  if (source.type === "card") return <CommunityOverlay scene={scene} source={source} />;
   if (source.type === "support") {
     const link = data.support;
     return (

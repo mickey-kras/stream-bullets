@@ -329,7 +329,7 @@ function TapButton({
     // Restart the press animation and float a decorative "+1" (both hidden with reduced motion).
     const target: HTMLButtonElement = button.current;
     target.classList.remove("punch");
-    void target.offsetWidth;
+    target.getBoundingClientRect();
     target.classList.add("punch");
     const plus: HTMLSpanElement = document.createElement("span");
     plus.className = "mash-plus";

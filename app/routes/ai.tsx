@@ -62,7 +62,8 @@ function Interest({ status }: Readonly<{ status: AiInterestStatus }>): ReactNode
       });
       setTotals(result.totals);
       if (result.counted) setMine(value);
-      const message: string = result.counted ? t(value === "up" ? "ai.countedUp" : "ai.countedDown") : t("ai.already");
+      const countedMessage: MessageId = value === "up" ? "ai.countedUp" : "ai.countedDown";
+      const message: string = t(result.counted ? countedMessage : "ai.already");
       toast(message);
       announce(message);
     } catch (error: unknown) {

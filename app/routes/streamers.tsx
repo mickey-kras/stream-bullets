@@ -89,6 +89,11 @@ function StreamerCard({ streamer, intent }: Readonly<{ streamer: Streamer; inten
   );
 }
 
+function directoryCount(shown: number, total: number): string {
+  if (shown === 0) return "";
+  return shown < total ? t("streamers.showingOf", { shown, total }) : tn("streamers.showing", shown);
+}
+
 /**
  * The Streamers directory (item 2): official pages first, then by handle, 20 at a time with "Load more", and a
  * search by name or @handle. From a landing sign (`?then=suggest|vote|discuss`, item 5) a dismissible prompt
@@ -104,7 +109,7 @@ export default function Streamers(): ReactNode {
   const [error, setError] = useState<string>("");
   const [text, setText] = useState<string>(data.query);
   const grid = useRef<HTMLDivElement | null>(null);
-  const typing = useRef<number>(0);
+  const typing = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined);
   const focusCard = useRef<number | null>(null);
   useRememberContentRoute("/streamers", t("nav.streamers"));
 
@@ -119,7 +124,7 @@ export default function Streamers(): ReactNode {
     setShownQuery(data.query);
     if (typeof document === "undefined" || document.activeElement?.id !== "streamer-search") setText(data.query);
   }
-  useEffect(() => () => window.clearTimeout(typing.current), []);
+  useEffect(() => () => globalThis.clearTimeout(typing.current), []);
   useEffect(() => {
     const index: number | null = focusCard.current;
     if (index === null) return;
@@ -133,7 +138,8 @@ export default function Streamers(): ReactNode {
     if (trimmed) params.set("query", trimmed);
     else params.delete("query");
     const qs: string = params.toString();
-    void navigate(`/streamers${qs ? `?${qs}` : ""}`, { replace, preventScrollReset: true });
+    const target: string = qs ? `/streamers?${qs}` : "/streamers";
+    navigate(target, { replace, preventScrollReset: true });
   }
 
   async function loadMore(): Promise<void> {
@@ -171,12 +177,7 @@ export default function Streamers(): ReactNode {
     </p>
   ) : null;
 
-  let count: string = "";
-  if (streamers.length > 0)
-    count =
-      streamers.length < data.total
-        ? t("streamers.showingOf", { shown: streamers.length, total: data.total })
-        : tn("streamers.showing", streamers.length);
+  const count: string = directoryCount(streamers.length, data.total);
 
   return (
     <>
@@ -228,7 +229,7 @@ export default function Streamers(): ReactNode {
                 action="/streamers"
                 onSubmit={(event: FormEvent<HTMLFormElement>) => {
                   event.preventDefault();
-                  window.clearTimeout(typing.current);
+                  globalThis.clearTimeout(typing.current);
                   search(text, false);
                 }}
               >
@@ -245,8 +246,8 @@ export default function Streamers(): ReactNode {
                   onChange={(event) => {
                     const value: string = event.currentTarget.value;
                     setText(value);
-                    window.clearTimeout(typing.current);
-                    typing.current = window.setTimeout(() => search(value, true), 350);
+                    globalThis.clearTimeout(typing.current);
+                    typing.current = globalThis.setTimeout(() => search(value, true), 350);
                   }}
                 />
                 {data.intent && <input type="hidden" name="then" value={data.intent} />}

@@ -1,4 +1,4 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import type { LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
 import { apiRoutes, dispatch } from "../server/api";
 
@@ -13,11 +13,4 @@ export async function loader({ request, context, params }: LoaderFunctionArgs): 
   );
 }
 
-export async function action({ request, context, params }: ActionFunctionArgs): Promise<Response> {
-  return dispatch(
-    apiRoutes,
-    request,
-    context.get(appContext),
-    params["*"] ?? new URL(request.url).pathname.slice("/api/".length),
-  );
-}
+export const action = loader;

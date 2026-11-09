@@ -25,11 +25,7 @@ export const localIcons = {
       <path d="M8 8h8M8 12h5" />
     </>
   ),
-  polls: (
-    <>
-      <path d="M5 20V10h4v10M10 20V4h4v16M15 20v-7h4v7" />
-    </>
-  ),
+  polls: <path d="M5 20V10h4v10M10 20V4h4v16M15 20v-7h4v7" />,
   schedule: (
     <>
       <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -48,11 +44,7 @@ export const localIcons = {
       <path d="M3 21v-3a6 6 0 0 1 12 0v3m1-16a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v3" />
     </>
   ),
-  google: (
-    <>
-      <path d="M18.36 5.64A9 9 0 1 0 21 12h-9" />
-    </>
-  ),
+  google: <path d="M18.36 5.64A9 9 0 1 0 21 12h-9" />,
   twitch: (
     <>
       <path d="M21 2H3v16h5v4l4-4h5l4-4V2Z" />
@@ -72,11 +64,7 @@ export const localIcons = {
       <path d="M17.5 6.5h.01" />
     </>
   ),
-  check: (
-    <>
-      <path d="M20 6 9 17l-5-5" />
-    </>
-  ),
+  check: <path d="M20 6 9 17l-5-5" />,
   search: (
     <>
       <circle cx="10" cy="10" r="7" />
@@ -95,26 +83,10 @@ export const localIcons = {
       <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
     </>
   ),
-  trash: (
-    <>
-      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-    </>
-  ),
-  flag: (
-    <>
-      <path d="M4 22V4M4 4h13l-2 4 2 4H4" />
-    </>
-  ),
-  upload: (
-    <>
-      <path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5" />
-    </>
-  ),
-  download: (
-    <>
-      <path d="M12 3v13m-5-5 5 5 5-5M4 16v5h16v-5" />
-    </>
-  ),
+  trash: <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />,
+  flag: <path d="M4 22V4M4 4h13l-2 4 2 4H4" />,
+  upload: <path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5" />,
+  download: <path d="M12 3v13m-5-5 5 5 5-5M4 16v5h16v-5" />,
   "zoom-in": (
     <>
       <circle cx="10" cy="10" r="7" />
@@ -127,21 +99,13 @@ export const localIcons = {
       <path d="m15 15 6 6M7 10h6" />
     </>
   ),
-  "chevron-down": (
-    <>
-      <path d="m6 9 6 6 6-6" />
-    </>
-  ),
+  "chevron-down": <path d="m6 9 6 6 6-6" />,
   "chevron-up": <path d="m6 15 6-6 6 6" />,
   "thumbs-up": thumb(THUMB_UP, false),
   "thumbs-up-filled": thumb(THUMB_UP, true),
   "thumbs-down": thumb(THUMB_DOWN, false),
   "thumbs-down-filled": thumb(THUMB_DOWN, true),
-  comment: (
-    <>
-      <path d="M3 4h18v13H9l-6 4Z" />
-    </>
-  ),
+  comment: <path d="M3 4h18v13H9l-6 4Z" />,
   "cat-tech": (
     <>
       <rect x="2" y="3" width="20" height="14" rx="1" />
@@ -160,11 +124,7 @@ export const localIcons = {
       <path d="M12 5v16" />
     </>
   ),
-  "cat-chatting": (
-    <>
-      <path d="M3 4h18v13H9l-6 4Z" />
-    </>
-  ),
+  "cat-chatting": <path d="M3 4h18v13H9l-6 4Z" />,
   "search-none": (
     <>
       <circle cx="10" cy="10" r="7" />

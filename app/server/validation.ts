@@ -336,11 +336,11 @@ export const eventRangeSchema = z
     "Pick a shorter range.",
   );
 
-const cardTabTargets = CARD_TABS.map((tab): string => `tab:${tab}`);
+const cardTabTargets = new Set<string>(CARD_TABS.map((tab): string => `tab:${tab}`));
 
 /** A card button goes to a tab of the page (`tab:topics`) or an https link. */
 export function isCardTarget(value: string): boolean {
-  return cardTabTargets.includes(value) || isHttpsLink(value);
+  return cardTabTargets.has(value) || isHttpsLink(value);
 }
 
 export const communityCardSchema = z
@@ -356,7 +356,7 @@ export const communityCardSchema = z
       .trim()
       .max(500)
       .refine(isCardTarget, "A button goes to a tab or an https link.")
-      .transform((value: string): string => (cardTabTargets.includes(value) ? value : new URL(value).href))
+      .transform((value: string): string => (cardTabTargets.has(value) ? value : new URL(value).href))
       .refine((value: string): boolean => value.length <= 500, "A button goes to a tab or an https link.")
       .nullable()
       .default(null),

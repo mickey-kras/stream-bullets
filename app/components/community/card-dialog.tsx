@@ -64,10 +64,11 @@ export function CardDialog({
   const [url, setUrl] = useState<string>(card?.buttonTarget?.startsWith("https://") ? card.buttonTarget : "");
   const [error, setError] = useState<string>("");
   const [pending, setPending] = useState<boolean>(false);
+  const buttonTarget: string = target === "external" ? url.trim() : target;
   const result: CommunityCard = {
     ...draft,
     buttonLabel: showButton ? label.trim() || null : null,
-    buttonTarget: showButton ? (target === "external" ? url.trim() : target) : null,
+    buttonTarget: showButton ? buttonTarget : null,
   };
   const destinations: SelectOption[] = [
     ...cardTabs.map((tab: CardTab) => ({ value: `tab:${tab}`, label: t(`community.tab.${tab}`) })),

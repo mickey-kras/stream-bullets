@@ -121,45 +121,51 @@ export async function runMashAction(
   const now = Date.now();
   const phase = mashPhaseAt({ phase: battle.phase, startsAt: battle.starts_at, endsAt: battle.ends_at }, now);
   const statements: D1PreparedStatement[] = [];
-  if (action === "start") {
-    if (phase !== "setup") throw new HttpError(409, "This battle has already started.");
-    const startsAt = input.countdown ? now + MASH_COUNTDOWN_MS : now;
-    statements.push(
-      mashUpdate(
-        env,
-        "UPDATE entry_mash SET phase=?,starts_at=?,ends_at=?,winner=NULL WHERE entry_id=? AND phase='setup'",
-        input.countdown ? "countdown" : "live",
-        startsAt,
-        startsAt + battle.duration_s * 1_000,
-        id,
-      ),
-    );
-  } else if (action === "end") {
-    if (phase === "setup" || phase === "finished") throw new HttpError(409, "This battle is not running.");
-    statements.push(
-      phase === "countdown"
-        ? mashUpdate(
-            env,
-            "UPDATE entry_mash SET phase='setup',starts_at=NULL,ends_at=NULL WHERE entry_id=? AND phase='countdown'",
-            id,
-          )
-        : mashUpdate(
-            env,
-            "UPDATE entry_mash SET ends_at=max(starts_at+1,?) WHERE entry_id=? AND phase IN ('countdown','live')",
-            now,
-            id,
-          ),
-    );
-  } else {
-    if (phase !== "finished") throw new HttpError(409, "Restart a battle once it has ended.");
-    statements.push(
-      mashUpdate(env, "DELETE FROM mash_taps WHERE entry_id=?", id),
-      mashUpdate(
-        env,
-        "UPDATE entry_mash SET phase='setup',starts_at=NULL,ends_at=NULL,winner=NULL WHERE entry_id=?",
-        id,
-      ),
-    );
+  switch (action) {
+    case "start": {
+      if (phase !== "setup") throw new HttpError(409, "This battle has already started.");
+      const startsAt = input.countdown ? now + MASH_COUNTDOWN_MS : now;
+      statements.push(
+        mashUpdate(
+          env,
+          "UPDATE entry_mash SET phase=?,starts_at=?,ends_at=?,winner=NULL WHERE entry_id=? AND phase='setup'",
+          input.countdown ? "countdown" : "live",
+          startsAt,
+          startsAt + battle.duration_s * 1_000,
+          id,
+        ),
+      );
+      break;
+    }
+    case "end": {
+      if (phase === "setup" || phase === "finished") throw new HttpError(409, "This battle is not running.");
+      statements.push(
+        phase === "countdown"
+          ? mashUpdate(
+              env,
+              "UPDATE entry_mash SET phase='setup',starts_at=NULL,ends_at=NULL WHERE entry_id=? AND phase='countdown'",
+              id,
+            )
+          : mashUpdate(
+              env,
+              "UPDATE entry_mash SET ends_at=max(starts_at+1,?) WHERE entry_id=? AND phase IN ('countdown','live')",
+              now,
+              id,
+            ),
+      );
+      break;
+    }
+    default: {
+      if (phase !== "finished") throw new HttpError(409, "Restart a battle once it has ended.");
+      statements.push(
+        mashUpdate(env, "DELETE FROM mash_taps WHERE entry_id=?", id),
+        mashUpdate(
+          env,
+          "UPDATE entry_mash SET phase='setup',starts_at=NULL,ends_at=NULL,winner=NULL WHERE entry_id=?",
+          id,
+        ),
+      );
+    }
   }
   statements.push(mashUpdate(env, "UPDATE streamers SET revision=revision+1 WHERE id=?", battle.streamer_id));
   const results = await env.DB.batch(statements);

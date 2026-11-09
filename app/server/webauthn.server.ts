@@ -102,17 +102,19 @@ class CborReader {
     return value;
   }
 
+  private simpleValue(info: number): boolean | null {
+    if (info === 20) return false;
+    if (info === 21) return true;
+    if (info === 22) return null;
+    return fail("Unsupported CBOR value.");
+  }
+
   read(depth = 0): CborValue {
     if (depth > MAX_CBOR_DEPTH) fail("CBOR data is nested too deeply.");
     const [initial] = this.take(1);
     const major = initial >> 5;
     const info = initial & 0x1f;
-    if (major === 7) {
-      if (info === 20) return false;
-      if (info === 21) return true;
-      if (info === 22) return null;
-      fail("Unsupported CBOR value.");
-    }
+    if (major === 7) return this.simpleValue(info);
     const value = this.argument(info);
     switch (major) {
       case 0:

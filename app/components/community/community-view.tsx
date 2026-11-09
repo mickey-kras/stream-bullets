@@ -210,6 +210,8 @@ export function CommunityView({
               key={card.id}
               className="info-card community-card"
               data-card={card.id}
+              role="region"
+              aria-label={card.title}
               onDragOver={(event) => {
                 if (editable && dragged.current) event.preventDefault();
               }}

@@ -83,7 +83,7 @@ export function ceremonyError(error: unknown): string {
 }
 
 export function webAuthnAvailable(): boolean {
-  return typeof window !== "undefined" && typeof window.PublicKeyCredential === "function";
+  return typeof globalThis.window !== "undefined" && typeof globalThis.PublicKeyCredential === "function";
 }
 
 /** Asks the key for an assertion and stamps this session. Throws on failure. */

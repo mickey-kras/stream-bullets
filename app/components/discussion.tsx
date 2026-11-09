@@ -240,8 +240,8 @@ function CommentArticle({
         </div>
       </article>
     );
-  const parentName =
-    parent === undefined ? null : parent && !parent.removed ? parent.author : t("discussion.removedParent");
+  let parentName: string | null = null;
+  if (parent !== undefined) parentName = parent && !parent.removed ? parent.author : t("discussion.removedParent");
   const reported = comment.reported || rules.reported.has(comment.id);
   return (
     <article className="comment" id={`cm-${comment.id}`}>
@@ -295,6 +295,7 @@ function Thread({
   }
   const count = thread.replies.length;
   const listId = `replies-${thread.id}`;
+  const showRepliesLabel: string = t(count === 1 ? "discussion.showReply" : "discussion.showReplies", { count });
   return (
     <li className={`thread${count ? " has-replies" : ""}`}>
       <CommentArticle comment={thread} parent={undefined} rules={rules} />
@@ -307,9 +308,7 @@ function Thread({
           onClick={() => setHidden(!hidden)}
         >
           <Icon name={hidden ? "chevron-right" : "chevron-down"} size={16} />
-          {hidden
-            ? t(count === 1 ? "discussion.showReply" : "discussion.showReplies", { count })
-            : t("discussion.hideReplies", { count })}
+          {hidden ? showRepliesLabel : t("discussion.hideReplies", { count })}
         </button>
       )}
       {(count > 0 || replying) && (
@@ -357,7 +356,8 @@ async function fetchThreads(
   let cursor: string | null = null;
   let loaded = 0;
   do {
-    const query: string = `sort=${sort}&view=thread${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`;
+    const cursorQuery: string = cursor ? `&cursor=${encodeURIComponent(cursor)}` : "";
+    const query: string = `sort=${sort}&view=thread${cursorQuery}`;
     const snapshot: ThreadSnapshot = await requestJson<ThreadSnapshot>(
       `/api/entries/${encodeURIComponent(entryId)}/comments?${query}`,
       {
@@ -541,6 +541,7 @@ export function Discussion({
     </>
   );
 
+  const unavailablePlaceholder: string = t(status === "frozen" ? "discussion.frozen" : "discussion.suspended");
   return (
     <section className="discussion" aria-labelledby={`discussion-${entryId}`}>
       <div className="discussion-head">
@@ -570,11 +571,7 @@ export function Discussion({
         <Composer
           viewer={viewer}
           label={t("discussion.write")}
-          placeholder={
-            writable
-              ? t("discussion.placeholder")
-              : t(status === "frozen" ? "discussion.frozen" : "discussion.suspended")
-          }
+          placeholder={writable ? t("discussion.placeholder") : unavailablePlaceholder}
           disabled={!writable}
           value={text}
           busy={busy}

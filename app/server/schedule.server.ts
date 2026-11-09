@@ -49,8 +49,8 @@ function parsed<T>(schema: z.ZodType<T>, value: unknown): T {
 }
 
 async function topicsFor(env: AppEnv, ids: string[]): Promise<Map<string, EventTopic[]>> {
+  if (ids.length === 0) return new Map<string, EventTopic[]>();
   const map = new Map<string, EventTopic[]>(ids.map((id: string): [string, EventTopic[]] => [id, []]));
-  if (ids.length === 0) return map;
   const { results } = await env.DB.prepare(`SELECT t.event_id, e.id, e.title, e.category
     FROM stream_event_topics t JOIN entries e ON e.id=t.entry_id
     WHERE t.event_id IN (SELECT value FROM json_each(?)) ORDER BY e.created_at`)
@@ -148,7 +148,7 @@ async function ownedEvent(env: AppEnv, viewerId: string, id: string): Promise<Ow
   )
     .bind(id)
     .first<OwnedEventRow>();
-  if (!row || row.owner_id !== viewerId) throw new HttpError(404, "Stream not found.");
+  if (row?.owner_id !== viewerId) throw new HttpError(404, "Stream not found.");
   return row;
 }
 
@@ -436,37 +436,58 @@ export async function patchEvent(env: AppEnv, viewerId: string, id: string, valu
       .run();
     return (await getEvent(env, id, now))!;
   }
+  return editEvent(env, id, row, patch, now);
+}
+
+async function editOneEvent(
+  env: AppEnv,
+  id: string,
+  row: OwnedEventRow,
+  patch: Extract<EventPatch, { action: "edit" }>,
+  topics: string[],
+  now: number,
+): Promise<StreamEvent> {
+  // One stream: update the row in place. An occurrence keeps its series; its repeat settings stay.
+  const first = parseDate(patch.date)!;
+  const [hour, minute] = patch.time.split(":").map(Number);
+  const start = zonedTime(first, hour, minute, patch.tz);
+  // A past stream moved into the future adds one upcoming stream; any other move keeps the count.
+  const adds = row.starts_at < now && start >= now;
+  if (adds) await assertRoom(env, row.streamer_id, 1, now);
+  await guardedBatch(env, [
+    env.DB.prepare(`UPDATE stream_events SET title=?, notes=?, starts_at=?, duration_min=?, platform=?, url=?, tz=?,
+      status=CASE WHEN status='cancelled' THEN 'cancelled' ELSE 'scheduled' END, is_exception=1, updated_at=?
+      WHERE id=?`).bind(
+      patch.title,
+      patch.notes,
+      start,
+      patch.durationMin,
+      patch.platform,
+      patch.url,
+      patch.tz,
+      now,
+      id,
+    ),
+    env.DB.prepare("DELETE FROM stream_event_topics WHERE event_id=?").bind(id),
+    env.DB.prepare(
+      "INSERT OR IGNORE INTO stream_event_topics (event_id,entry_id) SELECT ?, value FROM json_each(?)",
+    ).bind(id, JSON.stringify(topics)),
+    ...(adds ? [capacityGuard(env, row.streamer_id, now)] : []),
+  ]);
+  return (await getEvent(env, id, now))!;
+}
+
+async function editEvent(
+  env: AppEnv,
+  id: string,
+  row: OwnedEventRow,
+  patch: Extract<EventPatch, { action: "edit" }>,
+  now: number,
+): Promise<StreamEvent> {
   const topics = await validTopics(env, row.streamer_id, patch.topicIds);
   const regenerate = patch.repeatDays > 0 && (patch.scope === "following" || row.series_id === null);
   if (!regenerate && !(patch.scope === "following" && row.series_id !== null)) {
-    // One stream: update the row in place. An occurrence keeps its series; its repeat settings stay.
-    const first = parseDate(patch.date)!;
-    const [hour, minute] = patch.time.split(":").map(Number);
-    const start = zonedTime(first, hour, minute, patch.tz);
-    // A past stream moved into the future adds one upcoming stream; any other move keeps the count.
-    const adds = row.starts_at < now && start >= now;
-    if (adds) await assertRoom(env, row.streamer_id, 1, now);
-    await guardedBatch(env, [
-      env.DB.prepare(`UPDATE stream_events SET title=?, notes=?, starts_at=?, duration_min=?, platform=?, url=?, tz=?,
-        status=CASE WHEN status='cancelled' THEN 'cancelled' ELSE 'scheduled' END, is_exception=1, updated_at=?
-        WHERE id=?`).bind(
-        patch.title,
-        patch.notes,
-        start,
-        patch.durationMin,
-        patch.platform,
-        patch.url,
-        patch.tz,
-        now,
-        id,
-      ),
-      env.DB.prepare("DELETE FROM stream_event_topics WHERE event_id=?").bind(id),
-      env.DB.prepare(
-        "INSERT OR IGNORE INTO stream_event_topics (event_id,entry_id) SELECT ?, value FROM json_each(?)",
-      ).bind(id, JSON.stringify(topics)),
-      ...(adds ? [capacityGuard(env, row.streamer_id, now)] : []),
-    ]);
-    return (await getEvent(env, id, now))!;
+    return editOneEvent(env, id, row, patch, topics, now);
   }
   // This and the following: replace the rest of the series (or a one-off) with the new plan.
   const plan = planEvents(patch, now, patch.repeatDays > 0 ? (row.series_id ?? null) : null);

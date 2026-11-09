@@ -50,6 +50,12 @@ function ReasonChips({ reasons }: Readonly<{ reasons: { reason: ReportReason; co
   );
 }
 
+function appendReportItems(current: ReportItemList | null, more: ReportItemList): ReportItemList {
+  if (!current) return more;
+  const seen = new Set(current.items.map(itemKey));
+  return { ...more, items: [...current.items, ...more.items.filter((item) => !seen.has(itemKey(item)))] };
+}
+
 /** "Load more" for a paged list: disabled and showing the loading text while a page is on its way. */
 function LoadMore({
   busy,
@@ -337,9 +343,7 @@ function GroupCard({
       flushSync(() => {
         setBusy(false);
         setDetail((current: ReportItemList | null) => {
-          if (!current) return more;
-          const seen = new Set(current.items.map(itemKey));
-          return { ...more, items: [...current.items, ...more.items.filter((item) => !seen.has(itemKey(item)))] };
+          return appendReportItems(current, more);
         });
       });
       if (!more.next && more.items.length > 0) {

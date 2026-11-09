@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { t, type MessageId } from "../i18n";
 import { AVATAR_PRESET_COUNT, DEFAULT_AVATAR_PRESET } from "../../db/enums";
 
-export { AVATAR_PRESET_COUNT, DEFAULT_AVATAR_PRESET };
+export { AVATAR_PRESET_COUNT, DEFAULT_AVATAR_PRESET } from "../../db/enums";
 
 /** The accessible name of a preset picture (0..17) in the page language. */
 export function avatarName(preset: number): string {

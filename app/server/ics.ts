@@ -85,13 +85,14 @@ export function buildCalendar(
   options: { pageUrl?: string; now?: number } = {},
 ): string {
   const now = options.now ?? Date.now();
+  const calendarName: string = escapeText(`${name} · streams`);
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//StreamBullets//Stream schedule//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    `X-WR-CALNAME:${escapeText(`${name} · streams`)}`,
+    `X-WR-CALNAME:${calendarName}`,
   ];
   for (const event of events) {
     const description = [event.notes, options.pageUrl ? `Topics and polls: ${options.pageUrl}` : ""]

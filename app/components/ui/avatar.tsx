@@ -28,7 +28,9 @@ export function useImageUrl(url: string | null): string | null {
   );
   if (!url || url.startsWith("blob:")) return url;
   const version: number | undefined = map.get(url.split("?")[0]);
-  return version ? `${url}${url.includes("?") ? "&" : "?"}v=${version}` : url;
+  if (!version) return url;
+  const separator: string = url.includes("?") ? "&" : "?";
+  return `${url}${separator}v=${version}`;
 }
 
 function Photo({ url, className }: Readonly<{ url: string; className: string }>): ReactNode {

@@ -104,8 +104,8 @@ export function ModerateSheet({
     try {
       const result = await adminRequest<{ emailed?: boolean }>(`/api/admin/streamers/${page.id}`, "POST", input);
       const done: string = t(copy.done, { handle: page.handle });
-      if (!input.notify) await onDone(done);
-      else await onDone(`${done} ${t(result.emailed ? "moderation.emailed" : "moderation.inAppOnly")}`);
+      if (input.notify) await onDone(`${done} ${t(result.emailed ? "moderation.emailed" : "moderation.inAppOnly")}`);
+      else await onDone(done);
     } catch (error_: unknown) {
       if (needsStepUp(error_)) setPending(input);
       else setError(errorText(error_));
@@ -116,15 +116,16 @@ export function ModerateSheet({
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const reason = String(data.get("reason") ?? "");
-    if (!MODERATION_REASONS.includes(reason as ModerationReason)) {
+    const reason = data.get("reason");
+    if (typeof reason !== "string" || !MODERATION_REASONS.includes(reason as ModerationReason)) {
       setError(t("moderation.chooseReason"));
       return;
     }
-    void send({
+    const note = data.get("note");
+    send({
       action,
       reason: reason as ModerationReason,
-      note: String(data.get("note") ?? "").trim(),
+      note: typeof note === "string" ? note.trim() : "",
       notify: data.get("notify") === "on",
     });
   }

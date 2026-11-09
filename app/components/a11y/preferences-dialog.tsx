@@ -18,7 +18,7 @@ type ChoiceKey = "cvd" | "contrast" | "text" | "motion" | "mashAssist";
 
 interface Choice {
   value: string;
-  label: MessageId | string;
+  label: string;
   hint?: MessageId;
 }
 
@@ -74,7 +74,7 @@ const SR_INTERVALS: readonly [Prefs["srInterval"], MessageId][] = [
 ];
 
 /** Percentages and other labels that are the same in every language are not message ids. */
-function label(value: MessageId | string): string {
+function label(value: string): string {
   return value.startsWith("prefs.") ? t(value as MessageId) : value;
 }
 

@@ -45,6 +45,7 @@ export function Select({
   const [inner, setInner] = useState<string | undefined>(defaultValue);
   const current: string | undefined = value ?? inner;
   const selected: SelectOption | undefined = options.find((option: SelectOption) => option.value === current);
+  const labelIds: string | undefined = labelledBy ? [labelledBy, id].filter(Boolean).join(" ") : undefined;
   return (
     <div className={`cselect ${className}`.trim()}>
       <RadixSelect.Root
@@ -61,7 +62,7 @@ export function Select({
           id={id}
           className="cselect-trigger"
           aria-label={labelledBy ? undefined : label}
-          aria-labelledby={labelledBy ? `${labelledBy}${id ? ` ${id}` : ""}` : undefined}
+          aria-labelledby={labelIds}
         >
           {selected?.icon && (
             <span className="cselect-icon" aria-hidden="true">

@@ -35,7 +35,7 @@ export function HostDialog({
     if (pending) return false;
     setPending(true);
     setError("");
-    const updating: boolean = Boolean(access?.application && access.application.status === "pending");
+    const updating: boolean = access?.application?.status === "pending";
     try {
       await postJson<unknown>("/api/application", input);
       await onSaved();
