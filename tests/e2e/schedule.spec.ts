@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { newPage, close } from "./coverage";
+import { expect, test } from "./coverage";
 import { dateFromToday, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
@@ -82,7 +83,7 @@ test("an open Topics tab shows and hides the live badge as a stream starts and e
 
 test("the owner schedules a weekly stream, edits, cancels and deletes it", async ({ browser }) => {
   const context = await signedIn(browser, "featureowner", clientIp("schedule", 125));
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@feature_host?view=schedule");
   // The header action matches the tab.
   await page.locator("#suggest").click();
@@ -125,12 +126,12 @@ test("the owner schedules a weekly stream, edits, cancels and deletes it", async
   await expect(page.locator(".sched-row").filter({ hasText: "Speedrun practice" })).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator("button.fab")).toHaveText("Schedule a stream");
-  await context.close();
+  await close(context);
 });
 
 test("the calendar keeps far-off streams after the owner creates and cancels them there", async ({ browser }) => {
   const context = await signedIn(browser, "featureowner", clientIp("schedule", 128));
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@feature_host?view=schedule&mode=month");
   // Five months on, past what the page loads at first: the calendar fetches this range on its own.
   for (let step = 0; step < 5; step += 1) await page.getByRole("button", { name: "Next", exact: true }).click();
@@ -164,12 +165,12 @@ test("the calendar keeps far-off streams after the owner creates and cancels the
   for (const event of ((await listed.json()) as { events: { id: string; title: string }[] }).events)
     if (event.title.startsWith("Far stream"))
       expect((await context.request.delete(`/api/events/${event.id}`)).status()).toBe(200);
-  await context.close();
+  await close(context);
 });
 
 test("switching from Day to Week far ahead fetches the rest of the week", async ({ browser }) => {
   const context = await signedIn(browser, "featureowner", clientIp("schedule", 129));
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@feature_host?view=schedule&mode=week");
   // 22 weeks on, past what the page loads at first, then the Day view of the same weekday as today.
   for (let step = 0; step < 22; step += 1) await page.getByRole("button", { name: "Next", exact: true }).click();
@@ -189,7 +190,7 @@ test("switching from Day to Week far ahead fetches the rest of the week", async 
   await expect(page.locator(".cal-grid .cal-event").filter({ hasText: "Midweek far stream" })).toBeVisible();
   const { event } = (await created.json()) as { event: { id: string } };
   expect((await context.request.delete(`/api/events/${event.id}`)).status()).toBe(200);
-  await context.close();
+  await close(context);
 });
 
 test("a page with only far-off streams keeps the calendar open to them", async ({ browser, page }) => {
@@ -212,12 +213,12 @@ test("a page with only far-off streams keeps the calendar open to them", async (
   await expect(page.getByRole("button", { name: "Next", exact: true })).toBeVisible();
   const { event } = (await created.json()) as { event: { id: string } };
   expect((await owner.request.delete(`/api/events/${event.id}`)).status()).toBe(200);
-  await owner.close();
+  await close(owner);
 });
 
 test("the Day view gives early streams their own rows", async ({ browser }) => {
   const context = await signedIn(browser, "featureowner", clientIp("schedule", 131));
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@feature_host?view=schedule&mode=day");
   const tz = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
   // One daily series (the page owner may create only six streams a minute), then two of its streams moved onto
@@ -281,7 +282,7 @@ test("the Day view gives early streams their own rows", async ({ browser }) => {
   expect(Math.abs(restBox!.y - topHour!.y)).toBeLessThan(2);
   const deleted = await context.request.delete(`/api/events/${first.id}`, { data: { scope: "following" } });
   expect(deleted.status()).toBe(200);
-  await context.close();
+  await close(context);
 });
 
 test("schedule writes are owner-only and refused on frozen pages", async ({ browser }) => {
@@ -298,6 +299,6 @@ test("schedule writes are owner-only and refused on frozen pages", async ({ brow
   expect((await viewer.request.post("/api/events", { data: body })).status()).toBe(403);
   const frozen = await signedIn(browser, "frozenowner", clientIp("schedule", 127));
   expect((await frozen.request.post("/api/events", { data: body })).status()).toBe(423);
-  await viewer.close();
-  await frozen.close();
+  await close(viewer);
+  await close(frozen);
 });

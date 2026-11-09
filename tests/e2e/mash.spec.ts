@@ -1,4 +1,5 @@
-import { test, expect, type BrowserContext } from "@playwright/test";
+import { newPage, close } from "./coverage";
+import { test, expect, type BrowserContext } from "./coverage";
 import { accounts, runSql } from "./fixtures";
 import { mashId, shots, signedIn } from "./live-helpers";
 
@@ -23,11 +24,11 @@ test("a Mash Battle counts one tap per key press and updates the overlay live", 
   const owner = await signedIn(browser, "featureowner", 80);
   const viewer = await signedIn(browser, "viewer", 81);
   const id = await mashId(owner);
-  const obs = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+  const obs = await newPage(browser, { viewport: { width: 1920, height: 1080 } });
   await obs.goto("/@feature_host/overlay");
   await expect(obs.locator("[data-overlay-mash]")).toBeVisible();
 
-  const page = await viewer.newPage();
+  const page = await newPage(viewer);
   await page.goto(`/@feature_host?view=polls&entry=${id}`);
   await expect(page.getByRole("button", { name: /Radahn/ })).toHaveAttribute("aria-pressed", "true");
 
@@ -77,7 +78,7 @@ test("a Mash Battle counts one tap per key press and updates the overlay live", 
   // Restart deletes the taps and keeps the sides viewers picked.
   expect((await owner.request.post(`/api/mash/${id}/restart`, { data: {} })).status()).toBe(200);
   await expect(page.getByRole("button", { name: /Radahn/ })).toHaveAttribute("aria-pressed", "true");
-  await Promise.all([owner.close(), viewer.close(), obs.close()]);
+  await Promise.all([close(owner), close(viewer), close(obs)]);
 });
 
 test("only the host runs a battle and signed-out viewers see a sign-in prompt", async ({ browser, page }) => {
@@ -86,7 +87,7 @@ test("only the host runs a battle and signed-out viewers see a sign-in prompt", 
   expect((await viewer.request.post(`/api/mash/${id}/start`, { data: {} })).status()).toBe(403);
   await page.goto(`/@feature_host?view=polls&entry=${id}`);
   await expect(page.getByText("Sign in to join the battle.")).toBeVisible();
-  await viewer.close();
+  await close(viewer);
 });
 
 test("hold-assisted tapping stops when keyboard focus leaves the button", async ({ browser }) => {
@@ -103,12 +104,12 @@ test("hold-assisted tapping stops when keyboard focus leaves the button", async 
   } finally {
     await save(me.viewer.displayPrefs);
   }
-  await Promise.all([owner.close(), viewer.close()]);
+  await Promise.all([close(owner), close(viewer)]);
 });
 
 async function holdThenTab(owner: BrowserContext, viewer: BrowserContext): Promise<void> {
   const id = await mashId(owner);
-  const page = await viewer.newPage();
+  const page = await newPage(viewer);
   await page.goto(`/@feature_host?view=polls&entry=${id}`);
   await expect(page.getByRole("button", { name: /Radahn/ })).toHaveAttribute("aria-pressed", "true");
   expect((await owner.request.post(`/api/mash/${id}/start`, { data: { countdown: false } })).status()).toBe(200);

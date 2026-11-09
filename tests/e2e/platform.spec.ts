@@ -1,5 +1,6 @@
+import { newPage, close } from "./coverage";
 import { readFile } from "node:fs/promises";
-import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Page } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
 
@@ -79,13 +80,13 @@ test("public access rejects forged identities and unsafe mutations", async ({ br
   ]);
   expect(me.headers()["cache-control"]).toBe("no-store");
   expect(me.headers()["x-content-type-options"]).toBe("nosniff");
-  await owner.close();
-  await viewer.close();
+  await close(owner);
+  await close(viewer);
 });
 
 test("viewer topics, reactions, replies, and comment likes survive reload", async ({ browser }, testInfo) => {
   const context = await signedIn(browser, "viewer");
-  const page = await context.newPage();
+  const page = await newPage(context);
   await assertNoScriptErrors(page, async () => {
     await page.goto("/@test_host");
     await page.getByRole("button", { name: "Suggest a topic", exact: true }).click();
@@ -127,13 +128,13 @@ test("viewer topics, reactions, replies, and comment likes survive reload", asyn
   await page.screenshot({ path: testInfo.outputPath("community-desktop.png") });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: testInfo.outputPath("community-mobile.png") });
-  await context.close();
+  await close(context);
 });
 
 test("streamer controls a binary poll and the public OBS overlay updates live", async ({ browser }, testInfo) => {
   const ownerContext = await signedIn(browser, "owner");
   const viewerContext = await signedIn(browser, "viewer");
-  const owner = await ownerContext.newPage();
+  const owner = await newPage(ownerContext);
   await owner.goto("/@test_host?view=polls");
   await owner.getByRole("button", { name: "Create poll", exact: true }).click();
   const dialog = owner.getByRole("dialog");
@@ -146,11 +147,11 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   await expect(owner).toHaveURL(/entry=/);
   const pollId: string | null = new URL(owner.url()).searchParams.get("entry");
   if (!pollId) throw new Error("Created poll link is missing.");
-  const viewer = await viewerContext.newPage();
+  const viewer = await newPage(viewerContext);
   await viewer.goto(`/@test_host?view=polls&entry=${pollId}`);
   await expect(viewer.getByRole("button", { name: "Create poll", exact: true })).toHaveCount(0);
   const overlayContext = await browser.newContext({ baseURL: origin });
-  const overlay = await overlayContext.newPage();
+  const overlay = await newPage(overlayContext);
   await overlay.goto(`/@test_host/overlay?poll=${pollId}`);
   await expect(overlay.getByRole("heading", { name: "Should we stream on Friday?" })).toBeVisible();
   await viewer.getByRole("button", { name: "Yes", exact: true }).click();
@@ -181,15 +182,15 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   await expect(overlay.getByText("Results revealed", { exact: true })).toBeVisible();
   await expect(overlay.getByRole("button", { name: /^(Yes|No)$/ })).toHaveCount(0);
   await overlay.screenshot({ path: testInfo.outputPath("poll-overlay.png") });
-  await otherOwner.close();
-  await ownerContext.close();
-  await viewerContext.close();
-  await overlayContext.close();
+  await close(otherOwner);
+  await close(ownerContext);
+  await close(viewerContext);
+  await close(overlayContext);
 });
 
 test("a viewer joins the waitlist, an admin approves, and the viewer creates a streamer page", async ({ browser }) => {
   const context = await signedIn(browser, "newcomer");
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/streamers");
   await expect(page.getByRole("link", { name: "Admin", exact: true })).toHaveCount(0);
   await page.getByRole("link", { name: "Host a community", exact: true }).click();
@@ -227,7 +228,7 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   await expect(host.getByRole("button", { name: "Update request" })).toBeVisible();
 
   const adminContext = await signedIn(browser, "admin");
-  const admin = await adminContext.newPage();
+  const admin = await newPage(adminContext);
   await assertNoScriptErrors(admin, async () => {
     await admin.goto("/streamers");
     await admin.getByRole("link", { name: "Admin", exact: true }).click();
@@ -250,7 +251,7 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
     await expect(admin.getByRole("article", { name: "newcomer" })).toBeVisible();
     await expect(admin.getByRole("button", { name: "Approve newcomer" })).toHaveCount(0);
   });
-  await adminContext.close();
+  await close(adminContext);
 
   await page.reload();
   await expect(host.getByText("You're approved to host a community.", { exact: false })).toBeVisible();
@@ -294,7 +295,7 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   // On a phone the owner's empty list offers the page link instead of the header action.
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole("button", { name: "Copy page link" })).toBeVisible();
-  await context.close();
+  await close(context);
 });
 
 test("only administrators can open the review queue and its API", async ({ browser, page, request }) => {
@@ -304,7 +305,7 @@ test("only administrators can open the review queue and its API", async ({ brows
   const anonymous = await request.get("/api/admin/applications");
   expect(anonymous.status()).toBe(401);
   const context = await signedIn(browser, "viewer");
-  const viewer = await context.newPage();
+  const viewer = await newPage(context);
   const response = await viewer.goto("/admin");
   expect(response?.status()).toBe(404);
   await expect(viewer.getByRole("heading", { name: "Page not found" })).toBeVisible();
@@ -322,7 +323,7 @@ test("only administrators can open the review queue and its API", async ({ brows
   expect(review.status()).toBe(403);
   const me = (await (await context.request.get("/api/me")).json()) as { access: { admin: boolean } };
   expect(me.access.admin).toBe(false);
-  await context.close();
+  await close(context);
 });
 
 test("a viewer reports a topic and an admin removes it", async ({ browser, page, request }) => {
@@ -339,11 +340,11 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
     data: { action: "create", kind: "topic", title: "Second topic to report", body: "Another topic on the same board.", category: "Just chatting" },
   });
   expect(second.status()).toBe(200);
-  const ownerPage = await owner.newPage();
+  const ownerPage = await newPage(owner);
   await ownerPage.goto(`/@test_host?entry=${id}`);
   await expect(ownerPage.getByRole("heading", { name: title })).toBeVisible();
   await expect(ownerPage.getByRole("button", { name: "Report topic" })).toHaveCount(0);
-  await owner.close();
+  await close(owner);
 
   await page.goto(`/@test_host?entry=${id}`);
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
@@ -355,7 +356,7 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
   expect(anonymous.status()).toBe(401);
 
   const viewerContext = await signedIn(browser, "reporter");
-  const viewer = await viewerContext.newPage();
+  const viewer = await newPage(viewerContext);
   await assertNoScriptErrors(viewer, async () => {
     await viewer.goto(`/@test_host?entry=${id}`);
     await viewer.getByRole("button", { name: "Report topic" }).click();
@@ -388,7 +389,7 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
   expect(forbiddenResolve.status()).toBe(403);
 
   const adminContext = await signedIn(browser, "admin");
-  const admin = await adminContext.newPage();
+  const admin = await newPage(adminContext);
   await assertNoScriptErrors(admin, async () => {
     await admin.goto("/admin");
     await admin
@@ -424,14 +425,14 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
     await expect(removed.locator(".resolved-line")).toContainText("Removed");
     await expect(removed.getByRole("button")).toHaveCount(0);
   });
-  await adminContext.close();
+  await close(adminContext);
 
   await viewer.goto("/@test_host?view=topics&sort=newest");
   await expect(viewer.getByRole("heading", { name: "Pick the next conversation" })).toBeVisible();
   await expect(viewer.getByText(title)).toHaveCount(0);
   const gone = await viewerContext.request.get(`/api/entries/${id}`);
   expect(gone.status()).toBe(404);
-  await viewerContext.close();
+  await close(viewerContext);
 });
 
 test("topic panes and the resize control remain keyboard accessible", async ({ page }) => {

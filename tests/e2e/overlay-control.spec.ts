@@ -1,14 +1,15 @@
+import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "./coverage";
 import { runSql, signedIn as fixtureSignedIn } from "./fixtures";
 import { origin, shots, signedIn } from "./live-helpers";
 import { clientAddress, clientIp } from "./client-ips";
 
 test("the owner previews, takes and switches what the one OBS URL shows", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 90));
-  const control = await owner.newPage();
+  const control = await newPage(owner);
   await control.setViewportSize({ width: 1440, height: 1000 });
-  const obs = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+  const obs = await newPage(browser, { viewport: { width: 1920, height: 1080 } });
   await obs.goto("/@feature_host/overlay");
   await expect(obs.locator("[data-overlay-mash]")).toBeVisible();
 
@@ -51,7 +52,7 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await expect(obs.locator('[data-overlay-type="auto"]')).toBeVisible();
   await control.getByRole("checkbox", { name: "Instant switch (skip preview)" }).click();
   await expect(control.getByRole("checkbox", { name: "Instant switch (skip preview)" })).not.toBeChecked();
-  await Promise.all([owner.close(), obs.close()]);
+  await Promise.all([close(owner), close(obs)]);
 });
 
 /** Opens `count` live sockets from `page` at once: "open" for each that gets a snapshot, "refused" for each closed. */
@@ -78,7 +79,7 @@ async function liveSockets(page: Page, count: number, key: string | null = null)
 test("the owner copies the private overlay link, and a new link revokes the old one", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 93));
   await owner.grantPermissions(["clipboard-read", "clipboard-write"], { origin });
-  const control = await owner.newPage();
+  const control = await newPage(owner);
   await control.goto("/overlay-control");
   await control.getByText("Setup", { exact: true }).click();
   await control.getByRole("button", { name: "Create overlay link" }).click();
@@ -95,11 +96,11 @@ test("the owner copies the private overlay link, and a new link revokes the old 
     viewport: { width: 1920, height: 1080 },
     extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("overlay-control", 94) },
   });
-  const crowd = await obs.newPage();
+  const crowd = await newPage(obs);
   await crowd.goto("/privacy");
   expect(await liveSockets(crowd, 10)).toEqual(Array.from({ length: 10 }, () => "open"));
   expect(await liveSockets(crowd, 1)).toEqual(["refused"]);
-  const source = await obs.newPage();
+  const source = await newPage(obs);
   await source.goto(oldUrl);
   await expect(source.locator("[data-overlay-type]")).toBeVisible();
   await expect(source.locator(".overlay-connection")).toHaveCount(0);
@@ -114,36 +115,36 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   await expect(source.locator(".overlay-connection")).toContainText("Reconnecting");
   expect(await liveSockets(crowd, 1, oldKey)).toEqual(["refused"]);
   expect(await liveSockets(crowd, 1, newKey)).toEqual(["open"]);
-  await Promise.all([owner.close(), obs.close()]);
+  await Promise.all([close(owner), close(obs)]);
 });
 
 test("overlay control is for the page owner only", async ({ browser, page }) => {
   await page.goto("/overlay-control");
   await expect(page).toHaveURL(/\/streamers$/);
   const viewer = await signedIn(browser, "viewer", clientIp("overlay-control", 91));
-  const viewerPage = await viewer.newPage();
+  const viewerPage = await newPage(viewer);
   expect((await viewerPage.goto("/overlay-control"))?.status()).toBe(404);
   expect((await viewer.request.post("/api/overlay", { data: { action: "take" } })).status()).toBe(404);
   const long = "x".repeat(121);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 92));
   const tooLong = await owner.request.post("/api/overlay", { data: { action: "message", text: long, style: "info" } });
   expect(tooLong.status()).toBe(400);
-  await Promise.all([viewer.close(), owner.close()]);
+  await Promise.all([close(viewer), close(owner)]);
 });
 
 test("a monitor shows its stage only once it is scaled to the frame", async ({ browser }) => {
   const phone = { viewport: { width: 390, height: 844 } };
   // Without script the stage is never scaled, as before hydration. At its default size it would spill out.
   const still = await fixtureSignedIn(browser, "featureowner", 92, { ...phone, javaScriptEnabled: false });
-  const before = await still.newPage();
+  const before = await newPage(still);
   await before.goto("/overlay-control");
   await expect(before.locator('[data-ov-monitor="air"] .ov-scaler')).toBeHidden();
-  await still.close();
+  await close(still);
   const owner = await fixtureSignedIn(browser, "featureowner", 92, phone);
-  const page = await owner.newPage();
+  const page = await newPage(owner);
   await page.goto("/overlay-control");
   await expect(page.locator('[data-ov-monitor="air"] .ov-scaler')).toBeVisible();
-  await owner.close();
+  await close(owner);
 });
 
 test("the control page moves Up next on when the stream it shows starts", async ({ browser }) => {
@@ -159,7 +160,7 @@ test("the control page moves Up next on when the stream it shows starts", async 
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 94));
   try {
-    const control = await owner.newPage();
+    const control = await newPage(owner);
     await control.goto("/overlay-control");
     const monitor = control.locator('[data-ov-monitor="prev"] [data-overlay-source="next"]');
     await expect(monitor).toContainText("Soon stream");
@@ -170,6 +171,6 @@ test("the control page moves Up next on when the stream it shows starts", async 
       `DELETE FROM stream_events WHERE id='${id}';`,
       preview(`json_object('type','topic','ref',${topic})`),
     ]);
-    await owner.close();
+    await close(owner);
   }
 });

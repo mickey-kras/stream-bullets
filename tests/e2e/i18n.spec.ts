@@ -1,4 +1,5 @@
-import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { newPage, close } from "./coverage";
+import { expect, test, type BrowserContext, type Page } from "./coverage";
 import { origin, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
@@ -24,7 +25,7 @@ test("Accept-Language picks the page language and Intl follows it", async ({ bro
     locale: "de-DE",
     extraHTTPHeaders: { "Accept-Language": "de-AT,de;q=0.9" },
   });
-  const page = await context.newPage();
+  const page = await newPage(context);
   const response = await page.goto("/streamers");
   expect(response?.headers()["content-language"]).toBe("de");
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
@@ -33,7 +34,7 @@ test("Accept-Language picks the page language and Intl follows it", async ({ bro
   // Hydration loaded the same catalog: client-rendered text is German too.
   await page.getByRole("contentinfo").getByRole("link", { name: "Barrierefreiheit" }).click();
   await expect(page.getByRole("dialog", { name: "Barrierefreiheit & Anzeige" })).toBeVisible();
-  await context.close();
+  await close(context);
 });
 
 test("the language switcher saves the choice and reloads in it", async ({ page, context }) => {
@@ -53,7 +54,7 @@ test("the language switcher saves the choice and reloads in it", async ({ page, 
 
 test("a signed-in choice is saved to the account and wins over the cookie", async ({ browser }) => {
   const viewer = await signedIn(browser, "prefsviewer", clientIp("i18n", 180));
-  const page = await viewer.newPage();
+  const page = await newPage(viewer);
   await page.goto("/streamers?dialog=language");
   const saved = page.waitForResponse((response) => response.url().endsWith("/api/me/locale"));
   await page.getByRole("dialog").getByRole("button", { name: "Français" }).click();
@@ -62,7 +63,7 @@ test("a signed-in choice is saved to the account and wins over the cookie", asyn
   // Another browser with the same account and a different cookie still gets French.
   const other = await signedIn(browser, "prefsviewer", clientIp("i18n", 181));
   await inLanguage(other, "pl");
-  const second = await other.newPage();
+  const second = await newPage(other);
   await second.goto("/streamers");
   await expect(second.locator("html")).toHaveAttribute("lang", "fr");
   // Forget the saved language again so other specs see English.
@@ -73,8 +74,8 @@ test("a signed-in choice is saved to the account and wins over the cookie", asyn
       body: JSON.stringify({ locale: null }),
     }),
   );
-  await other.close();
-  await viewer.close();
+  await close(other);
+  await close(viewer);
 });
 
 test("Japanese, Chinese and Hindi never use an uppercase transform", async ({ browser }) => {
@@ -86,24 +87,24 @@ test("Japanese, Chinese and Hindi never use an uppercase transform", async ({ br
   ] as const) {
     const context = await browser.newContext({ baseURL: origin });
     await inLanguage(context, locale);
-    const page = await context.newPage();
+    const page = await newPage(context);
     await page.goto("/streamers");
     await expect(page.locator("html")).toHaveAttribute("lang", locale);
     const eyebrow = page.locator(".eyebrow").first();
     expect(await eyebrow.evaluate((element) => getComputedStyle(element).textTransform)).toBe(transform);
-    await context.close();
+    await close(context);
   }
 });
 
 test("legal pages stay in English with a translated binding notice", async ({ browser }) => {
   const context = await browser.newContext({ baseURL: origin });
   await inLanguage(context, "de");
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/terms");
   await expect(page.getByRole("note").filter({ hasText: "Die englische Fassung ist verbindlich." })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Terms of Service" })).toHaveAttribute("lang", "en");
   await expect(page.getByRole("heading", { name: "Automated agents and AI" })).toBeAttached();
-  await context.close();
+  await close(context);
 });
 
 test("the For AI agents page counts one vote per visitor per day", async ({ page, request }) => {
@@ -275,7 +276,7 @@ for (const locale of ["de", "ru"])
             extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${group.ip}` },
           });
       await inLanguage(phone, locale);
-      const page = await phone.newPage();
+      const page = await newPage(phone);
       for (const screen of group.screens) {
         await page.goto(screen.path);
         await expect(page.locator("html")).toHaveAttribute("lang", locale);
@@ -285,5 +286,5 @@ for (const locale of ["de", "ru"])
         expect(await phoneProblems(page), `${locale} ${screen.name}`).toEqual([]);
         await shot(page, `${locale}-390-${screen.name}`);
       }
-      await phone.close();
+      await close(phone);
     });

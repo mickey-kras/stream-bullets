@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { newPage, close } from "./coverage";
+import { expect, test } from "./coverage";
 import { signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
@@ -14,7 +15,7 @@ test("a page without saved cards shows the two defaults", async ({ page }) => {
 
 test("the owner adds, reorders and deletes cards; the support card follows the links", async ({ browser }) => {
   const context = await signedIn(browser, "featureowner", clientIp("community", 95));
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/@feature_host?view=community");
   const titles = page.locator(".community-grid .community-card h2");
   await expect(titles).toHaveText(["Bring an idea", "Join the Discord", "Support Feature"]);
@@ -53,7 +54,7 @@ test("the owner adds, reorders and deletes cards; the support card follows the l
     data: { cards: [{ ...card, buttonLabel: "Go", buttonTarget: "javascript:alert(1)" }] },
   });
   expect(unsafe.status()).toBe(400);
-  await context.close();
+  await close(context);
 });
 
 test("About shows support links and the owner edits them within the allow-list", async ({ browser, page }) => {
@@ -64,7 +65,7 @@ test("About shows support links and the owner edits them within the allow-list",
   await expect(section.getByRole("link", { name: /Merch tips/ })).toHaveAttribute("rel", "noopener noreferrer");
   await expect(section).toContainText("StreamBullets doesn't process or receive payments.");
   const context = await signedIn(browser, "featureowner", clientIp("community", 96));
-  const owner = await context.newPage();
+  const owner = await newPage(context);
   await owner.goto("/@feature_host?view=about");
   await owner.getByRole("link", { name: "Edit support links" }).click();
   await expect(owner).toHaveURL(/dialog=page/);
@@ -88,5 +89,5 @@ test("About shows support links and the owner edits them within the allow-list",
     },
   });
   expect(forged.status()).toBe(400);
-  await context.close();
+  await close(context);
 });

@@ -1,5 +1,6 @@
+import { newPage, close } from "./coverage";
 import { readFile } from "node:fs/promises";
-import { test, expect, type Browser, type BrowserContext, type CDPSession, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type CDPSession, type Page } from "./coverage";
 import { z } from "zod";
 import { clientIp } from "./client-ips";
 
@@ -57,13 +58,13 @@ test("only administrators reach the admin and security-key API", async ({ browse
     expect((await viewer.request.get(path)).status()).toBe(403);
   const options = await viewer.request.post("/api/admin/stepup/options", { data: {}, headers: { Origin: origin } });
   expect(options.status()).toBe(403);
-  await viewer.close();
+  await close(viewer);
 });
 
 test("an admin sets up two keys, confirms with a key in another session, and moderates", async ({ browser }) => {
   test.setTimeout(90_000);
   const context = await signedIn(browser, "keyadmin", clientIp("admin-keys", 121));
-  const page = await context.newPage();
+  const page = await newPage(context);
   const cdp = await context.newCDPSession(page);
   await cdp.send("WebAuthn.enable");
   const first = await addKey(cdp);
@@ -102,7 +103,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
 
   // A second session of the same account has no key check yet: Admin asks for a key first.
   const other = await signedIn(browser, "keyadmin2", clientIp("admin-keys", 122));
-  const second = await other.newPage();
+  const second = await newPage(other);
   const otherCdp = await other.newCDPSession(second);
   await otherCdp.send("WebAuthn.enable");
   const restored = await addKey(otherCdp);
@@ -141,7 +142,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await lift.getByRole("button", { name: "Unfreeze", exact: true }).click();
   await expect(row.locator(".mod-badge")).toHaveText("Active");
 
-  await Promise.all([context.close(), other.close()]);
+  await Promise.all([close(context), close(other)]);
 });
 
 test("reports are grouped by page and resolved per item", async ({ browser }) => {
@@ -155,11 +156,11 @@ test("reports are grouped by page and resolved per item", async ({ browser }) =>
     });
     expect([200, 409]).toContain(response.status());
   }
-  await reporter.close();
+  await close(reporter);
 
   // The key admin's first session has a fresh key check from the previous test, or the report-mode gate.
   const context = await signedIn(browser, "keyadmin", clientIp("admin-keys", 124), true);
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto("/admin?view=reports");
   const skip = page.getByRole("button", { name: "Continue without a key" });
   if (await skip.isVisible()) await skip.click();
@@ -175,5 +176,5 @@ test("reports are grouped by page and resolved per item", async ({ browser }) =>
   await page.getByRole("dialog").getByRole("button", { name: "Dismiss" }).click();
   await expect(page.getByRole("status").filter({ hasText: "dismissed" })).toHaveText("Reports dismissed.");
   await expect(page.getByRole("article", { name: "Pagination host" })).toHaveCount(0);
-  await context.close();
+  await close(context);
 });

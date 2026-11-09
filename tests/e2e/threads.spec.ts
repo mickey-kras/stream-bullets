@@ -1,5 +1,6 @@
+import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./coverage";
 import { accounts, runSql, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
@@ -24,7 +25,7 @@ async function seedThreads(): Promise<string> {
 test("replies collapse after two, removed comments keep their thread, one reply box", async ({ browser }) => {
   const entryId = await seedThreads();
   const context = await signedIn(browser, "viewer", clientIp("threads", 100));
-  const page = await context.newPage();
+  const page = await newPage(context);
   await page.goto(`/@other_host?entry=${entryId}`);
   const thread = page.locator("li.thread").filter({ has: page.getByText("Root comment", { exact: true }) });
   const replies = thread.locator(".replies > li > article.comment");
@@ -74,5 +75,5 @@ test("replies collapse after two, removed comments keep their thread, one reply 
   await page.reload();
   const again = page.locator("article.comment").filter({ has: page.getByText("Reply number 2", { exact: true }) });
   await expect(again.locator(".reported-note")).toHaveCount(1);
-  await context.close();
+  await close(context);
 });

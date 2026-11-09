@@ -1,5 +1,6 @@
+import { newPage, close } from "./coverage";
 import { readFile } from "node:fs/promises";
-import { expect, test, type Browser, type BrowserContext } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
 
@@ -95,11 +96,11 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
 
   // Signed-in viewers without a page are offered Host a community; /settings opens Your profile here.
   const context = await signedIn(browser, "viewer");
-  const viewer = await context.newPage();
+  const viewer = await newPage(context);
   await viewer.goto("/streamers");
   await expect(viewer.getByRole("main").getByRole("link", { name: "Host a community", exact: true })).toBeVisible();
   const response = await viewer.request.get("/settings", { maxRedirects: 0 });
   expect(response.status()).toBe(302);
   expect(response.headers().location).toBe("/streamers?dialog=profile");
-  await context.close();
+  await close(context);
 });
