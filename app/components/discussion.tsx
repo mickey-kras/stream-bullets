@@ -351,9 +351,10 @@ async function fetchThreads(
   sort: SortOrder,
   pages: number,
   signal?: AbortSignal,
+  from: string | null = null,
 ): Promise<{ threads: CommentThread[]; cursor: string | null; pages: number }> {
   const threads: CommentThread[] = [];
-  let cursor: string | null = null;
+  let cursor: string | null = from;
   let loaded = 0;
   do {
     const cursorQuery: string = cursor ? `&cursor=${encodeURIComponent(cursor)}` : "";
@@ -368,8 +369,13 @@ async function fetchThreads(
     cursor = snapshot.nextCursor;
     loaded += 1;
   } while (cursor && loaded < pages);
-  const unique = [...new Map(threads.map((thread: CommentThread) => [thread.id, thread])).values()];
-  return { threads: orderThreads(unique, sort), cursor, pages: loaded };
+  return { threads: mergeThreads([], threads, sort), cursor, pages: loaded };
+}
+
+/** The loaded threads plus a new page, each thread once, in the list's order. */
+function mergeThreads(current: CommentThread[], page: CommentThread[], sort: SortOrder): CommentThread[] {
+  const unique = [...new Map([...current, ...page].map((thread: CommentThread) => [thread.id, thread])).values()];
+  return orderThreads(unique, sort);
 }
 
 /** Find a comment anywhere in the loaded threads. */
@@ -429,6 +435,7 @@ export function Discussion({
   const [reported, setReported] = useState<Set<string>>(new Set());
   const [signIn, setSignIn] = useState<boolean>(false);
   const pages = useRef<number>(1);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const requestKey = `${entryId}:${sort}:${refreshKey}:${revision}`;
   const loading = loadedKey !== requestKey;
 
@@ -601,10 +608,18 @@ export function Discussion({
         <button
           type="button"
           className="load-more"
-          disabled={loading}
+          disabled={loading || loadingMore}
           onClick={() => {
-            pages.current += 1;
-            setRevision((value: number) => value + 1);
+            // Only the next page is fetched; the pages already shown stay as they are.
+            setLoadingMore(true);
+            fetchThreads(entryId, sort, 1, undefined, cursor)
+              .then((result) => {
+                pages.current += 1;
+                setThreads((current: CommentThread[]) => mergeThreads(current, result.threads, sort));
+                setCursor(result.cursor);
+              })
+              .catch((error_: unknown) => setError(errorMessage(error_)))
+              .finally(() => setLoadingMore(false));
           }}
         >
           {t("discussion.loadMore")}

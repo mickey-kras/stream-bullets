@@ -146,8 +146,22 @@ describe("AI interest counter abuse (security review finding 3)", () => {
     expect(visitorPrefix("fe80::1%eth0")).toBe("fe80:0:0:0::/64");
     expect(visitorPrefix("2001:db8:1:2:3:4:192.0.2.1")).toBe("2001:db8:1:2::/64");
     expect(visitorPrefix("::ffff:192.0.2.1")).toBe("192.0.2.1");
+    // An IPv4-mapped address counts as its IPv4 address in every spelling, not as the shared ::/64.
+    expect(visitorPrefix("::ffff:7f00:1")).toBe("127.0.0.1");
+    expect(visitorPrefix("::FFFF:C000:0201")).toBe("192.0.2.1");
+    expect(visitorPrefix("0:0:0:0:0:ffff:c000:201")).toBe("192.0.2.1");
+    expect(visitorPrefix("0:0:0:0:0:ffff:192.0.2.1")).toBe("192.0.2.1");
+    expect(visitorPrefix("::ffff:7f00:1")).not.toBe(visitorPrefix("::ffff:7f00:2"));
     // Not an address: unchanged.
-    for (const value of ["local", "1:2:3", "1::2::3", "1:2:3:4:5:6:7:8::", "zz::1", "1:2:3:4:5:6:7:8:9"])
+    for (const value of [
+      "local",
+      "1:2:3",
+      "1::2::3",
+      "1:2:3:4:5:6:7:8::",
+      "zz::1",
+      "1:2:3:4:5:6:7:8:9",
+      "::ffff:192.0.2.999",
+    ])
       expect([value, visitorPrefix(value)]).toEqual([value, value]);
   });
 

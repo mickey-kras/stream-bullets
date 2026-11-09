@@ -1,8 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { t } from "../../i18n";
 import type { Provider } from "../../types";
-import { errorMessage, postJson } from "../api";
-import { providerName } from "../shell/sign-in-dialog";
+import { ApiError, errorMessage, postJson } from "../api";
+import { providerName, SignIn } from "../shell/sign-in-dialog";
 import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { Sheet } from "../ui/sheet";
@@ -43,6 +43,8 @@ export function DataDialog({
   const [confirmation, setConfirmation] = useState<string>("");
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  // The server deletes only after a recent sign-in; then the person signs in again with their provider here.
+  const [reauth, setReauth] = useState<boolean>(false);
   const confirmed: boolean = confirmsDeletion(confirmation);
 
   async function remove(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -55,6 +57,7 @@ export function DataDialog({
       globalThis.location.assign("/");
     } catch (error_: unknown) {
       setError(errorMessage(error_));
+      setReauth(error_ instanceof ApiError && error_.code === "reauth_required");
       setPending(false);
     }
   }
@@ -113,6 +116,7 @@ export function DataDialog({
               {error}
             </p>
           </form>
+          {reauth && provider && <SignIn providers={[provider]} />}
         </>
       ) : (
         <>

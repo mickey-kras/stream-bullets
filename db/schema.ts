@@ -143,6 +143,25 @@ export const entryVotes = sqliteTable(
   ],
 );
 
+/**
+ * Votes per option, kept by triggers on `entry_votes` (migration 0019), so the live room and the board read at most
+ * six rows per poll instead of every vote.
+ */
+export const entryVoteCounts = sqliteTable(
+  "entry_vote_counts",
+  {
+    entryId: text("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    choice: integer("choice").notNull(),
+    votes: integer("votes").notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.entryId, table.choice] }),
+    check("entry_vote_counts_check", sql`${table.choice} BETWEEN 0 AND 5 AND ${table.votes} >= 0`),
+  ],
+);
+
 export const entryReactions = sqliteTable(
   "entry_reactions",
   {
@@ -239,7 +258,7 @@ export const votes = sqliteTable(
     userId: text("user_id").notNull(),
     choice: integer("choice").notNull(),
   },
-  (table) => [primaryKey({ columns: [table.pollId, table.userId] })],
+  (table) => [primaryKey({ columns: [table.pollId, table.userId] }), index("poll_votes_user_idx").on(table.userId)],
 );
 export const reactions = sqliteTable(
   "poll_reactions",
@@ -250,7 +269,10 @@ export const reactions = sqliteTable(
     userId: text("user_id").notNull(),
     value: integer("value").notNull(),
   },
-  (table) => [primaryKey({ columns: [table.pollId, table.userId] })],
+  (table) => [
+    primaryKey({ columns: [table.pollId, table.userId] }),
+    index("poll_reactions_user_idx").on(table.userId),
+  ],
 );
 export const comments = sqliteTable(
   "poll_comments",

@@ -247,6 +247,21 @@ export async function getViewerSession(
   return { viewer: viewerValue(response.user), sessionId: response.session.id };
 }
 
+/** How recent a sign-in must be for an irreversible account action (deleting the account). */
+export const RECENT_SIGN_IN_MS = 10 * 60 * 1000;
+
+/**
+ * Refuses an irreversible action on a session that did not start within `RECENT_SIGN_IN_MS`. A stolen session
+ * cookie then cannot delete the account: that needs a fresh sign-in with the provider. Answers 403 with the code
+ * `reauth_required`, so the client can offer to sign in again.
+ */
+export async function requireRecentSignIn(request: Request, env: AppEnv, now: number = Date.now()): Promise<void> {
+  const result = await createAuth(env).api.getSession({ headers: request.headers, query: { disableCookieCache: true } });
+  if (!result) throw new HttpError(401, "Sign in to continue.");
+  if (now - result.session.createdAt.getTime() > RECENT_SIGN_IN_MS)
+    throw new HttpError(403, "Sign in again to delete your account.", "reauth_required");
+}
+
 export async function getViewer(request: Request, context: AppContext): Promise<Viewer | null> {
   return (await getViewerSession(request, context))?.viewer ?? null;
 }

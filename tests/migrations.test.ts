@@ -113,7 +113,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0018", (): void => {
+  it("covers 0006 to 0019", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -128,7 +128,19 @@ describe("migrations 0006 onwards", (): void => {
       "0016",
       "0017",
       "0018",
+      "0019",
     ]);
+  });
+
+  it("backfills the vote counts (0019) from the votes already stored", async (): Promise<void> => {
+    const { results } = await db
+      .prepare(
+        `SELECT v.entry_id, v.choice, count(*) AS stored, c.votes FROM entry_votes v
+          LEFT JOIN entry_vote_counts c ON c.entry_id=v.entry_id AND c.choice=v.choice GROUP BY v.entry_id, v.choice`,
+      )
+      .all<{ stored: number; votes: number | null }>();
+    expect(results.length).toBeGreaterThan(0);
+    for (const row of results) expect(row.votes).toBe(row.stored);
   });
 
   it("adds the series time (0017) and template (0018) to existing series without a value", async (): Promise<void> => {

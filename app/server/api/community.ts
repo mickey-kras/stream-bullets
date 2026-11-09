@@ -13,7 +13,7 @@ export const communityRoutes: ApiRoute[] = [
   write("PUT", /community-cards/, async ({ request, env, viewer }) => {
     const cards = await saveCards(env, viewer.id, await readJson(request, z.unknown()));
     // The OBS page reloads a card it shows, or drops one that was removed.
-    await notifyOverlay(env, (await getOwnStreamer(env, viewer.id))!.id);
+    notifyOverlay(env, (await getOwnStreamer(env, viewer.id))!.id);
     return json({ cards });
   }),
   // PUT /api/support-links {links: [{kind, label, url}] (≤ 4), visible, card} → {links, visible, card}

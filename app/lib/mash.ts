@@ -85,7 +85,7 @@ export function secondsLeft(endsAt: number | null, now: number): number {
   return endsAt === null ? 0 : Math.max(0, Math.ceil((endsAt - now) / 1_000));
 }
 
-/** One account's taps not yet written to D1. */
+/** One account's running totals in a battle, to write to D1. */
 export interface TapDelta {
   userId: string;
   side: number;
@@ -97,7 +97,8 @@ export interface TapDelta {
 export const TAP_ROWS_PER_STATEMENT = 19;
 
 /**
- * The statements that add the deltas to `mash_taps`, at most 19 rows each. Rows for an account or
+ * The statements that write the running totals to `mash_taps`, at most 19 rows each. A total only ever grows, so
+ * writing it again (a retried flush after an eviction) changes nothing. Rows for an account or
  * battle deleted since the tap are skipped (the joins), so one deletion never fails the batch. So are rows
  * for a run that is over: `startsAt` must still be the battle's start, and the battle must still be running,
  * so a late write from an ended run never lands in a restarted one.
@@ -117,8 +118,8 @@ export function tapUpserts(
         FROM (VALUES ${chunk.map((): string => "(?,?,?,?,?)").join(",")}) v
         JOIN user u ON u.id=v.column2 JOIN entries e ON e.id=v.column1
         JOIN entry_mash m ON m.entry_id=v.column1 AND m.starts_at IS ? AND m.phase IN ('countdown','live') WHERE true
-        ON CONFLICT(entry_id,user_id) DO UPDATE SET taps=mash_taps.taps+excluded.taps,
-          assisted_taps=mash_taps.assisted_taps+excluded.assisted_taps`,
+        ON CONFLICT(entry_id,user_id) DO UPDATE SET taps=max(mash_taps.taps,excluded.taps),
+          assisted_taps=max(mash_taps.assisted_taps,excluded.assisted_taps)`,
       params: [
         ...chunk.flatMap((delta: TapDelta): (string | number)[] => [
           entryId,

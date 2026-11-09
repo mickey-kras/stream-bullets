@@ -43,7 +43,7 @@ export const moderationRoutes: ApiRoute[] = [
     const admin = await requireAdminSession(request, app);
     await consumeMutationQuota(env, admin.viewer.id);
     const result = await resolveReport(env, admin.viewer.id, input, admin.stepUp);
-    if (result.streamerId) await notifyRoom(env, result.streamerId);
+    if (result.streamerId) notifyRoom(env, result.streamerId);
     return json({ status: result.status, resolved: result.resolved });
   }),
 ];

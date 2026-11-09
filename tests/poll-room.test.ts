@@ -390,6 +390,31 @@ describe("live room snapshots", (): void => {
     expect(ids[0]).toBe(battle);
   });
 
+  it("answers a burst of refresh requests with one more snapshot, not one per request", async (): Promise<void> => {
+    const id = await rows.addPoll();
+    const socket = await join();
+    const before = socket.ofType("snapshot").length;
+    await rows.vote(id, 1);
+    const answers = await Promise.all(Array.from({ length: 10 }, () => post("refresh")));
+    expect(answers.map((answer) => answer.status)).toEqual(Array.from({ length: 10 }, () => 204));
+    expect(socket.ofType("snapshot").length - before).toBeLessThanOrEqual(2);
+    expect(lastOf<LiveSnapshot>(socket, "snapshot")).toMatchObject({ polls: [{ counts: [0, 1] }] });
+  });
+
+  it("reuses the last snapshot at a resync when the page has not changed", async (): Promise<void> => {
+    const id = await rows.addPoll();
+    const socket = await join();
+    faults.fail(/WITH recent AS/);
+    await alarmAfter(15_000);
+    // No poll query ran (it would have failed), and the viewer still got a fresh resync.
+    expect(socket.open).toBe(true);
+    expect(socket.ofType("snapshot")).toHaveLength(2);
+    faults.heal();
+    await rows.vote(id, 0);
+    await alarmAfter(15_000);
+    expect(lastOf<LiveSnapshot>(socket, "snapshot")).toMatchObject({ polls: [{ counts: [1, 0] }] });
+  });
+
   it("hides the counts of a binary poll until it is revealed", async (): Promise<void> => {
     const id = await rows.addPoll("binary");
     await rows.vote(id, 0);
@@ -467,10 +492,18 @@ describe("live room snapshots", (): void => {
     expect(socket.closeCode).toBe(1011);
   });
 
-  it("lets a failing alarm throw so the runtime retries it", async (): Promise<void> => {
-    await join();
+  it("logs a failing resync, drops the sockets so they reconnect, and still sets the next alarm", async (): Promise<void> => {
+    const socket = await join();
+    const battle = await rows.addBattle({}, { endsAt: Date.now() + 30_000 });
+    await post("mash", { id: battle });
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
     faults.fail(/SELECT revision, status FROM streamers/);
-    await expect(alarmAfter(15_000)).rejects.toThrow("injected");
+    await alarmAfter(15_000);
+    expect(log.mock.calls).toContainEqual(["live_resync_failed"]);
+    expect(socket.ofType("unavailable")).toHaveLength(1);
+    // A running battle still ends on time: the next alarm is set although this one failed.
+    expect(state().storage.alarm).not.toBeNull();
+    log.mockRestore();
   });
 
   it("refuses to send a snapshot with malformed stored options", async (): Promise<void> => {
@@ -833,6 +866,55 @@ describe("live room battles", (): void => {
     await fireAlarm();
     // Nobody watches, yet the alarm is due at the battle's end.
     expect(state().storage.alarm).toBe(Date.now() + 10_000);
+    await alarmAfter(10_000);
+    expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
+  });
+
+  it("keeps acknowledged taps through a restart before they reach D1, and counts them for the winner", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0, "player-2": 1 });
+    await tap(await join({ user: "player-1" }), id, 5, 1);
+    expect(await tap(await join({ key: "b".repeat(64), user: "player-2" }), id, 3, 1)).toMatchObject({ accepted: 3 });
+    // A deploy before the first write to D1: the acknowledged taps exist only in the room's storage.
+    expect(await rows.storedTaps(id)).toEqual([]);
+    vi.clearAllTimers();
+    rooms.restart(streamerId);
+    await state().ready;
+    await alarmAfter(10_000);
+    expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
+    expect(await rows.storedTaps(id)).toEqual([
+      { user_id: "player-1", side: 0, taps: 5 },
+      { user_id: "player-2", side: 1, taps: 3 },
+    ]);
+    // The finished battle's journal is gone.
+    expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
+  });
+
+  it("writes the same totals again after a restart without counting them twice", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0 });
+    await tap(await join({ user: "player-1" }), id, 4, 1, true);
+    await alarmAfter(MASH_FLUSH_MS);
+    const stored = async (): Promise<unknown> =>
+      database.db.prepare("SELECT taps, assisted_taps FROM mash_taps WHERE entry_id = ?").bind(id).first();
+    expect(await stored()).toEqual({ taps: 4, assisted_taps: 4 });
+    vi.clearAllTimers();
+    rooms.restart(streamerId);
+    await post("mash", { id });
+    // The restarted room finds the same totals in its journal and writes them once more.
+    await alarmAfter(MASH_FLUSH_MS);
+    expect(await stored()).toEqual({ taps: 4, assisted_taps: 4 });
+  });
+
+  it("stops the ticker when the last viewer leaves and still ends the battle at its alarm", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0 });
+    const socket = await join({ user: "player-1" });
+    await tap(socket, id, 2, 1);
+    expect(vi.getTimerCount()).toBe(1);
+    socket.close(1000, "Bye");
+    await room().webSocketClose(socket as unknown as WebSocket, 1000, "Bye", true);
+    // The next tick writes the last taps, then the ticker stops so the room can hibernate.
+    await alarmAfter(MASH_FLUSH_MS);
+    expect(vi.getTimerCount()).toBe(0);
+    expect(await rows.storedTaps(id)).toEqual([{ user_id: "player-1", side: 0, taps: 2 }]);
     await alarmAfter(10_000);
     expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
   });

@@ -809,6 +809,16 @@ describe("account deletion", (): void => {
     await expect(deleteAccount(env, "missing")).rejects.toMatchObject({ status: 404 });
   });
 
+  it("refuses a session that did not sign in recently, and deletes nothing", async (): Promise<void> => {
+    await env.DB.prepare("UPDATE session SET created_at=? WHERE user_id='leaver'")
+      .bind(Date.now() - 11 * 60 * 1000)
+      .run();
+    const { response } = await callDelete({ confirm: "DELETE" });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({ error: "Sign in again to delete your account.", code: "reauth_required" });
+    expect((await linkedRows("leaver")).user).toBe(1);
+  });
+
   it("requires the exact confirmation, then signs the browser out", async (): Promise<void> => {
     for (const body of [{}, { confirm: "delete" }, { confirm: "DELETE ", extra: true }, { confirm: "DELETE", x: 1 }]) {
       const { response } = await callDelete(body);

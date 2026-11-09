@@ -425,8 +425,8 @@ const entrySelect = `
     (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=1) AS likes,
     (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=-1) AS dislikes,
     (SELECT count(*) FROM entry_comments c WHERE c.entry_id=e.id AND c.removed_at IS NULL) AS comments,
-    (SELECT json_group_array(json_object('choice',choice,'count',n)) FROM
-      (SELECT choice,count(*) AS n FROM entry_votes v WHERE v.entry_id=e.id GROUP BY choice)) AS vote_counts,
+    (SELECT json_group_array(json_object('choice',choice,'count',votes)) FROM entry_vote_counts vc
+      WHERE vc.entry_id=e.id AND vc.votes>0) AS vote_counts,
     COALESCE((SELECT value FROM entry_reactions r WHERE r.entry_id=e.id AND r.user_id=?),0) AS reaction,
     (SELECT choice FROM entry_votes v WHERE v.entry_id=e.id AND v.user_id=?) AS my_vote,
     COALESCE((SELECT sum(value) FROM entry_reactions r WHERE r.entry_id=e.id),0) AS score,

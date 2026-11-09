@@ -7,7 +7,7 @@ export async function loader({ request, context }: LoaderFunctionArgs): Promise<
   try {
     return await createAuth(context.get(appContext).env).handler(request);
   } catch (error) {
-    return errorResponse(error);
+    return errorResponse(error, request);
   }
 }
 
@@ -19,6 +19,6 @@ export async function action({ request, context }: ActionFunctionArgs): Promise<
       new Request(request, { method: request.method, body: bytes }),
     );
   } catch (error) {
-    return errorResponse(error);
+    return errorResponse(error, request);
   }
 }

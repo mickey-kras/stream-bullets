@@ -108,7 +108,26 @@ export function json(value: unknown, status = 200): Response {
   return Response.json(value, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-export function errorResponse(error: unknown): Response {
+/**
+ * Logs an unexpected error so it can be diagnosed: its class, its stack frames and the Cloudflare Ray ID of the
+ * request. The message line is left out on purpose: driver and SQL errors can quote tokens or personal data.
+ */
+export function logError(event: string, error: unknown, request?: Request): void {
+  const frames: string[] =
+    error instanceof Error && error.stack
+      ? error.stack
+          .split("\n")
+          .slice(1)
+          .map((frame: string): string => frame.trim())
+      : [];
+  console.error(event, {
+    cause: error instanceof Error ? error.name : typeof error,
+    frames,
+    ray: request?.headers.get("CF-Ray") ?? null,
+  });
+}
+
+export function errorResponse(error: unknown, request?: Request): Response {
   if (error instanceof HttpError) {
     const response = json(
       error.code ? { error: error.message, code: error.code } : { error: error.message },
@@ -117,8 +136,12 @@ export function errorResponse(error: unknown): Response {
     if (error.status === 429) response.headers.set("Retry-After", "60");
     return response;
   }
-  console.error("request_failed");
-  return json({ error: "The request failed. Please try again." }, 500);
+  logError("request_failed", error, request);
+  const ray: string | null = request?.headers.get("CF-Ray") ?? null;
+  return json(
+    ray ? { error: "The request failed. Please try again.", ray } : { error: "The request failed. Please try again." },
+    500,
+  );
 }
 
 export function securityHeaders(
@@ -150,7 +173,9 @@ export function securityHeaders(
       "frame-ancestors 'none'",
     ].join("; "),
   );
-  if (new URL(request.url).protocol === "https:") headers.set("Strict-Transport-Security", "max-age=31536000");
+  // No `preload`: joining the browser preload list is a separate, slow-to-undo decision for the whole domain.
+  if (new URL(request.url).protocol === "https:")
+    headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   if (!headers.has("Cache-Control")) headers.set("Cache-Control", "no-store");
   return new Response(response.body, {
     status: response.status,

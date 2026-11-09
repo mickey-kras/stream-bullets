@@ -868,5 +868,5 @@ export async function deleteAccount(env: AppEnv, userId: string): Promise<void> 
   const streamerIds = [...results[0].results, ...results[1].results].map(
     (row: unknown): string => (row as { id: string }).id,
   );
-  await Promise.all(streamerIds.map((id: string): Promise<void> => notifyRoom(env, id)));
+  for (const id of streamerIds) notifyRoom(env, id);
 }

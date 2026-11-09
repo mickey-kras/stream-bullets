@@ -1,6 +1,12 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    // Outside workerd, `cloudflare:workers` resolves to a stub. Tests that need the Durable Object runtime mock it
+    // with tests/helpers/room.ts instead.
+    alias: { "cloudflare:workers": fileURLToPath(new URL("tests/helpers/workers.ts", import.meta.url)) },
+  },
   test: {
     include: ["tests/**/*.test.ts"],
     testTimeout: 30_000,
