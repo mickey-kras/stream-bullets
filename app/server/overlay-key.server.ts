@@ -24,7 +24,7 @@ export function newOverlayKey(): string {
   return btoa(String.fromCodePoint(...bytes))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
-    .replace(/=+$/, "");
+    .replaceAll("=", "");
 }
 
 /** The hex SHA-256 of a key, as stored. */

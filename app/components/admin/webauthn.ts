@@ -35,7 +35,7 @@ function fromBase64Url(value: string): ArrayBuffer {
 function toBase64Url(value: ArrayBuffer): string {
   let binary = "";
   for (const byte of new Uint8Array(value)) binary += String.fromCodePoint(byte);
-  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/u, "");
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
 interface Descriptor {
