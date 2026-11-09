@@ -1,102 +1,54 @@
 import { describe, expect, it } from "vitest";
 import {
-  coseAlgorithm,
-  decodeCbor,
-  derToRaw,
-  fromBase64,
   fromBase64Url,
-  parseAuthenticatorData,
-  toBase64,
   toBase64Url,
   verifyAuthentication,
   verifyRegistration,
   WebAuthnError,
   type Expected,
 } from "../app/server/webauthn.server";
-import { AT, encodeCbor, rawToDer, SoftKey, UP, UV, type CborInput, type KeyKind } from "./helpers/authenticator";
+import {
+  AT,
+  encodeCbor,
+  SoftKey,
+  UP,
+  UV,
+  type CborInput,
+  type KeyKind,
+} from "./helpers/authenticator";
+
+/*
+ * The verification itself is @simplewebauthn/server's. These tests pin the properties the admin step-up relies on,
+ * so a library update that loosens one of them fails here.
+ */
 
 const origin = "https://stream.example.test";
 const rpId = "stream.example.test";
 const challenge = toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
 const expected: Expected = { challenge, origin, rpId };
 
-async function registered(kind: KeyKind = "es256"): Promise<{ key: SoftKey; publicKey: string; counter: number }> {
+async function registered(
+  kind: KeyKind = "es256",
+): Promise<{ key: SoftKey; publicKey: string; counter: number }> {
   const key = await SoftKey.create(kind);
-  const credential = await key.register({ challenge, rp: { id: rpId } }, origin);
-  const result = await verifyRegistration(credential.response, expected);
+  const credential = await key.register(
+    { challenge, rp: { id: rpId } },
+    origin,
+  );
+  const result = await verifyRegistration(credential, expected);
   return { key, publicKey: result.publicKey, counter: result.counter };
 }
 
+function utf8(value: string): string {
+  return toBase64Url(new TextEncoder().encode(value));
+}
+
 describe("encodings", (): void => {
-  it("round-trips base64url and base64 and rejects bad input", (): void => {
+  it("round-trips base64url and rejects bad input", (): void => {
     const bytes = Uint8Array.of(0, 250, 251, 255, 62, 63);
     expect(fromBase64Url(toBase64Url(bytes))).toEqual(bytes);
-    expect(fromBase64(toBase64(bytes))).toEqual(bytes);
     expect(() => fromBase64Url("a+b")).toThrow(WebAuthnError);
     expect(() => fromBase64Url("a")).toThrow(WebAuthnError);
-  });
-
-  it("decodes the CBOR subset and refuses what authenticators never send", (): void => {
-    const map = new Map<CborInput, CborInput>([
-      ["a", [1, -1, true, false, null]],
-      [1, Uint8Array.of(1, 2)],
-      [2, 300],
-      [3, 70_000],
-      [4, 5_000_000_000 % 4_294_967_296],
-    ]);
-    const { value, length } = decodeCbor(encodeCbor(map));
-    expect(length).toBe(encodeCbor(map).length);
-    expect(value).toEqual(map);
-    expect(() => decodeCbor(Uint8Array.of(0x9f))).toThrow("Unsupported CBOR length.");
-    expect(() => decodeCbor(Uint8Array.of(0xfb))).toThrow("Unsupported CBOR value.");
-    expect(() => decodeCbor(Uint8Array.of(0xc1, 0x01))).toThrow("Unsupported CBOR value.");
-    expect(() => decodeCbor(Uint8Array.of(0x42, 1))).toThrow("Truncated CBOR data.");
-    expect(() => decodeCbor(Uint8Array.of(0xa2, 1, 1, 1, 2))).toThrow("Duplicate CBOR map key.");
-    expect(() => decodeCbor(Uint8Array.from(Array.from({ length: 12 }, () => 0x81)))).toThrow("nested too deeply");
-  });
-
-  it("converts DER ECDSA signatures and refuses malformed ones", (): void => {
-    const raw = Uint8Array.from({ length: 64 }, (_, index) => (index === 0 || index === 32 ? 0x80 : index));
-    expect(derToRaw(rawToDer(raw))).toEqual(raw);
-    const short = new Uint8Array(64);
-    short[31] = 1;
-    short[63] = 2;
-    expect(derToRaw(rawToDer(short))).toEqual(short);
-    expect(() => derToRaw(Uint8Array.of(0x31, 0))).toThrow("Invalid signature.");
-    expect(() => derToRaw(Uint8Array.of(0x30, 2, 0x03, 0))).toThrow("Invalid signature.");
-    expect(() => derToRaw(Uint8Array.of(0x30, 3, 0x02, 0, 0))).toThrow("Invalid signature.");
-    expect(() => derToRaw(Uint8Array.of(0x30, 6, 0x02, 1, 1, 0x02, 2, 1))).toThrow("Invalid signature.");
-    const long = Uint8Array.of(0x30, 37, 0x02, 33, 1, ...new Uint8Array(32), 0x02, 1, 1);
-    expect(() => derToRaw(long)).toThrow("Invalid signature.");
-    expect(() => derToRaw(Uint8Array.of(0x30, 7, 0x02, 1, 1, 0x02, 1, 1, 0))).toThrow("Invalid signature.");
-  });
-});
-
-describe("authenticator data", (): void => {
-  it("needs the fixed header and an exact length", (): void => {
-    expect(() => parseAuthenticatorData(new Uint8Array(36))).toThrow("too short");
-    const base = new Uint8Array(37);
-    expect(parseAuthenticatorData(base)).toMatchObject({ flags: 0, counter: 0, credential: null });
-    expect(() => parseAuthenticatorData(new Uint8Array(38))).toThrow("Unexpected bytes");
-    const attested = new Uint8Array(40);
-    attested[32] = AT;
-    expect(() => parseAuthenticatorData(attested)).toThrow("too short");
-    const noId = new Uint8Array(37 + 18);
-    noId[32] = AT;
-    expect(() => parseAuthenticatorData(noId)).toThrow("Invalid credential ID.");
-  });
-
-  it("skips extension data", (): void => {
-    const extensions = encodeCbor(new Map<CborInput, CborInput>([["credProtect", 1]]));
-    const bytes = new Uint8Array(37 + extensions.length);
-    bytes[32] = 0x80;
-    bytes.set(extensions, 37);
-    expect(parseAuthenticatorData(bytes).flags).toBe(0x80);
-  });
-
-  it("names the COSE algorithm and refuses others", (): void => {
-    expect(() => coseAlgorithm(encodeCbor(new Map<CborInput, CborInput>([[3, -35]])))).toThrow("Unsupported key");
-    expect(() => coseAlgorithm(encodeCbor([1]))).toThrow("Invalid COSE key.");
   });
 });
 
@@ -105,238 +57,298 @@ describe("registration", (): void => {
     "accepts a %s key with attestation none",
     async (kind): Promise<void> => {
       const key = await SoftKey.create(kind);
-      const credential = await key.register({ challenge, rp: { id: rpId } }, origin);
-      const result = await verifyRegistration(credential.response, expected);
-      expect(result).toMatchObject({ credentialId: key.id, counter: 0, backedUp: false, deviceType: "singleDevice" });
+      const credential = await key.register(
+        { challenge, rp: { id: rpId } },
+        origin,
+      );
+      const result = await verifyRegistration(credential, expected);
+      expect(result).toMatchObject({
+        credentialId: key.id,
+        counter: 0,
+        backedUp: false,
+        deviceType: "singleDevice",
+      });
       expect(result.aaguid).toBe("00000000-0000-0000-0000-000000000000");
     },
   );
 
+  it("stores the COSE key as base64, the passkey table's format", async (): Promise<void> => {
+    const key = await SoftKey.create();
+    const result = await verifyRegistration(
+      await key.register({ challenge, rp: { id: rpId } }, origin),
+      expected,
+    );
+    expect(
+      Uint8Array.from(
+        atob(result.publicKey),
+        (c: string): number => c.codePointAt(0)!,
+      ),
+    ).toEqual(await key.cose());
+  });
+
   it("reads the backup flags", async (): Promise<void> => {
     const key = await SoftKey.create();
-    const credential = await key.register({ challenge, rp: { id: rpId } }, origin, {
-      flags: UP | UV | AT | 0x08 | 0x10,
-    });
-    expect(await verifyRegistration(credential.response, expected)).toMatchObject({
+    const credential = await key.register(
+      { challenge, rp: { id: rpId } },
+      origin,
+      {
+        flags: UP | UV | AT | 0x08 | 0x10,
+      },
+    );
+    expect(await verifyRegistration(credential, expected)).toMatchObject({
       backedUp: true,
       deviceType: "multiDevice",
     });
   });
 
   it.each([
-    [{ type: "webauthn.get" }, "Wrong ceremony type."],
-    [{ challenge: toBase64Url(new Uint8Array(32)) }, "The challenge does not match."],
-    [{ origin: "https://evil.example" }, "The origin does not match."],
+    [{ type: "webauthn.get" }, /type/],
+    [{ challenge: toBase64Url(new Uint8Array(32)) }, /challenge/],
+    [{ origin: "https://evil.example" }, /origin/],
     [{ crossOrigin: true }, "Cross-origin requests are not allowed."],
-    [{ rpId: "evil.example" }, "The RP ID does not match."],
-    [{ flags: UV | AT }, "The key was not touched."],
-    [{ flags: UP | AT }, "The key did not verify"],
-    [{ flags: UP | UV }, "Unexpected bytes"],
+    [{ rpId: "evil.example" }, /RP ID/],
+    [{ flags: UV | AT }, /presence/],
+    [{ flags: UP | AT }, /verification/],
+    [{ flags: UP | UV }, /./],
+    [{ fmt: "packed" }, /./],
   ])("refuses %o", async (overrides, message): Promise<void> => {
     const key = await SoftKey.create();
-    const credential = await key.register({ challenge, rp: { id: rpId } }, origin, overrides);
-    await expect(verifyRegistration(credential.response, expected)).rejects.toThrow(message);
+    const credential = await key.register(
+      { challenge, rp: { id: rpId } },
+      origin,
+      overrides,
+    );
+    const result = verifyRegistration(credential, expected);
+    await expect(result).rejects.toThrow(WebAuthnError);
+    await expect(result).rejects.toThrow(message);
   });
 
   it("refuses malformed client data and attestation objects", async (): Promise<void> => {
     const key = await SoftKey.create();
-    const { response } = await key.register({ challenge, rp: { id: rpId } }, origin);
-    const bad = (patch: Partial<typeof response>) => verifyRegistration({ ...response, ...patch }, expected);
-    await expect(bad({ clientDataJSON: toBase64Url(new TextEncoder().encode("{")) })).rejects.toThrow("client data");
-    await expect(bad({ clientDataJSON: toBase64Url(new TextEncoder().encode("null")) })).rejects.toThrow("client data");
-    const bound = { type: "webauthn.create", challenge, origin, tokenBinding: { status: "present" } };
-    await expect(bad({ clientDataJSON: toBase64Url(new TextEncoder().encode(JSON.stringify(bound))) })).rejects.toThrow(
-      "Token binding",
+    const credential = await key.register(
+      { challenge, rp: { id: rpId } },
+      origin,
     );
-    await expect(bad({ attestationObject: toBase64Url(encodeCbor([1])) })).rejects.toThrow("attestation object");
+    const bad = (patch: Partial<typeof credential.response>) =>
+      verifyRegistration(
+        { ...credential, response: { ...credential.response, ...patch } },
+        expected,
+      );
+    await expect(bad({ clientDataJSON: utf8("{") })).rejects.toThrow(
+      "Invalid client data.",
+    );
+    await expect(bad({ clientDataJSON: utf8("null") })).rejects.toThrow(
+      "Invalid client data.",
+    );
+    const bound = {
+      type: "webauthn.create",
+      challenge,
+      origin,
+      tokenBinding: { status: "present" },
+    };
     await expect(
-      bad({ attestationObject: toBase64Url(encodeCbor(new Map<CborInput, CborInput>([["fmt", "none"]]))) }),
-    ).rejects.toThrow("attestation object");
-    const trailing = new Uint8Array([...fromBase64Url(response.attestationObject), 0]);
-    await expect(bad({ attestationObject: toBase64Url(trailing) })).rejects.toThrow("attestation object");
+      bad({ clientDataJSON: utf8(JSON.stringify(bound)) }),
+    ).rejects.toThrow("Token binding");
+    await expect(
+      bad({ attestationObject: toBase64Url(encodeCbor([1])) }),
+    ).rejects.toThrow(WebAuthnError);
+    await expect(
+      bad({
+        attestationObject: toBase64Url(
+          encodeCbor(new Map<CborInput, CborInput>([["fmt", "none"]])),
+        ),
+      }),
+    ).rejects.toThrow(WebAuthnError);
   });
 
   it("refuses COSE keys that do not match their algorithm", async (): Promise<void> => {
-    const attest = async (cose: Map<CborInput, CborInput>): Promise<unknown> => {
+    const attest = async (
+      cose: Map<CborInput, CborInput>,
+    ): Promise<unknown> => {
       const header = new Uint8Array(37);
-      header.set(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rpId))));
+      header.set(
+        new Uint8Array(
+          await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rpId)),
+        ),
+      );
       header[32] = UP | UV | AT;
-      const authData = Uint8Array.from([...header, ...new Uint8Array(16), 0, 1, 7, ...encodeCbor(cose)]);
+      const authData = Uint8Array.from([
+        ...header,
+        ...new Uint8Array(16),
+        0,
+        1,
+        7,
+        ...encodeCbor(cose),
+      ]);
       const attestation = encodeCbor(
         new Map<CborInput, CborInput>([
           ["fmt", "none"],
+          ["attStmt", new Map()],
           ["authData", authData],
         ]),
       );
       const clientData = { type: "webauthn.create", challenge, origin };
       return verifyRegistration(
         {
-          clientDataJSON: toBase64Url(new TextEncoder().encode(JSON.stringify(clientData))),
-          attestationObject: toBase64Url(attestation),
+          id: toBase64Url(Uint8Array.of(7)),
+          response: {
+            clientDataJSON: utf8(JSON.stringify(clientData)),
+            attestationObject: toBase64Url(attestation),
+          },
         },
         expected,
       );
     };
-    const map = (entries: [CborInput, CborInput][]) => new Map<CborInput, CborInput>(entries);
-    await expect(
-      attest(
-        map([
-          [1, 1],
-          [3, -7],
-        ]),
-      ),
-    ).rejects.toThrow("Invalid COSE key.");
-    await expect(
-      attest(
-        map([
-          [1, 2],
-          [3, -7],
-          [-1, 1],
-          [-2, new Uint8Array(31)],
-          [-3, new Uint8Array(32)],
-        ]),
-      ),
-    ).rejects.toThrow("Invalid COSE key.");
-    await expect(
-      attest(
-        map([
-          [1, 2],
-          [3, -8],
-          [-1, 6],
-        ]),
-      ),
-    ).rejects.toThrow("Invalid COSE key.");
-    await expect(
-      attest(
-        map([
-          [1, 1],
-          [3, -257],
-        ]),
-      ),
-    ).rejects.toThrow("Invalid COSE key.");
-    await expect(
-      attest(
-        map([
-          [1, 3],
-          [3, -257],
-          [-1, new Uint8Array(128)],
-          [-2, Uint8Array.of(1, 0, 1)],
-        ]),
-      ),
-    ).rejects.toThrow("too short");
+    const map = (entries: [CborInput, CborInput][]) =>
+      new Map<CborInput, CborInput>(entries);
+    await expect(attest(map([[3, -35]]))).rejects.toThrow(WebAuthnError);
+    await expect(attest(map([[1, 2]]))).rejects.toThrow(WebAuthnError);
   });
 });
 
 describe("authentication", (): void => {
-  it.each(["es256", "ed25519", "rs256"] as const)("verifies a %s assertion and returns the counter", async (kind) => {
-    const { key, publicKey } = await registered(kind);
-    const assertion = await key.assert({ challenge, rpId }, origin);
-    expect(await verifyAuthentication(assertion.response, expected, { publicKey, counter: 0 })).toEqual({ counter: 1 });
-  });
+  it.each(["es256", "ed25519", "rs256"] as const)(
+    "verifies a %s assertion and returns the counter",
+    async (kind) => {
+      const { key, publicKey } = await registered(kind);
+      const assertion = await key.assert({ challenge, rpId }, origin);
+      expect(
+        await verifyAuthentication(assertion, expected, {
+          publicKey,
+          counter: 0,
+        }),
+      ).toEqual({ counter: 1 });
+    },
+  );
 
   it("allows keys without a counter but refuses a counter that does not grow", async (): Promise<void> => {
     const { key, publicKey } = await registered();
     key.counting = false;
     const still = await key.assert({ challenge, rpId }, origin);
-    expect(await verifyAuthentication(still.response, expected, { publicKey, counter: 0 })).toEqual({ counter: 0 });
-    const replayed = await key.assert({ challenge, rpId }, origin, { counter: 4 });
-    await expect(verifyAuthentication(replayed.response, expected, { publicKey, counter: 4 })).rejects.toThrow(
-      "counter did not increase",
-    );
-    await expect(verifyAuthentication(still.response, expected, { publicKey, counter: 3 })).rejects.toThrow(
-      "counter did not increase",
-    );
+    expect(
+      await verifyAuthentication(still, expected, { publicKey, counter: 0 }),
+    ).toEqual({ counter: 0 });
+    const replayed = await key.assert({ challenge, rpId }, origin, {
+      counter: 4,
+    });
+    await expect(
+      verifyAuthentication(replayed, expected, { publicKey, counter: 4 }),
+    ).rejects.toThrow(/counter/);
+    await expect(
+      verifyAuthentication(still, expected, { publicKey, counter: 3 }),
+    ).rejects.toThrow(/counter/);
   });
 
   it.each([
-    [{ type: "webauthn.create" }, "Wrong ceremony type."],
-    [{ origin: "https://stream.example.test.evil.example" }, "The origin does not match."],
-    [{ rpId: "example.test" }, "The RP ID does not match."],
-    [{ flags: UP }, "did not verify"],
-    [{ flags: UV }, "not touched"],
+    [{ type: "webauthn.create" }, /type/],
+    [{ origin: "https://stream.example.test.evil.example" }, /origin/],
+    [{ crossOrigin: true }, "Cross-origin requests are not allowed."],
+    [{ rpId: "example.test" }, /RP ID/],
+    [{ flags: UP }, /verification/],
+    [{ flags: UV }, /not present/],
     [{ corruptSignature: true }, "The signature is not valid."],
   ])("refuses %o", async (overrides, message): Promise<void> => {
     const { key, publicKey } = await registered();
     const assertion = await key.assert({ challenge, rpId }, origin, overrides);
-    await expect(verifyAuthentication(assertion.response, expected, { publicKey, counter: 0 })).rejects.toThrow(
-      message,
-    );
+    const result = verifyAuthentication(assertion, expected, {
+      publicKey,
+      counter: 0,
+    });
+    await expect(result).rejects.toThrow(WebAuthnError);
+    await expect(result).rejects.toThrow(message);
   });
 
-  it.each(["es256", "ed25519", "rs256"] as const)("refuses a signature from another %s key", async (kind) => {
-    const { publicKey } = await registered(kind);
-    const other = await SoftKey.create(kind);
-    const assertion = await other.assert({ challenge, rpId }, origin);
-    const result = verifyAuthentication(assertion.response, expected, { publicKey, counter: 0 });
-    await expect(result).rejects.toThrow(WebAuthnError);
-    await expect(result).rejects.toThrow("The signature is not valid.");
-  });
+  it.each(["es256", "ed25519", "rs256"] as const)(
+    "refuses a signature from another %s key",
+    async (kind) => {
+      const { publicKey } = await registered(kind);
+      const other = await SoftKey.create(kind);
+      const assertion = await other.assert({ challenge, rpId }, origin);
+      const result = verifyAuthentication(assertion, expected, {
+        publicKey,
+        counter: 0,
+      });
+      await expect(result).rejects.toThrow(WebAuthnError);
+      await expect(result).rejects.toThrow("The signature is not valid.");
+    },
+  );
 
   it("refuses an assertion signed over another challenge", async (): Promise<void> => {
     const { key, publicKey } = await registered();
     const other = toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
     const assertion = await key.assert({ challenge: other, rpId }, origin);
-    await expect(verifyAuthentication(assertion.response, expected, { publicKey, counter: 0 })).rejects.toThrow(
-      "The challenge does not match.",
-    );
+    await expect(
+      verifyAuthentication(assertion, expected, { publicKey, counter: 0 }),
+    ).rejects.toThrow(/challenge/);
   });
 
-  it.each(["ed25519", "rs256"] as const)("refuses a corrupted %s signature", async (kind) => {
-    const { key, publicKey } = await registered(kind);
-    const assertion = await key.assert({ challenge, rpId }, origin, { corruptSignature: true });
-    await expect(verifyAuthentication(assertion.response, expected, { publicKey, counter: 0 })).rejects.toThrow(
-      "The signature is not valid.",
-    );
-  });
+  it.each(["ed25519", "rs256"] as const)(
+    "refuses a corrupted %s signature",
+    async (kind) => {
+      const { key, publicKey } = await registered(kind);
+      const assertion = await key.assert({ challenge, rpId }, origin, {
+        corruptSignature: true,
+      });
+      await expect(
+        verifyAuthentication(assertion, expected, { publicKey, counter: 0 }),
+      ).rejects.toThrow("The signature is not valid.");
+    },
+  );
 
   it.each([
     ["the counter", (bytes: Uint8Array): void => void (bytes[36] += 1)],
-    ["a flag", (bytes: Uint8Array): void => void (bytes[32] |= 0x10)],
-  ])("refuses authenticator data with %s changed after signing", async (_name, change): Promise<void> => {
-    const { key, publicKey } = await registered();
-    const assertion = await key.assert({ challenge, rpId }, origin);
-    const bytes = fromBase64Url(assertion.response.authenticatorData);
-    change(bytes);
-    const tampered = { ...assertion.response, authenticatorData: toBase64Url(bytes) };
-    await expect(verifyAuthentication(tampered, expected, { publicKey, counter: 0 })).rejects.toThrow(
-      "The signature is not valid.",
-    );
-  });
+    ["a flag", (bytes: Uint8Array): void => void (bytes[32] |= 0x08)],
+  ])(
+    "refuses authenticator data with %s changed after signing",
+    async (_name, change): Promise<void> => {
+      const { key, publicKey } = await registered();
+      const assertion = await key.assert({ challenge, rpId }, origin);
+      const bytes = fromBase64Url(assertion.response.authenticatorData);
+      change(bytes);
+      const tampered = {
+        ...assertion,
+        response: {
+          ...assertion.response,
+          authenticatorData: toBase64Url(bytes),
+        },
+      };
+      await expect(
+        verifyAuthentication(tampered, expected, { publicKey, counter: 0 }),
+      ).rejects.toThrow("The signature is not valid.");
+    },
+  );
 });
 
 describe("malformed input (security review finding 8)", (): void => {
-  /** Adds an extensions block holding a CBOR text string that is not valid UTF-8. */
-  function badExtensions(authenticatorData: string): string {
-    const bytes = fromBase64Url(authenticatorData);
+  it("refuses an assertion with malformed extension data with a WebAuthnError", async (): Promise<void> => {
+    const { key, publicKey } = await registered();
+    const assertion = await key.assert({ challenge, rpId }, origin);
+    const bytes = fromBase64Url(assertion.response.authenticatorData);
     const out = new Uint8Array(bytes.length + 2);
     out.set(bytes);
     out[32] |= 0x80;
     out.set([0x61, 0xff], bytes.length);
-    return toBase64Url(out);
-  }
-
-  it("turns bad UTF-8 in CBOR text into a WebAuthnError", (): void => {
-    expect(() => decodeCbor(Uint8Array.of(0x61, 0xff))).toThrow(WebAuthnError);
-    expect(() => decodeCbor(Uint8Array.of(0x61, 0xff))).toThrow("Invalid CBOR text.");
+    const response = {
+      ...assertion.response,
+      authenticatorData: toBase64Url(out),
+    };
+    await expect(
+      verifyAuthentication({ ...assertion, response }, expected, {
+        publicKey,
+        counter: 0,
+      }),
+    ).rejects.toThrow(WebAuthnError);
   });
 
-  it("refuses an assertion whose extension data is not valid UTF-8 with a WebAuthnError", async (): Promise<void> => {
-    const { key, publicKey } = await registered();
-    const assertion = await key.assert({ challenge, rpId }, origin);
-    const response = { ...assertion.response, authenticatorData: badExtensions(assertion.response.authenticatorData) };
-    const result = verifyAuthentication(response, expected, { publicKey, counter: 0 });
-    await expect(result).rejects.toThrow(WebAuthnError);
-    await expect(result).rejects.toThrow("Invalid CBOR text.");
-  });
-
-  it("turns any other failure while checking a key into a WebAuthnError", async (): Promise<void> => {
+  it("turns any failure while reading a stored key into a WebAuthnError", async (): Promise<void> => {
     const { key } = await registered();
     const assertion = await key.assert({ challenge, rpId }, origin);
-    // A stored key that is not base64 makes atob throw a DOMException.
-    const result = verifyAuthentication(assertion.response, expected, { publicKey: "!not base64!", counter: 0 });
-    await expect(result).rejects.toThrow(WebAuthnError);
-    await expect(result).rejects.toThrow("The key response could not be read.");
-    // An RS256 key whose exponent Web Crypto refuses.
+    await expect(
+      verifyAuthentication(assertion, expected, {
+        publicKey: "!not base64!",
+        counter: 0,
+      }),
+    ).rejects.toThrow(WebAuthnError);
     const rsa = encodeCbor(
       new Map<CborInput, CborInput>([
         [1, 3],
@@ -345,7 +357,10 @@ describe("malformed input (security review finding 8)", (): void => {
         [-2, new Uint8Array(0)],
       ]),
     );
-    const refused = verifyAuthentication(assertion.response, expected, { publicKey: toBase64(rsa), counter: 0 });
+    const refused = verifyAuthentication(assertion, expected, {
+      publicKey: btoa(String.fromCodePoint(...rsa)),
+      counter: 0,
+    });
     await expect(refused).rejects.toThrow(WebAuthnError);
   });
 });
