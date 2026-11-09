@@ -1,4 +1,10 @@
-import { test as base, type Browser, type BrowserContext, type BrowserContextOptions, type Page } from "@playwright/test";
+import {
+  test as base,
+  type Browser,
+  type BrowserContext,
+  type BrowserContextOptions,
+  type Page,
+} from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 
@@ -7,10 +13,15 @@ export type { APIRequestContext, Browser, BrowserContext, CDPSession, Page } fro
 
 const pages: Set<Page> = new Set();
 
-
 async function start(page: Page): Promise<void> {
   if (process.env.BROWSER_COVERAGE !== "1") return;
-  await page.coverage.startJSCoverage({ resetOnNavigation: false });
+  try {
+    await page.coverage.startJSCoverage({ resetOnNavigation: false });
+  } catch (error: unknown) {
+    // JavaScript-disabled contexts have no script execution to measure.
+    if (error instanceof Error && error.message.includes("Script execution is prohibited")) return;
+    throw error;
+  }
   pages.add(page);
 }
 
@@ -40,8 +51,11 @@ export const test = base.extend<{ coverage: void }>({
     await use(page);
     await collect(page);
   },
-  coverage: [async ({ browser: _browser }, use): Promise<void> => {
-    await use();
-    for (const page of pages) await collect(page);
-  }, { auto: true }],
+  coverage: [
+    async ({ browser: _browser }, use): Promise<void> => {
+      await use();
+      for (const page of pages) await collect(page);
+    },
+    { auto: true },
+  ],
 });

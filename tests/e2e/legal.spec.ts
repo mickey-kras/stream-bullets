@@ -51,24 +51,24 @@ test("the footer links to the legal pages, contact, and the reporting rules", as
   await expect(page.getByRole("heading", { name: "Reporting content and moderation" })).toBeInViewport();
 });
 
-test("the sign-in dialog links to the terms and privacy policy", async ({ page }) => {
-  // A streamer page uses the same dialog as the landing page without the CPU-heavy 3D scene.
-  await page.goto("/@test_host");
-  await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "Sign in or sign up" });
-  await expect(dialog).toBeVisible();
-  // The test server has no OAuth providers, so the dialog shows the neutral empty state.
-  await expect(dialog.getByRole("status")).toHaveText(
-    "Sign-in is turned off on this site for now. Public pages still work.",
-  );
-  await dialog.getByRole("link", { name: "Privacy Policy" }).click();
-  await expect(page).toHaveURL(/\/privacy$/);
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.goBack();
-  await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
-  await page.getByRole("dialog").getByRole("link", { name: "Terms" }).click();
-  await expect(page).toHaveURL(/\/terms$/);
-});
+for (const [name, path] of [
+  ["Privacy Policy", "/privacy"],
+  ["Terms", "/terms"],
+] as const) {
+  test(`the sign-in dialog links to ${name}`, async ({ page }) => {
+    // Test each link from a fresh dialog instead of sharing back-navigation state.
+    await page.goto("/streamers");
+    await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Sign in or sign up" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("status")).toHaveText(
+      "Sign-in is turned off on this site for now. Public pages still work.",
+    );
+    await dialog.getByRole("link", { name, exact: true }).click();
+    await expect(page).toHaveURL(new URL(path, "http://localhost:5173").href);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  });
+}
 
 test("the OBS overlay has no footer or site chrome", async ({ page }) => {
   await page.goto("/@test_host/overlay");

@@ -8,7 +8,11 @@ export default defineConfig({
   timeout: 45_000,
   expect: { timeout: 10_000 },
   forbidOnly: Boolean(process.env.CI),
-  reporter: [["list"], ["html", { open: "never" }]],
+  reporter: [
+    ["list"],
+    ["html", { open: "never" }],
+    ...(process.env.BROWSER_COVERAGE === "1" ? [["./scripts/browser-coverage-reporter.ts"] as [string]] : []),
+  ],
   use: { baseURL: "http://localhost:5173", trace: "retain-on-failure", screenshot: "only-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
