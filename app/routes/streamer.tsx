@@ -42,6 +42,7 @@ import { useLivePolls, useLiveRevalidation } from "../components/live";
 import { battleMarks, useBattleClock } from "../components/mash/use-mash";
 import { useScheduleClock } from "../components/use-clock";
 import { liveEventAt } from "../lib/schedule";
+import { copyText } from "../lib/clipboard";
 import { PollsView, usePollsMainClass } from "../components/streamer/polls-view";
 import type {
   BoardSnapshot,
@@ -417,10 +418,7 @@ export default function StreamerPage(): ReactNode {
 
   function copyPageLink(): void {
     const url = `${location.origin}/@${streamer.handle}`;
-    void navigator.clipboard
-      ?.writeText(url)
-      .then(() => toast(t("entry.linkCopied")))
-      .catch(() => toast(url));
+    void copyText(url).then((copied: boolean) => toast(copied ? t("entry.linkCopied") : url));
   }
 
   /** The empty Topics state: the owner shares the page; viewers suggest the first topic. */

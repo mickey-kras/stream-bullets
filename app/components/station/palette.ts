@@ -251,5 +251,3 @@ export function createPalette(compact: boolean) {
     ] as Array<[THREE.MeshStandardMaterial, number]>,
   };
 }
-
-export type Palette = ReturnType<typeof createPalette>;

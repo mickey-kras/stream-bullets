@@ -2,13 +2,12 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { useRevalidator } from "react-router";
 import { t } from "../../i18n";
 import type { Streamer, StreamerAccess, Viewer } from "../../types";
-import { errorMessage, postJson } from "../api";
+import { errorMessage, postJson, sendJson } from "../api";
 import { Icon } from "../ui/icon";
 import { Req, RequiredNote } from "../ui/required";
 import { Sheet } from "../ui/sheet";
 import { useToast } from "../ui/toast";
 import { StreamerWaitlist } from "../waitlist";
-import { sendJson } from "./me";
 
 /**
  * "Host a community" (item 17): the waitlist request and its states (pending, not approved), or, once

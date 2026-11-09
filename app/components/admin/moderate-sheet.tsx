@@ -1,8 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { MODERATION_REASONS, type ModerationReason, type PageAction } from "../../admin-types";
+import { MODERATION_REASONS, type ModerationReason, type PageAction, type StreamerStatus } from "../../types";
 import { t, type MessageId } from "../../i18n";
 import { reasonLabels } from "../../lib/moderation";
-import type { StreamerStatus } from "../../types";
 import { StreamerLogo } from "../ui/avatar";
 import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";

@@ -107,11 +107,6 @@ export function localDateOf(time: number, zone: string): LocalDate {
   return { year, month, day };
 }
 
-/** Midnight at the start of the local day that contains `time`. */
-export function startOfDay(time: number, zone: string): number {
-  return zonedTime(localDateOf(time, zone), 0, 0, zone);
-}
-
 /** `YYYY-MM-DD` */
 export function formatDate(date: LocalDate): string {
   return `${String(date.year).padStart(4, "0")}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;

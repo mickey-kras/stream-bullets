@@ -16,7 +16,8 @@ import {
   type TokenBucket,
 } from "../app/lib/mash";
 import { withSnapshotRuns, type MashLive } from "../app/components/live";
-import { battleMarks, nextBattleChange, TapBatch } from "../app/components/mash/use-mash";
+import { battleMarks, TapBatch } from "../app/components/mash/use-mash";
+import { nextMark } from "../app/lib/clock";
 import type { Entry, LiveSnapshot, MashPhase } from "../app/types";
 
 /** Sends `perBatch` taps every 200 ms for `seconds` and returns how many the bucket accepted. */
@@ -193,12 +194,12 @@ describe("Mash Battle clock", (): void => {
     const marks = battleMarks([battle("countdown", 3_000, 13_000), battle("setup", null, null), null]);
     expect(marks).toEqual([3_000, 13_000, 13_000 - MASH_BATCH_MS]);
     // The old 1 Hz clock woke at a random point in each second, so the start showed up to 1 s late.
-    expect(nextBattleChange(2_400, marks)).toBe(2_800);
-    expect(nextBattleChange(2_800, marks)).toBe(3_000);
-    expect(nextBattleChange(3_000, marks)).toBe(3_800);
-    expect(nextBattleChange(12_100, marks)).toBe(12_800);
-    expect(nextBattleChange(12_800, marks)).toBe(13_000);
-    expect(nextBattleChange(13_000, marks)).toBeNull();
+    expect(nextMark(2_400, marks, 1_000)).toBe(2_800);
+    expect(nextMark(2_800, marks, 1_000)).toBe(3_000);
+    expect(nextMark(3_000, marks, 1_000)).toBe(3_800);
+    expect(nextMark(12_100, marks, 1_000)).toBe(12_800);
+    expect(nextMark(12_800, marks, 1_000)).toBe(13_000);
+    expect(nextMark(13_000, marks, 1_000)).toBeNull();
   });
 
   it("ignores finished battles and battles with no times", (): void => {
