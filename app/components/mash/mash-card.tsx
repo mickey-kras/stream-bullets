@@ -335,7 +335,8 @@ function TapButton({
     plus.className = "mash-plus";
     plus.textContent = "+1";
     plus.setAttribute("aria-hidden", "true");
-    plus.style.left = `${20 + Math.random() * 60}%`;
+    const random: number = crypto.getRandomValues(new Uint32Array(1))[0] / 0x1_0000_0000;
+    plus.style.left = `${20 + random * 60}%`;
     target.appendChild(plus);
     setTimeout(() => plus.remove(), 600);
   }
