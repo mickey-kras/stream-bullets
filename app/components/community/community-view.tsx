@@ -206,12 +206,11 @@ export function CommunityView({
       ) : (
         <div className={`community-grid${editable ? " is-editing" : ""}`}>
           {shown.map((card: CommunityCard, index: number) => (
-            <section
+            <div
               key={card.id}
               className="info-card community-card"
               data-card={card.id}
-              role="region"
-              aria-label={card.title}
+              role="presentation"
               onDragOver={(event) => {
                 if (editable && dragged.current) event.preventDefault();
               }}
@@ -236,7 +235,7 @@ export function CommunityView({
                 />
               )}
               <CardContent card={card} />
-            </section>
+            </div>
           ))}
           {editable && cards.length < MAX_COMMUNITY_CARDS && (
             <button type="button" className="add-card-tile" onClick={() => onAdding(true)}>

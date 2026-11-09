@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -106,7 +107,7 @@ export const Cropper = forwardRef<
     }
   });
 
-  function exportBlob(): Promise<Blob> {
+  const exportBlob = useCallback((): Promise<Blob> => {
     return new Promise<Blob>((resolve, reject) => {
       const img = image.current;
       if (!img || !natural || !size) {
@@ -129,9 +130,9 @@ export const Cropper = forwardRef<
         0.9,
       );
     });
-  }
+  }, [crop, natural, size]);
 
-  useImperativeHandle(ref, () => ({ exportBlob }), [crop, natural, size]);
+  useImperativeHandle(ref, () => ({ exportBlob }), [exportBlob]);
 
   function move(dx: number, dy: number): void {
     setCrop((current: CropState) => (natural && size ? settle(size, natural, panBy(current, dx, dy)) : current));
@@ -239,7 +240,6 @@ export const Cropper = forwardRef<
                   width={pixels * 2}
                   height={pixels * 2}
                   data-size={pixels}
-                  role="img"
                   aria-label={t(page ? pageCaption : profileCaption)}
                   ref={(element: HTMLCanvasElement | null) => {
                     previews.current[index] = element;

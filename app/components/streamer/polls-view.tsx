@@ -66,7 +66,11 @@ function useBattleFocus(on: boolean): void {
   }, [on]);
 }
 
-function PollToolbarStart({ props, battle, phase }: Readonly<{
+function PollToolbarStart({
+  props,
+  battle,
+  phase,
+}: Readonly<{
   props: Readonly<PollsViewProps>;
   battle: Entry | null;
   phase: string;

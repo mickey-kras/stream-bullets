@@ -75,10 +75,7 @@ async function liveResponse(
   // A wrong or revoked overlay key is no error: the OBS source then joins like any signed-out viewer.
   else if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
   const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
-  return room.fetch(
-    `https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`,
-    { headers },
-  );
+  return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
 }
 
 export default {

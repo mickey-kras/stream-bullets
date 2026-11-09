@@ -43,7 +43,16 @@ import { battleMarks, useBattleClock } from "../components/mash/use-mash";
 import { useScheduleClock } from "../components/use-clock";
 import { liveEventAt } from "../lib/schedule";
 import { PollsView, usePollsMainClass } from "../components/streamer/polls-view";
-import type { BoardSnapshot, Entry, EntryStatus, LiveSnapshot, SortOrder, StreamEvent, Streamer, Viewer } from "../types";
+import type {
+  BoardSnapshot,
+  Entry,
+  EntryStatus,
+  LiveSnapshot,
+  SortOrder,
+  StreamEvent,
+  Streamer,
+  Viewer,
+} from "../types";
 import type { Route } from "./+types/streamer";
 
 type View = StreamerView;
@@ -72,7 +81,11 @@ function entryView(entry: Entry): View {
   return entry.kind === "topic" ? "topics" : "polls";
 }
 
-function boardFilters(params: URLSearchParams, view: View, official: boolean): {
+function boardFilters(
+  params: URLSearchParams,
+  view: View,
+  official: boolean,
+): {
   sort: SortOrder;
   query: string;
   status: EntryStatus | null;
@@ -86,7 +99,12 @@ function boardFilters(params: URLSearchParams, view: View, official: boolean): {
   return { sort, query: params.get("query") || "", status };
 }
 
-async function pageSchedule(env: AppEnv, streamer: Streamer, params: URLSearchParams, now: number): Promise<{
+async function pageSchedule(
+  env: AppEnv,
+  streamer: Streamer,
+  params: URLSearchParams,
+  now: number,
+): Promise<{
   events: StreamEvent[];
   linkedEvent: StreamEvent | null;
   mode: ScheduleMode;
@@ -204,9 +222,9 @@ function pageRole(owner: boolean, moderator: boolean): "owner" | "admin" | "view
   return moderator ? "admin" : "viewer";
 }
 
-function streamerHeaderAppearance(streamer: Streamer): Pick<
-  ComponentProps<typeof StreamerHeader>, "className" | "views" | "labels" | "icons" | "brand"
-> {
+function streamerHeaderAppearance(
+  streamer: Streamer,
+): Pick<ComponentProps<typeof StreamerHeader>, "className" | "views" | "labels" | "icons" | "brand"> {
   if (!streamer.isOfficial) return { className: "", views: streamerViews, labels: {}, icons: {} };
   return {
     className: "ideas-header",

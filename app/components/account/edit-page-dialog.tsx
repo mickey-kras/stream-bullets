@@ -82,7 +82,11 @@ function pagePreview(logoChoice: "profile" | "logo", logoUrl: string | null, vie
   return personPicture(viewer.avatar, viewer.avatarPreset);
 }
 
-function PageActions({ cropping, pending, onCrop }: Readonly<{
+function PageActions({
+  cropping,
+  pending,
+  onCrop,
+}: Readonly<{
   cropping: boolean;
   pending: boolean;
   onCrop: () => Promise<void>;

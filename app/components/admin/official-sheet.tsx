@@ -43,7 +43,9 @@ export function OfficialSheet({
     }
   }
 
-  const title: string = t(official ? "admin.pages.officialTitle" : "admin.pages.clearOfficialTitle", { handle: page.handle });
+  const title: string = t(official ? "admin.pages.officialTitle" : "admin.pages.clearOfficialTitle", {
+    handle: page.handle,
+  });
   return (
     <Sheet
       open
