@@ -1,9 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { Form, Link, useRevalidator } from "react-router";
-import type { AdminPage, AdminPageList, ModerationEvent, PageAction } from "../../admin-types";
+import type { AdminPage, AdminPageList, ModerationEvent, PageAction, StreamerStatus } from "../../types";
 import { t, tn } from "../../i18n";
 import { reasonText } from "../../lib/moderation";
-import type { StreamerStatus } from "../../types";
 import { EmptyState } from "../common";
 import { Avatar, StreamerLogo } from "../ui/avatar";
 import { Icon } from "../ui/icon";

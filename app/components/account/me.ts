@@ -67,15 +67,3 @@ export async function uploadImage(kind: "avatar" | "logo" | "background", body: 
   });
   return url;
 }
-
-export async function sendJson<T>(
-  method: "PUT" | "PATCH" | "POST" | "DELETE",
-  url: string,
-  body?: unknown,
-): Promise<T> {
-  return requestJson<T>(url, {
-    method,
-    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-}

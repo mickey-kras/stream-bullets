@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { nextMark } from "../../lib/clock";
 import { MASH_ASSISTED_RATE, MASH_BATCH_MS, MASH_MAX_BATCH, MASH_RATE, mashPhaseAt, secondsLeft } from "../../lib/mash";
 import type { Entry, MashPhase, MashState } from "../../types";
 import { sendLive, useMashLive, type MashDenial } from "../live";
@@ -57,11 +56,6 @@ export function battleMarks(entries: readonly (Pick<Entry, "mash"> | null)[]): n
     if (mash.endsAt !== null) marks.push(mash.endsAt, mash.endsAt - MASH_BATCH_MS);
   }
   return marks;
-}
-
-/** The next instant after `now` that a mark, or a whole second before it, falls on. Null with no mark ahead. */
-export function nextBattleChange(now: number, marks: readonly number[]): number | null {
-  return nextMark(now, marks, 1_000);
 }
 
 /**

@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, useRevalidator } from "react-router";
-import type { SecurityKey, StepUpStatus } from "../../admin-types";
+import type { SecurityKey, StepUpStatus } from "../../types";
 import { t } from "../../i18n";
 import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";

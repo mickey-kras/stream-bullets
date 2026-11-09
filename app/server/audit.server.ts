@@ -1,5 +1,5 @@
 import type { AppEnv } from "../env";
-import type { ModerationTarget } from "../admin-types";
+import type { ModerationTarget } from "../types";
 
 /** One row of the moderation and admin-security audit log (`moderation_actions`, item 29). */
 export interface AuditEntry {

@@ -3,7 +3,7 @@ import { useRevalidator } from "react-router";
 import { t } from "../../i18n";
 import { DEFAULT_AVATAR_PRESET, isAvatarPreset, type PictureSource } from "../../lib/avatars";
 import type { Provider, Viewer } from "../../types";
-import { errorMessage } from "../api";
+import { errorMessage, sendJson } from "../api";
 import { providerName } from "../shell/sign-in-dialog";
 import { bumpImage, Picture } from "../ui/avatar";
 import { DialogActions } from "../ui/dialog";
@@ -14,7 +14,7 @@ import { useToast } from "../ui/toast";
 import { AvatarPicker, type AvatarChoice } from "./avatar-picker";
 import { Cropper, type CropperHandle } from "./cropper";
 import { useDiscardGuard } from "./discard";
-import { IMAGE_TYPES, MAX_IMAGE_BYTES, sendJson, uploadImage } from "./me";
+import { IMAGE_TYPES, MAX_IMAGE_BYTES, uploadImage } from "./me";
 
 /** "Signed in with Google" (with the provider's mark) at the top of Your profile and Your data. */
 export function SignedInWith({ provider }: Readonly<{ provider: Provider | null }>): ReactNode {

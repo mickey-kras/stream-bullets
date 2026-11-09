@@ -1,8 +1,7 @@
 import { z } from "zod";
-import type { SecurityKey, StepUpMode, StepUpNeed, StepUpStatus } from "../admin-types";
+import type { SecurityKey, StepUpMode, StepUpNeed, StepUpStatus, Viewer } from "../types";
 import type { AppContext, AppEnv } from "../env";
 import { requestSession } from "../lib/shell.server";
-import type { Viewer } from "../types";
 import { isAdmin } from "./access.server";
 import { recordAudit, sessionLabel } from "./audit.server";
 import { getOrigin, HttpError } from "./http.server";

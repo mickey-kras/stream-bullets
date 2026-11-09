@@ -9,9 +9,9 @@ import type {
   ReportGroupList,
   ReportItem,
   ReportItemList,
-} from "../../admin-types";
+  ReportReason,
+} from "../../types";
 import { t, tn, type MessageId } from "../../i18n";
-import type { ReportReason } from "../../types";
 import { EmptyState } from "../common";
 import { Avatar, StreamerLogo } from "../ui/avatar";
 import { DialogActions } from "../ui/dialog";

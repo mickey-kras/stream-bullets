@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { t } from "../../i18n";
+import { copyText } from "../../lib/clipboard";
 import { errorMessage, postJson } from "../api";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { IconButton } from "../ui/icon-button";
@@ -33,12 +34,7 @@ export function OverlayLink({ hasKey }: Readonly<{ hasKey: boolean }>): ReactNod
 
   async function copyUrl(): Promise<void> {
     if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast(t("overlay.copied"));
-    } catch {
-      toast(t("contact.copyFallback"));
-    }
+    toast((await copyText(url)) ? t("overlay.copied") : t("contact.copyFallback"));
   }
 
   let hint: string = t("overlay.keyNone");
