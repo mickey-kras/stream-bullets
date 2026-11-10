@@ -164,7 +164,7 @@ export class PollRoom extends DurableObject<AppEnv> {
   private readonly buckets = new Map<string, TokenBucket>();
   private ticker: ReturnType<typeof setInterval> | undefined;
   /** Refresh requests not yet covered by a refresh that started after them. */
-  private refreshWaiters: { resolve: () => void; reject: (error: unknown) => void }[] = [];
+  private readonly refreshWaiters: { resolve: () => void; reject: (error: unknown) => void }[] = [];
   private refreshing: Promise<void> | undefined;
   private ticks = 0;
   private ticking = false;
@@ -885,15 +885,19 @@ export class PollRoom extends DurableObject<AppEnv> {
     return { expiresAt: lease.expiresAt, userId, openedAt };
   }
 
-  /** Closes sockets whose lease ran out, and sockets that have not pinged for IDLE_TIMEOUT_MS. */
-  private expireConnections(): void {
-    const now = Date.now();
+  private pruneConnectionCaches(now: number): void {
     for (const [id, until] of this.notLive) if (until <= now) this.notLive.delete(id);
     // A bucket refills to full within a second (capacity = rate), so dropping a full bucket of an account with no
     // socket left loses nothing. A partly used one stays, so a quick reconnect does not get a fresh bucket.
     const signedIn = new Set(this.activeSockets().map((socket: WebSocket): string | null => this.lease(socket).userId));
     for (const [userId, bucket] of this.buckets)
       if (!signedIn.has(userId) && now - bucket.at >= 1_000) this.buckets.delete(userId);
+  }
+
+  /** Closes sockets whose lease ran out, and sockets that have not pinged for IDLE_TIMEOUT_MS. */
+  private expireConnections(): void {
+    const now: number = Date.now();
+    this.pruneConnectionCaches(now);
     for (const socket of this.activeSockets()) {
       const lease = this.lease(socket);
       const pinged = this.ctx.getWebSocketAutoResponseTimestamp(socket)?.getTime() ?? 0;
