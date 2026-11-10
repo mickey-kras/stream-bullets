@@ -50,7 +50,14 @@ export function AccountDialogs(): ReactNode {
   if (name === "profile")
     return <ProfileDialog viewer={shell.viewer} provider={me?.signInProvider ?? null} onClose={close} />;
   if (name === "data")
-    return <DataDialog provider={me?.signInProvider ?? null} owner={Boolean(shell.ownStreamer)} onClose={close} />;
+    return (
+      <DataDialog
+        provider={me?.signInProvider ?? null}
+        providers={shell.providers}
+        owner={Boolean(shell.ownStreamer)}
+        onClose={close}
+      />
+    );
   if (!me?.viewer)
     return (
       <Sheet

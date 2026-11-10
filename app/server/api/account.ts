@@ -2,7 +2,7 @@ import type { AppContext, AppEnv } from "../../env";
 import type { Provider } from "../../types";
 import { getStreamerAccess } from "../access.server";
 import { deleteAccount, exportAccount } from "../account.server";
-import { configuredProviders, createAuth } from "../auth.server";
+import { configuredProviders, createAuth, requireRecentSignIn } from "../auth.server";
 import { consumeMutationQuota, getOwnStreamer, setDisplayPrefs, setLocale, updateProfile } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
 import { getSupport } from "../support.server";
@@ -75,6 +75,7 @@ export const accountRoutes: ApiRoute[] = [
   ),
   write("POST", /account\/delete/, async ({ request, app, env, viewer }) => {
     await readJson(request, accountDeletionSchema);
+    await requireRecentSignIn(request, env);
     await consumeMutationQuota(env, viewer.id);
     await deleteAccount(env, viewer.id);
     await endSession(request, app);

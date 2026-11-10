@@ -67,6 +67,14 @@ test("a member downloads their data, deletes their account, and is signed out", 
   await expect(confirm).toBeDisabled();
   // Any letter case confirms (review m21).
   await dialog.getByLabel("Type DELETE to confirm").fill("delete");
+  // Fixtures have no linked provider. A rejected deletion must still show the sign-in state.
+  await page.route("**/api/account/delete", (route) => route.fulfill({
+    status: 403,
+    json: { error: "Sign in again to delete your account.", code: "reauth_required" },
+  }), { times: 1 });
+  await dialog.getByRole("button", { name: "Delete my account" }).click();
+  await expect(dialog.getByText("Sign in again to delete your account.", { exact: true })).toBeVisible();
+  await expect(dialog.getByText("Sign-in is turned off on this site for now. Public pages still work.")).toBeVisible();
   await dialog.getByRole("button", { name: "Delete my account" }).click();
   await page.waitForURL(`${origin}/`);
 
