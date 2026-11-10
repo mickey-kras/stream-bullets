@@ -178,7 +178,9 @@ export function securityHeaders(
       "frame-ancestors 'none'",
     ].join("; "),
   );
-  if (new URL(request.url).protocol === "https:") headers.set("Strict-Transport-Security", "max-age=31536000");
+  // No `preload`: joining the browser preload list is a separate, slow-to-undo decision for the whole domain.
+  if (new URL(request.url).protocol === "https:")
+    headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   if (!headers.has("Cache-Control")) headers.set("Cache-Control", "no-store");
   return new Response(response.body, {
     status: response.status,
