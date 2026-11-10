@@ -83,6 +83,18 @@ describe("image metadata removal", () => {
     expect(imageSize(clean)).toMatchObject({ type: "jpg", width: 2, height: 3 });
   });
 
+  it("drops non-ICC APP2 data before and after JPEG scans", () => {
+    const metadata = [...segment(0xe2, ascii("FPXR private camera information")),
+      ...segment(0xe2, ascii("ICC_PROFILE")), ...segment(0xe2, [...ascii("ICC_PROFILEX"), 1, 1])];
+    const input = Uint8Array.from([0xff, 0xd8, ...metadata, ...jpeg().subarray(2, -2), ...metadata, 0xff, 0xd9]);
+    const clean = stripImageMetadata(input, "image/jpeg");
+    expect(contains(clean, "FPXR")).toBe(false);
+    expect(contains(clean, "private camera information")).toBe(false);
+    expect(contains(clean, "ICC_PROFILEX")).toBe(false);
+    expect(Buffer.from(clean).indexOf("ICC_PROFILE")).toBe(Buffer.from(clean).lastIndexOf("ICC_PROFILE"));
+    expect(imageSize(clean)).toMatchObject({ type: "jpg", width: 2, height: 3 });
+  });
+
   it("drops eXIf and text chunks from a PNG and keeps the rest in order", () => {
     const clean = stripImageMetadata(png(), "image/png");
     for (const text of ["eXIf", "GPS", "tEXt", "Jane Doe"]) expect(contains(clean, text)).toBe(false);

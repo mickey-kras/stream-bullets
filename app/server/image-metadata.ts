@@ -25,8 +25,11 @@ function concat(parts: Uint8Array[]): Uint8Array {
   return out;
 }
 
-/** JPEG segments dropped: APP1 (EXIF, XMP), APP3-APP13 (IPTC, vendor data), APP15 and COM. */
-function droppedJpegMarker(marker: number): boolean {
+/** Keep ICC data in APP2; drop private application segments and comments. */
+function droppedJpegMarker(marker: number, payload: Uint8Array): boolean {
+  if (marker === 0xe2) {
+    return payload.length < 14 || new TextDecoder().decode(payload.subarray(0, 12)) !== "ICC_PROFILE\0";
+  }
   return marker === 0xe1 || (marker >= 0xe3 && marker <= 0xed) || marker === 0xef || marker === 0xfe;
 }
 
@@ -74,7 +77,7 @@ function stripJpeg(bytes: Uint8Array): Uint8Array {
       const exif: Uint8Array | undefined =
         new TextDecoder().decode(payload.subarray(0, 6)) === "Exif\0\0" ? orientationExif(payload) : undefined;
       if (exif) parts.push(concat([Uint8Array.of(0xff, 0xe1, 0, exif.length + 8, 69, 120, 105, 102, 0, 0), exif]));
-    } else if (!droppedJpegMarker(marker)) parts.push(bytes.subarray(start, end));
+    } else if (!droppedJpegMarker(marker, bytes.subarray(offset + 2, end))) parts.push(bytes.subarray(start, end));
     offset = end;
     if (marker === 0xda) {
       offset = scanEnd(bytes, end);
