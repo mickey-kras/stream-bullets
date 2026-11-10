@@ -5,6 +5,7 @@ import { streamers } from "../../db/schema";
 import type { AppEnv } from "../env";
 import { assertStreamerWritable } from "./access.server";
 import { HttpError, readBody } from "./http.server";
+import { stripImageMetadata } from "./image-metadata";
 
 const types: Readonly<Record<string, string>> = { png: "image/png", jpg: "image/jpeg", webp: "image/webp" };
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -50,9 +51,10 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
   }
   const bytes = await readBody(request, MAX_IMAGE_BYTES);
   const contentType = validateImage(bytes, request.headers.get("Content-Type"));
+  const clean: Uint8Array = stripImageMetadata(bytes, contentType);
   const key = `${kind}/${userId}`;
   const url = `/images/${key}`;
-  await env.IMAGES.put(key, bytes, { httpMetadata: { contentType, cacheControl: "no-cache" } });
+  await env.IMAGES.put(key, clean, { httpMetadata: { contentType, cacheControl: "no-cache" } });
   if (kind === "avatar") {
     await env.DB.batch([
       env.DB.prepare("UPDATE user SET image = ?, updated_at = ? WHERE id = ?").bind(url, Date.now(), userId),

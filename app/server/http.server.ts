@@ -108,7 +108,31 @@ export function json(value: unknown, status = 200): Response {
   return Response.json(value, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-export function errorResponse(error: unknown): Response {
+/**
+ * The "at ..." lines of an error's stack. The message is left out on purpose, all of it: driver and SQL errors can
+ * quote tokens or personal data, also on later lines. A stack that does not start with the message gives no frames.
+ */
+function stackFrames(error: Error): string[] {
+  const header: string = String(error);
+  if (!error.stack?.startsWith(header)) return [];
+  return error.stack
+    .slice(header.length)
+    .split("\n")
+    .map((line: string): string => line.trim())
+    .filter((line: string): boolean => line.startsWith("at "));
+}
+
+/** Logs an unexpected error so it can be diagnosed: its class, its stack frames and the Cloudflare Ray ID. */
+export function logError(event: string, error: unknown, request?: Request): void {
+  const frames: string[] = error instanceof Error ? stackFrames(error) : [];
+  console.error(event, {
+    cause: error instanceof Error ? error.name : typeof error,
+    frames,
+    ray: request?.headers.get("CF-Ray") ?? null,
+  });
+}
+
+export function errorResponse(error: unknown, request?: Request): Response {
   if (error instanceof HttpError) {
     const response = json(
       error.code ? { error: error.message, code: error.code } : { error: error.message },
@@ -117,8 +141,12 @@ export function errorResponse(error: unknown): Response {
     if (error.status === 429) response.headers.set("Retry-After", "60");
     return response;
   }
-  console.error("request_failed");
-  return json({ error: "The request failed. Please try again." }, 500);
+  logError("request_failed", error, request);
+  const ray: string | null = request?.headers.get("CF-Ray") ?? null;
+  return json(
+    ray ? { error: "The request failed. Please try again.", ray } : { error: "The request failed. Please try again." },
+    500,
+  );
 }
 
 export function securityHeaders(

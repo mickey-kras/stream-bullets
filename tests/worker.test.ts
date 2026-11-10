@@ -409,4 +409,51 @@ describe("Worker cron", (): void => {
       written,
     );
   });
+
+  it("runs the top-up even when cleanup fails, logs the failure and fails the run", async (): Promise<void> => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const real = env.DB;
+    const failing = new Proxy(real, {
+      get(target: D1Database, key: string | symbol): unknown {
+        if (key === "prepare")
+          return (sql: string): D1PreparedStatement => {
+            if (/DELETE FROM session/i.test(sql)) throw new Error("D1 down");
+            return target.prepare(sql);
+          };
+        const value: unknown = Reflect.get(target, key);
+        return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(target) : value;
+      },
+    });
+    const ping = vi.spyOn(globalThis, "fetch");
+    try {
+      await expect(
+        worker.scheduled(
+          { scheduledTime: Date.now(), cron: "17 * * * *", noRetry: () => undefined },
+          { ...env, DB: failing, CRON_HEARTBEAT_URL: "https://hc.example/ping" },
+        ),
+      ).rejects.toThrow("Cron jobs failed: cleanup");
+      expect(log.mock.calls.map((call: unknown[]) => call[0])).toEqual(["cron_cleanup_failed"]);
+      // No heartbeat for a failed run, so the monitor alerts.
+      expect(ping).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+      ping.mockRestore();
+    }
+  });
+
+  it("pings the heartbeat after a successful run and logs a failed ping", async (): Promise<void> => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const ping = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 503 }));
+    try {
+      await worker.scheduled(
+        { scheduledTime: Date.now(), cron: "17 * * * *", noRetry: () => undefined },
+        { ...env, CRON_HEARTBEAT_URL: "https://hc.example/ping" },
+      );
+      expect(ping).toHaveBeenCalledWith("https://hc.example/ping", { method: "POST" });
+      expect(log.mock.calls).toEqual([["cron_heartbeat_failed", { status: 503 }]]);
+    } finally {
+      log.mockRestore();
+      ping.mockRestore();
+    }
+  });
 });

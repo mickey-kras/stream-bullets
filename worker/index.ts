@@ -7,6 +7,7 @@ import {
   HttpError,
   errorResponse,
   getOrigin,
+  logError,
   queryParams,
   requireSameOrigin,
   securityHeaders,
@@ -79,10 +80,30 @@ async function liveResponse(
 }
 
 export default {
+  /**
+   * The hourly jobs run side by side, so a failed cleanup never skips the schedule top-up. Each failure is logged;
+   * the run then throws, so the Cron Trigger is recorded as failed and an alert on failed cron runs fires.
+   */
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
-    await cleanExpiredData(env, controller.scheduledTime);
-    // Weekly series are written 12 weeks ahead; keep them topped up.
-    await topUpSeries(env, controller.scheduledTime);
+    const jobs: Record<string, (env: AppEnv, now: number) => Promise<unknown>> = {
+      cleanup: cleanExpiredData,
+      // Weekly series are written 12 weeks ahead; keep them topped up.
+      schedule_top_up: topUpSeries,
+    };
+    const names: string[] = Object.keys(jobs);
+    const results = await Promise.allSettled(names.map((name: string) => jobs[name](env, controller.scheduledTime)));
+    const failed: string[] = [];
+    for (const [index, result] of results.entries()) {
+      if (result.status === "fulfilled") continue;
+      failed.push(names[index]);
+      logError(`cron_${names[index]}_failed`, result.reason);
+    }
+    if (failed.length > 0) throw new Error(`Cron jobs failed: ${failed.join(", ")}`);
+    // A dead man's switch: the monitor alerts when this ping stops, which also catches a cron that never ran.
+    if (env.CRON_HEARTBEAT_URL) {
+      const ping = await fetch(env.CRON_HEARTBEAT_URL, { method: "POST" });
+      if (!ping.ok) console.error("cron_heartbeat_failed", { status: ping.status });
+    }
   },
   async fetch(request: Request, env: AppEnv): Promise<Response> {
     const nonce = btoa(String.fromCodePoint(...crypto.getRandomValues(new Uint8Array(18))));
@@ -111,7 +132,7 @@ export default {
         response = await handler(request, context);
       }
     } catch (error) {
-      response = errorResponse(error);
+      response = errorResponse(error, request);
       origin = "https://invalid.invalid";
     }
     const secured = securityHeaders(response, request, nonce, origin, import.meta.env.DEV);
