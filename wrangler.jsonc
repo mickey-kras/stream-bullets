@@ -9,8 +9,13 @@
   "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "stream-bullets-images" }],
   "durable_objects": { "bindings": [{ "name": "POLL_ROOMS", "class_name": "PollRoom" }] },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PollRoom"] }],
-  "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }],
-  "observability": { "enabled": false },
+  // Rate-limit counters are shared by every binding with the same namespace_id in the account, so the default
+  // (development) Worker uses its own namespace and never throttles production visitors.
+  "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1002", "simple": { "limit": 120, "period": 60 } }],
+  // Workers Logs keep the structured error logs (class, stack frames, Ray ID); Issues groups production failures.
+  // Source maps turn the logged frames into source lines.
+  "observability": { "enabled": true, "head_sampling_rate": 1, "issues": { "enabled": true } },
+  "upload_source_maps": true,
   "triggers": { "crons": ["17 * * * *"] },
   "env": {
     "production": {
