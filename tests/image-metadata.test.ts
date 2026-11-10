@@ -1,3 +1,4 @@
+import { crc32 } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { imageSize } from "image-size";
 import { stripImageMetadata } from "../app/server/image-metadata";
@@ -100,13 +101,68 @@ describe("image metadata removal", () => {
     expect(imageSize(clean)).toMatchObject({ type: "webp", width: 7, height: 9 });
   });
 
-  it("keeps a truncated trailing segment as it is instead of reading past the end", () => {
-    const cut = jpeg().subarray(0, 8);
-    expect([...stripImageMetadata(cut, "image/jpeg")]).toEqual([...cut]);
-    const pngCut = png().subarray(0, 20);
-    expect([...stripImageMetadata(pngCut, "image/png")]).toEqual([...pngCut]);
-    const webpCut = webp().subarray(0, 16);
-    expect(stripImageMetadata(webpCut, "image/webp").subarray(8, 16)).toEqual(webpCut.subarray(8, 16));
+  it("rejects truncated containers instead of retaining private trailing bytes", () => {
+    for (const [bytes, mime] of [[jpeg().subarray(0, 8), "image/jpeg"],
+      [png().subarray(0, 20), "image/png"], [webp().subarray(0, 16), "image/webp"]] as const) {
+      expect(() => stripImageMetadata(bytes, mime)).toThrow("Choose a valid");
+    }
+  });
+
+  it("removes metadata between JPEG scans and before EOI while preserving stuffed and restart bytes", () => {
+    const scan = [0x12, 0xff, 0, 0xe1, 0xff, 0xd0, 0x34];
+    const input = Uint8Array.from([...jpeg().subarray(0, -2),
+      ...segment(0xfe, ascii("private comment")), ...segment(0xe1, ascii("private EXIF")),
+      ...segment(0xda, [1, 1, 0, 0, 0x3f, 0]), ...scan,
+      0xff, ...segment(0xfe, ascii("last comment")), 0xff, 0xd9, ...ascii("trailing secret")]);
+    const clean = stripImageMetadata(input, "image/jpeg");
+    for (const text of ["private", "last comment", "trailing secret"]) expect(contains(clean, text)).toBe(false);
+    expect([...clean.subarray(-scan.length - 2)]).toEqual([...scan, 0xff, 0xd9]);
+  });
+
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])("keeps only orientation %i in each container", (orientation: number) => {
+    const tiff = [73, 73, 42, 0, 8, 0, 0, 0, 1, 0, 0x12, 1, 3, 0, 1, 0, 0, 0,
+      orientation, 0, 0, 0, 0, 0, 0, 0];
+    const privateExif = [...tiff, ...ascii("GPS camera owner")];
+    const jpg = Uint8Array.from([0xff, 0xd8, ...segment(0xe1, [...ascii("Exif"), 0, 0, ...privateExif]),
+      ...jpeg().subarray(2)]);
+    const pngInput = Uint8Array.from([...png().subarray(0, 33), ...pngChunk("eXIf", privateExif), ...png().subarray(33)]);
+    const webpBody = [...webp().subarray(12), ...riffChunk("EXIF", privateExif)];
+    const webpInput = Uint8Array.from([...ascii("RIFF"), ...u32le(webpBody.length + 4), ...ascii("WEBP"), ...webpBody]);
+    for (const [input, mime] of [[jpg, "image/jpeg"], [pngInput, "image/png"], [webpInput, "image/webp"]] as const) {
+      const clean = stripImageMetadata(input, mime);
+      expect(contains(clean, "GPS")).toBe(false);
+      expect(contains(clean, "camera owner")).toBe(false);
+      expect(Buffer.from(clean).includes(Buffer.from(tiff))).toBe(true);
+      expect(stripImageMetadata(clean, mime)).toEqual(clean);
+      if (mime === "image/png") {
+        const offset: number = Buffer.from(clean).indexOf("eXIf");
+        const view: DataView = new DataView(clean.buffer, clean.byteOffset, clean.byteLength);
+        expect(view.getUint32(offset + 4 + tiff.length)).toBe(crc32(clean.subarray(offset, offset + 4 + tiff.length)));
+      }
+      if (mime === "image/webp") expect(clean[20] & 0x08).toBe(0x08);
+    }
+    expect(imageSize(stripImageMetadata(jpg, "image/jpeg")).orientation).toBe(orientation);
+  });
+
+  it("rejects malformed JPEG lengths, missing EOI and unterminated scans", () => {
+    for (const tail of [[0], [0xff], [0xff, 0xe1], [0xff, 0xe1, 0, 1],
+      segment(0xe1, [0]), [...segment(0xda, [0]), 0x12, 0xff]]) {
+      expect(() => stripImageMetadata(Uint8Array.from([0xff, 0xd8, ...tail]), "image/jpeg")).toThrow("Choose a valid");
+    }
+  });
+
+  it("preserves standalone JPEG markers", () => {
+    const input = Uint8Array.from([0xff, 0xd8, 0xff, 1, 0xff, 0xd0, ...jpeg().subarray(2)]);
+    expect([...stripImageMetadata(input, "image/jpeg").subarray(0, 6)]).toEqual([...input.subarray(0, 6)]);
+  });
+
+  it("rejects PNGs without an end chunk and malformed WebP chunks", () => {
+    expect(() => stripImageMetadata(png().subarray(0, -12), "image/png")).toThrow("Choose a valid");
+    const invalid = webp().slice();
+    new DataView(invalid.buffer).setUint32(16, invalid.length, true);
+    expect(() => stripImageMetadata(invalid, "image/webp")).toThrow("Choose a valid");
+    new DataView(invalid.buffer).setUint32(16, 2, true);
+    expect(() => stripImageMetadata(invalid, "image/webp")).toThrow("Choose a valid");
   });
 
   it("refuses a type it does not know", () => {

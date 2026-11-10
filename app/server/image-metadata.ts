@@ -1,8 +1,12 @@
+import { crc32 } from "node:zlib";
+import { HttpError } from "./http.server";
+import { orientationExif } from "./image-orientation";
+
 /**
  * Removes metadata (EXIF with GPS and device data, XMP, IPTC, comments, text chunks) from an uploaded PNG, JPEG or
  * WebP without decoding the pixels. The browser cropper already re-encodes uploads, but any other client could
  * send a camera file straight to the API, and uploaded images are public. Colour data (ICC profiles, Adobe APP14)
- * stays, so images look the same. Input must already have passed `validateImage`.
+ * and the orientation stay, so images look the same. Input must already have passed `validateImage`.
  */
 export function stripImageMetadata(bytes: Uint8Array, mime: string): Uint8Array {
   if (mime === "image/jpeg") return stripJpeg(bytes);
@@ -26,20 +30,55 @@ function droppedJpegMarker(marker: number): boolean {
   return marker === 0xe1 || (marker >= 0xe3 && marker <= 0xed) || marker === 0xef || marker === 0xfe;
 }
 
+function invalidImage(): never {
+  throw new HttpError(400, "Choose a valid PNG, JPEG, or WebP image.");
+}
+
+/** Skip stuffed bytes and restart markers inside entropy-coded scan data. */
+function scanEnd(bytes: Uint8Array, start: number): number {
+  let offset: number = start;
+  while (offset < bytes.length - 1) {
+    if (bytes[offset] !== 0xff) { offset++; continue; }
+    const markerStart: number = offset;
+    while (bytes[offset] === 0xff) offset++;
+    const marker: number = bytes[offset];
+    if (marker !== 0 && (marker < 0xd0 || marker > 0xd7)) return markerStart;
+    offset++;
+  }
+  return invalidImage();
+}
+
 function stripJpeg(bytes: Uint8Array): Uint8Array {
   const parts: Uint8Array[] = [bytes.subarray(0, 2)];
   let offset = 2;
-  while (offset + 4 <= bytes.length && bytes[offset] === 0xff) {
-    const marker: number = bytes[offset + 1];
-    // Start of scan: the entropy-coded image data and everything after it is kept as it is.
-    if (marker === 0xda) break;
-    const end: number = offset + 2 + ((bytes[offset + 2] << 8) | bytes[offset + 3]);
-    if (end > bytes.length) break;
-    if (!droppedJpegMarker(marker)) parts.push(bytes.subarray(offset, end));
+  while (offset < bytes.length) {
+    const start: number = offset;
+    if (bytes[offset] !== 0xff) return invalidImage();
+    while (bytes[offset] === 0xff) offset++;
+    const marker: number = bytes[offset++];
+    if (marker === 0xd9) return concat([...parts, Uint8Array.of(0xff, 0xd9)]);
+    if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+      parts.push(bytes.subarray(start, offset));
+      continue;
+    }
+    if (offset + 2 > bytes.length) return invalidImage();
+    const length: number = (bytes[offset] << 8) | bytes[offset + 1];
+    const end: number = offset + length;
+    if (length < 2 || end > bytes.length) return invalidImage();
+    if (marker === 0xe1) {
+      const payload: Uint8Array = bytes.subarray(offset + 2, end);
+      // APP1 can also contain XMP; only EXIF has this identifier.
+      const exif: Uint8Array | undefined = new TextDecoder().decode(payload.subarray(0, 6)) === "Exif\0\0"
+        ? orientationExif(payload) : undefined;
+      if (exif) parts.push(concat([Uint8Array.of(0xff, 0xe1, 0, exif.length + 8, 69, 120, 105, 102, 0, 0), exif]));
+    } else if (!droppedJpegMarker(marker)) parts.push(bytes.subarray(start, end));
     offset = end;
+    if (marker === 0xda) {
+      offset = scanEnd(bytes, end);
+      parts.push(bytes.subarray(end, offset));
+    }
   }
-  parts.push(bytes.subarray(offset));
-  return concat(parts);
+  return invalidImage();
 }
 
 const PNG_DROPPED: ReadonlySet<string> = new Set(["eXIf", "tEXt", "zTXt", "iTXt", "tIME"]);
@@ -51,13 +90,24 @@ function stripPng(bytes: Uint8Array): Uint8Array {
   while (offset + 12 <= bytes.length) {
     // Length, type, data, CRC.
     const end: number = offset + 12 + view.getUint32(offset);
-    if (end > bytes.length) break;
+    if (end > bytes.length) return invalidImage();
     const type: string = String.fromCodePoint(...bytes.subarray(offset + 4, offset + 8));
-    if (!PNG_DROPPED.has(type)) parts.push(bytes.subarray(offset, end));
+    if (type === "eXIf") {
+      const exif: Uint8Array | undefined = orientationExif(bytes.subarray(offset + 8, end - 4));
+      if (exif) {
+        const chunk: Uint8Array = new Uint8Array(exif.length + 12);
+        const chunkView: DataView = new DataView(chunk.buffer);
+        chunkView.setUint32(0, exif.length);
+        chunk.set(bytes.subarray(offset + 4, offset + 8), 4);
+        chunk.set(exif, 8);
+        chunkView.setUint32(chunk.length - 4, crc32(chunk.subarray(4, -4)));
+        parts.push(chunk);
+      }
+    } else if (!PNG_DROPPED.has(type)) parts.push(bytes.subarray(offset, end));
+    if (type === "IEND") return concat(parts);
     offset = end;
   }
-  parts.push(bytes.subarray(offset));
-  return concat(parts);
+  return invalidImage();
 }
 
 /** VP8X feature flags for an EXIF and an XMP chunk. */
@@ -67,21 +117,42 @@ const VP8X_XMP = 0x04;
 function stripWebp(bytes: Uint8Array): Uint8Array {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const chunks: Uint8Array[] = [];
+  let hasExif = false;
   let offset = 12;
+  if (bytes.length < 12 || view.getUint32(4, true) !== bytes.length - 8) return invalidImage();
   while (offset + 8 <= bytes.length) {
     const size: number = view.getUint32(offset + 4, true);
     // Chunks are padded to an even size.
     const end: number = offset + 8 + size + (size % 2);
-    if (end > bytes.length) break;
+    if (end > bytes.length) return invalidImage();
     const type: string = String.fromCodePoint(...bytes.subarray(offset, offset + 4));
-    if (type !== "EXIF" && type !== "XMP ") {
+    if (type === "EXIF") {
+      const exif: Uint8Array | undefined = orientationExif(bytes.subarray(offset + 8, offset + 8 + size));
+      if (exif) {
+        const chunk: Uint8Array = new Uint8Array(exif.length + 8);
+        chunk.set(bytes.subarray(offset, offset + 4));
+        new DataView(chunk.buffer).setUint32(4, exif.length, true);
+        chunk.set(exif, 8);
+        chunks.push(chunk);
+        hasExif = true;
+      }
+    } else if (type !== "XMP ") {
       const chunk: Uint8Array = bytes.slice(offset, end);
-      if (type === "VP8X") chunk[8] &= ~(VP8X_EXIF | VP8X_XMP);
+      if (type === "VP8X") {
+        if (size !== 10) return invalidImage();
+        chunk[8] &= ~(VP8X_EXIF | VP8X_XMP);
+      }
       chunks.push(chunk);
     }
     offset = end;
   }
-  chunks.push(bytes.subarray(offset));
+  if (offset !== bytes.length) return invalidImage();
+  if (hasExif) {
+    const extended: Uint8Array | undefined = chunks.find((chunk: Uint8Array): boolean =>
+      String.fromCodePoint(...chunk.subarray(0, 4)) === "VP8X");
+    if (!extended || extended.length < 18) return invalidImage();
+    extended[8] |= VP8X_EXIF;
+  }
   const body: Uint8Array = concat(chunks);
   const header: Uint8Array = bytes.slice(0, 12);
   new DataView(header.buffer).setUint32(4, body.length + 4, true);
