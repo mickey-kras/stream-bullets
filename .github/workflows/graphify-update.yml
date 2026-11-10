@@ -1,0 +1,99 @@
+name: Update graph
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: graphify-update-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      changed: ${{ steps.graph.outputs.changed }}
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+        with:
+          egress-policy: audit
+      # Execute only the tool revision from the trusted default branch.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12'
+      - name: Install trusted graph tools
+        run: python -m pip install --require-hashes -r trusted/.github/graphify/requirements.txt
+      - name: Update graph from source data
+        id: graph
+        env:
+          GRAPHIFY_SOURCE_ROOT: ${{ github.workspace }}/candidate
+          GRAPHIFY_BACKEND: none
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PYTHONHASHSEED: '0'
+        run: |
+          python trusted/.github/graphify/snapshot.py --update --base "$BASE_SHA"
+          if git -C candidate diff --quiet -- graphify-out/graph.json && git -C candidate ls-files --error-unmatch graphify-out/graph.json > /dev/null 2>&1; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: steps.graph.outputs.changed == 'true'
+        with:
+          name: graph-${{ github.event.pull_request.head.sha }}
+          path: candidate/graphify-out/graph.json
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: build
+    if: needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: .github/graphify
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: graph-${{ github.event.pull_request.head.sha }}
+          path: graph-artifact
+      - name: Require graph writer configuration
+        env:
+          CLIENT_ID: ${{ vars.GRAPHIFY_APP_CLIENT_ID }}
+          PRIVATE_KEY: ${{ secrets.GRAPHIFY_APP_PRIVATE_KEY }}
+        run: test -n "$CLIENT_ID" && test -n "$PRIVATE_KEY"
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: writer
+        with:
+          client-id: ${{ vars.GRAPHIFY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GRAPHIFY_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: read
+      - name: Commit graph if the PR head is unchanged
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          github-token: ${{ steps.writer.outputs.token }}
+          script: await require('./.github/graphify/publish.cjs')({ github, context, core });

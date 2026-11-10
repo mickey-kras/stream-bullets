@@ -41,6 +41,10 @@ function inspectChanges(base, head, admitted = false, dependencyOnly = false) {
     failures.push("Separate CI policy changes from application changes");
   }
   if (policy.length && !admitted) failures.push("CI policy changes require exact-head or exact-tree owner approval");
+  const graph = head["graphify-out/graph.json"];
+  if (graph && (graph.type !== "blob" || graph.mode !== "100644")) {
+    failures.push("Graph snapshot must be a regular non-executable file");
+  }
   for (const [name, entry] of Object.entries(head)) {
     if (isPolicyPath(name) && (entry.type !== "blob" || !["100644", "100755"].includes(entry.mode))) {
       failures.push(`Policy input must be a regular file: ${name}`);
