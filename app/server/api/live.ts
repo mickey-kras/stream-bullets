@@ -15,7 +15,7 @@ export const liveRoutes: ApiRoute[] = [
   write("POST", /mash\/([0-9a-f-]{36})\/(start|end|restart)/, async ({ request, env, match, viewer }) => {
     const input = await readJson(request, mashStartSchema);
     const { streamerId } = await runMashAction(env, viewer.id, match[1], match[2] as MashAction, input);
-    await notifyMash(env, streamerId, match[1]);
+    notifyMash(env, streamerId, match[1]);
     return json({ ok: true });
   }),
   // GET /api/overlay → {overlay, data, handle}: the owner's overlay control state.
@@ -34,7 +34,7 @@ export const liveRoutes: ApiRoute[] = [
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
     await consumeMutationQuota(env, viewer.id, true);
     const key = await regenerateOverlayKey(env, viewer.id, streamer);
-    await notifyOverlayKey(env, streamer.id);
+    notifyOverlayKey(env, streamer.id);
     return json({ url: `${getOrigin(env)}/@${streamer.handle}/overlay?key=${key}` });
   }),
   // POST /api/overlay {action: preview|take|layout|message, ...} → {overlay}
@@ -43,7 +43,7 @@ export const liveRoutes: ApiRoute[] = [
     const streamer = await getOwnStreamer(env, viewer.id);
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
     const overlay = await updateOverlay(env, viewer.id, streamer.id, action);
-    await notifyOverlay(env, streamer.id);
+    notifyOverlay(env, streamer.id);
     return json({ overlay });
   }),
 ];

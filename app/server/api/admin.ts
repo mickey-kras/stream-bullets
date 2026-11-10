@@ -103,7 +103,7 @@ export const adminRoutes: ApiRoute[] = [
     const admin = await requireAdminSession(request, app, { sensitive: isSensitivePageAction(input.action) });
     await consumeMutationQuota(app.env, admin.viewer.id);
     const page = await moderatePage(app.env, admin, match[1], input);
-    await notifyRoom(app.env, page.id);
+    notifyRoom(app.env, page.id);
     const emailed: boolean = input.notify ? await notifyOwner(app.env, page.id, input.action) : false;
     return json({ page, emailed });
   }),
@@ -113,7 +113,7 @@ export const adminRoutes: ApiRoute[] = [
     const admin = await requireAdminSession(request, app, { sensitive: true });
     await consumeMutationQuota(app.env, admin.viewer.id);
     const page = await setOfficial(app.env, admin, match[1], input);
-    await notifyRoom(app.env, page.id);
+    notifyRoom(app.env, page.id);
     return json({ page });
   }),
   get(/admin\/report-groups/u, async ({ request, app }) => {
@@ -131,7 +131,7 @@ export const adminRoutes: ApiRoute[] = [
     const admin = await requireAdminSession(request, app);
     await consumeMutationQuota(app.env, admin.viewer.id);
     const result = await resolveReports(app.env, admin, input);
-    if (result.streamerId) await notifyRoom(app.env, result.streamerId);
+    if (result.streamerId) notifyRoom(app.env, result.streamerId);
     return json({ status: result.status, resolved: result.resolved });
   }),
   write("POST", path(`admin/entries/${ID}/remove`), async ({ request, app, match }) => {
@@ -139,7 +139,7 @@ export const adminRoutes: ApiRoute[] = [
     const admin = await requireAdminSession(request, app);
     await consumeMutationQuota(app.env, admin.viewer.id);
     const result = await removeEntryAsAdmin(app.env, admin, match[1], input);
-    await notifyRoom(app.env, result.streamerId);
+    notifyRoom(app.env, result.streamerId);
     return json({ removed: match[1], resolved: result.resolved });
   }),
   write("POST", path(`admin/entries/${ID}/status`), async ({ request, app, match }) => {
@@ -147,7 +147,7 @@ export const adminRoutes: ApiRoute[] = [
     const admin = await requireAdminSession(request, app);
     await consumeMutationQuota(app.env, admin.viewer.id);
     const result = await setEntryStatus(app.env, admin, match[1], input);
-    await notifyRoom(app.env, result.streamerId);
+    notifyRoom(app.env, result.streamerId);
     return json({ id: match[1], status: result.status, statusReason: result.statusReason });
   }),
 ];

@@ -6,6 +6,15 @@ import { vi } from "vitest";
  * alarms and hibernatable sockets are kept in memory; D1 stays a real Miniflare database.
  */
 
+/**
+ * `waitUntil` for code under test that tells the room something after the response. It cannot come from the
+ * vitest.workers-stub.config.ts stub: vitest.config.ts aliases `cloudflare:workers` to that file, so a test that
+ * mocks the module with this one would import itself.
+ */
+export function waitUntil(promise: Promise<unknown>): void {
+  void promise;
+}
+
 /** Stands in for `cloudflare:workers` (the test file mocks the module with this one). */
 export class DurableObject<Env = unknown> {
   protected readonly ctx: DurableObjectState;

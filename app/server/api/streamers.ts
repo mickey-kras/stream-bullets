@@ -44,7 +44,7 @@ export const streamerRoutes: ApiRoute[] = [
       input.action === "create" && input.kind === "mash"
         ? await createMash(env, viewer.id, streamer.id, input)
         : await mutateEntry(env, viewer.id, streamer.id, input, () => requireAdminSession(request, app));
-    await notifyRoom(env, streamer.id);
+    notifyRoom(env, streamer.id);
     return json(result);
   }),
   // PATCH /api/streamer {name?, about?, handle?, logoMode?: "profile" | "logo"} → {streamer}
