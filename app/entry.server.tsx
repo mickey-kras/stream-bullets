@@ -4,9 +4,10 @@ import { appContext } from "./env";
 import { requestLocale } from "./i18n/resolve";
 import { withLocale } from "./i18n/server";
 import { NonceContext } from "./lib/nonce";
+import { logError } from "./server/http.server";
 
-export const handleError: HandleErrorFunction = (_error, { request }) => {
-  if (!request.signal.aborted) console.error("server_request_failed");
+export const handleError: HandleErrorFunction = (error, { request }) => {
+  if (!request.signal.aborted) logError("server_request_failed", error, request);
 };
 
 export default async function handleRequest(
