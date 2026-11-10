@@ -113,9 +113,10 @@ describe("Mash Battle batching", (): void => {
     expect(TAP_ROWS_PER_STATEMENT * 5 + 1).toBeLessThanOrEqual(100);
   });
 
-  it("adds deltas to the stored counts instead of replacing them", (): void => {
+  it("stores running totals that only grow, so writing them twice changes nothing", (): void => {
     const [statement] = tapUpserts("battle", 1_000, [delta(1, 5, 2)]);
-    expect(statement.sql).toContain("taps=mash_taps.taps+excluded.taps");
+    expect(statement.sql).toContain("taps=max(mash_taps.taps,excluded.taps)");
+    expect(statement.sql).toContain("assisted_taps=max(mash_taps.assisted_taps,excluded.assisted_taps)");
     expect(statement.params).toEqual(["battle", "user-1", 1, 5, 2, 1_000]);
   });
 
