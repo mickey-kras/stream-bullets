@@ -29,10 +29,10 @@ function isPolicyPath(name) {
   );
 }
 
-// Only inert documentation can accompany policy changes. Unknown files count as
+// Only inert documentation and the generated graph can accompany policy changes. Unknown files count as
 // application inputs so executable additions cannot hide in a new directory.
 function isApplicationPath(name) {
-  if (isPolicyPath(name)) return false;
+  if (isPolicyPath(name) || name === "graphify-out/graph.json") return false;
   if (/^(app|worker|db|drizzle|tests)\//.test(name)) return true;
   return (
     !/\.(?:md|markdown|rst|txt)$/i.test(name) &&
@@ -56,10 +56,10 @@ function inspect(workflows) {
     }
   }
   const ci = YAML.parse(workflows[".github/workflows/ci.yml"] || "");
-  const required = ["verify", "quality", "checks", "sonar", "deploy"];
+  const required = ["verify", "quality", "graphify", "checks", "sonar", "deploy"];
   for (const name of required) if (!ci?.jobs?.[name]) failures.push(`Missing CI job: ${name}`);
   if (ci?.jobs?.checks?.if !== "always()") failures.push("Aggregate must run after failures");
-  for (const name of ["verify", "quality"]) {
+  for (const name of ["verify", "quality", "graphify"]) {
     if (!ci?.jobs?.checks?.needs?.includes(name)) failures.push(`Aggregate omits ${name}`);
   }
   for (const name of ["checks", "sonar"]) {

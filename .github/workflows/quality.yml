@@ -9,13 +9,13 @@ defaults:
   run:
     shell: bash
 env:
-  PINNED: 0cc8cb945d4ec189a78c6ef2bfb6873c21cf6aef
+  PINNED: 3e41f00d5be546121b06933f0f4d4777fa6f40d6
 jobs:
   policy:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+    - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
       with:
         egress-policy: audit
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+    - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
       with:
         egress-policy: audit
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -141,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+    - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
       with:
         egress-policy: audit
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -178,7 +178,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+    - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
       with:
         egress-policy: audit
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -202,7 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+    - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
       with:
         egress-policy: audit
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
