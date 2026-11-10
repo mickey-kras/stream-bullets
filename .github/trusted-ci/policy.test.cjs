@@ -6,8 +6,9 @@ const fixture = () => ({
   ".github/workflows/ci.yml": YAML.stringify({
     jobs: {
       verify: {},
+      graphify: {},
       quality: {},
-      checks: { if: "always()", needs: ["verify", "quality"] },
+      checks: { if: "always()", needs: ["verify", "quality", "graphify"] },
       sonar: {},
       deploy: { needs: ["checks", "sonar"] },
     },
@@ -215,4 +216,14 @@ test("lock-only edits cannot replace dependencies of an unchanged application CL
     addDependency(ordinary, "three");
     assert.equal(applicationDependenciesOnly(sourcePair(before), sourcePair(ordinary)), true, group);
   }
+});
+
+test("rejects a removed graph freshness gate", () => {
+  const files = fixture();
+  const ci = YAML.parse(files[".github/workflows/ci.yml"]);
+  delete ci.jobs.graphify;
+  ci.jobs.checks.needs = ["verify", "quality"];
+  files[".github/workflows/ci.yml"] = YAML.stringify(ci);
+  assert.ok(inspect(files).includes("Missing CI job: graphify"));
+  assert.ok(inspect(files).includes("Aggregate omits graphify"));
 });

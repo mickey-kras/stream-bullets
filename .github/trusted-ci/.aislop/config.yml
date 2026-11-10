@@ -26,6 +26,8 @@ telemetry:
 imports:
   provided:
     - cloudflare:workers
+    # The pinned graphifyy distribution provides the graphify Python package.
+    - graphify
 
 # The required application job runs pnpm audit with the frozen lockfile.
 # Do not let the isolated scanner discover candidate package-manager tools.
