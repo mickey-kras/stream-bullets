@@ -133,7 +133,7 @@ async function refreshWhere(
     RETURNING streamer_id`)
     .bind(Date.now(), key, JSON.stringify(sources))
     .first<{ streamer_id: string }>();
-  if (row) await notifyOverlay(env, row.streamer_id);
+  if (row) notifyOverlay(env, row.streamer_id);
 }
 
 /** How many times an action is re-applied when another control tab saved in between. */
