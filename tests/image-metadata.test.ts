@@ -95,6 +95,23 @@ describe("image metadata removal", () => {
     expect(imageSize(clean)).toMatchObject({ type: "jpg", width: 2, height: 3 });
   });
 
+  it("removes JFIF and JFXX thumbnails, unknown APP0 data and surplus APP14 data", () => {
+    const jfif = [...ascii("JFIF"), 0, 1, 1, 0, 0, 1, 0, 1, 1, 1];
+    const adobe = [...ascii("Adobe"), 0, 100, 0, 0, 0, 0, 1];
+    const input = Uint8Array.from([0xff, 0xd8,
+      ...segment(0xe0, [...jfif, 123, 45, 67]),
+      ...segment(0xe0, [...ascii("JFXX"), 0, 0x10, ...ascii("uncropped thumbnail")]),
+      ...segment(0xe0, ascii("vendor private data")), ...segment(0xe0, ascii("JFIF")),
+      ...segment(0xee, [...adobe, ...ascii("private tail")]), ...segment(0xee, ascii("private vendor")),
+      ...jpeg().subarray(2)]);
+    const clean = stripImageMetadata(input, "image/jpeg");
+    for (const text of ["JFXX", "uncropped", "private"]) expect(contains(clean, text)).toBe(false);
+    expect([...clean.subarray(2, 20)]).toEqual(segment(0xe0, [...jfif.slice(0, 12), 0, 0]));
+    expect(Buffer.from(clean).includes(Buffer.from([123, 45, 67]))).toBe(false);
+    expect(Buffer.from(clean).includes(Buffer.from(segment(0xee, adobe)))).toBe(true);
+    expect(imageSize(clean)).toMatchObject({ type: "jpg", width: 2, height: 3 });
+  });
+
   it("drops eXIf and text chunks from a PNG and keeps the rest in order", () => {
     const clean = stripImageMetadata(png(), "image/png");
     for (const text of ["eXIf", "GPS", "tEXt", "Jane Doe"]) expect(contains(clean, text)).toBe(false);

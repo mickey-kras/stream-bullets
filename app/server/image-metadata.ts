@@ -54,6 +54,26 @@ function scanEnd(bytes: Uint8Array, start: number): number {
   return invalidImage();
 }
 
+function cleanJpegSegment(marker: number, payload: Uint8Array, original: Uint8Array): Uint8Array | undefined {
+  const identifier: string = new TextDecoder().decode(payload.subarray(0, 6));
+  if (marker === 0xe0) {
+    if (payload.length < 14 || identifier.slice(0, 5) !== "JFIF\0") return undefined;
+    const header: Uint8Array = payload.slice(0, 14);
+    header[12] = 0;
+    header[13] = 0;
+    return concat([Uint8Array.of(0xff, 0xe0, 0, 16), header]);
+  }
+  if (marker === 0xe1) {
+    const exif: Uint8Array | undefined = identifier === "Exif\0\0" ? orientationExif(payload) : undefined;
+    return exif ? concat([Uint8Array.of(0xff, 0xe1, 0, exif.length + 8, 69, 120, 105, 102, 0, 0), exif]) : undefined;
+  }
+  if (marker === 0xee) {
+    if (payload.length < 12 || identifier.slice(0, 5) !== "Adobe") return undefined;
+    return concat([Uint8Array.of(0xff, 0xee, 0, 14), payload.subarray(0, 12)]);
+  }
+  return droppedJpegMarker(marker, payload) ? undefined : original;
+}
+
 function stripJpeg(bytes: Uint8Array): Uint8Array {
   const parts: Uint8Array[] = [bytes.subarray(0, 2)];
   let offset = 2;
@@ -71,13 +91,12 @@ function stripJpeg(bytes: Uint8Array): Uint8Array {
     const length: number = (bytes[offset] << 8) | bytes[offset + 1];
     const end: number = offset + length;
     if (length < 2 || end > bytes.length) return invalidImage();
-    if (marker === 0xe1) {
-      const payload: Uint8Array = bytes.subarray(offset + 2, end);
-      // APP1 can also contain XMP; only EXIF has this identifier.
-      const exif: Uint8Array | undefined =
-        new TextDecoder().decode(payload.subarray(0, 6)) === "Exif\0\0" ? orientationExif(payload) : undefined;
-      if (exif) parts.push(concat([Uint8Array.of(0xff, 0xe1, 0, exif.length + 8, 69, 120, 105, 102, 0, 0), exif]));
-    } else if (!droppedJpegMarker(marker, bytes.subarray(offset + 2, end))) parts.push(bytes.subarray(start, end));
+    const segment: Uint8Array | undefined = cleanJpegSegment(
+      marker,
+      bytes.subarray(offset + 2, end),
+      bytes.subarray(start, end),
+    );
+    if (segment) parts.push(segment);
     offset = end;
     if (marker === 0xda) {
       offset = scanEnd(bytes, end);
