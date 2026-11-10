@@ -983,6 +983,39 @@ describe("live room battles", (): void => {
     expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
   });
 
+  it("recovers pending taps before an idle refresh schedules the next alarm", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0 });
+    await tap(await join({ user: "player-1" }), id, 5, 1);
+    expect(await rows.storedTaps(id)).toEqual([]);
+    vi.clearAllTimers();
+    rooms.restart(streamerId);
+    await state().ready;
+
+    expect((await post("refresh")).status).toBe(204);
+    const nextAlarm: number | null = state().storage.alarm;
+    expect(nextAlarm).not.toBeNull();
+    vi.setSystemTime(nextAlarm!);
+    await fireAlarm();
+    expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
+    expect(await rows.storedTaps(id)).toEqual([{ user_id: "player-1", side: 0, taps: 5 }]);
+    expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
+  });
+
+  it("purges a deleted page's journal on an idle refresh after restart", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0 });
+    await tap(await join({ user: "player-1" }), id, 5, 1);
+    vi.clearAllTimers();
+    rooms.restart(streamerId);
+    await state().ready;
+    // The lightweight room schema does not cascade page deletion.
+    await database.db.prepare("DELETE FROM entries WHERE streamer_id = ?").bind(streamerId).run();
+    await database.db.prepare("DELETE FROM streamers WHERE id = ?").bind(streamerId).run();
+
+    expect((await post("refresh")).status).toBe(204);
+    expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
+    expect(state().storage.alarm).toBeNull();
+  });
+
   it("drops the journal of a battle deleted while the room was down", async (): Promise<void> => {
     const kept = await rows.addBattle({ "player-1": 0 });
     const deleted = await rows.addBattle({ "player-1": 0 });

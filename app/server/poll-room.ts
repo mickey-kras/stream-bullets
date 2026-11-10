@@ -310,10 +310,8 @@ export class PollRoom extends DurableObject<AppEnv> {
 
   private async refreshOnce(): Promise<void> {
     this.expireConnections();
-    // A page status change (frozen, suspended) also stops its battles. loadBattle can drop a battle, so the loop
-    // walks a copy of the ids.
-    const ids: string[] = [...this.battles.keys()];
-    for (const id of ids) await this.loadBattle(id);
+    // Recover persisted battles and purge deleted journals before deciding that this room is idle.
+    await this.resumeBattles();
     if (this.activeSockets().length > 0) {
       const snapshot = await this.snapshot();
       this.broadcast(snapshot);
@@ -558,7 +556,9 @@ export class PollRoom extends DurableObject<AppEnv> {
       WHERE e.streamer_id=? AND m.phase IN ('countdown','live')`)
       .bind(this.streamerId)
       .all<{ id: string }>();
-    for (const { id } of rows.results) await this.loadBattle(id);
+    // Include remembered battles so deletion and page status changes also update a room that stayed awake.
+    const ids: Set<string> = new Set([...this.battles.keys(), ...rows.results.map(({ id }): string => id)]);
+    for (const id of ids) await this.loadBattle(id);
     // Journals of battles that no longer run go too: one deleted with its page or its owner's account never reaches
     // dropBattle in a restarted room, and its journal holds player ids.
     this.ctx.storage.sql.exec(
