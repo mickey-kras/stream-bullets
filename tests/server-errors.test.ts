@@ -7,12 +7,38 @@ afterEach(() => vi.restoreAllMocks());
 describe("server route error logging", () => {
   it("does not expose exception details, URLs, or credentials in logs", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    handleError(new Error("SQL failed: session token secret-value"), {
-      request: new Request("https://app.example/api?code=oauth-secret"),
+    handleError(new TypeError("SQL failed: session token secret-value"), {
+      request: new Request("https://app.example/api?code=oauth-secret", { headers: { "CF-Ray": "8f1e2d3c4b5a6978-AMS" } }),
       context: new RouterContextProvider(),
       params: {},
     });
-    expect(log.mock.calls).toEqual([["server_request_failed"]]);
+    expect(log).toHaveBeenCalledTimes(1);
+    const [event, details] = log.mock.calls[0] as [string, { cause: string; frames: string[]; ray: string | null }];
+    // Enough to find the failure: the class, where it was thrown and the Ray ID to match the request.
+    expect(event).toBe("server_request_failed");
+    expect(details.cause).toBe("TypeError");
+    expect(details.frames.length).toBeGreaterThan(0);
+    expect(details.ray).toBe("8f1e2d3c4b5a6978-AMS");
+    expect(JSON.stringify(log.mock.calls)).not.toMatch(/secret-value|oauth-secret|SQL failed/);
+  });
+
+  it("leaves out every line of a message that spans several lines", () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    handleError(new Error("SQL failed\nparams: session-token-secret,person@example.com\n    at fake (evil.js:1:1)"), {
+      request: new Request("https://app.example/"),
+      context: new RouterContextProvider(),
+      params: {},
+    });
+    const [, details] = log.mock.calls[0] as [string, { frames: string[] }];
+    expect(details.frames.length).toBeGreaterThan(0);
+    expect(details.frames.every((frame: string): boolean => frame.startsWith("at "))).toBe(true);
+    expect(JSON.stringify(log.mock.calls)).not.toMatch(/session-token-secret|person@example\.com|SQL failed|evil\.js/);
+  });
+
+  it("logs a thrown non-Error value without frames", () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    handleError("boom", { request: new Request("https://app.example/"), context: new RouterContextProvider(), params: {} });
+    expect(log.mock.calls).toEqual([["server_request_failed", { cause: "string", frames: [], ray: null }]]);
   });
 
   it("does not report a cancelled request as a server failure", () => {

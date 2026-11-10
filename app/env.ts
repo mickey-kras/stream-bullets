@@ -25,6 +25,8 @@ export interface AppEnv {
   NOTIFY_EMAIL?: SendEmail;
   /** The sender address for owner notices, on a domain with Cloudflare Email Routing. */
   NOTIFY_FROM?: string;
+  /** Optional dead man's switch URL (for example a Healthchecks.io check) pinged after each successful cron run. */
+  CRON_HEARTBEAT_URL?: string;
 }
 
 export interface AppContext {
