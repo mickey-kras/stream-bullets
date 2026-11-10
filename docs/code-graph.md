@@ -3,8 +3,8 @@
 The graph is in `graphify-out/graph.json`. It uses Graphify 0.9.105 with no model calls.
 It includes application code, workers, the TypeScript database schema, tests, and authored Markdown documents.
 
-The tools and workflow arrive in PR #568. Until it is merged, this is a static snapshot.
-The commands below apply after that PR is merged.
+The tools and workflow arrive in PR #568. Until you merge it, this is a static snapshot.
+The commands below apply after you merge that PR.
 
 ## Automatic updates
 
@@ -15,7 +15,7 @@ A newer run cancels the older run for that PR. Before publishing, the updater ch
 It never force-pushes. Thus, an old build cannot replace a newer source commit.
 
 When inputs match the base, CI compares the graph with the base graph without extraction.
-When inputs differ, CI independently rebuilds the graph to verify its content.
+When inputs differ, CI independently rebuilds the graph to check its content.
 The updater does not edit source files. All quality gates run on its commit.
 
 Automatic writes apply only to branches in this repository. Fork contributors must generate the graph locally.
@@ -46,7 +46,7 @@ python .github/graphify/snapshot.py
 ```
 
 Stage added and deleted sources before building. Commit the graph with your changes.
-To check freshness without extraction, run:
+To rebuild and check freshness without changing files, run:
 
 ```sh
 python .github/graphify/snapshot.py --check
