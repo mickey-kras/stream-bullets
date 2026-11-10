@@ -22,6 +22,8 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await expect(obs.locator('[data-overlay-source="topic"]')).toContainText("Mic shootout");
   await expect(control.getByRole("button", { name: /Take/ })).toBeDisabled();
 
+  // Wait for the take request to finish; shortcuts are ignored while saving.
+  await expect(control.getByRole("radio", { name: /Message banner/ })).toBeEnabled();
   // Shortcut 5 picks the message banner. Typing in the field never switches the source.
   await control.locator("body").press("5");
   const message = control.locator("[data-ov-message]");
