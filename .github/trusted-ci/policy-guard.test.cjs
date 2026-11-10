@@ -76,6 +76,8 @@ test("policy changes allow prose but reject application and executable changes",
     "main.mjs",
     "tools/bypass.py",
     "docs/executable.mdx",
+    "graphify-out/execute.js",
+    "graphify-out/other.json",
   ]) {
     assert.equal(isApplicationPath(name), true, name);
     assert.ok(
@@ -409,4 +411,14 @@ test("live guard admits ordinary dependency additions with application changes w
     fixture.statuses.map((status) => status.state),
     ["pending", "success"],
   );
+});
+
+test("policy upgrades can include only the regular generated graph", () => {
+  const base = { "eslint.config.mjs": entry(BASE) };
+  const head = { "eslint.config.mjs": entry(), "graphify-out/graph.json": entry() };
+  assert.deepEqual(inspectChanges(base, head, true), []);
+  for (const mode of ["120000", "100755"]) {
+    head["graphify-out/graph.json"] = entry(SHA, mode);
+    assert.ok(inspectChanges(base, head, true).includes("Graph snapshot must be a regular non-executable file"));
+  }
 });
