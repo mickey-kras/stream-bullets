@@ -13,7 +13,7 @@ import {
   type TokenBucket,
 } from "../lib/mash";
 import type { LiveSnapshot, MashPhase, MashTick, OverlayPublic } from "../types";
-import { MASH_COLUMN, mashValue, notFinishedBattle } from "./mash-sql";
+import { LIVE_POLLS_SQL, livePolls, optionsFromJson, type PollRow } from "./live-polls";
 import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from "./overlay-state";
 
 /** The most sockets one room holds. */
@@ -65,10 +65,11 @@ interface TapMessage {
 }
 
 /**
- * A battle in countdown or live, held in memory so taps never wait on D1. Accepted taps wait in `pending` for up
- * to one second (MASH_FLUSH_MS) before they are written. If the runtime evicts or restarts the room in that second
- * (a deploy, for example), those taps are lost even though they were acknowledged. This is a known limit: the
- * room keeps them in memory only, so taps never wait on storage.
+ * A battle in countdown or live, held in memory so taps never wait on D1. Each accepted tap is first written to the
+ * room's own SQLite storage (`tap_journal`), and the runtime sends the acknowledgement only once that write is
+ * durable. D1 gets the totals once a second (MASH_FLUSH_MS). After an eviction or a deploy, the room reads the
+ * journal back, so an acknowledged tap is never lost and the winner always counts it. The journal and D1 hold
+ * running totals per player, not increments, so writing the same totals twice changes nothing.
  */
 interface Battle {
   id: string;
@@ -79,11 +80,14 @@ interface Battle {
   writable: boolean;
   /** Durable taps at load plus every tap counted since. */
   totals: number[];
+  /** Each player's taps and assisted taps in this battle: the D1 rows at load plus every tap counted since. */
   mine: Map<string, number>;
+  mineAssisted: Map<string, number>;
   players: Set<string>;
   assistedPlayers: Set<string>;
   sideOf: Map<string, Promise<number | null>>;
-  pending: Map<string, TapDelta>;
+  /** Players whose totals changed since the last write to D1. */
+  pending: Set<string>;
   seqs: Map<WebSocket, number>;
   /** Taps counted in each of the last five ticks, for the host's taps a second. */
   recent: number[];
@@ -93,23 +97,6 @@ interface Battle {
   finishing: boolean;
   lastFlush: number;
 }
-
-type PollRow = {
-  id: string;
-  title: string;
-  kind: "choice" | "binary";
-  options: string;
-  ends_at: number | null;
-  revealed: number;
-  total: number;
-  count_0: number;
-  count_1: number;
-  count_2: number;
-  count_3: number;
-  count_4: number;
-  count_5: number;
-  mash: string | null;
-};
 
 type BattleRow = {
   duration_s: number;
@@ -121,24 +108,13 @@ type BattleRow = {
 };
 
 type TapRow = { user_id: string; side: number; taps: number; assisted_taps: number };
+type JournalRow = { user_id: string; side: number; taps: number; assisted: number };
+
+/** How long the room waits after a burst of refresh requests before it queries D1 again. */
+const REFRESH_COALESCE_MS = 250;
 
 function response(message: string, status: number): Response {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
-}
-
-function optionsFromJson(value: string): string[] {
-  const parsed: unknown = JSON.parse(value);
-  if (
-    !Array.isArray(parsed) ||
-    parsed.length < 2 ||
-    parsed.length > 6 ||
-    !parsed.every(
-      (option: unknown): option is string => typeof option === "string" && option.length > 0 && option.length <= 80,
-    )
-  ) {
-    throw new Error("Invalid stored poll options");
-  }
-  return parsed;
 }
 
 function tapMessage(raw: string | ArrayBuffer): TapMessage | null {
@@ -187,6 +163,9 @@ export class PollRoom extends DurableObject<AppEnv> {
   /** One bucket per account, shared by all of its sockets. */
   private readonly buckets = new Map<string, TokenBucket>();
   private ticker: ReturnType<typeof setInterval> | undefined;
+  /** Refresh requests not yet covered by a refresh that started after them. */
+  private refreshWaiters: { resolve: () => void; reject: (error: unknown) => void }[] = [];
+  private refreshing: Promise<void> | undefined;
   private ticks = 0;
   private ticking = false;
 
@@ -194,6 +173,9 @@ export class PollRoom extends DurableObject<AppEnv> {
     super(ctx, env);
     ctx.blockConcurrencyWhile(async (): Promise<void> => {
       this.streamerId = await ctx.storage.get<string>("streamerId");
+      ctx.storage.sql.exec(`CREATE TABLE IF NOT EXISTS tap_journal (entry_id TEXT NOT NULL, starts_at INTEGER,
+        user_id TEXT NOT NULL, side INTEGER NOT NULL, taps INTEGER NOT NULL, assisted INTEGER NOT NULL,
+        PRIMARY KEY (entry_id, user_id))`);
     });
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
@@ -277,6 +259,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     const lease: ConnectionLease = { expiresAt: now + CONNECTION_LEASE_MS, userId: userId ?? null, openedAt: now };
     server.serializeAttachment(lease);
     this.send(server, JSON.stringify(this.withBattles(snapshot)));
+    this.startTicker();
     await this.scheduleResync();
     return new Response(null, { status: 101, webSocket: client });
   }
@@ -296,7 +279,36 @@ export class PollRoom extends DurableObject<AppEnv> {
     return this.admission(clientKey, role).refusal ?? undefined;
   }
 
+  /**
+   * Every vote asks for a refresh. While one runs, the requests that arrive share a single further refresh, so a
+   * burst of votes costs two snapshot queries, not one per vote. Each request returns when the first refresh that
+   * started after it ends, so steady traffic never holds earlier requests.
+   */
   private async refresh(): Promise<Response> {
+    const done = new Promise<void>((resolve, reject): void => {
+      this.refreshWaiters.push({ resolve, reject });
+    });
+    this.refreshing ??= this.runRefreshes().finally((): void => {
+      this.refreshing = undefined;
+    });
+    await done;
+    return new Response(null, { status: 204 });
+  }
+
+  private async runRefreshes(): Promise<void> {
+    while (this.refreshWaiters.length > 0) {
+      const round = this.refreshWaiters.splice(0);
+      try {
+        await this.refreshOnce();
+        for (const waiter of round) waiter.resolve();
+      } catch (error) {
+        for (const waiter of round) waiter.reject(error);
+      }
+      if (this.refreshWaiters.length > 0) await new Promise((resolve) => setTimeout(resolve, REFRESH_COALESCE_MS));
+    }
+  }
+
+  private async refreshOnce(): Promise<void> {
     this.expireConnections();
     // A page status change (frozen, suspended) also stops its battles. loadBattle can drop a battle, so the loop
     // walks a copy of the ids.
@@ -307,7 +319,6 @@ export class PollRoom extends DurableObject<AppEnv> {
       this.broadcast(snapshot);
     }
     await this.scheduleResync();
-    return new Response(null, { status: 204 });
   }
 
   /** The API changed a battle (start, end, restart): reload it from D1 and tell everyone. */
@@ -357,20 +368,25 @@ export class PollRoom extends DurableObject<AppEnv> {
     socket.close(1011, "Live connection failed");
   }
 
+  /**
+   * The resync: picks up running battles, ends the ones that ran out, and sends everyone a fresh snapshot. The next
+   * alarm is set in `finally`, so a D1 error never stops the resyncs for good.
+   */
   async alarm(): Promise<void> {
-    this.expireConnections();
-    await this.resumeBattles();
-    if (this.activeSockets().length === 0) {
-      await this.scheduleResync();
-      return;
-    }
+    let retry = false;
     try {
-      this.broadcast(await this.snapshot());
-      await this.scheduleResync();
+      this.expireConnections();
+      await this.resumeBattles();
+      if (this.activeSockets().length > 0) this.broadcast(await this.snapshot(true));
     } catch (error: unknown) {
       this.disconnect();
-      if (!(error instanceof PageSuspended)) throw error;
-      await this.scheduleResync();
+      // The class only: a D1 message can quote stored values.
+      if (!(error instanceof PageSuspended)) {
+        retry = true;
+        console.error("live_resync_failed", { cause: error instanceof Error ? error.name : "unknown" });
+      }
+    } finally {
+      await this.scheduleResync(retry);
     }
   }
 
@@ -394,14 +410,26 @@ export class PollRoom extends DurableObject<AppEnv> {
     const { bucket, accepted } = takeTaps(this.buckets.get(userId), message.n, message.assisted, now);
     this.buckets.set(userId, bucket);
     if (accepted > 0) {
+      const taps: number = (battle.mine.get(userId) ?? 0) + accepted;
+      const assisted: number = (battle.mineAssisted.get(userId) ?? 0) + (message.assisted ? accepted : 0);
+      // Durable before the acknowledgement: the runtime holds outgoing messages until this write is stored.
+      this.ctx.storage.sql.exec(
+        `INSERT INTO tap_journal (entry_id, starts_at, user_id, side, taps, assisted) VALUES (?, ?, ?, ?, ?, ?)
+          ON CONFLICT (entry_id, user_id) DO UPDATE SET starts_at = excluded.starts_at, side = excluded.side,
+          taps = excluded.taps, assisted = excluded.assisted`,
+        battle.id,
+        battle.startsAt,
+        userId,
+        pick,
+        taps,
+        assisted,
+      );
       battle.totals[pick] += accepted;
-      battle.mine.set(userId, (battle.mine.get(userId) ?? 0) + accepted);
+      battle.mine.set(userId, taps);
+      battle.mineAssisted.set(userId, assisted);
       battle.players.add(userId);
       if (message.assisted) battle.assistedPlayers.add(userId);
-      const delta = battle.pending.get(userId) ?? { userId, side: pick, taps: 0, assisted: 0 };
-      delta.taps += accepted;
-      if (message.assisted) delta.assisted += accepted;
-      battle.pending.set(userId, delta);
+      battle.pending.add(userId);
       battle.tickTaps += accepted;
       battle.dirty = true;
     }
@@ -462,8 +490,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     const known = this.battles.get(id);
     if (!row || row.phase === "setup" || row.phase === "finished") {
       // Restarted or deleted: unwritten taps belong to a battle that no longer exists.
-      this.battles.delete(id);
-      this.stopTickerIfIdle();
+      this.dropBattle(id);
       return null;
     }
     if (known?.startsAt === row.starts_at) {
@@ -483,10 +510,11 @@ export class PollRoom extends DurableObject<AppEnv> {
       writable: row.status === "active",
       totals: Array.from({ length: sides }, (): number => 0),
       mine: new Map(),
+      mineAssisted: new Map(),
       players: new Set(),
       assistedPlayers: new Set(),
       sideOf: new Map(),
-      pending: new Map(),
+      pending: new Set(),
       seqs: new Map(),
       recent: [],
       tickTaps: 0,
@@ -495,13 +523,29 @@ export class PollRoom extends DurableObject<AppEnv> {
       finishing: false,
       lastFlush: Date.now(),
     };
-    for (const tap of tapResult.results as TapRow[]) {
-      if (tap.side < sides) battle.totals[tap.side] += tap.taps;
+    const count = (tap: TapRow, pending: boolean): void => {
+      if (tap.side < sides) battle.totals[tap.side] += tap.taps - (battle.mine.get(tap.user_id) ?? 0);
       battle.mine.set(tap.user_id, tap.taps);
+      battle.mineAssisted.set(tap.user_id, tap.assisted_taps);
       battle.sideOf.set(tap.user_id, Promise.resolve(tap.side));
       if (tap.taps > 0) battle.players.add(tap.user_id);
       if (tap.assisted_taps > 0) battle.assistedPlayers.add(tap.user_id);
+      if (pending) battle.pending.add(tap.user_id);
+    };
+    for (const tap of tapResult.results as TapRow[]) count(tap, false);
+    // Taps acknowledged before an eviction or a deploy that D1 has not seen yet: written on the next flush.
+    const journal = this.ctx.storage.sql
+      .exec<JournalRow>(
+        "SELECT user_id, side, taps, assisted FROM tap_journal WHERE entry_id = ? AND starts_at IS ?",
+        id,
+        row.starts_at,
+      )
+      .toArray();
+    for (const entry of journal) {
+      if (entry.taps > (battle.mine.get(entry.user_id) ?? 0))
+        count({ user_id: entry.user_id, side: entry.side, taps: entry.taps, assisted_taps: entry.assisted }, true);
     }
+    this.ctx.storage.sql.exec("DELETE FROM tap_journal WHERE entry_id = ? AND starts_at IS NOT ?", id, row.starts_at);
     this.battles.set(id, battle);
     this.startTicker();
     return battle;
@@ -515,7 +559,20 @@ export class PollRoom extends DurableObject<AppEnv> {
       .bind(this.streamerId)
       .all<{ id: string }>();
     for (const { id } of rows.results) await this.loadBattle(id);
+    // Journals of battles that no longer run go too: one deleted with its page or its owner's account never reaches
+    // dropBattle in a restarted room, and its journal holds player ids.
+    this.ctx.storage.sql.exec(
+      "DELETE FROM tap_journal WHERE entry_id NOT IN (SELECT value FROM json_each(?))",
+      JSON.stringify([...this.battles.keys()]),
+    );
     await this.tick();
+  }
+
+  /** Forgets a battle that finished, restarted or was deleted, with its journal. */
+  private dropBattle(id: string): void {
+    this.battles.delete(id);
+    this.ctx.storage.sql.exec("DELETE FROM tap_journal WHERE entry_id = ?", id);
+    this.stopTickerIfIdle();
   }
 
   private startTicker(): void {
@@ -527,8 +584,14 @@ export class PollRoom extends DurableObject<AppEnv> {
     }, MASH_TICK_MS);
   }
 
+  /**
+   * The ticker runs while a battle has someone to show it to or taps to write. With nobody watching, it stops so
+   * the room can hibernate; the alarm at the battle's end (scheduleResync) still ends it on time.
+   */
   private stopTickerIfIdle(): void {
-    if (this.battles.size > 0 || this.ticker === undefined) return;
+    if (this.ticker === undefined) return;
+    const busy = (battle: Battle): boolean => battle.pending.size > 0 || battle.flushing || battle.finishing;
+    if (this.battles.size > 0 && (this.activeSockets().length > 0 || [...this.battles.values()].some(busy))) return;
     clearInterval(this.ticker);
     this.ticker = undefined;
   }
@@ -541,6 +604,7 @@ export class PollRoom extends DurableObject<AppEnv> {
       await this.tickBattles();
     } finally {
       this.ticking = false;
+      this.stopTickerIfIdle();
     }
   }
 
@@ -595,22 +659,23 @@ export class PollRoom extends DurableObject<AppEnv> {
     battle.lastFlush = Date.now();
     if (battle.flushing || battle.pending.size === 0) return;
     battle.flushing = true;
-    const deltas = [...battle.pending.values()];
-    battle.pending = new Map();
+    const users: string[] = [...battle.pending];
+    battle.pending = new Set();
+    const deltas: TapDelta[] = [];
+    for (const userId of users) {
+      const side = await battle.sideOf.get(userId);
+      if (typeof side !== "number") continue;
+      const taps: number = battle.mine.get(userId) ?? 0;
+      deltas.push({ userId, side, taps, assisted: battle.mineAssisted.get(userId) ?? 0 });
+    }
     try {
       const statements = tapUpserts(battle.id, battle.startsAt, deltas).map(({ sql, params }) =>
         this.env.DB.prepare(sql).bind(...params),
       );
       await this.env.DB.batch(statements);
-    } catch {
-      console.error("mash_flush_failed");
-      for (const delta of deltas) {
-        const merged = battle.pending.get(delta.userId);
-        if (merged) {
-          merged.taps += delta.taps;
-          merged.assisted += delta.assisted;
-        } else battle.pending.set(delta.userId, delta);
-      }
+    } catch (error: unknown) {
+      console.error("mash_flush_failed", { cause: error instanceof Error ? error.name : "unknown" });
+      for (const userId of users) battle.pending.add(userId);
     } finally {
       battle.flushing = false;
     }
@@ -646,8 +711,7 @@ export class PollRoom extends DurableObject<AppEnv> {
         ).bind(mashWinner(totals), battle.id, battle.startsAt),
         this.env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(this.streamerId),
       ]);
-      this.battles.delete(battle.id);
-      this.stopTickerIfIdle();
+      this.dropBattle(battle.id);
       if (this.activeSockets().length > 0) this.broadcast(await this.snapshot());
     } catch {
       // The next tick or alarm tries again.
@@ -656,9 +720,13 @@ export class PollRoom extends DurableObject<AppEnv> {
     }
   }
 
-  private async snapshot(): Promise<LiveSnapshot> {
+  /**
+   * The current snapshot, one D1 read for any number of callers at once. `unchangedOk` (the periodic resync) first
+   * reads only the page and overlay revisions and reuses the last snapshot when neither changed.
+   */
+  private async snapshot(unchangedOk = false): Promise<LiveSnapshot> {
     if (this.pendingSnapshot) return this.pendingSnapshot;
-    const pending = this.loadSnapshot();
+    const pending = unchangedOk ? this.reuseOrLoadSnapshot() : this.loadSnapshot();
     this.pendingSnapshot = pending;
     try {
       return await pending;
@@ -674,37 +742,32 @@ export class PollRoom extends DurableObject<AppEnv> {
     return overlayPublic(overlayValue(row));
   }
 
+  private async reuseOrLoadSnapshot(): Promise<LiveSnapshot> {
+    const latest = this.latestSnapshot;
+    if (!latest) return this.loadSnapshot();
+    const deadlinePassed = latest.polls.some(
+      (poll): boolean =>
+        !poll.revealed && poll.endsAt !== null && poll.endsAt > latest.serverNow && poll.endsAt <= Date.now(),
+    );
+    if (deadlinePassed) return this.loadSnapshot();
+    // The overlay has its own revision: an overlay change does not bump the page revision.
+    const row = await this.env.DB.prepare(
+      `SELECT s.revision, s.status, COALESCE(o.revision, 0) AS overlay_revision
+       FROM streamers s LEFT JOIN overlay_state o ON o.streamer_id = s.id WHERE s.id = ?`,
+    )
+      .bind(this.streamerId)
+      .first<{ revision: number; status: string; overlay_revision: number }>();
+    if (row?.status === "suspended") throw new PageSuspended("Stream suspended");
+    if (row?.revision !== latest.revision || row.overlay_revision !== latest.overlay?.revision)
+      return this.loadSnapshot();
+    return { ...latest, serverNow: Date.now() };
+  }
+
   private async loadSnapshot(): Promise<LiveSnapshot> {
     if (this.streamerId === undefined) throw new Error("Unbound poll room");
     const [streamer, polls, overlay] = await this.env.DB.batch([
       this.env.DB.prepare("SELECT revision, status FROM streamers WHERE id = ?").bind(this.streamerId),
-      this.env.DB.prepare(`
-        WITH recent AS (
-          SELECT id, title, kind, options, ends_at, revealed, created_at
-          FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary')
-          ORDER BY created_at DESC, id DESC LIMIT 50
-        ), active AS (
-          SELECT id, title, kind, options, ends_at, revealed, created_at
-          FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary')
-            AND revealed = 0 AND (ends_at IS NULL OR ends_at > unixepoch('subsec') * 1000)
-            AND ${notFinishedBattle("unixepoch('subsec') * 1000")}
-          ORDER BY created_at DESC, id DESC LIMIT 1
-        ), selected AS (
-          SELECT * FROM (SELECT * FROM recent UNION SELECT * FROM active)
-          ORDER BY (id = (SELECT id FROM active)) DESC, created_at DESC, id DESC LIMIT 50
-        )
-        SELECT e.id, e.title, e.kind, e.options, e.ends_at, e.revealed,
-          COUNT(v.user_id) AS total,
-          SUM(CASE WHEN v.choice = 0 THEN 1 ELSE 0 END) AS count_0,
-          SUM(CASE WHEN v.choice = 1 THEN 1 ELSE 0 END) AS count_1,
-          SUM(CASE WHEN v.choice = 2 THEN 1 ELSE 0 END) AS count_2,
-          SUM(CASE WHEN v.choice = 3 THEN 1 ELSE 0 END) AS count_3,
-          SUM(CASE WHEN v.choice = 4 THEN 1 ELSE 0 END) AS count_4,
-          SUM(CASE WHEN v.choice = 5 THEN 1 ELSE 0 END) AS count_5,
-          ${MASH_COLUMN}
-        FROM selected e LEFT JOIN entry_votes v ON v.entry_id = e.id
-        GROUP BY e.id ORDER BY e.created_at DESC, e.id DESC
-      `).bind(this.streamerId, this.streamerId),
+      this.env.DB.prepare(LIVE_POLLS_SQL).bind(this.streamerId, this.streamerId),
       this.env.DB.prepare(`SELECT ${OVERLAY_COLUMNS} FROM overlay_state WHERE streamer_id=?`).bind(this.streamerId),
     ]);
     const revisionRow = streamer.results[0] as { revision: number; status: string } | undefined;
@@ -720,27 +783,7 @@ export class PollRoom extends DurableObject<AppEnv> {
       type: "snapshot",
       revision: revisionRow.revision,
       serverNow: Date.now(),
-      polls: (polls.results as PollRow[]).map((poll: PollRow) => {
-        const options = optionsFromJson(poll.options);
-        const mash = mashValue(poll.mash, options.length);
-        return {
-          id: poll.id,
-          title: poll.title,
-          kind: mash ? "mash" : poll.kind,
-          options,
-          endsAt: poll.ends_at,
-          revealed: poll.revealed === 1,
-          counts:
-            poll.kind === "binary" && poll.revealed !== 1
-              ? null
-              : [poll.count_0, poll.count_1, poll.count_2, poll.count_3, poll.count_4, poll.count_5].slice(
-                  0,
-                  options.length,
-                ),
-          total: poll.total,
-          mash,
-        };
-      }),
+      polls: livePolls(polls.results as PollRow[]),
       overlay: this.overlay,
     };
     this.latestSnapshot = snapshot;
@@ -845,6 +888,12 @@ export class PollRoom extends DurableObject<AppEnv> {
   /** Closes sockets whose lease ran out, and sockets that have not pinged for IDLE_TIMEOUT_MS. */
   private expireConnections(): void {
     const now = Date.now();
+    for (const [id, until] of this.notLive) if (until <= now) this.notLive.delete(id);
+    // A bucket refills to full within a second (capacity = rate), so dropping a full bucket of an account with no
+    // socket left loses nothing. A partly used one stays, so a quick reconnect does not get a fresh bucket.
+    const signedIn = new Set(this.activeSockets().map((socket: WebSocket): string | null => this.lease(socket).userId));
+    for (const [userId, bucket] of this.buckets)
+      if (!signedIn.has(userId) && now - bucket.at >= 1_000) this.buckets.delete(userId);
     for (const socket of this.activeSockets()) {
       const lease = this.lease(socket);
       const pinged = this.ctx.getWebSocketAutoResponseTimestamp(socket)?.getTime() ?? 0;
@@ -856,10 +905,10 @@ export class PollRoom extends DurableObject<AppEnv> {
     }
   }
 
-  private async scheduleResync(): Promise<void> {
+  private async scheduleResync(retry = false): Promise<void> {
     const sockets = this.activeSockets();
     const now = Date.now();
-    let deadline = sockets.length > 0 ? now + RESYNC_INTERVAL_MS : Number.POSITIVE_INFINITY;
+    let deadline = retry || sockets.length > 0 ? now + RESYNC_INTERVAL_MS : Number.POSITIVE_INFINITY;
     for (const socket of sockets) deadline = Math.min(deadline, this.lease(socket).expiresAt);
     if (sockets.length > 0) {
       for (const poll of this.latestSnapshot?.polls ?? []) {

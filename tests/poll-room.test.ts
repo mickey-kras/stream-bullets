@@ -280,7 +280,11 @@ describe("live room admission", (): void => {
     const overlay = await join({ key: KEY, overlay: true });
     expect(state().tagsOf(overlay)).toEqual(["role:owner", "overlay-key"]);
     expect(anonymous[0].closeCode).toBe(1013);
-    expect(state().getWebSockets().filter((socket) => socket.open)).toHaveLength(200);
+    expect(
+      state()
+        .getWebSockets()
+        .filter((socket) => socket.open),
+    ).toHaveLength(200);
   });
 
   it("drops only the sockets that came in with a revoked overlay key", async (): Promise<void> => {
@@ -390,6 +394,106 @@ describe("live room snapshots", (): void => {
     expect(ids[0]).toBe(battle);
   });
 
+  it("answers a burst of refresh requests with one more snapshot, not one per request", async (): Promise<void> => {
+    const id = await rows.addPoll();
+    const socket = await join();
+    const before = socket.ofType("snapshot").length;
+    await rows.vote(id, 1);
+    const answers = await Promise.all(Array.from({ length: 10 }, () => post("refresh")));
+    expect(answers.map((answer) => answer.status)).toEqual(Array.from({ length: 10 }, () => 204));
+    expect(socket.ofType("snapshot").length - before).toBeLessThanOrEqual(2);
+    expect(lastOf<LiveSnapshot>(socket, "snapshot")).toMatchObject({ polls: [{ counts: [0, 1] }] });
+  });
+
+  it("answers each refresh request with its own round, not with the rounds queued after it", async (): Promise<void> => {
+    await rows.addPoll();
+    const socket = await join();
+    let release = (): void => undefined;
+    faults.fail(
+      /WITH recent AS/,
+      new Promise<void>((resolve): void => {
+        release = resolve;
+      }),
+    );
+    const first = post("refresh");
+    await vi.waitFor(() => expect(faults.held()).toBe(1));
+    const second = post("refresh");
+    faults.heal();
+    release();
+    // The first round failed (and dropped the viewer); the request queued behind it gets its own, working round.
+    expect((await first).status).toBe(503);
+    expect((await second).status).toBe(204);
+    expect(socket.ofType("unavailable")).toHaveLength(1);
+  });
+
+  it("reloads the overlay at a resync when only the overlay changed", async (): Promise<void> => {
+    const socket = await join();
+    // An overlay change whose room notification was lost: only overlay_state.revision moves.
+    await database.db
+      .prepare(
+        `INSERT INTO overlay_state (streamer_id, air, preview, position, size, instant, show_results, message, message_style, revision)
+        VALUES (?, '{"type":"message","ref":null}', '{"type":"message","ref":null}', 'top', 'l', 0, 1, 'BRB 5 min', 'info', 1)`,
+      )
+      .bind(streamerId)
+      .run();
+    await alarmAfter(15_000);
+    expect(lastOf<LiveSnapshot>(socket, "snapshot")?.overlay).toMatchObject({ revision: 1, message: "BRB 5 min" });
+  });
+
+  it("selects the remaining older open poll after the selected poll expires", async (): Promise<void> => {
+    const now = Date.now();
+    const remaining = await rows.addPoll("choice", null, now - 100_000);
+    const expiring = await rows.addPoll("choice", now + 5_000, now - 90_000);
+    for (let index = 0; index < 50; index += 1) {
+      await rows.addPoll("choice", now - 1, now - 50_000 + index);
+    }
+    const socket = await join({ overlay: true });
+    expect(lastOf<LiveSnapshot>(socket, "snapshot")?.polls.map((poll) => poll.id)).toContain(expiring);
+    expect(lastOf<LiveSnapshot>(socket, "snapshot")?.polls.map((poll) => poll.id)).not.toContain(remaining);
+    // D1 uses its own real clock; make its deadline pass along with the room's controlled clock.
+    await database.db
+      .prepare("UPDATE entries SET ends_at = ? WHERE id = ?")
+      .bind(now - 1, expiring)
+      .run();
+    await alarmAfter(5_000);
+    expect(lastOf<LiveSnapshot>(socket, "snapshot")?.polls.map((poll) => poll.id)).toContain(remaining);
+  });
+
+  it("retries failed battle recovery after restart without viewers", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0 });
+    await tap(await join({ user: "player-1" }), id, 4, 1);
+    vi.clearAllTimers();
+    rooms.restart(streamerId);
+    await state().ready;
+    faults.fail(/SELECT m.entry_id AS id/);
+    const log = vi.spyOn(console, "error").mockImplementation((): void => {});
+    try {
+      await alarmAfter(10_000);
+      expect(state().storage.alarm).toBe(Date.now() + 15_000);
+      faults.heal();
+      await alarmAfter(15_000);
+      expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
+      expect(await rows.storedTaps(id)).toEqual([{ user_id: "player-1", side: 0, taps: 4 }]);
+    } finally {
+      faults.heal();
+      log.mockRestore();
+    }
+  });
+
+  it("reuses the last snapshot at a resync when the page has not changed", async (): Promise<void> => {
+    const id = await rows.addPoll();
+    const socket = await join();
+    faults.fail(/WITH recent AS/);
+    await alarmAfter(15_000);
+    // No poll query ran (it would have failed), and the viewer still got a fresh resync.
+    expect(socket.open).toBe(true);
+    expect(socket.ofType("snapshot")).toHaveLength(2);
+    faults.heal();
+    await rows.vote(id, 0);
+    await alarmAfter(15_000);
+    expect(lastOf<LiveSnapshot>(socket, "snapshot")).toMatchObject({ polls: [{ counts: [1, 0] }] });
+  });
+
   it("hides the counts of a binary poll until it is revealed", async (): Promise<void> => {
     const id = await rows.addPoll("binary");
     await rows.vote(id, 0);
@@ -467,10 +571,18 @@ describe("live room snapshots", (): void => {
     expect(socket.closeCode).toBe(1011);
   });
 
-  it("lets a failing alarm throw so the runtime retries it", async (): Promise<void> => {
-    await join();
-    faults.fail(/SELECT revision, status FROM streamers/);
-    await expect(alarmAfter(15_000)).rejects.toThrow("injected");
+  it("logs a failing resync, drops the sockets so they reconnect, and still sets the next alarm", async (): Promise<void> => {
+    const socket = await join();
+    const battle = await rows.addBattle({}, { endsAt: Date.now() + 30_000 });
+    await post("mash", { id: battle });
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    faults.fail(/FROM streamers/);
+    await alarmAfter(15_000);
+    expect(log.mock.calls).toContainEqual(["live_resync_failed", { cause: "Error" }]);
+    expect(socket.ofType("unavailable")).toHaveLength(1);
+    // A running battle still ends on time: the next alarm is set although this one failed.
+    expect(state().storage.alarm).not.toBeNull();
+    log.mockRestore();
   });
 
   it("refuses to send a snapshot with malformed stored options", async (): Promise<void> => {
@@ -630,6 +742,21 @@ describe("live room token bucket", (): void => {
     expect(await tap(second, id, 20, 2)).toMatchObject({ accepted: 6, mine: 21 });
   });
 
+  it("keeps a used bucket when the account reconnects within a second", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0 });
+    const first = await join({ user: "player-1" });
+    expect(await tap(first, id, 20, 1)).toMatchObject({ accepted: 15 });
+    first.close(1000, "Bye");
+    await room().webSocketClose(first as unknown as WebSocket, 1000, "Bye", true);
+    const second = await join({ key: "b".repeat(64), user: "player-1" });
+    expect(await tap(second, id, 20, 1)).toMatchObject({ accepted: 0 });
+    second.close(1000, "Bye");
+    await room().webSocketClose(second as unknown as WebSocket, 1000, "Bye", true);
+    vi.setSystemTime(Date.now() + 1_000);
+    const third = await join({ key: "c".repeat(64), user: "player-1" });
+    expect(await tap(third, id, 20, 1)).toMatchObject({ accepted: 15 });
+  });
+
   it("holds assisted tapping to 6 taps a second", async (): Promise<void> => {
     const id = await rows.addBattle({ "player-1": 1 });
     expect(await tap(await join({ user: "player-1" }), id, 20, 1, true)).toMatchObject({ accepted: 6 });
@@ -769,7 +896,7 @@ describe("live room battles", (): void => {
     await tap(two, id, 4, 1);
     release();
     await flushing;
-    expect(errors).toHaveBeenCalledWith("mash_flush_failed");
+    expect(errors).toHaveBeenCalledWith("mash_flush_failed", { cause: "Error" });
     expect(await rows.storedTaps(id)).toEqual([]);
     faults.heal();
     await alarmAfter(MASH_FLUSH_MS);
@@ -833,6 +960,71 @@ describe("live room battles", (): void => {
     await fireAlarm();
     // Nobody watches, yet the alarm is due at the battle's end.
     expect(state().storage.alarm).toBe(Date.now() + 10_000);
+    await alarmAfter(10_000);
+    expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
+  });
+
+  it("keeps acknowledged taps through a restart before they reach D1, and counts them for the winner", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0, "player-2": 1 });
+    await tap(await join({ user: "player-1" }), id, 5, 1);
+    expect(await tap(await join({ key: "b".repeat(64), user: "player-2" }), id, 3, 1)).toMatchObject({ accepted: 3 });
+    // A deploy before the first write to D1: the acknowledged taps exist only in the room's storage.
+    expect(await rows.storedTaps(id)).toEqual([]);
+    vi.clearAllTimers();
+    rooms.restart(streamerId);
+    await state().ready;
+    await alarmAfter(10_000);
+    expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
+    expect(await rows.storedTaps(id)).toEqual([
+      { user_id: "player-1", side: 0, taps: 5 },
+      { user_id: "player-2", side: 1, taps: 3 },
+    ]);
+    // The finished battle's journal is gone.
+    expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
+  });
+
+  it("drops the journal of a battle deleted while the room was down", async (): Promise<void> => {
+    const kept = await rows.addBattle({ "player-1": 0 });
+    const deleted = await rows.addBattle({ "player-1": 0 });
+    const socket = await join({ user: "player-1" });
+    await tap(socket, kept, 2, 1);
+    await tap(socket, deleted, 3, 1);
+    vi.clearAllTimers();
+    rooms.restart(streamerId);
+    await state().ready;
+    // The owner deleted the battle (or their account) before the room came back.
+    await database.db.prepare("DELETE FROM entries WHERE id = ?").bind(deleted).run();
+    await alarmAfter(MASH_TICK_MS);
+    const journalled = state().storage.sql.exec<{ entry_id: string }>("SELECT DISTINCT entry_id FROM tap_journal");
+    expect(journalled.toArray()).toEqual([{ entry_id: kept }]);
+  });
+
+  it("writes the same totals again after a restart without counting them twice", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0 });
+    await tap(await join({ user: "player-1" }), id, 4, 1, true);
+    await alarmAfter(MASH_FLUSH_MS);
+    const stored = async (): Promise<unknown> =>
+      database.db.prepare("SELECT taps, assisted_taps FROM mash_taps WHERE entry_id = ?").bind(id).first();
+    expect(await stored()).toEqual({ taps: 4, assisted_taps: 4 });
+    vi.clearAllTimers();
+    rooms.restart(streamerId);
+    await post("mash", { id });
+    // The restarted room finds the same totals in its journal and writes them once more.
+    await alarmAfter(MASH_FLUSH_MS);
+    expect(await stored()).toEqual({ taps: 4, assisted_taps: 4 });
+  });
+
+  it("stops the ticker when the last viewer leaves and still ends the battle at its alarm", async (): Promise<void> => {
+    const id = await rows.addBattle({ "player-1": 0 });
+    const socket = await join({ user: "player-1" });
+    await tap(socket, id, 2, 1);
+    expect(vi.getTimerCount()).toBe(1);
+    socket.close(1000, "Bye");
+    await room().webSocketClose(socket as unknown as WebSocket, 1000, "Bye", true);
+    // The next tick writes the last taps, then the ticker stops so the room can hibernate.
+    await alarmAfter(MASH_FLUSH_MS);
+    expect(vi.getTimerCount()).toBe(0);
+    expect(await rows.storedTaps(id)).toEqual([{ user_id: "player-1", side: 0, taps: 2 }]);
     await alarmAfter(10_000);
     expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
   });

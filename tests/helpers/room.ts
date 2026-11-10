@@ -1,3 +1,4 @@
+import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { vi } from "vitest";
 
 /**
@@ -110,8 +111,19 @@ export function installWorkersRuntime(): void {
   vi.stubGlobal("Response", UpgradeResponse);
 }
 
+/** The Durable Object SQL API on an in-memory SQLite database: `exec` with bound values and `toArray()`. */
+class RoomSql {
+  readonly db = new DatabaseSync(":memory:");
+
+  exec<T>(query: string, ...bindings: SQLInputValue[]): { toArray: () => T[] } {
+    const rows = this.db.prepare(query).all(...bindings) as T[];
+    return { toArray: (): T[] => rows };
+  }
+}
+
 class RoomStorage {
   readonly values = new Map<string, unknown>();
+  readonly sql = new RoomSql();
   alarm: number | null = null;
 
   async get<T>(key: string): Promise<T | undefined> {
@@ -203,6 +215,17 @@ export class RoomNamespace<Room extends RoomLike> {
     };
   }
 
+  /**
+   * The runtime restarts the room (an eviction or a deploy): a new instance on the same storage. Its memory, the
+   * sockets and the ticker are gone.
+   */
+  restart(name: string): void {
+    const entry = this.rooms.get(name);
+    if (!entry) throw new Error(`No room ${name}`);
+    for (const { socket } of entry.state.accepted) socket.close(1012, "Restart");
+    this.rooms.set(name, { state: entry.state, room: this.create(entry.state) });
+  }
+
   entry(name: string): { state: RoomState; room: Room } {
     let entry = this.rooms.get(name);
     if (!entry) {
@@ -223,6 +246,10 @@ export const LIVE_SCHEMA = `
   CREATE TABLE overlay_state (streamer_id TEXT PRIMARY KEY, air TEXT NOT NULL, preview TEXT NOT NULL, position TEXT NOT NULL, size TEXT NOT NULL, instant INTEGER NOT NULL, show_results INTEGER NOT NULL, message TEXT NOT NULL, message_style TEXT NOT NULL, revision INTEGER NOT NULL);
   CREATE TABLE entries (id TEXT PRIMARY KEY, streamer_id TEXT NOT NULL, title TEXT NOT NULL, kind TEXT NOT NULL, options TEXT NOT NULL, ends_at INTEGER, revealed INTEGER NOT NULL, created_at INTEGER NOT NULL);
   CREATE TABLE entry_votes (entry_id TEXT NOT NULL, user_id TEXT NOT NULL, choice INTEGER NOT NULL, PRIMARY KEY(entry_id, user_id));
+  CREATE TABLE entry_vote_counts (entry_id TEXT NOT NULL, choice INTEGER NOT NULL, votes INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(entry_id, choice));
+  CREATE TRIGGER entry_votes_count_insert AFTER INSERT ON entry_votes BEGIN INSERT INTO entry_vote_counts SELECT NEW.entry_id, NEW.choice, 0 WHERE NOT EXISTS (SELECT 1 FROM entry_vote_counts WHERE entry_id = NEW.entry_id AND choice = NEW.choice); UPDATE entry_vote_counts SET votes = votes + 1 WHERE entry_id = NEW.entry_id AND choice = NEW.choice; END;
+  CREATE TRIGGER entry_votes_count_update AFTER UPDATE OF choice ON entry_votes WHEN OLD.choice != NEW.choice BEGIN UPDATE entry_vote_counts SET votes = votes - 1 WHERE entry_id = OLD.entry_id AND choice = OLD.choice; INSERT INTO entry_vote_counts SELECT NEW.entry_id, NEW.choice, 0 WHERE NOT EXISTS (SELECT 1 FROM entry_vote_counts WHERE entry_id = NEW.entry_id AND choice = NEW.choice); UPDATE entry_vote_counts SET votes = votes + 1 WHERE entry_id = NEW.entry_id AND choice = NEW.choice; END;
+  CREATE TRIGGER entry_votes_count_delete AFTER DELETE ON entry_votes BEGIN UPDATE entry_vote_counts SET votes = votes - 1 WHERE entry_id = OLD.entry_id AND choice = OLD.choice; END;
   CREATE INDEX entries_streamer ON entries(streamer_id, created_at, id);
 `;
 
