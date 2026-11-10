@@ -1,0 +1,73 @@
+# Repository graph
+
+The graph is in `graphify-out/graph.json`. It uses Graphify 0.9.105 with no model calls.
+It includes application code, workers, the TypeScript database schema, tests, and authored Markdown documents.
+
+The tools and workflow arrive in PR #568. Until it is merged, this is a static snapshot.
+The commands below apply after that PR is merged.
+
+## Automatic updates
+
+When a PR opens or receives commits, the updater checks its graph inputs.
+Changed inputs cause a new graph build. The updater commits the result to the same PR branch.
+
+A newer run cancels the older run for that PR. Before publishing, the updater checks the PR head again.
+It never force-pushes. Thus, an old build cannot replace a newer source commit.
+
+When inputs match the base, CI compares the graph with the base graph without extraction.
+When inputs differ, CI independently rebuilds the graph to verify its content.
+The updater does not edit source files. All quality gates run on its commit.
+
+Automatic writes apply only to branches in this repository. Fork contributors must generate the graph locally.
+
+PRs that change the extractor or its dependencies must also generate the graph locally for review.
+The updater executes trusted tools from the default branch and treats candidate files as data.
+
+## Configure the writer
+
+Install a GitHub App on this repository with `Contents: write` and `Pull requests: read` permissions.
+Set the repository variable `GRAPHIFY_APP_CLIENT_ID` and repository secret `GRAPHIFY_APP_PRIVATE_KEY`.
+The write job creates a short-lived token for this repository only.
+It runs separately from extraction and can commit only `graphify-out/graph.json`.
+
+An App token lets the generated commit start normal PR checks without manual workflow approval.
+The updater becomes active after its workflow and tools reach the default branch.
+
+## Local update
+
+Use Python 3.12. From the repository root:
+
+```sh
+python3.12 -m venv /tmp/stream-bullets-graphify
+. /tmp/stream-bullets-graphify/bin/activate
+python -m pip install --require-hashes -r .github/graphify/requirements.txt
+git add app db worker tests docs README.md AGENTS.md SECURITY.md
+python .github/graphify/snapshot.py
+```
+
+Stage added and deleted sources before building. Commit the graph with your changes.
+To check freshness without extraction, run:
+
+```sh
+python .github/graphify/snapshot.py --check
+```
+
+## Scope and queries
+
+Code extraction covers tracked TypeScript and TSX in `app`, `db`, `worker`, and `tests`.
+A separate Markdown pass covers `README.md`, `AGENTS.md`, `SECURITY.md`, and authored Markdown under `docs`.
+It adds headings, document links, and references to code symbols.
+It does not infer concepts from prose with a model.
+
+The graph excludes assets, translations, installed dependencies, build output, SQL migrations, and CI tools.
+It also excludes documents under `generated`, `archive`, and `changelog` directories.
+The TypeScript schema supplies the database structure.
+
+Use focused queries:
+
+```sh
+graphify query 'How are images uploaded?' --graph graphify-out/graph.json --budget 2000
+```
+
+The graph is a map, not proof of program behavior. Check the source when an edge is absent or unclear.
+The cloud index and review bot are separate services. This setup does not use them.
