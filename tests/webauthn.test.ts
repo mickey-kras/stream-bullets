@@ -161,7 +161,44 @@ describe("registration", (): void => {
     ).rejects.toThrow(WebAuthnError);
   });
 
-  it("refuses COSE keys that do not match their algorithm", async (): Promise<void> => {
+  it.each<{ name: string; entries: [CborInput, CborInput][] }>([
+    { name: "unsupported algorithm", entries: [[3, -35]] },
+    { name: "missing algorithm", entries: [[1, 2]] },
+    { name: "algorithm without a key", entries: [[3, -7]] },
+    { name: "ES256 with an OKP key", entries: [[1, 1], [3, -7]] },
+    { name: "ES256 with the wrong curve", entries: [[1, 2], [3, -7], [-1, 2]] },
+    {
+      name: "ES256 with short x",
+      entries: [[1, 2], [3, -7], [-1, 1], [-2, new Uint8Array(31)], [-3, new Uint8Array(32)]],
+    },
+    { name: "ES256 with missing y", entries: [[1, 2], [3, -7], [-1, 1], [-2, new Uint8Array(32)]] },
+    {
+      name: "ES256 with a point off the curve",
+      entries: [[1, 2], [3, -7], [-1, 1], [-2, new Uint8Array(32)], [-3, new Uint8Array(32)]],
+    },
+    { name: "EdDSA with an EC2 key", entries: [[1, 2], [3, -8], [-1, 6]] },
+    { name: "EdDSA with the wrong curve", entries: [[1, 1], [3, -8], [-1, 1]] },
+    { name: "EdDSA with missing x", entries: [[1, 1], [3, -8], [-1, 6]] },
+    { name: "EdDSA with short x", entries: [[1, 1], [3, -8], [-1, 6], [-2, new Uint8Array(31)]] },
+    { name: "RS256 with an OKP key", entries: [[1, 1], [3, -257]] },
+    { name: "RS256 with a missing modulus", entries: [[1, 3], [3, -257], [-2, Uint8Array.of(1, 0, 1)]] },
+    {
+      name: "RS256 with a 1024-bit modulus",
+      entries: [[1, 3], [3, -257], [-1, new Uint8Array(128).fill(255)], [-2, Uint8Array.of(1, 0, 1)]],
+    },
+    {
+      name: "RS256 with a padded short modulus",
+      entries: [[1, 3], [3, -257], [-1, Uint8Array.from([0, ...new Uint8Array(255).fill(255)])], [-2, Uint8Array.of(1, 0, 1)]],
+    },
+    {
+      name: "RS256 with a 2047-bit modulus",
+      entries: [[1, 3], [3, -257], [-1, Uint8Array.from([127, ...new Uint8Array(255).fill(255)])], [-2, Uint8Array.of(1, 0, 1)]],
+    },
+    {
+      name: "RS256 with an empty exponent",
+      entries: [[1, 3], [3, -257], [-1, new Uint8Array(256).fill(255)], [-2, new Uint8Array()]],
+    },
+  ])("refuses $name", async ({ entries }): Promise<void> => {
     const attest = async (
       cose: Map<CborInput, CborInput>,
     ): Promise<unknown> => {
@@ -199,10 +236,7 @@ describe("registration", (): void => {
         expected,
       );
     };
-    const map = (entries: [CborInput, CborInput][]) =>
-      new Map<CborInput, CborInput>(entries);
-    await expect(attest(map([[3, -35]]))).rejects.toThrow(WebAuthnError);
-    await expect(attest(map([[1, 2]]))).rejects.toThrow(WebAuthnError);
+    await expect(attest(new Map<CborInput, CborInput>(entries))).rejects.toThrow(WebAuthnError);
   });
 });
 

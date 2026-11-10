@@ -3,7 +3,7 @@ import {
   verifyRegistrationResponse,
   type RegistrationResponseJSON,
 } from "@simplewebauthn/server";
-import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import { isoBase64URL, isoCBOR } from "@simplewebauthn/server/helpers";
 
 /**
  * The WebAuthn checks for admin security keys (item 29), delegated to `@simplewebauthn/server`.
@@ -40,6 +40,44 @@ export function toBase64Url(bytes: Uint8Array): string {
 export function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
   if (!isoBase64URL.isBase64URL(value) || value.length % 4 === 1) throw new WebAuthnError("Invalid base64url value.");
   return Uint8Array.from(isoBase64URL.toBuffer(value));
+}
+
+/** Attestation "none" checks the algorithm but does not import the key. Validate it before storage. */
+async function validatePublicKey(publicKey: Uint8Array<ArrayBuffer>): Promise<void> {
+  const key = isoCBOR.decodeFirst<Map<number, unknown>>(publicKey);
+  const bytes = (label: number, length?: number): Uint8Array<ArrayBuffer> => {
+    const value = key.get(label);
+    if (!(value instanceof Uint8Array) || value.length === 0 || (length !== undefined && value.length !== length))
+      throw new WebAuthnError("Invalid COSE key.");
+    return Uint8Array.from(value);
+  };
+  const algorithm = key.get(3);
+  const keyType = key.get(1);
+  if (algorithm === -7) {
+    if (keyType !== 2 || key.get(-1) !== 1) throw new WebAuthnError("Invalid COSE key.");
+    await crypto.subtle.importKey(
+      "jwk",
+      { kty: "EC", crv: "P-256", x: toBase64Url(bytes(-2, 32)), y: toBase64Url(bytes(-3, 32)) },
+      { name: "ECDSA", namedCurve: "P-256" },
+      false,
+      ["verify"],
+    );
+  } else if (algorithm === -8) {
+    if (keyType !== 1 || key.get(-1) !== 6) throw new WebAuthnError("Invalid COSE key.");
+    await crypto.subtle.importKey("raw", bytes(-2, 32), { name: "Ed25519" }, false, ["verify"]);
+  } else {
+    // The registration verifier has already restricted algorithms to ES256, EdDSA, and RS256.
+    if (keyType !== 3) throw new WebAuthnError("Invalid COSE key.");
+    const imported = await crypto.subtle.importKey(
+      "jwk",
+      { kty: "RSA", n: toBase64Url(bytes(-1)), e: toBase64Url(bytes(-2)) },
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["verify"],
+    );
+    if ((imported.algorithm as RsaKeyAlgorithm).modulusLength < 2048)
+      throw new WebAuthnError("The RSA key is too short.");
+  }
 }
 
 /**
@@ -117,6 +155,7 @@ export function verifyRegistration(
     });
     if (!result.verified) throw new WebAuthnError("The attestation is not valid.");
     const info = result.registrationInfo;
+    await validatePublicKey(info.credential.publicKey);
     return {
       credentialId: info.credential.id,
       publicKey: isoBase64URL.fromBuffer(info.credential.publicKey, "base64"),
