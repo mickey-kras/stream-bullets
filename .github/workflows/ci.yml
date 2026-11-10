@@ -137,9 +137,36 @@ jobs:
           grep -Fq 'id="landing-title"' /tmp/streambullets.html
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/fonts.css --output /dev/null
 
+  graphify:
+    name: Graphify snapshot
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12'
+      - name: Install pinned local graph tools
+        run: python -m pip install --require-hashes -r .github/graphify/requirements.txt
+      - name: Test graph freshness checks
+        run: python -m unittest discover -s .github/graphify -p 'test_*.py'
+      - name: Test graph publication races
+        run: node --test .github/graphify/publish.test.cjs
+      - name: Check graph against an independent reference
+        env:
+          GRAPHIFY_BACKEND: none
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python .github/graphify/snapshot.py --check --base "$BASE_SHA"
+
   checks:
     name: Required quality gates
-    needs: [verify, quality]
+    needs: [verify, quality, graphify]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -148,7 +175,8 @@ jobs:
         env:
           VERIFY: ${{ needs.verify.result }}
           QUALITY: ${{ needs.quality.result }}
-        run: test "$VERIFY" = success && test "$QUALITY" = success
+          GRAPHIFY: ${{ needs.graphify.result }}
+        run: test "$VERIFY" = success && test "$QUALITY" = success && test "$GRAPHIFY" = success
 
   sonar:
     name: SonarQube quality gate
