@@ -170,3 +170,50 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     await close(ownerContext);
   }
 });
+
+for (const change of ["sort", "refresh"] as const) {
+  test(`cancels pending comment pagination on ${change}`, async ({ browser }) => {
+    const sessions = sessionSchema.parse(JSON.parse(await readFile(".wrangler/e2e/sessions.json", "utf8")));
+    const viewer = sessions.viewer;
+    if (!viewer) throw new Error("Missing discussion test account.");
+    const { entryId } = await seedHistory(viewer.id);
+    const context: BrowserContext = await browser.newContext({
+      baseURL: origin,
+      extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("discussion-history", change === "sort" ? 77 : 78) },
+    });
+    try {
+      const page = await newPage(context);
+      await page.goto(`/@test_host?entry=${entryId}`);
+      const more = page.getByRole("button", { name: "Load more comments" });
+      await expect(more).toBeEnabled();
+      const pending = page.waitForRequest((request) => request.url().includes("cursor="));
+      await page.route(`**/api/entries/${entryId}/comments?**`, async (route) => {
+        if (new URL(route.request().url()).searchParams.has("cursor")) return;
+        await route.continue();
+      });
+      await more.click();
+      const request = await pending;
+      const cancelled = page.waitForEvent("requestfailed", (failed) => failed === request);
+      if (change === "sort") {
+        await page.getByRole("combobox", { name: "Sort comments" }).click();
+        await page.getByRole("option", { name: "Top", exact: true }).click();
+      } else {
+        await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
+      }
+      await cancelled;
+      await expect(more).toBeEnabled();
+      if (change === "sort") {
+        await page.getByRole("combobox", { name: "Sort comments" }).click();
+        await page.getByRole("option", { name: "Newest", exact: true }).click();
+        await expect(more).toBeEnabled();
+      }
+      await page.unrouteAll({ behavior: "ignoreErrors" });
+      await more.click();
+      await expect(page.locator(".thread-list > li.thread")).toHaveCount(110);
+      await expect(more).toHaveCount(0);
+      await expect(page.locator(".discussion .form-error")).toBeEmpty();
+    } finally {
+      await close(context);
+    }
+  });
+}

@@ -10,7 +10,7 @@ const ranges = {
   pagination: [[50, 51]],
   moderation: [[60, 65]],
   shell: [[66, 67]],
-  "discussion-history": [[75, 76]],
+  "discussion-history": [[75, 78]],
   // Reserved: these addresses are used without clientIp.
   mash: [[80, 82]],
   "overlay-control": [[90, 94]],
