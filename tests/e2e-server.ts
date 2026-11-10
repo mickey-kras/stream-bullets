@@ -87,6 +87,8 @@ for (const role of [
 // this session counts as new for the whole run. A second session of the same account checks that a key check
 // stays with the session that made it.
 statements.push(`UPDATE session SET created_at=${now + 3_600_000} WHERE user_id='${users.keyadmin.id}';`);
+// Account deletion needs a sign-in from the last 10 minutes (account.spec.ts), however long the run takes.
+statements.push(`UPDATE session SET created_at=${now + 3_600_000} WHERE user_id='${users.leaver.id}';`);
 {
   const token: string = randomBytes(24).toString("hex");
   users.keyadmin2 = {
