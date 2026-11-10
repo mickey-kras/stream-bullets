@@ -143,25 +143,34 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const requestedView: string = url.searchParams.get("view") || "topics";
   let view: View = allowed.includes(requestedView as View) ? (requestedView as View) : "topics";
   const entryId: string | null = url.searchParams.get("entry");
-  const selected: Entry | null = entryId ? await getEntry(app.env, entryId, viewer?.id || null) : null;
+  const owner = viewer?.id === streamer.ownerId;
+  const now = Date.now();
+  // Independent reads go out together, so the page waits for the slowest one, not their sum.
+  const [selected, moderator, support, schedule] = await Promise.all([
+    entryId ? getEntry(app.env, entryId, viewer?.id || null) : null,
+    viewer ? isAdmin(app.env, viewer.id) : false,
+    getSupport(app.env, streamer.id),
+    pageSchedule(app.env, streamer, url.searchParams, now),
+  ]);
   if (entryId && selected?.streamerId !== streamer.id) throw new Response("Conversation not found.", { status: 404 });
   if (selected) view = entryView(selected);
   const { sort, query, status } = boardFilters(url.searchParams, view, official);
-  const board: BoardSnapshot = await listEntries(app.env, streamer, viewer?.id || null, {
-    kind: view === "polls" ? "polls" : "topics",
-    sort,
-    query,
-    cursor: null,
-    status,
-  });
-  const owner = viewer?.id === streamer.ownerId;
-  const now = Date.now();
-  const schedule = await pageSchedule(app.env, streamer, url.searchParams, now);
+  const [board, cards, topicChoices] = await Promise.all([
+    listEntries(app.env, streamer, viewer?.id || null, {
+      kind: view === "polls" ? "polls" : "topics",
+      sort,
+      query,
+      cursor: null,
+      status,
+    }),
+    view === "community" && !official ? listCards(app.env, streamer.id) : null,
+    owner && view === "schedule" ? listTopicChoices(app.env, streamer.id) : [],
+  ]);
   return {
     board,
     selected,
     viewer,
-    moderator: viewer ? await isAdmin(app.env, viewer.id) : false,
+    moderator,
     providers: configuredProviders(app.env),
     view,
     sort,
@@ -169,9 +178,9 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
     status,
     ...schedule,
     serverNow: now,
-    cards: view === "community" && !official ? await listCards(app.env, streamer.id) : null,
-    support: await getSupport(app.env, streamer.id),
-    topicChoices: owner && view === "schedule" ? await listTopicChoices(app.env, streamer.id) : [],
+    cards,
+    support,
+    topicChoices,
     intent: readIntent(url.searchParams.get("intent")),
   };
 }
