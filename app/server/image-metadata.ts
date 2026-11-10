@@ -57,7 +57,7 @@ function scanEnd(bytes: Uint8Array, start: number): number {
 function cleanJpegSegment(marker: number, payload: Uint8Array, original: Uint8Array): Uint8Array | undefined {
   const identifier: string = new TextDecoder().decode(payload.subarray(0, 6));
   if (marker === 0xe0) {
-    if (payload.length < 14 || identifier.slice(0, 5) !== "JFIF\0") return undefined;
+    if (payload.length < 14 || !identifier.startsWith("JFIF\0")) return undefined;
     const header: Uint8Array = payload.slice(0, 14);
     header[12] = 0;
     header[13] = 0;
@@ -68,10 +68,18 @@ function cleanJpegSegment(marker: number, payload: Uint8Array, original: Uint8Ar
     return exif ? concat([Uint8Array.of(0xff, 0xe1, 0, exif.length + 8, 69, 120, 105, 102, 0, 0), exif]) : undefined;
   }
   if (marker === 0xee) {
-    if (payload.length < 12 || identifier.slice(0, 5) !== "Adobe") return undefined;
+    if (payload.length < 12 || !identifier.startsWith("Adobe")) return undefined;
     return concat([Uint8Array.of(0xff, 0xee, 0, 14), payload.subarray(0, 12)]);
   }
   return droppedJpegMarker(marker, payload) ? undefined : original;
+}
+
+function jpegSegmentEnd(bytes: Uint8Array, offset: number): number {
+  if (offset + 2 > bytes.length) return invalidImage();
+  const length: number = (bytes[offset] << 8) | bytes[offset + 1];
+  const end: number = offset + length;
+  if (length < 2 || end > bytes.length) return invalidImage();
+  return end;
 }
 
 function stripJpeg(bytes: Uint8Array): Uint8Array {
@@ -87,10 +95,7 @@ function stripJpeg(bytes: Uint8Array): Uint8Array {
       parts.push(bytes.subarray(start, offset));
       continue;
     }
-    if (offset + 2 > bytes.length) return invalidImage();
-    const length: number = (bytes[offset] << 8) | bytes[offset + 1];
-    const end: number = offset + length;
-    if (length < 2 || end > bytes.length) return invalidImage();
+    const end: number = jpegSegmentEnd(bytes, offset);
     const segment: Uint8Array | undefined = cleanJpegSegment(
       marker,
       bytes.subarray(offset + 2, end),
@@ -139,6 +144,25 @@ function stripPng(bytes: Uint8Array): Uint8Array {
 const VP8X_EXIF = 0x08;
 const VP8X_XMP = 0x04;
 
+function cleanWebpChunk(type: string, original: Uint8Array, size: number): Uint8Array | undefined {
+  if (type === "XMP ") return undefined;
+  if (type === "EXIF") {
+    const exif: Uint8Array | undefined = orientationExif(original.subarray(8, 8 + size));
+    if (!exif) return undefined;
+    const chunk: Uint8Array = new Uint8Array(exif.length + 8);
+    chunk.set(original.subarray(0, 4));
+    new DataView(chunk.buffer).setUint32(4, exif.length, true);
+    chunk.set(exif, 8);
+    return chunk;
+  }
+  const chunk: Uint8Array = original.slice();
+  if (type === "VP8X") {
+    if (size !== 10) return invalidImage();
+    chunk[8] &= ~(VP8X_EXIF | VP8X_XMP);
+  }
+  return chunk;
+}
+
 function stripWebp(bytes: Uint8Array): Uint8Array {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const chunks: Uint8Array[] = [];
@@ -151,23 +175,10 @@ function stripWebp(bytes: Uint8Array): Uint8Array {
     const end: number = offset + 8 + size + (size % 2);
     if (end > bytes.length) return invalidImage();
     const type: string = String.fromCodePoint(...bytes.subarray(offset, offset + 4));
-    if (type === "EXIF") {
-      const exif: Uint8Array | undefined = orientationExif(bytes.subarray(offset + 8, offset + 8 + size));
-      if (exif) {
-        const chunk: Uint8Array = new Uint8Array(exif.length + 8);
-        chunk.set(bytes.subarray(offset, offset + 4));
-        new DataView(chunk.buffer).setUint32(4, exif.length, true);
-        chunk.set(exif, 8);
-        chunks.push(chunk);
-        hasExif = true;
-      }
-    } else if (type !== "XMP ") {
-      const chunk: Uint8Array = bytes.slice(offset, end);
-      if (type === "VP8X") {
-        if (size !== 10) return invalidImage();
-        chunk[8] &= ~(VP8X_EXIF | VP8X_XMP);
-      }
+    const chunk: Uint8Array | undefined = cleanWebpChunk(type, bytes.subarray(offset, end), size);
+    if (chunk) {
       chunks.push(chunk);
+      if (type === "EXIF") hasExif = true;
     }
     offset = end;
   }
