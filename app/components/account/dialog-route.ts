@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate, type Location } from "react-router";
 
 /** The account dialogs (item 17), Language and Accessibility & display. Each opens as `?dialog=<name>`. */
@@ -37,15 +37,20 @@ export function useAccountDialog(): { name: AccountDialogName | null; close: () 
   const value: string | null = new URLSearchParams(location.search).get("dialog");
   const name: AccountDialogName | null = isAccountDialog(value) ? value : null;
   const fromApp: boolean = Boolean((location.state as DialogState | null)?.dialogFrom);
+  const closing = useRef<boolean>(false);
   const close = useCallback((): void => {
+    closing.current = true;
     if (fromApp) navigate(-1);
     else navigate(dialogHref(location, null), { replace: true, preventScrollReset: true });
-    // The dialog unmounts with the route change, so focus can land on the page body. The account dialogs open
-    // from the account menu, so give focus back to its avatar button then.
-    globalThis.setTimeout(() => {
-      if (document.activeElement && document.activeElement !== document.body) return;
-      document.querySelector<HTMLElement>(".account-menu-wrap > button.profile")?.focus();
-    }, 60);
   }, [fromApp, location, navigate]);
+  // The dialog unmounts with the route change, so focus can land on the page body. Once the route without the
+  // dialog has rendered, give focus back to the account menu's avatar button, which the account dialogs open from.
+  // An effect, not a timer: the route change can take any time.
+  useEffect((): void => {
+    if (name !== null || !closing.current) return;
+    closing.current = false;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    document.querySelector<HTMLElement>(".account-menu-wrap > button.profile")?.focus();
+  }, [name]);
   return { name, close };
 }
