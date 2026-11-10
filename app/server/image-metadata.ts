@@ -38,7 +38,10 @@ function invalidImage(): never {
 function scanEnd(bytes: Uint8Array, start: number): number {
   let offset: number = start;
   while (offset < bytes.length - 1) {
-    if (bytes[offset] !== 0xff) { offset++; continue; }
+    if (bytes[offset] !== 0xff) {
+      offset++;
+      continue;
+    }
     const markerStart: number = offset;
     while (bytes[offset] === 0xff) offset++;
     const marker: number = bytes[offset];
@@ -68,8 +71,8 @@ function stripJpeg(bytes: Uint8Array): Uint8Array {
     if (marker === 0xe1) {
       const payload: Uint8Array = bytes.subarray(offset + 2, end);
       // APP1 can also contain XMP; only EXIF has this identifier.
-      const exif: Uint8Array | undefined = new TextDecoder().decode(payload.subarray(0, 6)) === "Exif\0\0"
-        ? orientationExif(payload) : undefined;
+      const exif: Uint8Array | undefined =
+        new TextDecoder().decode(payload.subarray(0, 6)) === "Exif\0\0" ? orientationExif(payload) : undefined;
       if (exif) parts.push(concat([Uint8Array.of(0xff, 0xe1, 0, exif.length + 8, 69, 120, 105, 102, 0, 0), exif]));
     } else if (!droppedJpegMarker(marker)) parts.push(bytes.subarray(start, end));
     offset = end;
@@ -148,8 +151,9 @@ function stripWebp(bytes: Uint8Array): Uint8Array {
   }
   if (offset !== bytes.length) return invalidImage();
   if (hasExif) {
-    const extended: Uint8Array | undefined = chunks.find((chunk: Uint8Array): boolean =>
-      String.fromCodePoint(...chunk.subarray(0, 4)) === "VP8X");
+    const extended: Uint8Array | undefined = chunks.find(
+      (chunk: Uint8Array): boolean => String.fromCodePoint(...chunk.subarray(0, 4)) === "VP8X",
+    );
     if (!extended || extended.length < 18) return invalidImage();
     extended[8] |= VP8X_EXIF;
   }
