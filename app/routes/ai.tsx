@@ -1,3 +1,5 @@
+import type { MetaArgs } from "react-router";
+import { canonicalMeta } from "../lib/seo";
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
 import { useState, type ReactNode } from "react";
@@ -12,8 +14,12 @@ import { appContext } from "../env";
 import { intlLocale, t, type MessageId } from "../i18n";
 import { aiInterestStatus, type AiInterestStatus, type AiInterestTotals } from "../server/ai.server";
 
-export function meta() {
-  return [{ title: `${t("ai.title")} · StreamBullets` }, { name: "description", content: t("ai.lead") }];
+export function meta({ matches }: MetaArgs) {
+  return [
+    ...canonicalMeta(matches, "/ai"),
+    { title: `${t("ai.title")} · StreamBullets` },
+    { name: "description", content: t("ai.lead") },
+  ];
 }
 
 export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs): Promise<AiInterestStatus> => {

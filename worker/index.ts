@@ -1,3 +1,4 @@
+import { sitemapResponse } from "../app/server/sitemap.server";
 import { createRequestHandler, RouterContextProvider } from "react-router";
 import { appContext, type AppEnv } from "../app/env";
 import { isStreamerListed } from "../app/server/access.server";
@@ -120,7 +121,9 @@ export default {
       const path = new URL(request.url).pathname;
       const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
       const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
-      if (calendar) {
+      if (path === "/sitemap.xml") {
+        response = await sitemapResponse(request, env);
+      } else if (calendar) {
         response = await calendarResponse(request, env, calendar[1], origin);
       } else if (live) {
         response = await liveResponse(request, env, live[1], key, nonce, responseHeaders);

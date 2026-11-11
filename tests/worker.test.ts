@@ -460,3 +460,28 @@ describe("Worker cron", (): void => {
     }
   });
 });
+
+
+describe("sitemap", (): void => {
+  it("serves public pages and all listed profiles, including frozen pages", async (): Promise<void> => {
+    await env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name,status) VALUES ('frozen','viewer','frozen_page','Frozen','frozen')").run();
+    const response = await fetchPath("/sitemap.xml?dialog=login");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("application/xml; charset=utf-8");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=300");
+    const xml: string = await response.text();
+    expect(xml).toContain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
+    for (const path of ["/", "/streamers", "/privacy", "/terms", "/ai", "/@zed_page", "/@frozen_page"]) {
+      expect(xml).toContain(`<loc>${origin}${path}</loc>`);
+    }
+    for (const path of ["hidden_page", "/admin", "/settings", "/overlay", "dialog="]) expect(xml).not.toContain(path);
+    expect(router.calls).toHaveLength(0);
+  });
+
+  it("handles HEAD and rejects writes", async (): Promise<void> => {
+    const head = await fetchPath("/sitemap.xml", { method: "HEAD" });
+    expect(head.status).toBe(200);
+    expect(await head.text()).toBe("");
+    expect((await fetchPath("/sitemap.xml", { method: "POST" })).status).toBe(405);
+  });
+});

@@ -1,3 +1,5 @@
+import type { MetaArgs } from "react-router";
+import { canonicalMeta } from "../lib/seo";
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
 import { SearchAdornments } from "../components/shell/directory-search";
@@ -17,8 +19,9 @@ import { SiteHeader } from "../components/shell/site-header";
 import { StreamerLogo } from "../components/ui/avatar";
 import { Icon, type IconName } from "../components/ui/icon";
 
-export function meta() {
+export function meta({ matches }: MetaArgs) {
   return [
+    ...canonicalMeta(matches, "/streamers"),
     { title: `${t("nav.streamers")} · StreamBullets` },
     { name: "description", content: t("meta.streamersDescription") },
   ];
