@@ -64,6 +64,7 @@ for (const [label, width, height] of [
     const still = await sample();
     await page.emulateMedia({ reducedMotion: "no-preference" });
     const animated = await sample();
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await testInfo.attach("mobile-hero-cost.json", {
       body: JSON.stringify({ width, height, load, still, animated }, null, 2),
       contentType: "application/json",
