@@ -9,13 +9,23 @@ export function headerOverflows(header: HTMLElement): boolean {
   const brand: HTMLElement | null = header.querySelector(":scope > .brand");
   const end: HTMLElement | null = header.querySelector(":scope > .header-end");
   const tabs: HTMLElement[] = [...nav.querySelectorAll<HTMLElement>(":scope > a, :scope > button")];
-  if (tabs.some((tab: HTMLElement) => tab.scrollWidth > tab.clientWidth + 1) || nav.scrollWidth > nav.clientWidth + 1)
+  if (
+    tabs.some((tab: HTMLElement) => tab.scrollWidth > tab.clientWidth + 1) ||
+    [nav, brand, end].some((part: HTMLElement | null) => part !== null && part.scrollWidth > part.clientWidth + 1)
+  )
     return true;
   if (tabs.length === 0) return false;
   const first: DOMRect = tabs[0].getBoundingClientRect();
   const last: DOMRect = tabs.at(-1)!.getBoundingClientRect();
   const brandRight: number | null = brand ? brand.getBoundingClientRect().right : null;
-  const endLeft: number | null = end ? end.getBoundingClientRect().left : null;
+  const endLeft: number | null = end
+    ? Math.min(
+        end.getBoundingClientRect().left,
+        ...[...end.children]
+          .filter((child: Element) => child.getClientRects().length > 0)
+          .map((child: Element) => child.getBoundingClientRect().left),
+      )
+    : null;
   return (brandRight !== null && first.left < brandRight + 4) || (endLeft !== null && last.right > endLeft - 4);
 }
 

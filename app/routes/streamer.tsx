@@ -20,6 +20,7 @@ import { listCards } from "../server/community.server";
 import { defaultRange, getEvent, listEvents, listTopicChoices } from "../server/schedule.server";
 import { getSupport } from "../server/support.server";
 import { EmptyState } from "../components/common";
+import { contactEmails } from "../legal";
 import { SignInDialog } from "../components/shell/sign-in-dialog";
 import { StreamerLogo } from "../components/ui/avatar";
 import { readIntent } from "../lib/directory";
@@ -468,8 +469,26 @@ export default function StreamerPage(): ReactNode {
   function renderEmptyTopics(): ReactNode {
     if (official)
       return (
-        <EmptyState title={t("ideas.emptyTitle")} icon="idea">
-          {t("ideas.emptyBody")}
+        <EmptyState
+          title={t("ideas.emptyTitle")}
+          icon="idea"
+          action={
+            !viewer && providers.length === 0 ? (
+              <a className="button-link" href={`mailto:${contactEmails.support}`}>
+                <Icon name="mail" size={18} />
+                {t("contact.openEmail")}
+              </a>
+            ) : (
+              writable && (
+                <button type="button" className="gold" onClick={() => (viewer ? setDialog("idea") : setSignIn(true))}>
+                  <Icon name="plus" size={18} />
+                  {t("ideas.suggest")}
+                </button>
+              )
+            )
+          }
+        >
+          {t(!viewer && providers.length === 0 ? "signIn.off" : "ideas.emptyBody")}
         </EmptyState>
       );
     if (owner)

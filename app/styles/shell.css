@@ -124,7 +124,7 @@ body:not(:has(.landing-page)) > .site-footer a:focus-visible { outline: 2px soli
 .streamer-home { display: flex; align-items: center; gap: 12px; border-radius: 44px; }
 .streamer-name { font: 600 22px/1.1 var(--heading); text-transform: uppercase; color: var(--cream); white-space: nowrap; }
 @media (min-width:65.6875em) {
-  .streamer-header { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .site-header { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
 }
 @media (max-width:78.125em) {
   .streamer-name { display: none; }
@@ -314,6 +314,7 @@ header .account-menu nav :is(a, button) svg.icon { width: 18px; height: 18px; fl
 }
 header.site-header > .brand, header.site-header > .streamer-brand { min-width: 0; overflow: hidden; }
 .streamer-header .streamer-name-wrap, .streamer-header .streamer-name { min-width: 0; max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ideas-header .streamer-name-wrap { grid-template-columns: minmax(0, 1fr); max-width: none; white-space: normal; }
 header.site-header.header-stacked { grid-template-columns: minmax(0, 1fr) auto !important; grid-template-areas: "brand actions" "nav nav" !important; row-gap: 2px; padding-bottom: 8px; }
 header.site-header.header-stacked > nav { justify-content: center; width: 100%; }
 .header-streamers.icon-button { display: inline-grid; place-items: center; width: 40px; height: 40px; min-width: 40px; padding: 0; }
