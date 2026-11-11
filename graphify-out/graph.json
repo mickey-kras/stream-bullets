@@ -32157,31 +32157,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L101",
-      "target": "tests_e2e_a11y_responsive_spec_expectreachable",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_e2e_a11y_responsive_spec",
-      "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L131",
-      "target": "tests_e2e_a11y_responsive_spec_expectlabelsfit",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_e2e_a11y_responsive_spec",
-      "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L91",
+      "source_location": "L100",
       "target": "tests_e2e_a11y_responsive_spec_expectcontained",
       "weight": 1.0
     },
@@ -32193,7 +32169,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L92",
+      "source_location": "L101",
       "target": "tests_e2e_a11y_responsive_spec_expectheaderfits",
       "weight": 1.0
     },
@@ -32205,8 +32181,32 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L99",
+      "source_location": "L108",
       "target": "tests_e2e_a11y_responsive_spec_opencontact",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L110",
+      "target": "tests_e2e_a11y_responsive_spec_expectreachable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L140",
+      "target": "tests_e2e_a11y_responsive_spec_expectlabelsfit",
       "weight": 1.0
     },
     {
@@ -116142,10 +116142,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "9bc77cf9afc1290f2fc892efb9f6b95a49184b34fb5d6e1191a0785c07276a02",
+    "content_sha256": "c596bd2ed201d8125219ee269ba9a7efac19760033ee2a404ee78433a91e8107",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "dee074b13844201bdad6ef34b9b3ef947444eeed796f2d7e890ce5a06ed68d3f",
+    "source_sha256": "33f9076854b3af583f169b9309abf731b4cef19b27db45846a9ab081e1cf8ca2",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -143731,45 +143731,52 @@
       "metadata": {
         "unresolved_calls": [
           {
+            "callee": "addInitScript",
+            "file": "tests/e2e/a11y-responsive.spec.ts",
+            "lang": "typescript",
+            "line": "L72",
+            "receiver_type": "Page"
+          },
+          {
             "callee": "setViewportSize",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L73",
+            "line": "L80",
             "receiver_type": "Page"
           },
           {
             "callee": "goto",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L79",
+            "line": "L86",
             "receiver_type": "Page"
           },
           {
             "callee": "locator",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L81",
+            "line": "L88",
             "receiver_type": "Page"
           },
           {
             "callee": "evaluate",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L82",
+            "line": "L90",
             "receiver_type": "Page"
           },
           {
             "callee": "emulateMedia",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L123",
+            "line": "L132",
             "receiver_type": "Page"
           },
           {
             "callee": "addStyleTag",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L126",
+            "line": "L135",
             "receiver_type": "Page"
           }
         ]
