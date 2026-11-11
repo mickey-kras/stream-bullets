@@ -39,7 +39,7 @@ def refresh(root: Path, base: str) -> bool:
         env={**os.environ, "GRAPHIFY_SOURCE_ROOT": str(root)}, check=True,
     )
     git(root, "add", "--", "graphify-out/graph.json")
-    paths = git(root, "diff", "--cached", "--name-only", "-z", head).decode().split("\0")
+    paths = git(root, "diff", "--cached", "--no-renames", "--name-only", "-z", head).decode().split("\0")
     entries: list[dict[str, str | None]] = []
     for path in filter(None, paths):
         index = git(root, "ls-files", "--stage", "-z", "--", path).decode()

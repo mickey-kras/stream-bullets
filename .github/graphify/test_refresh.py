@@ -110,3 +110,17 @@ class RefreshTests(unittest.TestCase):
         deleted = next(entry for entry in artifact["entries"] if entry["path"] == 'source.ts')
         self.assertIsNone(deleted["sha"])
         self.assertFalse((self.root / "source.ts").exists())
+
+    def test_renamed_file_removes_the_original_path(self) -> None:
+        self.git("switch", "main")
+        self.git("mv", "source.ts", "renamed.ts")
+        self.commit()
+        base = self.git("rev-parse", "HEAD")
+        self.git("switch", "feature")
+        with patch.object(refresh, "TOOLS", self.tools):
+            self.assertTrue(refresh.refresh(self.root, base))
+        artifact = json.loads((self.root / "graph-update.json").read_text())
+        entries = {entry["path"]: entry for entry in artifact["entries"]}
+        self.assertIn("source.ts", entries)
+        self.assertIsNone(entries["source.ts"]["sha"])
+        self.assertIn("renamed.ts", entries)
