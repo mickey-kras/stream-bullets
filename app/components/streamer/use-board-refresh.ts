@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BoardSnapshot, Entry, EntryStatus, SortOrder } from "../../types";
 import { requestJson } from "../api";
+import type { StreamerView } from "../shell/streamer-header";
 
 interface BoardSource {
   board: BoardSnapshot;
   selected: Entry | null;
-  view: string;
+  view: StreamerView;
   sort: SortOrder;
   query: string;
   status: EntryStatus | null;

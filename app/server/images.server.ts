@@ -164,7 +164,7 @@ export async function serveImage(
     }
     if (!response) {
       const object = await env.IMAGES.get(live.version ? `${path}/${live.version}` : path);
-      if (!object && live.version && retry) {
+      if (!object && retry) {
         retry = false;
         continue;
       }

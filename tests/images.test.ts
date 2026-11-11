@@ -173,15 +173,48 @@ describe("owned image storage", () => {
     },
   );
 
-  it("bounds retries when the currently referenced image object stays missing", async () => {
+  it("follows the first version published while a legacy image read is waiting for storage", async () => {
     const cache = imageCache();
-    await uploadImage(upload(), env, "viewer", "avatar");
-    const get = vi.spyOn(env.IMAGES, "get").mockResolvedValue(null);
-    await expect(serveImage(env, "avatar/viewer", "GET", cache)).rejects.toMatchObject({ status: 404 });
+    await env.DB.prepare("UPDATE user SET image='/images/avatar/viewer' WHERE id='viewer'").run();
+    await env.IMAGES.put("avatar/viewer", png);
+    const read = env.IMAGES.get.bind(env.IMAGES);
+    let release: (() => void) | undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let reached: (() => void) | undefined;
+    const started = new Promise<void>((resolve) => {
+      reached = resolve;
+    });
+    const get = vi.spyOn(env.IMAGES, "get").mockImplementationOnce(async (...args) => {
+      reached?.();
+      await held;
+      return read(...args);
+    });
+    const reading = serveImage(env, "avatar/viewer", "GET", cache);
+    await started;
+    await uploadImage(new Request(upload(), { body: redPng }), env, "viewer", "avatar");
+    release?.();
+    expect(new Uint8Array(await (await reading).arrayBuffer())).toEqual(redPng);
     expect(get).toHaveBeenCalledTimes(2);
-    expect(cache.match).toHaveBeenCalledTimes(2);
-    expect(cache.put).not.toHaveBeenCalled();
+    expect(get.mock.calls[0][0]).toBe("avatar/viewer");
+    expect(get.mock.calls[1][0]).toBe(await imageStorageKey(env, "viewer", "avatar"));
+    expect(cache.match).toHaveBeenCalledTimes(1);
   });
+
+  it.each(["legacy", "versioned"] as const)(
+    "bounds retries when the referenced %s object stays missing",
+    async (storage) => {
+      const cache = imageCache();
+      if (storage === "versioned") await uploadImage(upload(), env, "viewer", "avatar");
+      else await env.DB.prepare("UPDATE user SET image='/images/avatar/viewer' WHERE id='viewer'").run();
+      const get = vi.spyOn(env.IMAGES, "get").mockResolvedValue(null);
+      await expect(serveImage(env, "avatar/viewer", "GET", cache)).rejects.toMatchObject({ status: 404 });
+      expect(get).toHaveBeenCalledTimes(2);
+      expect(cache.match).toHaveBeenCalledTimes(storage === "versioned" ? 2 : 0);
+      expect(cache.put).not.toHaveBeenCalled();
+    },
+  );
 
   it("revokes cached page images and old account images even when storage cleanup fails", async () => {
     const cache = imageCache();

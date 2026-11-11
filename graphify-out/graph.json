@@ -18813,7 +18813,7 @@
       "relation": "calls",
       "source": "app_components_streamer_use_board_refresh_useboardrefresh",
       "source_file": "app/components/streamer/use-board-refresh.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "app_components_api_requestjson",
       "weight": 1.0
     },
@@ -35135,7 +35135,19 @@
       "relation": "references",
       "source": "app_components_streamer_use_board_refresh_boardsource",
       "source_file": "app/components/streamer/use-board-refresh.ts",
-      "source_location": "L11",
+      "source_location": "L10",
+      "target": "app_types_sortorder",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_components_streamer_use_board_refresh_boardsource",
+      "source_file": "app/components/streamer/use-board-refresh.ts",
+      "source_location": "L12",
       "target": "app_types_entrystatus",
       "weight": 1.0
     },
@@ -35147,7 +35159,7 @@
       "relation": "references",
       "source": "app_components_streamer_use_board_refresh_boardsource",
       "source_file": "app/components/streamer/use-board-refresh.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_types_boardsnapshot",
       "weight": 1.0
     },
@@ -35159,7 +35171,7 @@
       "relation": "references",
       "source": "app_components_streamer_use_board_refresh_boardsource",
       "source_file": "app/components/streamer/use-board-refresh.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_types_entry",
       "weight": 1.0
     },
@@ -35172,7 +35184,7 @@
       "source": "app_components_streamer_use_board_refresh_boardsource",
       "source_file": "app/components/streamer/use-board-refresh.ts",
       "source_location": "L9",
-      "target": "app_types_sortorder",
+      "target": "app_components_shell_streamer_header_streamerview",
       "weight": 1.0
     },
     {
@@ -47260,6 +47272,18 @@
       "source_file": "app/components/streamer/use-board-refresh.ts",
       "source_location": "L3",
       "target": "app_components_api_requestjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_streamer_use_board_refresh",
+      "source_file": "app/components/streamer/use-board-refresh.ts",
+      "source_location": "L4",
+      "target": "app_components_shell_streamer_header_streamerview",
       "weight": 1.0
     },
     {
@@ -74416,6 +74440,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_components_streamer_use_board_refresh",
+      "source_file": "app/components/streamer/use-board-refresh.ts",
+      "source_location": "L4",
+      "target": "app_components_shell_streamer_header",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_components_streamer_vote_buttons",
       "source_file": "app/components/streamer/vote-buttons.tsx",
       "source_location": "L1",
@@ -94458,7 +94495,7 @@
       "relation": "contains",
       "source": "app_components_streamer_use_board_refresh",
       "source_file": "app/components/streamer/use-board-refresh.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "app_components_streamer_use_board_refresh_useboardrefresh",
       "weight": 1.0
     },
@@ -94469,7 +94506,7 @@
       "relation": "contains",
       "source": "app_components_streamer_use_board_refresh",
       "source_file": "app/components/streamer/use-board-refresh.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_components_streamer_use_board_refresh_boardsource",
       "weight": 1.0
     },
@@ -111559,10 +111596,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "bcabd0d57edb404216923a4a1a5e4d475b2592e14f2e93d5e21806111fe1cc0c",
+    "content_sha256": "663bb4f55a86166bc10e1f13e4c95046ef5d3e747c9ebf0e65b5e5f56621b0d2",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "bb12822a352f18ca98b5ace14850ee909fb124b98b036c82e14e34d05990647d",
+    "source_sha256": "bcf932a81ff0554e750a487ca48d1be3d1989144025ab5ee4d4a51d2c7fb7bec",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -112689,7 +112726,7 @@
       "label": "BoardSource",
       "norm_label": "boardsource",
       "source_file": "app/components/streamer/use-board-refresh.ts",
-      "source_location": "L5"
+      "source_location": "L6"
     },
     {
       "_callable": true,
@@ -122574,7 +122611,7 @@
       "label": "useBoardRefresh()",
       "norm_label": "useboardrefresh()",
       "source_file": "app/components/streamer/use-board-refresh.ts",
-      "source_location": "L14"
+      "source_location": "L15"
     },
     {
       "_callable": true,

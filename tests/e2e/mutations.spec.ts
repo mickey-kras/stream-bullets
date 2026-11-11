@@ -129,7 +129,8 @@ test("deleting an open poll through its card menu returns to the current list", 
   const dialog = page.getByRole("dialog", { name: "Delete poll?", exact: true });
   await dialog.getByRole("button", { name: "Delete poll", exact: true }).click();
   await expect(dialog).not.toBeVisible();
-  await expect(page).toHaveURL(/view=polls$/);
+  await expect(page).not.toHaveURL(/[?&]entry=/);
+  await expect(page).toHaveURL(/[?&]view=polls(?:&|$)/);
   await expect(page.getByRole("heading", { name: "Selected poll to delete", exact: true })).toHaveCount(0);
   const removed = await owner.request.get(`/api/entries/${id}`);
   expect(removed.status()).toBe(404);
