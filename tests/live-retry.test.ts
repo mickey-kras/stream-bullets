@@ -65,8 +65,12 @@ it.each([false, true])("stops after nine failed connections, accepted snapshot: 
   expect(Socket.sockets).toHaveLength(9);
 });
 
-it.each([0, 0.999999])("spreads the first retry within its bounded delay for random %s", (random: number): void => {
-  vi.spyOn(Math, "random").mockReturnValue(random);
+it.each([0, 0xffffffff])("spreads the first retry within its bounded delay for random %s", (random: number): void => {
+  vi.spyOn(crypto, "getRandomValues").mockImplementation(<T extends ArrayBufferView | null>(array: T): T => {
+    if (!(array instanceof Uint32Array)) throw new Error("Expected Uint32Array jitter input");
+    array.fill(random);
+    return array;
+  });
   start();
   current().close();
   vi.advanceTimersByTime(random === 0 ? 499 : 998);
