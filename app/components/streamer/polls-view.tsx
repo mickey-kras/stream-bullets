@@ -195,7 +195,7 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
           </button>
         )}
       </div>
-      {!battle && (
+      {(!battle || live.status !== "live") && (
         <div className="connection-status">
           <output className={offline ? "conn-off" : undefined}>
             <Icon name={live.status === "live" ? "wifi" : "wifi-off"} size={16} />
@@ -207,13 +207,15 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
               {t("live.reconnect")}
             </button>
           )}
-          <IconButton
-            label={t("polls.refresh")}
-            icon="refresh"
-            spin={props.refreshes}
-            disabled={props.refreshing}
-            onClick={props.onRefresh}
-          />
+          {!battle && (
+            <IconButton
+              label={t("polls.refresh")}
+              icon="refresh"
+              spin={props.refreshes}
+              disabled={props.refreshing}
+              onClick={props.onRefresh}
+            />
+          )}
         </div>
       )}
       <div className={`poll-toolbar${selected ? " is-single" : ""}${battle && owner ? " owner-tools" : ""}`}>

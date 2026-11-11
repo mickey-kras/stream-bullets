@@ -52,7 +52,7 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
 /** The owner's second-screen remote for the one OBS overlay URL (item 33). */
 export default function OverlayControlPage(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
-  const { snapshot, status } = useLivePolls(loaded.handle);
+  const { snapshot, status, reconnect } = useLivePolls(loaded.handle);
   const revalidator = useRevalidator();
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
   // Another control tab changed the overlay: reload the full state (the live message has no preview).
@@ -79,6 +79,7 @@ export default function OverlayControlPage(): ReactNode {
           live={liveOverlay}
           hasOverlayKey={loaded.hasOverlayKey}
           connected={status === "live" || status === "connecting"}
+          reconnect={status === "offline" ? reconnect : undefined}
           scene={{ name: loaded.name, handle: loaded.handle, host: loaded.host, polls, data: loaded.data, now }}
         />
       </main>
