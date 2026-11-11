@@ -425,6 +425,8 @@ body:has(.landing-page)::after {
   flex: 1;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
+  width: 100%;
   max-width: 760px;
   padding: 120px 16px 90px max(64px, env(safe-area-inset-left, 0px));
   pointer-events: none;

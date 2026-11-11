@@ -68,35 +68,44 @@ async function openContact(page: Page): Promise<void> {
 }
 
 for (const locale of LOCALES) {
-  for (const width of WIDTHS) {
-    test(`${locale} shared layout and dialogs fit ${width}px`, async ({ page, context }) => {
-      await context.setExtraHTTPHeaders({
-        "CF-Connecting-IP": `198.51.100.${1 + LOCALES.indexOf(locale) * 8 + WIDTHS.indexOf(width)}`,
-      });
-      await page.setViewportSize({ width, height: 900 });
-      await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
-      for (const route of ["/", "/streamers", "/@streambullets", "/privacy"]) {
-        const response = await page.goto(route);
-        expect(response?.ok(), route).toBe(true);
-        await expect(page.locator("main")).toBeVisible();
-        await page.evaluate(() => document.fonts.ready);
-        await expectContained(page.locator("header, main, .site-footer, .page-title, #landing-title"));
-        await expectHeaderFits(page);
-      }
-      await openContact(page);
-      await expectContained(page.locator('[data-sheet="contact"], .contact-address, .contact-links, .sheet-head h2'));
-      await expectReachable(page.locator('[data-sheet="contact"] .modal-close'));
-      await page.locator('[data-sheet="contact"] .modal-close').click();
-      const displayLink: Locator = page.locator('.site-footer a[href*="dialog=a11y"]:visible');
-      await expectReachable(displayLink);
-      await displayLink.click();
-      await expect(page.locator('[data-sheet="a11y"]')).toBeVisible();
-      await expectContained(page.locator('[data-sheet="a11y"], .pref-group, .sheet-head h2'));
-      await expectReachable(page.locator('[data-sheet="a11y"] .sheet-actions .gold'));
-      await page.locator('[data-sheet="a11y"] .sheet-actions .gold').click();
-      await expect(page.locator('[data-sheet="a11y"]')).toHaveCount(0);
+  test(`${locale} shared layout and dialogs fit every viewport`, async ({ page, context }) => {
+    await context.setExtraHTTPHeaders({
+      "CF-Connecting-IP": `198.51.100.${1 + LOCALES.indexOf(locale) * 8}`,
     });
-  }
+    await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
+    for (const route of ["/", "/streamers", "/@streambullets", "/privacy"]) {
+      const response = await page.goto(route);
+      expect(response?.ok(), `${route}: ${response?.status()}`).toBe(true);
+      await expect(page.locator("main")).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      for (const width of WIDTHS) {
+        await test.step(`${route} at ${width}px`, async () => {
+          await page.setViewportSize({ width, height: 900 });
+          await expect(async () => {
+            await expectContained(page.locator("header, main, .site-footer, .page-title, #landing-title"));
+            await expectHeaderFits(page);
+          }).toPass({ timeout: 2_000 });
+        });
+      }
+    }
+    for (const width of WIDTHS) {
+      await test.step(`dialogs at ${width}px`, async () => {
+        await page.setViewportSize({ width, height: 900 });
+        await openContact(page);
+        await expectContained(page.locator('[data-sheet="contact"], .contact-address, .contact-links, .sheet-head h2'));
+        await expectReachable(page.locator('[data-sheet="contact"] .modal-close'));
+        await page.locator('[data-sheet="contact"] .modal-close').click();
+        const displayLink: Locator = page.locator('.site-footer a[href*="dialog=a11y"]:visible');
+        await expectReachable(displayLink);
+        await displayLink.click();
+        await expect(page.locator('[data-sheet="a11y"]')).toBeVisible();
+        await expectContained(page.locator('[data-sheet="a11y"], .pref-group, .sheet-head h2'));
+        await expectReachable(page.locator('[data-sheet="a11y"] .sheet-actions .gold'));
+        await page.locator('[data-sheet="a11y"] .sheet-actions .gold').click();
+        await expect(page.locator('[data-sheet="a11y"]')).toHaveCount(0);
+      });
+    }
+  });
 }
 
 for (const locale of LOCALES) {
