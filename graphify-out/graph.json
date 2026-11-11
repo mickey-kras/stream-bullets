@@ -4413,7 +4413,7 @@
       "relation": "calls",
       "source": "app_components_common_legaldocument",
       "source_file": "app/components/common.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "target": "app_components_shell_site_header_siteheader",
       "weight": 1.0
     },
@@ -4425,7 +4425,7 @@
       "relation": "calls",
       "source": "app_components_common_legaldocument",
       "source_file": "app/components/common.tsx",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "app_components_shell_back_link_backlink",
       "weight": 1.0
     },
@@ -4437,7 +4437,7 @@
       "relation": "calls",
       "source": "app_components_common_legaldocument",
       "source_file": "app/components/common.tsx",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -4449,7 +4449,7 @@
       "relation": "calls",
       "source": "app_components_common_legaldocument",
       "source_file": "app/components/common.tsx",
-      "source_location": "L75",
+      "source_location": "L76",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -4461,8 +4461,20 @@
       "relation": "calls",
       "source": "app_components_common_legaldocument",
       "source_file": "app/components/common.tsx",
-      "source_location": "L76",
+      "source_location": "L77",
       "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_common_legaldocument",
+      "source_file": "app/components/common.tsx",
+      "source_location": "L80",
+      "target": "app_legal_legalplaceholdersremain",
       "weight": 1.0
     },
     {
@@ -21897,8 +21909,20 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L474",
+      "source_location": "L478",
       "target": "app_components_common_legaldocument",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_privacy_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L487",
+      "target": "app_routes_privacy_sections",
       "weight": 1.0
     },
     {
@@ -23409,8 +23433,20 @@
       "relation": "calls",
       "source": "app_routes_terms_terms",
       "source_file": "app/routes/terms.tsx",
-      "source_location": "L247",
+      "source_location": "L251",
       "target": "app_components_common_legaldocument",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_terms_terms",
+      "source_file": "app/routes/terms.tsx",
+      "source_location": "L260",
+      "target": "app_routes_terms_sections",
       "weight": 1.0
     },
     {
@@ -26315,6 +26351,18 @@
       "source_file": "app/server/ip-prefix.ts",
       "source_location": "L34",
       "target": "app_server_ip_prefix_ipv6groups",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_legal_server_legalloader",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L22",
+      "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
     {
@@ -32925,8 +32973,32 @@
       "relation": "calls",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L17",
+      "source_location": "L21",
       "target": "tests_legal_test_render",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L75",
+      "target": "tests_legal_test_loaddetails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_legal_test_loaddetails",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L70",
+      "target": "app_server_legal_server_legalloader",
       "weight": 1.0
     },
     {
@@ -34653,6 +34725,30 @@
       "confidence_score": 1.0,
       "context": "export",
       "relation": "re_exports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L8",
+      "target": "app_server_legal_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "export",
+      "relation": "re_exports",
+      "source": "app_routes_terms",
+      "source_file": "app/routes/terms.tsx",
+      "source_location": "L8",
+      "target": "app_server_legal_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "export",
+      "relation": "re_exports",
       "source": "app_server_api_index",
       "source_file": "app/server/api/index.ts",
       "source_location": "L37",
@@ -35039,7 +35135,7 @@
       "relation": "references",
       "source": "app_env_appcontext",
       "source_file": "app/env.ts",
-      "source_location": "L37",
+      "source_location": "L39",
       "target": "app_i18n_index_locale",
       "weight": 1.0
     },
@@ -38559,7 +38655,7 @@
       "source": "app_components_common",
       "source_file": "app/components/common.tsx",
       "source_location": "L3",
-      "target": "app_legal_legal",
+      "target": "app_legal_legaldetails",
       "weight": 1.0
     },
     {
@@ -50102,8 +50198,32 @@
       "relation": "imports",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
+      "source_location": "L4",
+      "target": "app_legal_legaldetails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
       "source_location": "L5",
       "target": "app_lib_shell_paths",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L6",
+      "target": "app_server_legal_server_legalloader",
       "weight": 1.0
     },
     {
@@ -51266,8 +51386,32 @@
       "relation": "imports",
       "source": "app_routes_terms",
       "source_file": "app/routes/terms.tsx",
+      "source_location": "L4",
+      "target": "app_legal_legaldetails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_terms",
+      "source_file": "app/routes/terms.tsx",
       "source_location": "L5",
       "target": "app_lib_shell_paths",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_terms",
+      "source_file": "app/routes/terms.tsx",
+      "source_location": "L6",
+      "target": "app_server_legal_server_legalloader",
       "weight": 1.0
     },
     {
@@ -55300,6 +55444,66 @@
       "source_file": "app/server/images.server.ts",
       "source_location": "L8",
       "target": "app_server_image_metadata_stripimagemetadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L3",
+      "target": "app_env_appcontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L3",
+      "target": "app_env_appcontext_54cf5bec59a5",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L4",
+      "target": "app_legal_legal",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L4",
+      "target": "app_legal_legaldetails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L5",
+      "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
     {
@@ -63062,6 +63266,42 @@
       "relation": "imports",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
+      "source_location": "L10",
+      "target": "app_env_appcontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L10",
+      "target": "app_env_appcontext_54cf5bec59a5",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L10",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
       "source_location": "L5",
       "target": "app_components_shell_footer_sitefooter",
       "weight": 1.0
@@ -63111,7 +63351,7 @@
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
       "source_location": "L6",
-      "target": "app_legal_legalplaceholdersremain",
+      "target": "app_legal_legaldetails",
       "weight": 1.0
     },
     {
@@ -63136,6 +63376,18 @@
       "source_file": "tests/legal.test.ts",
       "source_location": "L8",
       "target": "app_routes_terms_terms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L9",
+      "target": "app_server_legal_server_legalloader",
       "weight": 1.0
     },
     {
@@ -76308,6 +76560,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L6",
+      "target": "app_server_legal_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_routes_settings",
       "source_file": "app/routes/settings.tsx",
       "source_location": "L1",
@@ -77084,6 +77348,18 @@
       "source_file": "app/routes/terms.tsx",
       "source_location": "L5",
       "target": "app_lib_shell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_terms",
+      "source_file": "app/routes/terms.tsx",
+      "source_location": "L6",
+      "target": "app_server_legal_server",
       "weight": 1.0
     },
     {
@@ -79005,6 +79281,67 @@
       "source_file": "app/server/images.server.ts",
       "source_location": "L8",
       "target": "app_server_image_metadata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L1",
+      "target": "ref_react_router",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L2",
+      "target": "ref_zod",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L3",
+      "target": "app_env",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L4",
+      "target": "app_legal",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L5",
+      "target": "app_server_http_server",
       "weight": 1.0
     },
     {
@@ -83171,6 +83508,18 @@
       "relation": "imports_from",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
+      "source_location": "L10",
+      "target": "app_env",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
       "source_location": "L2",
       "target": "ref_react_dom",
       "weight": 1.0
@@ -83245,6 +83594,18 @@
       "source_file": "tests/legal.test.ts",
       "source_location": "L8",
       "target": "app_routes_terms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L9",
+      "target": "app_server_legal_server",
       "weight": 1.0
     },
     {
@@ -94697,7 +95058,7 @@
       "relation": "contains",
       "source": "app_env",
       "source_file": "app/env.ts",
-      "source_location": "L32",
+      "source_location": "L34",
       "target": "app_env_appcontext",
       "weight": 1.0
     },
@@ -94719,7 +95080,7 @@
       "relation": "contains",
       "source": "app_env",
       "source_file": "app/env.ts",
-      "source_location": "L40",
+      "source_location": "L42",
       "target": "app_env_appcontext_54cf5bec59a5",
       "weight": 1.0
     },
@@ -95027,7 +95388,18 @@
       "relation": "contains",
       "source": "app_legal",
       "source_file": "app/legal.ts",
-      "source_location": "L15",
+      "source_location": "L14",
+      "target": "app_legal_legaldetails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_legal",
+      "source_file": "app/legal.ts",
+      "source_location": "L22",
       "target": "app_legal_legal",
       "weight": 1.0
     },
@@ -95038,7 +95410,7 @@
       "relation": "contains",
       "source": "app_legal",
       "source_file": "app/legal.ts",
-      "source_location": "L23",
+      "source_location": "L30",
       "target": "app_legal_legalplaceholdersremain",
       "weight": 1.0
     },
@@ -97018,7 +97390,18 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L17",
+      "source_location": "L10",
+      "target": "app_routes_privacy_meta",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_privacy",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L20",
       "target": "app_routes_privacy_sections",
       "weight": 1.0
     },
@@ -97029,7 +97412,7 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L472",
+      "source_location": "L475",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -97040,8 +97423,8 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L7",
-      "target": "app_routes_privacy_meta",
+      "source_location": "L8",
+      "target": "app_routes_privacy_loader",
       "weight": 1.0
     },
     {
@@ -97535,7 +97918,18 @@
       "relation": "contains",
       "source": "app_routes_terms",
       "source_file": "app/routes/terms.tsx",
-      "source_location": "L16",
+      "source_location": "L10",
+      "target": "app_routes_terms_meta",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_terms",
+      "source_file": "app/routes/terms.tsx",
+      "source_location": "L19",
       "target": "app_routes_terms_sections",
       "weight": 1.0
     },
@@ -97546,7 +97940,7 @@
       "relation": "contains",
       "source": "app_routes_terms",
       "source_file": "app/routes/terms.tsx",
-      "source_location": "L245",
+      "source_location": "L248",
       "target": "app_routes_terms_terms",
       "weight": 1.0
     },
@@ -97557,8 +97951,8 @@
       "relation": "contains",
       "source": "app_routes_terms",
       "source_file": "app/routes/terms.tsx",
-      "source_location": "L7",
-      "target": "app_routes_terms_meta",
+      "source_location": "L8",
+      "target": "app_routes_terms_loader",
       "weight": 1.0
     },
     {
@@ -100111,6 +100505,28 @@
       "source_file": "app/server/ip-prefix.ts",
       "source_location": "L31",
       "target": "app_server_ip_prefix_visitorprefix",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L16",
+      "target": "app_server_legal_server_legalloader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_legal_server",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L7",
+      "target": "app_server_legal_server_detailsschema",
       "weight": 1.0
     },
     {
@@ -104905,7 +105321,7 @@
       "relation": "contains",
       "source": "readme_local_use",
       "source_file": "README.md",
-      "source_location": "L88",
+      "source_location": "L89",
       "target": "readme_admin_security_keys",
       "weight": 1.0
     },
@@ -104916,7 +105332,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L117",
+      "source_location": "L118",
       "target": "readme_check_a_change",
       "weight": 1.0
     },
@@ -104927,7 +105343,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L135",
+      "source_location": "L136",
       "target": "readme_deploy_to_cloudflare",
       "weight": 1.0
     },
@@ -104949,7 +105365,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L185",
+      "source_location": "L186",
       "target": "readme_prototype_data",
       "weight": 1.0
     },
@@ -104960,7 +105376,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L189",
+      "source_location": "L190",
       "target": "readme_security_and_operating_limits",
       "weight": 1.0
     },
@@ -104971,7 +105387,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L207",
+      "source_location": "L208",
       "target": "readme_legal_pages",
       "weight": 1.0
     },
@@ -104982,7 +105398,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L223",
+      "source_location": "L224",
       "target": "readme_quality_gates",
       "weight": 1.0
     },
@@ -107512,8 +107928,30 @@
       "relation": "contains",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L10",
+      "source_location": "L12",
       "target": "tests_legal_test_render",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L57",
+      "target": "tests_legal_test_publicdetails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_legal_test",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L63",
+      "target": "tests_legal_test_loaddetails",
       "weight": 1.0
     },
     {
@@ -110230,7 +110668,7 @@
       "relation": "indirect_call",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L17",
+      "source_location": "L21",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -110242,7 +110680,7 @@
       "relation": "indirect_call",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L32",
+      "source_location": "L36",
       "target": "app_components_shell_footer_sitefooter",
       "weight": 1.0
     },
@@ -110758,7 +111196,7 @@
       "relation": "indirect_call",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L44",
+      "source_location": "L48",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -110770,7 +111208,7 @@
       "relation": "indirect_call",
       "source": "tests_legal_test",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L44",
+      "source_location": "L48",
       "target": "app_routes_terms_terms",
       "weight": 1.0
     },
@@ -110896,10 +111334,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "9bf8786ee18be6dcb18e86035e91f1c8142b834d778315d1dff1d078bf8f4029",
+    "content_sha256": "7d5866a99826a77ba6aab0638d991d2a92909326fde6c4c0a6e6477d86b74d73",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "87a6667aafbc5da23379b43051c0ab448309f6c0367b59887ebefc0c60909799",
+    "source_sha256": "c9a770c60fcf3ca480cf7185d5b3c0bf9620f4dd606dbe52ce9332d9f60d46f8",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -112182,7 +112620,7 @@
       "label": "AppContext",
       "norm_label": "appcontext",
       "source_file": "app/env.ts",
-      "source_location": "L32"
+      "source_location": "L34"
     },
     {
       "_callable": true,
@@ -112255,6 +112693,18 @@
       "norm_label": "pluralbase",
       "source_file": "app/i18n/index.ts",
       "source_location": "L92"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_legal_legaldetails",
+      "label": "LegalDetails",
+      "norm_label": "legaldetails",
+      "source_file": "app/legal.ts",
+      "source_location": "L14"
     },
     {
       "_callable": true,
@@ -122661,6 +123111,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_legal_legalplaceholdersremain",
+      "label": "legalPlaceholdersRemain()",
+      "norm_label": "legalplaceholdersremain()",
+      "source_file": "app/legal.ts",
+      "source_location": "L30"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_avatars_avatarname",
       "label": "avatarName()",
       "norm_label": "avatarname()",
@@ -123908,7 +124369,7 @@
       "label": "meta()",
       "norm_label": "meta()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L7"
+      "source_location": "L10"
     },
     {
       "_callable": true,
@@ -123919,7 +124380,18 @@
       "label": "Privacy()",
       "norm_label": "privacy()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L472"
+      "source_location": "L475"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_privacy_sections",
+      "label": "sections()",
+      "norm_label": "sections()",
+      "source_file": "app/routes/privacy.tsx",
+      "source_location": "L20"
     },
     {
       "_callable": true,
@@ -124359,7 +124831,18 @@
       "label": "meta()",
       "norm_label": "meta()",
       "source_file": "app/routes/terms.tsx",
-      "source_location": "L7"
+      "source_location": "L10"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_terms_sections",
+      "label": "sections()",
+      "norm_label": "sections()",
+      "source_file": "app/routes/terms.tsx",
+      "source_location": "L19"
     },
     {
       "_callable": true,
@@ -124370,7 +124853,7 @@
       "label": "Terms()",
       "norm_label": "terms()",
       "source_file": "app/routes/terms.tsx",
-      "source_location": "L245"
+      "source_location": "L248"
     },
     {
       "_callable": true,
@@ -126201,6 +126684,17 @@
       "norm_label": "visitorprefix()",
       "source_file": "app/server/ip-prefix.ts",
       "source_location": "L31"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_legal_server_legalloader",
+      "label": "legalLoader()",
+      "norm_label": "legalloader()",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L16"
     },
     {
       "_callable": true,
@@ -130788,11 +131282,33 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_legal_test_loaddetails",
+      "label": "loadDetails()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "set",
+            "file": "tests/legal.test.ts",
+            "lang": "typescript",
+            "line": "L65",
+            "receiver_type": "RouterContextProvider"
+          }
+        ]
+      },
+      "norm_label": "loaddetails()",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L63"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_legal_test_render",
       "label": "render()",
       "norm_label": "render()",
       "source_file": "tests/legal.test.ts",
-      "source_location": "L10"
+      "source_location": "L12"
     },
     {
       "_callable": true,
@@ -133960,7 +134476,7 @@
       "label": "appContext",
       "norm_label": "appcontext",
       "source_file": "app/env.ts",
-      "source_location": "L40"
+      "source_location": "L42"
     },
     {
       "_origin": "ast",
@@ -134091,17 +134607,7 @@
       "label": "legal",
       "norm_label": "legal",
       "source_file": "app/legal.ts",
-      "source_location": "L15"
-    },
-    {
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_legal_legalplaceholdersremain",
-      "label": "legalPlaceholdersRemain",
-      "norm_label": "legalplaceholdersremain",
-      "source_file": "app/legal.ts",
-      "source_location": "L23"
+      "source_location": "L22"
     },
     {
       "_origin": "ast",
@@ -134897,11 +135403,11 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_routes_privacy_sections",
-      "label": "sections",
-      "norm_label": "sections",
+      "id": "app_routes_privacy_loader",
+      "label": "loader",
+      "norm_label": "loader",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L17"
+      "source_location": "L8"
     },
     {
       "_origin": "ast",
@@ -134977,11 +135483,11 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_routes_terms_sections",
-      "label": "sections",
-      "norm_label": "sections",
+      "id": "app_routes_terms_loader",
+      "label": "loader",
+      "norm_label": "loader",
       "source_file": "app/routes/terms.tsx",
-      "source_location": "L16"
+      "source_location": "L8"
     },
     {
       "_origin": "ast",
@@ -135582,6 +136088,26 @@
       "norm_label": "ip-prefix.ts",
       "source_file": "app/server/ip-prefix.ts",
       "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_legal_server",
+      "label": "legal.server.ts",
+      "norm_label": "legal.server.ts",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_legal_server_detailsschema",
+      "label": "detailsSchema",
+      "norm_label": "detailsschema",
+      "source_file": "app/server/legal.server.ts",
+      "source_location": "L7"
     },
     {
       "_origin": "ast",
@@ -138725,6 +139251,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_legal_test_publicdetails",
+      "label": "publicDetails",
+      "norm_label": "publicdetails",
+      "source_file": "tests/legal.test.ts",
+      "source_location": "L57"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_lib_test",
       "label": "lib.test.ts",
       "norm_label": "lib.test.ts",
@@ -139470,7 +140006,7 @@
       "node_kind": "heading",
       "norm_label": "admin security keys",
       "source_file": "README.md",
-      "source_location": "L88"
+      "source_location": "L89"
     },
     {
       "_origin": "ast",
@@ -139492,7 +140028,7 @@
       "node_kind": "heading",
       "norm_label": "check a change",
       "source_file": "README.md",
-      "source_location": "L117"
+      "source_location": "L118"
     },
     {
       "_origin": "ast",
@@ -139503,7 +140039,7 @@
       "node_kind": "heading",
       "norm_label": "deploy to cloudflare",
       "source_file": "README.md",
-      "source_location": "L135"
+      "source_location": "L136"
     },
     {
       "_origin": "ast",
@@ -139514,7 +140050,7 @@
       "node_kind": "heading",
       "norm_label": "legal pages",
       "source_file": "README.md",
-      "source_location": "L207"
+      "source_location": "L208"
     },
     {
       "_origin": "ast",
@@ -139536,7 +140072,7 @@
       "node_kind": "heading",
       "norm_label": "prototype data",
       "source_file": "README.md",
-      "source_location": "L185"
+      "source_location": "L186"
     },
     {
       "_origin": "ast",
@@ -139547,7 +140083,7 @@
       "node_kind": "heading",
       "norm_label": "quality gates",
       "source_file": "README.md",
-      "source_location": "L223"
+      "source_location": "L224"
     },
     {
       "_origin": "ast",
@@ -139558,7 +140094,7 @@
       "node_kind": "heading",
       "norm_label": "security and operating limits",
       "source_file": "README.md",
-      "source_location": "L189"
+      "source_location": "L190"
     },
     {
       "_origin": "ast",
