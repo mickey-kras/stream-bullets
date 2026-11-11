@@ -999,7 +999,7 @@
   "schedule.noStreams": "aucun stream",
   "schedule.noStreamsDay": "Aucun stream ce jour-là.",
   "schedule.noStreamsDayBody": "Consultez le fil pour voir la suite.",
-  "schedule.nothingUpcoming": "Rien d’autre n’est prévu pour l’instant.",
+  "schedule.nothingUpcoming": "Aucun autre stream prévu dans cette plage de dates.",
   "schedule.onAir": "Prévu maintenant",
   "schedule.owner": "Propriétaire",
   "schedule.ownerEmptyBody": "Ajoutez votre prochain stream pour que votre communauté sache quand venir.",

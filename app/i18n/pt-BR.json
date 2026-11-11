@@ -999,7 +999,7 @@
   "schedule.noStreams": "sem lives",
   "schedule.noStreamsDay": "Não há lives neste dia.",
   "schedule.noStreamsDayBody": "Veja a lista para saber o que vem por aí.",
-  "schedule.nothingUpcoming": "Ainda não há mais nada agendado.",
+  "schedule.nothingUpcoming": "Não há outras transmissões agendadas neste intervalo de datas.",
   "schedule.onAir": "Agendado para agora",
   "schedule.owner": "Dono",
   "schedule.ownerEmptyBody": "Adicione sua próxima live para sua comunidade saber quando assistir.",

@@ -984,7 +984,7 @@
   "schedule.noStreams": "无直播",
   "schedule.noStreamsDay": "这一天没有直播。",
   "schedule.noStreamsDayBody": "查看列表了解接下来的直播。",
-  "schedule.nothingUpcoming": "暂时没有其他安排。",
+  "schedule.nothingUpcoming": "此日期范围内没有其他直播安排。",
   "schedule.onAir": "当前计划时段",
   "schedule.owner": "所有者",
   "schedule.ownerEmptyBody": "添加你的下一场直播，让社区知道何时收看。",

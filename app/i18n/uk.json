@@ -1029,7 +1029,7 @@
   "schedule.noStreams": "немає стримів",
   "schedule.noStreamsDay": "Цього дня стримів немає.",
   "schedule.noStreamsDayBody": "Перегляньте стрічку, щоб дізнатися, що далі.",
-  "schedule.nothingUpcoming": "Більше нічого не заплановано.",
+  "schedule.nothingUpcoming": "У цьому діапазоні дат більше трансляцій не заплановано.",
   "schedule.onAir": "За розкладом зараз",
   "schedule.owner": "Власник",
   "schedule.ownerEmptyBody": "Додайте наступний стрим, щоб спільнота знала, коли під’єднатися.",

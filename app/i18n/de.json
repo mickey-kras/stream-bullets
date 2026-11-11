@@ -999,7 +999,7 @@
   "schedule.noStreams": "keine Streams",
   "schedule.noStreamsDay": "An diesem Tag gibt es keine Streams.",
   "schedule.noStreamsDayBody": "Was als Nächstes kommt, steht im Feed.",
-  "schedule.nothingUpcoming": "Sonst ist noch nichts geplant.",
+  "schedule.nothingUpcoming": "Keine weiteren Streams in diesem Zeitraum geplant.",
   "schedule.onAir": "Jetzt geplant",
   "schedule.owner": "Inhaber:in",
   "schedule.ownerEmptyBody": "Trag deinen nächsten Stream ein, damit deine Community weiß, wann sie einschalten kann.",

@@ -984,7 +984,7 @@
   "schedule.noStreams": "配信なし",
   "schedule.noStreamsDay": "この日の配信はありません。",
   "schedule.noStreamsDayBody": "今後の予定はフィードで確認できます。",
-  "schedule.nothingUpcoming": "ほかに予定されている配信はまだありません。",
+  "schedule.nothingUpcoming": "この期間に予定されている配信は他にありません。",
   "schedule.onAir": "現在の配信予定",
   "schedule.owner": "オーナー",
   "schedule.ownerEmptyBody": "次の配信を登録して、視聴のタイミングを知らせましょう。",
