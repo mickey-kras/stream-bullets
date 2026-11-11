@@ -2,22 +2,59 @@ name: Quality gates
 
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      number:
+        description: Pull request number
+        required: true
+        type: string
+      expected_head:
+        description: Generated graph commit
+        required: true
+        type: string
+      base_sha:
+        description: Pull request base commit
+        required: true
+        type: string
   push:
     branches: [main]
 
 permissions:
   contents: read
+  pull-requests: read
   security-events: write
 
 concurrency:
-  group: quality-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
+  revision:
+    name: Validate PR revision
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          script: |
+            const { number, expected_head, base_sha } = context.payload.inputs;
+            if (!/^[1-9][0-9]*$/.test(number) || !/^[a-f0-9]{40}$/.test(expected_head) || !/^[a-f0-9]{40}$/.test(base_sha)) {
+              throw new Error('Invalid PR revision');
+            }
+            const { data: pull } = await github.rest.pulls.get({ ...context.repo, pull_number: Number(number) });
+            if (pull.state !== 'open' || pull.head.sha !== expected_head || context.sha !== expected_head ||
+                context.ref !== `refs/heads/${pull.head.ref}` || pull.base.sha !== base_sha ||
+                pull.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              throw new Error('PR revision changed; discard this run');
+            }
+
   quality:
+    needs: revision
     uses: ./.github/workflows/quality.yml
 
   verify:
+    needs: revision
     name: Verify application
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -138,6 +175,7 @@ jobs:
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/fonts.css --output /dev/null
 
   graphify:
+    needs: revision
     name: Graphify snapshot
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -161,7 +199,7 @@ jobs:
       - name: Check graph against an independent reference
         env:
           GRAPHIFY_BACKEND: none
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.inputs.base_sha || github.event.before }}
         run: python .github/graphify/snapshot.py --check --base "$BASE_SHA"
 
   checks:

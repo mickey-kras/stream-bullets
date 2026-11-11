@@ -3,9 +3,6 @@
 The graph is in `graphify-out/graph.json`. It uses Graphify 0.9.105 with no model calls.
 It includes application code, workers, the TypeScript database schema, tests, and authored Markdown documents.
 
-The tools and workflow arrive in PR #568. Until you merge it, this is a static snapshot.
-The commands below apply after you merge that PR.
-
 ## Automatic updates
 
 When a PR opens or receives commits, the updater checks its graph inputs.
@@ -23,15 +20,14 @@ Automatic writes apply only to branches in this repository. Fork contributors mu
 PRs that change the extractor or its dependencies must also generate the graph locally for review.
 The updater executes trusted tools from the default branch and treats candidate files as data.
 
-## Configure the writer
+## Graph commits
 
-Install a GitHub App on this repository with `Contents: write` and `Pull requests: read` permissions.
-Set the repository variable `GRAPHIFY_APP_CLIENT_ID` and repository secret `GRAPHIFY_APP_PRIVATE_KEY`.
-The write job creates a short-lived token for this repository only.
-It runs separately from extraction and can commit only `graphify-out/graph.json`.
+The updater uses the built-in `GITHUB_TOKEN`. No separate App or Graphify Cloud account is needed.
+The write job runs separately from extraction and changes only `graphify-out/graph.json`.
 
-An App token lets the generated commit start normal PR checks without manual workflow approval.
-The updater becomes active after its workflow and tools reach the default branch.
+After the commit, it starts quality checks for that revision and trusted policy validation.
+Each run rejects a stale PR revision. These checks do not start another graph update.
+The workflow needs write access to repository contents and Actions, plus read access to pull requests.
 
 ## Local update
 

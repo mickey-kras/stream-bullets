@@ -39,4 +39,13 @@ module.exports = async function publish({ github, context, core }) {
     sha: commit.sha,
     force: false,
   });
+  const inputs = { number: String(pull.number), expected_head: commit.sha };
+  // GITHUB_TOKEN writes do not start ordinary CI without approval. Dispatch it explicitly.
+  await github.rest.actions.createWorkflowDispatch({
+    ...context.repo, workflow_id: "ci.yml", ref: pull.head.ref,
+    inputs: { ...inputs, base_sha: pull.base.sha },
+  });
+  await github.rest.actions.createWorkflowDispatch({
+    ...context.repo, workflow_id: "policy-guard.yml", ref: "main", inputs,
+  });
 };

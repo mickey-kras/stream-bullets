@@ -108642,8 +108642,8 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L26",
-      "target": "docs_code_graph_configure_the_writer",
+      "source_location": "L23",
+      "target": "docs_code_graph_graph_commits",
       "weight": 1.0
     },
     {
@@ -108653,7 +108653,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L36",
+      "source_location": "L32",
       "target": "docs_code_graph_local_update",
       "weight": 1.0
     },
@@ -108664,7 +108664,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L55",
+      "source_location": "L51",
       "target": "docs_code_graph_scope_and_queries",
       "weight": 1.0
     },
@@ -108675,7 +108675,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L9",
+      "source_location": "L6",
       "target": "docs_code_graph_automatic_updates",
       "weight": 1.0
     },
@@ -115287,10 +115287,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "54d1413a070b952dbdda08572412fb5bd30fc6ebc0b3a6acfd24d7f8d3ad5186",
+    "content_sha256": "73146ba89b3c5d537de76cd53ea0390e9a6e03455f6654e38e10f3576b681f20",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "37741a1bce769c01352cc5b7941f284f4d94dc21185b0961d783d5a88dda2190",
+    "source_sha256": "2ce4b6d97b559f2f482674a206727b6686e8ea4f126b054cd5eb52cf6165e479",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -144834,18 +144834,18 @@
       "node_kind": "heading",
       "norm_label": "automatic updates",
       "source_file": "docs/code-graph.md",
-      "source_location": "L9"
+      "source_location": "L6"
     },
     {
       "_origin": "ast",
       "community": null,
       "file_type": "document",
-      "id": "docs_code_graph_configure_the_writer",
-      "label": "Configure the writer",
+      "id": "docs_code_graph_graph_commits",
+      "label": "Graph commits",
       "node_kind": "heading",
-      "norm_label": "configure the writer",
+      "norm_label": "graph commits",
       "source_file": "docs/code-graph.md",
-      "source_location": "L26"
+      "source_location": "L23"
     },
     {
       "_origin": "ast",
@@ -144856,7 +144856,7 @@
       "node_kind": "heading",
       "norm_label": "local update",
       "source_file": "docs/code-graph.md",
-      "source_location": "L36"
+      "source_location": "L32"
     },
     {
       "_origin": "ast",
@@ -144878,7 +144878,7 @@
       "node_kind": "heading",
       "norm_label": "scope and queries",
       "source_file": "docs/code-graph.md",
-      "source_location": "L55"
+      "source_location": "L51"
     },
     {
       "_origin": "ast",
