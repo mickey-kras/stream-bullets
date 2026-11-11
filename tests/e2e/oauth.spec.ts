@@ -81,9 +81,7 @@ async function signIn(page: Page, code: string): Promise<Response> {
     page.waitForResponse((response) => new URL(response.url()).pathname === "/api/auth/sign-in/social")
       .then((response: Response): void => { expect(response.status()).toBe(200); }),
     page.waitForResponse((response) => new URL(response.url()).pathname === "/api/auth/callback/twitch"),
-    page.waitForEvent("framenavigated", {
-      predicate: (frame): boolean => frame === page.mainFrame() && new URL(frame.url()).origin === origin,
-    }),
+    page.waitForEvent("domcontentloaded"),
     page.getByRole("button", { name: "Continue with Twitch" }).click(),
   ]);
   const location: string | null = await callbackResponse.headerValue("location");
