@@ -446,13 +446,13 @@ button.danger:hover { background: var(--danger-hover); border-color: var(--error
   .sheet-backdrop { background: var(--sheet-dim); }
 }
 .modal-content.sheet { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
-.sheet-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 12px 12px 32px; border-bottom: 1px solid var(--line); background: var(--modal); }
-.sheet-head h2 { flex: 1; margin: 0; font-size: 30px; line-height: 1.15; }
+.sheet-head { flex-shrink: 0; position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 12px 12px 32px; border-bottom: 1px solid var(--line); background: var(--modal); }
+.sheet-head h2 { flex: 1; min-width: 0; margin: 0; font-size: 1.875rem; line-height: 1.3; }
 .modal-content.sheet .sheet-head .modal-close { position: static; flex: 0 0 auto; }
 .back-step { flex: 0 0 auto; min-height: 40px; padding: 6px 10px; border: 0; background: none; color: var(--gold); font: 600 18px/1 var(--heading); }
 .back-step:hover { background: none; text-decoration: underline; text-underline-offset: 4px; }
 .sheet-head:has(.back-step) { padding-left: 16px; }
-.sheet-body { display: flex; flex-direction: column; gap: 16px; padding: 24px 32px 28px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scroll-padding-bottom: 150px; }
+.sheet-body { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6) var(--space-8); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scroll-padding-bottom: 150px; }
 .sheet-body > :is(p, label, .avatar-preview, .application-status, .upload-field, .avatar-picker, form, .deletion-list, .crop-layout, .crop-zoom, .modal-actions) { margin: 0; }
 .sheet-body p { color: var(--muted); }
 .sheet-body .application-status strong { color: var(--cream); }
@@ -473,7 +473,7 @@ button.danger:hover { background: var(--danger-hover); border-color: var(--error
 @media (max-width:43.75em) {
   .modal-content.sheet { inset: 0; left: 0; top: 0; transform: none; width: 100%; max-height: none; height: 100%; border: 0; border-radius: 0; }
   .sheet-head { padding-left: 20px; min-height: 60px; }
-  .sheet-head h2 { font-size: 26px; }
+  .sheet-head h2 { font-size: 1.625rem; }
   .sheet-body { padding: 20px 20px 28px; flex: 1; }
   .sheet .crop-stage { width: 100%; }
 }
@@ -798,7 +798,7 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .admin-page .page-column > p + .sched-actions { margin-top: 12px; }
 .dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 4px; }
 .modal-content .dialog-head h2 { margin: 0; }
-.modal-content .modal-close, .modal-content.sheet .sheet-head .modal-close { position: static; display: inline-grid; place-items: center; flex: none; width: 40px; height: 40px; min-height: 40px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
+.modal-content .modal-close, .modal-content.sheet .sheet-head .modal-close { position: static; display: inline-grid; place-items: center; flex: none; width: var(--control-size); height: var(--control-size); min-height: var(--control-size); padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
 .modal-content .modal-close:hover { background: var(--btn-hover); color: var(--cream); }
 .modal-content .modal-close svg { width: 20px; height: 20px; }
 @media (max-width:43.75em) {
@@ -1120,7 +1120,7 @@ table.month-grid td { position: relative; vertical-align: top; }
 .landing-start a:hover { color: var(--gold); }
 .nudge-pad { display: grid; grid-template-columns: repeat(3, 40px); gap: 4px; justify-content: center; margin: 14px auto 0; }
 .nudge-pad .icon-button.icon-button.icon-button { width: 40px; height: 40px; min-width: 40px; min-height: 40px; }
-.pref-group { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 14px; margin: 0; min-width: 0; }
+.pref-group { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 0 0 var(--space-4); margin: 0; min-width: 0; }
 .pref-group legend { padding: 0 6px; font: 600 1.125rem var(--heading); text-transform: uppercase; letter-spacing: .5px; }
 .pref-options { display: grid; gap: 8px; }
 .pref-group .choice { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; font-weight: 600; }
@@ -1724,3 +1724,17 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .settings-page search.search { max-width: 600px; }
 /* A dialog opens with focus on its title, without a ring */
 .modal-content h2[tabindex="-1"]:focus { outline: none; box-shadow: none; }
+
+:is(header nav, .header-end, .tabs, .modal-content, .poll-toolbar, .page-title, .info-card, .composer, .votes) :is(button, a.button-link, a.nav-tab), .cselect-trigger { font-family: var(--body); font-size: var(--text-control); line-height: var(--leading-body); text-transform: none; letter-spacing: normal; min-height: var(--control-size); white-space: normal; overflow-wrap: anywhere; }
+:is(.topic-title, .selected .topic-title, .topic-meta, .comment-text, .description) { font-family: var(--body); line-height: var(--leading-body); }
+.sheet-body .pref-group legend { font: 600 var(--text-control)/var(--leading-body) var(--body); text-transform: none; letter-spacing: normal; padding: 0; }
+.pref-group .choice { min-height: var(--control-size); border-color: var(--input-border); border-radius: var(--radius-control); font-size: var(--text-control); }
+.pref-group .choice > span { min-width: 0; overflow-wrap: anywhere; }
+.pref-group .choice small { font-size: var(--text-meta); }
+.pref-group .choice:hover { background: var(--btn-hover); }
+.pref-group .choice:has(:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.modal-content.sheet { border-radius: var(--radius-panel); }
+@media (max-width: 43.75em) {
+  .modal-content.sheet:not(.is-short) { border-radius: 0; }
+  .sheet-body { padding: var(--space-4); }
+}

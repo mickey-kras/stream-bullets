@@ -149,6 +149,22 @@
   --icon-lg: 24px;
   --icon-xl: 40px;
   --icon-gap: .5em;
+  --text-body: 1.125rem;
+  --text-control: 1rem;
+  --text-meta: .875rem;
+  --leading-body: 1.5;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --radius-control: 6px;
+  --radius-panel: 12px;
+  --control-size: 44px;
+  --content-width: 1250px;
 }
 :root[data-cvd=pd] {
   --status-live:#9a7bff;
