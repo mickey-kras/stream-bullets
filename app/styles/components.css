@@ -214,6 +214,9 @@ button.gold:hover { background:var(--gold-hover); }
 .streamer-card { display: flex; gap: 18px; margin-top: 20px; max-width: none; }
 .streamer-card:hover { border-color: var(--gold); }
 .streamer-card .user-avatar { width: 60px; height: 60px; }
+.featured-community { overflow-wrap: anywhere; }
+.featured-community ul { margin: 0; padding-left: 24px; }
+.featured-community li + li { margin-top: 12px; }
 .streamer-card h2 { font-size: 1.75rem; overflow-wrap: anywhere; }
 .streamer-card p { margin: 6px 0; }
 .streamer-bio { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; -webkit-line-clamp: 2; line-clamp: 2; }
