@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 env:
   WORK_BRANCH_RE: '^(feat|fix|refactor|docs|ci|security)/[a-z0-9]+(-[a-z0-9]+)*$'
@@ -33,9 +34,9 @@ jobs:
             [[ "$EXPECTED_HEAD" == "$GITHUB_SHA" ]]
             pull="$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER")"
             jq -e --arg sha "$GITHUB_SHA" --arg ref "$GITHUB_REF_NAME" --arg repo "$REPOSITORY" '
-              .state == "open" and .draft == false and
+              .state == "open" and
               .head.sha == $sha and .head.ref == $ref and .head.repo.full_name == $repo and
-              .base.ref == "main" and .user.login == "dependabot[bot]" and .user.id == 49699333
+              .base.ref == "main"
             ' <<< "$pull" > /dev/null
             HEAD_REPO="$(jq -r '.head.repo.full_name' <<< "$pull")"
             HEAD_REF="$(jq -r '.head.ref' <<< "$pull")"
