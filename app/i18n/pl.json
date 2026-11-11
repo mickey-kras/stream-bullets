@@ -464,6 +464,7 @@
   "error.browseStreamers": "Przeglądaj streamerów",
   "error.notFoundBody": "Ta strona nie istnieje.",
   "error.notFoundTitle": "Nie znaleziono strony",
+  "error.requestId": "Identyfikator żądania: {id}",
   "error.title": "Coś poszło nie tak",
   "footer.accessibility": "Dostępność",
   "footer.ai": "Agenci AI",

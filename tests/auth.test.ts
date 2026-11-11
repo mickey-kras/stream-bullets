@@ -27,7 +27,7 @@ function context(): AppContext {
 async function signedRequest(token: string): Promise<Request> {
   const signature: string = await makeSignature(token, secret);
   return new Request(`${env.APP_ORIGIN}/`, {
-    headers: { cookie: `__Secure-stream-bullets.session_token=${encodeURIComponent(`${token}.${signature}`)}` },
+    headers: { cookie: `__Host-stream-bullets.session_token=${encodeURIComponent(`${token}.${signature}`)}` },
   });
 }
 
@@ -60,9 +60,9 @@ async function seedSession(
 async function oauthCallback(provider: Provider = "twitch", authEnv: AppEnv = env): Promise<Request> {
   const clientAddress: string = `192.0.2.${oauthClient++}`;
   const response: Response = await createAuth(authEnv).handler(
-    new Request(`${env.APP_ORIGIN}/api/auth/sign-in/social`, {
+    new Request(`${authEnv.APP_ORIGIN}/api/auth/sign-in/social`, {
       method: "POST",
-      headers: { origin: env.APP_ORIGIN, "content-type": "application/json", "cf-connecting-ip": clientAddress },
+      headers: { origin: authEnv.APP_ORIGIN, "content-type": "application/json", "cf-connecting-ip": clientAddress },
       body: JSON.stringify({ provider, callbackURL: "/" }),
     }),
   );
@@ -71,7 +71,7 @@ async function oauthCallback(provider: Provider = "twitch", authEnv: AppEnv = en
   const state: string | null = new URL(result.url).searchParams.get("state");
   expect(state).not.toBeNull();
   return new Request(
-    `${env.APP_ORIGIN}/api/auth/callback/${provider}?state=${encodeURIComponent(state ?? "")}&code=test-code`,
+    `${authEnv.APP_ORIGIN}/api/auth/callback/${provider}?state=${encodeURIComponent(state ?? "")}&code=test-code`,
     {
       headers: {
         cookie: response.headers
@@ -297,8 +297,31 @@ describe("OAuth boundary", () => {
       expect(
         response.headers
           .getSetCookie()
-          .some((value: string) => value.startsWith("__Secure-stream-bullets.session_token=")),
+          .some((value: string) => value.startsWith("__Host-stream-bullets.session_token=")),
       ).toBe(false);
+    } finally {
+      restore();
+    }
+  });
+
+  it("keeps local HTTP OAuth sessions usable and expires the same cookie on sign-out", async () => {
+    const localEnv: AppEnv = { ...env, APP_ORIGIN: "http://localhost:5173" };
+    const callback: Request = await oauthCallback("twitch", localEnv);
+    const restore: () => void = stubTwitchIdentity("local-http-viewer", "local-http@example.test");
+    try {
+      const response: Response = await createAuth(localEnv).handler(callback);
+      expect(response.status).toBe(302);
+      const session: string = response.headers.getSetCookie().find((value: string) => value.startsWith("stream-bullets.session_token=")) ?? "";
+      expect(session).toContain("Path=/");
+      expect(session).toContain("HttpOnly");
+      expect(session).toContain("SameSite=Lax");
+      expect(session).not.toMatch(/;\s*Secure/i);
+      const headers = new Headers({ cookie: session.split(";")[0], origin: localEnv.APP_ORIGIN });
+      expect(await getViewer(new Request(localEnv.APP_ORIGIN, { headers }), { ...context(), env: localEnv })).toMatchObject({ name: "Twitch viewer" });
+      const signedOut: Response = await createAuth(localEnv).handler(new Request(`${localEnv.APP_ORIGIN}/api/auth/sign-out`, { method: "POST", headers }));
+      expect(signedOut.status).toBe(200);
+      expect(signedOut.headers.getSetCookie().find((value: string) => value.startsWith("stream-bullets.session_token="))).toContain("Max-Age=0");
+      expect(await getViewer(new Request(localEnv.APP_ORIGIN, { headers }), { ...context(), env: localEnv })).toBeNull();
     } finally {
       restore();
     }
@@ -314,6 +337,10 @@ describe("OAuth boundary", () => {
       );
       expect(response.status).toBe(302);
       expect(new URL(response.headers.get("location") ?? "", env.APP_ORIGIN).href).toBe(`${env.APP_ORIGIN}/`);
+      const hostCookie: string = response.headers.getSetCookie().find((value: string) => value.startsWith("__Host-stream-bullets.session_token=")) ?? "";
+      expect(hostCookie).toMatch(/;\s*Secure/i);
+      expect(hostCookie).toMatch(/;\s*Path=\//i);
+      expect(hostCookie).not.toMatch(/;\s*Domain=/i);
       const record: { access_token: string; refresh_token: string; id_token: string } | null = await env.DB.prepare(
         "SELECT access_token,refresh_token,id_token FROM account WHERE provider_id=? AND account_id=?",
       )
@@ -337,7 +364,7 @@ describe("OAuth boundary", () => {
       expect(
         replay.headers
           .getSetCookie()
-          .some((value: string) => value.startsWith("__Secure-stream-bullets.session_token=")),
+          .some((value: string) => value.startsWith("__Host-stream-bullets.session_token=")),
       ).toBe(false);
     } finally {
       restore();
@@ -436,7 +463,7 @@ describe("OAuth boundary", () => {
       expect(
         response.headers
           .getSetCookie()
-          .some((value: string) => value.startsWith("__Secure-stream-bullets.session_token=")),
+          .some((value: string) => value.startsWith("__Host-stream-bullets.session_token=")),
       ).toBe(false);
     } finally {
       restore();
@@ -457,7 +484,7 @@ describe("OAuth boundary", () => {
       expect(
         response.headers
           .getSetCookie()
-          .some((value: string) => value.startsWith("__Secure-stream-bullets.session_token=")),
+          .some((value: string) => value.startsWith("__Host-stream-bullets.session_token=")),
       ).toBe(false);
     } finally {
       restore();
@@ -491,7 +518,7 @@ describe("OAuth boundary", () => {
     expect(
       response.headers
         .getSetCookie()
-        .some((cookie: string) => cookie.startsWith("__Secure-stream-bullets.session_token=")),
+        .some((cookie: string) => cookie.startsWith("__Host-stream-bullets.session_token=")),
     ).toBe(false);
   });
 

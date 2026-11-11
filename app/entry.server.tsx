@@ -5,9 +5,10 @@ import { requestLocale } from "./i18n/resolve";
 import { withLocale } from "./i18n/server";
 import { NonceContext } from "./lib/nonce";
 import { logError } from "./server/http.server";
+import { requestId } from "./server/route-errors.server";
 
-export const handleError: HandleErrorFunction = (error, { request }) => {
-  if (!request.signal.aborted) logError("server_request_failed", error, request);
+export const handleError: HandleErrorFunction = (error, { request, context }) => {
+  if (!request.signal.aborted) logError("server_request_failed", error, request, requestId(context.get(appContext)));
 };
 
 export default async function handleRequest(
@@ -30,8 +31,8 @@ export default async function handleRequest(
       {
         nonce,
         signal: request.signal,
-        onError() {
-          console.error("render_failed");
+        onError(error: unknown) {
+          logError("render_failed", error, request, requestId(app));
           status = 500;
         },
       },

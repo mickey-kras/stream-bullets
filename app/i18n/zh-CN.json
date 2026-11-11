@@ -428,6 +428,7 @@
   "error.browseStreamers": "浏览主播",
   "error.notFoundBody": "此页面不存在。",
   "error.notFoundTitle": "找不到页面",
+  "error.requestId": "请求 ID：{id}",
   "error.title": "出错了",
   "footer.accessibility": "无障碍",
   "footer.ai": "AI 代理",

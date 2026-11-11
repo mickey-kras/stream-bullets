@@ -464,6 +464,7 @@
   "error.browseStreamers": "Переглянути стримерів",
   "error.notFoundBody": "Цієї сторінки не існує.",
   "error.notFoundTitle": "Сторінку не знайдено",
+  "error.requestId": "Ідентифікатор запиту: {id}",
   "error.title": "Щось пішло не так",
   "footer.accessibility": "Доступність",
   "footer.ai": "ШІ-агенти",

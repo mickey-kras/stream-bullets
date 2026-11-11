@@ -440,6 +440,7 @@
   "error.browseStreamers": "Streamer entdecken",
   "error.notFoundBody": "Diese Seite gibt es nicht.",
   "error.notFoundTitle": "Seite nicht gefunden",
+  "error.requestId": "Anfrage-ID: {id}",
   "error.title": "Etwas ist schiefgelaufen",
   "footer.accessibility": "Barrierefreiheit",
   "footer.ai": "KI-Agenten",
