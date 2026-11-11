@@ -177,7 +177,7 @@ test("a selected Mash Battle reconnects after its retry budget expires and accep
   expect(attempts).toBe(9);
   blocked = false;
   await page.getByRole("button", { name: "Reconnect", exact: true }).click();
-  await expect(page.getByText("Live updates connected", { exact: true })).toBeVisible();
+  await expect(page.locator(".connection-status")).toHaveCount(0);
   expect(attempts).toBe(10);
   await page.clock.resume();
   expect((await owner.request.post(`/api/mash/${id}/start`, { data: { countdown: false } })).status()).toBe(200);

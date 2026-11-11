@@ -195,27 +195,29 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
           </button>
         )}
       </div>
-      <div className="connection-status">
-        <output className={offline ? "conn-off" : undefined}>
-          <Icon name={live.status === "live" ? "wifi" : "wifi-off"} size={16} />
-          {t(liveLabels[live.status])}
-        </output>
-        {offline && (
-          <button type="button" onClick={live.reconnect}>
-            <Icon name="refresh" size={16} />
-            {t("live.reconnect")}
-          </button>
-        )}
-        {!battle && (
-          <IconButton
-            label={t("polls.refresh")}
-            icon="refresh"
-            spin={props.refreshes}
-            disabled={props.refreshing}
-            onClick={props.onRefresh}
-          />
-        )}
-      </div>
+      {(!battle || live.status !== "live") && (
+        <div className="connection-status">
+          <output className={offline ? "conn-off" : undefined}>
+            <Icon name={live.status === "live" ? "wifi" : "wifi-off"} size={16} />
+            {t(liveLabels[live.status])}
+          </output>
+          {offline && (
+            <button type="button" onClick={live.reconnect}>
+              <Icon name="refresh" size={16} />
+              {t("live.reconnect")}
+            </button>
+          )}
+          {!battle && (
+            <IconButton
+              label={t("polls.refresh")}
+              icon="refresh"
+              spin={props.refreshes}
+              disabled={props.refreshing}
+              onClick={props.onRefresh}
+            />
+          )}
+        </div>
+      )}
       <div className={`poll-toolbar${selected ? " is-single" : ""}${battle && owner ? " owner-tools" : ""}`}>
         <PollToolbarStart props={props} battle={battle} phase={phase} />
         {owner && (
