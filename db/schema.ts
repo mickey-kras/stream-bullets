@@ -50,7 +50,7 @@ export const streamers = sqliteTable(
     revision: integer("revision").notNull().default(0),
     /** Page logo (`/images/logo/{ownerId}`). Null falls back to the owner's picture, then the default. */
     logo: text("logo"),
-    /** The official StreamBullets page, pinned first in the directory. Set by an admin, never seeded. */
+    /** Official pages are pinned first in the directory. The system Ideas board is seeded by migration. */
     isOfficial: integer("is_official", { mode: "boolean" }).notNull().default(false),
     /** Last handle change. A handle can change once every 30 days; null until the first change. */
     handleChangedAt: integer("handle_changed_at"),
