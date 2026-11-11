@@ -8,7 +8,7 @@ test("a page without saved cards shows the two defaults", async ({ page }) => {
   const cards = page.locator(".community-card");
   await expect(cards).toHaveCount(2);
   await expect(cards.nth(0)).toContainText("Bring an idea");
-  await expect(cards.nth(1)).toContainText("Have your say live");
+  await expect(cards.nth(1)).toContainText("Explore polls");
   await cards.nth(1).getByRole("link", { name: "Open polls" }).click();
   await expect(page).toHaveURL(/view=polls/);
 });
