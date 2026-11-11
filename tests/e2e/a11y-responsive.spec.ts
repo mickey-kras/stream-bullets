@@ -68,8 +68,15 @@ async function openContact(page: Page): Promise<void> {
 }
 
 for (const locale of LOCALES) {
-  test(`${locale} shared layout and dialogs fit every viewport`, async ({ page, context }) => {
-    test.setTimeout(90_000);
+  test(`${locale} shared fallback layout and dialogs fit every viewport`, async ({ page, context }) => {
+    await page.addInitScript(() => {
+      const original = HTMLCanvasElement.prototype.getContext;
+      Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+        value: function (this: HTMLCanvasElement, contextId: string, options?: unknown): RenderingContext | null {
+          return contextId.startsWith("webgl") ? null : original.call(this, contextId, options);
+        },
+      });
+    });
     await page.setViewportSize({ width: WIDTHS[0], height: 900 });
     await context.setExtraHTTPHeaders({
       "CF-Connecting-IP": `198.51.100.${1 + LOCALES.indexOf(locale) * 8}`,
@@ -79,9 +86,11 @@ for (const locale of LOCALES) {
       const response = await page.goto(route);
       expect(response?.ok(), `${route}: ${response?.status()}`).toBe(true);
       await expect(page.locator("main")).toBeVisible();
+      if (route === "/") await expect(page.locator('.landing-station[data-status="unavailable"]')).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       for (const width of WIDTHS) {
         await test.step(`${route} at ${width}px`, async () => {
+          console.info(`Responsive layout: ${locale} ${route} ${width}px`);
           await page.setViewportSize({ width, height: 900 });
           await page.evaluate(() => new Promise<void>((resolve): void => {
             requestAnimationFrame((): void => {
