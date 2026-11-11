@@ -109188,7 +109188,7 @@
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
       "source_location": "L41",
-      "target": "docs_code_graph_local_update",
+      "target": "docs_code_graph_clone_setup",
       "weight": 1.0
     },
     {
@@ -109209,7 +109209,18 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L60",
+      "source_location": "L75",
+      "target": "docs_code_graph_local_update",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_code_graph_repository_graph",
+      "source_file": "docs/code-graph.md",
+      "source_location": "L94",
       "target": "docs_code_graph_scope_and_queries",
       "weight": 1.0
     },
@@ -115921,10 +115932,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "4415063ad2f5e6b032e7a4a88fca19c8bbfe4314def57c1ab892c640ea7f4f27",
+    "content_sha256": "ceaedee5b9a99c106819d88acf1cfd7c5eb2e926e82386186a374391256615a7",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "4528eac86cdae38a7d60121f1422469b9d6799bf68774c08dff2d64fdfad2c64",
+    "source_sha256": "8c928ec25ceedbe1480f51ee7e98168b2da3379a778c23c5b892848a5881757a",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -145641,6 +145652,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_code_graph_clone_setup",
+      "label": "Clone setup",
+      "node_kind": "heading",
+      "norm_label": "clone setup",
+      "source_file": "docs/code-graph.md",
+      "source_location": "L41"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_code_graph_graph_commits",
       "label": "Graph commits",
       "node_kind": "heading",
@@ -145657,7 +145679,7 @@
       "node_kind": "heading",
       "norm_label": "local update",
       "source_file": "docs/code-graph.md",
-      "source_location": "L41"
+      "source_location": "L75"
     },
     {
       "_origin": "ast",
@@ -145679,7 +145701,7 @@
       "node_kind": "heading",
       "norm_label": "scope and queries",
       "source_file": "docs/code-graph.md",
-      "source_location": "L60"
+      "source_location": "L94"
     },
     {
       "_origin": "ast",
