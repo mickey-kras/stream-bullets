@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { OFFICIAL_BOARD_ID } from "../lib/system";
 import {
   type AdminPage,
   type AdminPageList,
@@ -151,6 +152,8 @@ export async function setOfficial(
   const value = parsed(officialSchema, input);
   parsed(id, streamerId);
   await requireAdmin(env, admin.viewer.id);
+  if (streamerId === OFFICIAL_BOARD_ID && !value.official)
+    throw new HttpError(409, "The system Ideas board must remain official.");
   const flag: number = value.official ? 1 : 0;
   const [updated] = await env.DB.batch([
     env.DB.prepare("UPDATE streamers SET is_official=?, revision=revision+1 WHERE id=? AND is_official<>?").bind(
