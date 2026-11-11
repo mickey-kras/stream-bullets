@@ -4341,7 +4341,19 @@
       "relation": "calls",
       "source": "app_components_api_errormessage",
       "source_file": "app/components/api.ts",
-      "source_location": "L66",
+      "source_location": "L77",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_api_errormessage",
+      "source_file": "app/components/api.ts",
+      "source_location": "L78",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -5767,9 +5779,33 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_components_ideas_idea_dialog_environment",
+      "source_file": "app/components/ideas/idea-dialog.tsx",
+      "source_location": "L29",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L103",
+      "source_location": "L101",
+      "target": "app_components_ui_required_requirednote",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_ideas_idea_dialog_ideadialog",
+      "source_file": "app/components/ideas/idea-dialog.tsx",
+      "source_location": "L105",
       "target": "app_components_ui_required_req",
       "weight": 1.0
     },
@@ -5781,7 +5817,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L144",
+      "source_location": "L146",
       "target": "app_components_ui_dialog_dialogactions",
       "weight": 1.0
     },
@@ -5793,7 +5829,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L146",
+      "source_location": "L148",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -5805,7 +5841,19 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L52",
+      "source_location": "L48",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_ideas_idea_dialog_ideadialog",
+      "source_file": "app/components/ideas/idea-dialog.tsx",
+      "source_location": "L54",
       "target": "app_components_ideas_ideas_categorylabel",
       "weight": 1.0
     },
@@ -5817,7 +5865,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L53",
+      "source_location": "L55",
       "target": "app_components_topic_icon_categoryicon",
       "weight": 1.0
     },
@@ -5829,7 +5877,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L58",
+      "source_location": "L60",
       "target": "app_lib_ideas_isuntouchedtemplate",
       "weight": 1.0
     },
@@ -5841,7 +5889,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L59",
+      "source_location": "L61",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -5853,7 +5901,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L69",
+      "source_location": "L71",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -5865,7 +5913,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L76",
+      "source_location": "L78",
       "target": "app_components_ui_dialog_dialog",
       "weight": 1.0
     },
@@ -5877,7 +5925,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L82",
+      "source_location": "L84",
       "target": "app_components_ideas_idea_dialog_ideadialog_submit",
       "weight": 1.0
     },
@@ -5889,7 +5937,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L87",
+      "source_location": "L89",
       "target": "app_components_ui_select_select",
       "weight": 1.0
     },
@@ -5901,20 +5949,8 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L94",
+      "source_location": "L96",
       "target": "app_components_ideas_idea_dialog_switchtemplate",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_ideas_idea_dialog_ideadialog",
-      "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L99",
-      "target": "app_components_ui_required_requirednote",
       "weight": 1.0
     },
     {
@@ -5925,7 +5961,19 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog_submit",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L58",
+      "source_location": "L60",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_ideas_idea_dialog_ideadialog_submit",
+      "source_file": "app/components/ideas/idea-dialog.tsx",
+      "source_location": "L60",
       "target": "app_lib_ideas_isuntouchedtemplate",
       "weight": 1.0
     },
@@ -5937,7 +5985,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog_submit",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L59",
+      "source_location": "L61",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -5949,7 +5997,7 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog_submit",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L65",
+      "source_location": "L67",
       "target": "app_components_ideas_idea_dialog_environment",
       "weight": 1.0
     },
@@ -5961,8 +6009,20 @@
       "relation": "calls",
       "source": "app_components_ideas_idea_dialog_ideadialog_submit",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L69",
+      "source_location": "L71",
       "target": "app_components_api_errormessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_ideas_idea_dialog_switchtemplate",
+      "source_file": "app/components/ideas/idea-dialog.tsx",
+      "source_location": "L16",
+      "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
     {
@@ -20061,7 +20121,7 @@
       "relation": "calls",
       "source": "app_lib_prefs_savelocalecookie",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "target": "app_lib_prefs_setpreferencecookie",
       "weight": 1.0
     },
@@ -20073,8 +20133,20 @@
       "relation": "calls",
       "source": "app_lib_prefs_saveprefscookie",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L74",
+      "source_location": "L75",
       "target": "app_lib_prefs_setpreferencecookie",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_prefs_setpreferencecookie",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L109",
+      "target": "app_i18n_index_t",
       "weight": 1.0
     },
     {
@@ -32337,7 +32409,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L286",
+      "source_location": "L287",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -32349,7 +32421,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L287",
+      "source_location": "L288",
       "target": "tests_e2e_i18n_spec_shot",
       "weight": 1.0
     },
@@ -32361,7 +32433,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L65",
+      "source_location": "L66",
       "target": "tests_e2e_i18n_spec_inlanguage",
       "weight": 1.0
     },
@@ -35975,7 +36047,7 @@
       "relation": "references",
       "source": "app_lib_prefs_window",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L62",
+      "source_location": "L63",
       "target": "app_types_displayprefs",
       "weight": 1.0
     },
@@ -39459,6 +39531,30 @@
       "source": "app_components_api",
       "source_file": "app/components/api.ts",
       "source_location": "L1",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_api",
+      "source_file": "app/components/api.ts",
+      "source_location": "L1",
+      "target": "app_i18n_index_messageid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_api",
+      "source_file": "app/components/api.ts",
+      "source_location": "L1",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -40538,8 +40634,8 @@
       "relation": "imports",
       "source": "app_components_ideas_idea_dialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L2",
-      "target": "app_i18n_index_t",
+      "source_location": "L12",
+      "target": "app_lib_bug_templates_bug_templates",
       "weight": 1.0
     },
     {
@@ -40550,8 +40646,20 @@
       "relation": "imports",
       "source": "app_components_ideas_idea_dialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L3",
-      "target": "app_lib_ideas_bug_template",
+      "source_location": "L2",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_ideas_idea_dialog",
+      "source_file": "app/components/ideas/idea-dialog.tsx",
+      "source_location": "L2",
+      "target": "app_i18n_index_t",
       "weight": 1.0
     },
     {
@@ -49008,9 +49116,33 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "app_lib_bug_templates",
+      "source_file": "app/lib/bug-templates.ts",
+      "source_location": "L1",
+      "target": "app_i18n_index_locale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "app_lib_ideas",
       "source_file": "app/lib/ideas.ts",
       "source_location": "L1",
+      "target": "app_lib_bug_templates_bug_templates",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_ideas",
+      "source_file": "app/lib/ideas.ts",
+      "source_location": "L2",
       "target": "app_types_entrystatus",
       "weight": 1.0
     },
@@ -49095,7 +49227,7 @@
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L1",
-      "target": "app_i18n_resolve_locale_cookie",
+      "target": "app_i18n_index_t",
       "weight": 1.0
     },
     {
@@ -49107,6 +49239,18 @@
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L2",
+      "target": "app_i18n_resolve_locale_cookie",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_prefs",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L3",
       "target": "app_types_displayprefs",
       "weight": 1.0
     },
@@ -63182,7 +63326,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "target": "tests_e2e_coverage_close",
       "weight": 1.0
     },
@@ -63194,7 +63338,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -63206,7 +63350,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "target": "tests_e2e_coverage_browsercontext",
       "weight": 1.0
     },
@@ -63218,7 +63362,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "target": "tests_e2e_coverage_expect",
       "weight": 1.0
     },
@@ -63230,7 +63374,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "target": "tests_e2e_coverage_page",
       "weight": 1.0
     },
@@ -63242,7 +63386,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
@@ -63254,7 +63398,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_fixtures_origin",
       "weight": 1.0
     },
@@ -63266,7 +63410,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_fixtures_signedin",
       "weight": 1.0
     },
@@ -63278,7 +63422,7 @@
       "relation": "imports",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -66292,6 +66436,162 @@
       "source_file": "tests/live-retry.test.ts",
       "source_location": "L2",
       "target": "app_components_live_uselivepolls",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L2",
+      "target": "app_components_api_apierror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L2",
+      "target": "app_components_api_errormessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L3",
+      "target": "app_components_ideas_idea_dialog_environment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L3",
+      "target": "app_components_ideas_idea_dialog_switchtemplate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L4",
+      "target": "app_i18n_index_intllocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L4",
+      "target": "app_i18n_index_loadcatalog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L4",
+      "target": "app_i18n_index_locale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L4",
+      "target": "app_i18n_index_setlocalesource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L4",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L4",
+      "target": "app_i18n_index_tn",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L4",
+      "target": "db_enums_locales",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L5",
+      "target": "app_lib_bug_templates_bug_templates",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L6",
+      "target": "app_lib_ideas_isuntouchedtemplate",
       "weight": 1.0
     },
     {
@@ -71798,6 +72098,18 @@
       "source_file": "app/components/ideas/idea-dialog.tsx",
       "source_location": "L10",
       "target": "app_components_ideas_ideas",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_ideas_idea_dialog",
+      "source_file": "app/components/ideas/idea-dialog.tsx",
+      "source_location": "L12",
+      "target": "app_lib_bug_templates",
       "weight": 1.0
     },
     {
@@ -77404,9 +77716,34 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_lib_bug_templates",
+      "source_file": "app/lib/bug-templates.ts",
+      "source_location": "L1",
+      "target": "app_i18n_index",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_lib_ideas",
       "source_file": "app/lib/ideas.ts",
       "source_location": "L1",
+      "target": "app_lib_bug_templates",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_ideas",
+      "source_file": "app/lib/ideas.ts",
+      "source_location": "L2",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -77470,7 +77807,7 @@
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L1",
-      "target": "app_i18n_resolve",
+      "target": "app_i18n_index",
       "weight": 1.0
     },
     {
@@ -77482,6 +77819,18 @@
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L2",
+      "target": "app_i18n_resolve",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_prefs",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L3",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -85459,6 +85808,18 @@
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
       "source_location": "L1",
+      "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_i18n_spec",
+      "source_file": "tests/e2e/i18n.spec.ts",
+      "source_location": "L2",
       "target": "tests_e2e_coverage",
       "weight": 1.0
     },
@@ -85470,7 +85831,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_fixtures",
       "weight": 1.0
     },
@@ -85482,7 +85843,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "target": "tests_e2e_client_ips",
       "weight": 1.0
     },
@@ -87400,6 +87761,78 @@
       "source_file": "tests/live-retry.test.ts",
       "source_location": "L2",
       "target": "app_components_live",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L2",
+      "target": "app_components_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L3",
+      "target": "app_components_ideas_idea_dialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L4",
+      "target": "app_i18n_index",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L5",
+      "target": "app_lib_bug_templates",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_localization_context_test",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L6",
+      "target": "app_lib_ideas",
       "weight": 1.0
     },
     {
@@ -91632,6 +92065,17 @@
       "source": "app_components_api",
       "source_file": "app/components/api.ts",
       "source_location": "L65",
+      "target": "app_components_api_statusmessages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_api",
+      "source_file": "app/components/api.ts",
+      "source_location": "L76",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -92137,17 +92581,6 @@
       "relation": "contains",
       "source": "app_components_ideas_idea_dialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L12",
-      "target": "app_components_ideas_idea_dialog_template",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_ideas_idea_dialog",
-      "source_file": "app/components/ideas/idea-dialog.tsx",
       "source_location": "L15",
       "target": "app_components_ideas_idea_dialog_switchtemplate",
       "weight": 1.0
@@ -92159,7 +92592,7 @@
       "relation": "contains",
       "source": "app_components_ideas_idea_dialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L26",
+      "source_location": "L28",
       "target": "app_components_ideas_idea_dialog_environment",
       "weight": 1.0
     },
@@ -92170,7 +92603,7 @@
       "relation": "contains",
       "source": "app_components_ideas_idea_dialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L32",
+      "source_location": "L34",
       "target": "app_components_ideas_idea_dialog_ideadialog",
       "weight": 1.0
     },
@@ -92181,7 +92614,7 @@
       "relation": "contains",
       "source": "app_components_ideas_idea_dialog_ideadialog",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L56",
+      "source_location": "L58",
       "target": "app_components_ideas_idea_dialog_ideadialog_submit",
       "weight": 1.0
     },
@@ -99175,6 +99608,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "app_lib_bug_templates",
+      "source_file": "app/lib/bug-templates.ts",
+      "source_location": "L3",
+      "target": "app_lib_bug_templates_bug_templates",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "app_lib_clipboard",
       "source_file": "app/lib/clipboard.ts",
       "source_location": "L2",
@@ -99353,7 +99797,7 @@
       "relation": "contains",
       "source": "app_lib_ideas",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L11",
+      "source_location": "L12",
       "target": "app_lib_ideas_bug_template",
       "weight": 1.0
     },
@@ -99364,7 +99808,7 @@
       "relation": "contains",
       "source": "app_lib_ideas",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "app_lib_ideas_isuntouchedtemplate",
       "weight": 1.0
     },
@@ -99375,7 +99819,7 @@
       "relation": "contains",
       "source": "app_lib_ideas",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "app_lib_ideas_new_idea_status",
       "weight": 1.0
     },
@@ -99386,7 +99830,7 @@
       "relation": "contains",
       "source": "app_lib_ideas",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "target": "app_lib_ideas_topic_categories",
       "weight": 1.0
     },
@@ -99397,7 +99841,7 @@
       "relation": "contains",
       "source": "app_lib_ideas",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_lib_ideas_idea_categories",
       "weight": 1.0
     },
@@ -99408,7 +99852,7 @@
       "relation": "contains",
       "source": "app_lib_ideas",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_lib_ideas_ideacategory",
       "weight": 1.0
     },
@@ -99760,7 +100204,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L116",
+      "source_location": "L117",
       "target": "app_lib_prefs_listeners",
       "weight": 1.0
     },
@@ -99771,7 +100215,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L118",
+      "source_location": "L119",
       "target": "app_lib_prefs_setchangedprefs",
       "weight": 1.0
     },
@@ -99782,7 +100226,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L123",
+      "source_location": "L124",
       "target": "app_lib_prefs_subscribeprefs",
       "weight": 1.0
     },
@@ -99793,7 +100237,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L130",
+      "source_location": "L131",
       "target": "app_lib_prefs_changedprefs",
       "weight": 1.0
     },
@@ -99804,7 +100248,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "app_lib_prefs_withdefaults",
       "weight": 1.0
     },
@@ -99815,7 +100259,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_lib_prefs_prefs_script",
       "weight": 1.0
     },
@@ -99826,7 +100270,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_lib_prefs_prefs_cookie",
       "weight": 1.0
     },
@@ -99837,7 +100281,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L61",
+      "source_location": "L62",
       "target": "app_lib_prefs_window",
       "weight": 1.0
     },
@@ -99848,7 +100292,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "app_lib_prefs_applyprefs",
       "weight": 1.0
     },
@@ -99859,7 +100303,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "app_lib_prefs_saveprefscookie",
       "weight": 1.0
     },
@@ -99870,18 +100314,7 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L8",
-      "target": "app_lib_prefs_default_prefs",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_prefs",
-      "source_file": "app/lib/prefs.ts",
-      "source_location": "L81",
+      "source_location": "L82",
       "target": "app_lib_prefs_savelocalecookie",
       "weight": 1.0
     },
@@ -99892,7 +100325,18 @@
       "relation": "contains",
       "source": "app_lib_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L89",
+      "source_location": "L9",
+      "target": "app_lib_prefs_default_prefs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_prefs",
+      "source_file": "app/lib/prefs.ts",
+      "source_location": "L90",
       "target": "app_lib_prefs_setpreferencecookie",
       "weight": 1.0
     },
@@ -109361,6 +109805,83 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L1",
+      "target": "docs_localization_localization",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_localization_localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L11",
+      "target": "docs_localization_glossary",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_localization_localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L3",
+      "target": "docs_localization_scope_and_tone",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_localization_localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L31",
+      "target": "docs_localization_roadmap_statuses",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_localization_localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L50",
+      "target": "docs_localization_reports_and_errors",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_localization_localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L61",
+      "target": "docs_localization_legal_translation_gaps",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_localization_localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L67",
+      "target": "docs_localization_verification_and_native_review",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "docs_platform_concept",
       "source_file": "docs/platform-concept.md",
       "source_location": "L1",
@@ -110595,7 +111116,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "tests_e2e_i18n_spec_shot",
       "weight": 1.0
     },
@@ -110606,7 +111127,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -110617,7 +111138,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L177",
+      "source_location": "L178",
       "target": "tests_e2e_i18n_spec_phonescreen",
       "weight": 1.0
     },
@@ -110628,7 +111149,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L184",
+      "source_location": "L185",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -110639,7 +111160,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L187",
+      "source_location": "L188",
       "target": "tests_e2e_i18n_spec_phonescreens",
       "weight": 1.0
     },
@@ -110650,7 +111171,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "tests_e2e_i18n_spec_inlanguage",
       "weight": 1.0
     },
@@ -115675,7 +116196,7 @@
       "relation": "indirect_call",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L243",
+      "source_location": "L244",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -115921,10 +116442,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "5a167cd998d4823f49f96c64765f585a07fda0c41680f520b5c500dcbd814aae",
+    "content_sha256": "1a5fb3b9164c10930edac4703437b67bf2bfc209d390b821a15583664f10f147",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "bab24af6c762a838a35983979b873421b63eca8ed75aa4fcdda404d3c1171e65",
+    "source_sha256": "7d4425faea04e0f5c37de72923ff5640e9771e5544cd3cb3bf45053a7e66087f",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -117378,7 +117899,7 @@
       "label": "IdeaCategory",
       "norm_label": "ideacategory",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "_callable": true,
@@ -117426,7 +117947,7 @@
       "label": "Window",
       "norm_label": "window",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L61"
+      "source_location": "L62"
     },
     {
       "_callable": true,
@@ -119898,7 +120419,7 @@
       "label": "PhoneScreen",
       "norm_label": "phonescreen",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L177"
+      "source_location": "L178"
     },
     {
       "_callable": true,
@@ -121385,7 +121906,7 @@
       "label": "errorMessage()",
       "norm_label": "errormessage()",
       "source_file": "app/components/api.ts",
-      "source_location": "L65"
+      "source_location": "L76"
     },
     {
       "_callable": true,
@@ -121825,7 +122346,7 @@
       "label": "environment()",
       "norm_label": "environment()",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L26"
+      "source_location": "L28"
     },
     {
       "_callable": true,
@@ -121836,7 +122357,7 @@
       "label": "IdeaDialog()",
       "norm_label": "ideadialog()",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L32"
+      "source_location": "L34"
     },
     {
       "_callable": true,
@@ -121847,7 +122368,7 @@
       "label": "submit()",
       "norm_label": "submit()",
       "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L56"
+      "source_location": "L58"
     },
     {
       "_callable": true,
@@ -128071,7 +128592,7 @@
       "label": "isUntouchedTemplate()",
       "norm_label": "isuntouchedtemplate()",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L14"
+      "source_location": "L15"
     },
     {
       "_callable": true,
@@ -128214,7 +128735,7 @@
       "label": "applyPrefs()",
       "norm_label": "applyprefs()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L67"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -128225,7 +128746,7 @@
       "label": "changedPrefs()",
       "norm_label": "changedprefs()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L130"
+      "source_location": "L131"
     },
     {
       "_callable": true,
@@ -128236,7 +128757,7 @@
       "label": "saveLocaleCookie()",
       "norm_label": "savelocalecookie()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L81"
+      "source_location": "L82"
     },
     {
       "_callable": true,
@@ -128247,7 +128768,7 @@
       "label": "savePrefsCookie()",
       "norm_label": "saveprefscookie()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L72"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -128258,7 +128779,7 @@
       "label": "setChangedPrefs()",
       "norm_label": "setchangedprefs()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L118"
+      "source_location": "L119"
     },
     {
       "_callable": true,
@@ -128269,7 +128790,7 @@
       "label": "setPreferenceCookie()",
       "norm_label": "setpreferencecookie()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L89"
+      "source_location": "L90"
     },
     {
       "_callable": true,
@@ -128280,7 +128801,7 @@
       "label": "subscribePrefs()",
       "norm_label": "subscribeprefs()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L123"
+      "source_location": "L124"
     },
     {
       "_callable": true,
@@ -128291,7 +128812,7 @@
       "label": "withDefaults()",
       "norm_label": "withdefaults()",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_callable": true,
@@ -134645,14 +135166,14 @@
             "callee": "locator",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L185",
+            "line": "L186",
             "receiver_type": "Page"
           }
         ]
       },
       "norm_label": "headeraction()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L184"
+      "source_location": "L185"
     },
     {
       "_callable": true,
@@ -134667,14 +135188,14 @@
             "callee": "addCookies",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L9",
+            "line": "L10",
             "receiver_type": "BrowserContext"
           }
         ]
       },
       "norm_label": "inlanguage()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "_callable": true,
@@ -134689,28 +135210,28 @@
             "callee": "evaluate",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L142",
+            "line": "L143",
             "receiver_type": "Page"
           },
           {
             "callee": "checkVisibility",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L158",
+            "line": "L159",
             "receiver_type": "Element"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L159",
+            "line": "L160",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "phoneproblems()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L141"
+      "source_location": "L142"
     },
     {
       "_callable": true,
@@ -134725,21 +135246,21 @@
             "callee": "waitForLoadState",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L15",
+            "line": "L16",
             "receiver_type": "Page"
           },
           {
             "callee": "screenshot",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L17",
+            "line": "L18",
             "receiver_type": "Page"
           }
         ]
       },
       "norm_label": "shot()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "_callable": true,
@@ -138061,6 +138582,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_api_statusmessages",
+      "label": "statusMessages",
+      "norm_label": "statusmessages",
+      "source_file": "app/components/api.ts",
+      "source_location": "L65"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_common",
       "label": "common.tsx",
       "norm_label": "common.tsx",
@@ -138216,16 +138747,6 @@
       "norm_label": "idea-dialog.tsx",
       "source_file": "app/components/ideas/idea-dialog.tsx",
       "source_location": "L1"
-    },
-    {
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_components_ideas_idea_dialog_template",
-      "label": "template",
-      "norm_label": "template",
-      "source_file": "app/components/ideas/idea-dialog.tsx",
-      "source_location": "L12"
     },
     {
       "_origin": "ast",
@@ -139882,6 +140403,26 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_bug_templates",
+      "label": "bug-templates.ts",
+      "norm_label": "bug-templates.ts",
+      "source_file": "app/lib/bug-templates.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_bug_templates_bug_templates",
+      "label": "BUG_TEMPLATES",
+      "norm_label": "bug_templates",
+      "source_file": "app/lib/bug-templates.ts",
+      "source_location": "L3"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_clipboard",
       "label": "clipboard.ts",
       "norm_label": "clipboard.ts",
@@ -139966,7 +140507,7 @@
       "label": "BUG_TEMPLATE",
       "norm_label": "bug_template",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L11"
+      "source_location": "L12"
     },
     {
       "_origin": "ast",
@@ -139976,7 +140517,7 @@
       "label": "IDEA_CATEGORIES",
       "norm_label": "idea_categories",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L7"
+      "source_location": "L8"
     },
     {
       "_origin": "ast",
@@ -139986,7 +140527,7 @@
       "label": "NEW_IDEA_STATUS",
       "norm_label": "new_idea_status",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_origin": "ast",
@@ -139996,7 +140537,7 @@
       "label": "TOPIC_CATEGORIES",
       "norm_label": "topic_categories",
       "source_file": "app/lib/ideas.ts",
-      "source_location": "L4"
+      "source_location": "L5"
     },
     {
       "_origin": "ast",
@@ -140226,7 +140767,7 @@
       "label": "DEFAULT_PREFS",
       "norm_label": "default_prefs",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "_origin": "ast",
@@ -140236,7 +140777,7 @@
       "label": "listeners",
       "norm_label": "listeners",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L116"
+      "source_location": "L117"
     },
     {
       "_origin": "ast",
@@ -140246,7 +140787,7 @@
       "label": "PREFS_COOKIE",
       "norm_label": "prefs_cookie",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L5"
+      "source_location": "L6"
     },
     {
       "_origin": "ast",
@@ -140256,7 +140797,7 @@
       "label": "PREFS_SCRIPT",
       "norm_label": "prefs_script",
       "source_file": "app/lib/prefs.ts",
-      "source_location": "L31"
+      "source_location": "L32"
     },
     {
       "_origin": "ast",
@@ -143756,35 +144297,42 @@
             "callee": "goto",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L29",
+            "line": "L30",
             "receiver_type": "Page"
           },
           {
             "callee": "locator",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L31",
+            "line": "L32",
             "receiver_type": "Page"
           },
           {
             "callee": "getByRole",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L33",
+            "line": "L34",
             "receiver_type": "Page"
           },
           {
             "callee": "cookies",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L48",
+            "line": "L49",
             "receiver_type": "BrowserContext"
           },
           {
             "callee": "waitForResponse",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L59",
+            "line": "L60",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "url",
+            "file": "tests/e2e/i18n.spec.ts",
+            "lang": "typescript",
+            "line": "L310",
             "receiver_type": "Page"
           }
         ]
@@ -143801,7 +144349,7 @@
       "label": "phoneScreens",
       "norm_label": "phonescreens",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L187"
+      "source_location": "L188"
     },
     {
       "_origin": "ast",
@@ -145010,6 +145558,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_localization_context_test",
+      "label": "localization-context.test.ts",
+      "norm_label": "localization-context.test.ts",
+      "source_file": "tests/localization-context.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_mash_test",
       "label": "mash.test.ts",
       "norm_label": "mash.test.ts",
@@ -145856,6 +146414,94 @@
       "norm_label": "workload",
       "source_file": "docs/live-room-capacity.md",
       "source_location": "L30"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_localization",
+      "label": "localization.md",
+      "node_kind": "page",
+      "norm_label": "localization.md",
+      "source_file": "docs/localization.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_localization_glossary",
+      "label": "Glossary",
+      "node_kind": "heading",
+      "norm_label": "glossary",
+      "source_file": "docs/localization.md",
+      "source_location": "L11"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_localization_legal_translation_gaps",
+      "label": "Legal translation gaps",
+      "node_kind": "heading",
+      "norm_label": "legal translation gaps",
+      "source_file": "docs/localization.md",
+      "source_location": "L61"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_localization_localization",
+      "label": "Localization",
+      "node_kind": "heading",
+      "norm_label": "localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_localization_reports_and_errors",
+      "label": "Reports and errors",
+      "node_kind": "heading",
+      "norm_label": "reports and errors",
+      "source_file": "docs/localization.md",
+      "source_location": "L50"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_localization_roadmap_statuses",
+      "label": "Roadmap statuses",
+      "node_kind": "heading",
+      "norm_label": "roadmap statuses",
+      "source_file": "docs/localization.md",
+      "source_location": "L31"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_localization_scope_and_tone",
+      "label": "Scope and tone",
+      "node_kind": "heading",
+      "norm_label": "scope and tone",
+      "source_file": "docs/localization.md",
+      "source_location": "L3"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_localization_verification_and_native_review",
+      "label": "Verification and native review",
+      "node_kind": "heading",
+      "norm_label": "verification and native review",
+      "source_file": "docs/localization.md",
+      "source_location": "L67"
     },
     {
       "_origin": "ast",
