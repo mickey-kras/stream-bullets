@@ -440,6 +440,7 @@
   "error.browseStreamers": "स्ट्रीमर देखें",
   "error.notFoundBody": "यह पेज मौजूद नहीं है।",
   "error.notFoundTitle": "पेज नहीं मिला",
+  "error.requestId": "अनुरोध ID: {id}",
   "error.title": "कुछ गड़बड़ हो गई",
   "footer.accessibility": "सुगम्यता",
   "footer.ai": "AI एजेंट",

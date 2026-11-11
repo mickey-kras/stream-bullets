@@ -381,7 +381,7 @@ const sections: readonly LegalSection[] = [
             <tbody>
               <tr>
                 <td>
-                  <code>__Secure-stream-bullets.session_token</code>
+                  <code>__Host-stream-bullets.session_token</code>
                 </td>
                 <td>Keeps you signed in. HTTP-only, so page scripts cannot read it.</td>
                 <td>7 days, renewed while you use the site. Deleted when you sign out.</td>
@@ -424,7 +424,7 @@ const sections: readonly LegalSection[] = [
           </table>
         </div>
         <p>
-          On local development servers the cookie names have no <code>__Secure-</code> prefix. On phones that ask for
+          On local HTTP development servers the cookie names have no <code>__Host-</code> or <code>__Secure-</code> prefix. On phones that ask for
           motion access, the home page stores <code>stream-bullets:tilt-declined</code> in your browser’s local storage
           if you refuse, so it does not ask again. Pages also keep <code>sb.lastContent</code> in session storage, the
           last streamer page you visited, for the back link. Neither leaves your device. You can clear them with your

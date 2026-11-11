@@ -123,16 +123,17 @@ function stackFrames(error: Error): string[] {
 }
 
 /** Logs an unexpected error so it can be diagnosed: its class, its stack frames and the Cloudflare Ray ID. */
-export function logError(event: string, error: unknown, request?: Request): void {
+export function logError(event: string, error: unknown, request?: Request, requestId?: string): void {
   const frames: string[] = error instanceof Error ? stackFrames(error) : [];
   console.error(event, {
     cause: error instanceof Error ? error.name : typeof error,
     frames,
     ray: request?.headers.get("CF-Ray") ?? null,
+    ...(requestId ? { requestId } : {}),
   });
 }
 
-export function errorResponse(error: unknown, request?: Request): Response {
+export function errorResponse(error: unknown, request?: Request, requestId?: string): Response {
   if (error instanceof HttpError) {
     const response = json(
       error.code ? { error: error.message, code: error.code } : { error: error.message },
@@ -141,10 +142,10 @@ export function errorResponse(error: unknown, request?: Request): Response {
     if (error.status === 429) response.headers.set("Retry-After", "60");
     return response;
   }
-  logError("request_failed", error, request);
+  logError("request_failed", error, request, requestId);
   const ray: string | null = request?.headers.get("CF-Ray") ?? null;
   return json(
-    ray ? { error: "The request failed. Please try again.", ray } : { error: "The request failed. Please try again." },
+    { error: "The request failed. Please try again.", ...(ray ? { ray } : {}), ...(requestId ? { requestId } : {}) },
     500,
   );
 }

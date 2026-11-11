@@ -1,3 +1,5 @@
+export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
+import { withRouteErrors } from "../server/route-errors.server";
 import { useState, type ReactNode } from "react";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
 import { announce } from "../components/a11y/announcer";
@@ -14,9 +16,9 @@ export function meta() {
   return [{ title: `${t("ai.title")} · StreamBullets` }, { name: "description", content: t("ai.lead") }];
 }
 
-export async function loader({ request, context }: LoaderFunctionArgs): Promise<AiInterestStatus> {
+export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs): Promise<AiInterestStatus> => {
   return aiInterestStatus(context.get(appContext).env, request, Date.now());
-}
+});
 
 const ALLOWED: readonly MessageId[] = ["ai.can1", "ai.can2", "ai.can3"];
 const NOT_YET: readonly MessageId[] = ["ai.not1", "ai.not2", "ai.not3", "ai.not4"];

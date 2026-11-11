@@ -440,6 +440,7 @@
   "error.browseStreamers": "Browse streamers",
   "error.notFoundBody": "This page does not exist.",
   "error.notFoundTitle": "Page not found",
+  "error.requestId": "Request ID: {id}",
   "error.title": "Something went wrong",
   "footer.accessibility": "Accessibility",
   "footer.ai": "AI agents",
