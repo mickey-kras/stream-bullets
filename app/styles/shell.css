@@ -75,11 +75,11 @@ header nav [aria-current=page] { background:linear-gradient(110deg,var(--gold-hi
 .site-header { z-index: 3; }
 .brand .brand-avatar { width: 76px; height: 76px; font-size: 2.625rem; border: 3px solid var(--cream); }
 .profile .user-avatar { width: 40px; height: 40px; }
-.site-header nav a:not(.nav-tab) { display: inline-flex; justify-content: center; align-items: center; min-height: 44px; padding: 10px 12px; font: 600 1.25rem Oswald,sans-serif; text-transform: uppercase; }
+.site-header nav a:not(.nav-tab) { display: inline-flex; justify-content: center; align-items: center; min-height: 44px; padding: 10px 12px; font: 600 var(--text-control)/var(--leading-body) var(--body); text-transform: none; }
 .compact-nav-label { display: none; }
 .page-panel > p { max-width: 900px; }
 @media(max-width:1050px) {
-  .site-header nav a:not(.nav-tab) { font-size: 1.125rem; }
+  .site-header nav a:not(.nav-tab) { font-size: var(--text-control); }
 }
 @media(max-width:700px) {
   .site-header .brand .brand-avatar { width: 64px; height: 64px; font-size: 2rem; }
@@ -141,7 +141,7 @@ body:not(:has(.landing-page)) > .site-footer a:focus-visible { outline: 2px soli
   .generic-header { padding: 0 6px; column-gap: 6px; }
   .generic-header .brand { width: 92px; height: 64px; }
   .generic-header nav { display: flex; gap: 2px; }
-  .generic-header nav a { font-size: 16px; padding: 8px; min-height: 44px; }
+  .generic-header nav a { font-size: var(--text-control); padding: 8px; min-height: 44px; }
   .generic-header .nav-optional { display: none; }
   .generic-header .header-end > button { font-size: 14px; padding: 8px; }
   .back-link { min-height: 44px; margin-bottom: 0; }
@@ -173,7 +173,7 @@ header nav button { gap: 8px; }
 @media (max-width:35em) {
   .streamer-header nav :is(button, a.nav-tab) { flex-direction: column; gap: 4px; padding: 6px 2px; }
   .streamer-header nav :is(button, a.nav-tab) svg.icon { width: 20px; height: 20px; }
-  .site-header nav .compact-nav-label { font-size: 12px; }
+  .site-header nav .compact-nav-label { font-size: var(--text-meta); }
 }
 @media (max-width:30em) {
   .header-end .suggest-plus svg.icon { width: 22px; height: 22px; }
@@ -222,7 +222,7 @@ header nav button { gap: 8px; }
 a.nav-tab { border: 1px solid transparent; border-radius: 7px; text-decoration: none; }
 a.nav-tab:hover { border-color: var(--gold); }
 @media (max-width: 35em) {
-  .site-header nav .compact-nav-label { font-size: 0.6875rem; }
+  .site-header nav .compact-nav-label { font-size: var(--text-meta); }
 }
 @media (max-width: 43.75em) {
   body:not(:has(.landing-page)) > .site-footer nav { overflow: visible; justify-content: center; }
