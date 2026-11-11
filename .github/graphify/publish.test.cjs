@@ -11,6 +11,8 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
     const directory = mkdtempSync(join(tmpdir(), "graph-publish-"));
     const expected = { number: 1, head: { sha: "source" } };
     const pull = {
+      number: 1,
+      base: { sha: "base" },
       state: scenario === "closed" ? "closed" : "open",
       head: {
         sha: scenario === "superseded" ? "new" : "source",
@@ -20,8 +22,10 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
     };
     let reads = 0;
     const updates = [];
+    const dispatches = [];
     const github = {
       rest: {
+        actions: { createWorkflowDispatch: async (args) => { dispatches.push(args); } },
         pulls: {
           get: async () => ({
             data: ++reads === 2 && scenario === "raced" ? { ...pull, head: { ...pull.head, sha: "new" } } : pull,
@@ -60,6 +64,12 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
       if (scenario === "push-race") await assert.rejects(result, /fast forward/);
       else await result;
       assert.equal(updates.length, scenario === "current" ? 1 : 0);
+      assert.deepEqual(dispatches, scenario === "current" ? [
+        { owner: "owner", repo: "repo", workflow_id: "ci.yml", ref: "feat/example",
+          inputs: { number: "1", expected_head: "generated", base_sha: "base" } },
+        { owner: "owner", repo: "repo", workflow_id: "policy-guard.yml", ref: "main",
+          inputs: { number: "1", expected_head: "generated" } },
+      ] : []);
     } finally {
       process.chdir(original);
       rmSync(directory, { recursive: true });

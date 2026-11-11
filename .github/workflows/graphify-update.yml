@@ -64,6 +64,10 @@ jobs:
 
   publish:
     needs: build
+    permissions:
+      contents: write
+      pull-requests: read
+      actions: write
     if: needs.build.outputs.changed == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -80,20 +84,7 @@ jobs:
         with:
           name: graph-${{ github.event.pull_request.head.sha }}
           path: graph-artifact
-      - name: Require graph writer configuration
-        env:
-          CLIENT_ID: ${{ vars.GRAPHIFY_APP_CLIENT_ID }}
-          PRIVATE_KEY: ${{ secrets.GRAPHIFY_APP_PRIVATE_KEY }}
-        run: test -n "$CLIENT_ID" && test -n "$PRIVATE_KEY"
-      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        id: writer
-        with:
-          client-id: ${{ vars.GRAPHIFY_APP_CLIENT_ID }}
-          private-key: ${{ secrets.GRAPHIFY_APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: read
       - name: Commit graph if the PR head is unchanged
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
-          github-token: ${{ steps.writer.outputs.token }}
           script: await require('./.github/graphify/publish.cjs')({ github, context, core });
