@@ -18,7 +18,14 @@ export function headerOverflows(header: HTMLElement): boolean {
   const first: DOMRect = tabs[0].getBoundingClientRect();
   const last: DOMRect = tabs.at(-1)!.getBoundingClientRect();
   const brandRight: number | null = brand ? brand.getBoundingClientRect().right : null;
-  const endLeft: number | null = end ? end.getBoundingClientRect().left : null;
+  const endLeft: number | null = end
+    ? Math.min(
+        end.getBoundingClientRect().left,
+        ...[...end.children]
+          .filter((child: Element) => child.getClientRects().length > 0)
+          .map((child: Element) => child.getBoundingClientRect().left),
+      )
+    : null;
   return (brandRight !== null && first.left < brandRight + 4) || (endLeft !== null && last.right > endLeft - 4);
 }
 

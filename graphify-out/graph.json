@@ -11469,7 +11469,7 @@
       "relation": "calls",
       "source": "app_components_shell_fit_header_fitheader",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L53",
+      "source_location": "L60",
       "target": "app_components_shell_fit_header_headeroverflows",
       "weight": 1.0
     },
@@ -11481,7 +11481,7 @@
       "relation": "calls",
       "source": "app_components_shell_fit_header_usefitheader",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L31",
+      "source_location": "L38",
       "target": "app_components_shell_fit_header_fitheader",
       "weight": 1.0
     },
@@ -93227,7 +93227,7 @@
       "relation": "contains",
       "source": "app_components_shell_fit_header",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L29",
+      "source_location": "L36",
       "target": "app_components_shell_fit_header_usefitheader",
       "weight": 1.0
     },
@@ -93238,7 +93238,7 @@
       "relation": "contains",
       "source": "app_components_shell_fit_header",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L51",
+      "source_location": "L58",
       "target": "app_components_shell_fit_header_fitheader",
       "weight": 1.0
     },
@@ -114248,10 +114248,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "9080f58dafd8bc7f7b2d245adccb5a99fdcf91e9ac4b74a537b8ba28818887dd",
+    "content_sha256": "54c2051bda1b1f2748ba0e183b6a4808772e016a9b9944463f0d398741283fcb",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "22ae2de6e75e866ba676d208b053d46e37ba64fa20aa616d39a57ae5f646a8e9",
+    "source_sha256": "88a347c309b8358bb9bf991fd0686187af52869993bf4f8e456a452add5a2061",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -122169,7 +122169,7 @@
       "label": "fitHeader()",
       "norm_label": "fitheader()",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L51"
+      "source_location": "L58"
     },
     {
       "_callable": true,
@@ -122186,6 +122186,20 @@
             "lang": "typescript",
             "line": "L7",
             "receiver_type": "HTMLElement"
+          },
+          {
+            "callee": "getClientRects",
+            "file": "app/components/shell/fit-header.ts",
+            "lang": "typescript",
+            "line": "L25",
+            "receiver_type": "Element"
+          },
+          {
+            "callee": "getBoundingClientRect",
+            "file": "app/components/shell/fit-header.ts",
+            "lang": "typescript",
+            "line": "L26",
+            "receiver_type": "Element"
           }
         ]
       },
@@ -122206,21 +122220,21 @@
             "callee": "observe",
             "file": "app/components/shell/fit-header.ts",
             "lang": "typescript",
-            "line": "L42",
+            "line": "L49",
             "receiver_type": "ResizeObserver"
           },
           {
             "callee": "disconnect",
             "file": "app/components/shell/fit-header.ts",
             "lang": "typescript",
-            "line": "L46",
+            "line": "L53",
             "receiver_type": "ResizeObserver"
           }
         ]
       },
       "norm_label": "usefitheader()",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L29"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -141680,6 +141694,24 @@
       "file_type": "code",
       "id": "tests_e2e_desktop_layout_spec",
       "label": "desktop-layout.spec.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "getClientRects",
+            "file": "tests/e2e/desktop-layout.spec.ts",
+            "lang": "typescript",
+            "line": "L29",
+            "receiver_type": "Element"
+          },
+          {
+            "callee": "getBoundingClientRect",
+            "file": "tests/e2e/desktop-layout.spec.ts",
+            "lang": "typescript",
+            "line": "L30",
+            "receiver_type": "Element"
+          }
+        ]
+      },
       "norm_label": "desktop-layout.spec.ts",
       "source_file": "tests/e2e/desktop-layout.spec.ts",
       "source_location": "L1"

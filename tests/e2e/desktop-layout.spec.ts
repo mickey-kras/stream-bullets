@@ -24,6 +24,10 @@ for (const locale of LOCALES) {
         const panel: DOMRect = box("#detail");
         const card: DOMRect = box("#detail .empty-state");
         const subtitle: HTMLElement = document.querySelector(".ideas-sub")!;
+        const lastTab: DOMRect = document.querySelector(".ideas-header > nav > a:last-child")!.getBoundingClientRect();
+        const actions: DOMRect[] = [...document.querySelectorAll(".ideas-header > .header-end > *")]
+          .filter((element: Element) => element.getClientRects().length > 0)
+          .map((element: Element) => element.getBoundingClientRect());
         const range: Range = document.createRange();
         range.selectNodeContents(subtitle);
         const text: DOMRect[] = [...range.getClientRects()];
@@ -38,10 +42,14 @@ for (const locale of LOCALES) {
           clipped: bounds.some((clip: DOMRect) =>
             text.some((rect: DOMRect) => rect.left < clip.left - 1 || rect.right > clip.right + 1),
           ),
+          actionsOverlap: actions.some(
+            (rect: DOMRect) => lastTab.top < rect.bottom && lastTab.bottom > rect.top && lastTab.right > rect.left - 4,
+          ),
         };
       });
       expect(geometry.clipped, "the complete subtitle must remain visible").toBe(false);
       expect(geometry.navOffset, "tabs must stay centered in the header").toBeLessThanOrEqual(2);
+      expect(geometry.actionsOverlap, "account actions must not overlap the tabs").toBe(false);
       expect(geometry.leftInset).toBeGreaterThanOrEqual(20);
       expect(geometry.rightInset).toBeGreaterThanOrEqual(20);
       expect(
