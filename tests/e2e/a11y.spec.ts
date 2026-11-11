@@ -174,7 +174,7 @@ for (const width of [1363, 390]) {
       await page.keyboard.press("Escape");
       await expect(page.getByRole("button", { name: "More", exact: true })).toBeFocused();
     }
-    await expect(page.getByRole("link", { name: "Planned", exact: true })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("link", { name: "Planned", exact: true })).toHaveAttribute("aria-current", "true");
     await expect(page.getByRole("link", { name: "StreamBullets home", exact: true })).toHaveAttribute("href", "/");
     await expect(page.getByRole("link", { name: "Ideas for StreamBullets", exact: true })).toHaveAttribute(
       "href",
