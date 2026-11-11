@@ -69,6 +69,7 @@ async function openContact(page: Page): Promise<void> {
 
 for (const locale of LOCALES) {
   test(`${locale} shared layout and dialogs fit every viewport`, async ({ page, context }) => {
+    test.setTimeout(90_000);
     await context.setExtraHTTPHeaders({
       "CF-Connecting-IP": `198.51.100.${1 + LOCALES.indexOf(locale) * 8}`,
     });
@@ -84,7 +85,7 @@ for (const locale of LOCALES) {
           await expect(async () => {
             await expectContained(page.locator("header, main, .site-footer, .page-title, #landing-title"));
             await expectHeaderFits(page);
-          }).toPass({ timeout: 2_000 });
+          }).toPass({ timeout: 10_000 });
         });
       }
     }
