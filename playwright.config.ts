@@ -10,6 +10,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   reporter: [
     ["list"],
+    ["blob"],
     ["html", { open: "never" }],
     ...(process.env.BROWSER_COVERAGE === "1" ? [["./scripts/browser-coverage-reporter.ts"] as [string]] : []),
   ],
