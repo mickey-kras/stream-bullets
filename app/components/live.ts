@@ -185,6 +185,7 @@ export function useLivePolls(
     let watchdog: ReturnType<typeof setTimeout> | undefined;
     let pinger: ReturnType<typeof setInterval> | undefined;
     let attempts: number = 0;
+    let healthySince: number | null = null;
     function armWatchdog(current: WebSocket): void {
       if (watchdog) clearTimeout(watchdog);
       watchdog = setTimeout(() => {
@@ -218,7 +219,8 @@ export function useLivePolls(
         current.close(1002, "Invalid snapshot");
         return;
       }
-      attempts = 0;
+      healthySince ??= Date.now();
+      if (Date.now() - healthySince >= 60_000) attempts = 0;
       setStatus("live");
       armWatchdog(current);
       setMashLive((mash: MashLive) => withSnapshotRuns(mash, parsed.data));
@@ -234,6 +236,7 @@ export function useLivePolls(
       if (overlayKey) url.searchParams.set("key", overlayKey);
       socket = new WebSocket(url);
       const current: WebSocket = socket;
+      healthySince = null;
       armWatchdog(current);
       current.onopen = (): void => {
         if (!active) return;
@@ -258,13 +261,14 @@ export function useLivePolls(
         if (pinger) clearInterval(pinger);
         if (!active) return;
         if (watchdog) clearTimeout(watchdog);
-        attempts = Math.min(9, attempts + 1);
+        attempts += 1;
         if (attempts > 8) {
           setStatus("offline");
-        } else {
-          setStatus("reconnecting");
+          return;
         }
-        timer = setTimeout(connect, Math.min(30_000, 1000 * 2 ** (attempts - 1)));
+        setStatus("reconnecting");
+        const ceiling: number = Math.min(30_000, 1000 * 2 ** (attempts - 1));
+        timer = setTimeout(connect, ceiling * (0.5 + Math.random() * 0.5));
       };
     }
     connect();

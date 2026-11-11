@@ -333,6 +333,7 @@ export function OverlayControl({
   scene,
   hasOverlayKey,
   connected = true,
+  reconnect,
 }: Readonly<{
   initial: OverlayState;
   /** The overlay as the live room last sent it, so a change from another tab shows here too. */
@@ -342,6 +343,7 @@ export function OverlayControl({
   hasOverlayKey: boolean;
   /** False while the live connection is down: changes still save, but the OBS page hears of them later. */
   connected?: boolean;
+  reconnect?: () => void;
 }>): ReactNode {
   const toast = useToast();
   const [saved, setSaved] = useState<OverlayState>(initial);
@@ -349,9 +351,10 @@ export function OverlayControl({
   const [busy, setBusy] = useState<boolean>(false);
   const [enlarged, setEnlarged] = useState<MonitorKind | null>(null);
   const enlarge = (kind: MonitorKind): void => setEnlarged((value) => (value === kind ? null : kind));
+  const offline: boolean = reconnect !== undefined;
   useEffect(() => {
-    if (!connected) announce(t("overlay.disconnected"));
-  }, [connected]);
+    if (!connected) announce(t(offline ? "overlay.offline" : "overlay.disconnected"));
+  }, [connected, offline]);
   const titleId: string = useId();
   const same: boolean = sameSource(state.preview, state.air);
   const view: OverlayScene = { ...scene, overlay: state };
@@ -445,8 +448,13 @@ export function OverlayControl({
         <p className="ov-conn">
           <Icon name="wifi-off" size={18} />
           <span>
-            <strong>{t("overlay.disconnected")}</strong> {t("overlay.disconnectedBody")}
+            <strong>{t(offline ? "overlay.offline" : "overlay.disconnected")}</strong> {t("overlay.disconnectedBody")}
           </span>
+          {reconnect && (
+            <button type="button" onClick={reconnect}>
+              {t("overlay.reconnect")}
+            </button>
+          )}
         </p>
       )}
       <div
