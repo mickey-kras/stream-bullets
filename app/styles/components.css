@@ -1541,7 +1541,7 @@ input[type="checkbox"], input[type="radio"], .modal-content .choice input { widt
 .comment-actions .comment-direct > button { display: inline-flex; align-items: center; gap: 6px; }
 .signed-in-with { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 12px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font: 500 .875rem/1.4 var(--body); width: fit-content; }
 @media (min-width: 43.76em) {
-  main.streamers-page { padding-inline: max(42px, calc((100% - 1250px) / 2)); }
+  main.streamers-page { padding-inline: max(var(--space-8), calc((100% - var(--content-width)) / 2)); }
   .streamers-page > * { margin-inline: 0; }
 }
 .detail .empty-state { width: calc(100% - 60px); margin: 30px auto; }
@@ -1731,7 +1731,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .pref-group .choice { min-height: var(--control-size); border-color: var(--input-border); border-radius: var(--radius-control); font-size: var(--text-control); }
 .pref-group .choice > span { min-width: 0; overflow-wrap: anywhere; }
 .pref-group .choice small { font-size: var(--text-meta); }
-.pref-group .choice:hover { background: var(--btn-hover); }
+.pref-group .choice:hover { border-color: var(--gold); background: var(--btn-hover); }
 .pref-group .choice:has(:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .modal-content.sheet { border-radius: var(--radius-panel); }
 @media (max-width: 43.75em) {

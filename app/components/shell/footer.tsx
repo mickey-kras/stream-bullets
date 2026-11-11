@@ -65,6 +65,12 @@ export function SiteFooter(): ReactNode {
         <Link to={paths.terms} aria-current={current(paths.terms)}>
           {t("legal.terms")}
         </Link>
+        <DialogLink name="a11y" label={t("footer.accessibility")}>
+          <Icon name="eye" size={18} />
+        </DialogLink>
+        <DialogLink name="language" label={languageLabel}>
+          <Icon name="globe" size={18} />
+        </DialogLink>
         <button type="button" className="footer-link" aria-haspopup="dialog" onClick={() => setDialog("more")}>
           {t("footer.more")}
           <Icon name="chevron-down" size={16} />
