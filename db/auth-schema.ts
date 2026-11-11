@@ -17,6 +17,9 @@ export const user = sqliteTable(
     avatarPreset: integer("avatar_preset"),
     locale: text("locale", { enum: LOCALES }),
     displayPrefs: text("display_prefs"),
+    // Server-only milestones; aggregate conversion counts never contain account IDs.
+    firstVoteCounted: integer("first_vote_counted", { mode: "boolean" }).notNull().default(false),
+    firstTopicCounted: integer("first_topic_counted", { mode: "boolean" }).notNull().default(false),
   },
   (table) => [
     check(

@@ -1,4 +1,4 @@
-/* ON AIR landing. One screen, never scrolled: the 3D station fills the stage, copy floats over it on the
+/* ON AIR landing. One screen when space permits: the 3D station fills the stage, copy floats over it on the
    left behind a soft shade, and a gold rule closes the stage. On phones the copy sits on top and the
    station fills the rest of the screen, its mast tucked just behind the buttons. */
 body:has(.landing-page) {
@@ -611,5 +611,18 @@ body:has(.landing-page)::after {
   .atom-spin,
   .atom-head {
     animation-play-state: paused;
+  }
+}
+
+/* Short screens need access to the actions below the headline. */
+@media (max-height: 600px) {
+  .landing-main {
+    overflow-y: auto;
+    scroll-padding-block: 100px 24px;
+  }
+  .landing-hero {
+    flex: none;
+    width: 100%;
+    min-height: min-content;
   }
 }
