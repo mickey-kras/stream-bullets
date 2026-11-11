@@ -109190,7 +109190,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L23",
+      "source_location": "L30",
       "target": "docs_code_graph_graph_commits",
       "weight": 1.0
     },
@@ -109201,19 +109201,8 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L32",
+      "source_location": "L41",
       "target": "docs_code_graph_local_update",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_code_graph_repository_graph",
-      "source_file": "docs/code-graph.md",
-      "source_location": "L51",
-      "target": "docs_code_graph_scope_and_queries",
       "weight": 1.0
     },
     {
@@ -109225,6 +109214,17 @@
       "source_file": "docs/code-graph.md",
       "source_location": "L6",
       "target": "docs_code_graph_automatic_updates",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_code_graph_repository_graph",
+      "source_file": "docs/code-graph.md",
+      "source_location": "L60",
+      "target": "docs_code_graph_scope_and_queries",
       "weight": 1.0
     },
     {
@@ -115935,10 +115935,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "b64744dae21edbb930b55a9305d7549384b70d399f03e81b0e8827d21f77d15c",
+    "content_sha256": "4897e289619e89b47caa61c89fcf41c3884712af30739f4bb43e921488bf2a43",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "10a83e39a0ddb582248928123a9e35af97374d63c94b5f6a8ba7f78a5c4801bb",
+    "source_sha256": "e10b6f33bec5b85a8110f5c01956ab58448747370ce7f7f9d255b2970b2f9b97",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -145660,7 +145660,7 @@
       "node_kind": "heading",
       "norm_label": "graph commits",
       "source_file": "docs/code-graph.md",
-      "source_location": "L23"
+      "source_location": "L30"
     },
     {
       "_origin": "ast",
@@ -145671,7 +145671,7 @@
       "node_kind": "heading",
       "norm_label": "local update",
       "source_file": "docs/code-graph.md",
-      "source_location": "L32"
+      "source_location": "L41"
     },
     {
       "_origin": "ast",
@@ -145693,7 +145693,7 @@
       "node_kind": "heading",
       "norm_label": "scope and queries",
       "source_file": "docs/code-graph.md",
-      "source_location": "L51"
+      "source_location": "L60"
     },
     {
       "_origin": "ast",
