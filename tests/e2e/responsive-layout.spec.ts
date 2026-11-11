@@ -2,6 +2,9 @@ import { type Locator, type Page } from "@playwright/test";
 import { LOCALES } from "../../db/enums";
 import { test, expect } from "./coverage";
 
+const WIDTHS = [320, 390, 768, 1024, 1366, 1920] as const;
+const ENLARGED_WIDTHS = [320, 390] as const;
+
 async function expectContained(locator: Locator): Promise<void> {
   expect(await locator.count()).toBeGreaterThan(0);
   const overflowing: string[] = await locator.evaluateAll((elements: Element[]): string[] =>
@@ -11,7 +14,7 @@ async function expectContained(locator: Locator): Promise<void> {
         return rect.width > 0 &&
           (rect.left < -1 || rect.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 1);
       })
-      .map((element: Element): string => `${element.tagName}.${element.className}`),
+      .map((element: Element): string => `${element.tagName}#${element.id}.${element.className}: ${element.scrollWidth}/${element.clientWidth}`),
   );
   expect(overflowing).toEqual([]);
 }
@@ -65,8 +68,11 @@ async function openContact(page: Page): Promise<void> {
 }
 
 for (const locale of LOCALES) {
-  for (const width of [320, 390, 768, 1024, 1366, 1920]) {
+  for (const width of WIDTHS) {
     test(`${locale} shared layout and dialogs fit ${width}px`, async ({ page, context }) => {
+      await context.setExtraHTTPHeaders({
+        "CF-Connecting-IP": `198.51.100.${1 + LOCALES.indexOf(locale) * 8 + WIDTHS.indexOf(width)}`,
+      });
       await page.setViewportSize({ width, height: 900 });
       await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
       for (const route of ["/", "/streamers", "/@streambullets", "/privacy"]) {
@@ -94,8 +100,11 @@ for (const locale of LOCALES) {
 }
 
 for (const locale of LOCALES) {
-  for (const width of [320, 390]) {
+  for (const width of ENLARGED_WIDTHS) {
   test(`${locale} ${width}px enlarged and spaced text keeps dialog controls reachable`, async ({ page, context }) => {
+    await context.setExtraHTTPHeaders({
+      "CF-Connecting-IP": `198.51.100.${7 + LOCALES.indexOf(locale) * 8 + ENLARGED_WIDTHS.indexOf(width)}`,
+    });
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);

@@ -1122,7 +1122,7 @@ table.month-grid td { position: relative; vertical-align: top; }
 .nudge-pad .icon-button.icon-button.icon-button { width: 40px; height: 40px; min-width: 40px; min-height: 40px; }
 .pref-group { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 0 0 var(--space-4); margin: 0; min-width: 0; }
 .pref-group legend { padding: 0 6px; font: 600 1.125rem var(--heading); text-transform: uppercase; letter-spacing: .5px; }
-.pref-options { display: grid; gap: 8px; }
+.pref-options { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
 .pref-group .choice { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; font-weight: 600; }
 .pref-group .choice:has(:checked) { border-color: var(--gold); color: var(--gold); }
 .pref-group .choice small { display: block; margin-top: 2px; color: var(--muted); font-weight: 400; }
@@ -1727,7 +1727,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 
 :is(header nav, .header-end, .tabs, .modal-content, .poll-toolbar, .page-title, .info-card, .composer, .votes) :is(button, a.button-link, a.nav-tab), .cselect-trigger { font-family: var(--body); font-size: var(--text-control); line-height: var(--leading-body); text-transform: none; letter-spacing: normal; min-height: var(--control-size); white-space: normal; overflow-wrap: anywhere; }
 :is(.topic-title, .selected .topic-title, .topic-meta, .comment-text, .description) { font-family: var(--body); line-height: var(--leading-body); }
-.sheet-body .pref-group legend { font: 600 var(--text-control)/var(--leading-body) var(--body); text-transform: none; letter-spacing: normal; padding: 0; }
+.sheet-body .pref-group legend { max-width: 100%; font: 600 var(--text-control)/var(--leading-body) var(--body); text-transform: none; letter-spacing: normal; padding: 0; }
 .pref-group .choice { min-height: var(--control-size); border-color: var(--input-border); border-radius: var(--radius-control); font-size: var(--text-control); }
 .pref-group .choice > span { min-width: 0; overflow-wrap: anywhere; }
 .pref-group .choice small { font-size: var(--text-meta); }
@@ -1738,3 +1738,5 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
   .modal-content.sheet:not(.is-short) { border-radius: 0; }
   .sheet-body { padding: var(--space-4); }
 }
+
+.pref-group :is(.field, .field-label, .cselect, .pref-options) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
