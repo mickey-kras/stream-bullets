@@ -193,11 +193,19 @@ jobs:
   verify:
     name: Verify application
     needs: [static, unit, production, browser]
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
       coverage-id: ${{ steps.coverage.outputs.artifact-id }}
     steps:
+      - name: Require application checks
+        env:
+          STATIC: ${{ needs.static.result }}
+          UNIT: ${{ needs.unit.result }}
+          PRODUCTION: ${{ needs.production.result }}
+          BROWSER: ${{ needs.browser.result }}
+        run: test "$STATIC" = success && test "$UNIT" = success && test "$PRODUCTION" = success && test "$BROWSER" = success
       - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
         with:
           egress-policy: audit
