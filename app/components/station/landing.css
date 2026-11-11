@@ -623,3 +623,11 @@ body:has(.landing-page)::after {
     min-height: min-content;
   }
 }
+
+/* Keep the scene below the copy when the short phone layout scrolls. */
+@media (max-width: 700px) and (max-height: 600px) {
+  .landing-station {
+    min-height: 240px;
+    margin-top: 0;
+  }
+}
