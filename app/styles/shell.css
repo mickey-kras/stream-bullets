@@ -171,7 +171,8 @@ body:not(:has(.landing-page)) > .site-footer a:focus-visible { outline: 2px soli
 .logo-upload[hidden] { display: none; }
 header nav button { gap: 8px; }
 @media (max-width:35em) {
-  .streamer-header nav :is(button, a.nav-tab) { flex-direction: column; gap: 4px; padding: 6px 2px; }
+  .streamer-header > nav { display: flex; flex-wrap: wrap; }
+  .streamer-header > nav > :is(button, a.nav-tab) { flex: 1 0 auto; width: auto; max-width: 100%; flex-direction: column; gap: 4px; padding: 6px 2px; }
   .streamer-header nav :is(button, a.nav-tab) svg.icon { width: 20px; height: 20px; }
   .site-header nav .compact-nav-label { font-size: var(--text-meta); }
 }

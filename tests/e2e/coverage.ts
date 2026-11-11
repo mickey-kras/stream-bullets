@@ -52,8 +52,9 @@ export const test = base.extend<{ coverage: void }>({
     await collect(page);
   },
   coverage: [
-    async ({ browser: _browser }, use): Promise<void> => {
+    async ({ browser: _browser }, use, testInfo): Promise<void> => {
       await use();
+      for (const error of testInfo.errors) console.error(error.message);
       for (const page of pages) await collect(page);
     },
     { auto: true },
