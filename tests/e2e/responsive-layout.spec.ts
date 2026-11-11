@@ -16,6 +16,35 @@ async function expectContained(locator: Locator): Promise<void> {
   expect(overflowing).toEqual([]);
 }
 
+async function expectLabelsFit(locator: Locator): Promise<void> {
+  const clipped: string[] = await locator.evaluateAll((elements: Element[]): string[] =>
+    elements.filter((element: Element): boolean => {
+      const box: DOMRect = element.getBoundingClientRect();
+      if (!box.width || !box.height) return false;
+      const range: Range = document.createRange();
+      range.selectNodeContents(element);
+      return [...range.getClientRects()].some((text: DOMRect): boolean =>
+        text.width > 0 && (text.left < box.left - 1 || text.right > box.right + 1 ||
+          text.top < box.top - 1 || text.bottom > box.bottom + 1),
+      );
+    }).map((element: Element): string => element.textContent ?? element.tagName),
+  );
+  expect(clipped).toEqual([]);
+}
+
+async function expectHeaderFits(page: Page): Promise<void> {
+  const controls: Locator = page.locator("header nav > a, header nav > button, header .header-end > .gold, header .header-end .profile");
+  await expectLabelsFit(page.locator("header nav > a, header nav > button, header .header-end > .gold"));
+  const overlaps: boolean = await controls.evaluateAll((elements: Element[]): boolean => {
+    const boxes: DOMRect[] = elements.map((element: Element): DOMRect => element.getBoundingClientRect())
+      .filter((box: DOMRect): boolean => box.width > 0 && box.height > 0);
+    return boxes.some((box: DOMRect, index: number): boolean => boxes.slice(index + 1).some((other: DOMRect): boolean =>
+      box.left < other.right - 1 && box.right > other.left + 1 && box.top < other.bottom - 1 && box.bottom > other.top + 1,
+    ));
+  });
+  expect(overlaps).toBe(false);
+}
+
 async function expectReachable(locator: Locator): Promise<void> {
   await locator.scrollIntoViewIfNeeded();
   await expect(locator).toBeInViewport({ ratio: 1 });
@@ -46,6 +75,7 @@ for (const locale of LOCALES) {
         await expect(page.locator("main")).toBeVisible();
         await page.evaluate(() => document.fonts.ready);
         await expectContained(page.locator("header, main, .site-footer, .page-title, #landing-title"));
+        await expectHeaderFits(page);
       }
       await openContact(page);
       await expectContained(page.locator('[data-sheet="contact"], .contact-address, .contact-links, .sheet-head h2'));
@@ -64,11 +94,21 @@ for (const locale of LOCALES) {
 }
 
 for (const locale of LOCALES) {
-  test(`${locale} enlarged and spaced text keeps dialog controls reachable`, async ({ page, context }) => {
-    await page.setViewportSize({ width: 390, height: 700 });
+  for (const width of [320, 390]) {
+  test(`${locale} ${width}px enlarged and spaced text keeps dialog controls reachable`, async ({ page, context }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
-    await page.goto("/privacy?dialog=a11y");
+    await page.goto("/privacy");
     await page.addStyleTag({ content: `html { font-size: 200% !important; } html:root:root * { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; } p { margin-bottom: 2em !important; }` });
+    await expectContained(page.locator("header, main, .site-footer"));
+    await expectHeaderFits(page);
+    await openContact(page);
+    await expectContained(page.locator('[data-sheet="contact"], .contact-address, .contact-links'));
+    await expectLabelsFit(page.locator('[data-sheet="contact"] .sheet-head h2, .contact-links a'));
+    await expectReachable(page.locator('[data-sheet="contact"] .modal-close'));
+    await page.locator('[data-sheet="contact"] .modal-close').click();
+    await page.locator('.site-footer a[href*="dialog=a11y"]:visible').click();
     const lastOption: Locator = page.locator("#pref-live .choice").last();
     await lastOption.scrollIntoViewIfNeeded();
     await lastOption.click();
@@ -79,7 +119,17 @@ for (const locale of LOCALES) {
     });
     expect(spacing).toBeCloseTo(0.12, 2);
     await expectContained(page.locator('[data-sheet="a11y"], .pref-group, .sheet-head h2'));
-    await expectReachable(page.locator('[data-sheet="a11y"] .modal-close'));
+    const close: Locator = page.locator('[data-sheet="a11y"] .modal-close');
+    await expectReachable(close);
+    await close.focus();
+    const focus = await close.evaluate((element: HTMLElement) => {
+      const style: CSSStyleDeclaration = getComputedStyle(element);
+      return { width: Number.parseFloat(style.outlineWidth), style: style.outlineStyle, transition: style.transitionDuration };
+    });
+    expect(focus.width).toBeGreaterThanOrEqual(2);
+    expect(focus.style).not.toBe("none");
+    expect(Number.parseFloat(focus.transition)).toBe(0);
     await expectReachable(page.locator('[data-sheet="a11y"] .sheet-actions .gold'));
   });
+}
 }

@@ -408,7 +408,6 @@ body:has(.landing-page) .site-footer .footer-link { text-decoration: underline; 
   .landing-header { position: relative; }
   .landing-header .account-menu-wrap { position: static; }
 }
-/* The band is exactly 42px while the links fit on one row (13px torn edge + 28px plate). */
 /* Mash Battle focus on phones */
 @media (max-width: 43.75em) {
   body.battle-focus > .site-footer, body.battle-focus .polls-page .page-title, body.battle-focus .mash-fair, body.battle-focus .mash-tools a { display: none; }
