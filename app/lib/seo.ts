@@ -22,5 +22,6 @@ export function streamerCanonicalPath(
     params.set("event", eventId);
   } else if (view !== "topics") params.set("view", view);
   const query: string = params.toString();
-  return `/@${handle}${query ? `?${query}` : ""}`;
+  const suffix: string = query ? `?${query}` : "";
+  return `/@${handle}${suffix}`;
 }

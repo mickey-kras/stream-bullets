@@ -16,7 +16,7 @@ export async function sitemapResponse(request: Request, env: AppEnv): Promise<Re
     .orderBy(asc(streamers.handle));
   const paths: string[] = [...PUBLIC_PAGE_PATHS, ...rows.map((row): string => `/@${row.handle}`)];
   const urls: string = paths
-    .map((path: string): string => `<url><loc>${escapeXml(`${origin}${path}`)}</loc></url>`)
+    .map((path: string): string => `<url><loc>${escapeXml(origin + path)}</loc></url>`)
     .join("");
   return new Response(
     request.method === "HEAD"
@@ -37,5 +37,5 @@ function escapeXml(value: string): string {
     '"': "&quot;",
     "'": "&apos;",
   };
-  return value.replace(/[&<>"']/gu, (character: string): string => entities[character]);
+  return value.replaceAll(/[&<>"']/gu, (character: string): string => entities[character]);
 }
