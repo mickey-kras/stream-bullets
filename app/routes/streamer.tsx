@@ -1,6 +1,6 @@
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
-import { useEffect, useRef, useState, type ReactNode, type ComponentProps } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode, type ComponentProps } from "react";
 import {
   Link,
   useLoaderData,
@@ -31,13 +31,14 @@ import { useRememberContentRoute } from "../components/shell/back-link";
 import { StreamerHeader, streamerViews, type StreamerView } from "../components/shell/streamer-header";
 import { EntryDetail } from "../components/streamer/entry-detail";
 import { PageBanner } from "../components/streamer/page-banner";
+import { useBoardRefresh } from "../components/streamer/use-board-refresh";
 import { TopicBoard } from "../components/streamer/topic-board";
 import { SupportSection } from "../components/support/support";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
 import { Icon } from "../components/ui/icon";
 import { useToast } from "../components/ui/toast";
 import { t } from "../i18n";
-import { errorMessage, postJson, requestJson } from "../components/api";
+import { ApiError, errorMessage, postJson, requestJson } from "../components/api";
 import { CreateEntry } from "../components/create-entry";
 import { Discussion } from "../components/discussion";
 import { useLivePolls, useLiveRevalidation } from "../components/live";
@@ -75,7 +76,10 @@ export function meta({ loaderData: data, matches }: Route.MetaArgs) {
   const title: string = data.selected ? `${data.selected.title} · ${streamer.name}` : streamer.name;
   return [
     { title: `${title} · StreamBullets` },
-    { name: "description", content: streamer.about.slice(0, 160) || t("entry.tagline", { name: streamer.name }) },
+    {
+      name: "description",
+      content: streamer.about.slice(0, 160) || t("entry.tagline", { name: streamer.name }),
+    },
     ...structured.map((item: JsonLd) => ({ "script:ld+json": item })),
   ];
 }
@@ -259,16 +263,25 @@ function streamerHeaderAppearance(
 
 export default function StreamerPage(): ReactNode {
   const data = useLoaderData<typeof loader>();
-  const { board, selected: loadedSelected, viewer, moderator, view, sort, query, status, events, support } = data;
+  const { viewer, moderator, view, sort, query, status, events, support } = data;
+  const { board, selected: loadedSelected, refreshing, refresh: refreshData } = useBoardRefresh(data);
   const { streamer } = board;
   useRememberContentRoute(`/@${streamer.handle}`, streamer.name);
   const [searchParams, setSearchParams] = useSearchParams();
   const here = useLocation();
   const revalidator = useRevalidator();
+  const refresh = useCallback(async (): Promise<void> => {
+    try {
+      await refreshData();
+    } catch (error_: unknown) {
+      if (error_ instanceof ApiError && error_.status === 404) await revalidator.revalidate();
+      else throw error_;
+    }
+  }, [refreshData, revalidator]);
   const toast = useToast();
   const { dialog, setDialog, signIn, setSignIn } = useIntentDialog(data.intent, viewer, streamer);
   const { providers } = useShell();
-  const [pending, setPending] = useState<boolean>(false);
+  const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
   const [error, setError] = useState<string>("");
   const [extra, setExtra] = useState<Entry[]>([]);
   /** Spins the polls refresh icon once per click (item 20). */
@@ -278,7 +291,14 @@ export default function StreamerPage(): ReactNode {
   const generation = useRef<number>(0);
   const official = streamer.isOfficial;
   const live = useLivePolls(streamer.handle, view === "polls");
-  useLiveRevalidation(live.status, live.snapshot?.revision, revalidator.revalidate, view === "polls");
+  const refreshBoard = useCallback(async (): Promise<void> => {
+    try {
+      await refresh();
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
+    }
+  }, [refresh]);
+  useLiveRevalidation(live.status, live.snapshot?.revision, refreshBoard, view === "polls");
   const owner: boolean = viewer?.id === streamer.ownerId;
   const writable: boolean = streamer.status === "active";
   const scheduleNow: number = useScheduleClock(data.serverNow, events);
@@ -342,20 +362,24 @@ export default function StreamerPage(): ReactNode {
     setSearchParams(params, { replace: name === "event" });
   }
 
-  async function mutate(body: unknown): Promise<{ id: string }> {
-    setPending(true);
+  async function mutate(body: unknown, key: string = "create"): Promise<{ id: string }> {
+    setPending((current) => new Set([...current, key]));
     setError("");
     try {
       const result = await postJson<{ id: string }>(`/api/streamers/${encodeURIComponent(streamer.handle)}`, body);
-      await revalidator.revalidate();
+      if (key !== "create") await refresh();
       return result;
     } finally {
-      setPending(false);
+      setPending((current) => {
+        const next = new Set(current);
+        next.delete(key);
+        return next;
+      });
     }
   }
 
-  function act(body: unknown): void {
-    mutate(body).catch((error_: unknown) => setError(errorMessage(error_)));
+  function act(body: unknown, id: string): void {
+    mutate(body, id).catch((error_: unknown) => setError(errorMessage(error_)));
   }
 
   async function loadMore(): Promise<void> {
@@ -391,7 +415,10 @@ export default function StreamerPage(): ReactNode {
   }
 
   async function deleteEntry(id: string): Promise<void> {
-    await postJson<unknown>(`/api/streamers/${encodeURIComponent(streamer.handle)}`, { action: "delete", id });
+    await postJson<unknown>(`/api/streamers/${encodeURIComponent(streamer.handle)}`, {
+      action: "delete",
+      id,
+    });
     generation.current += 1;
     setExtra([]);
   }
@@ -413,7 +440,7 @@ export default function StreamerPage(): ReactNode {
         moderator={moderator}
         status={streamer.status}
         refreshKey={board.revision}
-        onChanged={() => void changed()}
+        onChanged={() => void refreshBoard()}
       />
     );
   }
@@ -505,12 +532,12 @@ export default function StreamerPage(): ReactNode {
                 owner={owner}
                 moderator={moderator}
                 writable={writable}
-                pending={pending}
+                pending={pending.has(selected.id)}
                 onBack={() => navigate("topics")}
-                onReact={(value) => act({ action: "react", id: selected.id, value })}
+                onReact={(value) => act({ action: "react", id: selected.id, value }, selected.id)}
                 onDelete={removeSelected}
                 onStatusSaved={async () => {
-                  await revalidator.revalidate();
+                  await refresh();
                   toast(t("ideas.admin.saved"));
                 }}
               />
@@ -545,20 +572,21 @@ export default function StreamerPage(): ReactNode {
         pending={pending}
         more={Boolean(cursor)}
         loadingMore={loadingMore}
-        refreshing={revalidator.state !== "idle"}
+        refreshing={refreshing}
         refreshes={refreshes}
         onCreate={() => setDialog("poll")}
         onOpen={(id: string | null) => navigate("polls", id ?? undefined)}
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onRefresh={() => {
           setRefreshes((value: number) => value + 1);
-          revalidator.revalidate();
+          void refreshBoard();
         }}
         onLoadMore={() => void loadMore()}
         onAction={act}
         onDelete={async (id: string) => {
+          if (loadedSelected?.id === id) return removeSelected();
           await deleteEntry(id);
-          await revalidator.revalidate();
+          await refresh();
         }}
         onDeleteSelected={removeSelected}
         discussion={renderDiscussion}
