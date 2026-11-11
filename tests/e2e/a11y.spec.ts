@@ -205,18 +205,20 @@ test("display dialog contains keyboard focus and restores its opener", async ({ 
   expect(outline.width).toBeGreaterThanOrEqual(2);
 });
 
-for (const failure of ["access", "write"] as const) {
-  test(`blocked storage ${failure} does not break the page or language switching`, async ({ page }) => {
-    await page.addInitScript((mode: "access" | "write"): void => {
-      if (mode === "access") {
-        Object.defineProperty(window, "sessionStorage", {
-          get(): never {
-            throw new DOMException("Blocked", "SecurityError");
-          },
-        });
+for (const failure of ["read", "write"] as const) {
+  test(`blocked focus storage ${failure} does not break the page or language switching`, async ({ page }) => {
+    await page.addInitScript((mode: "read" | "write"): void => {
+      if (mode === "read") {
+        const getItem = Storage.prototype.getItem;
+        Storage.prototype.getItem = function (key: string): string | null {
+          if (key === "sb-language-focus") throw new DOMException("Blocked", "SecurityError");
+          return getItem.call(this, key);
+        };
       } else {
-        Storage.prototype.setItem = (): never => {
-          throw new DOMException("Full", "QuotaExceededError");
+        const setItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function (key: string, value: string): void {
+          if (key === "sb-language-focus") throw new DOMException("Full", "QuotaExceededError");
+          setItem.call(this, key, value);
         };
       }
     }, failure);
