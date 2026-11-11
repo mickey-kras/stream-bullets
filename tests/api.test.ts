@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { getFeaturedStreamer } from "../app/server/featured-streamer.server";
 import type { AppEnv } from "../app/env";
 import { action } from "../app/routes/api";
 import { apiRoutes } from "../app/server/api";
@@ -211,7 +212,8 @@ describe("profile, language and preferences", (): void => {
     expect(await shellOf("owner")).toMatchObject({
       viewer: { id: "owner" },
       admin: false,
-      ownStreamer: { handle: "zed_page", name: "Zed", status: "active", statusReason: null },
+      ownStreamer: { handle: "zed_page",
+      name: "Zed", status: "active", statusReason: null },
       locale: "de",
       origin,
     });
@@ -412,5 +414,33 @@ describe("waitlist and reports through the handler table", (): void => {
       body: { targetKind: "entry", targetId: ids.topic, reason: "spam" },
     });
     expect(dismissed.status).toBe(404);
+  });
+});
+
+describe("first visitor destination", () => {
+  it("features a public community with real content before an empty page", async (): Promise<void> => {
+    expect(await getFeaturedStreamer(env)).toEqual({
+      handle: "zed_page",
+      name: "Zed",
+      entries: [{ id: ids.topic, title: "Topic", kind: "topic" }],
+    });
+  });
+
+  it("excludes frozen and suspended communities and falls back to an active page", async (): Promise<void> => {
+    await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(ids.page).run();
+    expect(await getFeaturedStreamer(env)).toEqual({ handle: "streambullets", name: "StreamBullets", entries: [] });
+    await env.DB.prepare("UPDATE streamers SET status='suspended' WHERE id=?").bind(ids.official).run();
+    expect(await getFeaturedStreamer(env)).toBeNull();
+  });
+
+  it("bounds links to the three latest entries, including polls", async (): Promise<void> => {
+    for (let index: number = 0; index < 4; index++) {
+      await env.DB.prepare(`INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at)
+        VALUES (?,?,'viewer','binary',?,'["Yes","No"]',?)`)
+        .bind(`poll-${index}`, ids.page, `Poll ${index}`, index + 2).run();
+    }
+    const featured = await getFeaturedStreamer(env);
+    expect(featured?.entries.map((entry) => entry.title)).toEqual(["Poll 3", "Poll 2", "Poll 1"]);
+    expect(featured?.entries.every((entry) => entry.kind === "binary")).toBe(true);
   });
 });

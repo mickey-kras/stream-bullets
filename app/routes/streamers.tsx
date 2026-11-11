@@ -1,13 +1,15 @@
+import { canonicalMeta } from "../lib/seo";
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
 import { SearchAdornments } from "../components/shell/directory-search";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { Link, useLoaderData, useLocation, useNavigate, type LoaderFunctionArgs } from "react-router";
+import { Link, useLoaderData, useLocation, useNavigate, type LoaderFunctionArgs, type MetaArgs } from "react-router";
 import { appContext } from "../env";
 import { t, tn } from "../i18n";
 import { directoryHref, readIntent, streamerTarget, type Intent } from "../lib/directory";
 import { useShell } from "../lib/shell";
 import { countStreamers, listStreamers } from "../server/data.server";
+import { getFeaturedStreamer, type FeaturedEntry, type FeaturedStreamer } from "../server/featured-streamer.server";
 import type { Streamer, StreamerDirectory } from "../types";
 import { errorMessage, requestJson } from "../components/api";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
@@ -17,8 +19,9 @@ import { SiteHeader } from "../components/shell/site-header";
 import { StreamerLogo } from "../components/ui/avatar";
 import { Icon, type IconName } from "../components/ui/icon";
 
-export function meta() {
+export function meta({ matches }: MetaArgs) {
   return [
+    ...canonicalMeta(matches, "/streamers"),
     { title: `${t("nav.streamers")} · StreamBullets` },
     { name: "description", content: t("meta.streamersDescription") },
   ];
@@ -29,8 +32,12 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
   const url = new URL(request.url);
   // "@handle" searches the handle: the @ is how people write it, not part of it.
   const query: string = (url.searchParams.get("query") ?? "").trim().replace(/^@/u, "").slice(0, 60);
-  const [page, total] = await Promise.all([listStreamers(app.env, null, query), countStreamers(app.env, query)]);
-  return { ...page, total, query, intent: readIntent(url.searchParams.get("then")) };
+  const [page, total, featured] = await Promise.all([
+    listStreamers(app.env, null, query),
+    countStreamers(app.env, query),
+    query ? Promise.resolve(null) : getFeaturedStreamer(app.env),
+  ]);
+  return { ...page, total, featured, query, intent: readIntent(url.searchParams.get("then")) };
 });
 
 const intentIcon: Record<Intent, IconName> = { suggest: "plus", vote: "polls", discuss: "comment" };
@@ -98,6 +105,7 @@ function directoryCount(shown: number, total: number): string {
 export default function Streamers(): ReactNode {
   const data = useLoaderData<typeof loader>();
   const shell = useShell();
+  const featured: FeaturedStreamer | null = data.featured;
   const location = useLocation();
   const navigate = useNavigate();
   const [extra, setExtra] = useState<{ streamers: Streamer[]; nextCursor: string | null; key: string } | null>(null);
@@ -213,9 +221,49 @@ export default function Streamers(): ReactNode {
             </Link>
           </output>
         )}
+        {featured && (
+          <section className="info-card featured-community" aria-labelledby="featured-title">
+            <span className="eyebrow">{t("streamers.startHere")}</span>
+            <h2 id="featured-title">
+              <Link className="text-link" to={streamerTarget(featured.handle, data.intent)}>
+                {featured.name}
+              </Link>
+            </h2>
+            {featured.entries.length > 0 && (
+              <>
+                <p>{t("streamers.featuredBody")}</p>
+                <ul>
+                  {featured.entries.map((entry: FeaturedEntry) => (
+                    <li key={entry.id}>
+                      <Link
+                        className="text-link"
+                        to={`/@${featured.handle}?view=${entry.kind === "topic" ? "topics" : "polls"}&entry=${entry.id}`}
+                      >
+                        {entry.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+        )}
         {hostCta}
         {data.total === 0 && !data.query ? (
-          <EmptyState title={t("streamers.emptyTitle")} icon="streamers">
+          <EmptyState
+            title={t("streamers.emptyTitle")}
+            icon="streamers"
+            action={
+              <Link
+                className="button-link"
+                to={dialogHref(location, "host")}
+                state={{ dialogFrom: location.pathname } satisfies DialogState}
+                preventScrollReset
+              >
+                {t("account.hostCommunity")}
+              </Link>
+            }
+          >
             {t("streamers.emptyBody")}
           </EmptyState>
         ) : (

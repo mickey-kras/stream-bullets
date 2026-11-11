@@ -1,5 +1,6 @@
+import { canonicalMeta } from "../lib/seo";
 import type { ReactNode } from "react";
-import { Link, useLoaderData } from "react-router";
+import { Link, useLoaderData, type MetaArgs } from "react-router";
 import { LegalDocument, type LegalSection } from "../components/common";
 import { contactEmails, legal, type LegalDetails } from "../legal";
 import { paths } from "../lib/shell";
@@ -7,8 +8,9 @@ import { legalLoader } from "../server/legal.server";
 
 export const loader = legalLoader;
 
-export function meta() {
+export function meta({ matches }: MetaArgs) {
   return [
+    ...canonicalMeta(matches, "/terms"),
     { title: "Terms of Service · StreamBullets" },
     { name: "description", content: "The rules for using StreamBullets, posting content, and reporting problems." },
   ];
