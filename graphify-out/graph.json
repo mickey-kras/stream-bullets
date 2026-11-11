@@ -109212,7 +109212,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L23",
+      "source_location": "L30",
       "target": "docs_code_graph_graph_commits",
       "weight": 1.0
     },
@@ -109223,19 +109223,8 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L32",
-      "target": "docs_code_graph_local_update",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_code_graph_repository_graph",
-      "source_file": "docs/code-graph.md",
-      "source_location": "L51",
-      "target": "docs_code_graph_scope_and_queries",
+      "source_location": "L41",
+      "target": "docs_code_graph_clone_setup",
       "weight": 1.0
     },
     {
@@ -109247,6 +109236,28 @@
       "source_file": "docs/code-graph.md",
       "source_location": "L6",
       "target": "docs_code_graph_automatic_updates",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_code_graph_repository_graph",
+      "source_file": "docs/code-graph.md",
+      "source_location": "L75",
+      "target": "docs_code_graph_local_update",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_code_graph_repository_graph",
+      "source_file": "docs/code-graph.md",
+      "source_location": "L94",
+      "target": "docs_code_graph_scope_and_queries",
       "weight": 1.0
     },
     {
@@ -115957,10 +115968,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "ba069f25341c4373dfd3f64712da7132d0b069b304be3372eb0e4ef0b6467b26",
+    "content_sha256": "88ec197e71cf704ca7a45ba7ddea0fd0ecf0137e0c2c20002dfa4034781c2679",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "7cd8a64ab4cef3916da78668944a274a87f584d8d778e9f191d3e6112e9902e7",
+    "source_sha256": "6c401109ced70cf06112506d3fac0103691271edfbfc1495296a43977164f45b",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -145728,12 +145739,23 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_code_graph_clone_setup",
+      "label": "Clone setup",
+      "node_kind": "heading",
+      "norm_label": "clone setup",
+      "source_file": "docs/code-graph.md",
+      "source_location": "L41"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_code_graph_graph_commits",
       "label": "Graph commits",
       "node_kind": "heading",
       "norm_label": "graph commits",
       "source_file": "docs/code-graph.md",
-      "source_location": "L23"
+      "source_location": "L30"
     },
     {
       "_origin": "ast",
@@ -145744,7 +145766,7 @@
       "node_kind": "heading",
       "norm_label": "local update",
       "source_file": "docs/code-graph.md",
-      "source_location": "L32"
+      "source_location": "L75"
     },
     {
       "_origin": "ast",
@@ -145766,7 +145788,7 @@
       "node_kind": "heading",
       "norm_label": "scope and queries",
       "source_file": "docs/code-graph.md",
-      "source_location": "L51"
+      "source_location": "L94"
     },
     {
       "_origin": "ast",
