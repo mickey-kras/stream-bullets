@@ -38,12 +38,17 @@ export async function mergeBrowserCoverage(
     );
     if (files.length === 0)
       throw new Error(`Missing browser coverage in ${directory}`);
+    let entriesFound: boolean = false;
     for (const file of files) {
       const entries = entrySchema.parse(
         JSON.parse(await readFile(join(directory, file), "utf8")),
       );
+      if (entries.length === 0) continue;
+      entriesFound = true;
       await coverage.add(entries);
     }
+    if (!entriesFound)
+      throw new Error(`Missing browser coverage in ${directory}`);
   }
   await coverage.generate();
   validateBrowserCoverage(await readFile(join(outputDir, "lcov.info"), "utf8"));
