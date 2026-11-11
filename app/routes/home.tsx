@@ -1,6 +1,7 @@
 import { canonicalMeta } from "../lib/seo";
 import { useCallback, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, type MetaArgs } from "react-router";
+import { trackCta } from "../lib/conversions";
 import { directoryHref, SIGN_INTENTS, type Intent } from "../lib/directory";
 import { paths, shellFromMatches, useShell } from "../lib/shell";
 import { siteJsonLd } from "../lib/structured-data";
@@ -38,12 +39,15 @@ export default function Home(): ReactNode {
   const openSign = useCallback(
     (index: number): void => {
       const intent: Intent | undefined = SIGN_INTENTS[index];
-      if (intent) navigate(directoryHref(intent));
+      if (intent) {
+        trackCta(`cta_${intent}`);
+        navigate(directoryHref(intent));
+      }
     },
     [navigate],
   );
   const browse = (className: string): ReactNode => (
-    <Link className={`button-link ${className}`} to={paths.streamers}>
+    <Link className={`button-link ${className}`} to={paths.streamers} onClick={() => trackCta("cta_browse")}>
       {t("landing.browse")}
       <Icon name="arrow-right" size={18} />
     </Link>
@@ -59,7 +63,13 @@ export default function Home(): ReactNode {
           {shell.viewer ? (
             <AccountMenu />
           ) : (
-            <button type="button" onClick={() => setSignInOpen(true)}>
+            <button
+              type="button"
+              onClick={() => {
+                trackCta("cta_sign_in");
+                setSignInOpen(true);
+              }}
+            >
               <Icon name="sign-in" size={18} />
               {t("signIn.trigger")}
             </button>
@@ -80,7 +90,11 @@ export default function Home(): ReactNode {
             <div className="landing-actions">
               {shell.ownStreamer ? (
                 <>
-                  <Link className="button-link gold" to={paths.streamer(shell.ownStreamer.handle)}>
+                  <Link
+                    className="button-link gold"
+                    to={paths.streamer(shell.ownStreamer.handle)}
+                    onClick={() => trackCta("cta_your_page")}
+                  >
                     <Icon name="your-page" size={18} />
                     {t("nav.yourPage")}
                   </Link>
@@ -105,7 +119,7 @@ export default function Home(): ReactNode {
             <ul className="landing-start" aria-label={t("landing.getStarted")}>
               {SIGN_INTENTS.map((intent: Intent) => (
                 <li key={intent}>
-                  <Link to={directoryHref(intent)}>
+                  <Link to={directoryHref(intent)} onClick={() => trackCta(`cta_${intent}`)}>
                     <Icon name={signIcon[intent]} size={16} />
                     {t(signLabel[intent])}
                   </Link>
