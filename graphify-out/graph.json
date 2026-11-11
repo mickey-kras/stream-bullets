@@ -115921,10 +115921,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "5cb9bfb9dbe99de983e1048342140c3ac3d0b650e16c5477cba1f68905cd7bbf",
+    "content_sha256": "5a167cd998d4823f49f96c64765f585a07fda0c41680f520b5c500dcbd814aae",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "12d31c138e48757f4cae2babba8714ac9ad889f4b67f34767efd1eb902913d3c",
+    "source_sha256": "bab24af6c762a838a35983979b873421b63eca8ed75aa4fcdda404d3c1171e65",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -143591,6 +143591,17 @@
       "file_type": "code",
       "id": "tests_e2e_conversions_spec",
       "label": "conversions.spec.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "scrollIntoView",
+            "file": "tests/e2e/conversions.spec.ts",
+            "lang": "typescript",
+            "line": "L85",
+            "receiver_type": "HTMLAnchorElement"
+          }
+        ]
+      },
       "norm_label": "conversions.spec.ts",
       "source_file": "tests/e2e/conversions.spec.ts",
       "source_location": "L1"

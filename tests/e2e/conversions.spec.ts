@@ -81,7 +81,9 @@ for (const [label, width, height] of [
     }
     for (const link of await page.locator(".landing-copy a").all()) {
       // Short screens keep the design and permit scrolling instead of clipping the actions.
-      if (height <= 600) await link.scrollIntoViewIfNeeded();
+      if (height <= 600) {
+        await link.evaluate((element: HTMLAnchorElement) => element.scrollIntoView({ block: "center" }));
+      }
       await expect(link).toBeInViewport({ ratio: 1 });
       // Trial clicks also detect overlap and clipped hit targets without navigating.
       await link.click({ trial: true });
