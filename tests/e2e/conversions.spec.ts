@@ -75,7 +75,12 @@ for (const [label, width, height] of [
     // Successful CI runs retain logs even when the workflow discards the HTML report.
     console.info("mobile-hero-cost", JSON.stringify({ width, height, load, still, animated }));
     expect(load.documentWidth).toBeLessThanOrEqual(load.viewportWidth);
+    if (width > 700 && height <= 600) {
+      await expect(page.locator(".landing-main")).toHaveCSS("overflow-y", "auto");
+    }
     for (const link of await page.locator(".landing-copy a").all()) {
+      // Landscape keeps the design and permits scrolling instead of clipping the actions.
+      if (width > 700 && height <= 600) await link.scrollIntoViewIfNeeded();
       await expect(link).toBeInViewport({ ratio: 1 });
       // Trial clicks also detect overlap and clipped hit targets without navigating.
       await link.click({ trial: true });

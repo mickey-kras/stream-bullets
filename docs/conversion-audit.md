@@ -98,4 +98,7 @@ CI uses software rendering. Its results do not predict performance on physical p
 
 Local Chromium failed to start because the environment denied its socket operation.
 The preview in the browser also timed out. Mobile timing measurements remain unverified locally.
-This PR keeps the current visuals. Measurements must identify a problem before rendering changes.
+Cloudflare screenshots confirmed visible controls at 320 x 568 and 390 x 844.
+At 844 x 390, the fixed-height page clipped the primary CTA and hid the action links.
+The hero area now scrolls on short landscape screens. Typography and artwork stay the same.
+No rendering change follows from timing assumptions.

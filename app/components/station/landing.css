@@ -597,3 +597,15 @@ body:has(.landing-page)::after {
     animation-play-state: paused;
   }
 }
+
+/* Short landscape screens need access to the actions below the headline. */
+@media (min-width: 701px) and (max-height: 600px) {
+  .landing-main {
+    overflow-y: auto;
+  }
+  .landing-hero {
+    flex: none;
+    width: 100%;
+    min-height: min-content;
+  }
+}
