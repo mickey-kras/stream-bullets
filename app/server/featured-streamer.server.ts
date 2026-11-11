@@ -24,6 +24,8 @@ export async function getFeaturedStreamer(env: AppEnv): Promise<FeaturedStreamer
   const entries = await env.DB.prepare(`
     SELECT id, title, kind FROM entries WHERE streamer_id = ?
     ORDER BY created_at DESC, id DESC LIMIT 3
-  `).bind(streamer.id).all<FeaturedEntry>();
+  `)
+    .bind(streamer.id)
+    .all<FeaturedEntry>();
   return { handle: streamer.handle, name: streamer.name, entries: entries.results };
 }
