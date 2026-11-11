@@ -2,19 +2,69 @@ name: Update graph
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      number:
+        description: Pull request to refresh
+        required: true
+        type: string
 
 permissions:
   contents: read
   pull-requests: read
 
 concurrency:
-  group: graphify-update-${{ github.event.pull_request.number }}
+  group: graphify-update-${{ github.event.pull_request.number || inputs.number || 'main' }}
   cancel-in-progress: true
 
 jobs:
+  refresh-open-prs:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+      actions: write
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const pulls = await github.paginate(github.rest.pulls.list, {
+              ...context.repo, state: 'open', base: 'main', per_page: 100,
+            });
+            for (const pull of pulls) {
+              if (pull.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`) continue;
+              await github.rest.actions.createWorkflowDispatch({
+                ...context.repo, workflow_id: 'graphify-update.yml', ref: 'main',
+                inputs: { number: String(pull.number) },
+              });
+            }
+
+  revision:
+    if: github.event_name != 'push' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      pull: ${{ steps.pull.outputs.result }}
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        id: pull
+        with:
+          script: |
+            const number = context.payload.pull_request?.number || Number(context.payload.inputs.number);
+            if (!Number.isSafeInteger(number) || number < 1) throw new Error('Invalid PR number');
+            const { data: pull } = await github.rest.pulls.get({ ...context.repo, pull_number: number });
+            if (pull.state !== 'open' || pull.base.ref !== 'main' ||
+                pull.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`) return null;
+            const { data: base } = await github.rest.git.getRef({ ...context.repo, ref: `heads/${pull.base.ref}` });
+            return { number, head: { sha: pull.head.sha }, base: { ref: pull.base.ref, sha: base.object.sha } };
+
   build:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    needs: revision
+    if: needs.revision.outputs.pull != 'null'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -31,7 +81,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ fromJSON(needs.revision.outputs.pull).head.sha }}
           path: candidate
           fetch-depth: 0
           persist-credentials: false
@@ -40,30 +90,24 @@ jobs:
           python-version: '3.12'
       - name: Install trusted graph tools
         run: python -m pip install --require-hashes -r trusted/.github/graphify/requirements.txt
-      - name: Update graph from source data
+      - name: Merge main and rebuild the generated graph
         id: graph
         env:
           GRAPHIFY_SOURCE_ROOT: ${{ github.workspace }}/candidate
           GRAPHIFY_BACKEND: none
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ fromJSON(needs.revision.outputs.pull).base.sha }}
           PYTHONHASHSEED: '0'
-        run: |
-          python trusted/.github/graphify/snapshot.py --update --base "$BASE_SHA"
-          if git -C candidate diff --quiet -- graphify-out/graph.json && git -C candidate ls-files --error-unmatch graphify-out/graph.json > /dev/null 2>&1; then
-            echo 'changed=false' >> "$GITHUB_OUTPUT"
-          else
-            echo 'changed=true' >> "$GITHUB_OUTPUT"
-          fi
+        run: python trusted/.github/graphify/refresh.py
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: steps.graph.outputs.changed == 'true'
         with:
-          name: graph-${{ github.event.pull_request.head.sha }}
-          path: candidate/graphify-out/graph.json
+          name: graph-${{ fromJSON(needs.revision.outputs.pull).head.sha }}
+          path: candidate/graph-update.json
           if-no-files-found: error
           retention-days: 1
 
   publish:
-    needs: build
+    needs: [revision, build]
     permissions:
       contents: write
       pull-requests: read
@@ -82,9 +126,12 @@ jobs:
           sparse-checkout: .github/graphify
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
-          name: graph-${{ github.event.pull_request.head.sha }}
+          name: graph-${{ fromJSON(needs.revision.outputs.pull).head.sha }}
           path: graph-artifact
       - name: Commit graph if the PR head is unchanged
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
-          script: await require('./.github/graphify/publish.cjs')({ github, context, core });
+          script: |
+            await require('./.github/graphify/publish.cjs')({ github, context, core, expected: JSON.parse(process.env.PR_REVISION) });
+        env:
+          PR_REVISION: ${{ needs.revision.outputs.pull }}
