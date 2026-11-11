@@ -21525,7 +21525,7 @@
       "relation": "calls",
       "source": "app_routes_home_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L108",
+      "source_location": "L122",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -21537,7 +21537,7 @@
       "relation": "calls",
       "source": "app_routes_home_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -21549,7 +21549,7 @@
       "relation": "calls",
       "source": "app_routes_home_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L37",
+      "source_location": "L39",
       "target": "app_lib_directory_directoryhref",
       "weight": 1.0
     },
@@ -21561,7 +21561,7 @@
       "relation": "calls",
       "source": "app_routes_home_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L43",
+      "source_location": "L45",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -21573,7 +21573,7 @@
       "relation": "calls",
       "source": "app_routes_home_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -21585,7 +21585,7 @@
       "relation": "calls",
       "source": "app_routes_home_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L56",
+      "source_location": "L58",
       "target": "app_components_shell_account_menu_accountmenu",
       "weight": 1.0
     },
@@ -21597,8 +21597,20 @@
       "relation": "calls",
       "source": "app_routes_home_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L67",
+      "source_location": "L69",
       "target": "app_components_station_station_station",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_home_home",
+      "source_file": "app/routes/home.tsx",
+      "source_location": "L92",
+      "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
     {
@@ -21609,7 +21621,7 @@
       "relation": "calls",
       "source": "app_routes_home_meta",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_lib_shell_shellfrommatches",
       "weight": 1.0
     },
@@ -21621,7 +21633,7 @@
       "relation": "calls",
       "source": "app_routes_home_meta",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -21633,7 +21645,7 @@
       "relation": "calls",
       "source": "app_routes_home_meta",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_lib_structured_data_sitejsonld",
       "weight": 1.0
     },
@@ -32001,7 +32013,7 @@
       "relation": "calls",
       "source": "tests_e2e_client_ips_checkallocations",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "target": "tests_e2e_client_ips_allocations",
       "weight": 1.0
     },
@@ -32013,7 +32025,7 @@
       "relation": "calls",
       "source": "tests_e2e_client_ips_clientaddress",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L74",
+      "source_location": "L75",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -50271,6 +50283,30 @@
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
       "source_location": "L10",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_home",
+      "source_file": "app/routes/home.tsx",
+      "source_location": "L10",
+      "target": "app_components_ui_icon_iconname",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_home",
+      "source_file": "app/routes/home.tsx",
+      "source_location": "L11",
       "target": "app_components_station_station_station",
       "weight": 1.0
     },
@@ -50379,7 +50415,19 @@
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
       "source_location": "L7",
-      "target": "app_components_shell_account_menu_accountmenu",
+      "target": "app_components_account_dialog_route_dialoghref",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_home",
+      "source_file": "app/routes/home.tsx",
+      "source_location": "L7",
+      "target": "app_components_account_dialog_route_dialogstate",
       "weight": 1.0
     },
     {
@@ -50391,31 +50439,19 @@
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
       "source_location": "L8",
+      "target": "app_components_shell_account_menu_accountmenu",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_home",
+      "source_file": "app/routes/home.tsx",
+      "source_location": "L9",
       "target": "app_components_shell_sign_in_dialog_signindialog",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_home",
-      "source_file": "app/routes/home.tsx",
-      "source_location": "L9",
-      "target": "app_components_ui_icon_icon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_home",
-      "source_file": "app/routes/home.tsx",
-      "source_location": "L9",
-      "target": "app_components_ui_icon_iconname",
       "weight": 1.0
     },
     {
@@ -62620,6 +62656,30 @@
       "source_file": "tests/e2e/landing.spec.ts",
       "source_location": "L2",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_landing_spec",
+      "source_file": "tests/e2e/landing.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_fixtures_signedin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_landing_spec",
+      "source_file": "tests/e2e/landing.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
     {
@@ -77580,7 +77640,7 @@
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
       "source_location": "L10",
-      "target": "app_components_station_station",
+      "target": "app_components_ui_icon",
       "weight": 1.0
     },
     {
@@ -77592,6 +77652,18 @@
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
       "source_location": "L11",
+      "target": "app_components_station_station",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_home",
+      "source_file": "app/routes/home.tsx",
+      "source_location": "L12",
       "target": "ref_components_station_landing_css",
       "weight": 1.0
     },
@@ -77664,7 +77736,7 @@
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
       "source_location": "L7",
-      "target": "app_components_shell_account_menu",
+      "target": "app_components_account_dialog_route",
       "weight": 1.0
     },
     {
@@ -77676,7 +77748,7 @@
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
       "source_location": "L8",
-      "target": "app_components_shell_sign_in_dialog",
+      "target": "app_components_shell_account_menu",
       "weight": 1.0
     },
     {
@@ -77688,7 +77760,7 @@
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
       "source_location": "L9",
-      "target": "app_components_ui_icon",
+      "target": "app_components_shell_sign_in_dialog",
       "weight": 1.0
     },
     {
@@ -84135,6 +84207,30 @@
       "source_file": "tests/e2e/landing.spec.ts",
       "source_location": "L1",
       "target": "tests_e2e_coverage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_landing_spec",
+      "source_file": "tests/e2e/landing.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_fixtures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_landing_spec",
+      "source_file": "tests/e2e/landing.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_client_ips",
       "weight": 1.0
     },
     {
@@ -99478,7 +99574,7 @@
       "relation": "contains",
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "target": "app_routes_home_signicon",
       "weight": 1.0
     },
@@ -99489,7 +99585,7 @@
       "relation": "contains",
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "app_routes_home_signlabel",
       "weight": 1.0
     },
@@ -99500,7 +99596,7 @@
       "relation": "contains",
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "app_routes_home_meta",
       "weight": 1.0
     },
@@ -99511,7 +99607,7 @@
       "relation": "contains",
       "source": "app_routes_home",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "app_routes_home_home",
       "weight": 1.0
     },
@@ -108608,7 +108704,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L39",
+      "source_location": "L40",
       "target": "tests_e2e_client_ips_spec",
       "weight": 1.0
     },
@@ -108619,7 +108715,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L42",
+      "source_location": "L43",
       "target": "tests_e2e_client_ips_allocations",
       "weight": 1.0
     },
@@ -108630,7 +108726,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "tests_e2e_client_ips_checkallocations",
       "weight": 1.0
     },
@@ -108641,7 +108737,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L65",
+      "source_location": "L66",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -108663,7 +108759,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "tests_e2e_client_ips_clientaddress",
       "weight": 1.0
     },
@@ -114152,10 +114248,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "e0d43b73ea6c176c1301597f5680b4e475e256c769e86f32330ee2fdac2d4b89",
+    "content_sha256": "745078574621afa5b71fc17cdf33b6e6c5960fca7ca6a7c5a2dbd262988bd479",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "724ec68cb8bc075c2d1e1df330d7c6838f6116d29c361a04cf0f87dd947433fb",
+    "source_sha256": "cf6bfb5ee2d5cc9678902811a7a392550f405bc4fdcf048b16a974320043e5b4",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -118081,7 +118177,7 @@
       "label": "Spec",
       "norm_label": "spec",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "_callable": true,
@@ -127209,7 +127305,7 @@
       "label": "Home()",
       "norm_label": "home()",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "_callable": true,
@@ -127220,7 +127316,7 @@
       "label": "meta()",
       "norm_label": "meta()",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_callable": true,
@@ -132547,7 +132643,7 @@
       "label": "allocations()",
       "norm_label": "allocations()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "_callable": true,
@@ -132558,7 +132654,7 @@
       "label": "checkAllocations()",
       "norm_label": "checkallocations()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L49"
+      "source_location": "L50"
     },
     {
       "_callable": true,
@@ -132569,7 +132665,7 @@
       "label": "clientAddress()",
       "norm_label": "clientaddress()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L73"
+      "source_location": "L74"
     },
     {
       "_callable": true,
@@ -132580,7 +132676,7 @@
       "label": "clientIp()",
       "norm_label": "clientip()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L65"
+      "source_location": "L66"
     },
     {
       "_callable": true,
@@ -138729,7 +138825,7 @@
       "label": "signIcon",
       "norm_label": "signicon",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L13"
+      "source_location": "L14"
     },
     {
       "_origin": "ast",
@@ -138739,7 +138835,7 @@
       "label": "signLabel",
       "norm_label": "signlabel",
       "source_file": "app/routes/home.tsx",
-      "source_location": "L14"
+      "source_location": "L15"
     },
     {
       "_origin": "ast",
