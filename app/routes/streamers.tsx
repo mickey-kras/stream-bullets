@@ -305,9 +305,7 @@ export default function Streamers(): ReactNode {
               </form>
             </search>
             <div className="list-toolbar">
-              <span className="list-count">
-                {count}
-              </span>
+              <span className="list-count">{count}</span>
               {streamers.length === 0 && (
                 <button type="button" className="text-button" onClick={() => search("", false)}>
                   {t("streamers.clearSearch")}

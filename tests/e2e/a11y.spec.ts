@@ -170,10 +170,16 @@ for (const width of [1363, 390]) {
     await page.getByRole("dialog").getByRole("button", { name: "English" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(language).toBeFocused();
-    if (width === 390) await page.keyboard.press("Escape");
+    if (width === 390) {
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("button", { name: "More", exact: true })).toBeFocused();
+    }
     await expect(page.getByRole("link", { name: "Planned", exact: true })).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("link", { name: "StreamBullets home", exact: true })).toHaveAttribute("href", "/");
-    await expect(page.getByRole("link", { name: "Ideas for StreamBullets", exact: true })).toHaveAttribute("href", "/@streambullets");
+    await expect(page.getByRole("link", { name: "Ideas for StreamBullets", exact: true })).toHaveAttribute(
+      "href",
+      "/@streambullets",
+    );
   });
 }
 
@@ -204,10 +210,14 @@ for (const failure of ["access", "write"] as const) {
     await page.addInitScript((mode: "access" | "write"): void => {
       if (mode === "access") {
         Object.defineProperty(window, "sessionStorage", {
-          get(): never { throw new DOMException("Blocked", "SecurityError"); },
+          get(): never {
+            throw new DOMException("Blocked", "SecurityError");
+          },
         });
       } else {
-        Storage.prototype.setItem = (): never => { throw new DOMException("Full", "QuotaExceededError"); };
+        Storage.prototype.setItem = (): never => {
+          throw new DOMException("Full", "QuotaExceededError");
+        };
       }
     }, failure);
     const errors: string[] = [];

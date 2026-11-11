@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { getLocale, LOCALE_NAMES, t, type Locale } from "../../i18n";
 import { paths } from "../../lib/shell";
@@ -28,6 +28,7 @@ export function SiteFooter(): ReactNode {
   const current = (path: string): "page" | undefined => (pathname === path ? "page" : undefined);
   const locale: Locale = getLocale();
   const languageLabel: string = t("language.current", { name: LOCALE_NAMES[locale] });
+  const moreTrigger = useRef<HTMLButtonElement>(null);
   const close = (): void => setDialog(null);
   useEffect(() => {
     try {
@@ -47,6 +48,7 @@ export function SiteFooter(): ReactNode {
           // Focus is already restored if storage becomes unavailable.
         }
       } else {
+        moreTrigger.current?.focus();
         setDialog("more");
       }
     });
@@ -88,7 +90,13 @@ export function SiteFooter(): ReactNode {
         <Link to={paths.terms} aria-current={current(paths.terms)}>
           {t("legal.terms")}
         </Link>
-        <button type="button" className="footer-link" aria-haspopup="dialog" onClick={() => setDialog("more")}>
+        <button
+          ref={moreTrigger}
+          type="button"
+          className="footer-link"
+          aria-haspopup="dialog"
+          onClick={() => setDialog("more")}
+        >
           {t("footer.more")}
           <Icon name="chevron-down" size={16} />
         </button>
