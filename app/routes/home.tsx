@@ -1,9 +1,10 @@
 import { useCallback, useState, type ReactNode } from "react";
-import { Link, useNavigate, type MetaArgs } from "react-router";
+import { Link, useLocation, useNavigate, type MetaArgs } from "react-router";
 import { directoryHref, SIGN_INTENTS, type Intent } from "../lib/directory";
 import { paths, shellFromMatches, useShell } from "../lib/shell";
 import { siteJsonLd } from "../lib/structured-data";
 import { t } from "../i18n";
+import { dialogHref, type DialogState } from "../components/account/dialog-route";
 import { AccountMenu } from "../components/shell/account-menu";
 import { SignInDialog } from "../components/shell/sign-in-dialog";
 import { Icon, type IconName } from "../components/ui/icon";
@@ -28,6 +29,7 @@ export function meta({ matches }: MetaArgs) {
 
 export default function Home(): ReactNode {
   const shell = useShell();
+  const location = useLocation();
   const navigate = useNavigate();
   const [signInOpen, setSignInOpen] = useState<boolean>(false);
   // A sign on the station (item 4): it flips, then the Streamers list opens with that intent.
@@ -72,6 +74,7 @@ export default function Home(): ReactNode {
               <span className="title-line">{t("landing.title2")}</span>
             </h1>
             <p>{t("landing.tagline")}</p>
+            <p>{t("landing.streamerBenefits")}</p>
             <div className="landing-actions">
               {shell.ownStreamer ? (
                 <>
@@ -82,7 +85,18 @@ export default function Home(): ReactNode {
                   {browse("secondary")}
                 </>
               ) : (
-                browse("gold")
+                <>
+                  {browse("gold")}
+                  <Link
+                    className="button-link secondary"
+                    to={dialogHref(location, "host")}
+                    state={{ dialogFrom: location.pathname } satisfies DialogState}
+                    preventScrollReset
+                  >
+                    <Icon name="mic" size={18} />
+                    {t("landing.joinStreamer")}
+                  </Link>
+                </>
               )}
             </div>
             {/* The station's signs as plain links, for keyboards, screen readers and anyone without WebGL. */}
