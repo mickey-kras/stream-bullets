@@ -70,7 +70,7 @@ test("selected poll data stays current and failed votes leave controls usable", 
   });
   const first = page.getByRole("button", { name: "First", exact: true });
   await first.click();
-  await expect(page.getByRole("alert")).toContainText("Vote unavailable");
+  await expect(page.locator(".page-error")).toHaveText("Vote unavailable");
   await expect(first).toBeEnabled();
   await page.unroute("**/api/streamers/test_host");
   await first.click();
@@ -89,6 +89,10 @@ test("a delayed board response cannot replace the next navigation", async ({ bro
   const held = new Promise<void>((resolve) => {
     release = resolve;
   });
+  let delivered: (() => void) | undefined;
+  const completed = new Promise<void>((resolve) => {
+    delivered = resolve;
+  });
   let reached: (() => void) | undefined;
   const started = new Promise<void>((resolve) => {
     reached = resolve;
@@ -98,16 +102,61 @@ test("a delayed board response cannot replace the next navigation", async ({ bro
     reached?.();
     await held;
     await route.fulfill({ response });
+    delivered?.();
   });
   await page.getByRole("button", { name: /Refresh polls/ }).click();
   await started;
   try {
-    await page.getByRole("link", { name: "Topics", exact: true }).click();
+    await page.locator(".streamer-header nav").getByRole("link", { name: "Topics", exact: true }).click();
     await expect(page).toHaveURL(/view=topics/);
   } finally {
     release?.();
   }
-  await expect(page.getByRole("heading", { name: /Topics/ }).first()).toBeVisible();
+  await completed;
+  await expect(page.getByRole("heading", { name: /Pick the next conversation/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Delayed refresh poll", exact: true })).toHaveCount(0);
+  await close(owner);
+});
+
+test("deleting an open poll through its card menu returns to the current list", async ({ browser }) => {
+  const owner = await signedIn(browser, "owner", clientIp("mutations", 25));
+  const id = await createPoll(owner, "Selected poll to delete");
+  const page = await newPage(owner);
+  await page.goto(`/@test_host?view=polls&entry=${id}`);
+  const card = page.locator("article.poll-card").filter({ hasText: "Selected poll to delete" });
+  await card.locator(".poll-kebab > summary").click();
+  await card.getByRole("button", { name: "Delete poll", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Delete poll?", exact: true });
+  await dialog.getByRole("button", { name: "Delete poll", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page).toHaveURL(/view=polls$/);
+  await expect(page.getByRole("heading", { name: "Selected poll to delete", exact: true })).toHaveCount(0);
+  const removed = await owner.request.get(`/api/entries/${id}`);
+  expect(removed.status()).toBe(404);
+  await close(owner);
+});
+
+test("refreshing a selection deleted by another client replaces stale content with the missing-page response", async ({
+  browser,
+}) => {
+  const owner = await signedIn(browser, "owner", clientIp("mutations", 25));
+  const id = await createPoll(owner, "Poll removed during a vote");
+  const viewer = await signedIn(browser, "viewer", clientIp("mutations", 26));
+  const page = await newPage(viewer);
+  await page.goto(`/@test_host?view=polls&entry=${id}`);
+  await page.route("**/api/streamers/test_host", async (route) => {
+    const vote = await route.fetch();
+    expect(vote.ok()).toBe(true);
+    const removed = await owner.request.post("/api/streamers/test_host", {
+      headers: { Origin: origin },
+      data: { action: "delete", id },
+    });
+    expect(removed.ok()).toBe(true);
+    await route.fulfill({ response: vote });
+  });
+  await page.getByRole("button", { name: "First", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Page not found", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Poll removed during a vote", exact: true })).toHaveCount(0);
+  await close(viewer);
   await close(owner);
 });

@@ -36,7 +36,7 @@ import { dialogHref, type DialogState } from "../components/account/dialog-route
 import { Icon } from "../components/ui/icon";
 import { useToast } from "../components/ui/toast";
 import { t } from "../i18n";
-import { errorMessage, postJson, requestJson } from "../components/api";
+import { ApiError, errorMessage, postJson, requestJson } from "../components/api";
 import { CreateEntry } from "../components/create-entry";
 import { Discussion } from "../components/discussion";
 import { useLivePolls, useLiveRevalidation } from "../components/live";
@@ -262,12 +262,20 @@ function streamerHeaderAppearance(
 export default function StreamerPage(): ReactNode {
   const data = useLoaderData<typeof loader>();
   const { viewer, moderator, view, sort, query, status, events, support } = data;
-  const { board, selected: loadedSelected, refreshing, refresh } = useBoardRefresh(data);
+  const { board, selected: loadedSelected, refreshing, refresh: refreshData } = useBoardRefresh(data);
   const { streamer } = board;
   useRememberContentRoute(`/@${streamer.handle}`, streamer.name);
   const [searchParams, setSearchParams] = useSearchParams();
   const here = useLocation();
   const revalidator = useRevalidator();
+  const refresh = useCallback(async (): Promise<void> => {
+    try {
+      await refreshData();
+    } catch (error_: unknown) {
+      if (error_ instanceof ApiError && error_.status === 404) await revalidator.revalidate();
+      else throw error_;
+    }
+  }, [refreshData, revalidator]);
   const toast = useToast();
   const { dialog, setDialog, signIn, setSignIn } = useIntentDialog(data.intent, viewer, streamer);
   const { providers } = useShell();
@@ -574,6 +582,7 @@ export default function StreamerPage(): ReactNode {
         onLoadMore={() => void loadMore()}
         onAction={act}
         onDelete={async (id: string) => {
+          if (loadedSelected?.id === id) return removeSelected();
           await deleteEntry(id);
           await refresh();
         }}

@@ -10,7 +10,7 @@ import { stripImageMetadata } from "./image-metadata";
 const types: Readonly<Record<string, string>> = { png: "image/png", jpg: "image/jpeg", webp: "image/webp" };
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-/** Account picture, page background and page logo. Each lives in R2 at `{kind}/{userId}`. */
+/** Account picture, page background and page logo use stable public addresses and immutable R2 versions. */
 export const IMAGE_KINDS = ["avatar", "background", "logo"] as const;
 export type ImageKind = (typeof IMAGE_KINDS)[number];
 
@@ -52,25 +52,29 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
   const bytes = await readBody(request, MAX_IMAGE_BYTES);
   const contentType = validateImage(bytes, request.headers.get("Content-Type"));
   const clean: Uint8Array = stripImageMetadata(bytes, contentType);
-  const key = `${kind}/${userId}`;
-  const url = `/images/${key}`;
-  await env.DB.prepare("DELETE FROM image_versions WHERE owner_id=? AND kind=?").bind(userId, kind).run();
+  const path = `${kind}/${userId}`;
+  const previous = await imageStorageKey(env, userId, kind);
+  const version = crypto.randomUUID();
+  const key = `${path}/${version}`;
+  const url = `/images/${path}`;
   await env.IMAGES.put(key, clean, { httpMetadata: { contentType, cacheControl: "no-cache" } });
+  const publish = env.DB.prepare(
+    "INSERT INTO image_versions (owner_id,kind,version) VALUES (?,?,?) ON CONFLICT(owner_id,kind) DO UPDATE SET version=excluded.version",
+  ).bind(userId, kind, version);
   if (kind === "avatar") {
     await env.DB.batch([
       env.DB.prepare("UPDATE user SET image = ?, updated_at = ? WHERE id = ?").bind(url, Date.now(), userId),
       env.DB.prepare("UPDATE streamers SET avatar = ? WHERE owner_id = ?").bind(url, userId),
+      publish,
     ]);
-  } else if (kind === "logo") {
-    await db.update(streamers).set({ logo: url }).where(eq(streamers.ownerId, userId));
   } else {
-    await db.update(streamers).set({ background: url }).where(eq(streamers.ownerId, userId));
+    await env.DB.batch([env.DB.prepare(`UPDATE streamers SET ${kind}=? WHERE owner_id=?`).bind(url, userId), publish]);
   }
-  await env.DB.prepare(
-    "INSERT INTO image_versions (owner_id,kind,version) VALUES (?,?,?) ON CONFLICT(owner_id,kind) DO UPDATE SET version=excluded.version",
-  )
-    .bind(userId, kind, crypto.randomUUID())
-    .run();
+  try {
+    await env.IMAGES.delete(previous);
+  } catch (error: unknown) {
+    console.error("Previous image cleanup failed.", { cause: error instanceof Error ? error.name : "unknown" });
+  }
   return url;
 }
 
@@ -80,6 +84,7 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
  */
 export async function deleteAvatar(env: AppEnv, userId: string): Promise<void> {
   const url = `/images/avatar/${userId}`;
+  const key = await imageStorageKey(env, userId, "avatar");
   await env.DB.batch([
     env.DB.prepare("UPDATE user SET image = NULL, updated_at = ? WHERE id = ? AND image = ?").bind(
       Date.now(),
@@ -88,7 +93,7 @@ export async function deleteAvatar(env: AppEnv, userId: string): Promise<void> {
     ),
     env.DB.prepare("UPDATE streamers SET avatar = NULL WHERE owner_id = ? AND avatar = ?").bind(userId, url),
   ]);
-  await env.IMAGES.delete(`avatar/${userId}`);
+  await env.IMAGES.delete([...new Set([key, `avatar/${userId}`])]);
 }
 
 /** `DELETE /api/images/logo`: the page goes back to the owner's profile picture. */
@@ -97,8 +102,28 @@ export async function deleteLogo(env: AppEnv, userId: string): Promise<void> {
   const profile = (await db.select().from(streamers).where(eq(streamers.ownerId, userId)).limit(1))[0];
   if (!profile) throw new HttpError(403, "Create a streamer profile first.");
   await assertStreamerWritable(env, profile.id, userId);
+  const key = await imageStorageKey(env, userId, "logo");
   await db.update(streamers).set({ logo: null }).where(eq(streamers.id, profile.id));
-  await env.IMAGES.delete(`logo/${userId}`);
+  await env.IMAGES.delete([...new Set([key, `logo/${userId}`])]);
+}
+
+export async function imageStorageKey(env: AppEnv, userId: string, kind: ImageKind): Promise<string> {
+  const row = await env.DB.prepare("SELECT version FROM image_versions WHERE owner_id=? AND kind=?")
+    .bind(userId, kind)
+    .first<{ version: string }>();
+  const path = `${kind}/${userId}`;
+  return row ? `${path}/${row.version}` : path;
+}
+
+export async function deleteImageObjects(env: AppEnv, userId: string, kind: ImageKind): Promise<void> {
+  const path = `${kind}/${userId}`;
+  await env.IMAGES.delete(path);
+  let cursor: string | undefined;
+  do {
+    const page = await env.IMAGES.list({ prefix: `${path}/`, cursor });
+    if (page.objects.length) await env.IMAGES.delete(page.objects.map((object) => object.key));
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
 }
 
 export async function serveImage(
@@ -121,8 +146,8 @@ export async function serveImage(
   if (live.version && !cache && typeof caches !== "undefined") {
     try {
       cache = await caches.open("public-images");
-    } catch {
-      console.error("Image cache open failed.");
+    } catch (error: unknown) {
+      console.error("Image cache open failed.", { cause: error instanceof Error ? error.name : "unknown" });
     }
   }
   const key: string | null =
@@ -131,12 +156,12 @@ export async function serveImage(
   if (key && cache) {
     try {
       response = await cache.match(key);
-    } catch {
-      console.error("Image cache lookup failed.");
+    } catch (error: unknown) {
+      console.error("Image cache lookup failed.", { cause: error instanceof Error ? error.name : "unknown" });
     }
   }
   if (!response) {
-    const object = await env.IMAGES.get(path);
+    const object = await env.IMAGES.get(live.version ? `${path}/${live.version}` : path);
     if (!object) throw new HttpError(404, "Image not found.");
     response = new Response(object.body, {
       headers: {
@@ -150,8 +175,8 @@ export async function serveImage(
     if (key && cache) {
       try {
         await cache.put(key, response.clone());
-      } catch {
-        console.error("Image cache write failed.");
+      } catch (error: unknown) {
+        console.error("Image cache write failed.", { cause: error instanceof Error ? error.name : "unknown" });
       }
     }
   }
