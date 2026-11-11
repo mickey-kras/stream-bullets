@@ -126,7 +126,7 @@ test("official information tabs explain the product and lead back to feedback", 
   await page.goto("/@streambullets?view=about");
   const tabs = page.getByRole("navigation", { name: "Main navigation" });
   await expect(tabs.getByRole("link", { name: "About StreamBullets", exact: true })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("main").getByRole("link", { name: "Ideas", exact: true })).toHaveAttribute("href", "?view=topics");
+  await expect(page.getByRole("main").getByRole("link", { name: "Ideas", exact: true })).toHaveAttribute("href", "/@streambullets?view=topics");
   await tabs.getByRole("link", { name: "Feedback guide", exact: true }).click();
   await expect(page.getByRole("heading", { name: "How we prioritize" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Reporting bugs" })).toBeVisible();
