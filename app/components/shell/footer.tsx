@@ -16,12 +16,6 @@ function MoreRow({ icon, children }: Readonly<{ icon: IconName; children: ReactN
   );
 }
 
-/**
- * The footer: legal links on the gold bottom band of the frame (42px desktop, 34px phones) in dark ink; the
- * landing page keeps its own dark strip. Phones show Privacy, Terms and More; More opens a sheet with the rest.
- * Suggest an improvement opens the official Ideas board with its dialog. The language switch shows the current
- * language in its own script.
- */
 export function SiteFooter(): ReactNode {
   const { pathname } = useLocation();
   const [dialog, setDialog] = useState<"contact" | "more" | null>(null);
@@ -65,6 +59,12 @@ export function SiteFooter(): ReactNode {
         <Link to={paths.terms} aria-current={current(paths.terms)}>
           {t("legal.terms")}
         </Link>
+        <DialogLink name="a11y" label={t("footer.accessibility")}>
+          <Icon name="eye" size={18} />
+        </DialogLink>
+        <DialogLink name="language" label={languageLabel}>
+          <Icon name="globe" size={18} />
+        </DialogLink>
         <button type="button" className="footer-link" aria-haspopup="dialog" onClick={() => setDialog("more")}>
           {t("footer.more")}
           <Icon name="chevron-down" size={16} />
