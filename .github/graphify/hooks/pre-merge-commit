@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 before=$(git write-tree)
-"$(git rev-parse --show-toplevel)/.githooks/pre-commit"
+"$(git rev-parse --git-path graphify/hooks/pre-commit)"
 # git merge can retain the tree it computed before this hook changed the index.
 if [ "$before" != "$(git write-tree)" ]; then
   echo 'Graph rebuilt and staged. Run git commit to finish this merge.' >&2

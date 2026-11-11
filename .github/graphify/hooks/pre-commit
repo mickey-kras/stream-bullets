@@ -5,4 +5,4 @@ python=$(git config --local --get graphify.python) || {
   echo 'Run the Graphify clone setup in docs/code-graph.md.' >&2
   exit 1
 }
-exec "$python" .github/graphify/pre_commit.py
+exec "$python" -I "$(git rev-parse --git-path graphify/pre_commit.py)"

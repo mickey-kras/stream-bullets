@@ -42,21 +42,25 @@ The workflow needs write access to repository contents and Actions, plus read ac
 
 Run this setup in each clone. Git does not copy local driver or hook configuration.
 The setup registers Graphify's native graph merge driver and the shared commit hooks.
-It stops if another hook configuration would be replaced.
+The setup stops if the clone already uses other hooks.
+
+Run setup only from reviewed source. It copies hooks and graph tools into `.git/graphify`.
+Installed hooks reject changes to the staged extractor or its requirements.
+Review tool changes before you run setup again.
 
 ```sh
-python3.12 -m venv .graphify-venv
-.graphify-venv/bin/python -m pip install --require-hashes -r .github/graphify/requirements.txt
-.graphify-venv/bin/python .github/graphify/setup.py
+python3.12 -m venv ~/.local/share/stream-bullets-graphify
+~/.local/share/stream-bullets-graphify/bin/python -m pip install --require-hashes -r .github/graphify/requirements.txt
+~/.local/share/stream-bullets-graphify/bin/python .github/graphify/setup.py
 ```
 
 The hooks rebuild and stage `graph.json` before ordinary and merge commits.
 For local merges, use `git merge --no-commit` followed by `git commit`.
 If an automatic merge rebuild changes the graph, the hook pauses the commit.
-Run `git commit` to finish; the graph is already staged.
+Run `git commit` to finish. The hook staged the graph.
 
 The hooks extract staged files in a temporary checkout. Unstaged source edits remain outside the graph.
-Extraction failures stop the commit. Only `graph.json` is tracked; other graph output stays local.
+Extraction failures stop the commit. Git tracks only `graph.json`. Other graph output stays local.
 
 The merge driver combines graph nodes and edges. The hook then rebuilds from source to remove stale nodes.
 The rebuild uses our code and Markdown extractor, with pinned dependencies and no model calls.

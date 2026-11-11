@@ -19,10 +19,10 @@ class HookTests(unittest.TestCase):
         self.git("init", "-q")
         self.git("config", "user.name", "Test")
         self.git("config", "user.email", "test@example.com")
-        shutil.copytree(TOOLS.parents[1] / ".githooks", self.root / ".githooks")
+        shutil.copytree(TOOLS.parents[1] / ".github/graphify/hooks", self.root / ".github/graphify/hooks")
         target = self.root / ".github/graphify"
-        target.mkdir(parents=True)
-        for name in ("setup.py", "pre_commit.py"):
+        target.mkdir(parents=True, exist_ok=True)
+        for name in ("setup.py", "pre_commit.py", "requirements.txt"):
             shutil.copy(TOOLS / name, target / name)
         (target / "snapshot.py").write_text(
             "from pathlib import Path\n"
@@ -44,10 +44,11 @@ class HookTests(unittest.TestCase):
         self.assertEqual((self.root / "source.ts").read_text(), "unstaged")
 
     def test_extraction_failure_blocks_commit(self) -> None:
-        (self.root / ".github/graphify/snapshot.py").write_text("raise SystemExit(1)\n")
+        (self.root / ".github/graphify/snapshot.py").write_text("from pathlib import Path\nPath('executed-candidate').touch()\nraise SystemExit(1)\n")
         self.git("add", ".")
         result = subprocess.run(["git", "commit", "-qm", "must fail"], cwd=self.root, check=False)
         self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.root / "executed-candidate").exists())
         self.assertEqual((self.root / "graphify-out/graph.json").read_text(), "old")
 
     def test_native_driver_merges_graph_nodes(self) -> None:

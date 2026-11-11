@@ -21,7 +21,7 @@ def refresh(root: Path, base: str) -> bool:
     if merge:
         result = subprocess.run(
             ["git", "-c", "core.hooksPath=/dev/null",
-             "-c", f"merge.graphify.driver={shlex.quote(sys.executable)} -m graphify merge-driver %O %A %B",
+             "-c", f"merge.graphify.driver={shlex.quote(sys.executable)} -I -m graphify merge-driver %O %A %B",
              "-c", "user.name=github-actions[bot]",
              "-c", "user.email=41898282+github-actions[bot]@users.noreply.github.com",
              "merge", "--no-commit", "--no-ff", base], cwd=root, check=False,
