@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RouterContextProvider } from "react-router";
 import { handleError } from "../app/entry.server";
+import { appContext, type AppEnv } from "../app/env";
+
+function context(): RouterContextProvider {
+  const context = new RouterContextProvider();
+  context.set(appContext, { env: {} as AppEnv, nonce: "test", responseHeaders: new Headers(), requestId: "test-request" });
+  return context;
+}
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -9,7 +16,7 @@ describe("server route error logging", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     handleError(new TypeError("SQL failed: session token secret-value"), {
       request: new Request("https://app.example/api?code=oauth-secret", { headers: { "CF-Ray": "8f1e2d3c4b5a6978-AMS" } }),
-      context: new RouterContextProvider(),
+      context: context(),
       params: {},
     });
     expect(log).toHaveBeenCalledTimes(1);
@@ -26,7 +33,7 @@ describe("server route error logging", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     handleError(new Error("SQL failed\nparams: session-token-secret,person@example.com\n    at fake (evil.js:1:1)"), {
       request: new Request("https://app.example/"),
-      context: new RouterContextProvider(),
+      context: context(),
       params: {},
     });
     const [, details] = log.mock.calls[0] as [string, { frames: string[] }];
@@ -37,8 +44,8 @@ describe("server route error logging", () => {
 
   it("logs a thrown non-Error value without frames", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    handleError("boom", { request: new Request("https://app.example/"), context: new RouterContextProvider(), params: {} });
-    expect(log.mock.calls).toEqual([["server_request_failed", { cause: "string", frames: [], ray: null }]]);
+    handleError("boom", { request: new Request("https://app.example/"), context: context(), params: {} });
+    expect(log.mock.calls).toEqual([["server_request_failed", { cause: "string", frames: [], ray: null, requestId: "test-request" }]]);
   });
 
   it("does not report a cancelled request as a server failure", () => {
@@ -47,7 +54,7 @@ describe("server route error logging", () => {
     controller.abort();
     handleError(new Error("cancelled"), {
       request: new Request("https://app.example/", { signal: controller.signal }),
-      context: new RouterContextProvider(),
+      context: context(),
       params: {},
     });
     expect(log).not.toHaveBeenCalled();

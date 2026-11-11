@@ -107,7 +107,8 @@ export default {
   },
   async fetch(request: Request, env: AppEnv): Promise<Response> {
     const nonce = btoa(String.fromCodePoint(...crypto.getRandomValues(new Uint8Array(18))));
-    const responseHeaders = new Headers();
+    const requestId: string = crypto.randomUUID();
+    const responseHeaders = new Headers({ "X-Request-ID": requestId });
     let response: Response;
     let origin: string;
     try {
@@ -128,14 +129,15 @@ export default {
         response = await serveImage(env, path.slice("/images/".length), request.method);
       } else {
         const context = new RouterContextProvider();
-        context.set(appContext, { env, nonce, responseHeaders });
+        context.set(appContext, { env, nonce, responseHeaders, requestId });
         response = await handler(request, context);
       }
     } catch (error) {
-      response = errorResponse(error, request);
+      response = errorResponse(error, request, requestId);
       origin = "https://invalid.invalid";
     }
     const secured = securityHeaders(response, request, nonce, origin, import.meta.env.DEV);
+    secured.headers.set("X-Request-ID", requestId);
     for (const value of responseHeaders.getSetCookie()) secured.headers.append("Set-Cookie", value);
     return secured;
   },

@@ -428,6 +428,7 @@
   "error.browseStreamers": "配信者を探す",
   "error.notFoundBody": "このページは存在しません。",
   "error.notFoundTitle": "ページが見つかりません",
+  "error.requestId": "リクエスト ID: {id}",
   "error.title": "問題が発生しました",
   "footer.accessibility": "アクセシビリティ",
   "footer.ai": "AI エージェント",

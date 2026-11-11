@@ -464,6 +464,7 @@
   "error.browseStreamers": "Смотреть стримеров",
   "error.notFoundBody": "Такой страницы нет.",
   "error.notFoundTitle": "Страница не найдена",
+  "error.requestId": "Идентификатор запроса: {id}",
   "error.title": "Что-то пошло не так",
   "footer.accessibility": "Доступность",
   "footer.ai": "ИИ-агенты",
