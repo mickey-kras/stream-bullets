@@ -160,21 +160,32 @@ test("headers keep every label on one line at 390px", async ({ browser }) => {
   await close(context);
 });
 
-test("the footer sits on the gold frame band: 42px on desktop, 34px on phones", async ({ page }) => {
+test("the footer keeps touch controls on the frame at desktop and phone widths", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/@test_host");
   const footer = page.getByRole("contentinfo");
   const desktop = (await footer.boundingBox())!;
-  expect(Math.round(desktop.height)).toBe(42);
+  expect(desktop.height).toBeGreaterThanOrEqual(44);
   expect(Math.round(desktop.y + desktop.height)).toBe(900);
   await expect(footer.getByRole("link", { name: "Streamers" })).toBeVisible();
   await expect(footer.getByRole("button", { name: "Contact" })).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
   const phone = (await footer.boundingBox())!;
-  expect(Math.round(phone.height)).toBe(34);
+  expect(phone.height).toBeGreaterThanOrEqual(44);
+  const targets = await footer.locator("a:visible, button:visible").evaluateAll((elements: Element[]) =>
+    elements.map((element: Element) => {
+      const box: DOMRect = element.getBoundingClientRect();
+      return { width: box.width, height: box.height, top: box.top, bottom: box.bottom };
+    }),
+  );
+  for (const target of targets) {
+    expect(target.width).toBeGreaterThanOrEqual(44);
+    expect(target.height).toBeGreaterThanOrEqual(44);
+    expect(target.top).toBeGreaterThanOrEqual(phone.y + 4);
+    expect(target.bottom).toBeLessThanOrEqual(phone.y + phone.height - 4);
+  }
   expect(Math.round(phone.y + phone.height)).toBe(844);
-  // Phones show Privacy, Terms and More; More holds the rest.
   await footer.getByRole("button", { name: "More" }).click();
   const more = page.getByRole("dialog", { name: "More" });
   await expect(more.getByRole("link", { name: "Report content" })).toHaveAttribute("href", "/terms#reporting");
