@@ -5,6 +5,13 @@ import { runSql, signedIn as fixtureSignedIn } from "./fixtures";
 import { origin, shots, signedIn } from "./live-helpers";
 import { clientAddress, clientIp } from "./client-ips";
 
+test.beforeEach(async () => {
+  // Each test and retry starts independently of the previous owner's display changes.
+  await runSql("overlay-control-reset", [
+    `UPDATE overlay_state SET air='{"type":"auto","ref":null}', preview=json_object('type','topic','ref',(SELECT id FROM entries WHERE title='Mic shootout' AND kind='topic')), instant=0, position='lower', size='m', show_results=1, message='', message_style='info', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`,
+  ]);
+});
+
 test("the owner previews, takes and switches what the one OBS URL shows", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 90));
   const control = await newPage(owner);
@@ -45,10 +52,13 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await control.getByRole("checkbox", { name: "Instant switch (skip preview)" }).click();
   await expect(control.getByRole("checkbox", { name: "Instant switch (skip preview)" })).toBeChecked();
   await expect(control.locator('[data-ov-monitor="prev"]')).toHaveCount(0);
+  await expect(control.getByRole("radio", { name: /^Hidden/ })).toBeEnabled();
   await control.locator("body").press("8");
   await expect(obs.locator('[data-overlay-type="hidden"]')).toBeEmpty();
   if (shots) await obs.screenshot({ path: `${shots}/overlay-hidden.png` });
 
+  // The OBS update can arrive before the save completes and shortcuts become available.
+  await expect(control.getByRole("radio", { name: /^Auto/ })).toBeEnabled();
   // Back to Auto so the page ends as it started: the newest open poll.
   await control.locator("body").press("1");
   await expect(obs.locator('[data-overlay-type="auto"]')).toBeVisible();

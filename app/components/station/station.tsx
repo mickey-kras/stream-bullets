@@ -105,9 +105,10 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
         </button>
       )}
       {status === "unavailable" && (
-        <output className="station-status">
-          The station preview is unavailable. You can still sign in and join the conversation.
-        </output>
+        <div className="station-fallback">
+          <img src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
+          <output className="station-status">{t("landing.unavailable")}</output>
+        </div>
       )}
     </section>
   );

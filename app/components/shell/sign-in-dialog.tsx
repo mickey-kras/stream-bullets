@@ -134,7 +134,12 @@ export function SignInDialog({
 }>): ReactNode {
   const description: string = reason ? t("signIn.descriptionWithReason", { reason }) : t("signIn.description");
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title={t("signIn.title")} description={description}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("signIn.title")}
+      description={providers.length > 0 ? description : undefined}
+    >
       <SignIn providers={providers} callbackURL={callbackURL} />
     </Dialog>
   );
