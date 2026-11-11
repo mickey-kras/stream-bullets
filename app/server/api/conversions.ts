@@ -12,7 +12,9 @@ export const conversionRoutes: ApiRoute[] = [
     const { id, event } = await readJson(request, clickSchema);
     const result = await env.DB.prepare(
       "INSERT INTO conversion_clicks (id,event,created_at) VALUES (?,?,?) ON CONFLICT(id) DO NOTHING",
-    ).bind(id, event, Date.now()).run();
+    )
+      .bind(id, event, Date.now())
+      .run();
     return json({ counted: result.meta.changes > 0 });
   }),
 ];

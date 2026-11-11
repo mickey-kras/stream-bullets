@@ -111,11 +111,11 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
         </ul>
         <p>
           Cloudflare Web Analytics measures visits and page performance. We also keep daily totals of landing-page
-          clicks, completed sign-ins, streamer applications, and first votes and topic submissions for 90 days.
-          These totals contain no account identifiers, IP addresses, page URLs, or user content. Random click
-          receipts expire after one day. Two flags on your account prevent repeated first-vote and first-topic
-          counts; they are included in your data export and removed with your account. We do not use advertising
-          trackers or build advertising profiles.
+          clicks, completed sign-ins, streamer applications, and first votes and topic submissions for 90 days. These
+          totals contain no account identifiers, IP addresses, page URLs, or user content. Random click receipts expire
+          after one day. Two flags on your account prevent repeated first-vote and first-topic counts; they are included
+          in your data export and removed with your account. We do not use advertising trackers or build advertising
+          profiles.
         </p>
       </>
     ),

@@ -59,7 +59,13 @@ export default function Home(): ReactNode {
           {shell.viewer ? (
             <AccountMenu />
           ) : (
-            <button type="button" onClick={() => { trackCta("cta_sign_in"); setSignInOpen(true); }}>
+            <button
+              type="button"
+              onClick={() => {
+                trackCta("cta_sign_in");
+                setSignInOpen(true);
+              }}
+            >
               <Icon name="sign-in" size={18} />
               {t("signIn.trigger")}
             </button>
@@ -79,7 +85,11 @@ export default function Home(): ReactNode {
             <div className="landing-actions">
               {shell.ownStreamer ? (
                 <>
-                  <Link className="button-link gold" to={paths.streamer(shell.ownStreamer.handle)} onClick={() => trackCta("cta_your_page")}>
+                  <Link
+                    className="button-link gold"
+                    to={paths.streamer(shell.ownStreamer.handle)}
+                    onClick={() => trackCta("cta_your_page")}
+                  >
                     <Icon name="your-page" size={18} />
                     {t("nav.yourPage")}
                   </Link>

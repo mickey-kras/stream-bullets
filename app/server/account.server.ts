@@ -688,7 +688,10 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       avatarPreset: account.avatar_preset,
       locale: account.locale,
       displayPreferences: parseJson(account.display_prefs),
-      conversionMilestones: { firstVote: account.first_vote_counted === 1, firstTopic: account.first_topic_counted === 1 },
+      conversionMilestones: {
+        firstVote: account.first_vote_counted === 1,
+        firstTopic: account.first_topic_counted === 1,
+      },
       createdAt: iso(account.created_at),
       updatedAt: iso(account.updated_at),
     },
