@@ -110268,17 +110268,6 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_spec",
       "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L213",
-      "target": "tests_e2e_a11y_spec_get",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_a11y_spec",
-      "source_file": "tests/e2e/a11y.spec.ts",
       "source_location": "L26",
       "target": "tests_e2e_a11y_spec_problems",
       "weight": 1.0
@@ -115968,10 +115957,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "3b6c36156bf5b611ab12c539e33466500909d198d729e7e3341c4a55df019420",
+    "content_sha256": "ba069f25341c4373dfd3f64712da7132d0b069b304be3372eb0e4ef0b6467b26",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "766495d7f2e135e4be555bbcac0d9c9e8009e1ce0947ff9a988d5a31f55eab92",
+    "source_sha256": "7cd8a64ab4cef3916da78668944a274a87f584d8d778e9f191d3e6112e9902e7",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -134413,17 +134402,6 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "tests_e2e_a11y_spec_get",
-      "label": "get()",
-      "norm_label": "get()",
-      "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L213"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
       "id": "tests_e2e_a11y_spec_problems_d6d2076ce386",
       "label": "problems()",
       "metadata": {
@@ -134453,11 +134431,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_a11y_spec_storage_getitem",
+      "label": ".getItem()",
+      "norm_label": ".getitem()",
+      "source_file": "tests/e2e/a11y.spec.ts",
+      "source_location": "L213"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_a11y_spec_storage_setitem",
       "label": ".setItem()",
       "norm_label": ".setitem()",
       "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L218"
+      "source_location": "L219"
     },
     {
       "_callable": true,
@@ -143497,7 +143486,7 @@
             "callee": "on",
             "file": "tests/e2e/a11y.spec.ts",
             "lang": "typescript",
-            "line": "L224",
+            "line": "L226",
             "receiver_type": "Page"
           }
         ]
