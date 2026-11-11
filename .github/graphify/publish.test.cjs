@@ -5,14 +5,25 @@ const { tmpdir } = require("node:os");
 const { join } = require("node:path");
 const publish = require("./publish.cjs");
 
-for (const scenario of ["current", "superseded", "raced", "fork", "closed", "push-race"]) {
+for (const scenario of [
+  "current",
+  "superseded",
+  "raced",
+  "fork",
+  "closed",
+  "push-race",
+  "base-changed",
+  "base-raced",
+  "merge",
+  "wrong-artifact",
+]) {
   test(`publication: ${scenario}`, async () => {
     const original = process.cwd();
     const directory = mkdtempSync(join(tmpdir(), "graph-publish-"));
-    const expected = { number: 1, head: { sha: "source" } };
+    const expected = { number: 1, head: { sha: "source" }, base: { ref: "main", sha: "base" } };
     const pull = {
       number: 1,
-      base: { sha: "base" },
+      base: { ref: "main", sha: "stale-recorded-base" },
       state: scenario === "closed" ? "closed" : "open",
       head: {
         sha: scenario === "superseded" ? "new" : "source",
@@ -21,17 +32,34 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
       },
     };
     let reads = 0;
+    let baseReads = 0;
     const updates = [];
     const dispatches = [];
     const github = {
       rest: {
-        actions: { createWorkflowDispatch: async (args) => { dispatches.push(args); } },
+        actions: {
+          createWorkflowDispatch: async (args) => {
+            dispatches.push(args);
+          },
+        },
         pulls: {
           get: async () => ({
             data: ++reads === 2 && scenario === "raced" ? { ...pull, head: { ...pull.head, sha: "new" } } : pull,
           }),
         },
         git: {
+          getRef: async (args) => {
+            assert.equal(args.ref, "heads/main");
+            baseReads += 1;
+            return {
+              data: {
+                object: {
+                  sha:
+                    scenario === "base-changed" || (scenario === "base-raced" && baseReads === 2) ? "new-base" : "base",
+                },
+              },
+            };
+          },
           getCommit: async () => ({ data: { tree: { sha: "base-tree" } } }),
           createBlob: async () => ({ data: { sha: "blob" } }),
           createTree: async (args) => {
@@ -41,7 +69,7 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
             return { data: { sha: "tree" } };
           },
           createCommit: async (args) => {
-            assert.deepEqual(args.parents, ["source"]);
+            assert.deepEqual(args.parents, scenario === "merge" ? ["source", "base"] : ["source"]);
             return { data: { sha: "generated" } };
           },
           updateRef: async (args) => {
@@ -55,21 +83,46 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
     try {
       process.chdir(directory);
       mkdirSync("graph-artifact");
-      writeFileSync("graph-artifact/graph.json", '{"nodes":[]}');
+      writeFileSync(
+        "graph-artifact/graph-update.json",
+        JSON.stringify({
+          head: scenario === "wrong-artifact" ? "wrong" : "source",
+          base: "base",
+          merge: scenario === "merge",
+          entries: [{ path: "graphify-out/graph.json", mode: "100644", type: "blob", content: "e30=" }],
+        }),
+      );
       const result = publish({
         github,
+        expected,
         context: { repo: { owner: "owner", repo: "repo" }, payload: { pull_request: expected } },
         core: { info: () => {} },
       });
       if (scenario === "push-race") await assert.rejects(result, /fast forward/);
+      else if (scenario === "wrong-artifact") await assert.rejects(result, /revision mismatch/);
       else await result;
-      assert.equal(updates.length, scenario === "current" ? 1 : 0);
-      assert.deepEqual(dispatches, scenario === "current" ? [
-        { owner: "owner", repo: "repo", workflow_id: "ci.yml", ref: "feat/example",
-          inputs: { number: "1", expected_head: "generated", base_sha: "base" } },
-        { owner: "owner", repo: "repo", workflow_id: "policy-guard.yml", ref: "main",
-          inputs: { number: "1", expected_head: "generated" } },
-      ] : []);
+      assert.equal(updates.length, ["current", "merge"].includes(scenario) ? 1 : 0);
+      assert.deepEqual(
+        dispatches,
+        ["current", "merge"].includes(scenario)
+          ? [
+              {
+                owner: "owner",
+                repo: "repo",
+                workflow_id: "ci.yml",
+                ref: "feat/example",
+                inputs: { number: "1", expected_head: "generated", base_sha: "base" },
+              },
+              {
+                owner: "owner",
+                repo: "repo",
+                workflow_id: "policy-guard.yml",
+                ref: "main",
+                inputs: { number: "1", expected_head: "generated" },
+              },
+            ]
+          : [],
+      );
     } finally {
       process.chdir(original);
       rmSync(directory, { recursive: true });
