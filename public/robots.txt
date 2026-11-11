@@ -12,3 +12,5 @@ Disallow: /admin
 Disallow: /overlay-control
 Disallow: /*/overlay
 Disallow: /*?dialog=
+
+Sitemap: https://streambullets.com/sitemap.xml

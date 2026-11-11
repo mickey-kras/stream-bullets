@@ -1,3 +1,4 @@
+import { canonicalMeta } from "../lib/seo";
 import { useCallback, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, type MetaArgs } from "react-router";
 import { directoryHref, SIGN_INTENTS, type Intent } from "../lib/directory";
@@ -21,6 +22,7 @@ const signLabel: Record<Intent, "landing.suggest" | "landing.vote" | "landing.di
 export function meta({ matches }: MetaArgs) {
   const origin: string = shellFromMatches(matches)?.origin ?? "";
   return [
+    ...canonicalMeta(matches, "/"),
     { title: t("meta.homeTitle") },
     { name: "description", content: t("meta.homeDescription") },
     { "script:ld+json": siteJsonLd(origin) },
