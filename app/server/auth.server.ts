@@ -137,6 +137,7 @@ function instagramProvider(
 
 export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
   const origin: string = getOrigin(env);
+  const secure: boolean = origin.startsWith("https:");
   if (typeof env.BETTER_AUTH_SECRET !== "string" || env.BETTER_AUTH_SECRET.length < 32) {
     throw new HttpError(503, "Authentication secret is not configured.");
   }
@@ -214,8 +215,13 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
     advanced: {
       disableOriginCheck: false,
       disableCSRFCheck: false,
-      useSecureCookies: origin.startsWith("https:"),
-      cookiePrefix: "stream-bullets",
+      // Better Auth otherwise prepends __Secure- even to a custom __Host- name.
+      useSecureCookies: false,
+      cookiePrefix: secure ? "__Secure-stream-bullets" : "stream-bullets",
+      defaultCookieAttributes: { secure },
+      cookies: {
+        session_token: { name: `${secure ? "__Host-" : ""}stream-bullets.session_token` },
+      },
       ipAddress: { ipAddressHeaders: ["cf-connecting-ip"] },
     },
     rateLimit: { enabled: true, storage: "database", window: 60, max: 60 },

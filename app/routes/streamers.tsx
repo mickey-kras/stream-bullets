@@ -1,3 +1,5 @@
+export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
+import { withRouteErrors } from "../server/route-errors.server";
 import { SearchAdornments } from "../components/shell/directory-search";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLoaderData, useLocation, useNavigate, type LoaderFunctionArgs } from "react-router";
@@ -6,7 +8,6 @@ import { t, tn } from "../i18n";
 import { directoryHref, readIntent, streamerTarget, type Intent } from "../lib/directory";
 import { useShell } from "../lib/shell";
 import { countStreamers, listStreamers } from "../server/data.server";
-import { HttpError } from "../server/http.server";
 import type { Streamer, StreamerDirectory } from "../types";
 import { errorMessage, requestJson } from "../components/api";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
@@ -23,19 +24,14 @@ export function meta() {
   ];
 }
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
+export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
   const url = new URL(request.url);
   // "@handle" searches the handle: the @ is how people write it, not part of it.
   const query: string = (url.searchParams.get("query") ?? "").trim().replace(/^@/u, "").slice(0, 60);
-  try {
-    const [page, total] = await Promise.all([listStreamers(app.env, null, query), countStreamers(app.env, query)]);
-    return { ...page, total, query, intent: readIntent(url.searchParams.get("then")) };
-  } catch (error: unknown) {
-    if (error instanceof HttpError) throw new Response(error.message, { status: error.status });
-    throw error;
-  }
-}
+  const [page, total] = await Promise.all([listStreamers(app.env, null, query), countStreamers(app.env, query)]);
+  return { ...page, total, query, intent: readIntent(url.searchParams.get("then")) };
+});
 
 const intentIcon: Record<Intent, IconName> = { suggest: "plus", vote: "polls", discuss: "comment" };
 const intentPrompt: Record<Intent, "streamers.intent.suggest" | "streamers.intent.vote" | "streamers.intent.discuss"> =

@@ -35,6 +35,7 @@ export interface AppContext {
   responseHeaders: Headers;
   /** The request's language, set by the root loader (app/lib/shell.server.ts) for entry.server.tsx. */
   locale?: Locale;
+  requestId?: string;
 }
 
 export const appContext = createContext<AppContext>();

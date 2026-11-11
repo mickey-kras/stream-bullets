@@ -15,7 +15,7 @@ test("privacy policy and terms render with contents and a draft notice", async (
     "Age limit and children",
   ])
     await expect(contents.getByRole("link", { name })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "__Secure-stream-bullets.session_token" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "__Host-stream-bullets.session_token" })).toBeVisible();
   await contents.getByRole("link", { name: "Cookies and local storage" }).click();
   await expect(page).toHaveURL(/\/privacy#cookies$/);
   await expect(page.getByRole("heading", { name: "Cookies and local storage" })).toBeInViewport();

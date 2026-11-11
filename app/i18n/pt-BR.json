@@ -440,6 +440,7 @@
   "error.browseStreamers": "Ver streamers",
   "error.notFoundBody": "Esta página não existe.",
   "error.notFoundTitle": "Página não encontrada",
+  "error.requestId": "ID da solicitação: {id}",
   "error.title": "Algo deu errado",
   "footer.accessibility": "Acessibilidade",
   "footer.ai": "Agentes de IA",

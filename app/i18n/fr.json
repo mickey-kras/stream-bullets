@@ -440,6 +440,7 @@
   "error.browseStreamers": "Parcourir les streamers",
   "error.notFoundBody": "Cette page n’existe pas.",
   "error.notFoundTitle": "Page introuvable",
+  "error.requestId": "Identifiant de requête : {id}",
   "error.title": "Un problème est survenu",
   "footer.accessibility": "Accessibilité",
   "footer.ai": "Agents IA",
