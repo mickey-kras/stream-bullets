@@ -20,10 +20,10 @@ for (const scenario of [
   test(`publication: ${scenario}`, async () => {
     const original = process.cwd();
     const directory = mkdtempSync(join(tmpdir(), "graph-publish-"));
-    const expected = { number: 1, head: { sha: "source" }, base: { sha: "base" } };
+    const expected = { number: 1, head: { sha: "source" }, base: { ref: "main", sha: "base" } };
     const pull = {
       number: 1,
-      base: { sha: scenario === "base-changed" ? "new-base" : "base" },
+      base: { ref: "main", sha: "stale-recorded-base" },
       state: scenario === "closed" ? "closed" : "open",
       head: {
         sha: scenario === "superseded" ? "new" : "source",
@@ -32,6 +32,7 @@ for (const scenario of [
       },
     };
     let reads = 0;
+    let baseReads = 0;
     const updates = [];
     const dispatches = [];
     const github = {
@@ -43,15 +44,22 @@ for (const scenario of [
         },
         pulls: {
           get: async () => ({
-            data:
-              ++reads === 2 && scenario === "raced"
-                ? { ...pull, head: { ...pull.head, sha: "new" } }
-                : reads === 2 && scenario === "base-raced"
-                  ? { ...pull, base: { sha: "new-base" } }
-                  : pull,
+            data: ++reads === 2 && scenario === "raced" ? { ...pull, head: { ...pull.head, sha: "new" } } : pull,
           }),
         },
         git: {
+          getRef: async (args) => {
+            assert.equal(args.ref, "heads/main");
+            baseReads += 1;
+            return {
+              data: {
+                object: {
+                  sha:
+                    scenario === "base-changed" || (scenario === "base-raced" && baseReads === 2) ? "new-base" : "base",
+                },
+              },
+            };
+          },
           getCommit: async () => ({ data: { tree: { sha: "base-tree" } } }),
           createBlob: async () => ({ data: { sha: "blob" } }),
           createTree: async (args) => {

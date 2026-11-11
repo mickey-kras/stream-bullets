@@ -43,8 +43,9 @@ jobs:
               throw new Error('Invalid PR revision');
             }
             const { data: pull } = await github.rest.pulls.get({ ...context.repo, pull_number: Number(number) });
+            const { data: base } = await github.rest.git.getRef({ ...context.repo, ref: `heads/${pull.base.ref}` });
             if (pull.state !== 'open' || pull.head.sha !== expected_head || context.sha !== expected_head ||
-                context.ref !== `refs/heads/${pull.head.ref}` || pull.base.sha !== base_sha ||
+                context.ref !== `refs/heads/${pull.head.ref}` || base.object.sha !== base_sha ||
                 pull.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
               throw new Error('PR revision changed; discard this run');
             }
