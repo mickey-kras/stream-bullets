@@ -29,34 +29,24 @@ export async function mergeBrowserCoverage(
   directories: string[],
   outputDir: string = "coverage/browser",
 ): Promise<void> {
-  if (directories.length === 0)
-    throw new Error("Browser coverage inputs are required.");
+  if (directories.length === 0) throw new Error("Browser coverage inputs are required.");
   const coverage = coverageReport(outputDir);
   for (const directory of directories) {
-    const files: string[] = (await readdir(directory)).filter(
-      (file: string): boolean => file.endsWith(".json"),
-    );
-    if (files.length === 0)
-      throw new Error(`Missing browser coverage in ${directory}`);
+    const files: string[] = (await readdir(directory)).filter((file: string): boolean => file.endsWith(".json"));
+    if (files.length === 0) throw new Error(`Missing browser coverage in ${directory}`);
     let entriesFound: boolean = false;
     for (const file of files) {
-      const entries = entrySchema.parse(
-        JSON.parse(await readFile(join(directory, file), "utf8")),
-      );
+      const entries = entrySchema.parse(JSON.parse(await readFile(join(directory, file), "utf8")));
       if (entries.length === 0) continue;
       entriesFound = true;
       await coverage.add(entries);
     }
-    if (!entriesFound)
-      throw new Error(`Missing browser coverage in ${directory}`);
+    if (!entriesFound) throw new Error(`Missing browser coverage in ${directory}`);
   }
   await coverage.generate();
   validateBrowserCoverage(await readFile(join(outputDir, "lcov.info"), "utf8"));
 }
 
-if (
-  process.argv[1] &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
-) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await mergeBrowserCoverage(process.argv.slice(2));
 }
