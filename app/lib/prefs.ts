@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { LOCALE_COOKIE } from "../i18n/resolve";
 import type { DisplayPrefs } from "../types";
 
@@ -105,7 +106,7 @@ export async function setPreferenceCookie(name: string, value: string, fallback:
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(fallback),
   });
-  if (!response.ok) throw new Error(`The preference cookie was not saved (${response.status}).`);
+  if (!response.ok) throw new Error(t("common.failed"));
 }
 
 /*

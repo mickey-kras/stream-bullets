@@ -1,3 +1,4 @@
+import { BUG_TEMPLATES } from "./bug-templates";
 import type { EntryStatus } from "../types";
 
 /** Topic categories on a normal streamer page. */
@@ -8,12 +9,12 @@ export const IDEA_CATEGORIES = ["feature", "bug", "design", "a11y", "lang"] as c
 export type IdeaCategory = (typeof IDEA_CATEGORIES)[number];
 
 /** Pre-filled Details for a bug report. Submitting it untouched is refused. */
-export const BUG_TEMPLATE = "What happened?\n\nWhat did you expect?\n\nSteps to reproduce:\n1. ";
+export const BUG_TEMPLATE = BUG_TEMPLATES.en;
 
 /** True when the text is empty or still exactly the bug template (whitespace aside). */
 export function isUntouchedTemplate(body: string): boolean {
   const value = body.trim();
-  return value === "" || value === BUG_TEMPLATE.trim();
+  return value === "" || Object.values(BUG_TEMPLATES).some((template: string): boolean => value === template.trim());
 }
 
 /** The status a new idea starts in. */

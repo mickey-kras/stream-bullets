@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { newPage, close } from "./coverage";
 import { expect, test, type BrowserContext, type Page } from "./coverage";
 import { origin, signedIn } from "./fixtures";
@@ -288,3 +289,32 @@ for (const locale of ["de", "ru"])
       }
       await close(phone);
     });
+
+for (const locale of ["en", "de", "es", "fr", "pl", "pt-BR", "ru", "uk", "hi", "zh-CN", "ja"]) {
+  test(`${locale} distinguishes the official board and preserves navigation when switching`, async ({ browser }) => {
+    const context = await browser.newContext({ baseURL: origin, viewport: { width: 390, height: 844 } });
+    await inLanguage(context, locale);
+    const page = await newPage(context);
+    await page.goto("/@streambullets?view=about");
+    const about = page.locator('.streamer-header nav a[aria-current="page"]');
+    const catalog: Record<string, string> = JSON.parse(readFileSync(new URL(`../../app/i18n/${locale}.json`, import.meta.url), "utf8")) as Record<string, string>;
+    await expect(page.locator("html")).toHaveAttribute("lang", locale);
+    await expect(about.locator(".nav-label")).toHaveText(catalog["ideas.aboutTab"]);
+    expect(await phoneProblems(page)).toEqual([]);
+    await page.goto("/@streambullets?view=topics&status=planned&sort=top#main-content");
+    const canonical: string | null = await page.locator('link[rel="canonical"]').getAttribute("href");
+    await page.locator('footer a[href*="dialog=language"]').click();
+    const target: string = locale === "en" ? "Русский" : "English";
+    await page.getByRole("dialog").getByRole("button", { name: target, exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", locale === "en" ? "ru" : "en");
+    const url = new URL(page.url());
+    expect(url.pathname).toBe("/@streambullets");
+    expect(url.searchParams.get("view")).toBe("topics");
+    expect(url.searchParams.get("status")).toBe("planned");
+    expect(url.searchParams.get("sort")).toBe("top");
+    expect(url.hash).toBe("#main-content");
+    expect(url.searchParams.has("dialog")).toBe(false);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", canonical ?? "");
+    await close(context);
+  });
+}

@@ -33,7 +33,7 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   await category.click();
   await page.getByRole("option", { name: "Bug" }).click();
   await expect(details).toHaveValue(template);
-  await expect(dialog.getByLabel("Include my browser and page info")).toBeChecked();
+  await expect(dialog.getByLabel("Include browser and screen details")).toBeChecked();
   await category.click();
   await page.getByRole("option", { name: "Feature idea" }).click();
   await expect(details).toHaveValue("");

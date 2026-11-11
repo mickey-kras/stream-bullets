@@ -1,4 +1,4 @@
-import { t } from "../i18n";
+import { getLocale, t, type MessageId } from "../i18n";
 
 /** An API failure with the server's stable `code` (for example `step_up_required`), when it sent one. */
 export class ApiError extends Error {
@@ -62,6 +62,21 @@ export async function sendJson<T>(
   });
 }
 
+const statusMessages: Readonly<Partial<Record<number, MessageId>>> = {
+  400: "error.invalid",
+  401: "error.signIn",
+  403: "error.forbidden",
+  404: "error.notFoundBody",
+  409: "error.conflict",
+  413: "error.tooLarge",
+  422: "error.invalid",
+  429: "error.rateLimit",
+};
+
 export function errorMessage(error: unknown): string {
+  if (error instanceof ApiError && getLocale() !== "en") {
+    return t(statusMessages[error.status] ?? "common.failed");
+  }
+  if (error instanceof TypeError || error instanceof DOMException) return t("common.failed");
   return error instanceof Error ? error.message : t("common.failed");
 }

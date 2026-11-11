@@ -260,7 +260,7 @@ function streamerHeaderAppearance(
   return {
     className: "ideas-header",
     views: officialViews,
-    labels: { topics: t("ideas.tab") },
+    labels: { topics: t("ideas.tab"), about: t("ideas.aboutTab") },
     icons: { topics: "idea" },
     brand: (
       <>
