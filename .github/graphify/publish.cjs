@@ -1,34 +1,42 @@
 const { readFileSync } = require("node:fs");
 
-module.exports = async function publish({ github, context, core }) {
-  const expected = context.payload.pull_request;
+module.exports = async function publish({ github, context, core, expected }) {
   const params = { ...context.repo, pull_number: expected.number };
   const { data: pull } = await github.rest.pulls.get(params);
   if (
     pull.state !== "open" ||
     pull.head.sha !== expected.head.sha ||
+    pull.base.sha !== expected.base.sha ||
     pull.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`
   ) {
     core.info("PR changed; discard the old graph.");
     return;
   }
-  const graph = readFileSync("graph-artifact/graph.json", "utf8");
-  JSON.parse(graph);
+  const update = JSON.parse(readFileSync("graph-artifact/graph-update.json", "utf8"));
+  if (update.head !== expected.head.sha || update.base !== expected.base.sha) {
+    throw new Error("Graph artifact revision mismatch");
+  }
   const { data: parent } = await github.rest.git.getCommit({ ...context.repo, commit_sha: expected.head.sha });
-  const { data: blob } = await github.rest.git.createBlob({ ...context.repo, content: graph, encoding: "utf-8" });
+  const entries = [];
+  for (const entry of update.entries) {
+    const { content, ...item } = entry;
+    if (content !== undefined) {
+      const { data: blob } = await github.rest.git.createBlob({ ...context.repo, content, encoding: "base64" });
+      item.sha = blob.sha;
+    }
+    entries.push(item);
+  }
   const { data: tree } = await github.rest.git.createTree({
-    ...context.repo,
-    base_tree: parent.tree.sha,
-    tree: [{ path: "graphify-out/graph.json", mode: "100644", type: "blob", sha: blob.sha }],
+    ...context.repo, base_tree: parent.tree.sha, tree: entries,
   });
   const { data: commit } = await github.rest.git.createCommit({
     ...context.repo,
-    message: "docs: refresh repository graph",
+    message: update.merge ? "chore: merge main and refresh repository graph" : "docs: refresh repository graph",
     tree: tree.sha,
-    parents: [expected.head.sha],
+    parents: update.merge ? [expected.head.sha, expected.base.sha] : [expected.head.sha],
   });
   const { data: latest } = await github.rest.pulls.get(params);
-  if (latest.state !== "open" || latest.head.sha !== expected.head.sha) {
+  if (latest.state !== "open" || latest.head.sha !== expected.head.sha || latest.base.sha !== expected.base.sha) {
     core.info("PR changed during generation; discard the old graph.");
     return;
   }

@@ -109176,7 +109176,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L23",
+      "source_location": "L29",
       "target": "docs_code_graph_graph_commits",
       "weight": 1.0
     },
@@ -109187,7 +109187,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L32",
+      "source_location": "L39",
       "target": "docs_code_graph_local_update",
       "weight": 1.0
     },
@@ -109198,7 +109198,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L51",
+      "source_location": "L58",
       "target": "docs_code_graph_scope_and_queries",
       "weight": 1.0
     },
@@ -115921,10 +115921,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "5a167cd998d4823f49f96c64765f585a07fda0c41680f520b5c500dcbd814aae",
+    "content_sha256": "9ce8dc33a0732a076e5a265882c42233d273120da17416a7ced75a5a710b3770",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "bab24af6c762a838a35983979b873421b63eca8ed75aa4fcdda404d3c1171e65",
+    "source_sha256": "a0aa5c82afc200751ac9992b7d6246d819fcef6dfe3b6de333942d0e5d145411",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -145646,7 +145646,7 @@
       "node_kind": "heading",
       "norm_label": "graph commits",
       "source_file": "docs/code-graph.md",
-      "source_location": "L23"
+      "source_location": "L29"
     },
     {
       "_origin": "ast",
@@ -145657,7 +145657,7 @@
       "node_kind": "heading",
       "norm_label": "local update",
       "source_file": "docs/code-graph.md",
-      "source_location": "L32"
+      "source_location": "L39"
     },
     {
       "_origin": "ast",
@@ -145679,7 +145679,7 @@
       "node_kind": "heading",
       "norm_label": "scope and queries",
       "source_file": "docs/code-graph.md",
-      "source_location": "L51"
+      "source_location": "L58"
     },
     {
       "_origin": "ast",
