@@ -5,15 +5,22 @@ It includes application code, workers, the TypeScript database schema, tests, an
 
 ## Automatic updates
 
-When a PR opens or receives commits, the updater checks its graph inputs.
-Changed inputs cause a new graph build. The updater commits the result to the same PR branch.
+When a PR opens or receives commits, the updater merges the latest `main` into its branch.
+A push to `main` starts an update for each open PR in this repository.
+The Update branch button also starts an update when it adds a commit.
 
-A newer run cancels the older run for that PR. Before publishing, the updater checks the PR head again.
+The updater takes the base graph and rebuilds it from the combined sources.
+It resolves conflicts in `graphify-out/graph.json` automatically. Source conflicts stop the update for review.
+
+GitHub can show a graph conflict until the update finishes.
+The generated-file attribute hides graph diffs. It does not change GitHub merge behavior.
+
+A newer run cancels the older run for that PR. Before publishing, the updater checks both the PR head and base again.
 It never force-pushes. Thus, an old build cannot replace a newer source commit.
 
 When inputs match the base, CI compares the graph with the base graph without extraction.
 When inputs differ, CI independently rebuilds the graph to check its content.
-The updater does not edit source files. All quality gates run on its commit.
+The updater preserves source changes from both branches. All quality gates run on its commit.
 
 Automatic writes apply only to branches in this repository. Fork contributors must generate the graph locally.
 
@@ -23,7 +30,9 @@ The updater executes trusted tools from the default branch and treats candidate 
 ## Graph commits
 
 The updater uses the built-in `GITHUB_TOKEN`. It needs no separate App or Graphify Cloud account.
-The write job runs separately from extraction and changes only `graphify-out/graph.json`.
+The write job runs separately from extraction. It publishes the merged tree and rebuilt graph.
+
+The merge commit records both parents. Source conflicts cannot produce a publication artifact.
 
 After the commit, it starts quality checks for that revision and trusted policy validation.
 Each run rejects a stale PR revision. These checks do not start another graph update.
