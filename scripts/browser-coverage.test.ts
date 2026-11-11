@@ -135,6 +135,14 @@ describe("browser coverage", (): void => {
         mergeBrowserCoverage([join(directory, "missing")], output),
         /ENOENT/,
       );
+      await writeFile(join(shards[1], "empty-page.json"), "[]");
+      await mergeBrowserCoverage(shards, output);
+      await writeFile(join(shards[1], "raw.json"), "[]");
+      await assert.rejects(
+        mergeBrowserCoverage(shards, output),
+        /Missing browser coverage/,
+      );
+      await rm(join(shards[1], "empty-page.json"));
       await rm(join(shards[1], "raw.json"));
       await assert.rejects(
         mergeBrowserCoverage(shards, output),
