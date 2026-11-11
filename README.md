@@ -13,6 +13,8 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 | Live updates | Durable Objects and read-only WebSockets |
 | Checks | Vitest, Playwright, GitHub Actions |
 
+For production sign-in and administrator setup, see [Authentication setup](docs/auth-setup.md).
+
 ## Behavior
 
 - Accounts start as viewers. In this version, a streamer profile needs approval.
@@ -37,7 +39,7 @@ A community app for streamers. Viewers suggest topics, discuss them, and vote. S
 - The page owner schedules streams on the **Schedule** tab, as one-off or weekly streams. Each stream has a platform, a link, and optional linked topics. The owner can edit, cancel, or delete a stream and add a replay link. Viewers see a feed of upcoming and past streams, plus day, week, and month views on desktop, in their local time zone.
 - `/@handle/schedule.ics` serves the schedule as a calendar feed. Calendar apps can subscribe to it.
 - The owner edits up to 8 cards on the **Community** tab and up to 4 support links in **Edit your page**. Support links open the provider site. StreamBullets takes no payments.
-- The official `@streambullets` page is the Ideas board. Signed-in users suggest improvements and report bugs there, and everyone can vote. **Suggest an improvement** in the footer and the account menu opens it.
+- Migration `0020` creates the official `@streambullets` Ideas board. Its system principal has no email, credentials, or sessions. Administrators manage suggestions through Admin. The board does not use a personal streamer slot and survives deletion of an administrator account. Signed-in users suggest improvements and report bugs there, and everyone can vote. **Suggest an improvement** in the footer and the account menu opens it.
 - The interface is in 11 languages: English, Spanish, Brazilian Portuguese, German, Polish, Ukrainian, Russian, Japanese, Simplified Chinese, French, and Hindi. The page language comes from the first of these sources that has a value: the account setting, the `sb_locale` cookie, and the browser `Accept-Language` header. If none has a value, the language is English. The catalogs are in `app/i18n/`. Add each new message id to all 11 files: `tests/i18n.test.ts` fails when a catalog is missing an id, a plural form, or a `{placeholder}`. The footer and the account menu open the language list. Posts by users stay in their own language. The Privacy Policy and the Terms stay in English. A translated note says that only the English text has legal effect.
 - **Accessibility & display** is in the footer and the account menu. It sets colour-vision palettes, high contrast, text size, a readable font, link underlines, and motion. It also sets the Mash Battle options: screen-reader score updates, keyboard shortcuts, and assisted tapping. Signed-in accounts keep the settings. A cookie keeps them for each browser. An inline script with the nonce of the response applies them before the first paint.
 - `/ai` describes the policy for AI agents. Agents can read public pages but cannot post, vote, or sign up. The page has an unverified like and dislike counter at `POST /api/ai-interest`. The counter allows one vote per visitor per day and keeps votes for 30 days. `/robots.txt` and `/llms.txt` give the same policy. Pages carry JSON-LD for the site, streamers, upcoming streams, and open topics.

@@ -1,3 +1,4 @@
+import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";
 import { IMAGE_KINDS, type ImageKind } from "./images.server";
@@ -825,6 +826,7 @@ const touchedStreamersMore = `
  * Uploaded images are removed after the database commit, then affected live rooms are refreshed.
  */
 export async function deleteAccount(env: AppEnv, userId: string): Promise<void> {
+  if (userId === SYSTEM_USER_ID) throw new HttpError(403, "The system principal cannot be deleted.");
   const statement = (sql: string): D1PreparedStatement => env.DB.prepare(sql).bind(userId);
   const results = await env.DB.batch([
     statement("SELECT id FROM streamers WHERE owner_id=?1"),
