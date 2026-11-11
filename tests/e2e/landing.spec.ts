@@ -1,5 +1,7 @@
 import { newPage, close } from "./coverage";
 import { expect, test } from "./coverage";
+import { signedIn } from "./fixtures";
+import { clientIp } from "./client-ips";
 
 test("mobile landing is one screen with Browse streamers and the scene under the copy", async ({ page }) => {
   test.slow(); // software WebGL in CI builds the scene on the CPU
@@ -20,7 +22,7 @@ test("mobile landing is one screen with Browse streamers and the scene under the
   const stationBox = (await station.boundingBox())!;
   expect(stationBox.y).toBeGreaterThan(headingBox.y + headingBox.height);
   expect(stationBox.y + stationBox.height).toBeLessThanOrEqual(844 + 1);
-  // Sign-up and sign-in are one OAuth step in the header; the hero has one primary action, Browse streamers.
+  // Browse remains the primary action; streamers can join through the existing application flow.
   const headerSignIn = page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true });
   await expect(headerSignIn).toHaveCount(1);
   await expect(page.getByRole("main").getByRole("button", { name: "Sign in / Sign up" })).toHaveCount(0);
@@ -29,6 +31,15 @@ test("mobile landing is one screen with Browse streamers and the scene under the
     "href",
     "/streamers",
   );
+  const join = page.getByRole("link", { name: "Join as a streamer", exact: true });
+  await expect(join).toBeInViewport();
+  await expect(join).toHaveAttribute("href", "/?dialog=host");
+  await expect(page.getByText("Collect topics from your viewers and run audience polls.")).toBeVisible();
+  await join.click();
+  await expect(page).toHaveURL(/\/\?dialog=host$/);
+  await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toBeVisible();
+  await page.getByRole("button", { name: "Close dialog" }).click();
+  await expect(page).toHaveURL(/\/$/);
   await headerSignIn.click();
   await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toBeVisible();
   await page.getByRole("button", { name: "Close dialog" }).click();
@@ -116,3 +127,26 @@ test("the tilt pill shows only on touch devices that ask for motion access", asy
   }
   await close(phone);
 });
+
+for (const role of ["viewer", "owner"] as const) {
+  test(`landing join path for ${role}`, async ({ browser }) => {
+    const context = await signedIn(browser, role, clientIp("landing", role === "viewer" ? 154 : 155), {
+      reducedMotion: "reduce",
+    });
+    const page = await newPage(context);
+    await page.goto("/");
+    const main = page.getByRole("main");
+    const join = main.getByRole("link", { name: "Join as a streamer", exact: true });
+    await expect(main.getByRole("link", { name: "Browse streamers" })).toBeVisible();
+    if (role === "viewer") {
+      await join.click();
+      await expect(page.getByRole("dialog", { name: "Host a community" })).toBeVisible();
+      await expect(page.getByRole("form", { name: "Host a community request" })).toBeVisible();
+      await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toHaveCount(0);
+    } else {
+      await expect(join).toHaveCount(0);
+      await expect(main.getByRole("link", { name: "Your page" })).toHaveAttribute("href", "/@test_host");
+    }
+    await close(context);
+  });
+}
