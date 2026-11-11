@@ -22,7 +22,7 @@ The updater executes trusted tools from the default branch and treats candidate 
 
 ## Graph commits
 
-The updater uses the built-in `GITHUB_TOKEN`. No separate App or Graphify Cloud account is needed.
+The updater uses the built-in `GITHUB_TOKEN`. It needs no separate App or Graphify Cloud account.
 The write job runs separately from extraction and changes only `graphify-out/graph.json`.
 
 After the commit, it starts quality checks for that revision and trusted policy validation.

@@ -268,7 +268,8 @@ export function useLivePolls(
         }
         setStatus("reconnecting");
         const ceiling: number = Math.min(30_000, 1000 * 2 ** (attempts - 1));
-        timer = setTimeout(connect, ceiling * (0.5 + Math.random() * 0.5));
+        const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
+        timer = setTimeout(connect, ceiling * (0.5 + jitter * 0.5));
       };
     }
     connect();

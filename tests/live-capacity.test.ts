@@ -155,7 +155,7 @@ afterAll(async (): Promise<void> => {
   try { closeClients(); } finally { await runtime?.dispose(); }
 });
 
-it.skipIf(!enabled)("measures local room admission, saturation, votes, mash and recovery", async (): Promise<void> => {
+it("measures local room admission, saturation, votes, mash and recovery", { skip: !enabled, timeout: 120_000 }, async (): Promise<void> => {
   reports.push({ environment: { node: process.version, platform: platform(), arch: arch(), cpu: cpus()[0]?.model, logicalCpus: cpus().length, memoryGiB: Number((totalmem() / 2 ** 30).toFixed(1)) } });
   for (const [role, limit] of [["anonymous", 100], ["member", 200]] as const) {
     for (const attempts of [limit - 1, limit, limit + 1]) {
@@ -251,4 +251,4 @@ it.skipIf(!enabled)("measures local room admission, saturation, votes, mash and 
   console.log("LIVE_CAPACITY_RESULTS", JSON.stringify(reports));
   const output: string | undefined = process.env.LIVE_CAPACITY_OUTPUT;
   if (output) await writeFile(output, JSON.stringify(reports, null, 2) + "\n");
-}, 120_000);
+});
