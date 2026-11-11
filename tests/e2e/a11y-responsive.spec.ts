@@ -36,7 +36,7 @@ async function expectLabelsFit(locator: Locator): Promise<void> {
 }
 
 async function expectHeaderFits(page: Page): Promise<void> {
-  const controls: Locator = page.locator("header nav > a, header nav > button, header .header-end > .gold, header .header-end .profile");
+  const controls: Locator = page.locator("header nav > a, header nav > button, header .header-end > .gold, header .header-end .profile, header .landing-brand");
   await expectLabelsFit(page.locator("header nav > a, header nav > button, header .header-end > .gold"));
   const overlaps: boolean = await controls.evaluateAll((elements: Element[]): boolean => {
     const boxes: DOMRect[] = elements.map((element: Element): DOMRect => element.getBoundingClientRect())
@@ -99,6 +99,21 @@ for (const locale of LOCALES) {
           }));
           await expectContained(page.locator("header, main, .site-footer, .page-title, #landing-title"));
           await expectHeaderFits(page);
+          if (route === "/") {
+            const headerOverlapsTitle: boolean = await page.locator(".landing-header").evaluate((header: HTMLElement): boolean =>
+              header.getBoundingClientRect().bottom > document.querySelector("#landing-title")!.getBoundingClientRect().top + 1,
+            );
+            expect(headerOverlapsTitle).toBe(false);
+            const brand: Locator = page.locator(".landing-brand img:visible");
+            await expect(brand).toHaveCount(1);
+            await expect(brand).toBeInViewport({ ratio: 1 });
+            const size = await brand.boundingBox();
+            expect(size?.width).toBeGreaterThanOrEqual(32);
+            expect(size?.height).toBeGreaterThanOrEqual(32);
+            const actions: Locator = page.locator(".landing-actions .button-link");
+            await expect(actions).toHaveCount(2);
+            await expectLabelsFit(actions);
+          }
         });
       }
     }
