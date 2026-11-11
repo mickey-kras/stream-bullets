@@ -97,6 +97,7 @@ describe("landing sign intents", (): void => {
     expect(directoryHref(null)).toBe("/streamers");
     expect(streamerTarget("zed", "suggest")).toBe("/@zed?view=topics&intent=suggest");
     expect(streamerTarget("zed", "vote")).toBe("/@zed?view=polls");
+    expect(streamerTarget("streambullets", "vote", true)).toBe("/@streambullets?view=topics");
     expect(streamerTarget("zed", "discuss")).toBe("/@zed?view=topics&sort=top&intent=discuss");
     expect(streamerTarget("zed", null)).toBe("/@zed");
   });
