@@ -32301,7 +32301,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_close",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L46",
+      "source_location": "L44",
       "target": "tests_e2e_coverage_collect",
       "weight": 1.0
     },
@@ -32313,7 +32313,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_newpage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L40",
+      "source_location": "L38",
       "target": "tests_e2e_coverage_start",
       "weight": 1.0
     },
@@ -32337,7 +32337,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L52",
+      "source_location": "L50",
       "target": "tests_e2e_coverage_start",
       "weight": 1.0
     },
@@ -32349,7 +32349,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L54",
+      "source_location": "L52",
       "target": "tests_e2e_coverage_collect",
       "weight": 1.0
     },
@@ -32409,7 +32409,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L287",
+      "source_location": "L286",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -32421,7 +32421,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L288",
+      "source_location": "L287",
       "target": "tests_e2e_i18n_spec_shot",
       "weight": 1.0
     },
@@ -110662,7 +110662,7 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L38",
+      "source_location": "L36",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -110673,7 +110673,7 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L44",
+      "source_location": "L42",
       "target": "tests_e2e_coverage_close",
       "weight": 1.0
     },
@@ -110684,7 +110684,7 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L50",
+      "source_location": "L48",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
@@ -116142,10 +116142,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "c744873fdf865b6fb095e9aadcc468d9a29b6e73fc052296f37015dee004fa50",
+    "content_sha256": "f63ce54d84364c2e37a36c6830847bb8e27c0907c012d25a58c3a7582389b1de",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "7717cd893720c14d50ecaa94d2a800b34b3d98992be864bc332313359901c0b6",
+    "source_sha256": "cc1afa8bd5250cc55634771af0890d0dbb3fab1481e6f2aba242bb2a8e3c098d",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -134871,7 +134871,7 @@
       "label": "close()",
       "norm_label": "close()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L44"
+      "source_location": "L42"
     },
     {
       "_callable": true,
@@ -134893,7 +134893,7 @@
       "label": "newPage()",
       "norm_label": "newpage()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L38"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -144093,7 +144093,7 @@
       "label": "test",
       "norm_label": "test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L50"
+      "source_location": "L48"
     },
     {
       "_origin": "ast",
