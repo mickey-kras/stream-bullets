@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { t } from "../../i18n";
-import { AtomLoader } from "./loader";
 import { askForTilt, onFirstMotion, tiltPillWanted } from "./tilt";
 import type { StationController } from "./scene.client";
 
 const DISPLAY_FONT = "Oswald, 'Arial Narrow', sans-serif";
 
-/** The interactive ON AIR station. Loads the Three.js scene straight away (it fills the landing), shows
-    the atom while it loads, and keeps the page usable when WebGL is missing. */
 export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void }> = {}): ReactNode {
   const host = useRef<HTMLDivElement>(null);
   const controller = useRef<StationController | null>(null);
@@ -78,8 +75,17 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
 
   return (
     <section className="landing-station" aria-label={t("landing.station")} data-status={status}>
+      {status !== "ready" && (
+        <img
+          className="station-poster"
+          src="/assets/station-poster.webp"
+          alt=""
+          width="1024"
+          height="1024"
+          fetchPriority="high"
+        />
+      )}
       <div className="landing-canvas" ref={host} />
-      {status === "loading" && <AtomLoader label={t("landing.tuning")} />}
       {/* Only after the station is ready (which happens in the browser), so server and client agree. */}
       {status === "ready" && !tiltDone && tiltPillWanted() && (
         <button
@@ -106,7 +112,6 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
       )}
       {status === "unavailable" && (
         <div className="station-fallback">
-          <img src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
           <output className="station-status">{t("landing.unavailable")}</output>
         </div>
       )}

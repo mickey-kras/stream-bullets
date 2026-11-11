@@ -60,6 +60,7 @@ test("an open Schedule tab moves a stream from upcoming to live to ended", async
   await expect(hero).toContainText("Mic shootout");
   await page.clock.fastForward("25:00:00");
   await expect(hero).toHaveClass(/status-live/);
+  await expect(hero).toContainText("Scheduled now");
   await expect(hero).toContainText("Mic shootout");
   await page.clock.fastForward("03:00:00");
   await expect(hero).toContainText("Variety night");
@@ -202,7 +203,7 @@ test("a page with only far-off streams keeps the calendar open to them", async (
   expect(created.status()).toBe(200);
   // Nothing falls in the range the page loads: the Feed shows the empty state and the views stay one click away.
   await page.goto("/@pagination_host?view=schedule");
-  await expect(page.getByText("Next stream to be announced.")).toBeVisible();
+  await expect(page.getByText("No streams in this date range.")).toBeVisible();
   await page.getByRole("button", { name: "Month", exact: true }).click();
   const today = new Date();
   const target = new Date(Date.now() + 120 * 86_400_000);

@@ -51,7 +51,10 @@ const intentPrompt: Record<Intent, "streamers.intent.suggest" | "streamers.inten
 function StreamerCard({ streamer, intent }: Readonly<{ streamer: Streamer; intent: Intent | null }>): ReactNode {
   if (streamer.isOfficial)
     return (
-      <Link className="info-card streamer-card official-card" to={streamerTarget(streamer.handle, intent)}>
+      <Link
+        className="info-card streamer-card official-card"
+        to={streamerTarget(streamer.handle, intent, streamer.isOfficial)}
+      >
         {streamer.logo || streamer.avatar ? (
           <StreamerLogo streamer={streamer} />
         ) : (
@@ -73,7 +76,7 @@ function StreamerCard({ streamer, intent }: Readonly<{ streamer: Streamer; inten
       </Link>
     );
   return (
-    <Link className="info-card streamer-card" to={streamerTarget(streamer.handle, intent)}>
+    <Link className="info-card streamer-card" to={streamerTarget(streamer.handle, intent, streamer.isOfficial)}>
       <StreamerLogo streamer={streamer} />
       <div>
         <h2>{streamer.name}</h2>
@@ -225,26 +228,25 @@ export default function Streamers(): ReactNode {
           <section className="info-card featured-community" aria-labelledby="featured-title">
             <span className="eyebrow">{t("streamers.startHere")}</span>
             <h2 id="featured-title">
-              <Link className="text-link" to={streamerTarget(featured.handle, data.intent)}>
+              <Link className="text-link" to={streamerTarget(featured.handle, data.intent, featured.isOfficial)}>
                 {featured.name}
               </Link>
+              {featured.isOfficial && <span className="official-badge">{t("streamers.official")}</span>}
             </h2>
+            <p>{t(featured.isOfficial ? "streamers.officialBio" : "streamers.featuredBody")}</p>
             {featured.entries.length > 0 && (
-              <>
-                <p>{t("streamers.featuredBody")}</p>
-                <ul>
-                  {featured.entries.map((entry: FeaturedEntry) => (
-                    <li key={entry.id}>
-                      <Link
-                        className="text-link"
-                        to={`/@${featured.handle}?view=${entry.kind === "topic" ? "topics" : "polls"}&entry=${entry.id}`}
-                      >
-                        {entry.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <ul>
+                {featured.entries.map((entry: FeaturedEntry) => (
+                  <li key={entry.id}>
+                    <Link
+                      className="text-link"
+                      to={`/@${featured.handle}?view=${entry.kind === "topic" ? "topics" : "polls"}&entry=${entry.id}`}
+                    >
+                      {entry.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             )}
           </section>
         )}
@@ -303,9 +305,13 @@ export default function Streamers(): ReactNode {
                 {count}
               </span>
               {streamers.length === 0 && (
-                <button type="button" className="text-button" onClick={() => search("", false)}>
+                <Link
+                  className="text-link"
+                  to={directoryHref(data.intent)}
+                  onClick={() => globalThis.clearTimeout(typing.current)}
+                >
                   {t("streamers.clearSearch")}
-                </button>
+                </Link>
               )}
             </div>
             <div ref={grid}>

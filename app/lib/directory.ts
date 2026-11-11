@@ -10,10 +10,10 @@ export function readIntent(value: string | null): Intent | null {
  * A directory card's link for the intent (item 5). The streamer page reads `intent`: `suggest` opens Suggest
  * a topic (or the sign-in dialog when signed out), `discuss` opens the top topic's discussion.
  */
-export function streamerTarget(handle: string, intent: Intent | null): string {
+export function streamerTarget(handle: string, intent: Intent | null, official: boolean = false): string {
   const base = `/@${handle}`;
   if (intent === "suggest") return `${base}?view=topics&intent=suggest`;
-  if (intent === "vote") return `${base}?view=polls`;
+  if (intent === "vote") return `${base}?view=${official ? "topics" : "polls"}`;
   if (intent === "discuss") return `${base}?view=topics&sort=top&intent=discuss`;
   return base;
 }

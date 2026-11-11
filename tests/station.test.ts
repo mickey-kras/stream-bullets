@@ -196,6 +196,15 @@ it.each([true, false])("injects wear uniforms and shader hooks (tiled=%s)", (til
 it("names the landing station with a native section, not a role", (): void => {
   vi.unstubAllGlobals();
   const html: string = renderToStaticMarkup(createElement(Station));
-  expect(html).toMatch(/^<section class="landing-station" aria-label="[^"]+" data-status="loading">/);
+  expect(html).toMatch(/<section class="landing-station" aria-label="[^"]+" data-status="loading">/);
   expect(html).not.toContain("role=");
+});
+
+
+it("renders a static station before JavaScript or WebGL is available", (): void => {
+  vi.unstubAllGlobals();
+  const html: string = renderToStaticMarkup(createElement(Station));
+  expect(html).toContain('class="station-poster"');
+  expect(html).toContain('src="/assets/station-poster.webp"');
+  expect(html).toContain('width="1024" height="1024"');
 });
