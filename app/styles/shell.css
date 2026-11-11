@@ -198,8 +198,6 @@ header nav button { gap: 8px; }
 .back-link.back-link { display: flex; width: fit-content; }
 .contact-address { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 12px 12px 16px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--field); }
 .contact-email { min-width: 0; font: 600 var(--text-control)/var(--leading-body) var(--body); color: var(--cream); user-select: all; overflow-wrap: anywhere; }
-.contact-links { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
-.contact-links .button-link { margin: 0; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
 .header-end #suggest { display: inline-flex; align-items: center; justify-content: center; }
 @media (max-width:30em) {
   .header-end #suggest { display: inline-grid; place-items: center; padding: 0; line-height: 0; }
@@ -417,5 +415,5 @@ body:has(.landing-page) .site-footer .footer-link { text-decoration: underline; 
 body > .site-footer :is(.footer-full, .footer-compact) { gap: var(--space-1) var(--space-2); padding: var(--space-1) var(--space-2); }
 body > .site-footer :is(.footer-full, .footer-compact) :is(a, button) { min-width: var(--control-size); max-width: 100%; min-height: var(--control-size); white-space: normal; overflow-wrap: anywhere; padding-inline: var(--space-2); font-size: var(--text-meta); line-height: var(--leading-body); }
 body > .site-footer .lang-switch span { opacity: 1; }
-.contact-links { flex-direction: column; align-items: stretch; }
-.contact-links .button-link { justify-content: flex-start; }
+.contact-links { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); flex-direction: column; align-items: stretch; }
+.contact-links .button-link { margin: 0; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; justify-content: flex-start; }

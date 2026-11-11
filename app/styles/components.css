@@ -445,7 +445,6 @@ button.danger:hover { background: var(--danger-hover); border-color: var(--error
 @supports not ((backdrop-filter: blur(6px)) or (-webkit-backdrop-filter: blur(6px))) {
   .sheet-backdrop { background: var(--sheet-dim); }
 }
-.modal-content.sheet { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
 .sheet-head { flex-shrink: 0; position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 12px 12px 32px; border-bottom: 1px solid var(--line); background: var(--modal); }
 .sheet-head h2 { flex: 1; min-width: 0; margin: 0; font-size: 1.875rem; line-height: 1.3; }
 .modal-content.sheet .sheet-head .modal-close { position: static; flex: 0 0 auto; }
@@ -1123,9 +1122,7 @@ table.month-grid td { position: relative; vertical-align: top; }
 .pref-group { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 0 0 var(--space-4); margin: 0; min-width: 0; }
 .pref-group legend { padding: 0 6px; font: 600 1.125rem var(--heading); text-transform: uppercase; letter-spacing: .5px; }
 .pref-options { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
-.pref-group .choice { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; font-weight: 600; }
 .pref-group .choice:has(:checked) { border-color: var(--gold); color: var(--gold); }
-.pref-group .choice small { display: block; margin-top: 2px; color: var(--muted); font-weight: 400; }
 .pref-group .choice input { margin-top: 2px; accent-color: var(--gold); flex: none; }
 html[data-reduced="true"] .mash-burst, html[data-reduced="true"] .mash-plus { display: none; }
 html[data-reduced="true"] .mash-button.punch { filter: brightness(1.15); }
@@ -1728,12 +1725,12 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 :is(header nav, .header-end, .tabs, .modal-content, .poll-toolbar, .page-title, .info-card, .composer, .votes) :is(button, a.button-link, a.nav-tab), .cselect-trigger { font-family: var(--body); font-size: var(--text-control); line-height: var(--leading-body); text-transform: none; letter-spacing: normal; min-height: var(--control-size); white-space: normal; overflow-wrap: anywhere; }
 :is(.topic-title, .selected .topic-title, .topic-meta, .comment-text, .description) { font-family: var(--body); line-height: var(--leading-body); }
 .sheet-body .pref-group legend { max-width: 100%; font: 600 var(--text-control)/var(--leading-body) var(--body); text-transform: none; letter-spacing: normal; padding: 0; }
-.pref-group .choice { min-height: var(--control-size); border-color: var(--input-border); border-radius: var(--radius-control); font-size: var(--text-control); }
+.pref-group .choice { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-control); cursor: pointer; font-weight: 600; min-height: var(--control-size); border-color: var(--input-border); font-size: var(--text-control); }
 .pref-group .choice > span { min-width: 0; overflow-wrap: anywhere; }
-.pref-group .choice small { font-size: var(--text-meta); }
+.pref-group .choice small { display: block; margin-top: 2px; color: var(--muted); font-weight: 400; font-size: var(--text-meta); }
 .pref-group .choice:hover { border-color: var(--gold); background: var(--btn-hover); }
 .pref-group .choice:has(:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.modal-content.sheet { border-radius: var(--radius-panel); }
+.modal-content.sheet { display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: var(--radius-panel); }
 @media (max-width: 43.75em) {
   .modal-content.sheet:not(.is-short) { border-radius: 0; }
   .sheet-body { padding: var(--space-4); }
