@@ -102,7 +102,17 @@ export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNo
 
 function SkipLink(): ReactNode {
   return (
-    <a className="skip-link" href="#main-content">
+    <a
+      className="skip-link"
+      href="#main-content"
+      onClick={() => {
+        const main: HTMLElement | null = document.getElementById("main-content");
+        if (main) {
+          main.tabIndex = -1;
+          main.focus();
+        }
+      }}
+    >
       {t("shell.skip")}
     </a>
   );

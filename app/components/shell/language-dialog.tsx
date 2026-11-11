@@ -24,6 +24,11 @@ export async function chooseLocale(locale: Locale, signedIn: boolean): Promise<v
   // Reload the same page without `?dialog=language`, so the list does not open again.
   const url = new URL(globalThis.location.href);
   url.searchParams.delete("dialog");
+  try {
+    sessionStorage.setItem("sb-language-focus", url.href);
+  } catch {
+    // Blocked storage must not prevent applying the saved language.
+  }
   globalThis.location.replace(url.href);
 }
 

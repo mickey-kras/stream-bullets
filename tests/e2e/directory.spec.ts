@@ -39,6 +39,7 @@ test("the Streamers directory pins the official page, pages with Load more, and 
 
   await expect(cards).toHaveCount(50);
   const count = page.locator(".list-count");
+  const announcement = page.locator("#sb-announce-polite");
   await expect(count).toHaveText(/^Showing 50 of \d+ pages$/);
   const total = Number(/of (\d+)/.exec((await count.textContent()) ?? "")?.[1]);
   await page.getByRole("button", { name: "Load more streamers" }).click();
@@ -53,14 +54,37 @@ test("the Streamers directory pins the official page, pages with Load more, and 
   await expect(page).toHaveURL(/query=room\+4/);
   await expect(cards).toHaveCount(9);
   await expect(count).toHaveText("Showing 9 pages");
+  await expect(announcement).toHaveText("Showing 9 pages");
+  await expect(search).toBeFocused();
   await search.fill("nothing_like_it");
   await search.press("Enter");
   await expect(cards).toHaveCount(0);
-  await expect(page.getByText("No streamers match “nothing_like_it”.")).toBeVisible();
+  await expect(page.locator(".empty")).toBeVisible();
+  await expect(announcement).toHaveText("No streamers match “nothing_like_it”.");
+  await expect(search).toBeFocused();
+  await search.fill("another_missing_streamer");
+  await search.press("Enter");
+  await expect(announcement).toHaveText("No streamers match “another_missing_streamer”.");
   await search.fill("@test_h");
   await search.press("Enter");
   await expect(cards).toHaveCount(1);
   await expect(cards.first()).toHaveAttribute("href", "/@test_host");
+  await expect(announcement).toHaveText("Showing 1 page");
+  await page.evaluate((): void => {
+    const region: HTMLElement | null = document.getElementById("sb-announce-polite");
+    if (!region) throw new Error("Missing live region");
+    region.dataset.updates = "0";
+    const observer = new MutationObserver((): void => {
+      region.dataset.updates = String(Number(region.dataset.updates) + 1);
+    });
+    observer.observe(region, { childList: true });
+  });
+  await search.fill("@streambullets");
+  await search.press("Enter");
+  await expect(cards).toHaveCount(1);
+  await expect(cards.first()).toHaveAttribute("href", "/@streambullets");
+  await expect(announcement).not.toHaveAttribute("data-updates", "0");
+  await expect(announcement).toHaveText("Showing 1 page");
   await page.goto("/streamers?query=nothing_here");
   await page.getByRole("button", { name: "Clear search" }).click();
   await expect(page).toHaveURL(/\/streamers$/);

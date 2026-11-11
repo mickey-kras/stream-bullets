@@ -72,7 +72,9 @@ export function StreamerHeader({
         <Link
           className="streamer-home"
           to={paths.streamer(streamer.handle)}
-          aria-label={t("streamer.home", { name: streamer.name })}
+          aria-label={
+            streamer.handle === "streambullets" ? t("ideas.heading") : t("streamer.home", { name: streamer.name })
+          }
         >
           {brand ?? (
             <>

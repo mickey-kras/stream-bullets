@@ -9,6 +9,7 @@ import { clientIp } from "./client-ips";
  */
 /* The landing page and its WebGL station have their own keyboard checks in landing.spec.ts. */
 const ROUTES: readonly string[] = [
+  "/",
   "/streamers",
   "/@test_host",
   "/@test_host?view=polls",
@@ -72,6 +73,7 @@ for (const route of ROUTES) {
     await expect(skip).toBeFocused();
     await skip.press("Enter");
     await expect(page).toHaveURL(/#main-content$/);
+    await expect(page.getByRole("main")).toBeFocused();
   });
 }
 
@@ -154,3 +156,68 @@ test("the overlay control page enlarges a monitor and collapses Position and siz
   await expect(page.locator(".ov-layout-wrap")).toHaveAttribute("open", "");
   await close(owner);
 });
+
+for (const width of [1363, 390]) {
+  test(`language switching keeps the Ideas filter and restores focus at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 936 });
+    await page.goto("/@streambullets?view=topics&status=planned&dialog=language");
+    await page.getByRole("dialog").getByRole("button", { name: "Русский" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    await expect(page).toHaveURL(/\/@streambullets\?view=topics&status=planned$/);
+    const language = page.locator('a[href*="dialog=language"]:visible');
+    await expect(language).toBeFocused();
+    await language.press("Enter");
+    await page.getByRole("dialog").getByRole("button", { name: "English" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(language).toBeFocused();
+    if (width === 390) await page.keyboard.press("Escape");
+    await expect(page.getByRole("link", { name: "Planned", exact: true })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("link", { name: "StreamBullets home", exact: true })).toHaveAttribute("href", "/");
+    await expect(page.getByRole("link", { name: "Ideas for StreamBullets", exact: true })).toHaveAttribute("href", "/@streambullets");
+  });
+}
+
+test("display dialog contains keyboard focus and restores its opener", async ({ page }) => {
+  await page.goto("/streamers");
+  const opener = page.getByRole("contentinfo").getByRole("link", { name: "Accessibility", exact: true });
+  await opener.focus();
+  await opener.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Accessibility & display" });
+  await expect(dialog).toBeVisible();
+  for (let index: number = 0; index < 35; index++) {
+    await page.keyboard.press("Tab");
+    await expect(dialog.locator(":focus")).toHaveCount(1);
+  }
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(opener).toBeFocused();
+  const outline = await opener.evaluate((link: HTMLElement): { style: string; width: number } => {
+    const style: CSSStyleDeclaration = getComputedStyle(link);
+    return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth) };
+  });
+  expect(outline.style).not.toBe("none");
+  expect(outline.width).toBeGreaterThanOrEqual(2);
+});
+
+for (const failure of ["access", "write"] as const) {
+  test(`blocked storage ${failure} does not break the page or language switching`, async ({ page }) => {
+    await page.addInitScript((mode: "access" | "write"): void => {
+      if (mode === "access") {
+        Object.defineProperty(window, "sessionStorage", {
+          get(): never { throw new DOMException("Blocked", "SecurityError"); },
+        });
+      } else {
+        Storage.prototype.setItem = (): never => { throw new DOMException("Full", "QuotaExceededError"); };
+      }
+    }, failure);
+    const errors: string[] = [];
+    page.on("pageerror", (error: Error) => errors.push(error.message));
+    await page.goto("/streamers");
+    await expect(page.getByRole("heading", { name: "Streamers", exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "Language: English" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Русский" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    await expect(page.getByRole("main")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+}
