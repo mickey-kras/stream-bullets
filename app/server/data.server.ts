@@ -27,6 +27,7 @@ import {
 import { IDEA_CATEGORIES, isUntouchedTemplate, NEW_IDEA_STATUS } from "../lib/ideas";
 import { auditStatement, type AuditEntry } from "./audit.server";
 import { HttpError } from "./http.server";
+import { imageStorageKey } from "./images.server";
 import { MASH_COLUMN, mashValue, notFinishedBattle } from "./mash-sql";
 import {
   directoryQuerySchema,
@@ -364,6 +365,7 @@ export async function updateStreamer(env: AppEnv, userId: string, input: Streame
   await assertStreamerWritable(env, current.id, userId);
   await consumeMutationQuota(env, userId);
   if (value.logoMode === "logo" && !current.logo) throw new HttpError(400, "Upload a logo first.");
+  const previousLogo = value.logoMode === "profile" && current.logo ? await imageStorageKey(env, userId, "logo") : null;
   const handleChangedAt = handleChange(current, value.handle, Date.now());
   const set: Partial<typeof streamers.$inferInsert> = { handleChangedAt };
   if (value.name !== undefined) set.name = value.name;
@@ -377,7 +379,7 @@ export async function updateStreamer(env: AppEnv, userId: string, input: Streame
     handleConflict(error);
   }
   if (!row) throw new HttpError(404, "Create your streamer page first.");
-  if (value.logoMode === "profile" && current.logo) await env.IMAGES.delete(`logo/${userId}`);
+  if (previousLogo) await env.IMAGES.delete([...new Set([previousLogo, `logo/${userId}`])]);
   return streamerValue({ ...row, ownerAvatarPreset: await ownerAvatarPreset(env, userId) }, true);
 }
 

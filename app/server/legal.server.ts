@@ -2,7 +2,6 @@ import type { LoaderFunctionArgs } from "react-router";
 import { z } from "zod";
 import { appContext } from "../env";
 import { legal, type LegalDetails } from "../legal";
-import { HttpError } from "./http.server";
 
 const detailsSchema = z
   .object({
@@ -19,6 +18,6 @@ export function legalLoader({ context }: LoaderFunctionArgs): LegalDetails {
   try {
     return { ...legal, ...detailsSchema.parse(JSON.parse(value)) };
   } catch {
-    throw new HttpError(503, "Legal details are not configured correctly.");
+    throw new Response("Legal details are not configured correctly.", { status: 503 });
   }
 }

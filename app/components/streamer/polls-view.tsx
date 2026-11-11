@@ -36,7 +36,7 @@ export interface PollsViewProps {
   sort: SortOrder;
   liveEvent: StreamEvent | null;
   live: { status: LiveStatus; snapshot: LiveSnapshot | null; reconnect: () => void };
-  pending: boolean;
+  pending: ReadonlySet<string>;
   more: boolean;
   loadingMore: boolean;
   refreshing: boolean;
@@ -46,7 +46,7 @@ export interface PollsViewProps {
   onSort: (sort: SortOrder) => void;
   onRefresh: () => void;
   onLoadMore: () => void;
-  onAction: (body: unknown) => void;
+  onAction: (body: unknown, id: string) => void;
   onDelete: (id: string) => Promise<void>;
   onDeleteSelected: () => Promise<void>;
   discussion: (entry: Entry) => ReactNode;
@@ -137,8 +137,8 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
         now={now}
         signedIn={Boolean(viewer) && writable}
         owner={owner && writable}
-        pending={props.pending}
-        onAction={props.onAction}
+        pending={props.pending.has(entry.id)}
+        onAction={(body: unknown) => props.onAction(body, entry.id)}
         onDiscuss={() => props.onOpen(entry.id)}
         onDelete={() => props.onDelete(entry.id)}
       />
@@ -151,8 +151,8 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
         now={now}
         signedIn={Boolean(viewer) && writable}
         owner={owner && writable}
-        pending={props.pending}
-        onAction={props.onAction}
+        pending={props.pending.has(battle.id)}
+        onAction={(body: unknown) => props.onAction(body, battle.id)}
       />
     );
   else if (!selected && entries.length === 0)
@@ -251,7 +251,7 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
             owner={owner}
             moderator={props.moderator}
             writable={writable}
-            pending={props.pending}
+            pending={props.pending.has(selected.id)}
             onDelete={props.onDeleteSelected}
           />
           {props.discussion(selected)}

@@ -225,7 +225,12 @@ async function seedNewTables(): Promise<void> {
       now,
       ids.hostPage,
     ),
-    run("INSERT INTO entry_mash (entry_id,duration_s,phase,starts_at,ends_at,winner) VALUES (?,30,'finished',?,?,1)", ids.hostPoll, now, now + 30_000),
+    run(
+      "INSERT INTO entry_mash (entry_id,duration_s,phase,starts_at,ends_at,winner) VALUES (?,30,'finished',?,?,1)",
+      ids.hostPoll,
+      now,
+      now + 30_000,
+    ),
     run(
       "INSERT INTO mash_taps (entry_id,user_id,side,taps,assisted_taps) VALUES (?1,'leaver',1,42,6),(?1,'other',0,10,0)",
       ids.hostPoll,
@@ -630,7 +635,14 @@ describe("tables added by migrations 0006–0012", (): void => {
           buttonLabel: "Join",
           buttonTarget: "https://discord.gg/leaver",
         },
-        { position: 1, icon: null, title: "Bring an idea", body: "Suggest a topic.", buttonLabel: null, buttonTarget: null },
+        {
+          position: 1,
+          icon: null,
+          title: "Bring an idea",
+          body: "Suggest a topic.",
+          buttonLabel: null,
+          buttonTarget: null,
+        },
       ],
       supportLinks: [{ position: 0, kind: "kofi", label: null, url: "https://ko-fi.com/leaver" }],
       overlay: {
@@ -665,7 +677,13 @@ describe("tables added by migrations 0006–0012", (): void => {
       ["logo", "image/webp", 2],
     ]);
     const text = JSON.stringify(data);
-    for (const hidden of ["PUBLIC-KEY-SECRET", "CREDENTIAL-ID-SECRET", "INTERNAL-ADMIN-NOTE", "other-public-key", "Host show"]) {
+    for (const hidden of [
+      "PUBLIC-KEY-SECRET",
+      "CREDENTIAL-ID-SECRET",
+      "INTERNAL-ADMIN-NOTE",
+      "other-public-key",
+      "Host show",
+    ]) {
       expect(text).not.toContain(hidden);
     }
   });
@@ -684,9 +702,9 @@ describe("tables added by migrations 0006–0012", (): void => {
       overlay_state: 1,
     });
     expect(await env.DB.prepare("SELECT count(*) AS n FROM stream_event_topics").first()).toEqual({ n: 0 });
-    expect(await env.DB.prepare("SELECT status_changed_by FROM streamers WHERE id=?").bind(ids.hostPage).first()).toEqual(
-      { status_changed_by: null },
-    );
+    expect(
+      await env.DB.prepare("SELECT status_changed_by FROM streamers WHERE id=?").bind(ids.hostPage).first(),
+    ).toEqual({ status_changed_by: null });
     // Moderation records keep the plain page id; the deleted admin is no longer named as the actor.
     const actions = await env.DB.prepare("SELECT id,streamer_id,actor_id FROM moderation_actions ORDER BY id").all();
     expect(actions.results).toEqual([
@@ -794,6 +812,29 @@ describe("account deletion", (): void => {
     expect(await env.IMAGES.head("background/leaver")).toBeNull();
     expect(await env.IMAGES.head("avatar/other")).not.toBeNull();
     expect(rooms.sort()).toEqual([ids.leaverPage, ids.hostPage].sort());
+  });
+
+  it("exports the published immutable image and deletes current and failed versions with the account", async (): Promise<void> => {
+    const current = "avatar/leaver/published";
+    const failed = "avatar/leaver/unpublished";
+    await env.IMAGES.put(current, new Uint8Array([1, 2, 3, 4, 5]), { httpMetadata: { contentType: "image/webp" } });
+    await env.IMAGES.put(failed, new Uint8Array([6, 7]));
+    await env.IMAGES.put("avatar/other/unpublished", new Uint8Array([8]));
+    await env.DB.prepare(
+      "INSERT INTO image_versions (owner_id,kind,version) VALUES ('leaver','avatar','published')",
+    ).run();
+    const data = await exportAccount(env, "leaver");
+    expect(data.images.find((image) => image.kind === "avatar")).toMatchObject({
+      url: `${origin}/images/avatar/leaver`,
+      contentType: "image/webp",
+      bytes: 5,
+    });
+    await deleteAccount(env, "leaver");
+    expect(await env.IMAGES.head(current)).toBeNull();
+    expect(await env.IMAGES.head(failed)).toBeNull();
+    expect(await env.IMAGES.head("avatar/leaver")).toBeNull();
+    expect(await env.IMAGES.head("avatar/other/unpublished")).not.toBeNull();
+    await env.IMAGES.delete("avatar/other/unpublished");
   });
 
   it("commits the deletion when image cleanup fails", async (): Promise<void> => {
