@@ -39,16 +39,16 @@ test("each poll stays usable while another vote is pending and only board data r
   const first = page.locator("article.poll-card").filter({ hasText: "Independent first poll" });
   const second = page.locator("article.poll-card").filter({ hasText: "Independent second poll" });
   try {
-    await first.getByRole("button", { name: "First", exact: true }).click();
-    await expect(first.getByRole("button", { name: "Second", exact: true })).toBeDisabled();
-    await expect(second.getByRole("button", { name: "Second", exact: true })).toBeEnabled();
-    await second.getByRole("button", { name: "Second", exact: true }).click();
-    await expect(second.getByRole("button", { name: "Second", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await first.getByRole("button", { name: /^First/ }).click();
+    await expect(first.getByRole("button", { name: /^Second/ })).toBeDisabled();
+    await expect(second.getByRole("button", { name: /^Second/ })).toBeEnabled();
+    await second.getByRole("button", { name: /^Second/ }).click();
+    await expect(second.getByRole("button", { name: /^Second/ })).toHaveAttribute("aria-pressed", "true");
   } finally {
     release?.();
   }
-  await expect(first.getByRole("button", { name: "First", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await expect(second.getByRole("button", { name: "Second", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(first.getByRole("button", { name: /^First/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(second.getByRole("button", { name: /^Second/ })).toHaveAttribute("aria-pressed", "true");
   expect(reads).toEqual([]);
   await close(viewer);
   await close(owner);
@@ -68,7 +68,7 @@ test("selected poll data stays current and failed votes leave controls usable", 
       body: JSON.stringify({ error: "Vote unavailable" }),
     });
   });
-  const first = page.getByRole("button", { name: "First", exact: true });
+  const first = page.getByRole("button", { name: /^First/ });
   await first.click();
   await expect(page.locator(".page-error")).toHaveText("Vote unavailable");
   await expect(first).toBeEnabled();
@@ -154,7 +154,7 @@ test("refreshing a selection deleted by another client replaces stale content wi
     expect(removed.ok()).toBe(true);
     await route.fulfill({ response: vote });
   });
-  await page.getByRole("button", { name: "First", exact: true }).click();
+  await page.getByRole("button", { name: /^First/ }).click();
   await expect(page.getByRole("heading", { name: "Page not found", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Poll removed during a vote", exact: true })).toHaveCount(0);
   await close(viewer);

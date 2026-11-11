@@ -145,8 +145,15 @@
     {
       "idx": 20,
       "version": "6",
-      "when": 1794356492978,
-      "tag": "0020_image_versions",
+      "when": 1794340000000,
+      "tag": "0020_official_board",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1794362580808,
+      "tag": "0021_image_versions",
       "breakpoints": true
     }
   ]

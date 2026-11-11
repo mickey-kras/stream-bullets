@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "da2ffe78-5813-4ee5-835d-0c72aa895688",
+  "id": "666b7e7c-710f-413d-a11d-977f42f4f320",
   "prevId": "8094fb60-e87f-4d3f-ad79-87425b4d6169",
   "tables": {
     "ai_interest": {
@@ -1266,64 +1266,6 @@
         "entry_votes_choice_check": {
           "name": "entry_votes_choice_check",
           "value": "\"entry_votes\".\"choice\" BETWEEN 0 AND 5"
-        }
-      }
-    },
-    "image_versions": {
-      "name": "image_versions",
-      "columns": {
-        "owner_id": {
-          "name": "owner_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "kind": {
-          "name": "kind",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "version": {
-          "name": "version",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "image_versions_owner_id_user_id_fk": {
-          "name": "image_versions_owner_id_user_id_fk",
-          "tableFrom": "image_versions",
-          "tableTo": "user",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "image_versions_owner_id_kind_pk": {
-          "columns": [
-            "owner_id",
-            "kind"
-          ],
-          "name": "image_versions_owner_id_kind_pk"
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {
-        "image_versions_kind_check": {
-          "name": "image_versions_kind_check",
-          "value": "\"image_versions\".\"kind\" IN ('avatar', 'background', 'logo')"
         }
       }
     },

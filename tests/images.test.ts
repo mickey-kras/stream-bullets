@@ -137,6 +137,52 @@ describe("owned image storage", () => {
     expect(new Set(keys).size).toBe(2);
   });
 
+  it.each(["replacement", "revocation"] as const)(
+    "rechecks a disappeared version after %s during a delayed cache miss",
+    async (change) => {
+      const cache = imageCache();
+      await uploadImage(upload(), env, "viewer", "avatar");
+      let release: (() => void) | undefined;
+      const held = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let reached: (() => void) | undefined;
+      const started = new Promise<void>((resolve) => {
+        reached = resolve;
+      });
+      vi.mocked(cache.match).mockImplementationOnce(async () => {
+        reached?.();
+        await held;
+        return undefined;
+      });
+      const get = vi.spyOn(env.IMAGES, "get");
+      const reading = serveImage(env, "avatar/viewer", "GET", cache);
+      await started;
+      if (change === "replacement") await uploadImage(new Request(upload(), { body: redPng }), env, "viewer", "avatar");
+      else await deleteAvatar(env, "viewer");
+      release?.();
+      if (change === "replacement") {
+        expect(new Uint8Array(await (await reading).arrayBuffer())).toEqual(redPng);
+        expect(get).toHaveBeenCalledTimes(2);
+        expect(cache.match).toHaveBeenCalledTimes(2);
+      } else {
+        await expect(reading).rejects.toMatchObject({ status: 404 });
+        expect(get).toHaveBeenCalledTimes(1);
+        expect(cache.match).toHaveBeenCalledTimes(1);
+      }
+    },
+  );
+
+  it("bounds retries when the currently referenced image object stays missing", async () => {
+    const cache = imageCache();
+    await uploadImage(upload(), env, "viewer", "avatar");
+    const get = vi.spyOn(env.IMAGES, "get").mockResolvedValue(null);
+    await expect(serveImage(env, "avatar/viewer", "GET", cache)).rejects.toMatchObject({ status: 404 });
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(cache.match).toHaveBeenCalledTimes(2);
+    expect(cache.put).not.toHaveBeenCalled();
+  });
+
   it("revokes cached page images and old account images even when storage cleanup fails", async () => {
     const cache = imageCache();
     await env.DB.prepare(

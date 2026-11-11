@@ -141,46 +141,53 @@ export async function serveImage(
           ON v.owner_id=u.id AND v.kind=? WHERE u.id=? AND u.image=?`).bind(kind, userId, url)
       : env.DB.prepare(`SELECT v.version FROM streamers s LEFT JOIN image_versions v
           ON v.owner_id=s.owner_id AND v.kind=? WHERE s.owner_id=? AND s.${kind}=?`).bind(kind, userId, url);
-  const live = await reference.first<{ version: string | null }>();
-  if (!live) throw new HttpError(404, "Image not found.");
-  if (live.version && !cache && typeof caches !== "undefined") {
-    try {
-      cache = await caches.open("public-images");
-    } catch (error: unknown) {
-      console.error("Image cache open failed.", { cause: error instanceof Error ? error.name : "unknown" });
-    }
-  }
-  const key: string | null =
-    live.version && cache ? `${env.APP_ORIGIN}${url}?version=${encodeURIComponent(live.version)}` : null;
-  let response: Response | undefined;
-  if (key && cache) {
-    try {
-      response = await cache.match(key);
-    } catch (error: unknown) {
-      console.error("Image cache lookup failed.", { cause: error instanceof Error ? error.name : "unknown" });
-    }
-  }
-  if (!response) {
-    const object = await env.IMAGES.get(live.version ? `${path}/${live.version}` : path);
-    if (!object) throw new HttpError(404, "Image not found.");
-    response = new Response(object.body, {
-      headers: {
-        "Cache-Control": "public, max-age=3600",
-        "Content-Security-Policy": "default-src 'none'; sandbox",
-        "X-Content-Type-Options": "nosniff",
-        "Content-Type": object.httpMetadata?.contentType ?? "application/octet-stream",
-        ETag: object.httpEtag,
-      },
-    });
-    if (key && cache) {
+  let retry = true;
+  for (;;) {
+    const live = await reference.first<{ version: string | null }>();
+    if (!live) throw new HttpError(404, "Image not found.");
+    if (live.version && !cache && typeof caches !== "undefined") {
       try {
-        await cache.put(key, response.clone());
+        cache = await caches.open("public-images");
       } catch (error: unknown) {
-        console.error("Image cache write failed.", { cause: error instanceof Error ? error.name : "unknown" });
+        console.error("Image cache open failed.", { cause: error instanceof Error ? error.name : "unknown" });
       }
     }
+    const key: string | null =
+      live.version && cache ? `${env.APP_ORIGIN}${url}?version=${encodeURIComponent(live.version)}` : null;
+    let response: Response | undefined;
+    if (key && cache) {
+      try {
+        response = await cache.match(key);
+      } catch (error: unknown) {
+        console.error("Image cache lookup failed.", { cause: error instanceof Error ? error.name : "unknown" });
+      }
+    }
+    if (!response) {
+      const object = await env.IMAGES.get(live.version ? `${path}/${live.version}` : path);
+      if (!object && live.version && retry) {
+        retry = false;
+        continue;
+      }
+      if (!object) throw new HttpError(404, "Image not found.");
+      response = new Response(object.body, {
+        headers: {
+          "Cache-Control": "public, max-age=3600",
+          "Content-Security-Policy": "default-src 'none'; sandbox",
+          "X-Content-Type-Options": "nosniff",
+          "Content-Type": object.httpMetadata?.contentType ?? "application/octet-stream",
+          ETag: object.httpEtag,
+        },
+      });
+      if (key && cache) {
+        try {
+          await cache.put(key, response.clone());
+        } catch (error: unknown) {
+          console.error("Image cache write failed.", { cause: error instanceof Error ? error.name : "unknown" });
+        }
+      }
+    }
+    const headers = new Headers(response.headers);
+    headers.set("Cache-Control", "no-store");
+    return new Response(method === "HEAD" ? null : response.body, { headers });
   }
-  const headers = new Headers(response.headers);
-  headers.set("Cache-Control", "no-store");
-  return new Response(method === "HEAD" ? null : response.body, { headers });
 }
