@@ -3,6 +3,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { makeSignature } from "better-auth/crypto";
+import { OFFICIAL_BOARD_ID } from "../app/lib/system.ts";
 
 interface BuildConfig {
   main: string;
@@ -68,7 +69,6 @@ for (const role of [
   "reporter",
   "frozenowner",
   "suspendedowner",
-  "officialowner",
   "featureowner",
   "keyadmin",
   "prefsviewer",
@@ -139,10 +139,9 @@ statements.push(
   `INSERT INTO moderation_actions(id,target_kind,target_id,streamer_id,action,reason,note,notify_owner,actor_id,created_at) VALUES ('${randomUUID()}','streamer','${frozenStreamId}','${frozenStreamId}','freeze','Under review','Seeded for tests',1,'${users.admin.id}',${now});`,
   `INSERT INTO moderation_actions(id,target_kind,target_id,streamer_id,action,reason,note,notify_owner,actor_id,created_at) VALUES ('${randomUUID()}','streamer','${suspendedStreamId}','${suspendedStreamId}','suspend','Repeated spam','Seeded for tests',0,'${users.admin.id}',${now});`,
 );
-// The official StreamBullets page (item 46): pinned first in the directory. Never seeded by a migration (R14).
-const officialStreamId: string = randomUUID();
+// Migration 0020 supplies the official Ideas board. Seed only its test content.
+const officialStreamId: string = OFFICIAL_BOARD_ID;
 statements.push(
-  `INSERT INTO streamers(id,owner_id,handle,name,about,revision,is_official) VALUES ('${officialStreamId}','${users.officialowner.id}','streambullets','StreamBullets','Ideas and bug reports for StreamBullets.',0,1);`,
   `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed,status,status_reason,status_changed_at) VALUES ('${randomUUID()}','${officialStreamId}','${users.viewer.id}','topic','Dark mode for the overlay','Please.','design','[]',${now},0,'planned',NULL,${now});`,
 );
 // Enough pages for the Streamers directory to need "Load more" (50 per page). Their handles sort after every
