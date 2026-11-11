@@ -191,30 +191,34 @@ body:has(.landing-page)::after {
   border-color: var(--gold);
 }
 
-/* A static brand mark and localized note replace the scene when WebGL is unavailable. */
+/* The poster occupies the stage without changing its layout. */
+.station-poster {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 66%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
 .station-fallback {
   position: absolute;
   z-index: 2;
-  display: grid;
-  justify-items: center;
-  gap: 24px;
   right: 8%;
-  top: 50%;
+  bottom: 8%;
   width: 36%;
-  transform: translateY(-50%);
   text-align: center;
 }
-.station-fallback img { width: min(180px, 100%); height: auto; }
 .station-fallback .station-status {
   position: static;
-  max-width: 36ch;
   margin: 0;
-  color: var(--muted);
+  padding: 8px 12px;
+  background: #061a1ee6;
+  color: var(--cream);
   font-size: 15px;
 }
 @media (max-width: 700px) {
-  .station-fallback { left: 16px; right: 16px; width: auto; gap: 12px; }
-  .station-fallback img { width: min(100px, 20vh); }
+  .station-poster { width: 100%; }
+  .station-fallback { left: 16px; right: 16px; bottom: 16px; width: auto; }
 }
 
 /* Loading atom, in CSS only. Each orbit is a circle squashed into an ellipse; a fading conic trail spins

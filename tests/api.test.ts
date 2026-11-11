@@ -422,13 +422,14 @@ describe("first visitor destination", () => {
     expect(await getFeaturedStreamer(env)).toEqual({
       handle: "zed_page",
       name: "Zed",
+      isOfficial: false,
       entries: [{ id: ids.topic, title: "Topic", kind: "topic" }],
     });
   });
 
   it("excludes frozen and suspended communities and falls back to an active page", async (): Promise<void> => {
     await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(ids.page).run();
-    expect(await getFeaturedStreamer(env)).toEqual({ handle: "streambullets", name: "StreamBullets", entries: [] });
+    expect(await getFeaturedStreamer(env)).toEqual({ handle: "streambullets", name: "StreamBullets", isOfficial: true, entries: [] });
     await env.DB.prepare("UPDATE streamers SET status='suspended' WHERE id=?").bind(ids.official).run();
     expect(await getFeaturedStreamer(env)).toBeNull();
   });
