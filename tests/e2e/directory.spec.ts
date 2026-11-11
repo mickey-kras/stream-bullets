@@ -104,3 +104,18 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
   expect(response.headers().location).toBe("/streamers?dialog=profile");
   await close(context);
 });
+
+test("visitors can open real content from the featured community", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "Browse streamers", exact: true }).click();
+  const featured = page.getByRole("region", { name: "StreamBullets" });
+  await expect(featured.getByText("Start here")).toBeVisible();
+  const entry = featured.locator("li a").first();
+  const title: string = await entry.innerText();
+  await expect(entry).toHaveAttribute("href", /view=topics&entry=/);
+  await entry.click();
+  await expect(page).toHaveURL(/entry=/);
+  await expect(page.getByRole("heading", { name: title, exact: true }).first()).toBeVisible();
+  await page.goto("/streamers?query=nothing_here");
+  await expect(page.getByText("Start here", { exact: true })).toHaveCount(0);
+});
