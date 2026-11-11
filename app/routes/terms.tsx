@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { LegalDocument, type LegalSection } from "../components/common";
-import { contactEmails, legal } from "../legal";
+import { contactEmails, legal, type LegalDetails } from "../legal";
 import { paths } from "../lib/shell";
+import { legalLoader } from "../server/legal.server";
+
+export const loader = legalLoader;
 
 export function meta() {
   return [
@@ -13,7 +16,7 @@ export function meta() {
 
 const mail: ReactNode = <a href={`mailto:${legal.contactEmail}`}>{legal.contactEmail}</a>;
 
-const sections: readonly LegalSection[] = [
+const sections = (legal: LegalDetails): readonly LegalSection[] => [
   {
     id: "about",
     title: "About these terms",
@@ -243,6 +246,7 @@ const sections: readonly LegalSection[] = [
 ];
 
 export default function Terms(): ReactNode {
+  const legal = useLoaderData<typeof loader>();
   return (
     <LegalDocument
       title="Terms of Service"
@@ -252,7 +256,8 @@ export default function Terms(): ReactNode {
           with respect, and report anything that breaks the rules.
         </p>
       }
-      sections={sections}
+      legal={legal}
+      sections={sections(legal)}
     />
   );
 }
