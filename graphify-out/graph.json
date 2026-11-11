@@ -31845,7 +31845,7 @@
       "relation": "calls",
       "source": "tests_e2e_client_ips_checkallocations",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "tests_e2e_client_ips_allocations",
       "weight": 1.0
     },
@@ -31857,7 +31857,7 @@
       "relation": "calls",
       "source": "tests_e2e_client_ips_clientaddress",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -32061,7 +32061,7 @@
       "relation": "calls",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L102",
+      "source_location": "L117",
       "target": "tests_e2e_oauth_spec_signin",
       "weight": 1.0
     },
@@ -32073,7 +32073,7 @@
       "relation": "calls",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L104",
+      "source_location": "L119",
       "target": "tests_e2e_oauth_spec_expecthostcookie",
       "weight": 1.0
     },
@@ -32085,7 +32085,7 @@
       "relation": "calls",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L105",
+      "source_location": "L120",
       "target": "tests_e2e_oauth_spec_viewer",
       "weight": 1.0
     },
@@ -62184,6 +62184,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_e2e_oauth_spec",
+      "source_file": "tests/e2e/oauth.spec.ts",
+      "source_location": "L8",
+      "target": "tests_e2e_client_ips_clientaddress",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
       "source_location": "L1",
@@ -83186,6 +83198,18 @@
       "source_file": "tests/e2e/oauth.spec.ts",
       "source_location": "L7",
       "target": "tests_helpers_database",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_oauth_spec",
+      "source_file": "tests/e2e/oauth.spec.ts",
+      "source_location": "L8",
+      "target": "tests_e2e_client_ips",
       "weight": 1.0
     },
     {
@@ -107006,7 +107030,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L37",
+      "source_location": "L38",
       "target": "tests_e2e_client_ips_spec",
       "weight": 1.0
     },
@@ -107017,7 +107041,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L40",
+      "source_location": "L41",
       "target": "tests_e2e_client_ips_allocations",
       "weight": 1.0
     },
@@ -107028,7 +107052,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L47",
+      "source_location": "L48",
       "target": "tests_e2e_client_ips_checkallocations",
       "weight": 1.0
     },
@@ -107039,7 +107063,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L63",
+      "source_location": "L64",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -107061,7 +107085,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L71",
+      "source_location": "L72",
       "target": "tests_e2e_client_ips_clientaddress",
       "weight": 1.0
     },
@@ -107446,8 +107470,8 @@
       "relation": "contains",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L13",
-      "target": "tests_e2e_oauth_spec_providerrequests",
+      "source_location": "L105",
+      "target": "tests_e2e_oauth_spec_viewer",
       "weight": 1.0
     },
     {
@@ -107458,6 +107482,17 @@
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
       "source_location": "L14",
+      "target": "tests_e2e_oauth_spec_providerrequests",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_oauth_spec",
+      "source_file": "tests/e2e/oauth.spec.ts",
+      "source_location": "L15",
       "target": "tests_e2e_oauth_spec_providerresponse",
       "weight": 1.0
     },
@@ -107468,7 +107503,7 @@
       "relation": "contains",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "tests_e2e_oauth_spec_signin",
       "weight": 1.0
     },
@@ -107479,19 +107514,8 @@
       "relation": "contains",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L84",
+      "source_location": "L96",
       "target": "tests_e2e_oauth_spec_expecthostcookie",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_oauth_spec",
-      "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L93",
-      "target": "tests_e2e_oauth_spec_viewer",
       "weight": 1.0
     },
     {
@@ -111963,7 +111987,7 @@
       "relation": "indirect_call",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L57",
+      "source_location": "L58",
       "target": "tests_e2e_oauth_spec_providerresponse",
       "weight": 1.0
     },
@@ -112185,10 +112209,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "35a069c0808dcc08f806449eec7758d9d49d62970e292aff961b6ca11b48035d",
+    "content_sha256": "4a8323469dd77782967bb792e42434eca9fcf635edaf31449e8b99a6b8134bb7",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "0ace0f9d712d88fb298f90687d7d9dfcf14c6518fd795c4ed5a761dd07b942c5",
+    "source_sha256": "78d802e4a695301d521923f62b7ff7d0c6f82b02900d7f8ab092fe7efdfaf2a5",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -116075,7 +116099,7 @@
       "label": "Spec",
       "norm_label": "spec",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L37"
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -130348,7 +130372,7 @@
       "label": "allocations()",
       "norm_label": "allocations()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L40"
+      "source_location": "L41"
     },
     {
       "_callable": true,
@@ -130359,7 +130383,7 @@
       "label": "checkAllocations()",
       "norm_label": "checkallocations()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L47"
+      "source_location": "L48"
     },
     {
       "_callable": true,
@@ -130370,7 +130394,7 @@
       "label": "clientAddress()",
       "norm_label": "clientaddress()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L71"
+      "source_location": "L72"
     },
     {
       "_callable": true,
@@ -130381,7 +130405,7 @@
       "label": "clientIp()",
       "norm_label": "clientip()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L63"
+      "source_location": "L64"
     },
     {
       "_callable": true,
@@ -130717,7 +130741,7 @@
       "label": "expectHostCookie()",
       "norm_label": "expecthostcookie()",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L84"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -130732,14 +130756,14 @@
             "callee": "text",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L18",
+            "line": "L19",
             "receiver_type": "RuntimeRequest"
           }
         ]
       },
       "norm_label": "providerresponse()",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L14"
+      "source_location": "L15"
     },
     {
       "_callable": true,
@@ -130754,35 +130778,63 @@
             "callee": "route",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L68",
+            "line": "L69",
             "receiver_type": "Page"
           },
           {
             "callee": "goto",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L78",
+            "line": "L79",
             "receiver_type": "Page"
           },
           {
             "callee": "waitForResponse",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L79",
+            "line": "L81",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "waitForEvent",
+            "file": "tests/e2e/oauth.spec.ts",
+            "lang": "typescript",
+            "line": "L84",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "mainFrame",
+            "file": "tests/e2e/oauth.spec.ts",
+            "lang": "typescript",
+            "line": "L85",
             "receiver_type": "Page"
           },
           {
             "callee": "getByRole",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L80",
+            "line": "L87",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "url",
+            "file": "tests/e2e/oauth.spec.ts",
+            "lang": "typescript",
+            "line": "L91",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "waitForLoadState",
+            "file": "tests/e2e/oauth.spec.ts",
+            "lang": "typescript",
+            "line": "L92",
             "receiver_type": "Page"
           }
         ]
       },
       "norm_label": "signin()",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L67"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -130793,7 +130845,7 @@
       "label": "viewer()",
       "norm_label": "viewer()",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L93"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -139368,7 +139420,7 @@
             "callee": "cookies",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L107",
+            "line": "L122",
             "receiver_type": "BrowserContext"
           }
         ]
@@ -139385,7 +139437,7 @@
       "label": "providerRequests",
       "norm_label": "providerrequests",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L13"
+      "source_location": "L14"
     },
     {
       "_origin": "ast",

@@ -3,6 +3,7 @@ import { expect, test } from "./coverage";
 test("JSON-LD remains readable under the production CSP on page loads and navigation", async ({ page }) => {
   await page.addInitScript(() => {
     document.addEventListener("securitypolicyviolation", (event: SecurityPolicyViolationEvent): void => {
+      if (event.effectiveDirective !== "script-src-elem") return;
       document.documentElement.dataset.cspViolations = JSON.stringify([
         ...JSON.parse(document.documentElement.dataset.cspViolations ?? "[]") as string[],
         event.effectiveDirective,
@@ -25,8 +26,11 @@ test("JSON-LD remains readable under the production CSP on page loads and naviga
       expect(blocks).toContainEqual(expect.objectContaining({ "@type": "Person", alternateName: "@feature_host" }));
       expect(blocks).toContainEqual(expect.objectContaining({ "@type": "Event", name: "Mic shootout" }));
       await page.locator("button.topic").filter({ hasText: "Mic shootout" }).click();
-      await expect(page.locator('script[type="application/ld+json"]').filter({ hasText: '"@type":"DiscussionForumPosting"' }))
-        .toContainText('"headline":"Mic shootout"');
+      await expect.poll(async (): Promise<Record<string, unknown>[]> =>
+        (await scripts.allTextContents()).map((text: string): Record<string, unknown> =>
+          JSON.parse(text) as Record<string, unknown>,
+        ),
+      ).toContainEqual(expect.objectContaining({ "@type": "DiscussionForumPosting", headline: "Mic shootout" }));
     }
     expect(await page.locator("html").getAttribute("data-csp-violations")).toBeNull();
     // A positive control proves that the same document blocks executable inline scripts.

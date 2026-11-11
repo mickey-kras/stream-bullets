@@ -26,6 +26,7 @@ const ranges = {
   directory: [[135, 135]],
   "route-errors": [[136, 136]],
   alignment: [[140, 149]],
+  oauth: [[150, 153]],
   a11y: [[177, 179]],
   i18n: [
     [180, 181],

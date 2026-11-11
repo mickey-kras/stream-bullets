@@ -5,6 +5,7 @@ import { Miniflare, Response as RuntimeResponse, type Request as RuntimeRequest 
 import type { BrowserContext, Page, Response } from "@playwright/test";
 import { test, expect, newPage, close } from "./coverage";
 import { applyMigrations, migrationFiles } from "../helpers/database";
+import { clientAddress } from "./client-ips";
 
 const origin: string = "https://localhost:5174";
 const sessionName: string = "__Host-stream-bullets.session_token";
@@ -76,8 +77,19 @@ async function signIn(page: Page, code: string): Promise<Response> {
     await route.fulfill({ status: 302, headers: { location: callback.href }, body: "" });
   });
   await page.goto(`${origin}/streamers?dialog=profile`);
-  const callbackResponse: Promise<Response> = page.waitForResponse((response) => response.url().includes("/api/auth/callback/twitch"));
-  await page.getByRole("button", { name: "Continue with Twitch" }).click();
+  const [, callbackResponse] = await Promise.all([
+    page.waitForResponse((response) => new URL(response.url()).pathname === "/api/auth/sign-in/social")
+      .then((response: Response): void => { expect(response.status()).toBe(200); }),
+    page.waitForResponse((response) => new URL(response.url()).pathname === "/api/auth/callback/twitch"),
+    page.waitForEvent("framenavigated", {
+      predicate: (frame): boolean => frame === page.mainFrame() && new URL(frame.url()).origin === origin,
+    }),
+    page.getByRole("button", { name: "Continue with Twitch" }).click(),
+  ]);
+  const location: string | null = await callbackResponse.headerValue("location");
+  expect(location).not.toBeNull();
+  expect(page.url()).toBe(new URL(location ?? "", origin).href);
+  await page.waitForLoadState("load");
   return callbackResponse;
 }
 
@@ -95,7 +107,10 @@ async function viewer(context: BrowserContext): Promise<unknown> {
 }
 
 test("OAuth creates a host-only HTTPS session and sign-out expires it", async ({ browser }) => {
-  const context = await browser.newContext({ ignoreHTTPSErrors: true });
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("oauth", 150) },
+  });
   try {
     const page = await newPage(context);
     const code: string = `browser-${++sequence}`;
@@ -122,7 +137,10 @@ test("OAuth creates a host-only HTTPS session and sign-out expires it", async ({
 });
 
 test("deleting an OAuth-created account expires the HTTPS cookie", async ({ browser }) => {
-  const context = await browser.newContext({ ignoreHTTPSErrors: true });
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("oauth", 151) },
+  });
   try {
     const page = await newPage(context);
     await signIn(page, `browser-${++sequence}`);
@@ -140,7 +158,10 @@ test("deleting an OAuth-created account expires the HTTPS cookie", async ({ brow
 });
 
 test("a failed provider exchange creates no browser session", async ({ browser }) => {
-  const context = await browser.newContext({ ignoreHTTPSErrors: true });
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("oauth", 152) },
+  });
   try {
     const page = await newPage(context);
     const callback = await signIn(page, "rejected-code");
@@ -156,7 +177,10 @@ test("a failed provider exchange creates no browser session", async ({ browser }
 
 
 test("a callback with unrelated state never exchanges a code or creates a session", async ({ browser }) => {
-  const context = await browser.newContext({ ignoreHTTPSErrors: true });
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("oauth", 153) },
+  });
   try {
     const page = await newPage(context);
     const before: number = providerRequests.length;
