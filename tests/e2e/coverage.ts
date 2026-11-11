@@ -27,7 +27,9 @@ async function start(page: Page): Promise<void> {
 
 async function collect(page: Page): Promise<void> {
   if (!pages.has(page)) return;
+  console.info("Collecting browser coverage");
   const entries = await page.coverage.stopJSCoverage();
+  console.info("Collected browser coverage");
   await mkdir("coverage/browser/raw", { recursive: true });
   await writeFile(`coverage/browser/raw/${randomUUID()}.json`, JSON.stringify(entries));
   pages.delete(page);

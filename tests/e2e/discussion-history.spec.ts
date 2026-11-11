@@ -56,6 +56,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
   const owner = sessions.owner;
   if (!viewer || !owner) throw new Error("Missing discussion test accounts.");
   const { entryId, remoteParentId } = await seedHistory(viewer.id);
+  console.info("Seeded discussion history");
   const context: BrowserContext = await browser.newContext({
     baseURL: origin,
     extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("discussion-history", 75) },
@@ -87,7 +88,9 @@ test("historical comment mutations stay visible and accurate after refresh", asy
   try {
     const page = await newPage(context);
     await page.goto(`/@test_host?entry=${entryId}`);
+    console.info("Loading historical comments");
     await page.getByRole("button", { name: "Load more comments" }).click();
+    console.info("Loaded historical comments");
     const oldest = page
       .locator("article.comment")
       .filter({ has: page.getByText("History comment 001", { exact: true }) });
@@ -177,6 +180,7 @@ for (const change of ["sort", "refresh"] as const) {
     const viewer = sessions.viewer;
     if (!viewer) throw new Error("Missing discussion test account.");
     const { entryId } = await seedHistory(viewer.id);
+    console.info("Seeded discussion pagination");
     const context: BrowserContext = await browser.newContext({
       baseURL: origin,
       extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("discussion-history", change === "sort" ? 77 : 78) },
@@ -191,8 +195,11 @@ for (const change of ["sort", "refresh"] as const) {
         if (new URL(route.request().url()).searchParams.has("cursor")) return;
         await route.continue();
       });
+      console.info("Loading comment pagination");
       await more.click();
+      console.info("Clicked comment pagination");
       const request = await pending;
+      console.info("Observed pending pagination");
       const cancelled = page.waitForEvent("requestfailed", (failed) => failed === request);
       if (change === "sort") {
         await page.getByRole("combobox", { name: "Sort comments" }).click();
@@ -208,7 +215,9 @@ for (const change of ["sort", "refresh"] as const) {
         await expect(more).toBeEnabled();
       }
       await page.unrouteAll({ behavior: "ignoreErrors" });
+      console.info("Loading comment pagination");
       await more.click();
+      console.info("Clicked comment pagination");
       await expect(page.locator(".thread-list > li.thread")).toHaveCount(110);
       await expect(more).toHaveCount(0);
       await expect(page.locator(".discussion .form-error")).toBeEmpty();

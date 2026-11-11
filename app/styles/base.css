@@ -48,7 +48,7 @@ html, body { min-width: 320px; }
 kbd { display: inline-grid; place-items: center; min-width: 22px; padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; font: 600 12px/1.4 var(--body); color: var(--cream); }
 fieldset { min-width: 0; }
 :root:lang(de) body { hyphens: auto; -webkit-hyphens: auto; }
-:root:lang(de) h1, :root:lang(de) h2 { overflow-wrap: break-word; }
+:root:lang(de) h1, :root:lang(de) h2 { overflow-wrap: anywhere; }
 :root:is(:lang(ja), :lang(zh), :lang(hi)) * { text-transform: none !important; letter-spacing: normal !important; }
 :root:is(:lang(ja), :lang(zh)) body { word-break: normal; line-break: strict; }
 .icon { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -0.15em; overflow: visible; fill: none; stroke: currentColor; pointer-events: none; }

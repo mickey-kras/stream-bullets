@@ -278,6 +278,7 @@ for (const locale of ["de", "ru"])
       await inLanguage(phone, locale);
       const page = await newPage(phone);
       for (const screen of group.screens) {
+        console.info(`Checking ${locale} ${group.role ?? "visitor"} ${screen.name}`);
         await page.goto(screen.path);
         await expect(page.locator("html")).toHaveAttribute("lang", locale);
         await screen.open?.(page);
