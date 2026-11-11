@@ -11505,7 +11505,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L29",
+      "source_location": "L23",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -11517,7 +11517,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L30",
+      "source_location": "L24",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11529,7 +11529,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L48",
+      "source_location": "L42",
       "target": "app_components_shell_dialog_link_dialoglink",
       "weight": 1.0
     },
@@ -11541,7 +11541,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L50",
+      "source_location": "L44",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -11553,7 +11553,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L79",
+      "source_location": "L73",
       "target": "app_components_shell_contact_dialog_contactdialog",
       "weight": 1.0
     },
@@ -11565,7 +11565,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L80",
+      "source_location": "L74",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -11577,7 +11577,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L90",
+      "source_location": "L84",
       "target": "app_components_shell_footer_morerow",
       "weight": 1.0
     },
@@ -94307,7 +94307,7 @@
       "relation": "contains",
       "source": "app_components_shell_footer",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L25",
+      "source_location": "L19",
       "target": "app_components_shell_footer_sitefooter",
       "weight": 1.0
     },
@@ -115440,10 +115440,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "11caae0cf56199e25818e1d439fe4b46accc957c611b5c95dbe4b458278c42ab",
+    "content_sha256": "8a388183744e756a3bed2b3e64f3d5f444c5853639452332806999e907628d36",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "a42a21761e66c241bad4ae08d8b73fef7f42da66712823fa54fba7673c6fc6c7",
+    "source_sha256": "e192d153d1082ef083c90472bbd2649b970bbda87eefb2c30d61da848091d2e8",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -123472,7 +123472,7 @@
       "label": "SiteFooter()",
       "norm_label": "sitefooter()",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L25"
+      "source_location": "L19"
     },
     {
       "_callable": true,
@@ -143689,7 +143689,7 @@
             "callee": "addStyleTag",
             "file": "tests/e2e/responsive-layout.spec.ts",
             "lang": "typescript",
-            "line": "L69",
+            "line": "L71",
             "receiver_type": "Page"
           }
         ]
