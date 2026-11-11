@@ -46,9 +46,10 @@ export async function close(target: BrowserContext | Page): Promise<void> {
 }
 
 export const test = base.extend<{ coverage: void }>({
-  page: async ({ page }, use): Promise<void> => {
+  page: async ({ page }, use, testInfo): Promise<void> => {
     await start(page);
     await use(page);
+    for (const error of testInfo.errors) console.error(error.message ?? error.value);
     await collect(page);
   },
   coverage: [

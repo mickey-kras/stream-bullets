@@ -2,9 +2,9 @@
    (scratchpad/mocksrc: the app stylesheet, mock.css, icons.css and a11y.css). */
 * { box-sizing:border-box; }
 html { height:100%; overflow:hidden; }
-body { height:100vh; height:100dvh; margin:0; padding:14px 16px 16px; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at 30% 0,var(--c-21424755),transparent 60%),var(--bg); color:var(--cream); font:400 1.125rem/1.45 var(--body); }
-button, input, textarea, select { font:inherit; color:inherit; }
-button { cursor:pointer; border:1px solid var(--btn-border); border-radius:7px; background:linear-gradient(110deg,var(--btn-hi),var(--btn-lo)); padding:10px 16px; }
+body { height:100vh; height:100dvh; margin:0; padding:14px 16px 16px; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at 30% 0,var(--c-21424755),transparent 60%),var(--bg); color:var(--cream); font:400 var(--text-body)/var(--leading-body) var(--body); }
+button, input, textarea, select { font:inherit; font-size:var(--text-control); color:inherit; }
+button { cursor:pointer; border:1px solid var(--btn-border); border-radius:var(--radius-control); background:linear-gradient(110deg,var(--btn-hi),var(--btn-lo)); padding:var(--space-3) var(--space-4); }
 button:hover { border-color:var(--gold); background-color:var(--btn-hover); }
 button:disabled { opacity:.55; cursor:wait; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
@@ -38,7 +38,7 @@ html, body { min-width: 320px; }
 @media (max-width:43.75em) {
   body { --frame-band: 34px; --frame-band-rag: 10px; --frame-pad-x: 10px; }
 }
-.icon-button { display: inline-grid; place-items: center; width: 40px; height: 40px; min-height: 40px; padding: 0; border: 1px solid var(--input-border); border-radius: 6px; background: var(--c-122b31); }
+.icon-button { display: inline-grid; place-items: center; width: var(--control-size); height: var(--control-size); min-height: var(--control-size); padding: 0; border: 1px solid var(--input-border); border-radius: 6px; background: var(--c-122b31); }
 @media (max-width:43.75em) {
   .icon-button { width: 44px; height: 44px; }
 }
@@ -48,7 +48,7 @@ html, body { min-width: 320px; }
 kbd { display: inline-grid; place-items: center; min-width: 22px; padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; font: 600 12px/1.4 var(--body); color: var(--cream); }
 fieldset { min-width: 0; }
 :root:lang(de) body { hyphens: auto; -webkit-hyphens: auto; }
-:root:lang(de) h1, :root:lang(de) h2 { overflow-wrap: break-word; }
+:root:lang(de) h1, :root:lang(de) h2 { overflow-wrap: anywhere; }
 :root:is(:lang(ja), :lang(zh), :lang(hi)) * { text-transform: none !important; letter-spacing: normal !important; }
 :root:is(:lang(ja), :lang(zh)) body { word-break: normal; line-break: strict; }
 .icon { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -0.15em; overflow: visible; fill: none; stroke: currentColor; pointer-events: none; }
@@ -88,3 +88,6 @@ main [id] { scroll-margin-top: 24px; }
   main [id] { scroll-margin-top: 72px; }
 }
 input[type="range"] { min-height: 24px; }
+
+:where(p, h1, h2, h3, legend, label) { overflow-wrap: anywhere; }
+:root:lang(hi) body { line-height: 1.65; }
