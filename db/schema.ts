@@ -719,3 +719,28 @@ export const imageVersions = sqliteTable(
     check("image_versions_kind_check", sql`${table.kind} IN ('avatar', 'background', 'logo')`),
   ],
 );
+
+/** Anonymous UTC-day totals. No account, session, IP, URL, or user content. */
+export const conversionDaily = sqliteTable(
+  "conversion_daily",
+  {
+    day: text("day").notNull(),
+    event: text("event").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.day, table.event] }),
+    check("conversion_daily_count_check", sql`${table.count} >= 0`),
+  ],
+);
+
+/** Random click receipts expire after one day; they cannot identify a visitor. */
+export const conversionClicks = sqliteTable(
+  "conversion_clicks",
+  {
+    id: text("id").primaryKey(),
+    event: text("event").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [index("conversion_clicks_created_idx").on(table.createdAt)],
+);

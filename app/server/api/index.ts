@@ -2,6 +2,7 @@ import { accountRoutes } from "./account";
 import { adminRoutes } from "./admin";
 import { aiRoutes } from "./ai";
 import { communityRoutes } from "./community";
+import { conversionRoutes } from "./conversions";
 import { cookieRoutes } from "./cookies";
 import { entryRoutes } from "./entries";
 import { imageRoutes } from "./images";
@@ -32,6 +33,7 @@ export const apiRoutes: readonly ApiRoute[] = [
   ...adminRoutes,
   ...aiRoutes,
   ...cookieRoutes,
+  ...conversionRoutes,
 ];
 
 export { dispatch } from "./router";

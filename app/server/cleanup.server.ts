@@ -22,6 +22,13 @@ export async function cleanExpiredData(env: AppEnv, now: number): Promise<void> 
     env.DB.prepare(
       "DELETE FROM content_reports WHERE id IN (SELECT id FROM content_reports WHERE status <> 'open' AND resolved_at < ? LIMIT 5000)",
     ).bind(now - REPORT_RETENTION_MS),
+    // Click receipts prevent retries from counting twice. Aggregate totals contain no visitor identifiers.
+    env.DB.prepare(
+      "DELETE FROM conversion_clicks WHERE id IN (SELECT id FROM conversion_clicks WHERE created_at < ? LIMIT 5000)",
+    ).bind(now - 86_400_000),
+    env.DB.prepare("DELETE FROM conversion_daily WHERE day < date(?, 'unixepoch', '-90 days')").bind(
+      Math.floor(now / 1000),
+    ),
     // AI interest votes count for 30 days.
     ...pruneAiInterest(env, now),
   ]);

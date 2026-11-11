@@ -25,6 +25,8 @@ interface UserRow {
   avatar_preset: number | null;
   locale: string | null;
   display_prefs: string | null;
+  first_vote_counted: number;
+  first_topic_counted: number;
 }
 
 interface StreamerRow {
@@ -235,6 +237,7 @@ export interface AccountExport {
     avatarPreset: number | null;
     locale: string | null;
     displayPreferences: unknown;
+    conversionMilestones: { firstVote: boolean; firstTopic: boolean };
     createdAt: string;
     updatedAt: string;
   };
@@ -651,7 +654,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
   const now = Date.now();
   const [userResult, streamerResult, applicationResult, overlayResult] = await env.DB.batch([
     env.DB.prepare(
-      "SELECT id,name,email,email_verified,image,avatar_preset,locale,display_prefs,created_at,updated_at FROM user WHERE id=?",
+      "SELECT id,name,email,email_verified,image,avatar_preset,locale,display_prefs,first_vote_counted,first_topic_counted,created_at,updated_at FROM user WHERE id=?",
     ).bind(userId),
     env.DB.prepare(
       `SELECT id,handle,name,about,avatar,background,logo,is_official,handle_changed_at,status,status_reason,
@@ -685,6 +688,10 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       avatarPreset: account.avatar_preset,
       locale: account.locale,
       displayPreferences: parseJson(account.display_prefs),
+      conversionMilestones: {
+        firstVote: account.first_vote_counted === 1,
+        firstTopic: account.first_topic_counted === 1,
+      },
       createdAt: iso(account.created_at),
       updatedAt: iso(account.updated_at),
     },
