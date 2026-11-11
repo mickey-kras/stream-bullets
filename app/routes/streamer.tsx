@@ -1,3 +1,4 @@
+import { canonicalMeta, streamerCanonicalPath } from "../lib/seo";
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
 import { useCallback, useEffect, useRef, useState, type ReactNode, type ComponentProps } from "react";
@@ -68,6 +69,8 @@ const officialViews: readonly View[] = ["topics", "about", "community"];
 export function meta({ loaderData: data, matches }: Route.MetaArgs) {
   if (!data) return [{ title: "StreamBullets" }];
   const { streamer } = data.board;
+  if (streamer.status === "suspended")
+    return [{ title: `${streamer.name} · StreamBullets` }, { name: "robots", content: "noindex" }];
   const origin: string = shellFromMatches(matches)?.origin ?? "";
   const structured: JsonLd[] = [
     personJsonLd(streamer, origin),
@@ -76,6 +79,17 @@ export function meta({ loaderData: data, matches }: Route.MetaArgs) {
   if (data.selected) structured.push(postingJsonLd(data.selected, streamer, origin));
   const title: string = data.selected ? `${data.selected.title} · ${streamer.name}` : streamer.name;
   return [
+    ...canonicalMeta(
+      matches,
+      streamerCanonicalPath(
+        streamer.handle,
+        data.view,
+        data.selected?.id ?? null,
+        data.view === "schedule"
+          ? ((data.linkedEvent ?? data.events.find((event: StreamEvent) => event.id === data.openEvent))?.id ?? null)
+          : null,
+      ),
+    ),
     { title: `${title} · StreamBullets` },
     {
       name: "description",
