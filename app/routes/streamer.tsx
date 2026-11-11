@@ -441,14 +441,14 @@ export default function StreamerPage(): ReactNode {
         moderator={moderator}
         status={streamer.status}
         refreshKey={board.revision}
-        onChanged={() => void refreshBoard()}
+        onChanged={refreshBoard}
       />
     );
   }
 
   function copyPageLink(): void {
     const url = `${location.origin}/@${streamer.handle}`;
-    void copyText(url).then((copied: boolean) => toast(copied ? t("entry.linkCopied") : url));
+    copyText(url).then((copied: boolean) => toast(copied ? t("entry.linkCopied") : url));
   }
 
   /** The empty Topics state: the owner shares the page; viewers suggest the first topic. */
@@ -569,7 +569,7 @@ export default function StreamerPage(): ReactNode {
         onSelect={(id: string) => navigate("topics", id)}
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onSearch={(next: string) => changeBoard("query", next)}
-        onLoadMore={() => void loadMore()}
+        onLoadMore={loadMore}
       />
     );
   }
@@ -598,9 +598,9 @@ export default function StreamerPage(): ReactNode {
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onRefresh={() => {
           setRefreshes((value: number) => value + 1);
-          void refreshBoard();
+          refreshBoard();
         }}
-        onLoadMore={() => void loadMore()}
+        onLoadMore={loadMore}
         onAction={act}
         onDelete={async (id: string) => {
           if (loadedSelected?.id === id) return removeSelected();
