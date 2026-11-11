@@ -16,12 +16,6 @@ function MoreRow({ icon, children }: Readonly<{ icon: IconName; children: ReactN
   );
 }
 
-/**
- * The footer: legal links on the gold bottom band of the frame (42px desktop, 34px phones) in dark ink; the
- * landing page keeps its own dark strip. Phones show Privacy, Terms and More; More opens a sheet with the rest.
- * Suggest an improvement opens the official Ideas board with its dialog. The language switch shows the current
- * language in its own script.
- */
 export function SiteFooter(): ReactNode {
   const { pathname } = useLocation();
   const [dialog, setDialog] = useState<"contact" | "more" | null>(null);

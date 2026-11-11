@@ -415,7 +415,7 @@ body:has(.landing-page) .site-footer .footer-link { text-decoration: underline; 
 }
 
 body > .site-footer :is(.footer-full, .footer-compact) { gap: var(--space-1) var(--space-2); padding: var(--space-1) var(--space-2); }
-body > .site-footer :is(.footer-full, .footer-compact) :is(a, button) { min-height: var(--control-size); white-space: normal; padding-inline: var(--space-2); font-size: var(--text-meta); line-height: var(--leading-body); }
+body > .site-footer :is(.footer-full, .footer-compact) :is(a, button) { min-width: var(--control-size); min-height: var(--control-size); white-space: normal; padding-inline: var(--space-2); font-size: var(--text-meta); line-height: var(--leading-body); }
 body > .site-footer .lang-switch span { opacity: 1; }
 .contact-links { flex-direction: column; align-items: stretch; }
 .contact-links .button-link { justify-content: flex-start; }

@@ -51,7 +51,9 @@ for (const locale of LOCALES) {
       await expectContained(page.locator('[data-sheet="contact"], .contact-address, .contact-links, .sheet-head h2'));
       await expectReachable(page.locator('[data-sheet="contact"] .modal-close'));
       await page.locator('[data-sheet="contact"] .modal-close').click();
-      await page.goto("/privacy?dialog=a11y");
+      const displayLink: Locator = page.locator('.site-footer a[href*="dialog=a11y"]:visible');
+      await expectReachable(displayLink);
+      await displayLink.click();
       await expect(page.locator('[data-sheet="a11y"]')).toBeVisible();
       await expectContained(page.locator('[data-sheet="a11y"], .pref-group, .sheet-head h2'));
       await expectReachable(page.locator('[data-sheet="a11y"] .sheet-actions .gold'));

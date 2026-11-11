@@ -3,7 +3,7 @@
 * { box-sizing:border-box; }
 html { height:100%; overflow:hidden; }
 body { height:100vh; height:100dvh; margin:0; padding:14px 16px 16px; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at 30% 0,var(--c-21424755),transparent 60%),var(--bg); color:var(--cream); font:400 var(--text-body)/var(--leading-body) var(--body); }
-button, input, textarea, select { font:inherit; color:inherit; }
+button, input, textarea, select { font:inherit; font-size:var(--text-control); color:inherit; }
 button { cursor:pointer; border:1px solid var(--btn-border); border-radius:var(--radius-control); background:linear-gradient(110deg,var(--btn-hi),var(--btn-lo)); padding:var(--space-3) var(--space-4); }
 button:hover { border-color:var(--gold); background-color:var(--btn-hover); }
 button:disabled { opacity:.55; cursor:wait; }
@@ -89,6 +89,5 @@ main [id] { scroll-margin-top: 24px; }
 }
 input[type="range"] { min-height: 24px; }
 
-:where(button, input, textarea, select) { font-size: var(--text-control); }
 :where(p, h1, h2, h3, legend, label) { overflow-wrap: anywhere; }
 :root:lang(hi) body { line-height: 1.65; }
