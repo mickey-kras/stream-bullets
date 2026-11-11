@@ -1,3 +1,4 @@
+import { OFFICIAL_BOARD_ID } from "../../lib/system";
 import { useState, type ReactNode } from "react";
 import { Form, Link, useRevalidator } from "react-router";
 import type { AdminPage, AdminPageList, ModerationEvent, PageAction, StreamerStatus } from "../../types";
@@ -137,14 +138,16 @@ function PageRow({
               {actionLabel(action)}
             </button>
           ))}
-          <button
-            type="button"
-            aria-label={`${t(page.isOfficial ? "admin.pages.clearOfficial" : "admin.pages.markOfficial")} @${page.handle}`}
-            onClick={() => onOfficial(page)}
-          >
-            <Icon name="shield-check" size={18} />
-            {t(page.isOfficial ? "admin.pages.clearOfficial" : "admin.pages.markOfficial")}
-          </button>
+          {page.id !== OFFICIAL_BOARD_ID && (
+            <button
+              type="button"
+              aria-label={`${t(page.isOfficial ? "admin.pages.clearOfficial" : "admin.pages.markOfficial")} @${page.handle}`}
+              onClick={() => onOfficial(page)}
+            >
+              <Icon name="shield-check" size={18} />
+              {t(page.isOfficial ? "admin.pages.clearOfficial" : "admin.pages.markOfficial")}
+            </button>
+          )}
           <Link className="button-link" to={`/@${page.handle}`}>
             <Icon name="arrow-right" size={18} />
             {t("admin.pages.view")}

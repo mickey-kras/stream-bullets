@@ -113,7 +113,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0019", (): void => {
+  it("covers 0006 to 0020", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -129,6 +129,7 @@ describe("migrations 0006 onwards", (): void => {
       "0017",
       "0018",
       "0019",
+      "0020",
     ]);
   });
 
@@ -152,7 +153,7 @@ describe("migrations 0006 onwards", (): void => {
 
   it("keeps every existing row, vote, reaction, comment and like", async (): Promise<void> => {
     expect(before).toMatchObject({ entries: 3, entry_votes: 3, entry_comments: 3, comment_likes: 2 });
-    expect(await counts()).toEqual(before);
+    expect(await counts()).toEqual({ ...before, user: before.user + 1, streamers: before.streamers + 1 });
     const votes = await db.prepare("SELECT entry_id,user_id,choice FROM entry_votes ORDER BY entry_id,user_id").all();
     expect(votes.results).toEqual([
       { entry_id: "binary", user_id: "fan", choice: 1 },
