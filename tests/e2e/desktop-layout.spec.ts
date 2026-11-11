@@ -8,7 +8,10 @@ for (const locale of LOCALES) {
   ) as Record<string, string>;
 
   for (const width of [1280, 1363, 1920]) {
-    test(`${locale} desktop board keeps text, navigation and empty borders inside their frames at ${width}px`, async ({ page, context }) => {
+    test(`${locale} desktop board keeps text, navigation and empty borders inside their frames at ${width}px`, async ({
+      page,
+      context,
+    }) => {
       await page.setViewportSize({ width, height: 1080 });
       await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
       await page.goto("/@streambullets?view=topics&status=shipped");
@@ -32,14 +35,19 @@ for (const locale of LOCALES) {
           navOffset: Math.abs(nav.x + nav.width / 2 - header.x - header.width / 2),
           leftInset: card.left - panel.left,
           rightInset: panel.right - card.right,
-          clipped: bounds.some((clip: DOMRect) => text.some((rect: DOMRect) => rect.left < clip.left - 1 || rect.right > clip.right + 1)),
+          clipped: bounds.some((clip: DOMRect) =>
+            text.some((rect: DOMRect) => rect.left < clip.left - 1 || rect.right > clip.right + 1),
+          ),
         };
       });
       expect(geometry.clipped, "the complete subtitle must remain visible").toBe(false);
       expect(geometry.navOffset, "tabs must stay centered in the header").toBeLessThanOrEqual(2);
       expect(geometry.leftInset).toBeGreaterThanOrEqual(20);
       expect(geometry.rightInset).toBeGreaterThanOrEqual(20);
-      expect(Math.abs(geometry.leftInset - geometry.rightInset), "the complete card border must have equal insets").toBeLessThanOrEqual(2);
+      expect(
+        Math.abs(geometry.leftInset - geometry.rightInset),
+        "the complete card border must have equal insets",
+      ).toBeLessThanOrEqual(2);
     });
   }
 
@@ -58,7 +66,9 @@ for (const locale of LOCALES) {
     await expect(page.locator(".station-status")).toHaveText(messages["landing.unavailable"]);
     await expect(page.locator(".station-fallback")).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
-    const headingFits: boolean = await page.locator("#landing-title").evaluate((heading: HTMLElement): boolean => heading.scrollWidth <= heading.clientWidth + 1);
+    const headingFits: boolean = await page
+      .locator("#landing-title")
+      .evaluate((heading: HTMLElement): boolean => heading.scrollWidth <= heading.clientWidth + 1);
     expect(headingFits, "the hero heading must fit its column").toBe(true);
     await page.locator(".landing-header button").click();
     const dialog = page.getByRole("dialog");

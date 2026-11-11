@@ -466,7 +466,7 @@ export default function StreamerPage(): ReactNode {
               </a>
             ) : (
               writable && (
-                <button type="button" className="gold" onClick={() => viewer ? setDialog("idea") : setSignIn(true)}>
+                <button type="button" className="gold" onClick={() => (viewer ? setDialog("idea") : setSignIn(true))}>
                   <Icon name="plus" size={18} />
                   {t("ideas.suggest")}
                 </button>

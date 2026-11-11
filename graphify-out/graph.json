@@ -11469,7 +11469,7 @@
       "relation": "calls",
       "source": "app_components_shell_fit_header_fitheader",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L50",
+      "source_location": "L53",
       "target": "app_components_shell_fit_header_headeroverflows",
       "weight": 1.0
     },
@@ -11481,7 +11481,7 @@
       "relation": "calls",
       "source": "app_components_shell_fit_header_usefitheader",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L28",
+      "source_location": "L31",
       "target": "app_components_shell_fit_header_fitheader",
       "weight": 1.0
     },
@@ -11805,7 +11805,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L151",
+      "source_location": "L156",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11817,7 +11817,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L152",
+      "source_location": "L157",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -11829,7 +11829,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L158",
+      "source_location": "L163",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -11865,7 +11865,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signindialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L138",
+      "source_location": "L143",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -21993,7 +21993,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_floatingaction",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L213",
+      "source_location": "L214",
       "target": "app_routes_streamer_headeraction",
       "weight": 1.0
     },
@@ -22005,7 +22005,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_headeraction",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L202",
+      "source_location": "L203",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22017,7 +22017,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L142",
+      "source_location": "L143",
       "target": "app_lib_shell_server_requestviewer",
       "weight": 1.0
     },
@@ -22029,7 +22029,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L144",
+      "source_location": "L145",
       "target": "app_server_data_server_getvisiblestreamer",
       "weight": 1.0
     },
@@ -22041,7 +22041,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L156",
+      "source_location": "L157",
       "target": "app_server_data_server_getentry",
       "weight": 1.0
     },
@@ -22053,7 +22053,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L157",
+      "source_location": "L158",
       "target": "app_server_access_server_isadmin",
       "weight": 1.0
     },
@@ -22065,7 +22065,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "app_server_support_server_getsupport",
       "weight": 1.0
     },
@@ -22077,7 +22077,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L159",
+      "source_location": "L160",
       "target": "app_routes_streamer_pageschedule",
       "weight": 1.0
     },
@@ -22089,7 +22089,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L162",
+      "source_location": "L163",
       "target": "app_routes_streamer_entryview",
       "weight": 1.0
     },
@@ -22101,7 +22101,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L163",
+      "source_location": "L164",
       "target": "app_routes_streamer_boardfilters",
       "weight": 1.0
     },
@@ -22113,7 +22113,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L165",
+      "source_location": "L166",
       "target": "app_server_data_server_listentries",
       "weight": 1.0
     },
@@ -22125,7 +22125,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L172",
+      "source_location": "L173",
       "target": "app_server_community_server_listcards",
       "weight": 1.0
     },
@@ -22137,7 +22137,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L173",
+      "source_location": "L174",
       "target": "app_server_schedule_server_listtopicchoices",
       "weight": 1.0
     },
@@ -22149,7 +22149,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L180",
+      "source_location": "L181",
       "target": "app_server_auth_server_configuredproviders",
       "weight": 1.0
     },
@@ -22161,7 +22161,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L190",
+      "source_location": "L191",
       "target": "app_lib_directory_readintent",
       "weight": 1.0
     },
@@ -22173,7 +22173,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_meta",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L70",
+      "source_location": "L71",
       "target": "app_lib_shell_shellfrommatches",
       "weight": 1.0
     },
@@ -22185,7 +22185,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_meta",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L72",
+      "source_location": "L73",
       "target": "app_lib_structured_data_personjsonld",
       "weight": 1.0
     },
@@ -22197,7 +22197,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_meta",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "app_lib_structured_data_eventsjsonld",
       "weight": 1.0
     },
@@ -22209,7 +22209,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_meta",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L75",
+      "source_location": "L76",
       "target": "app_lib_structured_data_postingjsonld",
       "weight": 1.0
     },
@@ -22221,7 +22221,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_meta",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L81",
+      "source_location": "L82",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22233,7 +22233,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_pageschedule",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L120",
+      "source_location": "L121",
       "target": "app_server_schedule_server_defaultrange",
       "weight": 1.0
     },
@@ -22245,7 +22245,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_pageschedule",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L124",
+      "source_location": "L125",
       "target": "app_server_schedule_server_listevents",
       "weight": 1.0
     },
@@ -22257,7 +22257,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_pageschedule",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "app_server_schedule_server_getevent",
       "weight": 1.0
     },
@@ -22269,7 +22269,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerheaderappearance",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L248",
+      "source_location": "L249",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22281,7 +22281,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L267",
+      "source_location": "L268",
       "target": "app_components_streamer_use_board_refresh_useboardrefresh",
       "weight": 1.0
     },
@@ -22293,7 +22293,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L269",
+      "source_location": "L270",
       "target": "app_components_shell_back_link_useremembercontentroute",
       "weight": 1.0
     },
@@ -22305,7 +22305,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L281",
+      "source_location": "L282",
       "target": "app_components_ui_toast_usetoast",
       "weight": 1.0
     },
@@ -22317,7 +22317,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L282",
+      "source_location": "L283",
       "target": "app_routes_streamer_useintentdialog",
       "weight": 1.0
     },
@@ -22329,7 +22329,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L283",
+      "source_location": "L284",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -22341,7 +22341,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L293",
+      "source_location": "L294",
       "target": "app_components_live_uselivepolls",
       "weight": 1.0
     },
@@ -22353,7 +22353,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L298",
+      "source_location": "L299",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -22365,7 +22365,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L301",
+      "source_location": "L302",
       "target": "app_components_live_useliverevalidation",
       "weight": 1.0
     },
@@ -22377,7 +22377,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L304",
+      "source_location": "L305",
       "target": "app_components_use_clock_usescheduleclock",
       "weight": 1.0
     },
@@ -22389,7 +22389,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L305",
+      "source_location": "L306",
       "target": "app_lib_schedule_liveeventat",
       "weight": 1.0
     },
@@ -22401,7 +22401,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L316",
+      "source_location": "L317",
       "target": "app_routes_streamer_mergeliveentry",
       "weight": 1.0
     },
@@ -22413,7 +22413,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L321",
+      "source_location": "L322",
       "target": "app_components_mash_use_mash_battlemarks",
       "weight": 1.0
     },
@@ -22425,7 +22425,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L321",
+      "source_location": "L322",
       "target": "app_components_mash_use_mash_usebattleclock",
       "weight": 1.0
     },
@@ -22437,7 +22437,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L322",
+      "source_location": "L323",
       "target": "app_components_streamer_polls_view_usepollsmainclass",
       "weight": 1.0
     },
@@ -22449,7 +22449,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L450",
+      "source_location": "L451",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22461,7 +22461,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L450",
+      "source_location": "L451",
       "target": "app_lib_clipboard_copytext",
       "weight": 1.0
     },
@@ -22473,7 +22473,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L627",
+      "source_location": "L646",
       "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
@@ -22485,7 +22485,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L716",
+      "source_location": "L735",
       "target": "app_routes_streamer_headeraction",
       "weight": 1.0
     },
@@ -22497,7 +22497,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L718",
+      "source_location": "L737",
       "target": "app_routes_streamer_floatingaction",
       "weight": 1.0
     },
@@ -22509,7 +22509,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L719",
+      "source_location": "L738",
       "target": "app_routes_streamer_pagerole",
       "weight": 1.0
     },
@@ -22521,7 +22521,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L731",
+      "source_location": "L750",
       "target": "app_components_shell_streamer_header_streamerheader",
       "weight": 1.0
     },
@@ -22533,7 +22533,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L734",
+      "source_location": "L753",
       "target": "app_routes_streamer_streamerheaderappearance",
       "weight": 1.0
     },
@@ -22545,32 +22545,8 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L755",
-      "target": "app_components_ui_icon_icon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L762",
-      "target": "app_components_streamer_page_banner_pagebanner",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage",
-      "source_file": "app/routes/streamer.tsx",
       "source_location": "L774",
-      "target": "app_routes_streamer_streamerpage_renderpage",
+      "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
     {
@@ -22582,6 +22558,30 @@
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L781",
+      "target": "app_components_streamer_page_banner_pagebanner",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L793",
+      "target": "app_routes_streamer_streamerpage_renderpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L800",
       "target": "app_components_create_entry_createentry",
       "weight": 1.0
     },
@@ -22593,7 +22593,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L786",
+      "source_location": "L805",
       "target": "app_routes_streamer_streamerpage_closeintentdialog",
       "weight": 1.0
     },
@@ -22605,7 +22605,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L789",
+      "source_location": "L808",
       "target": "app_routes_streamer_streamerpage_mutate",
       "weight": 1.0
     },
@@ -22617,7 +22617,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L791",
+      "source_location": "L810",
       "target": "app_routes_streamer_streamerpage_navigate",
       "weight": 1.0
     },
@@ -22629,7 +22629,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L794",
+      "source_location": "L813",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -22641,7 +22641,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L798",
+      "source_location": "L817",
       "target": "app_routes_streamer_streamerpage_setparam",
       "weight": 1.0
     },
@@ -22653,7 +22653,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L803",
+      "source_location": "L822",
       "target": "app_components_ideas_idea_dialog_ideadialog",
       "weight": 1.0
     },
@@ -22665,7 +22665,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_act",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L382",
+      "source_location": "L383",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -22677,7 +22677,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_act",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L382",
+      "source_location": "L383",
       "target": "app_routes_streamer_streamerpage_mutate",
       "weight": 1.0
     },
@@ -22689,7 +22689,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_closeintentdialog",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L355",
+      "source_location": "L356",
       "target": "app_routes_streamer_streamerpage_setparam",
       "weight": 1.0
     },
@@ -22701,7 +22701,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_copypagelink",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L450",
+      "source_location": "L451",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22713,7 +22713,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_copypagelink",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L450",
+      "source_location": "L451",
       "target": "app_lib_clipboard_copytext",
       "weight": 1.0
     },
@@ -22725,7 +22725,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_loadmore",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L400",
+      "source_location": "L401",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -22737,7 +22737,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_removeselected",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L428",
+      "source_location": "L429",
       "target": "app_routes_streamer_streamerpage_deleteentry",
       "weight": 1.0
     },
@@ -22749,7 +22749,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_removeselected",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L429",
+      "source_location": "L430",
       "target": "app_routes_streamer_streamerpage_navigate",
       "weight": 1.0
     },
@@ -22761,7 +22761,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L601",
+      "source_location": "L620",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22773,7 +22773,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L614",
+      "source_location": "L633",
       "target": "app_components_ui_avatar_streamerlogo",
       "weight": 1.0
     },
@@ -22785,7 +22785,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L622",
+      "source_location": "L641",
       "target": "app_components_support_support_supportsection",
       "weight": 1.0
     },
@@ -22797,7 +22797,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L627",
+      "source_location": "L646",
       "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
@@ -22809,7 +22809,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L632",
+      "source_location": "L651",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -22821,7 +22821,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderdiscussion",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L434",
+      "source_location": "L435",
       "target": "app_components_discussion_discussion",
       "weight": 1.0
     },
@@ -22833,7 +22833,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderemptylist",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L499",
+      "source_location": "L518",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -22845,7 +22845,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderemptylist",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L500",
+      "source_location": "L519",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22857,7 +22857,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderemptylist",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L506",
+      "source_location": "L525",
       "target": "app_routes_streamer_streamerpage_renderemptytopics",
       "weight": 1.0
     },
@@ -22869,7 +22869,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderemptytopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L457",
+      "source_location": "L458",
       "target": "app_components_common_emptystate",
       "weight": 1.0
     },
@@ -22881,7 +22881,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderemptytopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L457",
+      "source_location": "L459",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22893,7 +22893,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderemptytopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L468",
+      "source_location": "L464",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -22905,7 +22905,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderofficialcommunity",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L644",
+      "source_location": "L663",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22917,7 +22917,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderofficialcommunity",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L650",
+      "source_location": "L669",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -22929,7 +22929,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L671",
+      "source_location": "L690",
       "target": "app_routes_streamer_streamerpage_rendertopics",
       "weight": 1.0
     },
@@ -22941,7 +22941,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L673",
+      "source_location": "L692",
       "target": "app_routes_streamer_streamerpage_renderpolls",
       "weight": 1.0
     },
@@ -22953,7 +22953,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L674",
+      "source_location": "L693",
       "target": "app_routes_streamer_streamerpage_renderabout",
       "weight": 1.0
     },
@@ -22965,7 +22965,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L677",
+      "source_location": "L696",
       "target": "app_components_schedule_schedule_view_scheduleview",
       "weight": 1.0
     },
@@ -22977,7 +22977,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L688",
+      "source_location": "L707",
       "target": "app_routes_streamer_streamerpage_setparam",
       "weight": 1.0
     },
@@ -22989,7 +22989,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L696",
+      "source_location": "L715",
       "target": "app_routes_streamer_streamerpage_renderofficialcommunity",
       "weight": 1.0
     },
@@ -23001,7 +23001,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L698",
+      "source_location": "L717",
       "target": "app_components_community_community_view_communityview",
       "weight": 1.0
     },
@@ -23013,7 +23013,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L560",
+      "source_location": "L579",
       "target": "app_components_streamer_polls_view_pollsview",
       "weight": 1.0
     },
@@ -23025,7 +23025,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L578",
+      "source_location": "L597",
       "target": "app_routes_streamer_streamerpage_navigate",
       "weight": 1.0
     },
@@ -23037,7 +23037,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L579",
+      "source_location": "L598",
       "target": "app_routes_streamer_streamerpage_changeboard",
       "weight": 1.0
     },
@@ -23049,7 +23049,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L584",
+      "source_location": "L603",
       "target": "app_routes_streamer_streamerpage_loadmore",
       "weight": 1.0
     },
@@ -23061,7 +23061,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L587",
+      "source_location": "L606",
       "target": "app_routes_streamer_streamerpage_removeselected",
       "weight": 1.0
     },
@@ -23073,7 +23073,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L588",
+      "source_location": "L607",
       "target": "app_routes_streamer_streamerpage_deleteentry",
       "weight": 1.0
     },
@@ -23085,7 +23085,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L513",
+      "source_location": "L532",
       "target": "app_components_streamer_topic_board_topicboard",
       "weight": 1.0
     },
@@ -23097,7 +23097,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L525",
+      "source_location": "L544",
       "target": "app_routes_streamer_streamerpage_renderemptylist",
       "weight": 1.0
     },
@@ -23109,7 +23109,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L529",
+      "source_location": "L548",
       "target": "app_components_streamer_entry_detail_entrydetail",
       "weight": 1.0
     },
@@ -23121,7 +23121,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L536",
+      "source_location": "L555",
       "target": "app_routes_streamer_streamerpage_navigate",
       "weight": 1.0
     },
@@ -23133,7 +23133,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L537",
+      "source_location": "L556",
       "target": "app_routes_streamer_streamerpage_act",
       "weight": 1.0
     },
@@ -23145,7 +23145,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L541",
+      "source_location": "L560",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -23157,7 +23157,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L544",
+      "source_location": "L563",
       "target": "app_routes_streamer_streamerpage_renderdiscussion",
       "weight": 1.0
     },
@@ -23169,7 +23169,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L547",
+      "source_location": "L566",
       "target": "app_routes_streamer_streamerpage_renderemptytopics",
       "weight": 1.0
     },
@@ -23181,7 +23181,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L551",
+      "source_location": "L570",
       "target": "app_routes_streamer_streamerpage_changeboard",
       "weight": 1.0
     },
@@ -23193,7 +23193,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L553",
+      "source_location": "L572",
       "target": "app_routes_streamer_streamerpage_loadmore",
       "weight": 1.0
     },
@@ -51207,7 +51207,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L22",
-      "target": "app_components_shell_sign_in_dialog_signindialog",
+      "target": "app_legal_contactemails",
       "weight": 1.0
     },
     {
@@ -51219,7 +51219,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L23",
-      "target": "app_components_ui_avatar_streamerlogo",
+      "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
     {
@@ -51231,6 +51231,18 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L24",
+      "target": "app_components_ui_avatar_streamerlogo",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_streamer",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L25",
       "target": "app_lib_directory_readintent",
       "weight": 1.0
     },
@@ -51242,7 +51254,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_lib_shell_shellfrommatches",
       "weight": 1.0
     },
@@ -51254,7 +51266,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -51266,7 +51278,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_structured_data_eventsjsonld",
       "weight": 1.0
     },
@@ -51278,7 +51290,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_structured_data_jsonld",
       "weight": 1.0
     },
@@ -51290,7 +51302,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_structured_data_personjsonld",
       "weight": 1.0
     },
@@ -51302,7 +51314,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_structured_data_postingjsonld",
       "weight": 1.0
     },
@@ -51314,7 +51326,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "target": "app_components_community_community_view_communityview",
       "weight": 1.0
     },
@@ -51326,7 +51338,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L28",
+      "source_location": "L29",
       "target": "app_components_ideas_idea_dialog_ideadialog",
       "weight": 1.0
     },
@@ -51338,7 +51350,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "app_components_schedule_schedule_view_schedulemode",
       "weight": 1.0
     },
@@ -51350,7 +51362,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "app_components_schedule_schedule_view_schedulemodes",
       "weight": 1.0
     },
@@ -51362,7 +51374,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "app_components_schedule_schedule_view_scheduleview",
       "weight": 1.0
     },
@@ -51374,7 +51386,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "target": "app_components_shell_back_link_useremembercontentroute",
       "weight": 1.0
     },
@@ -51386,7 +51398,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_components_shell_streamer_header_streamerheader",
       "weight": 1.0
     },
@@ -51398,7 +51410,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_components_shell_streamer_header_streamerview",
       "weight": 1.0
     },
@@ -51410,7 +51422,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_components_shell_streamer_header_streamerviews",
       "weight": 1.0
     },
@@ -51422,7 +51434,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "target": "app_components_streamer_entry_detail_entrydetail",
       "weight": 1.0
     },
@@ -51434,7 +51446,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L33",
+      "source_location": "L34",
       "target": "app_components_streamer_page_banner_pagebanner",
       "weight": 1.0
     },
@@ -51446,7 +51458,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "app_components_streamer_use_board_refresh_useboardrefresh",
       "weight": 1.0
     },
@@ -51458,7 +51470,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L35",
+      "source_location": "L36",
       "target": "app_components_streamer_topic_board_topicboard",
       "weight": 1.0
     },
@@ -51470,7 +51482,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "target": "app_components_support_support_supportsection",
       "weight": 1.0
     },
@@ -51482,7 +51494,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
@@ -51494,7 +51506,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "target": "app_components_account_dialog_route_dialogstate",
       "weight": 1.0
     },
@@ -51506,7 +51518,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L38",
+      "source_location": "L39",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -51518,7 +51530,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L39",
+      "source_location": "L40",
       "target": "app_components_ui_toast_usetoast",
       "weight": 1.0
     },
@@ -51530,7 +51542,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L40",
+      "source_location": "L41",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -51542,7 +51554,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "target": "app_components_api_apierror",
       "weight": 1.0
     },
@@ -51554,7 +51566,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -51566,7 +51578,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -51578,7 +51590,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "target": "app_components_api_requestjson",
       "weight": 1.0
     },
@@ -51590,7 +51602,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L42",
+      "source_location": "L43",
       "target": "app_components_create_entry_createentry",
       "weight": 1.0
     },
@@ -51602,7 +51614,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L43",
+      "source_location": "L44",
       "target": "app_components_discussion_discussion",
       "weight": 1.0
     },
@@ -51614,7 +51626,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "app_components_live_uselivepolls",
       "weight": 1.0
     },
@@ -51626,7 +51638,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "app_components_live_useliverevalidation",
       "weight": 1.0
     },
@@ -51638,7 +51650,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "target": "app_components_mash_use_mash_battlemarks",
       "weight": 1.0
     },
@@ -51650,7 +51662,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "target": "app_components_mash_use_mash_usebattleclock",
       "weight": 1.0
     },
@@ -51662,7 +51674,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L46",
+      "source_location": "L47",
       "target": "app_components_use_clock_usescheduleclock",
       "weight": 1.0
     },
@@ -51674,7 +51686,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L47",
+      "source_location": "L48",
       "target": "app_lib_schedule_liveeventat",
       "weight": 1.0
     },
@@ -51686,7 +51698,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L48",
+      "source_location": "L49",
       "target": "app_lib_clipboard_copytext",
       "weight": 1.0
     },
@@ -51698,7 +51710,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "app_components_streamer_polls_view_pollsview",
       "weight": 1.0
     },
@@ -51710,7 +51722,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "app_components_streamer_polls_view_usepollsmainclass",
       "weight": 1.0
     },
@@ -51722,7 +51734,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_types_boardsnapshot",
       "weight": 1.0
     },
@@ -51734,7 +51746,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_types_entry",
       "weight": 1.0
     },
@@ -51746,7 +51758,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_types_entrystatus",
       "weight": 1.0
     },
@@ -51758,7 +51770,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_types_livesnapshot",
       "weight": 1.0
     },
@@ -51770,7 +51782,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_types_sortorder",
       "weight": 1.0
     },
@@ -51782,7 +51794,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_types_streamer",
       "weight": 1.0
     },
@@ -51794,7 +51806,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_types_streamevent",
       "weight": 1.0
     },
@@ -51806,7 +51818,7 @@
       "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "target": "app_types_viewer",
       "weight": 1.0
     },
@@ -62212,6 +62224,42 @@
       "source_file": "tests/e2e-coverage.test.ts",
       "source_location": "L3",
       "target": "tests_e2e_coverage_newpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_desktop_layout_spec",
+      "source_file": "tests/e2e/desktop-layout.spec.ts",
+      "source_location": "L2",
+      "target": "db_enums_locales",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_desktop_layout_spec",
+      "source_file": "tests/e2e/desktop-layout.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_expect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_desktop_layout_spec",
+      "source_file": "tests/e2e/desktop-layout.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
     {
@@ -78246,7 +78294,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L22",
-      "target": "app_components_shell_sign_in_dialog",
+      "target": "app_legal",
       "weight": 1.0
     },
     {
@@ -78258,7 +78306,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L23",
-      "target": "app_components_ui_avatar",
+      "target": "app_components_shell_sign_in_dialog",
       "weight": 1.0
     },
     {
@@ -78270,7 +78318,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L24",
-      "target": "app_lib_directory",
+      "target": "app_components_ui_avatar",
       "weight": 1.0
     },
     {
@@ -78282,7 +78330,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L25",
-      "target": "app_lib_shell",
+      "target": "app_lib_directory",
       "weight": 1.0
     },
     {
@@ -78294,7 +78342,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L26",
-      "target": "app_lib_structured_data",
+      "target": "app_lib_shell",
       "weight": 1.0
     },
     {
@@ -78306,7 +78354,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L27",
-      "target": "app_components_community_community_view",
+      "target": "app_lib_structured_data",
       "weight": 1.0
     },
     {
@@ -78318,7 +78366,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L28",
-      "target": "app_components_ideas_idea_dialog",
+      "target": "app_components_community_community_view",
       "weight": 1.0
     },
     {
@@ -78330,7 +78378,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L29",
-      "target": "app_components_schedule_schedule_view",
+      "target": "app_components_ideas_idea_dialog",
       "weight": 1.0
     },
     {
@@ -78354,7 +78402,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L30",
-      "target": "app_components_shell_back_link",
+      "target": "app_components_schedule_schedule_view",
       "weight": 1.0
     },
     {
@@ -78366,7 +78414,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L31",
-      "target": "app_components_shell_streamer_header",
+      "target": "app_components_shell_back_link",
       "weight": 1.0
     },
     {
@@ -78378,7 +78426,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L32",
-      "target": "app_components_streamer_entry_detail",
+      "target": "app_components_shell_streamer_header",
       "weight": 1.0
     },
     {
@@ -78390,7 +78438,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L33",
-      "target": "app_components_streamer_page_banner",
+      "target": "app_components_streamer_entry_detail",
       "weight": 1.0
     },
     {
@@ -78402,7 +78450,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L34",
-      "target": "app_components_streamer_use_board_refresh",
+      "target": "app_components_streamer_page_banner",
       "weight": 1.0
     },
     {
@@ -78414,7 +78462,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L35",
-      "target": "app_components_streamer_topic_board",
+      "target": "app_components_streamer_use_board_refresh",
       "weight": 1.0
     },
     {
@@ -78426,7 +78474,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L36",
-      "target": "app_components_support_support",
+      "target": "app_components_streamer_topic_board",
       "weight": 1.0
     },
     {
@@ -78438,7 +78486,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L37",
-      "target": "app_components_account_dialog_route",
+      "target": "app_components_support_support",
       "weight": 1.0
     },
     {
@@ -78450,7 +78498,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L38",
-      "target": "app_components_ui_icon",
+      "target": "app_components_account_dialog_route",
       "weight": 1.0
     },
     {
@@ -78462,7 +78510,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L39",
-      "target": "app_components_ui_toast",
+      "target": "app_components_ui_icon",
       "weight": 1.0
     },
     {
@@ -78486,7 +78534,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L40",
-      "target": "app_i18n_index",
+      "target": "app_components_ui_toast",
       "weight": 1.0
     },
     {
@@ -78498,7 +78546,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L41",
-      "target": "app_components_api",
+      "target": "app_i18n_index",
       "weight": 1.0
     },
     {
@@ -78510,7 +78558,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L42",
-      "target": "app_components_create_entry",
+      "target": "app_components_api",
       "weight": 1.0
     },
     {
@@ -78522,7 +78570,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L43",
-      "target": "app_components_discussion",
+      "target": "app_components_create_entry",
       "weight": 1.0
     },
     {
@@ -78534,7 +78582,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L44",
-      "target": "app_components_live",
+      "target": "app_components_discussion",
       "weight": 1.0
     },
     {
@@ -78546,7 +78594,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L45",
-      "target": "app_components_mash_use_mash",
+      "target": "app_components_live",
       "weight": 1.0
     },
     {
@@ -78558,7 +78606,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L46",
-      "target": "app_components_use_clock",
+      "target": "app_components_mash_use_mash",
       "weight": 1.0
     },
     {
@@ -78570,7 +78618,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L47",
-      "target": "app_lib_schedule",
+      "target": "app_components_use_clock",
       "weight": 1.0
     },
     {
@@ -78582,7 +78630,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L48",
-      "target": "app_lib_clipboard",
+      "target": "app_lib_schedule",
       "weight": 1.0
     },
     {
@@ -78594,7 +78642,7 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L49",
-      "target": "app_components_streamer_polls_view",
+      "target": "app_lib_clipboard",
       "weight": 1.0
     },
     {
@@ -78606,6 +78654,18 @@
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L50",
+      "target": "app_components_streamer_polls_view",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_streamer",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L51",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -78618,7 +78678,7 @@
       "relation": "imports_from",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L60",
+      "source_location": "L61",
       "target": "ref_types_streamer",
       "type_only": true,
       "weight": 1.0
@@ -83834,6 +83894,42 @@
       "source_file": "tests/e2e-coverage.test.ts",
       "source_location": "L4",
       "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_desktop_layout_spec",
+      "source_file": "tests/e2e/desktop-layout.spec.ts",
+      "source_location": "L1",
+      "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_desktop_layout_spec",
+      "source_file": "tests/e2e/desktop-layout.spec.ts",
+      "source_location": "L2",
+      "target": "db_enums",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_desktop_layout_spec",
+      "source_file": "tests/e2e/desktop-layout.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage",
       "weight": 1.0
     },
     {
@@ -93107,7 +93203,7 @@
       "relation": "contains",
       "source": "app_components_shell_fit_header",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L26",
+      "source_location": "L29",
       "target": "app_components_shell_fit_header_usefitheader",
       "weight": 1.0
     },
@@ -93118,7 +93214,7 @@
       "relation": "contains",
       "source": "app_components_shell_fit_header",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L48",
+      "source_location": "L51",
       "target": "app_components_shell_fit_header_fitheader",
       "weight": 1.0
     },
@@ -93228,7 +93324,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L144",
+      "source_location": "L149",
       "target": "app_components_shell_sign_in_dialog_signinbutton",
       "weight": 1.0
     },
@@ -99608,7 +99704,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L109",
+      "source_location": "L110",
       "target": "app_routes_streamer_pageschedule",
       "weight": 1.0
     },
@@ -99619,7 +99715,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L139",
+      "source_location": "L140",
       "target": "app_routes_streamer_loader",
       "weight": 1.0
     },
@@ -99630,7 +99726,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L194",
+      "source_location": "L195",
       "target": "app_routes_streamer_mergeliveentry",
       "weight": 1.0
     },
@@ -99641,7 +99737,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L201",
+      "source_location": "L202",
       "target": "app_routes_streamer_headeraction",
       "weight": 1.0
     },
@@ -99652,7 +99748,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L211",
+      "source_location": "L212",
       "target": "app_routes_streamer_floatingaction",
       "weight": 1.0
     },
@@ -99663,7 +99759,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L217",
+      "source_location": "L218",
       "target": "app_routes_streamer_useintentdialog",
       "weight": 1.0
     },
@@ -99674,7 +99770,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L236",
+      "source_location": "L237",
       "target": "app_routes_streamer_pagerole",
       "weight": 1.0
     },
@@ -99685,7 +99781,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L241",
+      "source_location": "L242",
       "target": "app_routes_streamer_streamerheaderappearance",
       "weight": 1.0
     },
@@ -99696,7 +99792,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L264",
+      "source_location": "L265",
       "target": "app_routes_streamer_streamerpage",
       "weight": 1.0
     },
@@ -99707,7 +99803,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L62",
+      "source_location": "L63",
       "target": "app_routes_streamer_view",
       "weight": 1.0
     },
@@ -99718,7 +99814,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L63",
+      "source_location": "L64",
       "target": "app_routes_streamer_dialog",
       "weight": 1.0
     },
@@ -99729,7 +99825,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "target": "app_routes_streamer_officialviews",
       "weight": 1.0
     },
@@ -99740,7 +99836,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "app_routes_streamer_meta",
       "weight": 1.0
     },
@@ -99751,7 +99847,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L87",
+      "source_location": "L88",
       "target": "app_routes_streamer_entryview",
       "weight": 1.0
     },
@@ -99762,7 +99858,7 @@
       "relation": "contains",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L91",
+      "source_location": "L92",
       "target": "app_routes_streamer_boardfilters",
       "weight": 1.0
     },
@@ -99773,7 +99869,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L337",
+      "source_location": "L338",
       "target": "app_routes_streamer_streamerpage_navigate",
       "weight": 1.0
     },
@@ -99784,7 +99880,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L352",
+      "source_location": "L353",
       "target": "app_routes_streamer_streamerpage_closeintentdialog",
       "weight": 1.0
     },
@@ -99795,7 +99891,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L358",
+      "source_location": "L359",
       "target": "app_routes_streamer_streamerpage_setparam",
       "weight": 1.0
     },
@@ -99806,7 +99902,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L365",
+      "source_location": "L366",
       "target": "app_routes_streamer_streamerpage_mutate",
       "weight": 1.0
     },
@@ -99817,7 +99913,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L381",
+      "source_location": "L382",
       "target": "app_routes_streamer_streamerpage_act",
       "weight": 1.0
     },
@@ -99828,7 +99924,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L385",
+      "source_location": "L386",
       "target": "app_routes_streamer_streamerpage_loadmore",
       "weight": 1.0
     },
@@ -99839,7 +99935,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L406",
+      "source_location": "L407",
       "target": "app_routes_streamer_streamerpage_changeboard",
       "weight": 1.0
     },
@@ -99850,7 +99946,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L413",
+      "source_location": "L414",
       "target": "app_routes_streamer_streamerpage_changed",
       "weight": 1.0
     },
@@ -99861,7 +99957,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L417",
+      "source_location": "L418",
       "target": "app_routes_streamer_streamerpage_deleteentry",
       "weight": 1.0
     },
@@ -99872,7 +99968,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L426",
+      "source_location": "L427",
       "target": "app_routes_streamer_streamerpage_removeselected",
       "weight": 1.0
     },
@@ -99883,7 +99979,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L432",
+      "source_location": "L433",
       "target": "app_routes_streamer_streamerpage_renderdiscussion",
       "weight": 1.0
     },
@@ -99894,7 +99990,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L448",
+      "source_location": "L449",
       "target": "app_routes_streamer_streamerpage_copypagelink",
       "weight": 1.0
     },
@@ -99905,7 +100001,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L454",
+      "source_location": "L455",
       "target": "app_routes_streamer_streamerpage_renderemptytopics",
       "weight": 1.0
     },
@@ -99916,7 +100012,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L495",
+      "source_location": "L514",
       "target": "app_routes_streamer_streamerpage_renderemptylist",
       "weight": 1.0
     },
@@ -99927,7 +100023,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L511",
+      "source_location": "L530",
       "target": "app_routes_streamer_streamerpage_rendertopics",
       "weight": 1.0
     },
@@ -99938,7 +100034,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L558",
+      "source_location": "L577",
       "target": "app_routes_streamer_streamerpage_renderpolls",
       "weight": 1.0
     },
@@ -99949,7 +100045,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L597",
+      "source_location": "L616",
       "target": "app_routes_streamer_streamerpage_renderabout",
       "weight": 1.0
     },
@@ -99960,7 +100056,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L641",
+      "source_location": "L660",
       "target": "app_routes_streamer_streamerpage_renderofficialcommunity",
       "weight": 1.0
     },
@@ -99971,7 +100067,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L670",
+      "source_location": "L689",
       "target": "app_routes_streamer_streamerpage_renderpage",
       "weight": 1.0
     },
@@ -113238,7 +113334,7 @@
       "relation": "indirect_call",
       "source": "app_routes_streamer_streamerpage_loadmore",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L391",
+      "source_location": "L392",
       "target": "app_server_stepup_server_status",
       "weight": 1.0
     },
@@ -113250,7 +113346,7 @@
       "relation": "indirect_call",
       "source": "app_routes_streamer_streamerpage_navigate",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L344",
+      "source_location": "L345",
       "target": "app_server_stepup_server_status",
       "weight": 1.0
     },
@@ -114084,10 +114180,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "fddb0f3c18ef64039bb3cd200592388a98568403e8681a7305c53eb8a0e24b22",
+    "content_sha256": "4334ef491c418b96a0f1715231566f053390dce742963c6c81e01b4b36c47c81",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "12383f4e6b071c8a2df46ab1cc396fbd256821551c0216ebb4e57c2de543ab01",
+    "source_sha256": "06e711bf6fc68406eb0ca3d118a63acd670359033a8ec27d24d27d2cf981906b",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -115709,7 +115805,7 @@
       "label": "Dialog",
       "norm_label": "dialog",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L63"
+      "source_location": "L64"
     },
     {
       "_callable": true,
@@ -115721,7 +115817,7 @@
       "label": "View",
       "norm_label": "view",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L62"
+      "source_location": "L63"
     },
     {
       "_callable": true,
@@ -122005,7 +122101,7 @@
       "label": "fitHeader()",
       "norm_label": "fitheader()",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L48"
+      "source_location": "L51"
     },
     {
       "_callable": true,
@@ -122042,21 +122138,21 @@
             "callee": "observe",
             "file": "app/components/shell/fit-header.ts",
             "lang": "typescript",
-            "line": "L39",
+            "line": "L42",
             "receiver_type": "ResizeObserver"
           },
           {
             "callee": "disconnect",
             "file": "app/components/shell/fit-header.ts",
             "lang": "typescript",
-            "line": "L43",
+            "line": "L46",
             "receiver_type": "ResizeObserver"
           }
         ]
       },
       "norm_label": "usefitheader()",
       "source_file": "app/components/shell/fit-header.ts",
-      "source_location": "L26"
+      "source_location": "L29"
     },
     {
       "_callable": true,
@@ -122144,7 +122240,7 @@
       "label": "SignInButton()",
       "norm_label": "signinbutton()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L144"
+      "source_location": "L149"
     },
     {
       "_callable": true,
@@ -127240,7 +127336,7 @@
       "label": "boardFilters()",
       "norm_label": "boardfilters()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L91"
+      "source_location": "L92"
     },
     {
       "_callable": true,
@@ -127251,7 +127347,7 @@
       "label": "entryView()",
       "norm_label": "entryview()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L87"
+      "source_location": "L88"
     },
     {
       "_callable": true,
@@ -127262,7 +127358,7 @@
       "label": "floatingAction()",
       "norm_label": "floatingaction()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L211"
+      "source_location": "L212"
     },
     {
       "_callable": true,
@@ -127273,7 +127369,7 @@
       "label": "headerAction()",
       "norm_label": "headeraction()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L201"
+      "source_location": "L202"
     },
     {
       "_callable": true,
@@ -127284,7 +127380,7 @@
       "label": "mergeLiveEntry()",
       "norm_label": "mergeliveentry()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L194"
+      "source_location": "L195"
     },
     {
       "_callable": true,
@@ -127295,7 +127391,7 @@
       "label": "meta()",
       "norm_label": "meta()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L67"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -127306,7 +127402,7 @@
       "label": "pageRole()",
       "norm_label": "pagerole()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L236"
+      "source_location": "L237"
     },
     {
       "_callable": true,
@@ -127317,7 +127413,7 @@
       "label": "pageSchedule()",
       "norm_label": "pageschedule()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L109"
+      "source_location": "L110"
     },
     {
       "_callable": true,
@@ -127328,7 +127424,7 @@
       "label": "streamerHeaderAppearance()",
       "norm_label": "streamerheaderappearance()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L241"
+      "source_location": "L242"
     },
     {
       "_callable": true,
@@ -127339,7 +127435,7 @@
       "label": "StreamerPage()",
       "norm_label": "streamerpage()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L264"
+      "source_location": "L265"
     },
     {
       "_callable": true,
@@ -127350,7 +127446,7 @@
       "label": "act()",
       "norm_label": "act()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L381"
+      "source_location": "L382"
     },
     {
       "_callable": true,
@@ -127361,7 +127457,7 @@
       "label": "changeBoard()",
       "norm_label": "changeboard()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L406"
+      "source_location": "L407"
     },
     {
       "_callable": true,
@@ -127372,7 +127468,7 @@
       "label": "changed()",
       "norm_label": "changed()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L413"
+      "source_location": "L414"
     },
     {
       "_callable": true,
@@ -127383,7 +127479,7 @@
       "label": "closeIntentDialog()",
       "norm_label": "closeintentdialog()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L352"
+      "source_location": "L353"
     },
     {
       "_callable": true,
@@ -127394,7 +127490,7 @@
       "label": "copyPageLink()",
       "norm_label": "copypagelink()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L448"
+      "source_location": "L449"
     },
     {
       "_callable": true,
@@ -127405,7 +127501,7 @@
       "label": "deleteEntry()",
       "norm_label": "deleteentry()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L417"
+      "source_location": "L418"
     },
     {
       "_callable": true,
@@ -127416,7 +127512,7 @@
       "label": "loadMore()",
       "norm_label": "loadmore()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L385"
+      "source_location": "L386"
     },
     {
       "_callable": true,
@@ -127427,7 +127523,7 @@
       "label": "mutate()",
       "norm_label": "mutate()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L365"
+      "source_location": "L366"
     },
     {
       "_callable": true,
@@ -127438,7 +127534,7 @@
       "label": "navigate()",
       "norm_label": "navigate()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L337"
+      "source_location": "L338"
     },
     {
       "_callable": true,
@@ -127449,7 +127545,7 @@
       "label": "removeSelected()",
       "norm_label": "removeselected()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L426"
+      "source_location": "L427"
     },
     {
       "_callable": true,
@@ -127460,7 +127556,7 @@
       "label": "renderAbout()",
       "norm_label": "renderabout()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L597"
+      "source_location": "L616"
     },
     {
       "_callable": true,
@@ -127471,7 +127567,7 @@
       "label": "renderDiscussion()",
       "norm_label": "renderdiscussion()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L432"
+      "source_location": "L433"
     },
     {
       "_callable": true,
@@ -127482,7 +127578,7 @@
       "label": "renderEmptyList()",
       "norm_label": "renderemptylist()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L495"
+      "source_location": "L514"
     },
     {
       "_callable": true,
@@ -127493,7 +127589,7 @@
       "label": "renderEmptyTopics()",
       "norm_label": "renderemptytopics()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L454"
+      "source_location": "L455"
     },
     {
       "_callable": true,
@@ -127504,7 +127600,7 @@
       "label": "renderOfficialCommunity()",
       "norm_label": "renderofficialcommunity()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L641"
+      "source_location": "L660"
     },
     {
       "_callable": true,
@@ -127515,7 +127611,7 @@
       "label": "renderPage()",
       "norm_label": "renderpage()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L670"
+      "source_location": "L689"
     },
     {
       "_callable": true,
@@ -127526,7 +127622,7 @@
       "label": "renderPolls()",
       "norm_label": "renderpolls()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L558"
+      "source_location": "L577"
     },
     {
       "_callable": true,
@@ -127537,7 +127633,7 @@
       "label": "renderTopics()",
       "norm_label": "rendertopics()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L511"
+      "source_location": "L530"
     },
     {
       "_callable": true,
@@ -127548,7 +127644,7 @@
       "label": "setParam()",
       "norm_label": "setparam()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L358"
+      "source_location": "L359"
     },
     {
       "_callable": true,
@@ -127559,7 +127655,7 @@
       "label": "useIntentDialog()",
       "norm_label": "useintentdialog()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L217"
+      "source_location": "L218"
     },
     {
       "_callable": true,
@@ -138717,7 +138813,7 @@
       "label": "loader",
       "norm_label": "loader",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L139"
+      "source_location": "L140"
     },
     {
       "_origin": "ast",
@@ -138727,7 +138823,7 @@
       "label": "officialViews",
       "norm_label": "officialviews",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L65"
+      "source_location": "L66"
     },
     {
       "_origin": "ast",
@@ -141465,6 +141561,16 @@
       "norm_label": "test",
       "source_file": "tests/e2e/coverage.ts",
       "source_location": "L48"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_desktop_layout_spec",
+      "label": "desktop-layout.spec.ts",
+      "norm_label": "desktop-layout.spec.ts",
+      "source_file": "tests/e2e/desktop-layout.spec.ts",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",
