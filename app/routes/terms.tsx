@@ -1,7 +1,6 @@
-import type { MetaArgs } from "react-router";
 import { canonicalMeta } from "../lib/seo";
 import type { ReactNode } from "react";
-import { Link, useLoaderData } from "react-router";
+import { Link, useLoaderData, type MetaArgs } from "react-router";
 import { LegalDocument, type LegalSection } from "../components/common";
 import { contactEmails, legal, type LegalDetails } from "../legal";
 import { paths } from "../lib/shell";

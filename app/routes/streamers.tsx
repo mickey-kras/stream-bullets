@@ -1,10 +1,9 @@
-import type { MetaArgs } from "react-router";
 import { canonicalMeta } from "../lib/seo";
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
 import { SearchAdornments } from "../components/shell/directory-search";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { Link, useLoaderData, useLocation, useNavigate, type LoaderFunctionArgs } from "react-router";
+import { Link, useLoaderData, useLocation, useNavigate, type LoaderFunctionArgs, type MetaArgs } from "react-router";
 import { appContext } from "../env";
 import { t, tn } from "../i18n";
 import { directoryHref, readIntent, streamerTarget, type Intent } from "../lib/directory";

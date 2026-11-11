@@ -461,10 +461,11 @@ describe("Worker cron", (): void => {
   });
 });
 
-
 describe("sitemap", (): void => {
   it("serves public pages and all listed profiles, including frozen pages", async (): Promise<void> => {
-    await env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name,status) VALUES ('frozen','viewer','frozen_page','Frozen','frozen')").run();
+    await env.DB.prepare(
+      "INSERT INTO streamers (id,owner_id,handle,name,status) VALUES ('frozen','viewer','frozen_page','Frozen','frozen')",
+    ).run();
     const response = await fetchPath("/sitemap.xml?dialog=login");
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/xml; charset=utf-8");

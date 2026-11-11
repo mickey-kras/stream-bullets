@@ -85,7 +85,7 @@ export function meta({ loaderData: data, matches }: Route.MetaArgs) {
         data.view,
         data.selected?.id ?? null,
         data.view === "schedule"
-          ? (data.linkedEvent ?? data.events.find((event: StreamEvent) => event.id === data.openEvent))?.id ?? null
+          ? ((data.linkedEvent ?? data.events.find((event: StreamEvent) => event.id === data.openEvent))?.id ?? null)
           : null,
       ),
     ),

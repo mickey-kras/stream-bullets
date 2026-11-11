@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { canonicalMeta, PUBLIC_PAGE_PATHS, streamerCanonicalPath } from "../app/lib/seo";
 
-const matches = [{ id: "root", loaderData: { origin: "https://streambullets.com" }, pathname: "/", params: {}, handle: undefined }];
+const matches = [
+  { id: "root", loaderData: { origin: "https://streambullets.com" }, pathname: "/", params: {}, handle: undefined },
+];
 
 describe("canonical URLs", (): void => {
   it("uses configured origins for public pages and omits links without shell data", (): void => {

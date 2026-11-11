@@ -1,9 +1,8 @@
-import type { MetaArgs } from "react-router";
 import { canonicalMeta } from "../lib/seo";
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
 import { useState, type ReactNode } from "react";
-import { useLoaderData, type LoaderFunctionArgs } from "react-router";
+import { useLoaderData, type LoaderFunctionArgs, type MetaArgs } from "react-router";
 import { announce } from "../components/a11y/announcer";
 import { errorMessage, postJson } from "../components/api";
 import { BackLink } from "../components/shell/back-link";

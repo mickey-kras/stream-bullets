@@ -18,17 +18,24 @@ export async function sitemapResponse(request: Request, env: AppEnv): Promise<Re
   const urls: string = paths
     .map((path: string): string => `<url><loc>${escapeXml(`${origin}${path}`)}</loc></url>`)
     .join("");
-  return new Response(request.method === "HEAD" ? null : `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`, {
-    headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=300" },
-  });
+  return new Response(
+    request.method === "HEAD"
+      ? null
+      : `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`,
+    {
+      headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=300" },
+    },
+  );
 }
 
 function escapeXml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&apos;");
+  const entities: Readonly<Record<string, string>> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&apos;",
+  };
+  return value.replace(/[&<>"']/gu, (character: string): string => entities[character]);
 }
