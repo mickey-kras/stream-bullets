@@ -125,6 +125,8 @@ body:has(.landing-page)::after {
   padding: 0;
 }
 .landing-hero {
+  min-width: 0;
+  width: 100%;
   position: relative;
   isolation: isolate;
   display: flex;
@@ -425,6 +427,8 @@ body:has(.landing-page)::after {
   flex: 1;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
+  width: 100%;
   max-width: 760px;
   padding: 120px 16px 90px max(64px, env(safe-area-inset-left, 0px));
   pointer-events: none;
@@ -545,7 +549,10 @@ body:has(.landing-page)::after {
     flex: 1 1 140px;
     padding-inline: 12px;
     font-size: 18px;
-    white-space: nowrap;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: var(--leading-body);
   }
   /* The scene's vignette darkens its bottom edge; fade it into the page ink so it meets Safari's toolbar
      without a seam. */
@@ -590,9 +597,23 @@ body:has(.landing-page)::after {
   }
 }
 @media (max-width: 380px) {
+  .landing-brand {
+    flex-shrink: 0;
+  }
+  .landing-page .landing-header nav {
+    min-width: 0;
+    flex-shrink: 1;
+  }
   .landing-page .landing-header nav > button {
+    min-width: 0;
     padding: 8px;
     font-size: 16px;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .landing-copy {
+    padding-top: calc(96px + env(safe-area-inset-top, 0px));
   }
 }
 @media (prefers-reduced-motion: reduce) {
