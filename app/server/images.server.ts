@@ -54,6 +54,7 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
   const clean: Uint8Array = stripImageMetadata(bytes, contentType);
   const key = `${kind}/${userId}`;
   const url = `/images/${key}`;
+  await env.DB.prepare("DELETE FROM image_versions WHERE owner_id=? AND kind=?").bind(userId, kind).run();
   await env.IMAGES.put(key, clean, { httpMetadata: { contentType, cacheControl: "no-cache" } });
   if (kind === "avatar") {
     await env.DB.batch([
@@ -65,6 +66,11 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
   } else {
     await db.update(streamers).set({ background: url }).where(eq(streamers.ownerId, userId));
   }
+  await env.DB.prepare(
+    "INSERT INTO image_versions (owner_id,kind,version) VALUES (?,?,?) ON CONFLICT(owner_id,kind) DO UPDATE SET version=excluded.version",
+  )
+    .bind(userId, kind, crypto.randomUUID())
+    .run();
   return url;
 }
 
@@ -95,25 +101,61 @@ export async function deleteLogo(env: AppEnv, userId: string): Promise<void> {
   await env.IMAGES.delete(`logo/${userId}`);
 }
 
-export async function serveImage(env: AppEnv, path: string, method: string): Promise<Response> {
+export async function serveImage(
+  env: AppEnv,
+  path: string,
+  method: string,
+  cache?: Pick<Cache, "match" | "put">,
+): Promise<Response> {
   if (!/^(avatar|background|logo)\/[a-zA-Z0-9_-]{1,128}$/.test(path)) throw new HttpError(404, "Image not found.");
-  // Serve only images a live account or streamer page still references. An object left in R2 after an
-  // account deletion (for example, when the storage delete failed) is then never public again.
   const [kind, userId] = path.split("/");
   const url = `/images/${path}`;
   const reference =
     kind === "avatar"
-      ? env.DB.prepare("SELECT 1 AS live FROM user WHERE id=? AND image=?").bind(userId, url)
-      : env.DB.prepare(`SELECT 1 AS live FROM streamers WHERE owner_id=? AND ${kind}=?`).bind(userId, url);
-  if (!(await reference.first<{ live: number }>())) throw new HttpError(404, "Image not found.");
-  const object = await env.IMAGES.get(path);
-  if (!object) throw new HttpError(404, "Image not found.");
-  const headers = new Headers({
-    "Cache-Control": "no-cache",
-    "Content-Security-Policy": "default-src 'none'; sandbox",
-    "X-Content-Type-Options": "nosniff",
-  });
-  headers.set("Content-Type", object.httpMetadata?.contentType ?? "application/octet-stream");
-  headers.set("ETag", object.httpEtag);
-  return new Response(method === "HEAD" ? null : object.body, { headers });
+      ? env.DB.prepare(`SELECT v.version FROM user u LEFT JOIN image_versions v
+          ON v.owner_id=u.id AND v.kind=? WHERE u.id=? AND u.image=?`).bind(kind, userId, url)
+      : env.DB.prepare(`SELECT v.version FROM streamers s LEFT JOIN image_versions v
+          ON v.owner_id=s.owner_id AND v.kind=? WHERE s.owner_id=? AND s.${kind}=?`).bind(kind, userId, url);
+  const live = await reference.first<{ version: string | null }>();
+  if (!live) throw new HttpError(404, "Image not found.");
+  if (live.version && !cache && typeof caches !== "undefined") {
+    try {
+      cache = await caches.open("public-images");
+    } catch {
+      console.error("Image cache open failed.");
+    }
+  }
+  const key: string | null =
+    live.version && cache ? `${env.APP_ORIGIN}${url}?version=${encodeURIComponent(live.version)}` : null;
+  let response: Response | undefined;
+  if (key && cache) {
+    try {
+      response = await cache.match(key);
+    } catch {
+      console.error("Image cache lookup failed.");
+    }
+  }
+  if (!response) {
+    const object = await env.IMAGES.get(path);
+    if (!object) throw new HttpError(404, "Image not found.");
+    response = new Response(object.body, {
+      headers: {
+        "Cache-Control": "public, max-age=3600",
+        "Content-Security-Policy": "default-src 'none'; sandbox",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Type": object.httpMetadata?.contentType ?? "application/octet-stream",
+        ETag: object.httpEtag,
+      },
+    });
+    if (key && cache) {
+      try {
+        await cache.put(key, response.clone());
+      } catch {
+        console.error("Image cache write failed.");
+      }
+    }
+  }
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "no-store");
+  return new Response(method === "HEAD" ? null : response.body, { headers });
 }

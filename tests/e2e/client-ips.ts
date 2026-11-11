@@ -6,6 +6,7 @@
  */
 const ranges = {
   platform: [[10, 15]],
+  mutations: [[25, 27]],
   account: [[40, 40]],
   pagination: [[50, 51]],
   moderation: [[60, 65]],

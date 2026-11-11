@@ -141,6 +141,13 @@
       "when": 1794243376338,
       "tag": "0019_entry_vote_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1794356492978,
+      "tag": "0020_image_versions",
+      "breakpoints": true
     }
   ]
 }

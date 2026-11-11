@@ -273,3 +273,20 @@ repo:mickey-kras/stream-bullets:ref:refs/heads/main
 Use the audience from that credential for `TAILSCALE_AUDIENCE`. Copying secrets from another repository does not extend its trust scope. A 403 response during token exchange blocks SonarQube. Deployment waits for SonarQube.
 
 The documentation tools check writing rules. They do not prove full ASD-STE100 Issue 9 compliance or validate dictionary meanings.
+
+### Board refreshes and public image cache
+
+Votes and reactions disable only the affected entry. They refresh the board and its selected entry through
+existing API reads. They do not reload the shell, support settings, or schedule. Newer refreshes and navigation
+cancel older requests. Failed mutations show an error and release their controls.
+
+Public image bodies use the Workers Cache API for one hour per data center. Each request first checks the
+current D1 reference and upload version. A cache hit skips R2. Browsers receive `Cache-Control: no-store` so
+that a later request must check access again. Requests for deleted references fail before the cache lookup.
+
+Migration `0020_image_versions.sql` adds upload versions. Existing images bypass the cache until their next
+upload. Replacement disables the previous version before writing R2. It publishes a new version after the reference
+update. Old cache writes cannot populate the new version. Unused versions expire after one hour.
+
+Cache failures fall back to R2 and emit a fixed error message. D1 and R2 failures remain request failures.
+The server does not use a stale body if it cannot check access.
