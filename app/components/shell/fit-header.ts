@@ -9,7 +9,10 @@ export function headerOverflows(header: HTMLElement): boolean {
   const brand: HTMLElement | null = header.querySelector(":scope > .brand");
   const end: HTMLElement | null = header.querySelector(":scope > .header-end");
   const tabs: HTMLElement[] = [...nav.querySelectorAll<HTMLElement>(":scope > a, :scope > button")];
-  if (tabs.some((tab: HTMLElement) => tab.scrollWidth > tab.clientWidth + 1) || nav.scrollWidth > nav.clientWidth + 1)
+  if (
+    tabs.some((tab: HTMLElement) => tab.scrollWidth > tab.clientWidth + 1) ||
+    [nav, brand, end].some((part: HTMLElement | null) => part !== null && part.scrollWidth > part.clientWidth + 1)
+  )
     return true;
   if (tabs.length === 0) return false;
   const first: DOMRect = tabs[0].getBoundingClientRect();

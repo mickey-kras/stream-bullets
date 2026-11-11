@@ -191,17 +191,30 @@ body:has(.landing-page)::after {
   border-color: var(--gold);
 }
 
-/* The no-WebGL note, centred where the station will stand. */
-.station-status {
+/* A static brand mark and localized note replace the scene when WebGL is unavailable. */
+.station-fallback {
   position: absolute;
   z-index: 2;
-  display: block;
-  right: 22%;
-  top: 48%;
-  max-width: 30ch;
+  display: grid;
+  justify-items: center;
+  gap: 24px;
+  right: 8%;
+  top: 50%;
+  width: 36%;
+  transform: translateY(-50%);
+  text-align: center;
+}
+.station-fallback img { width: min(180px, 100%); height: auto; }
+.station-fallback .station-status {
+  position: static;
+  max-width: 36ch;
   margin: 0;
   color: var(--muted);
   font-size: 15px;
+}
+@media (max-width: 700px) {
+  .station-fallback { left: 16px; right: 16px; width: auto; gap: 12px; }
+  .station-fallback img { width: min(100px, 20vh); }
 }
 
 /* Loading atom, in CSS only. Each orbit is a circle squashed into an ellipse; a fading conic trail spins
@@ -428,7 +441,8 @@ body:has(.landing-page)::after {
   text-shadow:
     0 4px 0 #0000004d,
     0 20px 50px #0000008c;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .landing-copy > p {
   margin: 20px 0 0;
