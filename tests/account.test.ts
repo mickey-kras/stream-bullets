@@ -312,7 +312,7 @@ function zeroes(): Record<string, number> {
 }
 
 async function cookie(): Promise<string> {
-  return `__Secure-stream-bullets.session_token=${encodeURIComponent(`${sessionToken}.${await makeSignature(sessionToken, secret)}`)}`;
+  return `__Host-stream-bullets.session_token=${encodeURIComponent(`${sessionToken}.${await makeSignature(sessionToken, secret)}`)}`;
 }
 
 function routeContext(): RouterContextProvider {
@@ -873,7 +873,7 @@ describe("account deletion", (): void => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ deleted: true });
     expect(await linkedRows("leaver")).toEqual(zeroes());
-    const expired = cookies.find((value: string) => value.startsWith("__Secure-stream-bullets.session_token="));
+    const expired = cookies.find((value: string) => value.startsWith("__Host-stream-bullets.session_token="));
     expect(expired).toMatch(/Max-Age=0/i);
 
     const me = await loader({

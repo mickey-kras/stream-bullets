@@ -1,14 +1,12 @@
-import { StreamerSearch } from "./components/shell/directory-search";
+import { withRouteErrors } from "./server/route-errors.server";
+import { RouteErrorBoundary } from "./components/route-error";
 import {
-  Link,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  isRouteErrorResponse,
   useMatches,
-  useRouteError,
   useRouteLoaderData,
   type LoaderFunctionArgs,
   type ShouldRevalidateFunctionArgs,
@@ -17,30 +15,22 @@ import type { ReactNode } from "react";
 import { Announcer } from "./components/a11y/announcer";
 import { AccountDialogs } from "./components/account/account-dialogs";
 import { SiteFooter } from "./components/shell/footer";
-import { SiteHeader } from "./components/shell/site-header";
-import { Icon } from "./components/ui/icon";
 import { ToastProvider } from "./components/ui/toast";
 import { appContext } from "./env";
-import { HttpError } from "./server/http.server";
 import { getLocale, t } from "./i18n";
 import { useNonce } from "./lib/nonce";
 import { PREFS_SCRIPT } from "./lib/prefs";
 import { loadShell } from "./lib/shell.server";
-import { paths, type ShellData } from "./lib/shell";
+import { type ShellData } from "./lib/shell";
 import "./styles.css";
 
 /** Routes without site chrome. The OBS overlay is a browser source, so it shows only the poll. */
 const bareRoutes: ReadonlySet<string> = new Set(["routes/overlay"]);
 
 /** Shell data for every header, the account menu and the footer (see app/lib/shell.ts). */
-export async function loader({ request, context }: LoaderFunctionArgs): Promise<ShellData> {
-  try {
-    return await loadShell(request, context.get(appContext));
-  } catch (error: unknown) {
-    if (error instanceof HttpError) throw new Response(error.message, { status: error.status });
-    throw error;
-  }
-}
+export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs): Promise<ShellData> => {
+  return loadShell(request, context.get(appContext));
+});
 
 /**
  * The shell changes only when the session or the person's role changes: after a form submission, an explicit
@@ -134,26 +124,10 @@ export default function App(): ReactNode {
 
 /** The 404 page and the error page: the generic header, a streamer search (404) and a way on, as in the mockup. */
 export function ErrorBoundary(): ReactNode {
-  const error: unknown = useRouteError();
-  const missing = isRouteErrorResponse(error) && error.status === 404;
   return (
     <ToastProvider>
       <SkipLink />
-      <SiteHeader />
-      <main className="page-panel not-found-page" id="main-content">
-        <div className="page-column">
-          <Icon name={missing ? "compass" : "warning"} size={40} />
-          <h1>{missing ? t("error.notFoundTitle") : t("error.title")}</h1>
-          <p>{missing ? t("error.notFoundBody") : t("error.body")}</p>
-          {missing && <StreamerSearch id="nf-search" />}
-          <div className="not-found-actions">
-            <Link className="button-link gold" to={paths.streamers}>
-              <Icon name="streamers" size={18} />
-              {t("error.browseStreamers")}
-            </Link>
-          </div>
-        </div>
-      </main>
+      <RouteErrorBoundary />
       <SiteFooter />
     </ToastProvider>
   );

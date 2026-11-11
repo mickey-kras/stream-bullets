@@ -178,7 +178,7 @@ describe("Worker request checks", (): void => {
 
 describe("Worker pages", (): void => {
   it("hands other paths to React Router with the app context and adds the security headers", async (): Promise<void> => {
-    const response = await fetchPath("/streamers?view=all");
+    const response = await fetchPath("/streamers?view=all", { headers: { "X-Request-ID": "untrusted-id" } });
     expect(await response.text()).toBe("page");
     expect(router.mode).toBe(import.meta.env.MODE);
     expect(router.build).toMatchObject({ build: "server-build" });
@@ -186,6 +186,9 @@ describe("Worker pages", (): void => {
     expect(request.url).toBe(`${origin}/streamers?view=all`);
     const app = context.get(appContext) as AppContext;
     expect(app.env).toBe(env);
+    expect(app.requestId).toMatch(/^[a-f0-9-]{36}$/);
+    expect(app.requestId).not.toBe("untrusted-id");
+    expect(response.headers.get("X-Request-ID")).toBe(app.requestId);
     expect(app.nonce).toMatch(/^[A-Za-z0-9+/]{24}$/);
     const policy = response.headers.get("Content-Security-Policy");
     expect(policy).toContain(`'nonce-${app.nonce}'`);

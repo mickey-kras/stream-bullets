@@ -1,3 +1,5 @@
+export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
+import { withRouteErrors } from "../server/route-errors.server";
 import { useState, type ReactNode } from "react";
 import { Link, useLoaderData, useRevalidator, type LoaderFunctionArgs } from "react-router";
 import type { ApplicationQueue, ApplicationReviewItem, ApplicationStatus, ReportGroupFilter } from "../types";
@@ -72,7 +74,7 @@ export function meta() {
  * Admin data loads only after the server-side gate: an administrator, and under ADMIN_STEP_UP=enforce two
  * registered keys and a step-up in this session from the last 15 minutes. The API checks the same on every call.
  */
-export async function loader({ request, context }: LoaderFunctionArgs) {
+export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
   const session = await requestSession(request, app);
   const providers = configuredProviders(app.env);
@@ -129,7 +131,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
   if (view === "keys") return ready;
   return { ...ready, queue: await listApplications(app.env, { status: ready.status, cursor: null }) };
-}
+});
 
 type LoaderData = ReturnType<typeof useLoaderData<typeof loader>>;
 

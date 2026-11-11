@@ -1,3 +1,5 @@
+export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
+import { withRouteErrors } from "../server/route-errors.server";
 import { useCallback, useEffect, useRef, useState, type ReactNode, type ComponentProps } from "react";
 import {
   Link,
@@ -134,7 +136,7 @@ async function pageSchedule(
   };
 }
 
-export async function loader({ request, context, params }: LoaderFunctionArgs) {
+export const loader = withRouteErrors(async ({ request, context, params }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
   const viewer = await requestViewer(request, app);
@@ -187,7 +189,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
     topicChoices,
     intent: readIntent(url.searchParams.get("intent")),
   };
-}
+});
 
 function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revision: number): Entry | null {
   if (!entry || !snapshot || snapshot.revision < revision) return entry;

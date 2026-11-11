@@ -1,3 +1,5 @@
+export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
+import { withRouteErrors } from "../server/route-errors.server";
 import type { ReactNode } from "react";
 import { redirect, useLoaderData, useRevalidator, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
@@ -18,7 +20,7 @@ export function meta() {
   return [{ title: `${t("overlay.controlTitle")} · StreamBullets` }, { name: "robots", content: "noindex" }];
 }
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
+export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
   const viewer = await requestViewer(request, app);
   if (!viewer) throw redirect(paths.streamers);
@@ -45,7 +47,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     data,
     initial: { ...snapshots[0], polls } satisfies LiveSnapshot,
   };
-}
+});
 
 /** The owner's second-screen remote for the one OBS overlay URL (item 33). */
 export default function OverlayControlPage(): ReactNode {

@@ -1,3 +1,5 @@
+export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
+import { withRouteErrors } from "../server/route-errors.server";
 import type { ReactNode } from "react";
 import { useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
@@ -10,7 +12,7 @@ import { OverlayStage, upNextStart, type OverlayPoll, type OverlayScene } from "
 import { useRevalidateAt } from "../components/use-clock";
 import type { LiveSnapshot, OverlayPublic, OverlaySourceRef } from "../types";
 
-export async function loader({ request, context, params }: LoaderFunctionArgs) {
+export const loader = withRouteErrors(async ({ request, context, params }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
   const streamer = await getStreamer(app.env, params.handle.slice(1));
@@ -34,7 +36,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
     initial,
     data,
   };
-}
+});
 
 /** The one OBS browser source URL. It shows whatever the owner puts on air from Overlay control. */
 export default function Overlay(): ReactNode {

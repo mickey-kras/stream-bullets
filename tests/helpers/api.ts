@@ -30,7 +30,7 @@ export function apiCaller(
   };
   const cookie = async (user: string): Promise<string> => {
     const token = `${user}-session-token`;
-    return `__Secure-stream-bullets.session_token=${encodeURIComponent(`${token}.${await makeSignature(token, secret)}`)}`;
+    return `__Host-stream-bullets.session_token=${encodeURIComponent(`${token}.${await makeSignature(token, secret)}`)}`;
   };
   const call = async (method: string, path: string, options: CallOptions = {}): Promise<Response> => {
     const url = `${origin}/api/${path}`;

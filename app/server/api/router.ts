@@ -109,6 +109,6 @@ export async function dispatch(
     }
     throw new HttpError(405, "Method not allowed.");
   } catch (error) {
-    return errorResponse(error, request);
+    return errorResponse(error, request, app.requestId);
   }
 }
