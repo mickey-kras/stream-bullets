@@ -27,7 +27,9 @@ module.exports = async function publish({ github, context, core, expected }) {
     entries.push(item);
   }
   const { data: tree } = await github.rest.git.createTree({
-    ...context.repo, base_tree: parent.tree.sha, tree: entries,
+    ...context.repo,
+    base_tree: parent.tree.sha,
+    tree: entries,
   });
   const { data: commit } = await github.rest.git.createCommit({
     ...context.repo,

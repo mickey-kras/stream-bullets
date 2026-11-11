@@ -5,7 +5,18 @@ const { tmpdir } = require("node:os");
 const { join } = require("node:path");
 const publish = require("./publish.cjs");
 
-for (const scenario of ["current", "superseded", "raced", "fork", "closed", "push-race", "base-changed", "base-raced", "merge", "wrong-artifact"]) {
+for (const scenario of [
+  "current",
+  "superseded",
+  "raced",
+  "fork",
+  "closed",
+  "push-race",
+  "base-changed",
+  "base-raced",
+  "merge",
+  "wrong-artifact",
+]) {
   test(`publication: ${scenario}`, async () => {
     const original = process.cwd();
     const directory = mkdtempSync(join(tmpdir(), "graph-publish-"));
@@ -25,11 +36,19 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
     const dispatches = [];
     const github = {
       rest: {
-        actions: { createWorkflowDispatch: async (args) => { dispatches.push(args); } },
+        actions: {
+          createWorkflowDispatch: async (args) => {
+            dispatches.push(args);
+          },
+        },
         pulls: {
           get: async () => ({
-            data: ++reads === 2 && scenario === "raced" ? { ...pull, head: { ...pull.head, sha: "new" } }
-              : reads === 2 && scenario === "base-raced" ? { ...pull, base: { sha: "new-base" } } : pull,
+            data:
+              ++reads === 2 && scenario === "raced"
+                ? { ...pull, head: { ...pull.head, sha: "new" } }
+                : reads === 2 && scenario === "base-raced"
+                  ? { ...pull, base: { sha: "new-base" } }
+                  : pull,
           }),
         },
         git: {
@@ -56,12 +75,18 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
     try {
       process.chdir(directory);
       mkdirSync("graph-artifact");
-      writeFileSync("graph-artifact/graph-update.json", JSON.stringify({
-        head: scenario === "wrong-artifact" ? "wrong" : "source", base: "base", merge: scenario === "merge",
-        entries: [{ path: "graphify-out/graph.json", mode: "100644", type: "blob", content: "e30=" }],
-      }));
+      writeFileSync(
+        "graph-artifact/graph-update.json",
+        JSON.stringify({
+          head: scenario === "wrong-artifact" ? "wrong" : "source",
+          base: "base",
+          merge: scenario === "merge",
+          entries: [{ path: "graphify-out/graph.json", mode: "100644", type: "blob", content: "e30=" }],
+        }),
+      );
       const result = publish({
-        github, expected,
+        github,
+        expected,
         context: { repo: { owner: "owner", repo: "repo" }, payload: { pull_request: expected } },
         core: { info: () => {} },
       });
@@ -69,12 +94,27 @@ for (const scenario of ["current", "superseded", "raced", "fork", "closed", "pus
       else if (scenario === "wrong-artifact") await assert.rejects(result, /revision mismatch/);
       else await result;
       assert.equal(updates.length, ["current", "merge"].includes(scenario) ? 1 : 0);
-      assert.deepEqual(dispatches, ["current", "merge"].includes(scenario) ? [
-        { owner: "owner", repo: "repo", workflow_id: "ci.yml", ref: "feat/example",
-          inputs: { number: "1", expected_head: "generated", base_sha: "base" } },
-        { owner: "owner", repo: "repo", workflow_id: "policy-guard.yml", ref: "main",
-          inputs: { number: "1", expected_head: "generated" } },
-      ] : []);
+      assert.deepEqual(
+        dispatches,
+        ["current", "merge"].includes(scenario)
+          ? [
+              {
+                owner: "owner",
+                repo: "repo",
+                workflow_id: "ci.yml",
+                ref: "feat/example",
+                inputs: { number: "1", expected_head: "generated", base_sha: "base" },
+              },
+              {
+                owner: "owner",
+                repo: "repo",
+                workflow_id: "policy-guard.yml",
+                ref: "main",
+                inputs: { number: "1", expected_head: "generated" },
+              },
+            ]
+          : [],
+      );
     } finally {
       process.chdir(original);
       rmSync(directory, { recursive: true });

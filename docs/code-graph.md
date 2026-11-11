@@ -11,6 +11,7 @@ The Update branch button also starts an update when it adds a commit.
 
 The updater takes the base graph and rebuilds it from the combined sources.
 It resolves conflicts in `graphify-out/graph.json` automatically. Source conflicts stop the update for review.
+
 GitHub can show a graph conflict until the update finishes.
 The generated-file attribute hides graph diffs. It does not change GitHub merge behavior.
 
@@ -30,6 +31,7 @@ The updater executes trusted tools from the default branch and treats candidate 
 
 The updater uses the built-in `GITHUB_TOKEN`. It needs no separate App or Graphify Cloud account.
 The write job runs separately from extraction. It publishes the merged tree and rebuilt graph.
+
 The merge commit records both parents. Source conflicts cannot produce a publication artifact.
 
 After the commit, it starts quality checks for that revision and trusted policy validation.
