@@ -122,13 +122,19 @@ for (const locale of LOCALES) {
     const close: Locator = page.locator('[data-sheet="a11y"] .modal-close');
     await expectReachable(close);
     await close.focus();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(close).toBeFocused();
     const focus = await close.evaluate((element: HTMLElement) => {
       const style: CSSStyleDeclaration = getComputedStyle(element);
-      return { width: Number.parseFloat(style.outlineWidth), style: style.outlineStyle, transition: style.transitionDuration };
+      return { width: Number.parseFloat(style.outlineWidth), style: style.outlineStyle };
     });
     expect(focus.width).toBeGreaterThanOrEqual(2);
     expect(focus.style).not.toBe("none");
-    expect(Number.parseFloat(focus.transition)).toBe(0);
+    const transition: number = await page.locator("#pref-live .cselect-trigger svg").evaluate((element: SVGElement): number =>
+      Number.parseFloat(getComputedStyle(element).transitionDuration),
+    );
+    expect(transition).toBeLessThanOrEqual(0.00001);
     await expectReachable(page.locator('[data-sheet="a11y"] .sheet-actions .gold'));
   });
 }
