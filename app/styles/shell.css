@@ -9,7 +9,7 @@ header { border-bottom:1px solid var(--header-rule); display:grid; grid-template
 .brand::after { left:auto; transform:scaleX(-1); right:0; }
 .header-end { display:flex; align-items:center; grid-area:actions; margin:0; gap:16px; min-width:0; justify-content:flex-end; }
 .header-end .gold { font:600 1.5rem/1 var(--heading); text-transform:uppercase; letter-spacing:.4px; display:inline-flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap; min-height:48px; font-size:1.312rem; padding:10px 16px; }
-.profile { width:46px; height:46px; flex-shrink:0; border-radius:50%; padding:0; border:0; background:none; overflow:hidden; display: inline-grid; place-items: center; }
+.account-menu-wrap > .profile { width:44px; height:44px; min-width:44px; min-height:44px; flex-shrink:0; border-radius:50%; padding:0; border:0; background:none; overflow:hidden; display: inline-grid; place-items: center; }
 .profile:hover { background:none; outline:2px solid var(--gold); outline-offset:3px; }
 @media(max-width:1250px) {
   .brand::before { left:0; }
@@ -18,7 +18,6 @@ header { border-bottom:1px solid var(--header-rule); display:grid; grid-template
   body::before { border-width:10px; }
   .brand::before, .brand::after { width:29px; height:6px; top:calc(50% - 3px); box-shadow:7px -12px 0 -1px var(--gold),7px 12px 0 -1px var(--gold); }
   .header-end .gold { font-style:normal; font-variant:normal; font-weight:600; font-stretch:normal; line-height:normal; font-family:var(--heading); letter-spacing:0; }
-  .profile { width:37px; height:37px; }
 }
 header nav { align-items:center; grid-area:nav; display:flex; justify-content:center; gap:4px; width:auto; height:auto; min-width:0; overflow:visible; }
 header nav :is(button, a.nav-tab) { background:none; border-color:transparent; font:600 1.25rem/1 Oswald,sans-serif; text-transform:uppercase; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 12px; font-size:1.25rem; letter-spacing:.7px; white-space:nowrap; }
@@ -64,7 +63,6 @@ header nav [aria-current=page] { background:linear-gradient(110deg,var(--gold-hi
   header .nav-label { display:none; }
   .header-end { gap:10px; }
   .header-end .gold { font-size:1.062rem; padding:10px 12px; }
-  .profile { width:40px; height:40px; }
   .poll-footer { flex-wrap:wrap; }
 }
 @media(max-width:480px) {
