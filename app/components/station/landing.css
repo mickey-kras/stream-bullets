@@ -125,6 +125,8 @@ body:has(.landing-page)::after {
   padding: 0;
 }
 .landing-hero {
+  min-width: 0;
+  width: 100%;
   position: relative;
   isolation: isolate;
   display: flex;
