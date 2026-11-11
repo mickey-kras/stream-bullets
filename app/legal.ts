@@ -8,11 +8,18 @@ export const contactEmails = {
 } as const;
 
 /**
- * Operator details shown in the privacy policy, terms, and contact points.
- * Replace every placeholder before launch. `legalPlaceholdersRemain` lets pages
- * show a visible warning while any placeholder is still present.
+ * Public legal fields. Runtime configuration supplies operator details on the legal routes.
+ * The defaults keep unconfigured deployments visibly in draft without personal data in source.
  */
-export const legal = {
+export interface LegalDetails {
+  operatorName: string;
+  operatorCountry: string;
+  contactEmail: string;
+  minimumAge: number;
+  policyEffectiveDate: string;
+}
+
+export const legal: LegalDetails = {
   operatorName: "[OPERATOR NAME]",
   operatorCountry: "[COUNTRY OF RESIDENCE]",
   contactEmail: contactEmails.privacy,
@@ -20,6 +27,8 @@ export const legal = {
   policyEffectiveDate: "[EFFECTIVE DATE]",
 } as const;
 
-export const legalPlaceholdersRemain: boolean = Object.values(legal).some(
-  (value: string | number): boolean => typeof value === "string" && value.startsWith("["),
-);
+export function legalPlaceholdersRemain(details: LegalDetails): boolean {
+  return Object.values(details).some(
+    (value: string | number): boolean => typeof value === "string" && value.startsWith("["),
+  );
+}

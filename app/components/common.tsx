@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { getLocale, t } from "../i18n";
-import { legal, legalPlaceholdersRemain } from "../legal";
+import { type LegalDetails, legalPlaceholdersRemain } from "../legal";
 import { BackLink } from "./shell/back-link";
 import { SiteHeader } from "./shell/site-header";
 import { Dialog } from "./ui/dialog";
@@ -63,7 +63,8 @@ export function LegalDocument({
   title,
   summary,
   sections,
-}: Readonly<{ title: string; summary: ReactNode; sections: readonly LegalSection[] }>): ReactNode {
+  legal,
+}: Readonly<{ title: string; summary: ReactNode; sections: readonly LegalSection[]; legal: LegalDetails }>): ReactNode {
   return (
     <>
       <SiteHeader />
@@ -76,7 +77,7 @@ export function LegalDocument({
               <span>{t("legal.englishOnly")}</span>
             </p>
           )}
-          {legalPlaceholdersRemain && (
+          {legalPlaceholdersRemain(legal) && (
             <p className="legal-draft" role="note" lang="en">
               <strong>Draft — operator details pending.</strong> Values in square brackets are placeholders. This text
               is not final until the operator replaces them.

@@ -7,6 +7,8 @@ export interface AppEnv {
   POLL_ROOMS: DurableObjectNamespace;
   REQUEST_LIMITER: RateLimit;
   APP_ORIGIN: string;
+  /** Runtime JSON for the public legal pages. Store as a Worker secret, never in source. */
+  LEGAL_DETAILS?: string;
   BETTER_AUTH_SECRET: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;

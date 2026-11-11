@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { LegalDocument, type LegalSection } from "../components/common";
-import { contactEmails, legal } from "../legal";
+import { contactEmails, legal, type LegalDetails } from "../legal";
 import { paths } from "../lib/shell";
+import { legalLoader } from "../server/legal.server";
+
+export const loader = legalLoader;
 
 export function meta() {
   return [
@@ -14,7 +17,7 @@ export function meta() {
 const mail: ReactNode = <a href={`mailto:${legal.contactEmail}`}>{legal.contactEmail}</a>;
 const support: ReactNode = <a href={`mailto:${contactEmails.support}`}>{contactEmails.support}</a>;
 
-const sections: readonly LegalSection[] = [
+const sections = (legal: LegalDetails): readonly LegalSection[] => [
   {
     id: "who-we-are",
     title: "Who is responsible",
@@ -470,6 +473,7 @@ const sections: readonly LegalSection[] = [
 ];
 
 export default function Privacy(): ReactNode {
+  const legal = useLoaderData<typeof loader>();
   return (
     <LegalDocument
       title="Privacy Policy"
@@ -479,7 +483,8 @@ export default function Privacy(): ReactNode {
           never sell your data, and you can download or delete everything from Your data in the account menu.
         </p>
       }
-      sections={sections}
+      legal={legal}
+      sections={sections(legal)}
     />
   );
 }
