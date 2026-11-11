@@ -704,3 +704,18 @@ export const aiInterestDaily = sqliteTable(
     check("ai_interest_daily_count_check", sql`${table.up} >= 0 AND ${table.down} >= 0`),
   ],
 );
+
+export const imageVersions = sqliteTable(
+  "image_versions",
+  {
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(),
+    version: text("version").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.ownerId, table.kind] }),
+    check("image_versions_kind_check", sql`${table.kind} IN ('avatar', 'background', 'logo')`),
+  ],
+);

@@ -134,3 +134,56 @@ async function holdThenTab(owner: BrowserContext, viewer: BrowserContext): Promi
   expect(await count()).toBe(stopped);
   expect((await owner.request.post(`/api/mash/${id}/end`, { data: {} })).status()).toBe(200);
 }
+
+test("a selected Mash Battle reconnects after its retry budget expires and accepts taps", async ({ browser }) => {
+  const owner = await signedIn(browser, "featureowner", 80);
+  const viewer = await signedIn(browser, "viewer", 81);
+  const id: string = await mashId(owner);
+  const page = await newPage(viewer);
+  let blocked: boolean = true;
+  let attempts: number = 0;
+  let acknowledgedTaps: number | null = null;
+  await page.routeWebSocket("**/api/live/feature_host", async (socket) => {
+    attempts += 1;
+    if (blocked) await socket.close({ code: 1013, reason: "Test outage" });
+    else {
+      const server = socket.connectToServer();
+      server.onMessage((message) => {
+        socket.send(message);
+        if (typeof message !== "string" || !message.startsWith("{")) return;
+        const reply: unknown = JSON.parse(message);
+        if (
+          typeof reply === "object" && reply !== null &&
+          "type" in reply && reply.type === "mash-ack" &&
+          "id" in reply && reply.id === id &&
+          "mine" in reply && typeof reply.mine === "number"
+        ) acknowledgedTaps = reply.mine;
+      });
+    }
+  });
+  await page.clock.install({ time: Date.now() });
+  await page.goto(`/@feature_host?view=polls&entry=${id}`);
+  await expect(page.locator(".mash-card")).toBeVisible();
+  await expect.poll(() => attempts).toBeGreaterThan(0);
+  await page.clock.pauseAt(Date.now() + 1000);
+  for (let failure: number = 0; failure < 9 && attempts < 9; failure += 1) {
+    const previous: number = attempts;
+    await page.clock.fastForward(30_001);
+    await expect.poll(() => attempts).toBeGreaterThan(previous);
+  }
+  await expect(page.getByText("Live updates are offline.", { exact: true })).toBeVisible();
+  expect(attempts).toBe(9);
+  await page.clock.fastForward(60_001);
+  expect(attempts).toBe(9);
+  blocked = false;
+  await page.getByRole("button", { name: "Reconnect", exact: true }).click();
+  await expect(page.getByText("Live updates connected", { exact: true })).toBeVisible();
+  expect(attempts).toBe(10);
+  await page.clock.resume();
+  expect((await owner.request.post(`/api/mash/${id}/start`, { data: { countdown: false } })).status()).toBe(200);
+  await page.locator(".mash-button").click();
+  await expect.poll(() => acknowledgedTaps).toBe(26);
+  await expect(page.locator("[data-mash-mine]")).toHaveText("26");
+  expect((await owner.request.post(`/api/mash/${id}/end`, { data: {} })).status()).toBe(200);
+  await Promise.all([close(owner), close(viewer)]);
+});

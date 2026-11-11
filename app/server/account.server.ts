@@ -1,7 +1,7 @@
 import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";
-import { IMAGE_KINDS, type ImageKind } from "./images.server";
+import { deleteImageObjects, imageStorageKey, IMAGE_KINDS, type ImageKind } from "./images.server";
 import { notifyRoom } from "./live.server";
 
 /** Rows read per query while building an export, so memory grows with one page at a time per query. */
@@ -407,7 +407,7 @@ async function readAll<T extends PagedRow>(env: AppEnv, sql: string, userId: str
 async function imageRecords(env: AppEnv, userId: string, origin: string): Promise<ImageRecord[]> {
   const records: ImageRecord[] = [];
   for (const kind of IMAGE_KINDS) {
-    const key = `${kind}/${userId}`;
+    const key = await imageStorageKey(env, userId, kind);
     const object = await env.IMAGES.head(key);
     if (object) {
       records.push({
@@ -861,7 +861,7 @@ export async function deleteAccount(env: AppEnv, userId: string): Promise<void> 
   ]);
   if (results.at(-1)?.results.length !== 1) throw new HttpError(404, "Account not found.");
   try {
-    await env.IMAGES.delete(IMAGE_KINDS.map((kind: string): string => `${kind}/${userId}`));
+    for (const kind of IMAGE_KINDS) await deleteImageObjects(env, userId, kind);
   } catch (error_: unknown) {
     // The account is already deleted, so the request still succeeds. Log the error class, not its
     // message, so operators can remove the leftover images without exposing storage details.

@@ -10,7 +10,7 @@ import { stripImageMetadata } from "./image-metadata";
 const types: Readonly<Record<string, string>> = { png: "image/png", jpg: "image/jpeg", webp: "image/webp" };
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-/** Account picture, page background and page logo. Each lives in R2 at `{kind}/{userId}`. */
+/** Account picture, page background and page logo use stable public addresses and immutable R2 versions. */
 export const IMAGE_KINDS = ["avatar", "background", "logo"] as const;
 export type ImageKind = (typeof IMAGE_KINDS)[number];
 
@@ -52,18 +52,28 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
   const bytes = await readBody(request, MAX_IMAGE_BYTES);
   const contentType = validateImage(bytes, request.headers.get("Content-Type"));
   const clean: Uint8Array = stripImageMetadata(bytes, contentType);
-  const key = `${kind}/${userId}`;
-  const url = `/images/${key}`;
+  const path = `${kind}/${userId}`;
+  const previous = await imageStorageKey(env, userId, kind);
+  const version = crypto.randomUUID();
+  const key = `${path}/${version}`;
+  const url = `/images/${path}`;
   await env.IMAGES.put(key, clean, { httpMetadata: { contentType, cacheControl: "no-cache" } });
+  const publish = env.DB.prepare(
+    "INSERT INTO image_versions (owner_id,kind,version) VALUES (?,?,?) ON CONFLICT(owner_id,kind) DO UPDATE SET version=excluded.version",
+  ).bind(userId, kind, version);
   if (kind === "avatar") {
     await env.DB.batch([
       env.DB.prepare("UPDATE user SET image = ?, updated_at = ? WHERE id = ?").bind(url, Date.now(), userId),
       env.DB.prepare("UPDATE streamers SET avatar = ? WHERE owner_id = ?").bind(url, userId),
+      publish,
     ]);
-  } else if (kind === "logo") {
-    await db.update(streamers).set({ logo: url }).where(eq(streamers.ownerId, userId));
   } else {
-    await db.update(streamers).set({ background: url }).where(eq(streamers.ownerId, userId));
+    await env.DB.batch([env.DB.prepare(`UPDATE streamers SET ${kind}=? WHERE owner_id=?`).bind(url, userId), publish]);
+  }
+  try {
+    await env.IMAGES.delete(previous);
+  } catch (error: unknown) {
+    console.error("Previous image cleanup failed.", { cause: error instanceof Error ? error.name : "unknown" });
   }
   return url;
 }
@@ -74,6 +84,7 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
  */
 export async function deleteAvatar(env: AppEnv, userId: string): Promise<void> {
   const url = `/images/avatar/${userId}`;
+  const key = await imageStorageKey(env, userId, "avatar");
   await env.DB.batch([
     env.DB.prepare("UPDATE user SET image = NULL, updated_at = ? WHERE id = ? AND image = ?").bind(
       Date.now(),
@@ -82,7 +93,7 @@ export async function deleteAvatar(env: AppEnv, userId: string): Promise<void> {
     ),
     env.DB.prepare("UPDATE streamers SET avatar = NULL WHERE owner_id = ? AND avatar = ?").bind(userId, url),
   ]);
-  await env.IMAGES.delete(`avatar/${userId}`);
+  await env.IMAGES.delete([...new Set([key, `avatar/${userId}`])]);
 }
 
 /** `DELETE /api/images/logo`: the page goes back to the owner's profile picture. */
@@ -91,29 +102,92 @@ export async function deleteLogo(env: AppEnv, userId: string): Promise<void> {
   const profile = (await db.select().from(streamers).where(eq(streamers.ownerId, userId)).limit(1))[0];
   if (!profile) throw new HttpError(403, "Create a streamer profile first.");
   await assertStreamerWritable(env, profile.id, userId);
+  const key = await imageStorageKey(env, userId, "logo");
   await db.update(streamers).set({ logo: null }).where(eq(streamers.id, profile.id));
-  await env.IMAGES.delete(`logo/${userId}`);
+  await env.IMAGES.delete([...new Set([key, `logo/${userId}`])]);
 }
 
-export async function serveImage(env: AppEnv, path: string, method: string): Promise<Response> {
+export async function imageStorageKey(env: AppEnv, userId: string, kind: ImageKind): Promise<string> {
+  const row = await env.DB.prepare("SELECT version FROM image_versions WHERE owner_id=? AND kind=?")
+    .bind(userId, kind)
+    .first<{ version: string }>();
+  const path = `${kind}/${userId}`;
+  return row ? `${path}/${row.version}` : path;
+}
+
+export async function deleteImageObjects(env: AppEnv, userId: string, kind: ImageKind): Promise<void> {
+  const path = `${kind}/${userId}`;
+  await env.IMAGES.delete(path);
+  let cursor: string | undefined;
+  do {
+    const page = await env.IMAGES.list({ prefix: `${path}/`, cursor });
+    if (page.objects.length) await env.IMAGES.delete(page.objects.map((object) => object.key));
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
+}
+
+export async function serveImage(
+  env: AppEnv,
+  path: string,
+  method: string,
+  cache?: Pick<Cache, "match" | "put">,
+): Promise<Response> {
   if (!/^(avatar|background|logo)\/[a-zA-Z0-9_-]{1,128}$/.test(path)) throw new HttpError(404, "Image not found.");
-  // Serve only images a live account or streamer page still references. An object left in R2 after an
-  // account deletion (for example, when the storage delete failed) is then never public again.
   const [kind, userId] = path.split("/");
   const url = `/images/${path}`;
   const reference =
     kind === "avatar"
-      ? env.DB.prepare("SELECT 1 AS live FROM user WHERE id=? AND image=?").bind(userId, url)
-      : env.DB.prepare(`SELECT 1 AS live FROM streamers WHERE owner_id=? AND ${kind}=?`).bind(userId, url);
-  if (!(await reference.first<{ live: number }>())) throw new HttpError(404, "Image not found.");
-  const object = await env.IMAGES.get(path);
-  if (!object) throw new HttpError(404, "Image not found.");
-  const headers = new Headers({
-    "Cache-Control": "no-cache",
-    "Content-Security-Policy": "default-src 'none'; sandbox",
-    "X-Content-Type-Options": "nosniff",
-  });
-  headers.set("Content-Type", object.httpMetadata?.contentType ?? "application/octet-stream");
-  headers.set("ETag", object.httpEtag);
-  return new Response(method === "HEAD" ? null : object.body, { headers });
+      ? env.DB.prepare(`SELECT v.version FROM user u LEFT JOIN image_versions v
+          ON v.owner_id=u.id AND v.kind=? WHERE u.id=? AND u.image=?`).bind(kind, userId, url)
+      : env.DB.prepare(`SELECT v.version FROM streamers s LEFT JOIN image_versions v
+          ON v.owner_id=s.owner_id AND v.kind=? WHERE s.owner_id=? AND s.${kind}=?`).bind(kind, userId, url);
+  let retry = true;
+  for (;;) {
+    const live = await reference.first<{ version: string | null }>();
+    if (!live) throw new HttpError(404, "Image not found.");
+    if (live.version && !cache && typeof caches !== "undefined") {
+      try {
+        cache = await caches.open("public-images");
+      } catch (error: unknown) {
+        console.error("Image cache open failed.", { cause: error instanceof Error ? error.name : "unknown" });
+      }
+    }
+    const key: string | null =
+      live.version && cache ? `${env.APP_ORIGIN}${url}?version=${encodeURIComponent(live.version)}` : null;
+    let response: Response | undefined;
+    if (key && cache) {
+      try {
+        response = await cache.match(key);
+      } catch (error: unknown) {
+        console.error("Image cache lookup failed.", { cause: error instanceof Error ? error.name : "unknown" });
+      }
+    }
+    if (!response) {
+      const object = await env.IMAGES.get(live.version ? `${path}/${live.version}` : path);
+      if (!object && retry) {
+        retry = false;
+        continue;
+      }
+      if (!object) throw new HttpError(404, "Image not found.");
+      response = new Response(object.body, {
+        headers: {
+          "Cache-Control": "public, max-age=3600",
+          "Content-Security-Policy": "default-src 'none'; sandbox",
+          "X-Content-Type-Options": "nosniff",
+          "Content-Type": object.httpMetadata?.contentType ?? "application/octet-stream",
+          ETag: object.httpEtag,
+        },
+      });
+      if (key && cache) {
+        try {
+          await cache.put(key, response.clone());
+        } catch (error: unknown) {
+          console.error("Image cache write failed.", { cause: error instanceof Error ? error.name : "unknown" });
+        }
+      }
+    }
+    const headers = new Headers(response.headers);
+    headers.set("Cache-Control", "no-store");
+    return new Response(method === "HEAD" ? null : response.body, { headers });
+  }
 }
