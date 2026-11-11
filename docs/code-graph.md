@@ -38,6 +38,40 @@ After the commit, it starts quality checks for that revision and trusted policy 
 Each run rejects a stale PR revision. These checks do not start another graph update.
 The workflow needs write access to repository contents and Actions, plus read access to pull requests.
 
+## Clone setup
+
+Run this setup in each clone. Git does not copy local driver or hook configuration.
+The setup registers Graphify's native graph merge driver and the shared commit hooks.
+The setup stops if the clone already uses other hooks.
+
+Run setup only from reviewed source. It copies hooks and graph tools into `.git/graphify`.
+Installed hooks reject changes to the staged extractor or its requirements.
+Review tool changes before you run setup again.
+
+```sh
+python3.12 -m venv ~/.local/share/stream-bullets-graphify
+~/.local/share/stream-bullets-graphify/bin/python -m pip install --require-hashes -r .github/graphify/requirements.txt
+~/.local/share/stream-bullets-graphify/bin/python .github/graphify/setup.py
+```
+
+The hooks rebuild and stage `graph.json` before ordinary and merge commits.
+For local merges, use `git merge --no-commit` followed by `git commit`.
+If an automatic merge rebuild changes the graph, the hook pauses the commit.
+Run `git commit` to finish. The hook staged the graph.
+
+The hooks extract staged files in a temporary checkout. Unstaged source edits remain outside the graph.
+Extraction failures stop the commit. Git tracks only `graph.json`. Other graph output stays local.
+
+The merge driver combines graph nodes and edges. The hook then rebuilds from source to remove stale nodes.
+The rebuild uses our code and Markdown extractor, with pinned dependencies and no model calls.
+Do not use `graphify hook install`: its post-commit rebuild leaves the graph outside the source commit.
+
+GitHub cannot use a merge driver installed in your clone. The PR updater still handles server-side conflicts.
+It reads the current base branch reference, not the PR's recorded base commit.
+
+For a controlled CI commit that already rebuilt the graph, set `GRAPHIFY_SKIP_HOOK=1`.
+Normal development commits must use the hooks.
+
 ## Local update
 
 Use Python 3.12. From the repository root:

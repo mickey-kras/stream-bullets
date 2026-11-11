@@ -3,10 +3,12 @@ const { readFileSync } = require("node:fs");
 module.exports = async function publish({ github, context, core, expected }) {
   const params = { ...context.repo, pull_number: expected.number };
   const { data: pull } = await github.rest.pulls.get(params);
+  const { data: base } = await github.rest.git.getRef({ ...context.repo, ref: `heads/${expected.base.ref}` });
   if (
     pull.state !== "open" ||
     pull.head.sha !== expected.head.sha ||
-    pull.base.sha !== expected.base.sha ||
+    pull.base.ref !== expected.base.ref ||
+    base.object.sha !== expected.base.sha ||
     pull.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`
   ) {
     core.info("PR changed; discard the old graph.");
@@ -38,7 +40,13 @@ module.exports = async function publish({ github, context, core, expected }) {
     parents: update.merge ? [expected.head.sha, expected.base.sha] : [expected.head.sha],
   });
   const { data: latest } = await github.rest.pulls.get(params);
-  if (latest.state !== "open" || latest.head.sha !== expected.head.sha || latest.base.sha !== expected.base.sha) {
+  const { data: latestBase } = await github.rest.git.getRef({ ...context.repo, ref: `heads/${expected.base.ref}` });
+  if (
+    latest.state !== "open" ||
+    latest.head.sha !== expected.head.sha ||
+    latest.base.ref !== expected.base.ref ||
+    latestBase.object.sha !== expected.base.sha
+  ) {
     core.info("PR changed during generation; discard the old graph.");
     return;
   }
@@ -55,7 +63,7 @@ module.exports = async function publish({ github, context, core, expected }) {
     ...context.repo,
     workflow_id: "ci.yml",
     ref: pull.head.ref,
-    inputs: { ...inputs, base_sha: pull.base.sha },
+    inputs: { ...inputs, base_sha: expected.base.sha },
   });
   await github.rest.actions.createWorkflowDispatch({
     ...context.repo,

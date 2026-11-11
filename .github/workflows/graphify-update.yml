@@ -59,7 +59,8 @@ jobs:
             const { data: pull } = await github.rest.pulls.get({ ...context.repo, pull_number: number });
             if (pull.state !== 'open' || pull.base.ref !== 'main' ||
                 pull.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`) return null;
-            return { number, head: { sha: pull.head.sha }, base: { sha: pull.base.sha } };
+            const { data: base } = await github.rest.git.getRef({ ...context.repo, ref: `heads/${pull.base.ref}` });
+            return { number, head: { sha: pull.head.sha }, base: { ref: pull.base.ref, sha: base.object.sha } };
 
   build:
     needs: revision
