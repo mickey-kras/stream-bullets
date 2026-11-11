@@ -11505,7 +11505,31 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L107",
+      "source_location": "L104",
+      "target": "app_components_shell_contact_dialog_contactdialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_footer_sitefooter",
+      "source_file": "app/components/shell/footer.tsx",
+      "source_location": "L105",
+      "target": "app_components_ui_sheet_sheet",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_footer_sitefooter",
+      "source_file": "app/components/shell/footer.tsx",
+      "source_location": "L115",
       "target": "app_components_shell_footer_morerow",
       "weight": 1.0
     },
@@ -11541,7 +11565,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L71",
+      "source_location": "L73",
       "target": "app_components_shell_dialog_link_dialoglink",
       "weight": 1.0
     },
@@ -11553,32 +11577,8 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L73",
+      "source_location": "L75",
       "target": "app_components_ui_icon_icon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_shell_footer_sitefooter",
-      "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L96",
-      "target": "app_components_shell_contact_dialog_contactdialog",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_shell_footer_sitefooter",
-      "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L97",
-      "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
     {
@@ -23589,7 +23589,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L321",
+      "source_location": "L319",
       "target": "app_routes_streamers_streamercard",
       "weight": 1.0
     },
@@ -23601,7 +23601,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L335",
+      "source_location": "L333",
       "target": "app_routes_streamers_streamers_loadmore",
       "weight": 1.0
     },
@@ -110268,7 +110268,7 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_spec",
       "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L207",
+      "source_location": "L213",
       "target": "tests_e2e_a11y_spec_get",
       "weight": 1.0
     },
@@ -115968,10 +115968,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "c2e21d859154d7bde37ad6de7f10678898f3f45f5ec81014c66532c0587ec4e7",
+    "content_sha256": "3b6c36156bf5b611ab12c539e33466500909d198d729e7e3341c4a55df019420",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "fa7794a3f3d2354432785d27a49c4dc38e814ef54d2357b483c8dc61cb3e8953",
+    "source_sha256": "28d66feb3b36f5a09b09c0b8a02f571ae5bf4f968c43aedeef7bff9f5918d628",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -124016,7 +124016,7 @@
             "callee": "getClientRects",
             "file": "app/components/shell/footer.tsx",
             "lang": "typescript",
-            "line": "L41",
+            "line": "L42",
             "receiver_type": "HTMLAnchorElement"
           }
         ]
@@ -134417,7 +134417,7 @@
       "label": "get()",
       "norm_label": "get()",
       "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L207"
+      "source_location": "L213"
     },
     {
       "_callable": true,
@@ -134457,7 +134457,7 @@
       "label": ".setItem()",
       "norm_label": ".setitem()",
       "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L210"
+      "source_location": "L218"
     },
     {
       "_callable": true,
@@ -143497,7 +143497,7 @@
             "callee": "on",
             "file": "tests/e2e/a11y.spec.ts",
             "lang": "typescript",
-            "line": "L214",
+            "line": "L224",
             "receiver_type": "Page"
           }
         ]
