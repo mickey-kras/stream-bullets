@@ -260,9 +260,18 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: 4c8f932bbf73d6901fbb40f559f6e1f4
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || { echo '::error::Set CLOUDFLARE_API_TOKEN in the production environment.'; exit 1; }
-          pnpm exec wrangler d1 time-travel info DB --env production
+          bookmark_info=$(pnpm exec wrangler d1 time-travel info DB --env production)
+          printf '%s\n' "$bookmark_info"
+          {
+            echo '### D1 Time Travel bookmark before migrations'
+            echo "Commit: \`$GITHUB_SHA\`"
+            echo '```text'
+            printf '%s\n' "$bookmark_info"
+            echo '```'
+            echo 'D1 restore steps: https://developers.cloudflare.com/d1/reference/time-travel/'
+          } >> "$GITHUB_STEP_SUMMARY"
           pnpm exec wrangler d1 migrations apply DB --env production --remote
-          pnpm exec wrangler deploy --config build/server/wrangler.json
+          pnpm exec wrangler deploy --config build/server/wrangler.json --message "commit $GITHUB_SHA"
       - name: Check production response and assets
         if: steps.revision.outputs.deploy == 'true'
         run: |
