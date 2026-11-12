@@ -1108,7 +1108,6 @@
   "streamers.search": "खोजें",
   "streamers.searchLabel": "स्ट्रीमर खोजें",
   "streamers.searchPlaceholder": "नाम या @handle से खोजें…",
-  "streamers.searchSuffix": "स्ट्रीमर",
   "streamers.showing.one": "{count} पेज दिख रहे हैं",
   "streamers.showing.other": "{count} पेज दिख रहे हैं",
   "streamers.showingOf": "{total} में से {shown} पेज दिखाए जा रहे हैं",

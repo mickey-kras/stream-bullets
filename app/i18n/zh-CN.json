@@ -1090,7 +1090,6 @@
   "streamers.search": "搜索",
   "streamers.searchLabel": "搜索主播",
   "streamers.searchPlaceholder": "按名称或 @用户名搜索…",
-  "streamers.searchSuffix": "主播",
   "streamers.showing.other": "显示 {count} 个页面",
   "streamers.showingOf": "显示 {total} 个页面中的 {shown} 个",
   "streamers.startHere": "从这里开始",
