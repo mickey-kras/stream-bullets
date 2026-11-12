@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { t } from "../../i18n";
+import { motionReduced, watchMotion } from "./motion";
 import { askForTilt, onFirstMotion, tiltPillWanted } from "./tilt";
 import type { StationController } from "./scene.client";
 
@@ -23,7 +24,7 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
   useEffect(() => {
     if (!host.current) return;
     const wide: MediaQueryList = globalThis.matchMedia("(min-width: 701px)");
-    const reduced: MediaQueryList = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
+    const lifecycle = new AbortController();
     let disposed: boolean = false;
     function fail(): void {
       controller.current?.dispose();
@@ -54,20 +55,17 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
           return;
         }
         controller.current = station;
-        station.motion(!reduced.matches);
+        station.motion(!motionReduced());
         setStatus("ready");
       } catch {
         if (!disposed) fail();
       }
     }
     void start();
-    function preference(): void {
-      controller.current?.motion(!reduced.matches);
-    }
-    reduced.addEventListener("change", preference);
+    watchMotion((reduced: boolean): void => controller.current?.motion(!reduced), lifecycle.signal);
     return () => {
       disposed = true;
-      reduced.removeEventListener("change", preference);
+      lifecycle.abort();
       controller.current?.dispose();
       controller.current = null;
     };
