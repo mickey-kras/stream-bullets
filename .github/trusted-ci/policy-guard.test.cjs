@@ -3,7 +3,15 @@ const assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
 const { readFileSync } = require("node:fs");
 const { resolve } = require("node:path");
-const { inspectChanges, validComment, snapshot, run, runWithStatus, STATUS_CONTEXT } = require("./policy-guard.cjs");
+const {
+  inspectChanges,
+  validComment,
+  snapshot,
+  run,
+  runWithStatus,
+  STATUS_CONTEXT,
+  CHECK_NAME,
+} = require("./policy-guard.cjs");
 const { inspect, isPolicyPath, isApplicationPath } = require("./policy.cjs");
 const SHA = "a".repeat(40);
 const BASE = "b".repeat(40);
@@ -191,8 +199,13 @@ function harness({
   let reads = 0;
   let commentReads = 0;
   const statuses = [];
+  const checks = [];
   const github = {
     rest: {
+      checks: {
+        create: async (check) => ({ data: { id: checks.push({ ...check }) } }),
+        update: async ({ check_run_id, ...update }) => Object.assign(checks[check_run_id - 1], update),
+      },
       repos: {
         createCommitStatus: async (status) => {
           statuses.push(status);
@@ -228,7 +241,12 @@ function harness({
         : [];
     },
   };
-  return { github, context: { repo: { owner: "owner", repo: "repo" }, payload: { pull_request: pull } }, statuses };
+  return {
+    github,
+    context: { repo: { owner: "owner", repo: "repo" }, payload: { pull_request: pull } },
+    statuses,
+    checks,
+  };
 }
 
 test("trusted API guard rejects run:true scanner bypass and fork/stale admissions without executing head code", async () => {
@@ -285,12 +303,34 @@ test("live comment events publish required status on PR head and revoke green on
   }
 });
 
+test("dispatched and comment runs mirror the required guard check on the validated PR head", async () => {
+  for (const [eventName, options, conclusion] of [
+    ["workflow_dispatch", { admitted: true }, "success"],
+    ["workflow_dispatch", { rejectedComment: true }, "failure"],
+    ["issue_comment", { admitted: true }, "success"],
+  ]) {
+    const dispatched = harness(options);
+    dispatched.context.eventName = eventName;
+    const result = runWithStatus(dispatched, dispatched.context.payload.pull_request, TRUSTED);
+    if (conclusion === "success") await result;
+    else await assert.rejects(result, /exact-head/);
+    assert.deepEqual(dispatched.checks, [
+      { owner: "owner", repo: "repo", name: CHECK_NAME, head_sha: SHA, status: "completed", conclusion },
+    ]);
+  }
+  const event = harness({ admitted: true });
+  event.context.eventName = "pull_request_target";
+  await runWithStatus(event, event.context.payload.pull_request, TRUSTED);
+  assert.deepEqual(event.checks, []);
+});
+
 test("trusted workflow covers comment revocation and base retarget without executing candidate code", () => {
   const YAML = require("yaml");
   const workflow = YAML.parse(readFileSync(resolve(__dirname, "../workflows/policy-guard.yml"), "utf8"));
   assert.deepEqual(workflow.on.issue_comment.types, ["created", "edited", "deleted"]);
   assert.ok(workflow.on.pull_request_target.types.includes("edited"));
   assert.equal(workflow.permissions.statuses, "write");
+  assert.equal(workflow.permissions.checks, "write");
   assert.equal(workflow.permissions.contents, "read");
   assert.equal(workflow.jobs.guard.concurrency["cancel-in-progress"], true);
   const steps = workflow.jobs.guard.steps;
