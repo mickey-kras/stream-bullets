@@ -143,8 +143,8 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
 }
 
 const STATUS_CONTEXT = "Trusted CI policy";
-// The ruleset also requires the `guard` job check. Dispatched and comment runs report that
-// check on the default-branch commit, so mirror it on the PR head the run validated.
+// The ruleset also requires the `guard` job check. Owner comment runs report that check
+// on the default-branch commit, so mirror it on the PR head the run validated.
 const CHECK_NAME = "guard";
 
 // Both entry points run trusted code. The early workflow step binds the status
