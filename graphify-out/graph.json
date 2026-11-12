@@ -23709,7 +23709,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L154",
+      "source_location": "L155",
       "target": "app_components_shell_back_link_useremembercontentroute",
       "weight": 1.0
     },
@@ -23721,7 +23721,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L154",
+      "source_location": "L155",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -23733,32 +23733,8 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L198",
-      "target": "app_components_api_errormessage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamers_streamers",
-      "source_file": "app/routes/streamers.tsx",
-      "source_location": "L211",
-      "target": "app_components_account_dialog_route_dialoghref",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamers_streamers",
-      "source_file": "app/routes/streamers.tsx",
-      "source_location": "L220",
-      "target": "app_routes_streamers_directorycount",
+      "source_location": "L192",
+      "target": "app_routes_streamers_streamers_keepsearchvisible",
       "weight": 1.0
     },
     {
@@ -23770,6 +23746,42 @@
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
       "source_location": "L224",
+      "target": "app_components_api_errormessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamers_streamers",
+      "source_file": "app/routes/streamers.tsx",
+      "source_location": "L237",
+      "target": "app_components_account_dialog_route_dialoghref",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamers_streamers",
+      "source_file": "app/routes/streamers.tsx",
+      "source_location": "L246",
+      "target": "app_routes_streamers_directorycount",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamers_streamers",
+      "source_file": "app/routes/streamers.tsx",
+      "source_location": "L250",
       "target": "app_components_a11y_announcer_announce",
       "weight": 1.0
     },
@@ -23781,7 +23793,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L229",
+      "source_location": "L255",
       "target": "app_components_shell_site_header_siteheader",
       "weight": 1.0
     },
@@ -23793,7 +23805,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L241",
+      "source_location": "L267",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -23805,7 +23817,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L257",
+      "source_location": "L283",
       "target": "app_lib_directory_directoryhref",
       "weight": 1.0
     },
@@ -23817,7 +23829,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L265",
+      "source_location": "L291",
       "target": "app_routes_streamers_featuredcommunity",
       "weight": 1.0
     },
@@ -23829,7 +23841,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L268",
+      "source_location": "L294",
       "target": "app_components_common_emptystate",
       "weight": 1.0
     },
@@ -23841,7 +23853,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L292",
+      "source_location": "L318",
       "target": "app_routes_streamers_streamers_search",
       "weight": 1.0
     },
@@ -23853,7 +23865,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L313",
+      "source_location": "L340",
       "target": "app_components_shell_directory_search_searchadornments",
       "weight": 1.0
     },
@@ -23865,7 +23877,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L332",
+      "source_location": "L359",
       "target": "app_routes_streamers_streamercard",
       "weight": 1.0
     },
@@ -23877,7 +23889,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L346",
+      "source_location": "L373",
       "target": "app_routes_streamers_streamers_loadmore",
       "weight": 1.0
     },
@@ -23889,7 +23901,7 @@
       "relation": "calls",
       "source": "app_routes_streamers_streamers_loadmore",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L198",
+      "source_location": "L224",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -32673,7 +32685,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L100",
+      "source_location": "L108",
       "target": "tests_e2e_a11y_responsive_spec_expectcontained",
       "weight": 1.0
     },
@@ -32685,7 +32697,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L101",
+      "source_location": "L109",
       "target": "tests_e2e_a11y_responsive_spec_expectheaderfits",
       "weight": 1.0
     },
@@ -32697,7 +32709,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L115",
+      "source_location": "L123",
       "target": "tests_e2e_a11y_responsive_spec_expectlabelsfit",
       "weight": 1.0
     },
@@ -32709,7 +32721,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L123",
+      "source_location": "L131",
       "target": "tests_e2e_a11y_responsive_spec_opencontact",
       "weight": 1.0
     },
@@ -32721,7 +32733,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L125",
+      "source_location": "L133",
       "target": "tests_e2e_a11y_responsive_spec_expectreachable",
       "weight": 1.0
     },
@@ -32733,7 +32745,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec_expectheaderfits",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L40",
+      "source_location": "L46",
       "target": "tests_e2e_a11y_responsive_spec_expectlabelsfit",
       "weight": 1.0
     },
@@ -32793,7 +32805,7 @@
       "relation": "calls",
       "source": "tests_e2e_client_ips_checkallocations",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L53",
+      "source_location": "L54",
       "target": "tests_e2e_client_ips_allocations",
       "weight": 1.0
     },
@@ -32805,7 +32817,7 @@
       "relation": "calls",
       "source": "tests_e2e_client_ips_clientaddress",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L76",
+      "source_location": "L77",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -63590,7 +63602,31 @@
       "relation": "imports",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L2",
+      "source_location": "L5",
+      "target": "tests_helpers_database_applymigrations",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L5",
+      "target": "tests_helpers_database_migrationfiles",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L7",
       "target": "db_enums_locales",
       "weight": 1.0
     },
@@ -63602,7 +63638,7 @@
       "relation": "imports",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L3",
+      "source_location": "L8",
       "target": "tests_e2e_coverage_expect",
       "weight": 1.0
     },
@@ -63614,7 +63650,7 @@
       "relation": "imports",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L3",
+      "source_location": "L8",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
@@ -86689,7 +86725,7 @@
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
       "source_location": "L1",
-      "target": "ref_playwright_test",
+      "target": "ref_node_crypto",
       "weight": 1.0
     },
     {
@@ -86701,7 +86737,7 @@
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
       "source_location": "L2",
-      "target": "db_enums",
+      "target": "ref_node_fs",
       "weight": 1.0
     },
     {
@@ -86713,6 +86749,66 @@
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
       "source_location": "L3",
+      "target": "ref_node_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L4",
+      "target": "ref_miniflare",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L5",
+      "target": "tests_helpers_database",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L6",
+      "target": "ref_playwright_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L7",
+      "target": "db_enums",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L8",
       "target": "tests_e2e_coverage",
       "weight": 1.0
     },
@@ -103730,7 +103826,18 @@
       "relation": "contains",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L175",
+      "source_location": "L177",
+      "target": "app_routes_streamers_streamers_keepsearchvisible",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_streamers_streamers",
+      "source_file": "app/routes/streamers.tsx",
+      "source_location": "L201",
       "target": "app_routes_streamers_streamers_search",
       "weight": 1.0
     },
@@ -103741,7 +103848,7 @@
       "relation": "contains",
       "source": "app_routes_streamers_streamers",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L185",
+      "source_location": "L211",
       "target": "app_routes_streamers_streamers_loadmore",
       "weight": 1.0
     },
@@ -112563,29 +112670,7 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L22",
-      "target": "tests_e2e_a11y_responsive_spec_expectlabelsfit",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_a11y_responsive_spec",
-      "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L38",
-      "target": "tests_e2e_a11y_responsive_spec_expectheaderfits",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_a11y_responsive_spec",
-      "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L5",
+      "source_location": "L10",
       "target": "tests_e2e_a11y_responsive_spec_widths",
       "weight": 1.0
     },
@@ -112596,18 +112681,7 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L51",
-      "target": "tests_e2e_a11y_responsive_spec_expectreachable",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_a11y_responsive_spec",
-      "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L6",
+      "source_location": "L11",
       "target": "tests_e2e_a11y_responsive_spec_enlarged_widths",
       "weight": 1.0
     },
@@ -112618,8 +112692,8 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L60",
-      "target": "tests_e2e_a11y_responsive_spec_opencontact",
+      "source_location": "L13",
+      "target": "tests_e2e_a11y_responsive_spec_expectcontained",
       "weight": 1.0
     },
     {
@@ -112629,8 +112703,41 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L8",
-      "target": "tests_e2e_a11y_responsive_spec_expectcontained",
+      "source_location": "L27",
+      "target": "tests_e2e_a11y_responsive_spec_expectlabelsfit",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L44",
+      "target": "tests_e2e_a11y_responsive_spec_expectheaderfits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L57",
+      "target": "tests_e2e_a11y_responsive_spec_expectreachable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_a11y_responsive_spec",
+      "source_file": "tests/e2e/a11y-responsive.spec.ts",
+      "source_location": "L66",
+      "target": "tests_e2e_a11y_responsive_spec_opencontact",
       "weight": 1.0
     },
     {
@@ -112761,7 +112868,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L41",
+      "source_location": "L42",
       "target": "tests_e2e_client_ips_spec",
       "weight": 1.0
     },
@@ -112772,7 +112879,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "tests_e2e_client_ips_allocations",
       "weight": 1.0
     },
@@ -112783,7 +112890,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "target": "tests_e2e_client_ips_checkallocations",
       "weight": 1.0
     },
@@ -112794,7 +112901,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -112805,7 +112912,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L75",
+      "source_location": "L76",
       "target": "tests_e2e_client_ips_clientaddress",
       "weight": 1.0
     },
@@ -112816,7 +112923,7 @@
       "relation": "contains",
       "source": "tests_e2e_client_ips",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "tests_e2e_client_ips_ranges",
       "weight": 1.0
     },
@@ -118340,10 +118447,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "141867f8b27d76f4c4522268514476eb8cdf6e2d7df51473ca16bc863819c9b2",
+    "content_sha256": "f0361bbb9fb6e9e701bfc2a1638655a0536b197219effc187f326738eb2ac309",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "73c260902b73e8629d2a6be18a829dc7fb8f81dd5cb467c499c1637a34cec297",
+    "source_sha256": "aeca018541dd38d8244afaba9fe0a4f715c556983d05005637f6db980e9d0eb9",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -122329,7 +122436,7 @@
       "label": "Spec",
       "norm_label": "spec",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L41"
+      "source_location": "L42"
     },
     {
       "_callable": true,
@@ -132039,11 +132146,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_routes_streamers_streamers_keepsearchvisible",
+      "label": "keepSearchVisible()",
+      "norm_label": "keepsearchvisible()",
+      "source_file": "app/routes/streamers.tsx",
+      "source_location": "L177"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_routes_streamers_streamers_loadmore",
       "label": "loadMore()",
       "norm_label": "loadmore()",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L185"
+      "source_location": "L211"
     },
     {
       "_callable": true,
@@ -132054,7 +132172,7 @@
       "label": "search()",
       "norm_label": "search()",
       "source_file": "app/routes/streamers.tsx",
-      "source_location": "L175"
+      "source_location": "L201"
     },
     {
       "_callable": true,
@@ -136982,28 +137100,28 @@
             "callee": "count",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L9",
+            "line": "L14",
             "receiver_type": "Locator"
           },
           {
             "callee": "evaluateAll",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L10",
+            "line": "L15",
             "receiver_type": "Locator"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L13",
-            "receiver_type": "SVGElement"
+            "line": "L18",
+            "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "expectcontained()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L8"
+      "source_location": "L13"
     },
     {
       "_callable": true,
@@ -137018,21 +137136,21 @@
             "callee": "locator",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L39",
+            "line": "L45",
             "receiver_type": "Page"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L42",
-            "receiver_type": "SVGElement"
+            "line": "L48",
+            "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "expectheaderfits()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L38"
+      "source_location": "L44"
     },
     {
       "_callable": true,
@@ -137047,21 +137165,35 @@
             "callee": "evaluateAll",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L23",
+            "line": "L28",
             "receiver_type": "Locator"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L25",
-            "receiver_type": "SVGElement"
+            "line": "L30",
+            "receiver_type": "Element"
+          },
+          {
+            "callee": "matches",
+            "file": "tests/e2e/a11y-responsive.spec.ts",
+            "lang": "typescript",
+            "line": "L32",
+            "receiver_type": "Element"
+          },
+          {
+            "callee": "closest",
+            "file": "tests/e2e/a11y-responsive.spec.ts",
+            "lang": "typescript",
+            "line": "L32",
+            "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "expectlabelsfit()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L22"
+      "source_location": "L27"
     },
     {
       "_callable": true,
@@ -137076,28 +137208,28 @@
             "callee": "scrollIntoViewIfNeeded",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L52",
+            "line": "L58",
             "receiver_type": "Locator"
           },
           {
             "callee": "click",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L54",
+            "line": "L60",
             "receiver_type": "Locator"
           },
           {
             "callee": "boundingBox",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L55",
+            "line": "L61",
             "receiver_type": "Locator"
           }
         ]
       },
       "norm_label": "expectreachable()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L51"
+      "source_location": "L57"
     },
     {
       "_callable": true,
@@ -137112,14 +137244,14 @@
             "callee": "locator",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L61",
+            "line": "L67",
             "receiver_type": "Page"
           }
         ]
       },
       "norm_label": "opencontact()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L60"
+      "source_location": "L66"
     },
     {
       "_callable": true,
@@ -137247,7 +137379,7 @@
       "label": "allocations()",
       "norm_label": "allocations()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L44"
+      "source_location": "L45"
     },
     {
       "_callable": true,
@@ -137258,7 +137390,7 @@
       "label": "checkAllocations()",
       "norm_label": "checkallocations()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L51"
+      "source_location": "L52"
     },
     {
       "_callable": true,
@@ -137269,7 +137401,7 @@
       "label": "clientAddress()",
       "norm_label": "clientaddress()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L75"
+      "source_location": "L76"
     },
     {
       "_callable": true,
@@ -137280,7 +137412,7 @@
       "label": "clientIp()",
       "norm_label": "clientip()",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L67"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -146254,57 +146386,71 @@
             "callee": "addInitScript",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L72",
+            "line": "L78",
             "receiver_type": "Page"
           },
           {
             "callee": "setViewportSize",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L80",
+            "line": "L86",
             "receiver_type": "Page"
           },
           {
             "callee": "goto",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L86",
+            "line": "L93",
             "receiver_type": "Page"
           },
           {
             "callee": "locator",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L88",
+            "line": "L95",
             "receiver_type": "Page"
           },
           {
             "callee": "evaluate",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L90",
+            "line": "L97",
             "receiver_type": "Page"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L104",
+            "line": "L112",
             "receiver_type": "HTMLElement"
           },
           {
             "callee": "emulateMedia",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L147",
+            "line": "L155",
             "receiver_type": "Page"
           },
           {
             "callee": "addStyleTag",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L150",
+            "line": "L158",
             "receiver_type": "Page"
+          },
+          {
+            "callee": "getByRole",
+            "file": "tests/e2e/a11y-responsive.spec.ts",
+            "lang": "typescript",
+            "line": "L269",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "scrollIntoView",
+            "file": "tests/e2e/a11y-responsive.spec.ts",
+            "lang": "typescript",
+            "line": "L282",
+            "receiver_type": "Element"
           }
         ]
       },
@@ -146320,7 +146466,7 @@
       "label": "ENLARGED_WIDTHS",
       "norm_label": "enlarged_widths",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L6"
+      "source_location": "L11"
     },
     {
       "_origin": "ast",
@@ -146330,7 +146476,7 @@
       "label": "WIDTHS",
       "norm_label": "widths",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L5"
+      "source_location": "L10"
     },
     {
       "_origin": "ast",
@@ -146563,7 +146709,7 @@
       "label": "ranges",
       "norm_label": "ranges",
       "source_file": "tests/e2e/client-ips.ts",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "_origin": "ast",
