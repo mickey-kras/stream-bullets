@@ -95,8 +95,7 @@ function CardTools({
   );
 }
 
-// Show saved/default cards and optional Support. Owners manage up to eight cards with drag or buttons. Each
-// save replaces the list.
+// Saving writes the complete card list, including defaults on the first edit.
 export function CommunityView({
   name,
   cards: saved,

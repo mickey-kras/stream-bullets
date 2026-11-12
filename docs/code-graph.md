@@ -56,7 +56,7 @@ Markdown extraction covers `README.md`, `AGENTS.md`, `SECURITY.md`, and authored
 It adds headings, document links, and code-symbol references without model inference.
 
 Excluded: assets, translations, dependencies, build output, SQL migrations, CI tools, and documents under `generated`, `archive`, or `changelog`.
-The TypeScript schema supplies database structure.
+The TypeScript schema defines the database structure.
 
 Use focused queries:
 

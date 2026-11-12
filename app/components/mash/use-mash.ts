@@ -8,7 +8,6 @@ export type MashAssist = "off" | "hold" | "toggle";
 
 // Use the newest loader, snapshot or 5 Hz tick state.
 export interface MashView extends MashState {
-
   current: MashPhase;
   left: number;
   // Live milliseconds remaining; zero otherwise.

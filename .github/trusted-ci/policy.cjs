@@ -29,8 +29,8 @@ function isPolicyPath(name) {
   );
 }
 
-// Policy changes allow only documentation and the generated graph beside them.
-// Treat unknown files as application inputs to catch executable additions.
+// Only inert documentation and the generated graph can accompany policy changes. Unknown files count as
+// application inputs so executable additions cannot hide in a new directory.
 function isApplicationPath(name) {
   if (isPolicyPath(name) || name === "graphify-out/graph.json") return false;
   if (/^(app|worker|db|drizzle|tests)\//.test(name)) return true;

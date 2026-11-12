@@ -1,5 +1,5 @@
 #!/bin/sh
-# Rebuild and stage graphify-out/graph.json with source changes.
+# graphify: rebuild graphify-out/graph.json and commit it with the code that changed it.
 if [ "${GRAPHIFY_SKIP_HOOK:-0}" != 1 ] &&
 	! git diff --cached --quiet -- . ':!graphify-out/graph.json'; then
 	python=$(git config --get graphify.python || echo python3)

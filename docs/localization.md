@@ -68,7 +68,7 @@ UI notices and this glossary do not translate legal disclosures.
 - Browser checks: official labels, narrow layouts, locale changes with filters and fragments.
 
 Locale selection adds no URL prefix and preserves canonical SEO behavior. `Intl` formats dates and counts.
-Bundled fonts cover Latin and Cyrillic. CJK and Devanagari use system fallback.
+Bundled fonts cover Latin and Cyrillic. CJK and Devanagari rely on system fonts.
 One operating system cannot prove device-wide glyph coverage.
 Before release, check Hindi shaping, Chinese and Japanese glyphs, and enlarged mixed-script names on Windows, macOS, Android, and iOS.
 

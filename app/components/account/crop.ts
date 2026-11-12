@@ -13,7 +13,6 @@ export interface CropState {
 }
 
 export interface CropGeometry extends CropState {
-
   width: number;
   height: number;
   // Visible source square in image pixels.

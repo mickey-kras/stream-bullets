@@ -28,7 +28,7 @@ export interface DialogState {
   languageOpener?: "account";
 }
 
-// Opening pushes history. Closing in-app dialogs goes back; closing URL-provided dialogs replaces the entry.
+// Preserve Back navigation: app-opened dialogs pop history; direct dialog URLs use replacement.
 export function useAccountDialog(): { name: AccountDialogName | null; close: () => void } {
   const location = useLocation();
   const navigate = useNavigate();

@@ -58,7 +58,7 @@ Daily counts do not connect clicks to later actions. Do not infer exact visitor 
 
 ## Mobile evidence
 
-Baseline production build sizes, not measured transfers:
+Sizes from the baseline production build, not measured transfers:
 
 | Asset | Uncompressed | Gzip |
 | --- | ---: | ---: |
@@ -78,10 +78,10 @@ pnpm exec playwright test tests/e2e/conversions.spec.ts
 
 The checks cover overflow and clickable CTAs at 320 x 568, 390 x 844, and 844 x 390.
 Playwright reports attach screenshots and `mobile-hero-cost.json`.
-CI saves reports on failure. Successful runs print `mobile-hero-cost` measurements.
-Attachments record asset sizes, readiness, and two-second animated and static samples.
+CI saves reports on failure. Successful runs show the `mobile-hero-cost` measurements.
+Attachments contain the asset sizes, readiness, and two-second animated and static samples.
 
-Task time and frame cadence are lab indicators, not GPU timings or visitor Core Web Vitals.
+Task time and frame cadence are lab indicators, not GPU timings or Core Web Vitals from visitors.
 CI software rendering cannot predict physical-phone performance.
 
 Local Chromium failed because the environment denied sockets. Browser preview timed out. Local mobile timings remain unverified.

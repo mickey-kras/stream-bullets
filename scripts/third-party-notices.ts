@@ -1,7 +1,12 @@
-// Generate THIRD_PARTY_NOTICES.md for runtime dependencies, including transitive packages.
-// Exclude build tools. See SECURITY.md for license review requirements.
-// node scripts/third-party-notices.ts          # regenerate
-// node scripts/third-party-notices.ts --check  # reject stale notices
+/**
+ * Writes THIRD_PARTY_NOTICES.md: the name, version, license and license text of every package the app ships, which
+ * is the runtime `dependencies` of package.json and their own runtime dependencies. Build tools (devDependencies)
+ * do not ship and are not listed. `--check` fails when the file is out of date, so a dependency change cannot merge
+ * without its notices, and the diff shows the reviewer which licenses changed (SECURITY.md, Dependency licenses).
+ *
+ *   node scripts/third-party-notices.ts          # rewrite the file
+ *   node scripts/third-party-notices.ts --check  # CI
+ */
 import { readFile, readdir, realpath, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,14 +27,14 @@ interface Package {
 const root: string = join(dirname(fileURLToPath(import.meta.url)), "..");
 const output: string = join(root, "THIRD_PARTY_NOTICES.md");
 
-// Resolve dependencies beside their package in pnpm's layout.
+/** The directory of `name` as `from` resolves it: pnpm puts a package's dependencies next to it. */
 async function resolvePackage(from: string, name: string): Promise<string | null> {
   const modules: string = from.slice(0, from.lastIndexOf("/node_modules/") + "/node_modules".length);
   for (const base of from === root ? [join(root, "node_modules")] : [modules, join(root, "node_modules")]) {
     try {
       return await realpath(join(base, name));
     } catch {
-      // Optional platform packages may be absent here.
+      // Not installed here (an optional dependency for another platform): try the next place.
     }
   }
   return null;

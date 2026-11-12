@@ -12,7 +12,7 @@ Admin content removal uses the same check and records a `moderation_actions` row
 Authors and page owners need no key to remove their content.
 
 The default mode, `report`, permits access without a key check.
-Each unchecked admin call records `step_up_missing`, the administrator, and the route.
+Unchecked calls to admin endpoints record `step_up_missing`, the administrator, and the route.
 
 - Challenges use 32 random bytes, expire after 2 minutes, and bind to a session and purpose. First use consumes them.
 - Assertions must match `APP_ORIGIN` and its host's relying party ID hash. Keys must confirm user presence and verification through PIN or biometrics.

@@ -141,7 +141,8 @@ function harness({
   const candidate = structuredClone(tree);
   const policy = candidate.find((file) => file.path === ".github/workflows/quality.yml");
   policy.sha = "d".repeat(40);
-  // Keep required job names. The trusted guard must reject the no-op scanner that candidate checks accept.
+  // All original required job names remain. The candidate policy inspector accepts
+  // this no-op scanner; the independent trusted guard must reject its changed blob.
   const originalPolicy = blobs[tree.find((file) => file.path === policy.path).sha];
   blobs[policy.sha] = actionUpdate
     ? originalPolicy.replace(

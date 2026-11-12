@@ -37,7 +37,6 @@ export default async function handleRequest(
         },
       },
     );
-    // Render inside the locale scope before streaming.
     await stream.allReady;
     headers.set("Content-Type", "text/html; charset=utf-8");
     headers.set("Content-Language", locale);

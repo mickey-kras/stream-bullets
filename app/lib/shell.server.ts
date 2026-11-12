@@ -30,7 +30,6 @@ export async function loadShell(request: Request, app: AppContext): Promise<Shel
   const viewer: Viewer | null = await requestViewer(request, app);
   const providers = configuredProviders(app.env);
   const locale = requestLocale(request, viewer?.locale ?? null);
-  // Render locale for entry.server.tsx.
   app.locale = locale;
   const prefs: DisplayPrefs =
     viewer?.displayPrefs ?? readDisplayPrefs(readCookie(request.headers.get("Cookie"), PREFS_COOKIE)) ?? {};

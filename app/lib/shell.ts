@@ -63,6 +63,19 @@ export const paths = {
   streamer: (handle: string): string => `/@${handle}`,
 } as const;
 
+// Validate ?next= as a same-origin path. Reject external URLs, backslashes, control characters, and absent values.
+export function localPath(value: string | null | undefined): string | null {
+  if (
+    !value?.startsWith("/") ||
+    value.startsWith("//") ||
+    [...value].some((char: string): boolean => char === "\\" || char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
+  )
+    return null;
+  const base = "https://local.invalid";
+  const url = new URL(value, base);
+  return url.origin === base ? `${url.pathname}${url.search}${url.hash}` : null;
+}
+
 // Replace only the complete /@from segment; /@abcd must not match abc. Return null for other pages.
 export function renamedPath(pathname: string, from: string, to: string): string | null {
   const old = `/@${from}`;

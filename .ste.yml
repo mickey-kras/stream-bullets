@@ -1,4 +1,5 @@
-# Check STE writing rules, excluding the Issue 9 dictionary.
+# ste-cli configuration for the ASD-STE100 documentation gate.
+# These checks do not verify the official Issue 9 dictionary.
 presets: [software]
 exclude:
   - "*requirements.txt"

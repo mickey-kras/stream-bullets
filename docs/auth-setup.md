@@ -102,7 +102,7 @@ Removing a method needs recent sign-in. Concurrent removals cannot remove the la
 
 Registration needs age and terms acknowledgement before OAuth.
 Eligibility is self-declared. The app requests no birthday scopes or birth dates.
-Private acceptance records store time, minimum age, and `app/signup-policy.ts` policy versions.
+Private acceptance records store the time, minimum age, and policy versions from `app/signup-policy.ts`.
 Existing accounts remain usable. Their next acknowledged interactive sign-in records current acceptance without backdating.
 
 New accounts can edit display names. Invalid provider names open a correction field.

@@ -4,7 +4,7 @@ Viewers suggest topics, discuss, and vote. Streamers run polls and show them thr
 
 | Layer | Implementation |
 | --- | --- |
-| Application | React, React Router framework mode, TypeScript |
+| Application | React, React Router in framework mode, TypeScript |
 | UI | Tailwind CSS, Radix UI, StreamBullets design |
 | Runtime | Cloudflare Workers |
 | Data | D1, Drizzle |
@@ -48,8 +48,8 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - Add message IDs to all 11 `app/i18n/` catalogs. `tests/i18n.test.ts` checks IDs, plural forms, and `{placeholder}` values.
 - User content keeps its language. Legal text remains English with translated notices of its legal authority.
 - **Accessibility & display** controls colour-vision palettes, contrast, text size, font, link underlines, and motion.
-- It also controls Mash Battle score announcements, shortcuts, and assisted tapping. Accounts and browser cookies keep preferences.
-- A nonce-protected inline script applies preferences before first paint.
+- It also controls score announcements for Mash Battle, shortcuts, and assisted tapping. Accounts and browser cookies keep preferences.
+- Before first paint, an inline script with the response nonce applies the preferences.
 - `/ai`, `/robots.txt`, and `/llms.txt` allow public agent reads and prohibit posting, voting, and registration.
 - `POST /api/ai-interest` accepts one unverified like or dislike per visitor per day. Retention is 30 days.
 - JSON-LD describes the site, streamers, upcoming streams, and open topics.
@@ -82,7 +82,7 @@ Each complete pair enables its sign-in button. Do not commit secrets or database
 | `BETTER_AUTH_SECRET` | Stable random secret, at least 32 characters. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth credentials. |
 | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | Twitch OAuth credentials. |
-| `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | TikTok Login Kit credentials. No provider email. |
+| `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | Credentials for TikTok Login Kit. No provider email. |
 | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Instagram Login credentials. Requires Meta review and a creator or business account. No provider email. |
 | `ADMIN_EMAILS` | Case-insensitive administrator emails, separated by commas or spaces. |
 | `AI_INTEREST_SALT` | Worker secret, at least 16 random characters. Keys the daily IP hash. The counter never stores raw IPs. Absence disables the counter and buttons. |
@@ -172,12 +172,15 @@ One-time setup:
 - Configure stable `BETTER_AUTH_SECRET`, provider credentials, and `ADMIN_EMAILS` as Worker secrets. Wrangler preserves them.
 - Make the checks mandatory and block direct pushes. See [Quality gates](#quality-gates).
 
-Deployment records a D1 Time Travel bookmark, applies migrations, uploads Worker and assets, and checks the homepage and stylesheet.
+Deployment records a bookmark for D1 Time Travel, applies migrations, uploads Worker and assets, and checks the homepage and stylesheet.
 Migration failure stops deployment. Smoke failure fails the run without automatic schema rollback.
 Keep migrations compatible with the live Worker. Time Travel keeps 7 days on Free and 30 days on Paid.
 
 After fixing a missing secret, rerun the failed job.
 For code rollback, revert through a PR after checking schema compatibility. Never rerun an old successful deployment over newer code.
+
+See [recovery](docs/recovery.md) for a fast code rollback with `wrangler rollback` and D1 restoration.
+The deployment summary records the D1 bookmark and commit SHA. Check the schema compatibility before rollback.
 
 For manual deployment, authenticate Wrangler:
 
@@ -216,7 +219,7 @@ Never remove migration records or apply old schema files to live data.
 
 ## Prototype data
 
-Migrations `0000`-`0002` preserve legacy poll tables. `0003` adds platform tables.
+Migrations `0000`-`0002` keep the legacy poll tables. Migration `0003` adds the platform tables.
 Future imports need reviewed ownership mappings. Do not infer OAuth owners from Sites identities.
 Browser-only prototype topics and profiles never reached the server.
 
@@ -235,19 +238,19 @@ Browser-only prototype topics and profiles never reached the server.
 - Rooms resync every 15 seconds. Reconnect loads current state. Disconnected views refresh HTTP every 30 seconds.
 - See [live capacity](docs/live-room-capacity.md) for retry budgets and measured limits.
 - HTTP limits are approximate per Cloudflare location. D1 mutation limits apply per account across targets. Neither stops coordinated multi-account abuse.
-- Pages allow 1,000 topics and polls. Discussions allow 10,000 comments. The app limits HTTP bodies and page sizes.
+- Pages allow 1,000 topics and polls. Discussions allow 10,000 comments. The app caps the HTTP bodies and page sizes.
 - Images accept PNG, JPEG, or WebP: at most 5 MB, 16 million pixels, and 8,192 pixels per side.
 - Accounts have one avatar. Streamers have one background. Application image URLs are public.
 - Uploads remove private metadata, including camera and location data, and keep orientation and color profiles.
-- Public responses omit email, credentials, tokens, and sessions. Logs omit HTTP bodies, identities, and error messages.
-- Error logs contain type, stack frames, and call ID. Responses share that ID for report lookup. Workers logs and issue grouping are enabled.
+- Public responses omit email, credentials, tokens, and sessions. Logs omit the HTTP bodies, identities, and error messages.
+- Error logs contain type, stack frames, and call ID. Responses share that ID for report lookup. The site enables Workers logs and issue grouping.
 - Limit administrator access to trusted accounts. Administrators can read applicant emails.
 - Application decisions appear in the account dialog without email notifications. Deleting a user also deletes their `0004` application row.
 - Hourly cleanup removes expired sessions, OAuth state, and rate-limit records in bounded batches.
 - Authors and owners delete content. Administrators review reports. There is no account-ban workflow.
 - **Your data** supports export and permanent deletion. Deleted D1 rows can remain in Time Travel for 30 days. Never restore deleted accounts.
-- Necessary cookies and consent behavior are documented in the Privacy Policy. Get consent before adding optional cookies and update that policy.
-- The general limiter keys requests with an IP SHA-256 hash. Better Auth stores session IP and user agent and uses IP-based database limits.
+- The Privacy Policy describes necessary cookies and consent behavior. Get consent before adding optional cookies and update that policy.
+- The general limiter keys requests with an IP SHA-256 hash. Better Auth stores the IP and user agent for each session. It uses IP-based database limits.
 
 ## Legal pages
 
@@ -260,7 +263,7 @@ Only English legal text has legal effect. Translated notices explain this.
 
 Dependencies and lockfiles use exact versions with a seven-day release-age check.
 Exceptions for `minimatch@11.0.1` and `@isaacs/nonrecursive-glob-match@1.0.1` admit glob denial-of-service fixes.
-Overrides patch Miniflare HTTP and image dependencies and Drizzle Kit's esbuild. CI checks the resolved tree.
+Overrides fix the HTTP and image dependencies in Miniflare and esbuild in Drizzle Kit. CI checks the resolved tree.
 
 ## Quality gates
 
@@ -280,7 +283,7 @@ PRs need `Required quality gates` and `Trusted CI policy`. Production also needs
 | Policy | Unpinned action, ignored failure, missing gate, or mixed CI/application change |
 
 Scanners use immutable `PINNED` tooling. Candidate configuration cannot select tools.
-Promote tools and pins in a separate CI PR. Keep CI policy separate from application changes.
+Promote tools and pins in a separate CI PR. Keep changes to CI policy separate from application changes.
 Aislop compatibility settings keep Workers globals and virtual modules. `pnpm audit` owns dependency auditing.
 
 The independent `policy` workflow uses `pull_request_target` and owner-comment events.
@@ -311,7 +314,7 @@ Configure repository protection:
 - Allow `tag:github-sonar` to reach SonarQube.
 
 Enable the dependency graph under **Settings > Advanced Security** ([security settings](https://github.com/mickey-kras/stream-bullets/settings/security_analysis)).
-The GitHub connector cannot change it. Keep dependency review mandatory.
+The GitHub connector has no control for that setting. Keep the dependency review mandatory.
 CODEOWNERS alone enables no protection. Writers can publish statuses. Required code-owner review protects workflow changes.
 
 SonarQube consumes verification coverage from the same commit. The workflow uses secrets only on `main`. Missing configuration blocks deployment.

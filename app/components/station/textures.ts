@@ -191,7 +191,6 @@ export function paintedMetal(o: PaintOptions): Surface {
     bb.fill();
   }
   function paintChips(): void {
-
     for (let i = 0; i < chips * 90; i++) {
       const near =
         seamPoints.length && rnd() > 0.4
