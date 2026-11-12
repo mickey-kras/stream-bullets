@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { authClient } from "../../auth-client";
 import { t } from "../../i18n";
+import { signupPolicy } from "../../signup-policy";
 import { legal } from "../../legal";
 import { paths, type Provider } from "../../lib/shell";
 import { errorMessage } from "../api";
@@ -39,6 +40,8 @@ export function SignIn({
   callbackURL?: string;
 }>): ReactNode {
   const here: string = useHere();
+  const [accepted, setAccepted] = useState<boolean>(false);
+  const [displayName, setDisplayName] = useState<string>("");
   const [pending, setPending] = useState<Provider | null>(null);
   const [error, setError] = useState<string>("");
   async function signIn(provider: Provider): Promise<void> {
@@ -49,8 +52,12 @@ export function SignIn({
       const result = await authClient.signIn.social({
         provider: provider as "google",
         callbackURL: callbackURL ?? here,
+        errorCallbackURL: "/sign-in",
+        newUserCallbackURL: paths.profile,
+        additionalData: { acceptance: { accepted, ...signupPolicy }, ...(displayName.trim() ? { displayName } : {}) },
       });
-      if (result.error) throw new Error(t("signIn.failed"));
+      if (result.error)
+        throw new Error(t(result.error.code === "INVALID_DISPLAY_NAME" ? "signup.nameCorrection" : "signIn.failed"));
     } catch (error_: unknown) {
       setError(errorMessage(error_));
     } finally {
@@ -59,6 +66,26 @@ export function SignIn({
   }
   return (
     <div className="sign-in-options">
+      {providers.length > 0 && (
+        <>
+          <label>
+            <span>{t("signup.displayName")}</span>
+            <input
+              name="signup-name"
+              value={displayName}
+              maxLength={40}
+              onChange={(event) => setDisplayName(event.currentTarget.value)}
+            />
+          </label>
+          <label>
+            <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.currentTarget.checked)} />
+            <span>
+              {t("signup.accept", { age: legal.minimumAge })} <Link to={paths.terms}>{t("legal.terms")}</Link>{" "}
+              {t("signIn.and")} <Link to={paths.privacy}>{t("legal.privacyPolicy")}</Link>.
+            </span>
+          </label>
+        </>
+      )}
       {providers.map((provider: Provider) => {
         const label: string = t("signIn.continueWith", { provider: providerName[provider] });
         let content: ReactNode = pending === provider ? t("signIn.connecting") : label;
@@ -73,7 +100,7 @@ export function SignIn({
           <button
             type="button"
             className={provider === "instagram" ? "gold sign-in-two-line" : "gold"}
-            disabled={pending !== null}
+            disabled={pending !== null || !accepted}
             key={provider}
             aria-describedby={provider === "google" ? "hint-google" : undefined}
             onClick={() => {

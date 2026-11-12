@@ -19,6 +19,7 @@ interface UserRow {
   name: string;
   email: string;
   email_verified: number;
+  email_link_verified: number;
   image: string | null;
   created_at: number;
   updated_at: number;
@@ -225,7 +226,15 @@ export interface ImageRecord {
   uploadedAt: string;
 }
 
+interface SignupAcceptanceRecord {
+  accepted_at: number;
+  minimum_age: number;
+  terms_version: string;
+  privacy_version: string;
+}
+
 export interface AccountExport {
+  signupAcceptance: SignupAcceptanceRecord | null;
   exportedAt: string;
   notes: string;
   account: {
@@ -233,6 +242,7 @@ export interface AccountExport {
     name: string;
     email: string;
     emailVerified: boolean;
+    emailLinkVerified: boolean;
     image: string | null;
     avatarPreset: number | null;
     locale: string | null;
@@ -654,7 +664,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
   const now = Date.now();
   const [userResult, streamerResult, applicationResult, overlayResult] = await env.DB.batch([
     env.DB.prepare(
-      "SELECT id,name,email,email_verified,image,avatar_preset,locale,display_prefs,first_vote_counted,first_topic_counted,created_at,updated_at FROM user WHERE id=?",
+      "SELECT id,name,email,email_verified,email_link_verified,image,avatar_preset,locale,display_prefs,first_vote_counted,first_topic_counted,created_at,updated_at FROM user WHERE id=?",
     ).bind(userId),
     env.DB.prepare(
       `SELECT id,handle,name,about,avatar,background,logo,is_official,handle_changed_at,status,status_reason,
@@ -676,7 +686,14 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
 
   const history = await readHistory(env, userId, now);
 
+  const signupAcceptance = await env.DB.prepare(
+    "SELECT accepted_at,minimum_age,terms_version,privacy_version FROM signup_acceptance WHERE user_id=?",
+  )
+    .bind(userId)
+    .first<SignupAcceptanceRecord>();
+
   return {
+    signupAcceptance,
     exportedAt: iso(now),
     notes: NOTES,
     account: {
@@ -684,6 +701,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       name: account.name,
       email: account.email,
       emailVerified: account.email_verified === 1,
+      emailLinkVerified: account.email_link_verified === 1,
       image: account.image,
       avatarPreset: account.avatar_preset,
       locale: account.locale,

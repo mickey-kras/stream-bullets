@@ -11,6 +11,7 @@ import { Icon } from "../ui/icon";
 import { Req, RequiredNote } from "../ui/required";
 import { Sheet } from "../ui/sheet";
 import { useToast } from "../ui/toast";
+import { LoginMethods } from "./login-methods";
 import { AvatarPicker, type AvatarChoice } from "./avatar-picker";
 import { Cropper, type CropperHandle } from "./cropper";
 import { useDiscardGuard } from "./discard";
@@ -246,6 +247,7 @@ export function ProfileDialog({
           <p className="muted">{t("upload.help")}</p>
         </form>
       )}
+      {!cropping && <LoginMethods blocked={pending || changes.length > 0} />}
       {guard.confirm}
     </Sheet>
   );

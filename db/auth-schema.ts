@@ -9,6 +9,7 @@ export const user = sqliteTable(
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
     emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+    emailLinkVerified: integer("email_link_verified", { mode: "boolean" }).notNull().default(false),
     image: text("image"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
@@ -22,6 +23,7 @@ export const user = sqliteTable(
     firstTopicCounted: integer("first_topic_counted", { mode: "boolean" }).notNull().default(false),
   },
   (table) => [
+    uniqueIndex("user_normalized_email_idx").on(sql`lower(trim(${table.email}))`),
     check(
       "user_avatar_preset_check",
       sql`${table.avatarPreset} IS NULL OR ${table.avatarPreset} BETWEEN 0 AND ${sql.raw(String(AVATAR_PRESET_COUNT - 1))}`,
@@ -125,3 +127,13 @@ export const rateLimit = sqliteTable(
   },
   (table) => [index("rate_limit_expiry_idx").on(table.lastRequest)],
 );
+
+export const signupAcceptance = sqliteTable("signup_acceptance", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  acceptedAt: integer("accepted_at", { mode: "timestamp_ms" }).notNull(),
+  minimumAge: integer("minimum_age").notNull(),
+  termsVersion: text("terms_version").notNull(),
+  privacyVersion: text("privacy_version").notNull(),
+});
