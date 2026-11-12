@@ -143,6 +143,9 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
 }
 
 const STATUS_CONTEXT = "Trusted CI policy";
+// The ruleset also requires the `guard` job check. Owner comment runs report that check
+// on the default-branch commit, so mirror it on the PR head the run validated.
+const CHECK_NAME = "guard";
 
 // Both entry points run trusted code. The early workflow step binds the status
 // to a live API revision; run() rechecks it before and after inspecting Git data.
@@ -166,17 +169,36 @@ async function runWithStatus({ github, context }, expected, trustedSha = process
             ? "Validating current policy admission"
             : "Trusted policy validation failed",
     });
+  const check =
+    context.eventName !== "pull_request_target"
+      ? await github.rest.checks.create({
+          ...context.repo,
+          name: CHECK_NAME,
+          head_sha: expected.head.sha,
+          status: "in_progress",
+        })
+      : undefined;
+  const finish = async (state) => {
+    await status(state);
+    if (check)
+      await github.rest.checks.update({
+        ...context.repo,
+        check_run_id: check.data.id,
+        status: "completed",
+        conclusion: state,
+      });
+  };
   await status("pending");
   try {
     await run(
       { github, context: { repo: context.repo, payload: { ...context.payload, pull_request: expected } } },
       trustedSha,
     );
-    await status("success");
+    await finish("success");
   } catch (error) {
-    await status("failure");
+    await finish("failure");
     throw error;
   }
 }
 
-module.exports = { inspectChanges, validComment, snapshot, run, runWithStatus, STATUS_CONTEXT };
+module.exports = { inspectChanges, validComment, snapshot, run, runWithStatus, STATUS_CONTEXT, CHECK_NAME };

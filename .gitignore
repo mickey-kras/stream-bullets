@@ -64,7 +64,6 @@ yarn-error.log*
 
 __pycache__/
 
-# Shared graph; reports and tool environments stay local.
-/graphify-out/*
-!/graphify-out/graph.json
+# The graph is published to the graph branch. Local copies stay untracked.
+/graphify-out/
 /.graphify-venv/
