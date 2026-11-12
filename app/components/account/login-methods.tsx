@@ -2,8 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { authClient } from "../../auth-client";
 import { useShell } from "../../lib/shell";
 import { t } from "../../i18n";
-import { providerName } from "../shell/sign-in-dialog";
-import { SignIn } from "../shell/sign-in-dialog";
+import { providerName, SignIn } from "../shell/sign-in-dialog";
 import type { Provider } from "../../types";
 
 interface LoginAccount {

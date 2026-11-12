@@ -13,6 +13,7 @@ const errors: Readonly<Record<string, MessageId>> = {
   INVALID_DISPLAY_NAME: "signup.nameCorrection",
   ELIGIBILITY_REQUIRED: "signup.eligibility",
   reauth_required: "loginMethods.reauthenticate",
+  unable_to_link_account: "loginMethods.failed",
 };
 
 export function loader({ request, context }: LoaderFunctionArgs): { providers: Provider[]; error: MessageId | null } {

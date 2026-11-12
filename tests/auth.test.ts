@@ -1162,7 +1162,7 @@ describe("explicit login methods", () => {
       await env.DB.prepare("DELETE FROM session WHERE user_id=?").bind("link-stranger").run();
       const response: Response = await createAuth(env).handler(revoked);
       expect(new URL(response.headers.get("location") ?? "", env.APP_ORIGIN).searchParams.get("error")).toBe(
-        "reauth_required",
+        "unable_to_link_account",
       );
       expect(await env.DB.prepare("SELECT user_id FROM account WHERE account_id='owned-twitch'").first()).toEqual({
         user_id: "link-owner",

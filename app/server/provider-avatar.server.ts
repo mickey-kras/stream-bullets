@@ -35,7 +35,8 @@ export async function importProviderPhoto(
       userId,
       "avatar",
     );
-  } catch {
-    console.warn("provider_avatar_import_failed");
+  } catch (error: unknown) {
+    // Error messages can contain provider URLs. Log only a bounded failure category.
+    console.warn("provider_avatar_import_failed", error instanceof DOMException ? "network_or_timeout" : "import");
   }
 }
