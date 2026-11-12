@@ -9,6 +9,7 @@ import { clientIp } from "./client-ips";
  */
 /* The landing page and its WebGL station have their own keyboard checks in landing.spec.ts. */
 const ROUTES: readonly string[] = [
+  "/",
   "/streamers",
   "/@test_host",
   "/@test_host?view=polls",
@@ -72,6 +73,7 @@ for (const route of ROUTES) {
     await expect(skip).toBeFocused();
     await skip.press("Enter");
     await expect(page).toHaveURL(/#main-content$/);
+    await expect(page.getByRole("main")).toBeFocused();
   });
 }
 
@@ -154,3 +156,111 @@ test("the overlay control page enlarges a monitor and collapses Position and siz
   await expect(page.locator(".ov-layout-wrap")).toHaveAttribute("open", "");
   await close(owner);
 });
+
+for (const width of [1363, 390]) {
+  test(`language switching keeps the Ideas filter and restores focus at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 936 });
+    await page.goto("/@streambullets?view=topics&status=planned&dialog=language");
+    await page.getByRole("dialog").getByRole("button", { name: "Русский" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    await expect(page).toHaveURL(/\/@streambullets\?view=topics&status=planned$/);
+    const language = page.locator('a[href*="dialog=language"]:visible');
+    await expect(language).toBeFocused();
+    await language.press("Enter");
+    await page.getByRole("dialog").getByRole("button", { name: "English" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(language).toBeFocused();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Planned", exact: true })).toHaveAttribute("aria-current", "true");
+    await expect(page.getByRole("link", { name: "StreamBullets home", exact: true })).toHaveAttribute("href", "/");
+    await expect(page.getByRole("link", { name: "Ideas for StreamBullets", exact: true })).toHaveAttribute(
+      "href",
+      "/@streambullets",
+    );
+  });
+}
+
+for (const width of [1363, 390]) {
+  test(`account language switching restores the header opener at ${width}px`, async ({ browser }) => {
+    const viewer = await signedIn(browser, "prefsviewer", clientIp("a11y", width === 390 ? 175 : 176), {
+      viewport: { width, height: 936 },
+    });
+    const page = await newPage(viewer);
+    await page.goto("/@streambullets?view=topics&status=planned");
+    const avatar = page.locator(".account-menu-wrap > button.profile");
+    for (const [language, locale] of [
+      ["Русский", "ru"],
+      ["English", "en"],
+    ] as const) {
+      await avatar.click();
+      await page.locator('.account-menu a[href*="dialog=language"]').click();
+      await page.getByRole("dialog").getByRole("button", { name: language }).click();
+      await expect(page.locator("html")).toHaveAttribute("lang", locale);
+      await expect(page).toHaveURL(/status=planned$/);
+      await expect(avatar).toBeFocused();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+    }
+    const footerLanguage = page.locator('.site-footer a[href*="dialog=language"]:visible');
+    for (const [language, locale] of [
+      ["Русский", "ru"],
+      ["English", "en"],
+    ] as const) {
+      await footerLanguage.click();
+      await page.getByRole("dialog").getByRole("button", { name: language }).click();
+      await expect(page.locator("html")).toHaveAttribute("lang", locale);
+      await expect(footerLanguage).toBeFocused();
+    }
+    await close(viewer);
+  });
+}
+
+test("display dialog contains keyboard focus and restores its opener", async ({ page }) => {
+  await page.goto("/streamers");
+  const opener = page.getByRole("contentinfo").getByRole("link", { name: "Accessibility", exact: true });
+  await opener.focus();
+  await opener.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Accessibility & display" });
+  await expect(dialog).toBeVisible();
+  for (let index: number = 0; index < 35; index++) {
+    await page.keyboard.press("Tab");
+    await expect(dialog.locator(":focus")).toHaveCount(1);
+  }
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(opener).toBeFocused();
+  const outline = await opener.evaluate((link: HTMLElement): { style: string; width: number } => {
+    const style: CSSStyleDeclaration = getComputedStyle(link);
+    return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth) };
+  });
+  expect(outline.style).not.toBe("none");
+  expect(outline.width).toBeGreaterThanOrEqual(2);
+});
+
+for (const failure of ["read", "write"] as const) {
+  test(`blocked focus storage ${failure} does not break the page or language switching`, async ({ page }) => {
+    await page.addInitScript((mode: "read" | "write"): void => {
+      if (mode === "read") {
+        const getItem = Storage.prototype.getItem;
+        Storage.prototype.getItem = function (key: string): string | null {
+          if (key === "sb-language-focus") throw new DOMException("Blocked", "SecurityError");
+          return getItem.call(this, key);
+        };
+      } else {
+        const setItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function (key: string, value: string): void {
+          if (key === "sb-language-focus") throw new DOMException("Full", "QuotaExceededError");
+          setItem.call(this, key, value);
+        };
+      }
+    }, failure);
+    const errors: string[] = [];
+    page.on("pageerror", (error: Error) => errors.push(error.message));
+    await page.goto("/streamers");
+    await expect(page.getByRole("heading", { name: "Streamers", exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "Language: English" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Русский" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    await expect(page.getByRole("main")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+}

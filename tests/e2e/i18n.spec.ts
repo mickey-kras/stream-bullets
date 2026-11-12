@@ -47,10 +47,12 @@ test("the language switcher saves the choice and reloads in it", async ({ page, 
   await expect(page.locator("html")).toHaveAttribute("lang", "ru");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   expect((await context.cookies()).find((cookie) => cookie.name === "sb_locale")?.value).toBe("ru");
+  await expect(page.getByRole("link", { name: "Язык: Русский" })).toBeFocused();
   // Back to English through the same switcher.
   await page.getByRole("contentinfo").getByRole("link", { name: "Язык: Русский" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "English" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.getByRole("link", { name: "Language: English" })).toBeFocused();
 });
 
 test("a signed-in choice is saved to the account and wins over the cookie", async ({ browser }) => {

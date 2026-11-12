@@ -170,7 +170,14 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
                     to={row.to}
                     aria-current={row.current ? "page" : undefined}
                     aria-haspopup={row.dialog ? "dialog" : undefined}
-                    state={row.dialog ? ({ dialogFrom: pathname } satisfies DialogState) : undefined}
+                    state={
+                      row.dialog
+                        ? ({
+                            dialogFrom: pathname,
+                            languageOpener: row.dialog === "language" ? "account" : undefined,
+                          } satisfies DialogState)
+                        : undefined
+                    }
                     preventScrollReset={Boolean(row.dialog)}
                     onClick={() => setOpenAt(null)}
                   >

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { getLocale, LOCALE_NAMES, t, type Locale } from "../../i18n";
 import { paths } from "../../lib/shell";
@@ -23,6 +23,30 @@ export function SiteFooter(): ReactNode {
   const locale: Locale = getLocale();
   const languageLabel: string = t("language.current", { name: LOCALE_NAMES[locale] });
   const close = (): void => setDialog(null);
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("sb-language-focus") !== globalThis.location.href) return;
+    } catch {
+      return;
+    }
+    const frame: number = requestAnimationFrame(() => {
+      let fromAccount: boolean;
+      try {
+        fromAccount = sessionStorage.getItem("sb-language-opener") === "account";
+        sessionStorage.removeItem("sb-language-focus");
+        sessionStorage.removeItem("sb-language-opener");
+      } catch {
+        return;
+      }
+      const selector: HTMLElement | undefined = [
+        ...document.querySelectorAll<HTMLElement>(
+          fromAccount ? ".account-menu-wrap > button.profile" : '.site-footer a[href*="dialog=language"]',
+        ),
+      ].find((element: HTMLElement) => element.getClientRects().length > 0);
+      selector?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
   return (
     <footer className="site-footer">
       <nav aria-label={t("footer.nav")} className="footer-full">
