@@ -1,4 +1,5 @@
 {
+  "built_at_commit": "682995b9e9fa01a07ac8693f50ee66f989ecae4d",
   "directed": true,
   "edges": [
     {
@@ -112572,6 +112573,39 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L1",
+      "target": "docs_design_wasteland_overlays_readme_wasteland_overlay_mockups",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_mockups",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L13",
+      "target": "docs_design_wasteland_overlays_readme_status",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_mockups",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L6",
+      "target": "docs_design_wasteland_overlays_readme_files",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "docs_github_rulesets_readme",
       "source_file": "docs/github-rulesets/README.md",
       "source_location": "L1",
@@ -119659,10 +119693,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "b6dba3845af579f3c8252f53fa53e7c98a52e998b86a7eab584c1b38874146c3",
+    "content_sha256": "fa616f775e54f4108dfa2dd973af01a19fde47ddea1678a2ae37d8733ba99018",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "301e05100088c352d4be13954b5ef5cd20f8d27f5cded87273d23f7b828ca29d",
+    "source_sha256": "3581716ee43324a5824c666a58208b611aa0652128227b98ffe29d218644127b",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -150634,6 +150668,50 @@
       "norm_label": "read totals",
       "source_file": "docs/conversion-audit.md",
       "source_location": "L55"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme",
+      "label": "wasteland-overlays/README.md",
+      "node_kind": "page",
+      "norm_label": "wasteland-overlays/readme.md",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_files",
+      "label": "Files",
+      "node_kind": "heading",
+      "norm_label": "files",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L6"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_status",
+      "label": "Status",
+      "node_kind": "heading",
+      "norm_label": "status",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L13"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_wasteland_overlay_mockups",
+      "label": "Wasteland overlay mockups",
+      "node_kind": "heading",
+      "norm_label": "wasteland overlay mockups",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",
