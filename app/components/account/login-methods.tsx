@@ -60,7 +60,9 @@ export function LoginMethods({ blocked }: Readonly<{ blocked: boolean }>): React
     }
   }
   const configuredProviderIds: readonly string[] = configured;
-  const usableAccounts: LoginAccount[] = accounts.filter((account) => configuredProviderIds.includes(account.providerId));
+  const usableAccounts: LoginAccount[] = accounts.filter((account) =>
+    configuredProviderIds.includes(account.providerId),
+  );
   const providers: Provider[] = configured.filter((provider) =>
     usableAccounts.some((account) => account.providerId === provider),
   );

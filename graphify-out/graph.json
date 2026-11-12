@@ -1593,7 +1593,7 @@
       "relation": "calls",
       "source": "app_components_account_login_methods_loginmethods",
       "source_file": "app/components/account/login-methods.tsx",
-      "source_location": "L81",
+      "source_location": "L83",
       "target": "app_components_account_login_methods_loginmethods_change",
       "weight": 1.0
     },
@@ -1605,7 +1605,7 @@
       "relation": "calls",
       "source": "app_components_account_login_methods_loginmethods",
       "source_file": "app/components/account/login-methods.tsx",
-      "source_location": "L96",
+      "source_location": "L98",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -119486,10 +119486,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "83b21ad7ef7e420addf45bb3552df4fd6c870ebc4a9a9d54063b8c7a9cc655e5",
+    "content_sha256": "6a7eff505507c20b75d93e58318b87ead3f50d919d1f15454d86e7575cdf5eea",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "9f812e4d7b76b6319af990d1cbdb584f6863b9842fb3b7b343673774c619876e",
+    "source_sha256": "945cf33284b7147e78a6999b2eadf0c2b1e4845fa707afc46a9c64f9ed9e7306",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
