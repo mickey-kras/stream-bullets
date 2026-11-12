@@ -90,8 +90,16 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
   useEffect(() => {
     const root: HTMLDivElement | null = wrap.current;
     if (!open || !root) return;
+    // The panel stays mounted while hidden, so reset its scroll before focusing the first row.
+    if (panel.current) panel.current.scrollTop = 0;
     const first: HTMLElement | null | undefined = panel.current?.querySelector<HTMLElement>("a, button");
     (first ?? panel.current)?.focus({ preventScroll: true });
+    // The panel's top edge, so its max-height keeps it on screen (shell.css).
+    const fit = (): void => {
+      const menu: HTMLDivElement | null = panel.current;
+      if (menu) menu.style.setProperty("--menu-top", `${Math.max(0, menu.getBoundingClientRect().top)}px`);
+    };
+    fit();
     const outside = (event: PointerEvent): void => {
       if (!root.contains(event.target as Node)) setOpenAt(null);
     };
@@ -105,10 +113,12 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
       if (event.relatedTarget && !root.contains(event.relatedTarget as Node)) setOpenAt(null);
     };
     document.addEventListener("pointerdown", outside);
+    globalThis.addEventListener("resize", fit);
     root.addEventListener("keydown", onEscape);
     root.addEventListener("focusout", leave);
     return () => {
       document.removeEventListener("pointerdown", outside);
+      globalThis.removeEventListener("resize", fit);
       root.removeEventListener("keydown", onEscape);
       root.removeEventListener("focusout", leave);
     };

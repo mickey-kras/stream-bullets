@@ -11385,7 +11385,7 @@
       "relation": "calls",
       "source": "app_components_shell_account_menu_accountmenu",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L117",
+      "source_location": "L127",
       "target": "app_components_shell_sign_in_dialog_signinbutton",
       "weight": 1.0
     },
@@ -11397,7 +11397,7 @@
       "relation": "calls",
       "source": "app_components_shell_account_menu_accountmenu",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L129",
+      "source_location": "L139",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11409,7 +11409,7 @@
       "relation": "calls",
       "source": "app_components_shell_account_menu_accountmenu",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L145",
+      "source_location": "L155",
       "target": "app_components_ui_avatar_avatar",
       "weight": 1.0
     },
@@ -11421,7 +11421,7 @@
       "relation": "calls",
       "source": "app_components_shell_account_menu_accountmenu",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L157",
+      "source_location": "L167",
       "target": "app_components_streamer_page_banner_ownernotice",
       "weight": 1.0
     },
@@ -11433,7 +11433,7 @@
       "relation": "calls",
       "source": "app_components_shell_account_menu_accountmenu",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L165",
+      "source_location": "L175",
       "target": "app_components_shell_account_menu_accountmenurows",
       "weight": 1.0
     },
@@ -11445,7 +11445,7 @@
       "relation": "calls",
       "source": "app_components_shell_account_menu_accountmenu",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L185",
+      "source_location": "L195",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -11457,7 +11457,7 @@
       "relation": "calls",
       "source": "app_components_shell_account_menu_accountmenu",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L199",
+      "source_location": "L209",
       "target": "app_components_shell_account_menu_accountmenu_signout",
       "weight": 1.0
     },
@@ -11661,7 +11661,7 @@
       "relation": "calls",
       "source": "app_components_shell_directory_search_searchadornments",
       "source_file": "app/components/shell/directory-search.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11673,7 +11673,7 @@
       "relation": "calls",
       "source": "app_components_shell_directory_search_streamersearch",
       "source_file": "app/components/shell/directory-search.tsx",
-      "source_location": "L28",
+      "source_location": "L30",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11685,7 +11685,7 @@
       "relation": "calls",
       "source": "app_components_shell_directory_search_streamersearch",
       "source_file": "app/components/shell/directory-search.tsx",
-      "source_location": "L31",
+      "source_location": "L33",
       "target": "app_components_shell_directory_search_searchadornments",
       "weight": 1.0
     },
@@ -32709,7 +32709,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1011",
+      "source_location": "L1013",
       "target": "tests_auth_test_freshaccount",
       "weight": 1.0
     },
@@ -32721,7 +32721,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1091",
+      "source_location": "L1093",
       "target": "tests_auth_test_responseviewer",
       "weight": 1.0
     },
@@ -32733,7 +32733,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1123",
+      "source_location": "L1125",
       "target": "tests_auth_test_linkcallback",
       "weight": 1.0
     },
@@ -32745,7 +32745,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1244",
+      "source_location": "L1277",
       "target": "tests_auth_test_accountrequest",
       "weight": 1.0
     },
@@ -32829,7 +32829,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L752",
+      "source_location": "L754",
       "target": "tests_auth_test_answer",
       "weight": 1.0
     },
@@ -32841,7 +32841,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L757",
+      "source_location": "L759",
       "target": "tests_auth_test_instagram",
       "weight": 1.0
     },
@@ -32853,7 +32853,7 @@
       "relation": "calls",
       "source": "tests_auth_test_accountrequest",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L891",
+      "source_location": "L893",
       "target": "tests_auth_test_signedrequest",
       "weight": 1.0
     },
@@ -32865,7 +32865,7 @@
       "relation": "calls",
       "source": "tests_auth_test_accountrequest",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L895",
+      "source_location": "L897",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -32877,7 +32877,7 @@
       "relation": "calls",
       "source": "tests_auth_test_freshaccount",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L905",
+      "source_location": "L907",
       "target": "tests_auth_test_seedsession",
       "weight": 1.0
     },
@@ -32889,7 +32889,7 @@
       "relation": "calls",
       "source": "tests_auth_test_instagram",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L703",
+      "source_location": "L705",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -32901,7 +32901,7 @@
       "relation": "calls",
       "source": "tests_auth_test_linkcallback",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L916",
+      "source_location": "L918",
       "target": "tests_auth_test_accountrequest",
       "weight": 1.0
     },
@@ -32913,7 +32913,7 @@
       "relation": "calls",
       "source": "tests_auth_test_linkcallback",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L928",
+      "source_location": "L930",
       "target": "tests_auth_test_signedrequest",
       "weight": 1.0
     },
@@ -32937,7 +32937,7 @@
       "relation": "calls",
       "source": "tests_auth_test_responseviewer",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1386",
+      "source_location": "L1513",
       "target": "app_server_auth_server_getviewer",
       "weight": 1.0
     },
@@ -32949,7 +32949,7 @@
       "relation": "calls",
       "source": "tests_auth_test_responseviewer",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1386",
+      "source_location": "L1513",
       "target": "tests_auth_test_context",
       "weight": 1.0
     },
@@ -97869,7 +97869,7 @@
       "relation": "contains",
       "source": "app_components_shell_account_menu_accountmenu",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L120",
+      "source_location": "L130",
       "target": "app_components_shell_account_menu_accountmenu_signout",
       "weight": 1.0
     },
@@ -97990,7 +97990,7 @@
       "relation": "contains",
       "source": "app_components_shell_directory_search",
       "source_file": "app/components/shell/directory-search.tsx",
-      "source_location": "L23",
+      "source_location": "L25",
       "target": "app_components_shell_directory_search_streamersearch",
       "weight": 1.0
     },
@@ -113940,7 +113940,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1381",
+      "source_location": "L1508",
       "target": "tests_auth_test_responseviewer",
       "weight": 1.0
     },
@@ -114006,7 +114006,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L686",
+      "source_location": "L688",
       "target": "tests_auth_test_instagramconfig",
       "weight": 1.0
     },
@@ -114017,7 +114017,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L702",
+      "source_location": "L704",
       "target": "tests_auth_test_instagram",
       "weight": 1.0
     },
@@ -114028,7 +114028,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L720",
+      "source_location": "L722",
       "target": "tests_auth_test_answer",
       "weight": 1.0
     },
@@ -114039,7 +114039,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L885",
+      "source_location": "L887",
       "target": "tests_auth_test_accountrequest",
       "weight": 1.0
     },
@@ -114050,7 +114050,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L904",
+      "source_location": "L906",
       "target": "tests_auth_test_freshaccount",
       "weight": 1.0
     },
@@ -114061,7 +114061,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L915",
+      "source_location": "L917",
       "target": "tests_auth_test_linkcallback",
       "weight": 1.0
     },
@@ -120333,10 +120333,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f7ef3344de0f942e7a2d5213dafde8ffe2e833998344c648de2eb8cac680ef8c",
+    "content_sha256": "8cf0f8baa47010257247cfb1ed2395ec2dd3a07f481f56e7c4ec5cc644aabe46",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "3aaba1a9e8439a1536d72a24d0b418010f32c73d8ea38ee5310dafd6755a4ee2",
+    "source_sha256": "ef4aadbab7ae1195bd4f96f031a66e02ae3236c5cc9382e0557877901f1d9358",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -124310,7 +124310,7 @@
       "label": "InstagramConfig",
       "norm_label": "instagramconfig",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L686"
+      "source_location": "L688"
     },
     {
       "_callable": true,
@@ -128222,7 +128222,7 @@
             "callee": "stopPropagation",
             "file": "app/components/shell/account-menu.tsx",
             "lang": "typescript",
-            "line": "L100",
+            "line": "L108",
             "receiver_type": "FocusEvent"
           }
         ]
@@ -128240,7 +128240,7 @@
       "label": "signOut()",
       "norm_label": "signout()",
       "source_file": "app/components/shell/account-menu.tsx",
-      "source_location": "L120"
+      "source_location": "L130"
     },
     {
       "_callable": true,
@@ -128372,7 +128372,7 @@
       "label": "StreamerSearch()",
       "norm_label": "streamersearch()",
       "source_file": "app/components/shell/directory-search.tsx",
-      "source_location": "L23"
+      "source_location": "L25"
     },
     {
       "_callable": true,
@@ -138970,7 +138970,7 @@
       "label": "accountRequest()",
       "norm_label": "accountrequest()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L885"
+      "source_location": "L887"
     },
     {
       "_callable": true,
@@ -138981,7 +138981,7 @@
       "label": "answer()",
       "norm_label": "answer()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L720"
+      "source_location": "L722"
     },
     {
       "_callable": true,
@@ -139003,7 +139003,7 @@
       "label": "freshAccount()",
       "norm_label": "freshaccount()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L904"
+      "source_location": "L906"
     },
     {
       "_callable": true,
@@ -139014,7 +139014,7 @@
       "label": "instagram()",
       "norm_label": "instagram()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L702"
+      "source_location": "L704"
     },
     {
       "_callable": true,
@@ -139025,7 +139025,7 @@
       "label": "linkCallback()",
       "norm_label": "linkcallback()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L915"
+      "source_location": "L917"
     },
     {
       "_callable": true,
@@ -139047,7 +139047,7 @@
       "label": "responseViewer()",
       "norm_label": "responseviewer()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1381"
+      "source_location": "L1508"
     },
     {
       "_callable": true,

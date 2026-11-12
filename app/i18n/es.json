@@ -1108,7 +1108,6 @@
   "streamers.search": "Buscar",
   "streamers.searchLabel": "Buscar streamers",
   "streamers.searchPlaceholder": "Busca por nombre o @usuario…",
-  "streamers.searchSuffix": "streamers",
   "streamers.showing.one": "Mostrando {count} página",
   "streamers.showing.other": "Mostrando {count} páginas",
   "streamers.showingOf": "Mostrando {shown} de {total} páginas",

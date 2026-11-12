@@ -12,8 +12,10 @@ export function SearchAdornments(): ReactNode {
       </span>
       <button type="submit" className="search-button">
         <Icon name="search" size={18} />
-        <span className="search-text">{t("streamers.search")}</span>
-        <span className="sr-only"> {t("streamers.searchSuffix")}</span>
+        <span className="search-text" aria-hidden="true">
+          {t("streamers.search")}
+        </span>
+        <span className="sr-only">{t("streamers.searchLabel")}</span>
       </button>
     </>
   );
