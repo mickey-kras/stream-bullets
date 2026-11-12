@@ -242,6 +242,8 @@ Scanner tools use the immutable `PINNED` revision in the quality workflow. Candi
 
 The independent `policy` workflow uses `pull_request_target` and owner comment events. It executes trusted code from `github.workflow_sha` and reads candidate Git blobs as data. It compares protected files against that exact trusted revision. This guard activates after the workflow merges into the default branch.
 
+Graph updates and owner comments start this workflow on `main`. These runs also report the `guard` check on the PR head.
+
 Application dependency changes can accompany application code. They must use exact registry versions and preserve install settings. Type packages can change with their matching application dependency. Packages with commands, build and test tools, their dependency graphs, scripts, and CI controls still need policy approval.
 
 A PR with policy changes needs approval for its file tree, current base, and trusted workflow revision. Get the tree SHA with `git rev-parse HEAD^{tree}`. The repository owner can post this exact comment:

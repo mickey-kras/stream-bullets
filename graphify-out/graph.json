@@ -110386,7 +110386,7 @@
       "relation": "contains",
       "source": "readme_quality_gates",
       "source_file": "README.md",
-      "source_location": "L280",
+      "source_location": "L282",
       "target": "readme_board_refreshes_and_public_image_cache",
       "weight": 1.0
     },
@@ -116988,10 +116988,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "55533cfc6d5ad5a94d9eb742013f3b21b843758ee29e1c1959d6f915d3637a8d",
+    "content_sha256": "f65bbfb3dfdb3dee23d1c8f7f6ba69f27733b67e2378ee8be86c0c7ae23575e8",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "22b7363b2ddb06da449cb24455042a6f47461f6fde984bb9bdb72f8592d75f48",
+    "source_sha256": "91eff7d8168c31e37b2364039dc7d2744b50c0eef09c3a0ec770882b004a90f2",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -147434,7 +147434,7 @@
       "node_kind": "heading",
       "norm_label": "board refreshes and public image cache",
       "source_file": "README.md",
-      "source_location": "L280"
+      "source_location": "L282"
     },
     {
       "_origin": "ast",
