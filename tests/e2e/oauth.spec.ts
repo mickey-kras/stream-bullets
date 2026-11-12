@@ -227,7 +227,9 @@ test("invalid signup names show correction guidance before OAuth starts", async 
     const page = await newPage(context);
     await page.goto(`${origin}/sign-in`);
     await page.getByLabel("Display name (optional; used for new accounts)").fill("Alice\u2028Bob");
-    await page.getByRole("checkbox", { name: /I confirm/ }).check();
+    const acceptance = page.getByRole("checkbox", { name: /I confirm/ });
+    await expect(acceptance).toBeInViewport();
+    await acceptance.check();
     await page.getByRole("button", { name: "Continue with Twitch" }).click();
     await expect(page.getByRole("alert")).toContainText("Enter a display name below, then try again.");
     expect(new URL(page.url()).pathname).toBe("/sign-in");

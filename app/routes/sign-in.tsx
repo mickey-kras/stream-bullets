@@ -27,11 +27,13 @@ export function loader({ request, context }: LoaderFunctionArgs): { providers: P
 export default function SignInPage(): ReactNode {
   const { providers, error } = useLoaderData<typeof loader>();
   return (
-    <main className="page">
-      <h1>{t("signIn.title")}</h1>
-      {error && <p role="alert">{t(error)}</p>}
-      <SignIn providers={providers} callbackURL="/settings" />
-      <a href={`mailto:${contactEmails.support}`}>{contactEmails.support}</a>
+    <main className="page-panel settings-page" id="main-content">
+      <div className="page-column">
+        <h1>{t("signIn.title")}</h1>
+        {error && <p role="alert">{t(error)}</p>}
+        <SignIn providers={providers} callbackURL="/settings" />
+        <a href={`mailto:${contactEmails.support}`}>{contactEmails.support}</a>
+      </div>
     </main>
   );
 }
