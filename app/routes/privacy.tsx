@@ -277,6 +277,10 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           only the decision, not a copy of their text.
         </li>
         <li>
+          <strong>Request and error logs</strong> stay in Cloudflare Workers Logs for up to 7 days. Then Cloudflare
+          deletes them.
+        </li>
+        <li>
           <strong>Backups:</strong> the database keeps point-in-time recovery history for up to 30 days. Deleted data
           leaves that history within 30 days. We do not restore deleted accounts from it.
         </li>
@@ -457,7 +461,12 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
         <li>Provider sign-in tokens are encrypted in the database.</li>
         <li>Owner and permission checks run on the server. Only administrators can review applications and reports.</li>
         <li>Rate limits slow down abuse. The general limiter keys on a one-way hash of your IP address.</li>
-        <li>We do not log request bodies or identities, and platform logging is off by default.</li>
+        <li>
+          Cloudflare Workers Logs record each request: the method and URL, the response status, the timing, the request
+          headers, and the request data that Cloudflare adds, such as the Ray ID and the approximate location. They also
+          record error details: the error class, the code location, and the Ray ID. Our error logs do not hold request
+          bodies or the content you post.
+        </li>
       </ul>
     ),
   },
