@@ -442,10 +442,10 @@ export async function createStation(
   const lifecycle = new AbortController();
   const listen = { signal: lifecycle.signal };
   const reduced = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
-  const compact = globalThis.matchMedia("(max-width: 700px)").matches;
-  const k = createKit(compact, options.family ?? "Oswald, sans-serif");
+  const compact: MediaQueryList = globalThis.matchMedia("(max-width: 700px)");
+  const k = createKit(compact.matches, options.family ?? "Oswald, sans-serif");
   await pause();
-  const shots: Record<StationView, Shot> = compact ? { ...SHOTS, hero: PHONE_HERO } : SHOTS;
+  const shots: Record<StationView, Shot> = { ...SHOTS, hero: compact.matches ? PHONE_HERO : SHOTS.hero };
   const state = {
     playing: !reduced.matches,
     dragging: false,
@@ -459,7 +459,7 @@ export async function createStation(
     shadowTilt: Number.NaN,
   };
 
-  const renderer = createRenderer(wrap, compact);
+  const renderer = createRenderer(wrap, compact.matches);
   const scene = new THREE.Scene();
   scene.background = T.backdrop();
   scene.fog = new THREE.Fog("#123a3c", 42, 95);
@@ -470,7 +470,7 @@ export async function createStation(
   const station = new THREE.Group();
   scene.add(station);
   const { tilt, signs } = await buildModel(k, scene, station);
-  const key = addLights(scene, compact);
+  const key = addLights(scene, compact.matches);
   const { composer, bloom, finish } = createPost(renderer, scene, camera);
   // Compile shaders off the critical path where the browser can (parallel shader compile), instead of
   // stalling the first frame.
@@ -502,10 +502,11 @@ export async function createStation(
     renderer.setSize(rig.width, rig.height);
     composer.setSize(rig.width, rig.height);
     bloom.resolution.set(rig.width / 2, rig.height / 2);
-    if (compact) {
-      shots.hero = fitPhone(camera.fov, (options.overlap?.() ?? 0) / rig.height);
-      // Re-frame straight away unless the person has turned the station themselves.
-      if (state.view === "hero" && !state.dragging && state.idleSince < 0) place(shots.hero);
+    shots.hero = compact.matches ? fitPhone(camera.fov, (options.overlap?.() ?? 0) / rig.height) : SHOTS.hero;
+    // Re-frame on either side of the breakpoint unless the person has turned the station themselves.
+    if (state.view === "hero" && !state.dragging && state.idleSince < 0) {
+      rig.goal = shots.hero;
+      place(shots.hero);
     }
     applyShift();
     state.dirty = true;

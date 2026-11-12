@@ -5,6 +5,7 @@ import { createStation, type StationView } from "../app/components/station/scene
 
 const gpu = vi.hoisted(() => ({
   render: vi.fn(),
+  camera: null as THREE.PerspectiveCamera | null,
   dispose: vi.fn(),
   remove: vi.fn(),
   setSize: vi.fn(),
@@ -51,7 +52,13 @@ vi.mock("three/addons/postprocessing/EffectComposer.js", () => ({
     dispose = vi.fn();
   },
 }));
-vi.mock("three/addons/postprocessing/RenderPass.js", () => ({ RenderPass: class {} }));
+vi.mock("three/addons/postprocessing/RenderPass.js", () => ({
+  RenderPass: class {
+    constructor(_scene: THREE.Scene, camera: THREE.PerspectiveCamera) {
+      gpu.camera = camera;
+    }
+  },
+}));
 vi.mock("three/addons/postprocessing/OutputPass.js", () => ({ OutputPass: class {} }));
 vi.mock("three/addons/postprocessing/UnrealBloomPass.js", () => ({
   UnrealBloomPass: class {
@@ -74,7 +81,10 @@ it.each([true, false])(
   async (reduced: boolean): Promise<void> => {
     installRecordingCanvas();
     const media = Object.assign(new EventTarget(), { matches: reduced });
-    vi.stubGlobal("matchMedia", (): EventTarget => media);
+    const compact = Object.assign(new EventTarget(), { matches: reduced });
+    vi.stubGlobal("matchMedia", (query: string): EventTarget =>
+      query === "(max-width: 700px)" ? compact : media,
+    );
     vi.stubGlobal("devicePixelRatio", 2);
     let frame: FrameRequestCallback = (): void => {
       throw new Error("Animation not scheduled");
@@ -87,10 +97,13 @@ it.each([true, false])(
     vi.stubGlobal("cancelAnimationFrame", cancel);
     const disconnect = vi.fn();
     let visible: (entries: Array<{ isIntersecting: boolean }>) => void = (): void => {};
+    let resize: () => void = (): void => {};
     vi.stubGlobal(
       "ResizeObserver",
       class {
-        constructor(private readonly callback: () => void) {}
+        constructor(private readonly callback: () => void) {
+          resize = callback;
+        }
         observe(): void {
           this.callback();
         }
@@ -121,6 +134,17 @@ it.each([true, false])(
     );
     expect(host.appendChild).toHaveBeenCalledOnce();
     expect(gpu.setSize).toHaveBeenCalledWith(1200, 800);
+    const initialPosition = gpu.camera!.position.clone();
+    compact.matches = !compact.matches;
+    host.clientWidth = 390;
+    host.clientHeight = 700;
+    resize();
+    expect(gpu.camera!.position.equals(initialPosition)).toBe(false);
+    compact.matches = !compact.matches;
+    host.clientWidth = 1200;
+    host.clientHeight = 800;
+    resize();
+    expect(gpu.camera!.position.distanceTo(initialPosition)).toBeLessThan(0.00001);
     const pointer = (pointerType: string): Event =>
       Object.assign(new Event("pointermove"), { pointerType, clientX: 900, clientY: 200 });
     host.dispatchEvent(pointer("touch"));
