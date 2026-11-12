@@ -154,29 +154,35 @@ function reliableProviderEmail(provider: string | undefined, profile: unknown): 
   return null;
 }
 
+async function addSignInContext(
+  additionalData: { acceptance?: unknown; displayName?: unknown } | null | undefined,
+): Promise<void> {
+  const acceptance = z
+    .object({
+      accepted: z.literal(true),
+      minimumAge: z.literal(signupPolicy.minimumAge),
+      termsVersion: z.literal(signupPolicy.termsVersion),
+      privacyVersion: z.literal(signupPolicy.privacyVersion),
+    })
+    .safeParse(additionalData?.acceptance);
+  if (acceptance.success) await addOAuthServerContext({ acceptedAt: Date.now(), ...signupPolicy });
+  const displayName: unknown = additionalData?.displayName;
+  if (displayName !== undefined) {
+    const parsed = displayNameSchema.safeParse(displayName);
+    if (!parsed.success)
+      throw new APIError("BAD_REQUEST", {
+        code: "INVALID_DISPLAY_NAME",
+        message: "Enter a display name with 1 to 40 characters on one line.",
+      });
+    await addOAuthServerContext({ displayName: parsed.data });
+  }
+}
+
 function authRequestHooks(env: AppEnv, origin: string): NonNullable<BetterAuthOptions["hooks"]> {
   return {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === "/sign-in/social" || ctx.path === "/sign-in/oauth2") {
-        const acceptance = z
-          .object({
-            accepted: z.literal(true),
-            minimumAge: z.literal(signupPolicy.minimumAge),
-            termsVersion: z.literal(signupPolicy.termsVersion),
-            privacyVersion: z.literal(signupPolicy.privacyVersion),
-          })
-          .safeParse(ctx.body?.additionalData?.acceptance);
-        if (acceptance.success) await addOAuthServerContext({ acceptedAt: Date.now(), ...signupPolicy });
-        const displayName: unknown = ctx.body?.additionalData?.displayName;
-        if (displayName !== undefined) {
-          const parsed = displayNameSchema.safeParse(displayName);
-          if (!parsed.success)
-            throw new APIError("BAD_REQUEST", {
-              code: "INVALID_DISPLAY_NAME",
-              message: "Enter a display name with 1 to 40 characters on one line.",
-            });
-          await addOAuthServerContext({ displayName: parsed.data });
-        }
+        await addSignInContext(ctx.body?.additionalData);
       }
       if (ctx.path !== "/link-social" && ctx.path !== "/unlink-account") return;
       if (ctx.headers?.get("origin") !== origin)
