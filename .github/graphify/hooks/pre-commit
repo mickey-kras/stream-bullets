@@ -1,0 +1,8 @@
+#!/bin/sh
+# graphify: rebuild graphify-out/graph.json and commit it with the code that changed it.
+if [ "${GRAPHIFY_SKIP_HOOK:-0}" != 1 ] &&
+	! git diff --cached --quiet -- . ':!graphify-out/graph.json'; then
+	python=$(git config --get graphify.python || echo python3)
+	{ PYTHONHASHSEED=0 GRAPHIFY_BACKEND=none "$python" .github/graphify/snapshot.py &&
+		git add graphify-out/graph.json; } || exit 1
+fi

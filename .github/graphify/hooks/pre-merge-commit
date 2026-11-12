@@ -1,0 +1,9 @@
+#!/bin/sh
+# Git does not run pre-commit for a merge without conflicts. Rebuild the graph here too.
+before=$(git write-tree)
+.github/graphify/hooks/pre-commit || exit 1
+# A merge keeps the tree it computed before this hook. Stop so that the next commit includes the graph.
+if [ "$before" != "$(git write-tree)" ]; then
+	echo 'Graph rebuilt and staged. Run git commit to finish this merge.' >&2
+	exit 1
+fi
