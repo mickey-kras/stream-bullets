@@ -154,9 +154,7 @@ export function CommunityView({
     const [card] = next.splice(index, 1);
     next.splice(target, 0, card);
     setAnnouncement(t("community.moved", { title: card.title, n: target + 1, count: next.length }));
-    save(next).catch((error_: unknown) =>
-      toast(errorMessage(error_), { tone: "error" }),
-    );
+    save(next).catch((error_: unknown) => toast(errorMessage(error_), { tone: "error" }));
   }
 
   function remove(card: CommunityCard): void {
@@ -169,9 +167,7 @@ export function CommunityView({
           action: { label: t("common.undo"), onClick: () => void save(before, t("community.restored")) },
         }),
       )
-      .catch((error_: unknown) =>
-        toast(errorMessage(error_), { tone: "error" }),
-      );
+      .catch((error_: unknown) => toast(errorMessage(error_), { tone: "error" }));
   }
 
   return (

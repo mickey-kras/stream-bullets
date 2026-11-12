@@ -201,7 +201,8 @@ export function planEvents(input: EventInput, now: number, seriesId: string | nu
   const repeatUntil = until ? zonedTime(addDays(until, 1), 0, 0, input.tz) - 1 : null;
   const rule: SeriesRule = { first, hour, minute, zone: input.tz, days, until };
   const starts = expandSeries(rule, Math.max(now + SERIES_HORIZON_MS, start + 1));
-  if (starts.length === 0) throw new HttpError(400, "No stream falls on the chosen days before the end date.", "schedule_no_occurrences");
+  if (starts.length === 0)
+    throw new HttpError(400, "No stream falls on the chosen days before the end date.", "schedule_no_occurrences");
   const done = seriesDone(rule, starts.at(-1)!);
   return {
     starts,

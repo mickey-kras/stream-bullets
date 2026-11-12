@@ -19,7 +19,8 @@ export function isImageKind(value: string): value is ImageKind {
 }
 
 export function validateImage(bytes: Uint8Array, contentType: string | null): string {
-  if (!bytes.length || bytes.length > MAX_IMAGE_BYTES) throw new HttpError(413, "Choose an image up to 5 MB.", "invalid_image");
+  if (!bytes.length || bytes.length > MAX_IMAGE_BYTES)
+    throw new HttpError(413, "Choose an image up to 5 MB.", "invalid_image");
   let dimensions: ReturnType<typeof imageSize>;
   try {
     dimensions = imageSize(bytes);

@@ -26,7 +26,8 @@ export function switchTemplate(body: string, from: IdeaCategory, to: IdeaCategor
 
 /** Only these two browser details are appended to the public report. */
 export function environment(): string {
-  const browser = /(Edg|Firefox|Chrome|Safari)\/[\d.]+/.exec(navigator.userAgent)?.[0] ?? t("ideas.form.unknownBrowser");
+  const browser =
+    /(Edg|Firefox|Chrome|Safari)\/[\d.]+/.exec(navigator.userAgent)?.[0] ?? t("ideas.form.unknownBrowser");
   return t("ideas.form.environment", { browser, width: screen.width, height: screen.height });
 }
 
@@ -57,7 +58,10 @@ export function IdeaDialog({
 
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    if (category === "bug" && (isUntouchedTemplate(body) || body.trimEnd().endsWith(BUG_TEMPLATES[getLocale()].trim()))) {
+    if (
+      category === "bug" &&
+      (isUntouchedTemplate(body) || body.trimEnd().endsWith(BUG_TEMPLATES[getLocale()].trim()))
+    ) {
       setError(t("ideas.form.fillTemplate"));
       return;
     }

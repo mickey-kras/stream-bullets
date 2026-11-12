@@ -69,7 +69,7 @@ const statusMessages: Readonly<Partial<Record<number, MessageId>>> = {
   404: "error.notFoundBody",
   409: "error.conflict",
   413: "error.tooLarge",
-  415: "upload.invalid",
+  415: "error.invalid",
   422: "error.invalid",
   429: "error.rateLimit",
 };

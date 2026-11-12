@@ -3,8 +3,10 @@
 ## Scope and tone
 
 System UI uses the active locale. Brand names, handles, and user content stay unchanged.
+
 Use direct instructions. Russian and Ukrainian use polite plural address throughout.
-German uses `du`; French uses `vous`. Spanish and Brazilian Portuguese use familiar, direct instructions.
+German uses `du`. French uses `vous`. Spanish and Brazilian Portuguese use familiar, direct instructions.
+
 Idea status labels agree with the word for idea where the language requires gender agreement.
 A like or dislike is a reaction. A vote selects one poll option. These actions are distinct.
 
@@ -25,8 +27,8 @@ A like or dislike is a reaction. A vote selects one poll option. These actions a
 | ja | 話題 | アイデア | アンケート | 票 | いいね | よくないね | コメント | 配信者 | コミュニティ |
 
 Chinese uses 投票 for the poll and the act of voting. Counts use 票.
-English product vocabulary is retained where it is established in the target locale.
-Translate labels in context; do not replace words in user content.
+Keep English product terms that the target locale commonly uses.
+Translate labels in context. Do not replace words in user content.
 
 ## Roadmap statuses
 
@@ -51,12 +53,14 @@ Translate labels in context; do not replace words in user content.
 
 Bug reports are public ideas. The optional metadata adds browser version and screen size.
 It does not add the page URL, query string, fragment, screenshot, cookies, or account fields.
-The typed report text is not automatically redacted. Users must review it before posting.
+
+The app does not redact report text. Users must review it before posting.
 Bug templates exist for every locale. The server rejects an untouched template from any locale.
 
 API response messages remain English for compatibility. Non-English UI translates known error codes first.
 This includes handle conflicts, empty bug templates, image formats, schedule dates, and security-key actions.
-Unknown codes use translated HTTP status guidance. Internal validation details are not displayed in other languages.
+
+Unknown codes use translated HTTP status guidance. Other languages do not show internal validation details.
 Status and machine-readable error codes remain available to callers.
 Schedule, community, and admin screens use the same error formatter as other forms.
 
@@ -71,14 +75,15 @@ Do not treat translated UI notices or this glossary as translations of legal dis
 Catalog checks cover keys, placeholders, and integer plural categories.
 Context tests cover bug templates, error fallback, mixed-script draft text, and counts.
 Browser checks cover official labels, narrow layouts, and language changes with filters and fragments.
-Canonical URLs retain the existing SEO behavior; locale selection does not add a URL prefix.
+
+Canonical URLs keep the existing SEO behavior. Locale selection does not add a URL prefix.
 Dates and counts use the active locale through `Intl`.
 
 The bundled fonts cover Latin and Cyrillic. CJK and Devanagari depend on system font fallback.
 A browser test on one operating system cannot certify glyph coverage on all supported devices.
-Review Hindi shaping and Chinese/Japanese glyphs on Windows, macOS, Android, and iOS before release.
+Review Hindi shaping and Chinese and Japanese glyphs on Windows, macOS, Android, and iOS before release.
 Review long mixed-script user names at enlarged text settings on those platforms.
 
-Native review is still needed for Hindi status wording, Japanese participation headlines, and Chinese poll terminology.
+Native speakers must review Hindi status wording, Japanese participation headlines, and Chinese poll terminology.
 Also confirm regional tone in Spanish, Brazilian Portuguese, and French, including feminine idea status labels.
 These changes are source-based corrections, not a claim of native-speaker certification.
