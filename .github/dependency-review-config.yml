@@ -1,7 +1,6 @@
-# Vulnerabilities block updates; license obligations depend on how code is used.
-# Shipped dependencies are gated by CI instead: THIRD_PARTY_NOTICES.md must match the runtime dependency closure
-# (scripts/third-party-notices.ts --check), so every license change shows up in the PR diff for the review in
-# SECURITY.md. Build tools (for example CC-BY-4.0 caniuse-lite, MPL-2.0 lightningcss) do not ship.
+# Block vulnerabilities here. Review licenses under SECURITY.md.
+# CI checks runtime notices with scripts/third-party-notices.ts --check.
+# Build tools, including caniuse-lite and lightningcss, do not ship.
 fail-on-severity: high
 vulnerability-check: true
 license-check: false

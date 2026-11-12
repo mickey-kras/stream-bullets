@@ -2,7 +2,7 @@ import { useLayoutEffect, useEffect, type RefObject } from "react";
 
 const useIsomorphicLayoutEffect = typeof document === "undefined" ? useEffect : useLayoutEffect;
 
-/** True when the header's tabs would be clipped or would touch the brand or the actions on one row. */
+// Detect tab clipping or collisions with brand/actions.
 export function headerOverflows(header: HTMLElement): boolean {
   const nav: HTMLElement | null = header.querySelector(":scope > nav");
   if (!nav) return false;
@@ -29,10 +29,7 @@ export function headerOverflows(header: HTMLElement): boolean {
   return (brandRight !== null && first.left < brandRight + 4) || (endLeft !== null && last.right > endLeft - 4);
 }
 
-/**
- * Puts the header's tabs on a second row (`header-stacked`) whenever one row would clip a label or crowd the
- * brand or the actions: at any width, text size or language. Runs on mount, on resize and when fonts load.
- */
+// Stack tabs when one row would clip or crowd them. Recheck on mount, resize and font load.
 export function useFitHeader(header: RefObject<HTMLElement | null>): void {
   useIsomorphicLayoutEffect(() => {
     if (header.current) fitHeader(header.current);

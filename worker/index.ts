@@ -21,13 +21,12 @@ import { scheduleCalendar, topUpSeries } from "../app/server/schedule.server";
 
 export { PollRoom } from "../app/server/poll-room";
 
-/** The hex SHA-256 of a string. */
 async function sha256(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(bytes), (byte: number) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-/** The key a visitor is counted by: the hashed IPv4 address or IPv6 /64 (an IPv4-mapped address counts as IPv4). */
+// Hash an IPv4 address or IPv6 /64; IPv4-mapped IPv6 counts as IPv4.
 async function clientKey(request: Request): Promise<string> {
   return sha256(visitorPrefix(request.headers.get("CF-Connecting-IP") ?? "local"));
 }
@@ -38,7 +37,7 @@ async function calendarResponse(request: Request, env: AppEnv, handle: string, o
   if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
   queryParams(request, []);
   const streamer = await getStreamer(env, handle);
-  // Suspended pages have no public calendar, the owner's included.
+  // Suspension blocks calendars, including the owner's.
   if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
   const body = await scheduleCalendar(env, streamer, origin);
   return new Response(request.method === "HEAD" ? null : body, {
@@ -63,10 +62,9 @@ async function liveResponse(
   if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
     throw new HttpError(426, "Use a WebSocket connection.");
   const streamer = await getStreamer(env, handle);
-  // Suspended pages refuse live connections, the owner's included.
+  // Suspension blocks live connections, including the owner's.
   if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
-  // The room trusts only these headers for who taps in a Mash Battle and who owns the page; a client-sent copy
-  // never reaches it.
+  // Overwrite client identity headers before forwarding to the room.
   const viewer = await getViewer(request, { env, nonce, responseHeaders });
   const headers = new Headers({
     Upgrade: "websocket",
@@ -74,21 +72,18 @@ async function liveResponse(
   });
   if (viewer) headers.set("X-SB-User", viewer.id);
   if (viewer?.id === streamer.ownerId) headers.set("X-SB-Owner", "1");
-  // A wrong or revoked overlay key is no error: the OBS source then joins like any signed-out viewer.
+  // Invalid/revoked keys join as signed-out viewers.
   else if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
   const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
   return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
 }
 
 export default {
-  /**
-   * The hourly jobs run side by side, so a failed cleanup never skips the schedule top-up. Each failure is logged;
-   * the run then throws, so the Cron Trigger is recorded as failed and an alert on failed cron runs fires.
-   */
+  // Run hourly jobs independently. Log each failure, then throw so cron failure alerts fire.
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
     const jobs: Record<string, (env: AppEnv, now: number) => Promise<unknown>> = {
       cleanup: cleanExpiredData,
-      // Weekly series are written 12 weeks ahead; keep them topped up.
+      // Keep weekly series 12 weeks ahead.
       schedule_top_up: topUpSeries,
     };
     const names: string[] = Object.keys(jobs);
@@ -100,7 +95,7 @@ export default {
       logError(`cron_${names[index]}_failed`, result.reason);
     }
     if (failed.length > 0) throw new Error(`Cron jobs failed: ${failed.join(", ")}`);
-    // A dead man's switch: the monitor alerts when this ping stops, which also catches a cron that never ran.
+    // Heartbeat alerts also detect cron jobs that never run.
     if (env.CRON_HEARTBEAT_URL) {
       const ping = await fetch(env.CRON_HEARTBEAT_URL, { method: "POST" });
       if (!ping.ok) console.error("cron_heartbeat_failed", { status: ping.status });

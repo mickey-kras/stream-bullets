@@ -364,7 +364,7 @@ describe("owned image storage", () => {
     expect((await serveImage(env, "background/viewer", "GET")).status).toBe(200);
     const avatarKey = await imageStorageKey(env, "viewer", "avatar");
     const backgroundKey = await imageStorageKey(env, "viewer", "background");
-    // Simulate an account deletion whose R2 cleanup failed: the rows are gone, the objects remain.
+    // Simulate failed R2 cleanup after account deletion: rows gone, objects retained.
     await env.DB.prepare("DELETE FROM user WHERE id=?").bind("viewer").run();
     expect(await env.IMAGES.head(avatarKey)).not.toBeNull();
     expect(await env.IMAGES.head(backgroundKey)).not.toBeNull();

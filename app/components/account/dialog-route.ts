@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate, type Location } from "react-router";
 
-/** The account dialogs (item 17), Language and Accessibility & display. Each opens as `?dialog=<name>`. */
+// Account, language and display dialogs use ?dialog=<name>.
 export const ACCOUNT_DIALOGS = ["profile", "host", "data", "page", "language", "a11y"] as const;
 export type AccountDialogName = (typeof ACCOUNT_DIALOGS)[number];
 
@@ -9,7 +9,7 @@ export function isAccountDialog(value: string | null): value is AccountDialogNam
   return (ACCOUNT_DIALOGS as readonly (string | null)[]).includes(value);
 }
 
-/** The current URL with `?dialog=` set (or removed with null), keeping every other parameter and the hash. */
+// Set/remove dialog while preserving other parameters and hash.
 export function dialogHref(
   location: Pick<Location, "pathname" | "search" | "hash">,
   name: AccountDialogName | null,
@@ -22,16 +22,13 @@ export function dialogHref(
   return `${location.pathname}${query}${location.hash}`;
 }
 
-/** Marks a dialog opened from inside the app, so closing it can step back instead of adding history. */
+// Mark in-app dialogs so closure navigates back.
 export interface DialogState {
   dialogFrom?: string;
   languageOpener?: "account";
 }
 
-/**
- * The open account dialog and how to close it. Opening pushes a history entry, so the browser's Back closes
- * the dialog; closing an in-app dialog goes back, and closing one that came with the URL replaces it.
- */
+// Opening pushes history. Closing in-app dialogs goes back; closing URL-provided dialogs replaces the entry.
 export function useAccountDialog(): { name: AccountDialogName | null; close: () => void } {
   const location = useLocation();
   const navigate = useNavigate();
@@ -44,9 +41,7 @@ export function useAccountDialog(): { name: AccountDialogName | null; close: () 
     if (fromApp) navigate(-1);
     else navigate(dialogHref(location, null), { replace: true, preventScrollReset: true });
   }, [fromApp, location, navigate]);
-  // The dialog unmounts with the route change, so focus can land on the page body. Once the route without the
-  // dialog has rendered, give focus back to the account menu's avatar button, which the account dialogs open from.
-  // An effect, not a timer: the route change can take any time.
+  // Restore avatar focus after route rendering, not a timer: unmount can otherwise leave focus on body.
   useEffect((): void => {
     if (name !== null || !closing.current) return;
     closing.current = false;

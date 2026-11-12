@@ -18,9 +18,9 @@ import { adminPerson, adminPicture, validPreset } from "./moderation.server";
 import { resolveOpenReports, type ReportResult } from "./reports.server";
 import type { AdminSession } from "./stepup.server";
 
-/* Content reports grouped by streamer page, then de-duplicated by reported item (item 27). */
+// Content reports grouped by streamer page, then de-duplicated by reported item.
 
-/** Keyset cursor over the group order: most open reports, then newest report, then page id. */
+// Keyset cursor over the group order: most open reports, then newest report, then page id.
 const GROUP_CURSOR = /^(\d{1,9})\.(\d{1,16})\.([0-9a-f-]{36})$/u;
 
 export const reportGroupQuerySchema = z
@@ -36,7 +36,7 @@ export const reportGroupQuerySchema = z
   })
   .strict();
 
-/** Keyset cursor over the item order: open first, then newest report, then kind and id. */
+// Keyset cursor over the item order: open first, then newest report, then kind and id.
 const CURSOR = /^([01])\.(\d{1,16})\.(entry|comment)\.([0-9a-f-]{36})$/u;
 
 export const reportItemQuerySchema = z
@@ -70,7 +70,7 @@ function parsed<T>(schema: z.ZodType<T>, value: unknown): T {
   return result.data;
 }
 
-/** SQL for the status filter. Only these three constant strings reach the query. */
+// SQL for the status filter. Only these three constant strings reach the query.
 function statusFilter(filter: ReportGroupFilter): string {
   if (filter === "open") return "r.status = 'open'";
   if (filter === "resolved") return "r.status <> 'open'";
@@ -113,10 +113,8 @@ function groupStreamer(row: StreamerColumns): ReportGroup["streamer"] {
   };
 }
 
-/**
- * One card per streamer page: counts, newest report and top reasons. Pages with most open reports come first,
- * `GROUP_PAGE_SIZE` at a time; `query` matches the page handle or name. Counts cover every report in the filter.
- */
+// Page cards: counts, newest report, and top reasons. Order by open-report count; page with `GROUP_PAGE_SIZE`;
+// search handle/name. Counts cover the full filter.
 export async function listReportGroups(
   env: AppEnv,
   adminId: string,
@@ -248,11 +246,8 @@ function itemValue(
   };
 }
 
-/**
- * The reports on one page, de-duplicated by item: one row per topic, poll or comment ("Reported by N people"),
- * items with an open report first, then by newest report. Pages hold `ITEM_PAGE_SIZE` items; counts, reasons and
- * status cover every report in the filter, while each item lists only its newest `ITEM_REPORT_LIMIT` reports.
- */
+// Deduplicate reports per item. Order open items first, then newest report; page with `ITEM_PAGE_SIZE`.
+// Counts/reasons/status cover all filtered reports; details keep only `ITEM_REPORT_LIMIT` newest reports.
 export async function listReportItems(
   env: AppEnv,
   adminId: string,
@@ -342,10 +337,8 @@ export async function listReportItems(
   };
 }
 
-/**
- * Resolves in bulk: every open report about one item (remove or dismiss), or every open report on one page
- * (dismiss only: content is never removed in bulk). Each decision writes one audit row.
- */
+// Resolve all open item reports (remove/dismiss) or page reports (dismiss only). Never bulk-delete content.
+// Write one audit row per decision.
 export async function resolveReports(
   env: AppEnv,
   admin: AdminSession,

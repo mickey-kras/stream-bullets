@@ -1,39 +1,46 @@
 # Security policy
 
-Use GitHub private vulnerability reporting for security issues. If that feature is unavailable, contact the repository owner to arrange a private channel before sending details. Include the affected version, steps to reproduce the issue, and its impact. Do not include secrets or personal data.
+Report vulnerabilities through GitHub private vulnerability reporting.
+If unavailable, arrange a private channel with the repository owner first.
+Include the affected version, reproduction steps, and impact. Exclude secrets and personal data.
 
 ## Admin security keys
 
-Admin actions need an administrator account (a verified address in `ADMIN_EMAILS`). With `ADMIN_STEP_UP=enforce`, they also need a WebAuthn assertion from one of the account's security keys in the current session. The server checks this on every admin endpoint and in the Admin page loader. The browser never decides.
+Admin needs a verified address in `ADMIN_EMAILS`.
+With `ADMIN_STEP_UP=enforce`, every admin endpoint and page loader also checks a security key in the current session.
+Admin content removal uses the same check and records a `moderation_actions` row.
+Authors and page owners need no key to remove their content.
 
-An administrator can also remove a topic, poll or comment from a streamer page. That removal uses the same check, and it writes a row to `moderation_actions`. Authors and page owners remove their own content without a key.
+The default mode, `report`, permits access without a key check.
+Each unchecked admin call records `step_up_missing`, the administrator, and the route.
 
-Without an `ADMIN_STEP_UP` value, the mode is `report`. In that mode, an admin can act without a key check. The server then writes a `step_up_missing` row with the admin and the route.
-
-- Each assertion uses a random 32-byte challenge. The server stores the challenge per session and purpose for 2 minutes. It deletes the challenge on first use, so an attacker cannot use a response again.
-- The server checks the origin against `APP_ORIGIN` and the relying party ID hash against its host name. The key must report user presence and user verification (PIN or biometrics).
-- The signature counter must increase when the key reports one. A compare-and-set update stops two parallel uses of one assertion.
-- The server stores the step-up time on the session row, not on the user. Another session of the same account does not inherit it. Sign-out or session expiry ends it.
-- The server accepts a first key only within 5 minutes of a new sign-in. Later keys need a key check from the last 2 minutes. Removing a key needs a key check with a different key, and nobody can remove the last key.
-- The `moderation_actions` table records each key check, failed check, key change and moderation action. Audit rows store a hash of the session id, not the id.
+- Challenges use 32 random bytes, expire after 2 minutes, and bind to a session and purpose. First use consumes them.
+- Assertions must match `APP_ORIGIN` and its host's relying party ID hash. Keys must confirm user presence and verification through PIN or biometrics.
+- Reported signature counters must increase. Compare-and-set updates prevent parallel assertion reuse.
+- Step-up applies only to the session. Sign-out or session expiry ends it.
+- First-key registration needs sign-in within 5 minutes. Later registrations need a key check within 2 minutes.
+- Key removal needs a different key. The server refuses removal of the last key.
+- `moderation_actions` records successful and failed checks, key changes, and moderation. It stores hashed session IDs.
 
 ### Recovery when the administrator loses every key
 
-Only the site operator can recover. The operator needs Cloudflare access to the production D1 database.
+Recovery needs site-operator access to production D1 through Cloudflare.
 
-1. Confirm the administrator's identity through a channel other than the account.
-2. Delete that account's keys and record the reset:
+1. Confirm the administrator's identity through another channel.
+2. Delete the keys and record the reset:
 
    ```sh
    pnpm exec wrangler d1 execute DB --env production --remote --command "DELETE FROM passkey WHERE user_id='<USER_ID>'; INSERT INTO moderation_actions (id, target_kind, target_id, action, reason, actor_id, created_at) VALUES (lower(hex(randomblob(16))), 'passkey', '<USER_ID>', 'keys_reset', 'operator recovery', NULL, unixepoch()*1000);"
    ```
 
-3. Ask the administrator to sign out, sign in again and register two new keys within 5 minutes.
+3. Ask the administrator to sign out, sign in, and register two keys within 5 minutes.
 
 ## Dependency licenses
 
-Before a dependency ships, the maintainer must review its license and the licenses of its runtime dependencies. Record the review in the PR. Check the permitted use, distribution terms, attribution, license notices, and source disclosure requirements. Keep required notices with the release. Block the release if a license is unknown or its terms conflict with distribution of this application.
+Before release, review each dependency and its runtime dependency licenses. Record the review in the PR.
+Check the permitted use, distribution, attribution, notices, and source disclosure. Ship mandatory notices.
+Block release for unknown or incompatible licenses.
 
-CI compares `THIRD_PARTY_NOTICES.md` with the runtime dependencies (`node scripts/third-party-notices.ts --check`). When a dependency changes, CI fails until you run the script again. Then the PR diff shows each license that changed.
-
-The dependency review checks for vulnerabilities. It does not approve licenses. Repeat the manual review when an update changes a license or adds a runtime dependency.
+CI runs `node scripts/third-party-notices.ts --check` against `THIRD_PARTY_NOTICES.md`.
+After dependency changes, regenerate the notices. Review changed licenses in the diff.
+Vulnerability checks do not approve licenses. Repeat license review for changed licenses or new runtime dependencies.

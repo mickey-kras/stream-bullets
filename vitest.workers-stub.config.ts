@@ -1,7 +1,5 @@
-/**
- * Stands in for `cloudflare:workers` outside workerd: vitest.config.ts aliases the module to this file. The
- * background work starts at once, as in the runtime; tests observe its effects (for example a room fetch) directly.
- */
+// vitest.config.ts aliases cloudflare:workers here outside workerd.
+// Start background work immediately so tests can observe its effects.
 export function waitUntil(promise: Promise<unknown>): void {
   void promise;
 }

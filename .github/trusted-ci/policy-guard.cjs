@@ -6,8 +6,7 @@ const { admittedDependabot } = require("./policy-dependabot.cjs");
 const OWNER = { login: "mickey-kras", id: 24433677 };
 const SHA = /^[a-f0-9]{40}$/;
 
-// A repository owner cannot approve their own PR. An explicit comment is an
-// admission bound to the candidate, current base and trusted policy.
+// Self-approval requires an owner comment bound to the candidate, base, and trusted policy.
 function commentAdmission(comments, head, base, trusted, tree) {
   const prefix = /^(Approve|Reject) CI policy: /;
   const decisive = comments.filter(
@@ -72,7 +71,7 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
     candidate.base?.sha === expected.base.sha;
   if (!current(pull)) throw new Error("Pull request revision changed; rerun on the current head");
   const base = await snapshot(github, context.repo, trustedSha);
-  // Read candidate Git objects as inert data; never checkout or load candidate code.
+  // Read candidate Git objects as data. Never execute candidate code.
   const head = await snapshot(github, context.repo, pull.head.sha);
   const cache = new Map();
   const read = async (entry) => {
@@ -143,12 +142,11 @@ async function run({ github, context }, trustedSha = process.env.TRUSTED_SHA) {
 }
 
 const STATUS_CONTEXT = "Trusted CI policy";
-// The ruleset also requires the `guard` job check. Owner comment runs report that check
-// on the default-branch commit, so mirror it on the PR head the run validated.
+// Owner-comment runs report `guard` on the default branch. Mirror it on the validated PR head.
 const CHECK_NAME = "guard";
 
-// Both entry points run trusted code. The early workflow step binds the status
-// to a live API revision; run() rechecks it before and after inspecting Git data.
+// Trusted entry points bind status to a live API revision.
+// run() rechecks that revision before and after Git inspection.
 async function runWithStatus({ github, context }, expected, trustedSha = process.env.TRUSTED_SHA) {
   if (
     !Number.isSafeInteger(expected?.number) ||

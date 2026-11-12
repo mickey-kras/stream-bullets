@@ -47,7 +47,6 @@ async function body<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-/** Signs in as `admin` unless another user is named. */
 function asAdmin(method: string, path: string, options: CallOptions = {}): Promise<Response> {
   return call(method, path, { user: "admin", ...options });
 }
@@ -63,7 +62,7 @@ async function seed(): Promise<void> {
       now,
       JSON.stringify(["owner", "viewer", "admin", "reporter", "official"]),
     ),
-    // `admin` and `admin2` are two sessions of the same administrator.
+    // admin and admin2 are sessions of the same account.
     run(
       `INSERT INTO session (id,token,user_id,expires_at,created_at,updated_at)
         SELECT 's-'||key, key||'-session-token', value, ?1, ?2, ?2
@@ -126,7 +125,6 @@ beforeEach(async (): Promise<void> => {
   await seed();
 });
 
-/* ---------- Security-key ceremonies through the API ---------- */
 
 async function addKey(key: SoftKey, name: string, user = "admin"): Promise<Response> {
   const options = await call("POST", "admin/keys/options", { user, body: {} });
@@ -151,7 +149,7 @@ async function twoKeys(): Promise<[SoftKey, SoftKey]> {
   return [first, second];
 }
 
-/** Moves the step-up stamp and the step-up audit rows back in time, as if `ms` had passed. */
+// Age the session and audit step-up times by `ms`.
 async function age(ms: number): Promise<void> {
   await env.DB.batch([
     env.DB.prepare("UPDATE session SET admin_verified_at=admin_verified_at-? WHERE admin_verified_at IS NOT NULL").bind(
@@ -167,7 +165,7 @@ async function seedReport(targetKind: "entry" | "comment", targetId: string, rep
   expect(response.status).toBe(200);
 }
 
-/* Every admin endpoint, with a body that would pass validation. */
+// Valid bodies for every admin endpoint.
 const endpoints: [string, string, unknown?][] = [
   ["GET", "admin/stepup"],
   ["POST", "admin/stepup/options", {}],
@@ -256,7 +254,7 @@ describe("admin authorisation", (): void => {
           "SELECT target_id, actor_id, metadata FROM moderation_actions WHERE target_kind='admin_session' AND action='step_up_missing' ORDER BY created_at, metadata",
         ).all<{ target_id: string; actor_id: string; metadata: string }>()
       ).results;
-    // No keys yet: enforce would ask for keys.
+    // Without keys, enforce would require registration.
     expect((await asAdmin("GET", "admin/report-groups?status=open")).status).toBe(200);
     expect(
       (await asAdmin("POST", `admin/streamers/${ids.page}`, { body: { action: "freeze", reason: "spam" } })).status,
@@ -266,15 +264,14 @@ describe("admin authorisation", (): void => {
       ["admin", { route: "GET /api/admin/report-groups", need: "keys", sensitive: false }],
       ["admin", { route: `POST /api/admin/streamers/${ids.page}`, need: "keys", sensitive: true }],
     ]);
-    // The session is a hash, never the raw id.
     expect(rows[0].target_id).toMatch(/^[0-9a-f]{64}$/u);
     expect(rows[0].target_id).not.toContain("s-admin");
-    // With two keys and a stale step-up, enforce would ask for a key check.
+    // With two keys, stale step-up would require a new check.
     const [first] = await twoKeys();
     await age(16 * minute);
     expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
     expect(JSON.parse((await missing()).at(-1)?.metadata ?? "{}")).toMatchObject({ need: "step_up" });
-    // A fresh step-up, the off mode, and a refused non-admin write nothing.
+    // Fresh checks, off mode, and refused non-admin calls add no row.
     expect((await stepUp(first)).status).toBe(200);
     const before = (await missing()).length;
     expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
@@ -305,7 +302,7 @@ describe("enforced step-up", (): void => {
     expect(await body<StepUpStatus>(await asAdmin("GET", "admin/stepup"))).toMatchObject({ need: "keys", keys: 0 });
 
     const [first] = await twoKeys();
-    // Adding a key stamps the session, so age the stamp to see the gate.
+    // Age the registration step-up to exercise the gate.
     await age(16 * minute);
     const stale = await asAdmin("GET", "admin/report-groups");
     expect(stale.status).toBe(403);
@@ -368,7 +365,7 @@ describe("enforced step-up", (): void => {
     expect(await body<{ error: string }>(late)).toMatchObject({ code: "step_up_required" });
     expect((await stepUp(first)).status).toBe(200);
     expect((await asAdmin("POST", `admin/streamers/${ids.page}`, suspend)).status).toBe(200);
-    // Lifting a suspension needs only the 15-minute window.
+    // Unsuspend needs only the 15-minute window.
     await age(3 * minute);
     const lifted = await asAdmin("POST", `admin/streamers/${ids.page}`, {
       body: { action: "unsuspend", reason: "other" },
@@ -406,7 +403,6 @@ describe("enforced step-up", (): void => {
     )
       .bind(own, ids.topic)
       .run();
-    // The author and the page owner need no key.
     expect((await call("POST", "comments", { user: "viewer", body: { action: "delete", id: own } })).status).toBe(200);
     const removeTopic = { body: { action: "delete", id: ids.topic } };
     const removeComment = { body: { action: "delete", id: ids.comment } };
@@ -523,7 +519,7 @@ describe("security-key ceremonies", (): void => {
     const [first] = await twoKeys();
     const request = await body<RequestOptions>(await asAdmin("POST", "admin/stepup/options", { body: {} }));
     const assertion = await first.assert(request, origin);
-    // Extension data holding a CBOR text string that is not valid UTF-8.
+    // CBOR extension string with invalid UTF-8.
     const bytes = fromBase64Url(assertion.response.authenticatorData);
     const tampered = new Uint8Array(bytes.length + 2);
     tampered.set(bytes);
@@ -638,7 +634,6 @@ describe("step-up binding (test review gaps)", (): void => {
     const other = await body<RequestOptions>(await call("POST", "admin/stepup/options", { user: "admin2", body: {} }));
     const stolen = await asAdmin("POST", "admin/stepup/verify", { body: await first.assert(other, origin) });
     expect(await body<{ code: string }>(stolen)).toMatchObject({ code: "challenge_expired" });
-    // The other session's challenge is still there for that session.
     const own = await call("POST", "admin/stepup/verify", { user: "admin2", body: await first.assert(other, origin) });
     expect(own.status).toBe(200);
     const register = await body<CreationOptions>(await asAdmin("POST", "admin/keys/options", { body: {} }));
@@ -651,12 +646,12 @@ describe("step-up binding (test review gaps)", (): void => {
     const [first] = await twoKeys();
     const options = await body<RequestOptions>(await asAdmin("POST", "admin/stepup/options", { body: {} }));
     expect((await call("POST", "admin/stepup/options", { user: "admin2", body: {} })).status).toBe(200);
-    // Both sessions hold the same challenge, so only the counter's compare-and-set can stop the second use.
+    // Shared challenge: only the counter compare-and-set stops replay.
     await env.DB.prepare("UPDATE verification SET value=? WHERE identifier LIKE 'admin-webauthn:stepup:%'")
       .bind(options.challenge)
       .run();
     const assertion = await first.assert(options, origin);
-    // Hold the first batch until the second arrives, so both have read the key before either writes.
+    // Hold both writes until both requests have read the key.
     let release: (() => void) | null = null;
     const raced = {
       ...env,

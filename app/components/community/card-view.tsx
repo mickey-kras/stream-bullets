@@ -5,7 +5,7 @@ import type { CardTab, CommunityCard } from "../../types";
 import { Icon } from "../ui/icon";
 import { cardIcons, tabIcons } from "./cards";
 
-/** A card's button: a tab of this page, or an https link that opens in a new tab. */
+// Buttons target a local tab or HTTPS URL in a new tab.
 function CardButton({ card }: Readonly<{ card: CommunityCard }>): ReactNode {
   if (!card.buttonLabel || !card.buttonTarget) return null;
   if (card.buttonTarget.startsWith("tab:")) {
@@ -27,7 +27,6 @@ function CardButton({ card }: Readonly<{ card: CommunityCard }>): ReactNode {
   );
 }
 
-/** The inside of a Community card: icon and title, text, optional button. */
 export function CardContent({ card }: Readonly<{ card: CommunityCard }>): ReactNode {
   return (
     <>

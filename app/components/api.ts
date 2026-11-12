@@ -1,6 +1,6 @@
 import { getLocale, t, type MessageId } from "../i18n";
 
-/** An API failure with the server's stable `code` (for example `step_up_required`), when it sent one. */
+// API error with a stable optional server code.
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -11,7 +11,7 @@ export class ApiError extends Error {
   }
 }
 
-/** Turns a failed response body into an ApiError, with `fallback` when the body has no message. */
+// Parse error body; use fallback when no message exists.
 export function apiError(status: number, body: unknown, fallback: string): ApiError {
   const record: Record<string, unknown> = typeof body === "object" && body !== null ? { ...body } : {};
   const message: string = typeof record.error === "string" ? record.error : fallback;
@@ -20,10 +20,7 @@ export function apiError(status: number, body: unknown, fallback: string): ApiEr
 
 const NOT_JSON: unique symbol = Symbol("not JSON");
 
-/**
- * Fetches same-origin JSON. A failed response, or a body that is not JSON (a proxy error page, for example),
- * throws an ApiError with `fallback` as its message when the server sent none.
- */
+// Fetch same-origin JSON. Failed responses and non-JSON bodies throw ApiError; absent messages use fallback.
 export async function requestJson<T>(
   url: string,
   init?: RequestInit,
@@ -36,7 +33,7 @@ export async function requestJson<T>(
   return body as T;
 }
 
-/** The server wants a fresh security-key check before it repeats this admin action. */
+// Retry this admin action after fresh step-up.
 export function needsStepUp(error: unknown): boolean {
   return error instanceof ApiError && error.code === "step_up_required";
 }

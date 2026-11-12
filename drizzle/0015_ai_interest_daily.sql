@@ -6,5 +6,5 @@ CREATE TABLE `ai_interest_daily` (
 	CONSTRAINT "ai_interest_daily_count_check" CHECK("ai_interest_daily"."up" >= 0 AND "ai_interest_daily"."down" >= 0)
 );
 --> statement-breakpoint
--- Backfill: the totals start from the votes already stored.
+-- Initialize totals from stored votes.
 INSERT INTO `ai_interest_daily` (`day`, `up`, `down`) SELECT `day`, SUM(`value` = 1), SUM(`value` = -1) FROM `ai_interest` GROUP BY `day`;

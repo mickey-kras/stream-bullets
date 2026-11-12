@@ -21,7 +21,7 @@ export default async function handleRequest(
   if (request.method === "HEAD") return new Response(null, { status, headers });
   const app = context.get(appContext);
   const { nonce } = app;
-  // The root loader resolved the language with the account's saved choice; without it, use cookie and browser.
+  // Prefer the root loader's account locale; otherwise use cookie and browser.
   const locale = app.locale ?? requestLocale(request, null);
   return withLocale(locale, async (): Promise<Response> => {
     const stream = await renderToReadableStream(
@@ -37,7 +37,7 @@ export default async function handleRequest(
         },
       },
     );
-    // Rendering finishes inside the language scope; the response only streams what is already rendered.
+    // Render inside the locale scope before streaming.
     await stream.allReady;
     headers.set("Content-Type", "text/html; charset=utf-8");
     headers.set("Content-Language", locale);

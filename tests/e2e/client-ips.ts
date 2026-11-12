@@ -1,11 +1,6 @@
-/**
- * The responsive matrix owns 198.51.100.1-88 (TEST-NET-2), one address per case.
- * Signed-out mobile dialog/search cases own 203.0.113.1-11 and 203.0.113.30-40 (TEST-NET-3).
- * Client IPs for the e2e specs: the last octet of 192.0.2.x (TEST-NET-1), sent as CF-Connecting-IP.
- * The worker's REQUEST_LIMITER allows 120 requests a minute per IP, so specs that share an address can push
- * each other over the limit when they run back to back. Each spec owns the inclusive ranges below and asks for
- * its addresses through `clientIp`, which refuses an address outside them. Give a new spec a free range here.
- */
+// Responsive cases own 198.51.100.1-88. Mobile dialog/search cases own 203.0.113.1-11 and .30-40.
+// Other specs use owned 192.0.2.x ranges via CF-Connecting-IP. clientIp rejects out-of-range addresses.
+// Allocate free ranges to isolate each spec's 120 requests/min quota.
 const ranges = {
   platform: [[10, 15]],
   mutations: [[25, 27]],
@@ -14,7 +9,7 @@ const ranges = {
   moderation: [[60, 65]],
   shell: [[66, 67]],
   "discussion-history": [[75, 78]],
-  // Reserved: these addresses are used without clientIp.
+  // Reserved for callers without clientIp.
   mash: [[80, 82]],
   "overlay-control": [[90, 94]],
   community: [[95, 96]],
@@ -42,14 +37,13 @@ const ranges = {
 
 export type Spec = keyof typeof ranges;
 
-/** Every range as [spec, first, last], sorted by first address. */
 function allocations(): [Spec, number, number][] {
   return (Object.entries(ranges) as [Spec, readonly (readonly [number, number])[]][])
     .flatMap(([spec, list]) => list.map(([first, last]): [Spec, number, number] => [spec, first, last]))
     .sort((a, b) => a[1] - b[1]);
 }
 
-/** Fails at import if a range leaves 1-254 or two ranges overlap, so a clash shows up before any test runs. */
+// Reject out-of-range (1-254) or overlapping allocations at import.
 function checkAllocations(): void {
   let previous: [Spec, number, number] | null = null;
   for (const current of allocations()) {
@@ -65,7 +59,7 @@ function checkAllocations(): void {
 }
 checkAllocations();
 
-/** The last octet `octet`, after checking that `spec` owns it. */
+// Validate that `spec` owns `octet`.
 export function clientIp(spec: Spec, octet: number): number {
   if (!ranges[spec].some(([first, last]) => Number.isInteger(octet) && octet >= first && octet <= last)) {
     throw new Error(`192.0.2.${octet} is not in the ${spec} client IP range (see tests/e2e/client-ips.ts).`);
@@ -73,7 +67,6 @@ export function clientIp(spec: Spec, octet: number): number {
   return octet;
 }
 
-/** The full address for a CF-Connecting-IP header. */
 export function clientAddress(spec: Spec, octet: number): string {
   return `192.0.2.${clientIp(spec, octet)}`;
 }

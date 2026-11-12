@@ -2,12 +2,8 @@ import { crc32 } from "node:zlib";
 import { HttpError } from "./http.server";
 import { orientationExif } from "./image-orientation";
 
-/**
- * Removes metadata (EXIF with GPS and device data, XMP, IPTC, comments, text chunks) from an uploaded PNG, JPEG or
- * WebP without decoding the pixels. The browser cropper already re-encodes uploads, but any other client could
- * send a camera file straight to the API, and uploaded images are public. Colour data (ICC profiles, Adobe APP14)
- * and the orientation stay, so images look the same. Input must already have passed `validateImage`.
- */
+// Strip private PNG/JPEG/WebP metadata without pixel decoding. API clients can bypass browser re-encoding.
+// Keep ICC, Adobe APP14, and orientation. Requires `validateImage`.
 export function stripImageMetadata(bytes: Uint8Array, mime: string): Uint8Array {
   if (mime === "image/jpeg") return stripJpeg(bytes);
   if (mime === "image/png") return stripPng(bytes);
@@ -25,7 +21,7 @@ function concat(parts: Uint8Array[]): Uint8Array {
   return out;
 }
 
-/** Keep ICC data in APP2; drop private application segments and comments. */
+// Keep ICC data in APP2; drop private application segments and comments.
 function droppedJpegMarker(marker: number, payload: Uint8Array): boolean {
   if (marker === 0xe2) {
     return payload.length < 14 || new TextDecoder().decode(payload.subarray(0, 12)) !== "ICC_PROFILE\0";
@@ -37,7 +33,7 @@ function invalidImage(): never {
   throw new HttpError(400, "Choose a valid PNG, JPEG, or WebP image.");
 }
 
-/** Skip stuffed bytes and restart markers inside entropy-coded scan data. */
+// Skip stuffed bytes and restart markers inside entropy-coded scan data.
 function scanEnd(bytes: Uint8Array, start: number): number {
   let offset: number = start;
   while (offset < bytes.length - 1) {
@@ -140,7 +136,7 @@ function stripPng(bytes: Uint8Array): Uint8Array {
   return invalidImage();
 }
 
-/** VP8X feature flags for an EXIF and an XMP chunk. */
+// VP8X feature flags for an EXIF and an XMP chunk.
 const VP8X_EXIF = 0x08;
 const VP8X_XMP = 0x04;
 

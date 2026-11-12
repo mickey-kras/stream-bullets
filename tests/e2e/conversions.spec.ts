@@ -39,7 +39,7 @@ for (const [label, width, height] of [
     };
     const sample = async (): Promise<Record<string, number>> => {
       const start = await metrics();
-      // Fixed observation window, not a readiness wait. Measures CPU tasks and animation cadence.
+      // Fixed CPU-task and frame-cadence sample; not a readiness wait.
       const frames = await page.evaluate(
         () =>
           new Promise<number>((resolve) => {
@@ -73,19 +73,18 @@ for (const [label, width, height] of [
       body: await page.screenshot({ fullPage: true }),
       contentType: "image/png",
     });
-    // Successful CI runs retain logs even when the workflow discards the HTML report.
+    // Logs retain measurements when successful CI runs discard the HTML report.
     console.info("mobile-hero-cost", JSON.stringify({ width, height, load, still, animated }));
     expect(load.documentWidth).toBeLessThanOrEqual(load.viewportWidth);
     if (height <= 600) {
       await expect(page.locator(".landing-main")).toHaveCSS("overflow-y", "auto");
     }
     for (const link of await page.locator(".landing-copy a").all()) {
-      // Short screens keep the design and permit scrolling instead of clipping the actions.
       if (height <= 600) {
         await link.evaluate((element: HTMLAnchorElement) => element.scrollIntoView({ block: "center" }));
       }
       await expect(link).toBeInViewport({ ratio: 1 });
-      // Trial clicks also detect overlap and clipped hit targets without navigating.
+      // Trial clicks detect overlap and clipping without navigation.
       await link.click({ trial: true });
     }
     await devtools.detach();

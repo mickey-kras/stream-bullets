@@ -38,7 +38,7 @@ function shell(extra: Partial<ShellData> = {}): ShellData {
   };
 }
 
-/** Renders `node` on the server inside a router whose root loader returned `data`. */
+// Render `node` with router root-loader `data`.
 async function renderInRoot(node: () => ReactNode, data: ShellData | null): Promise<string> {
   const handler = createStaticHandler([
     { id: "root", path: "/", loader: () => data, Component: () => node() as ReactElement },
@@ -384,7 +384,7 @@ describe("upcomingRows", () => {
       hero,
       500,
     );
-    // A live stream takes its series' row like the next stream would, and an ended one stays out.
+    // A live stream occupies its series row; an ended stream does not.
     expect(rows.map((r) => r.id)).toEqual(["live-b", "live-solo", "c1"]);
   });
 });

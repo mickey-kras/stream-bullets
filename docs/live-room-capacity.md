@@ -1,31 +1,28 @@
 # Live room capacity
 
-The application permits 200 live connections per streamer. Anonymous viewers can use 100 of these connections.
-One client address can use ten viewer connections. The owner and an overlay with a valid key share ten priority seats.
-These are application admission limits, not measured Cloudflare infrastructure limits.
+Per streamer: 200 connections, including 100 anonymous connections.
+Each client address permits ten viewer connections. Owners and valid-key overlays share ten priority seats.
+These are application limits, not measured Cloudflare limits.
 
 ## Reproduce locally
 
-Install the pinned dependencies with `pnpm install --frozen-lockfile`. Run this command from the repository root:
+Install the pinned dependencies. Then run from the repository root:
 
 ```sh
+pnpm install --frozen-lockfile
 LIVE_CAPACITY=1 LIVE_CAPACITY_OUTPUT=/tmp/live-capacity-results.json pnpm exec vitest run tests/live-capacity.test.ts
 ```
 
-The harness creates an isolated Miniflare runtime and temporary local databases. It cannot target a production URL.
-It bundles the real `PollRoom` class and uses workerd WebSockets, D1, and SQLite storage for the object.
-The test Worker provides internal identities directly. It does not test public authentication, session lookup, or rate limits.
+The isolated Miniflare harness uses real `PollRoom`, workerd WebSockets, temporary D1, and object SQLite storage.
+It cannot target production. Direct internal identities bypass public authentication, session lookup, and rate limits.
+Latency measurements use real sockets.
 
-It does not use simulated sockets for latency measurements.
+`LIVE_CAPACITY_RESULTS` prints JSON. Optional `LIVE_CAPACITY_OUTPUT` saves it.
+Handshake timing includes the first snapshot. Update timing covers the vote burst through final-revision delivery to every client.
+Mash timing covers individual acknowledgements and final tick delivery.
 
-The output contains a `LIVE_CAPACITY_RESULTS` JSON record. `LIVE_CAPACITY_OUTPUT` also saves that record as a file.
-Omit `LIVE_CAPACITY_OUTPUT` when you need only console output. Handshake timing includes the first snapshot.
-Update timing runs from the start of the vote burst through delivery of the final revision to each connected client.
-
-Mash timing measures individual acknowledgement latency and final tick delivery to all connected clients.
-The counter for D1 records each statement that the room executes, including statements inside batches.
-The report lists fixture writes separately.
-It does not measure D1 rows scanned, query CPU, billed operations, or production cost.
+D1 counters include each room statement, including batches, with fixture writes separate.
+They exclude scanned rows, query CPU, billing, and production cost.
 
 ## Workload
 
@@ -40,17 +37,16 @@ It does not measure D1 rows scanned, query CPU, billed operations, or production
 | Mash burst | 60 | Twenty members send three batches of three taps. Acknowledge all 180 taps |
 | Object recovery | 1 reset | Abort the object, recover 180 taps, reconnect a member, and count one further tap |
 
-Each try uses a distinct client key. The boundary scenarios use separate streamer rooms.
-The storm emulates one try from each disconnected client. Separate browser tests check the retry limits.
-
-An overload refusal must do no work in D1 for the room. The test compares the counters before and after the storm.
-The priority clients remain connected during the storm and can reconnect after it at full capacity.
+Each try uses a distinct client key. Boundary scenarios use separate rooms.
+The storm models one try per disconnected client. Browser tests cover retry budgets.
+Overload refusals must execute zero room D1 statements.
+Priority clients must stay connected and reconnect at full capacity.
 
 ## Results and limits
 
-The recorded run passed on November 10, 2026, with Node `v24.22.1` on Linux x64.
-The host exposed an AMD EPYC 9V45 processor, nine logical CPUs, and 9.7 GiB of memory.
-Vitest reported 34.34 seconds for the run, including runtime lifecycle work.
+Recorded pass: November 10, 2026, with Node `v24.22.1` on Linux x64.
+Host: AMD EPYC 9V45, nine logical CPUs, 9.7 GiB memory.
+Vitest duration: 34.34 seconds, including runtime lifecycle work.
 
 | Scenario | Accepted / refused | Latency in ms: `p50`, `p95`, maximum |
 | --- | --- | --- |
@@ -67,61 +63,48 @@ Vitest reported 34.34 seconds for the run, including runtime lifecycle work.
 | Sixty mash batches, acknowledgement | All 180 taps accepted | 2.41 / 9.09 / 9.25 |
 | Final mash tick to 200 sockets | All 200 received total 180 | 210.87 / 213.77 / 213.88 |
 
-Admission timings include successful and refused tries in each row.
-The run returned 252 expected HTTP 503 responses. It returned no unexpected admission statuses and had no message timeouts.
-The 250 refused storm tries executed zero room D1 statements.
-The vote burst executed 12 room D1 statements plus 40 fixture vote statements.
-The mash burst executed 22 room D1 statements and stored 180 taps in the local durable journal.
+Admission timings include accepted and refused tries.
+The run produced 252 expected HTTP 503 responses, no unexpected admission statuses, and no message timeouts.
+Storm refusals executed zero room D1 statements.
 
-After the object reset, D1 recovered all 180 taps. A reconnected member then received a cumulative count of ten.
-The next tap raised the durable journal total to 181.
+Votes executed 12 room statements plus 40 fixture statements. Mash executed 22 room statements and journaled 180 taps.
+After reset, D1 recovered 180 taps. A reconnected member saw ten cumulative taps. The next tap raised the journal total to 181.
 
-The verified local capacity is 200 sockets for this mixed-room burst workload.
-Owner and overlay sockets stayed connected during the refusal storm. Two new priority connections then displaced two viewers.
-The room kept exactly 200 open connections.
+This mixed-room burst verified 200 local sockets.
+Owner and overlay stayed connected during the storm. Two new priority connections displaced two viewers without exceeding 200 sockets.
 
-Measurements are local observations. They are not production guarantees or an infrastructure capacity claim.
-The runner shares CPU and memory with other tasks. It has no CPU reservation or isolated resource budget.
-The JSON record includes the operating system, Node version, CPU model, logical CPU count, and visible memory.
+These observations do not guarantee production capacity or measure infrastructure ceilings.
+The runner shares CPU and memory without reserved resources.
+JSON records OS, Node version, CPU model and count, and visible memory.
+`pnpm-lock.yaml` pins dependencies, including Miniflare. Test compatibility date: `2026-05-15`.
 
-`pnpm-lock.yaml` fixes the dependency versions, including Miniflare. The test compatibility date is `2026-05-15`.
-
-The workload is a short burst against one room. It does not show sustained throughput, multi-region latency, or slow-consumer behavior.
-It does not model a large history, fifty large polls, many concurrent battles, or deployment-wide contention.
-Use a separate staging environment with an agreed concurrency target before increasing the admission limits.
-Do not run disruptive production load tests.
+The short, single-room burst excludes sustained load, multi-region latency, slow consumers, large histories, fifty large polls, concurrent battles, and deployment contention.
+Before raising limits, agree on concurrency targets and measure staging. Do not run disruptive production load tests.
 
 ## Bounded reliability change
 
-Before this change, the browser retried indefinitely after it displayed an offline state. Brief successful snapshots also reset its retry count.
-A saturated room can thus cause repeated reconnects, including repeated owner-seat replacement.
+Before the fix, offline clients retried indefinitely. Brief snapshots reset the count and caused repeated owner-seat displacement.
+Interactive clients allow eight automatic retries after initial connection.
+Backoff uses 50 to 100 percent of exponential delay, capped at 30 seconds.
+A valid snapshot after 60 healthy seconds restores the budget.
 
-The client now permits eight automatic retries after the initial connection.
-Backoff uses 50 to 100 percent of the exponential delay, with a 30-second ceiling.
-A valid snapshot after at least 60 seconds of a healthy connection restores the budget.
-
-After the client uses the budget, the viewer can use the Reconnect control. The owner control page has the same action.
-In OBS, use the interaction window for the browser source to select Reconnect, or refresh the browser source.
-
-HTTP 429 and 503 remain explicit admission responses. When the room evicts a connection, it uses code 1013 to close the WebSocket.
+After exhaustion, viewers and owners can select Reconnect.
+OBS sources retry indefinitely because they can run unattended.
+Admission returns HTTP 429 or 503. Eviction closes WebSockets with code 1013.
 
 ## Remaining bottlenecks
 
-Each streamer still uses one object for admission, snapshot broadcast, and battle sequencing.
-The fixed 200-connection limit prevents this harness from measuring a larger single-object ceiling.
-Each active battle broadcasts to every live socket. D1 receives vote writes and bounded battle-total flushes.
-The test counter does not set a database cost limit.
+One object per streamer handles admission, broadcasts, and battle ordering.
+The 200-connection cap prevents measuring a higher object ceiling.
+Each battle broadcasts to all sockets. D1 handles votes and bounded battle-total flushes. Statement counters prove no cost limit.
 
-No measured compute limit currently justifies sharding. Keep the present architecture and first set a business concurrency target.
-If staging measurements justify sharding, estimate a separate eight-point investigation and prototype.
-Keep one authoritative coordinator for battle totals and ordering, and use subscriber objects for fanout.
-
-Measure the delivery between objects and the recovery of sequences.
-Check the duplicate delivery, admission during overload, and recovery after a deployment before you select that design.
-Sharded production implementation is outside this issue.
+No measured compute limit yet justifies sharding. Set a business concurrency target first.
+If staging supports sharding, scope a separate eight-point investigation and prototype.
+Keep one authoritative battle coordinator and subscriber objects for fanout.
+Measure the inter-object delivery, sequence recovery, duplicate delivery, overload admission, and deployment recovery before choosing that design.
+Production sharding remains outside this issue.
 
 ## Recovery API
 
-The test-only reset uses the documented [abort method](https://developers.cloudflare.com/durable-objects/api/state/#abort).
-This resets the object instance. The recovery checks read the real persistent journal and D1 totals.
-The reset endpoint and measurement counters exist only in the test bundle.
+The test-only [abort method](https://developers.cloudflare.com/durable-objects/api/state/#abort) resets the object instance.
+Recovery checks use real journal and D1 persistence. Reset endpoints and counters exist only in the test bundle.

@@ -4,16 +4,14 @@ Issue: #585. Baseline: `0641d22`. Audit date: 2026-11-10.
 
 ## Existing analytics
 
-Cloudflare enables Web Analytics with automatic installation for `streambullets.com`.
-Zaraz has no configured tools. The application has no analytics SDK or conversion events.
-Workers observability captures errors. The privacy page incorrectly said that the site used no analytics.
+Cloudflare Web Analytics has automatic installation enabled for `streambullets.com`.
+Zaraz has no tools. The baseline app had no analytics SDK or conversion events.
+Workers observability captures errors. The baseline privacy page incorrectly denied analytics use.
 
-The live HTML response contained no beacon script during this audit.
-Its CSP permits only scripts from the same origin or scripts with a nonce.
-Thus, the account setting alone does not prove that browsers send performance data.
-Check the beacon delivery before using Web Analytics visits as a denominator.
+Audit HTML contained no beacon. CSP permits same-origin or nonce-protected scripts only.
+Check the beacon delivery before treating Web Analytics visits as a denominator.
 See [Cloudflare setup and CSP guidance](https://developers.cloudflare.com/web-analytics/faq/).
-This PR does not change Cloudflare settings or the CSP.
+This change leaves Cloudflare settings and CSP intact.
 
 ## Conversion definitions
 
@@ -28,33 +26,27 @@ This PR does not change Cloudflare settings or the CSP.
 | `first_vote` | Account stores its first poll vote | Once per account |
 | `first_topic` | Account stores its first topic | Once per account |
 
-Database triggers update totals in the same transaction as the source write.
-Failed writes and transactions that roll back do not count. Refreshes and reads do not count.
-Topic deletion and vote changes do not reset account milestones.
+Database triggers update totals with source writes atomically.
+Failed writes, rollbacks, reads, refreshes, topic deletion, and vote changes do not add or reset milestones.
+Migration flags existing votes and topics without adding totals.
+The migration cannot recover deleted activity. Those accounts can count next time. Re-created accounts can count again.
 
-The migration sets flags for existing votes and topics without adding totals.
-It cannot recover activity that users deleted before this migration.
-Those accounts can count on their next action. A new account after deletion can count again.
+Totals store UTC day, fixed event name, and count only.
+They contain no account IDs, IPs, URLs, provider details, or content and remain after account deletion.
+Exports include both account flags. Account deletion removes them.
 
-Totals contain only a UTC date, a fixed event name, and a count.
-They contain no account IDs, IP addresses, URLs, provider details, or user content.
-The two account flags appear in account exports and disappear with account deletion.
-Totals remain after deletion because they cannot identify an account.
+Click requests accept fixed CTA names and a random UUID only. The endpoint rejects completion events and extra fields.
+Clients send no cookies or referrer. Retained receipts prevent repeat counts.
 
-The click endpoint accepts only fixed CTA names and a random UUID.
-It rejects completion events and extra fields. The client sends no cookies or referrer.
-Repeated receipts do not count again during their retention period.
+Worker limits do not prevent fraud. The client never retries failed calls, which can undercount. Navigation still works.
 
-The Worker limits requests. Public click counts do not prevent fraud.
-The client does not retry failed requests, so counts can be too low. Navigation still works.
-
-Hourly cleanup removes receipts older than one day and totals older than 90 days.
-Cleanup uses batches of 5,000 receipts, so a large backlog can extend retention.
-A replay after receipt deletion can count again. The browser stores no visitor identifier.
+Hourly cleanup removes receipts after one day and totals after 90 days.
+Receipt batches hold 5,000 rows. Backlogs can extend retention. Replays after deletion can count again.
+Browsers store no visitor identifier.
 
 ## Read totals
 
-Use the D1 console or Wrangler. There is no public endpoint for totals.
+Use D1 or Wrangler. Totals have no public endpoint:
 
 ```sql
 SELECT day, event, count
@@ -62,13 +54,11 @@ FROM conversion_daily
 ORDER BY day DESC, event;
 ```
 
-These counts show daily activity. They do not link clicks to later actions.
-Do not infer exact conversion rates for visitors.
+Daily counts do not connect clicks to later actions. Do not infer exact visitor conversion rates.
 
 ## Mobile evidence
 
-The production build at the baseline reports these sizes.
-These are build estimates, not measured network transfers.
+Baseline production build sizes, not measured transfers:
 
 | Asset | Uncompressed | Gzip |
 | --- | ---: | ---: |
@@ -76,33 +66,27 @@ These are build estimates, not measured network transfers.
 | Station scene JavaScript | 748.80 kB | 197.65 kB |
 | Home CSS | 9.21 kB | 2.54 kB |
 
-The scene loads dynamically, batches static geometry, and pauses rendering when hidden.
-It also caps resolution on mobile and supports reduced motion.
-These findings come from source code, not timing measurements.
+Source inspection confirms dynamic scene loading, static geometry batching, hidden-render pausing, mobile resolution caps, and reduced motion.
+This inspection measures no timing.
 
-Run the browser check after building:
+Run browser checks:
 
 ```sh
 pnpm build
 pnpm exec playwright test tests/e2e/conversions.spec.ts
 ```
 
-It checks 320 x 568, 390 x 844, and 844 x 390 viewports.
-It checks horizontal overflow and whether each landing CTA can receive a click.
-The Playwright report includes screenshots and `mobile-hero-cost.json` attachments.
-CI saves that report only on failure. Successful runs also print measurements with the `mobile-hero-cost` label.
+The checks cover overflow and clickable CTAs at 320 x 568, 390 x 844, and 844 x 390.
+Playwright reports attach screenshots and `mobile-hero-cost.json`.
+CI saves reports on failure. Successful runs print `mobile-hero-cost` measurements.
+Attachments record asset sizes, readiness, and two-second animated and static samples.
 
-Each attachment contains sizes of assets, readiness, and two-second samples with and without animation.
-Task time and frame cadence are lab indicators, not GPU timings or Core Web Vitals from visitors.
-CI uses software rendering. Its results do not predict performance on physical phones.
+Task time and frame cadence are lab indicators, not GPU timings or visitor Core Web Vitals.
+CI software rendering cannot predict physical-phone performance.
 
-Local Chromium failed to start because the environment denied its socket operation.
-The preview in the browser also timed out. Mobile timing measurements remain unverified locally.
+Local Chromium failed because the environment denied sockets. Browser preview timed out. Local mobile timings remain unverified.
 
-Cloudflare screenshots at the audit baseline confirmed visible controls at 320 x 568 and 390 x 844.
-At 844 x 390, the fixed-height page clipped the primary CTA and hid the action links.
-
-The new benefits text also clipped action links at 320 x 568.
-The hero area now scrolls on short screens in either orientation.
-Typography and artwork stay the same.
-No rendering change follows from timing assumptions.
+Baseline Cloudflare screenshots showed controls at 320 x 568 and 390 x 844, but clipped CTAs at 844 x 390.
+New benefits text also clipped links at 320 x 568.
+The hero now scrolls on short screens in either orientation, keeping typography and artwork.
+No rendering change relies on assumed timings.

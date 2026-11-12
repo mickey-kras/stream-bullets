@@ -2,7 +2,7 @@ import { aiInterestSchema, aiInterestStatus, recordAiInterest } from "../ai.serv
 import { json, queryParams, readJson } from "../http.server";
 import { get, openWrite, type ApiRoute } from "./router";
 
-/** The AI interest counter on /ai (item 45): one unverified vote per visitor per day. */
+// The AI interest counter on /ai: one unverified vote per visitor per day.
 export const aiRoutes: ApiRoute[] = [
   // GET /api/ai-interest → {available, totals: {up, down}, mine}
   get(/ai-interest/, async ({ request, env }) => {

@@ -1,8 +1,6 @@
 import * as THREE from "three";
 
-/* Procedural surfaces for the broadcast station. Everything is painted onto canvases at start-up,
-   so the model ships without image assets. Each surface returns a colour map plus matching bump
-   and roughness maps, drawn in the same pass so seams, rivets, chips and rust line up. */
+// Generate canvas color/bump/roughness maps together at startup so seams and wear align; no shipped images.
 
 export type Random = () => number;
 
@@ -43,7 +41,7 @@ function surface(color: HTMLCanvasElement, bump: HTMLCanvasElement, rough: HTMLC
   };
 }
 
-/** Clone a surface with its own repeat, sharing the painted canvases. */
+// Independent repeat settings share source canvases.
 export function repeat(source: Surface, x: number, y: number): Surface {
   const clone = (t: THREE.CanvasTexture): THREE.CanvasTexture => {
     const c = t.clone();
@@ -105,7 +103,7 @@ export interface PaintOptions {
   roughness?: number;
 }
 
-/** Enamel over steel: mottled paint, panel seams, rivets, chipped edges and rust runs. */
+// Enamel, seams, rivets, chips and rust.
 export function paintedMetal(o: PaintOptions): Surface {
   const W = 1024,
     H = 512;
@@ -123,7 +121,7 @@ export function paintedMetal(o: PaintOptions): Surface {
   bb.fillRect(0, 0, W, H);
   rr.fillStyle = grey(baseRough);
   rr.fillRect(0, 0, W, H);
-  // Mottled, sun-faded enamel.
+
   for (let i = 0; i < 260; i++) {
     const x = rnd() * W,
       y = rnd() * H,
@@ -140,14 +138,14 @@ export function paintedMetal(o: PaintOptions): Surface {
     bb.fillStyle = grey(110 + v * 40);
     bb.fillRect(x, y, 1.5, 1.5);
   }
-  // Grime settles toward the bottom of every panel.
+  // Panel grime accumulates near the bottom.
   const g = a.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, "rgba(0,0,0,0)");
   g.addColorStop(0.7, `rgba(40,26,12,${0.12 * grime})`);
   g.addColorStop(1, `rgba(30,18,8,${0.4 * grime})`);
   a.fillStyle = g;
   a.fillRect(0, 0, W, H);
-  // Panel seams with a lit lip and riveted edges.
+
   const sx = o.seamsX ?? 6,
     sy = o.seamsY ?? 2;
   const seamPoints: Array<[number, number]> = [];
@@ -193,7 +191,7 @@ export function paintedMetal(o: PaintOptions): Surface {
     bb.fill();
   }
   function paintChips(): void {
-    // Chipped enamel exposing dark primer and bare metal.
+
     for (let i = 0; i < chips * 90; i++) {
       const near =
         seamPoints.length && rnd() > 0.4
@@ -217,7 +215,7 @@ export function paintedMetal(o: PaintOptions): Surface {
     }
   }
   paintChips();
-  // Rust runs that start at seams and rivets and drip downward.
+  // Rust descends from seams/rivets.
   for (let i = 0; i < rust * 70; i++) {
     const start =
       seamPoints.length && rnd() > 0.3
@@ -244,7 +242,7 @@ export function paintedMetal(o: PaintOptions): Surface {
   return surface(c, b, r);
 }
 
-/** Aged brass: warm metal with smudges, a little verdigris and fine polishing scratches. */
+// Brass patina and polishing scratches.
 export function agedBrass(seed: number, base: string = "#b8894a"): Surface {
   const W = 512,
     H = 512;
@@ -293,7 +291,7 @@ export function agedBrass(seed: number, base: string = "#b8894a"): Surface {
   return surface(c, b, r);
 }
 
-/** Radial deck of riveted brass and copper plates, worn bright along the walking line. */
+// Riveted radial deck; foot traffic polishes the walking ring.
 export function deckPlates(seed: number): Surface {
   const S = 1024,
     C = S / 2;
@@ -380,7 +378,7 @@ export function deckPlates(seed: number): Surface {
     if (rnd() <= 0.5) color = rnd() > 0.6 ? "#7a3c1c" : "#a8a59c";
     blob(a, x, y, rad, color, 0.16);
   }
-  // Polished walking ring: brighter and smoother where feet have worn the patina.
+  // Walking ring is brighter/smoother than surrounding patina.
   a.globalAlpha = 0.22;
   a.strokeStyle = "#b9b6ab";
   a.lineWidth = 70;
@@ -400,7 +398,6 @@ export function deckPlates(seed: number): Surface {
   return result;
 }
 
-/** Oiled plank floor or desk veneer. */
 export function woodPlanks(seed: number, base: string = "#6b3f24", planks: number = 8): Surface {
   const W = 512,
     H = 512;
@@ -436,7 +433,6 @@ export function woodPlanks(seed: number, base: string = "#6b3f24", planks: numbe
   return surface(c, b, r);
 }
 
-/** Diamond-tufted leather for the studio walls and chair. */
 export function tufted(seed: number, base: string = "#7a3a22"): Surface {
   const S = 512;
   const rnd = random(seed);
@@ -489,7 +485,6 @@ export function hazard(): THREE.CanvasTexture {
   return texture(c, true);
 }
 
-/** Soft cloud puff used for fog banks and steam. */
 export function cloud(seed: number): THREE.CanvasTexture {
   const S = 256;
   const rnd = random(seed);
@@ -524,7 +519,7 @@ export function glow(inner: string = "rgba(255,226,170,1)"): THREE.CanvasTexture
   return t;
 }
 
-/** Instrument face: cream dial with ticks and a red zone; `amber` gives a backlit VU meter. */
+// Cream dial with red zone; amber selects backlit VU styling.
 export function dial(amber: boolean): THREE.CanvasTexture {
   const S = 256;
   const [c, a] = layer(S, S);
@@ -565,7 +560,7 @@ export function dial(amber: boolean): THREE.CanvasTexture {
   return t;
 }
 
-/** Glow mask for a dial's red zone: the red ticks and arc on black, for an emissive map. */
+// Emissive mask: red ticks/arc on black.
 export function dialRedZone(): THREE.CanvasTexture {
   const [c, a] = layer(256, 256);
   a.fillStyle = "#000000";
@@ -590,7 +585,6 @@ export function dialRedZone(): THREE.CanvasTexture {
   return t;
 }
 
-/** Horizontal slot grille for the classic desk microphone. */
 export function grille(): THREE.CanvasTexture {
   const [c, a] = layer(64, 512);
   a.fillStyle = "#e8e8e4";
@@ -603,7 +597,6 @@ export function grille(): THREE.CanvasTexture {
   return t;
 }
 
-/** Tape reel face: aluminium flange with three cut-outs. */
 export function reel(): THREE.CanvasTexture {
   const S = 256;
   const [c, a] = layer(S, S);
@@ -634,7 +627,6 @@ export function reel(): THREE.CanvasTexture {
   return t;
 }
 
-/** Studio clock face. */
 export function clockFace(): THREE.CanvasTexture {
   const [c, a] = layer(256, 256);
   a.fillStyle = "#efe4c6";
@@ -655,7 +647,7 @@ export function clockFace(): THREE.CanvasTexture {
   return t;
 }
 
-/** Page-matching backdrop: deep teal with a lit haze behind the station. */
+// Page-matching teal backdrop with station haze.
 export function backdrop(): THREE.CanvasTexture {
   const [c, a] = layer(1024, 640);
   a.fillStyle = "#061a1e";
@@ -669,7 +661,6 @@ export function backdrop(): THREE.CanvasTexture {
   return t;
 }
 
-/** Dark fluted wall panelling for the studio, with vertical channels and a faint sheen. */
 export function flutes(seed: number): Surface {
   const W = 512,
     H = 512;
@@ -700,8 +691,7 @@ export function flutes(seed: number): Surface {
   return surface(c, b, r);
 }
 
-/** Face of a rack of broadcast equipment: brushed panels, amber meters, knobs and a tuning dial.
-    Returns the colour map and a matching emissive map in which only the meter windows glow. */
+// Equipment rack color/emissive maps; only meter windows emit.
 export function rackFace(): {
   map: THREE.CanvasTexture;
   glow: THREE.CanvasTexture;

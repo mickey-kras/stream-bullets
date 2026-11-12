@@ -95,11 +95,8 @@ function CardTools({
   );
 }
 
-/**
- * The Community tab (item 24). Viewers see the owner's cards (or the two defaults until the first save, R18) and an
- * optional Support card. The owner adds, edits, deletes and reorders (drag, or the up and down buttons) up to 8 cards;
- * every change saves the whole list.
- */
+// Show saved/default cards and optional Support. Owners manage up to eight cards with drag or buttons. Each
+// save replaces the list.
 export function CommunityView({
   name,
   cards: saved,

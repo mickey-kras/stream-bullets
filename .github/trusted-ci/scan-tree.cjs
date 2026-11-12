@@ -2,9 +2,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const assert = require("node:assert/strict");
 
-// Never follow candidate links or allow its tool-control files into a privileged
-// scanner's configuration search. The original checkout remains available to
-// scanners that accept an explicit trusted configuration.
+// Exclude candidate symlinks and tool controls from privileged scanner discovery.
+// Scanners with explicit trusted configuration can use the original checkout.
 function prepare(source, destination, trusted = __dirname) {
   source = fs.realpathSync(source);
   destination = path.resolve(destination);
@@ -41,8 +40,7 @@ function prepare(source, destination, trusted = __dirname) {
         copy(input, output);
       } else {
         assert.ok(entry.isFile(), "Candidate must contain only regular files and directories");
-        // The pinned Aislop API always applies inline suppressions. Reject their
-        // comment syntax and the duplicate detector's unanchored syntax before scanning.
+        // Pinned Aislop applies suppressions. Reject inline and unanchored duplicate directives first.
         const content = fs.readFileSync(input, "utf8");
         assert.ok(
           !suppression.test(content) && !duplicateSuppression.test(content),

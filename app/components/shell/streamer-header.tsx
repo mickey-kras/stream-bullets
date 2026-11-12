@@ -26,11 +26,8 @@ const viewLabel: Record<StreamerView, MessageId> = {
   community: "streamer.nav.community",
 };
 
-/**
- * The streamer page header. Left: the small StreamBullets icon (home), a divider, then the streamer's picture and
- * name (their Topics). Middle: the five tabs as links with aria-current. Right: Streamers, the page action
- * (`action`, e.g. Suggest a topic) and the account control. On phones it keeps two rows and never wraps a label.
- */
+// Header: home/streamer identity, active tab links, page action and account. Phones use two rows without
+// label wrapping.
 export function StreamerHeader({
   streamer,
   current,

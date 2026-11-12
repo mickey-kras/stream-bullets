@@ -3,11 +3,9 @@ const YAML = require("yaml");
 
 const BOT = { login: "dependabot[bot]", id: 49699333, type: "Bot" };
 const GROUPS = ["dependencies", "devDependencies", "optionalDependencies"];
-// Scanner tool dependencies stay manual: updating them also needs a reviewed
-// immutable PINNED promotion, otherwise the scanner would still run old code.
+// Scanner updates need a reviewed PINNED promotion to execute the new code.
 const PACKAGES = [["package.json", "pnpm-lock.yaml"]];
-// Repository manifests use exact registry versions. URLs, aliases, ranges and
-// local/workspace dependencies are outside automatic admission.
+// Admit exact registry versions only. URLs, aliases, ranges, and local packages need approval.
 const VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const PACKAGE_NAME = /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/;
 const ACTION = /^([\w.-]+(?:\/[\w.-]+)+)@[a-f0-9]{40}$/;
@@ -56,8 +54,7 @@ function actionPinsOnly(before, after) {
 }
 
 function lockControlsUnchanged(before, after, manifest) {
-  // Registry packages resolve by name/version through the protected registry
-  // configuration. Non-registry resolutions require explicit owner admission.
+  // Use the protected registry. Other resolutions need explicit owner approval.
   if (!after.packages || typeof after.packages !== "object" || Array.isArray(after.packages)) return false;
   for (const [identifier, pkg] of Object.entries(after.packages)) {
     const separator = identifier.lastIndexOf("@");
@@ -136,8 +133,7 @@ async function admittedDependabot(pull, repository, base, head, read) {
     const after = JSON.parse(await read(head[packagePath]));
     if (!dependencyVersionsOnly(before, after)) return false;
 
-    // Dependency graph consistency and vulnerabilities remain enforced by the
-    // frozen install/audit gates. Admission freezes lockfile control metadata.
+    // Frozen installs and audits check the dependency graph. Admission preserves lockfile controls.
     if (!lockControlsUnchanged(parseYaml(await read(base[lockPath])), parseYaml(await read(head[lockPath])), after)) {
       return false;
     }

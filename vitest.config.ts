@@ -3,8 +3,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
-    // Outside workerd, `cloudflare:workers` resolves to a stub. Tests that need the Durable Object runtime mock it
-    // with tests/helpers/room.ts instead.
+    // Outside workerd, use a stub. Room tests mock the module with tests/helpers/room.ts.
     alias: { "cloudflare:workers": fileURLToPath(new URL("vitest.workers-stub.config.ts", import.meta.url)) },
   },
   test: {

@@ -10,11 +10,11 @@ import { Icon } from "../ui/icon";
 
 export type OverlayPoll = LiveSnapshot["polls"][number];
 
-/** What one overlay graphic needs. The OBS page and the control page monitors share it. */
+// Shared graphic data for OBS and control monitors.
 export interface OverlayScene {
   name: string;
   handle: string;
-  /** The host the "Tap at" line shows, such as streambullets.com. */
+  // Host shown in Tap at.
   host: string;
   overlay: Pick<OverlayPublic, "position" | "size" | "showResults" | "message" | "messageStyle">;
   polls: readonly OverlayPoll[];
@@ -26,7 +26,7 @@ function noSubscription(): () => void {
   return (): void => undefined;
 }
 
-/** False during the server render and hydration, so times render in the viewer's own time zone only. */
+// Delay local-time rendering until after hydration.
 function useHydrated(): boolean {
   return useSyncExternalStore(
     noSubscription,
@@ -35,10 +35,8 @@ function useHydrated(): boolean {
   );
 }
 
-/**
- * The poll a poll source shows: Auto picks the newest open poll, else the newest poll. A Mash Battle is open until
- * its phase at `now` is finished; its entry never gets an end time or a reveal.
- */
+// Auto chooses newest open poll, then newest poll. Mash openness follows phase at now; entries never receive
+// end/reveal values.
 export function overlayPoll(
   source: OverlaySourceRef,
   polls: readonly OverlayPoll[],
@@ -57,7 +55,7 @@ function MashOverlay({ scene, poll }: Readonly<{ scene: OverlayScene; poll: Over
   const view = useMashView(poll, scene.now);
   if (!view) return null;
   const shown: boolean = scene.overlay.showResults;
-  // With results hidden, a finished battle shows an empty ring instead of its winner.
+  // Hidden results use an empty ring, including finished battles.
   let left: number = view.current === "live" ? view.left : view.durationS;
   if (view.current === "finished") left = 0;
   const top: ReactNode =
@@ -126,7 +124,7 @@ function startsIn(startsAt: number, now: number): string {
   return t("overlay.inDays", { n: Math.floor(hours / 24) });
 }
 
-/** When the Up next source needs new data: the start of the stream it shows. Null for other sources. */
+// Refresh Up next at its stream's start; null for other sources.
 export function upNextStart(source: OverlaySourceRef, data: Pick<OverlayData, "next">): number | null {
   return source.type === "next" ? (data.next?.startsAt ?? null) : null;
 }
@@ -157,7 +155,7 @@ function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
 }
 
 function CommunityOverlay({ scene, source }: Readonly<{ scene: OverlayScene; source: OverlaySourceRef }>): ReactNode {
-  // No ref means the first card; a ref to a removed card shows nothing rather than another card.
+  // Missing ref selects first card; deleted refs show nothing.
   const card = source.ref === null ? scene.data.cards[0] : scene.data.cards.find((item) => item.id === source.ref);
   if (!card) return null;
   let target: string = "";
@@ -239,10 +237,7 @@ function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source
   return null;
 }
 
-/**
- * One overlay graphic on a 1920 by 1080 stage: polls and Mash Battles fill the stage, the other
- * sources sit where the position preset puts them. "Hidden" renders an empty, transparent stage.
- */
+// 1920x1080 stage. Polls/battles fill it; other sources use presets. Hidden is transparent and empty.
 export function OverlayStage({
   scene,
   source,

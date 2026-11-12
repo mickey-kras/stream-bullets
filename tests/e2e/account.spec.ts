@@ -30,7 +30,7 @@ test("a member downloads their data, deletes their account, and is signed out", 
     },
   ]);
   const page = await newPage(context);
-  // The old settings page opens Your profile over the Streamers list; Your data is in the account menu.
+  // Legacy /settings opens Your profile; Your data stays in the account menu.
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/streamers\?dialog=profile$/);
   await expect(page.getByRole("dialog", { name: "Your profile" })).toBeVisible();
@@ -59,15 +59,14 @@ test("a member downloads their data, deletes their account, and is signed out", 
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("button", { name: "Keep my account" })).toBeVisible();
   await expect(dialog).toContainText("Replies other people wrote under your comments stay");
-  // The list fits the account: this one owns a page.
   await expect(dialog).toContainText("Your streamer page and everything posted on it");
   const confirm = dialog.getByRole("button", { name: "Type DELETE to enable" });
   await expect(confirm).toBeDisabled();
   await dialog.getByLabel("Type DELETE to confirm").fill("DELET");
   await expect(confirm).toBeDisabled();
-  // Any letter case confirms (review m21).
+  // Confirmation ignores letter case.
   await dialog.getByLabel("Type DELETE to confirm").fill("delete");
-  // Fixtures have no linked provider. A rejected deletion must still show the sign-in state.
+  // Fixtures have no provider; failed deletion must retain sign-in controls.
   await page.route("**/api/account/delete", (route) => route.fulfill({
     status: 403,
     json: { error: "Sign in again to delete your account.", code: "reauth_required" },

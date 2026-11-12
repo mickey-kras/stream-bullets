@@ -46,13 +46,13 @@ export interface StationController {
 }
 
 export interface StationOptions {
-  /** Font stack used for painted signage. */
+
   family?: string;
-  /** Fraction of the canvas width to push the model right, leaving room for page copy. */
+  // Horizontal canvas fraction reserved for copy.
   shift?: (width: number, height: number) => number;
-  /** Pixels at the top of the canvas covered by page content (phones), so the model is framed below it. */
+  // Phone content occlusion in pixels.
   overlap?: () => number;
-  /** A sign was clicked or tapped (0 Suggest a topic, 1 Vote in a poll, 2 Discuss the stream); its flip is done. */
+  // Completed sign flip: 0 suggest, 1 vote, 2 discuss.
   onSign?: (index: number) => void;
 }
 
@@ -64,8 +64,7 @@ interface Shot {
   shift: number;
 }
 
-/** On phones the station stands under the copy. This is the closest the camera comes; `fitPhone` pulls
-    it back and re-aims it so the whole model fits the part of the canvas the copy leaves uncovered. */
+// Minimum phone camera distance; fitPhone pulls back/re-aims to fit the uncovered canvas.
 const PHONE_HERO: Shot = {
   target: new THREE.Vector3(0, 4.25, 0),
   theta: 0.16,
@@ -73,19 +72,18 @@ const PHONE_HERO: Shot = {
   radius: 17.5,
   shift: 0,
 };
-/** Height of the model on screen from the hero angle, in world units: the deck's near edge to the top of
-    the signal rings, with the lean of the view folded in. */
+// Projected model height in world units, from near deck edge to signal rings, including view lean.
 const MODEL_LOW = -2.6;
 const MODEL_HIGH = 9.6;
 
-/** Phone hero shot for a canvas whose top `hidden` fraction is covered by the page. */
+// Phone hero framing with hidden top fraction.
 export function fitPhone(fovDegrees: number, hidden: number): Shot {
   const tanHalf = Math.tan(THREE.MathUtils.degToRad(fovDegrees / 2));
   const covered = Math.min(0.6, Math.max(0, hidden));
   const span = MODEL_HIGH - MODEL_LOW;
   const radius = Math.max(PHONE_HERO.radius, span / ((1 - covered) * 2 * tanHalf));
   const visible = 2 * tanHalf * radius;
-  // Centre the model in the uncovered part of the frame.
+  // Center in the uncovered frame.
   const y = (MODEL_LOW + MODEL_HIGH) / 2 + (covered * visible) / 2;
   return { ...PHONE_HERO, radius, target: new THREE.Vector3(0, y, 0) };
 }
@@ -161,7 +159,7 @@ const SHOTS: Record<StationView, Shot> = {
   },
 };
 
-/** How long the station waits after an orbit drag before easing back to its hero angle. */
+// Idle delay before returning from orbit to hero view.
 const RETURN_AFTER_MS = 4000;
 
 function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRenderer {
@@ -172,7 +170,7 @@ function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRend
   renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio, compact ? 1.25 : 1.6));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
-  // The light and almost all of the model are fixed, so the shadow map is drawn on demand, not per frame.
+  // Fixed lighting/geometry permit on-demand shadows.
   renderer.shadowMap.autoUpdate = false;
   renderer.shadowMap.needsUpdate = true;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -182,12 +180,12 @@ function createRenderer(wrap: HTMLDivElement, compact: boolean): THREE.WebGLRend
     "aria-label",
     "3D model of a round teal and brass radio station with a broadcast mast, steam tanks and a studio inside. Drag to turn it.",
   );
-  // The landing never scrolls, so every drag on the canvas turns the station.
+  // Canvas drags orbit the station.
   renderer.domElement.style.touchAction = "none";
   return renderer;
 }
 
-/** Image-based lighting: teal sky, warm horizon and a few softboxes so brass has something to reflect. */
+// Teal sky, warm horizon and softbox reflections.
 function createEnvironment(renderer: THREE.WebGLRenderer): THREE.WebGLRenderTarget {
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envScene = new THREE.Scene();
@@ -269,7 +267,7 @@ function addLights(scene: THREE.Scene, compact: boolean): THREE.DirectionalLight
   return key;
 }
 
-/** Bloom for the lamps and neon, then a soft vignette and film grain. */
+// Lamp/neon bloom, vignette and grain.
 function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
   const composer = new EffectComposer(
     renderer,
@@ -301,13 +299,13 @@ function createPost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: T
   return { composer, bloom, finish };
 }
 
-/** Hand the main thread back to the browser for a moment, so taps, scrolling and paint keep up. */
+// Yield for input, scrolling and paint.
 const pause = (): Promise<void> =>
   new Promise((resolve: () => void): void => {
     setTimeout(resolve, 0);
   });
 
-/** Builds the model part by part, pausing between parts so the page stays responsive while it loads. */
+// Build in yielding steps to keep the page responsive.
 async function buildModel(
   k: Kit,
   scene: THREE.Scene,
@@ -328,16 +326,16 @@ async function buildModel(
   const signs = buildSigns(k, station);
   buildAtom(k, station);
   await pause();
-  // Merge everything that never moves; the camera-facing mast head and the flipping signs stay live.
+  // Merge static parts; retain mast head and sign animation.
   const moving = batchStatic(station, k.animators, [tilt, ...signs]);
-  // Shadows render once (see the loop), so parts that move on their own do not cast stale ones.
+  // Moving parts must not cast stale one-shot shadows.
   for (const m of moving) m.castShadow = false;
-  // The drifting haze lives outside the station, so it joins after the merge has sampled the animators.
+  // Add external haze after merge animation sampling.
   buildAtmosphere(k, scene);
   return { tilt, signs };
 }
 
-/** Camera rig: smooth spherical moves between shots, plus a horizontal view offset for page copy. */
+// Spherical camera transitions with horizontal copy offset.
 function createRig(
   camera: THREE.PerspectiveCamera,
   controls: OrbitControls,
@@ -387,7 +385,7 @@ function createRig(
   return { rig, place, step, applyShift };
 }
 
-/** Vertical orbit limits (polar angle from straight above): from almost overhead to below the deck. */
+// Polar limits: near overhead to below deck.
 const MIN_POLAR = 0.05;
 const MAX_POLAR = Math.PI - 0.05;
 
@@ -432,8 +430,7 @@ function disposeScene(scene: THREE.Scene, k: Kit): void {
   if (scene.background instanceof THREE.Texture) scene.background.dispose();
 }
 
-/** Builds the station into `wrap`. The build runs in steps (see `buildModel`), so it resolves once the
-    first frame is ready; the canvas joins the page only then. */
+// Build into wrap in steps; resolve at first-frame readiness before mounting the canvas.
 export async function createStation(
   wrap: HTMLDivElement,
   onFailure: () => void,
@@ -454,7 +451,7 @@ export async function createStation(
     last: performance.now(),
     visible: true,
     view: "hero" as StationView,
-    /** When the last orbit drag ended, or -1 when the camera has not been dragged away. */
+    // Last orbit completion; -1 before any drag.
     idleSince: -1,
     shadowTilt: Number.NaN,
   };
@@ -472,8 +469,7 @@ export async function createStation(
   const { tilt, signs } = await buildModel(k, scene, station);
   const key = addLights(scene, compact.matches);
   const { composer, bloom, finish } = createPost(renderer, scene, camera);
-  // Compile shaders off the critical path where the browser can (parallel shader compile), instead of
-  // stalling the first frame.
+  // Compile shaders asynchronously where supported to avoid first-frame stalls.
   await renderer.compileAsync?.(scene, camera);
   wrap.appendChild(renderer.domElement);
 
@@ -485,7 +481,7 @@ export async function createStation(
   });
   controls.addEventListener("end", (): void => {
     state.dragging = false;
-    // After a drag the station drifts back to its hero angle once it has been left alone for a while.
+    // Return to hero view after orbit inactivity.
     state.idleSince = performance.now();
   });
   controls.addEventListener("change", (): void => {
@@ -503,7 +499,7 @@ export async function createStation(
     composer.setSize(rig.width, rig.height);
     bloom.resolution.set(rig.width / 2, rig.height / 2);
     shots.hero = compact.matches ? fitPhone(camera.fov, (options.overlap?.() ?? 0) / rig.height) : SHOTS.hero;
-    // Re-frame on either side of the breakpoint unless the person has turned the station themselves.
+    // Reframe across breakpoints unless the user has orbited.
     if (state.view === "hero" && !state.dragging && state.idleSince < 0) {
       rig.goal = shots.hero;
       place(shots.hero);
@@ -565,7 +561,7 @@ export async function createStation(
       0,
     );
     const turning = flips.update(camera, dt, state.playing);
-    // Redraw shadows only when something that casts them has moved: a turning sign or the mast head.
+    // Redraw shadows only after caster movement.
     if (turning || Math.abs(tilt.rotation.y - state.shadowTilt) >= 0.04) {
       renderer.shadowMap.needsUpdate = true;
       state.shadowTilt = tilt.rotation.y;

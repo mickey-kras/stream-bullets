@@ -3,8 +3,7 @@ import { fileURLToPath } from "node:url";
 import safeTools from "./safe-path.cjs";
 
 const trusted = dirname(fileURLToPath(import.meta.url));
-// Only reviewed tools are discoverable. In particular Cargo/Ruby/PHP and npx
-// must not execute candidate build scripts, plugins, or downloaded tools.
+// Expose reviewed tools only. Block Cargo/Ruby/PHP and npx from executing candidate or downloaded code.
 process.env.PATH = safeTools.safePath(join(process.env.RUNNER_TEMP, "aislop-safe-bin"));
 process.env.AISLOP_NO_TELEMETRY = "1";
 process.env.DO_NOT_TRACK = "1";

@@ -16,7 +16,7 @@ import { loader as controlLoader } from "../app/routes/overlay-control";
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
-/** Mash Battle and overlay control (Phase 5), and the owner's schedule and Community routes, end to end on D1. */
+// D1 integration checks for battles, overlays, schedules, and Community.
 
 const origin = "https://live.example.test";
 const secret = "test-only-secret-5b1e0c9d8a7f6e5d4c3b2a1908f7e6d5";
@@ -30,7 +30,7 @@ const foreignTopic = "20000000-0000-4000-8000-000000000014";
 
 let database: TestDatabase;
 let env: AppEnv;
-/** The live room calls the API made, as `path?streamerId` plus the JSON body. */
+// Record room API calls as path?streamerId plus JSON body.
 let roomCalls: { path: string; body: string }[];
 
 const { call, cookie, context } = apiCaller(() => env, origin, secret);
@@ -238,7 +238,7 @@ describe("Auto on the overlay", (): void => {
     const auto = (newest: OverlayPoll): string | undefined =>
       overlayPoll({ type: "auto", ref: null }, [newest, open], now)?.id;
     expect(auto(battle("finished", now - 60_000))).toBe("open");
-    // Still stored as live, but past its end.
+    // Stored as live, but already past its end.
     expect(auto(battle("live", now - 60_000))).toBe("open");
     expect(auto(battle("live", now - 5_000))).toBe("battle-live");
     expect(auto(battle("countdown", now + 3_000))).toBe("battle-countdown");
@@ -252,7 +252,7 @@ describe("Up next on the overlay", (): void => {
 
   it("reloads the overlay once, when the shown stream starts", (): void => {
     vi.useFakeTimers();
-    // The local clock runs 3 seconds ahead of the server; the reload follows the server.
+    // The local clock is 3 s ahead; reload must use server time.
     vi.setSystemTime(1_000_000 + 3_000);
     const serverNow = 1_000_000;
     const data: Pick<OverlayData, "next"> = { next: { title: "Boss rush", startsAt: serverNow + 600_000 } };
@@ -363,7 +363,7 @@ describe("overlay poll card", (): void => {
     expect(battle("finished", true)).toContain("mash-winner");
     for (const phase of ["live", "finished"] as const) {
       const hidden = battle(phase, false);
-      // The sides, the phase and the clock stay; the bar, the totals and the winner go.
+      // Keep sides, phase, and clock; hide bar, totals, and winner.
       expect(hidden).toContain(`data-overlay-mash="${phase}"`);
       expect(hidden).toContain("Cats");
       expect(hidden).toContain("Dogs");
@@ -497,7 +497,7 @@ describe("Mash Battle owner controls", (): void => {
     expect((await act(id, "start", {}, "viewer")).status).toBe(403);
     expect((await act(id, "start", { countdown: "yes" })).status).toBe(400);
     expect((await act(id, "pause")).status).toBe(404);
-    // Another request changed the battle between the read and the write.
+    // Simulate a concurrent battle change between read and write.
     const raced: AppEnv = {
       ...env,
       DB: {
@@ -555,7 +555,7 @@ describe("overlay control", (): void => {
     await send({ action: "layout", instant: true, size: "s" });
     const state = await overlay(await send({ action: "preview", source: { type: "topic", ref: topic } }));
     expect(state).toMatchObject({ air: { type: "topic", ref: topic }, preview: { type: "topic", ref: topic } });
-    // The GET also returns a topic on air even when it is not in the newest list.
+    // GET must return the on-air topic outside the newest list.
     const read = await body<{ data: OverlayData }>(await call("GET", "overlay", { user: "owner" }));
     expect(read.data.topics.map((value) => value.id)).toContain(topic);
   });
@@ -597,7 +597,7 @@ describe("overlay control", (): void => {
     expect(roomCalls).toEqual([]);
   });
 
-  /** A database where `race` runs right after each of the first `times` overlay reads, like a second tab saving. */
+  // Run `race` after the first `times` overlay reads to simulate a second tab.
   function racingEnv(race: () => Promise<unknown>, times: number): AppEnv {
     let left = times;
     const db = env.DB;
@@ -655,7 +655,7 @@ describe("overlay control", (): void => {
   });
 
   it("keeps an old topic on air and in preview in the monitors' data", async (): Promise<void> => {
-    // 55 newer topics push the seeded one out of the newest 50.
+    // 55 newer topics displace the seed from the newest 50.
     const newer: string[] = Array.from({ length: 55 }, (): string => crypto.randomUUID());
     await env.DB.batch(
       newer.map((id: string, index: number) =>
@@ -672,7 +672,7 @@ describe("overlay control", (): void => {
     const loaded = await controlLoader({ request, params: {}, context: context(), url: new URL(url), pattern: "" });
     expect(loaded.state.air).toEqual({ type: "topic", ref: topic });
     expect(loaded.data.topics.map((value) => value.id)).toContain(topic);
-    // The overlay API the control page reloads from holds it too, on air or in preview.
+    // Overlay reload retains the topic on air or in preview.
     const api = async (): Promise<string[]> =>
       (await body<{ data: OverlayData }>(await call("GET", "overlay", { user: "owner" }))).data.topics.map(
         (value) => value.id,
@@ -713,7 +713,6 @@ describe("overlay control", (): void => {
     ]);
     expect(data.next).toEqual({ title: "Soon", startsAt: now + day });
     expect(data.support).toEqual({ kind: "kofi", label: null, url: "https://ko-fi.com/live" });
-    // A provider picture URL is never sent to the OBS page.
     await env.DB.prepare("UPDATE user SET image='https://cdn.example/a.png' WHERE id='viewer'").run();
     expect((await getOverlayData(env, page, [topic])).topics[0].avatar).toBeNull();
   });
@@ -782,7 +781,7 @@ describe("schedule and Community routes", (): void => {
   it("reloads an overlay showing Up next after each schedule change, and only then", async (): Promise<void> => {
     const revision = async (): Promise<number> => (await getOverlayState(env, page)).revision;
     const reloads = (): number => roomCalls.filter((value) => value.path === `/overlay?streamerId=${page}`).length;
-    // Another source on air: schedule changes leave the overlay alone.
+    // Schedule edits must preserve other on-air sources.
     await updateOverlay(env, "owner", page, { action: "preview", source: { type: "topic", ref: topic } });
     await updateOverlay(env, "owner", page, { action: "take" });
     let before = await revision();
@@ -790,7 +789,7 @@ describe("schedule and Community routes", (): void => {
     const { event: stream } = await body<{ event: StreamEvent }>(first);
     expect(await revision()).toBe(before);
     expect(reloads()).toBe(0);
-    // Up next on air (in preview too): creating, moving, cancelling and deleting all reload it.
+    // Up next must reload on event creation, edits, cancellation, and deletion.
     await updateOverlay(env, "owner", page, { action: "preview", source: { type: "next", ref: null } });
     await updateOverlay(env, "owner", page, { action: "take" });
     const steps: [string, string, Record<string, unknown> | undefined][] = [
@@ -841,7 +840,7 @@ describe("schedule and Community routes", (): void => {
       user: "owner",
       body: { links: [{ kind: "kofi", label: null, url: "https://ko-fi.com/live" }], visible: false, card: true },
     });
-    // The card leads to the links in About, so it is stored off while they are hidden.
+    // Hide the support card when its About links are hidden.
     expect(await body(support)).toMatchObject({ visible: false, card: false, links: [{ kind: "kofi" }] });
     expect(
       (await call("PUT", "support-links", { user: "owner", body: { links: [{ kind: "kofi", url: "x" }] } })).status,

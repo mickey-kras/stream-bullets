@@ -6,13 +6,12 @@ import { clientIp } from "./client-ips";
 test("mobile landing is one screen with Browse streamers and the scene under the copy", async ({ page }) => {
   test.slow(); // software WebGL in CI builds the scene on the CPU
   await page.setViewportSize({ width: 390, height: 844 });
-  // Reduced motion renders the scene on demand, which keeps software WebGL in CI responsive.
+  // Reduced motion keeps CI software WebGL responsive.
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   const heading = page.getByRole("heading", { name: "YOUR VOICE, ON AIR." });
   await expect(heading).toBeVisible();
-  // The live station fills the screen under the headline. The atom shows while the scene loads (slowly,
-  // on CI's software WebGL); then the station either renders or explains why it cannot.
+  // Show the loading atom, then the station or its failure message.
   const station = page.locator(".landing-station");
   await expect(station.locator(".landing-canvas canvas").or(station.locator(".station-status"))).toHaveCount(1, {
     timeout: 60_000,
@@ -22,7 +21,6 @@ test("mobile landing is one screen with Browse streamers and the scene under the
   const stationBox = (await station.boundingBox())!;
   expect(stationBox.y).toBeGreaterThan(headingBox.y + headingBox.height);
   expect(stationBox.y + stationBox.height).toBeLessThanOrEqual(844 + 1);
-  // Browse remains the primary action; streamers can join through the existing application flow.
   const headerSignIn = page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true });
   await expect(headerSignIn).toHaveCount(1);
   await expect(page.getByRole("main").getByRole("button", { name: "Sign in / Sign up" })).toHaveCount(0);
@@ -44,10 +42,8 @@ test("mobile landing is one screen with Browse streamers and the scene under the
   await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toBeVisible();
   await page.getByRole("button", { name: "Close dialog" }).click();
   await expect(headerSignIn).toBeFocused();
-  // The legal footer stays on the one screen.
   await expect(page.getByRole("contentinfo").getByRole("link", { name: "Privacy" })).toBeInViewport();
   await expect(page.getByRole("heading", { name: "Pick the next conversation" })).toHaveCount(0);
-  // One adaptive screen: nothing scrolls in either direction.
   const page_ = await page.evaluate(() => {
     const el = document.querySelector(".landing-page")!;
     return {
@@ -78,7 +74,7 @@ test("desktop landing remains usable when WebGL is unavailable", async ({ page }
   await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toBeVisible();
   await page.getByRole("button", { name: "Close dialog" }).click();
-  // The station's three signs are also plain links, so they work without WebGL and from the keyboard.
+  // Plain sign links work without WebGL and with the keyboard.
   const start = page.getByRole("list", { name: "Get started" });
   await expect(start.getByRole("link")).toHaveText(["Suggest a topic", "Vote in a poll", "Discuss the stream"]);
   await start.getByRole("link", { name: "Vote in a poll" }).click();
@@ -88,7 +84,7 @@ test("desktop landing remains usable when WebGL is unavailable", async ({ page }
 
 test("the tilt pill shows only on touch devices that ask for motion access", async ({ browser }) => {
   test.slow(); // software WebGL in CI builds the scene on the CPU
-  // Desktop: even a browser with requestPermission (Safari on a Mac) gets no pill.
+  // Desktop gets no permission pill, even with requestPermission.
   const desktop = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: "reduce" });
   const stubPermission = (): void => {
     Object.defineProperty(globalThis.DeviceOrientationEvent, "requestPermission", {
@@ -104,7 +100,7 @@ test("the tilt pill shows only on touch devices that ask for motion access", asy
   await expect(page.getByRole("button", { name: "Tilt to look around" })).toHaveCount(0);
   await close(desktop);
 
-  // A touch phone whose browser needs the tap (iOS Safari) gets the pill once the station is ready.
+  // Show the permission pill on touch phones once the station is ready.
   const phone = await browser.newContext({
     viewport: { width: 390, height: 844 },
     hasTouch: true,
@@ -112,8 +108,7 @@ test("the tilt pill shows only on touch devices that ask for motion access", asy
     reducedMotion: "reduce",
   });
   await phone.addInitScript(stubPermission);
-  // Reduced motion hides the pill (tilting is motion). The system asks for less motion here to keep the CPU
-  // scene still, so the Accessibility & display setting "Full motion" brings the pill back.
+  // Reduced motion hides tilt permission. Full motion restores it.
   await phone.addCookies([
     { name: "sb_prefs", value: encodeURIComponent('{"motion":"full"}'), domain: "localhost", path: "/" },
   ]);

@@ -1,8 +1,6 @@
 import * as THREE from "three";
 
-/* An original retro public-service poster for the studio wall: two-tone slate and cream, embossed
-   lettering, a storm of static up top and the station microphone in a roundel. Painted large and
-   mipmapped so it stays crisp when the camera is far away and clean when it is close. */
+// Original slate/cream broadcast poster. Large mipmapped artwork stays clear across viewing distances.
 
 const W = 512;
 const H = 700;
@@ -52,7 +50,7 @@ function bolt(a: Ctx, x: number, y: number, s: number): void {
   a.fill();
 }
 
-/** The upper scene: a broadcast mast beaming through storm clouds full of static. */
+// Static-filled storm and broadcast mast.
 function skyline(a: Ctx): void {
   a.fillStyle = CREAM;
   a.strokeStyle = CREAM;
@@ -110,7 +108,7 @@ function outlined(a: Ctx, fill: string, width = 7): void {
   a.stroke();
 }
 
-/** The roundel: a big ribbon microphone on its yoke, outlined in ink like a print. */
+// Ink-outlined microphone roundel.
 function roundel(a: Ctx): void {
   const cx = W / 2;
   const cy = 420;
@@ -167,7 +165,6 @@ function roundel(a: Ctx): void {
   }
 }
 
-/** A small atom badge in the corner, the station's own emblem. */
 function badge(a: Ctx): void {
   const x = 440;
   const y = 560;
@@ -204,7 +201,7 @@ export function poster(family: string): HTMLCanvasElement {
   return canvas;
 }
 
-/** The poster as a mipmapped, anisotropic texture, so it downsamples without shimmer. */
+// Mipmaps/anisotropy prevent shimmer when downsampling.
 export function posterTexture(family: string): THREE.CanvasTexture {
   const t = new THREE.CanvasTexture(poster(family));
   t.colorSpace = THREE.SRGBColorSpace;

@@ -6,10 +6,8 @@ import { overlayKeySchema, regenerateOverlayKey } from "../overlay-key.server";
 import { getOverlayData, getOverlayState, overlayActionSchema, sourceTopics, updateOverlay } from "../overlay.server";
 import { get, requireViewer, write, type ApiRoute } from "./router";
 
-/**
- * Mash Battle owner controls and overlay control (Phase 5). Taps do not come here: they go over the
- * live WebSocket (R16). Creating a battle is `POST /api/streamers/:handle {action:"create", kind:"mash"}`.
- */
+// Mash controls use HTTP; taps use the live WebSocket. Create battles with `POST /api/streamers/:handle
+// {action:"create", kind:"mash"}`.
 export const liveRoutes: ApiRoute[] = [
   // POST /api/mash/:id/start {countdown?} | /end {} | /restart {} → {ok: true}
   write("POST", /mash\/([0-9a-f-]{36})\/(start|end|restart)/, async ({ request, env, match, viewer }) => {

@@ -1,8 +1,7 @@
 name: docs-ste
 
-# ASD-STE100 Simplified Technical English gate for the documentation.
-# ste-cli checks the writing rules of the standard. Vale checks the STE style of vale-llm-slop.
-# These checks do not prove full Issue 9 compliance or validate dictionary meanings.
+# Check STE writing rules with ste-cli and Vale.
+# These checks do not certify Issue 9 compliance or dictionary meanings.
 
 'on':
   workflow_call:
@@ -40,7 +39,7 @@ jobs:
                 */.git/*|*/node_modules/*|*/.vale/styles/*|*/.architecture-site/*|*/dist/*|*/build/*|*/coverage/*|*/generated/*|*/licenses/*|*/license.md|*/license.markdown|*/third_party_notices.md|*/third_party_notices.markdown|*/changelog.md|*/changelog.markdown) continue ;;
               esac
               mkdir -p "$stage/$(dirname -- "$path")"
-              # Append a suffix to preserve distinct source paths and use the Markdown parser.
+              # Keep source paths distinct and select the Markdown parser.
               cp -- "$path" "$stage/$path.md"
             done
           git ls-files -z -- ':(icase)*.json' |
@@ -103,7 +102,7 @@ jobs:
                 */.git/*|*/node_modules/*|*/.vale/styles/*|*/.architecture-site/*|*/dist/*|*/build/*|*/coverage/*|*/generated/*|*/licenses/*|*/license.md|*/license.markdown|*/third_party_notices.md|*/third_party_notices.markdown|*/changelog.md|*/changelog.markdown) continue ;;
               esac
               mkdir -p "$stage/$(dirname -- "$path")"
-              # Append a suffix to preserve distinct source paths and use the Markdown parser.
+              # Keep source paths distinct and select the Markdown parser.
               cp -- "$path" "$stage/$path.md"
             done
           git ls-files -z -- ':(icase)*.json' |
@@ -141,5 +140,5 @@ jobs:
           config: .vale.ini
           filter_mode: nofilter
           fail_level: warning
-          # Without this, the action passes when the findings are more than the annotation limit.
+          # Fail even when findings exceed the annotation limit.
           fail_on_error: true

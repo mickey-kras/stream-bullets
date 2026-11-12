@@ -1,12 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { applyMigrations, createTestDatabase, migrationFiles, type TestDatabase } from "./helpers/database";
 
-/**
- * Applies 0000–0005, writes data the way the released app did, then applies 0006 onwards.
- * 0000–0005 are the migrations on main (7bf63c1, byte for byte the same files); 0006 is the first new one.
- * A migration that rebuilt `user`, `streamers`, `entries` or `entry_comments` would drop the old
- * table and fire ON DELETE CASCADE, so every count below would fall to zero (risk R1).
- */
+// Seed released schema 0000-0005 (7bf63c1), then apply 0006 onward.
+// Rebuilding user, streamers, entries, or entry_comments can trigger destructive ON DELETE CASCADE.
 
 const TABLES = [
   "user",
@@ -98,7 +94,7 @@ beforeAll(async (): Promise<void> => {
   await applyMigrations(db, released);
   await seedReleasedData();
   before = await counts();
-  // A series written before 0017 keeps its row and gets no stored time of day or template.
+  // Pre-0017 series retain their rows without a stored time or template.
   await applyMigrations(
     db,
     applied.filter((file: string): boolean => file < "0017"),

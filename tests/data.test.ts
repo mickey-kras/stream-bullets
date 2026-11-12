@@ -176,7 +176,7 @@ describe("topics and polls", (): void => {
     await env.DB.batch([
       env.DB.prepare("UPDATE entries SET created_at=1 WHERE id=?").bind(openId),
       env.DB.prepare("UPDATE entries SET created_at=2 WHERE id=?").bind(battleId),
-      // Finished battles keep ends_at=NULL and revealed=0 on the entry; only the battle row says it is over.
+      // Finished battles retain ends_at=NULL and revealed=0; read battle state.
       env.DB.prepare(
         "INSERT INTO entry_mash (entry_id,duration_s,phase,starts_at,ends_at,winner) VALUES (?,30,'finished',?,?,0)",
       ).bind(battleId, now - 60_000, now - 30_000),
@@ -184,7 +184,7 @@ describe("topics and polls", (): void => {
     const auto = async (): Promise<string[]> =>
       (await getOverlaySnapshot(env, streamer.id, null)).polls.map((poll): string => poll.id);
     expect(await auto()).toEqual([openId]);
-    // Past its end but not yet marked finished counts as finished too.
+    // Treat elapsed battles as finished before the persisted phase changes.
     await env.DB.prepare("UPDATE entry_mash SET phase='live' WHERE entry_id=?").bind(battleId).run();
     expect(await auto()).toEqual([openId]);
     for (const [phase, startsAt] of [
@@ -390,7 +390,7 @@ describe("discussion", (): void => {
       status: 403,
     });
     await mutateComment(env, "viewer", { action: "delete", id: parent.id });
-    // The parent becomes a "Comment removed" placeholder: no author, text or likes, and the reply stays under it.
+    // Keep replies under an anonymous, empty parent placeholder.
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toMatchObject([
       { id: reply.id, parentId: parent.id, text: "Reply", removed: false },
       { id: parent.id, parentId: null, text: "", author: "", authorId: "", avatar: null, likes: 0, removed: true },
@@ -402,7 +402,6 @@ describe("discussion", (): void => {
     await expect(mutateComment(env, "viewer", { action: "delete", id: parent.id })).rejects.toMatchObject({
       status: 404,
     });
-    // Removing the last reply removes the placeholder too.
     await mutateComment(env, "owner", { action: "delete", id: reply.id });
     expect((await listComments(env, id, null, { sort: "newest", cursor: null })).comments).toEqual([]);
   });

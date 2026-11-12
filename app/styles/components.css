@@ -1,5 +1,4 @@
-/* Components: dialogs, sheets, selects, buttons, cards and the streamer page. Feature styles for later phases
-   (schedule, Mash Battle, overlay control, admin) are ported too, so those phases only wire markup. */
+/* Shared components and feature layouts. */
 button.gold, .gold { background:linear-gradient(110deg,var(--gold-hi),var(--gold-lo)); color:var(--on-gold); border-color:var(--gold-lo); }
 button.gold:hover { background:var(--gold-hover); }
 .browse { min-height:0; min-width:0; display:flex; flex-direction:column; padding-right:0; container-type:inline-size; }
@@ -374,7 +373,7 @@ button.danger:hover { background: var(--danger-hover); border-color: var(--error
 .report-confirmation { margin: 12px 0 20px; display: flex; gap: 10px; align-items: flex-start; }
 .report-snapshot { margin: 0; padding: 12px 14px; border-left: 3px solid var(--line); background: var(--field); white-space: pre-wrap; overflow-wrap: anywhere; }
 .view-tabs { margin-top: 14px; }
-/* ---- Approved mockup additions ---- */
+
 .streamers-page .directory-search { max-width: 600px; margin-top: 18px; }
 .streamers-page .page-title + .muted { margin: 0 0 4px; }
 .streamer-card[hidden] { display: none; }
@@ -1558,9 +1557,9 @@ input[type="checkbox"], input[type="radio"], .modal-content .choice input { widt
 @media (max-width: 43.75em) {
   .modal-content.sheet > output.dialog-notice { margin: 10px 20px 0; }
 }
-/* ---- App adaptations ---- */
+
 .icon-14 { width: 14px; height: 14px; }
-/* Radix Select: the list is portalled and positioned by Radix, sized to the trigger. */
+/* Radix positions the portalled list; match trigger width. */
 .cselect-list.cselect-popper { position: relative; left: auto; right: auto; top: auto; z-index: 70; width: var(--radix-select-trigger-width); min-width: 160px; max-height: min(264px, var(--radix-select-content-available-height)); }
 .cselect-popper .cselect-option { outline: none; }
 .cselect-popper .cselect-option > span:not(.cselect-icon, .cselect-check) { flex: 1; min-width: 0; }
@@ -1569,9 +1568,9 @@ input[type="checkbox"], input[type="radio"], .modal-content .choice input { widt
 .cselect-popper .cselect-check { visibility: visible; display: inline-grid; place-items: center; }
 .cselect-trigger[data-state="open"] .ico-chevron { transform: rotate(180deg); }
 .cselect-trigger[data-placeholder] .cselect-value { color: var(--muted); }
-/* Spin once (refresh): restart by re-rendering with the class. */
+/* Remount the refresh class to restart animation. */
 
-/* Phase 3: account dialogs and the Streamers directory. */
+/* Account dialogs and directory. */
 .avatar-grid .avatar-option:has(input:checked) { border-color: var(--gold); background: var(--avatar-selected); }
 .avatar-grid .avatar-option:has(input:checked)::after { content: "✓"; position: absolute; right: 0; bottom: 0; width: 21px; height: 21px; border-radius: 50%; background: var(--gold); color: var(--on-gold-badge); font: 700 15px/21px Figtree,Onest,sans-serif; text-align: center; }
 .avatar-grid .avatar-option:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 2px; }
@@ -1580,7 +1579,7 @@ button.crop-stage { display: block; padding: 0; border: 0; border-radius: 8px; f
 search.directory-search > form { display: contents; }
 output.intent-prompt, output.handle-warn { color: inherit; }
 .modal-content .avatar-grid label.avatar-option { display: grid; margin: 0; }
-/* Polls list, poll card and Mash Battle page (mockup polls-page and mash-page) */
+/* Polls and Mash Battle. */
 .polls-page .poll-card, .polls-page .poll-toolbar { max-width: none; }
 .connection-status .conn-off svg { color: var(--error); }
 .mash-teaser { display: flex; align-items: center; gap: 18px; padding: 20px 24px; border-color: var(--gold); color: var(--cream); }
@@ -1704,22 +1703,22 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 }
 .mash-page .poll-toolbar > a.text-link { display: inline-flex; align-items: center; min-height: 44px; margin-left: auto; }
 .mash-page .poll-toolbar :is(.back, .mash-next > *) { min-height: 44px; }
-/* Required-field markers (mockup m2, round 3) */
+/* Required fields. */
 .req { color: var(--gold); font-weight: 700; }
 .req-note { margin: 0 0 4px; font-size: .8125rem; color: var(--muted); }
-/* Paused controls on a frozen or suspended page look paused (mockup m14, round 2) */
+/* Disabled controls on moderated pages. */
 .streamer-shell:has(> .page-banner) :is(.votes button, .poll-react button, .composer button, .composer textarea, .poll-option, .comment-actions button, .header-action, #suggest, .mash-pick):disabled { background: var(--tab) !important; color: var(--muted) !important; border-color: var(--line) !important; border-style: dashed !important; box-shadow: none !important; opacity: .55; cursor: not-allowed; }
 .streamer-shell:has(> .page-banner) :is(.votes button, .poll-react button, .composer button, .comment-actions button):disabled svg { color: var(--muted); }
-/* Admin actions in the moderation banner */
+/* Moderation banner actions. */
 .banner-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; flex-basis: 100%; margin-left: 28px; }
 .banner-actions .banner-link { margin: 0; flex-basis: auto; }
-/* The Take bar stays at the bottom of the phone screen, as the mockup's dock does */
+/* Phone Take bar stays at the screen bottom. */
 @media (max-width: 56.25em) {
   main.ov-control > .ov-take-dock { position: sticky; bottom: -16px; z-index: 5; margin: 16px -12px -16px; }
 }
-/* The admin searches keep the 600px form width; their form is display: contents inside <search> */
+/* Admin searches retain 600px width with display: contents forms. */
 .settings-page search.search { max-width: 600px; }
-/* A dialog opens with focus on its title, without a ring */
+/* Focus dialog titles without a ring. */
 .modal-content h2[tabindex="-1"]:focus { outline: none; box-shadow: none; }
 
 :is(header nav, .header-end, .tabs, .modal-content, .poll-toolbar, .page-title, .info-card, .composer, .votes) :is(button, a.button-link, a.nav-tab), .cselect-trigger { font-family: var(--body); font-size: var(--text-control); line-height: var(--leading-body); text-transform: none; letter-spacing: normal; min-height: var(--control-size); white-space: normal; overflow-wrap: anywhere; }
