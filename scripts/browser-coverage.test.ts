@@ -70,6 +70,8 @@ describe("browser coverage", (): void => {
       await coverageReport(directory).add([entry]);
       await coverageReport(directory).add([
         { ...entry, url: "https://third-party.example/script.js" },
+        { ...entry, url: "http://localhost:51750/assets/example.js" },
+        { ...entry, url: "http://localhost:5175/other/example.js" },
       ]);
       // Vite emits JSON catalogs as JavaScript without a source map.
       await coverageReport(directory).add([
@@ -90,7 +92,7 @@ describe("browser coverage", (): void => {
       await rm(directory, { recursive: true, force: true });
     }
   });
-  it("combines disjoint shards and rejects missing or empty inputs", async (): Promise<void> => {
+  it("combines shards from both application origins and rejects missing or empty inputs", async (): Promise<void> => {
     const directory: string = await mkdtemp(join(tmpdir(), "browser-shards-"));
     const shards: string[] = [join(directory, "one"), join(directory, "two")];
     try {
@@ -106,7 +108,7 @@ describe("browser coverage", (): void => {
           join(shard, "raw.json"),
           JSON.stringify([
             {
-              url: `http://localhost:5173/assets/shard-${index}.js`,
+              url: `http://localhost:${index === 0 ? 5173 : 5175}/assets/shard-${index}.js`,
               scriptId: "1",
               source: code,
               functions: [

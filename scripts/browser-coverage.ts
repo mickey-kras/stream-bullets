@@ -10,7 +10,8 @@ export function coverageReport(outputDir: string = "coverage/browser"): Coverage
   return new CoverageReport({
     outputDir,
     reports: ["lcovonly", "console-summary"],
-    entryFilter: (entry): boolean => entry.url.startsWith("http://localhost:5173/assets/"),
+    entryFilter: (entry): boolean =>
+      entry.url.startsWith("http://localhost:5173/assets/") || entry.url.startsWith("http://localhost:5175/assets/"),
     sourcePath: applicationSourcePath,
     outputFilter: (entry): boolean => entry.sourcePath.startsWith("app/"),
     sourceFilter: (sourcePath: string): boolean =>
