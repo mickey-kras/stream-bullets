@@ -40,7 +40,7 @@ async function seedReleasedData(): Promise<void> {
     run(
       `INSERT INTO user (id,name,email,email_verified,image,created_at,updated_at) VALUES
         ('host','Host','host@example.test',1,'/images/avatar/host',?1,?1),
-        ('fan','Fan','fan@example.test',1,NULL,?1,?1),
+        ('fan','Fan',' Fan@Example.Test ',1,NULL,?1,?1),
         ('fan2','Fan two','fan2@example.test',0,NULL,?1,?1)`,
       now,
     ),
@@ -64,7 +64,9 @@ async function seedReleasedData(): Promise<void> {
       now,
       now + 60_000,
     ),
-    run(`INSERT INTO entry_votes (entry_id,user_id,choice) VALUES ('poll','fan',2),('poll','fan2',0),('binary','fan',1)`),
+    run(
+      `INSERT INTO entry_votes (entry_id,user_id,choice) VALUES ('poll','fan',2),('poll','fan2',0),('binary','fan',1)`,
+    ),
     run(`INSERT INTO entry_reactions (entry_id,user_id,value) VALUES ('topic','host',1),('topic','fan2',-1)`),
     run(
       `INSERT INTO entry_comments (id,entry_id,author_id,text,created_at,parent_id) VALUES
@@ -113,7 +115,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0022", (): void => {
+  it("covers 0006 to 0025", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -132,7 +134,17 @@ describe("migrations 0006 onwards", (): void => {
       "0020",
       "0021",
       "0022",
+      "0023",
+      "0024",
+      "0025",
     ]);
+  });
+
+  it("normalizes existing email addresses without changing user identity", async () => {
+    expect(await db.prepare("SELECT id,email FROM user WHERE id='fan'").first()).toEqual({
+      id: "fan",
+      email: "fan@example.test",
+    });
   });
 
   it("backfills the vote counts (0019) from the votes already stored", async (): Promise<void> => {
@@ -230,21 +242,23 @@ describe("migrations 0006 onwards", (): void => {
     await rejects("UPDATE user SET locale='xx' WHERE id='fan'");
     await rejects("UPDATE user SET display_prefs='not json' WHERE id='fan'");
     await db.prepare("UPDATE user SET avatar_preset=17, locale='pt-BR', display_prefs='{}' WHERE id='fan'").run();
-    await db.prepare(
-      "INSERT INTO streamers (id,owner_id,handle,name) VALUES ('page2','fan','fan_page','Fan')",
-    ).run();
+    await db.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES ('page2','fan','fan_page','Fan')").run();
     await rejects("UPDATE streamers SET status='deleted' WHERE id='page2'");
     await rejects("UPDATE streamers SET is_official=2 WHERE id='page2'");
     await rejects("UPDATE streamers SET support_card=5 WHERE id='page2'");
-    await db.prepare(
-      "INSERT INTO entries (id,streamer_id,author_id,kind,title,created_at) VALUES ('idea','page2','fan','topic','Idea',1)",
-    ).run();
+    await db
+      .prepare(
+        "INSERT INTO entries (id,streamer_id,author_id,kind,title,created_at) VALUES ('idea','page2','fan','topic','Idea',1)",
+      )
+      .run();
     await rejects("UPDATE entries SET status='done' WHERE id='idea'");
     await rejects(`UPDATE entries SET status_reason='${"x".repeat(501)}' WHERE id='idea'`);
     await rejects(
       "INSERT INTO community_cards (id,streamer_id,position,title,body,button_label,button_target) VALUES ('k','page2',0,'T','B','Go','http://x.test')",
     );
-    await rejects("INSERT INTO streamer_links (id,streamer_id,position,kind,url) VALUES ('l','page2',4,'kofi','https://ko-fi.com/x')");
+    await rejects(
+      "INSERT INTO streamer_links (id,streamer_id,position,kind,url) VALUES ('l','page2',4,'kofi','https://ko-fi.com/x')",
+    );
     await rejects("INSERT INTO overlay_state (streamer_id,air,updated_at) VALUES ('page2','{\"type\":\"upnext\"}',1)");
     await rejects("INSERT INTO ai_interest (day,ip_hash,value) VALUES ('2026-11-05','0123456789abcdef',0)");
     await rejects(`INSERT INTO overlay_keys (streamer_id,key_hash,created_at) VALUES ('page2','${"A".repeat(64)}',1)`);

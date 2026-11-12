@@ -162,6 +162,27 @@
       "when": 1794376197990,
       "tag": "0022_conversion_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1794454495921,
+      "tag": "0023_signup_acceptance",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1794455343919,
+      "tag": "0024_normalized_email",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1794456095376,
+      "tag": "0025_email_link_authority",
+      "breakpoints": true
     }
   ]
 }

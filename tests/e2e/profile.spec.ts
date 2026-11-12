@@ -71,6 +71,7 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   // Unsaved edits ask before closing.
   await dialog.getByLabel("Display name").fill("Reporter Two");
   await expect(dialog.locator(".preview-name")).toHaveText("Reporter Two");
+  await expect(dialog.getByText("Save or discard your profile changes before changing login methods.")).toBeVisible();
   await page.keyboard.press("Escape");
   const discard = page.getByRole("alertdialog", { name: "Discard changes?" });
   await expect(discard).toContainText("Display name");
@@ -181,7 +182,8 @@ test("Edit your page: handle warning, a cropped logo, then the profile picture a
   await expect(page.locator(".streamer-home .brand-avatar")).toHaveAttribute("data-preset", "14");
 
   // A new handle saved from the page moves to the new address, and the shell's links follow it at once.
-  const restore = "UPDATE streamers SET handle='other_host', handle_changed_at=NULL WHERE handle IN ('other_host','other_host_2');";
+  const restore =
+    "UPDATE streamers SET handle='other_host', handle_changed_at=NULL WHERE handle IN ('other_host','other_host_2');";
   await runSql("rename-reset", [restore]);
   try {
     await page.goto("/@other_host?dialog=page");
@@ -189,7 +191,9 @@ test("Edit your page: handle warning, a cropped logo, then the profile picture a
     await dialog.getByRole("button", { name: "Save page" }).click();
     await expect(page).toHaveURL(/\/@other_host_2(\?|$)/);
     await page.getByRole("button", { name: "Account menu for otherowner" }).click();
-    const yourPage = page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Your page", exact: true });
+    const yourPage = page
+      .getByRole("navigation", { name: "Account" })
+      .getByRole("link", { name: "Your page", exact: true });
     await expect(yourPage).toHaveAttribute("href", "/@other_host_2");
   } finally {
     await runSql("rename-reset", [restore]);
