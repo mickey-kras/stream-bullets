@@ -6,6 +6,7 @@ import {
   Link,
   useLoaderData,
   useLocation,
+  useNavigate,
   useRevalidator,
   useSearchParams,
   type LoaderFunctionArgs,
@@ -28,6 +29,7 @@ import { shellFromMatches, useShell } from "../lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, type JsonLd } from "../lib/structured-data";
 import { CommunityView } from "../components/community/community-view";
 import { IdeaDialog } from "../components/ideas/idea-dialog";
+import { statusLabel } from "../components/ideas/ideas";
 import { ScheduleView, scheduleModes, type ScheduleMode } from "../components/schedule/schedule-view";
 import { useRememberContentRoute } from "../components/shell/back-link";
 import { StreamerHeader, streamerViews, type StreamerView } from "../components/shell/streamer-header";
@@ -39,7 +41,7 @@ import { SupportSection } from "../components/support/support";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
 import { Icon } from "../components/ui/icon";
 import { useToast } from "../components/ui/toast";
-import { t } from "../i18n";
+import { t, tn } from "../i18n";
 import { ApiError, errorMessage, postJson, requestJson } from "../components/api";
 import { CreateEntry } from "../components/create-entry";
 import { Discussion } from "../components/discussion";
@@ -63,6 +65,14 @@ import type { Route } from "./+types/streamer";
 
 type View = StreamerView;
 type Dialog = "topic" | "poll" | "idea" | "event" | "card" | null;
+/** History state on a detail opened from the list, so Back returns to that list entry instead of adding one. */
+interface ListReturnState {
+  listReturn: true;
+}
+
+function cameFromList(state: unknown): boolean {
+  return typeof state === "object" && state !== null && (state as Partial<ListReturnState>).listReturn === true;
+}
 /** The official StreamBullets page is the Ideas board: Ideas, About and Community. */
 const officialViews: readonly View[] = ["topics", "about", "community"];
 
@@ -284,6 +294,7 @@ export default function StreamerPage(): ReactNode {
   useRememberContentRoute(`/@${streamer.handle}`, streamer.name);
   const [searchParams, setSearchParams] = useSearchParams();
   const here = useLocation();
+  const go = useNavigate();
   const revalidator = useRevalidator();
   const refresh = useCallback(async (): Promise<void> => {
     try {
@@ -359,6 +370,22 @@ export default function StreamerPage(): ReactNode {
       if (status) params.set("status", status);
     }
     setSearchParams(params);
+  }
+
+  /** Opens an entry from the list. The history entry remembers the list, so Back can return to it. */
+  function openFromList(next: View, entryId: string): void {
+    if (searchParams.has("entry")) return navigate(next, entryId);
+    const params = new URLSearchParams(searchParams);
+    params.set("view", next);
+    params.set("entry", entryId);
+    params.delete("intent");
+    setSearchParams(params, { state: { listReturn: true } satisfies ListReturnState });
+  }
+
+  /** Back to the list: the previous history entry when the list opened this detail, so filters, scroll and focus stay. */
+  function backToList(next: View): void {
+    if (cameFromList(here.state)) go(-1);
+    else navigate(next);
   }
 
   // A create navigates to the new entry, then its dialog closes. That close must not rewrite the URL from the
@@ -525,13 +552,32 @@ export default function StreamerPage(): ReactNode {
     );
   }
 
+  /** A search or status filter with no results: the board has content, so offer the way back to all of it. */
+  function renderFilteredEmpty(): ReactNode {
+    const params = new URLSearchParams({ view: "topics" });
+    if (!official) params.set("sort", sort);
+    return (
+      <EmptyState
+        title={status ? t("ideas.noMatch", { status: statusLabel(status) }) : t("entry.noMatch")}
+        icon="search-none"
+        action={
+          <Link className="button-link" to={`?${params}`}>
+            <Icon name={status ? "idea" : "close"} size={18} />
+            {status ? t("ideas.allIdeas") : t("entry.clearSearch")}
+          </Link>
+        }
+      />
+    );
+  }
+
   function renderEmptyList(): ReactNode {
-    if (query)
+    if (query || status)
       return (
-        <p className="empty">
-          <Icon name="search-none" size={20} />
-          {t("entry.noMatch")}
-        </p>
+        <>
+          {/* Desktop: the detail pane explains the empty result. Topics already show "0 topics" above the list. */}
+          {official && <p className="empty desk-empty">{tn("ideas.count", 0)}</p>}
+          <div className="list-empty">{renderFilteredEmpty()}</div>
+        </>
       );
     return (
       <>
@@ -566,7 +612,7 @@ export default function StreamerPage(): ReactNode {
                 moderator={moderator}
                 writable={writable}
                 pending={pending.has(selected.id)}
-                onBack={() => navigate("topics")}
+                onBack={() => backToList("topics")}
                 onReact={(value) => act({ action: "react", id: selected.id, value }, selected.id)}
                 onDelete={removeSelected}
                 onStatusSaved={async () => {
@@ -576,11 +622,13 @@ export default function StreamerPage(): ReactNode {
               />
               {renderDiscussion(selected)}
             </>
+          ) : query || status ? (
+            renderFilteredEmpty()
           ) : (
             renderEmptyTopics()
           )
         }
-        onSelect={(id: string) => navigate("topics", id)}
+        onSelect={(id: string) => openFromList("topics", id)}
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onSearch={(next: string) => changeBoard("query", next)}
         onLoadMore={loadMore}
@@ -608,7 +656,7 @@ export default function StreamerPage(): ReactNode {
         refreshing={refreshing}
         refreshes={refreshes}
         onCreate={() => setDialog("poll")}
-        onOpen={(id: string | null) => navigate("polls", id ?? undefined)}
+        onOpen={(id: string | null) => (id ? openFromList("polls", id) : backToList("polls"))}
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onRefresh={() => {
           setRefreshes((value: number) => value + 1);

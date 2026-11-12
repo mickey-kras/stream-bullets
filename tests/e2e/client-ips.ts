@@ -31,6 +31,7 @@ const ranges = {
   alignment: [[140, 149]],
   oauth: [[150, 153]],
   landing: [[154, 155]],
+  "board-navigation": [[160, 163]],
   a11y: [[175, 179]],
   i18n: [
     [180, 181],
