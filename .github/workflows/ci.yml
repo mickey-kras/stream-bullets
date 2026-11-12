@@ -2,20 +2,6 @@ name: Quality gates
 
 on:
   pull_request:
-  workflow_dispatch:
-    inputs:
-      number:
-        description: Pull request number
-        required: true
-        type: string
-      expected_head:
-        description: Generated graph commit
-        required: true
-        type: string
-      base_sha:
-        description: Pull request base commit
-        required: true
-        type: string
   push:
     branches: [main]
 
@@ -25,38 +11,15 @@ permissions:
   security-events: write
 
 concurrency:
-  group: quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.number || github.ref }}
+  group: quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
-  revision:
-    name: Validate PR revision
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
-        if: github.event_name == 'workflow_dispatch'
-        with:
-          script: |
-            const { number, expected_head, base_sha } = context.payload.inputs;
-            if (!/^[1-9][0-9]*$/.test(number) || !/^[a-f0-9]{40}$/.test(expected_head) || !/^[a-f0-9]{40}$/.test(base_sha)) {
-              throw new Error('Invalid PR revision');
-            }
-            const { data: pull } = await github.rest.pulls.get({ ...context.repo, pull_number: Number(number) });
-            const { data: base } = await github.rest.git.getRef({ ...context.repo, ref: `heads/${pull.base.ref}` });
-            if (pull.state !== 'open' || pull.head.sha !== expected_head || context.sha !== expected_head ||
-                context.ref !== `refs/heads/${pull.head.ref}` || base.object.sha !== base_sha ||
-                pull.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
-              throw new Error('PR revision changed; discard this run');
-            }
-
   quality:
-    needs: revision
     uses: ./.github/workflows/quality.yml
 
   static:
     name: Static application checks
-    needs: revision
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -88,7 +51,6 @@ jobs:
 
   unit:
     name: Unit coverage
-    needs: revision
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
@@ -118,7 +80,6 @@ jobs:
 
   production:
     name: Production build validation
-    needs: revision
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -139,7 +100,6 @@ jobs:
 
   browser:
     name: Browser tests (${{ matrix.shard }}/4)
-    needs: revision
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -311,32 +271,29 @@ jobs:
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/fonts.css --output /dev/null
 
   graphify:
-    needs: revision
     name: Graphify snapshot
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
         with:
           egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.12'
       - name: Install pinned local graph tools
         run: python -m pip install --require-hashes -r .github/graphify/requirements.txt
-      - name: Test graph freshness checks
+      - name: Test graph extraction
         run: python -m unittest discover -s .github/graphify -p 'test_*.py'
-      - name: Test graph publication races
-        run: node --test .github/graphify/publish.test.cjs
-      - name: Check graph against an independent reference
+      # main publishes the graph to the graph branch. Pull requests only prove that it builds.
+      - name: Build the graph
         env:
           GRAPHIFY_BACKEND: none
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.inputs.base_sha || github.event.before }}
-        run: python .github/graphify/snapshot.py --check --base "$BASE_SHA"
+          PYTHONHASHSEED: '0'
+        run: python .github/graphify/snapshot.py
 
   checks:
     name: Required quality gates

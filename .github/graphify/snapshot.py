@@ -1,5 +1,4 @@
-"""Build or check the committed, code and documentation Graphify snapshot."""
-import argparse
+"""Build the Graphify snapshot of application code and authored documentation."""
 import hashlib
 import json
 import os
@@ -35,22 +34,6 @@ def tool_digest() -> str:
 def content_digest(graph: dict[str, object]) -> str:
     content = {key: value for key, value in graph.items() if key != "graph"}
     return hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()
-
-
-def inputs_current(graph: dict[str, object]) -> bool:
-    metadata = graph["graph"]
-    return (metadata.get("source_sha256") == source_digest(source_paths())
-            and metadata.get("tool_sha256") == tool_digest())
-
-
-def expected_graph(base: str | None) -> dict[str, object]:
-    if base:
-        baseline = json.loads(subprocess.check_output(
-            ["git", "show", f"{base}:graphify-out/graph.json"], cwd=ROOT
-        ))
-        if inputs_current(baseline):
-            return baseline
-    return build()
 
 
 def source_paths() -> list[str]:
@@ -122,35 +105,9 @@ def build() -> dict[str, object]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true")
-    parser.add_argument("--update", action="store_true", help="Build only when inputs are stale")
-    parser.add_argument("--base", help="Trusted base commit for unchanged-input comparison")
-    args = parser.parse_args()
     if OUTPUT.is_symlink() or OUTPUT.parent.is_symlink():
         raise ValueError("Graph output must be a regular repository file")
-    if args.update and ROOT != TOOLS.parents[1]:
-        for name in ("snapshot.py", "requirements.txt"):
-            candidate = ROOT / ".github" / "graphify" / name
-            if candidate.is_symlink() or candidate.read_bytes() != (TOOLS / name).read_bytes():
-                print("Graph tools changed; generate this snapshot locally for review.")
-                return
-    existing = json.loads(OUTPUT.read_text()) if OUTPUT.exists() else None
-    graph = expected_graph(args.base) if args.check or args.update else build()
-    if args.check:
-        if existing != graph:
-            raise SystemExit("Graph is stale or modified. Regenerate the graph.")
-        print("Graph matches the independent reference.")
-        return
-    if args.update and existing == graph:
-        print("Graph is current; no commit needed.")
-        return
-    if args.base and inputs_current(graph) and existing is not None:
-        baseline = json.loads(subprocess.check_output(
-            ["git", "show", f"{args.base}:graphify-out/graph.json"], cwd=ROOT
-        ))
-        if inputs_current(baseline) and existing != baseline:
-            raise SystemExit("Graph data changed without inputs; restore the base graph.")
+    graph = build()
     OUTPUT.parent.mkdir(exist_ok=True)
     OUTPUT.write_text(json.dumps(graph, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
     print(f"Wrote {OUTPUT.relative_to(ROOT)}")
