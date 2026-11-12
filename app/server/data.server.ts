@@ -294,7 +294,7 @@ function handleConflict(error: unknown): never {
     message = `${error.message} ${causeMessage}`;
   }
   if (message.includes("UNIQUE constraint failed: streamers.handle"))
-    throw new HttpError(409, "This handle is already in use.");
+    throw new HttpError(409, "This handle is already in use.", "handle_taken");
   throw error;
 }
 
@@ -700,7 +700,7 @@ async function removeEntry(
       .bind(permission.id)
       .first<{ is_official: number; status: EntryStatus | null }>();
     if (idea?.is_official === 1 && idea.status !== null && idea.status !== NEW_IDEA_STATUS)
-      throw new HttpError(403, "You can delete your idea only while it is under review.");
+      throw new HttpError(403, "You can delete your idea only while it is under review.", "idea_not_under_review");
   }
   const [removed] = await env.DB.batch([
     env.DB.prepare(`DELETE FROM entries WHERE id=? AND streamer_id=?
@@ -743,7 +743,7 @@ async function newEntryStatus(
   if (official !== (IDEA_CATEGORIES as readonly string[]).includes(category))
     throw new HttpError(400, official ? "Pick a category for your idea." : "Pick a topic category.");
   if (official && category === "bug" && isUntouchedTemplate(action.body ?? ""))
-    throw new HttpError(400, "Describe the bug: fill in what happened and how to reproduce it.");
+    throw new HttpError(400, "Describe the bug: fill in what happened and how to reproduce it.", "bug_template_empty");
   return official ? NEW_IDEA_STATUS : null;
 }
 

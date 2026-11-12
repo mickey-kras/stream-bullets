@@ -50,7 +50,7 @@ export function SignIn({
         provider: provider as "google",
         callbackURL: callbackURL ?? here,
       });
-      if (result.error) throw new Error(result.error.message || t("signIn.failed"));
+      if (result.error) throw new Error(t("signIn.failed"));
     } catch (error_: unknown) {
       setError(errorMessage(error_));
     } finally {

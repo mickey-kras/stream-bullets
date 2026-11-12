@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { MAX_COMMUNITY_CARDS } from "../../../db/enums";
 import { t } from "../../i18n";
 import type { CommunityCard, SupportSettings } from "../../types";
-import { sendJson } from "../api";
+import { sendJson, errorMessage } from "../api";
 import { EmptyState } from "../common";
 import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
@@ -154,9 +154,7 @@ export function CommunityView({
     const [card] = next.splice(index, 1);
     next.splice(target, 0, card);
     setAnnouncement(t("community.moved", { title: card.title, n: target + 1, count: next.length }));
-    save(next).catch((error_: unknown) =>
-      toast(error_ instanceof Error ? error_.message : t("common.failed"), { tone: "error" }),
-    );
+    save(next).catch((error_: unknown) => toast(errorMessage(error_), { tone: "error" }));
   }
 
   function remove(card: CommunityCard): void {
@@ -169,9 +167,7 @@ export function CommunityView({
           action: { label: t("common.undo"), onClick: () => void save(before, t("community.restored")) },
         }),
       )
-      .catch((error_: unknown) =>
-        toast(error_ instanceof Error ? error_.message : t("common.failed"), { tone: "error" }),
-      );
+      .catch((error_: unknown) => toast(errorMessage(error_), { tone: "error" }));
   }
 
   return (

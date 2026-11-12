@@ -1,6 +1,6 @@
 import type { SecurityKey } from "../../types";
 import { t } from "../../i18n";
-import { ApiError, requestJson } from "../api";
+import { ApiError, requestJson, errorMessage } from "../api";
 
 /**
  * Browser side of the admin security-key ceremonies. The server sends WebAuthn options as JSON with base64url
@@ -18,7 +18,7 @@ export async function adminRequest<T>(url: string, method = "GET", body?: unknow
 }
 
 export function errorText(error: unknown): string {
-  return error instanceof Error ? error.message : t("admin.requestFailed");
+  return error instanceof Error ? errorMessage(error) : t("admin.requestFailed");
 }
 
 function fromBase64Url(value: string): ArrayBuffer {
@@ -70,7 +70,7 @@ function descriptors(list: Descriptor[]): PublicKeyCredentialDescriptor[] {
 
 /** Why a ceremony failed, as the gate says it. Cancelling and timing out look the same to the browser. */
 export function ceremonyError(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
+  if (error instanceof ApiError) return errorMessage(error);
   if (error instanceof DOMException) {
     if (error.name === "NotAllowedError" || error.name === "AbortError") return t("keys.cancelled");
     if (error.name === "InvalidStateError") return t("keys.alreadyRegistered");

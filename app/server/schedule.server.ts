@@ -187,7 +187,7 @@ function seriesDone(rule: SeriesRule, after: number): boolean {
  */
 export function planEvents(input: EventInput, now: number, seriesId: string | null = null): Plan {
   const first = parseDate(input.date);
-  if (!first) throw new HttpError(400, "Pick a valid date.");
+  if (!first) throw new HttpError(400, "Pick a valid date.", "invalid_schedule_date");
   const [hour, minute] = input.time.split(":").map(Number);
   const start = zonedTime(first, hour, minute, input.tz);
   if (input.repeatDays === 0) return { starts: [start], seriesId: null, repeatDays: 0, repeatUntil: null };
@@ -197,11 +197,12 @@ export function planEvents(input: EventInput, now: number, seriesId: string | nu
     until &&
     until.year * 10_000 + until.month * 100 + until.day < first.year * 10_000 + first.month * 100 + first.day
   )
-    throw new HttpError(400, "The end date is before the first stream.");
+    throw new HttpError(400, "The end date is before the first stream.", "invalid_schedule_date");
   const repeatUntil = until ? zonedTime(addDays(until, 1), 0, 0, input.tz) - 1 : null;
   const rule: SeriesRule = { first, hour, minute, zone: input.tz, days, until };
   const starts = expandSeries(rule, Math.max(now + SERIES_HORIZON_MS, start + 1));
-  if (starts.length === 0) throw new HttpError(400, "No stream falls on the chosen days before the end date.");
+  if (starts.length === 0)
+    throw new HttpError(400, "No stream falls on the chosen days before the end date.", "schedule_no_occurrences");
   const done = seriesDone(rule, starts.at(-1)!);
   return {
     starts,

@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent, type ReactNode } from "react";
-import { t } from "../../i18n";
-import { BUG_TEMPLATE, IDEA_CATEGORIES, isUntouchedTemplate, type IdeaCategory } from "../../lib/ideas";
+import { getLocale, t } from "../../i18n";
+import { IDEA_CATEGORIES, isUntouchedTemplate, type IdeaCategory } from "../../lib/ideas";
 import { errorMessage } from "../api";
 import { categoryIcon } from "../topic-icon";
 import { Dialog, DialogActions } from "../ui/dialog";
@@ -9,23 +9,26 @@ import { Req, RequiredNote } from "../ui/required";
 import { Select, type SelectOption } from "../ui/select";
 import { categoryLabel } from "./ideas";
 
-const template = BUG_TEMPLATE.trim();
+import { BUG_TEMPLATES } from "../../lib/bug-templates";
 
 /** Switching to Bug adds the template after any text; leaving Bug removes it again while it is untouched. */
 export function switchTemplate(body: string, from: IdeaCategory, to: IdeaCategory): string {
+  const bugTemplate: string = BUG_TEMPLATES[getLocale()];
+  const template: string = bugTemplate.trim();
   const text = body.trimEnd();
   if (to === "bug" && from !== "bug") {
     if (text.endsWith(template)) return body;
-    return text ? `${text}\n\n${BUG_TEMPLATE}` : BUG_TEMPLATE;
+    return text ? `${text}\n\n${bugTemplate}` : bugTemplate;
   }
   if (from === "bug" && to !== "bug" && text.endsWith(template)) return text.slice(0, -template.length).trimEnd();
   return body;
 }
 
-/** Browser and page details for a bug report. No personal data: no account, no address, no history. */
-function environment(): string {
-  const browser = /(Edg|Firefox|Chrome|Safari)\/[\d.]+/.exec(navigator.userAgent)?.[0] ?? "Unknown";
-  return `Browser: ${browser} · Screen: ${screen.width}×${screen.height} · Page: ${location.pathname}${location.search}`;
+/** Only these two browser details are appended to the public report. */
+export function environment(): string {
+  const browser =
+    /(Edg|Firefox|Chrome|Safari)\/[\d.]+/.exec(navigator.userAgent)?.[0] ?? t("ideas.form.unknownBrowser");
+  return t("ideas.form.environment", { browser, width: screen.width, height: screen.height });
 }
 
 /** "Suggest an improvement" on the official page (item 46). New ideas start Under review. */
@@ -43,7 +46,7 @@ export function IdeaDialog({
   const id = useId();
   const [category, setCategory] = useState<IdeaCategory>(initialCategory);
   const [title, setTitle] = useState<string>("");
-  const [body, setBody] = useState<string>(initialCategory === "bug" ? BUG_TEMPLATE : "");
+  const [body, setBody] = useState<string>(initialCategory === "bug" ? BUG_TEMPLATES[getLocale()] : "");
   const [meta, setMeta] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [pending, setPending] = useState<boolean>(false);
@@ -55,7 +58,10 @@ export function IdeaDialog({
 
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    if (category === "bug" && (isUntouchedTemplate(body) || body.trimEnd().endsWith(template))) {
+    if (
+      category === "bug" &&
+      (isUntouchedTemplate(body) || body.trimEnd().endsWith(BUG_TEMPLATES[getLocale()].trim()))
+    ) {
       setError(t("ideas.form.fillTemplate"));
       return;
     }

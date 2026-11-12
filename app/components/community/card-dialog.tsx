@@ -1,3 +1,4 @@
+import { errorMessage } from "../api";
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { CARD_ICONS } from "../../../db/enums";
 import { t } from "../../i18n";
@@ -82,7 +83,7 @@ export function CardDialog({
     try {
       await onSave(result);
     } catch (error_: unknown) {
-      setError(error_ instanceof Error ? error_.message : t("common.failed"));
+      setError(errorMessage(error_));
       setPending(false);
     }
   }
