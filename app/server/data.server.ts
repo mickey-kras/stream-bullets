@@ -688,7 +688,7 @@ async function removeEntry(
       targetId: permission.id,
       streamerId: permission.streamer_id,
       action: "entry_removed",
-      metadata: { title: permission.title.slice(0, 200), via: "page" },
+      metadata: { via: "page" },
     },
   );
   const admin = removal.admin;

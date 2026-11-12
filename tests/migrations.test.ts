@@ -108,14 +108,27 @@ beforeAll(async (): Promise<void> => {
     .run();
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0017"),
+    applied.filter((file: string): boolean => file >= "0017" && file < "0026"),
+  );
+  // Entry removal records written before 0026 kept a copy of the entry title.
+  await db.batch([
+    db.prepare(
+      `INSERT INTO moderation_actions (id,target_kind,target_id,action,metadata,created_at) VALUES
+        ('ma-entry','entry','gone','entry_removed','{"title":"Old topic","via":"page","stepUp":"fresh"}',1),
+        ('ma-page','streamer','page','freeze','{"title":"Kept","stepUp":"fresh"}',1),
+        ('ma-null','entry','gone2','entry_removed',NULL,1)`,
+    ),
+  ]);
+  await applyMigrations(
+    db,
+    applied.filter((file: string): boolean => file >= "0026"),
   );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0025", (): void => {
+  it("covers 0006 to 0026", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -137,6 +150,7 @@ describe("migrations 0006 onwards", (): void => {
       "0023",
       "0024",
       "0025",
+      "0026",
     ]);
   });
 
@@ -145,6 +159,15 @@ describe("migrations 0006 onwards", (): void => {
       id: "fan",
       email: "fan@example.test",
     });
+  });
+
+  it("removes copied entry titles from moderation records (0026) and keeps the other keys", async (): Promise<void> => {
+    const { results } = await db.prepare("SELECT id,metadata FROM moderation_actions ORDER BY id").all();
+    expect(results).toEqual([
+      { id: "ma-entry", metadata: '{"via":"page","stepUp":"fresh"}' },
+      { id: "ma-null", metadata: null },
+      { id: "ma-page", metadata: '{"title":"Kept","stepUp":"fresh"}' },
+    ]);
   });
 
   it("backfills the vote counts (0019) from the votes already stored", async (): Promise<void> => {
