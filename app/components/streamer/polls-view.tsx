@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t, type MessageId } from "../../i18n";
 import { paths } from "../../lib/shell";
@@ -120,9 +120,28 @@ function PollToolbarStart({
   return toolbarStart;
 }
 
+/**
+ * Back from one poll to the list, by its Back control or the browser: focus returns to the poll that was open,
+ * instead of the page, because the Back control is gone.
+ */
+function useReturnFocus(selectedId: string | null): void {
+  const previous = useRef<string | null>(selectedId);
+  useEffect(() => {
+    const id: string | null = previous.current;
+    previous.current = selectedId;
+    if (!id || selectedId) return;
+    const active: Element | null = document.activeElement;
+    if (active instanceof HTMLElement && active !== document.body && active.isConnected) return;
+    const card: HTMLElement | null = document.querySelector<HTMLElement>(`[data-entry-id="${CSS.escape(id)}"]`);
+    const target: HTMLElement | null = card?.matches("a") ? card : (card?.querySelector(".discuss-link") ?? null);
+    target?.focus();
+  }, [selectedId]);
+}
+
 /** The Polls tab: the list, one poll with its discussion, or one Mash Battle on its own page. */
 export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
   const { name, viewer, owner, writable, entries, selected, now, live } = props;
+  useReturnFocus(selected?.id ?? null);
   const battle: Entry | null = selected?.kind === "mash" ? selected : null;
   const phase: string = useBattlePhase(battle, now);
   useBattleFocus(battle !== null && (phase === "live" || phase === "countdown"));

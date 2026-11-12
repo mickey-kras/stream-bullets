@@ -1,8 +1,10 @@
-import { useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode, type RefObject } from "react";
+import { useLocation, useNavigation } from "react-router";
 import { ScrollArea } from "radix-ui";
 import { t, tn } from "../../i18n";
 import type { Entry, EntryStatus, SortOrder, StreamEvent } from "../../types";
-import { IdeaFilters, IdeaStatus } from "../ideas/ideas";
+import { announce } from "../a11y/announcer";
+import { IdeaFilters, IdeaStatus, statusLabel } from "../ideas/ideas";
 import { platformIcon, platformLabel } from "../schedule/format";
 import { TopicIcon } from "../topic-icon";
 import { Icon } from "../ui/icon";
@@ -98,6 +100,85 @@ function Splitter({
   );
 }
 
+/** True when the element is gone or hidden, for example the list on a phone while a detail is open. */
+function hidden(element: Element | null): boolean {
+  return !(element instanceof HTMLElement) || !element.isConnected || element.getClientRects().length === 0;
+}
+
+/** True when keyboard focus has nowhere useful to be: on the page itself or on a control that just disappeared. */
+function focusLost(): boolean {
+  return document.activeElement === document.body || hidden(document.activeElement);
+}
+
+/**
+ * On phones the list and the detail take turns. Opening a detail moves focus to its title when the row that
+ * opened it disappears. Going back, by the Back control or the browser, restores the list's scroll position and
+ * focuses the row that was open.
+ */
+function useListDetailFocus(
+  workspace: RefObject<HTMLElement | null>,
+  hasSelection: boolean,
+  selectedId: string | null,
+): (id: string) => void {
+  const scroll = useRef<{ element: Element; top: number }[]>([]);
+  const opened = useRef<string | null>(null);
+  const previous = useRef<boolean>(hasSelection);
+  useEffect(() => {
+    if (hasSelection && selectedId) opened.current = selectedId;
+  }, [hasSelection, selectedId]);
+  useEffect(() => {
+    const root: HTMLElement | null = workspace.current;
+    const was: boolean = previous.current;
+    previous.current = hasSelection;
+    if (!root || was === hasSelection) return;
+    if (hasSelection) {
+      if (focusLost()) root.querySelector<HTMLElement>("#detail .detail-title")?.focus({ preventScroll: true });
+      return;
+    }
+    const saved: { element: Element; top: number }[] = scroll.current;
+    scroll.current = [];
+    // On desktop the list never went away, so its scroll and focus are still where the reader left them.
+    if (!focusLost()) return;
+    for (const { element, top } of saved) if (element.isConnected) element.scrollTop = top;
+    const id: string | null = opened.current;
+    const row: HTMLElement | null = id
+      ? root.querySelector<HTMLElement>(`#topics [data-entry-id="${CSS.escape(id)}"]`)
+      : null;
+    row?.focus({ preventScroll: saved.length > 0 });
+  }, [workspace, hasSelection]);
+  /** Remembers where the list was scrolled before a row opens its detail. */
+  return (id: string): void => {
+    opened.current = id;
+    const root: HTMLElement | null = workspace.current;
+    if (!root) return;
+    const elements: Element[] = [
+      root,
+      ...root.querySelectorAll(".browse, #topics"),
+      document.scrollingElement ?? document.documentElement,
+    ];
+    scroll.current = elements.map((element: Element) => ({ element, top: element.scrollTop }));
+  };
+}
+
+/** Reads the result count out after a search or status filter, the way the streamer directory does. */
+function useResultAnnouncement(
+  count: number,
+  more: boolean,
+  official: boolean,
+  query: string,
+  status: EntryStatus | null,
+): void {
+  const filter: string = JSON.stringify([query, status]);
+  const first = useRef<string>(filter);
+  useEffect(() => {
+    if (first.current === filter) return;
+    first.current = filter;
+    let message: string = `${tn(official ? "ideas.count" : "entry.count", count)}${more ? "+" : ""}`;
+    if (count === 0) message = status ? t("ideas.noMatch", { status: statusLabel(status) }) : t("entry.noMatch");
+    announce(message, { key: "board-results" });
+  }, [filter, count, more, official, status]);
+}
+
 /**
  * The Topics tab (and the Ideas board on the official page): the searchable, sortable list on the left, the
  * selected entry and its discussion on the right, with a resizable split.
@@ -142,6 +223,15 @@ export function TopicBoard({
   const [split, setSplit] = useState<number>(40);
   const workspace = useRef<HTMLElement>(null);
   const noun = official ? "ideas" : "topics";
+  const remember = useListDetailFocus(workspace, hasSelection, selected?.id ?? null);
+  useResultAnnouncement(entries.length, more, official, query, status);
+  const navigation = useNavigation();
+  const here = useLocation();
+  // A new search, filter or sort is loading: the old list stays, marked busy, and is never shown as empty.
+  const loading: boolean =
+    navigation.state === "loading" &&
+    navigation.location.pathname === here.pathname &&
+    navigation.location.search !== here.search;
   function search(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     const value = new FormData(event.currentTarget).get("query");
@@ -209,14 +299,18 @@ export function TopicBoard({
         )}
         <ScrollArea.Root className="topic-scroll-root">
           <ScrollArea.Viewport asChild tabIndex={0} style={{ overflowY: "auto" }}>
-            <section id="topics" aria-label={t(`entry.list.${noun}`)}>
+            <section id="topics" aria-label={t(`entry.list.${noun}`)} aria-busy={loading || undefined}>
               {entries.map((entry: Entry) => (
                 <button
                   type="button"
                   key={entry.id}
                   className={`topic${official ? " idea-row" : ""} ${selected?.id === entry.id ? "selected" : ""}`}
                   aria-pressed={selected?.id === entry.id}
-                  onClick={() => onSelect(entry.id)}
+                  data-entry-id={entry.id}
+                  onClick={() => {
+                    remember(entry.id);
+                    onSelect(entry.id);
+                  }}
                 >
                   <span className="topic-icon">
                     <TopicIcon category={entry.category} />

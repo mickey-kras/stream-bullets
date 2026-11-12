@@ -193,6 +193,7 @@ export function MashTeaser({ entry, now }: Readonly<{ entry: Entry; now: number 
     <Link
       className={`poll-card mash-teaser phase-${phase === "setup" ? "waiting" : phase}`}
       to={`?view=polls&entry=${entry.id}`}
+      data-entry-id={entry.id}
     >
       <Icon name="zap" size={24} />
       <span>
@@ -231,7 +232,7 @@ export function PollCard({
 }>): ReactNode {
   const closed: boolean = entry.revealed || (entry.endsAt !== null && entry.endsAt <= now);
   return (
-    <article className="poll-card">
+    <article className="poll-card" data-entry-id={entry.id}>
       {owner && <PollMenu entry={entry} closed={closed} pending={pending} onAction={onAction} onDelete={onDelete} />}
       <PollStatus poll={entry} now={now} />
       <h2>{entry.title}</h2>

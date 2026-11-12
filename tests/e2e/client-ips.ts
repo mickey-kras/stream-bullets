@@ -1,5 +1,6 @@
 /**
  * The responsive matrix owns 198.51.100.1-88 (TEST-NET-2), one address per case.
+ * Signed-out mobile dialog/search cases own 203.0.113.1-11 and 203.0.113.30-40 (TEST-NET-3).
  * Client IPs for the e2e specs: the last octet of 192.0.2.x (TEST-NET-1), sent as CF-Connecting-IP.
  * The worker's REQUEST_LIMITER allows 120 requests a minute per IP, so specs that share an address can push
  * each other over the limit when they run back to back. Each spec owns the inclusive ranges below and asks for
@@ -30,6 +31,7 @@ const ranges = {
   alignment: [[140, 149]],
   oauth: [[150, 153]],
   landing: [[154, 155]],
+  "board-navigation": [[160, 163]],
   a11y: [[175, 179]],
   i18n: [
     [180, 181],

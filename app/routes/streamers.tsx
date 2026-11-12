@@ -149,6 +149,7 @@ export default function Streamers(): ReactNode {
   const [error, setError] = useState<string>("");
   const [text, setText] = useState<string>(data.query);
   const grid = useRef<HTMLDivElement | null>(null);
+  const searchInput = useRef<HTMLInputElement | null>(null);
   const typing = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(undefined);
   const focusCard = useRef<number | null>(null);
   useRememberContentRoute("/streamers", t("nav.streamers"));
@@ -171,6 +172,31 @@ export default function Streamers(): ReactNode {
     focusCard.current = null;
     grid.current?.querySelectorAll<HTMLElement>(".streamer-card")[index]?.focus();
   }, [streamers.length]);
+
+  useEffect(() => {
+    function keepSearchVisible(): void {
+      const input: HTMLInputElement | null = searchInput.current;
+      const panel: HTMLElement | null = input?.closest<HTMLElement>(".streamers-page") ?? null;
+      if (!input || !panel || document.activeElement !== input) return;
+      const viewport: VisualViewport | null = window.visualViewport;
+      const top: number = Math.max(panel.getBoundingClientRect().top, viewport?.offsetTop ?? 0);
+      const bottom: number = Math.min(
+        panel.getBoundingClientRect().bottom,
+        (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight),
+      );
+      const bounds: DOMRect = input.getBoundingClientRect();
+      if (bottom > top && (bounds.top < top || bounds.bottom > bottom)) {
+        panel.scrollTop += (bounds.top + bounds.bottom - top - bottom) / 2;
+      }
+    }
+    keepSearchVisible();
+    window.addEventListener("resize", keepSearchVisible);
+    window.visualViewport?.addEventListener("resize", keepSearchVisible);
+    return (): void => {
+      window.removeEventListener("resize", keepSearchVisible);
+      window.visualViewport?.removeEventListener("resize", keepSearchVisible);
+    };
+  }, [data.query]);
 
   function search(value: string, replace: boolean): void {
     const params = new URLSearchParams(location.search);
@@ -296,6 +322,7 @@ export default function Streamers(): ReactNode {
                   {t("streamers.searchLabel")}
                 </label>
                 <input
+                  ref={searchInput}
                   id="streamer-search"
                   name="query"
                   type="search"
