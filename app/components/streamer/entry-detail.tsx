@@ -114,7 +114,9 @@ export function EntryDetail({
           </>
         )}
       </div>
-      <h2>{entry.title}</h2>
+      <h2 className="detail-title" tabIndex={-1}>
+        {entry.title}
+      </h2>
       <div className="author">
         <Avatar name={entry.author} url={entry.avatar} preset={entry.avatarPreset} />
         <span className="byline">
