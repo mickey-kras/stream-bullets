@@ -143,8 +143,12 @@ describe("localPath", (): void => {
   it("keeps same-origin paths and rejects anything that could leave the site", (): void => {
     expect(localPath("/@alice?intent=suggest#top")).toBe("/@alice?intent=suggest#top");
     expect(localPath("/streamers")).toBe("/streamers");
+    expect(localPath("/\u{1f600}?q=\u00e9")).toBe("/%F0%9F%98%80?q=%C3%A9");
     const unsafe = [null, undefined, "", "streamers", "//evil.example", "/\\evil.example", "/\t/evil.example"];
     for (const value of [...unsafe, "https://evil.example", "javascript:alert(1)"]) expect(localPath(value)).toBeNull();
+    for (const codePoint of [...Array.from({ length: 32 }, (_, index: number): number => index), 127]) {
+      expect(localPath(`/a${String.fromCodePoint(codePoint)}b`)).toBeNull();
+    }
   });
 });
 
