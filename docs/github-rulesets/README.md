@@ -14,6 +14,7 @@ The Aislop status check is mandatory because this repository does not upload its
 
 The rule for branch names matches the rule in **GPU Workload Supervisor**.
 It permits `main`, Dependabot, and the `feat`, `fix`, `refactor`, `docs`, `ci`, `security`, and `release` prefixes.
+It also permits the `graph` branch. The **Publish graph** workflow writes the code graph to that branch.
 
 SonarQube remains a gate for deployment from `main`, as in **GPU Workload Supervisor**.
 The rule does not need its status on a **pull request** because that job does not run there.
