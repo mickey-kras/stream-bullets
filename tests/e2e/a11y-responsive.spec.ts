@@ -284,6 +284,8 @@ test.describe("configured-provider mobile dialogs", () => {
             await expectReachable(provider);
           }
           await expectReachable(signIn.locator(".modal-close"));
+          await expect(signIn.locator("h2")).toBeInViewport({ ratio: 1 });
+          await expectLabelsFit(signIn.locator("h2"));
           await signIn.locator(".modal-close").click();
         });
       }
