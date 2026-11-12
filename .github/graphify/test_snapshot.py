@@ -1,6 +1,5 @@
-"""Check input selection, freshness, and loop prevention."""
+"""Check input selection, extraction, and output safety."""
 import importlib.util
-import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -19,29 +18,6 @@ class SnapshotTests(unittest.TestCase):
         for path in ("node_modules/a.ts", "docs/image.jpg", "graphify-out/README.md", "THIRD_PARTY_NOTICES.md",
                      "docs/generated/api.md", "docs/archive/old.md", "app/style.css"):
             self.assertFalse(snapshot.is_source(path), path)
-
-    def test_forged_checksum_is_rejected_without_extraction(self) -> None:
-        baseline = {"nodes": [{"id": "real"}], "edges": [], "graph": {}}
-        forged = {"nodes": [], "edges": [], "graph": {}}
-        forged["graph"]["content_sha256"] = snapshot.content_digest(forged)
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "graph.json"
-            output.write_text(json.dumps(forged))
-            with patch.object(snapshot, "OUTPUT", output), \
-                 patch.object(snapshot, "inputs_current", return_value=True), \
-                 patch.object(snapshot.subprocess, "check_output", return_value=json.dumps(baseline).encode()), \
-                 patch.object(snapshot, "build", side_effect=AssertionError("Unexpected extraction")):
-                for mode in ("--check", "--update"):
-                    with patch.object(snapshot.sys, "argv", ["snapshot.py", mode, "--base", "base"]):
-                        with self.assertRaises(SystemExit):
-                            snapshot.main()
-
-    def test_changed_inputs_regenerate_independently(self) -> None:
-        with patch.object(snapshot.subprocess, "check_output", return_value=b'{"graph": {}}'), \
-             patch.object(snapshot, "inputs_current", return_value=False), \
-             patch.object(snapshot, "build", return_value={"nodes": ["generated"]}) as build:
-            self.assertEqual(snapshot.expected_graph("base"), {"nodes": ["generated"]})
-            build.assert_called_once()
 
     def test_markdown_pass_preserves_code_edges_and_resolves_citations(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -62,7 +38,7 @@ class SnapshotTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "graph.json"
             output.symlink_to(Path(directory) / "other.json")
-            with patch.object(snapshot, "OUTPUT", output), patch.object(snapshot.sys, "argv", ["snapshot.py", "--update"]):
+            with patch.object(snapshot, "OUTPUT", output), patch.object(snapshot, "build", side_effect=AssertionError("Unexpected extraction")):
                 with self.assertRaisesRegex(ValueError, "regular repository file"):
                     snapshot.main()
 
