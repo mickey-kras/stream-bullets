@@ -92,6 +92,11 @@ test("viewer topics, reactions, replies, and comment likes survive reload", asyn
     await page.getByRole("button", { name: "Suggest a topic", exact: true }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
+    const category = dialog.getByRole("combobox", { name: "Category" });
+    await expect(category).toContainText("Just chatting");
+    await category.click();
+    await expect(page.getByRole("option").first()).toHaveText("Just chatting");
+    await page.getByRole("option", { name: "Just chatting" }).click();
     await dialog.getByRole("textbox", { name: "Title", exact: true }).fill("How should we build a quiet PC?");
     await dialog.getByLabel("Details").fill("Compare cooling and fan speeds. <img src=x onerror=alert(1)>");
     await dialog.getByRole("button", { name: "Submit topic" }).click();

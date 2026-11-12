@@ -19,10 +19,10 @@ const POLL_KINDS: readonly (readonly [PollKind, "create.choice" | "create.binary
 ];
 
 const categories: readonly Omit<SelectOption, "label">[] = [
+  { value: "Just chatting", icon: "cat-chatting" },
   { value: "Tech & setups", icon: "cat-tech" },
   { value: "Gaming", icon: "cat-gaming" },
   { value: "Creative", icon: "cat-creative" },
-  { value: "Just chatting", icon: "cat-chatting" },
 ];
 
 const durations: readonly [string, MessageId][] = [
@@ -146,7 +146,7 @@ export function CreateEntry({
                 id="topic-category"
                 name="category"
                 labelledBy="topic-category-label"
-                defaultValue="Tech & setups"
+                defaultValue="Just chatting"
                 options={categories.map((option) => ({ ...option, label: topicCategoryLabel(option.value) }))}
               />
             </div>
