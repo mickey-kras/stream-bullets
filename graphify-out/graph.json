@@ -14733,7 +14733,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L506",
+      "source_location": "L505",
       "target": "app_components_station_scene_client_fitphone",
       "weight": 1.0
     },
@@ -14745,7 +14745,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L518",
+      "source_location": "L519",
       "target": "app_components_station_look_createlook",
       "weight": 1.0
     },
@@ -14757,7 +14757,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L519",
+      "source_location": "L520",
       "target": "app_components_station_flips_createflips",
       "weight": 1.0
     },
@@ -14769,7 +14769,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L613",
+      "source_location": "L614",
       "target": "app_components_station_materials_field_paint",
       "weight": 1.0
     },
@@ -14781,7 +14781,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L622",
+      "source_location": "L623",
       "target": "app_components_station_scene_client_disposescene",
       "weight": 1.0
     },
@@ -114346,7 +114346,18 @@
       "relation": "contains",
       "source": "tests_station_controller_test",
       "source_file": "tests/station-controller.test.ts",
-      "source_location": "L26",
+      "source_location": "L107",
+      "target": "tests_station_controller_test_observe",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_station_controller_test",
+      "source_file": "tests/station-controller.test.ts",
+      "source_location": "L27",
       "target": "tests_station_controller_test_fromscene",
       "weight": 1.0
     },
@@ -114357,8 +114368,19 @@
       "relation": "contains",
       "source": "tests_station_controller_test",
       "source_file": "tests/station-controller.test.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "tests_station_controller_test_dispose",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_station_controller_test",
+      "source_file": "tests/station-controller.test.ts",
+      "source_location": "L57",
+      "target": "tests_station_controller_test_constructor",
       "weight": 1.0
     },
     {
@@ -114370,28 +114392,6 @@
       "source_file": "tests/station-controller.test.ts",
       "source_location": "L6",
       "target": "tests_station_controller_test_gpu",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_station_controller_test",
-      "source_file": "tests/station-controller.test.ts",
-      "source_location": "L93",
-      "target": "tests_station_controller_test_constructor",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_station_controller_test",
-      "source_file": "tests/station-controller.test.ts",
-      "source_location": "L94",
-      "target": "tests_station_controller_test_observe",
       "weight": 1.0
     },
     {
@@ -116988,10 +116988,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "c8a5b2b75efc63040dfec2a51c1fa42d68d98ad7e835c50738da9bee1742a367",
+    "content_sha256": "55533cfc6d5ad5a94d9eb742013f3b21b843758ee29e1c1959d6f915d3637a8d",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "16ffaacf905220aa20688f3eef77b65124b62c0241f25cf1256a97d508bf9d38",
+    "source_sha256": "22b7363b2ddb06da449cb24455042a6f47461f6fde984bb9bdb72f8592d75f48",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -126446,63 +126446,63 @@
             "callee": "observe",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L513",
+            "line": "L514",
             "receiver_type": "ResizeObserver"
           },
           {
             "callee": "observe",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L517",
+            "line": "L518",
             "receiver_type": "IntersectionObserver"
           },
           {
             "callee": "update",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L554",
+            "line": "L555",
             "receiver_type": "OrbitControls"
           },
           {
             "callee": "render",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L573",
+            "line": "L574",
             "receiver_type": "EffectComposer"
           },
           {
             "callee": "preventDefault",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L582",
+            "line": "L583",
             "receiver_type": "Event"
           },
           {
             "callee": "disconnect",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L619",
+            "line": "L620",
             "receiver_type": "ResizeObserver"
           },
           {
             "callee": "disconnect",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L620",
+            "line": "L621",
             "receiver_type": "IntersectionObserver"
           },
           {
             "callee": "dispose",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L621",
+            "line": "L622",
             "receiver_type": "OrbitControls"
           },
           {
             "callee": "dispose",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L625",
+            "line": "L626",
             "receiver_type": "EffectComposer"
           }
         ]
@@ -138493,7 +138493,7 @@
       "label": "constructor()",
       "norm_label": "constructor()",
       "source_file": "tests/station-controller.test.ts",
-      "source_location": "L93"
+      "source_location": "L57"
     },
     {
       "_callable": true,
@@ -138504,7 +138504,7 @@
       "label": "dispose()",
       "norm_label": "dispose()",
       "source_file": "tests/station-controller.test.ts",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "_callable": true,
@@ -138515,7 +138515,7 @@
       "label": "fromScene()",
       "norm_label": "fromscene()",
       "source_file": "tests/station-controller.test.ts",
-      "source_location": "L26"
+      "source_location": "L27"
     },
     {
       "_callable": true,
@@ -138526,7 +138526,7 @@
       "label": "observe()",
       "norm_label": "observe()",
       "source_file": "tests/station-controller.test.ts",
-      "source_location": "L94"
+      "source_location": "L107"
     },
     {
       "_callable": true,
@@ -145485,42 +145485,42 @@
             "callee": "locator",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L104",
+            "line": "L109",
             "receiver_type": "Page"
           },
           {
             "callee": "getByText",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L115",
+            "line": "L120",
             "receiver_type": "Page"
           },
           {
             "callee": "reload",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L116",
+            "line": "L121",
             "receiver_type": "Page"
           },
           {
             "callee": "screenshot",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L128",
+            "line": "L133",
             "receiver_type": "Page"
           },
           {
             "callee": "setViewportSize",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L129",
+            "line": "L134",
             "receiver_type": "Page"
           },
           {
             "callee": "newContext",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L153",
+            "line": "L158",
             "receiver_type": "Browser"
           }
         ]
