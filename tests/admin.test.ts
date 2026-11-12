@@ -440,7 +440,7 @@ describe("enforced step-up", (): void => {
         target_id: ids.topic,
         actor_id: "admin",
         streamer_id: ids.page,
-        metadata: JSON.stringify({ title: "Spam topic", via: "page", stepUp: "fresh" }),
+        metadata: JSON.stringify({ via: "page", stepUp: "fresh" }),
       },
     ]);
   });
@@ -857,7 +857,7 @@ describe("page moderation and the reports queue", (): void => {
       "SELECT reason, note, metadata FROM moderation_actions WHERE action='entry_removed'",
     ).first<{ reason: string; note: string; metadata: string }>();
     expect(row).toMatchObject({ reason: "spam", note: "Link farm" });
-    expect(JSON.parse(row?.metadata ?? "{}")).toMatchObject({ title: "Spam topic" });
+    expect(JSON.parse(row?.metadata ?? "{}")).toEqual({ stepUp: "missing" });
 
     const declined = await asAdmin("POST", `admin/entries/${ids.idea}/status`, {
       body: { status: "declined", reason: "Out of scope" },

@@ -419,7 +419,7 @@ describe("moderation rights", (): void => {
         target_id: poll,
         action: "entry_removed",
         actor_id: "admin",
-        metadata: JSON.stringify({ title: "Pick a colour", via: "page", stepUp: "fresh" }),
+        metadata: JSON.stringify({ via: "page", stepUp: "fresh" }),
       },
     ]);
     // Admin routes run the gate themselves and write their own row.

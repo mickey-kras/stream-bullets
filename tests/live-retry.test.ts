@@ -31,8 +31,8 @@ class Socket {
 let cleanup: (() => void) | undefined;
 
 function current(): Socket { return Socket.sockets[Socket.sockets.length - 1]; }
-function start(): void {
-  useLivePolls("test_host");
+function start(persistent = false): void {
+  useLivePolls("test_host", true, null, persistent);
   cleanup = hooks.effects[0]();
 }
 
@@ -112,4 +112,50 @@ it("exhausts the budget when each accepted connection stalls until the watchdog 
   }
   expect(Socket.sockets).toHaveLength(9);
   expect(hooks.update).toHaveBeenLastCalledWith("offline");
+});
+
+it("keeps retrying at the 30 second ceiling when persistent", (): void => {
+  vi.stubGlobal("addEventListener", vi.fn());
+  vi.stubGlobal("removeEventListener", vi.fn());
+  vi.stubGlobal("document", { visibilityState: "visible", addEventListener: vi.fn(), removeEventListener: vi.fn() });
+  start(true);
+  for (let attempt: number = 0; attempt < 40; attempt += 1) {
+    current().close();
+    vi.advanceTimersByTime(30_000);
+  }
+  expect(Socket.sockets).toHaveLength(41);
+  expect(hooks.update).not.toHaveBeenCalledWith("offline");
+  current().close();
+  vi.advanceTimersByTime(14_999);
+  expect(Socket.sockets).toHaveLength(41);
+  vi.advanceTimersByTime(15_001);
+  expect(Socket.sockets).toHaveLength(42);
+});
+
+it("retries at once when the network or the tab comes back while persistent", (): void => {
+  const target = new EventTarget();
+  const page = Object.assign(new EventTarget(), { visibilityState: "visible" });
+  vi.stubGlobal("addEventListener", target.addEventListener.bind(target));
+  vi.stubGlobal("removeEventListener", target.removeEventListener.bind(target));
+  vi.stubGlobal("document", page);
+  start(true);
+  for (let attempt: number = 0; attempt < 10; attempt += 1) {
+    current().close();
+    vi.advanceTimersByTime(30_000);
+  }
+  current().close();
+  expect(Socket.sockets).toHaveLength(11);
+  target.dispatchEvent(new Event("online"));
+  expect(Socket.sockets).toHaveLength(12);
+  // Already connecting: a second wake does not open another socket.
+  page.dispatchEvent(new Event("visibilitychange"));
+  expect(Socket.sockets).toHaveLength(12);
+  current().close();
+  page.dispatchEvent(new Event("visibilitychange"));
+  expect(Socket.sockets).toHaveLength(13);
+  cleanup?.();
+  cleanup = undefined;
+  current().close();
+  target.dispatchEvent(new Event("online"));
+  expect(Socket.sockets).toHaveLength(13);
 });

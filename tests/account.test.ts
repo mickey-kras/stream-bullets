@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { appContext, type AppEnv } from "../app/env";
 import { action, loader } from "../app/routes/api";
 import { DELETED_AUTHOR_SNAPSHOT, deleteAccount, EXPORT_PAGE_SIZE, exportAccount } from "../app/server/account.server";
+import { mutateEntry } from "../app/server/data.server";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 const origin = "https://stream.example.test";
@@ -801,6 +802,21 @@ describe("account deletion", (): void => {
     expect(
       await env.DB.prepare("SELECT snapshot,target_author_id FROM content_reports WHERE id='r-removed'").first(),
     ).toEqual({ snapshot: DELETED_AUTHOR_SNAPSHOT, target_author_id: null });
+  });
+
+  it("keeps no copy of a removed topic's title in the moderation records", async (): Promise<void> => {
+    const admins: AppEnv = { ...env, ADMIN_EMAILS: "admin@example.test" };
+    const gate = async (): Promise<{ stepUp: string }> => ({ stepUp: "fresh" });
+    await mutateEntry(admins, "admin", ids.hostPage, { action: "delete", id: ids.leaverTopic }, gate);
+    await deleteAccount(env, "leaver");
+    const rows = await env.DB.prepare(
+      "SELECT target_id,metadata FROM moderation_actions WHERE action='entry_removed'",
+    ).all<{ target_id: string; metadata: string }>();
+    expect(rows.results).toEqual([
+      { target_id: ids.leaverTopic, metadata: JSON.stringify({ via: "page", stepUp: "fresh" }) },
+    ]);
+    const all = await env.DB.prepare("SELECT metadata FROM moderation_actions").all<{ metadata: string | null }>();
+    for (const row of all.results) expect(row.metadata ?? "").not.toContain("Leaver topic");
   });
 
   it("cascades the streamer page, removes images, and refreshes affected live rooms", async (): Promise<void> => {
