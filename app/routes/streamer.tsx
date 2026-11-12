@@ -588,6 +588,7 @@ export default function StreamerPage(): ReactNode {
   }
 
   function renderTopics(): ReactNode {
+    const emptyDetail: ReactNode = query || status ? renderFilteredEmpty() : renderEmptyTopics();
     return (
       <TopicBoard
         name={streamer.name}
@@ -622,10 +623,8 @@ export default function StreamerPage(): ReactNode {
               />
               {renderDiscussion(selected)}
             </>
-          ) : query || status ? (
-            renderFilteredEmpty()
           ) : (
-            renderEmptyTopics()
+            emptyDetail
           )
         }
         onSelect={(id: string) => openFromList("topics", id)}
