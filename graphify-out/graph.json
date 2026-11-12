@@ -23121,7 +23121,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L711",
+      "source_location": "L710",
       "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
@@ -23133,7 +23133,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L805",
+      "source_location": "L804",
       "target": "app_routes_streamer_headeraction",
       "weight": 1.0
     },
@@ -23145,7 +23145,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L807",
+      "source_location": "L806",
       "target": "app_routes_streamer_floatingaction",
       "weight": 1.0
     },
@@ -23157,7 +23157,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L808",
+      "source_location": "L807",
       "target": "app_routes_streamer_pagerole",
       "weight": 1.0
     },
@@ -23169,7 +23169,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L820",
+      "source_location": "L819",
       "target": "app_components_shell_streamer_header_streamerheader",
       "weight": 1.0
     },
@@ -23181,7 +23181,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L823",
+      "source_location": "L822",
       "target": "app_routes_streamer_streamerheaderappearance",
       "weight": 1.0
     },
@@ -23193,7 +23193,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L844",
+      "source_location": "L843",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -23205,7 +23205,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L851",
+      "source_location": "L850",
       "target": "app_components_streamer_page_banner_pagebanner",
       "weight": 1.0
     },
@@ -23217,7 +23217,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L863",
+      "source_location": "L862",
       "target": "app_routes_streamer_streamerpage_renderpage",
       "weight": 1.0
     },
@@ -23229,7 +23229,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L870",
+      "source_location": "L869",
       "target": "app_components_create_entry_createentry",
       "weight": 1.0
     },
@@ -23241,7 +23241,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L875",
+      "source_location": "L874",
       "target": "app_routes_streamer_streamerpage_closeintentdialog",
       "weight": 1.0
     },
@@ -23253,7 +23253,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L878",
+      "source_location": "L877",
       "target": "app_routes_streamer_streamerpage_mutate",
       "weight": 1.0
     },
@@ -23265,7 +23265,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L880",
+      "source_location": "L879",
       "target": "app_routes_streamer_streamerpage_navigate",
       "weight": 1.0
     },
@@ -23277,7 +23277,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L883",
+      "source_location": "L882",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -23289,7 +23289,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L887",
+      "source_location": "L886",
       "target": "app_routes_streamer_streamerpage_setparam",
       "weight": 1.0
     },
@@ -23301,7 +23301,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L892",
+      "source_location": "L891",
       "target": "app_components_ideas_idea_dialog_ideadialog",
       "weight": 1.0
     },
@@ -23445,7 +23445,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L682",
+      "source_location": "L681",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -23457,7 +23457,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L698",
+      "source_location": "L697",
       "target": "app_components_ui_avatar_streamerlogo",
       "weight": 1.0
     },
@@ -23469,7 +23469,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L706",
+      "source_location": "L705",
       "target": "app_components_support_support_supportsection",
       "weight": 1.0
     },
@@ -23481,7 +23481,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L711",
+      "source_location": "L710",
       "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
@@ -23493,7 +23493,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderabout",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L716",
+      "source_location": "L715",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -23649,7 +23649,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderofficialcommunity",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L728",
+      "source_location": "L727",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -23661,7 +23661,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderofficialcommunity",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L739",
+      "source_location": "L738",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -23673,7 +23673,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L760",
+      "source_location": "L759",
       "target": "app_routes_streamer_streamerpage_rendertopics",
       "weight": 1.0
     },
@@ -23685,7 +23685,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L762",
+      "source_location": "L761",
       "target": "app_routes_streamer_streamerpage_renderpolls",
       "weight": 1.0
     },
@@ -23697,7 +23697,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L763",
+      "source_location": "L762",
       "target": "app_routes_streamer_streamerpage_renderabout",
       "weight": 1.0
     },
@@ -23709,7 +23709,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L766",
+      "source_location": "L765",
       "target": "app_components_schedule_schedule_view_scheduleview",
       "weight": 1.0
     },
@@ -23721,7 +23721,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L777",
+      "source_location": "L776",
       "target": "app_routes_streamer_streamerpage_setparam",
       "weight": 1.0
     },
@@ -23733,7 +23733,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L785",
+      "source_location": "L784",
       "target": "app_routes_streamer_streamerpage_renderofficialcommunity",
       "weight": 1.0
     },
@@ -23745,7 +23745,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L787",
+      "source_location": "L786",
       "target": "app_components_community_community_view_communityview",
       "weight": 1.0
     },
@@ -23757,7 +23757,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L641",
+      "source_location": "L640",
       "target": "app_components_streamer_polls_view_pollsview",
       "weight": 1.0
     },
@@ -23769,7 +23769,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L659",
+      "source_location": "L658",
       "target": "app_routes_streamer_streamerpage_backtolist",
       "weight": 1.0
     },
@@ -23781,7 +23781,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L659",
+      "source_location": "L658",
       "target": "app_routes_streamer_streamerpage_openfromlist",
       "weight": 1.0
     },
@@ -23793,7 +23793,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L660",
+      "source_location": "L659",
       "target": "app_routes_streamer_streamerpage_changeboard",
       "weight": 1.0
     },
@@ -23805,7 +23805,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L668",
+      "source_location": "L667",
       "target": "app_routes_streamer_streamerpage_removeselected",
       "weight": 1.0
     },
@@ -23817,7 +23817,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_renderpolls",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L669",
+      "source_location": "L668",
       "target": "app_routes_streamer_streamerpage_deleteentry",
       "weight": 1.0
     },
@@ -23829,103 +23829,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L592",
-      "target": "app_components_streamer_topic_board_topicboard",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage_rendertopics",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L604",
-      "target": "app_routes_streamer_streamerpage_renderemptylist",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage_rendertopics",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L608",
-      "target": "app_components_streamer_entry_detail_entrydetail",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage_rendertopics",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L615",
-      "target": "app_routes_streamer_streamerpage_backtolist",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage_rendertopics",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L616",
-      "target": "app_routes_streamer_streamerpage_act",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage_rendertopics",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L620",
-      "target": "app_i18n_index_t",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage_rendertopics",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L623",
-      "target": "app_routes_streamer_streamerpage_renderdiscussion",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage_rendertopics",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L626",
-      "target": "app_routes_streamer_streamerpage_renderfilteredempty",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_streamer_streamerpage_rendertopics",
-      "source_file": "app/routes/streamer.tsx",
-      "source_location": "L628",
+      "source_location": "L591",
       "target": "app_routes_streamer_streamerpage_renderemptytopics",
       "weight": 1.0
     },
@@ -23937,7 +23841,103 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L631",
+      "source_location": "L591",
+      "target": "app_routes_streamer_streamerpage_renderfilteredempty",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage_rendertopics",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L593",
+      "target": "app_components_streamer_topic_board_topicboard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage_rendertopics",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L605",
+      "target": "app_routes_streamer_streamerpage_renderemptylist",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage_rendertopics",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L609",
+      "target": "app_components_streamer_entry_detail_entrydetail",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage_rendertopics",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L616",
+      "target": "app_routes_streamer_streamerpage_backtolist",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage_rendertopics",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L617",
+      "target": "app_routes_streamer_streamerpage_act",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage_rendertopics",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L621",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage_rendertopics",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L624",
+      "target": "app_routes_streamer_streamerpage_renderdiscussion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_streamer_streamerpage_rendertopics",
+      "source_file": "app/routes/streamer.tsx",
+      "source_location": "L630",
       "target": "app_routes_streamer_streamerpage_openfromlist",
       "weight": 1.0
     },
@@ -23949,7 +23949,7 @@
       "relation": "calls",
       "source": "app_routes_streamer_streamerpage_rendertopics",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L632",
+      "source_location": "L631",
       "target": "app_routes_streamer_streamerpage_changeboard",
       "weight": 1.0
     },
@@ -104632,6 +104632,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "app_routes_overlay_errorboundary",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L101",
+      "target": "app_routes_overlay_errorboundary_finishattempt",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L11",
@@ -105118,7 +105129,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L639",
+      "source_location": "L638",
       "target": "app_routes_streamer_streamerpage_renderpolls",
       "weight": 1.0
     },
@@ -105129,7 +105140,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L678",
+      "source_location": "L677",
       "target": "app_routes_streamer_streamerpage_renderabout",
       "weight": 1.0
     },
@@ -105140,7 +105151,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L725",
+      "source_location": "L724",
       "target": "app_routes_streamer_streamerpage_renderofficialcommunity",
       "weight": 1.0
     },
@@ -105151,7 +105162,7 @@
       "relation": "contains",
       "source": "app_routes_streamer_streamerpage",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L759",
+      "source_location": "L758",
       "target": "app_routes_streamer_streamerpage_renderpage",
       "weight": 1.0
     },
@@ -119318,6 +119329,18 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "app_routes_overlay_errorboundary",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L106",
+      "target": "app_routes_overlay_errorboundary_finishattempt",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "app_routes_streamer_streamerpage_loadmore",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L433",
@@ -120310,10 +120333,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "3c458fc282c46eb5b5898a464a3931d411345606df7b46c71c6ed7a08a749090",
+    "content_sha256": "f7ef3344de0f942e7a2d5213dafde8ffe2e833998344c648de2eb8cac680ef8c",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "5d8ce938e958e93662bdffadf42b2cb91682c0a1f9f72df4e8637af4859a0a14",
+    "source_sha256": "3aaba1a9e8439a1536d72a24d0b418010f32c73d8ea38ee5310dafd6755a4ee2",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -133722,6 +133745,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_routes_overlay_errorboundary_finishattempt",
+      "label": "finishAttempt()",
+      "norm_label": "finishattempt()",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L101"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_routes_overlay_overlay",
       "label": "Overlay()",
       "norm_label": "overlay()",
@@ -134067,7 +134101,7 @@
       "label": "renderAbout()",
       "norm_label": "renderabout()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L678"
+      "source_location": "L677"
     },
     {
       "_callable": true,
@@ -134122,7 +134156,7 @@
       "label": "renderOfficialCommunity()",
       "norm_label": "renderofficialcommunity()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L725"
+      "source_location": "L724"
     },
     {
       "_callable": true,
@@ -134133,7 +134167,7 @@
       "label": "renderPage()",
       "norm_label": "renderpage()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L759"
+      "source_location": "L758"
     },
     {
       "_callable": true,
@@ -134144,7 +134178,7 @@
       "label": "renderPolls()",
       "norm_label": "renderpolls()",
       "source_file": "app/routes/streamer.tsx",
-      "source_location": "L639"
+      "source_location": "L638"
     },
     {
       "_callable": true,
