@@ -55,7 +55,9 @@ async function expectHeaderFits(page: Page): Promise<void> {
 }
 
 async function expectReachable(locator: Locator): Promise<void> {
-  await locator.scrollIntoViewIfNeeded();
+  await locator.evaluate((element: Element): void => {
+    element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" });
+  });
   await expect(locator).toBeInViewport({ ratio: 1 });
   await locator.click({ trial: true });
   const size = await locator.boundingBox();
@@ -274,13 +276,12 @@ test.describe("configured-provider mobile dialogs", () => {
           await expectLabelsFit(signIn.locator("h2"));
           await expectLabelsFit(providers);
           const consent: Locator = signIn.getByRole("checkbox");
-          await consent.scrollIntoViewIfNeeded();
+          await consent.evaluate((element: Element): void => {
+            element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" });
+          });
           await expect(consent).toBeInViewport({ ratio: 1 });
           await consent.check();
           for (const provider of await providers.all()) {
-            await provider.evaluate((element: Element): void => {
-              element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" });
-            });
             await expectReachable(provider);
           }
           await expectReachable(signIn.locator(".modal-close"));

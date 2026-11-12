@@ -32685,7 +32685,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L108",
+      "source_location": "L110",
       "target": "tests_e2e_a11y_responsive_spec_expectcontained",
       "weight": 1.0
     },
@@ -32697,7 +32697,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L109",
+      "source_location": "L111",
       "target": "tests_e2e_a11y_responsive_spec_expectheaderfits",
       "weight": 1.0
     },
@@ -32709,7 +32709,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L123",
+      "source_location": "L125",
       "target": "tests_e2e_a11y_responsive_spec_expectlabelsfit",
       "weight": 1.0
     },
@@ -32721,7 +32721,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L131",
+      "source_location": "L133",
       "target": "tests_e2e_a11y_responsive_spec_opencontact",
       "weight": 1.0
     },
@@ -32733,7 +32733,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L133",
+      "source_location": "L135",
       "target": "tests_e2e_a11y_responsive_spec_expectreachable",
       "weight": 1.0
     },
@@ -112736,7 +112736,7 @@
       "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L66",
+      "source_location": "L68",
       "target": "tests_e2e_a11y_responsive_spec_opencontact",
       "weight": 1.0
     },
@@ -118447,10 +118447,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f0361bbb9fb6e9e701bfc2a1638655a0536b197219effc187f326738eb2ac309",
+    "content_sha256": "24d99d11d28d09010d21069f1804f430feccef8b96f40cbe3189d1883ca47eac",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "22d59e9201cb88974eb9ee476eb5452c67243e36f5870696e343dd8cb5dc1696",
+    "source_sha256": "7ebbc526a62f0b744d92d143ad67ca91ca192e5ee78a641297cf951d2b600ed5",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -137205,24 +137205,31 @@
       "metadata": {
         "unresolved_calls": [
           {
-            "callee": "scrollIntoViewIfNeeded",
+            "callee": "evaluate",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
             "line": "L58",
             "receiver_type": "Locator"
           },
           {
+            "callee": "scrollIntoView",
+            "file": "tests/e2e/a11y-responsive.spec.ts",
+            "lang": "typescript",
+            "line": "L59",
+            "receiver_type": "Element"
+          },
+          {
             "callee": "click",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L60",
+            "line": "L62",
             "receiver_type": "Locator"
           },
           {
             "callee": "boundingBox",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L61",
+            "line": "L63",
             "receiver_type": "Locator"
           }
         ]
@@ -137244,14 +137251,14 @@
             "callee": "locator",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L67",
+            "line": "L69",
             "receiver_type": "Page"
           }
         ]
       },
       "norm_label": "opencontact()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
-      "source_location": "L66"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -146386,70 +146393,70 @@
             "callee": "addInitScript",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L78",
+            "line": "L80",
             "receiver_type": "Page"
           },
           {
             "callee": "setViewportSize",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L86",
+            "line": "L88",
             "receiver_type": "Page"
           },
           {
             "callee": "goto",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L93",
+            "line": "L95",
             "receiver_type": "Page"
           },
           {
             "callee": "locator",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L95",
+            "line": "L97",
             "receiver_type": "Page"
           },
           {
             "callee": "evaluate",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L97",
+            "line": "L99",
             "receiver_type": "Page"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L112",
+            "line": "L114",
             "receiver_type": "HTMLElement"
           },
           {
             "callee": "emulateMedia",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L155",
+            "line": "L157",
             "receiver_type": "Page"
           },
           {
             "callee": "addStyleTag",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L158",
+            "line": "L160",
             "receiver_type": "Page"
           },
           {
             "callee": "getByRole",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L269",
+            "line": "L271",
             "receiver_type": "Page"
           },
           {
             "callee": "scrollIntoView",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
-            "line": "L282",
+            "line": "L280",
             "receiver_type": "Element"
           }
         ]
