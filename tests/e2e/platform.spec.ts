@@ -422,7 +422,7 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
     const resolved = admin.getByRole("article", { name: "Test host" });
     await resolved.getByRole("button", { name: /Show \d+ reported items?/ }).click();
     const removed = resolved.getByRole("listitem").filter({ hasText: "Limited offer, click now." });
-    await expect(removed.locator(".resolved-line")).toContainText("Removed");
+    await expect(removed.locator(".resolved-line")).toContainText("Content removed");
     await expect(removed.getByRole("button")).toHaveCount(0);
   });
   await close(adminContext);

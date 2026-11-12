@@ -27,7 +27,7 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   await expect(page).toHaveURL(/intent=suggest/);
   const dialog = page.getByRole("dialog", { name: "Suggest an improvement" });
   await expect(dialog).toBeVisible();
-  const details = dialog.getByLabel("Details");
+  const details = dialog.getByRole("textbox", { name: "Details", exact: true });
   await dialog.getByLabel("Title").fill("Week view starts on Sunday");
   const category = dialog.getByRole("combobox", { name: "Category" });
   await category.click();
