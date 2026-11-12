@@ -151,7 +151,9 @@ The deployment records the current bookmark for D1 Time Travel before applying p
 
 Time Travel retention is 7 days on Workers Free and 30 days on Workers Paid.
 
-After changing a missing secret, rerun the failed deployment job. For a code rollback, revert the change through a PR. Check the schema compatibility first. Do not rerun an old successful deployment after newer code is live.
+After changing a missing secret, rerun the failed deployment job. For a fast code rollback, use `wrangler rollback`. Refer to [docs/recovery.md](docs/recovery.md). Check the schema compatibility first. Then revert the change through a PR. Do not rerun an old successful deployment after newer code is live.
+
+To restore D1 to the bookmark of a deployment, refer to [docs/recovery.md](docs/recovery.md). After PR #652, the summary of the deployment job shows the bookmark and the commit SHA.
 
 For a manual deployment, authenticate Wrangler on your deployment machine:
 

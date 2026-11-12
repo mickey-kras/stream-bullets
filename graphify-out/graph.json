@@ -11947,9 +11947,21 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_components_shell_sign_in_dialog_profileover",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L41",
+      "target": "app_components_account_dialog_route_dialoghref",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L107",
+      "source_location": "L121",
       "target": "app_components_shell_sign_in_dialog_signin_signin",
       "weight": 1.0
     },
@@ -11961,7 +11973,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L110",
+      "source_location": "L124",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -11973,7 +11985,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L42",
+      "source_location": "L55",
       "target": "app_components_shell_sign_in_dialog_usehere",
       "weight": 1.0
     },
@@ -11985,7 +11997,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L60",
+      "source_location": "L74",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11997,7 +12009,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L62",
+      "source_location": "L76",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -12009,7 +12021,19 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L60",
+      "source_location": "L70",
+      "target": "app_components_shell_sign_in_dialog_profileover",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_sign_in_dialog_signin_signin",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L74",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12021,7 +12045,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L62",
+      "source_location": "L76",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -12033,7 +12057,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L183",
+      "source_location": "L197",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12045,7 +12069,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L184",
+      "source_location": "L198",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -12057,7 +12081,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L190",
+      "source_location": "L204",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -12069,7 +12093,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signindialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L162",
+      "source_location": "L176",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12081,7 +12105,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signindialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L164",
+      "source_location": "L178",
       "target": "app_components_ui_dialog_dialog",
       "weight": 1.0
     },
@@ -12093,8 +12117,20 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signindialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L170",
+      "source_location": "L184",
       "target": "app_components_shell_sign_in_dialog_signin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_sign_in_dialog_usehere",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L34",
+      "target": "app_lib_shell_localpath",
       "weight": 1.0
     },
     {
@@ -14191,6 +14227,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_components_station_motion_watchmotion",
+      "source_file": "app/components/station/motion.ts",
+      "source_location": "L19",
+      "target": "app_components_station_motion_motionreduced",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
       "source_location": "L232",
@@ -14553,7 +14601,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_addlights",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L261",
+      "source_location": "L262",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -14565,7 +14613,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L316",
+      "source_location": "L317",
       "target": "app_components_station_deck_builddeck",
       "weight": 1.0
     },
@@ -14577,7 +14625,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L317",
+      "source_location": "L318",
       "target": "app_components_station_scene_client_pause",
       "weight": 1.0
     },
@@ -14589,7 +14637,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L318",
+      "source_location": "L319",
       "target": "app_components_station_hall_buildhall",
       "weight": 1.0
     },
@@ -14601,7 +14649,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L320",
+      "source_location": "L321",
       "target": "app_components_station_studio_buildstudio",
       "weight": 1.0
     },
@@ -14613,7 +14661,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L322",
+      "source_location": "L323",
       "target": "app_components_station_wing_buildwing",
       "weight": 1.0
     },
@@ -14625,7 +14673,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L323",
+      "source_location": "L324",
       "target": "app_components_station_decals_builddecals",
       "weight": 1.0
     },
@@ -14637,7 +14685,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L325",
+      "source_location": "L326",
       "target": "app_components_station_works_buildworks",
       "weight": 1.0
     },
@@ -14649,7 +14697,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L327",
+      "source_location": "L328",
       "target": "app_components_station_mast_buildmast",
       "weight": 1.0
     },
@@ -14661,7 +14709,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L328",
+      "source_location": "L329",
       "target": "app_components_station_signs_buildsigns",
       "weight": 1.0
     },
@@ -14673,7 +14721,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L329",
+      "source_location": "L330",
       "target": "app_components_station_atom_buildatom",
       "weight": 1.0
     },
@@ -14685,7 +14733,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L332",
+      "source_location": "L333",
       "target": "app_components_station_merge_batchstatic",
       "weight": 1.0
     },
@@ -14697,7 +14745,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L336",
+      "source_location": "L337",
       "target": "app_components_station_atmosphere_buildatmosphere",
       "weight": 1.0
     },
@@ -14723,6 +14771,18 @@
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L447",
       "target": "app_components_station_scene_client_pause",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_scene_client_createstation",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L450",
+      "target": "app_components_station_motion_motionreduced",
       "weight": 1.0
     },
     {
@@ -14853,7 +14913,19 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L614",
+      "source_location": "L521",
+      "target": "app_components_station_motion_watchmotion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_scene_client_createstation",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L610",
       "target": "app_components_station_materials_field_paint",
       "weight": 1.0
     },
@@ -14865,7 +14937,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L623",
+      "source_location": "L619",
       "target": "app_components_station_scene_client_disposescene",
       "weight": 1.0
     },
@@ -14877,7 +14949,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_disposescene",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L426",
+      "source_location": "L427",
       "target": "app_components_station_scene_client_collectmaterialtextures",
       "weight": 1.0
     },
@@ -15261,7 +15333,7 @@
       "relation": "calls",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_components_station_tilt_onfirstmotion",
       "weight": 1.0
     },
@@ -15273,7 +15345,19 @@
       "relation": "calls",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L63",
+      "source_location": "L58",
+      "target": "app_components_station_motion_motionreduced",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L64",
       "target": "app_components_station_station_station_start",
       "weight": 1.0
     },
@@ -15285,7 +15369,19 @@
       "relation": "calls",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L77",
+      "source_location": "L65",
+      "target": "app_components_station_motion_watchmotion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L75",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -15297,7 +15393,7 @@
       "relation": "calls",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L90",
+      "source_location": "L88",
       "target": "app_components_station_tilt_tiltpillwanted",
       "weight": 1.0
     },
@@ -15309,7 +15405,7 @@
       "relation": "calls",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L95",
+      "source_location": "L93",
       "target": "app_components_station_tilt_askfortilt",
       "weight": 1.0
     },
@@ -15321,7 +15417,19 @@
       "relation": "calls",
       "source": "app_components_station_station_station_start",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L60",
+      "source_location": "L58",
+      "target": "app_components_station_motion_motionreduced",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station_start",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L61",
       "target": "app_components_station_station_station_fail",
       "weight": 1.0
     },
@@ -22401,7 +22509,7 @@
       "relation": "calls",
       "source": "app_routes_sign_in_loader",
       "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L22",
+      "source_location": "L35",
       "target": "app_server_auth_server_configuredproviders",
       "weight": 1.0
     },
@@ -22411,9 +22519,21 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_routes_sign_in_signinpage",
+      "source": "app_routes_sign_in_loader",
       "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L32",
+      "source_location": "L37",
+      "target": "app_lib_shell_localpath",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_sign_in_meta",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L23",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22425,7 +22545,43 @@
       "relation": "calls",
       "source": "app_routes_sign_in_signinpage",
       "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L34",
+      "source_location": "L45",
+      "target": "app_components_shell_site_header_siteheader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_sign_in_signinpage",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L48",
+      "target": "app_components_shell_back_link_backlink",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_sign_in_signinpage",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L49",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_sign_in_signinpage",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L51",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -35779,6 +35935,30 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L44",
+      "target": "tests_station_motion_test_stubpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L69",
+      "target": "tests_station_motion_test_fire",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_station_test",
       "source_file": "tests/station.test.ts",
       "source_location": "L63",
@@ -37584,7 +37764,7 @@
       "relation": "imports_from",
       "source": "app_components_station_station_station_start",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "target": "app_components_station_scene_client",
       "weight": 1.0
     },
@@ -45891,6 +46071,18 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L10",
+      "target": "app_components_ui_dialog_dialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L11",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -45902,7 +46094,7 @@
       "relation": "imports",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L10",
+      "source_location": "L11",
       "target": "app_components_ui_icon_iconname",
       "weight": 1.0
     },
@@ -45963,6 +46155,18 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L7",
+      "target": "app_lib_shell_localpath",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L7",
       "target": "app_lib_shell_paths",
       "weight": 1.0
     },
@@ -45987,7 +46191,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L8",
-      "target": "app_components_api_errormessage",
+      "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
     {
@@ -45999,7 +46203,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L9",
-      "target": "app_components_ui_dialog_dialog",
+      "target": "app_components_api_errormessage",
       "weight": 1.0
     },
     {
@@ -47487,7 +47691,7 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L19",
-      "target": "app_components_station_shapes_deck_y",
+      "target": "app_components_station_motion_motionreduced",
       "weight": 1.0
     },
     {
@@ -47499,19 +47703,7 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L19",
-      "target": "app_components_station_shapes_mesh",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_station_scene_client",
-      "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L19",
-      "target": "app_components_station_shapes_polar",
+      "target": "app_components_station_motion_watchmotion",
       "weight": 1.0
     },
     {
@@ -47523,7 +47715,31 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L20",
-      "target": "app_components_station_signs_buildsigns",
+      "target": "app_components_station_shapes_deck_y",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_station_scene_client",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L20",
+      "target": "app_components_station_shapes_mesh",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_station_scene_client",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L20",
+      "target": "app_components_station_shapes_polar",
       "weight": 1.0
     },
     {
@@ -47535,6 +47751,18 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L21",
+      "target": "app_components_station_signs_buildsigns",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_station_scene_client",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L22",
       "target": "app_components_station_studio_buildstudio",
       "weight": 1.0
     },
@@ -47546,7 +47774,7 @@
       "relation": "imports",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_components_station_wing_buildwing",
       "weight": 1.0
     },
@@ -47558,7 +47786,7 @@
       "relation": "imports",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L24",
+      "source_location": "L25",
       "target": "app_components_station_works_buildworks",
       "weight": 1.0
     },
@@ -47727,7 +47955,7 @@
       "source": "app_components_station_station",
       "source_file": "app/components/station/station.tsx",
       "source_location": "L3",
-      "target": "app_components_station_tilt_askfortilt",
+      "target": "app_components_station_motion_motionreduced",
       "weight": 1.0
     },
     {
@@ -47739,19 +47967,7 @@
       "source": "app_components_station_station",
       "source_file": "app/components/station/station.tsx",
       "source_location": "L3",
-      "target": "app_components_station_tilt_onfirstmotion",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_station_station",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L3",
-      "target": "app_components_station_tilt_tiltpillwanted",
+      "target": "app_components_station_motion_watchmotion",
       "weight": 1.0
     },
     {
@@ -47763,6 +47979,42 @@
       "source": "app_components_station_station",
       "source_file": "app/components/station/station.tsx",
       "source_location": "L4",
+      "target": "app_components_station_tilt_askfortilt",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L4",
+      "target": "app_components_station_tilt_onfirstmotion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L4",
+      "target": "app_components_station_tilt_tiltpillwanted",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L5",
       "target": "app_components_station_scene_client_stationcontroller",
       "weight": 1.0
     },
@@ -52562,6 +52814,30 @@
       "relation": "imports",
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L10",
+      "target": "app_lib_shell_localpath",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L11",
+      "target": "app_types_provider",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
       "source_location": "L3",
       "target": "app_env_appcontext",
       "weight": 1.0
@@ -52611,19 +52887,7 @@
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
       "source_location": "L6",
-      "target": "app_i18n_index_messageid",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_sign_in",
-      "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L6",
-      "target": "app_i18n_index_t",
+      "target": "app_components_shell_back_link_backlink",
       "weight": 1.0
     },
     {
@@ -52635,7 +52899,7 @@
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
       "source_location": "L7",
-      "target": "app_legal_contactemails",
+      "target": "app_components_shell_site_header_siteheader",
       "weight": 1.0
     },
     {
@@ -52647,7 +52911,31 @@
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
       "source_location": "L8",
-      "target": "app_types_provider",
+      "target": "app_i18n_index_messageid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L8",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L9",
+      "target": "app_legal_contactemails",
       "weight": 1.0
     },
     {
@@ -67203,6 +67491,18 @@
       "source": "tests_lib_test",
       "source_file": "tests/lib.test.ts",
       "source_location": "L17",
+      "target": "app_lib_shell_localpath",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_lib_test",
+      "source_file": "tests/lib.test.ts",
+      "source_location": "L17",
       "target": "app_lib_shell_paths",
       "weight": 1.0
     },
@@ -70228,6 +70528,30 @@
       "source_file": "tests/station-interaction.test.ts",
       "source_location": "L6",
       "target": "app_components_station_merge_batchstatic",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L2",
+      "target": "app_components_station_motion_motionreduced",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L2",
+      "target": "app_components_station_motion_watchmotion",
       "weight": 1.0
     },
     {
@@ -76718,6 +77042,18 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L10",
+      "target": "app_components_ui_dialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L11",
       "target": "app_components_ui_icon",
       "weight": 1.0
     },
@@ -76802,7 +77138,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L8",
-      "target": "app_components_api",
+      "target": "app_components_account_dialog_route",
       "weight": 1.0
     },
     {
@@ -76814,7 +77150,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L9",
-      "target": "app_components_ui_dialog",
+      "target": "app_components_api",
       "weight": 1.0
     },
     {
@@ -77747,7 +78083,7 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L19",
-      "target": "app_components_station_shapes",
+      "target": "app_components_station_motion",
       "weight": 1.0
     },
     {
@@ -77759,7 +78095,7 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L20",
-      "target": "app_components_station_signs",
+      "target": "app_components_station_shapes",
       "weight": 1.0
     },
     {
@@ -77771,7 +78107,7 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L21",
-      "target": "app_components_station_studio",
+      "target": "app_components_station_signs",
       "weight": 1.0
     },
     {
@@ -77783,7 +78119,7 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L22",
-      "target": "app_components_station_textures",
+      "target": "app_components_station_studio",
       "weight": 1.0
     },
     {
@@ -77795,7 +78131,7 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L23",
-      "target": "app_components_station_wing",
+      "target": "app_components_station_textures",
       "weight": 1.0
     },
     {
@@ -77807,6 +78143,18 @@
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L24",
+      "target": "app_components_station_wing",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_station_scene_client",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L25",
       "target": "app_components_station_works",
       "weight": 1.0
     },
@@ -77928,7 +78276,7 @@
       "source": "app_components_station_station",
       "source_file": "app/components/station/station.tsx",
       "source_location": "L3",
-      "target": "app_components_station_tilt",
+      "target": "app_components_station_motion",
       "weight": 1.0
     },
     {
@@ -77940,6 +78288,18 @@
       "source": "app_components_station_station",
       "source_file": "app/components/station/station.tsx",
       "source_location": "L4",
+      "target": "app_components_station_tilt",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L5",
       "target": "app_components_station_scene_client",
       "type_only": true,
       "weight": 1.0
@@ -81368,6 +81728,31 @@
       "relation": "imports_from",
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L10",
+      "target": "app_lib_shell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L11",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
       "source_location": "L2",
       "target": "ref_react",
       "type_only": true,
@@ -81418,7 +81803,7 @@
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
       "source_location": "L6",
-      "target": "app_i18n_index",
+      "target": "app_components_shell_back_link",
       "weight": 1.0
     },
     {
@@ -81430,7 +81815,7 @@
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
       "source_location": "L7",
-      "target": "app_legal",
+      "target": "app_components_shell_site_header",
       "weight": 1.0
     },
     {
@@ -81442,8 +81827,19 @@
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
       "source_location": "L8",
-      "target": "app_types",
-      "type_only": true,
+      "target": "app_i18n_index",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L9",
+      "target": "app_legal",
       "weight": 1.0
     },
     {
@@ -91425,6 +91821,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L2",
+      "target": "app_components_station_motion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_station_test",
       "source_file": "tests/station.test.ts",
       "source_location": "L1",
@@ -97691,7 +98111,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_components_shell_sign_in_dialog_providericon",
       "weight": 1.0
     },
@@ -97702,7 +98122,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L149",
+      "source_location": "L163",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -97713,18 +98133,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L176",
-      "target": "app_components_shell_sign_in_dialog_signinbutton",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_shell_sign_in_dialog",
-      "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "app_components_shell_sign_in_dialog_providername",
       "weight": 1.0
     },
@@ -97735,7 +98144,18 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L26",
+      "source_location": "L190",
+      "target": "app_components_shell_sign_in_dialog_signinbutton",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L31",
       "target": "app_components_shell_sign_in_dialog_usehere",
       "weight": 1.0
     },
@@ -97746,7 +98166,18 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L35",
+      "source_location": "L39",
+      "target": "app_components_shell_sign_in_dialog_profileover",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L48",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -97757,7 +98188,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L47",
+      "source_location": "L61",
       "target": "app_components_shell_sign_in_dialog_signin_signin",
       "weight": 1.0
     },
@@ -98800,6 +99231,28 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "app_components_station_motion",
+      "source_file": "app/components/station/motion.ts",
+      "source_location": "L16",
+      "target": "app_components_station_motion_watchmotion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_station_motion",
+      "source_file": "app/components/station/motion.ts",
+      "source_location": "L6",
+      "target": "app_components_station_motion_motionreduced",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "app_components_station_palette",
       "source_file": "app/components/station/palette.ts",
       "source_location": "L142",
@@ -99198,7 +99651,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "target": "app_components_station_scene_client_shots",
       "weight": 1.0
     },
@@ -99209,7 +99662,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L167",
+      "source_location": "L168",
       "target": "app_components_station_scene_client_createrenderer",
       "weight": 1.0
     },
@@ -99220,7 +99673,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L191",
+      "source_location": "L192",
       "target": "app_components_station_scene_client_createenvironment",
       "weight": 1.0
     },
@@ -99231,7 +99684,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L237",
+      "source_location": "L238",
       "target": "app_components_station_scene_client_addlights",
       "weight": 1.0
     },
@@ -99242,7 +99695,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_components_station_scene_client_stationview",
       "weight": 1.0
     },
@@ -99253,7 +99706,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L273",
+      "source_location": "L274",
       "target": "app_components_station_scene_client_createpost",
       "weight": 1.0
     },
@@ -99264,7 +99717,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L305",
+      "source_location": "L306",
       "target": "app_components_station_scene_client_pause",
       "weight": 1.0
     },
@@ -99275,7 +99728,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L311",
+      "source_location": "L312",
       "target": "app_components_station_scene_client_buildmodel",
       "weight": 1.0
     },
@@ -99286,7 +99739,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L341",
+      "source_location": "L342",
       "target": "app_components_station_scene_client_createrig",
       "weight": 1.0
     },
@@ -99297,7 +99750,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L394",
+      "source_location": "L395",
       "target": "app_components_station_scene_client_createcontrols",
       "weight": 1.0
     },
@@ -99308,18 +99761,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L40",
-      "target": "app_components_station_scene_client_stationcontroller",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_station_scene_client",
-      "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L407",
+      "source_location": "L408",
       "target": "app_components_station_scene_client_collectmaterialtextures",
       "weight": 1.0
     },
@@ -99330,7 +99772,18 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L413",
+      "source_location": "L41",
+      "target": "app_components_station_scene_client_stationcontroller",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_station_scene_client",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L414",
       "target": "app_components_station_scene_client_disposescene",
       "weight": 1.0
     },
@@ -99341,7 +99794,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L437",
+      "source_location": "L438",
       "target": "app_components_station_scene_client_createstation",
       "weight": 1.0
     },
@@ -99352,7 +99805,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L48",
+      "source_location": "L49",
       "target": "app_components_station_scene_client_stationoptions",
       "weight": 1.0
     },
@@ -99363,7 +99816,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L59",
+      "source_location": "L60",
       "target": "app_components_station_scene_client_shot",
       "weight": 1.0
     },
@@ -99374,7 +99827,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L69",
+      "source_location": "L70",
       "target": "app_components_station_scene_client_phone_hero",
       "weight": 1.0
     },
@@ -99385,7 +99838,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "target": "app_components_station_scene_client_fitphone",
       "weight": 1.0
     },
@@ -99396,7 +99849,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L93",
+      "source_location": "L94",
       "target": "app_components_station_scene_client_turnaround",
       "weight": 1.0
     },
@@ -99737,7 +100190,7 @@
       "relation": "contains",
       "source": "app_components_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_components_station_station_station",
       "weight": 1.0
     },
@@ -99748,7 +100201,7 @@
       "relation": "contains",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L28",
+      "source_location": "L29",
       "target": "app_components_station_station_station_fail",
       "weight": 1.0
     },
@@ -99759,19 +100212,8 @@
       "relation": "contains",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L33",
+      "source_location": "L34",
       "target": "app_components_station_station_station_start",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_station_station_station",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L64",
-      "target": "app_components_station_station_station_preference",
       "weight": 1.0
     },
     {
@@ -103148,7 +103590,7 @@
       "source": "app_lib_shell",
       "source_file": "app/lib/shell.ts",
       "source_location": "L71",
-      "target": "app_lib_shell_renamedpath",
+      "target": "app_lib_shell_localpath",
       "weight": 1.0
     },
     {
@@ -103160,6 +103602,17 @@
       "source_file": "app/lib/shell.ts",
       "source_location": "L8",
       "target": "app_lib_shell_shelldata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_shell",
+      "source_file": "app/lib/shell.ts",
+      "source_location": "L87",
+      "target": "app_lib_shell_renamedpath",
       "weight": 1.0
     },
     {
@@ -104247,7 +104700,7 @@
       "relation": "contains",
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L10",
+      "source_location": "L13",
       "target": "app_routes_sign_in_errors",
       "weight": 1.0
     },
@@ -104258,8 +104711,8 @@
       "relation": "contains",
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L19",
-      "target": "app_routes_sign_in_loader",
+      "source_location": "L22",
+      "target": "app_routes_sign_in_meta",
       "weight": 1.0
     },
     {
@@ -104270,6 +104723,17 @@
       "source": "app_routes_sign_in",
       "source_file": "app/routes/sign-in.tsx",
       "source_location": "L27",
+      "target": "app_routes_sign_in_loader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L41",
       "target": "app_routes_sign_in_signinpage",
       "weight": 1.0
     },
@@ -112759,6 +113223,127 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L1",
+      "target": "docs_recovery_production_recovery",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_production_recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L120",
+      "target": "docs_recovery_durable_object_pollroom_state_after_a_d1_restore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_production_recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L136",
+      "target": "docs_recovery_checks_after_recovery",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_production_recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L17",
+      "target": "docs_recovery_roll_back_the_worker",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_production_recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L56",
+      "target": "docs_recovery_restore_d1",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_production_recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L9",
+      "target": "docs_recovery_select_the_procedure",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_production_recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L97",
+      "target": "docs_recovery_r2_images_after_a_d1_restore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_restore_d1",
+      "source_file": "docs/recovery.md",
+      "source_location": "L60",
+      "target": "docs_recovery_find_the_bookmark",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_restore_d1",
+      "source_file": "docs/recovery.md",
+      "source_location": "L74",
+      "target": "docs_recovery_prepare",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_restore_d1",
+      "source_file": "docs/recovery.md",
+      "source_location": "L83",
+      "target": "docs_recovery_restore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_recovery_restore_d1",
+      "source_file": "docs/recovery.md",
+      "source_location": "L91",
+      "target": "docs_recovery_after_the_restore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "readme",
       "source_file": "README.md",
       "source_location": "L1",
@@ -112783,7 +113368,7 @@
       "relation": "contains",
       "source": "readme_quality_gates",
       "source_file": "README.md",
-      "source_location": "L282",
+      "source_location": "L284",
       "target": "readme_board_refreshes_and_public_image_cache",
       "weight": 1.0
     },
@@ -112827,7 +113412,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L186",
+      "source_location": "L188",
       "target": "readme_prototype_data",
       "weight": 1.0
     },
@@ -112838,7 +113423,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L190",
+      "source_location": "L192",
       "target": "readme_security_and_operating_limits",
       "weight": 1.0
     },
@@ -112849,7 +113434,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L208",
+      "source_location": "L210",
       "target": "readme_legal_pages",
       "weight": 1.0
     },
@@ -112860,7 +113445,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L224",
+      "source_location": "L226",
       "target": "readme_quality_gates",
       "weight": 1.0
     },
@@ -116908,17 +117493,6 @@
       "relation": "contains",
       "source": "tests_station_controller_test",
       "source_file": "tests/station-controller.test.ts",
-      "source_location": "L107",
-      "target": "tests_station_controller_test_observe",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_station_controller_test",
-      "source_file": "tests/station-controller.test.ts",
       "source_location": "L27",
       "target": "tests_station_controller_test_fromscene",
       "weight": 1.0
@@ -116954,6 +117528,28 @@
       "source_file": "tests/station-controller.test.ts",
       "source_location": "L6",
       "target": "tests_station_controller_test_gpu",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_station_controller_test",
+      "source_file": "tests/station-controller.test.ts",
+      "source_location": "L98",
+      "target": "tests_station_controller_test_observe",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_station_controller_test",
+      "source_file": "tests/station-controller.test.ts",
+      "source_location": "L99",
+      "target": "tests_station_controller_test_disconnect",
       "weight": 1.0
     },
     {
@@ -117009,6 +117605,50 @@
       "source_file": "tests/station-interaction.test.ts",
       "source_location": "L33",
       "target": "tests_station_interaction_test_camera",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L34",
+      "target": "tests_station_motion_test_fire",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L4",
+      "target": "tests_station_motion_test_observed",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L6",
+      "target": "tests_station_motion_test_page",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_station_motion_test",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L8",
+      "target": "tests_station_motion_test_stubpage",
       "weight": 1.0
     },
     {
@@ -118488,6 +119128,17 @@
       "relation": "references",
       "source": "readme",
       "source_file": "README.md",
+      "source_location": "L154",
+      "target": "docs_recovery",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
+      "source": "readme",
+      "source_file": "README.md",
       "source_location": "L16",
       "target": "docs_auth_setup",
       "weight": 1.0
@@ -118630,21 +119281,9 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
-      "source": "app_components_station_station_station",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L67",
-      "target": "app_components_station_station_station_preference",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "relation": "indirect_call",
       "source": "app_components_station_station_station_start",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L40",
+      "source_location": "L41",
       "target": "app_components_station_station_station_fail",
       "weight": 1.0
     },
@@ -118908,7 +119547,7 @@
       "relation": "indirect_call",
       "source": "tests_lib_test",
       "source_file": "tests/lib.test.ts",
-      "source_location": "L194",
+      "source_location": "L203",
       "target": "tests_board_states_test_streamer",
       "weight": 1.0
     },
@@ -119648,6 +120287,18 @@
       "_origin": "ast",
       "confidence": "INFERRED",
       "confidence_score": 0.95,
+      "context": "PollRoom",
+      "relation": "references",
+      "source": "docs_recovery_durable_object_pollroom_state_after_a_d1_restore",
+      "source_file": "docs/recovery.md",
+      "source_location": "L122",
+      "target": "app_server_poll_room_pollroom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
       "context": "Streamer",
       "relation": "references",
       "source": "docs_api_changed_response_shapes",
@@ -119682,10 +120333,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "e509cc932549240a0dec643b534eab2907a73060df398599312f379b868d5119",
+    "content_sha256": "f7ef3344de0f942e7a2d5213dafde8ffe2e833998344c648de2eb8cac680ef8c",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "e0dd929786089cd8001cbb9fb610becf1dad437bf1c4f7044c738783a4117630",
+    "source_sha256": "3aaba1a9e8439a1536d72a24d0b418010f32c73d8ea38ee5310dafd6755a4ee2",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -120683,7 +121334,7 @@
       "label": "Shot",
       "norm_label": "shot",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L59"
+      "source_location": "L60"
     },
     {
       "_callable": true,
@@ -120695,7 +121346,7 @@
       "label": "StationController",
       "norm_label": "stationcontroller",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L40"
+      "source_location": "L41"
     },
     {
       "_callable": true,
@@ -120707,7 +121358,7 @@
       "label": "StationOptions",
       "norm_label": "stationoptions",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L48"
+      "source_location": "L49"
     },
     {
       "_callable": true,
@@ -120719,7 +121370,7 @@
       "label": "StationView",
       "norm_label": "stationview",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L26"
+      "source_location": "L27"
     },
     {
       "_callable": true,
@@ -123984,6 +124635,30 @@
       "norm_label": "mashreply",
       "source_file": "tests/realtime.test.ts",
       "source_location": "L101"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_station_motion_test_observed",
+      "label": "Observed",
+      "norm_label": "observed",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L4"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_station_motion_test_page",
+      "label": "Page",
+      "norm_label": "page",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L6"
     },
     {
       "_callable": true,
@@ -127846,11 +128521,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_shell_sign_in_dialog_profileover",
+      "label": "profileOver()",
+      "norm_label": "profileover()",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L39"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_shell_sign_in_dialog_signin",
       "label": "SignIn()",
       "norm_label": "signin()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L35"
+      "source_location": "L48"
     },
     {
       "_callable": true,
@@ -127861,7 +128547,7 @@
       "label": "signIn()",
       "norm_label": "signin()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L47"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -127872,7 +128558,7 @@
       "label": "SignInButton()",
       "norm_label": "signinbutton()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L176"
+      "source_location": "L190"
     },
     {
       "_callable": true,
@@ -127883,7 +128569,7 @@
       "label": "SignInDialog()",
       "norm_label": "signindialog()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L149"
+      "source_location": "L163"
     },
     {
       "_callable": true,
@@ -127894,7 +128580,7 @@
       "label": "useHere()",
       "norm_label": "usehere()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L26"
+      "source_location": "L31"
     },
     {
       "_callable": true,
@@ -128784,6 +129470,46 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_station_motion_motionreduced",
+      "label": "motionReduced()",
+      "norm_label": "motionreduced()",
+      "source_file": "app/components/station/motion.ts",
+      "source_location": "L6"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_station_motion_watchmotion",
+      "label": "watchMotion()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "observe",
+            "file": "app/components/station/motion.ts",
+            "lang": "typescript",
+            "line": "L26",
+            "receiver_type": "MutationObserver"
+          },
+          {
+            "callee": "disconnect",
+            "file": "app/components/station/motion.ts",
+            "lang": "typescript",
+            "line": "L27",
+            "receiver_type": "MutationObserver"
+          }
+        ]
+      },
+      "norm_label": "watchmotion()",
+      "source_file": "app/components/station/motion.ts",
+      "source_location": "L16"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_station_palette_createpalette",
       "label": "createPalette()",
       "norm_label": "createpalette()",
@@ -129085,7 +129811,7 @@
       "label": "addLights()",
       "norm_label": "addlights()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L237"
+      "source_location": "L238"
     },
     {
       "_callable": true,
@@ -129096,7 +129822,7 @@
       "label": "buildModel()",
       "norm_label": "buildmodel()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L311"
+      "source_location": "L312"
     },
     {
       "_callable": true,
@@ -129107,7 +129833,7 @@
       "label": "collectMaterialTextures()",
       "norm_label": "collectmaterialtextures()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L407"
+      "source_location": "L408"
     },
     {
       "_callable": true,
@@ -129118,7 +129844,7 @@
       "label": "createControls()",
       "norm_label": "createcontrols()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L394"
+      "source_location": "L395"
     },
     {
       "_callable": true,
@@ -129129,7 +129855,7 @@
       "label": "createEnvironment()",
       "norm_label": "createenvironment()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L191"
+      "source_location": "L192"
     },
     {
       "_callable": true,
@@ -129144,14 +129870,14 @@
             "callee": "addPass",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L281",
+            "line": "L282",
             "receiver_type": "EffectComposer"
           }
         ]
       },
       "norm_label": "createpost()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L273"
+      "source_location": "L274"
     },
     {
       "_callable": true,
@@ -129162,7 +129888,7 @@
       "label": "createRenderer()",
       "norm_label": "createrenderer()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L167"
+      "source_location": "L168"
     },
     {
       "_callable": true,
@@ -129173,7 +129899,7 @@
       "label": "createRig()",
       "norm_label": "createrig()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L341"
+      "source_location": "L342"
     },
     {
       "_callable": true,
@@ -129223,56 +129949,56 @@
             "callee": "update",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L555",
+            "line": "L551",
             "receiver_type": "OrbitControls"
           },
           {
             "callee": "render",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L574",
+            "line": "L570",
             "receiver_type": "EffectComposer"
           },
           {
             "callee": "preventDefault",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L583",
+            "line": "L579",
             "receiver_type": "Event"
           },
           {
             "callee": "disconnect",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L620",
+            "line": "L616",
             "receiver_type": "ResizeObserver"
           },
           {
             "callee": "disconnect",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L621",
+            "line": "L617",
             "receiver_type": "IntersectionObserver"
           },
           {
             "callee": "dispose",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L622",
+            "line": "L618",
             "receiver_type": "OrbitControls"
           },
           {
             "callee": "dispose",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L626",
+            "line": "L622",
             "receiver_type": "EffectComposer"
           }
         ]
       },
       "norm_label": "createstation()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L437"
+      "source_location": "L438"
     },
     {
       "_callable": true,
@@ -129283,7 +130009,7 @@
       "label": "disposeScene()",
       "norm_label": "disposescene()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L413"
+      "source_location": "L414"
     },
     {
       "_callable": true,
@@ -129294,7 +130020,7 @@
       "label": "fitPhone()",
       "norm_label": "fitphone()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L82"
+      "source_location": "L83"
     },
     {
       "_callable": true,
@@ -129305,7 +130031,7 @@
       "label": "pause()",
       "norm_label": "pause()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L305"
+      "source_location": "L306"
     },
     {
       "_callable": true,
@@ -129316,7 +130042,7 @@
       "label": "turnaround()",
       "norm_label": "turnaround()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L93"
+      "source_location": "L94"
     },
     {
       "_callable": true,
@@ -129677,7 +130403,7 @@
       "label": "Station()",
       "norm_label": "station()",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "_callable": true,
@@ -129688,18 +130414,7 @@
       "label": "fail()",
       "norm_label": "fail()",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L28"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_components_station_station_station_preference",
-      "label": "preference()",
-      "norm_label": "preference()",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L64"
+      "source_location": "L29"
     },
     {
       "_callable": true,
@@ -129710,7 +130425,7 @@
       "label": "start()",
       "norm_label": "start()",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L33"
+      "source_location": "L34"
     },
     {
       "_callable": true,
@@ -132304,11 +133019,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_shell_localpath",
+      "label": "localPath()",
+      "norm_label": "localpath()",
+      "source_file": "app/lib/shell.ts",
+      "source_location": "L71"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_shell_renamedpath",
       "label": "renamedPath()",
       "norm_label": "renamedpath()",
       "source_file": "app/lib/shell.ts",
-      "source_location": "L71"
+      "source_location": "L87"
     },
     {
       "_callable": true,
@@ -133089,7 +133815,18 @@
       "label": "loader()",
       "norm_label": "loader()",
       "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L19"
+      "source_location": "L27"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_sign_in_meta",
+      "label": "meta()",
+      "norm_label": "meta()",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L22"
     },
     {
       "_callable": true,
@@ -133100,7 +133837,7 @@
       "label": "SignInPage()",
       "norm_label": "signinpage()",
       "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L27"
+      "source_location": "L41"
     },
     {
       "_callable": true,
@@ -138578,13 +139315,6 @@
       "metadata": {
         "unresolved_calls": [
           {
-            "callee": "locator",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L45",
-            "receiver_type": "Page"
-          },
-          {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
@@ -138690,17 +139420,6 @@
       "file_type": "code",
       "id": "tests_e2e_a11y_responsive_spec_opencontact",
       "label": "openContact()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "locator",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L69",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "opencontact()",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
       "source_location": "L68"
@@ -138714,13 +139433,6 @@
       "label": "problems()",
       "metadata": {
         "unresolved_calls": [
-          {
-            "callee": "evaluate",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L33",
-            "receiver_type": "Page"
-          },
           {
             "callee": "getAttribute",
             "file": "tests/e2e/a11y.spec.ts",
@@ -138785,17 +139497,6 @@
       "file_type": "code",
       "id": "tests_e2e_admin_keys_spec_shot",
       "label": "shot()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "screenshot",
-            "file": "tests/e2e/admin-keys.spec.ts",
-            "lang": "typescript",
-            "line": "L50",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "shot()",
       "source_file": "tests/e2e/admin-keys.spec.ts",
       "source_location": "L49"
@@ -138851,17 +139552,6 @@
       "file_type": "code",
       "id": "tests_e2e_board_navigation_spec_row",
       "label": "row()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "locator",
-            "file": "tests/e2e/board-navigation.spec.ts",
-            "lang": "typescript",
-            "line": "L18",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "row()",
       "source_file": "tests/e2e/board-navigation.spec.ts",
       "source_location": "L17"
@@ -139082,17 +139772,6 @@
       "file_type": "code",
       "id": "tests_e2e_i18n_spec_headeraction",
       "label": "headerAction()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "locator",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L188",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "headeraction()",
       "source_file": "tests/e2e/i18n.spec.ts",
       "source_location": "L187"
@@ -139129,13 +139808,6 @@
       "metadata": {
         "unresolved_calls": [
           {
-            "callee": "evaluate",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L145",
-            "receiver_type": "Page"
-          },
-          {
             "callee": "checkVisibility",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
@@ -139162,24 +139834,6 @@
       "file_type": "code",
       "id": "tests_e2e_i18n_spec_shot",
       "label": "shot()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "waitForLoadState",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L16",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "screenshot",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L18",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "shot()",
       "source_file": "tests/e2e/i18n.spec.ts",
       "source_location": "L13"
@@ -139275,17 +139929,6 @@
       "file_type": "code",
       "id": "tests_e2e_mutations_spec_loaderreads",
       "label": "loaderReads()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "on",
-            "file": "tests/e2e/mutations.spec.ts",
-            "lang": "typescript",
-            "line": "L16",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "loaderreads()",
       "source_file": "tests/e2e/mutations.spec.ts",
       "source_location": "L14"
@@ -139330,59 +139973,6 @@
       "file_type": "code",
       "id": "tests_e2e_oauth_spec_signin",
       "label": "signIn()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "route",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L74",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "goto",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L87",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "waitForResponse",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L89",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "waitForEvent",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L95",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L97",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "url",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L103",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "waitForLoadState",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L104",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "signin()",
       "source_file": "tests/e2e/oauth.spec.ts",
       "source_location": "L73"
@@ -139405,17 +139995,6 @@
       "file_type": "code",
       "id": "tests_e2e_overlay_control_spec_livesockets",
       "label": "liveSockets()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "evaluate",
-            "file": "tests/e2e/overlay-control.spec.ts",
-            "lang": "typescript",
-            "line": "L72",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "livesockets()",
       "source_file": "tests/e2e/overlay-control.spec.ts",
       "source_location": "L71"
@@ -139449,24 +140028,6 @@
       "file_type": "code",
       "id": "tests_e2e_platform_spec_assertnoscripterrors",
       "label": "assertNoScriptErrors()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "on",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L41",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "off",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L43",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "assertnoscripterrors()",
       "source_file": "tests/e2e/platform.spec.ts",
       "source_location": "L36"
@@ -139573,24 +140134,6 @@
       "file_type": "code",
       "id": "tests_e2e_roles_spec_menurows",
       "label": "menuRows()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "locator",
-            "file": "tests/e2e/roles.spec.ts",
-            "lang": "typescript",
-            "line": "L41",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/roles.spec.ts",
-            "lang": "typescript",
-            "line": "L44",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "menurows()",
       "source_file": "tests/e2e/roles.spec.ts",
       "source_location": "L40"
@@ -139613,17 +140156,6 @@
       "file_type": "code",
       "id": "tests_e2e_shell_spec_headerlabelsdonotwrap",
       "label": "headerLabelsDoNotWrap()",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "locator",
-            "file": "tests/e2e/shell.spec.ts",
-            "lang": "typescript",
-            "line": "L34",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "headerlabelsdonotwrap()",
       "source_file": "tests/e2e/shell.spec.ts",
       "source_location": "L33"
@@ -141702,6 +142234,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_station_controller_test_disconnect",
+      "label": "disconnect()",
+      "norm_label": "disconnect()",
+      "source_file": "tests/station-controller.test.ts",
+      "source_location": "L99"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_station_controller_test_dispose",
       "label": "dispose()",
       "norm_label": "dispose()",
@@ -141728,7 +142271,7 @@
       "label": "observe()",
       "norm_label": "observe()",
       "source_file": "tests/station-controller.test.ts",
-      "source_location": "L107"
+      "source_location": "L98"
     },
     {
       "_callable": true,
@@ -141784,6 +142327,28 @@
       "norm_label": "storage()",
       "source_file": "tests/station-interaction.test.ts",
       "source_location": "L323"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_station_motion_test_fire",
+      "label": "fire()",
+      "norm_label": "fire()",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L34"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_station_motion_test_stubpage",
+      "label": "stubPage()",
+      "norm_label": "stubpage()",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L8"
     },
     {
       "_callable": true,
@@ -143289,7 +143854,7 @@
       "label": "providerIcon",
       "norm_label": "providericon",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "_origin": "ast",
@@ -143299,7 +143864,7 @@
       "label": "providerName",
       "norm_label": "providername",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "_origin": "ast",
@@ -143585,6 +144150,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_station_motion",
+      "label": "motion.ts",
+      "norm_label": "motion.ts",
+      "source_file": "app/components/station/motion.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_station_palette",
       "label": "palette.ts",
       "norm_label": "palette.ts",
@@ -143689,7 +144264,7 @@
       "label": "PHONE_HERO",
       "norm_label": "phone_hero",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L69"
+      "source_location": "L70"
     },
     {
       "_origin": "ast",
@@ -143699,7 +144274,7 @@
       "label": "SHOTS",
       "norm_label": "shots",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L101"
+      "source_location": "L102"
     },
     {
       "_origin": "ast",
@@ -145280,7 +145855,7 @@
       "label": "errors",
       "norm_label": "errors",
       "source_file": "app/routes/sign-in.tsx",
-      "source_location": "L10"
+      "source_location": "L13"
     },
     {
       "_origin": "ast",
@@ -147942,67 +148517,11 @@
       "metadata": {
         "unresolved_calls": [
           {
-            "callee": "addInitScript",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L80",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "setViewportSize",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L88",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "goto",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L95",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L97",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "evaluate",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L99",
-            "receiver_type": "Page"
-          },
-          {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/a11y-responsive.spec.ts",
             "lang": "typescript",
             "line": "L114",
             "receiver_type": "HTMLElement"
-          },
-          {
-            "callee": "emulateMedia",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L157",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "addStyleTag",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L160",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/a11y-responsive.spec.ts",
-            "lang": "typescript",
-            "line": "L271",
-            "receiver_type": "Page"
           },
           {
             "callee": "scrollIntoView",
@@ -148043,73 +148562,6 @@
       "file_type": "code",
       "id": "tests_e2e_a11y_spec",
       "label": "a11y.spec.ts",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "goto",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L64",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L65",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L67",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "addInitScript",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L82",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "reload",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L107",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "evaluate",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L108",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "waitForResponse",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L126",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "setViewportSize",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L147",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "on",
-            "file": "tests/e2e/a11y.spec.ts",
-            "lang": "typescript",
-            "line": "L257",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "a11y.spec.ts",
       "source_file": "tests/e2e/a11y.spec.ts",
       "source_location": "L1"
@@ -148178,41 +148630,6 @@
             "lang": "typescript",
             "line": "L69",
             "receiver_type": "CDPSession"
-          },
-          {
-            "callee": "goto",
-            "file": "tests/e2e/admin-keys.spec.ts",
-            "lang": "typescript",
-            "line": "L72",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByText",
-            "file": "tests/e2e/admin-keys.spec.ts",
-            "lang": "typescript",
-            "line": "L73",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/admin-keys.spec.ts",
-            "lang": "typescript",
-            "line": "L74",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/admin-keys.spec.ts",
-            "lang": "typescript",
-            "line": "L76",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByLabel",
-            "file": "tests/e2e/admin-keys.spec.ts",
-            "lang": "typescript",
-            "line": "L86",
-            "receiver_type": "Page"
           }
         ]
       },
@@ -148258,48 +148675,6 @@
       "label": "board-navigation.spec.ts",
       "metadata": {
         "unresolved_calls": [
-          {
-            "callee": "goto",
-            "file": "tests/e2e/board-navigation.spec.ts",
-            "lang": "typescript",
-            "line": "L28",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "evaluate",
-            "file": "tests/e2e/board-navigation.spec.ts",
-            "lang": "typescript",
-            "line": "L32",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/board-navigation.spec.ts",
-            "lang": "typescript",
-            "line": "L38",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/board-navigation.spec.ts",
-            "lang": "typescript",
-            "line": "L44",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "goBack",
-            "file": "tests/e2e/board-navigation.spec.ts",
-            "lang": "typescript",
-            "line": "L55",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByText",
-            "file": "tests/e2e/board-navigation.spec.ts",
-            "lang": "typescript",
-            "line": "L72",
-            "receiver_type": "Page"
-          },
           {
             "callee": "newContext",
             "file": "tests/e2e/board-navigation.spec.ts",
@@ -148522,46 +148897,11 @@
       "metadata": {
         "unresolved_calls": [
           {
-            "callee": "goto",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L30",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L32",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L34",
-            "receiver_type": "Page"
-          },
-          {
             "callee": "cookies",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
             "line": "L49",
             "receiver_type": "BrowserContext"
-          },
-          {
-            "callee": "waitForResponse",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L62",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "url",
-            "file": "tests/e2e/i18n.spec.ts",
-            "lang": "typescript",
-            "line": "L312",
-            "receiver_type": "Page"
           }
         ]
       },
@@ -148715,45 +149055,6 @@
       "file_type": "code",
       "id": "tests_e2e_mutations_spec",
       "label": "mutations.spec.ts",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "goto",
-            "file": "tests/e2e/mutations.spec.ts",
-            "lang": "typescript",
-            "line": "L28",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "route",
-            "file": "tests/e2e/mutations.spec.ts",
-            "lang": "typescript",
-            "line": "L34",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/mutations.spec.ts",
-            "lang": "typescript",
-            "line": "L39",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/mutations.spec.ts",
-            "lang": "typescript",
-            "line": "L71",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "unroute",
-            "file": "tests/e2e/mutations.spec.ts",
-            "lang": "typescript",
-            "line": "L75",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "mutations.spec.ts",
       "source_file": "tests/e2e/mutations.spec.ts",
       "source_location": "L1"
@@ -148772,34 +149073,6 @@
             "lang": "typescript",
             "line": "L138",
             "receiver_type": "BrowserContext"
-          },
-          {
-            "callee": "goto",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L228",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByLabel",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L229",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L230",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "url",
-            "file": "tests/e2e/oauth.spec.ts",
-            "lang": "typescript",
-            "line": "L235",
-            "receiver_type": "Page"
           }
         ]
       },
@@ -148823,24 +149096,6 @@
       "file_type": "code",
       "id": "tests_e2e_overlay_control_spec",
       "label": "overlay-control.spec.ts",
-      "metadata": {
-        "unresolved_calls": [
-          {
-            "callee": "goto",
-            "file": "tests/e2e/overlay-control.spec.ts",
-            "lang": "typescript",
-            "line": "L134",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/overlay-control.spec.ts",
-            "lang": "typescript",
-            "line": "L158",
-            "receiver_type": "Page"
-          }
-        ]
-      },
       "norm_label": "overlay-control.spec.ts",
       "source_file": "tests/e2e/overlay-control.spec.ts",
       "source_location": "L1"
@@ -148874,55 +149129,6 @@
       "label": "platform.spec.ts",
       "metadata": {
         "unresolved_calls": [
-          {
-            "callee": "goto",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L48",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L49",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L109",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByText",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L120",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "reload",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L121",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "screenshot",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L133",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "setViewportSize",
-            "file": "tests/e2e/platform.spec.ts",
-            "lang": "typescript",
-            "line": "L134",
-            "receiver_type": "Page"
-          },
           {
             "callee": "newContext",
             "file": "tests/e2e/platform.spec.ts",
@@ -149005,39 +149211,11 @@
       "metadata": {
         "unresolved_calls": [
           {
-            "callee": "goto",
-            "file": "tests/e2e/roles.spec.ts",
-            "lang": "typescript",
-            "line": "L103",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/roles.spec.ts",
-            "lang": "typescript",
-            "line": "L107",
-            "receiver_type": "Page"
-          },
-          {
             "callee": "newContext",
             "file": "tests/e2e/roles.spec.ts",
             "lang": "typescript",
             "line": "L141",
             "receiver_type": "Browser"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/roles.spec.ts",
-            "lang": "typescript",
-            "line": "L160",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByText",
-            "file": "tests/e2e/roles.spec.ts",
-            "lang": "typescript",
-            "line": "L200",
-            "receiver_type": "Page"
           }
         ]
       },
@@ -149384,53 +149562,11 @@
       "metadata": {
         "unresolved_calls": [
           {
-            "callee": "goto",
-            "file": "tests/e2e/shell.spec.ts",
-            "lang": "typescript",
-            "line": "L53",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "getByRole",
-            "file": "tests/e2e/shell.spec.ts",
-            "lang": "typescript",
-            "line": "L54",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "locator",
-            "file": "tests/e2e/shell.spec.ts",
-            "lang": "typescript",
-            "line": "L85",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "evaluate",
-            "file": "tests/e2e/shell.spec.ts",
-            "lang": "typescript",
-            "line": "L158",
-            "receiver_type": "Page"
-          },
-          {
-            "callee": "setViewportSize",
-            "file": "tests/e2e/shell.spec.ts",
-            "lang": "typescript",
-            "line": "L164",
-            "receiver_type": "Page"
-          },
-          {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/shell.spec.ts",
             "lang": "typescript",
             "line": "L178",
             "receiver_type": "Element"
-          },
-          {
-            "callee": "goBack",
-            "file": "tests/e2e/shell.spec.ts",
-            "lang": "typescript",
-            "line": "L206",
-            "receiver_type": "Page"
           },
           {
             "callee": "newContext",
@@ -150192,6 +150328,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_station_motion_test",
+      "label": "station-motion.test.ts",
+      "norm_label": "station-motion.test.ts",
+      "source_file": "tests/station-motion.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_station_test",
       "label": "station.test.ts",
       "norm_label": "station.test.ts",
@@ -150893,6 +151039,138 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_recovery",
+      "label": "recovery.md",
+      "node_kind": "page",
+      "norm_label": "recovery.md",
+      "source_file": "docs/recovery.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_after_the_restore",
+      "label": "After the restore",
+      "node_kind": "heading",
+      "norm_label": "after the restore",
+      "source_file": "docs/recovery.md",
+      "source_location": "L91"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_checks_after_recovery",
+      "label": "Checks after recovery",
+      "node_kind": "heading",
+      "norm_label": "checks after recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L136"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_durable_object_pollroom_state_after_a_d1_restore",
+      "label": "Durable Object PollRoom state after a D1 restore",
+      "node_kind": "heading",
+      "norm_label": "durable object pollroom state after a d1 restore",
+      "source_file": "docs/recovery.md",
+      "source_location": "L120"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_find_the_bookmark",
+      "label": "Find the bookmark",
+      "node_kind": "heading",
+      "norm_label": "find the bookmark",
+      "source_file": "docs/recovery.md",
+      "source_location": "L60"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_prepare",
+      "label": "Prepare",
+      "node_kind": "heading",
+      "norm_label": "prepare",
+      "source_file": "docs/recovery.md",
+      "source_location": "L74"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_production_recovery",
+      "label": "Production recovery",
+      "node_kind": "heading",
+      "norm_label": "production recovery",
+      "source_file": "docs/recovery.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_r2_images_after_a_d1_restore",
+      "label": "R2 images after a D1 restore",
+      "node_kind": "heading",
+      "norm_label": "r2 images after a d1 restore",
+      "source_file": "docs/recovery.md",
+      "source_location": "L97"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_restore",
+      "label": "Restore",
+      "node_kind": "heading",
+      "norm_label": "restore",
+      "source_file": "docs/recovery.md",
+      "source_location": "L83"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_restore_d1",
+      "label": "Restore D1",
+      "node_kind": "heading",
+      "norm_label": "restore d1",
+      "source_file": "docs/recovery.md",
+      "source_location": "L56"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_roll_back_the_worker",
+      "label": "Roll back the Worker",
+      "node_kind": "heading",
+      "norm_label": "roll back the worker",
+      "source_file": "docs/recovery.md",
+      "source_location": "L17"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_recovery_select_the_procedure",
+      "label": "Select the procedure",
+      "node_kind": "heading",
+      "norm_label": "select the procedure",
+      "source_file": "docs/recovery.md",
+      "source_location": "L9"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "readme",
       "label": "README.md",
       "node_kind": "page",
@@ -150931,7 +151209,7 @@
       "node_kind": "heading",
       "norm_label": "board refreshes and public image cache",
       "source_file": "README.md",
-      "source_location": "L282"
+      "source_location": "L284"
     },
     {
       "_origin": "ast",
@@ -150964,7 +151242,7 @@
       "node_kind": "heading",
       "norm_label": "legal pages",
       "source_file": "README.md",
-      "source_location": "L208"
+      "source_location": "L210"
     },
     {
       "_origin": "ast",
@@ -150986,7 +151264,7 @@
       "node_kind": "heading",
       "norm_label": "prototype data",
       "source_file": "README.md",
-      "source_location": "L186"
+      "source_location": "L188"
     },
     {
       "_origin": "ast",
@@ -150997,7 +151275,7 @@
       "node_kind": "heading",
       "norm_label": "quality gates",
       "source_file": "README.md",
-      "source_location": "L224"
+      "source_location": "L226"
     },
     {
       "_origin": "ast",
@@ -151008,7 +151286,7 @@
       "node_kind": "heading",
       "norm_label": "security and operating limits",
       "source_file": "README.md",
-      "source_location": "L190"
+      "source_location": "L192"
     },
     {
       "_origin": "ast",

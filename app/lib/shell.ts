@@ -65,6 +65,22 @@ export const paths = {
 } as const;
 
 /**
+ * `value` as a same-origin path (`/streamers?q=a`), or null for anything else: an absolute or protocol-relative
+ * URL, a backslash or control character a browser could read as another host, or no value. Guards `?next=`.
+ */
+export function localPath(value: string | null | undefined): string | null {
+  if (
+    !value?.startsWith("/") ||
+    value.startsWith("//") ||
+    [...value].some((char: string): boolean => char === "\\" || char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
+  )
+    return null;
+  const base = "https://local.invalid";
+  const url = new URL(value, base);
+  return url.origin === base ? `${url.pathname}${url.search}${url.hash}` : null;
+}
+
+/**
  * Where a page under `/@from` moves when that handle becomes `to`, or null when `pathname` is not on that page.
  * Only the whole first segment counts, so `/@abcd` is not a page of `abc`.
  */

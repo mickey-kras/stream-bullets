@@ -14,7 +14,7 @@ import {
   withDefaults,
 } from "../app/lib/prefs";
 import { effectiveStatus, expandSeries, upcomingRows } from "../app/lib/schedule";
-import { paths, renamedPath, shellFromMatches, useShell, type ShellData } from "../app/lib/shell";
+import { localPath, paths, renamedPath, shellFromMatches, useShell, type ShellData } from "../app/lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, siteJsonLd } from "../app/lib/structured-data";
 import { supportLabel } from "../app/lib/support";
 import { replyParent, visibleReplies } from "../app/lib/threads";
@@ -136,6 +136,15 @@ describe("display preferences", (): void => {
       shell({ prefs: { text: "130" } }),
     );
     expect(parsed(html)).toEqual({ ...DEFAULT_PREFS, text: "130" });
+  });
+});
+
+describe("localPath", (): void => {
+  it("keeps same-origin paths and rejects anything that could leave the site", (): void => {
+    expect(localPath("/@alice?intent=suggest#top")).toBe("/@alice?intent=suggest#top");
+    expect(localPath("/streamers")).toBe("/streamers");
+    const unsafe = [null, undefined, "", "streamers", "//evil.example", "/\\evil.example", "/\t/evil.example"];
+    for (const value of [...unsafe, "https://evil.example", "javascript:alert(1)"]) expect(localPath(value)).toBeNull();
   });
 });
 

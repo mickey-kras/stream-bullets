@@ -4,7 +4,8 @@ import { authClient } from "../../auth-client";
 import { t } from "../../i18n";
 import { signupPolicy } from "../../signup-policy";
 import { legal } from "../../legal";
-import { paths, type Provider } from "../../lib/shell";
+import { localPath, paths, type Provider } from "../../lib/shell";
+import { dialogHref } from "../account/dialog-route";
 import { errorMessage } from "../api";
 import { Dialog } from "../ui/dialog";
 import { Icon, type IconName } from "../ui/icon";
@@ -22,10 +23,22 @@ export const providerName: Record<Provider, string> = {
   instagram: "Instagram",
 };
 
-/** Back to the page the person signed in from (the OAuth round trip lands there again). */
+/**
+ * Back to the page the person signed in from (the OAuth round trip lands there again). A new account lands there
+ * too, with Your profile open over it (`?dialog=profile`), so an `?intent=` survives sign-up. A failed round trip
+ * lands on /sign-in with that page as `?next=`, so the retry returns there.
+ */
 function useHere(): string {
   const { pathname, search } = useLocation();
+  // On the error landing itself, "here" is the page it carries, not /sign-in with its error.
+  if (pathname === "/sign-in") return localPath(new URLSearchParams(search).get("next")) ?? "/settings";
   return `${pathname}${search}`;
+}
+
+/** `path` with Your profile open over it, keeping its other parameters (`?intent=`) and hash. */
+function profileOver(path: string): string {
+  const url = new URL(path, "https://local.invalid");
+  return dialogHref(url, "profile");
 }
 
 /**
@@ -44,6 +57,7 @@ export function SignIn({
   const [displayName, setDisplayName] = useState<string>("");
   const [pending, setPending] = useState<Provider | null>(null);
   const [error, setError] = useState<string>("");
+  const returnTo: string = callbackURL ?? here;
   async function signIn(provider: Provider): Promise<void> {
     setError("");
     setPending(provider);
@@ -51,9 +65,9 @@ export function SignIn({
       // Instagram is a generic OAuth provider: the social sign-in endpoint serves it too.
       const result = await authClient.signIn.social({
         provider: provider as "google",
-        callbackURL: callbackURL ?? here,
-        errorCallbackURL: "/sign-in",
-        newUserCallbackURL: paths.profile,
+        callbackURL: returnTo,
+        errorCallbackURL: `/sign-in?${new URLSearchParams({ next: returnTo }).toString()}`,
+        newUserCallbackURL: profileOver(returnTo),
         additionalData: { acceptance: { accepted, ...signupPolicy }, ...(displayName.trim() ? { displayName } : {}) },
       });
       if (result.error)
