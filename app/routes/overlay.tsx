@@ -98,9 +98,12 @@ export function ErrorBoundary(): ReactNode {
     const attempt: number = attempts.current;
     const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
     const delay: number = Math.min(60_000, 5000 * 2 ** (Math.min(attempt, 8) - 1)) * (0.5 + jitter * 0.5);
+    function finishAttempt(): void {
+      setSettled((value: number) => value + 1);
+    }
     const timer = setTimeout(() => {
       if (attempt > ERROR_RELOAD_AFTER) globalThis.location.reload();
-      else void retry.current().finally(() => setSettled((value: number) => value + 1));
+      else retry.current().finally(finishAttempt);
     }, delay);
     return (): void => clearTimeout(timer);
   }, [settled]);

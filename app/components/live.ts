@@ -341,7 +341,7 @@ export function useLiveRevalidation(
       timer.current = null;
       const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
       next.current = Date.now() + REVALIDATE_INTERVAL_MS + jitter * REVALIDATE_JITTER_MS;
-      void latest.current();
+      latest.current();
     }, delay);
   }, [status, revision, enabled]);
   const disconnected: boolean = enabled && status !== "live";

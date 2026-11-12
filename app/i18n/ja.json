@@ -1090,7 +1090,6 @@
   "streamers.search": "検索",
   "streamers.searchLabel": "配信者を検索",
   "streamers.searchPlaceholder": "名前または @ハンドルで検索…",
-  "streamers.searchSuffix": "配信者",
   "streamers.showing.other": "{count} ページを表示",
   "streamers.showingOf": "{total} ページ中 {shown} ページを表示",
   "streamers.startHere": "ここから始めよう",
