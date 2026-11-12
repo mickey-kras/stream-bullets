@@ -795,8 +795,8 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .sheet-body p .text-link { display: inline-flex; align-items: center; gap: 6px; }
 .status-tabs.view-tabs a { padding: 8px 16px; gap: 6px; font-size: 17px; }
 .admin-page .page-column > p + .sched-actions { margin-top: 12px; }
-.dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 4px; }
-.modal-content .dialog-head h2 { margin: 0; }
+.dialog-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 4px; padding-block: 8px; background: var(--modal); }
+.modal-content .dialog-head h2 { min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .modal-content .modal-close, .modal-content.sheet .sheet-head .modal-close { position: static; display: inline-grid; place-items: center; flex: none; width: var(--control-size); height: var(--control-size); min-height: var(--control-size); padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
 .modal-content .modal-close:hover { background: var(--btn-hover); color: var(--cream); }
 .modal-content .modal-close svg { width: 20px; height: 20px; }

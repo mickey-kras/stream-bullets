@@ -112,7 +112,7 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
   const search = page.getByRole("searchbox", { name: "Search streamers" });
   await search.fill("test_h");
   await search.press("Enter");
-  await expect(page).toHaveURL(/then=discuss/);
+  await expect(page).toHaveURL((url: URL): boolean => url.searchParams.get("query") === "test_h" && url.searchParams.get("then") === "discuss");
   await page.getByRole("link", { name: "Clear this prompt and show the plain streamer list" }).click();
   await expect(page).toHaveURL(/\/streamers\?query=test_h$/);
   await expect(page.getByRole("link", { name: /Test host/ })).toHaveAttribute("href", "/@test_host");

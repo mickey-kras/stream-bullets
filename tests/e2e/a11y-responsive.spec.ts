@@ -1,8 +1,13 @@
+import { randomBytes } from "node:crypto";
+import { readdir } from "node:fs/promises";
+import { resolve } from "node:path";
+import { Miniflare } from "miniflare";
+import { applyMigrations, migrationFiles } from "../helpers/database";
 import { type Locator, type Page } from "@playwright/test";
 import { LOCALES } from "../../db/enums";
 import { test, expect } from "./coverage";
 
-const WIDTHS = [320, 390, 768, 1024, 1366, 1920] as const;
+const WIDTHS = [320, 390, 430, 768, 1024, 1366, 1920] as const;
 const ENLARGED_WIDTHS = [320, 390] as const;
 
 async function expectContained(locator: Locator): Promise<void> {
@@ -24,11 +29,12 @@ async function expectLabelsFit(locator: Locator): Promise<void> {
     elements.filter((element: Element): boolean => {
       const box: DOMRect = element.getBoundingClientRect();
       if (!box.width || !box.height) return false;
+      const verticalBox: DOMRect = (element.matches("h2") ? element.closest('[role="dialog"]') : null)?.getBoundingClientRect() ?? box;
       const range: Range = document.createRange();
       range.selectNodeContents(element);
       return [...range.getClientRects()].some((text: DOMRect): boolean =>
         text.width > 0 && (text.left < box.left - 1 || text.right > box.right + 1 ||
-          text.top < box.top - 1 || text.bottom > box.bottom + 1),
+          text.top < verticalBox.top - 1 || text.bottom > verticalBox.bottom + 1),
       );
     }).map((element: Element): string => element.textContent ?? element.tagName),
   );
@@ -49,7 +55,9 @@ async function expectHeaderFits(page: Page): Promise<void> {
 }
 
 async function expectReachable(locator: Locator): Promise<void> {
-  await locator.scrollIntoViewIfNeeded();
+  await locator.evaluate((element: Element): void => {
+    element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" });
+  });
   await expect(locator).toBeInViewport({ ratio: 1 });
   await locator.click({ trial: true });
   const size = await locator.boundingBox();
@@ -82,7 +90,8 @@ for (const locale of LOCALES) {
       "CF-Connecting-IP": `198.51.100.${1 + LOCALES.indexOf(locale) * 8}`,
     });
     await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
-    for (const route of ["/", "/streamers", "/@streambullets", "/privacy"]) {
+    test.setTimeout(90_000);
+    for (const route of ["/", "/streamers", "/@streambullets", "/privacy", "/terms", "/ai"]) {
       const response = await page.goto(route);
       expect(response?.ok(), `${route}: ${response?.status()}`).toBe(true);
       await expect(page.locator("main")).toBeVisible();
@@ -97,6 +106,7 @@ for (const locale of LOCALES) {
               requestAnimationFrame((): void => resolve());
             });
           }));
+          expect(await page.evaluate((): boolean => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
           await expectContained(page.locator("header, main, .site-footer, .page-title, #landing-title"));
           await expectHeaderFits(page);
           if (route === "/") {
@@ -185,4 +195,129 @@ for (const locale of LOCALES) {
     await expectReachable(page.locator('[data-sheet="a11y"] .sheet-actions .gold'));
   });
 }
+}
+
+test.describe("configured-provider mobile dialogs", () => {
+  const origin: string = "http://localhost:5175";
+  let runtime: Miniflare;
+  test.setTimeout(90_000);
+
+  test.beforeAll(async (): Promise<void> => {
+    runtime = new Miniflare({
+      modulesRoot: resolve("build/server"),
+      modules: [
+        { type: "ESModule", path: resolve("build/server/index.js") },
+        ...(await readdir("build/server/assets"))
+          .filter((file: string): boolean => file.endsWith(".js"))
+          .map((file: string) => ({ type: "ESModule" as const, path: resolve("build/server/assets", file) })),
+      ],
+      compatibilityDate: "2026-07-01",
+      compatibilityFlags: ["nodejs_compat"],
+      host: "127.0.0.1",
+      port: 5175,
+      assets: { directory: resolve("build/client"), routerConfig: { has_user_worker: true } },
+      bindings: {
+        APP_ORIGIN: origin,
+        BETTER_AUTH_SECRET: randomBytes(32).toString("hex"),
+        GOOGLE_CLIENT_ID: "layout-test-client",
+        GOOGLE_CLIENT_SECRET: "layout-test-secret",
+        TWITCH_CLIENT_ID: "layout-test-client",
+        TWITCH_CLIENT_SECRET: "layout-test-secret",
+        TIKTOK_CLIENT_KEY: "layout-test-client",
+        TIKTOK_CLIENT_SECRET: "layout-test-secret",
+        INSTAGRAM_CLIENT_ID: "layout-test-client",
+        INSTAGRAM_CLIENT_SECRET: "layout-test-secret",
+      },
+      d1Databases: ["DB"],
+      r2Buckets: ["IMAGES"],
+      durableObjects: { POLL_ROOMS: { className: "PollRoom", useSQLite: true } },
+      ratelimits: { REQUEST_LIMITER: { namespace_id: "616", simple: { limit: 120, period: 60 } } },
+      outboundService: (): never => {
+        throw new Error("Mobile layout tests must not contact external services.");
+      },
+    });
+    await applyMigrations((await runtime.getD1Database("DB")) as unknown as D1Database, await migrationFiles());
+    await runtime.ready;
+  });
+
+  test.afterAll(async (): Promise<void> => {
+    await runtime?.dispose();
+  });
+
+  for (const locale of LOCALES) {
+    test(`${locale} signed-out dialogs remain reachable in portrait and landscape`, async ({ page, context }) => {
+      await context.setExtraHTTPHeaders({ "CF-Connecting-IP": `203.0.113.${LOCALES.indexOf(locale) + 1}` });
+      await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
+      await page.goto(`${origin}/streamers`);
+      for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 768, height: 320 }]) {
+        await test.step(`${viewport.width}x${viewport.height}`, async (): Promise<void> => {
+          await page.setViewportSize(viewport);
+          for (const name of ["language", "a11y"] as const) {
+            await page.locator(`.site-footer a[href*="dialog=${name}"]:visible`).click();
+            const dialog: Locator = page.locator(`[data-sheet="${name}"]`);
+            await expect(dialog).toBeVisible();
+            await expectContained(dialog);
+            const lastControl: Locator = name === "language" ? dialog.locator(".lang-option").last() : dialog.locator(".sheet-actions .gold");
+            await expectReachable(lastControl);
+            await expectReachable(dialog.locator(".modal-close"));
+            await dialog.locator(".modal-close").click();
+            await expect(dialog).toHaveCount(0);
+          }
+          await openContact(page);
+          await expectContained(page.locator('[data-sheet="contact"], .contact-address, .contact-links'));
+          await expectReachable(page.locator('[data-sheet="contact"] .modal-close'));
+          await page.locator('[data-sheet="contact"] .modal-close').click();
+          await page.locator("header .header-signin").click();
+          const signIn: Locator = page.getByRole("dialog");
+          await expect(signIn).toBeVisible();
+          await expectContained(signIn);
+          const providers: Locator = signIn.locator(".sign-in-options button");
+          await expect(providers).toHaveCount(4);
+          await expectLabelsFit(signIn.locator("h2"));
+          await expectLabelsFit(providers);
+          const consent: Locator = signIn.getByRole("checkbox");
+          await consent.evaluate((element: Element): void => {
+            element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" });
+          });
+          await expect(consent).toBeInViewport({ ratio: 1 });
+          await consent.check();
+          for (const provider of await providers.all()) {
+            await expectReachable(provider);
+          }
+          await expectReachable(signIn.locator(".modal-close"));
+          await expect(signIn.locator("h2")).toBeInViewport({ ratio: 1 });
+          await expectLabelsFit(signIn.locator("h2"));
+          await signIn.locator(".modal-close").click();
+        });
+      }
+    });
+
+  }
+});
+
+for (const locale of LOCALES) {
+  test(`${locale} directory search survives a reduced viewport and restores the footer`, async ({ page, context }) => {
+    await context.setExtraHTTPHeaders({ "CF-Connecting-IP": `203.0.113.${LOCALES.indexOf(locale) + 30}` });
+    await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
+    for (const width of [320, 390, 430, 768]) {
+      await test.step(`${width}px reduced-height search`, async (): Promise<void> => {
+        await page.setViewportSize({ width, height: 844 });
+        await page.goto("/streamers");
+        const search: Locator = page.getByRole("searchbox");
+        await search.focus();
+        await page.setViewportSize({ width, height: 300 });
+        await expect(search).toBeInViewport({ ratio: 1 });
+        await search.fill("no_matching_mobile_page");
+        await search.press("Enter");
+        await expect(page).toHaveURL(/query=no_matching_mobile_page/);
+        await expect(search).toBeFocused();
+        await expect(search).toBeInViewport({ ratio: 1 });
+        await expectContained(page.locator("header, main, .site-footer, .directory-search"));
+        await page.setViewportSize({ width, height: 844 });
+        const language: Locator = page.locator('.site-footer a[href*="dialog=language"]:visible');
+        await language.scrollIntoViewIfNeeded();
+        await expect(language).toBeInViewport({ ratio: 1 });
+      });
+    }
+  });
 }

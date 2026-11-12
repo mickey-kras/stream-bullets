@@ -622,8 +622,10 @@ export default function StreamerPage(): ReactNode {
               />
               {renderDiscussion(selected)}
             </>
+          ) : query || status ? (
+            renderFilteredEmpty()
           ) : (
-            (query || status ? renderFilteredEmpty() : renderEmptyTopics())
+            renderEmptyTopics()
           )
         }
         onSelect={(id: string) => openFromList("topics", id)}
