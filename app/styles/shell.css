@@ -147,6 +147,10 @@ body:not(:has(.landing-page)) > .site-footer a:focus-visible { outline: 2px soli
 .account-menu-wrap { display: flex; }
 .account-menu { position: absolute; top: calc(100% - 6px); right: 12px; z-index: 30; width: 260px; padding: 8px; background: var(--modal); border: 1px solid var(--c-6b7b72); border-radius: 12px; box-shadow: 0 24px 60px var(--c-0009); text-align: left; text-transform: none; letter-spacing: 0; }
 .account-menu[hidden] { display: none; }
+/* Short viewports and 400% zoom: the panel scrolls within the screen (--menu-top is set while it is open), and
+   its header rises above the frame and footer so the lower rows stay reachable (WCAG 1.4.10). */
+.account-menu { max-height: calc(100vh - var(--menu-top, 96px) - 8px); max-height: calc(100dvh - var(--menu-top, 96px) - 8px); overflow-y: auto; overscroll-behavior: contain; }
+header:has(.account-menu:not([hidden])) { z-index: 12; }
 .account-id { display: flex; align-items: center; gap: 12px; padding: 8px 10px 12px; margin-bottom: 6px; border-bottom: 1px solid var(--line); }
 .account-id .user-avatar { width: 44px; height: 44px; }
 .account-id strong { display: block; font: 600 18px/1.2 var(--body); color: var(--cream); }

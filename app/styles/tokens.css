@@ -238,6 +238,13 @@
   --c-9cacab:#e6eeec;
   --header-rule:#b8c9c6;
 }
+/* High contrast keeps the protan live hue (a lighter violet, 8.5:1 on black); tritan keeps the high-contrast red. */
+:root[data-contrast=high][data-cvd=pd] {
+  --status-live:#ad94ff;
+  --status-live-bg:#ad94ff;
+  --status-live-fg:#000;
+  --live:#ad94ff;
+}
 /* High contrast also follows the system setting until the person picks a contrast mode. */
 @media (prefers-contrast: more) {
   :root:not([data-contrast]) {
@@ -286,5 +293,11 @@
     --c-e6e4d1:#fff;
     --c-9cacab:#e6eeec;
     --header-rule:#b8c9c6;
+  }
+  :root:not([data-contrast])[data-cvd=pd] {
+    --status-live:#ad94ff;
+    --status-live-bg:#ad94ff;
+    --status-live-fg:#000;
+    --live:#ad94ff;
   }
 }

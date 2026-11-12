@@ -1144,7 +1144,6 @@
   "streamers.search": "Szukaj",
   "streamers.searchLabel": "Szukaj streamerów",
   "streamers.searchPlaceholder": "Szukaj po nazwie lub @nazwie…",
-  "streamers.searchSuffix": "streamerów",
   "streamers.showing.few": "Wyświetlono {count} strony",
   "streamers.showing.many": "Wyświetlono {count} stron",
   "streamers.showing.one": "Wyświetlono {count} stronę",
