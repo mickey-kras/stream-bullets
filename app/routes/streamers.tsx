@@ -1,3 +1,4 @@
+import { announce } from "../components/a11y/announcer";
 import { canonicalMeta } from "../lib/seo";
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
@@ -185,6 +186,11 @@ export default function Streamers(): ReactNode {
   ) : null;
 
   const count: string = directoryCount(streamers.length, data.total);
+  const resultMessage: string =
+    count || (data.query ? t("streamers.noMatch", { query: data.query }) : t("streamers.emptyTitle"));
+  useEffect(() => {
+    announce(resultMessage, { key: "directory-results" });
+  }, [data.query, resultMessage]);
 
   return (
     <>
@@ -301,9 +307,7 @@ export default function Streamers(): ReactNode {
               </form>
             </search>
             <div className="list-toolbar">
-              <span className="list-count" aria-live="polite">
-                {count}
-              </span>
+              <span className="list-count">{count}</span>
               {streamers.length === 0 && (
                 <Link
                   className="text-link"
