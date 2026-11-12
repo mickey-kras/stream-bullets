@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError, errorMessage } from "../app/components/api";
+import { ceremonyError, errorText } from "../app/components/admin/webauthn";
 import { environment, switchTemplate } from "../app/components/ideas/idea-dialog";
 import { LOCALES, intlLocale, loadCatalog, setLocaleSource, t, tn, type Locale } from "../app/i18n";
 import { BUG_TEMPLATES } from "../app/lib/bug-templates";
@@ -11,6 +12,15 @@ afterEach((): void => {
 });
 
 describe("localized participation", (): void => {
+  it("uses the Polish counted participant form", async (): Promise<void> => {
+    await loadCatalog("pl");
+    setLocaleSource((): Locale => "pl");
+    expect(tn("mash.participants", 1)).toBe("uczestnik");
+    for (const count of [0, 2, 3, 4, 5, 22, 23, 24, 101]) {
+      expect(tn("mash.participants", count)).toBe("uczestników");
+    }
+  });
+
   it.each(LOCALES)("%s offers a localized bug template and rejects an empty report", async (locale: Locale): Promise<void> => {
     await loadCatalog(locale);
     setLocaleSource((): Locale => locale);
@@ -44,5 +54,12 @@ describe("localized participation", (): void => {
     expect(error).toMatchObject({ status: 429, code: "rate_limited" });
     expect(errorMessage(new TypeError("Failed to fetch"))).toBe(t("common.failed"));
     expect(errorMessage(new ApiError("Unexpected server detail", 502, null))).toBe(t("common.failed"));
+    expect(errorMessage(new ApiError("Unknown reason", 400, "future_code"))).toBe(t("error.invalid"));
+    const taken = new ApiError("This handle is already in use.", 409, "handle_taken");
+    expect(errorMessage(taken)).toBe(t("error.handleTaken"));
+    expect(errorText(taken)).toBe(t("error.handleTaken"));
+    expect(ceremonyError(new ApiError("Add another key first.", 409, "last_key"))).toBe(t("keys.onlyKey"));
+    expect(errorMessage(new ApiError("Fill in the template.", 400, "bug_template_empty"))).toBe(t("ideas.form.fillTemplate"));
+    expect(errorMessage(new ApiError("Invalid date.", 400, "invalid_schedule_date"))).toBe(t("error.scheduleDate"));
   });
 });

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { t } from "../app/i18n";
 import { pendingSave } from "../app/lib/pending-save";
 import { saveLocaleCookie, savePrefsCookie } from "../app/lib/prefs";
 
@@ -66,7 +67,7 @@ describe("the preference cookies", (): void => {
     ]);
     expect(fetcher.mock.calls[0][1]).toMatchObject({ method: "POST", keepalive: true, credentials: "same-origin" });
     fetcher.mockResolvedValue(new Response(null, { status: 403 }));
-    await expect(saveLocaleCookie("de")).rejects.toThrow(/403/);
+    await expect(saveLocaleCookie("de")).rejects.toThrow(t("common.failed"));
     await expect(savePrefsCookie({ text: "100" })).resolves.toBeUndefined();
   });
 });

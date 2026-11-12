@@ -54,9 +54,11 @@ It does not add the page URL, query string, fragment, screenshot, cookies, or ac
 The typed report text is not automatically redacted. Users must review it before posting.
 Bug templates exist for every locale. The server rejects an untouched template from any locale.
 
-API response messages remain English for compatibility. Non-English UI uses translated status guidance.
+API response messages remain English for compatibility. Non-English UI translates known error codes first.
+This includes handle conflicts, empty bug templates, image formats, schedule dates, and security-key actions.
+Unknown codes use translated HTTP status guidance. Internal validation details are not displayed in other languages.
 Status and machine-readable error codes remain available to callers.
-Detailed server validation reasons still need stable translation keys; status guidance is less specific.
+Schedule, community, and admin screens use the same error formatter as other forms.
 
 ## Legal translation gaps
 

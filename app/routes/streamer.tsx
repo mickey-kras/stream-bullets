@@ -260,7 +260,7 @@ function streamerHeaderAppearance(
   return {
     className: "ideas-header",
     views: officialViews,
-    labels: { topics: t("ideas.tab"), about: t("ideas.aboutTab") },
+    labels: { topics: t("ideas.tab"), about: t("ideas.aboutTab"), community: t("ideas.howEyebrow") },
     icons: { topics: "idea" },
     brand: (
       <>
@@ -635,6 +635,9 @@ export default function StreamerPage(): ReactNode {
           <h1>{streamer.name}</h1>
           <section className="info-card">
             <p className="description">{streamer.about || t("ideas.aboutBody")}</p>
+            <Link className="text-link" to="?view=topics">
+              {t("ideas.tab")}
+            </Link>
           </section>
         </>
       );
@@ -676,6 +679,11 @@ export default function StreamerPage(): ReactNode {
       <>
         <span className="eyebrow">{t("ideas.howEyebrow")}</span>
         <h1>{t("ideas.howTitle")}</h1>
+        <p>
+          <Link className="text-link" to="?view=topics">
+            {t("ideas.tab")}
+          </Link>
+        </p>
         <div className="community-grid">
           <section className="info-card community-card">
             <h2>

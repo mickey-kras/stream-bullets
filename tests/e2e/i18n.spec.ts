@@ -303,7 +303,7 @@ for (const locale of ["en", "de", "es", "fr", "pl", "pt-BR", "ru", "uk", "hi", "
     expect(await phoneProblems(page)).toEqual([]);
     await page.goto("/@streambullets?view=topics&status=planned&sort=top#main-content");
     const canonical: string | null = await page.locator('link[rel="canonical"]').getAttribute("href");
-    await page.locator('footer a[href*="dialog=language"]').click();
+    await page.locator('footer a[href*="dialog=language"]:visible').click();
     const target: string = locale === "en" ? "Русский" : "English";
     await page.getByRole("dialog").getByRole("button", { name: target, exact: true }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", locale === "en" ? "ru" : "en");
