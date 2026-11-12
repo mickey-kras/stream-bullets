@@ -170,16 +170,47 @@ for (const width of [1363, 390]) {
     await page.getByRole("dialog").getByRole("button", { name: "English" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(language).toBeFocused();
-    if (width === 390) {
-      await page.keyboard.press("Escape");
-      await expect(page.getByRole("button", { name: "More", exact: true })).toBeFocused();
-    }
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Planned", exact: true })).toHaveAttribute("aria-current", "true");
     await expect(page.getByRole("link", { name: "StreamBullets home", exact: true })).toHaveAttribute("href", "/");
     await expect(page.getByRole("link", { name: "Ideas for StreamBullets", exact: true })).toHaveAttribute(
       "href",
       "/@streambullets",
     );
+  });
+}
+
+for (const width of [1363, 390]) {
+  test(`account language switching restores the header opener at ${width}px`, async ({ browser }) => {
+    const viewer = await signedIn(browser, "prefsviewer", clientIp("a11y", width === 390 ? 175 : 176), {
+      viewport: { width, height: 936 },
+    });
+    const page = await newPage(viewer);
+    await page.goto("/@streambullets?view=topics&status=planned");
+    const avatar = page.locator(".account-menu-wrap > button.profile");
+    for (const [language, locale] of [
+      ["Русский", "ru"],
+      ["English", "en"],
+    ] as const) {
+      await avatar.click();
+      await page.locator('.account-menu a[href*="dialog=language"]').click();
+      await page.getByRole("dialog").getByRole("button", { name: language }).click();
+      await expect(page.locator("html")).toHaveAttribute("lang", locale);
+      await expect(page).toHaveURL(/status=planned$/);
+      await expect(avatar).toBeFocused();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+    }
+    const footerLanguage = page.locator('.site-footer a[href*="dialog=language"]:visible');
+    for (const [language, locale] of [
+      ["Русский", "ru"],
+      ["English", "en"],
+    ] as const) {
+      await footerLanguage.click();
+      await page.getByRole("dialog").getByRole("button", { name: language }).click();
+      await expect(page.locator("html")).toHaveAttribute("lang", locale);
+      await expect(footerLanguage).toBeFocused();
+    }
+    await close(viewer);
   });
 }
 

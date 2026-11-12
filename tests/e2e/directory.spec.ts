@@ -86,7 +86,7 @@ test("the Streamers directory pins the official page, pages with Load more, and 
   await expect(announcement).not.toHaveAttribute("data-updates", "0");
   await expect(announcement).toHaveText("Showing 1 page");
   await page.goto("/streamers?query=nothing_here");
-  await page.getByRole("button", { name: "Clear search" }).click();
+  await page.getByRole("link", { name: "Clear search" }).click();
   await expect(page).toHaveURL(/\/streamers$/);
   await expect(search).toHaveValue("");
   await expect(cards).toHaveCount(50);
@@ -101,6 +101,7 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
     "/@test_host?view=topics&intent=suggest",
   );
   await page.goto("/streamers?then=vote");
+  await expect(page.locator(".streamer-card.official-card")).toHaveAttribute("href", "/@streambullets?view=topics");
   await expect(page.getByRole("link", { name: /Test host/ })).toHaveAttribute("href", "/@test_host?view=polls");
   await page.goto("/streamers?then=discuss");
   await expect(page.getByRole("link", { name: /Test host/ })).toHaveAttribute(
@@ -132,7 +133,7 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
 test("visitors can open real content from the featured community", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Browse streamers", exact: true }).click();
-  const featured = page.getByRole("region", { name: "StreamBullets" });
+  const featured = page.getByRole("region", { name: /^StreamBullets/ });
   await expect(featured.getByText("Start here")).toBeVisible();
   const entry = featured.locator("li a").first();
   const title: string = await entry.innerText();
@@ -142,4 +143,17 @@ test("visitors can open real content from the featured community", async ({ page
   await expect(page.getByRole("heading", { name: title, exact: true }).first()).toBeVisible();
   await page.goto("/streamers?query=nothing_here");
   await expect(page.getByText("Start here", { exact: true })).toHaveCount(0);
+});
+
+
+test("official information tabs explain the product and lead back to feedback", async ({ page }) => {
+  await page.goto("/@streambullets?view=about");
+  const tabs = page.getByRole("navigation", { name: "Main navigation" });
+  await expect(tabs.getByRole("link", { name: "About StreamBullets", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("main").getByRole("link", { name: "Ideas", exact: true })).toHaveAttribute("href", "/@streambullets?view=topics");
+  await tabs.getByRole("link", { name: "Feedback guide", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "How we prioritize" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Reporting bugs" })).toBeVisible();
+  await page.getByRole("main").getByRole("link", { name: "Ideas", exact: true }).click();
+  await expect(page).toHaveURL(/view=topics/);
 });

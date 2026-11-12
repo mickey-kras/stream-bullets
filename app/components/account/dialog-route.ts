@@ -25,6 +25,7 @@ export function dialogHref(
 /** Marks a dialog opened from inside the app, so closing it can step back instead of adding history. */
 export interface DialogState {
   dialogFrom?: string;
+  languageOpener?: "account";
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { getLocale, LOCALE_NAMES, t, type Locale } from "../../i18n";
 import { paths } from "../../lib/shell";
@@ -16,19 +16,12 @@ function MoreRow({ icon, children }: Readonly<{ icon: IconName; children: ReactN
   );
 }
 
-/**
- * The footer: legal links on the gold bottom band of the frame (42px desktop, 34px phones) in dark ink; the
- * landing page keeps its own dark strip. Phones show Privacy, Terms and More; More opens a sheet with the rest.
- * Suggest an improvement opens the official Ideas board with its dialog. The language switch shows the current
- * language in its own script.
- */
 export function SiteFooter(): ReactNode {
   const { pathname } = useLocation();
   const [dialog, setDialog] = useState<"contact" | "more" | null>(null);
   const current = (path: string): "page" | undefined => (pathname === path ? "page" : undefined);
   const locale: Locale = getLocale();
   const languageLabel: string = t("language.current", { name: LOCALE_NAMES[locale] });
-  const moreTrigger = useRef<HTMLButtonElement>(null);
   const close = (): void => setDialog(null);
   useEffect(() => {
     try {
@@ -37,23 +30,23 @@ export function SiteFooter(): ReactNode {
       return;
     }
     const frame: number = requestAnimationFrame(() => {
-      const selector: HTMLAnchorElement | undefined = [
-        ...document.querySelectorAll<HTMLAnchorElement>('a[href*="dialog=language"]'),
-      ].find((link: HTMLAnchorElement) => link.getClientRects().length > 0);
-      if (selector) {
-        selector.focus();
-        try {
-          sessionStorage.removeItem("sb-language-focus");
-        } catch {
-          // Focus is already restored if storage becomes unavailable.
-        }
-      } else {
-        moreTrigger.current?.focus();
-        setDialog("more");
+      let fromAccount: boolean;
+      try {
+        fromAccount = sessionStorage.getItem("sb-language-opener") === "account";
+        sessionStorage.removeItem("sb-language-focus");
+        sessionStorage.removeItem("sb-language-opener");
+      } catch {
+        return;
       }
+      const selector: HTMLElement | undefined = [
+        ...document.querySelectorAll<HTMLElement>(
+          fromAccount ? ".account-menu-wrap > button.profile" : '.site-footer a[href*="dialog=language"]',
+        ),
+      ].find((element: HTMLElement) => element.getClientRects().length > 0);
+      selector?.focus();
     });
     return () => cancelAnimationFrame(frame);
-  }, [dialog]);
+  }, []);
   return (
     <footer className="site-footer">
       <nav aria-label={t("footer.nav")} className="footer-full">
@@ -90,13 +83,13 @@ export function SiteFooter(): ReactNode {
         <Link to={paths.terms} aria-current={current(paths.terms)}>
           {t("legal.terms")}
         </Link>
-        <button
-          ref={moreTrigger}
-          type="button"
-          className="footer-link"
-          aria-haspopup="dialog"
-          onClick={() => setDialog("more")}
-        >
+        <DialogLink name="a11y" label={t("footer.accessibility")}>
+          <Icon name="eye" size={18} />
+        </DialogLink>
+        <DialogLink name="language" label={languageLabel}>
+          <Icon name="globe" size={18} />
+        </DialogLink>
+        <button type="button" className="footer-link" aria-haspopup="dialog" onClick={() => setDialog("more")}>
           {t("footer.more")}
           <Icon name="chevron-down" size={16} />
         </button>
