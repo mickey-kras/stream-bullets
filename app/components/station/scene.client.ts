@@ -16,6 +16,7 @@ import { createLook } from "./look";
 import { buildMast } from "./mast";
 import { batchStatic } from "./merge";
 import * as M from "./materials";
+import { motionReduced, watchMotion } from "./motion";
 import { DECK_Y, mesh, polar } from "./shapes";
 import { buildSigns } from "./signs";
 import { buildStudio } from "./studio";
@@ -441,13 +442,12 @@ export async function createStation(
 ): Promise<StationController> {
   const lifecycle = new AbortController();
   const listen = { signal: lifecycle.signal };
-  const reduced = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
   const compact: MediaQueryList = globalThis.matchMedia("(max-width: 700px)");
   const k = createKit(compact.matches, options.family ?? "Oswald, sans-serif");
   await pause();
   const shots: Record<StationView, Shot> = { ...SHOTS, hero: compact.matches ? PHONE_HERO : SHOTS.hero };
   const state = {
-    playing: !reduced.matches,
+    playing: !motionReduced(),
     dragging: false,
     dirty: true,
     clock: 0,
@@ -518,14 +518,10 @@ export async function createStation(
   visibility.observe(wrap);
   const look = createLook(wrap, lifecycle.signal);
   const flips = createFlips(signs, wrap, renderer.domElement, lifecycle.signal, options.onSign);
-  reduced.addEventListener(
-    "change",
-    (): void => {
-      state.playing = !reduced.matches;
-      state.dirty = true;
-    },
-    listen,
-  );
+  watchMotion((reduced: boolean): void => {
+    state.playing = !reduced;
+    state.dirty = true;
+  }, lifecycle.signal);
 
   const returnToHero = (now: number): void => {
     if (state.idleSince >= 0 && !state.dragging && now - state.idleSince > RETURN_AFTER_MS) {
@@ -593,7 +589,7 @@ export async function createStation(
       rig.goal = shots[name];
       controls.autoRotate = name === "orbit";
       controls.minPolarAngle = name === "top" ? 0 : MIN_POLAR;
-      rig.moving = state.playing && !reduced.matches;
+      rig.moving = state.playing && !motionReduced();
       if (!rig.moving) place(rig.goal);
       state.dirty = true;
     },
