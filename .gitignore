@@ -64,6 +64,7 @@ yarn-error.log*
 
 __pycache__/
 
-# The graph is published to the graph branch. Local copies stay untracked.
-/graphify-out/
+# Track only the graph. Other Graphify output stays local.
+/graphify-out/*
+!/graphify-out/graph.json
 /.graphify-venv/

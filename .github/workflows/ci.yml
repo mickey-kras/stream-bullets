@@ -288,12 +288,12 @@ jobs:
         run: python -m pip install --require-hashes -r .github/graphify/requirements.txt
       - name: Test graph extraction
         run: python -m unittest discover -s .github/graphify -p 'test_*.py'
-      # main publishes the graph to the graph branch. Pull requests only prove that it builds.
-      - name: Build the graph
+      # Every commit on main carries a graph that matches its sources.
+      - name: Check the committed graph
         env:
           GRAPHIFY_BACKEND: none
           PYTHONHASHSEED: '0'
-        run: python .github/graphify/snapshot.py
+        run: python .github/graphify/snapshot.py --check
 
   checks:
     name: Required quality gates
