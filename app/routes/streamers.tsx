@@ -96,6 +96,38 @@ function StreamerCard({ streamer, intent }: Readonly<{ streamer: Streamer; inten
   );
 }
 
+function FeaturedCommunity({
+  featured,
+  intent,
+}: Readonly<{ featured: FeaturedStreamer; intent: Intent | null }>): ReactNode {
+  return (
+    <section className="info-card featured-community" aria-labelledby="featured-title">
+      <span className="eyebrow">{t("streamers.startHere")}</span>
+      <h2 id="featured-title">
+        <Link className="text-link" to={streamerTarget(featured.handle, intent, featured.isOfficial)}>
+          {featured.name}
+        </Link>
+        {featured.isOfficial && <span className="official-badge">{t("streamers.official")}</span>}
+      </h2>
+      <p>{t(featured.isOfficial ? "streamers.officialBio" : "streamers.featuredBody")}</p>
+      {featured.entries.length > 0 && (
+        <ul>
+          {featured.entries.map((entry: FeaturedEntry) => (
+            <li key={entry.id}>
+              <Link
+                className="text-link"
+                to={`/@${featured.handle}?view=${entry.kind === "topic" ? "topics" : "polls"}&entry=${entry.id}`}
+              >
+                {entry.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function directoryCount(shown: number, total: number): string {
   if (shown === 0) return "";
   return shown < total ? t("streamers.showingOf", { shown, total }) : tn("streamers.showing", shown);
@@ -230,32 +262,7 @@ export default function Streamers(): ReactNode {
             </Link>
           </output>
         )}
-        {featured && (
-          <section className="info-card featured-community" aria-labelledby="featured-title">
-            <span className="eyebrow">{t("streamers.startHere")}</span>
-            <h2 id="featured-title">
-              <Link className="text-link" to={streamerTarget(featured.handle, data.intent, featured.isOfficial)}>
-                {featured.name}
-              </Link>
-              {featured.isOfficial && <span className="official-badge">{t("streamers.official")}</span>}
-            </h2>
-            <p>{t(featured.isOfficial ? "streamers.officialBio" : "streamers.featuredBody")}</p>
-            {featured.entries.length > 0 && (
-              <ul>
-                {featured.entries.map((entry: FeaturedEntry) => (
-                  <li key={entry.id}>
-                    <Link
-                      className="text-link"
-                      to={`/@${featured.handle}?view=${entry.kind === "topic" ? "topics" : "polls"}&entry=${entry.id}`}
-                    >
-                      {entry.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        )}
+        {featured && <FeaturedCommunity featured={featured} intent={data.intent} />}
         {hostCta}
         {data.total === 0 && !data.query ? (
           <EmptyState
