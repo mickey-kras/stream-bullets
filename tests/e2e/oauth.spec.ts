@@ -27,7 +27,12 @@ async function providerResponse(request: RuntimeRequest): Promise<RuntimeRespons
     email_verified: true,
     preferred_username: "Browser viewer",
   })}.c2lnbmF0dXJl`;
-  return RuntimeResponse.json({ access_token: `access-${code}`, token_type: "bearer", expires_in: 3600, id_token: token });
+  return RuntimeResponse.json({
+    access_token: `access-${code}`,
+    token_type: "bearer",
+    expires_in: 3600,
+    id_token: token,
+  });
 }
 
 test.beforeAll(async () => {
@@ -72,17 +77,26 @@ async function signIn(page: Page, code: string): Promise<Response> {
     expect(url.searchParams.get("redirect_uri")).toBe(`${origin}/api/auth/callback/twitch`);
     expect(url.searchParams.get("state")).toBeTruthy();
     const callback = new URL(`${origin}/api/auth/callback/twitch`);
-    callback.searchParams.set("state", code === "wrong-state" ? "unrelated-state" : url.searchParams.get("state") ?? "");
+    callback.searchParams.set(
+      "state",
+      code === "wrong-state" ? "unrelated-state" : (url.searchParams.get("state") ?? ""),
+    );
     callback.searchParams.set("code", code);
     await route.fulfill({ status: 302, headers: { location: callback.href }, body: "" });
   });
   await page.goto(`${origin}/streamers?dialog=profile`);
   const [, callbackResponse] = await Promise.all([
-    page.waitForResponse((response) => new URL(response.url()).pathname === "/api/auth/sign-in/social")
-      .then((response: Response): void => { expect(response.status()).toBe(200); }),
+    page
+      .waitForResponse((response) => new URL(response.url()).pathname === "/api/auth/sign-in/social")
+      .then((response: Response): void => {
+        expect(response.status()).toBe(200);
+      }),
     page.waitForResponse((response) => new URL(response.url()).pathname === "/api/auth/callback/twitch"),
     page.waitForEvent("domcontentloaded"),
-    page.getByRole("button", { name: "Continue with Twitch" }).click(),
+    (async () => {
+      await page.getByRole("checkbox", { name: /I confirm/ }).check();
+      await page.getByRole("button", { name: "Continue with Twitch" }).click();
+    })(),
   ]);
   const location: string | null = await callbackResponse.headerValue("location");
   expect(location).not.toBeNull();
@@ -114,7 +128,11 @@ test("OAuth creates a host-only HTTPS session and sign-out expires it", async ({
     const code: string = `browser-${++sequence}`;
     const callback = await signIn(page, code);
     expect(callback.status()).toBe(302);
-    expectHostCookie((await callback.headersArray()).find((header) => header.name.toLowerCase() === "set-cookie" && header.value.startsWith(sessionName))?.value ?? "");
+    expectHostCookie(
+      (await callback.headersArray()).find(
+        (header) => header.name.toLowerCase() === "set-cookie" && header.value.startsWith(sessionName),
+      )?.value ?? "",
+    );
     await expect.poll(() => viewer(context)).toMatchObject({ name: "Browser viewer" });
     expect(providerRequests).toContain(code);
     const cookie = (await context.cookies()).find((item) => item.name === sessionName);
@@ -122,7 +140,11 @@ test("OAuth creates a host-only HTTPS session and sign-out expires it", async ({
     const staleCookie: string = `${sessionName}=${cookie?.value}`;
     const response = await context.request.post(`${origin}/api/auth/sign-out`, { headers: { origin }, data: {} });
     expect(response.status()).toBe(200);
-    const expired: string = response.headersArray().find((header) => header.name.toLowerCase() === "set-cookie" && header.value.startsWith(sessionName))?.value ?? "";
+    const expired: string =
+      response
+        .headersArray()
+        .find((header) => header.name.toLowerCase() === "set-cookie" && header.value.startsWith(sessionName))?.value ??
+      "";
     expectHostCookie(expired);
     expect(expired).toMatch(/Max-Age=0/i);
     expect((await context.cookies()).find((item) => item.name === sessionName)).toBeUndefined();
@@ -143,9 +165,16 @@ test("deleting an OAuth-created account expires the HTTPS cookie", async ({ brow
     const page = await newPage(context);
     await signIn(page, `browser-${++sequence}`);
     await expect.poll(() => viewer(context)).toMatchObject({ name: "Browser viewer" });
-    const response = await context.request.post(`${origin}/api/account/delete`, { headers: { origin }, data: { confirm: "DELETE" } });
+    const response = await context.request.post(`${origin}/api/account/delete`, {
+      headers: { origin },
+      data: { confirm: "DELETE" },
+    });
     expect(response.status()).toBe(200);
-    const expired: string = response.headersArray().find((header) => header.name.toLowerCase() === "set-cookie" && header.value.startsWith(sessionName))?.value ?? "";
+    const expired: string =
+      response
+        .headersArray()
+        .find((header) => header.name.toLowerCase() === "set-cookie" && header.value.startsWith(sessionName))?.value ??
+      "";
     expectHostCookie(expired);
     expect(expired).toMatch(/Max-Age=0/i);
     expect((await context.cookies()).find((item) => item.name === sessionName)).toBeUndefined();
@@ -173,7 +202,6 @@ test("a failed provider exchange creates no browser session", async ({ browser }
   }
 });
 
-
 test("a callback with unrelated state never exchanges a code or creates a session", async ({ browser }) => {
   const context = await browser.newContext({
     ignoreHTTPSErrors: true,
@@ -188,6 +216,44 @@ test("a callback with unrelated state never exchanges a code or creates a sessio
     expect(providerRequests).toHaveLength(before);
     expect((await context.cookies()).find((item) => item.name === sessionName)).toBeUndefined();
     expect(await viewer(context)).toBeNull();
+  } finally {
+    await close(context);
+  }
+});
+
+test("invalid signup names show correction guidance before OAuth starts", async ({ browser }) => {
+  const context = await browser.newContext({ ignoreHTTPSErrors: true });
+  try {
+    const page = await newPage(context);
+    await page.goto(`${origin}/sign-in`);
+    await page.getByLabel("Display name (optional; used for new accounts)").fill("Alice\u2028Bob");
+    await page.getByRole("checkbox", { name: /I confirm/ }).check();
+    await page.getByRole("button", { name: "Continue with Twitch" }).click();
+    await expect(page.getByRole("alert")).toContainText("Enter a display name below, then try again.");
+    expect(new URL(page.url()).pathname).toBe("/sign-in");
+  } finally {
+    await close(context);
+  }
+});
+
+test("unsaved profile edits disable login method changes", async ({ browser }) => {
+  const context = await browser.newContext({ ignoreHTTPSErrors: true });
+  try {
+    const page = await newPage(context);
+    await signIn(page, `browser-${++sequence}`);
+    const profile = (await viewer(context)) as { id: string };
+    const db = await runtime.getD1Database("DB");
+    await db
+      .prepare("INSERT INTO account(id,account_id,provider_id,user_id,created_at,updated_at) VALUES(?,?,?,?,?,?)")
+      .bind(`extra-${sequence}`, `extra-${sequence}`, "twitch", profile.id, Date.now(), Date.now())
+      .run();
+    await page.goto(`${origin}/streamers?dialog=profile`);
+    const dialog = page.getByRole("dialog", { name: "Your profile" });
+    const remove = dialog.getByRole("button", { name: "Remove Twitch" }).first();
+    await expect(remove).toBeEnabled();
+    await dialog.getByLabel("Display name").fill("Unsaved change");
+    await expect(remove).toBeDisabled();
+    await expect(dialog.getByText("Save or discard your profile changes before changing login methods.")).toBeVisible();
   } finally {
     await close(context);
   }

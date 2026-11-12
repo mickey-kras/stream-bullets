@@ -57,7 +57,7 @@ Never paste client secrets into an issue, a PR, or a chat.
 8. Test sign-in and sign-out with a separate viewer account.
 
 See [Twitch app registration](https://dev.twitch.tv/docs/authentication/register-app/).
-Use the same provider on later visits. The application does not link accounts across providers automatically.
+Use the same provider on later visits. Another provider can discover the same profile when both email ownership proofs are reliable.
 
 ## Launch checks
 
@@ -72,3 +72,57 @@ Use the same provider on later visits. The application does not link accounts ac
 
 The administrator can create a personal profile without waitlist approval.
 Other accounts can sign in as viewers. Streamer applications still need approval.
+
+## Account linking and registration
+
+Google and Twitch identities use provider subject IDs. Each profile keeps its internal user ID.
+
+Email addresses are private. A unique index covers normalized email addresses, including concurrent registrations.
+
+Normalization trims surrounding spaces and folds case. It does not remove dots or plus tags.
+
+A first sign-in through another provider links to the existing user only when both email verification flags are true.
+Google and Twitch adapters read the `email_verified` OIDC claim. Only the Boolean value `true` counts as verified.
+
+Automatic linking through Google requires Gmail or a Google Workspace hosted-domain claim.
+Ordinary provider email verification remains separate and still supports the forwarded-address admin setup.
+A Google account with a third-party email must connect explicitly if Google cannot establish current email ownership.
+See [Google email authority](https://developers.google.com/identity/gsi/web/guides/verify-google-id-token).
+
+Automatic linking has an empty trusted-provider list and independently checks both ownership proofs.
+A private `emailLinkVerified` flag records reliable ownership of the profile email; client input cannot set it.
+Original-provider sign-in can establish this flag only when a reliable claim matches that same profile email.
+Explicit links with a different email do not promote the profile email.
+Twitch requests the email and verification claims with `openid` and `user:read:email` scopes.
+
+See [Twitch OIDC claims](https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/) for their semantics.
+An unverified email collision requires verification at the provider or explicit linking from the original account.
+
+The authority migration preserves existing verification flags and accounts without rebuilding the user table.
+It backfills only verified, single-provider Twitch accounts and verified, single-provider Google accounts with Gmail addresses.
+Other historical accounts need an authoritative original-provider sign-in or explicit linking.
+
+The normalized-email index fails safely if old data contains collisions. Resolve those records before applying the migration; never merge them automatically.
+
+Use Your profile to link any configured provider after a recent sign-in. Complete authorization with the added provider.
+Explicit linking proves control through the current session and the added provider subject, including providers without email.
+After those checks, the callback trusts that provider only for its own explicit linking request. Automatic sign-in never uses this exception.
+
+An identity owned by another profile cannot move to the current profile. Sign in to that profile or contact support.
+
+Removing a login method requires a recent sign-in. Concurrent removals cannot remove the final method.
+
+New registrations require explicit age and terms acknowledgement before the OAuth redirect.
+This is self-declared eligibility, not verified age. No birthday scopes or dates of birth are collected.
+
+The private acceptance record stores the time, minimum age, and policy versions from `app/signup-policy.ts`.
+Existing accounts remain usable. Their next acknowledged interactive sign-in records acceptance without a backdated value.
+
+A new account can use an editable display name. If a provider name is invalid, the sign-in page offers a correction field.
+
+Later sign-ins and account links preserve saved profile edits.
+Google and Twitch photos use the validated image pipeline. Downloads have a size limit and timeout; redirects are rejected.
+
+Only the approved provider image hosts are accepted. Failed imports use the preset fallback.
+
+Your profile provides photo replacement and removal controls.

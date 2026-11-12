@@ -48,7 +48,10 @@ export function requireNotCrossSite(request: Request, env: AppEnv): void {
   }
 }
 
-export async function readBody(request: Request, maxBytes: number): Promise<Uint8Array<ArrayBuffer>> {
+export async function readBody(
+  request: Pick<Request, "body" | "headers">,
+  maxBytes: number,
+): Promise<Uint8Array<ArrayBuffer>> {
   const length = request.headers.get("Content-Length");
   if (length !== null && (!/^\d+$/.test(length) || Number(length) > maxBytes))
     throw new HttpError(413, "Request is too large.");

@@ -1567,6 +1567,66 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_components_account_login_methods_loginmethods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L15",
+      "target": "app_lib_shell_useshell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_account_login_methods_loginmethods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L25",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_account_login_methods_loginmethods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L83",
+      "target": "app_components_account_login_methods_loginmethods_change",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_account_login_methods_loginmethods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L98",
+      "target": "app_components_shell_sign_in_dialog_signin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_account_login_methods_loginmethods_change",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L55",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_components_account_me_useme",
       "source_file": "app/components/account/me.ts",
       "source_location": "L35",
@@ -1593,7 +1653,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_initialchoice",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L75",
+      "source_location": "L76",
       "target": "app_lib_avatars_isavatarpreset",
       "weight": 1.0
     },
@@ -1605,7 +1665,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profilechanges",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L80",
+      "source_location": "L81",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -1617,7 +1677,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profilechanges",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L81",
+      "source_location": "L82",
       "target": "app_components_account_profile_dialog_initialchoice",
       "weight": 1.0
     },
@@ -1629,7 +1689,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L100",
+      "source_location": "L101",
       "target": "app_components_ui_toast_usetoast",
       "weight": 1.0
     },
@@ -1641,7 +1701,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L103",
+      "source_location": "L104",
       "target": "app_components_account_profile_dialog_initialchoice",
       "weight": 1.0
     },
@@ -1653,7 +1713,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L125",
+      "source_location": "L126",
       "target": "app_components_account_profile_dialog_profilechanges",
       "weight": 1.0
     },
@@ -1665,7 +1725,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L126",
+      "source_location": "L127",
       "target": "app_components_account_discard_usediscardguard",
       "weight": 1.0
     },
@@ -1677,7 +1737,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -1689,7 +1749,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L139",
+      "source_location": "L140",
       "target": "app_components_account_me_uploadimage",
       "weight": 1.0
     },
@@ -1701,7 +1761,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L139",
+      "source_location": "L140",
       "target": "app_components_ui_avatar_bumpimage",
       "weight": 1.0
     },
@@ -1713,7 +1773,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L140",
+      "source_location": "L141",
       "target": "app_components_api_sendjson",
       "weight": 1.0
     },
@@ -1725,7 +1785,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L149",
+      "source_location": "L150",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -1737,7 +1797,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L174",
+      "source_location": "L175",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -1749,7 +1809,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L183",
+      "source_location": "L184",
       "target": "app_components_ui_dialog_dialogactions",
       "weight": 1.0
     },
@@ -1761,7 +1821,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L184",
+      "source_location": "L185",
       "target": "app_components_account_profile_dialog_profiledialog_applycrop",
       "weight": 1.0
     },
@@ -1773,7 +1833,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L185",
+      "source_location": "L186",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -1785,7 +1845,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L202",
+      "source_location": "L203",
       "target": "app_components_account_cropper_cropper",
       "weight": 1.0
     },
@@ -1797,7 +1857,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L208",
+      "source_location": "L209",
       "target": "app_components_account_profile_dialog_profiledialog_save",
       "weight": 1.0
     },
@@ -1809,7 +1869,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L212",
+      "source_location": "L213",
       "target": "app_components_ui_required_requirednote",
       "weight": 1.0
     },
@@ -1821,7 +1881,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L213",
+      "source_location": "L214",
       "target": "app_components_account_profile_dialog_signedinwith",
       "weight": 1.0
     },
@@ -1833,7 +1893,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L215",
+      "source_location": "L216",
       "target": "app_components_account_profile_dialog_profilepreview",
       "weight": 1.0
     },
@@ -1845,7 +1905,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L215",
+      "source_location": "L216",
       "target": "app_components_ui_avatar_picture",
       "weight": 1.0
     },
@@ -1857,7 +1917,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L221",
+      "source_location": "L222",
       "target": "app_components_ui_required_req",
       "weight": 1.0
     },
@@ -1869,7 +1929,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L232",
+      "source_location": "L233",
       "target": "app_components_account_avatar_picker_avatarpicker",
       "weight": 1.0
     },
@@ -1881,7 +1941,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L238",
+      "source_location": "L239",
       "target": "app_components_account_profile_dialog_uploadfield",
       "weight": 1.0
     },
@@ -1893,7 +1953,31 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L243",
+      "source_location": "L244",
+      "target": "app_components_account_profile_dialog_profiledialog_objecturl",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_account_profile_dialog_profiledialog",
+      "source_file": "app/components/account/profile-dialog.tsx",
+      "source_location": "L250",
+      "target": "app_components_account_login_methods_loginmethods",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_account_profile_dialog_profiledialog_applycrop",
+      "source_file": "app/components/account/profile-dialog.tsx",
+      "source_location": "L160",
       "target": "app_components_account_profile_dialog_profiledialog_objecturl",
       "weight": 1.0
     },
@@ -1905,19 +1989,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog_applycrop",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L159",
-      "target": "app_components_account_profile_dialog_profiledialog_objecturl",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_account_profile_dialog_profiledialog_applycrop",
-      "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L168",
+      "source_location": "L169",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -1929,32 +2001,8 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog_save",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L133",
+      "source_location": "L134",
       "target": "app_i18n_index_t",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_account_profile_dialog_profiledialog_save",
-      "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L139",
-      "target": "app_components_account_me_uploadimage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_account_profile_dialog_profiledialog_save",
-      "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L139",
-      "target": "app_components_ui_avatar_bumpimage",
       "weight": 1.0
     },
     {
@@ -1966,6 +2014,30 @@
       "source": "app_components_account_profile_dialog_profiledialog_save",
       "source_file": "app/components/account/profile-dialog.tsx",
       "source_location": "L140",
+      "target": "app_components_account_me_uploadimage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_account_profile_dialog_profiledialog_save",
+      "source_file": "app/components/account/profile-dialog.tsx",
+      "source_location": "L140",
+      "target": "app_components_ui_avatar_bumpimage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_account_profile_dialog_profiledialog_save",
+      "source_file": "app/components/account/profile-dialog.tsx",
+      "source_location": "L141",
       "target": "app_components_api_sendjson",
       "weight": 1.0
     },
@@ -1977,7 +2049,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_profiledialog_save",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L149",
+      "source_location": "L150",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -1989,7 +2061,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_signedinwith",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L24",
+      "source_location": "L25",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -2001,7 +2073,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_signedinwith",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -2013,7 +2085,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_uploadfield",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -2025,7 +2097,7 @@
       "relation": "calls",
       "source": "app_components_account_profile_dialog_uploadfield",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L56",
+      "source_location": "L57",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11865,43 +11937,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L41",
-      "target": "app_components_shell_sign_in_dialog_usehere",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_shell_sign_in_dialog_signin",
-      "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L53",
-      "target": "app_i18n_index_t",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_shell_sign_in_dialog_signin",
-      "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L55",
-      "target": "app_components_api_errormessage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_shell_sign_in_dialog_signin",
-      "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L80",
+      "source_location": "L107",
       "target": "app_components_shell_sign_in_dialog_signin_signin",
       "weight": 1.0
     },
@@ -11913,8 +11949,44 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L83",
+      "source_location": "L110",
       "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_sign_in_dialog_signin",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L42",
+      "target": "app_components_shell_sign_in_dialog_usehere",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_sign_in_dialog_signin",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L60",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_sign_in_dialog_signin",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L62",
+      "target": "app_components_api_errormessage",
       "weight": 1.0
     },
     {
@@ -11925,7 +11997,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L53",
+      "source_location": "L60",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11937,7 +12009,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signin_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L55",
+      "source_location": "L62",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -11949,7 +12021,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L156",
+      "source_location": "L183",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11961,7 +12033,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L157",
+      "source_location": "L184",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -11973,7 +12045,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signinbutton",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L163",
+      "source_location": "L190",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -11985,7 +12057,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signindialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L135",
+      "source_location": "L162",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -11997,7 +12069,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signindialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L137",
+      "source_location": "L164",
       "target": "app_components_ui_dialog_dialog",
       "weight": 1.0
     },
@@ -12009,7 +12081,7 @@
       "relation": "calls",
       "source": "app_components_shell_sign_in_dialog_signindialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L143",
+      "source_location": "L170",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -22185,7 +22257,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L484",
+      "source_location": "L489",
       "target": "app_components_common_legaldocument",
       "weight": 1.0
     },
@@ -22197,8 +22269,44 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L493",
+      "source_location": "L498",
       "target": "app_routes_privacy_sections",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_sign_in_loader",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L21",
+      "target": "app_server_auth_server_configuredproviders",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_sign_in_signinpage",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L30",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_sign_in_signinpage",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L32",
+      "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
     {
@@ -24141,7 +24249,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L836",
+      "source_location": "L854",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -24153,7 +24261,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L871",
+      "source_location": "L889",
       "target": "app_server_images_server_deleteimageobjects",
       "weight": 1.0
     },
@@ -24165,7 +24273,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L880",
+      "source_location": "L898",
       "target": "app_server_live_server_notifyroom",
       "weight": 1.0
     },
@@ -24177,7 +24285,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L653",
+      "source_location": "L663",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -24189,7 +24297,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L672",
+      "source_location": "L682",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -24201,7 +24309,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L677",
+      "source_location": "L687",
       "target": "app_server_account_server_readhistory",
       "weight": 1.0
     },
@@ -24213,7 +24321,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L680",
+      "source_location": "L697",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -24225,7 +24333,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L690",
+      "source_location": "L708",
       "target": "app_server_account_server_parsejson",
       "weight": 1.0
     },
@@ -24237,7 +24345,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L709",
+      "source_location": "L727",
       "target": "app_server_account_server_optionaliso",
       "weight": 1.0
     },
@@ -24249,7 +24357,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L719",
+      "source_location": "L737",
       "target": "app_server_account_server_pageexport",
       "weight": 1.0
     },
@@ -24261,7 +24369,7 @@
       "relation": "calls",
       "source": "app_server_account_server_exportaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L797",
+      "source_location": "L815",
       "target": "app_server_account_server_imagerecords",
       "weight": 1.0
     },
@@ -24273,7 +24381,7 @@
       "relation": "calls",
       "source": "app_server_account_server_imagerecords",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L413",
+      "source_location": "L423",
       "target": "app_server_images_server_imagestoragekey",
       "weight": 1.0
     },
@@ -24285,7 +24393,7 @@
       "relation": "calls",
       "source": "app_server_account_server_optionaliso",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L394",
+      "source_location": "L404",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -24297,7 +24405,7 @@
       "relation": "calls",
       "source": "app_server_account_server_pageexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L592",
+      "source_location": "L602",
       "target": "app_server_account_server_optionaliso",
       "weight": 1.0
     },
@@ -24309,7 +24417,7 @@
       "relation": "calls",
       "source": "app_server_account_server_pageexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L601",
+      "source_location": "L611",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -24321,7 +24429,7 @@
       "relation": "calls",
       "source": "app_server_account_server_pageexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L637",
+      "source_location": "L647",
       "target": "app_server_account_server_parsejson",
       "weight": 1.0
     },
@@ -24729,7 +24837,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_configuredproviders",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L27",
+      "source_location": "L30",
       "target": "app_server_auth_server_providercredentials",
       "weight": 1.0
     },
@@ -24741,7 +24849,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_configuredproviders",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L29",
+      "source_location": "L32",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -24753,7 +24861,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L139",
+      "source_location": "L158",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -24765,7 +24873,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L142",
+      "source_location": "L161",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -24777,7 +24885,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L144",
+      "source_location": "L163",
       "target": "app_server_auth_server_configuredproviders",
       "weight": 1.0
     },
@@ -24789,7 +24897,19 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L205",
+      "source_location": "L345",
+      "target": "app_server_provider_avatar_server_importproviderphoto",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_auth_server_createauth",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L411",
       "target": "app_server_auth_server_instagramprovider",
       "weight": 1.0
     },
@@ -24801,7 +24921,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewer",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L275",
+      "source_location": "L489",
       "target": "app_server_auth_server_getviewersession",
       "weight": 1.0
     },
@@ -24813,7 +24933,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewersession",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L244",
+      "source_location": "L458",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -24825,7 +24945,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewersession",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L253",
+      "source_location": "L467",
       "target": "app_server_auth_server_viewervalue",
       "weight": 1.0
     },
@@ -24837,7 +24957,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_requirerecentsignin",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L265",
+      "source_location": "L479",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -24849,7 +24969,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_requirerecentsignin",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L269",
+      "source_location": "L483",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -24861,7 +24981,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_viewervalue",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L289",
+      "source_location": "L503",
       "target": "app_server_validation_readdisplayprefs",
       "weight": 1.0
     },
@@ -26157,7 +26277,7 @@
       "relation": "calls",
       "source": "app_server_http_server_errorresponse",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L138",
+      "source_location": "L141",
       "target": "app_server_http_server_json",
       "weight": 1.0
     },
@@ -26169,7 +26289,7 @@
       "relation": "calls",
       "source": "app_server_http_server_errorresponse",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L145",
+      "source_location": "L148",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -26193,7 +26313,7 @@
       "relation": "calls",
       "source": "app_server_http_server_logerror",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L127",
+      "source_location": "L130",
       "target": "app_server_http_server_stackframes",
       "weight": 1.0
     },
@@ -26205,7 +26325,7 @@
       "relation": "calls",
       "source": "app_server_http_server_queryparams",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L102",
+      "source_location": "L105",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -26217,7 +26337,7 @@
       "relation": "calls",
       "source": "app_server_http_server_readbody",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L54",
+      "source_location": "L57",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -26229,7 +26349,7 @@
       "relation": "calls",
       "source": "app_server_http_server_readjson",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L84",
+      "source_location": "L87",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -26241,7 +26361,7 @@
       "relation": "calls",
       "source": "app_server_http_server_readjson",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L86",
+      "source_location": "L89",
       "target": "app_server_http_server_readbody",
       "weight": 1.0
     },
@@ -28903,6 +29023,42 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_server_provider_avatar_server_importproviderphoto",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L23",
+      "target": "app_server_provider_avatar_server_allowedproviderphoto",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_provider_avatar_server_importproviderphoto",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L27",
+      "target": "app_server_http_server_readbody",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_provider_avatar_server_importproviderphoto",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L28",
+      "target": "app_server_images_server_uploadimage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_server_report_groups_server_groupstreamer",
       "source_file": "app/server/report-groups.server.ts",
       "source_location": "L110",
@@ -31437,7 +31593,7 @@
       "relation": "calls",
       "source": "db_auth_schema_user",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L29",
+      "source_location": "L31",
       "target": "db_enums_sqllist",
       "weight": 1.0
     },
@@ -31677,7 +31833,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L571",
+      "source_location": "L572",
       "target": "tests_account_test_callexport",
       "weight": 1.0
     },
@@ -31689,7 +31845,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L586",
+      "source_location": "L587",
       "target": "tests_account_test_seednewtables",
       "weight": 1.0
     },
@@ -31701,7 +31857,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L694",
+      "source_location": "L695",
       "target": "tests_account_test_linkedrows",
       "weight": 1.0
     },
@@ -31713,7 +31869,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L697",
+      "source_location": "L698",
       "target": "tests_account_test_zeroes",
       "weight": 1.0
     },
@@ -31725,7 +31881,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L858",
+      "source_location": "L859",
       "target": "tests_account_test_calldelete",
       "weight": 1.0
     },
@@ -31737,7 +31893,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L881",
+      "source_location": "L882",
       "target": "tests_account_test_cookie",
       "weight": 1.0
     },
@@ -31749,7 +31905,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L883",
+      "source_location": "L884",
       "target": "tests_account_test_routecontext",
       "weight": 1.0
     },
@@ -32025,7 +32181,55 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L183",
+      "source_location": "L1011",
+      "target": "tests_auth_test_freshaccount",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L1091",
+      "target": "tests_auth_test_responseviewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L1123",
+      "target": "tests_auth_test_linkcallback",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L1244",
+      "target": "tests_auth_test_accountrequest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L207",
       "target": "tests_auth_test_seedsession",
       "weight": 1.0
     },
@@ -32037,7 +32241,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L184",
+      "source_location": "L208",
       "target": "tests_auth_test_signedrequest",
       "weight": 1.0
     },
@@ -32049,7 +32253,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L210",
+      "source_location": "L234",
       "target": "tests_auth_test_context",
       "weight": 1.0
     },
@@ -32061,7 +32265,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L285",
+      "source_location": "L309",
       "target": "tests_auth_test_oauthcallback",
       "weight": 1.0
     },
@@ -32073,7 +32277,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L287",
+      "source_location": "L311",
       "target": "tests_auth_test_stubtwitchidentity",
       "weight": 1.0
     },
@@ -32085,7 +32289,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L376",
+      "source_location": "L411",
       "target": "tests_auth_test_stubgoogleidentity",
       "weight": 1.0
     },
@@ -32097,7 +32301,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L716",
+      "source_location": "L752",
       "target": "tests_auth_test_answer",
       "weight": 1.0
     },
@@ -32109,8 +32313,44 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L721",
+      "source_location": "L757",
       "target": "tests_auth_test_instagram",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test_accountrequest",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L891",
+      "target": "tests_auth_test_signedrequest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test_accountrequest",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L895",
+      "target": "app_server_auth_server_createauth",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test_freshaccount",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L905",
+      "target": "tests_auth_test_seedsession",
       "weight": 1.0
     },
     {
@@ -32121,8 +32361,32 @@
       "relation": "calls",
       "source": "tests_auth_test_instagram",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L667",
+      "source_location": "L703",
       "target": "app_server_auth_server_createauth",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test_linkcallback",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L916",
+      "target": "tests_auth_test_accountrequest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test_linkcallback",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L928",
+      "target": "tests_auth_test_signedrequest",
       "weight": 1.0
     },
     {
@@ -32133,8 +32397,32 @@
       "relation": "calls",
       "source": "tests_auth_test_oauthcallback",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L62",
+      "source_location": "L68",
       "target": "app_server_auth_server_createauth",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test_responseviewer",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L1386",
+      "target": "app_server_auth_server_getviewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_auth_test_responseviewer",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L1386",
+      "target": "tests_auth_test_context",
       "weight": 1.0
     },
     {
@@ -32673,7 +32961,7 @@
       "relation": "calls",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L115",
+      "source_location": "L129",
       "target": "tests_e2e_oauth_spec_signin",
       "weight": 1.0
     },
@@ -32685,7 +32973,7 @@
       "relation": "calls",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L117",
+      "source_location": "L131",
       "target": "tests_e2e_oauth_spec_expecthostcookie",
       "weight": 1.0
     },
@@ -32697,7 +32985,7 @@
       "relation": "calls",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L118",
+      "source_location": "L136",
       "target": "tests_e2e_oauth_spec_viewer",
       "weight": 1.0
     },
@@ -34089,8 +34377,8 @@
       "relation": "calls",
       "source": "tests_migrations_test",
       "source_file": "tests/migrations.test.ts",
-      "source_location": "L97",
-      "target": "tests_migrations_test_seedreleaseddata",
+      "source_location": "L100",
+      "target": "tests_migrations_test_counts",
       "weight": 1.0
     },
     {
@@ -34101,8 +34389,8 @@
       "relation": "calls",
       "source": "tests_migrations_test",
       "source_file": "tests/migrations.test.ts",
-      "source_location": "L98",
-      "target": "tests_migrations_test_counts",
+      "source_location": "L99",
+      "target": "tests_migrations_test_seedreleaseddata",
       "weight": 1.0
     },
     {
@@ -35759,7 +36047,7 @@
       "relation": "re_exports",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L14",
+      "source_location": "L17",
       "target": "app_server_validation",
       "weight": 1.0
     },
@@ -36311,7 +36599,7 @@
       "relation": "references",
       "source": "app_server_account_server_imagerecord",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L221",
+      "source_location": "L222",
       "target": "app_server_images_server_imagekind",
       "weight": 1.0
     },
@@ -38124,6 +38412,78 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L2",
+      "target": "app_auth_client_authclient",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L3",
+      "target": "app_lib_shell_useshell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L4",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L5",
+      "target": "app_components_shell_sign_in_dialog_providername",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L6",
+      "target": "app_components_shell_sign_in_dialog_signin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L7",
+      "target": "app_types_provider",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "app_components_account_me",
       "source_file": "app/components/account/me.ts",
       "source_location": "L2",
@@ -38271,6 +38631,18 @@
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
       "source_location": "L14",
+      "target": "app_components_account_login_methods_loginmethods",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_account_profile_dialog",
+      "source_file": "app/components/account/profile-dialog.tsx",
+      "source_location": "L15",
       "target": "app_components_account_avatar_picker_avatarchoice",
       "weight": 1.0
     },
@@ -38282,7 +38654,7 @@
       "relation": "imports",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "app_components_account_avatar_picker_avatarpicker",
       "weight": 1.0
     },
@@ -38294,7 +38666,7 @@
       "relation": "imports",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "app_components_account_cropper_cropper",
       "weight": 1.0
     },
@@ -38306,7 +38678,7 @@
       "relation": "imports",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "app_components_account_cropper_cropperhandle",
       "weight": 1.0
     },
@@ -38318,7 +38690,7 @@
       "relation": "imports",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "app_components_account_discard_usediscardguard",
       "weight": 1.0
     },
@@ -38330,7 +38702,7 @@
       "relation": "imports",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_components_account_me_image_types",
       "weight": 1.0
     },
@@ -38342,7 +38714,7 @@
       "relation": "imports",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_components_account_me_max_image_bytes",
       "weight": 1.0
     },
@@ -38354,7 +38726,7 @@
       "relation": "imports",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_components_account_me_uploadimage",
       "weight": 1.0
     },
@@ -45038,6 +45410,30 @@
       "relation": "imports",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L10",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L10",
+      "target": "app_components_ui_icon_iconname",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L3",
       "target": "app_auth_client_authclient",
       "weight": 1.0
@@ -45063,6 +45459,18 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L5",
+      "target": "app_signup_policy_signuppolicy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L6",
       "target": "app_legal_legal",
       "weight": 1.0
     },
@@ -45074,7 +45482,7 @@
       "relation": "imports",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_lib_shell_paths",
       "weight": 1.0
     },
@@ -45086,7 +45494,7 @@
       "relation": "imports",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_types_provider",
       "weight": 1.0
     },
@@ -45098,7 +45506,7 @@
       "relation": "imports",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -45110,32 +45518,8 @@
       "relation": "imports",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_components_ui_dialog_dialog",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_shell_sign_in_dialog",
-      "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L9",
-      "target": "app_components_ui_icon_icon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_shell_sign_in_dialog",
-      "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L9",
-      "target": "app_components_ui_icon_iconname",
       "weight": 1.0
     },
     {
@@ -51672,6 +52056,102 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L3",
+      "target": "app_env_appcontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L3",
+      "target": "app_env_appcontext_54cf5bec59a5",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L4",
+      "target": "app_server_auth_server_configuredproviders",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L5",
+      "target": "app_components_shell_sign_in_dialog_signin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L6",
+      "target": "app_i18n_index_messageid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L6",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L7",
+      "target": "app_legal_contactemails",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L8",
+      "target": "app_types_provider",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L1",
@@ -56030,79 +56510,7 @@
       "relation": "imports",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L11",
-      "target": "app_server_http_server_getorigin",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L11",
-      "target": "app_server_http_server_httperror",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L12",
-      "target": "app_server_validation_displaynameschema",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L12",
-      "target": "app_server_validation_readdisplayprefs",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L6",
-      "target": "app_env_appcontext",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L6",
-      "target": "app_env_appenv",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L7",
+      "source_location": "L10",
       "target": "db_enums_locales",
       "weight": 1.0
     },
@@ -56114,7 +56522,7 @@
       "relation": "imports",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L8",
+      "source_location": "L11",
       "target": "app_i18n_index_locale",
       "weight": 1.0
     },
@@ -56126,7 +56534,7 @@
       "relation": "imports",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L9",
+      "source_location": "L12",
       "target": "app_types_provider",
       "weight": 1.0
     },
@@ -56138,8 +56546,104 @@
       "relation": "imports",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L9",
+      "source_location": "L12",
       "target": "app_types_viewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L14",
+      "target": "app_server_http_server_getorigin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L14",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L15",
+      "target": "app_server_validation_displaynameschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L15",
+      "target": "app_server_validation_readdisplayprefs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L4",
+      "target": "app_signup_policy_signuppolicy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L5",
+      "target": "app_server_provider_avatar_server_importproviderphoto",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L9",
+      "target": "app_env_appcontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L9",
+      "target": "app_env_appenv",
       "weight": 1.0
     },
     {
@@ -58420,6 +58924,42 @@
       "source_file": "app/server/poll-room.ts",
       "source_location": "L3",
       "target": "app_lib_mash_tokenbucket",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_provider_avatar_server",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L1",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_provider_avatar_server",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L2",
+      "target": "app_server_http_server_readbody",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_provider_avatar_server",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L3",
+      "target": "app_server_images_server_uploadimage",
       "weight": 1.0
     },
     {
@@ -61731,7 +62271,7 @@
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
       "source_location": "L15",
-      "target": "app_types_provider",
+      "target": "app_signup_policy_signuppolicy",
       "weight": 1.0
     },
     {
@@ -61743,7 +62283,55 @@
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
       "source_location": "L16",
+      "target": "app_types_viewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L17",
+      "target": "app_types_provider",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L18",
+      "target": "tests_helpers_database_applymigrations",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L18",
       "target": "tests_helpers_database_createtestdatabase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L18",
+      "target": "tests_helpers_database_migrationfiles",
       "weight": 1.0
     },
     {
@@ -67752,6 +68340,54 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_provider_avatar_test",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L2",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_provider_avatar_test",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L3",
+      "target": "app_server_provider_avatar_server_allowedproviderphoto",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_provider_avatar_test",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L3",
+      "target": "app_server_provider_avatar_server_importproviderphoto",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_provider_avatar_test",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L4",
+      "target": "tests_helpers_database_createtestdatabase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_realtime_test",
       "source_file": "tests/realtime.test.ts",
       "source_location": "L5",
@@ -70555,6 +71191,79 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L1",
+      "target": "ref_react",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L2",
+      "target": "app_auth_client",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L3",
+      "target": "app_lib_shell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L4",
+      "target": "app_i18n_index",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L5",
+      "target": "app_components_shell_sign_in_dialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L7",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_components_account_me",
       "source_file": "app/components/account/me.ts",
       "source_location": "L1",
@@ -70655,7 +71364,7 @@
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
       "source_location": "L14",
-      "target": "app_components_account_avatar_picker",
+      "target": "app_components_account_login_methods",
       "weight": 1.0
     },
     {
@@ -70667,7 +71376,7 @@
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
       "source_location": "L15",
-      "target": "app_components_account_cropper",
+      "target": "app_components_account_avatar_picker",
       "weight": 1.0
     },
     {
@@ -70679,7 +71388,7 @@
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
       "source_location": "L16",
-      "target": "app_components_account_discard",
+      "target": "app_components_account_cropper",
       "weight": 1.0
     },
     {
@@ -70691,6 +71400,18 @@
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
       "source_location": "L17",
+      "target": "app_components_account_discard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_account_profile_dialog",
+      "source_file": "app/components/account/profile-dialog.tsx",
+      "source_location": "L18",
       "target": "app_components_account_me",
       "weight": 1.0
     },
@@ -75204,6 +75925,18 @@
       "relation": "imports_from",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
+      "source_location": "L10",
+      "target": "app_components_ui_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_shell_sign_in_dialog",
+      "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L2",
       "target": "ref_react_router",
       "weight": 1.0
@@ -75241,7 +75974,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L5",
-      "target": "app_legal",
+      "target": "app_signup_policy",
       "weight": 1.0
     },
     {
@@ -75253,7 +75986,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L6",
-      "target": "app_lib_shell",
+      "target": "app_legal",
       "weight": 1.0
     },
     {
@@ -75265,7 +75998,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L7",
-      "target": "app_components_api",
+      "target": "app_lib_shell",
       "weight": 1.0
     },
     {
@@ -75277,7 +76010,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L8",
-      "target": "app_components_ui_dialog",
+      "target": "app_components_api",
       "weight": 1.0
     },
     {
@@ -75289,7 +76022,7 @@
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
       "source_location": "L9",
-      "target": "app_components_ui_icon",
+      "target": "app_components_ui_dialog",
       "weight": 1.0
     },
     {
@@ -79806,6 +80539,104 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L1",
+      "target": "ref_react_router",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L2",
+      "target": "ref_react",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L3",
+      "target": "app_env",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L4",
+      "target": "app_server_auth_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L5",
+      "target": "app_components_shell_sign_in_dialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L6",
+      "target": "app_i18n_index",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L7",
+      "target": "app_legal",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L8",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_routes_streamer",
       "source_file": "app/routes/streamer.tsx",
       "source_location": "L1",
@@ -82069,7 +82900,7 @@
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
       "source_location": "L10",
-      "target": "ref_zod",
+      "target": "db_enums",
       "weight": 1.0
     },
     {
@@ -82081,7 +82912,8 @@
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
       "source_location": "L11",
-      "target": "app_server_http_server",
+      "target": "app_i18n_index",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -82093,6 +82925,43 @@
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
       "source_location": "L12",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L13",
+      "target": "ref_zod",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L14",
+      "target": "app_server_http_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L15",
       "target": "app_server_validation",
       "weight": 1.0
     },
@@ -82117,7 +82986,7 @@
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
       "source_location": "L4",
-      "target": "ref_drizzle_orm",
+      "target": "app_signup_policy",
       "weight": 1.0
     },
     {
@@ -82129,20 +82998,7 @@
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
       "source_location": "L5",
-      "target": "db_auth_schema",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L6",
-      "target": "app_env",
-      "type_only": true,
+      "target": "app_server_provider_avatar_server",
       "weight": 1.0
     },
     {
@@ -82154,7 +83010,7 @@
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
       "source_location": "L7",
-      "target": "db_enums",
+      "target": "ref_drizzle_orm",
       "weight": 1.0
     },
     {
@@ -82166,8 +83022,7 @@
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
       "source_location": "L8",
-      "target": "app_i18n_index",
-      "type_only": true,
+      "target": "db_auth_schema",
       "weight": 1.0
     },
     {
@@ -82179,7 +83034,7 @@
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
       "source_location": "L9",
-      "target": "app_types",
+      "target": "app_env",
       "type_only": true,
       "weight": 1.0
     },
@@ -83422,6 +84277,43 @@
       "source_file": "app/server/poll-room.ts",
       "source_location": "L3",
       "target": "app_lib_mash",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_provider_avatar_server",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L1",
+      "target": "app_env",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_provider_avatar_server",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L2",
+      "target": "app_server_http_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_server_provider_avatar_server",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L3",
+      "target": "app_server_images_server",
       "weight": 1.0
     },
     {
@@ -84910,6 +85802,18 @@
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
       "source_location": "L15",
+      "target": "app_signup_policy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L16",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -84922,7 +85826,7 @@
       "relation": "imports_from",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L16",
+      "source_location": "L18",
       "target": "tests_helpers_database",
       "weight": 1.0
     },
@@ -88726,6 +89630,55 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_provider_avatar_test",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_provider_avatar_test",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L2",
+      "target": "app_env",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_provider_avatar_test",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L3",
+      "target": "app_server_provider_avatar_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_provider_avatar_test",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L4",
+      "target": "tests_helpers_database",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_realtime_test",
       "source_file": "tests/realtime.test.ts",
       "source_location": "L1",
@@ -90380,7 +91333,7 @@
       "relation": "re_exports",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L14",
+      "source_location": "L17",
       "target": "app_server_validation_isplaceholderemail",
       "weight": 1.0
     },
@@ -90476,7 +91429,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_actiontakenrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L121",
+      "source_location": "L122",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90488,7 +91441,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_cardrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L80",
+      "source_location": "L81",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90500,7 +91453,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_commentrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L170",
+      "source_location": "L171",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90512,7 +91465,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_entryrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L157",
+      "source_location": "L158",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90524,7 +91477,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_eventrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L61",
+      "source_location": "L62",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90536,7 +91489,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_legacycommentrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L213",
+      "source_location": "L214",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90548,7 +91501,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_legacyreactionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L208",
+      "source_location": "L209",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90560,7 +91513,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_legacyvoterow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L203",
+      "source_location": "L204",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90572,7 +91525,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_likerow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L196",
+      "source_location": "L197",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90584,7 +91537,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_linkrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L89",
+      "source_location": "L90",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90596,7 +91549,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_mashtaprow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90608,7 +91561,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_pagemoderationrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L115",
+      "source_location": "L116",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90620,7 +91573,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_passkeyrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L106",
+      "source_location": "L107",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90632,7 +91585,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_providerrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L142",
+      "source_location": "L143",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90644,7 +91597,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_reactionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L181",
+      "source_location": "L182",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90656,7 +91609,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_reportrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L379",
+      "source_location": "L389",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90668,7 +91621,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_sessionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L149",
+      "source_location": "L150",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -90680,7 +91633,7 @@
       "relation": "inherits",
       "source": "app_server_account_server_voterow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L188",
+      "source_location": "L189",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -91519,6 +92472,39 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L14",
+      "target": "app_components_account_login_methods_loginmethods",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_account_login_methods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L9",
+      "target": "app_components_account_login_methods_loginaccount",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_account_login_methods_loginmethods",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L40",
+      "target": "app_components_account_login_methods_loginmethods_change",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "app_components_account_me",
       "source_file": "app/components/account/me.ts",
       "source_location": "L17",
@@ -91576,7 +92562,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "app_components_account_profile_dialog_signedinwith",
       "weight": 1.0
     },
@@ -91587,7 +92573,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_components_account_profile_dialog_uploadfield",
       "weight": 1.0
     },
@@ -91598,7 +92584,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L66",
+      "source_location": "L67",
       "target": "app_components_account_profile_dialog_newphoto",
       "weight": 1.0
     },
@@ -91609,7 +92595,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "app_components_account_profile_dialog_initialchoice",
       "weight": 1.0
     },
@@ -91620,7 +92606,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "app_components_account_profile_dialog_profilechanges",
       "weight": 1.0
     },
@@ -91631,7 +92617,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L85",
+      "source_location": "L86",
       "target": "app_components_account_profile_dialog_profilepreview",
       "weight": 1.0
     },
@@ -91642,7 +92628,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "app_components_account_profile_dialog_profiledialog",
       "weight": 1.0
     },
@@ -91653,7 +92639,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L118",
+      "source_location": "L119",
       "target": "app_components_account_profile_dialog_profiledialog_objecturl",
       "weight": 1.0
     },
@@ -91664,7 +92650,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L128",
+      "source_location": "L129",
       "target": "app_components_account_profile_dialog_profiledialog_save",
       "weight": 1.0
     },
@@ -91675,7 +92661,7 @@
       "relation": "contains",
       "source": "app_components_account_profile_dialog_profiledialog",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L154",
+      "source_location": "L155",
       "target": "app_components_account_profile_dialog_profiledialog_applycrop",
       "weight": 1.0
     },
@@ -95602,7 +96588,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "target": "app_components_shell_sign_in_dialog_providericon",
       "weight": 1.0
     },
@@ -95613,7 +96599,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L122",
+      "source_location": "L149",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -95624,7 +96610,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L149",
+      "source_location": "L176",
       "target": "app_components_shell_sign_in_dialog_signinbutton",
       "weight": 1.0
     },
@@ -95635,7 +96621,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_components_shell_sign_in_dialog_providername",
       "weight": 1.0
     },
@@ -95646,7 +96632,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_components_shell_sign_in_dialog_usehere",
       "weight": 1.0
     },
@@ -95657,7 +96643,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -95668,7 +96654,7 @@
       "relation": "contains",
       "source": "app_components_shell_sign_in_dialog_signin",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L44",
+      "source_location": "L47",
       "target": "app_components_shell_sign_in_dialog_signin_signin",
       "weight": 1.0
     },
@@ -102048,7 +103034,7 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L481",
+      "source_location": "L486",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -102072,6 +103058,39 @@
       "source_file": "app/routes/settings.tsx",
       "source_location": "L5",
       "target": "app_routes_settings_loader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L10",
+      "target": "app_routes_sign_in_errors",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L18",
+      "target": "app_routes_sign_in_loader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_sign_in",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L26",
+      "target": "app_routes_sign_in_signinpage",
       "weight": 1.0
     },
     {
@@ -102851,7 +103870,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L106",
+      "source_location": "L107",
       "target": "app_server_account_server_passkeyrow",
       "weight": 1.0
     },
@@ -102862,7 +103881,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L115",
+      "source_location": "L116",
       "target": "app_server_account_server_pagemoderationrow",
       "weight": 1.0
     },
@@ -102873,7 +103892,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L121",
+      "source_location": "L122",
       "target": "app_server_account_server_actiontakenrow",
       "weight": 1.0
     },
@@ -102884,7 +103903,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L129",
+      "source_location": "L130",
       "target": "app_server_account_server_applicationrow",
       "weight": 1.0
     },
@@ -102895,7 +103914,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L138",
+      "source_location": "L139",
       "target": "app_server_account_server_pagedrow",
       "weight": 1.0
     },
@@ -102906,7 +103925,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L142",
+      "source_location": "L143",
       "target": "app_server_account_server_providerrow",
       "weight": 1.0
     },
@@ -102917,7 +103936,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L149",
+      "source_location": "L150",
       "target": "app_server_account_server_sessionrow",
       "weight": 1.0
     },
@@ -102928,7 +103947,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L157",
+      "source_location": "L158",
       "target": "app_server_account_server_entryrow",
       "weight": 1.0
     },
@@ -102950,7 +103969,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L170",
+      "source_location": "L171",
       "target": "app_server_account_server_commentrow",
       "weight": 1.0
     },
@@ -102961,7 +103980,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L181",
+      "source_location": "L182",
       "target": "app_server_account_server_reactionrow",
       "weight": 1.0
     },
@@ -102972,7 +103991,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L188",
+      "source_location": "L189",
       "target": "app_server_account_server_voterow",
       "weight": 1.0
     },
@@ -102983,7 +104002,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L196",
+      "source_location": "L197",
       "target": "app_server_account_server_likerow",
       "weight": 1.0
     },
@@ -102994,7 +104013,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L203",
+      "source_location": "L204",
       "target": "app_server_account_server_legacyvoterow",
       "weight": 1.0
     },
@@ -103005,7 +104024,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L208",
+      "source_location": "L209",
       "target": "app_server_account_server_legacyreactionrow",
       "weight": 1.0
     },
@@ -103016,7 +104035,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L213",
+      "source_location": "L214",
       "target": "app_server_account_server_legacycommentrow",
       "weight": 1.0
     },
@@ -103027,7 +104046,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L220",
+      "source_location": "L221",
       "target": "app_server_account_server_imagerecord",
       "weight": 1.0
     },
@@ -103038,7 +104057,18 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L228",
+      "source_location": "L229",
+      "target": "app_server_account_server_signupacceptancerecord",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_account_server",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L236",
       "target": "app_server_account_server_accountexport",
       "weight": 1.0
     },
@@ -103049,7 +104079,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L32",
+      "source_location": "L33",
       "target": "app_server_account_server_streamerrow",
       "weight": 1.0
     },
@@ -103060,7 +104090,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L377",
+      "source_location": "L387",
       "target": "app_server_account_server_deleted_author_snapshot",
       "weight": 1.0
     },
@@ -103071,7 +104101,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L379",
+      "source_location": "L389",
       "target": "app_server_account_server_reportrow",
       "weight": 1.0
     },
@@ -103082,7 +104112,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L389",
+      "source_location": "L399",
       "target": "app_server_account_server_iso",
       "weight": 1.0
     },
@@ -103093,7 +104123,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L393",
+      "source_location": "L403",
       "target": "app_server_account_server_optionaliso",
       "weight": 1.0
     },
@@ -103104,7 +104134,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L398",
+      "source_location": "L408",
       "target": "app_server_account_server_readall",
       "weight": 1.0
     },
@@ -103115,7 +104145,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L410",
+      "source_location": "L420",
       "target": "app_server_account_server_imagerecords",
       "weight": 1.0
     },
@@ -103126,7 +104156,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L432",
+      "source_location": "L442",
       "target": "app_server_account_server_readhistory",
       "weight": 1.0
     },
@@ -103137,7 +104167,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "app_server_account_server_overlayrow",
       "weight": 1.0
     },
@@ -103148,7 +104178,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L567",
+      "source_location": "L577",
       "target": "app_server_account_server_history",
       "weight": 1.0
     },
@@ -103159,7 +104189,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L569",
+      "source_location": "L579",
       "target": "app_server_account_server_parsejson",
       "weight": 1.0
     },
@@ -103170,7 +104200,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L578",
+      "source_location": "L588",
       "target": "app_server_account_server_pageexport",
       "weight": 1.0
     },
@@ -103181,7 +104211,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L61",
+      "source_location": "L62",
       "target": "app_server_account_server_eventrow",
       "weight": 1.0
     },
@@ -103192,7 +104222,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L652",
+      "source_location": "L662",
       "target": "app_server_account_server_exportaccount",
       "weight": 1.0
     },
@@ -103214,7 +104244,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L80",
+      "source_location": "L81",
       "target": "app_server_account_server_cardrow",
       "weight": 1.0
     },
@@ -103225,7 +104255,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L835",
+      "source_location": "L853",
       "target": "app_server_account_server_deleteaccount",
       "weight": 1.0
     },
@@ -103236,7 +104266,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L89",
+      "source_location": "L90",
       "target": "app_server_account_server_linkrow",
       "weight": 1.0
     },
@@ -103247,7 +104277,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "app_server_account_server_mashtaprow",
       "weight": 1.0
     },
@@ -103808,7 +104838,18 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L138",
+      "source_location": "L141",
+      "target": "app_server_auth_server_reliableprovideremail",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L157",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -103819,7 +104860,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L17",
+      "source_location": "L20",
       "target": "app_server_auth_server_providercredentials",
       "weight": 1.0
     },
@@ -103830,18 +104871,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L240",
-      "target": "app_server_auth_server_getviewersession",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L25",
+      "source_location": "L28",
       "target": "app_server_auth_server_configuredproviders",
       "weight": 1.0
     },
@@ -103852,51 +104882,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L257",
-      "target": "app_server_auth_server_recent_sign_in_ms",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L264",
-      "target": "app_server_auth_server_requirerecentsignin",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L274",
-      "target": "app_server_auth_server_getviewer",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L279",
-      "target": "app_server_auth_server_viewervalue",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_auth_server",
-      "source_file": "app/server/auth.server.ts",
-      "source_location": "L42",
+      "source_location": "L45",
       "target": "app_server_auth_server_placeholder_domains",
       "weight": 1.0
     },
@@ -103907,7 +104893,62 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L47",
+      "source_location": "L454",
+      "target": "app_server_auth_server_getviewersession",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L471",
+      "target": "app_server_auth_server_recent_sign_in_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L478",
+      "target": "app_server_auth_server_requirerecentsignin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L488",
+      "target": "app_server_auth_server_getviewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L493",
+      "target": "app_server_auth_server_viewervalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_auth_server",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L50",
       "target": "app_server_auth_server_placeholderemail",
       "weight": 1.0
     },
@@ -103918,7 +104959,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L56",
+      "source_location": "L59",
       "target": "app_server_auth_server_placeholderallowed",
       "weight": 1.0
     },
@@ -103929,7 +104970,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L63",
+      "source_location": "L66",
       "target": "app_server_auth_server_signinprovider",
       "weight": 1.0
     },
@@ -103940,7 +104981,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L71",
+      "source_location": "L74",
       "target": "app_server_auth_server_instagramtokenschema",
       "weight": 1.0
     },
@@ -103951,7 +104992,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L79",
+      "source_location": "L82",
       "target": "app_server_auth_server_instagramprofileschema",
       "weight": 1.0
     },
@@ -103962,7 +105003,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L90",
+      "source_location": "L93",
       "target": "app_server_auth_server_instagramprovider",
       "weight": 1.0
     },
@@ -104699,7 +105740,18 @@
       "relation": "contains",
       "source": "app_server_http_server",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L107",
+      "source_location": "L101",
+      "target": "app_server_http_server_queryparams",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_http_server",
+      "source_file": "app/server/http.server.ts",
+      "source_location": "L110",
       "target": "app_server_http_server_json",
       "weight": 1.0
     },
@@ -104710,7 +105762,7 @@
       "relation": "contains",
       "source": "app_server_http_server",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L115",
+      "source_location": "L118",
       "target": "app_server_http_server_stackframes",
       "weight": 1.0
     },
@@ -104721,7 +105773,7 @@
       "relation": "contains",
       "source": "app_server_http_server",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L126",
+      "source_location": "L129",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -104732,7 +105784,7 @@
       "relation": "contains",
       "source": "app_server_http_server",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L136",
+      "source_location": "L139",
       "target": "app_server_http_server_errorresponse",
       "weight": 1.0
     },
@@ -104754,7 +105806,7 @@
       "relation": "contains",
       "source": "app_server_http_server",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L153",
+      "source_location": "L156",
       "target": "app_server_http_server_securityheaders",
       "weight": 1.0
     },
@@ -104809,19 +105861,8 @@
       "relation": "contains",
       "source": "app_server_http_server",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L82",
+      "source_location": "L85",
       "target": "app_server_http_server_readjson",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_http_server",
-      "source_file": "app/server/http.server.ts",
-      "source_location": "L98",
-      "target": "app_server_http_server_queryparams",
       "weight": 1.0
     },
     {
@@ -106362,6 +107403,28 @@
       "source_file": "app/server/poll-room.ts",
       "source_location": "L74",
       "target": "app_server_poll_room_battle",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_provider_avatar_server",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L17",
+      "target": "app_server_provider_avatar_server_importproviderphoto",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_provider_avatar_server",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L5",
+      "target": "app_server_provider_avatar_server_allowedproviderphoto",
       "weight": 1.0
     },
     {
@@ -108547,6 +109610,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "app_signup_policy",
+      "source_file": "app/signup-policy.ts",
+      "source_location": "L1",
+      "target": "app_signup_policy_signuppolicy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "app_types",
       "source_file": "app/types.ts",
       "source_location": "L129",
@@ -109308,7 +110382,7 @@
       "relation": "contains",
       "source": "db_auth_schema",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L102",
+      "source_location": "L104",
       "target": "db_auth_schema_verification",
       "weight": 1.0
     },
@@ -109319,7 +110393,7 @@
       "relation": "contains",
       "source": "db_auth_schema",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L118",
+      "source_location": "L120",
       "target": "db_auth_schema_ratelimit",
       "weight": 1.0
     },
@@ -109330,7 +110404,18 @@
       "relation": "contains",
       "source": "db_auth_schema",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L37",
+      "source_location": "L131",
+      "target": "db_auth_schema_signupacceptance",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "db_auth_schema",
+      "source_file": "db/auth-schema.ts",
+      "source_location": "L39",
       "target": "db_auth_schema_session",
       "weight": 1.0
     },
@@ -109352,7 +110437,7 @@
       "relation": "contains",
       "source": "db_auth_schema",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L57",
+      "source_location": "L59",
       "target": "db_auth_schema_passkey",
       "weight": 1.0
     },
@@ -109363,7 +110448,7 @@
       "relation": "contains",
       "source": "db_auth_schema",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L77",
+      "source_location": "L79",
       "target": "db_auth_schema_account",
       "weight": 1.0
     },
@@ -110058,6 +111143,17 @@
       "source_file": "docs/auth-setup.md",
       "source_location": "L7",
       "target": "docs_auth_setup_administrator_account",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_auth_setup_production_sign_in_setup",
+      "source_file": "docs/auth-setup.md",
+      "source_location": "L76",
+      "target": "docs_auth_setup_account_linking_and_registration",
       "weight": 1.0
     },
     {
@@ -110958,7 +112054,18 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L133",
+      "source_location": "L1381",
+      "target": "tests_auth_test_responseviewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L152",
       "target": "tests_auth_test_stubtwitchidentity",
       "weight": 1.0
     },
@@ -110969,7 +112076,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L23",
+      "source_location": "L25",
       "target": "tests_auth_test_context",
       "weight": 1.0
     },
@@ -110980,7 +112087,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L27",
+      "source_location": "L29",
       "target": "tests_auth_test_signedrequest",
       "weight": 1.0
     },
@@ -110991,7 +112098,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L34",
+      "source_location": "L36",
       "target": "tests_auth_test_seedsession",
       "weight": 1.0
     },
@@ -111002,7 +112109,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L60",
+      "source_location": "L62",
       "target": "tests_auth_test_oauthcallback",
       "weight": 1.0
     },
@@ -111013,7 +112120,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L650",
+      "source_location": "L686",
       "target": "tests_auth_test_instagramconfig",
       "weight": 1.0
     },
@@ -111024,7 +112131,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L666",
+      "source_location": "L702",
       "target": "tests_auth_test_instagram",
       "weight": 1.0
     },
@@ -111035,7 +112142,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L684",
+      "source_location": "L720",
       "target": "tests_auth_test_answer",
       "weight": 1.0
     },
@@ -111046,7 +112153,40 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L87",
+      "source_location": "L885",
+      "target": "tests_auth_test_accountrequest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L904",
+      "target": "tests_auth_test_freshaccount",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L915",
+      "target": "tests_auth_test_linkcallback",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_auth_test",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L93",
       "target": "tests_auth_test_stubgoogleidentity",
       "weight": 1.0
     },
@@ -111871,7 +113011,18 @@
       "relation": "contains",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L103",
+      "source_location": "L108",
+      "target": "tests_e2e_oauth_spec_expecthostcookie",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_oauth_spec",
+      "source_file": "tests/e2e/oauth.spec.ts",
+      "source_location": "L117",
       "target": "tests_e2e_oauth_spec_viewer",
       "weight": 1.0
     },
@@ -111904,19 +113055,8 @@
       "relation": "contains",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L68",
+      "source_location": "L73",
       "target": "tests_e2e_oauth_spec_signin",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_oauth_spec",
-      "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L94",
-      "target": "tests_e2e_oauth_spec_expecthostcookie",
       "weight": 1.0
     },
     {
@@ -116754,7 +117894,7 @@
       "relation": "indirect_call",
       "source": "tests_e2e_oauth_spec",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L58",
+      "source_location": "L63",
       "target": "tests_e2e_oauth_spec_providerresponse",
       "weight": 1.0
     },
@@ -116988,10 +118128,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "c8a5b2b75efc63040dfec2a51c1fa42d68d98ad7e835c50738da9bee1742a367",
+    "content_sha256": "7cad328a8384e0f8404d182b0eb0aee115cd5fd09310d1957ca71f400f3af387",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "16ffaacf905220aa20688f3eef77b65124b62c0241f25cf1256a97d508bf9d38",
+    "source_sha256": "6845427acab3465f88bd616437c68b0fb3baf76cd22af7479ad4abee9e9051e2",
     "tool_sha256": "cdcf7b908e8aa33060788190dff5bed41775165afdd1e3f4303b757f4f1292ab"
   },
   "hyperedges": [],
@@ -117313,6 +118453,18 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_account_login_methods_loginaccount",
+      "label": "LoginAccount",
+      "norm_label": "loginaccount",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L9"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_account_me_me",
       "label": "Me",
       "norm_label": "me",
@@ -117329,7 +118481,7 @@
       "label": "NewPhoto",
       "norm_label": "newphoto",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L66"
+      "source_location": "L67"
     },
     {
       "_callable": true,
@@ -118697,7 +119849,7 @@
       "label": "AccountExport",
       "norm_label": "accountexport",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L228"
+      "source_location": "L236"
     },
     {
       "_callable": true,
@@ -118709,7 +119861,7 @@
       "label": "ActionTakenRow",
       "norm_label": "actiontakenrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L121"
+      "source_location": "L122"
     },
     {
       "_callable": true,
@@ -118721,7 +119873,7 @@
       "label": "ApplicationRow",
       "norm_label": "applicationrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L129"
+      "source_location": "L130"
     },
     {
       "_callable": true,
@@ -118733,7 +119885,7 @@
       "label": "CardRow",
       "norm_label": "cardrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L80"
+      "source_location": "L81"
     },
     {
       "_callable": true,
@@ -118745,7 +119897,7 @@
       "label": "CommentRow",
       "norm_label": "commentrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L170"
+      "source_location": "L171"
     },
     {
       "_callable": true,
@@ -118757,7 +119909,7 @@
       "label": "EntryRow",
       "norm_label": "entryrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L157"
+      "source_location": "L158"
     },
     {
       "_callable": true,
@@ -118769,7 +119921,7 @@
       "label": "EventRow",
       "norm_label": "eventrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L61"
+      "source_location": "L62"
     },
     {
       "_callable": true,
@@ -118781,7 +119933,7 @@
       "label": "History",
       "norm_label": "history",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L567"
+      "source_location": "L577"
     },
     {
       "_callable": true,
@@ -118793,7 +119945,7 @@
       "label": "ImageRecord",
       "norm_label": "imagerecord",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L220"
+      "source_location": "L221"
     },
     {
       "_callable": true,
@@ -118805,7 +119957,7 @@
       "label": "LegacyCommentRow",
       "norm_label": "legacycommentrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L213"
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -118817,7 +119969,7 @@
       "label": "LegacyReactionRow",
       "norm_label": "legacyreactionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L208"
+      "source_location": "L209"
     },
     {
       "_callable": true,
@@ -118829,7 +119981,7 @@
       "label": "LegacyVoteRow",
       "norm_label": "legacyvoterow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L203"
+      "source_location": "L204"
     },
     {
       "_callable": true,
@@ -118841,7 +119993,7 @@
       "label": "LikeRow",
       "norm_label": "likerow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L196"
+      "source_location": "L197"
     },
     {
       "_callable": true,
@@ -118853,7 +120005,7 @@
       "label": "LinkRow",
       "norm_label": "linkrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L89"
+      "source_location": "L90"
     },
     {
       "_callable": true,
@@ -118865,7 +120017,7 @@
       "label": "MashTapRow",
       "norm_label": "mashtaprow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L96"
+      "source_location": "L97"
     },
     {
       "_callable": true,
@@ -118877,7 +120029,7 @@
       "label": "OverlayRow",
       "norm_label": "overlayrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L49"
+      "source_location": "L50"
     },
     {
       "_callable": true,
@@ -118889,7 +120041,7 @@
       "label": "PagedRow",
       "norm_label": "pagedrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L138"
+      "source_location": "L139"
     },
     {
       "_callable": true,
@@ -118901,7 +120053,7 @@
       "label": "PageModerationRow",
       "norm_label": "pagemoderationrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L115"
+      "source_location": "L116"
     },
     {
       "_callable": true,
@@ -118913,7 +120065,7 @@
       "label": "PasskeyRow",
       "norm_label": "passkeyrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L106"
+      "source_location": "L107"
     },
     {
       "_callable": true,
@@ -118925,7 +120077,7 @@
       "label": "ProviderRow",
       "norm_label": "providerrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L142"
+      "source_location": "L143"
     },
     {
       "_callable": true,
@@ -118937,7 +120089,7 @@
       "label": "ReactionRow",
       "norm_label": "reactionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L181"
+      "source_location": "L182"
     },
     {
       "_callable": true,
@@ -118949,7 +120101,7 @@
       "label": "ReportRow",
       "norm_label": "reportrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L379"
+      "source_location": "L389"
     },
     {
       "_callable": true,
@@ -118961,7 +120113,19 @@
       "label": "SessionRow",
       "norm_label": "sessionrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L149"
+      "source_location": "L150"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_account_server_signupacceptancerecord",
+      "label": "SignupAcceptanceRecord",
+      "norm_label": "signupacceptancerecord",
+      "source_file": "app/server/account.server.ts",
+      "source_location": "L229"
     },
     {
       "_callable": true,
@@ -118973,7 +120137,7 @@
       "label": "StreamerRow",
       "norm_label": "streamerrow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L32"
+      "source_location": "L33"
     },
     {
       "_callable": true,
@@ -118997,7 +120161,7 @@
       "label": "VoteRow",
       "norm_label": "voterow",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L188"
+      "source_location": "L189"
     },
     {
       "_callable": true,
@@ -120929,7 +122093,7 @@
       "label": "InstagramConfig",
       "norm_label": "instagramconfig",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L650"
+      "source_location": "L686"
     },
     {
       "_callable": true,
@@ -121700,6 +122864,28 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_account_login_methods_loginmethods",
+      "label": "LoginMethods()",
+      "norm_label": "loginmethods()",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L14"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_account_login_methods_loginmethods_change",
+      "label": "change()",
+      "norm_label": "change()",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L40"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_account_me_uploadimage",
       "label": "uploadImage()",
       "norm_label": "uploadimage()",
@@ -121726,7 +122912,7 @@
       "label": "initialChoice()",
       "norm_label": "initialchoice()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L73"
+      "source_location": "L74"
     },
     {
       "_callable": true,
@@ -121737,7 +122923,7 @@
       "label": "profileChanges()",
       "norm_label": "profilechanges()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L78"
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -121748,7 +122934,7 @@
       "label": "ProfileDialog()",
       "norm_label": "profiledialog()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L95"
+      "source_location": "L96"
     },
     {
       "_callable": true,
@@ -121759,7 +122945,7 @@
       "label": "applyCrop()",
       "norm_label": "applycrop()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L154"
+      "source_location": "L155"
     },
     {
       "_callable": true,
@@ -121770,7 +122956,7 @@
       "label": "objectUrl()",
       "norm_label": "objecturl()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L118"
+      "source_location": "L119"
     },
     {
       "_callable": true,
@@ -121781,7 +122967,7 @@
       "label": "save()",
       "norm_label": "save()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L128"
+      "source_location": "L129"
     },
     {
       "_callable": true,
@@ -121792,7 +122978,7 @@
       "label": "profilePreview()",
       "norm_label": "profilepreview()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L85"
+      "source_location": "L86"
     },
     {
       "_callable": true,
@@ -121803,7 +122989,7 @@
       "label": "SignedInWith()",
       "norm_label": "signedinwith()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_callable": true,
@@ -121814,7 +123000,7 @@
       "label": "UploadField()",
       "norm_label": "uploadfield()",
       "source_file": "app/components/account/profile-dialog.tsx",
-      "source_location": "L31"
+      "source_location": "L32"
     },
     {
       "_callable": true,
@@ -125087,7 +126273,7 @@
       "label": "SignIn()",
       "norm_label": "signin()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L34"
+      "source_location": "L35"
     },
     {
       "_callable": true,
@@ -125098,7 +126284,7 @@
       "label": "signIn()",
       "norm_label": "signin()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L44"
+      "source_location": "L47"
     },
     {
       "_callable": true,
@@ -125109,7 +126295,7 @@
       "label": "SignInButton()",
       "norm_label": "signinbutton()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L149"
+      "source_location": "L176"
     },
     {
       "_callable": true,
@@ -125120,7 +126306,7 @@
       "label": "SignInDialog()",
       "norm_label": "signindialog()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L122"
+      "source_location": "L149"
     },
     {
       "_callable": true,
@@ -125131,7 +126317,7 @@
       "label": "useHere()",
       "norm_label": "usehere()",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "_callable": true,
@@ -130205,7 +131391,7 @@
       "label": "Privacy()",
       "norm_label": "privacy()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L481"
+      "source_location": "L486"
     },
     {
       "_callable": true,
@@ -130228,6 +131414,28 @@
       "norm_label": "loader()",
       "source_file": "app/routes/settings.tsx",
       "source_location": "L5"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_sign_in_loader",
+      "label": "loader()",
+      "norm_label": "loader()",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L18"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_sign_in_signinpage",
+      "label": "SignInPage()",
+      "norm_label": "signinpage()",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L26"
     },
     {
       "_callable": true,
@@ -130876,7 +132084,7 @@
       "label": "deleteAccount()",
       "norm_label": "deleteaccount()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L835"
+      "source_location": "L853"
     },
     {
       "_callable": true,
@@ -130887,7 +132095,7 @@
       "label": "exportAccount()",
       "norm_label": "exportaccount()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L652"
+      "source_location": "L662"
     },
     {
       "_callable": true,
@@ -130898,7 +132106,7 @@
       "label": "imageRecords()",
       "norm_label": "imagerecords()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L410"
+      "source_location": "L420"
     },
     {
       "_callable": true,
@@ -130909,7 +132117,7 @@
       "label": "iso()",
       "norm_label": "iso()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L389"
+      "source_location": "L399"
     },
     {
       "_callable": true,
@@ -130920,7 +132128,7 @@
       "label": "optionalIso()",
       "norm_label": "optionaliso()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L393"
+      "source_location": "L403"
     },
     {
       "_callable": true,
@@ -130931,7 +132139,7 @@
       "label": "pageExport()",
       "norm_label": "pageexport()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L578"
+      "source_location": "L588"
     },
     {
       "_callable": true,
@@ -130942,7 +132150,7 @@
       "label": "parseJson()",
       "norm_label": "parsejson()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L569"
+      "source_location": "L579"
     },
     {
       "_callable": true,
@@ -130953,7 +132161,7 @@
       "label": "readAll()",
       "norm_label": "readall()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L398"
+      "source_location": "L408"
     },
     {
       "_callable": true,
@@ -130964,7 +132172,7 @@
       "label": "readHistory()",
       "norm_label": "readhistory()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L432"
+      "source_location": "L442"
     },
     {
       "_callable": true,
@@ -131250,7 +132458,7 @@
       "label": "configuredProviders()",
       "norm_label": "configuredproviders()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L25"
+      "source_location": "L28"
     },
     {
       "_callable": true,
@@ -131261,7 +132469,7 @@
       "label": "createAuth()",
       "norm_label": "createauth()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L138"
+      "source_location": "L157"
     },
     {
       "_callable": true,
@@ -131272,7 +132480,7 @@
       "label": "getViewer()",
       "norm_label": "getviewer()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L274"
+      "source_location": "L488"
     },
     {
       "_callable": true,
@@ -131283,7 +132491,7 @@
       "label": "getViewerSession()",
       "norm_label": "getviewersession()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L240"
+      "source_location": "L454"
     },
     {
       "_callable": true,
@@ -131294,7 +132502,7 @@
       "label": "instagramProvider()",
       "norm_label": "instagramprovider()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L90"
+      "source_location": "L93"
     },
     {
       "_callable": true,
@@ -131305,7 +132513,7 @@
       "label": "placeholderAllowed()",
       "norm_label": "placeholderallowed()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L56"
+      "source_location": "L59"
     },
     {
       "_callable": true,
@@ -131316,7 +132524,7 @@
       "label": "placeholderEmail()",
       "norm_label": "placeholderemail()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L47"
+      "source_location": "L50"
     },
     {
       "_callable": true,
@@ -131327,7 +132535,18 @@
       "label": "providerCredentials()",
       "norm_label": "providercredentials()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L17"
+      "source_location": "L20"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_auth_server_reliableprovideremail",
+      "label": "reliableProviderEmail()",
+      "norm_label": "reliableprovideremail()",
+      "source_file": "app/server/auth.server.ts",
+      "source_location": "L141"
     },
     {
       "_callable": true,
@@ -131338,7 +132557,7 @@
       "label": "requireRecentSignIn()",
       "norm_label": "requirerecentsignin()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L264"
+      "source_location": "L478"
     },
     {
       "_callable": true,
@@ -131349,7 +132568,7 @@
       "label": "signInProvider()",
       "norm_label": "signinprovider()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L63"
+      "source_location": "L66"
     },
     {
       "_callable": true,
@@ -131360,7 +132579,7 @@
       "label": "viewerValue()",
       "norm_label": "viewervalue()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L279"
+      "source_location": "L493"
     },
     {
       "_callable": true,
@@ -131921,7 +133140,7 @@
       "label": "errorResponse()",
       "norm_label": "errorresponse()",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L136"
+      "source_location": "L139"
     },
     {
       "_callable": true,
@@ -131954,7 +133173,7 @@
       "label": "json()",
       "norm_label": "json()",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L107"
+      "source_location": "L110"
     },
     {
       "_callable": true,
@@ -131965,7 +133184,7 @@
       "label": "logError()",
       "norm_label": "logerror()",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L126"
+      "source_location": "L129"
     },
     {
       "_callable": true,
@@ -131976,7 +133195,7 @@
       "label": "queryParams()",
       "norm_label": "queryparams()",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L98"
+      "source_location": "L101"
     },
     {
       "_callable": true,
@@ -131991,7 +133210,7 @@
             "callee": "set",
             "file": "app/server/http.server.ts",
             "lang": "typescript",
-            "line": "L76",
+            "line": "L79",
             "receiver_type": "Uint8Array"
           }
         ]
@@ -132009,7 +133228,7 @@
       "label": "readJson()",
       "norm_label": "readjson()",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L82"
+      "source_location": "L85"
     },
     {
       "_callable": true,
@@ -132042,7 +133261,7 @@
       "label": "securityHeaders()",
       "norm_label": "securityheaders()",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L153"
+      "source_location": "L156"
     },
     {
       "_callable": true,
@@ -132053,7 +133272,7 @@
       "label": "stackFrames()",
       "norm_label": "stackframes()",
       "source_file": "app/server/http.server.ts",
-      "source_location": "L115"
+      "source_location": "L118"
     },
     {
       "_callable": true,
@@ -133750,6 +134969,28 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_provider_avatar_server_allowedproviderphoto",
+      "label": "allowedProviderPhoto()",
+      "norm_label": "allowedproviderphoto()",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L5"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_provider_avatar_server_importproviderphoto",
+      "label": "importProviderPhoto()",
+      "norm_label": "importproviderphoto()",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L17"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_report_groups_server_groupstreamer",
       "label": "groupStreamer()",
       "norm_label": "groupstreamer()",
@@ -135213,11 +136454,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_auth_test_accountrequest",
+      "label": "accountRequest()",
+      "norm_label": "accountrequest()",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L885"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_auth_test_answer",
       "label": "answer()",
       "norm_label": "answer()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L684"
+      "source_location": "L720"
     },
     {
       "_callable": true,
@@ -135228,7 +136480,18 @@
       "label": "context()",
       "norm_label": "context()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L23"
+      "source_location": "L25"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_auth_test_freshaccount",
+      "label": "freshAccount()",
+      "norm_label": "freshaccount()",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L904"
     },
     {
       "_callable": true,
@@ -135239,7 +136502,18 @@
       "label": "instagram()",
       "norm_label": "instagram()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L666"
+      "source_location": "L702"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_auth_test_linkcallback",
+      "label": "linkCallback()",
+      "norm_label": "linkcallback()",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L915"
     },
     {
       "_callable": true,
@@ -135250,7 +136524,18 @@
       "label": "oauthCallback()",
       "norm_label": "oauthcallback()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L60"
+      "source_location": "L62"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_auth_test_responseviewer",
+      "label": "responseViewer()",
+      "norm_label": "responseviewer()",
+      "source_file": "tests/auth.test.ts",
+      "source_location": "L1381"
     },
     {
       "_callable": true,
@@ -135261,7 +136546,7 @@
       "label": "seedSession()",
       "norm_label": "seedsession()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L34"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -135272,7 +136557,7 @@
       "label": "signedRequest()",
       "norm_label": "signedrequest()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L27"
+      "source_location": "L29"
     },
     {
       "_callable": true,
@@ -135283,7 +136568,7 @@
       "label": "stubGoogleIdentity()",
       "norm_label": "stubgoogleidentity()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L87"
+      "source_location": "L93"
     },
     {
       "_callable": true,
@@ -135294,7 +136579,7 @@
       "label": "stubTwitchIdentity()",
       "norm_label": "stubtwitchidentity()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L133"
+      "source_location": "L152"
     },
     {
       "_callable": true,
@@ -136108,7 +137393,7 @@
       "label": "expectHostCookie()",
       "norm_label": "expecthostcookie()",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L94"
+      "source_location": "L108"
     },
     {
       "_callable": true,
@@ -136145,56 +137430,56 @@
             "callee": "route",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L69",
+            "line": "L74",
             "receiver_type": "Page"
           },
           {
             "callee": "goto",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L79",
+            "line": "L87",
             "receiver_type": "Page"
           },
           {
             "callee": "waitForResponse",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L81",
+            "line": "L89",
             "receiver_type": "Page"
           },
           {
             "callee": "waitForEvent",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L84",
+            "line": "L95",
             "receiver_type": "Page"
           },
           {
             "callee": "getByRole",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L85",
+            "line": "L97",
             "receiver_type": "Page"
           },
           {
             "callee": "url",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L89",
+            "line": "L103",
             "receiver_type": "Page"
           },
           {
             "callee": "waitForLoadState",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L90",
+            "line": "L104",
             "receiver_type": "Page"
           }
         ]
       },
       "norm_label": "signin()",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L68"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -136205,7 +137490,7 @@
       "label": "viewer()",
       "norm_label": "viewer()",
       "source_file": "tests/e2e/oauth.spec.ts",
-      "source_location": "L103"
+      "source_location": "L117"
     },
     {
       "_callable": true,
@@ -139133,6 +140418,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_account_login_methods",
+      "label": "login-methods.tsx",
+      "norm_label": "login-methods.tsx",
+      "source_file": "app/components/account/login-methods.tsx",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_account_me",
       "label": "me.ts",
       "norm_label": "me.ts",
@@ -140067,7 +141362,7 @@
       "label": "providerIcon",
       "norm_label": "providericon",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L11"
+      "source_location": "L12"
     },
     {
       "_origin": "ast",
@@ -140077,7 +141372,7 @@
       "label": "providerName",
       "norm_label": "providername",
       "source_file": "app/components/shell/sign-in-dialog.tsx",
-      "source_location": "L17"
+      "source_location": "L18"
     },
     {
       "_origin": "ast",
@@ -142044,6 +143339,26 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_routes_sign_in",
+      "label": "sign-in.tsx",
+      "norm_label": "sign-in.tsx",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_sign_in_errors",
+      "label": "errors",
+      "norm_label": "errors",
+      "source_file": "app/routes/sign-in.tsx",
+      "source_location": "L10"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_routes_streamer",
       "label": "streamer.tsx",
       "norm_label": "streamer.tsx",
@@ -142158,7 +143473,7 @@
       "label": "DELETED_AUTHOR_SNAPSHOT",
       "norm_label": "deleted_author_snapshot",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L377"
+      "source_location": "L387"
     },
     {
       "_origin": "ast",
@@ -142528,7 +143843,7 @@
       "label": "instagramProfileSchema",
       "norm_label": "instagramprofileschema",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L79"
+      "source_location": "L82"
     },
     {
       "_origin": "ast",
@@ -142538,7 +143853,7 @@
       "label": "instagramTokenSchema",
       "norm_label": "instagramtokenschema",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L71"
+      "source_location": "L74"
     },
     {
       "_origin": "ast",
@@ -142548,7 +143863,7 @@
       "label": "PLACEHOLDER_DOMAINS",
       "norm_label": "placeholder_domains",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L42"
+      "source_location": "L45"
     },
     {
       "_origin": "ast",
@@ -142558,7 +143873,7 @@
       "label": "RECENT_SIGN_IN_MS",
       "norm_label": "recent_sign_in_ms",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L257"
+      "source_location": "L471"
     },
     {
       "_origin": "ast",
@@ -143129,6 +144444,16 @@
       "norm_label": "room_paths",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L38"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_provider_avatar_server",
+      "label": "provider-avatar.server.ts",
+      "norm_label": "provider-avatar.server.ts",
+      "source_file": "app/server/provider-avatar.server.ts",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",
@@ -143754,6 +145079,26 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_signup_policy",
+      "label": "signup-policy.ts",
+      "norm_label": "signup-policy.ts",
+      "source_file": "app/signup-policy.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_signup_policy_signuppolicy",
+      "label": "signupPolicy",
+      "norm_label": "signuppolicy",
+      "source_file": "app/signup-policy.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_types",
       "label": "types.ts",
       "norm_label": "types.ts",
@@ -143798,7 +145143,7 @@
       "label": "account",
       "norm_label": "account",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L77"
+      "source_location": "L79"
     },
     {
       "_origin": "ast",
@@ -143808,7 +145153,7 @@
       "label": "passkey",
       "norm_label": "passkey",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L57"
+      "source_location": "L59"
     },
     {
       "_origin": "ast",
@@ -143818,7 +145163,7 @@
       "label": "rateLimit",
       "norm_label": "ratelimit",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L118"
+      "source_location": "L120"
     },
     {
       "_origin": "ast",
@@ -143828,7 +145173,17 @@
       "label": "session",
       "norm_label": "session",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L37"
+      "source_location": "L39"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "db_auth_schema_signupacceptance",
+      "label": "signupAcceptance",
+      "norm_label": "signupacceptance",
+      "source_file": "db/auth-schema.ts",
+      "source_location": "L131"
     },
     {
       "_origin": "ast",
@@ -143848,7 +145203,7 @@
       "label": "verification",
       "norm_label": "verification",
       "source_file": "db/auth-schema.ts",
-      "source_location": "L102"
+      "source_location": "L104"
     },
     {
       "_origin": "ast",
@@ -145391,8 +146746,36 @@
             "callee": "cookies",
             "file": "tests/e2e/oauth.spec.ts",
             "lang": "typescript",
-            "line": "L120",
+            "line": "L138",
             "receiver_type": "BrowserContext"
+          },
+          {
+            "callee": "goto",
+            "file": "tests/e2e/oauth.spec.ts",
+            "lang": "typescript",
+            "line": "L228",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "getByLabel",
+            "file": "tests/e2e/oauth.spec.ts",
+            "lang": "typescript",
+            "line": "L229",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "getByRole",
+            "file": "tests/e2e/oauth.spec.ts",
+            "lang": "typescript",
+            "line": "L230",
+            "receiver_type": "Page"
+          },
+          {
+            "callee": "url",
+            "file": "tests/e2e/oauth.spec.ts",
+            "lang": "typescript",
+            "line": "L233",
+            "receiver_type": "Page"
           }
         ]
       },
@@ -146554,6 +147937,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_provider_avatar_test",
+      "label": "provider-avatar.test.ts",
+      "norm_label": "provider-avatar.test.ts",
+      "source_file": "tests/provider-avatar.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_realtime_test",
       "label": "realtime.test.ts",
       "norm_label": "realtime.test.ts",
@@ -146962,6 +148355,17 @@
       "norm_label": "auth-setup.md",
       "source_file": "docs/auth-setup.md",
       "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_auth_setup_account_linking_and_registration",
+      "label": "Account linking and registration",
+      "node_kind": "heading",
+      "norm_label": "account linking and registration",
+      "source_file": "docs/auth-setup.md",
+      "source_location": "L76"
     },
     {
       "_origin": "ast",

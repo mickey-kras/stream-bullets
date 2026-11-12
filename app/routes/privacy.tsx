@@ -56,12 +56,17 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
         </ul>
         <p>
-          We do not download or show your provider profile picture. Until you pick a preset picture or upload a photo,
-          your avatar on StreamBullets is the default Space explorer picture.
+          When you register with Google or Twitch, we try to import your provider profile picture as your initial
+          avatar. If the import fails, we use the default Space explorer picture.
         </p>
+        <p>You can replace or remove the photo in Your profile. Later sign-ins do not replace your chosen picture.</p>
         <h3>What you give us</h3>
         <ul>
           <li>Your display name if you change it, the preset picture you pick, and any avatar image you upload.</li>
+          <li>
+            Your age and terms acknowledgement: its time, the minimum age, and the policy versions you accepted. This
+            private record is self-declared eligibility, not verified age. We do not collect your date of birth.
+          </li>
           <li>
             Your language and your Accessibility &amp; display settings, if you choose them. Signed in, we keep them
             with your account; signed out, they stay in cookies in your browser.

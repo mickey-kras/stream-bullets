@@ -401,6 +401,7 @@ describe("account export", (): void => {
       name: "Name leaver",
       email: "leaver@example.test",
       emailVerified: true,
+      emailLinkVerified: false,
       image: "/images/avatar/leaver",
       createdAt: new Date(now - day).toISOString(),
       updatedAt: new Date(now).toISOString(),

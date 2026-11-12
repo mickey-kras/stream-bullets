@@ -1,5 +1,8 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { APIError, betterAuth, type BetterAuthOptions, type User } from "better-auth";
+import { addOAuthServerContext, createAuthMiddleware, getOAuthState, getSessionFromCtx } from "better-auth/api";
+import { signupPolicy } from "../signup-policy";
+import { importProviderPhoto } from "./provider-avatar.server";
 import { genericOAuth } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../../db/auth-schema";
@@ -135,6 +138,22 @@ function instagramProvider(
   };
 }
 
+function reliableProviderEmail(provider: string | undefined, profile: unknown): string | null {
+  const parsed = z
+    .object({
+      email: z.string().trim().toLowerCase().email(),
+      email_verified: z.literal(true),
+      hd: z.unknown().optional(),
+    })
+    .safeParse(profile);
+  if (!parsed.success) return null;
+  const { email, hd } = parsed.data;
+  if (provider === "twitch") return email;
+  if (provider === "google" && (email.endsWith("@gmail.com") || (typeof hd === "string" && hd.length > 0)))
+    return email;
+  return null;
+}
+
 export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
   const origin: string = getOrigin(env);
   const secure: boolean = origin.startsWith("https:");
@@ -149,10 +168,139 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: [origin],
     database: drizzleAdapter(drizzle(env.DB), { provider: "sqlite", schema, transaction: false }),
+    onAPIError: { errorURL: `${origin}/sign-in` },
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path === "/sign-in/social" || ctx.path === "/sign-in/oauth2") {
+          const acceptance = z
+            .object({
+              accepted: z.literal(true),
+              minimumAge: z.literal(signupPolicy.minimumAge),
+              termsVersion: z.literal(signupPolicy.termsVersion),
+              privacyVersion: z.literal(signupPolicy.privacyVersion),
+            })
+            .safeParse(ctx.body?.additionalData?.acceptance);
+          if (acceptance.success) await addOAuthServerContext({ acceptedAt: Date.now(), ...signupPolicy });
+          const displayName: unknown = ctx.body?.additionalData?.displayName;
+          if (displayName !== undefined) {
+            const parsed = displayNameSchema.safeParse(displayName);
+            if (!parsed.success)
+              throw new APIError("BAD_REQUEST", {
+                code: "INVALID_DISPLAY_NAME",
+                message: "Enter a display name with 1 to 40 characters on one line.",
+              });
+            await addOAuthServerContext({ displayName: parsed.data });
+          }
+        }
+        if (ctx.path !== "/link-social" && ctx.path !== "/unlink-account") return;
+        if (ctx.headers?.get("origin") !== origin)
+          throw new APIError("FORBIDDEN", { message: "Use this site's account settings." });
+        const session = await getSessionFromCtx(ctx, { disableCookieCache: true });
+        if (!session) throw new APIError("UNAUTHORIZED", { message: "Sign in to continue." });
+        if (Date.now() - session.session.createdAt.getTime() > RECENT_SIGN_IN_MS) {
+          throw new APIError("FORBIDDEN", {
+            code: "REAUTH_REQUIRED",
+            message: "Sign in again before changing login methods.",
+          });
+        }
+        if (ctx.path === "/link-social") {
+          if (!configuredProviders(env).includes(ctx.body?.provider) || ctx.body?.idToken) {
+            throw new APIError("BAD_REQUEST", {
+              message: "Use a configured provider authorization to link an account.",
+            });
+          }
+          await addOAuthServerContext({ linkingSession: session.session.id });
+          return;
+        }
+        const accountId = z.string().min(1).max(128).safeParse(ctx.body?.accountId);
+        if (!accountId.success) throw new APIError("BAD_REQUEST", { message: "Choose a linked account." });
+        const removed = await env.DB.prepare(`DELETE FROM account WHERE id=? AND user_id=?
+          AND EXISTS (SELECT 1 FROM account other WHERE other.user_id=? AND other.id<>?
+            AND other.provider_id IN (SELECT value FROM json_each(?))) RETURNING id`)
+          .bind(
+            accountId.data,
+            session.user.id,
+            session.user.id,
+            accountId.data,
+            JSON.stringify(configuredProviders(env)),
+          )
+          .first();
+        if (!removed)
+          throw new APIError("BAD_REQUEST", {
+            code: "LOGIN_METHOD_REQUIRED",
+            message: "Keep at least one login method. Refresh the account list and try again.",
+          });
+        return ctx.json({ status: true });
+      }),
+    },
     user: {
-      // Read with the session, never accepted from sign-up or Better Auth's own endpoints (input: false).
-      // Our endpoints write them: PATCH /api/profile, /api/me/locale and /api/me/preferences.
+      async validateUserInfo({ user, source }, ctx) {
+        const reliableEmail: string | null =
+          source.method === "oauth" ? reliableProviderEmail(source.oauth?.providerId, source.oauth?.profile) : null;
+        if (source.action === "create-user") {
+          // Better Auth passes this same validated data object to its create hooks.
+          // input:false excludes this field from both client input and provider-map copying.
+          user.emailLinkVerified = reliableEmail !== null && reliableEmail === user.email;
+          return;
+        }
+        if (source.action === "sign-in") {
+          if (reliableEmail !== null) {
+            await env.DB.prepare("UPDATE user SET email_link_verified=1 WHERE id=? AND email=?")
+              .bind(user.id, reliableEmail)
+              .run();
+          }
+          return;
+        }
+        if (source.action !== "link-account") return;
+        const state = await getOAuthState();
+        if (!state?.link) {
+          const existing = await env.DB.prepare("SELECT email,email_verified,email_link_verified FROM user WHERE id=?")
+            .bind(user.id)
+            .first<{ email: string; email_verified: number; email_link_verified: number }>();
+          if (
+            user.emailVerified !== true ||
+            existing?.email_verified !== 1 ||
+            existing.email_link_verified !== 1 ||
+            reliableEmail === null ||
+            reliableEmail !== existing.email ||
+            typeof user.email !== "string" ||
+            user.email.trim().toLowerCase() !== existing.email.trim().toLowerCase()
+          ) {
+            return {
+              error: "account_not_linked",
+              errorDescription:
+                "Verify your email or sign in with the original provider and connect this account in settings.",
+            };
+          }
+          return;
+        }
+        const session = await getSessionFromCtx(ctx, { disableCookieCache: true });
+        if (
+          !session ||
+          state?.link?.userId !== session.user.id ||
+          state.serverContext?.linkingSession !== session.session.id ||
+          Date.now() - session.session.createdAt.getTime() > RECENT_SIGN_IN_MS
+        ) {
+          return { error: "reauth_required", errorDescription: "Sign in again and restart account linking." };
+        }
+        if (typeof user.email !== "string" || !user.email.trim()) {
+          return {
+            error: "account_not_linked",
+            errorDescription: "Verify an email with this provider before connecting it.",
+          };
+        }
+        const provider: string | undefined = source.oauth?.providerId;
+        if (source.method !== "oauth" || !provider || !configuredProviders(env).includes(provider as Provider)) {
+          return { error: "account_not_linked", errorDescription: "Choose a configured login provider." };
+        }
+        // Explicit state proves both identities; email is not the ownership proof in this flow.
+        // Replace this request's list, never the shared array or the automatic-linking policy.
+        ctx.context.trustedProviders = [...ctx.context.trustedProviders, provider];
+      },
+      // Profile endpoints write display fields; the OAuth validation gate writes email authority.
+      // Clients cannot set these fields through Better Auth endpoints.
       additionalFields: {
+        emailLinkVerified: { type: "boolean", required: false, input: false, returned: false, defaultValue: false },
         avatarPreset: { type: "number", required: false, input: false },
         locale: { type: "string", required: false, input: false },
         displayPrefs: { type: "string", required: false, input: false },
@@ -171,14 +319,58 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
                 message: "This provider gave an address that StreamBullets cannot use. Sign in with another provider.",
               });
             }
-            const name = displayNameSchema.safeParse(user.name);
+            const state = await getOAuthState();
+            if (
+              typeof state?.serverContext?.acceptedAt !== "number" ||
+              state.serverContext.minimumAge !== signupPolicy.minimumAge ||
+              state.serverContext.termsVersion !== signupPolicy.termsVersion ||
+              state.serverContext.privacyVersion !== signupPolicy.privacyVersion
+            ) {
+              throw new APIError("BAD_REQUEST", {
+                code: "ELIGIBILITY_REQUIRED",
+                message: "Confirm that you are 16 or older and accept the terms before signing up.",
+              });
+            }
+            const name = displayNameSchema.safeParse(state.serverContext.displayName ?? user.name);
             if (!name.success) {
               throw new APIError("BAD_REQUEST", {
                 code: "INVALID_DISPLAY_NAME",
-                message: "Set your provider display name to 1 to 40 characters on one line, then sign in again.",
+                message: "Enter a display name with 1 to 40 characters on one line, then try again.",
               });
             }
             return { data: { ...user, name: name.data } };
+          },
+          async after(user, context): Promise<void> {
+            await env.DB.prepare("UPDATE user SET image=NULL WHERE id=?").bind(user.id).run();
+            if (user.image) await importProviderPhoto(env, user.id, user.image, signInProvider(context));
+          },
+        },
+      },
+      session: {
+        create: {
+          async before(session) {
+            const state = await getOAuthState();
+            const acceptance = z
+              .object({
+                acceptedAt: z.number().int().positive(),
+                minimumAge: z.number().int().positive(),
+                termsVersion: z.string().min(1),
+                privacyVersion: z.string().min(1),
+              })
+              .safeParse(state?.serverContext);
+            if (acceptance.success) {
+              await env.DB.prepare(`INSERT INTO signup_acceptance(user_id,accepted_at,minimum_age,terms_version,privacy_version)
+                VALUES(?,?,?,?,?) ON CONFLICT(user_id) DO NOTHING`)
+                .bind(
+                  session.userId,
+                  acceptance.data.acceptedAt,
+                  acceptance.data.minimumAge,
+                  acceptance.data.termsVersion,
+                  acceptance.data.privacyVersion,
+                )
+                .run();
+            }
+            return { data: session };
           },
         },
       },
@@ -186,12 +378,26 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
     socialProviders: {
       ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
         ? {
-            google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
+            google: {
+              clientId: env.GOOGLE_CLIENT_ID,
+              clientSecret: env.GOOGLE_CLIENT_SECRET,
+              mapProfileToUser: (profile) => ({
+                email: profile.email?.trim().toLowerCase(),
+                emailVerified: profile.email_verified === true,
+              }),
+            },
           }
         : {}),
       ...(env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET
         ? {
-            twitch: { clientId: env.TWITCH_CLIENT_ID, clientSecret: env.TWITCH_CLIENT_SECRET },
+            twitch: {
+              clientId: env.TWITCH_CLIENT_ID,
+              clientSecret: env.TWITCH_CLIENT_SECRET,
+              mapProfileToUser: (profile) => ({
+                email: profile.email?.trim().toLowerCase(),
+                emailVerified: profile.email_verified === true,
+              }),
+            },
           }
         : {}),
       ...(env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET
@@ -206,9 +412,17 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
         : [],
     account: {
       encryptOAuthTokens: true,
-      accountLinking: { enabled: false },
+      accountLinking: {
+        enabled: true,
+        disableImplicitLinking: false,
+        trustedProviders: [],
+        requireLocalEmailVerified: true,
+        allowDifferentEmails: true,
+        allowUnlinkingAll: false,
+        updateUserInfoOnLink: false,
+      },
     },
-    disabledPaths: ["/link-social", "/unlink-account", "/update-user"],
+    disabledPaths: ["/update-user", "/oauth2/link"],
     session: {
       cookieCache: { enabled: false },
     },
