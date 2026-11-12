@@ -80,6 +80,9 @@ export interface MashLive {
 const emptyMash: MashLive = { ticks: {}, mine: {}, denied: {}, runs: {} };
 /** The client pings this often, so the room knows the socket is in use and does not close it as idle. */
 const PING_INTERVAL_MS = 20_000;
+/** A page reloads its data at most this often from live changes, plus jitter, so busy rooms stay under the IP limit. */
+export const REVALIDATE_INTERVAL_MS = 5000;
+const REVALIDATE_JITTER_MS = 2500;
 let mashLive: MashLive = emptyMash;
 let liveSocket: WebSocket | null = null;
 const mashListeners = new Set<() => void>();
@@ -166,6 +169,8 @@ export function useLivePolls(
   enabled = true,
   /** The owner's overlay key from the OBS URL, so the socket keeps the owner's seat. */
   overlayKey: string | null = null,
+  /** Never goes offline: keeps retrying (an unattended OBS source has nobody to press Reconnect). */
+  persistent = false,
 ): { snapshot: LiveSnapshot | null; status: LiveStatus; reconnect: () => void } {
   const [snapshot, setSnapshot] = useState<LiveSnapshot | null>(null);
   const [status, setStatus] = useState<LiveStatus>("connecting");
@@ -186,6 +191,7 @@ export function useLivePolls(
     let pinger: ReturnType<typeof setInterval> | undefined;
     let attempts: number = 0;
     let healthySince: number | null = null;
+    let waiting: boolean = false;
     function armWatchdog(current: WebSocket): void {
       if (watchdog) clearTimeout(watchdog);
       watchdog = setTimeout(() => {
@@ -230,6 +236,7 @@ export function useLivePolls(
       if (current.readyState === WebSocket.OPEN) current.send("ping");
     }
     function connect(): void {
+      waiting = false;
       if (!active) return;
       const url: URL = new URL(`/api/live/${encodeURIComponent(handle)}`, globalThis.location.origin);
       url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
@@ -262,25 +269,40 @@ export function useLivePolls(
         if (!active) return;
         if (watchdog) clearTimeout(watchdog);
         attempts += 1;
-        if (attempts > 8) {
+        if (attempts > 8 && !persistent) {
           setStatus("offline");
           return;
         }
         setStatus("reconnecting");
-        const ceiling: number = Math.min(30_000, 1000 * 2 ** (attempts - 1));
+        const ceiling: number = Math.min(30_000, 1000 * 2 ** (Math.min(attempts, 16) - 1));
         const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
+        waiting = true;
         timer = setTimeout(connect, ceiling * (0.5 + jitter * 0.5));
       };
     }
+    /** The network or the tab came back: retry now instead of waiting out the backoff. */
+    function wake(): void {
+      if (!waiting || document.visibilityState === "hidden") return;
+      if (timer) clearTimeout(timer);
+      connect();
+    }
     connect();
+    if (persistent) {
+      globalThis.addEventListener("online", wake);
+      document.addEventListener("visibilitychange", wake);
+    }
     return (): void => {
       active = false;
+      if (persistent) {
+        globalThis.removeEventListener("online", wake);
+        document.removeEventListener("visibilitychange", wake);
+      }
       if (timer) clearTimeout(timer);
       if (watchdog) clearTimeout(watchdog);
       if (pinger) clearInterval(pinger);
       socket?.close();
     };
-  }, [handle, enabled, retry, overlayKey]);
+  }, [handle, enabled, retry, overlayKey, persistent]);
   return { snapshot, status, reconnect: (): void => setRetry((value: number) => value + 1) };
 }
 
@@ -302,16 +324,26 @@ export function useLiveRevalidation(
 ): void {
   const observed = useRef<string>("");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** When the last live reload started, or until when the next one waits (leading + trailing throttle). */
+  const next = useRef<number>(0);
+  const latest = useRef<() => Promise<void>>(revalidate);
+  useEffect(() => {
+    latest.current = revalidate;
+  }, [revalidate]);
   useEffect(() => {
     const key: string = `${enabled}:${status}:${revision ?? ""}`;
     if (observed.current === key) return;
     observed.current = key;
+    // A pending reload already covers this change: it fetches the newest data when it runs.
     if (!enabled || status !== "live" || timer.current) return;
+    const delay: number = Math.max(400, next.current - Date.now());
     timer.current = setTimeout(() => {
       timer.current = null;
-      void revalidate();
-    }, 400);
-  }, [status, revision, revalidate, enabled]);
+      const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
+      next.current = Date.now() + REVALIDATE_INTERVAL_MS + jitter * REVALIDATE_JITTER_MS;
+      latest.current();
+    }, delay);
+  }, [status, revision, enabled]);
   const disconnected: boolean = enabled && status !== "live";
   useEffect(() => {
     if (!disconnected) return;

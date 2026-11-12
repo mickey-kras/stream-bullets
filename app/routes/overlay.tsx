@@ -1,6 +1,5 @@
-export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
 import { t } from "../i18n";
@@ -42,7 +41,7 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
 export default function Overlay(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
   const [search] = useSearchParams();
-  const { snapshot, status, reconnect } = useLivePolls(loaded.handle, true, search.get("key"));
+  const { snapshot, status } = useLivePolls(loaded.handle, true, search.get("key"), true);
   const revalidator = useRevalidator();
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const live: OverlayPublic | null | undefined = snapshot?.overlay;
@@ -68,20 +67,45 @@ export default function Overlay(): ReactNode {
   return (
     <main className="overlay-screen ov-screen" id="main-content" aria-label={t("overlay.label", { name: loaded.name })}>
       <OverlayStage scene={scene} source={source} />
+      {/* The overlay never goes offline (it keeps retrying), so it never puts a button on stream. */}
       {status !== "live" && (
         <output className="overlay-connection">
-          {status === "connecting" && t("overlay.connecting")}
-          {status === "reconnecting" && t("overlay.reconnecting")}
-          {status === "offline" && (
-            <>
-              <span>{t("overlay.offline")}</span>{" "}
-              <button type="button" onClick={reconnect}>
-                {t("overlay.reconnect")}
-              </button>
-            </>
-          )}
+          {status === "connecting" ? t("overlay.connecting") : t("overlay.reconnecting")}
         </output>
       )}
     </main>
   );
+}
+
+/** Attempts reload the data first; after this many a full page load also recovers a failed route module. */
+const ERROR_RELOAD_AFTER = 6;
+
+/**
+ * An OBS source runs unattended, so a failed load (a 429, a network blip, a deploy) must not leave the site's error
+ * page on stream. This shows nothing over the stream and retries with backoff until the overlay loads again.
+ */
+export function ErrorBoundary(): ReactNode {
+  const { revalidate } = useRevalidator();
+  const retry = useRef<() => Promise<void>>(revalidate);
+  useEffect(() => {
+    retry.current = revalidate;
+  }, [revalidate]);
+  const attempts = useRef<number>(0);
+  /** Counts finished attempts: one that fails and leaves this boundary up schedules the next. */
+  const [settled, setSettled] = useState<number>(0);
+  useEffect(() => {
+    attempts.current += 1;
+    const attempt: number = attempts.current;
+    const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
+    const delay: number = Math.min(60_000, 5000 * 2 ** (Math.min(attempt, 8) - 1)) * (0.5 + jitter * 0.5);
+    function finishAttempt(): void {
+      setSettled((value: number) => value + 1);
+    }
+    const timer = setTimeout(() => {
+      if (attempt > ERROR_RELOAD_AFTER) globalThis.location.reload();
+      else retry.current().finally(finishAttempt);
+    }, delay);
+    return (): void => clearTimeout(timer);
+  }, [settled]);
+  return <main className="overlay-screen ov-screen" id="main-content" aria-busy="true" />;
 }

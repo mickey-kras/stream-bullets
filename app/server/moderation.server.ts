@@ -328,7 +328,7 @@ export async function listModerationPages(env: AppEnv, adminId: string, query: P
 
 /**
  * Removes a topic or poll for moderation, on any page status. Closes every open report about it and records
- * the decision with the item's title, so the log still says what was removed.
+ * the decision with the item's ID only. The log keeps no copy of the content.
  */
 export async function removeEntryAsAdmin(
   env: AppEnv,
@@ -340,9 +340,9 @@ export async function removeEntryAsAdmin(
   const value = parsed(entryRemovalSchema, input);
   parsed(id, entryId);
   await requireAdmin(env, admin.viewer.id);
-  const entry = await env.DB.prepare("SELECT streamer_id, title FROM entries WHERE id=?")
+  const entry = await env.DB.prepare("SELECT streamer_id FROM entries WHERE id=?")
     .bind(entryId)
-    .first<{ streamer_id: string; title: string }>();
+    .first<{ streamer_id: string }>();
   if (!entry) throw new HttpError(404, "Topic or poll not found.");
   await deleteEntry(env, admin.viewer.id, entry.streamer_id, entryId, "checked");
   const [closed] = await env.DB.batch([
@@ -358,7 +358,7 @@ export async function removeEntryAsAdmin(
       reason: value.reason,
       note: value.note,
       actorId: admin.viewer.id,
-      metadata: { title: entry.title.slice(0, 200), stepUp: admin.stepUp },
+      metadata: { stepUp: admin.stepUp },
       createdAt: now,
     }),
   ]);

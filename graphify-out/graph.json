@@ -6477,7 +6477,7 @@
       "relation": "calls",
       "source": "app_components_live_handlesidemessage",
       "source_file": "app/components/live.ts",
-      "source_location": "L140",
+      "source_location": "L143",
       "target": "app_components_live_setmashlive",
       "weight": 1.0
     },
@@ -6489,7 +6489,7 @@
       "relation": "calls",
       "source": "app_components_live_uselivepolls",
       "source_file": "app/components/live.ts",
-      "source_location": "L275",
+      "source_location": "L289",
       "target": "app_components_live_uselivepolls_connect",
       "weight": 1.0
     },
@@ -6501,7 +6501,7 @@
       "relation": "calls",
       "source": "app_components_live_uselivepolls_connect",
       "source_file": "app/components/live.ts",
-      "source_location": "L240",
+      "source_location": "L247",
       "target": "app_components_live_uselivepolls_armwatchdog",
       "weight": 1.0
     },
@@ -6513,7 +6513,7 @@
       "relation": "calls",
       "source": "app_components_live_uselivepolls_connect",
       "source_file": "app/components/live.ts",
-      "source_location": "L251",
+      "source_location": "L258",
       "target": "app_components_live_uselivepolls_receive",
       "weight": 1.0
     },
@@ -6525,7 +6525,7 @@
       "relation": "calls",
       "source": "app_components_live_uselivepolls_receive",
       "source_file": "app/components/live.ts",
-      "source_location": "L216",
+      "source_location": "L222",
       "target": "app_components_live_handlesidemessage",
       "weight": 1.0
     },
@@ -6537,7 +6537,7 @@
       "relation": "calls",
       "source": "app_components_live_uselivepolls_receive",
       "source_file": "app/components/live.ts",
-      "source_location": "L225",
+      "source_location": "L231",
       "target": "app_components_live_uselivepolls_armwatchdog",
       "weight": 1.0
     },
@@ -6549,7 +6549,7 @@
       "relation": "calls",
       "source": "app_components_live_uselivepolls_receive",
       "source_file": "app/components/live.ts",
-      "source_location": "L226",
+      "source_location": "L232",
       "target": "app_components_live_setmashlive",
       "weight": 1.0
     },
@@ -6561,7 +6561,7 @@
       "relation": "calls",
       "source": "app_components_live_uselivepolls_receive",
       "source_file": "app/components/live.ts",
-      "source_location": "L226",
+      "source_location": "L232",
       "target": "app_components_live_withsnapshotruns",
       "weight": 1.0
     },
@@ -6573,8 +6573,20 @@
       "relation": "calls",
       "source": "app_components_live_uselivepolls_receive",
       "source_file": "app/components/live.ts",
-      "source_location": "L227",
+      "source_location": "L233",
       "target": "app_components_live_uselivepolls_updatesnapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_live_uselivepolls_wake",
+      "source_file": "app/components/live.ts",
+      "source_location": "L287",
+      "target": "app_components_live_uselivepolls_connect",
       "weight": 1.0
     },
     {
@@ -22197,7 +22209,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_loader",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L18",
+      "source_location": "L17",
       "target": "app_server_data_server_getstreamer",
       "weight": 1.0
     },
@@ -22209,7 +22221,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_loader",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L23",
+      "source_location": "L22",
       "target": "app_server_overlay_server_getoverlaystate",
       "weight": 1.0
     },
@@ -22221,7 +22233,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_loader",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L23",
+      "source_location": "L22",
       "target": "app_server_overlay_state_overlaypublic",
       "weight": 1.0
     },
@@ -22233,7 +22245,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_loader",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L26",
+      "source_location": "L25",
       "target": "app_server_data_server_getoverlaysnapshot",
       "weight": 1.0
     },
@@ -22245,7 +22257,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_loader",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L27",
+      "source_location": "L26",
       "target": "app_server_overlay_server_getoverlaydata",
       "weight": 1.0
     },
@@ -22257,7 +22269,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_loader",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L27",
+      "source_location": "L26",
       "target": "app_server_overlay_server_sourcetopics",
       "weight": 1.0
     },
@@ -22269,7 +22281,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "target": "app_components_live_uselivepolls",
       "weight": 1.0
     },
@@ -22281,7 +22293,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L50",
+      "source_location": "L49",
       "target": "app_components_live_useliverevalidation",
       "weight": 1.0
     },
@@ -22293,7 +22305,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L53",
+      "source_location": "L52",
       "target": "app_components_live_useservertime",
       "weight": 1.0
     },
@@ -22305,7 +22317,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L58",
+      "source_location": "L57",
       "target": "app_components_overlay_overlay_stage_upnextstart",
       "weight": 1.0
     },
@@ -22317,7 +22329,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L58",
+      "source_location": "L57",
       "target": "app_components_use_clock_userevalidateat",
       "weight": 1.0
     },
@@ -22329,7 +22341,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L69",
+      "source_location": "L68",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -22341,7 +22353,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L70",
+      "source_location": "L69",
       "target": "app_components_overlay_overlay_stage_overlaystage",
       "weight": 1.0
     },
@@ -22365,7 +22377,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L489",
+      "source_location": "L498",
       "target": "app_components_common_legaldocument",
       "weight": 1.0
     },
@@ -22377,7 +22389,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L498",
+      "source_location": "L507",
       "target": "app_routes_privacy_sections",
       "weight": 1.0
     },
@@ -32181,7 +32193,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L391",
+      "source_location": "L392",
       "target": "tests_account_test_seed",
       "weight": 1.0
     },
@@ -32193,7 +32205,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L572",
+      "source_location": "L573",
       "target": "tests_account_test_callexport",
       "weight": 1.0
     },
@@ -32205,7 +32217,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L587",
+      "source_location": "L588",
       "target": "tests_account_test_seednewtables",
       "weight": 1.0
     },
@@ -32217,7 +32229,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L695",
+      "source_location": "L696",
       "target": "tests_account_test_linkedrows",
       "weight": 1.0
     },
@@ -32229,7 +32241,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L698",
+      "source_location": "L699",
       "target": "tests_account_test_zeroes",
       "weight": 1.0
     },
@@ -32241,7 +32253,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L859",
+      "source_location": "L875",
       "target": "tests_account_test_calldelete",
       "weight": 1.0
     },
@@ -32253,7 +32265,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L882",
+      "source_location": "L898",
       "target": "tests_account_test_cookie",
       "weight": 1.0
     },
@@ -32265,19 +32277,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L884",
-      "target": "tests_account_test_routecontext",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_account_test_calldelete",
-      "source_file": "tests/account.test.ts",
-      "source_location": "L337",
+      "source_location": "L900",
       "target": "tests_account_test_routecontext",
       "weight": 1.0
     },
@@ -32290,6 +32290,18 @@
       "source": "tests_account_test_calldelete",
       "source_file": "tests/account.test.ts",
       "source_location": "L338",
+      "target": "tests_account_test_routecontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_account_test_calldelete",
+      "source_file": "tests/account.test.ts",
+      "source_location": "L339",
       "target": "app_routes_api_action",
       "weight": 1.0
     },
@@ -32301,20 +32313,8 @@
       "relation": "calls",
       "source": "tests_account_test_calldelete",
       "source_file": "tests/account.test.ts",
-      "source_location": "L341",
+      "source_location": "L342",
       "target": "tests_account_test_cookie",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_account_test_callexport",
-      "source_file": "tests/account.test.ts",
-      "source_location": "L326",
-      "target": "app_routes_api_loader",
       "weight": 1.0
     },
     {
@@ -32326,6 +32326,18 @@
       "source": "tests_account_test_callexport",
       "source_file": "tests/account.test.ts",
       "source_location": "L327",
+      "target": "app_routes_api_loader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_account_test_callexport",
+      "source_file": "tests/account.test.ts",
+      "source_location": "L328",
       "target": "tests_account_test_cookie",
       "weight": 1.0
     },
@@ -32337,7 +32349,7 @@
       "relation": "calls",
       "source": "tests_account_test_callexport",
       "source_file": "tests/account.test.ts",
-      "source_location": "L329",
+      "source_location": "L330",
       "target": "tests_account_test_routecontext",
       "weight": 1.0
     },
@@ -34807,6 +34819,30 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L53",
+      "target": "tests_live_revalidation_test_render",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_live_revalidation_test_render",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L34",
+      "target": "app_components_live_useliverevalidation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_mash_test",
       "source_file": "tests/mash.test.ts",
       "source_location": "L37",
@@ -36408,18 +36444,6 @@
       "source": "app_routes_ai",
       "source_file": "app/routes/ai.tsx",
       "source_location": "L2",
-      "target": "app_components_route_error",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "export",
-      "relation": "re_exports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L1",
       "target": "app_components_route_error",
       "weight": 1.0
     },
@@ -51938,139 +51962,7 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L10",
-      "target": "app_components_live_uselivepolls",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L10",
-      "target": "app_components_live_useliverevalidation",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L10",
-      "target": "app_components_live_useservertime",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L11",
-      "target": "app_components_overlay_overlay_stage_overlaypoll",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L11",
-      "target": "app_components_overlay_overlay_stage_overlayscene",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L11",
-      "target": "app_components_overlay_overlay_stage_overlaystage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L11",
-      "target": "app_components_overlay_overlay_stage_upnextstart",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L12",
-      "target": "app_components_use_clock_userevalidateat",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L13",
-      "target": "app_types_livesnapshot",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L13",
-      "target": "app_types_overlaypublic",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L13",
-      "target": "app_types_overlaysourceref",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L2",
+      "source_location": "L1",
       "target": "app_server_route_errors_server_withrouteerrors",
       "weight": 1.0
     },
@@ -52082,7 +51974,103 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L5",
+      "source_location": "L10",
+      "target": "app_components_overlay_overlay_stage_overlaypoll",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L10",
+      "target": "app_components_overlay_overlay_stage_overlayscene",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L10",
+      "target": "app_components_overlay_overlay_stage_overlaystage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L10",
+      "target": "app_components_overlay_overlay_stage_upnextstart",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L11",
+      "target": "app_components_use_clock_userevalidateat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L12",
+      "target": "app_types_livesnapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L12",
+      "target": "app_types_overlaypublic",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L12",
+      "target": "app_types_overlaysourceref",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L4",
       "target": "app_env_appcontext",
       "weight": 1.0
     },
@@ -52094,7 +52082,7 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "target": "app_env_appcontext_54cf5bec59a5",
       "weight": 1.0
     },
@@ -52106,7 +52094,7 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -52118,7 +52106,7 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "target": "app_server_data_server_getoverlaysnapshot",
       "weight": 1.0
     },
@@ -52130,7 +52118,7 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "target": "app_server_data_server_getstreamer",
       "weight": 1.0
     },
@@ -52142,7 +52130,7 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "target": "app_server_overlay_server_getoverlaydata",
       "weight": 1.0
     },
@@ -52154,7 +52142,7 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "target": "app_server_overlay_server_getoverlaystate",
       "weight": 1.0
     },
@@ -52166,7 +52154,7 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "target": "app_server_overlay_server_sourcetopics",
       "weight": 1.0
     },
@@ -52178,8 +52166,44 @@
       "relation": "imports",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "target": "app_server_overlay_state_overlaypublic",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L9",
+      "target": "app_components_live_uselivepolls",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L9",
+      "target": "app_components_live_useliverevalidation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L9",
+      "target": "app_components_live_useservertime",
       "weight": 1.0
     },
     {
@@ -61731,6 +61755,18 @@
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
       "source_location": "L7",
+      "target": "app_server_data_server_mutateentry",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_account_test",
+      "source_file": "tests/account.test.ts",
+      "source_location": "L8",
       "target": "tests_helpers_database_createtestdatabase",
       "weight": 1.0
     },
@@ -61742,7 +61778,7 @@
       "relation": "imports",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
@@ -67972,6 +68008,42 @@
       "source_file": "tests/live-retry.test.ts",
       "source_location": "L2",
       "target": "app_components_live_uselivepolls",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L2",
+      "target": "app_components_live_livestatus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L2",
+      "target": "app_components_live_revalidate_interval_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L2",
+      "target": "app_components_live_useliverevalidation",
       "weight": 1.0
     },
     {
@@ -80835,8 +80907,8 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L10",
-      "target": "app_components_live",
+      "source_location": "L1",
+      "target": "app_server_route_errors_server",
       "weight": 1.0
     },
     {
@@ -80847,7 +80919,7 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L11",
+      "source_location": "L10",
       "target": "app_components_overlay_overlay_stage",
       "weight": 1.0
     },
@@ -80859,7 +80931,7 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L12",
+      "source_location": "L11",
       "target": "app_components_use_clock",
       "weight": 1.0
     },
@@ -80871,7 +80943,7 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L13",
+      "source_location": "L12",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -80885,7 +80957,7 @@
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
       "source_location": "L2",
-      "target": "app_server_route_errors_server",
+      "target": "ref_react",
       "weight": 1.0
     },
     {
@@ -80897,19 +80969,6 @@
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
       "source_location": "L3",
-      "target": "ref_react",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L4",
       "target": "ref_react_router",
       "weight": 1.0
     },
@@ -80921,7 +80980,7 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "target": "app_env",
       "weight": 1.0
     },
@@ -80933,7 +80992,7 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "target": "app_i18n_index",
       "weight": 1.0
     },
@@ -80945,7 +81004,7 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "target": "app_server_data_server",
       "weight": 1.0
     },
@@ -80957,7 +81016,7 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "target": "app_server_overlay_server",
       "weight": 1.0
     },
@@ -80969,8 +81028,20 @@
       "relation": "imports_from",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "target": "app_server_overlay_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L9",
+      "target": "app_components_live",
       "weight": 1.0
     },
     {
@@ -86048,6 +86119,18 @@
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
       "source_location": "L7",
+      "target": "app_server_data_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_account_test",
+      "source_file": "tests/account.test.ts",
+      "source_location": "L8",
       "target": "tests_helpers_database",
       "weight": 1.0
     },
@@ -90046,6 +90129,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L2",
+      "target": "app_components_live",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_localization_context_test",
       "source_file": "tests/localization-context.test.ts",
       "source_location": "L1",
@@ -92027,18 +92134,6 @@
       "confidence_score": 1.0,
       "context": "re-export",
       "relation": "imports_from",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L1",
-      "target": "app_components_route_error",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "re-export",
-      "relation": "imports_from",
       "source": "app_routes_overlay_control",
       "source_file": "app/routes/overlay-control.tsx",
       "source_location": "L1",
@@ -92260,18 +92355,6 @@
       "source": "app_routes_ai",
       "source_file": "app/routes/ai.tsx",
       "source_location": "L2",
-      "target": "app_components_route_error_routeerrorboundary",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "re-export",
-      "relation": "re_exports",
-      "source": "app_routes_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L1",
       "target": "app_components_route_error_routeerrorboundary",
       "weight": 1.0
     },
@@ -95188,7 +95271,18 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L113",
+      "source_location": "L101",
+      "target": "app_components_live_withsnapshotruns",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_live",
+      "source_file": "app/components/live.ts",
+      "source_location": "L116",
       "target": "app_components_live_subscribemash",
       "weight": 1.0
     },
@@ -95199,7 +95293,7 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L121",
+      "source_location": "L124",
       "target": "app_components_live_usemashlive",
       "weight": 1.0
     },
@@ -95210,7 +95304,7 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L130",
+      "source_location": "L133",
       "target": "app_components_live_sendlive",
       "weight": 1.0
     },
@@ -95221,7 +95315,7 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L137",
+      "source_location": "L140",
       "target": "app_components_live_handlesidemessage",
       "weight": 1.0
     },
@@ -95232,7 +95326,7 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L164",
+      "source_location": "L167",
       "target": "app_components_live_uselivepolls",
       "weight": 1.0
     },
@@ -95265,7 +95359,7 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L287",
+      "source_location": "L309",
       "target": "app_components_live_useservertime",
       "weight": 1.0
     },
@@ -95276,7 +95370,7 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L297",
+      "source_location": "L319",
       "target": "app_components_live_useliverevalidation",
       "weight": 1.0
     },
@@ -95408,7 +95502,18 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L85",
+      "source_location": "L84",
+      "target": "app_components_live_revalidate_interval_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_live",
+      "source_file": "app/components/live.ts",
+      "source_location": "L88",
       "target": "app_components_live_mashlisteners",
       "weight": 1.0
     },
@@ -95419,19 +95524,8 @@
       "relation": "contains",
       "source": "app_components_live",
       "source_file": "app/components/live.ts",
-      "source_location": "L87",
+      "source_location": "L90",
       "target": "app_components_live_setmashlive",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_live",
-      "source_file": "app/components/live.ts",
-      "source_location": "L98",
-      "target": "app_components_live_withsnapshotruns",
       "weight": 1.0
     },
     {
@@ -95441,7 +95535,7 @@
       "relation": "contains",
       "source": "app_components_live_uselivepolls",
       "source_file": "app/components/live.ts",
-      "source_location": "L189",
+      "source_location": "L195",
       "target": "app_components_live_uselivepolls_armwatchdog",
       "weight": 1.0
     },
@@ -95452,7 +95546,7 @@
       "relation": "contains",
       "source": "app_components_live_uselivepolls",
       "source_file": "app/components/live.ts",
-      "source_location": "L196",
+      "source_location": "L202",
       "target": "app_components_live_uselivepolls_updatesnapshot",
       "weight": 1.0
     },
@@ -95463,7 +95557,7 @@
       "relation": "contains",
       "source": "app_components_live_uselivepolls",
       "source_file": "app/components/live.ts",
-      "source_location": "L205",
+      "source_location": "L211",
       "target": "app_components_live_uselivepolls_updateoverlay",
       "weight": 1.0
     },
@@ -95474,7 +95568,7 @@
       "relation": "contains",
       "source": "app_components_live_uselivepolls",
       "source_file": "app/components/live.ts",
-      "source_location": "L208",
+      "source_location": "L214",
       "target": "app_components_live_uselivepolls_receive",
       "weight": 1.0
     },
@@ -95485,7 +95579,7 @@
       "relation": "contains",
       "source": "app_components_live_uselivepolls",
       "source_file": "app/components/live.ts",
-      "source_location": "L229",
+      "source_location": "L235",
       "target": "app_components_live_uselivepolls_ping",
       "weight": 1.0
     },
@@ -95496,8 +95590,19 @@
       "relation": "contains",
       "source": "app_components_live_uselivepolls",
       "source_file": "app/components/live.ts",
-      "source_location": "L232",
+      "source_location": "L238",
       "target": "app_components_live_uselivepolls_connect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_live_uselivepolls",
+      "source_file": "app/components/live.ts",
+      "source_location": "L284",
+      "target": "app_components_live_uselivepolls_wake",
       "weight": 1.0
     },
     {
@@ -104010,7 +104115,7 @@
       "relation": "contains",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L15",
+      "source_location": "L14",
       "target": "app_routes_overlay_loader",
       "weight": 1.0
     },
@@ -104021,8 +104126,19 @@
       "relation": "contains",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L42",
+      "source_location": "L41",
       "target": "app_routes_overlay_overlay",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_routes_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L87",
+      "target": "app_routes_overlay_errorboundary",
       "weight": 1.0
     },
     {
@@ -104063,6 +104179,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "app_routes_overlay_errorboundary",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L101",
+      "target": "app_routes_overlay_errorboundary_finishattempt",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
       "source_location": "L11",
@@ -104087,7 +104214,7 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L486",
+      "source_location": "L495",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -112865,7 +112992,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "tests_account_test_now",
       "weight": 1.0
     },
@@ -112876,7 +113003,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "tests_account_test_ids",
       "weight": 1.0
     },
@@ -112887,7 +113014,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L176",
+      "source_location": "L177",
       "target": "tests_account_test_seednewtables",
       "weight": 1.0
     },
@@ -112898,7 +113025,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L253",
+      "source_location": "L254",
       "target": "tests_account_test_linkedrows",
       "weight": 1.0
     },
@@ -112909,7 +113036,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L286",
+      "source_location": "L287",
       "target": "tests_account_test_zeroes",
       "weight": 1.0
     },
@@ -112920,7 +113047,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "tests_account_test_seed",
       "weight": 1.0
     },
@@ -112931,7 +113058,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L314",
+      "source_location": "L315",
       "target": "tests_account_test_cookie",
       "weight": 1.0
     },
@@ -112942,7 +113069,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L318",
+      "source_location": "L319",
       "target": "tests_account_test_routecontext",
       "weight": 1.0
     },
@@ -112953,7 +113080,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L324",
+      "source_location": "L325",
       "target": "tests_account_test_callexport",
       "weight": 1.0
     },
@@ -112964,7 +113091,7 @@
       "relation": "contains",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L335",
+      "source_location": "L336",
       "target": "tests_account_test_calldelete",
       "weight": 1.0
     },
@@ -116031,6 +116158,39 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L29",
+      "target": "tests_live_revalidation_test_revalidate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L31",
+      "target": "tests_live_revalidation_test_render",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L5",
+      "target": "tests_live_revalidation_test_hooks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "tests_mash_test",
       "source_file": "tests/mash.test.ts",
       "source_location": "L24",
@@ -118362,9 +118522,21 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "app_components_live_uselivepolls",
+      "source_file": "app/components/live.ts",
+      "source_location": "L291",
+      "target": "app_components_live_uselivepolls_wake",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "app_components_live_uselivepolls_connect",
       "source_file": "app/components/live.ts",
-      "source_location": "L246",
+      "source_location": "L253",
       "target": "app_components_live_uselivepolls_ping",
       "weight": 1.0
     },
@@ -118376,7 +118548,7 @@
       "relation": "indirect_call",
       "source": "app_components_live_uselivepolls_receive",
       "source_file": "app/components/live.ts",
-      "source_location": "L216",
+      "source_location": "L222",
       "target": "app_components_live_uselivepolls_updateoverlay",
       "weight": 1.0
     },
@@ -118388,7 +118560,7 @@
       "relation": "indirect_call",
       "source": "app_components_live_usemashlive",
       "source_file": "app/components/live.ts",
-      "source_location": "L123",
+      "source_location": "L126",
       "target": "app_components_live_subscribemash",
       "weight": 1.0
     },
@@ -118510,6 +118682,18 @@
       "source_file": "app/lib/use-prefs.ts",
       "source_location": "L9",
       "target": "app_lib_prefs_subscribeprefs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "app_routes_overlay_errorboundary",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L106",
+      "target": "app_routes_overlay_errorboundary_finishattempt",
       "weight": 1.0
     },
     {
@@ -118797,6 +118981,18 @@
       "source": "tests_live_retry_test",
       "source_file": "tests/live-retry.test.ts",
       "source_location": "L71",
+      "target": "app_components_station_textures_random_a415ab5cc17c",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_live_revalidation_test",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L89",
       "target": "app_components_station_textures_random_a415ab5cc17c",
       "weight": 1.0
     },
@@ -119486,10 +119682,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "6cc43e0669180be318190242aee2e4a43615e6219ad190d08268415419f48615",
+    "content_sha256": "e509cc932549240a0dec643b534eab2907a73060df398599312f379b868d5119",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "c650261609ae278dcdc0fa6cd3cf1e8182508476a8e9a66f6c53699ec979cb4f",
+    "source_sha256": "e0dd929786089cd8001cbb9fb610becf1dad437bf1c4f7044c738783a4117630",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -125602,7 +125798,7 @@
       "label": "handleSideMessage()",
       "norm_label": "handlesidemessage()",
       "source_file": "app/components/live.ts",
-      "source_location": "L137"
+      "source_location": "L140"
     },
     {
       "_callable": true,
@@ -125613,7 +125809,7 @@
       "label": "sendLive()",
       "norm_label": "sendlive()",
       "source_file": "app/components/live.ts",
-      "source_location": "L130"
+      "source_location": "L133"
     },
     {
       "_callable": true,
@@ -125624,7 +125820,7 @@
       "label": "setMashLive()",
       "norm_label": "setmashlive()",
       "source_file": "app/components/live.ts",
-      "source_location": "L87"
+      "source_location": "L90"
     },
     {
       "_callable": true,
@@ -125635,7 +125831,7 @@
       "label": "subscribeMash()",
       "norm_label": "subscribemash()",
       "source_file": "app/components/live.ts",
-      "source_location": "L113"
+      "source_location": "L116"
     },
     {
       "_callable": true,
@@ -125646,7 +125842,7 @@
       "label": "useLivePolls()",
       "norm_label": "uselivepolls()",
       "source_file": "app/components/live.ts",
-      "source_location": "L164"
+      "source_location": "L167"
     },
     {
       "_callable": true,
@@ -125661,14 +125857,14 @@
             "callee": "close",
             "file": "app/components/live.ts",
             "lang": "typescript",
-            "line": "L193",
+            "line": "L199",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": "armwatchdog()",
       "source_file": "app/components/live.ts",
-      "source_location": "L189"
+      "source_location": "L195"
     },
     {
       "_callable": true,
@@ -125683,14 +125879,14 @@
             "callee": "close",
             "file": "app/components/live.ts",
             "lang": "typescript",
-            "line": "L253",
+            "line": "L260",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": "connect()",
       "source_file": "app/components/live.ts",
-      "source_location": "L232"
+      "source_location": "L238"
     },
     {
       "_callable": true,
@@ -125705,14 +125901,14 @@
             "callee": "send",
             "file": "app/components/live.ts",
             "lang": "typescript",
-            "line": "L230",
+            "line": "L236",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": "ping()",
       "source_file": "app/components/live.ts",
-      "source_location": "L229"
+      "source_location": "L235"
     },
     {
       "_callable": true,
@@ -125727,14 +125923,14 @@
             "callee": "close",
             "file": "app/components/live.ts",
             "lang": "typescript",
-            "line": "L213",
+            "line": "L219",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": "receive()",
       "source_file": "app/components/live.ts",
-      "source_location": "L208"
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -125745,7 +125941,7 @@
       "label": "updateOverlay()",
       "norm_label": "updateoverlay()",
       "source_file": "app/components/live.ts",
-      "source_location": "L205"
+      "source_location": "L211"
     },
     {
       "_callable": true,
@@ -125756,7 +125952,18 @@
       "label": "updateSnapshot()",
       "norm_label": "updatesnapshot()",
       "source_file": "app/components/live.ts",
-      "source_location": "L196"
+      "source_location": "L202"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_live_uselivepolls_wake",
+      "label": "wake()",
+      "norm_label": "wake()",
+      "source_file": "app/components/live.ts",
+      "source_location": "L284"
     },
     {
       "_callable": true,
@@ -125767,7 +125974,7 @@
       "label": "useLiveRevalidation()",
       "norm_label": "useliverevalidation()",
       "source_file": "app/components/live.ts",
-      "source_location": "L297"
+      "source_location": "L319"
     },
     {
       "_callable": true,
@@ -125778,7 +125985,7 @@
       "label": "useMashLive()",
       "norm_label": "usemashlive()",
       "source_file": "app/components/live.ts",
-      "source_location": "L121"
+      "source_location": "L124"
     },
     {
       "_callable": true,
@@ -125789,7 +125996,7 @@
       "label": "useServerTime()",
       "norm_label": "useservertime()",
       "source_file": "app/components/live.ts",
-      "source_location": "L287"
+      "source_location": "L309"
     },
     {
       "_callable": true,
@@ -125800,7 +126007,7 @@
       "label": "withSnapshotRuns()",
       "norm_label": "withsnapshotruns()",
       "source_file": "app/components/live.ts",
-      "source_location": "L98"
+      "source_location": "L101"
     },
     {
       "_callable": true,
@@ -132801,11 +133008,33 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_routes_overlay_errorboundary",
+      "label": "ErrorBoundary()",
+      "norm_label": "errorboundary()",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L87"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_routes_overlay_errorboundary_finishattempt",
+      "label": "finishAttempt()",
+      "norm_label": "finishattempt()",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L101"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_routes_overlay_overlay",
       "label": "Overlay()",
       "norm_label": "overlay()",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L42"
+      "source_location": "L41"
     },
     {
       "_callable": true,
@@ -132827,7 +133056,7 @@
       "label": "Privacy()",
       "norm_label": "privacy()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L486"
+      "source_location": "L495"
     },
     {
       "_callable": true,
@@ -137722,14 +137951,14 @@
             "callee": "get",
             "file": "tests/account.test.ts",
             "lang": "typescript",
-            "line": "L349",
+            "line": "L350",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "calldelete()",
       "source_file": "tests/account.test.ts",
-      "source_location": "L335"
+      "source_location": "L336"
     },
     {
       "_callable": true,
@@ -137740,7 +137969,7 @@
       "label": "callExport()",
       "norm_label": "callexport()",
       "source_file": "tests/account.test.ts",
-      "source_location": "L324"
+      "source_location": "L325"
     },
     {
       "_callable": true,
@@ -137751,7 +137980,7 @@
       "label": "cookie()",
       "norm_label": "cookie()",
       "source_file": "tests/account.test.ts",
-      "source_location": "L314"
+      "source_location": "L315"
     },
     {
       "_callable": true,
@@ -137762,7 +137991,7 @@
       "label": "linkedRows()",
       "norm_label": "linkedrows()",
       "source_file": "tests/account.test.ts",
-      "source_location": "L253"
+      "source_location": "L254"
     },
     {
       "_callable": true,
@@ -137777,14 +138006,14 @@
             "callee": "set",
             "file": "tests/account.test.ts",
             "lang": "typescript",
-            "line": "L320",
+            "line": "L321",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "routecontext()",
       "source_file": "tests/account.test.ts",
-      "source_location": "L318"
+      "source_location": "L319"
     },
     {
       "_callable": true,
@@ -137795,7 +138024,7 @@
       "label": "seed()",
       "norm_label": "seed()",
       "source_file": "tests/account.test.ts",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "_callable": true,
@@ -137806,7 +138035,7 @@
       "label": "seedNewTables()",
       "norm_label": "seednewtables()",
       "source_file": "tests/account.test.ts",
-      "source_location": "L176"
+      "source_location": "L177"
     },
     {
       "_callable": true,
@@ -137817,7 +138046,7 @@
       "label": "zeroes()",
       "norm_label": "zeroes()",
       "source_file": "tests/account.test.ts",
-      "source_location": "L286"
+      "source_location": "L287"
     },
     {
       "_callable": true,
@@ -140879,6 +141108,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_live_revalidation_test_render",
+      "label": "render()",
+      "norm_label": "render()",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L31"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_mash_test_simulate",
       "label": "simulate()",
       "norm_label": "simulate()",
@@ -142549,7 +142789,7 @@
       "label": "mashListeners",
       "norm_label": "mashlisteners",
       "source_file": "app/components/live.ts",
-      "source_location": "L85"
+      "source_location": "L88"
     },
     {
       "_origin": "ast",
@@ -142580,6 +142820,16 @@
       "norm_label": "overlayschema",
       "source_file": "app/components/live.ts",
       "source_location": "L18"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_live_revalidate_interval_ms",
+      "label": "REVALIDATE_INTERVAL_MS",
+      "norm_label": "revalidate_interval_ms",
+      "source_file": "app/components/live.ts",
+      "source_location": "L84"
     },
     {
       "_origin": "ast",
@@ -144980,7 +145230,7 @@
       "label": "loader",
       "norm_label": "loader",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L15"
+      "source_location": "L14"
     },
     {
       "_origin": "ast",
@@ -147410,7 +147660,7 @@
       "label": "ids",
       "norm_label": "ids",
       "source_file": "tests/account.test.ts",
-      "source_location": "L15"
+      "source_location": "L16"
     },
     {
       "_origin": "ast",
@@ -147420,7 +147670,7 @@
       "label": "now",
       "norm_label": "now",
       "source_file": "tests/account.test.ts",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "_origin": "ast",
@@ -149550,6 +149800,13 @@
             "lang": "typescript",
             "line": "L71",
             "receiver_type": "T"
+          },
+          {
+            "callee": "dispatchEvent",
+            "file": "tests/live-retry.test.ts",
+            "lang": "typescript",
+            "line": "L148",
+            "receiver_type": "EventTarget"
           }
         ]
       },
@@ -149566,6 +149823,47 @@
       "norm_label": "hooks",
       "source_file": "tests/live-retry.test.ts",
       "source_location": "L4"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_live_revalidation_test",
+      "label": "live-revalidation.test.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "fill",
+            "file": "tests/live-revalidation.test.ts",
+            "lang": "typescript",
+            "line": "L68",
+            "receiver_type": "T"
+          }
+        ]
+      },
+      "norm_label": "live-revalidation.test.ts",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_live_revalidation_test_hooks",
+      "label": "hooks",
+      "norm_label": "hooks",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L5"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_live_revalidation_test_revalidate",
+      "label": "revalidate",
+      "norm_label": "revalidate",
+      "source_file": "tests/live-revalidation.test.ts",
+      "source_location": "L29"
     },
     {
       "_origin": "ast",

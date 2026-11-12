@@ -78,7 +78,7 @@ test("poll discussion refreshes when a remote comment changes the board", async 
   await close(context);
 });
 
-test("the OBS overlay bounds retries, refreshes over HTTP, and reconnects on request", async ({ browser }) => {
+test("the OBS overlay keeps retrying, refreshes over HTTP, and recovers on its own", async ({ browser }) => {
   const owner = await signedIn(browser);
   const created = await owner.request.post("/api/streamers/pagination_host", {
     headers: { Origin: "http://localhost:5173" },
@@ -103,12 +103,15 @@ test("the OBS overlay bounds retries, refreshes over HTTP, and reconnects on req
   await expect(page.getByRole("heading", { name: "An overlay recovery poll" })).toBeVisible();
   await expect.poll(() => attempts).toBeGreaterThan(0);
   await page.clock.pauseAt(Date.now() + 1000);
-  for (let failure: number = 0; failure < 9 && attempts < 9; failure += 1) {
+  // The unattended overlay never runs out of retries: it keeps trying at the 30 second ceiling past the budget.
+  for (let failure: number = 0; failure < 12 && attempts < 12; failure += 1) {
     const previous: number = attempts;
     await page.clock.fastForward(30_001);
     await expect.poll(() => attempts).toBeGreaterThan(previous);
   }
-  await expect(page.getByText("Live updates offline.", { exact: true })).toBeVisible();
+  await expect(page.locator(".overlay-connection")).toHaveText("Reconnecting…");
+  await expect(page.getByText("Live updates offline.", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Reconnect", exact: true })).toHaveCount(0);
   const voted = await owner.request.post("/api/streamers/pagination_host", {
     headers: { Origin: "http://localhost:5173" },
     data: { action: "vote", id: poll.id, choice: 0 },
@@ -116,19 +119,19 @@ test("the OBS overlay bounds retries, refreshes over HTTP, and reconnects on req
   expect(voted.status()).toBe(200);
   await page.clock.fastForward(30_001);
   await expect(page.locator(".overlay-total")).toContainText("1 vote");
-  expect(attempts).toBe(9);
-  const stopped: number = attempts;
-  await page.clock.fastForward(300_001);
-  expect(attempts).toBe(stopped);
+  const failed: number = attempts;
   blocked = false;
-  await page.getByRole("button", { name: "Reconnect", exact: true }).click();
+  await page.clock.fastForward(30_001);
+  await expect.poll(() => attempts).toBeGreaterThan(failed);
   await expect(page.locator(".overlay-connection")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Reconnect", exact: true })).toHaveCount(0);
   await close(context);
   await close(owner);
 });
 
-test("briefly accepted connections do not renew the automatic retry budget", async ({ browser }) => {
-  const context = await browser.newContext({ baseURL: "http://localhost:5173" });
+test("briefly accepted connections do not renew the controller's automatic retry budget", async ({ browser }) => {
+  // The OBS overlay never gives up, so the bounded budget is checked on the owner's overlay controller.
+  const context = await signedIn(browser);
   const page = await newPage(context);
   let attempts: number = 0;
   await page.routeWebSocket("**/api/live/pagination_host", (socket) => {
@@ -137,7 +140,7 @@ test("briefly accepted connections do not renew the automatic retry budget", asy
     socket.onMessage(() => { void socket.close({ code: 1013, reason: "Seat reclaimed" }); });
   });
   await page.clock.install({ time: Date.now() });
-  await page.goto("/@pagination_host/overlay");
+  await page.goto("/overlay-control");
   await expect.poll(() => attempts).toBe(1);
   await page.clock.pauseAt(Date.now() + 1000);
   for (let connection: number = 1; connection <= 9; connection += 1) {
@@ -147,7 +150,7 @@ test("briefly accepted connections do not renew the automatic retry budget", asy
       await expect.poll(() => attempts).toBe(connection + 1);
     }
   }
-  await expect(page.getByText("Live updates offline.", { exact: true })).toBeVisible();
+  await expect(page.locator(".ov-conn")).toContainText("Live updates offline.");
   await page.clock.fastForward(300_001);
   expect(attempts).toBe(9);
   await close(context);
