@@ -72,7 +72,7 @@ export function localPath(value: string | null | undefined): string | null {
   if (
     !value?.startsWith("/") ||
     value.startsWith("//") ||
-    [...value].some((char: string): boolean => char === "\\" || char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
+    [...value].some((char: string): boolean => char === "\\" || char.codePointAt(0)! < 32 || char.codePointAt(0) === 127)
   )
     return null;
   const base = "https://local.invalid";
