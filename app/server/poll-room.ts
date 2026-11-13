@@ -211,12 +211,16 @@ export class PollRoom extends DurableObject<AppEnv> {
     try {
       return await pending;
     } catch (error: unknown) {
-      this.disconnect();
-      if (!(error instanceof PageSuspended)) return response("Live updates unavailable", 503);
-      return url.pathname === "/subscribe" ? response("Stream not found", 404) : new Response(null, { status: 204 });
+      return this.requestFailure(error, url.pathname);
     } finally {
       this.pendingHandlers.delete(pending);
     }
+  }
+
+  private requestFailure(error: unknown, path: string): Response {
+    this.disconnect();
+    if (!(error instanceof PageSuspended)) return response("Live updates unavailable", 503);
+    return path === "/subscribe" ? response("Stream not found", 404) : new Response(null, { status: 204 });
   }
 
   private async resetTestState(request: Request): Promise<Response> {

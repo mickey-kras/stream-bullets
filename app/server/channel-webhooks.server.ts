@@ -165,6 +165,17 @@ const TWITCH_REVOCATIONS: Readonly<Record<string, ChannelStatusCode>> = {
   version_removed: "subscription_removed",
 };
 
+async function confirmTwitchSubscription(
+  env: AppEnv,
+  broadcaster: string,
+  challenge: string | undefined,
+): Promise<Response> {
+  // Only confirm subscriptions for a connected channel.
+  if (!challenge || !(await connectionForChannel(env, "twitch", broadcaster)))
+    throw new HttpError(404, "Unknown channel.");
+  return new Response(challenge, { headers: { "Content-Type": "text/plain" } });
+}
+
 /** Twitch EventSub: HMAC-SHA256 over message id + timestamp + raw body with TWITCH_EVENTSUB_SECRET. */
 export async function twitchWebhook(request: Request, env: AppEnv, now: number = Date.now()): Promise<Response> {
   requirePost(request);
@@ -209,10 +220,7 @@ export async function twitchWebhook(request: Request, env: AppEnv, now: number =
     // Ingestion is off: confirm no new subscription and drop events.
     if (type === "webhook_callback_verification") throw new HttpError(404, "Unknown channel.");
   } else if (type === "webhook_callback_verification") {
-    // Only confirm subscriptions for a connected channel.
-    if (!parsed.challenge || !(await connectionForChannel(env, "twitch", broadcaster)))
-      throw new HttpError(404, "Unknown channel.");
-    return new Response(parsed.challenge, { headers: { "Content-Type": "text/plain" } });
+    return await confirmTwitchSubscription(env, broadcaster, parsed.challenge);
   } else if (type === "notification") {
     const events = twitchEvents(parsed.subscription.type, parsed.event, now, sentAt);
     // A signed notification for an unknown channel gets a non-2xx answer (410). Twitch counts it as a failed

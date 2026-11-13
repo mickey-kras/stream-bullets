@@ -178,7 +178,7 @@ export function ChannelPanel({
     resultShown.current = true;
     document.getElementById("channels-title")?.scrollIntoView({ block: "start" });
     banner.current?.focus();
-    void navigate(location.pathname, { replace: true, preventScrollReset: true });
+    navigate(location.pathname, { replace: true, preventScrollReset: true });
   }, [initialResult, location.pathname, navigate]);
 
   // Coming back to the page from the back-forward cache (after the provider) must not leave buttons disabled.
@@ -251,7 +251,7 @@ export function ChannelPanel({
       });
       setFocusConnect(platform);
       setConfirming(null);
-      void revalidator.revalidate();
+      revalidator.revalidate();
     } catch (error: unknown) {
       setConfirming(null);
       failed(error);
@@ -259,7 +259,7 @@ export function ChannelPanel({
       // connection, so focus moves to its Connect button as after a disconnect.
       if (error instanceof ApiError && (error.status === 404 || error.status === 409)) {
         if (error.status === 404) setFocusConnect(platform);
-        void revalidator.revalidate();
+        revalidator.revalidate();
       }
     } finally {
       setBusy(null);
@@ -288,14 +288,12 @@ export function ChannelPanel({
           // A platform this site no longer offers cannot be reconnected, so its status advice would mislead.
           // The quota message names the reset time in the viewer's time zone, so it shows after hydration.
           const waitsForTime = connection?.code === "quota_exhausted" && !hydrated;
-          const problem =
-            connection && channel.available && !waitsForTime
-              ? statusMessage(
-                  connection,
-                  connection.code === "quota_exhausted" ? quotaResetText(connection.updatedAt) : null,
-                  channel.platform,
-                )
-              : null;
+          let problem: string | null = null;
+          if (connection && channel.available && !waitsForTime) {
+            const quotaReset: string | null =
+              connection.code === "quota_exhausted" ? quotaResetText(connection.updatedAt) : null;
+            problem = statusMessage(connection, quotaReset, channel.platform);
+          }
           return (
             <li key={channel.platform} className="ch-item" data-channel={channel.platform}>
               <p className="ch-head">
