@@ -64,5 +64,5 @@ Rotation runs every 15 seconds, with a 10-second minimum stay before replacement
 These scheduling values are preview choices for review.
 
 Browser checks confirmed artwork loading, the 12 animation rows, crowd controls, composition, and transparency.
-Browser export checks and new screenshot transfer did not complete.
+The browser test checks artwork exports and saves preview captures.
 OBS checks remain incomplete.

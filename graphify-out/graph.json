@@ -73968,6 +73968,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_coverage_expect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_e2e_desktop_layout_spec",
       "source_file": "tests/e2e/desktop-layout.spec.ts",
       "source_location": "L2",
@@ -99412,6 +99436,55 @@
       "source_file": "tests/e2e-coverage.test.ts",
       "source_location": "L4",
       "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L1",
+      "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L2",
+      "target": "ref_node_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L3",
+      "target": "ref_playwright_test",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_coverage",
       "weight": 1.0
     },
     {
@@ -136649,10 +136722,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "75e0819dfc260c13dcf09b787b261a540b1badd636136ba7a140ca0f5c60ce52",
+    "content_sha256": "850f2595a944b6483a67278660f4bab0ffd30c91777acadd261c3fd0799e80dc",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "8b666b29e485bd76c71747fbd6399163363d799e31e132c458e0cf365818ea74",
+    "source_sha256": "7b23a05c94aa302b6ef7596e699083ac33500689b6b57fdf067036103b3b38ec",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -169270,6 +169343,41 @@
       "norm_label": "test",
       "source_file": "tests/e2e/coverage.ts",
       "source_location": "L48"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_design_preview_spec",
+      "label": "design-preview.spec.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "abort",
+            "file": "tests/e2e/design-preview.spec.ts",
+            "lang": "typescript",
+            "line": "L15",
+            "receiver_type": "Route"
+          },
+          {
+            "callee": "request",
+            "file": "tests/e2e/design-preview.spec.ts",
+            "lang": "typescript",
+            "line": "L17",
+            "receiver_type": "Route"
+          },
+          {
+            "callee": "fulfill",
+            "file": "tests/e2e/design-preview.spec.ts",
+            "lang": "typescript",
+            "line": "L19",
+            "receiver_type": "Route"
+          }
+        ]
+      },
+      "norm_label": "design-preview.spec.ts",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",
