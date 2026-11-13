@@ -1,3 +1,4 @@
+import nodeCrypto from "node:crypto";
 import { DurableObject } from "cloudflare:workers";
 import type { AppEnv } from "../env";
 import { z } from "zod";
@@ -967,6 +968,6 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       cause: error instanceof Error ? error.name : "unknown",
     });
     state.backoffMs = Math.min(BACKOFF_MAX_MS, Math.max(BACKOFF_MIN_MS, state.backoffMs * 2));
-    return Math.round(state.backoffMs * (0.5 + Math.random() / 2));
+    return nodeCrypto.randomInt(Math.ceil(state.backoffMs / 2), state.backoffMs + 1);
   }
 }

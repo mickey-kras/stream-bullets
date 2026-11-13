@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { catch as withFallback, z } from "zod";
 import {
   isLiveMessage,
   MAX_BADGES,
@@ -37,7 +37,7 @@ const name = z
   .string()
   .max(200)
   .transform((value: string): string => cleanText(value, 100));
-const color = z.catch(
+const color = withFallback(
   z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
@@ -83,7 +83,7 @@ const twitchChatSchema = z.object({
   message_id: id,
   message: z.object({
     text: z.string().max(4000),
-    fragments: z.catch(
+    fragments: withFallback(
       z
         .array(
           z.object({
@@ -97,7 +97,7 @@ const twitchChatSchema = z.object({
     ),
   }),
   color: z.unknown().optional(),
-  badges: z.catch(z.array(z.object({ set_id: z.string().max(64), id: z.string().max(64) })).max(100), []),
+  badges: withFallback(z.array(z.object({ set_id: z.string().max(64), id: z.string().max(64) })).max(100), []),
 });
 
 const twitchTarget = z.object({ target_user_id: id });
@@ -204,7 +204,7 @@ const kickChatSchema = z.object({
     identity: z
       .object({
         username_color: z.unknown().optional(),
-        badges: z.catch(z.array(z.object({ text: z.string().max(64), type: z.string().max(64) })).max(100), []),
+        badges: withFallback(z.array(z.object({ text: z.string().max(64), type: z.string().max(64) })).max(100), []),
       })
       .nullish(),
   }),
@@ -213,7 +213,7 @@ const kickChatSchema = z.object({
 });
 const kickBanSchema = z.object({
   banned_user: z.object({ user_id: id }),
-  metadata: z.catch(
+  metadata: withFallback(
     z.object({ created_at: z.string().max(64).nullish(), expires_at: z.string().max(64).nullish() }),
     {},
   ),

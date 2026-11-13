@@ -120,6 +120,15 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     expect(await inbox(owner, replyId)).toHaveLength(0);
     await ownerPage.goto(`/@test_host?entry=${entryId}&comment=${replyId}`);
     const reply = ownerPage.locator(`#cm-${replyId}`);
+    const thread = ownerPage.locator("li.thread").filter({ has: ownerPage.locator(`#cm-${rootId}`) });
+    await thread.locator(".thread-toggle").click();
+    await expect(reply).not.toBeVisible();
+    await ownerPage.locator(`#cm-${rootId}`).getByRole("button", { name: "Reply", exact: true }).click();
+    await expect(thread.getByRole("textbox", { name: "Write a reply to viewer", exact: true })).toBeVisible();
+    await thread.locator(".thread-toggle").click();
+    await ownerPage.locator(`#cm-${rootId}`).getByRole("button", { name: "Reply", exact: true }).click();
+    await expect(thread.getByRole("textbox", { name: "Write a reply to viewer", exact: true })).toBeVisible();
+    await thread.getByRole("button", { name: "Cancel reply", exact: true }).click();
     await reply.getByRole("button", { name: "Edit", exact: true }).click();
     const replyEditor = reply.getByRole("textbox", { name: "Edit comment", exact: true });
     await replyEditor.press("End");

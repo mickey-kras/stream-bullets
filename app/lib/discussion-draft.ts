@@ -49,3 +49,45 @@ export function readDraft(key: string): { draft: DiscussionDraft; unavailable: b
     return { draft: empty, unavailable: true };
   }
 }
+
+interface DraftSnapshot {
+  draft: DiscussionDraft;
+  unavailable: boolean;
+}
+export interface DiscussionDraftStore {
+  subscribe: (listener: () => void) => () => void;
+  getSnapshot: () => DraftSnapshot;
+  getServerSnapshot: () => DraftSnapshot;
+  update: (change: Partial<DiscussionDraft>) => void;
+}
+
+export function createDraftStore(key: string): DiscussionDraftStore {
+  let current: DraftSnapshot | undefined;
+  const server: DraftSnapshot = {
+    draft: { text: "", mentions: [], replyText: "", replyMentions: [], replyId: null },
+    unavailable: false,
+  };
+  const listeners = new Set<() => void>();
+  const getSnapshot = (): DraftSnapshot => (current ??= readDraft(key));
+  return {
+    subscribe: (listener: () => void): (() => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    getSnapshot,
+    getServerSnapshot: (): DraftSnapshot => server,
+    update: (change: Partial<DiscussionDraft>): void => {
+      const draft: DiscussionDraft = { ...getSnapshot().draft, ...change };
+      let unavailable = false;
+      try {
+        sessionStorage.setItem(key, JSON.stringify(draft));
+      } catch {
+        unavailable = true;
+      }
+      current = { draft, unavailable };
+      for (const listener of listeners) listener();
+    },
+  };
+}

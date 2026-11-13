@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { retainedMentions, type MentionSelection } from "../app/components/mention-input";
-import { draftSchema, readDraft } from "../app/lib/discussion-draft";
+import { createDraftStore, draftSchema, readDraft } from "../app/lib/discussion-draft";
 
 const selection: MentionSelection = {
   userId: "public-account",
@@ -102,5 +102,49 @@ describe("draft storage failures", () => {
     };
     vi.stubGlobal("sessionStorage", { getItem: (): string => JSON.stringify(draft) });
     expect(readDraft("entry")).toEqual({ draft, unavailable: false });
+  });
+});
+
+describe("draft snapshots across hydration", () => {
+  it("starts hydration with the server's empty snapshot before restoring saved text", () => {
+    const saved = { text: "Restored draft", mentions: [], replyText: "", replyMentions: [], replyId: null };
+    vi.stubGlobal("sessionStorage", { getItem: (): string => JSON.stringify(saved) });
+    const store = createDraftStore("entry");
+    expect(store.getServerSnapshot().draft.text).toBe("");
+    expect(store.getSnapshot().draft).toEqual(saved);
+    expect(store.getSnapshot()).toBe(store.getSnapshot());
+    expect(store.getServerSnapshot().draft.text).toBe("");
+  });
+  it("preserves selected identity across consecutive text and selection writes", () => {
+    const writes = new Map<string, string>();
+    vi.stubGlobal("sessionStorage", {
+      getItem: (key: string): string | null => writes.get(key) ?? null,
+      setItem: (key: string, value: string): void => {
+        writes.set(key, value);
+      },
+    });
+    const store = createDraftStore("entry");
+    const listener = vi.fn();
+    const unsubscribe = store.subscribe(listener);
+    const selected = [{ userId: "opaque-account", start: 0, end: 4 }];
+    store.update({ mentions: selected });
+    store.update({ text: "@Ana hello" });
+    expect(readDraft("entry").draft).toMatchObject({ text: "@Ana hello", mentions: selected });
+    expect(listener).toHaveBeenCalledTimes(2);
+    unsubscribe();
+    store.update({ replyText: "Another draft" });
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
+  it("keeps an editable in-memory draft when storage is blocked", () => {
+    vi.stubGlobal("sessionStorage", null);
+    Object.defineProperty(globalThis, "sessionStorage", {
+      configurable: true,
+      get: (): never => {
+        throw new DOMException("Blocked", "SecurityError");
+      },
+    });
+    const store = createDraftStore("entry");
+    store.update({ text: "Still editable" });
+    expect(store.getSnapshot()).toMatchObject({ draft: { text: "Still editable" }, unavailable: true });
   });
 });

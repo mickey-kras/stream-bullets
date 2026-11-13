@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import { useSearchParams } from "react-router";
-import { readDraft, type DiscussionDraft } from "../lib/discussion-draft";
+import { createDraftStore, type DiscussionDraft } from "../lib/discussion-draft";
 import { MentionInput, type MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
@@ -405,19 +405,25 @@ function Thread({
   );
   const replying =
     replyTo !== null && (replyTo.id === thread.id || thread.replies.some((reply: Comment) => reply.id === replyTo.id));
-  // Reveal hidden replies when opening an inline reply form.
-  const target: string | null = targetId ?? (replying && replyTo ? replyTo.id : null);
-  const [opened, setOpened] = useState<string | null>(target);
-  if (opened !== target) {
-    setOpened(target);
-    if (target !== null) setHidden(false);
+  const [opened, setOpened] = useState<string | null>(targetId);
+  if (opened !== targetId) {
+    setOpened(targetId);
+    if (targetId !== null && (targetId === thread.id || thread.replies.some((reply: Comment) => reply.id === targetId)))
+      setHidden(false);
   }
+  const threadRules: CommentRules = {
+    ...rules,
+    onReply: (comment: Comment) => {
+      setHidden(false);
+      rules.onReply(comment);
+    },
+  };
   const count = thread.replies.length;
   const listId = `replies-${thread.id}`;
   const showRepliesLabel: string = t(count === 1 ? "discussion.showReply" : "discussion.showReplies", { count });
   return (
     <li className={`thread${count ? " has-replies" : ""}`}>
-      <CommentArticle comment={thread} parent={undefined} rules={rules} />
+      <CommentArticle comment={thread} parent={undefined} rules={threadRules} />
       {count > 0 && (
         <button
           type="button"
@@ -441,7 +447,7 @@ function Thread({
         >
           {shown.map((reply: Comment) => (
             <li key={reply.id}>
-              <CommentArticle comment={reply} parent={replyParent(thread, reply)} rules={rules} />
+              <CommentArticle comment={reply} parent={replyParent(thread, reply)} rules={threadRules} />
             </li>
           ))}
           {more > 0 && (
@@ -546,23 +552,15 @@ export function Discussion({
   const [loadedKey, setLoadedKey] = useState<string>("");
   const [busy, setBusy] = useState<boolean>(false);
   const draftKey = `discussion:${viewer?.id ?? "anonymous"}:${entryId}`;
-  const [initial] = useState(() => readDraft(draftKey));
   const [error, setError] = useState<string>("");
-  const [draftUnavailable, setDraftUnavailable] = useState<boolean>(initial.unavailable);
-  const [draft, setDraft] = useState<DiscussionDraft>(initial.draft);
-  const draftRef = useRef<DiscussionDraft>(initial.draft);
+  const draftStore = useMemo(() => createDraftStore(draftKey), [draftKey]);
+  const { draft, unavailable: draftUnavailable } = useSyncExternalStore(
+    draftStore.subscribe,
+    draftStore.getSnapshot,
+    draftStore.getServerSnapshot,
+  );
   const { text, mentions, replyText, replyMentions, replyId } = draft;
-  function changeDraft(change: Partial<DiscussionDraft>): void {
-    const next: DiscussionDraft = { ...draftRef.current, ...change };
-    draftRef.current = next;
-    setDraft(next);
-    try {
-      sessionStorage.setItem(draftKey, JSON.stringify(next));
-      setDraftUnavailable(false);
-    } catch {
-      setDraftUnavailable(true);
-    }
-  }
+  const changeDraft: (change: Partial<DiscussionDraft>) => void = draftStore.update;
   const [reported, setReported] = useState<Set<string>>(new Set());
   const [signIn, setSignIn] = useState<boolean>(false);
   const pages = useRef<number>(1);
@@ -581,12 +579,14 @@ export function Discussion({
       .then(async (result) => {
         let values = result.threads;
         let targetError = "";
-        if (targetId) {
+        const targets = new Set([targetId, draftStore.getSnapshot().draft.replyId]);
+        for (const id of targets) {
+          if (id === null || (id !== targetId && findComment(values, id))) continue;
           try {
             const exact = await requestJson<{
               thread: CommentThread;
               entryId: string;
-            }>(`/api/comments/${encodeURIComponent(targetId)}`, {
+            }>(`/api/comments/${encodeURIComponent(id)}`, {
               signal: controller.signal,
             });
             if (exact.entryId !== entryId) throw new Error(t("discussion.commentUnavailable"));
@@ -610,7 +610,7 @@ export function Discussion({
         setLoadingMoreKey("");
       });
     return () => controller.abort();
-  }, [entryId, sort, requestKey, targetId]);
+  }, [entryId, sort, requestKey, targetId, draftStore]);
 
   useEffect(() => {
     if (!targetId) {
@@ -683,7 +683,7 @@ export function Discussion({
         if (parentId) {
           changeDraft({ replyText: "", replyMentions: [], replyId: null });
         } else {
-          if (draftRef.current.text === value) changeDraft({ text: "", mentions: [] });
+          if (draftStore.getSnapshot().draft.text === value) changeDraft({ text: "", mentions: [] });
         }
       })
       .catch(() => undefined);
@@ -811,10 +811,7 @@ export function Discussion({
         </p>
       )}
       <p className="form-error" role="alert">
-        {draftUnavailable ? t("discussion.draftUnavailable") : ""}
-      </p>
-      <p className="form-error" role="alert">
-        {error}
+        {[draftUnavailable ? t("discussion.draftUnavailable") : "", error].filter(Boolean).join(" ")}
       </p>
       {loading && threads.length === 0 && <output className="muted">{t("discussion.loading")}</output>}
       {!loading && threads.length === 0 && <p className="empty">{t("discussion.empty")}</p>}

@@ -144,6 +144,13 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     );
     await remoteParent.getByRole("button", { name: "Reply", exact: true }).click();
     await expect(page.getByRole("button", { name: "Cancel reply", exact: true })).toBeVisible();
+    const replyDraft = page.getByRole("textbox", { name: "Write a reply to viewer", exact: true });
+    await replyDraft.fill("Keep this historical reply draft.");
+    await page.reload();
+    await expect(replyDraft).toHaveValue("Keep this historical reply draft.");
+    await expect(remoteParent).toBeVisible();
+    await page.getByRole("button", { name: "Load more comments" }).click();
+    await expect(reply).toBeVisible();
     const remoteDelete = await ownerContext.request.post("/api/comments", {
       headers: { Origin: origin },
       data: { action: "delete", id: remoteParentId },
