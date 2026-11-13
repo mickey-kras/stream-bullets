@@ -331,11 +331,14 @@ async function abandonConnect(
   error: unknown,
 ): Promise<ConnectResult> {
   logError("channel_connect_failed", error);
-  await revokeToken(env, platform, tokens);
+  // Google revokes the user's whole grant, which a newer reconnect of the channel can use: a YouTube token is
+  // revoked only after the cleanup found the row still this callback's own.
+  if (platform !== "youtube") await revokeToken(env, platform, tokens);
+  let owned = true;
   // Only the tokens this callback wrote are its own. A newer callback, or a disconnect that marked the row
   // meanwhile, owns the row: it stays as it is.
   try {
-    await env.DB.batch(
+    const [first] = await env.DB.batch(
       connection.reconnect
         ? [
             env.DB.prepare(
@@ -356,10 +359,12 @@ async function abandonConnect(
             ).bind(connection.id, connection.writtenAt),
           ],
     );
+    owned = first.meta.changes > 0;
   } catch (cleanupError: unknown) {
-    // The token is revoked already, so what stays cannot read the channel. The owner sees an error and retries.
+    // The token is revoked, so what stays cannot read the channel. The owner sees an error and retries.
     logError("channel_connect_cleanup_failed", cleanupError);
   }
+  if (platform === "youtube" && owned) await revokeToken(env, platform, tokens);
   return "failed";
 }
 

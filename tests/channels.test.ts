@@ -459,46 +459,53 @@ describe("callback failures", (): void => {
     expect(JSON.stringify(errors.mock.calls)).not.toMatch(/kick-access|kick-refresh|kick-code/);
   });
 
-  it("leaves a newer reconnect alone when an older reconnect's ingest call fails later", async (): Promise<void> => {
-    vi.spyOn(console, "error").mockImplementation((): void => undefined);
-    expect(await connectChannel("kick")).toBe("connected");
-    const working = env.CHANNEL_INGEST;
-    let release = (): void => undefined;
-    const held = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    let reached = (): void => undefined;
-    const waiting = new Promise<void>((resolve) => {
-      reached = resolve;
-    });
-    let hold = true;
-    env.CHANNEL_INGEST = {
-      idFromName: (name: string) => working.idFromName(name),
-      get: (id: DurableObjectId) => ({
-        fetch: async (input: string, init?: RequestInit): Promise<Response> => {
-          if (!hold || !new URL(input).pathname.endsWith("/connect")) return working.get(id).fetch(input, init);
-          hold = false;
-          reached();
-          await held;
-          return new Response(null, { status: 503 });
-        },
-      }),
-    } as unknown as DurableObjectNamespace;
-    const start = Date.now();
-    vi.spyOn(Date, "now").mockReturnValue(start);
-    const older = connectChannel("kick");
-    await waiting;
-    // A second reconnect writes its tokens later and connects.
-    vi.spyOn(Date, "now").mockReturnValue(start + 1000);
-    expect(await connectChannel("kick")).toBe("connected");
-    release();
-    expect(await older).toBe("failed");
-    expect(await env.DB.prepare("SELECT status, status_code FROM channel_connections").first()).toEqual({
-      status: "active",
-      status_code: null,
-    });
-    expect(await env.DB.prepare("SELECT updated_at FROM channel_tokens").first("updated_at")).toBe(start + 1000);
-  });
+  it.each(["kick", "youtube"] as const)(
+    "leaves a newer %s reconnect alone when an older reconnect's ingest call fails later",
+    async (platform): Promise<void> => {
+      vi.spyOn(console, "error").mockImplementation((): void => undefined);
+      expect(await connectChannel(platform)).toBe("connected");
+      const working = env.CHANNEL_INGEST;
+      let release = (): void => undefined;
+      const held = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let reached = (): void => undefined;
+      const waiting = new Promise<void>((resolve) => {
+        reached = resolve;
+      });
+      let hold = true;
+      env.CHANNEL_INGEST = {
+        idFromName: (name: string) => working.idFromName(name),
+        get: (id: DurableObjectId) => ({
+          fetch: async (input: string, init?: RequestInit): Promise<Response> => {
+            if (!hold || !new URL(input).pathname.endsWith("/connect")) return working.get(id).fetch(input, init);
+            hold = false;
+            reached();
+            await held;
+            return new Response(null, { status: 503 });
+          },
+        }),
+      } as unknown as DurableObjectNamespace;
+      const start = Date.now();
+      vi.spyOn(Date, "now").mockReturnValue(start);
+      const older = connectChannel(platform);
+      await waiting;
+      // A second reconnect writes its tokens later and connects.
+      vi.spyOn(Date, "now").mockReturnValue(start + 1000);
+      expect(await connectChannel(platform)).toBe("connected");
+      fake.calls.length = 0;
+      release();
+      expect(await older).toBe("failed");
+      // Google revokes the whole grant, which the newer reconnect uses: the older YouTube token is not revoked.
+      const revokes = fake.calls.filter((item) => item.url.pathname.endsWith("/revoke"));
+      expect(revokes).toHaveLength(platform === "youtube" ? 0 : 1);
+      expect(await env.DB.prepare("SELECT status, status_code FROM channel_connections").first()).toEqual({
+        status: "active",
+        status_code: null,
+      });
+      expect(await env.DB.prepare("SELECT updated_at FROM channel_tokens").first("updated_at")).toBe(start + 1000);
+    },
+  );
 
   it("connects nothing when channels were turned off after the start", async (): Promise<void> => {
     const authorize = await startConnect("kick");

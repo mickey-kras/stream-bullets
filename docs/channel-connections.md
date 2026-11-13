@@ -334,6 +334,8 @@ For a reconnect, it deletes the tokens and marks the connection `needs_reauth`.
 The cleanup changes the row only while it holds the tokens of this callback. A newer reconnect keeps its tokens.
 If that cleanup fails too, the callback logs it and still answers `failed`.
 
+The callback revokes a YouTube token only if the row still holds the tokens of this callback.
+
 ## Logs and alerts
 
 The logs hold only fixed codes, platforms, and counts. They never hold an ID, a name, a token, or message text.
