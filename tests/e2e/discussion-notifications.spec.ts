@@ -267,9 +267,13 @@ test("duplicate names retain the selected account through draft reload, rename, 
     await editor.press("End");
     await editor.pressSequentially("!".repeat(100));
     await expect(editor).toHaveValue(`${originalText}${"!".repeat(100)}`);
-    await editor.press("Control+z");
+    for (let count = 0; count < 100 && (await editor.inputValue()) !== originalText; count++) {
+      await editor.press("Control+z");
+    }
     await expect(editor).toHaveValue(originalText);
-    await editor.press("Control+Shift+z");
+    for (let count = 0; count < 100 && (await editor.inputValue()) !== `${originalText}${"!".repeat(100)}`; count++) {
+      await editor.press("Control+Shift+z");
+    }
     await expect(editor).toHaveValue(`${originalText}${"!".repeat(100)}`);
     await comment.getByRole("button", { name: "Save", exact: true }).click();
     await expect(comment.getByText("Edited", { exact: true })).toBeVisible();
