@@ -97,6 +97,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:production
       - run: pnpm exec wrangler deploy --config build/server/wrangler.json --dry-run
+      - run: pnpm build:test
+      - run: node scripts/check-test-deployment.ts
+      - run: pnpm exec wrangler deploy --config build/server/wrangler.json --dry-run
 
   browser:
     name: Browser tests (${{ matrix.shard }}/4)
