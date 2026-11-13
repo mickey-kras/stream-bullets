@@ -1,3 +1,4 @@
+import nodeCrypto from "node:crypto";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { MAX_ACTIVITY_MESSAGE_LENGTH, parseActivityMessage, quotaDay, type ActivityChat, type ActivityEvent } from "../app/lib/activity";
@@ -1383,10 +1384,7 @@ describe("ChannelIngest YouTube polling", (): void => {
     await addConnection("youtube");
     await listen();
     vi.spyOn(console, "error").mockImplementation((): void => undefined);
-    vi.spyOn(crypto, "getRandomValues").mockImplementation(<T extends ArrayBufferView | null>(array: T): T => {
-      if (array) new Uint8Array(array.buffer, array.byteOffset, array.byteLength).fill(255);
-      return array;
-    });
+    vi.spyOn(nodeCrypto, "randomInt").mockImplementation((_min, max): number => Number(max) - 1);
     fake.chatError = "backendError";
     await poll();
     await poll();
@@ -1611,14 +1609,11 @@ describe("ChannelIngest YouTube polling", (): void => {
     expect(await connectionRow("youtube")).toMatchObject({ status: "error", status_code: "quota_exhausted" });
   });
 
-  it("backs off on provider errors within bounds and stops when access is revoked", async (): Promise<void> => {
+  it.each(["minimum", "maximum"] as const)("backs off at the %s jitter bound and stops when access is revoked", async (bound): Promise<void> => {
     await addConnection("youtube");
     await listen();
     vi.spyOn(console, "error").mockImplementation((): void => undefined);
-    vi.spyOn(crypto, "getRandomValues").mockImplementation(<T extends ArrayBufferView | null>(array: T): T => {
-      if (array) new Uint8Array(array.buffer, array.byteOffset, array.byteLength).fill(255);
-      return array;
-    });
+    vi.spyOn(nodeCrypto, "randomInt").mockImplementation((min, max): number => bound === "minimum" ? Number(min) : Number(max) - 1);
     await poll();
     fake.chatError = "backendError";
     const waits: number[] = [];
@@ -1626,8 +1621,8 @@ describe("ChannelIngest YouTube polling", (): void => {
       await poll();
       waits.push((state().storage.alarm ?? 0) - clock);
     }
-    expect(waits.slice(0, 4)).toEqual([1000, 2000, 4000, 8000]);
-    expect(Math.max(...waits)).toBe(300_000);
+    expect(waits.slice(0, 4)).toEqual(bound === "minimum" ? [500, 1000, 2000, 4000] : [1000, 2000, 4000, 8000]);
+    expect(Math.max(...waits)).toBe(bound === "minimum" ? 150_000 : 300_000);
     fake.chatError = null;
     await poll();
     expect(await state().storage.get("youtube")).toMatchObject({ backoffMs: 0 });
