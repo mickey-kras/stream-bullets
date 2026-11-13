@@ -4,10 +4,7 @@ import { Icon } from "../ui/icon";
 
 type Reaction = -1 | 0 | 1;
 
-/**
- * Like and Dislike with thumbs and a count (item 20), for topics, ideas and polls. A pressed thumb is filled.
- * Poll buttons name the poll for screen readers ("Like poll, 3"), as the mockup does.
- */
+// Filled thumbs indicate reactions. Accessible poll labels include type and count.
 export function VoteButtons({
   reaction,
   likes,

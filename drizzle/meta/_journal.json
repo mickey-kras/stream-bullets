@@ -190,6 +190,20 @@
       "when": 1794460000000,
       "tag": "0026_audit_entry_titles",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "6",
+      "when": 1794515289771,
+      "tag": "0027_channel_connections",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "6",
+      "when": 1794530841603,
+      "tag": "0028_channel_data_read_at",
+      "breakpoints": true
     }
   ]
 }

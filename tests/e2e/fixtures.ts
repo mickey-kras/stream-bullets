@@ -7,12 +7,12 @@ import { z } from "zod";
 export const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
 
-/** The seeded account ids by role (see tests/e2e-server.ts). */
+// Seeded account IDs by role; see tests/e2e-server.ts.
 export async function accounts(): Promise<Record<string, { id: string; cookie: string }>> {
   return sessionSchema.parse(JSON.parse(await readFile(".wrangler/e2e/sessions.json", "utf8")));
 }
 
-/** A browser context signed in as a seeded role. Each spec uses its own IP block for the rate limiter. */
+// Seeded-role context; each spec has its own rate-limit IP block.
 export async function signedIn(
   browser: Browser,
   role: string,
@@ -39,7 +39,7 @@ export async function signedIn(
   return context;
 }
 
-/** Runs SQL against the e2e database, for data the UI cannot create quickly. */
+// Seed data through SQL when UI setup would be slow.
 export async function runSql(name: string, statements: string[]): Promise<void> {
   const path: string = resolve(`.wrangler/e2e/${name}.sql`);
   await writeFile(path, statements.join("\n"));
@@ -64,7 +64,7 @@ export async function runSql(name: string, statements: string[]): Promise<void> 
   );
 }
 
-/** A local calendar date `days` from today, as the date input wants it. */
+// Local input date `days` from today.
 export function dateFromToday(days: number): string {
   const date = new Date(Date.now() + days * 86_400_000);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;

@@ -11,7 +11,7 @@ import { categoryLabel } from "./ideas";
 
 import { BUG_TEMPLATES } from "../../lib/bug-templates";
 
-/** Switching to Bug adds the template after any text; leaving Bug removes it again while it is untouched. */
+// Add the bug template after existing text; remove it on category change only while untouched.
 export function switchTemplate(body: string, from: IdeaCategory, to: IdeaCategory): string {
   const bugTemplate: string = BUG_TEMPLATES[getLocale()];
   const template: string = bugTemplate.trim();
@@ -24,14 +24,14 @@ export function switchTemplate(body: string, from: IdeaCategory, to: IdeaCategor
   return body;
 }
 
-/** Only these two browser details are appended to the public report. */
+// Only these browser fields enter public reports.
 export function environment(): string {
   const browser =
     /(Edg|Firefox|Chrome|Safari)\/[\d.]+/.exec(navigator.userAgent)?.[0] ?? t("ideas.form.unknownBrowser");
   return t("ideas.form.environment", { browser, width: screen.width, height: screen.height });
 }
 
-/** "Suggest an improvement" on the official page (item 46). New ideas start Under review. */
+// New official-board ideas start Under review.
 export function IdeaDialog({
   open,
   initialCategory = "feature",

@@ -14,7 +14,7 @@ export interface FeaturedStreamer {
   entries: FeaturedEntry[];
 }
 
-/** Prefer a public page with content, using the directory's order to break ties. */
+// Prefer a public page with content, using the directory's order to break ties.
 export async function getFeaturedStreamer(env: AppEnv): Promise<FeaturedStreamer | null> {
   const streamer = await env.DB.prepare(`
     SELECT id, handle, name, is_official FROM streamers s WHERE status = 'active'

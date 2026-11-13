@@ -23,7 +23,7 @@ export function buildDecals(k: Kit, station: THREE.Group, parts: { hall: THREE.G
       m.renderOrder = 1;
     };
     const front = (a: number): boolean => Math.abs(Math.atan2(Math.sin(a + 0.14), Math.cos(a + 0.14))) < 0.85;
-    // Rust weeping from the fascia rivet row and the plinth rivets.
+    // Rust beneath fascia/plinth rivets.
     for (let i = 0; i < 18; i++) {
       const a = rnd() * TAU;
       if (front(a)) continue;
@@ -33,7 +33,7 @@ export function buildDecals(k: Kit, station: THREE.Group, parts: { hall: THREE.G
       const a = rnd() * TAU;
       conform(bolts[i % 4], a - 0.06, a + 0.06, 0.1, 0.39, 0.212);
     }
-    // Grime drips beneath ledges: the fascia soffit onto the rear wall, the sill onto the skirt, the planter lips.
+    // Grime beneath ledges, sills and planter lips.
     for (const [a0, a1] of [
       [1.55, 2.35],
       [2.6, 3.45],
@@ -53,11 +53,11 @@ export function buildDecals(k: Kit, station: THREE.Group, parts: { hall: THREE.G
       [0.25, 0.62],
     ] as const)
       conform(grime[0], a0, a1, 0.04, 0.38, 0.735);
-    // Flaked paint on fascia and wall, concentrated toward the weather side and the corners.
+    // Flaking concentrates on weather-facing corners.
     for (let i = 0; i < 14; i++) {
       const a = rnd() * TAU,
         y = 2.55 + rnd() * 0.8;
-      // Keep the front of the fascia, where ON AIR and the wordmark hang, free of flaked paint.
+      // Keep fascia lettering clear of paint flakes.
       if (front(a)) continue;
       conform(chipsSet[i % 3], a - 0.09, a + 0.09, y, y + 0.28, 0.238);
     }
@@ -66,7 +66,7 @@ export function buildDecals(k: Kit, station: THREE.Group, parts: { hall: THREE.G
         y = 0.8 + rnd() * 1.4;
       conform(chipsSet[i % 3], a - 0.1, a + 0.1, y, y + 0.3, 0.02);
     }
-    // Scuffs, scratches and chips where hands and feet meet the building.
+    // Contact wear on walls and steps.
     const sheet = (
       mat: THREE.Material,
       w: number,
@@ -89,7 +89,7 @@ export function buildDecals(k: Kit, station: THREE.Group, parts: { hall: THREE.G
     sheet(chipsSet[1], 0.35, 0.25, [-0.66, 0.4, 1.278], wing);
     sheet(grime[1], 1, 0.9, [-0.08, 2.25, 0.705], wing);
     sheet(d("bolts2", 15), 0.5, 0.8, [0.45, 2.4, 0.706], wing);
-    // Worn walkway on the deck: scuffs where people walk in and turn toward the door.
+    // Foot-traffic wear toward the door.
     for (const [x, z, r, w] of [
       [0.2, 3.6, 0.2, 1.6],
       [1.1, 3, -0.6, 1.3],
@@ -121,7 +121,7 @@ export function buildDecals(k: Kit, station: THREE.Group, parts: { hall: THREE.G
       m.rotation.x = -Math.PI / 2;
       m.renderOrder = 1;
     }
-    // Verdigris on the brass rim of the deck.
+
     for (let i = 0; i < 10; i++) {
       const a = rnd() * TAU;
       const m = mesh(

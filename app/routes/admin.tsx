@@ -70,10 +70,8 @@ export function meta() {
   return [{ title: `${t("account.admin")} · StreamBullets` }, { name: "robots", content: "noindex" }];
 }
 
-/**
- * Admin data loads only after the server-side gate: an administrator, and under ADMIN_STEP_UP=enforce two
- * registered keys and a step-up in this session from the last 15 minutes. The API checks the same on every call.
- */
+// Load only after the server admin gate. Enforce mode requires two keys and session step-up within 15
+// minutes; each API call repeats the check.
 export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
   const session = await requestSession(request, app);
@@ -405,7 +403,7 @@ function AdminContent({ data }: Readonly<{ data: LoaderData }>): ReactNode {
   return null;
 }
 
-/** Under ADMIN_STEP_UP=report: a reminder until two keys exist. Admin still opens. */
+// Report mode warns about missing keys without blocking Admin.
 function KeysReminder({ data }: Readonly<{ data: LoaderData }>): ReactNode {
   if (data.stepUp?.mode !== "report" || data.stepUp.keys >= data.stepUp.requiredKeys) return null;
   if (data.view === "keys") return null;
@@ -450,7 +448,7 @@ export default function Admin(): ReactNode {
   const [skipped, setSkipped] = useState<boolean>(false);
   const { providers, view, screen, stepUp } = data;
   const sectionLabel = t(views.find((item) => item.value === view)?.label ?? "admin.view.requests");
-  // Report mode: ask for the key like enforce would, but let the admin continue (the server logs it).
+  // Report mode permits bypass and logs it server-side.
   const softGate =
     screen === "admin" &&
     stepUp?.mode === "report" &&

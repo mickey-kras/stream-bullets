@@ -1,10 +1,9 @@
-/* Design tokens. Colours, fonts and the display-preference hooks on <html> (data-cvd, data-contrast,
-   data-text, data-motion, data-underline, data-font) used by the Accessibility & display preferences (P7). */
+/* Design tokens and html data-* hooks for display preferences. */
 :root {
   color-scheme: dark;
   --heading: Oswald, 'Arial Narrow', system-ui,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans CJK JP','PingFang SC','Microsoft YaHei','Noto Sans CJK SC','Noto Sans Devanagari','Nirmala UI',sans-serif;
   --body: Figtree, Onest, system-ui,'Segoe UI',Roboto,'Noto Sans','Helvetica Neue',Arial,'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans CJK JP','PingFang SC','Microsoft YaHei','Noto Sans CJK SC','Noto Sans Devanagari','Nirmala UI',sans-serif;
-  /* The mockup sized some type by its frame; in the app the frame is the viewport. */
+  /* Use viewport dimensions for responsive type. */
   --vw: 1vw;
   --vh: 1dvh;
   --avatar-bg: #324c4e;
@@ -118,7 +117,7 @@
   --mash-c: #e8735a;
   --mash-d: #a58cf0;
   --mash-shadow: #00000059;
-  /* The transparency checkerboard behind the overlay monitors (the OBS source is transparent). */
+  /* Overlay transparency checkerboard. */
   --mock-check-a: #2a2d33;
   --mock-check-b: #1f2227;
   --tab-border:#6b8285;
@@ -238,7 +237,14 @@
   --c-9cacab:#e6eeec;
   --header-rule:#b8c9c6;
 }
-/* High contrast also follows the system setting until the person picks a contrast mode. */
+/* High contrast keeps the protan live hue (a lighter violet, 8.5:1 on black); tritan keeps the high-contrast red. */
+:root[data-contrast=high][data-cvd=pd] {
+  --status-live:#ad94ff;
+  --status-live-bg:#ad94ff;
+  --status-live-fg:#000;
+  --live:#ad94ff;
+}
+/* Follow system contrast until explicitly selected. */
 @media (prefers-contrast: more) {
   :root:not([data-contrast]) {
     --bg:#000;
@@ -286,5 +292,11 @@
     --c-e6e4d1:#fff;
     --c-9cacab:#e6eeec;
     --header-rule:#b8c9c6;
+  }
+  :root:not([data-contrast])[data-cvd=pd] {
+    --status-live:#ad94ff;
+    --status-live-bg:#ad94ff;
+    --status-live-fg:#000;
+    --live:#ad94ff;
   }
 }

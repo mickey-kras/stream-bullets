@@ -16,7 +16,7 @@ import { displayNameSchema, readDisplayPrefs } from "./validation";
 
 export { isPlaceholderEmail } from "./validation";
 
-/** Sign-in providers in button order. Each needs both values of its credential pair (plan section 5). */
+// Provider button order; each requires a complete credential pair.
 const providerCredentials = (env: AppEnv): readonly (readonly [Provider, string | undefined, string | undefined])[] => [
   ["google", env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET],
   ["tiktok", env.TIKTOK_CLIENT_KEY, env.TIKTOK_CLIENT_SECRET],
@@ -24,7 +24,7 @@ const providerCredentials = (env: AppEnv): readonly (readonly [Provider, string 
   ["instagram", env.INSTAGRAM_CLIENT_ID, env.INSTAGRAM_CLIENT_SECRET],
 ];
 
-/** The providers whose credential pair is set. A half-set pair is a configuration error (503). */
+// Incomplete provider credentials return 503.
 export function configuredProviders(env: AppEnv): Provider[] {
   const providers: Provider[] = [];
   for (const [provider, id, secret] of providerCredentials(env)) {
@@ -36,12 +36,8 @@ export function configuredProviders(env: AppEnv): Provider[] {
   return providers;
 }
 
-/**
- * TikTok and Instagram share no email address. Accounts from them get a stable, non-routable placeholder with
- * emailVerified false, so they can never be admins and the app never shows or mails the address (R5). Better Auth's
- * TikTok provider writes its own `{open_id}@tiktok.placeholder.invalid`; the Instagram provider below writes
- * `{id}@instagram.invalid`.
- */
+// TikTok/Instagram use non-routable, unverified emails: never admin, displayed, or mailed. TikTok uses
+// `{open_id}@tiktok.placeholder.invalid`; Instagram uses `{id}@instagram.invalid`.
 export const PLACEHOLDER_DOMAINS = {
   tiktok: "tiktok.placeholder.invalid",
   instagram: "instagram.invalid",
@@ -51,18 +47,15 @@ export function placeholderEmail(provider: keyof typeof PLACEHOLDER_DOMAINS, id:
   return `${id}@${PLACEHOLDER_DOMAINS[provider]}`;
 }
 
-/**
- * Better Auth finds an existing user by email before it creates one. So an account from another provider that
- * claims `{id}@instagram.invalid` would block the real Instagram user, who would get "account not linked"
- * (security review finding 9). Only the provider that owns a placeholder domain may create an `.invalid` address.
- */
+// Only the owning provider may create its `.invalid` addresses; otherwise email lookup could block the real
+// provider account.
 export function placeholderAllowed(email: string, provider: string | null): boolean {
   const domain: string = email.toLowerCase().split("@").at(-1) ?? "";
   if (!/\.invalid\.?$/u.test(domain)) return true;
   return Object.entries(PLACEHOLDER_DOMAINS).some(([owner, owned]) => owner === provider && owned === domain);
 }
 
-/** The provider of the OAuth callback that is creating the user: `/callback/:id` or `/oauth2/callback/:providerId`. */
+// Provider from `/callback/:id` or `/oauth2/callback/:providerId`.
 function signInProvider(context: { params?: Record<string, unknown> } | null): string | null {
   const value: unknown = context?.params?.id ?? context?.params?.providerId;
   return typeof value === "string" ? value : null;
@@ -86,10 +79,8 @@ const instagramProfileSchema = z.object({
   name: z.string().optional(),
 });
 
-/**
- * "Continue with Instagram": Instagram API with Instagram Login (professional accounts only, needs Meta app
- * review). It is plain OAuth 2 with a form-post token exchange whose answer may be wrapped in `data[]`.
- */
+// Instagram Login requires professional accounts and Meta review. OAuth 2 uses form-post token exchange;
+// responses may wrap values in `data[]`.
 function instagramProvider(
   clientId: string,
   clientSecret: string,
@@ -233,8 +224,8 @@ function authUserOptions(env: AppEnv): NonNullable<BetterAuthOptions["user"]> {
       const reliableEmail: string | null =
         source.method === "oauth" ? reliableProviderEmail(source.oauth?.providerId, source.oauth?.profile) : null;
       if (source.action === "create-user") {
-        // Better Auth passes this same validated data object to its create hooks.
-        // input:false excludes this field from both client input and provider-map copying.
+        // Better Auth passes this same validated data object to its create hooks. input:false excludes this
+        // field from both client input and provider-map copying.
         user.emailLinkVerified = reliableEmail !== null && reliableEmail === user.email;
         return;
       }
@@ -288,12 +279,11 @@ function authUserOptions(env: AppEnv): NonNullable<BetterAuthOptions["user"]> {
       if (source.method !== "oauth" || !provider || !configuredProviders(env).includes(provider as Provider)) {
         return { error: "account_not_linked", errorDescription: "Choose a configured login provider." };
       }
-      // Explicit state proves both identities; email is not the ownership proof in this flow.
-      // Replace this request's list, never the shared array or the automatic-linking policy.
+      // Explicit linking proves both identities without email. Replace only this request's provider list;
+      // preserve the shared list and automatic-linking policy.
       ctx.context.trustedProviders = [...ctx.context.trustedProviders, provider];
     },
-    // Profile endpoints write display fields; the OAuth validation gate writes email authority.
-    // Clients cannot set these fields through Better Auth endpoints.
+    // App endpoints own display fields; OAuth validation owns email authority. Better Auth rejects client writes.
     additionalFields: {
       emailLinkVerified: { type: "boolean", required: false, input: false, returned: false, defaultValue: false },
       avatarPreset: { type: "number", required: false, input: false },
@@ -399,6 +389,9 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
             google: {
               clientId: env.GOOGLE_CLIENT_ID,
               clientSecret: env.GOOGLE_CLIENT_SECRET,
+              // Without this, Better Auth asks Google for incremental authorization, and the sign-in token would
+              // also carry the YouTube scope of a connected channel.
+              includeGrantedScopes: false,
               mapProfileToUser: (profile) => ({
                 email: profile.email?.trim().toLowerCase(),
                 emailVerified: profile.email_verified === true,
@@ -468,7 +461,7 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
   return betterAuth(options);
 }
 
-/** The signed-in viewer and the id of their session (for the per-session admin step-up). Server only. */
+// Server-only viewer/session pair for per-session step-up.
 export async function getViewerSession(
   request: Request,
   context: AppContext,
@@ -485,29 +478,30 @@ export async function getViewerSession(
   return { viewer: viewerValue(response.user), sessionId: response.session.id };
 }
 
-/** How recent a sign-in must be for an irreversible account action (deleting the account). */
+// Fresh-session window for account deletion and channel connection changes.
 export const RECENT_SIGN_IN_MS = 10 * 60 * 1000;
 
-/**
- * Refuses an irreversible action on a session that did not start within `RECENT_SIGN_IN_MS`. A stolen session
- * cookie then cannot delete the account: that needs a fresh sign-in with the provider. Answers 403 with the code
- * `reauth_required`, so the client can offer to sign in again.
- */
-export async function requireRecentSignIn(request: Request, env: AppEnv, now: number = Date.now()): Promise<void> {
+// Require a session newer than `RECENT_SIGN_IN_MS`; stolen old cookies cannot delete accounts or change channels.
+// Return 403 `reauth_required` with `message` for client reauthentication.
+export async function requireRecentSignIn(
+  request: Request,
+  env: AppEnv,
+  now: number = Date.now(),
+  message: string = "Sign in again to delete your account.",
+): Promise<void> {
   const result = await createAuth(env).api.getSession({
     headers: request.headers,
     query: { disableCookieCache: true },
   });
   if (!result) throw new HttpError(401, "Sign in to continue.");
   if (now - result.session.createdAt.getTime() > RECENT_SIGN_IN_MS)
-    throw new HttpError(403, "Sign in again to delete your account.", "reauth_required");
+    throw new HttpError(403, message, "reauth_required");
 }
 
 export async function getViewer(request: Request, context: AppContext): Promise<Viewer | null> {
   return (await getViewerSession(request, context))?.viewer ?? null;
 }
 
-/** Shapes the signed-in account for the client. */
 export function viewerValue(account: User & Record<string, unknown>): Viewer {
   const avatar: string = `/images/avatar/${encodeURIComponent(account.id)}`;
   const preset = account.avatarPreset;

@@ -14,7 +14,7 @@ import {
   withDefaults,
 } from "../app/lib/prefs";
 import { effectiveStatus, expandSeries, upcomingRows } from "../app/lib/schedule";
-import { paths, renamedPath, shellFromMatches, useShell, type ShellData } from "../app/lib/shell";
+import { localPath, paths, renamedPath, shellFromMatches, useShell, type ShellData } from "../app/lib/shell";
 import { eventsJsonLd, personJsonLd, postingJsonLd, siteJsonLd } from "../app/lib/structured-data";
 import { supportLabel } from "../app/lib/support";
 import { replyParent, visibleReplies } from "../app/lib/threads";
@@ -38,7 +38,7 @@ function shell(extra: Partial<ShellData> = {}): ShellData {
   };
 }
 
-/** Renders `node` on the server inside a router whose root loader returned `data`. */
+// Render `node` with router root-loader `data`.
 async function renderInRoot(node: () => ReactNode, data: ShellData | null): Promise<string> {
   const handler = createStaticHandler([
     { id: "root", path: "/", loader: () => data, Component: () => node() as ReactElement },
@@ -136,6 +136,19 @@ describe("display preferences", (): void => {
       shell({ prefs: { text: "130" } }),
     );
     expect(parsed(html)).toEqual({ ...DEFAULT_PREFS, text: "130" });
+  });
+});
+
+describe("localPath", (): void => {
+  it("keeps same-origin paths and rejects anything that could leave the site", (): void => {
+    expect(localPath("/@alice?intent=suggest#top")).toBe("/@alice?intent=suggest#top");
+    expect(localPath("/streamers")).toBe("/streamers");
+    expect(localPath("/\u{1f600}?q=\u00e9")).toBe("/%F0%9F%98%80?q=%C3%A9");
+    const unsafe = [null, undefined, "", "streamers", "//evil.example", "/\\evil.example", "/\t/evil.example"];
+    for (const value of [...unsafe, "https://evil.example", "javascript:alert(1)"]) expect(localPath(value)).toBeNull();
+    for (const codePoint of [...Array.from({ length: 32 }, (_, index: number): number => index), 127]) {
+      expect(localPath(`/a${String.fromCodePoint(codePoint)}b`)).toBeNull();
+    }
   });
 });
 
@@ -384,7 +397,7 @@ describe("upcomingRows", () => {
       hero,
       500,
     );
-    // A live stream takes its series' row like the next stream would, and an ended one stays out.
+    // A live stream occupies its series row; an ended stream does not.
     expect(rows.map((r) => r.id)).toEqual(["live-b", "live-solo", "c1"]);
   });
 });

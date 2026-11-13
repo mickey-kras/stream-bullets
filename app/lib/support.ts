@@ -3,16 +3,16 @@ import type { SupportLinkKind } from "../types";
 import { isPlainUrlText } from "./url-text";
 
 export interface SupportProvider {
-  /** Shown on the button (except `other`, which uses the owner's label). */
+  // Button label; other uses the owner's label.
   label: string;
-  /** Allowed hosts. A `www.` prefix is accepted too. Empty means any public host (`other`). */
+  // Allow www. prefixes. Empty host list permits any public host (other).
   hosts: readonly string[];
-  /** The path must start with this (Twitch subscriptions live under /subs/). */
+  // Required path prefix, such as /subs/ for Twitch.
   pathPrefix?: string;
   icon: "gift" | "heart" | "star" | "link";
 }
 
-/** Link-outs only: StreamBullets never handles money. Each provider's links must stay on its own domain. */
+// External links only; no payment handling. Restrict each provider to its own domain.
 export const SUPPORT_PROVIDERS: Readonly<Record<SupportLinkKind, SupportProvider>> = {
   kofi: { label: "Ko-fi", hosts: ["ko-fi.com"], icon: "gift" },
   patreon: { label: "Patreon", hosts: ["patreon.com"], icon: "heart" },
@@ -25,7 +25,7 @@ export const SUPPORT_PROVIDERS: Readonly<Record<SupportLinkKind, SupportProvider
   other: { label: "Other", hosts: [], icon: "link" },
 };
 
-/** True when `url` is an https link on the provider's own domain, with a page path (not just the home page). */
+// HTTPS provider URL with a non-root path.
 export function isAllowedSupportLink(kind: SupportLinkKind, url: string): boolean {
   if (url.length > 500 || !isPlainUrlText(url) || !URL.canParse(url)) return false;
   const parsed = new URL(url);
@@ -33,7 +33,7 @@ export function isAllowedSupportLink(kind: SupportLinkKind, url: string): boolea
   const host = parsed.hostname.toLowerCase();
   const provider = SUPPORT_PROVIDERS[kind];
   if (provider.hosts.length === 0) {
-    // Any public host name: a dot, letters somewhere, and not an IP address.
+    // Public hostname: contains a dot and letters; excludes IP addresses.
     return host.includes(".") && /[a-z]/.test(host) && !host.startsWith("[") && !/^[\d.]+$/.test(host);
   }
   if (!provider.hosts.some((allowed: string): boolean => host === allowed || host === `www.${allowed}`)) return false;
@@ -43,7 +43,7 @@ export function isAllowedSupportLink(kind: SupportLinkKind, url: string): boolea
   return path.length > 1;
 }
 
-/** Provider names that are words rather than brands, in the page language. */
+// Translate generic names; retain brands.
 const PROVIDER_WORDS: Partial<Record<SupportLinkKind, MessageId>> = {
   streamlabs: "support.provider.streamlabs",
   streamelements: "support.provider.streamelements",
@@ -52,13 +52,11 @@ const PROVIDER_WORDS: Partial<Record<SupportLinkKind, MessageId>> = {
   other: "support.provider.other",
 };
 
-/** A provider's name for buttons and lists. */
 export function providerLabel(kind: SupportLinkKind): string {
   const id: MessageId | undefined = PROVIDER_WORDS[kind];
   return id ? t(id) : SUPPORT_PROVIDERS[kind].label;
 }
 
-/** The button text for a link. */
 export function supportLabel(link: { kind: SupportLinkKind; label: string | null }): string {
   return link.kind === "other" ? link.label || t("support.fallbackLabel") : providerLabel(link.kind);
 }

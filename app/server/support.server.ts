@@ -31,7 +31,7 @@ export async function getSupport(env: AppEnv, streamerId: string): Promise<Suppo
   };
 }
 
-/** Checks one link against its provider's domain allow-list. Returns the error to show, or null. */
+// Checks one link against its provider's domain allow-list. Returns the error to show, or null.
 export function supportLinkError(link: SupportLinkInput, index: number): string | null {
   const provider = SUPPORT_PROVIDERS[link.kind];
   if (!isAllowedSupportLink(link.kind, link.url))
@@ -42,7 +42,7 @@ export function supportLinkError(link: SupportLinkInput, index: number): string 
   return null;
 }
 
-/** `PUT /api/support-links`: replaces the owner's links (at most 4) and where they show, in one batch. */
+// `PUT /api/support-links`: replaces the owner's links (at most 4) and where they show, in one batch.
 export async function saveSupport(env: AppEnv, viewerId: string, value: unknown): Promise<SupportSettings> {
   const result = supportSettingsSchema.safeParse(value);
   if (!result.success) throw new HttpError(400, result.error.issues[0]?.message ?? "Invalid support links.");

@@ -4,12 +4,12 @@ import type { DisplayPrefs, Provider, StreamerStatus, Viewer } from "../types";
 
 export type { Provider } from "../types";
 
-/** The root loader's data: everything the headers, account menu and footer need on every page. */
+// Shared root loader data.
 export interface ShellData {
   viewer: Viewer | null;
   providers: Provider[];
   admin: boolean;
-  /** The viewer's own page. A frozen or suspended page shows its owner a notice in the account menu (R13). */
+  // Owner's page; frozen/suspended status appears in the account menu.
   ownStreamer: {
     handle: string;
     name: string;
@@ -17,15 +17,15 @@ export interface ShellData {
     statusReason: string | null;
     statusChangedAt: number | null;
   } | null;
-  /** The page's language: the account's, then the cookie's, then the browser's, then English. */
+  // Locale priority: account, cookie, browser, English.
   locale: Locale;
-  /** Display preferences: the account's when signed in and saved, else this browser's cookie. */
+  // Saved account preferences; otherwise browser cookie.
   prefs: DisplayPrefs;
-  /** The site's origin (APP_ORIGIN), for absolute links in structured data. */
+  // APP_ORIGIN for absolute structured-data links.
   origin: string;
 }
 
-/** Shell data from the root loader. Falls back to signed out where the root loader did not run (some 404s). */
+// Default to signed out if the root loader did not run, such as some 404s.
 export function useShell(): ShellData {
   return (
     useRouteLoaderData<ShellData>("root") ?? {
@@ -40,7 +40,6 @@ export function useShell(): ShellData {
   );
 }
 
-/** The root loader's data inside a route's `meta` function. */
 export function shellFromMatches(
   matches: readonly ({ id: string; loaderData?: unknown } | undefined)[],
 ): ShellData | null {
@@ -48,7 +47,7 @@ export function shellFromMatches(
   return (root?.loaderData as ShellData | undefined) ?? null;
 }
 
-/** App paths the shell links to. Account settings are dialogs (`?dialog=profile`); /settings redirects there. */
+// Account settings use ?dialog=profile; /settings redirects there.
 export const paths = {
   home: "/",
   streamers: "/streamers",
@@ -58,16 +57,28 @@ export const paths = {
   privacy: "/privacy",
   terms: "/terms",
   reporting: "/terms#reporting",
-  /** The official Ideas board, with Suggest an improvement open (item 46). */
+  // Official board with the suggestion dialog open.
   ideas: "/@streambullets?intent=suggest",
   ai: "/ai",
   streamer: (handle: string): string => `/@${handle}`,
 } as const;
 
-/**
- * Where a page under `/@from` moves when that handle becomes `to`, or null when `pathname` is not on that page.
- * Only the whole first segment counts, so `/@abcd` is not a page of `abc`.
- */
+// Validate ?next= as a same-origin path. Reject external URLs, backslashes, control characters, and absent values.
+export function localPath(value: string | null | undefined): string | null {
+  if (
+    !value?.startsWith("/") ||
+    value.startsWith("//") ||
+    [...value].some(
+      (char: string): boolean => char === "\\" || char.codePointAt(0)! < 32 || char.codePointAt(0) === 127,
+    )
+  )
+    return null;
+  const base = "https://local.invalid";
+  const url = new URL(value, base);
+  return url.origin === base ? `${url.pathname}${url.search}${url.hash}` : null;
+}
+
+// Replace only the complete /@from segment; /@abcd must not match abc. Return null for other pages.
 export function renamedPath(pathname: string, from: string, to: string): string | null {
   const old = `/@${from}`;
   if (pathname !== old && !pathname.startsWith(`${old}/`)) return null;

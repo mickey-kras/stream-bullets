@@ -31,7 +31,7 @@ async function signedIn(browser: Browser, role: string, ip: number, mobile = fal
   return context;
 }
 
-/** A CTAP2 security key with a PIN set, like a YubiKey: user verification works and touches are automatic. */
+// CTAP2 key with a PIN, user verification, and automatic touches.
 async function addKey(cdp: CDPSession): Promise<string> {
   const { authenticatorId } = await cdp.send("WebAuthn.addVirtualAuthenticator", {
     options: {
@@ -78,14 +78,13 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await page.getByRole("button", { name: "Register this key" }).click();
   await expect(page.getByRole("heading", { name: "Add a backup key" })).toBeVisible();
 
-  // The backup key is a second authenticator. Keep the first key's credential to use it again later.
+  // Keep the first credential while registering the backup authenticator.
   const { credentials } = await cdp.send("WebAuthn.getCredentials", { authenticatorId: first });
   expect(credentials).toHaveLength(1);
   await cdp.send("WebAuthn.removeVirtualAuthenticator", { authenticatorId: first });
   await addKey(cdp);
   await expect(page.getByLabel("Key name")).toHaveValue("YubiKey – safe");
   await page.getByRole("button", { name: "Register this key" }).click();
-  // With both keys, the tab lists them.
   await expect(page.getByRole("article", { name: "YubiKey – safe" })).toBeVisible();
   await expect(page.getByRole("article", { name: "YubiKey – desk" })).toBeVisible();
   await page.getByRole("link", { name: "Streamer requests" }).click();
@@ -101,7 +100,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await expect(page.getByRole("article", { name: "YubiKey – keyring" })).toBeVisible();
   await shot(page, "keys-tab");
 
-  // A second session of the same account has no key check yet: Admin asks for a key first.
+  // A second session of the same account needs its own key check.
   const other = await signedIn(browser, "keyadmin2", clientIp("admin-keys", 122));
   const second = await newPage(other);
   const otherCdp = await other.newCDPSession(second);
@@ -115,7 +114,6 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await second.getByRole("button", { name: "Use security key" }).click();
   await expect(second.getByRole("heading", { name: /^Admin\s*:\s*Streamer pages$/ })).toBeVisible();
 
-  // Freeze a page with a reason and a note, then lift it.
   await second.getByLabel("Search streamer pages").fill("zz_room_48");
   await second.getByLabel("Search streamer pages").press("Enter");
   const row = second.getByRole("article", { name: "Room 48" });
@@ -127,7 +125,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await sheet.getByLabel("Internal note (optional)").fill("Test freeze from the browser suite.");
   await shot(second, "moderate-sheet");
   await sheet.getByRole("button", { name: "Freeze", exact: true }).click();
-  // "Notify the owner" is on by default for a freeze. The e2e server has no NOTIFY_EMAIL binding, so no email.
+  // Freeze defaults to notification; without NOTIFY_EMAIL, e2e sends no email.
   await expect(second.getByRole("status").filter({ hasText: "Froze" })).toHaveText(
     "Froze @zz_room_48. The owner sees a notice on their page. No email went out.",
   );
@@ -158,7 +156,7 @@ test("reports are grouped by page and resolved per item", async ({ browser }) =>
   }
   await close(reporter);
 
-  // The key admin's first session has a fresh key check from the previous test, or the report-mode gate.
+  // The first key-admin session has a fresh check or uses report mode.
   const context = await signedIn(browser, "keyadmin", clientIp("admin-keys", 124), true);
   const page = await newPage(context);
   await page.goto("/admin?view=reports");

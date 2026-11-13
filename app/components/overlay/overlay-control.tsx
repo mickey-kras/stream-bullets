@@ -20,7 +20,7 @@ import { useToast } from "../ui/toast";
 import { OverlayLink } from "./overlay-link";
 import { OverlayStage, type OverlayScene } from "./overlay-stage";
 
-/** The overlay message limit (the `overlay_state_message_check` constraint). */
+// Must match overlay_state_message_check.
 export const OVERLAY_MESSAGE_MAX = 120;
 
 const SOURCES: readonly { type: OverlaySource; label: MessageId; hint: MessageId; icon: IconName }[] = [
@@ -59,7 +59,7 @@ function sameSource(a: OverlaySourceRef, b: OverlaySourceRef): boolean {
   return a.type === b.type && a.ref === b.ref;
 }
 
-/** The ref a source starts with when the owner picks it: the newest poll, topic or card. */
+// Default source ref: newest poll, topic or card.
 export function defaultRef(type: OverlaySource, data: OverlayData): string | null {
   if (type === "poll") return data.polls[0]?.id ?? null;
   if (type === "topic") return data.topics[0]?.id ?? null;
@@ -67,11 +67,8 @@ export function defaultRef(type: OverlaySource, data: OverlayData): string | nul
   return null;
 }
 
-/**
- * What the control shows: the newer of what this tab saved and what the loader read, with a newer live `overlay`
- * message (another control tab, or the phone) on top. That message has no preview or message draft, so those
- * stay until the loader catches up.
- */
+// Use the newest saved, loaded or live overlay state. Live messages omit preview/draft fields; retain those
+// until reload catches up.
 export function controlState(
   saved: OverlayState,
   loaded: OverlayState,
@@ -93,19 +90,13 @@ export function controlState(
 
 type MonitorKind = "prev" | "air";
 
-/**
- * Opens "Position and size" on wide screens. Phones start with it closed, under the sources. The <details>
- * element keeps its own open state, so this runs once when it mounts and never fights the person's toggle.
- */
+// Initialize details open on wide screens only; preserve subsequent user toggles.
 function openOnWideScreens(element: HTMLDetailsElement | null): void {
   if (element && globalThis.matchMedia?.("(min-width: 43.75em)").matches) element.open = true;
 }
 
-/**
- * A 1920 by 1080 stage scaled to the width of its frame. The scale is a CSS variable, not React state. The stage
- * stays hidden until it is scaled, so it never shows at a wrong size and spills out of the frame.
- * On narrow screens the enlarge button gives the monitor the full width.
- */
+// Scale a 1920x1080 stage through CSS. Hide until measured to prevent overflow. Enlarge uses full width on
+// narrow screens.
 function Monitor({
   kind,
   source,
@@ -323,10 +314,7 @@ function SourcePicker({
   return null;
 }
 
-/**
- * Overlay control (item 33): Preview and On air monitors, Take, instant switch, layout presets and the
- * sources. Every change goes to `POST /api/overlay`, and the live room tells the OBS page at once.
- */
+// POST /api/overlay saves control changes; live room updates OBS immediately.
 export function OverlayControl({
   initial,
   live,
@@ -336,12 +324,12 @@ export function OverlayControl({
   reconnect,
 }: Readonly<{
   initial: OverlayState;
-  /** The overlay as the live room last sent it, so a change from another tab shows here too. */
+  // Latest live overlay state includes changes from other tabs.
   live?: OverlayPublic | null;
   scene: Omit<OverlayScene, "overlay">;
-  /** Whether the page has a private overlay link. Its key is never sent back. */
+  // Private-link existence only; never return its key.
   hasOverlayKey: boolean;
-  /** False while the live connection is down: changes still save, but the OBS page hears of them later. */
+  // Offline changes save but reach OBS after reconnect.
   connected?: boolean;
   reconnect?: () => void;
 }>): ReactNode {
@@ -378,7 +366,7 @@ export function OverlayControl({
     run({ action: "preview", source: { type, ref: defaultRef(type, scene.data) } });
   };
 
-  // Shortcuts: 1–8 pick a source, T takes the preview live. Typing in a field never triggers them.
+  // 1..8 selects sources; T takes preview live. Ignore typing in fields.
   useEffect(() => {
     const listener = (event: KeyboardEvent): void => {
       if (busy || event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;

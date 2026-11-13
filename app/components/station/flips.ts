@@ -1,12 +1,10 @@
 import * as THREE from "three";
 
-/* The mast signs turn over once when the pointer moves onto them, or when one is tapped. Each sign turns
-   on its own, finishes its turn before it can start another, and only turns again after the pointer
-   has left it and come back. A click or tap on a sign also activates it (item 4): it turns, and when the
-   turn ends `onActivate` gets its index, which the landing uses to open the Streamers list. */
+// Hover flips once until pointer exit; taps/clicks activate after the current flip ends. onActivate receives
+// the sign index for directory navigation.
 
 const FLIP_SECONDS = 1.1;
-/** A tap is a touch that lifts within this time and distance; anything longer is an orbit drag. */
+// Tap time/distance bounds distinguish orbit drags.
 const TAP_MS = 400;
 const TAP_PX = 10;
 
@@ -14,15 +12,15 @@ const ease = (t: number): number => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) 
 
 interface Sign {
   pivot: THREE.Group;
-  /** Seconds into the current turn, or -1 at rest. */
+  // Turn elapsed seconds; -1 at rest.
   turn: number;
   hovered: boolean;
-  /** Clicked or tapped: activate when the current turn ends. */
+  // Activate after the current turn.
   pending: boolean;
 }
 
 export interface Flips {
-  /** Advance turns and check what the pointer is over; returns true while any sign is turning. */
+  // Advance turns/hit testing; return whether animating.
   update: (camera: THREE.Camera, dt: number, enabled: boolean) => boolean;
 }
 
@@ -32,7 +30,7 @@ function advanceTurns(signs: readonly Sign[], dt: number, done: (sign: Sign) => 
     if (s.turn < 0) continue;
     s.turn += dt;
     const t = Math.min(s.turn / FLIP_SECONDS, 1);
-    // Positive turn about the sign's own x axis rolls its top edge toward the viewer.
+    // Positive local-x rotation rolls the top edge toward the viewer.
     s.pivot.rotation.x = ease(t) * Math.PI * 2;
     if (t >= 1) {
       s.pivot.rotation.x = 0;
@@ -77,7 +75,7 @@ export function createFlips(
   wrap.addEventListener(
     "pointerdown",
     (e: PointerEvent): void => {
-      // Mouse presses count too: a click activates a sign, and a drag still orbits.
+      // Mouse clicks activate; drags orbit.
       if (e.pointerType !== "mouse" || e.button === 0) down = { x: e.clientX, y: e.clientY, at: e.timeStamp };
     },
     { signal },
@@ -114,7 +112,7 @@ export function createFlips(
 
   return {
     update: (camera: THREE.Camera, dt: number, enabled: boolean): boolean => {
-      // The pointer cursor shows that a sign is a link, with motion on or off.
+      // Show pointer cursor regardless of motion settings.
       const over = hover ? signAt(camera, hover) : undefined;
       for (const s of signs) {
         const now = s === over;
@@ -129,7 +127,7 @@ export function createFlips(
           start(tapped);
           tapped.pending = true;
         } else {
-          // Motion off: no turn, go straight on.
+          // Reduced motion activates immediately.
           tapped.pending = true;
           activated(tapped);
         }

@@ -14,7 +14,6 @@ import { ScheduleForm, type EventBody } from "./schedule-form";
 
 export type EventStep = "view" | "edit" | "cancel" | "delete" | "replay";
 
-/** Downloads a one-stream .ics file for the viewer's calendar app. */
 export function downloadEvent(event: StreamEvent, name: string, pageUrl: string): void {
   const text = buildCalendar(
     name,
@@ -245,7 +244,6 @@ function ReplayStep({ event, onDone }: Readonly<{ event: StreamEvent; onDone: (m
   );
 }
 
-/** One stream: its facts and actions; the owner edits, cancels, deletes or adds a replay in the same sheet. */
 export function EventDialog({
   event,
   step,

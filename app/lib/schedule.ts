@@ -1,34 +1,31 @@
 import type { StreamEvent, StreamEventStatus } from "../types";
 import { addDays, compareDates, weekdayOf, zonedTime, type LocalDate } from "./zoned";
 
-/** A weekly series is stored as one row per occurrence, generated this far ahead; the hourly cron tops it up. */
+// Generate weekly occurrences this far ahead; hourly cron extends them.
 export const SERIES_HORIZON_MS = 12 * 7 * 86_400_000;
 
-/** At most this many occurrences are written for one series in one go (12 weeks × 7 days). */
+// Maximum occurrences per batch: 12 weeks x 7 days.
 export const MAX_SERIES_BATCH = 84;
 
-/** Weekday bitmask: bit 0 is Sunday … bit 6 is Saturday. */
+// Weekday bits: 0 = Sunday; 6 = Saturday.
 export function hasWeekday(mask: number, weekday: number): boolean {
   return (mask & (1 << weekday)) !== 0;
 }
 
 export interface SeriesRule {
-  /** First day the series may occur on (local to `zone`). */
+  // First allowed local date in zone.
   first: LocalDate;
   hour: number;
   minute: number;
   zone: string;
-  /** Weekday bitmask, 1..127. */
+  // Weekday bitmask, 1..127.
   days: number;
-  /** Last day (inclusive), or null for no end. */
+  // Inclusive last day; null if unlimited.
   until: LocalDate | null;
 }
 
-/**
- * The start times of a weekly series from `rule.first` onwards, before `horizon` (UTC ms) and up to `rule.until`.
- * Every occurrence keeps the same wall-clock time in the series' zone, so a daylight-saving change moves the UTC
- * time, not the local one. No RRULE: each occurrence is a plain timestamp.
- */
+// Generate UTC timestamps from first through until, before horizon. Preserve zoned wall time across DST
+// changes; no RRULE.
 export function expandSeries(rule: SeriesRule, horizon: number, limit: number = MAX_SERIES_BATCH): number[] {
   const starts: number[] = [];
   if (rule.days <= 0) return starts;
@@ -43,10 +40,7 @@ export function expandSeries(rule: SeriesRule, horizon: number, limit: number = 
   return starts;
 }
 
-/**
- * What a stream shows as: cancelled and ended stay as stored; otherwise the clock decides between upcoming
- * (scheduled), live and ended.
- */
+// Keep cancelled/ended status; derive other states from the clock.
 export function effectiveStatus(
   stored: StreamEventStatus,
   startsAt: number,
@@ -58,12 +52,12 @@ export function effectiveStatus(
   return now < startsAt + durationMin * 60_000 ? "live" : "ended";
 }
 
-/** The schedule's clock wakes this often before a mark: countdowns round to the nearest minute, hour or day. */
+// Countdown wake interval before each mark.
 export const SCHEDULE_STEP_MS = 30_000;
 
 export type Timed = Pick<StreamEvent, "status" | "startsAt" | "durationMin">;
 
-/** The instants the schedule's display changes: each stream not yet ended or cancelled starts and ends. */
+// Start/end boundaries for active streams.
 export function scheduleMarks(events: readonly Timed[]): number[] {
   const marks: number[] = [];
   for (const event of events)
@@ -72,7 +66,7 @@ export function scheduleMarks(events: readonly Timed[]): number[] {
   return marks;
 }
 
-/** The streams as they show at `now`: the loader's status moves on with the clock. */
+// Advance loaded statuses using now.
 export function statusesAt<T extends Timed>(events: readonly T[], now: number): T[] {
   return events.map((event: T): T => {
     const status = effectiveStatus(event.status, event.startsAt, event.durationMin, now);
@@ -80,16 +74,13 @@ export function statusesAt<T extends Timed>(events: readonly T[], now: number): 
   });
 }
 
-/** The first stream live at `now`, by the clock rather than the status the loader stored. */
+// First live stream at now, regardless of loaded status.
 export function liveEventAt<T extends Timed>(events: readonly T[], now: number): T | null {
   return statusesAt(events, now).find((event: T) => event.status === "live") ?? null;
 }
 
-/**
- * The Upcoming list under the hero: one row per series, the next one still on, plus one-off streams.
- * A cancelled stream shows but never takes its series' place, so a cancellation cannot hide the next stream.
- * Live streams other than the hero come first (they started earlier), so overlapping streams never disappear.
- */
+// Show each series' next active occurrence plus one-offs. Keep cancellations without hiding the next
+// occurrence. Include overlapping live streams before upcoming ones.
 export function upcomingRows<T extends Pick<StreamEvent, "startsAt" | "status" | "seriesId">>(
   events: readonly T[],
   next: T | undefined,

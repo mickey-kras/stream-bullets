@@ -6,10 +6,7 @@ import * as T from "./textures";
 export type Animator = (time: number, dt: number) => void;
 export type Draw = (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
 
-/**
- * Shared state for building and running the station: the palette, the registries the render loop and the
- * lights switch walk, and helpers that need either. Built once per station and passed to every part.
- */
+// Per-station palette, animation/light registries and shared helpers.
 export function createKit(compact: boolean, family: string) {
   const palette = createPalette(compact);
   const { brass, gold, red, plantGreen, plantDark } = palette;
@@ -27,10 +24,9 @@ export function createKit(compact: boolean, family: string) {
     emissives: [...palette.lit],
     halos: [] as Array<[THREE.Sprite, number]>,
     practicals: [] as Array<[THREE.PointLight, number]>,
-    /** Extra work for the lights switch, registered by the parts that own it. */
+    // Part-specific light-switch callbacks.
     onLights: [] as Array<(on: boolean) => void>,
 
-    /** Soft additive glow around a light source. */
     halo(at: P, size: number, color: string, opacity: number, parent: THREE.Object3D): THREE.Sprite {
       const material = new THREE.SpriteMaterial({
         map: glowTexture,
@@ -48,7 +44,7 @@ export function createKit(compact: boolean, family: string) {
       kit.halos.push([s, opacity * 0.7]);
       return s;
     },
-    /** Point light that goes dark with the lights switch. power is [intensity, distance]. */
+    // Switchable light; power = [intensity, distance].
     practical(color: string, power: readonly [number, number], at: P, parent: THREE.Object3D): THREE.PointLight {
       const l = new THREE.PointLight(color, power[0], power[1], 2);
       l.position.set(at[0], at[1], at[2]);
@@ -56,7 +52,7 @@ export function createKit(compact: boolean, family: string) {
       kit.practicals.push([l, power[0]]);
       return l;
     },
-    /** Painted canvas label that repaints when the typeface changes. size is [width, height]. */
+    // Repaint on typeface changes; size = [width, height].
     label(
       draw: Draw,
       size: readonly [number, number],
@@ -91,7 +87,7 @@ export function createKit(compact: boolean, family: string) {
       if (glowing > 0.5) kit.emissives.push([mat, glowing]);
       return mesh(new THREE.PlaneGeometry(w, h), mat, at, parent, false);
     },
-    /** A clump of leaves. */
+
     plant(at: P, count: number, length: number, parent: THREE.Object3D, seed: number): void {
       const rnd = T.random(seed);
       for (let i = 0; i < count; i++) {
@@ -101,7 +97,7 @@ export function createKit(compact: boolean, family: string) {
         frond(base, angle, shape, rnd() > 0.5 ? plantGreen : plantDark, parent);
       }
     },
-    /** Round instrument with a twitching needle; amber gauges are backlit VU meters. */
+    // Animated instrument; amber dials are backlit VU meters.
     gauge(at: P, rot: number, size: number, parent: THREE.Object3D, amber = false, high = false): void {
       const g = add(new THREE.Group(), parent);
       g.position.set(at[0], at[1], at[2]);
@@ -130,7 +126,7 @@ export function createKit(compact: boolean, family: string) {
         0.002,
       );
       const seed = Math.random() * 10;
-      // VU meters dance; pressure dials idle near the middle, or strain against the red when running high.
+      // VU needles dance; pressure needles idle or strain near red.
       const pressureMotion: readonly [number, number, number, number] = high
         ? [2.6, 0.14, 0.07, -1]
         : [0.7, 0.12, 0.02, -0.3];
@@ -138,11 +134,11 @@ export function createKit(compact: boolean, family: string) {
       needle.rotation.z = rest;
       kit.animators.push((t: number): void => {
         needle.rotation.z = Math.sin(t * speed + seed) * swing + Math.sin(t * 11.7 + seed) * jitter + rest;
-        // A high-pressure dial's red zone throbs like a warning lamp.
+        // Pulse high-pressure red zones.
         if (high) faceMaterial.emissiveIntensity = kit.illuminated ? 1.2 + 0.7 * Math.sin(t * 5 + seed) : 0;
       });
     },
-    /** Red hand-wheel valve. */
+
     valve(at: P, rot: THREE.Euler, size: number, parent: THREE.Object3D): void {
       const g = add(new THREE.Group(), parent);
       g.position.set(at[0], at[1], at[2]);

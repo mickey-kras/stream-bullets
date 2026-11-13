@@ -21,7 +21,6 @@ export const pageFilters: { value: PageFilter; label: "admin.pages.all" | `admin
   { value: "suspended", label: "admin.pages.suspended" },
 ];
 
-/** Active, Frozen or Suspended, as a badge. */
 export function StatusBadge({ status }: Readonly<{ status: StreamerStatus }>): ReactNode {
   const icons = { suspended: "eye-off", frozen: "lock", active: "success" } as const;
   const icon = icons[status];
@@ -40,7 +39,7 @@ const historyLabels: Record<string, PageAction> = {
   unsuspend: "unsuspend",
 };
 
-/** An audit action in words; unknown actions show as stored. */
+// Translate known audit actions; preserve unknown values.
 function historyLabel(action: string): string {
   if (action in historyLabels) return actionLabel(historyLabels[action]);
   if (action === "official") return t("admin.pages.markedOfficial");
@@ -158,7 +157,6 @@ function PageRow({
   );
 }
 
-/** The Streamer pages tab: search, status filter, and Freeze/Suspend with their reverse. */
 export function StreamerPages({
   filter,
   query,

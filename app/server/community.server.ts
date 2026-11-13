@@ -25,7 +25,7 @@ function cardValue(row: CardRow): CommunityCard {
   };
 }
 
-/** The page's cards in order, or null when the owner never saved any (the page then shows the defaults, R18). */
+// Return ordered cards, or null for the default cards.
 export async function listCards(env: AppEnv, streamerId: string): Promise<CommunityCard[] | null> {
   const { results } = await env.DB.prepare("SELECT * FROM community_cards WHERE streamer_id=? ORDER BY position")
     .bind(streamerId)
@@ -33,19 +33,15 @@ export async function listCards(env: AppEnv, streamerId: string): Promise<Commun
   return results.length === 0 ? null : results.map(cardValue);
 }
 
-/** An overlay source that names a card no longer on the page goes to Hidden, never to another card. */
+// An overlay source that names a card no longer on the page goes to Hidden, never to another card.
 function clearedCard(column: "air" | "preview"): string {
   return `CASE WHEN json_extract(${column},'$.type')='card' AND json_extract(${column},'$.ref') IS NOT NULL
     AND json_extract(${column},'$.ref') NOT IN (SELECT id FROM community_cards WHERE streamer_id=?1)
     THEN '{"type":"hidden","ref":null}' ELSE ${column} END`;
 }
 
-/**
- * `PUT /api/community-cards`: replaces the owner's whole ordered list (at most 8) in one atomic batch. Saving an
- * empty list brings the two default cards back, because no rows means defaults. A card sent with the id of one of
- * the page's cards keeps that id, so the overlay keeps showing it; the rows are rewritten because the position
- * index is unique and positions only go up to 7. An overlay that shows a card gets a new revision, so it reloads.
- */
+// Replace up to eight cards atomically. Empty restores defaults; existing IDs preserve overlay references.
+// Rewrite positions (unique, 0-7), bump overlay revision, and reload.
 export async function saveCards(env: AppEnv, viewerId: string, value: unknown): Promise<CommunityCard[] | null> {
   const result = communityCardsSchema.safeParse(value);
   if (!result.success) throw new HttpError(400, result.error.issues[0]?.message ?? "Invalid cards.");

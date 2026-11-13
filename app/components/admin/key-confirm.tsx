@@ -3,7 +3,7 @@ import { t } from "../../i18n";
 import { Icon } from "../ui/icon";
 import { ceremonyError, confirmWithKey, webAuthnAvailable } from "./webauthn";
 
-/** What to do when keys are lost. Recovery is operator-only (SECURITY.md). */
+// Operator-only lost-key recovery; see SECURITY.md.
 export function LostKeys(): ReactNode {
   return (
     <details className="key-lost">
@@ -13,10 +13,7 @@ export function LostKeys(): ReactNode {
   );
 }
 
-/**
- * "Confirm it's you": one WebAuthn assertion with a registered security key. On success the server stamps this
- * session, and `onConfirmed` runs (reload the data, or retry the action that asked for it).
- */
+// WebAuthn assertion stamps this session; onConfirmed reloads data or retries the action.
 export function KeyConfirm({
   onConfirmed,
   inDialog = false,
@@ -25,9 +22,9 @@ export function KeyConfirm({
 }: Readonly<{
   onConfirmed: () => Promise<void> | void;
   inDialog?: boolean;
-  /** The card title is the page's h1 (the gate screen). */
+  // Gate title is the page h1.
   pageHeading?: boolean;
-  /** The button text; "Use security key" by default. */
+  // Default: Use security key.
   label?: string;
 }>): ReactNode {
   const [phase, setPhase] = useState<"idle" | "waiting">("idle");

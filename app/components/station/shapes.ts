@@ -1,26 +1,25 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
-/* Geometry helpers shared by every part of the station. Positions are passed as [x, y, z] tuples and
-   sizes as tuples in the order the underlying Three.js geometry expects them. */
+// Shared geometry helpers. Positions: [x,y,z]; sizes follow Three.js geometry tuple order.
 
 export type P = readonly [number, number, number];
 
 export const TAU = Math.PI * 2;
-/** Height of the deck plate above the platform origin. */
+// Deck height above platform origin.
 export const DECK_Y = 0.45;
 
-/** Sides for a round section of radius r: thin rails need far fewer than thick pipes to look round. */
+// Reduce segments for thin rails.
 export function sides(r: number, most = 12): number {
   return Math.min(most, Math.max(5, Math.round(5 + r * 90)));
 }
 
-/** Sides for a lathe or cylinder of radius r seen whole: a 5 cm cap needs 16, a 1 m tank 48. */
+// Visible round parts: 16 sides for 5cm caps; 48 for 1m tanks.
 function roundSides(r: number): number {
   return Math.max(12, Math.round(12 + r * 40));
 }
 
-/** Segments along a curve: enough to keep bends smooth without cutting straight runs finely. */
+// Curve segments preserve bends without oversampling straight runs.
 function runSegments(curve: THREE.Curve<THREE.Vector3>, closed: boolean): number {
   const length = curve.getLength();
   let turn = 0;
@@ -31,7 +30,7 @@ function runSegments(curve: THREE.Curve<THREE.Vector3>, closed: boolean): number
     turn += prev.angleTo(t);
     prev = t;
   }
-  // About one segment per 9 degrees of turn, and at least one per half metre of run.
+  // At least one segment per 9-degree turn and half-meter run.
   return Math.min(closed ? 160 : 120, Math.max(4, Math.ceil(turn / 0.16), Math.ceil(length * 2)));
 }
 
@@ -55,15 +54,15 @@ export function mesh(
   return m;
 }
 
-/** Rounded box: size is [width, height, depth]. */
+// size = [width, height, depth].
 export function box(size: P, at: P, mat: THREE.Material, parent: THREE.Object3D, radius = 0.03): THREE.Mesh {
   const [w, h, d] = size;
-  // Small parts read the same with a single bevel step.
+  // Use one bevel step for small parts.
   const steps = Math.max(w, h, d) < 0.35 ? 1 : 2;
   return mesh(new RoundedBoxGeometry(w, h, d, steps, Math.min(radius, w / 2, h / 2, d / 2)), mat, at, parent);
 }
 
-/** Cylinder: dims is [radiusTop, radiusBottom, height]; extra is [segments, openEnded, thetaStart, thetaLength]. */
+// dims = [radiusTop, radiusBottom, height]; extra = [segments, openEnded, thetaStart, thetaLength].
 export function cyl(
   dims: P,
   at: P,
@@ -86,7 +85,7 @@ export function ball(r: number, at: P, mat: THREE.Material, parent: THREE.Object
   return mesh(new THREE.SphereGeometry(r, around, Math.max(6, Math.round(around * 0.66))), mat, at, parent);
 }
 
-/** Torus: ring is [radius, tube]; flat rings lie in the horizontal plane. */
+// ring = [radius, tube]; flat rings are horizontal.
 export function torus(
   ring: readonly [number, number],
   at: P,
@@ -127,7 +126,7 @@ export function tube(
   return mesh(new THREE.TubeGeometry(curve, runSegments(curve, closed), r, sides(r), closed), mat, [0, 0, 0], parent);
 }
 
-/** Pipe through waypoints with tight, rounded elbows and a flange at each end. */
+// Rounded-elbow pipe with end flanges.
 export function pipe(
   points: THREE.Vector3[],
   r: number,
@@ -181,7 +180,7 @@ export function pipe(
   return m;
 }
 
-/** Points on a horizontal circle of radius r from angle a0 to a1 (angles from +z toward +x). */
+// Horizontal circle points; angles run +z to +x.
 export function arc(r: number, a0: number, a1: number, y: number, n = 48): THREE.Vector3[] {
   const pts: THREE.Vector3[] = [];
   for (let i = 0; i <= n; i++) {
@@ -240,7 +239,7 @@ export function extrude(
   return mesh(geometry, mat, at, parent);
 }
 
-/** Rounded plate: size is [width, height, depth, cornerRadius]. */
+// size = [width, height, depth, cornerRadius].
 export function plaque(
   size: readonly [number, number, number, number],
   at: P,
@@ -251,7 +250,7 @@ export function plaque(
   return extrude(rounded(w, h, r), d, mat, at, parent, 0.015);
 }
 
-/** Rounded picture frame: size is [width, height, cornerRadius, border, depth]. */
+// size = [width, height, cornerRadius, border, depth].
 export function frame(
   size: readonly [number, number, number, number, number],
   at: P,
@@ -264,7 +263,7 @@ export function frame(
   return extrude(s, d, mat, at, parent, 0.015);
 }
 
-/** Horizontal slab with rounded corners centred on `at`: size is [width, depth, height, cornerRadius]. */
+// Centered slab; size = [width, depth, height, cornerRadius].
 export function slab(
   size: readonly [number, number, number, number],
   at: P,
@@ -323,7 +322,7 @@ export function ringPoints(r: number, y: number, count: number, a0 = 0, a1 = TAU
   });
 }
 
-/** One leaf: a tapered ribbon from `base`, curving up. shape is [length, width, lift]. */
+// Curved tapered leaf; shape = [length, width, lift].
 export function frond(
   base: P,
   angle: number,
@@ -356,7 +355,7 @@ export function frond(
   mesh(g, mat, [0, 0, 0], parent, false);
 }
 
-/** Lathe profile from flat [radius, height] pairs: profile(r0, h0, r1, h1, ...). */
+// Flat radius/height pairs: profile(r0, h0, r1, h1, ...).
 export function profile(...pairs: number[]): Array<[number, number]> {
   const out: Array<[number, number]> = [];
   for (let i = 0; i + 1 < pairs.length; i += 2) out.push([pairs[i], pairs[i + 1]]);

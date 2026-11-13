@@ -14,23 +14,13 @@ import {
   type Expected,
 } from "./webauthn.server";
 
-/**
- * Admin step-up with FIDO2 security keys (item 29, risk R17).
- *
- * Better Auth has no step-up API, and a passkey sign-in would make a new session. So the step-up is a
- * verify-only WebAuthn ceremony that stamps `session.admin_verified_at` on the current session. Admin endpoints
- * then read that stamp:
- * - 15 minutes for admin data and ordinary actions,
- * - 2 minutes for sensitive actions (freeze, suspend, and adding or removing a key).
- *
- * `ADMIN_STEP_UP` picks the policy. Unset means `report`, so the owner is never locked out before they register
- * keys. `enforce` blocks admin work without two keys and a fresh step-up. A value that is set but not known
- * fails closed (`enforce`).
- */
+// Verify FIDO2 keys on the current session; passkey sign-in would create another session. Stamp
+// `session.admin_verified_at`: 15 minutes for ordinary actions, 2 for sensitive actions. Unset `ADMIN_STEP_UP`
+// means `report`; `enforce` requires two keys plus fresh step-up. Unknown modes fail closed.
 
 export const STEP_UP_WINDOW_MS = 15 * 60_000;
 export const SENSITIVE_WINDOW_MS = 2 * 60_000;
-/** A first key may be registered only this soon after sign-in. */
+// A first key may be registered only this soon after sign-in.
 export const ONBOARDING_WINDOW_MS = 5 * 60_000;
 export const CHALLENGE_TTL_MS = 2 * 60_000;
 export const CEREMONY_TIMEOUT_MS = 60_000;
@@ -43,7 +33,7 @@ interface CredentialDescriptor {
   transports: string[];
 }
 
-/** The JSON forms of WebAuthn options; the browser turns the base64url fields into bytes. */
+// The JSON forms of WebAuthn options; the browser turns the base64url fields into bytes.
 export interface RequestOptions {
   challenge: string;
   rpId: string;
@@ -75,7 +65,7 @@ export function stepUpMode(env: AppEnv): StepUpMode {
   return "enforce";
 }
 
-/** The relying party: the app origin and its host name. WebAuthn ties every key to this RP ID. */
+// The relying party: the app origin and its host name. WebAuthn ties every key to this RP ID.
 export function relyingParty(env: AppEnv): { origin: string; rpId: string } {
   const origin = getOrigin(env);
   return { origin, rpId: new URL(origin).hostname };
@@ -84,7 +74,7 @@ export function relyingParty(env: AppEnv): { origin: string; rpId: string } {
 export interface AdminSession {
   viewer: Viewer;
   sessionId: string;
-  /** How this request met the step-up policy, for the audit log. */
+  // How this request met the step-up policy, for the audit log.
   stepUp: "fresh" | "missing" | "off";
 }
 
@@ -154,7 +144,7 @@ async function status(env: AppEnv, userId: string, sessionId: string, now: numbe
   };
 }
 
-/** The signed-in admin and their session. Throws 401 for anonymous requests and 403 for everyone but admins. */
+// The signed-in admin and their session. Throws 401 for anonymous requests and 403 for everyone but admins.
 export async function requireAdminViewer(
   request: Request,
   app: AppContext,
@@ -170,10 +160,8 @@ export async function getStepUpStatus(request: Request, app: AppContext, now = D
   return status(app.env, viewer.id, sessionId, now);
 }
 
-/**
- * The gate in front of every admin endpoint and the admin page loader. `sensitive` asks for a step-up from the last
- * 2 minutes instead of 15. In `report` mode a missing step-up is allowed and logged; in `off` mode it is skipped.
- */
+// Gate every admin endpoint/loader. Sensitive checks expire after 2 minutes, ordinary checks after 15.
+// `report` permits/logs missing checks; `off` skips them.
 export async function requireAdminSession(
   request: Request,
   app: AppContext,
@@ -201,7 +189,7 @@ export async function requireAdminSession(
   let wouldBlock: StepUpNeed = fresh ? "none" : "step_up";
   if (current.keys < REQUIRED_KEYS) wouldBlock = "keys";
   if (wouldBlock !== "none") {
-    // A log line alone is easy to miss, so report mode also writes an audit row with the actor and the route.
+    // Report mode also writes actor/route audit rows.
     const route = `${request.method} ${new URL(request.url).pathname}`;
     console.warn(JSON.stringify({ event: "admin_step_up_missing", route, need: wouldBlock }));
     await recordAudit(app.env, {
@@ -216,7 +204,7 @@ export async function requireAdminSession(
   return { viewer, sessionId, stepUp: fresh ? "fresh" : "missing" };
 }
 
-/* ---------- Challenges: one per session and purpose, single use, 2 minutes ---------- */
+// Challenges: one per session and purpose, single use, 2 minutes
 
 type Purpose = "stepup" | "register";
 
@@ -236,7 +224,7 @@ async function issueChallenge(env: AppEnv, purpose: Purpose, sessionId: string, 
   return challenge;
 }
 
-/** Takes the challenge out of storage, so a second use of the same response fails. */
+// Takes the challenge out of storage, so a second use of the same response fails.
 async function consumeChallenge(env: AppEnv, purpose: Purpose, sessionId: string, now: number): Promise<string> {
   const row = await env.DB.prepare("DELETE FROM verification WHERE identifier=? RETURNING value, expires_at")
     .bind(challengeId(purpose, sessionId))
@@ -250,7 +238,7 @@ function expected(env: AppEnv, challenge: string): Expected {
   return { challenge, ...relyingParty(env) };
 }
 
-/* ---------- Step-up ---------- */
+// Step-up
 
 const base64url = z
   .string()
@@ -334,10 +322,8 @@ export async function stepUpOptions(
   };
 }
 
-/**
- * Checks an assertion from one of the admin's own keys and stamps this session. Each failure writes an audit row;
- * the challenge is gone either way, so a response can never be replayed.
- */
+// Verify an admin-owned key and stamp this session. Audit failures; consume challenges on success or failure
+// to prevent replay.
 export async function verifyStepUp(
   env: AppEnv,
   admin: { viewer: Viewer; sessionId: string },
@@ -373,8 +359,8 @@ export async function verifyStepUp(
     throw error;
   }
   const [updated] = await env.DB.batch([
-    // Compare-and-set on the counter, so two racing uses of one assertion cannot both pass. The next two
-    // statements run only when this one changed a row (`changes()` is the previous statement's count).
+    // Compare-and-set prevents concurrent assertion replay. Following statements require `changes()` from this
+    // update.
     env.DB.prepare("UPDATE passkey SET counter=? WHERE id=? AND counter=?").bind(counter, key.id, key.counter),
     env.DB.prepare("UPDATE session SET admin_verified_at=? WHERE id=? AND user_id=? AND changes()=1").bind(
       now,
@@ -390,7 +376,7 @@ export async function verifyStepUp(
   return { verifiedAt: now, freshUntil: now + STEP_UP_WINDOW_MS, keyId: key.id };
 }
 
-/* ---------- Key registration and management ---------- */
+// Key registration and management
 
 function registrationRefused(block: StepUpStatus["registerBlock"]): HttpError {
   if (block === "limit") return new HttpError(409, `You can register up to ${MAX_KEYS} keys.`, "key_limit");
@@ -399,7 +385,7 @@ function registrationRefused(block: StepUpStatus["registerBlock"]): HttpError {
   return new HttpError(403, "Confirm with a key you already registered, then add the new key.", "step_up_required");
 }
 
-/** User handle for WebAuthn: random per account would be better, but the account id is not secret and is stable. */
+// Use the stable, non-secret account ID as WebAuthn user handle.
 function userHandle(userId: string): string {
   return toBase64Url(new TextEncoder().encode(userId));
 }
@@ -433,10 +419,8 @@ export async function registrationOptions(
   };
 }
 
-/**
- * Stores a new key. The admin needs no keys and a sign-in from the last 5 minutes, or a key check from the last
- * 2 minutes. Adding the key counts as a key check for this session.
- */
+// First key requires sign-in within 5 minutes; later keys require step-up within 2 minutes. Registration
+// stamps this session.
 export async function registerKey(
   env: AppEnv,
   admin: { viewer: Viewer; sessionId: string },
@@ -534,10 +518,8 @@ export async function renameKey(env: AppEnv, admin: AdminSession, id: string, na
   if (updated.meta.changes !== 1) throw new HttpError(404, "Key not found.");
 }
 
-/**
- * Removes a key. Needs a step-up from the last 2 minutes made with another key (in every mode: key management never
- * depends on ADMIN_STEP_UP), and never removes the last key. Recovery from lost keys is operator-only (SECURITY.md).
- */
+// Require a different key's step-up within 2 minutes in every mode. Never remove the last key; lost-key
+// recovery is operator-only (SECURITY.md).
 export async function removeKey(
   env: AppEnv,
   admin: { viewer: Viewer; sessionId: string },

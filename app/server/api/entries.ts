@@ -8,10 +8,9 @@ import { get, parsedQuery, write, type ApiRoute } from "./router";
 
 const entryPath = /entries\/([a-f0-9-]{36})(\/comments)?/;
 
-/** A single topic or poll, its discussion, and comment actions. */
 export const entryRoutes: ApiRoute[] = [
-  // GET /api/entries/:id → {entry}
-  // GET /api/entries/:id/comments?sort&cursor&view=flat|thread → DiscussionSnapshot | ThreadSnapshot
+  // GET /api/entries/:id → {entry} GET /api/entries/:id/comments?sort&cursor&view=flat|thread →
+  // DiscussionSnapshot | ThreadSnapshot
   get(entryPath, async ({ request, env, match, viewer }) => {
     if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Endpoint not found.");
     const entry = await getVisibleEntry(env, match[1], viewer?.id ?? null);
