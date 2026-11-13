@@ -39,8 +39,8 @@ export function readDraft(key: string): { draft: DiscussionDraft; unavailable: b
     replyMentions: [],
     replyId: null,
   };
-  if (typeof sessionStorage === "undefined") return { draft: empty, unavailable: false };
   try {
+    if (typeof sessionStorage === "undefined") return { draft: empty, unavailable: false };
     const value = sessionStorage.getItem(key);
     if (!value) return { draft: empty, unavailable: false };
     const result = draftSchema.safeParse(JSON.parse(value));

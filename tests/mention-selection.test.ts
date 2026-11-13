@@ -78,6 +78,16 @@ describe("draft storage failures", () => {
     });
     expect(readDraft("entry").unavailable).toBe(true);
   });
+  it("reports a browser policy that denies the storage property itself", () => {
+    vi.stubGlobal("sessionStorage", null);
+    Object.defineProperty(globalThis, "sessionStorage", {
+      configurable: true,
+      get: (): never => {
+        throw new DOMException("Blocked", "SecurityError");
+      },
+    });
+    expect(readDraft("entry").unavailable).toBe(true);
+  });
   it("reports a corrupt saved draft", () => {
     vi.stubGlobal("sessionStorage", { getItem: (): string => "{invalid" });
     expect(readDraft("entry").unavailable).toBe(true);
