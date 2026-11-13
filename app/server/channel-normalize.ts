@@ -37,11 +37,7 @@ const name = z
   .string()
   .max(200)
   .transform((value: string): string => cleanText(value, 100));
-const color = z
-  .string()
-  .regex(/^#[0-9a-fA-F]{6}$/)
-  .optional()
-  .catch(undefined);
+const color = z.catch(z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(), undefined);
 
 function parseTime(value: string | undefined | null): number | null {
   if (!value) return null;
@@ -81,22 +77,21 @@ const twitchChatSchema = z.object({
   message_id: id,
   message: z.object({
     text: z.string().max(4000),
-    fragments: z
-      .array(
-        z.object({
-          type: z.string().max(32),
-          text: z.string().max(4000),
-          emote: z.object({ id: z.string().regex(/^[\w-]{1,64}$/) }).nullish(),
-        }),
-      )
-      .max(500)
-      .catch([]),
+    fragments: z.catch(
+      z
+        .array(
+          z.object({
+            type: z.string().max(32),
+            text: z.string().max(4000),
+            emote: z.object({ id: z.string().regex(/^[\w-]{1,64}$/) }).nullish(),
+          }),
+        )
+        .max(500),
+      [],
+    ),
   }),
   color: z.unknown().optional(),
-  badges: z
-    .array(z.object({ set_id: z.string().max(64), id: z.string().max(64) }))
-    .max(100)
-    .catch([]),
+  badges: z.catch(z.array(z.object({ set_id: z.string().max(64), id: z.string().max(64) })).max(100), []),
 });
 
 const twitchTarget = z.object({ target_user_id: id });
@@ -203,10 +198,7 @@ const kickChatSchema = z.object({
     identity: z
       .object({
         username_color: z.unknown().optional(),
-        badges: z
-          .array(z.object({ text: z.string().max(64), type: z.string().max(64) }))
-          .max(100)
-          .catch([]),
+        badges: z.catch(z.array(z.object({ text: z.string().max(64), type: z.string().max(64) })).max(100), []),
       })
       .nullish(),
   }),
@@ -215,7 +207,10 @@ const kickChatSchema = z.object({
 });
 const kickBanSchema = z.object({
   banned_user: z.object({ user_id: id }),
-  metadata: z.object({ created_at: z.string().max(64).nullish(), expires_at: z.string().max(64).nullish() }).catch({}),
+  metadata: z.catch(
+    z.object({ created_at: z.string().max(64).nullish(), expires_at: z.string().max(64).nullish() }),
+    {},
+  ),
 });
 
 /** `[emote:123:Name]` in Kick chat text. Kick documents no emote image host, so the feed shows the name. */
