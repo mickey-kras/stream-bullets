@@ -8,6 +8,7 @@ import { cookieRoutes } from "./cookies";
 import { entryRoutes } from "./entries";
 import { imageRoutes } from "./images";
 import { liveRoutes } from "./live";
+import { notificationRoutes } from "./notifications";
 import { moderationRoutes } from "./moderation";
 import type { ApiRoute } from "./router";
 import { scheduleRoutes } from "./schedule";
@@ -20,6 +21,7 @@ export const apiRoutes: readonly ApiRoute[] = [
   ...accountRoutes,
   ...streamerRoutes,
   ...entryRoutes,
+  ...notificationRoutes,
   ...imageRoutes,
   ...moderationRoutes,
   ...scheduleRoutes,

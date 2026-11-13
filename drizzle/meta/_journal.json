@@ -204,6 +204,13 @@
       "when": 1794530841603,
       "tag": "0028_channel_data_read_at",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "6",
+      "when": 1794597692477,
+      "tag": "0029_discussion_notifications",
+      "breakpoints": true
     }
   ]
 }

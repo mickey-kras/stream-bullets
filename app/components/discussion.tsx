@@ -1,8 +1,24 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { useSearchParams } from "react-router";
+import { readDraft, type DiscussionDraft } from "../lib/discussion-draft";
+import { MentionInput, type MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
 import { orderThreads, replyParent, visibleReplies } from "../lib/threads";
-import type { Comment, CommentThread, SortOrder, StreamerStatus, ThreadSnapshot, Viewer } from "../types";
+import type {
+  Comment,
+  CommentThread,
+  SortOrder,
+  StreamerStatus,
+  ThreadSnapshot,
+  Viewer,
+} from "../types";
 import { KeyConfirm } from "./admin/key-confirm";
 import { errorMessage, needsStepUp, postJson, requestJson } from "./api";
 import { Avatar, Modal } from "./common";
@@ -45,7 +61,12 @@ export function DeleteButton({
   }
   return (
     <>
-      <button type="button" disabled={disabled} aria-label={text ? label : undefined} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        disabled={disabled}
+        aria-label={text ? label : undefined}
+        onClick={() => setOpen(true)}
+      >
         <Icon name="trash" size={16} />
         {text ?? label}
       </button>
@@ -62,11 +83,20 @@ export function DeleteButton({
         </p>
         {stepUp && <KeyConfirm inDialog label={label} onConfirmed={remove} />}
         <div className="modal-actions">
-          <button type="button" disabled={pending} onClick={() => setOpen(false)}>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setOpen(false)}
+          >
             {t("dialog.cancel")}
           </button>
           {!stepUp && (
-            <button className="gold" type="button" disabled={pending} onClick={() => void remove()}>
+            <button
+              className="gold"
+              type="button"
+              disabled={pending}
+              onClick={() => void remove()}
+            >
               {pending ? t("discussion.deleting") : label}
             </button>
           )}
@@ -74,12 +104,6 @@ export function DeleteButton({
       </Modal>
     </>
   );
-}
-
-// Grow textarea to its CSS maximum height.
-function grow(element: HTMLTextAreaElement): void {
-  element.style.height = "auto";
-  element.style.height = `${element.scrollHeight + 2}px`;
 }
 
 const timeUnits: [number, number, Intl.RelativeTimeFormatUnit][] = [
@@ -93,8 +117,12 @@ const timeUnits: [number, number, Intl.RelativeTimeFormatUnit][] = [
 
 function relativeTime(time: number): string {
   const seconds = Math.round((time - Date.now()) / 1000);
-  const [, size, unit] = timeUnits.find(([limit]) => Math.abs(seconds) < limit) ?? timeUnits[5];
-  return new Intl.RelativeTimeFormat(intlLocale(), { numeric: "auto" }).format(Math.round(seconds / size), unit);
+  const [, size, unit] =
+    timeUnits.find(([limit]) => Math.abs(seconds) < limit) ?? timeUnits[5];
+  return new Intl.RelativeTimeFormat(intlLocale(), { numeric: "auto" }).format(
+    Math.round(seconds / size),
+    unit,
+  );
 }
 
 function Composer({
@@ -106,6 +134,9 @@ function Composer({
   busy,
   onChange,
   onSubmit,
+  entryId,
+  mentions,
+  onMentionsChange,
 }: Readonly<{
   viewer: Viewer;
   label: string;
@@ -115,6 +146,9 @@ function Composer({
   busy: boolean;
   onChange: (value: string) => void;
   onSubmit: () => void;
+  entryId: string;
+  mentions: MentionSelection[];
+  onMentionsChange: (mentions: MentionSelection[]) => void;
 }>): ReactNode {
   return (
     <form
@@ -124,22 +158,26 @@ function Composer({
         onSubmit();
       }}
     >
-      <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
-      <textarea
-        data-composer
-        value={value}
-        required
-        disabled={disabled}
-        maxLength={2000}
-        rows={1}
-        aria-label={label}
-        placeholder={placeholder}
-        onChange={(event) => {
-          onChange(event.currentTarget.value);
-          grow(event.currentTarget);
-        }}
+      <Avatar
+        name={viewer.name}
+        url={viewer.avatar}
+        preset={viewer.avatarPreset}
       />
-      <button className="gold" type="submit" disabled={disabled || busy || !value.trim()}>
+      <MentionInput
+        entryId={entryId}
+        value={value}
+        mentions={mentions}
+        onChange={onChange}
+        onMentionsChange={onMentionsChange}
+        label={label}
+        placeholder={placeholder}
+        disabled={disabled || busy}
+      />
+      <button
+        className="gold"
+        type="submit"
+        disabled={disabled || busy || !value.trim()}
+      >
         <Icon name="send" size={18} />
         {t("discussion.post")}
       </button>
@@ -154,20 +192,39 @@ interface CommentRules {
   writable: boolean;
   busy: boolean;
   reported: Set<string>;
+  entryId: string;
+  onEdit: (
+    comment: Comment,
+    text: string,
+    mentions: MentionSelection[],
+  ) => Promise<void>;
   onLike: (comment: Comment) => void;
   onReply: (comment: Comment) => void;
   onDelete: (comment: Comment) => Promise<void>;
   onReported: (id: string) => void;
 }
 
-function CommentActions({ comment, rules }: Readonly<{ comment: Comment; rules: CommentRules }>): ReactNode {
+function CommentActions({
+  comment,
+  rules,
+  onEdit,
+}: Readonly<{
+  comment: Comment;
+  rules: CommentRules;
+  onEdit: () => void;
+}>): ReactNode {
   const { viewer } = rules;
   const reported = comment.reported || rules.reported.has(comment.id);
   // Only admins can remove content from moderated pages.
   const canDelete = Boolean(
-    viewer && (rules.moderator || (rules.writable && (comment.authorId === viewer.id || rules.ownerId === viewer.id))),
+    viewer &&
+    (rules.moderator ||
+      (rules.writable &&
+        (comment.authorId === viewer.id || rules.ownerId === viewer.id))),
   );
-  const canReport = Boolean(viewer && comment.authorId !== viewer.id && !reported);
+  const canReport = Boolean(
+    viewer && comment.authorId !== viewer.id && !reported,
+  );
   const report = canReport && (
     <ReportButton
       targetKind="comment"
@@ -194,16 +251,30 @@ function CommentActions({ comment, rules }: Readonly<{ comment: Comment; rules: 
         aria-label={t("discussion.likeBy", { name: comment.author })}
         onClick={() => rules.onLike(comment)}
       >
-        <Icon name={comment.liked ? "thumbs-up-filled" : "thumbs-up"} size={16} />
+        <Icon
+          name={comment.liked ? "thumbs-up-filled" : "thumbs-up"}
+          size={16}
+        />
         {t("discussion.like")} <span className="count">{comment.likes}</span>
       </button>
-      <button type="button" disabled={!viewer || !rules.writable} onClick={() => rules.onReply(comment)}>
+      <button
+        type="button"
+        disabled={!viewer || !rules.writable}
+        onClick={() => rules.onReply(comment)}
+      >
         <Icon name="reply" size={16} />
         {t("discussion.reply")}
       </button>
+      {viewer?.id === comment.authorId && rules.writable && (
+        <button type="button" disabled={rules.busy} onClick={onEdit}>
+          {t("common.edit")}
+        </button>
+      )}
       {canDelete && canReport ? (
         <details className="more-actions">
-          <summary aria-label={t("discussion.moreActions", { name: comment.author })}>
+          <summary
+            aria-label={t("discussion.moreActions", { name: comment.author })}
+          >
             <Icon name="more" size={18} />
           </summary>
           <div className="more-menu">
@@ -223,14 +294,58 @@ function CommentActions({ comment, rules }: Readonly<{ comment: Comment; rules: 
   );
 }
 
+function MentionText({ comment }: Readonly<{ comment: Comment }>): ReactNode {
+  const parts: ReactNode[] = [];
+  let offset = 0;
+  for (const mention of [...(comment.mentions ?? [])].sort(
+    (a: MentionSelection, b: MentionSelection) => a.start - b.start,
+  )) {
+    parts.push(comment.text.slice(offset, mention.start));
+    parts.push(
+      <strong
+        className="comment-mention"
+        key={mention.userId}
+        title={mention.userId}
+      >
+        {comment.text.slice(mention.start, mention.end)}
+      </strong>,
+    );
+    offset = mention.end;
+  }
+  parts.push(comment.text.slice(offset));
+  return parts;
+}
+
 function CommentArticle({
   comment,
   parent,
   rules,
-}: Readonly<{ comment: Comment; parent: Comment | null | undefined; rules: CommentRules }>): ReactNode {
+}: Readonly<{
+  comment: Comment;
+  parent: Comment | null | undefined;
+  rules: CommentRules;
+}>): ReactNode {
+  const [editing, setEditing] = useState<boolean>(false);
+  const [draft, setDraft] = useState<string>(comment.text);
+  const [mentions, setMentions] = useState<MentionSelection[]>(
+    comment.mentions ?? [],
+  );
+  const [error, setError] = useState<string>("");
+  const editButton = useRef<HTMLDivElement | null>(null);
+  const focusActions = (): void => {
+    requestAnimationFrame(() =>
+      editButton.current
+        ?.querySelector<HTMLButtonElement>("button")
+        ?.focus({ preventScroll: true }),
+    );
+  };
   if (comment.removed)
     return (
-      <article className="comment removed" id={`cm-${comment.id}`} aria-label={t("discussion.removed")}>
+      <article
+        className="comment removed"
+        id={`cm-${comment.id}`}
+        aria-label={t("discussion.removed")}
+      >
         <span className="removed-avatar" aria-hidden="true">
           <Icon name="eye-off" size={18} />
         </span>
@@ -240,11 +355,17 @@ function CommentArticle({
       </article>
     );
   let parentName: string | null = null;
-  if (parent !== undefined) parentName = parent && !parent.removed ? parent.author : t("discussion.removedParent");
+  if (parent !== undefined)
+    parentName =
+      parent && !parent.removed ? parent.author : t("discussion.removedParent");
   const reported = comment.reported || rules.reported.has(comment.id);
   return (
-    <article className="comment" id={`cm-${comment.id}`}>
-      <Avatar name={comment.author} url={comment.avatar} preset={comment.avatarPreset} />
+    <article className="comment" tabIndex={-1} id={`cm-${comment.id}`}>
+      <Avatar
+        name={comment.author}
+        url={comment.avatar}
+        preset={comment.avatarPreset}
+      />
       <div className="comment-body">
         <div className="comment-meta">
           <strong>{comment.author}</strong>
@@ -262,13 +383,88 @@ function CommentArticle({
           )}
         </div>
         {parentName !== null && (
-          <a className="replying reply-mention" href={`#cm-${comment.parentId}`}>
+          <a
+            className="replying reply-mention"
+            href={`#cm-${comment.parentId}`}
+          >
             <Icon name="reply" size={16} />
             {t("discussion.replyTo", { name: parentName })}
           </a>
         )}
-        <p className="comment-text">{comment.text}</p>
-        <CommentActions comment={comment} rules={rules} />
+        {editing ? (
+          <form
+            className="comment-editor"
+            onSubmit={(event: FormEvent<HTMLFormElement>) => {
+              event.preventDefault();
+              setError("");
+              void rules
+                .onEdit(comment, draft, mentions)
+                .then(() => {
+                  setEditing(false);
+                  focusActions();
+                })
+                .catch((cause: unknown) => setError(errorMessage(cause)));
+            }}
+          >
+            <MentionInput
+              entryId={rules.entryId}
+              value={draft}
+              mentions={mentions}
+              onChange={setDraft}
+              onMentionsChange={setMentions}
+              label={t("discussion.editComment")}
+              placeholder={t("discussion.placeholder")}
+              disabled={rules.busy}
+            />
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+            <div className="comment-edit-actions">
+              <button
+                type="submit"
+                className="gold"
+                disabled={rules.busy || !draft.trim()}
+              >
+                {t("common.save")}
+              </button>
+              <button
+                type="button"
+                disabled={rules.busy}
+                onClick={() => {
+                  setEditing(false);
+                  focusActions();
+                }}
+              >
+                {t("dialog.cancel")}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <p className="comment-text">
+            <MentionText comment={comment} />
+          </p>
+        )}
+        {comment.editedAt && (
+          <span className="muted">{t("discussion.edited")}</span>
+        )}
+        <div ref={editButton}>
+          <CommentActions
+            comment={comment}
+            rules={rules}
+            onEdit={() => {
+              setDraft(comment.text);
+              setMentions(comment.mentions ?? []);
+              setEditing(true);
+              requestAnimationFrame(() =>
+                document
+                  .querySelector<HTMLTextAreaElement>(
+                    `#cm-${comment.id} textarea`,
+                  )
+                  ?.focus({ preventScroll: true }),
+              );
+            }}
+          />
+        </div>
       </div>
     </article>
   );
@@ -279,14 +475,31 @@ function Thread({
   rules,
   replyTo,
   replyBox,
-}: Readonly<{ thread: CommentThread; rules: CommentRules; replyTo: Comment | null; replyBox: ReactNode }>): ReactNode {
+  targetId,
+}: Readonly<{
+  thread: CommentThread;
+  rules: CommentRules;
+  replyTo: Comment | null;
+  replyBox: ReactNode;
+  targetId: string | null;
+}>): ReactNode {
   const [expanded, setExpanded] = useState<boolean>(false);
   const [hidden, setHidden] = useState<boolean>(false);
-  const { shown, hidden: more } = visibleReplies(thread.replies, expanded);
+  const { shown, hidden: more } = visibleReplies(
+    thread.replies,
+    expanded ||
+      Boolean(
+        targetId &&
+        thread.replies.some((reply: Comment) => reply.id === targetId),
+      ),
+  );
   const replying =
-    replyTo !== null && (replyTo.id === thread.id || thread.replies.some((reply: Comment) => reply.id === replyTo.id));
+    replyTo !== null &&
+    (replyTo.id === thread.id ||
+      thread.replies.some((reply: Comment) => reply.id === replyTo.id));
   // Reveal hidden replies when opening an inline reply form.
-  const target: string | null = replying && replyTo ? replyTo.id : null;
+  const target: string | null =
+    targetId ?? (replying && replyTo ? replyTo.id : null);
   const [opened, setOpened] = useState<string | null>(target);
   if (opened !== target) {
     setOpened(target);
@@ -294,7 +507,10 @@ function Thread({
   }
   const count = thread.replies.length;
   const listId = `replies-${thread.id}`;
-  const showRepliesLabel: string = t(count === 1 ? "discussion.showReply" : "discussion.showReplies", { count });
+  const showRepliesLabel: string = t(
+    count === 1 ? "discussion.showReply" : "discussion.showReplies",
+    { count },
+  );
   return (
     <li className={`thread${count ? " has-replies" : ""}`}>
       <CommentArticle comment={thread} parent={undefined} rules={rules} />
@@ -316,12 +532,18 @@ function Thread({
           id={listId}
           hidden={hidden}
           aria-label={t("discussion.repliesTo", {
-            name: thread.removed ? t("discussion.removedParent") : thread.author,
+            name: thread.removed
+              ? t("discussion.removedParent")
+              : thread.author,
           })}
         >
           {shown.map((reply: Comment) => (
             <li key={reply.id}>
-              <CommentArticle comment={reply} parent={replyParent(thread, reply)} rules={rules} />
+              <CommentArticle
+                comment={reply}
+                parent={replyParent(thread, reply)}
+                rules={rules}
+              />
             </li>
           ))}
           {more > 0 && (
@@ -334,7 +556,10 @@ function Thread({
                 onClick={() => setExpanded(true)}
               >
                 <Icon name="chevron-down" size={16} />
-                {t(more === 1 ? "discussion.viewMoreOne" : "discussion.viewMore", { count: more })}
+                {t(
+                  more === 1 ? "discussion.viewMoreOne" : "discussion.viewMore",
+                  { count: more },
+                )}
               </button>
             </li>
           )}
@@ -356,7 +581,9 @@ async function fetchThreads(
   let cursor: string | null = from;
   let loaded = 0;
   do {
-    const cursorQuery: string = cursor ? `&cursor=${encodeURIComponent(cursor)}` : "";
+    const cursorQuery: string = cursor
+      ? `&cursor=${encodeURIComponent(cursor)}`
+      : "";
     const query: string = `sort=${sort}&view=thread${cursorQuery}`;
     const snapshot: ThreadSnapshot = await requestJson<ThreadSnapshot>(
       `/api/entries/${encodeURIComponent(entryId)}/comments?${query}`,
@@ -372,8 +599,16 @@ async function fetchThreads(
 }
 
 // Append threads without duplicates; preserve list order.
-function mergeThreads(current: CommentThread[], page: CommentThread[], sort: SortOrder): CommentThread[] {
-  const unique = [...new Map([...current, ...page].map((thread: CommentThread) => [thread.id, thread])).values()];
+function mergeThreads(
+  current: CommentThread[],
+  page: CommentThread[],
+  sort: SortOrder,
+): CommentThread[] {
+  const unique = [
+    ...new Map(
+      [...current, ...page].map((thread: CommentThread) => [thread.id, thread]),
+    ).values(),
+  ];
   return orderThreads(unique, sort);
 }
 
@@ -386,10 +621,16 @@ function findComment(threads: CommentThread[], id: string): Comment | null {
   return null;
 }
 
-function updateComment(threads: CommentThread[], id: string, change: (comment: Comment) => Comment): CommentThread[] {
+function updateComment(
+  threads: CommentThread[],
+  id: string,
+  change: (comment: Comment) => Comment,
+): CommentThread[] {
   return threads.map((thread: CommentThread) => ({
     ...(thread.id === id ? { ...thread, ...change(thread) } : thread),
-    replies: thread.replies.map((reply: Comment) => (reply.id === id ? change(reply) : reply)),
+    replies: thread.replies.map((reply: Comment) =>
+      reply.id === id ? change(reply) : reply,
+    ),
   }));
 }
 
@@ -416,6 +657,8 @@ export function Discussion({
   onChanged: () => void;
 }>): ReactNode {
   const { providers } = useShell();
+  const [search] = useSearchParams();
+  const targetId = search.get("comment");
   const writable = status === "active";
   const [sort, setSort] = useState<SortOrder>("newest");
   const [revision, setRevision] = useState<number>(0);
@@ -424,12 +667,22 @@ export function Discussion({
   const [loadedKey, setLoadedKey] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [busy, setBusy] = useState<boolean>(false);
-  const [text, setText] = useState<string>("");
-  const [replyText, setReplyText] = useState<string>("");
-  const [replyId, setReplyId] = useState<string | null>(null);
+  const draftKey = `discussion:${viewer?.id ?? "anonymous"}:${entryId}`;
+  const [initialDraft] = useState<DiscussionDraft>(() => readDraft(draftKey));
+  const [text, setText] = useState<string>(initialDraft.text);
+  const [mentions, setMentions] = useState<MentionSelection[]>(
+    initialDraft.mentions,
+  );
+  const [replyMentions, setReplyMentions] = useState<MentionSelection[]>(
+    initialDraft.replyMentions,
+  );
+  const [replyText, setReplyText] = useState<string>(initialDraft.replyText);
+  const [replyId, setReplyId] = useState<string | null>(initialDraft.replyId);
   const [reported, setReported] = useState<Set<string>>(new Set());
   const [signIn, setSignIn] = useState<boolean>(false);
   const pages = useRef<number>(1);
+  const focusedTarget = useRef<string | null>(null);
+  const restoredPosition = useRef<boolean>(false);
   const requestController = useRef<AbortController | null>(null);
   const [loadingMoreKey, setLoadingMoreKey] = useState<string>("");
   const requestKey = `${entryId}:${sort}:${refreshKey}:${revision}`;
@@ -440,12 +693,29 @@ export function Discussion({
     const controller = new AbortController();
     requestController.current = controller;
     fetchThreads(entryId, sort, pages.current, controller.signal)
-      .then((result) => {
+      .then(async (result) => {
+        let values = result.threads;
+        let targetError = "";
+        if (targetId) {
+          try {
+            const exact = await requestJson<{
+              thread: CommentThread;
+              entryId: string;
+            }>(`/api/comments/${encodeURIComponent(targetId)}`, {
+              signal: controller.signal,
+            });
+            if (exact.entryId !== entryId)
+              throw new Error(t("discussion.commentUnavailable"));
+            values = mergeThreads(values, [exact.thread], sort);
+          } catch (cause: unknown) {
+            targetError = errorMessage(cause);
+          }
+        }
         if (controller.signal.aborted) return;
         pages.current = result.pages;
-        setThreads(result.threads);
+        setThreads(values);
         setCursor(result.cursor);
-        setError("");
+        setError(targetError);
         setLoadedKey(requestKey);
         setLoadingMoreKey("");
       })
@@ -456,7 +726,59 @@ export function Discussion({
         setLoadingMoreKey("");
       });
     return () => controller.abort();
-  }, [entryId, sort, requestKey]);
+  }, [entryId, sort, requestKey, targetId]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        draftKey,
+        JSON.stringify({ text, mentions, replyText, replyMentions, replyId }),
+      );
+    } catch {
+      setError(t("discussion.draftUnavailable"));
+    }
+  }, [draftKey, text, mentions, replyText, replyMentions, replyId]);
+
+  useEffect(() => {
+    if (!targetId) {
+      focusedTarget.current = null;
+      return;
+    }
+    if (focusedTarget.current === targetId || !findComment(threads, targetId))
+      return;
+    const frame = requestAnimationFrame(() => {
+      const element = document.getElementById(`cm-${targetId}`);
+      focusedTarget.current = targetId;
+      element?.scrollIntoView({ block: "center" });
+      element?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [targetId, threads]);
+
+  useEffect(() => {
+    const scroller = document.getElementById("detail");
+    if (!scroller) return;
+    const key = `${draftKey}:scroll`;
+    const save = (): void => {
+      try {
+        sessionStorage.setItem(key, String(scroller.scrollTop));
+      } catch {
+        /* Draft storage reports unavailable storage. */
+      }
+    };
+    if (!loading && !restoredPosition.current && !targetId) {
+      try {
+        const position = Number(sessionStorage.getItem(key));
+        if (Number.isFinite(position) && position >= 0)
+          scroller.scrollTop = position;
+      } catch {
+        /* Draft storage reports unavailable storage. */
+      }
+      restoredPosition.current = true;
+    }
+    scroller.addEventListener("scroll", save, { passive: true });
+    return () => scroller.removeEventListener("scroll", save);
+  }, [draftKey, loading, targetId]);
 
   const replyTo = replyId ? findComment(threads, replyId) : null;
 
@@ -481,20 +803,35 @@ export function Discussion({
       postJson(`/api/streamers/${encodeURIComponent(handle)}`, {
         action: "comment",
         id: entryId,
-        text: value.trim(),
+        text: value,
+        mentions: parentId ? replyMentions : mentions,
         parentId,
       }),
     )
       .then(() => {
         if (parentId) {
           setReplyText("");
+          setReplyMentions([]);
           setReplyId(null);
-        } else setText((current: string) => (current === value ? "" : current));
+        } else {
+          setText((current: string) => (current === value ? "" : current));
+          setMentions([]);
+        }
       })
       .catch(() => undefined);
   }
 
   const rules: CommentRules = {
+    entryId,
+    onEdit: (comment: Comment, value: string, selected: MentionSelection[]) =>
+      run(() =>
+        postJson("/api/comments", {
+          action: "edit",
+          id: comment.id,
+          text: value,
+          mentions: selected,
+        }),
+      ),
     viewer,
     ownerId,
     moderator,
@@ -518,14 +855,22 @@ export function Discussion({
         });
     },
     onReply: (comment: Comment) => setReplyId(comment.id),
-    onDelete: (comment: Comment) => run(() => postJson("/api/comments", { action: "delete", id: comment.id })),
-    onReported: (id: string) => setReported((current) => new Set(current).add(id)),
+    onDelete: (comment: Comment) =>
+      run(() =>
+        postJson("/api/comments", { action: "delete", id: comment.id }),
+      ),
+    onReported: (id: string) =>
+      setReported((current) => new Set(current).add(id)),
   };
 
   const replyBox = viewer && replyTo && (
     <>
       <div className="replying">
-        {t("discussion.replyingTo", { name: replyTo.removed ? t("discussion.removedParent") : replyTo.author })}{" "}
+        {t("discussion.replyingTo", {
+          name: replyTo.removed
+            ? t("discussion.removedParent")
+            : replyTo.author,
+        })}{" "}
         <button
           type="button"
           className="small-button"
@@ -537,8 +882,15 @@ export function Discussion({
         </button>
       </div>
       <Composer
+        entryId={entryId}
+        mentions={replyMentions}
+        onMentionsChange={setReplyMentions}
         viewer={viewer}
-        label={t("discussion.writeReply", { name: replyTo.removed ? t("discussion.removedParent") : replyTo.author })}
+        label={t("discussion.writeReply", {
+          name: replyTo.removed
+            ? t("discussion.removedParent")
+            : replyTo.author,
+        })}
         placeholder={t("discussion.replyPlaceholder")}
         disabled={!writable}
         value={replyText}
@@ -549,7 +901,9 @@ export function Discussion({
     </>
   );
 
-  const unavailablePlaceholder: string = t(status === "frozen" ? "discussion.frozen" : "discussion.suspended");
+  const unavailablePlaceholder: string = t(
+    status === "frozen" ? "discussion.frozen" : "discussion.suspended",
+  );
   return (
     <section className="discussion" aria-labelledby={`discussion-${entryId}`}>
       <div className="discussion-head">
@@ -577,9 +931,14 @@ export function Discussion({
       </div>
       {viewer ? (
         <Composer
+          entryId={entryId}
+          mentions={mentions}
+          onMentionsChange={setMentions}
           viewer={viewer}
           label={t("discussion.write")}
-          placeholder={writable ? t("discussion.placeholder") : unavailablePlaceholder}
+          placeholder={
+            writable ? t("discussion.placeholder") : unavailablePlaceholder
+          }
           disabled={!writable}
           value={text}
           busy={busy}
@@ -588,21 +947,40 @@ export function Discussion({
         />
       ) : (
         <p className="join-discussion">
-          <button type="button" className="gold" onClick={() => setSignIn(true)}>
+          <button
+            type="button"
+            className="gold"
+            onClick={() => setSignIn(true)}
+          >
             <Icon name="comment" size={18} />
             {t("discussion.signIn")}
           </button>
-          <SignInDialog open={signIn} onOpenChange={setSignIn} providers={providers} />
+          <SignInDialog
+            open={signIn}
+            onOpenChange={setSignIn}
+            providers={providers}
+          />
         </p>
       )}
       <p className="form-error" role="alert">
         {error}
       </p>
-      {loading && threads.length === 0 && <output className="muted">{t("discussion.loading")}</output>}
-      {!loading && threads.length === 0 && <p className="empty">{t("discussion.empty")}</p>}
+      {loading && threads.length === 0 && (
+        <output className="muted">{t("discussion.loading")}</output>
+      )}
+      {!loading && threads.length === 0 && (
+        <p className="empty">{t("discussion.empty")}</p>
+      )}
       <ul className="thread-list" aria-label={t("discussion.comments")}>
         {threads.map((thread: CommentThread) => (
-          <Thread key={thread.id} thread={thread} rules={rules} replyTo={replyTo} replyBox={replyBox} />
+          <Thread
+            key={thread.id}
+            thread={thread}
+            rules={rules}
+            replyTo={replyTo}
+            replyBox={replyBox}
+            targetId={targetId}
+          />
         ))}
       </ul>
       {cursor && (
@@ -619,7 +997,9 @@ export function Discussion({
               .then((result) => {
                 if (controller.signal.aborted) return;
                 pages.current += 1;
-                setThreads((current: CommentThread[]) => mergeThreads(current, result.threads, sort));
+                setThreads((current: CommentThread[]) =>
+                  mergeThreads(current, result.threads, sort),
+                );
                 setCursor(result.cursor);
               })
               .catch((error_: unknown) => {

@@ -142,7 +142,47 @@ export interface MashState {
   assisted: number;
 }
 
+export interface CommentMention {
+  userId: string;
+  start: number;
+  end: number;
+}
+
+export interface MentionCandidate {
+  id: string;
+  name: string;
+  avatar: string | null;
+  avatarPreset: number | null;
+  handle: string | null;
+}
+
+export interface NotificationPreferences {
+  replies: boolean;
+  mentions: boolean;
+}
+
+export interface NotificationItem {
+  id: string;
+  kind: "reply" | "mention";
+  commentId: string;
+  entryId: string;
+  handle: string;
+  href: string;
+  actor: string;
+  createdAt: number;
+  read: boolean;
+}
+
+export interface NotificationSnapshot {
+  notifications: NotificationItem[];
+  nextCursor: string | null;
+  unreadCount: number;
+  preferences: NotificationPreferences;
+}
+
 export interface Comment {
+  editedAt?: number | null;
+  mentions?: CommentMention[];
   id: string;
   entryId: string;
   // Empty when removed.

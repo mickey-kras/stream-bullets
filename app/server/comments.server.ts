@@ -1,5 +1,6 @@
 import type { AppEnv } from "../env";
 import type { Comment, CommentThread, DiscussionSnapshot, ThreadSnapshot } from "../types";
+import { mentionStatements, validateMentions } from "./discussion-notifications.server";
 import { assertStreamerWritable } from "./access.server";
 import {
   applyMutation,
@@ -11,6 +12,7 @@ import {
   adminRemoval,
   type AdminRemovalGate,
   type StepUpGate,
+  getVisibleEntry,
 } from "./data.server";
 import { HttpError } from "./http.server";
 import { commentActionSchema, commentQuerySchema, type CommentQuery } from "./validation";
@@ -25,6 +27,8 @@ interface CommentRow {
   author_id: string;
   text: string;
   created_at: number;
+  edited_at: number | null;
+  mentions: string;
   parent_id: string | null;
   removed_at: number | null;
   author: string;
@@ -35,7 +39,9 @@ interface CommentRow {
   reported: number;
 }
 
-const commentColumns = `c.*, u.name AS author, u.image AS avatar, u.avatar_preset,
+const commentColumns = `c.*,
+      coalesce((SELECT json_group_array(json_object('userId',m.user_id,'start',m.start,'end',m.end))
+        FROM comment_mentions m WHERE m.comment_id=c.id),'[]') AS mentions, u.name AS author, u.image AS avatar, u.avatar_preset,
       (SELECT count(*) FROM comment_likes l WHERE l.comment_id=c.id) AS likes,
       EXISTS(SELECT 1 FROM comment_likes l WHERE l.comment_id=c.id AND l.user_id=?) AS liked,
       EXISTS(SELECT 1 FROM content_reports cr WHERE cr.target_kind='comment' AND cr.target_id=c.id
@@ -53,6 +59,8 @@ function commentValue(row: CommentRow): Comment {
     avatarPreset: removed ? null : row.avatar_preset,
     text: removed ? "" : row.text,
     createdAt: row.created_at,
+    editedAt: removed ? null : row.edited_at,
+    mentions: removed ? [] : JSON.parse(row.mentions) as NonNullable<Comment["mentions"]>,
     parentId: row.parent_id,
     likes: removed ? 0 : row.likes,
     liked: !removed && row.liked === 1,
@@ -199,6 +207,8 @@ async function removeComment(
             AND NOT EXISTS(SELECT 1 FROM entry_comments r WHERE r.parent_id=c.id AND r.id<>g.id)
       )
       DELETE FROM entry_comments WHERE id IN (SELECT id FROM gone)`).bind(comment.parent_id),
+    env.DB.prepare("DELETE FROM notifications WHERE comment_id=?").bind(id),
+    env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(id),
     env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
   ];
   const result = await env.DB.batch(statements);
@@ -229,7 +239,22 @@ export async function mutateComment(
   await consumeMutationQuota(env, viewerId);
   const comment = await commentPermission(env, action.id);
   await assertStreamerWritable(env, comment.streamer_id, viewerId, { moderation: action.action === "delete" });
-  if (action.action === "like") {
+  if (action.action === "edit") {
+    if (comment.author_id !== viewerId) throw new HttpError(403, "Only the author can edit this comment.");
+    await consumeMutationQuota(env, viewerId, true);
+    await validateMentions(env, comment.streamer_id, action.text, action.mentions, action.id);
+    const result = await env.DB.batch([
+      env.DB.prepare("UPDATE entry_comments SET text=?,edited_at=? WHERE id=? AND author_id=? AND removed_at IS NULL")
+        .bind(action.text, Date.now(), action.id, viewerId),
+      env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(action.id),
+      ...mentionStatements(env, action.id, action.mentions),
+      env.DB.prepare(`DELETE FROM notifications WHERE comment_id=? AND kind='mention'
+        AND NOT EXISTS(SELECT 1 FROM comment_mentions m WHERE m.comment_id=notifications.comment_id AND m.user_id=notifications.user_id)`)
+        .bind(action.id),
+      env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
+    ]);
+    if (!result[0].meta.changes) throw new HttpError(404, "Comment not found.");
+  } else if (action.action === "like") {
     const statement = action.liked
       ? env.DB.prepare(
           "INSERT INTO comment_likes (comment_id,user_id) SELECT id,? FROM entry_comments WHERE id=? AND removed_at IS NULL ON CONFLICT(comment_id,user_id) DO NOTHING",
@@ -240,4 +265,26 @@ export async function mutateComment(
     await removeComment(env, viewerId, action.id, comment, stepUp);
   }
   return { id: action.id };
+}
+
+export async function getCommentThread(env: AppEnv, id: string, viewerId: string | null): Promise<{
+  comment: Comment; rootId: string; thread: CommentThread; handle: string; entryId: string;
+}> {
+  const row = await env.DB.prepare(`SELECT ${commentColumns} FROM entry_comments c JOIN user u ON u.id=c.author_id WHERE c.id=?`)
+    .bind(viewerId ?? "", viewerId ?? "", id).first<CommentRow>();
+  if (!row || row.removed_at !== null || !(await getVisibleEntry(env, row.entry_id, viewerId)))
+    throw new HttpError(404, "Comment not found.");
+  const root = await env.DB.prepare(`WITH RECURSIVE ancestors(id,parent_id) AS (
+    SELECT id,parent_id FROM entry_comments WHERE id=?
+    UNION ALL SELECT c.id,c.parent_id FROM entry_comments c JOIN ancestors a ON c.id=a.parent_id
+  ) SELECT id FROM ancestors WHERE parent_id IS NULL`).bind(id).first<{ id: string }>();
+  if (!root) throw new HttpError(404, "Comment not found.");
+  const rootRow = await env.DB.prepare(`SELECT ${commentColumns} FROM entry_comments c JOIN user u ON u.id=c.author_id WHERE c.id=?`)
+    .bind(viewerId ?? "", viewerId ?? "", root.id).first<CommentRow>();
+  const page = await env.DB.prepare("SELECT s.handle FROM streamers s JOIN entries e ON e.streamer_id=s.id WHERE e.id=?")
+    .bind(row.entry_id).first<{ handle: string }>();
+  if (!rootRow || !page) throw new HttpError(404, "Comment not found.");
+  const replies = await threadReplies(env, [root.id], viewerId);
+  return { comment: commentValue(row), rootId: root.id,
+    thread: { ...commentValue(rootRow), replies: replies.get(root.id) ?? [] }, handle: page.handle, entryId: row.entry_id };
 }

@@ -103,3 +103,31 @@ Overlay, Mash Battle, admin, step-up, and AI-interest handlers now exist in the 
 For complete route definitions, inspect their modules in `app/server/api/`.
 New modules export `ApiRoute[]` through `get()` and `write()` and join `apiRoutes` in `index.ts`.
 Streamer-page writes must call `assertStreamerWritable()`.
+
+## Discussion updates
+
+| Route | Input | Result |
+| --- | --- | --- |
+| `POST /api/streamers/:handle` | `{action: "comment", id, text, parentId?, mentions?}` | `{id}`. New comment or reply. |
+| `POST /api/comments` | `{action: "edit", id, text, mentions?}` | `{id}`. Author only; removed comments cannot change. |
+| `GET /api/comments/:id` | None | `{comment, rootId, thread, handle, entryId}`. Exact comment and its thread, subject to page access. |
+| `GET /api/entries/:id/mention-candidates` | `query`, at most 40 characters | `{users}`. At most 10 public profiles or participants in this community. Requires sign-in. |
+| `GET /api/notifications` | Optional opaque `cursor` | `NotificationSnapshot`: at most 50 notifications, unread count, preferences and next cursor. Requires sign-in. |
+| `POST /api/notifications` | `{action: "read", id, read}` | `{ok: true}`. Only the recipient can change read state. |
+| `POST /api/notifications` | `{action: "preferences", replies, mentions}` | `{ok: true}`. Saves in-app delivery preferences for new events. |
+
+Comments include `editedAt` and `mentions`. Mention selections contain `{userId, start, end}`.
+Offsets use UTF-16 indices into the exact comment text. Do not trim text before sending it.
+Each selection must match `@name` for an available account. Up to five distinct accounts are allowed.
+Plain `@name` text without a selection does not send a notification.
+
+New replies and selected mentions send in-app notifications. Self-notifications are excluded.
+A reply that also mentions its parent author sends one reply notification.
+Edits do not send notifications. Removing a mention retracts its notification.
+Deleted comments and inaccessible pages do not appear in the inbox or exact-comment lookup.
+Notifications keep no comment excerpts. They link to the current comment.
+Email and push delivery are not enabled.
+
+Each inbox retains up to 200 notifications for up to 90 days.
+Expired records are removed on the next delivery. Delivery also limits each sender to 100 notifications per hour,
+with at most 10 per recipient per hour. Existing content quotas still apply.

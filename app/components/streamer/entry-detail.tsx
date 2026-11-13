@@ -70,6 +70,7 @@ export function EntryDetail({
   writable,
   pending,
   onBack,
+  onDiscuss,
   onReact,
   onDelete,
   onStatusSaved,
@@ -81,6 +82,7 @@ export function EntryDetail({
   writable: boolean;
   pending: boolean;
   onBack: () => void;
+  onDiscuss: () => void;
   onReact: (value: -1 | 0 | 1) => void;
   onDelete: () => Promise<void>;
 
@@ -124,6 +126,10 @@ export function EntryDetail({
       </div>
       <p className="description">{entry.body}</p>
       <IdeaOutcome entry={entry} />
+      <button type="button" className="open-discussion gold" onClick={onDiscuss}>
+        <Icon name="comment" size={18} />
+        {t("discussion.open")}
+      </button>
       <div className="votes">
         <VoteButtons
           reaction={entry.reaction}

@@ -192,6 +192,7 @@ export const entryComments = sqliteTable(
     text: text("text").notNull(),
     createdAt: integer("created_at").notNull(),
     parentId: text("parent_id"),
+    editedAt: integer("edited_at"),
     // Deleted parents remain as "Comment removed" placeholders.
     removedAt: integer("removed_at"),
   },
@@ -209,6 +210,44 @@ export const entryComments = sqliteTable(
     check("entry_comments_parent_check", sql`${table.parentId} IS NULL OR ${table.parentId} <> ${table.id}`),
   ],
 );
+
+export const commentMentions = sqliteTable("comment_mentions", {
+  commentId: text("comment_id").notNull().references(() => entryComments.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  start: integer("start").notNull(),
+  end: integer("end").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.commentId, table.userId] }),
+  index("comment_mentions_user_idx").on(table.userId),
+  check("comment_mentions_range_check", sql`${table.start} >= 0 AND ${table.end} > ${table.start} AND ${table.end} <= 2000`),
+]);
+
+export const notificationPreferences = sqliteTable("notification_preferences", {
+  userId: text("user_id").primaryKey().references(() => user.id, { onDelete: "cascade" }),
+  replies: integer("replies").notNull().default(1),
+  mentions: integer("mentions").notNull().default(1),
+}, (table) => [
+  check("notification_preferences_replies_check", sql`${table.replies} IN (0,1)`),
+  check("notification_preferences_mentions_check", sql`${table.mentions} IN (0,1)`),
+]);
+
+export const notifications = sqliteTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  actorId: text("actor_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  commentId: text("comment_id").notNull().references(() => entryComments.id, { onDelete: "cascade" }),
+  kind: text("kind", { enum: ["reply", "mention"] }).notNull(),
+  createdAt: integer("created_at").notNull(),
+  read: integer("read").notNull().default(0),
+}, (table) => [
+  uniqueIndex("notifications_delivery_idx").on(table.userId, table.commentId),
+  index("notifications_inbox_idx").on(table.userId, table.createdAt, table.id),
+  index("notifications_actor_idx").on(table.actorId, table.createdAt),
+  index("notifications_comment_idx").on(table.commentId),
+  index("notifications_expiry_idx").on(table.createdAt),
+  check("notifications_kind_check", sql`${table.kind} IN ('reply','mention')`),
+  check("notifications_read_check", sql`${table.read} IN (0,1)`),
+]);
 
 export const commentLikes = sqliteTable(
   "comment_likes",

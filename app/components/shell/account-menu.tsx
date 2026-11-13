@@ -5,6 +5,7 @@ import { t, type MessageId } from "../../i18n";
 import { paths, useShell, type ShellData } from "../../lib/shell";
 import { dialogHref, type AccountDialogName, type DialogState } from "../account/dialog-route";
 import { OwnerNotice } from "../streamer/page-banner";
+import { NotificationLink } from "../notifications";
 import { Avatar } from "../ui/avatar";
 import { Icon, type IconName } from "../ui/icon";
 import { SignInButton } from "./sign-in-dialog";
@@ -135,82 +136,85 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
   const moderated: boolean = Boolean(shell.ownStreamer && shell.ownStreamer.status !== "active");
 
   return (
-    <div className="account-menu-wrap" ref={wrap}>
-      <button
-        ref={button}
-        type="button"
-        className="profile"
-        aria-expanded={open}
-        aria-controls={menuId}
-        aria-label={t(moderated ? "account.menuForNotice" : "account.menuFor", { name: viewer.name })}
-        onClick={() => setOpenAt((value: string | null) => (value === location ? null : location))}
-      >
-        <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
-        {moderated && <span className="notice-dot" aria-hidden="true" />}
-      </button>
-      <div className="account-menu" id={menuId} ref={panel} tabIndex={-1} hidden={!open}>
-        <div className="account-id">
+    <>
+      <NotificationLink key={viewer.id} />
+      <div className="account-menu-wrap" ref={wrap}>
+        <button
+          ref={button}
+          type="button"
+          className="profile"
+          aria-expanded={open}
+          aria-controls={menuId}
+          aria-label={t(moderated ? "account.menuForNotice" : "account.menuFor", { name: viewer.name })}
+          onClick={() => setOpenAt((value: string | null) => (value === location ? null : location))}
+        >
           <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
-          <div>
-            <strong>{viewer.name}</strong>
-            <span>{roleLine}</span>
+          {moderated && <span className="notice-dot" aria-hidden="true" />}
+        </button>
+        <div className="account-menu" id={menuId} ref={panel} tabIndex={-1} hidden={!open}>
+          <div className="account-id">
+            <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
+            <div>
+              <strong>{viewer.name}</strong>
+              <span>{roleLine}</span>
+            </div>
           </div>
+          {shell.ownStreamer && (
+            <OwnerNotice
+              status={shell.ownStreamer.status}
+              reason={shell.ownStreamer.statusReason}
+              changedAt={shell.ownStreamer.statusChangedAt}
+            />
+          )}
+          <nav aria-label={t("account.nav")}>
+            <ul>
+              {accountMenuRows(shell, here, streamerHeader).map((group: MenuRow[], index: number) => [
+                index > 0 && <li key={`divider-${group[0].label}`} className="account-menu-divider" aria-hidden="true" />,
+                ...group.map((row: MenuRow) => (
+                  <li key={row.label}>
+                    <Link
+                      to={row.to}
+                      aria-current={row.current ? "page" : undefined}
+                      aria-haspopup={row.dialog ? "dialog" : undefined}
+                      state={
+                        row.dialog
+                          ? ({
+                              dialogFrom: pathname,
+                              languageOpener: row.dialog === "language" ? "account" : undefined,
+                            } satisfies DialogState)
+                          : undefined
+                      }
+                      preventScrollReset={Boolean(row.dialog)}
+                      onClick={() => setOpenAt(null)}
+                    >
+                      <span className="icon-muted">
+                        <Icon name={row.icon} size={18} />
+                      </span>
+                      {t(row.label)}
+                    </Link>
+                  </li>
+                )),
+              ])}
+              <li className="account-menu-divider" aria-hidden="true" />
+              <li>
+                <button
+                  type="button"
+                  className="account-menu-signout"
+                  disabled={signingOut}
+                  onClick={() => {
+                    void signOut();
+                  }}
+                >
+                  <span className="icon-muted">
+                    <Icon name="sign-out" size={18} />
+                  </span>
+                  {signingOut ? t("account.signingOut") : t("account.signOut")}
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
-        {shell.ownStreamer && (
-          <OwnerNotice
-            status={shell.ownStreamer.status}
-            reason={shell.ownStreamer.statusReason}
-            changedAt={shell.ownStreamer.statusChangedAt}
-          />
-        )}
-        <nav aria-label={t("account.nav")}>
-          <ul>
-            {accountMenuRows(shell, here, streamerHeader).map((group: MenuRow[], index: number) => [
-              index > 0 && <li key={`divider-${group[0].label}`} className="account-menu-divider" aria-hidden="true" />,
-              ...group.map((row: MenuRow) => (
-                <li key={row.label}>
-                  <Link
-                    to={row.to}
-                    aria-current={row.current ? "page" : undefined}
-                    aria-haspopup={row.dialog ? "dialog" : undefined}
-                    state={
-                      row.dialog
-                        ? ({
-                            dialogFrom: pathname,
-                            languageOpener: row.dialog === "language" ? "account" : undefined,
-                          } satisfies DialogState)
-                        : undefined
-                    }
-                    preventScrollReset={Boolean(row.dialog)}
-                    onClick={() => setOpenAt(null)}
-                  >
-                    <span className="icon-muted">
-                      <Icon name={row.icon} size={18} />
-                    </span>
-                    {t(row.label)}
-                  </Link>
-                </li>
-              )),
-            ])}
-            <li className="account-menu-divider" aria-hidden="true" />
-            <li>
-              <button
-                type="button"
-                className="account-menu-signout"
-                disabled={signingOut}
-                onClick={() => {
-                  void signOut();
-                }}
-              >
-                <span className="icon-muted">
-                  <Icon name="sign-out" size={18} />
-                </span>
-                {signingOut ? t("account.signingOut") : t("account.signOut")}
-              </button>
-            </li>
-          </ul>
-        </nav>
       </div>
-    </div>
+    </>
   );
 }
