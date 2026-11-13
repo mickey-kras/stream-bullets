@@ -67,13 +67,10 @@ export function backoffMs(attempt: number, random: number): number {
   return Math.round(ceiling * (0.5 + jitter * 0.5));
 }
 
-function cryptoRandom(): number {
-  return crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
-}
-
 export function openActivitySocket(options: ActivitySocketOptions): ActivitySocket {
   const Impl: ActivityWebSocketConstructor = options.WebSocketImpl ?? WebSocket;
-  const random: () => number = options.random ?? cryptoRandom;
+  // Jitter only spreads reconnects; it needs no cryptographic source.
+  const random: () => number = options.random ?? Math.random;
   const setTimer = options.setTimer ?? ((callback: () => void, ms: number): unknown => setTimeout(callback, ms));
   const clearTimer =
     options.clearTimer ?? ((handle: unknown): void => clearTimeout(handle as ReturnType<typeof setTimeout>));

@@ -21009,7 +21009,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L135",
+      "source_location": "L132",
       "target": "app_lib_activity_parseactivitymessage",
       "weight": 1.0
     },
@@ -21021,7 +21021,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L173",
+      "source_location": "L170",
       "target": "app_lib_activity_socket_openactivitysocket_connect",
       "weight": 1.0
     },
@@ -21033,7 +21033,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_armping",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L122",
+      "source_location": "L119",
       "target": "app_lib_activity_socket_openactivitysocket_stop",
       "weight": 1.0
     },
@@ -21045,7 +21045,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_armping",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L126",
+      "source_location": "L123",
       "target": "app_lib_activity_socket_openactivitysocket_armping",
       "weight": 1.0
     },
@@ -21057,7 +21057,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_armwatchdog",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L117",
+      "source_location": "L114",
       "target": "app_lib_activity_socket_openactivitysocket_stop",
       "weight": 1.0
     },
@@ -21069,7 +21069,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_armwatchdog",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L118",
+      "source_location": "L115",
       "target": "app_lib_activity_socket_openactivitysocket_drop",
       "weight": 1.0
     },
@@ -21081,8 +21081,32 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_connect",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L160",
+      "source_location": "L157",
       "target": "app_lib_activity_socket_backoffms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_activity_socket_openactivitysocket_connect",
+      "source_file": "app/lib/activity-socket.ts",
+      "source_location": "L161",
+      "target": "app_lib_activity_socket_openactivitysocket_armwatchdog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_activity_socket_openactivitysocket_connect",
+      "source_file": "app/lib/activity-socket.ts",
+      "source_location": "L162",
+      "target": "app_lib_activity_socket_openactivitysocket_armping",
       "weight": 1.0
     },
     {
@@ -21094,30 +21118,6 @@
       "source": "app_lib_activity_socket_openactivitysocket_connect",
       "source_file": "app/lib/activity-socket.ts",
       "source_location": "L164",
-      "target": "app_lib_activity_socket_openactivitysocket_armwatchdog",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_activity_socket_openactivitysocket_connect",
-      "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L165",
-      "target": "app_lib_activity_socket_openactivitysocket_armping",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_lib_activity_socket_openactivitysocket_connect",
-      "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L167",
       "target": "app_lib_activity_socket_openactivitysocket_receive",
       "weight": 1.0
     },
@@ -21129,7 +21129,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_connect",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L169",
+      "source_location": "L166",
       "target": "app_lib_activity_socket_openactivitysocket_drop",
       "weight": 1.0
     },
@@ -21141,7 +21141,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_detach",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L97",
+      "source_location": "L94",
       "target": "app_lib_activity_socket_openactivitysocket_stop",
       "weight": 1.0
     },
@@ -21153,7 +21153,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_drop",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L104",
+      "source_location": "L101",
       "target": "app_lib_activity_socket_openactivitysocket_detach",
       "weight": 1.0
     },
@@ -21165,7 +21165,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_drop",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L113",
+      "source_location": "L110",
       "target": "app_lib_activity_socket_backoffms",
       "weight": 1.0
     },
@@ -21177,7 +21177,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_receive",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L132",
+      "source_location": "L129",
       "target": "app_lib_activity_socket_openactivitysocket_armwatchdog",
       "weight": 1.0
     },
@@ -21189,7 +21189,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_receive",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L135",
+      "source_location": "L132",
       "target": "app_lib_activity_parseactivitymessage",
       "weight": 1.0
     },
@@ -21201,7 +21201,7 @@
       "relation": "calls",
       "source": "app_lib_activity_socket_openactivitysocket_receive",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L140",
+      "source_location": "L137",
       "target": "app_lib_activity_socket_openactivitysocket_drop",
       "weight": 1.0
     },
@@ -118703,17 +118703,6 @@
       "source": "app_lib_activity_socket",
       "source_file": "app/lib/activity-socket.ts",
       "source_location": "L70",
-      "target": "app_lib_activity_socket_cryptorandom",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_activity_socket",
-      "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L74",
       "target": "app_lib_activity_socket_openactivitysocket",
       "weight": 1.0
     },
@@ -118735,7 +118724,7 @@
       "relation": "contains",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L103",
+      "source_location": "L100",
       "target": "app_lib_activity_socket_openactivitysocket_drop",
       "weight": 1.0
     },
@@ -118746,7 +118735,7 @@
       "relation": "contains",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L116",
+      "source_location": "L113",
       "target": "app_lib_activity_socket_openactivitysocket_armwatchdog",
       "weight": 1.0
     },
@@ -118757,7 +118746,7 @@
       "relation": "contains",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L121",
+      "source_location": "L118",
       "target": "app_lib_activity_socket_openactivitysocket_armping",
       "weight": 1.0
     },
@@ -118768,7 +118757,7 @@
       "relation": "contains",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L130",
+      "source_location": "L127",
       "target": "app_lib_activity_socket_openactivitysocket_receive",
       "weight": 1.0
     },
@@ -118779,7 +118768,7 @@
       "relation": "contains",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L151",
+      "source_location": "L148",
       "target": "app_lib_activity_socket_openactivitysocket_connect",
       "weight": 1.0
     },
@@ -118790,7 +118779,7 @@
       "relation": "contains",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L87",
+      "source_location": "L84",
       "target": "app_lib_activity_socket_openactivitysocket_stop",
       "weight": 1.0
     },
@@ -118801,7 +118790,7 @@
       "relation": "contains",
       "source": "app_lib_activity_socket_openactivitysocket",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L92",
+      "source_location": "L89",
       "target": "app_lib_activity_socket_openactivitysocket_detach",
       "weight": 1.0
     },
@@ -140419,7 +140408,7 @@
       "relation": "indirect_call",
       "source": "app_lib_activity_socket_openactivitysocket_drop",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L113",
+      "source_location": "L110",
       "target": "app_lib_activity_socket_openactivitysocket_connect",
       "weight": 1.0
     },
@@ -141637,10 +141626,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "16d1e5f57e5f20d95bfbcc57dedad17d4e1cc38e1b0dec79afdb18b786cfeb2c",
+    "content_sha256": "85105b506c232ee9b594e212e8c3273f0b00a0eea274947e09b7ef51a9429da4",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "7b7c9cbf8504470a9ff29e61628a0172a73489e4a10a175e38ef1bd9d9d82906",
+    "source_sha256": "c3bea4512b8098c7044d005420dcf0989e16bc88b2356b7f63010c5875bac0bd",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -155123,22 +155112,11 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_lib_activity_socket_cryptorandom",
-      "label": "cryptoRandom()",
-      "norm_label": "cryptorandom()",
-      "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L70"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
       "id": "app_lib_activity_socket_openactivitysocket",
       "label": "openActivitySocket()",
       "norm_label": "openactivitysocket()",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L74"
+      "source_location": "L70"
     },
     {
       "_callable": true,
@@ -155149,7 +155127,7 @@
       "label": "armPing()",
       "norm_label": "armping()",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L121"
+      "source_location": "L118"
     },
     {
       "_callable": true,
@@ -155160,7 +155138,7 @@
       "label": "armWatchdog()",
       "norm_label": "armwatchdog()",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L116"
+      "source_location": "L113"
     },
     {
       "_callable": true,
@@ -155171,7 +155149,7 @@
       "label": "connect()",
       "norm_label": "connect()",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L151"
+      "source_location": "L148"
     },
     {
       "_callable": true,
@@ -155182,7 +155160,7 @@
       "label": "detach()",
       "norm_label": "detach()",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L92"
+      "source_location": "L89"
     },
     {
       "_callable": true,
@@ -155193,7 +155171,7 @@
       "label": "drop()",
       "norm_label": "drop()",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L103"
+      "source_location": "L100"
     },
     {
       "_callable": true,
@@ -155204,7 +155182,7 @@
       "label": "receive()",
       "norm_label": "receive()",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L130"
+      "source_location": "L127"
     },
     {
       "_callable": true,
@@ -155215,7 +155193,7 @@
       "label": "stop()",
       "norm_label": "stop()",
       "source_file": "app/lib/activity-socket.ts",
-      "source_location": "L87"
+      "source_location": "L84"
     },
     {
       "_callable": true,
