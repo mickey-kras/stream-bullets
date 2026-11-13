@@ -111,6 +111,64 @@ function twitchEmoteUrl(emoteId: string): string {
   return `https://static-cdn.jtvnw.net/emoticons/v2/${encodeURIComponent(emoteId)}/default/dark/1.0`;
 }
 
+function twitchChatEvents(event: unknown, receivedAt: number, sentAt: number | null): ActivityEvent[] {
+  const parsed = twitchChatSchema.safeParse(event);
+  if (!parsed.success) return [];
+  const value = parsed.data;
+  const raw: ActivityFragment[] = value.message.fragments.length
+    ? value.message.fragments.map(
+        (fragment): ActivityFragment =>
+          fragment.type === "emote" && fragment.emote
+            ? {
+                type: "emote",
+                id: fragment.emote.id,
+                name: cleanText(fragment.text, 100),
+                url: twitchEmoteUrl(fragment.emote.id),
+              }
+            : { type: "text", text: fragment.text },
+      )
+    : [{ type: "text", text: value.message.text }];
+  const { text, fragments } = boundFragments(raw);
+  const chat: ActivityChat = {
+    kind: "chat",
+    id: `twitch:${value.message_id}`,
+    platform: "twitch",
+    channelId: value.broadcaster_user_id,
+    messageId: value.message_id,
+    user: {
+      id: value.chatter_user_id,
+      login: cleanText(value.chatter_user_login, 100),
+      displayName: value.chatter_user_name,
+      ...(color.parse(value.color) ? { color: color.parse(value.color) } : {}),
+    },
+    text,
+    fragments,
+    badges: value.badges
+      .slice(0, MAX_BADGES)
+      .map((badge) => ({ id: cleanText(badge.set_id, 64), label: cleanText(badge.set_id, 64) })),
+    sentAt,
+    receivedAt,
+    live: isLiveMessage(sentAt, receivedAt),
+  };
+  return [chat];
+}
+
+function twitchModerationEvents(event: unknown, receivedAt: number, sentAt: number | null): ActivityEvent[] {
+  const parsed = twitchModerate.safeParse(event);
+  if (!parsed.success) return [];
+  const { action, ban, timeout } = parsed.data;
+  if (action === "ban" && ban)
+    return [{ kind: "ban", platform: "twitch", userId: ban.user_id, until: null, receivedAt, bannedAt: sentAt }];
+  if (action === "timeout" && timeout) {
+    const until = parseTime(timeout.expires_at);
+    return until === null
+      ? []
+      : [{ kind: "ban", platform: "twitch", userId: timeout.user_id, until, receivedAt, bannedAt: sentAt }];
+  }
+  // Deletions and clears also arrive as channel.chat.* events; unbans need no feed change.
+  return [];
+}
+
 /** Events from one Twitch EventSub notification. `sentAt` is the message timestamp header. */
 export function twitchEvents(
   subscriptionType: string,
@@ -118,47 +176,7 @@ export function twitchEvents(
   receivedAt: number,
   sentAt: number | null,
 ): ActivityEvent[] {
-  if (subscriptionType === "channel.chat.message") {
-    const parsed = twitchChatSchema.safeParse(event);
-    if (!parsed.success) return [];
-    const value = parsed.data;
-    const raw: ActivityFragment[] = value.message.fragments.length
-      ? value.message.fragments.map(
-          (fragment): ActivityFragment =>
-            fragment.type === "emote" && fragment.emote
-              ? {
-                  type: "emote",
-                  id: fragment.emote.id,
-                  name: cleanText(fragment.text, 100),
-                  url: twitchEmoteUrl(fragment.emote.id),
-                }
-              : { type: "text", text: fragment.text },
-        )
-      : [{ type: "text", text: value.message.text }];
-    const { text, fragments } = boundFragments(raw);
-    const chat: ActivityChat = {
-      kind: "chat",
-      id: `twitch:${value.message_id}`,
-      platform: "twitch",
-      channelId: value.broadcaster_user_id,
-      messageId: value.message_id,
-      user: {
-        id: value.chatter_user_id,
-        login: cleanText(value.chatter_user_login, 100),
-        displayName: value.chatter_user_name,
-        ...(color.parse(value.color) ? { color: color.parse(value.color) } : {}),
-      },
-      text,
-      fragments,
-      badges: value.badges
-        .slice(0, MAX_BADGES)
-        .map((badge) => ({ id: cleanText(badge.set_id, 64), label: cleanText(badge.set_id, 64) })),
-      sentAt,
-      receivedAt,
-      live: isLiveMessage(sentAt, receivedAt),
-    };
-    return [chat];
-  }
+  if (subscriptionType === "channel.chat.message") return twitchChatEvents(event, receivedAt, sentAt);
   if (subscriptionType === "channel.chat.message_delete") {
     const parsed = z.object({ message_id: id }).safeParse(event);
     return parsed.success
@@ -172,20 +190,7 @@ export function twitchEvents(
       ? [{ kind: "clear_user", platform: "twitch", userId: parsed.data.target_user_id, receivedAt }]
       : [];
   }
-  if (subscriptionType === "channel.moderate") {
-    const parsed = twitchModerate.safeParse(event);
-    if (!parsed.success) return [];
-    const { action, ban, timeout } = parsed.data;
-    if (action === "ban" && ban)
-      return [{ kind: "ban", platform: "twitch", userId: ban.user_id, until: null, receivedAt, bannedAt: sentAt }];
-    if (action === "timeout" && timeout) {
-      const until = parseTime(timeout.expires_at);
-      return until === null
-        ? []
-        : [{ kind: "ban", platform: "twitch", userId: timeout.user_id, until, receivedAt, bannedAt: sentAt }];
-    }
-    // Deletions and clears also arrive as channel.chat.* events; unbans need no feed change.
-  }
+  if (subscriptionType === "channel.moderate") return twitchModerationEvents(event, receivedAt, sentAt);
   return [];
 }
 
