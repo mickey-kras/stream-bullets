@@ -854,6 +854,26 @@ describe("ChannelIngest load and robustness", (): void => {
     expect(await state().storage.get("youtube")).toBeUndefined();
   });
 
+  it("writes nothing from a YouTube poll that a page suspension overtook", async (): Promise<void> => {
+    await addConnection("youtube");
+    await listen();
+    await state().ready;
+    await room().alarm();
+    const real = globalThis.fetch;
+    vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
+      const response = await real(input, init);
+      if (new URL(input).pathname.endsWith("/liveChat/messages")) {
+        await env.DB.prepare("UPDATE streamers SET status='suspended' WHERE id=?").bind(page).run();
+        await post("page-status", "youtube");
+      }
+      return response;
+    });
+    fake.chatPages = [{ items: [youtubeText("late", "UCa", "hi", {}, new Date().toISOString())], nextPageToken: "p" }];
+    await state().storage.deleteAlarm();
+    await room().alarm();
+    expect(state().storage.sql.exec("SELECT seq FROM events").toArray()).toEqual([]);
+  });
+
   it("keeps subscription ids it could not delete on disconnect", async (): Promise<void> => {
     await addConnection("twitch");
     await post("connect", "twitch");

@@ -26073,7 +26073,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L434",
+      "source_location": "L436",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -26085,7 +26085,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L437",
+      "source_location": "L439",
       "target": "app_server_channel_ingest_bankey",
       "weight": 1.0
     },
@@ -26097,7 +26097,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L441",
+      "source_location": "L443",
       "target": "app_server_channel_ingest_channelingest_admit",
       "weight": 1.0
     },
@@ -26109,32 +26109,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L809",
+      "source_location": "L811",
       "target": "app_server_channel_ingest_channelingest_closesockets",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_alarm",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L809",
-      "target": "app_server_channel_tokens_server_channelsoff",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_alarm",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L810",
-      "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
     {
@@ -26146,6 +26122,30 @@
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L811",
+      "target": "app_server_channel_tokens_server_channelsoff",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_alarm",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L812",
+      "target": "app_server_channel_ingest_channelingest_prune",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_alarm",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L813",
       "target": "app_server_channel_ingest_channelingest_nextexpiry",
       "weight": 1.0
     },
@@ -26157,7 +26157,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_alarm",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L817",
+      "source_location": "L819",
       "target": "app_server_channel_ingest_channelingest_pollyoutube",
       "weight": 1.0
     },
@@ -26169,7 +26169,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_broadcast",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L320",
+      "source_location": "L322",
       "target": "app_server_channel_ingest_channelingest_send",
       "weight": 1.0
     },
@@ -26181,7 +26181,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L729",
+      "source_location": "L731",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -26193,20 +26193,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L737",
+      "source_location": "L739",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_cleanupchannel",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L740",
-      "target": "app_server_channel_tokens_server_loadtokens",
       "weight": 1.0
     },
     {
@@ -26218,6 +26206,18 @@
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L742",
+      "target": "app_server_channel_tokens_server_loadtokens",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_cleanupchannel",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L744",
       "target": "app_server_channel_ingest_channelingest_knownsubscriptions",
       "weight": 1.0
     },
@@ -26229,7 +26229,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L743",
+      "source_location": "L745",
       "target": "app_server_channel_providers_server_unsubscribe",
       "weight": 1.0
     },
@@ -26241,7 +26241,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L746",
+      "source_location": "L748",
       "target": "app_server_channel_providers_server_revoketoken",
       "weight": 1.0
     },
@@ -26253,7 +26253,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L755",
+      "source_location": "L757",
       "target": "app_server_channel_ingest_channelingest_broadcast",
       "weight": 1.0
     },
@@ -26265,7 +26265,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L263",
+      "source_location": "L265",
       "target": "app_server_channel_ingest_channelingest_closesockets",
       "weight": 1.0
     },
@@ -26277,7 +26277,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L264",
+      "source_location": "L266",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -26289,7 +26289,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L268",
+      "source_location": "L270",
       "target": "app_server_channel_ingest_channelingest_forgetconnections",
       "weight": 1.0
     },
@@ -26301,7 +26301,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L271",
+      "source_location": "L273",
       "target": "app_server_channel_ingest_limits_newbuckets",
       "weight": 1.0
     },
@@ -26313,7 +26313,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closeall",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L272",
+      "source_location": "L274",
       "target": "app_server_channel_ingest_channelingest_createtables",
       "weight": 1.0
     },
@@ -26325,7 +26325,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_closesockets",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L282",
+      "source_location": "L284",
       "target": "app_server_channel_ingest_channelingest_send",
       "weight": 1.0
     },
@@ -26337,7 +26337,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L612",
+      "source_location": "L614",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -26349,7 +26349,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L616",
+      "source_location": "L618",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -26361,7 +26361,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L620",
+      "source_location": "L622",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -26373,7 +26373,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L621",
+      "source_location": "L623",
       "target": "app_server_channel_ingest_channelingest_resubscribe",
       "weight": 1.0
     },
@@ -26385,7 +26385,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L629",
+      "source_location": "L631",
       "target": "app_server_channel_ingest_channelingest_schedulealarm",
       "weight": 1.0
     },
@@ -26397,7 +26397,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L631",
+      "source_location": "L633",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -26409,7 +26409,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_connection",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L501",
+      "source_location": "L503",
       "target": "app_server_channel_ingest_channelingest_readconnection",
       "weight": 1.0
     },
@@ -26433,7 +26433,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_disconnectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L719",
+      "source_location": "L721",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -26445,7 +26445,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_disconnectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L721",
+      "source_location": "L723",
       "target": "app_server_channel_ingest_channelingest_cleanupchannel",
       "weight": 1.0
     },
@@ -26457,7 +26457,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_disconnectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L721",
+      "source_location": "L723",
       "target": "app_server_channel_ingest_channelingest_serialsubscriptions",
       "weight": 1.0
     },
@@ -26637,7 +26637,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_firstsight",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L362",
+      "source_location": "L364",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -26649,7 +26649,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_firstsight",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L363",
+      "source_location": "L365",
       "target": "app_server_channel_ingest_channelingest_remember",
       "weight": 1.0
     },
@@ -26661,7 +26661,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_freshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L566",
+      "source_location": "L568",
       "target": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "weight": 1.0
     },
@@ -26673,7 +26673,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L452",
+      "source_location": "L454",
       "target": "app_server_channel_ingest_channelingest_firstsight",
       "weight": 1.0
     },
@@ -26685,7 +26685,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L452",
+      "source_location": "L454",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -26697,7 +26697,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L462",
+      "source_location": "L464",
       "target": "app_server_channel_ingest_channelingest_remember",
       "weight": 1.0
     },
@@ -26709,7 +26709,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L465",
+      "source_location": "L467",
       "target": "app_server_channel_ingest_bankey",
       "weight": 1.0
     },
@@ -26721,7 +26721,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L473",
+      "source_location": "L475",
       "target": "app_server_channel_ingest_channelingest_broadcast",
       "weight": 1.0
     },
@@ -26733,7 +26733,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L481",
+      "source_location": "L483",
       "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
@@ -26745,7 +26745,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_knownsubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L652",
+      "source_location": "L654",
       "target": "app_server_channel_providers_server_listsubscriptions",
       "weight": 1.0
     },
@@ -26757,7 +26757,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_knownsubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L652",
+      "source_location": "L654",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -26769,7 +26769,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L584",
+      "source_location": "L586",
       "target": "app_server_channel_ingest_channelingest_storedtokens",
       "weight": 1.0
     },
@@ -26781,7 +26781,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L585",
+      "source_location": "L587",
       "target": "app_server_channel_providers_server_reauthrequired",
       "weight": 1.0
     },
@@ -26793,7 +26793,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L591",
+      "source_location": "L593",
       "target": "app_server_channel_providers_server_refreshtokens",
       "weight": 1.0
     },
@@ -26805,7 +26805,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L599",
+      "source_location": "L601",
       "target": "app_server_channel_tokens_server_replacetokens",
       "weight": 1.0
     },
@@ -26817,7 +26817,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_overlaykeyrevoked",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L291",
+      "source_location": "L293",
       "target": "app_server_channel_ingest_channelingest_send",
       "weight": 1.0
     },
@@ -26841,7 +26841,19 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pagestatuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L256",
+      "source_location": "L257",
+      "target": "app_server_channel_ingest_channelingest_bump",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_pagestatuschanged",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L258",
       "target": "app_server_channel_ingest_channelingest_closesockets",
       "weight": 1.0
     },
@@ -26853,7 +26865,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L925",
+      "source_location": "L927",
       "target": "app_server_channel_ingest_channelingest_spendquota",
       "weight": 1.0
     },
@@ -26865,7 +26877,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L925",
+      "source_location": "L927",
       "target": "app_server_channel_providers_server_providererror",
       "weight": 1.0
     },
@@ -26877,7 +26889,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L926",
+      "source_location": "L928",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -26889,7 +26901,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L931",
+      "source_location": "L933",
       "target": "app_server_channel_ingest_channelingest_refreshtitle",
       "weight": 1.0
     },
@@ -26901,7 +26913,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L945",
+      "source_location": "L947",
       "target": "app_server_channel_providers_server_youtubelivechat",
       "weight": 1.0
     },
@@ -26913,7 +26925,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L949",
+      "source_location": "L951",
       "target": "app_server_channel_providers_server_youtubechatpage",
       "weight": 1.0
     },
@@ -26925,32 +26937,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L952",
+      "source_location": "L954",
       "target": "app_server_channel_ingest_channelingest_admitevents",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_poll",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L952",
-      "target": "app_server_channel_ingest_channelingest_ingest",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_poll",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L952",
-      "target": "app_server_channel_normalize_youtubeevents",
       "weight": 1.0
     },
     {
@@ -26962,6 +26950,30 @@
       "source": "app_server_channel_ingest_channelingest_poll",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L954",
+      "target": "app_server_channel_ingest_channelingest_ingest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_poll",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L954",
+      "target": "app_server_channel_normalize_youtubeevents",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_poll",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L956",
       "target": "app_server_channel_ingest_channelingest_touch",
       "weight": 1.0
     },
@@ -26973,7 +26985,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L965",
+      "source_location": "L967",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -26985,20 +26997,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollfailed",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L978",
+      "source_location": "L980",
       "target": "app_lib_activity_quotaday",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_pollyoutube",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L845",
-      "target": "app_server_channel_tokens_server_channelsoff",
       "weight": 1.0
     },
     {
@@ -27010,6 +27010,18 @@
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L847",
+      "target": "app_server_channel_tokens_server_channelsoff",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_pollyoutube",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L849",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -27021,7 +27033,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L857",
+      "source_location": "L859",
       "target": "app_server_channel_ingest_superseded",
       "weight": 1.0
     },
@@ -27033,7 +27045,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L861",
+      "source_location": "L863",
       "target": "app_server_channel_ingest_channelingest_poll",
       "weight": 1.0
     },
@@ -27045,7 +27057,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L864",
+      "source_location": "L866",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -27057,7 +27069,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_pollyoutube",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L867",
+      "source_location": "L869",
       "target": "app_server_channel_ingest_channelingest_pollfailed",
       "weight": 1.0
     },
@@ -27069,7 +27081,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_prune",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L339",
+      "source_location": "L341",
       "target": "app_server_channel_ingest_channelingest_deleteids",
       "weight": 1.0
     },
@@ -27081,7 +27093,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L393",
+      "source_location": "L395",
       "target": "app_server_channel_ingest_reply",
       "weight": 1.0
     },
@@ -27093,7 +27105,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L396",
+      "source_location": "L398",
       "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
@@ -27105,20 +27117,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L397",
+      "source_location": "L399",
       "target": "app_server_channel_ingest_channelingest_known",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_receive",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L403",
-      "target": "app_server_channel_ingest_channelingest_admitevents",
       "weight": 1.0
     },
     {
@@ -27130,6 +27130,18 @@
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L405",
+      "target": "app_server_channel_ingest_channelingest_admitevents",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_receive",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L407",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -27141,7 +27153,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L418",
+      "source_location": "L420",
       "target": "app_server_channel_ingest_channelingest_remember",
       "weight": 1.0
     },
@@ -27153,7 +27165,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L419",
+      "source_location": "L421",
       "target": "app_server_channel_ingest_channelingest_ingest",
       "weight": 1.0
     },
@@ -27165,7 +27177,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L421",
+      "source_location": "L423",
       "target": "app_server_channel_ingest_channelingest_schedulealarm",
       "weight": 1.0
     },
@@ -27177,7 +27189,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L422",
+      "source_location": "L424",
       "target": "app_server_channel_ingest_channelingest_touch",
       "weight": 1.0
     },
@@ -27189,7 +27201,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L901",
+      "source_location": "L903",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -27201,7 +27213,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L906",
+      "source_location": "L908",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -27213,7 +27225,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L907",
+      "source_location": "L909",
       "target": "app_server_channel_ingest_channelingest_refreshtitle",
       "weight": 1.0
     },
@@ -27225,20 +27237,8 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshrequested",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L918",
+      "source_location": "L920",
       "target": "app_server_channel_ingest_channelingest_setstatus",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_channel_ingest_channelingest_refreshtitle",
-      "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L880",
-      "target": "app_server_channel_providers_server_channelidentity",
       "weight": 1.0
     },
     {
@@ -27250,6 +27250,18 @@
       "source": "app_server_channel_ingest_channelingest_refreshtitle",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L882",
+      "target": "app_server_channel_providers_server_channelidentity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_channelingest_refreshtitle",
+      "source_file": "app/server/channel-ingest.ts",
+      "source_location": "L884",
       "target": "app_server_channel_providers_server_providererror",
       "weight": 1.0
     },
@@ -27261,7 +27273,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_refreshtitle",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L883",
+      "source_location": "L885",
       "target": "app_server_channel_ingest_channelingest_spendquota",
       "weight": 1.0
     },
@@ -27273,7 +27285,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_remember",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L355",
+      "source_location": "L357",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -27285,7 +27297,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L695",
+      "source_location": "L697",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -27297,7 +27309,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L696",
+      "source_location": "L698",
       "target": "app_server_channel_ingest_channelingest_knownsubscriptions",
       "weight": 1.0
     },
@@ -27309,7 +27321,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L698",
+      "source_location": "L700",
       "target": "app_server_channel_providers_server_unsubscribe",
       "weight": 1.0
     },
@@ -27321,7 +27333,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L702",
+      "source_location": "L704",
       "target": "app_server_channel_ingest_channelingest_subscribe",
       "weight": 1.0
     },
@@ -27333,7 +27345,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L704",
+      "source_location": "L706",
       "target": "app_server_channel_providers_server_listsubscriptions",
       "weight": 1.0
     },
@@ -27345,7 +27357,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L707",
+      "source_location": "L709",
       "target": "app_server_channel_providers_server_providererror",
       "weight": 1.0
     },
@@ -27357,7 +27369,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_resubscribe",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L667",
+      "source_location": "L669",
       "target": "app_server_channel_ingest_channelingest_serialsubscriptions",
       "weight": 1.0
     },
@@ -27369,7 +27381,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_resubscribe",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L668",
+      "source_location": "L670",
       "target": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "weight": 1.0
     },
@@ -27381,7 +27393,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L548",
+      "source_location": "L550",
       "target": "app_server_channel_ingest_channelingest_broadcast",
       "weight": 1.0
     },
@@ -27393,7 +27405,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_snapshot",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L327",
+      "source_location": "L329",
       "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
@@ -27405,7 +27417,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_spendquota",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L785",
+      "source_location": "L787",
       "target": "app_lib_activity_quotaday",
       "weight": 1.0
     },
@@ -27417,7 +27429,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L764",
+      "source_location": "L766",
       "target": "app_server_channel_ingest_reply",
       "weight": 1.0
     },
@@ -27429,7 +27441,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L766",
+      "source_location": "L768",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -27441,7 +27453,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L768",
+      "source_location": "L770",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -27453,7 +27465,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L576",
+      "source_location": "L578",
       "target": "app_server_channel_tokens_server_loadtokens",
       "weight": 1.0
     },
@@ -27465,7 +27477,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L579",
+      "source_location": "L581",
       "target": "app_server_channel_providers_server_reauthrequired",
       "weight": 1.0
     },
@@ -37293,7 +37305,19 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1195",
+      "source_location": "L1006",
+      "target": "tests_channel_ingest_test_stuck",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_channel_ingest_test",
+      "source_file": "tests/channel-ingest.test.ts",
+      "source_location": "L1215",
       "target": "tests_channel_ingest_test_poll",
       "weight": 1.0
     },
@@ -37305,7 +37329,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1334",
+      "source_location": "L1354",
       "target": "tests_channel_ingest_test_quota",
       "weight": 1.0
     },
@@ -37317,7 +37341,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1347",
+      "source_location": "L1367",
       "target": "tests_channel_ingest_test_pollcalls",
       "weight": 1.0
     },
@@ -37471,18 +37495,6 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "tests_channel_ingest_test",
-      "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L986",
-      "target": "tests_channel_ingest_test_stuck",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
       "source": "tests_channel_ingest_test_addconnection",
       "source_file": "tests/channel-ingest.test.ts",
       "source_location": "L108",
@@ -37533,7 +37545,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_poll",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1162",
+      "source_location": "L1182",
       "target": "tests_channel_ingest_test_state",
       "weight": 1.0
     },
@@ -37545,7 +37557,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_poll",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1164",
+      "source_location": "L1184",
       "target": "tests_channel_ingest_test_room",
       "weight": 1.0
     },
@@ -42959,7 +42971,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L609",
+      "source_location": "L611",
       "target": "app_lib_activity_channelstatus",
       "weight": 1.0
     },
@@ -42971,7 +42983,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L609",
+      "source_location": "L611",
       "target": "app_lib_activity_channelstatuscode",
       "weight": 1.0
     },
@@ -42983,7 +42995,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_freshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L563",
+      "source_location": "L565",
       "target": "app_server_channel_tokens_server_storedtokens",
       "weight": 1.0
     },
@@ -42995,7 +43007,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L583",
+      "source_location": "L585",
       "target": "app_server_channel_tokens_server_storedtokens",
       "weight": 1.0
     },
@@ -43007,7 +43019,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L574",
+      "source_location": "L576",
       "target": "app_server_channel_tokens_server_storedtokens",
       "weight": 1.0
     },
@@ -103692,7 +103704,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_admit",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L368",
+      "source_location": "L370",
       "target": "app_server_channel_ingest_limits_admission",
       "weight": 1.0
     },
@@ -103704,7 +103716,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_admitevents",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L431",
+      "source_location": "L433",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -103716,7 +103728,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_broadcast",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L318",
+      "source_location": "L320",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -103728,7 +103740,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_bump",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L276",
+      "source_location": "L278",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103740,7 +103752,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_cleanupchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L724",
+      "source_location": "L726",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103752,7 +103764,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L609",
+      "source_location": "L611",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103764,7 +103776,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_connection",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L495",
+      "source_location": "L497",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103788,7 +103800,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_disconnectchannel",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L718",
+      "source_location": "L720",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103800,7 +103812,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_freshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L563",
+      "source_location": "L565",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103812,7 +103824,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_ingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L447",
+      "source_location": "L449",
       "target": "app_lib_activity_activityevent",
       "weight": 1.0
     },
@@ -103824,7 +103836,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_known",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L350",
+      "source_location": "L352",
       "target": "app_server_channel_ingest_sql_idtable",
       "weight": 1.0
     },
@@ -103836,7 +103848,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_knownsubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L646",
+      "source_location": "L648",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103848,7 +103860,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L583",
+      "source_location": "L585",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103860,7 +103872,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_readconnection",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L509",
+      "source_location": "L511",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103872,7 +103884,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_receive",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L386",
+      "source_location": "L388",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103884,7 +103896,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_remember",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L354",
+      "source_location": "L356",
       "target": "app_server_channel_ingest_sql_idtable",
       "weight": 1.0
     },
@@ -103896,7 +103908,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L688",
+      "source_location": "L690",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103908,7 +103920,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_resubscribe",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L661",
+      "source_location": "L663",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103920,7 +103932,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_serialsubscriptions",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L672",
+      "source_location": "L674",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103932,7 +103944,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L521",
+      "source_location": "L523",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103944,7 +103956,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L521",
+      "source_location": "L523",
       "target": "app_lib_activity_channelstatus",
       "weight": 1.0
     },
@@ -103956,7 +103968,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_setstatus",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L521",
+      "source_location": "L523",
       "target": "app_lib_activity_channelstatuscode",
       "weight": 1.0
     },
@@ -103968,7 +103980,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_statuschanged",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L760",
+      "source_location": "L762",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103980,7 +103992,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_storedtokens",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L574",
+      "source_location": "L576",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -103992,7 +104004,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_touch",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L551",
+      "source_location": "L553",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -104475,7 +104487,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_channelingest_snapshot",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L326",
+      "source_location": "L328",
       "target": "app_lib_activity_activitychat",
       "weight": 1.0
     },
@@ -128816,28 +128828,6 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1161",
-      "target": "tests_channel_ingest_test_poll",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_channel_ingest_test",
-      "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1167",
-      "target": "tests_channel_ingest_test_pollcalls",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_channel_ingest_test",
-      "source_file": "tests/channel-ingest.test.ts",
       "source_location": "L117",
       "target": "tests_channel_ingest_test_connectionrow",
       "weight": 1.0
@@ -128849,7 +128839,29 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1171",
+      "source_location": "L1181",
+      "target": "tests_channel_ingest_test_poll",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_test",
+      "source_file": "tests/channel-ingest.test.ts",
+      "source_location": "L1187",
+      "target": "tests_channel_ingest_test_pollcalls",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_channel_ingest_test",
+      "source_file": "tests/channel-ingest.test.ts",
+      "source_location": "L1191",
       "target": "tests_channel_ingest_test_quota",
       "weight": 1.0
     },
@@ -128970,8 +128982,8 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L979",
-      "target": "tests_channel_ingest_test_stuck",
+      "source_location": "L98",
+      "target": "tests_channel_ingest_test_addconnection",
       "weight": 1.0
     },
     {
@@ -128981,8 +128993,8 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L98",
-      "target": "tests_channel_ingest_test_addconnection",
+      "source_location": "L999",
+      "target": "tests_channel_ingest_test_stuck",
       "weight": 1.0
     },
     {
@@ -133465,7 +133477,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L262",
+      "source_location": "L264",
       "target": "app_server_channel_ingest_channelingest_closeall",
       "weight": 1.0
     },
@@ -133476,7 +133488,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L276",
+      "source_location": "L278",
       "target": "app_server_channel_ingest_channelingest_bump",
       "weight": 1.0
     },
@@ -133487,7 +133499,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L280",
+      "source_location": "L282",
       "target": "app_server_channel_ingest_channelingest_closesockets",
       "weight": 1.0
     },
@@ -133498,7 +133510,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L288",
+      "source_location": "L290",
       "target": "app_server_channel_ingest_channelingest_overlaykeyrevoked",
       "weight": 1.0
     },
@@ -133509,7 +133521,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L297",
+      "source_location": "L299",
       "target": "app_server_channel_ingest_channelingest_websocketmessage",
       "weight": 1.0
     },
@@ -133520,7 +133532,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L302",
+      "source_location": "L304",
       "target": "app_server_channel_ingest_channelingest_websocketclose",
       "weight": 1.0
     },
@@ -133531,7 +133543,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L306",
+      "source_location": "L308",
       "target": "app_server_channel_ingest_channelingest_websocketerror",
       "weight": 1.0
     },
@@ -133542,7 +133554,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L310",
+      "source_location": "L312",
       "target": "app_server_channel_ingest_channelingest_send",
       "weight": 1.0
     },
@@ -133553,7 +133565,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L318",
+      "source_location": "L320",
       "target": "app_server_channel_ingest_channelingest_broadcast",
       "weight": 1.0
     },
@@ -133564,7 +133576,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L326",
+      "source_location": "L328",
       "target": "app_server_channel_ingest_channelingest_snapshot",
       "weight": 1.0
     },
@@ -133575,7 +133587,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L334",
+      "source_location": "L336",
       "target": "app_server_channel_ingest_channelingest_prune",
       "weight": 1.0
     },
@@ -133586,7 +133598,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L346",
+      "source_location": "L348",
       "target": "app_server_channel_ingest_channelingest_deleteids",
       "weight": 1.0
     },
@@ -133597,7 +133609,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L350",
+      "source_location": "L352",
       "target": "app_server_channel_ingest_channelingest_known",
       "weight": 1.0
     },
@@ -133608,7 +133620,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L354",
+      "source_location": "L356",
       "target": "app_server_channel_ingest_channelingest_remember",
       "weight": 1.0
     },
@@ -133619,7 +133631,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L361",
+      "source_location": "L363",
       "target": "app_server_channel_ingest_channelingest_firstsight",
       "weight": 1.0
     },
@@ -133630,7 +133642,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L368",
+      "source_location": "L370",
       "target": "app_server_channel_ingest_channelingest_admit",
       "weight": 1.0
     },
@@ -133641,7 +133653,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L386",
+      "source_location": "L388",
       "target": "app_server_channel_ingest_channelingest_receive",
       "weight": 1.0
     },
@@ -133652,7 +133664,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L431",
+      "source_location": "L433",
       "target": "app_server_channel_ingest_channelingest_admitevents",
       "weight": 1.0
     },
@@ -133663,7 +133675,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L447",
+      "source_location": "L449",
       "target": "app_server_channel_ingest_channelingest_ingest",
       "weight": 1.0
     },
@@ -133674,7 +133686,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L486",
+      "source_location": "L488",
       "target": "app_server_channel_ingest_channelingest_forgetconnections",
       "weight": 1.0
     },
@@ -133685,7 +133697,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L495",
+      "source_location": "L497",
       "target": "app_server_channel_ingest_channelingest_connection",
       "weight": 1.0
     },
@@ -133696,7 +133708,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L509",
+      "source_location": "L511",
       "target": "app_server_channel_ingest_channelingest_readconnection",
       "weight": 1.0
     },
@@ -133707,7 +133719,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L521",
+      "source_location": "L523",
       "target": "app_server_channel_ingest_channelingest_setstatus",
       "weight": 1.0
     },
@@ -133718,7 +133730,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L551",
+      "source_location": "L553",
       "target": "app_server_channel_ingest_channelingest_touch",
       "weight": 1.0
     },
@@ -133729,7 +133741,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L563",
+      "source_location": "L565",
       "target": "app_server_channel_ingest_channelingest_freshtokens",
       "weight": 1.0
     },
@@ -133740,7 +133752,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L574",
+      "source_location": "L576",
       "target": "app_server_channel_ingest_channelingest_storedtokens",
       "weight": 1.0
     },
@@ -133751,7 +133763,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L583",
+      "source_location": "L585",
       "target": "app_server_channel_ingest_channelingest_loadfreshtokens",
       "weight": 1.0
     },
@@ -133762,7 +133774,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L609",
+      "source_location": "L611",
       "target": "app_server_channel_ingest_channelingest_connectchannel",
       "weight": 1.0
     },
@@ -133773,7 +133785,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L646",
+      "source_location": "L648",
       "target": "app_server_channel_ingest_channelingest_knownsubscriptions",
       "weight": 1.0
     },
@@ -133784,7 +133796,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L661",
+      "source_location": "L663",
       "target": "app_server_channel_ingest_channelingest_resubscribe",
       "weight": 1.0
     },
@@ -133795,7 +133807,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L672",
+      "source_location": "L674",
       "target": "app_server_channel_ingest_channelingest_serialsubscriptions",
       "weight": 1.0
     },
@@ -133806,7 +133818,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L688",
+      "source_location": "L690",
       "target": "app_server_channel_ingest_channelingest_replacesubscriptions",
       "weight": 1.0
     },
@@ -133817,7 +133829,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L718",
+      "source_location": "L720",
       "target": "app_server_channel_ingest_channelingest_disconnectchannel",
       "weight": 1.0
     },
@@ -133828,7 +133840,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L724",
+      "source_location": "L726",
       "target": "app_server_channel_ingest_channelingest_cleanupchannel",
       "weight": 1.0
     },
@@ -133839,7 +133851,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L760",
+      "source_location": "L762",
       "target": "app_server_channel_ingest_channelingest_statuschanged",
       "weight": 1.0
     },
@@ -133850,7 +133862,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L775",
+      "source_location": "L777",
       "target": "app_server_channel_ingest_channelingest_schedulealarm",
       "weight": 1.0
     },
@@ -133861,7 +133873,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L784",
+      "source_location": "L786",
       "target": "app_server_channel_ingest_channelingest_spendquota",
       "weight": 1.0
     },
@@ -133872,7 +133884,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L807",
+      "source_location": "L809",
       "target": "app_server_channel_ingest_channelingest_alarm",
       "weight": 1.0
     },
@@ -133883,7 +133895,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L830",
+      "source_location": "L832",
       "target": "app_server_channel_ingest_channelingest_nextexpiry",
       "weight": 1.0
     },
@@ -133894,7 +133906,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L844",
+      "source_location": "L846",
       "target": "app_server_channel_ingest_channelingest_pollyoutube",
       "weight": 1.0
     },
@@ -133905,7 +133917,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L879",
+      "source_location": "L881",
       "target": "app_server_channel_ingest_channelingest_refreshtitle",
       "weight": 1.0
     },
@@ -133916,7 +133928,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L896",
+      "source_location": "L898",
       "target": "app_server_channel_ingest_channelingest_refreshrequested",
       "weight": 1.0
     },
@@ -133927,7 +133939,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L924",
+      "source_location": "L926",
       "target": "app_server_channel_ingest_channelingest_poll",
       "weight": 1.0
     },
@@ -133938,7 +133950,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_channelingest",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L963",
+      "source_location": "L965",
       "target": "app_server_channel_ingest_channelingest_pollfailed",
       "weight": 1.0
     },
@@ -136075,7 +136087,7 @@
       "relation": "indirect_call",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L961",
+      "source_location": "L981",
       "target": "tests_channels_test_callback",
       "weight": 1.0
     },
@@ -136501,10 +136513,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "d59d721b852ec37a8edeb4eb333c070cc7c11ac40cca567c997b2a0079ded296",
+    "content_sha256": "f1ba33eb084881ef05778aef1dcea07089766e157c2752f38d6a9a6a354e956d",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "5df1aac92dba3f4274254d8c55889d79e80a1db46c5f93d1333267aa2e4251cd",
+    "source_sha256": "3567866730b51a764c63b2330397199d39822642652dd87343643427843dcff1",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -151921,7 +151933,7 @@
       "label": ".admit()",
       "norm_label": ".admit()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L368"
+      "source_location": "L370"
     },
     {
       "_callable": true,
@@ -151932,7 +151944,7 @@
       "label": ".admitEvents()",
       "norm_label": ".admitevents()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L431"
+      "source_location": "L433"
     },
     {
       "_callable": true,
@@ -151943,7 +151955,7 @@
       "label": ".alarm()",
       "norm_label": ".alarm()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L807"
+      "source_location": "L809"
     },
     {
       "_callable": true,
@@ -151954,7 +151966,7 @@
       "label": ".broadcast()",
       "norm_label": ".broadcast()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L318"
+      "source_location": "L320"
     },
     {
       "_callable": true,
@@ -151965,7 +151977,7 @@
       "label": ".bump()",
       "norm_label": ".bump()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L276"
+      "source_location": "L278"
     },
     {
       "_callable": true,
@@ -151976,7 +151988,7 @@
       "label": ".cleanupChannel()",
       "norm_label": ".cleanupchannel()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L724"
+      "source_location": "L726"
     },
     {
       "_callable": true,
@@ -151987,7 +151999,7 @@
       "label": ".closeAll()",
       "norm_label": ".closeall()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L262"
+      "source_location": "L264"
     },
     {
       "_callable": true,
@@ -152002,14 +152014,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L283",
+            "line": "L285",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".closesockets()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L280"
+      "source_location": "L282"
     },
     {
       "_callable": true,
@@ -152020,7 +152032,7 @@
       "label": ".connectChannel()",
       "norm_label": ".connectchannel()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L609"
+      "source_location": "L611"
     },
     {
       "_callable": true,
@@ -152031,7 +152043,7 @@
       "label": ".connection()",
       "norm_label": ".connection()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L495"
+      "source_location": "L497"
     },
     {
       "_callable": true,
@@ -152082,7 +152094,7 @@
       "label": ".deleteIds()",
       "norm_label": ".deleteids()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L346"
+      "source_location": "L348"
     },
     {
       "_callable": true,
@@ -152093,7 +152105,7 @@
       "label": ".disconnectChannel()",
       "norm_label": ".disconnectchannel()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L718"
+      "source_location": "L720"
     },
     {
       "_callable": true,
@@ -152115,7 +152127,7 @@
       "label": ".firstSight()",
       "norm_label": ".firstsight()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L361"
+      "source_location": "L363"
     },
     {
       "_callable": true,
@@ -152126,7 +152138,7 @@
       "label": ".forgetConnections()",
       "norm_label": ".forgetconnections()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L486"
+      "source_location": "L488"
     },
     {
       "_callable": true,
@@ -152137,7 +152149,7 @@
       "label": ".freshTokens()",
       "norm_label": ".freshtokens()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L563"
+      "source_location": "L565"
     },
     {
       "_callable": true,
@@ -152148,7 +152160,7 @@
       "label": ".ingest()",
       "norm_label": ".ingest()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L447"
+      "source_location": "L449"
     },
     {
       "_callable": true,
@@ -152159,7 +152171,7 @@
       "label": ".known()",
       "norm_label": ".known()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L350"
+      "source_location": "L352"
     },
     {
       "_callable": true,
@@ -152170,7 +152182,7 @@
       "label": ".knownSubscriptions()",
       "norm_label": ".knownsubscriptions()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L646"
+      "source_location": "L648"
     },
     {
       "_callable": true,
@@ -152181,7 +152193,7 @@
       "label": ".loadFreshTokens()",
       "norm_label": ".loadfreshtokens()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L583"
+      "source_location": "L585"
     },
     {
       "_callable": true,
@@ -152192,7 +152204,7 @@
       "label": ".nextExpiry()",
       "norm_label": ".nextexpiry()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L830"
+      "source_location": "L832"
     },
     {
       "_callable": true,
@@ -152207,14 +152219,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L292",
+            "line": "L294",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".overlaykeyrevoked()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L288"
+      "source_location": "L290"
     },
     {
       "_callable": true,
@@ -152247,7 +152259,7 @@
       "label": ".poll()",
       "norm_label": ".poll()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L924"
+      "source_location": "L926"
     },
     {
       "_callable": true,
@@ -152258,7 +152270,7 @@
       "label": ".pollFailed()",
       "norm_label": ".pollfailed()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L963"
+      "source_location": "L965"
     },
     {
       "_callable": true,
@@ -152269,7 +152281,7 @@
       "label": ".pollYoutube()",
       "norm_label": ".pollyoutube()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L844"
+      "source_location": "L846"
     },
     {
       "_callable": true,
@@ -152280,7 +152292,7 @@
       "label": ".prune()",
       "norm_label": ".prune()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L334"
+      "source_location": "L336"
     },
     {
       "_callable": true,
@@ -152291,7 +152303,7 @@
       "label": ".readConnection()",
       "norm_label": ".readconnection()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L509"
+      "source_location": "L511"
     },
     {
       "_callable": true,
@@ -152302,7 +152314,7 @@
       "label": ".receive()",
       "norm_label": ".receive()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L386"
+      "source_location": "L388"
     },
     {
       "_callable": true,
@@ -152313,7 +152325,7 @@
       "label": ".refreshRequested()",
       "norm_label": ".refreshrequested()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L896"
+      "source_location": "L898"
     },
     {
       "_callable": true,
@@ -152324,7 +152336,7 @@
       "label": ".refreshTitle()",
       "norm_label": ".refreshtitle()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L879"
+      "source_location": "L881"
     },
     {
       "_callable": true,
@@ -152335,7 +152347,7 @@
       "label": ".remember()",
       "norm_label": ".remember()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L354"
+      "source_location": "L356"
     },
     {
       "_callable": true,
@@ -152346,7 +152358,7 @@
       "label": ".replaceSubscriptions()",
       "norm_label": ".replacesubscriptions()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L688"
+      "source_location": "L690"
     },
     {
       "_callable": true,
@@ -152357,7 +152369,7 @@
       "label": ".resubscribe()",
       "norm_label": ".resubscribe()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L661"
+      "source_location": "L663"
     },
     {
       "_callable": true,
@@ -152368,7 +152380,7 @@
       "label": ".scheduleAlarm()",
       "norm_label": ".schedulealarm()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L775"
+      "source_location": "L777"
     },
     {
       "_callable": true,
@@ -152383,14 +152395,14 @@
             "callee": "send",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L312",
+            "line": "L314",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".send()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L310"
+      "source_location": "L312"
     },
     {
       "_callable": true,
@@ -152401,7 +152413,7 @@
       "label": ".serialSubscriptions()",
       "norm_label": ".serialsubscriptions()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L672"
+      "source_location": "L674"
     },
     {
       "_callable": true,
@@ -152412,7 +152424,7 @@
       "label": ".setStatus()",
       "norm_label": ".setstatus()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L521"
+      "source_location": "L523"
     },
     {
       "_callable": true,
@@ -152423,7 +152435,7 @@
       "label": ".snapshot()",
       "norm_label": ".snapshot()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L326"
+      "source_location": "L328"
     },
     {
       "_callable": true,
@@ -152434,7 +152446,7 @@
       "label": ".spendQuota()",
       "norm_label": ".spendquota()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L784"
+      "source_location": "L786"
     },
     {
       "_callable": true,
@@ -152445,7 +152457,7 @@
       "label": ".statusChanged()",
       "norm_label": ".statuschanged()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L760"
+      "source_location": "L762"
     },
     {
       "_callable": true,
@@ -152456,7 +152468,7 @@
       "label": ".storedTokens()",
       "norm_label": ".storedtokens()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L574"
+      "source_location": "L576"
     },
     {
       "_callable": true,
@@ -152478,7 +152490,7 @@
       "label": ".touch()",
       "norm_label": ".touch()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L551"
+      "source_location": "L553"
     },
     {
       "_callable": true,
@@ -152493,14 +152505,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L303",
+            "line": "L305",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".websocketclose()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L302"
+      "source_location": "L304"
     },
     {
       "_callable": true,
@@ -152515,14 +152527,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L307",
+            "line": "L309",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".websocketerror()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L306"
+      "source_location": "L308"
     },
     {
       "_callable": true,
@@ -152537,14 +152549,14 @@
             "callee": "close",
             "file": "app/server/channel-ingest.ts",
             "lang": "typescript",
-            "line": "L299",
+            "line": "L301",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".websocketmessage()",
       "source_file": "app/server/channel-ingest.ts",
-      "source_location": "L297"
+      "source_location": "L299"
     },
     {
       "_callable": true,
@@ -157765,7 +157777,7 @@
       "label": "poll()",
       "norm_label": "poll()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1161"
+      "source_location": "L1181"
     },
     {
       "_callable": true,
@@ -157776,7 +157788,7 @@
       "label": "pollCalls()",
       "norm_label": "pollcalls()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1167"
+      "source_location": "L1187"
     },
     {
       "_callable": true,
@@ -157798,7 +157810,7 @@
       "label": "quota()",
       "norm_label": "quota()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1171"
+      "source_location": "L1191"
     },
     {
       "_callable": true,
@@ -157842,7 +157854,7 @@
       "label": "stuck()",
       "norm_label": "stuck()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L979"
+      "source_location": "L999"
     },
     {
       "_callable": true,

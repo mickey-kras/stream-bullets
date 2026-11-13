@@ -253,6 +253,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   private async pageStatusChanged(): Promise<Response> {
     if (await this.pageSuspended()) {
       this.suspensions += 1;
+      // A YouTube poll in flight is superseded: its messages are not stored for a later snapshot.
+      this.bump("youtube");
       this.closeSockets("Page suspended");
     }
     return new Response(null, { status: 204 });
