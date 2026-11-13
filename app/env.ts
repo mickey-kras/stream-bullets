@@ -7,6 +7,10 @@ export interface AppEnv {
   POLL_ROOMS: DurableObjectNamespace;
   REQUEST_LIMITER: RateLimit;
   APP_ORIGIN: string;
+  APP_ENV?: string;
+  DEPLOYED_COMMIT?: string;
+  TEST_ACCESS_SECRET?: string;
+  TEST_DATABASE_ID?: string;
   // Public legal fields as runtime JSON. Store in a Worker secret.
   LEGAL_DETAILS?: string;
   BETTER_AUTH_SECRET: string;
