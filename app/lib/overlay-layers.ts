@@ -44,7 +44,7 @@ export const MIN_RECT: Record<"chat" | "characters", { w: number; h: number }> =
 
 // Chat stays off by default, so existing OBS scenes do not change.
 export const DEFAULT_LAYERS: OverlayLayers = {
-  chat: { enabled: false, rect: { x: 1460, y: 280, w: 420, h: 640 }, hideCommands: true },
+  chat: { enabled: false, rect: { x: 1240, y: 300, w: 640, h: 660 }, hideCommands: true },
   characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
 };
 
@@ -81,22 +81,50 @@ function defaultCharacters(): CharactersLayer {
   return { ...DEFAULT_LAYERS.characters, rect: copyRect(DEFAULT_LAYERS.characters.rect) };
 }
 
-// Stored and broadcast layers. Missing keys take defaults, so `{}` reads as DEFAULT_LAYERS. Invalid values throw.
-export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = z.object({
-  chat: z
-    .object({
-      enabled: z.boolean().default(DEFAULT_LAYERS.chat.enabled),
-      rect: chatRectSchema.default(() => copyRect(DEFAULT_LAYERS.chat.rect)),
-      hideCommands: z.boolean().default(DEFAULT_LAYERS.chat.hideCommands),
-    })
-    .default(defaultChat),
-  characters: z
-    .object({
-      enabled: z.boolean().default(DEFAULT_LAYERS.characters.enabled),
-      rect: charactersRectSchema.default(() => copyRect(DEFAULT_LAYERS.characters.rect)),
-    })
-    .default(defaultCharacters),
-});
+// A stored rect: unknown keys are dropped, and an invalid rect reads as the layer's default rect.
+function storedRectSchema(layer: "chat" | "characters"): z.ZodType<LayerRect, unknown> {
+  const min = MIN_RECT[layer];
+  return z
+    .object({ x: coordinate, y: coordinate, w: size, h: size })
+    .refine(
+      (rect: LayerRect): boolean =>
+        rect.x + rect.w <= DESIGN_W && rect.y + rect.h <= DESIGN_H && rect.w >= min.w && rect.h >= min.h,
+    )
+    .catch(() => copyRect(DEFAULT_LAYERS[layer].rect));
+}
+
+// Stored and broadcast layers. This schema never throws: older and newer versions must not break the overlay.
+// Missing keys take defaults too, so `{}` reads as DEFAULT_LAYERS. Unknown keys are dropped.
+// An invalid field reads as its default. An invalid layer, or an invalid whole value, reads as its defaults.
+// Writes use the strict layersPatchSchema.
+export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = z
+  .object({
+    chat: z
+      .object({
+        enabled: z.boolean().catch(DEFAULT_LAYERS.chat.enabled),
+        rect: storedRectSchema("chat"),
+        hideCommands: z.boolean().catch(DEFAULT_LAYERS.chat.hideCommands),
+      })
+      .catch(defaultChat),
+    characters: z
+      .object({
+        enabled: z.boolean().catch(DEFAULT_LAYERS.characters.enabled),
+        rect: storedRectSchema("characters"),
+      })
+      .catch(defaultCharacters),
+  })
+  .catch((): OverlayLayers => ({ chat: defaultChat(), characters: defaultCharacters() }));
+
+// Reads a stored `layers` JSON text. Invalid JSON reads as the defaults, the same as an invalid value.
+export function parseStoredLayers(raw: string): OverlayLayers {
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    value = null;
+  }
+  return storedLayersSchema.parse(value);
+}
 
 export const chatPatchSchema = z
   .object({ enabled: z.boolean().optional(), rect: chatRectSchema.optional(), hideCommands: z.boolean().optional() })

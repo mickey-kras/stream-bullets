@@ -1,6 +1,7 @@
 import {
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -11,36 +12,39 @@ import {
 import { t, type MessageId } from "../../i18n";
 import { SAMPLE_CHAT } from "../../lib/chat-feed";
 import {
+  diffLayers,
+  isEmptyPatch,
+  layersAction,
+  mergePatches,
+  moveRect,
+  resizeRect,
+  setRectField,
+  withoutSent,
+  withRect,
+  type EditableLayer,
+  type RectField,
+} from "../../lib/layer-geometry";
+import {
   DESIGN_H,
   DESIGN_W,
   MIN_RECT,
+  mergeLayers,
   type CharactersLayer,
   type ChatLayer,
   type LayerRect,
+  type LayersPatch,
   type OverlayLayers,
 } from "../../lib/overlay-layers";
 import type { OverlaySourceRef, OverlayState } from "../../types";
 import { errorMessage, postJson } from "../api";
-import { OverlayComposition } from "./overlay-composition";
+import { CHARACTERS_READY, OverlayComposition } from "./overlay-composition";
 import type { OverlayScene } from "./overlay-stage";
 import { useDesignScale } from "./use-design-scale";
-
-/** The characters layer ships with the playground (#664). Until then its controls stay disabled. */
-export const PLAYGROUND_READY = false;
 
 /** Keyboard and number-field edits save after this much idle time. Drags save on pointer-up. */
 export const SAVE_IDLE_MS = 400;
 
-export type EditableLayer = "chat" | "characters";
-export type RectField = keyof LayerRect;
 export type PreviewBackground = "checker" | "game";
-
-/** POST /api/overlay {action: "layers"}. A rect is always sent whole. */
-export interface LayersAction {
-  action: "layers";
-  chat?: Partial<ChatLayer>;
-  characters?: Partial<CharactersLayer>;
-}
 
 const LAYER_NAMES: Readonly<Record<EditableLayer, MessageId>> = {
   chat: "overlay.comp.chat",
@@ -63,56 +67,6 @@ const ARROWS: Readonly<Record<string, readonly [number, number]>> = {
   ArrowDown: [0, 1],
 };
 
-function clamp(value: number, low: number, high: number): number {
-  return Math.min(Math.max(value, low), high);
-}
-
-/** Whole design pixels, at least `min`, inside the 1920x1080 frame. A rect that is too wide moves left first. */
-export function clampRect(rect: LayerRect, min: { w: number; h: number }): LayerRect {
-  const w: number = clamp(Math.round(rect.w), min.w, DESIGN_W);
-  const h: number = clamp(Math.round(rect.h), min.h, DESIGN_H);
-  return { x: clamp(Math.round(rect.x), 0, DESIGN_W - w), y: clamp(Math.round(rect.y), 0, DESIGN_H - h), w, h };
-}
-
-/** Moves a rect by design pixels and keeps its size. */
-export function moveRect(rect: LayerRect, dx: number, dy: number): LayerRect {
-  return clampRect({ ...rect, x: rect.x + dx, y: rect.y + dy }, { w: rect.w, h: rect.h });
-}
-
-/** Resizes from the bottom-right corner. The top-left corner stays where it is. */
-export function resizeRect(rect: LayerRect, dw: number, dh: number, min: { w: number; h: number }): LayerRect {
-  return {
-    x: rect.x,
-    y: rect.y,
-    w: clamp(Math.round(rect.w + dw), min.w, DESIGN_W - rect.x),
-    h: clamp(Math.round(rect.h + dh), min.h, DESIGN_H - rect.y),
-  };
-}
-
-/** Sets one field from a number input. A size that does not fit moves the layer towards the top-left corner. */
-export function setRectField(
-  rect: LayerRect,
-  field: RectField,
-  value: number,
-  min: { w: number; h: number },
-): LayerRect {
-  return clampRect({ ...rect, [field]: value }, min);
-}
-
-function withRect(layers: OverlayLayers, layer: EditableLayer, rect: LayerRect): OverlayLayers {
-  return layer === "chat"
-    ? { ...layers, chat: { ...layers.chat, rect } }
-    : { ...layers, characters: { ...layers.characters, rect } };
-}
-
-/** The patch for the changed layers, each sent whole so a save never mixes two edits. */
-export function layersAction(layers: OverlayLayers, changed: ReadonlySet<EditableLayer>): LayersAction {
-  const action: LayersAction = { action: "layers" };
-  if (changed.has("chat")) action.chat = { ...layers.chat, rect: { ...layers.chat.rect } };
-  if (changed.has("characters")) action.characters = { ...layers.characters, rect: { ...layers.characters.rect } };
-  return action;
-}
-
 interface Drag {
   layer: EditableLayer;
   mode: "move" | "resize";
@@ -127,8 +81,10 @@ interface Drag {
 type SaveStatus = "idle" | "saving" | "saved";
 
 /**
- * Optimistic layer edits. Local changes show at once and save in the background, one request at a time. A failed
- * save rolls back to the saved layers and reports the error without blocking further edits.
+ * Optimistic layer edits, tracked per field. Local changes show at once over the newest saved or live layers and save
+ * in the background, one request at a time. A request sends only the fields changed since the last request, so an
+ * edit made in another tab is never reverted. A failed save rolls back only the fields of that request, reports the
+ * error and still saves later edits.
  */
 function useLayerDraft(
   layers: OverlayLayers,
@@ -137,20 +93,16 @@ function useLayerDraft(
   shown: OverlayLayers;
   status: SaveStatus;
   error: string | null;
-  edit: (
-    layer: EditableLayer,
-    change: (current: OverlayLayers) => OverlayLayers,
-    when: "now" | "idle" | "later",
-  ) => void;
+  edit: (change: (current: OverlayLayers) => OverlayLayers, when: "now" | "idle" | "later") => void;
   flush: () => void;
 } {
-  const [draft, setDraft] = useState<OverlayLayers | null>(null);
+  // Every unconfirmed local field (sent or not), and the subset not sent yet.
+  const [draft, setDraft] = useState<LayersPatch>({});
   const [status, setStatus] = useState<SaveStatus>("idle");
   const [error, setError] = useState<string | null>(null);
-  const draftRef = useRef<OverlayLayers | null>(null);
+  const draftRef = useRef<LayersPatch>({});
+  const unsent = useRef<LayersPatch>({});
   const savedRef = useRef<OverlayLayers>(layers);
-  const changed = useRef<Set<EditableLayer>>(new Set());
-  const edits = useRef<number>(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busy = useRef<boolean>(false);
   const again = useRef<boolean>(false);
@@ -166,7 +118,7 @@ function useLayerDraft(
     [],
   );
 
-  const setBoth = (next: OverlayLayers | null): void => {
+  const setBoth = (next: LayersPatch): void => {
     draftRef.current = next;
     setDraft(next);
   };
@@ -178,31 +130,25 @@ function useLayerDraft(
       again.current = true;
       return;
     }
-    const current: OverlayLayers | null = draftRef.current;
-    if (!current || changed.current.size === 0) return;
-    const action: LayersAction = layersAction(current, changed.current);
-    changed.current = new Set();
-    const sent: number = edits.current;
+    const sent: LayersPatch = unsent.current;
+    if (isEmptyPatch(sent)) return;
+    unsent.current = {};
     busy.current = true;
     setStatus("saving");
     try {
-      const result = await postJson<{ overlay: OverlayState }>("/api/overlay", action);
+      const result = await postJson<{ overlay: OverlayState }>("/api/overlay", layersAction(sent));
       savedCallback.current(result.overlay);
-      // Later edits keep their draft until their own save.
-      if (edits.current === sent) setBoth(null);
       setError(null);
       setStatus("saved");
     } catch (failure: unknown) {
-      // 400, 409, 423, 429 and network errors: show the saved layers again.
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = null;
-      changed.current = new Set();
-      again.current = false;
-      setBoth(null);
+      // 400, 409, 423, 429 and network errors: these fields show the saved layers again.
       setError(errorMessage(failure));
       setStatus("idle");
     } finally {
+      // Either way the sent fields leave the draft, unless they were edited again since.
+      setBoth(withoutSent(draftRef.current, sent));
       busy.current = false;
+      // Edits made during the request save now, after a failure too.
       if (again.current) {
         again.current = false;
         void save();
@@ -213,14 +159,12 @@ function useLayerDraft(
     void save();
   };
 
-  const edit = (
-    layer: EditableLayer,
-    change: (current: OverlayLayers) => OverlayLayers,
-    when: "now" | "idle" | "later",
-  ): void => {
-    setBoth(change(draftRef.current ?? savedRef.current));
-    changed.current.add(layer);
-    edits.current += 1;
+  const edit = (change: (current: OverlayLayers) => OverlayLayers, when: "now" | "idle" | "later"): void => {
+    const before: OverlayLayers = mergeLayers(savedRef.current, draftRef.current);
+    const patch: LayersPatch = diffLayers(before, change(before));
+    if (isEmptyPatch(patch)) return;
+    setBoth(mergePatches(draftRef.current, patch));
+    unsent.current = mergePatches(unsent.current, patch);
     if (when === "later") return;
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
@@ -228,7 +172,8 @@ function useLayerDraft(
     else timer.current = setTimeout(flush, SAVE_IDLE_MS);
   };
 
-  return { shown: draft ?? layers, status, error, edit, flush };
+  const shown: OverlayLayers = useMemo(() => mergeLayers(layers, draft), [layers, draft]);
+  return { shown, status, error, edit, flush };
 }
 
 /** A whole-number field for one rect value. It keeps what is typed until it is a valid value or loses focus. */
@@ -413,7 +358,7 @@ export function CompositionEditor({
   const drag = useRef<Drag | null>(null);
 
   const setRect = (layer: EditableLayer, rect: LayerRect, when: "now" | "idle" | "later"): void =>
-    edit(layer, (current: OverlayLayers) => withRect(current, layer, rect), when);
+    edit((current: OverlayLayers) => withRect(current, layer, rect), when);
 
   const pointerDown = (layer: EditableLayer) => (event: PointerEvent<HTMLElement>, mode: Drag["mode"]) => {
     const element: HTMLElement | null = frame.current;
@@ -459,7 +404,7 @@ export function CompositionEditor({
   const field = (layer: EditableLayer) => (name: RectField, value: number, final: boolean) =>
     setRect(layer, setRectField(shown[layer].rect, name, value, MIN_RECT[layer]), final ? "now" : "idle");
 
-  const charactersEditable: boolean = PLAYGROUND_READY;
+  const charactersEditable: boolean = CHARACTERS_READY;
   const chat: ChatLayer = shown.chat;
   const characters: CharactersLayer = shown.characters;
   let statusText: string = "";
@@ -508,9 +453,7 @@ export function CompositionEditor({
                   height: characters.rect.h,
                 }}
               >
-                <span>
-                  {t("overlay.comp.characters")} · {t("overlay.comp.soon")}
-                </span>
+                <span>{t("overlay.comp.layerSoon", { layer: t("overlay.comp.characters") })}</span>
               </div>
               <OverlayComposition
                 scene={scene}
@@ -549,6 +492,11 @@ export function CompositionEditor({
           <p className="muted ov-comp-help" id={helpId}>
             {t("overlay.comp.moveHelp")}
           </p>
+          {chat.enabled && (
+            <p className="muted ov-comp-help" data-comp-sample>
+              {t("overlay.comp.sampleChat")}
+            </p>
+          )}
           <p className="sr-only" id={resizeHelpId}>
             {t("overlay.comp.resizeHelp")}
           </p>
@@ -556,13 +504,16 @@ export function CompositionEditor({
         <div className="ov-comp-layers">
           <fieldset className="ov-comp-layer" data-comp-layer="chat">
             <legend>{t("overlay.comp.chat")}</legend>
+            <p className="muted ov-comp-note" data-comp-chat-source>
+              {t("overlay.comp.chatSource")} <a href="#channels-title">{t("overlay.comp.chatSourceLink")}</a>
+            </p>
             <label className="choice">
               <input
                 type="checkbox"
                 checked={chat.enabled}
                 onChange={(event) => {
                   const enabled: boolean = event.currentTarget.checked;
-                  edit("chat", (current) => ({ ...current, chat: { ...current.chat, enabled } }), "now");
+                  edit((current) => ({ ...current, chat: { ...current.chat, enabled } }), "now");
                 }}
               />
               <span>{t("overlay.comp.show")}</span>
@@ -574,7 +525,7 @@ export function CompositionEditor({
                 aria-describedby={commandsId}
                 onChange={(event) => {
                   const hideCommands: boolean = event.currentTarget.checked;
-                  edit("chat", (current) => ({ ...current, chat: { ...current.chat, hideCommands } }), "now");
+                  edit((current) => ({ ...current, chat: { ...current.chat, hideCommands } }), "now");
                 }}
               />
               <span>{t("overlay.comp.hideCommands")}</span>
@@ -595,11 +546,7 @@ export function CompositionEditor({
                 disabled={!charactersEditable}
                 onChange={(event) => {
                   const enabled: boolean = event.currentTarget.checked;
-                  edit(
-                    "characters",
-                    (current) => ({ ...current, characters: { ...current.characters, enabled } }),
-                    "now",
-                  );
+                  edit((current) => ({ ...current, characters: { ...current.characters, enabled } }), "now");
                 }}
               />
               <span>{t("overlay.comp.show")}</span>

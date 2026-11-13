@@ -107,14 +107,15 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
 - `rect` holds `{x, y, w, h}`: whole pixels of the 1920 × 1080 design space.
   `x + w` is at most 1920, and `y + h` is at most 1080.
 - The minimum size is 280 × 160 for `chat` and 640 × 160 for `characters`.
-- The body changes only the fields that it names. Unknown fields return `400`.
+- The body changes only the fields that it names. The API merges each field into the saved layers.
+  Thus send only the fields that you change. Unknown fields return `400`.
 - The change goes live at once. Overlay pages get the new `layers` through the live room.
 - Each `layers` action counts against the write quota of 60 changes each minute.
-- Errors: `400` for an invalid body or a rectangle outside the frame, and `401` without sign-in.
-  `403` for another origin, or for a user who does not own the page.
+- The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
+- Errors: `400` for an invalid body or a rectangle outside the frame, `401` without sign-in, and `403` for another origin.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
 - `OverlayState.layers` and `OverlayPublic.layers` are `{chat: {enabled, rect, hideCommands}, characters: {enabled, rect}}`.
-  Missing stored fields take the defaults. Chat and characters are off by default, and `hideCommands` is on.
+  Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value. Chat and characters are off by default, and `hideCommands` is on.
 - See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, and the chat limits.
 
 ## Later phases

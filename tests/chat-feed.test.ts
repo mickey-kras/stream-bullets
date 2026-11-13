@@ -13,8 +13,10 @@ import {
   chatReducer,
   displayFragments,
   initialChatState,
+  graphemes,
   isChatCommand,
   nextWakeAt,
+  safeEmoteUrl,
   type ChatOptions,
   type ChatRow,
   type ChatState,
@@ -96,6 +98,38 @@ describe("isChatCommand", () => {
     expect(isChatCommand(`!${"a".repeat(33)}`)).toBe(false);
     expect(isChatCommand("")).toBe(false);
   });
+
+  it("treats a full-width ！ as ! and skips leading format characters and white space", () => {
+    expect(isChatCommand("！jump")).toBe(true);
+    expect(isChatCommand("\u200b!jump")).toBe(true);
+    expect(isChatCommand("\ufeff\u200d !jump")).toBe(true);
+    expect(isChatCommand("\u2066\u3000！ジャンプ now")).toBe(true);
+    expect(isChatCommand("！")).toBe(false);
+    expect(isChatCommand("！ jump")).toBe(false);
+    expect(isChatCommand(`！${"a".repeat(32)}`)).toBe(true);
+    expect(isChatCommand(`！${"a".repeat(33)}`)).toBe(false);
+    expect(isChatCommand("\u200bhi !jump")).toBe(false);
+  });
+});
+
+describe("safeEmoteUrl", () => {
+  it("allows HTTPS on the default port from EMOTE_HOSTS only", () => {
+    const good = "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0";
+    expect(safeEmoteUrl(good)).toBe(good);
+    expect(safeEmoteUrl("https://static-cdn.jtvnw.net:443/x")).toBe("https://static-cdn.jtvnw.net/x");
+    expect(safeEmoteUrl("https://static-cdn.jtvnw.net:8443/x")).toBeNull();
+    expect(safeEmoteUrl("https://user@static-cdn.jtvnw.net/x")).toBeNull();
+    expect(safeEmoteUrl("https://:secret@static-cdn.jtvnw.net/x")).toBeNull();
+    expect(safeEmoteUrl("http://static-cdn.jtvnw.net/x")).toBeNull();
+    expect(safeEmoteUrl("https://evil.example/x")).toBeNull();
+    expect(safeEmoteUrl("not a url")).toBeNull();
+  });
+});
+
+describe("graphemes", () => {
+  it("keeps emoji sequences and combining marks whole", () => {
+    expect(graphemes("a👨‍👩‍👧‍👦é")).toEqual(["a", "👨‍👩‍👧‍👦", "é"]);
+  });
 });
 
 describe("displayFragments", () => {
@@ -147,12 +181,16 @@ describe("displayFragments", () => {
         { type: "emote", id: "1", name: "Bad", url: "https://evil.example/x.png" },
         { type: "emote", id: "2", name: "Plain", url: "http://static-cdn.jtvnw.net/x" },
         { type: "emote", id: "3", name: "Broken", url: "not a url" },
+        { type: "emote", id: "4", name: "Port", url: "https://static-cdn.jtvnw.net:8443/x" },
+        { type: "emote", id: "5", name: "Login", url: "https://a:b@static-cdn.jtvnw.net/x" },
       ],
     });
     expect(displayFragments(message, 50).fragments).toEqual([
       { type: "text", text: "Bad" },
       { type: "text", text: "Plain" },
       { type: "text", text: "Broken" },
+      { type: "text", text: "Port" },
+      { type: "text", text: "Login" },
     ]);
   });
 });
@@ -224,6 +262,47 @@ describe("chatReducer: live events", () => {
     expect(send(initialChatState(), event(command), 0).rows).toEqual([]);
     const shown = send(initialChatState(), event(command), 0, showAll);
     expect(textOf(shown.rows[0])).toBe("!jump");
+    expect(shown.rows[0].command).toBe(true);
+  });
+
+  it("removes shown and queued commands when hideCommands turns on", () => {
+    const opts: ChatOptions = { hideCommands: false, limits: { burstThreshold: 100 } };
+    const [a, b, c, d] = [chat({ text: "!jump" }), chat({ text: "hi" }), chat({ text: "！dance" }), chat({ text: "yo" })];
+    let state = initialChatState();
+    state = send(state, event(a), 0, opts);
+    state = runUntil(state, 500, opts);
+    state = send(state, event(b), 500, opts);
+    state = send(state, event(c), 500, opts);
+    state = send(state, event(d), 500, opts);
+    expect(ids(state.rows)).toEqual([a.id, b.id]);
+    expect(ids(state.pending)).toEqual([c.id, d.id]);
+    const on: ChatOptions = { ...opts, hideCommands: true };
+    state = chatReducer(state, { type: "filter", hideCommands: true, now: 500 }, on);
+    expect(state.rows.map((row) => [row.id, row.phase])).toEqual([
+      [a.id, "leaving"],
+      [b.id, "entering"],
+    ]);
+    expect(ids(state.pending)).toEqual([d.id]);
+    state = runUntil(state, 500 + CHAT_LIMITS.leaveMs, on);
+    expect(ids(state.rows)).toEqual([b.id, d.id]);
+  });
+
+  it("changes nothing when hideCommands turns off or nothing matches", () => {
+    let state = send(initialChatState(), event(chat({ text: "hi" })), 0, showAll);
+    state = runUntil(state, 500, showAll);
+    expect(chatReducer(state, { type: "filter", hideCommands: false, now: 600 }, showAll)).toBe(state);
+    expect(chatReducer(state, { type: "filter", hideCommands: true, now: 600 }, options)).toBe(state);
+    // Hidden commands are never kept, so turning the option off does not bring them back.
+    const hiddenState = send(initialChatState(), event(chat({ text: "!jump" })), 0, options);
+    expect(chatReducer(hiddenState, { type: "filter", hideCommands: false, now: 10 }, showAll).rows).toEqual([]);
+  });
+
+  it("leaves a command row that is already leaving alone when filtering", () => {
+    const opts: ChatOptions = { hideCommands: false, limits: { maxRows: 1 } };
+    let state = send(initialChatState(), event(chat({ text: "!jump" })), 0, opts);
+    state = send(state, event(chat({ text: "hi" })), 1000, opts);
+    expect(state.rows.map((row) => row.phase)).toEqual(["leaving", "entering"]);
+    expect(chatReducer(state, { type: "filter", hideCommands: true, now: 1000 }, opts)).toBe(state);
   });
 
   it("drops the oldest queued message when the queue is full", () => {
@@ -236,7 +315,7 @@ describe("chatReducer: live events", () => {
     expect(ids(state.pending)).toEqual(messages.slice(4).map((m) => m.id));
   });
 
-  it("shows a burst newest-first without animation", () => {
+  it("shows a burst at once in arrival order (oldest first) without animation", () => {
     let state = initialChatState();
     const messages = Array.from({ length: 6 }, () => chat());
     for (const message of messages) state = send(state, event(message), 0);
@@ -258,7 +337,7 @@ describe("chatReducer: live events", () => {
       state = send(state, event(message), now);
       expect(state.pending.length).toBeLessThanOrEqual(CHAT_LIMITS.maxPending);
       expect(state.rows.filter((row) => row.phase !== "leaving").length).toBeLessThanOrEqual(CHAT_LIMITS.maxRows);
-      expect(state.rows.length).toBeLessThanOrEqual(CHAT_LIMITS.maxRows + CHAT_LIMITS.maxPending);
+      expect(state.rows.length).toBeLessThanOrEqual(CHAT_LIMITS.maxRows + CHAT_LIMITS.maxLeaving);
     }
     state = runUntil(state, now + 5_000);
     expect(state.pending).toEqual([]);
@@ -289,7 +368,7 @@ describe("chatReducer: live events", () => {
   });
 
   it("caps rows that are leaving", () => {
-    const opts: ChatOptions = { hideCommands: true, limits: { maxRows: 1, maxPending: 2, burstThreshold: 1 } };
+    const opts: ChatOptions = { hideCommands: true, limits: { maxRows: 1, maxLeaving: 2, burstThreshold: 1 } };
     let state = initialChatState();
     for (let i = 0; i < 6; i += 1) state = send(state, event(chat()), 0, opts);
     state = tick(state, 200, opts);

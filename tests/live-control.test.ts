@@ -156,8 +156,23 @@ describe("stored overlay and battle values", (): void => {
     expect(() => overlayValue({ ...row, position: "left" })).toThrow();
     expect(() => overlayValue({ ...row, air: '{"type":"poll"}' })).toThrow();
     expect(() => overlayValue({ ...row, preview: "not json" })).toThrow();
-    expect(() => overlayValue({ ...row, layers: "not json" })).toThrow();
-    expect(() => overlayValue({ ...row, layers: '{"chat":{"rect":{"x":0,"y":0,"w":10,"h":10}}}' })).toThrow();
+  });
+
+  it("reads a bad layers value as the default layers and keeps the rest of the overlay", (): void => {
+    const rest = { ...overlayValue(row), layers: DEFAULT_LAYERS };
+    for (const layers of [
+      "not json",
+      "null",
+      '"chat"',
+      '{"chat":"on","characters":[]}',
+      '{"chat":{"rect":{"x":0,"y":0,"w":10,"h":10},"enabled":"yes","hideCommands":1},"future":{"enabled":true}}',
+    ])
+      expect(overlayValue({ ...row, layers })).toEqual(rest);
+    // Only the bad field takes its default.
+    expect(
+      overlayValue({ ...row, layers: '{"chat":{"enabled":true,"rect":{"x":0,"y":0,"w":10,"h":10},"theme":"neon"}}' })
+        .layers,
+    ).toEqual(layers);
   });
 
   it("hides the preview, and the message unless the message is on air", (): void => {
@@ -450,7 +465,9 @@ describe("Mash Battle owner controls", (): void => {
     expect(created.status).toBe(200);
     const { id } = await body<{ id: string }>(created);
     expect(
-      await env.DB.prepare("SELECT e.kind,e.options,m.duration_s,m.phase FROM entries e JOIN entry_mash m ON m.entry_id=e.id WHERE e.id=?")
+      await env.DB.prepare(
+        "SELECT e.kind,e.options,m.duration_s,m.phase FROM entries e JOIN entry_mash m ON m.entry_id=e.id WHERE e.id=?",
+      )
         .bind(id)
         .first(),
     ).toEqual({ kind: "choice", options: '["Cats","Dogs"]', duration_s: 30, phase: "setup" });
@@ -462,8 +479,12 @@ describe("Mash Battle owner controls", (): void => {
     const bad = { action: "create", kind: "mash", title: "Same", options: ["A", "a"], durationS: 30 };
     expect((await call("POST", "streamers/live_page", { user: "owner", body: bad })).status).toBe(400);
     expect(
-      (await call("POST", "streamers/live_page", { user: "owner", body: { ...bad, options: ["A", "B"], durationS: 20 } }))
-        .status,
+      (
+        await call("POST", "streamers/live_page", {
+          user: "owner",
+          body: { ...bad, options: ["A", "B"], durationS: 20 },
+        })
+      ).status,
     ).toBe(400);
     expect(await env.DB.prepare("SELECT count(*) AS n FROM entry_mash").first()).toEqual({ n: 0 });
   });
@@ -660,7 +681,13 @@ describe("overlay control", (): void => {
   });
 
   it("keeps each layout value the action leaves out", async (): Promise<void> => {
-    const current: OverlayState = { ...DEFAULT_OVERLAY, position: "top", size: "l", instant: false, showResults: false };
+    const current: OverlayState = {
+      ...DEFAULT_OVERLAY,
+      position: "top",
+      size: "l",
+      instant: false,
+      showResults: false,
+    };
     expect(await nextOverlayState(env, page, current, { action: "layout" })).toEqual({ ...current, revision: 1 });
     expect(
       await nextOverlayState(env, page, current, { action: "layout", size: "s", instant: false, showResults: true }),

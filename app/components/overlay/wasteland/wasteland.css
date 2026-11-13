@@ -33,6 +33,14 @@
 .ov-layer[data-scaled] > .ov-layer-canvas {
   visibility: visible;
 }
+/* A per-layer source: the canvas fits inside the viewport and sits in its bottom-right corner (overlay-composition). */
+.ov-layer[data-alone] > .ov-layer-canvas {
+  left: auto;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  transform-origin: 100% 100%;
+}
 
 /* ---------- Merged chat: A1 compact capsule rows ---------- */
 .wl-chat {
@@ -52,6 +60,9 @@
     "Arial Narrow",
     sans-serif;
   color: var(--wl-text);
+  /* Viewers' words are never hyphenated, whatever the page language (the site sets hyphens: auto for German). */
+  hyphens: manual;
+  -webkit-hyphens: manual;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 min(80px, 25%));
   mask-image: linear-gradient(to bottom, transparent 0, #000 min(80px, 25%));
 }
@@ -198,9 +209,6 @@
 }
 .wl-item[data-phase="leaving"] {
   animation: wl-fade-up 220ms var(--wl-ease-in) both;
-}
-.wl-item[data-phase="removed"] .wl-txt {
-  opacity: 0.7;
 }
 .wl-item[data-phase="removed"] .wl-msg {
   font-style: italic;

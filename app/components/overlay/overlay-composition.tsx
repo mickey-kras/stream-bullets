@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import { memo, useRef, type CSSProperties, type ReactNode } from "react";
 import type { ActivityChat } from "../../lib/activity";
 import type { ChatRow } from "../../lib/chat-feed";
 import {
@@ -26,22 +26,23 @@ export interface OverlayLayerSlotProps {
   live: boolean;
 }
 
+/**
+ * Whether the characters layer can render (the playground, #664). The one switch for everything that depends on it:
+ * while false the layer reads no activity feed (a socket costs provider quota; YouTube is polled only while one is
+ * open), its per-layer source opens no live-room socket, its editor controls stay disabled and its OBS URL is not
+ * offered. Set it to true when #664 ships.
+ */
+export const CHARACTERS_READY: boolean = false;
+
 /** The characters layer. Empty until the playground ships (#664). */
 export function CharactersSlot(_props: Readonly<OverlayLayerSlotProps>): ReactNode {
   return null;
 }
 
-/**
- * Whether the characters layer reads the activity feed. Off until #664: a socket costs provider quota (YouTube is
- * polled only while one is open), and an empty layer has no use for it.
- */
-export const CHARACTERS_USE_FEED = false;
-
 /** Whether a page that renders `only` (null: the composition) needs the activity feed for an enabled layer. */
 export function usesActivityFeed(layers: OverlayLayers, only: OverlayLayer | null): boolean {
   const chat: boolean = (only === null || only === "chat") && layers.chat.enabled;
-  const characters: boolean =
-    CHARACTERS_USE_FEED && (only === null || only === "characters") && layers.characters.enabled;
+  const characters: boolean = CHARACTERS_READY && (only === null || only === "characters") && layers.characters.enabled;
   return chat || characters;
 }
 
@@ -50,8 +51,11 @@ function percent(value: number, total: number): string {
 }
 
 /**
- * A layer box. In the composition it sits at its rect, in % of the 1920x1080 frame. On its own (a per-layer OBS
- * source) it fills the viewport. Either way its content is rect.w x rect.h design pixels, scaled to the box width.
+ * A layer box. Its content is rect.w x rect.h design pixels. In the composition the box sits at its rect, in % of
+ * the 1920x1080 frame, and the content scales to the box width. On its own (a per-layer OBS source) the box fills
+ * the viewport and the content scales to fit inside it ("contain"), anchored to the bottom-right corner: the OBS
+ * source size may not match the layer's aspect ratio, and chat grows from the bottom (newest row last) and sits on
+ * the right by default, so the newest rows stay visible and in place. The free space is left and above.
  */
 function LayerBox({
   layer,
@@ -65,7 +69,7 @@ function LayerBox({
   children: ReactNode;
 }>): ReactNode {
   const box = useRef<HTMLDivElement | null>(null);
-  useDesignScale(box, rect.w);
+  useDesignScale(box, rect.w, alone ? rect.h : undefined);
   const place: CSSProperties = alone
     ? { left: 0, top: 0, width: "100%", height: "100%" }
     : {
@@ -75,7 +79,7 @@ function LayerBox({
         height: percent(rect.h, DESIGN_H),
       };
   return (
-    <div className="ov-layer" data-layer={layer} style={place} ref={box}>
+    <div className="ov-layer" data-layer={layer} data-alone={alone || undefined} style={place} ref={box}>
       <div className="ov-layer-canvas" style={{ width: rect.w, height: rect.h }}>
         {children}
       </div>
@@ -83,7 +87,8 @@ function LayerBox({
   );
 }
 
-function ChatSlot({
+/** Memoised, so a page re-render (like the 1 s server clock tick) does not re-render the chat. */
+const ChatSlot = memo(function ChatSlot({
   feed,
   settings,
   samples,
@@ -96,7 +101,7 @@ function ChatSlot({
 }>): ReactNode {
   const rows: ChatRow[] = useChat({ feed, samples, hideCommands: settings.hideCommands, serverOffset });
   return <ChatLayer rows={rows} />;
-}
+});
 
 /**
  * The overlay: characters at the bottom, then the on-air content, then chat on top. OBS and the editor preview

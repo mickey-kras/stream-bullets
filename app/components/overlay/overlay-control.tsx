@@ -524,7 +524,7 @@ export function OverlayControl({
               <Icon name="link" size={16} />
               {t("overlay.setup")}
             </summary>
-            <OverlayLink hasKey={hasOverlayKey} />
+            <OverlayLink hasKey={hasOverlayKey} layers={state.layers} />
           </details>
         </div>
       </div>
