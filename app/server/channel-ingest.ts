@@ -4,7 +4,6 @@ import { z } from "zod";
 import {
   activityEventSchema,
   CHANNEL_STATUS_CODES,
-  MAX_ACTIVITY_MESSAGE_LENGTH,
   quotaDay,
   type ActivityChat,
   type ActivityEvent,
@@ -12,6 +11,8 @@ import {
   type ChannelStatus,
   type ChannelStatusCode,
 } from "../lib/activity";
+import { banKey, eventForBroadcast, snapshotMessage } from "./channel-ingest-events";
+export { snapshotMessage } from "./channel-ingest-events";
 import { youtubeEvents } from "./channel-normalize";
 import {
   channelIdentity,
@@ -100,14 +101,6 @@ const NEW_YOUTUBE_STATE: YoutubeState = { liveChatId: null, pageToken: null, bac
 
 type EventRow = { body: string };
 
-/**
- * The content key of a ban: the same user, end and ban time is one ban, so copies match while a new ban after an
- * unban (a new ban time) does not.
- */
-function banKey(event: Extract<ActivityEvent, { kind: "ban" }>): string {
-  return `ban:${event.platform}:${event.userId}:${event.until ?? "perm"}:${event.bannedAt ?? ""}`;
-}
-
 /** A disconnect or close started while a poll waited: the poll stops and writes nothing. */
 class Superseded extends Error {}
 
@@ -117,20 +110,6 @@ function reply(message: string, status: number): Response {
 
 function isPlatform(value: string | null): value is ActivityPlatform {
   return value !== null && (PLATFORMS as readonly string[]).includes(value);
-}
-
-/**
- * The snapshot as one socket message. The oldest messages are left out until it fits the consumer's message limit,
- * so a reconnecting consumer always gets the newest history.
- */
-export function snapshotMessage(events: readonly ActivityChat[]): string {
-  let start = 0;
-  let message = JSON.stringify({ type: "snapshot", events, replay: true });
-  while (message.length > MAX_ACTIVITY_MESSAGE_LENGTH && start < events.length) {
-    start += Math.max(1, Math.ceil((events.length - start) / 10));
-    message = JSON.stringify({ type: "snapshot", events: events.slice(start), replay: true });
-  }
-  return message;
 }
 
 export class ChannelIngest extends DurableObject<AppEnv> {
@@ -472,22 +451,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       } else if (event.kind === "clear") {
         sql.exec("DELETE FROM events WHERE platform=?", event.platform);
       }
-      this.broadcastCurrentEvent(event, now);
+      this.broadcast(eventForBroadcast(event, now));
     }
     this.prune(now);
-  }
-
-  private broadcastCurrentEvent(event: ActivityEvent, now: number): void {
-    // Moderation leaves the snapshot before it is sent, so a reconnect never shows a removed message. A timeout
-    // that already ended still removes the user's messages: consumers get a clear_user, not a ban that is over.
-    if (event.kind === "ban" && event.until !== null && event.until <= now)
-      this.broadcast({
-        kind: "clear_user",
-        platform: event.platform,
-        userId: event.userId,
-        receivedAt: event.receivedAt,
-      });
-    else this.broadcast(event);
   }
 
   // Connections ---------------------------------------------------------------------------------------------------
