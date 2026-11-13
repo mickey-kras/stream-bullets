@@ -1383,7 +1383,10 @@ describe("ChannelIngest YouTube polling", (): void => {
     await addConnection("youtube");
     await listen();
     vi.spyOn(console, "error").mockImplementation((): void => undefined);
-    vi.spyOn(Math, "random").mockReturnValue(1);
+    vi.spyOn(crypto, "getRandomValues").mockImplementation(<T extends ArrayBufferView | null>(array: T): T => {
+      if (array) new Uint8Array(array.buffer, array.byteOffset, array.byteLength).fill(255);
+      return array;
+    });
     fake.chatError = "backendError";
     await poll();
     await poll();
@@ -1612,7 +1615,10 @@ describe("ChannelIngest YouTube polling", (): void => {
     await addConnection("youtube");
     await listen();
     vi.spyOn(console, "error").mockImplementation((): void => undefined);
-    vi.spyOn(Math, "random").mockReturnValue(1);
+    vi.spyOn(crypto, "getRandomValues").mockImplementation(<T extends ArrayBufferView | null>(array: T): T => {
+      if (array) new Uint8Array(array.buffer, array.byteOffset, array.byteLength).fill(255);
+      return array;
+    });
     await poll();
     fake.chatError = "backendError";
     const waits: number[] = [];

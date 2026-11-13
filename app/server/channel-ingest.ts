@@ -967,6 +967,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       cause: error instanceof Error ? error.name : "unknown",
     });
     state.backoffMs = Math.min(BACKOFF_MAX_MS, Math.max(BACKOFF_MIN_MS, state.backoffMs * 2));
-    return Math.round(state.backoffMs * (0.5 + Math.random() / 2));
+    const random = crypto.getRandomValues(new Uint32Array(1))[0] / 0x1_0000_0000;
+    return Math.round(state.backoffMs * (0.5 + random / 2));
   }
 }
