@@ -32121,7 +32121,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_admission",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L897",
+      "source_location": "L899",
       "target": "app_server_poll_room_pollroom_lease",
       "weight": 1.0
     },
@@ -32133,7 +32133,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_admission",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L898",
+      "source_location": "L900",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -32145,7 +32145,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_admission",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L902",
+      "source_location": "L904",
       "target": "app_server_poll_room_oldest",
       "weight": 1.0
     },
@@ -32157,7 +32157,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_admission",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L908",
+      "source_location": "L910",
       "target": "app_server_poll_room_response",
       "weight": 1.0
     },
@@ -32169,7 +32169,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_alarm",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L423",
+      "source_location": "L425",
       "target": "app_server_poll_room_pollroom_runalarm",
       "weight": 1.0
     },
@@ -32181,7 +32181,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_battlefor",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L524",
+      "source_location": "L526",
       "target": "app_server_poll_room_pollroom_loadbattle",
       "weight": 1.0
     },
@@ -32193,7 +32193,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_broadcast",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L869",
+      "source_location": "L871",
       "target": "app_server_poll_room_pollroom_withbattles",
       "weight": 1.0
     },
@@ -32205,7 +32205,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_broadcast",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L870",
+      "source_location": "L872",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -32217,7 +32217,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_broadcast",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L870",
+      "source_location": "L872",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -32229,7 +32229,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_disconnect",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L883",
+      "source_location": "L885",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -32241,7 +32241,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_disconnect",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L884",
+      "source_location": "L886",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -32253,7 +32253,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_dropbattle",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L634",
+      "source_location": "L636",
       "target": "app_server_poll_room_pollroom_stoptickerifidle",
       "weight": 1.0
     },
@@ -32265,7 +32265,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_evict",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L919",
+      "source_location": "L921",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -32277,7 +32277,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L949",
+      "source_location": "L951",
       "target": "app_server_poll_room_pollroom_pruneconnectioncaches",
       "weight": 1.0
     },
@@ -32289,7 +32289,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L950",
+      "source_location": "L952",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -32301,7 +32301,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L951",
+      "source_location": "L953",
       "target": "app_server_poll_room_pollroom_lease",
       "weight": 1.0
     },
@@ -32313,7 +32313,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_expireconnections",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L955",
+      "source_location": "L957",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -32349,8 +32349,8 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_fetch",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L187",
-      "target": "app_server_test_environment_config_validatetestenvironment",
+      "source_location": "L185",
+      "target": "app_server_poll_room_pollroom_resetteststate",
       "weight": 1.0
     },
     {
@@ -32361,19 +32361,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_fetch",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L194",
-      "target": "app_server_poll_room_pollroom_disconnect",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_fetch",
-      "source_file": "app/server/poll-room.ts",
-      "source_location": "L231",
+      "source_location": "L197",
       "target": "app_server_poll_room_pollroom_validatesubscription",
       "weight": 1.0
     },
@@ -32385,8 +32373,20 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_fetch",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L235",
+      "source_location": "L201",
       "target": "app_server_poll_room_pollroom_handlerequest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_fetch",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L214",
+      "target": "app_server_poll_room_pollroom_disconnect",
       "weight": 1.0
     },
     {
@@ -32397,7 +32397,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_finish",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L748",
+      "source_location": "L750",
       "target": "app_server_poll_room_pollroom_flush",
       "weight": 1.0
     },
@@ -32409,7 +32409,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_finish",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L766",
+      "source_location": "L768",
       "target": "app_lib_mash_mashwinner",
       "weight": 1.0
     },
@@ -32421,7 +32421,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_finish",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L769",
+      "source_location": "L771",
       "target": "app_server_poll_room_pollroom_dropbattle",
       "weight": 1.0
     },
@@ -32433,7 +32433,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_finish",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L770",
+      "source_location": "L772",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -32445,7 +32445,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_finish",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L770",
+      "source_location": "L772",
       "target": "app_server_poll_room_pollroom_broadcast",
       "weight": 1.0
     },
@@ -32457,7 +32457,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_finish",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L770",
+      "source_location": "L772",
       "target": "app_server_poll_room_pollroom_snapshot",
       "weight": 1.0
     },
@@ -32469,7 +32469,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_flush",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L730",
+      "source_location": "L732",
       "target": "app_lib_mash_tapupserts",
       "weight": 1.0
     },
@@ -32481,32 +32481,8 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_handlerequest",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L269",
-      "target": "app_server_poll_room_pollroom_refresh",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_handlerequest",
-      "source_file": "app/server/poll-room.ts",
-      "source_location": "L270",
-      "target": "app_server_poll_room_pollroom_mashchanged",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_handlerequest",
-      "source_file": "app/server/poll-room.ts",
       "source_location": "L271",
-      "target": "app_server_poll_room_pollroom_overlaychanged",
+      "target": "app_server_poll_room_pollroom_refresh",
       "weight": 1.0
     },
     {
@@ -32518,7 +32494,19 @@
       "source": "app_server_poll_room_pollroom_handlerequest",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L272",
-      "target": "app_server_poll_room_pollroom_overlaykeyrevoked",
+      "target": "app_server_poll_room_pollroom_mashchanged",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_handlerequest",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L273",
+      "target": "app_server_poll_room_pollroom_overlaychanged",
       "weight": 1.0
     },
     {
@@ -32530,6 +32518,18 @@
       "source": "app_server_poll_room_pollroom_handlerequest",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L274",
+      "target": "app_server_poll_room_pollroom_overlaykeyrevoked",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_handlerequest",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L276",
       "target": "app_server_poll_room_pollroom_subscribe",
       "weight": 1.0
     },
@@ -32541,7 +32541,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_handlewebsocketmessage",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L402",
+      "source_location": "L404",
       "target": "app_server_poll_room_tapmessage_765bc3730357",
       "weight": 1.0
     },
@@ -32553,7 +32553,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_handlewebsocketmessage",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L407",
+      "source_location": "L409",
       "target": "app_server_poll_room_pollroom_tap",
       "weight": 1.0
     },
@@ -32565,7 +32565,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_handlewebsocketmessage",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L408",
+      "source_location": "L410",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -32577,7 +32577,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_loadbattle",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L532",
+      "source_location": "L534",
       "target": "app_server_poll_room_pollroom_readbattle",
       "weight": 1.0
     },
@@ -32589,7 +32589,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_loadoverlay",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L795",
+      "source_location": "L797",
       "target": "app_server_overlay_state_overlaypublic",
       "weight": 1.0
     },
@@ -32601,7 +32601,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_loadoverlay",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L795",
+      "source_location": "L797",
       "target": "app_server_overlay_state_overlayvalue",
       "weight": 1.0
     },
@@ -32613,7 +32613,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_loadsnapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L831",
+      "source_location": "L833",
       "target": "app_server_poll_room_pagesuspended",
       "weight": 1.0
     },
@@ -32625,7 +32625,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_loadsnapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L832",
+      "source_location": "L834",
       "target": "app_server_overlay_state_overlaypublic",
       "weight": 1.0
     },
@@ -32637,7 +32637,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_loadsnapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L832",
+      "source_location": "L834",
       "target": "app_server_overlay_state_overlayvalue",
       "weight": 1.0
     },
@@ -32649,7 +32649,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_loadsnapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L839",
+      "source_location": "L841",
       "target": "app_server_live_polls_livepolls",
       "weight": 1.0
     },
@@ -32661,7 +32661,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_mashchanged",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L368",
+      "source_location": "L370",
       "target": "app_server_poll_room_response",
       "weight": 1.0
     },
@@ -32673,7 +32673,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_mashchanged",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L370",
+      "source_location": "L372",
       "target": "app_server_poll_room_pollroom_loadbattle",
       "weight": 1.0
     },
@@ -32685,7 +32685,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_mashchanged",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L371",
+      "source_location": "L373",
       "target": "app_server_poll_room_pollroom_refresh",
       "weight": 1.0
     },
@@ -32697,7 +32697,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_mashtick",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L706",
+      "source_location": "L708",
       "target": "app_lib_mash_secondsleft",
       "weight": 1.0
     },
@@ -32709,7 +32709,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_overlaychanged",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L384",
+      "source_location": "L386",
       "target": "app_server_poll_room_pollroom_loadoverlay",
       "weight": 1.0
     },
@@ -32721,7 +32721,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_overlaychanged",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L387",
+      "source_location": "L389",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -32733,7 +32733,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_overlaychanged",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L387",
+      "source_location": "L389",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -32745,7 +32745,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_overlaykeyrevoked",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L376",
+      "source_location": "L378",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -32757,7 +32757,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_overlaykeyrevoked",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L377",
+      "source_location": "L379",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -32769,7 +32769,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_pruneconnectioncaches",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L941",
+      "source_location": "L943",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -32781,7 +32781,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_pruneconnectioncaches",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L941",
+      "source_location": "L943",
       "target": "app_server_poll_room_pollroom_lease",
       "weight": 1.0
     },
@@ -32793,7 +32793,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_readbattle",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L550",
+      "source_location": "L552",
       "target": "app_server_poll_room_pollroom_dropbattle",
       "weight": 1.0
     },
@@ -32805,7 +32805,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_readbattle",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L557",
+      "source_location": "L559",
       "target": "app_server_poll_room_pollroom_startticker",
       "weight": 1.0
     },
@@ -32817,7 +32817,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_readbattle",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L560",
+      "source_location": "L562",
       "target": "app_server_live_polls_optionsfromjson",
       "weight": 1.0
     },
@@ -32829,7 +32829,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_refresh",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L333",
+      "source_location": "L335",
       "target": "app_server_poll_room_pollroom_runrefreshes",
       "weight": 1.0
     },
@@ -32841,32 +32841,8 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_refreshonce",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L354",
-      "target": "app_server_poll_room_pollroom_expireconnections",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_refreshonce",
-      "source_file": "app/server/poll-room.ts",
       "source_location": "L356",
-      "target": "app_server_poll_room_pollroom_resumebattles",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_refreshonce",
-      "source_file": "app/server/poll-room.ts",
-      "source_location": "L357",
-      "target": "app_server_poll_room_pollroom_activesockets",
+      "target": "app_server_poll_room_pollroom_expireconnections",
       "weight": 1.0
     },
     {
@@ -32878,7 +32854,7 @@
       "source": "app_server_poll_room_pollroom_refreshonce",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L358",
-      "target": "app_server_poll_room_pollroom_snapshot",
+      "target": "app_server_poll_room_pollroom_resumebattles",
       "weight": 1.0
     },
     {
@@ -32890,7 +32866,19 @@
       "source": "app_server_poll_room_pollroom_refreshonce",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L359",
-      "target": "app_server_poll_room_pollroom_broadcast",
+      "target": "app_server_poll_room_pollroom_activesockets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_refreshonce",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L360",
+      "target": "app_server_poll_room_pollroom_snapshot",
       "weight": 1.0
     },
     {
@@ -32902,7 +32890,55 @@
       "source": "app_server_poll_room_pollroom_refreshonce",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L361",
+      "target": "app_server_poll_room_pollroom_broadcast",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_refreshonce",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L363",
       "target": "app_server_poll_room_pollroom_scheduleresync",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_resetteststate",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L223",
+      "target": "app_server_poll_room_response",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_resetteststate",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L224",
+      "target": "app_server_test_environment_config_validatetestenvironment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_resetteststate",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L231",
+      "target": "app_server_poll_room_pollroom_disconnect",
       "weight": 1.0
     },
     {
@@ -32913,7 +32949,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_resumebattles",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L620",
+      "source_location": "L622",
       "target": "app_server_poll_room_pollroom_loadbattle",
       "weight": 1.0
     },
@@ -32925,7 +32961,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_resumebattles",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L627",
+      "source_location": "L629",
       "target": "app_server_poll_room_pollroom_tick",
       "weight": 1.0
     },
@@ -32937,7 +32973,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_reuseorloadsnapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L800",
+      "source_location": "L802",
       "target": "app_server_poll_room_pollroom_loadsnapshot",
       "weight": 1.0
     },
@@ -32949,7 +32985,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_reuseorloadsnapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L813",
+      "source_location": "L815",
       "target": "app_server_poll_room_pagesuspended",
       "weight": 1.0
     },
@@ -32961,7 +32997,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_runalarm",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L435",
+      "source_location": "L437",
       "target": "app_server_poll_room_pollroom_expireconnections",
       "weight": 1.0
     },
@@ -32973,7 +33009,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_runalarm",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L436",
+      "source_location": "L438",
       "target": "app_server_poll_room_pollroom_resumebattles",
       "weight": 1.0
     },
@@ -32985,32 +33021,8 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_runalarm",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L437",
+      "source_location": "L439",
       "target": "app_server_poll_room_pollroom_activesockets",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_runalarm",
-      "source_file": "app/server/poll-room.ts",
-      "source_location": "L437",
-      "target": "app_server_poll_room_pollroom_broadcast",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_runalarm",
-      "source_file": "app/server/poll-room.ts",
-      "source_location": "L437",
-      "target": "app_server_poll_room_pollroom_snapshot",
       "weight": 1.0
     },
     {
@@ -33022,6 +33034,30 @@
       "source": "app_server_poll_room_pollroom_runalarm",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L439",
+      "target": "app_server_poll_room_pollroom_broadcast",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_runalarm",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L439",
+      "target": "app_server_poll_room_pollroom_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_runalarm",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L441",
       "target": "app_server_poll_room_pollroom_disconnect",
       "weight": 1.0
     },
@@ -33033,7 +33069,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_runalarm",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L446",
+      "source_location": "L448",
       "target": "app_server_poll_room_pollroom_scheduleresync",
       "weight": 1.0
     },
@@ -33045,7 +33081,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_runrefreshes",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L344",
+      "source_location": "L346",
       "target": "app_server_poll_room_pollroom_refreshonce",
       "weight": 1.0
     },
@@ -33057,7 +33093,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_scheduleresync",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L962",
+      "source_location": "L964",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -33069,7 +33105,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_scheduleresync",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L965",
+      "source_location": "L967",
       "target": "app_server_poll_room_pollroom_lease",
       "weight": 1.0
     },
@@ -33081,7 +33117,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_sidefor",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L500",
+      "source_location": "L502",
       "target": "app_server_poll_room_pollroom_lookupside",
       "weight": 1.0
     },
@@ -33093,7 +33129,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_snapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L782",
+      "source_location": "L784",
       "target": "app_server_poll_room_pollroom_loadsnapshot",
       "weight": 1.0
     },
@@ -33105,7 +33141,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_snapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L782",
+      "source_location": "L784",
       "target": "app_server_poll_room_pollroom_reuseorloadsnapshot",
       "weight": 1.0
     },
@@ -33117,7 +33153,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_startticker",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L641",
+      "source_location": "L643",
       "target": "app_server_poll_room_pollroom_tick",
       "weight": 1.0
     },
@@ -33129,7 +33165,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_stoptickerifidle",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L652",
+      "source_location": "L654",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -33141,7 +33177,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_subscribe",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L293",
+      "source_location": "L295",
       "target": "app_server_poll_room_pollroom_snapshot",
       "weight": 1.0
     },
@@ -33153,20 +33189,8 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_subscribe",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L294",
-      "target": "app_server_poll_room_pollroom_expireconnections",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_subscribe",
-      "source_file": "app/server/poll-room.ts",
       "source_location": "L296",
-      "target": "app_server_poll_room_pollroom_admission",
+      "target": "app_server_poll_room_pollroom_expireconnections",
       "weight": 1.0
     },
     {
@@ -33178,6 +33202,18 @@
       "source": "app_server_poll_room_pollroom_subscribe",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L298",
+      "target": "app_server_poll_room_pollroom_admission",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_subscribe",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L300",
       "target": "app_server_poll_room_pollroom_evict",
       "weight": 1.0
     },
@@ -33189,32 +33225,8 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_subscribe",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L306",
+      "source_location": "L308",
       "target": "app_server_poll_room_pollroom_send",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_subscribe",
-      "source_file": "app/server/poll-room.ts",
-      "source_location": "L306",
-      "target": "app_server_poll_room_pollroom_withbattles",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_subscribe",
-      "source_file": "app/server/poll-room.ts",
-      "source_location": "L307",
-      "target": "app_server_poll_room_pollroom_startticker",
       "weight": 1.0
     },
     {
@@ -33226,6 +33238,30 @@
       "source": "app_server_poll_room_pollroom_subscribe",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L308",
+      "target": "app_server_poll_room_pollroom_withbattles",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_subscribe",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L309",
+      "target": "app_server_poll_room_pollroom_startticker",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_subscribe",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L310",
       "target": "app_server_poll_room_pollroom_scheduleresync",
       "weight": 1.0
     },
@@ -33237,7 +33273,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tap",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L452",
+      "source_location": "L454",
       "target": "app_server_poll_room_pollroom_lease",
       "weight": 1.0
     },
@@ -33249,7 +33285,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tap",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L455",
+      "source_location": "L457",
       "target": "app_server_poll_room_pollroom_battlefor",
       "weight": 1.0
     },
@@ -33261,7 +33297,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tap",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L456",
+      "source_location": "L458",
       "target": "app_lib_mash_mashphaseat",
       "weight": 1.0
     },
@@ -33273,7 +33309,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tap",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L461",
+      "source_location": "L463",
       "target": "app_server_poll_room_pollroom_sidefor",
       "weight": 1.0
     },
@@ -33285,7 +33321,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tap",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L467",
+      "source_location": "L469",
       "target": "app_lib_mash_taketaps",
       "weight": 1.0
     },
@@ -33297,7 +33333,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tick",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L662",
+      "source_location": "L664",
       "target": "app_server_poll_room_pollroom_tickbattles",
       "weight": 1.0
     },
@@ -33309,7 +33345,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tick",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L665",
+      "source_location": "L667",
       "target": "app_server_poll_room_pollroom_stoptickerifidle",
       "weight": 1.0
     },
@@ -33321,7 +33357,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tickbattles",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L675",
+      "source_location": "L677",
       "target": "app_lib_mash_mashphaseat",
       "weight": 1.0
     },
@@ -33333,7 +33369,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tickbattles",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L679",
+      "source_location": "L681",
       "target": "app_server_poll_room_pollroom_finish",
       "weight": 1.0
     },
@@ -33345,7 +33381,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tickbattles",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L693",
+      "source_location": "L695",
       "target": "app_server_poll_room_pollroom_mashtick",
       "weight": 1.0
     },
@@ -33357,20 +33393,8 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_tickbattles",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L694",
+      "source_location": "L696",
       "target": "app_server_poll_room_pollroom_activesockets",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_poll_room_pollroom_tickbattles",
-      "source_file": "app/server/poll-room.ts",
-      "source_location": "L694",
-      "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
     {
@@ -33382,6 +33406,18 @@
       "source": "app_server_poll_room_pollroom_tickbattles",
       "source_file": "app/server/poll-room.ts",
       "source_location": "L696",
+      "target": "app_server_poll_room_pollroom_send",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_poll_room_pollroom_tickbattles",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L698",
       "target": "app_server_poll_room_pollroom_flush",
       "weight": 1.0
     },
@@ -33393,7 +33429,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_validatesubscription",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L318",
+      "source_location": "L320",
       "target": "app_server_poll_room_response",
       "weight": 1.0
     },
@@ -33405,7 +33441,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_validatesubscription",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L323",
+      "source_location": "L325",
       "target": "app_server_poll_room_pollroom_expireconnections",
       "weight": 1.0
     },
@@ -33417,7 +33453,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_validatesubscription",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L324",
+      "source_location": "L326",
       "target": "app_server_poll_room_pollroom_admission",
       "weight": 1.0
     },
@@ -33429,7 +33465,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_websocketclose",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L414",
+      "source_location": "L416",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -33441,7 +33477,7 @@
       "relation": "calls",
       "source": "app_server_poll_room_pollroom_websocketmessage",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L392",
+      "source_location": "L394",
       "target": "app_server_poll_room_pollroom_handlewebsocketmessage",
       "weight": 1.0
     },
@@ -35853,7 +35889,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_checksecret",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L319",
+      "source_location": "L300",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -35865,7 +35901,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_communityfixtures",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L72",
+      "source_location": "L75",
       "target": "app_server_test_environment_server_fixtureid",
       "weight": 1.0
     },
@@ -35877,8 +35913,20 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_communityfixtures",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L87",
+      "source_location": "L82",
       "target": "app_server_test_environment_server_testaccountid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_deletetestimages",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L167",
+      "target": "app_server_images_server_deleteimageobjects",
       "weight": 1.0
     },
     {
@@ -35889,7 +35937,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_requiretestaccess",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "app_server_test_environment_config_validatetestenvironment",
       "weight": 1.0
     },
@@ -35901,7 +35949,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_requiretestaccess",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L51",
+      "source_location": "L52",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
     },
@@ -35913,7 +35961,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_requiretestaccess",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L61",
+      "source_location": "L62",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -35925,7 +35973,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_requiretestaccess",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L66",
+      "source_location": "L67",
       "target": "app_server_test_environment_server_checksecret",
       "weight": 1.0
     },
@@ -35961,7 +36009,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_resettestrooms",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L178",
+      "source_location": "L161",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -35973,7 +36021,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L183",
+      "source_location": "L172",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
     },
@@ -35985,7 +36033,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L190",
+      "source_location": "L179",
       "target": "app_server_test_environment_server_fixtureid",
       "weight": 1.0
     },
@@ -35997,7 +36045,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L213",
+      "source_location": "L202",
       "target": "app_server_test_environment_server_resettestrooms",
       "weight": 1.0
     },
@@ -36009,8 +36057,8 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L215",
-      "target": "app_server_images_server_deleteimageobjects",
+      "source_location": "L203",
+      "target": "app_server_test_environment_server_deletetestimages",
       "weight": 1.0
     },
     {
@@ -36021,7 +36069,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L248",
+      "source_location": "L229",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -36033,7 +36081,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L294",
+      "source_location": "L276",
       "target": "app_server_test_environment_server_communityfixtures",
       "weight": 1.0
     },
@@ -36045,7 +36093,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L323",
+      "source_location": "L304",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
     },
@@ -36057,7 +36105,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L324",
+      "source_location": "L305",
       "target": "app_server_http_server_queryparams",
       "weight": 1.0
     },
@@ -36069,7 +36117,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L338",
+      "source_location": "L320",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -36081,7 +36129,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L339",
+      "source_location": "L321",
       "target": "app_server_http_server_requiresameorigin",
       "weight": 1.0
     },
@@ -36093,7 +36141,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L342",
+      "source_location": "L324",
       "target": "app_server_http_server_readbody",
       "weight": 1.0
     },
@@ -36105,7 +36153,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L349",
+      "source_location": "L331",
       "target": "app_server_test_environment_server_checksecret",
       "weight": 1.0
     },
@@ -36117,7 +36165,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L350",
+      "source_location": "L332",
       "target": "app_server_test_environment_server_accesscookie",
       "weight": 1.0
     },
@@ -36129,7 +36177,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L353",
+      "source_location": "L335",
       "target": "app_server_test_environment_server_seedtestenvironment",
       "weight": 1.0
     },
@@ -36141,7 +36189,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L371",
+      "source_location": "L353",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -43031,7 +43079,7 @@
       "relation": "references",
       "source": "app_server_poll_room_pollroom_loadoverlay",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L791",
+      "source_location": "L793",
       "target": "app_types_overlaypublic",
       "weight": 1.0
     },
@@ -43043,7 +43091,7 @@
       "relation": "references",
       "source": "app_server_poll_room_pollroom_loadsnapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L819",
+      "source_location": "L821",
       "target": "app_types_livesnapshot",
       "weight": 1.0
     },
@@ -43055,7 +43103,7 @@
       "relation": "references",
       "source": "app_server_poll_room_pollroom_reuseorloadsnapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L798",
+      "source_location": "L800",
       "target": "app_types_livesnapshot",
       "weight": 1.0
     },
@@ -43067,7 +43115,7 @@
       "relation": "references",
       "source": "app_server_poll_room_pollroom_snapshot",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L780",
+      "source_location": "L782",
       "target": "app_types_livesnapshot",
       "weight": 1.0
     },
@@ -104016,7 +104064,7 @@
       "relation": "references",
       "source": "app_server_poll_room_pollroom_broadcast",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L868",
+      "source_location": "L870",
       "target": "app_types_livesnapshot",
       "weight": 1.0
     },
@@ -104040,7 +104088,7 @@
       "relation": "references",
       "source": "app_server_poll_room_pollroom_mashtick",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L700",
+      "source_location": "L702",
       "target": "app_types_mashphase",
       "weight": 1.0
     },
@@ -104052,7 +104100,7 @@
       "relation": "references",
       "source": "app_server_poll_room_pollroom_withbattles",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L847",
+      "source_location": "L849",
       "target": "app_types_livesnapshot",
       "weight": 1.0
     },
@@ -104499,7 +104547,7 @@
       "relation": "references",
       "source": "app_server_poll_room_pollroom_mashtick",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L700",
+      "source_location": "L702",
       "target": "app_types_mashtick",
       "weight": 1.0
     },
@@ -124758,7 +124806,7 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L174",
+      "source_location": "L157",
       "target": "app_server_test_environment_server_resettestrooms",
       "weight": 1.0
     },
@@ -124769,7 +124817,18 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L182",
+      "source_location": "L165",
+      "target": "app_server_test_environment_server_deletetestimages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L171",
       "target": "app_server_test_environment_server_seedtestenvironment",
       "weight": 1.0
     },
@@ -124813,7 +124872,7 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L315",
+      "source_location": "L296",
       "target": "app_server_test_environment_server_checksecret",
       "weight": 1.0
     },
@@ -124824,7 +124883,7 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L322",
+      "source_location": "L303",
       "target": "app_server_test_environment_server_testenvironmentresponse",
       "weight": 1.0
     },
@@ -124857,7 +124916,7 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L48",
+      "source_location": "L49",
       "target": "app_server_test_environment_server_requiretestaccess",
       "weight": 1.0
     },
@@ -124868,7 +124927,7 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L69",
+      "source_location": "L70",
       "target": "app_server_test_environment_server_communityfixtures",
       "weight": 1.0
     },
@@ -134016,7 +134075,18 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L256",
+      "source_location": "L222",
+      "target": "app_server_poll_room_pollroom_resetteststate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_server_poll_room_pollroom",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L258",
       "target": "app_server_poll_room_pollroom_handlerequest",
       "weight": 1.0
     },
@@ -134027,7 +134097,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L277",
+      "source_location": "L279",
       "target": "app_server_poll_room_pollroom_validstream",
       "weight": 1.0
     },
@@ -134038,7 +134108,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L287",
+      "source_location": "L289",
       "target": "app_server_poll_room_pollroom_subscribe",
       "weight": 1.0
     },
@@ -134049,7 +134119,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L312",
+      "source_location": "L314",
       "target": "app_server_poll_room_pollroom_validatesubscription",
       "weight": 1.0
     },
@@ -134060,7 +134130,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L329",
+      "source_location": "L331",
       "target": "app_server_poll_room_pollroom_refresh",
       "weight": 1.0
     },
@@ -134071,7 +134141,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L340",
+      "source_location": "L342",
       "target": "app_server_poll_room_pollroom_runrefreshes",
       "weight": 1.0
     },
@@ -134082,7 +134152,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L353",
+      "source_location": "L355",
       "target": "app_server_poll_room_pollroom_refreshonce",
       "weight": 1.0
     },
@@ -134093,7 +134163,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L365",
+      "source_location": "L367",
       "target": "app_server_poll_room_pollroom_mashchanged",
       "weight": 1.0
     },
@@ -134104,7 +134174,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L375",
+      "source_location": "L377",
       "target": "app_server_poll_room_pollroom_overlaykeyrevoked",
       "weight": 1.0
     },
@@ -134115,7 +134185,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L383",
+      "source_location": "L385",
       "target": "app_server_poll_room_pollroom_overlaychanged",
       "weight": 1.0
     },
@@ -134126,7 +134196,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L391",
+      "source_location": "L393",
       "target": "app_server_poll_room_pollroom_websocketmessage",
       "weight": 1.0
     },
@@ -134137,7 +134207,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L401",
+      "source_location": "L403",
       "target": "app_server_poll_room_pollroom_handlewebsocketmessage",
       "weight": 1.0
     },
@@ -134148,7 +134218,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L411",
+      "source_location": "L413",
       "target": "app_server_poll_room_pollroom_websocketclose",
       "weight": 1.0
     },
@@ -134159,7 +134229,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L417",
+      "source_location": "L419",
       "target": "app_server_poll_room_pollroom_websocketerror",
       "weight": 1.0
     },
@@ -134170,7 +134240,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L422",
+      "source_location": "L424",
       "target": "app_server_poll_room_pollroom_alarm",
       "weight": 1.0
     },
@@ -134181,7 +134251,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L432",
+      "source_location": "L434",
       "target": "app_server_poll_room_pollroom_runalarm",
       "weight": 1.0
     },
@@ -134192,7 +134262,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L451",
+      "source_location": "L453",
       "target": "app_server_poll_room_pollroom_tap",
       "weight": 1.0
     },
@@ -134203,7 +134273,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L497",
+      "source_location": "L499",
       "target": "app_server_poll_room_pollroom_sidefor",
       "weight": 1.0
     },
@@ -134214,7 +134284,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L512",
+      "source_location": "L514",
       "target": "app_server_poll_room_pollroom_lookupside",
       "weight": 1.0
     },
@@ -134225,7 +134295,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L520",
+      "source_location": "L522",
       "target": "app_server_poll_room_pollroom_battlefor",
       "weight": 1.0
     },
@@ -134236,7 +134306,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L529",
+      "source_location": "L531",
       "target": "app_server_poll_room_pollroom_loadbattle",
       "weight": 1.0
     },
@@ -134247,7 +134317,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L539",
+      "source_location": "L541",
       "target": "app_server_poll_room_pollroom_readbattle",
       "weight": 1.0
     },
@@ -134258,7 +134328,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L612",
+      "source_location": "L614",
       "target": "app_server_poll_room_pollroom_resumebattles",
       "weight": 1.0
     },
@@ -134269,7 +134339,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L631",
+      "source_location": "L633",
       "target": "app_server_poll_room_pollroom_dropbattle",
       "weight": 1.0
     },
@@ -134280,7 +134350,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L637",
+      "source_location": "L639",
       "target": "app_server_poll_room_pollroom_startticker",
       "weight": 1.0
     },
@@ -134291,7 +134361,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L649",
+      "source_location": "L651",
       "target": "app_server_poll_room_pollroom_stoptickerifidle",
       "weight": 1.0
     },
@@ -134302,7 +134372,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L658",
+      "source_location": "L660",
       "target": "app_server_poll_room_pollroom_tick",
       "weight": 1.0
     },
@@ -134313,7 +134383,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L669",
+      "source_location": "L671",
       "target": "app_server_poll_room_pollroom_tickbattles",
       "weight": 1.0
     },
@@ -134324,7 +134394,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L700",
+      "source_location": "L702",
       "target": "app_server_poll_room_pollroom_mashtick",
       "weight": 1.0
     },
@@ -134335,7 +134405,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L716",
+      "source_location": "L718",
       "target": "app_server_poll_room_pollroom_flush",
       "weight": 1.0
     },
@@ -134346,7 +134416,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L744",
+      "source_location": "L746",
       "target": "app_server_poll_room_pollroom_finish",
       "weight": 1.0
     },
@@ -134357,7 +134427,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L780",
+      "source_location": "L782",
       "target": "app_server_poll_room_pollroom_snapshot",
       "weight": 1.0
     },
@@ -134368,7 +134438,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L791",
+      "source_location": "L793",
       "target": "app_server_poll_room_pollroom_loadoverlay",
       "weight": 1.0
     },
@@ -134379,7 +134449,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L798",
+      "source_location": "L800",
       "target": "app_server_poll_room_pollroom_reuseorloadsnapshot",
       "weight": 1.0
     },
@@ -134390,7 +134460,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L819",
+      "source_location": "L821",
       "target": "app_server_poll_room_pollroom_loadsnapshot",
       "weight": 1.0
     },
@@ -134401,7 +134471,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L847",
+      "source_location": "L849",
       "target": "app_server_poll_room_pollroom_withbattles",
       "weight": 1.0
     },
@@ -134412,7 +134482,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L868",
+      "source_location": "L870",
       "target": "app_server_poll_room_pollroom_broadcast",
       "weight": 1.0
     },
@@ -134423,7 +134493,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L873",
+      "source_location": "L875",
       "target": "app_server_poll_room_pollroom_send",
       "weight": 1.0
     },
@@ -134434,7 +134504,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L882",
+      "source_location": "L884",
       "target": "app_server_poll_room_pollroom_disconnect",
       "weight": 1.0
     },
@@ -134445,7 +134515,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L890",
+      "source_location": "L892",
       "target": "app_server_poll_room_pollroom_activesockets",
       "weight": 1.0
     },
@@ -134456,7 +134526,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L896",
+      "source_location": "L898",
       "target": "app_server_poll_room_pollroom_admission",
       "weight": 1.0
     },
@@ -134467,7 +134537,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L918",
+      "source_location": "L920",
       "target": "app_server_poll_room_pollroom_evict",
       "weight": 1.0
     },
@@ -134478,7 +134548,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L923",
+      "source_location": "L925",
       "target": "app_server_poll_room_pollroom_lease",
       "weight": 1.0
     },
@@ -134489,7 +134559,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L938",
+      "source_location": "L940",
       "target": "app_server_poll_room_pollroom_pruneconnectioncaches",
       "weight": 1.0
     },
@@ -134500,7 +134570,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L947",
+      "source_location": "L949",
       "target": "app_server_poll_room_pollroom_expireconnections",
       "weight": 1.0
     },
@@ -134511,7 +134581,7 @@
       "relation": "method",
       "source": "app_server_poll_room_pollroom",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L961",
+      "source_location": "L963",
       "target": "app_server_poll_room_pollroom_scheduleresync",
       "weight": 1.0
     },
@@ -135463,7 +135533,7 @@
       "relation": "indirect_call",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L198",
+      "source_location": "L187",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -136513,10 +136583,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f1ba33eb084881ef05778aef1dcea07089766e157c2752f38d6a9a6a354e956d",
+    "content_sha256": "4253fe872f507ba5965a32ae3753f2debac3cf2e91e89d406a670197816427f9",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "3567866730b51a764c63b2330397199d39822642652dd87343643427843dcff1",
+    "source_sha256": "a28a138cf3e8b4f38f7d18143aee38f90dc823e8a5d3a7b281cd847ae15f68ff",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -155200,7 +155270,7 @@
       "label": ".activeSockets()",
       "norm_label": ".activesockets()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L890"
+      "source_location": "L892"
     },
     {
       "_callable": true,
@@ -155211,7 +155281,7 @@
       "label": ".admission()",
       "norm_label": ".admission()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L896"
+      "source_location": "L898"
     },
     {
       "_callable": true,
@@ -155222,7 +155292,7 @@
       "label": ".alarm()",
       "norm_label": ".alarm()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L422"
+      "source_location": "L424"
     },
     {
       "_callable": true,
@@ -155233,7 +155303,7 @@
       "label": ".battleFor()",
       "norm_label": ".battlefor()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L520"
+      "source_location": "L522"
     },
     {
       "_callable": true,
@@ -155244,7 +155314,7 @@
       "label": ".broadcast()",
       "norm_label": ".broadcast()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L868"
+      "source_location": "L870"
     },
     {
       "_callable": true,
@@ -155288,14 +155358,14 @@
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L885",
+            "line": "L887",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".disconnect()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L882"
+      "source_location": "L884"
     },
     {
       "_callable": true,
@@ -155306,7 +155376,7 @@
       "label": ".dropBattle()",
       "norm_label": ".dropbattle()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L631"
+      "source_location": "L633"
     },
     {
       "_callable": true,
@@ -155321,14 +155391,14 @@
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L920",
+            "line": "L922",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".evict()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L918"
+      "source_location": "L920"
     },
     {
       "_callable": true,
@@ -155343,14 +155413,14 @@
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L957",
+            "line": "L959",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".expireconnections()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L947"
+      "source_location": "L949"
     },
     {
       "_callable": true,
@@ -155372,7 +155442,7 @@
       "label": ".finish()",
       "norm_label": ".finish()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L744"
+      "source_location": "L746"
     },
     {
       "_callable": true,
@@ -155383,7 +155453,7 @@
       "label": ".flush()",
       "norm_label": ".flush()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L716"
+      "source_location": "L718"
     },
     {
       "_callable": true,
@@ -155394,7 +155464,7 @@
       "label": ".handleRequest()",
       "norm_label": ".handlerequest()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L256"
+      "source_location": "L258"
     },
     {
       "_callable": true,
@@ -155409,14 +155479,14 @@
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L404",
+            "line": "L406",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".handlewebsocketmessage()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L401"
+      "source_location": "L403"
     },
     {
       "_callable": true,
@@ -155431,14 +155501,14 @@
             "callee": "deserializeAttachment",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L924",
+            "line": "L926",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".lease()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L923"
+      "source_location": "L925"
     },
     {
       "_callable": true,
@@ -155449,7 +155519,7 @@
       "label": ".loadBattle()",
       "norm_label": ".loadbattle()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L529"
+      "source_location": "L531"
     },
     {
       "_callable": true,
@@ -155460,7 +155530,7 @@
       "label": ".loadOverlay()",
       "norm_label": ".loadoverlay()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L791"
+      "source_location": "L793"
     },
     {
       "_callable": true,
@@ -155471,7 +155541,7 @@
       "label": ".loadSnapshot()",
       "norm_label": ".loadsnapshot()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L819"
+      "source_location": "L821"
     },
     {
       "_callable": true,
@@ -155482,7 +155552,7 @@
       "label": ".lookupSide()",
       "norm_label": ".lookupside()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L512"
+      "source_location": "L514"
     },
     {
       "_callable": true,
@@ -155493,7 +155563,7 @@
       "label": ".mashChanged()",
       "norm_label": ".mashchanged()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L365"
+      "source_location": "L367"
     },
     {
       "_callable": true,
@@ -155504,7 +155574,7 @@
       "label": ".mashTick()",
       "norm_label": ".mashtick()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L700"
+      "source_location": "L702"
     },
     {
       "_callable": true,
@@ -155515,7 +155585,7 @@
       "label": ".overlayChanged()",
       "norm_label": ".overlaychanged()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L383"
+      "source_location": "L385"
     },
     {
       "_callable": true,
@@ -155530,14 +155600,14 @@
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L378",
+            "line": "L380",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".overlaykeyrevoked()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L375"
+      "source_location": "L377"
     },
     {
       "_callable": true,
@@ -155548,7 +155618,7 @@
       "label": ".pruneConnectionCaches()",
       "norm_label": ".pruneconnectioncaches()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L938"
+      "source_location": "L940"
     },
     {
       "_callable": true,
@@ -155559,7 +155629,7 @@
       "label": ".readBattle()",
       "norm_label": ".readbattle()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L539"
+      "source_location": "L541"
     },
     {
       "_callable": true,
@@ -155570,7 +155640,7 @@
       "label": ".refresh()",
       "norm_label": ".refresh()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L329"
+      "source_location": "L331"
     },
     {
       "_callable": true,
@@ -155581,7 +155651,18 @@
       "label": ".refreshOnce()",
       "norm_label": ".refreshonce()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L353"
+      "source_location": "L355"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_poll_room_pollroom_resetteststate",
+      "label": ".resetTestState()",
+      "norm_label": ".resetteststate()",
+      "source_file": "app/server/poll-room.ts",
+      "source_location": "L222"
     },
     {
       "_callable": true,
@@ -155592,7 +155673,7 @@
       "label": ".resumeBattles()",
       "norm_label": ".resumebattles()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L612"
+      "source_location": "L614"
     },
     {
       "_callable": true,
@@ -155603,7 +155684,7 @@
       "label": ".reuseOrLoadSnapshot()",
       "norm_label": ".reuseorloadsnapshot()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L798"
+      "source_location": "L800"
     },
     {
       "_callable": true,
@@ -155614,7 +155695,7 @@
       "label": ".runAlarm()",
       "norm_label": ".runalarm()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L432"
+      "source_location": "L434"
     },
     {
       "_callable": true,
@@ -155625,7 +155706,7 @@
       "label": ".runRefreshes()",
       "norm_label": ".runrefreshes()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L340"
+      "source_location": "L342"
     },
     {
       "_callable": true,
@@ -155636,7 +155717,7 @@
       "label": ".scheduleResync()",
       "norm_label": ".scheduleresync()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L961"
+      "source_location": "L963"
     },
     {
       "_callable": true,
@@ -155651,21 +155732,21 @@
             "callee": "send",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L876",
+            "line": "L878",
             "receiver_type": "WebSocket"
           },
           {
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L878",
+            "line": "L880",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".send()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L873"
+      "source_location": "L875"
     },
     {
       "_callable": true,
@@ -155676,7 +155757,7 @@
       "label": ".sideFor()",
       "norm_label": ".sidefor()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L497"
+      "source_location": "L499"
     },
     {
       "_callable": true,
@@ -155687,7 +155768,7 @@
       "label": ".snapshot()",
       "norm_label": ".snapshot()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L780"
+      "source_location": "L782"
     },
     {
       "_callable": true,
@@ -155698,7 +155779,7 @@
       "label": ".startTicker()",
       "norm_label": ".startticker()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L637"
+      "source_location": "L639"
     },
     {
       "_callable": true,
@@ -155709,7 +155790,7 @@
       "label": ".stopTickerIfIdle()",
       "norm_label": ".stoptickerifidle()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L649"
+      "source_location": "L651"
     },
     {
       "_callable": true,
@@ -155720,7 +155801,7 @@
       "label": ".subscribe()",
       "norm_label": ".subscribe()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L287"
+      "source_location": "L289"
     },
     {
       "_callable": true,
@@ -155731,7 +155812,7 @@
       "label": ".tap()",
       "norm_label": ".tap()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L451"
+      "source_location": "L453"
     },
     {
       "_callable": true,
@@ -155742,7 +155823,7 @@
       "label": ".tick()",
       "norm_label": ".tick()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L658"
+      "source_location": "L660"
     },
     {
       "_callable": true,
@@ -155753,7 +155834,7 @@
       "label": ".tickBattles()",
       "norm_label": ".tickbattles()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L669"
+      "source_location": "L671"
     },
     {
       "_callable": true,
@@ -155764,7 +155845,7 @@
       "label": ".validateSubscription()",
       "norm_label": ".validatesubscription()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L312"
+      "source_location": "L314"
     },
     {
       "_callable": true,
@@ -155775,7 +155856,7 @@
       "label": ".validStream()",
       "norm_label": ".validstream()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L277"
+      "source_location": "L279"
     },
     {
       "_callable": true,
@@ -155790,14 +155871,14 @@
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L412",
+            "line": "L414",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".websocketclose()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L411"
+      "source_location": "L413"
     },
     {
       "_callable": true,
@@ -155812,14 +155893,14 @@
             "callee": "close",
             "file": "app/server/poll-room.ts",
             "lang": "typescript",
-            "line": "L418",
+            "line": "L420",
             "receiver_type": "WebSocket"
           }
         ]
       },
       "norm_label": ".websocketerror()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L417"
+      "source_location": "L419"
     },
     {
       "_callable": true,
@@ -155830,7 +155911,7 @@
       "label": ".webSocketMessage()",
       "norm_label": ".websocketmessage()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L391"
+      "source_location": "L393"
     },
     {
       "_callable": true,
@@ -155841,7 +155922,7 @@
       "label": ".withBattles()",
       "norm_label": ".withbattles()",
       "source_file": "app/server/poll-room.ts",
-      "source_location": "L847"
+      "source_location": "L849"
     },
     {
       "_callable": true,
@@ -156853,7 +156934,7 @@
       "label": "checkSecret()",
       "norm_label": "checksecret()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L315"
+      "source_location": "L296"
     },
     {
       "_callable": true,
@@ -156864,7 +156945,18 @@
       "label": "communityFixtures()",
       "norm_label": "communityfixtures()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L69"
+      "source_location": "L70"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_test_environment_server_deletetestimages",
+      "label": "deleteTestImages()",
+      "norm_label": "deletetestimages()",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L165"
     },
     {
       "_callable": true,
@@ -156886,7 +156978,7 @@
       "label": "requireTestAccess()",
       "norm_label": "requiretestaccess()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L48"
+      "source_location": "L49"
     },
     {
       "_callable": true,
@@ -156908,7 +157000,7 @@
       "label": "resetTestRooms()",
       "norm_label": "resettestrooms()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L174"
+      "source_location": "L157"
     },
     {
       "_callable": true,
@@ -156919,7 +157011,7 @@
       "label": "seedTestEnvironment()",
       "norm_label": "seedtestenvironment()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L182"
+      "source_location": "L171"
     },
     {
       "_callable": true,
@@ -156941,7 +157033,7 @@
       "label": "testEnvironmentResponse()",
       "norm_label": "testenvironmentresponse()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L322"
+      "source_location": "L303"
     },
     {
       "_callable": true,
