@@ -535,6 +535,8 @@ ask an app to refresh or delete the API data that it stores within 30 days. Thus
   read failed and the data is older than 30 days.
 - Before the job removes the row, it checks the data age again. A slow read that succeeded after the job stopped
   waiting keeps the row. A read that finds another channel counts as failed.
+- A reconnect after the read sets a new data time. The job then keeps the row, also when the read found the
+  access revoked.
 - Until 32 days, the job never removes data that it did not try to read in this run. Past 32 days, it removes
   the connection without a read (`stale_backstop`).
 - The job also removes a connection that needs a new authorization for more than 7 days.

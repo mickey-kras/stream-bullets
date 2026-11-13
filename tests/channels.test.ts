@@ -866,6 +866,31 @@ describe("YouTube data retention", (): void => {
     expect(reasons.results.map((row) => JSON.parse(row.metadata as string).reason)).toEqual(["reauth", "stale"]);
   });
 
+  it("keeps a connection that was reconnected after its refresh found the access revoked", async (): Promise<void> => {
+    expect(await connectChannel("youtube")).toBe("connected");
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    const now = Date.now();
+    await setRow("youtube", { data_read_at: now - 26 * day });
+    await env.DB.prepare("UPDATE channel_tokens SET expires_at=1").run();
+    fake.refreshStatus = 400;
+    const working = env.CHANNEL_INGEST;
+    env.CHANNEL_INGEST = {
+      idFromName: (name: string) => working.idFromName(name),
+      get: (id: DurableObjectId) => ({
+        fetch: async (input: string, init?: RequestInit): Promise<Response> => {
+          const response = await working.get(id).fetch(input, init);
+          // The owner reconnects after the refresh answered, before the job marks its rows.
+          if (new URL(input).pathname.endsWith("/refresh")) await setRow("youtube", { status: "active", data_read_at: now });
+          return response;
+        },
+      }),
+    } as unknown as DurableObjectNamespace;
+    await expireYoutubeConnections(env, now);
+    env.CHANNEL_INGEST = working;
+    expect(await platforms()).toEqual(["youtube"]);
+    expect(await env.DB.prepare("SELECT status_code FROM channel_connections").first("status_code")).not.toBe("disconnecting");
+  });
+
   it("never takes a row that a disconnect is marking now, and does nothing while channels are off", async (): Promise<void> => {
     expect(await connectChannel("youtube")).toBe("connected");
     const now = Date.now();

@@ -29025,7 +29025,7 @@
       "relation": "calls",
       "source": "app_server_channels_server_expiredyoutuberows",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L564",
+      "source_location": "L565",
       "target": "app_server_channels_server_within",
       "weight": 1.0
     },
@@ -29037,7 +29037,7 @@
       "relation": "calls",
       "source": "app_server_channels_server_expiredyoutuberows",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L565",
+      "source_location": "L566",
       "target": "app_server_ingest_call_server_callingest",
       "weight": 1.0
     },
@@ -29049,7 +29049,7 @@
       "relation": "calls",
       "source": "app_server_channels_server_expiredyoutuberows",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L574",
+      "source_location": "L575",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -29193,7 +29193,7 @@
       "relation": "calls",
       "source": "app_server_channels_server_routefor",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L641",
+      "source_location": "L644",
       "target": "app_server_channels_server_connectionforchannel",
       "weight": 1.0
     },
@@ -37845,7 +37845,7 @@
       "relation": "calls",
       "source": "tests_channels_test",
       "source_file": "tests/channels.test.ts",
-      "source_location": "L958",
+      "source_location": "L983",
       "target": "tests_channels_test_stubyoutubechannels",
       "weight": 1.0
     },
@@ -120731,7 +120731,7 @@
       "relation": "contains",
       "source": "app_server_channels_server",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L612",
+      "source_location": "L615",
       "target": "app_server_channels_server_route_cache_ms",
       "weight": 1.0
     },
@@ -120742,19 +120742,8 @@
       "relation": "contains",
       "source": "app_server_channels_server",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L616",
+      "source_location": "L619",
       "target": "app_server_channels_server_unknown_cache_ms",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_channels_server",
-      "source_file": "app/server/channels.server.ts",
-      "source_location": "L617",
-      "target": "app_server_channels_server_routes",
       "weight": 1.0
     },
     {
@@ -120776,6 +120765,17 @@
       "source": "app_server_channels_server",
       "source_file": "app/server/channels.server.ts",
       "source_location": "L620",
+      "target": "app_server_channels_server_routes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_channels_server",
+      "source_file": "app/server/channels.server.ts",
+      "source_location": "L623",
       "target": "app_server_channels_server_forgetroutes",
       "weight": 1.0
     },
@@ -120786,7 +120786,7 @@
       "relation": "contains",
       "source": "app_server_channels_server",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L631",
+      "source_location": "L634",
       "target": "app_server_channels_server_routefor",
       "weight": 1.0
     },
@@ -120797,7 +120797,7 @@
       "relation": "contains",
       "source": "app_server_channels_server",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L648",
+      "source_location": "L651",
       "target": "app_server_channels_server_connectionforchannel",
       "weight": 1.0
     },
@@ -127419,7 +127419,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L555",
+      "source_location": "L557",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -136501,10 +136501,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "75d1dd1e6cbddf0e99da5a30e1ad298a9d0cd89f8b2b5569d0fd52638e11db6d",
+    "content_sha256": "d59d721b852ec37a8edeb4eb333c070cc7c11ac40cca567c997b2a0079ded296",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "09e50eb9c150d6dcffc6235cd5a92ba2b35cd7b181d5062a3df8af80bf7842f4",
+    "source_sha256": "5df1aac92dba3f4274254d8c55889d79e80a1db46c5f93d1333267aa2e4251cd",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -153237,7 +153237,7 @@
       "label": "connectionForChannel()",
       "norm_label": "connectionforchannel()",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L648"
+      "source_location": "L651"
     },
     {
       "_callable": true,
@@ -153314,7 +153314,7 @@
       "label": "forgetRoutes()",
       "norm_label": "forgetroutes()",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L620"
+      "source_location": "L623"
     },
     {
       "_callable": true,
@@ -153369,7 +153369,7 @@
       "label": "routeFor()",
       "norm_label": "routefor()",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L631"
+      "source_location": "L634"
     },
     {
       "_callable": true,
@@ -166397,7 +166397,7 @@
       "label": "ROUTE_CACHE_MS",
       "norm_label": "route_cache_ms",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L612"
+      "source_location": "L615"
     },
     {
       "_origin": "ast",
@@ -166407,7 +166407,7 @@
       "label": "routes",
       "norm_label": "routes",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L617"
+      "source_location": "L620"
     },
     {
       "_origin": "ast",
@@ -166447,7 +166447,7 @@
       "label": "UNKNOWN_CACHE_MS",
       "norm_label": "unknown_cache_ms",
       "source_file": "app/server/channels.server.ts",
-      "source_location": "L616"
+      "source_location": "L619"
     },
     {
       "_origin": "ast",
@@ -171185,7 +171185,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L555"
+      "source_location": "L557"
     },
     {
       "_origin": "ast",

@@ -553,7 +553,8 @@ async function expiredYoutubeRows(
   )
     .bind(now - YOUTUBE_DATA_REFRESH_MS, EXPIRY_BATCH * 5)
     .all<{ id: string; streamer_id: string; data_read_at: number }>();
-  const revoked: string[] = [];
+  // With the data time the job read: a reconnect after the refresh sets a new one, and its row is not marked.
+  const revoked: { id: string; at: number }[] = [];
   const stale: string[] = [];
   let attempts = 0;
   let failures = 0;
@@ -575,7 +576,7 @@ async function expiredYoutubeRows(
     }
     if (result === "recent") continue;
     attempts += 1;
-    if (result === "reauth") revoked.push(row.id);
+    if (result === "reauth") revoked.push({ id: row.id, at: row.data_read_at });
     else if (result !== "refreshed") {
       failures += 1;
       if (row.data_read_at < now - YOUTUBE_DATA_RETENTION_MS) stale.push(row.id);
@@ -585,12 +586,14 @@ async function expiredYoutubeRows(
   // A stale row is checked again here: a refresh that timed out for the job can still have written fresh data.
   const marked = await env.DB.prepare(
     `UPDATE channel_connections SET status='needs_reauth', status_code='disconnecting', updated_at=?1
-      WHERE id IN (SELECT id FROM channel_connections WHERE platform='youtube' AND status_code IS NOT 'disconnecting'
-        AND (id IN (SELECT value FROM json_each(?3)) OR (id IN (SELECT value FROM json_each(?4)) AND data_read_at < ?6)
+      WHERE id IN (SELECT c.id FROM channel_connections c WHERE platform='youtube' AND status_code IS NOT 'disconnecting'
+        AND (EXISTS (SELECT 1 FROM json_each(?3) r WHERE r.value ->> 'id' = c.id AND r.value ->> 'at' = c.data_read_at)
+          OR (id IN (SELECT value FROM json_each(?4)) AND data_read_at < ?6)
           OR (status='needs_reauth' AND updated_at < ?2) OR data_read_at < ?7)
         ORDER BY data_read_at LIMIT ?5)
       RETURNING id, streamer_id, platform, CASE
-        WHEN id IN (SELECT value FROM json_each(?3)) THEN 'reauth'
+        WHEN EXISTS (SELECT 1 FROM json_each(?3) r WHERE r.value ->> 'id' = channel_connections.id
+          AND r.value ->> 'at' = channel_connections.data_read_at) THEN 'reauth'
         WHEN id IN (SELECT value FROM json_each(?4)) AND data_read_at < ?6 THEN 'stale'
         WHEN data_read_at < ?7 THEN 'stale_backstop'
         ELSE 'reauth' END AS reason`,
