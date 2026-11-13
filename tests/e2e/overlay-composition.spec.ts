@@ -71,7 +71,7 @@ test("a per-layer chat source shows and hides the chat live when the owner chang
   await expect(obs.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
   // Hiding closed the activity socket and showing opened a new one.
   expect(activitySockets).toBe(2);
-  await owner.close();
+  await close(owner);
 });
 
 test("an unknown layer renders an empty transparent page", async ({ page }) => {
@@ -393,13 +393,13 @@ test.describe("merged chat on the overlay", () => {
     );
     await expect(source.rows).toHaveCount(2);
     // Snapshot rows never slide in.
-    await expect(source.chat.locator("li.wl-in")).toHaveCount(0);
+    await expect(source.chat.locator("li[data-enter]")).toHaveCount(0);
     await expect(source.chat.locator('li[data-phase="entering"]')).toHaveCount(0);
 
     // A live row slides in and settles.
     source.send(event(c));
     await expect(source.rows).toHaveCount(3);
-    await expect(source.rows.nth(2)).toHaveClass(/\bwl-in\b/);
+    await expect(source.rows.nth(2)).toHaveAttribute("data-enter", "true");
     await expect(source.rows.nth(2)).toHaveAttribute("data-phase", "shown");
     // Mark the rendered rows: a remount (and its animation) would drop the mark.
     await source.rows.evaluateAll((items) => items.forEach((item) => item.setAttribute("data-e2e-kept", "1")));
@@ -410,9 +410,13 @@ test.describe("merged chat on the overlay", () => {
     await expect(source.chat.locator("li[data-e2e-kept]")).toHaveCount(3);
     // The new snapshot row and the old rows show at once, without an entering state.
     await expect(source.chat.locator('li[data-phase="entering"]')).toHaveCount(0);
-    await expect(source.rows.nth(3)).not.toHaveClass(/\bwl-in\b/);
+    await expect(source.rows.nth(3)).not.toHaveAttribute("data-enter");
     await expect(source.rows.nth(3)).toHaveAttribute("data-phase", "shown");
-    await expect(source.rows.nth(0)).not.toHaveClass(/\bwl-in\b/);
+    await expect(source.rows.nth(0)).not.toHaveAttribute("data-enter");
+    // Nothing slides or fades in: a snapshot shows its rows in place.
+    expect(await source.rows.evaluateAll((items) => items.map((item) => item.getAnimations().length))).toEqual([
+      0, 0, 0, 0,
+    ]);
     await close(source.page);
   });
 
@@ -515,7 +519,7 @@ test("the chat layer has the same geometry on the OBS composition and in the edi
   // The preview plays sample chat and opens no activity socket.
   await expect(layer.locator("li.wl-item").first()).toBeVisible();
   expect(activity).toEqual([]);
-  await owner.close();
+  await close(owner);
 });
 
 for (const viewport of [
@@ -593,7 +597,7 @@ test("turning on hide commands removes a command row from an open chat source", 
   await expect(source.page.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
   expect(source.sockets).toHaveLength(1);
   await close(source.page);
-  await owner.close();
+  await close(owner);
 });
 
 interface DesignRects {
@@ -653,7 +657,7 @@ test("with chat on, the OBS composition matches the editor preview at 1280x720 a
     // The default chat rect, in the preview.
     const { x, y, w, h } = DEFAULT_LAYERS.chat.rect;
     expectSameRects(preview, { poll: preview.poll, chat: { x, y, w, h } });
-    await owner.close();
+    await close(owner);
 
     for (const viewport of [
       { width: 1280, height: 720 },

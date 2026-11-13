@@ -25,8 +25,10 @@ export const CHAT_LIMITS = {
   maxLeaving: 8,
   lifetimeMs: 120_000,
   removedHoldMs: 1_400,
-  enterMs: 420,
-  leaveMs: 240,
+  /** The slide-in of a new row (ROW_MOTION in use-row-motion.ts). */
+  enterMs: 520,
+  /** The fade-out of a leaving row (wasteland.css). */
+  leaveMs: 300,
   enterIntervalMs: 150,
   burstThreshold: 4,
   maxDisplayChars: 200,

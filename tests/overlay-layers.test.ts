@@ -26,13 +26,13 @@ describe("layer defaults", (): void => {
     expect(OVERLAY_LAYERS).toEqual(["content", "chat", "characters"]);
     expect([DESIGN_W, DESIGN_H]).toEqual([1920, 1080]);
     expect(DEFAULT_LAYERS).toEqual({
-      chat: { enabled: false, rect: { x: 1240, y: 372, w: 640, h: 660 }, hideCommands: true },
+      chat: { enabled: false, rect: { x: 979, y: 73, w: 826, h: 934 }, hideCommands: true },
       characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
     });
     expect(MIN_RECT).toEqual({ chat: { w: 280, h: 160 }, characters: { w: 640, h: 160 } });
     // The A1 mockup place: 40 px from the right edge and 48 px from the bottom edge.
-    expect(DESIGN_W - DEFAULT_LAYERS.chat.rect.x - DEFAULT_LAYERS.chat.rect.w).toBe(40);
-    expect(DESIGN_H - DEFAULT_LAYERS.chat.rect.y - DEFAULT_LAYERS.chat.rect.h).toBe(48);
+    expect(DESIGN_W - DEFAULT_LAYERS.chat.rect.x - DEFAULT_LAYERS.chat.rect.w).toBe(115);
+    expect(DESIGN_H - DEFAULT_LAYERS.chat.rect.y - DEFAULT_LAYERS.chat.rect.h).toBe(73);
     for (const layer of ["chat", "characters"] as const) {
       const rect: LayerRect = DEFAULT_LAYERS[layer].rect;
       expect(inside(rect)).toBe(true);
@@ -75,8 +75,8 @@ describe("stored layers", (): void => {
   it("returns fresh defaults, so editing one result never changes another", (): void => {
     const first: OverlayLayers = storedLayersSchema.parse({});
     first.chat.rect.x = 0;
-    expect(storedLayersSchema.parse({}).chat.rect.x).toBe(1240);
-    expect(DEFAULT_LAYERS.chat.rect.x).toBe(1240);
+    expect(storedLayersSchema.parse({}).chat.rect.x).toBe(979);
+    expect(DEFAULT_LAYERS.chat.rect.x).toBe(979);
   });
 
   it("reads a missing value, also as a missing key of an enclosing object, as fresh defaults", (): void => {
@@ -86,7 +86,7 @@ describe("stored layers", (): void => {
     expect(first).toEqual(DEFAULT_LAYERS);
     first.chat.rect.x = 0;
     expect(message.parse({}).layers).toEqual(DEFAULT_LAYERS);
-    expect(DEFAULT_LAYERS.chat.rect.x).toBe(1240);
+    expect(DEFAULT_LAYERS.chat.rect.x).toBe(979);
   });
 
   it("drops unknown keys from older or newer versions", (): void => {
@@ -160,7 +160,7 @@ describe("stored layers", (): void => {
     expect(parseStoredLayers("")).toEqual(DEFAULT_LAYERS);
     const fallback: OverlayLayers = parseStoredLayers("null");
     fallback.chat.rect.x = 0;
-    expect(DEFAULT_LAYERS.chat.rect.x).toBe(1240);
+    expect(DEFAULT_LAYERS.chat.rect.x).toBe(979);
   });
 });
 
