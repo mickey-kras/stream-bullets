@@ -3,12 +3,21 @@ import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import { DEFAULT_LAYERS } from "../../app/lib/overlay-layers";
+import { SAMPLE_INTERVAL_MS } from "../../app/components/overlay/use-chat";
 
 const OWNER_IP = clientIp("composition-editor", 245);
+const MOTION_IP = clientIp("composition-editor", 246);
+const OVERLAP_IP = clientIp("composition-editor", 247);
+const LEAVE_IP = clientIp("composition-editor", 248);
 // Set COMPOSITION_SHOT to a file path to save a 1440x900 screenshot of the editor.
 const shot: string | undefined = process.env.COMPOSITION_SHOT;
 
-const resetLayers = `UPDATE overlay_state SET layers='{}', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`;
+const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
+const resetLayers = `UPDATE overlay_state SET layers='{}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
+const chatOn = `UPDATE overlay_state SET layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
+// The seeded on-air content: the Mash Battle poll. It fills the top half of the stage (about y 48 to 550).
+const seededAir = `UPDATE overlay_state SET air=json_object('type','poll','ref',(SELECT id FROM entries WHERE streamer_id=${FEATURE_HOST} AND title='Which boss first?')), revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
+const OVERLAP_NOTE = "Chat covers part of the on-air content. Drag it to a free area.";
 
 test.beforeEach(async () => {
   await runSql("composition-editor-reset", [resetLayers]);
@@ -67,11 +76,11 @@ test("the owner places the chat layer by mouse and keyboard, and the layout pers
   save = saved(page);
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
-  await page.mouse.move(from.x - 60, from.y + 20, { steps: 6 });
-  await page.mouse.move(from.x - 120, from.y + 40, { steps: 6 });
+  await page.mouse.move(from.x - 60, from.y - 20, { steps: 6 });
+  await page.mouse.move(from.x - 120, from.y - 40, { steps: 6 });
   await page.mouse.up();
   await save;
-  const moved = { x: start.x + Math.round(-120 / scale), y: start.y + Math.round(40 / scale) };
+  const moved = { x: start.x + Math.round(-120 / scale), y: start.y + Math.round(-40 / scale) };
   expect(await value(page, "chat", "X")).toBe(moved.x);
   expect(await value(page, "chat", "Y")).toBe(moved.y);
 
@@ -165,7 +174,12 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   await expect(show).not.toBeChecked();
   await expect(hide).toBeChecked();
   // The chat source note links to the channel connections on the same page.
-  await expect(chatLayer.getByRole("link", { name: "Connect channels" })).toHaveAttribute("href", "#channels-title");
+  const connect = chatLayer.getByRole("link", { name: "Connect channels" });
+  await expect(connect).toHaveAttribute("href", "#channels-title");
+  await expect(connect).toHaveClass("text-link");
+  await expect(chatLayer.locator("[data-comp-chat-source]")).toHaveText(
+    "Chat shows messages from the channels you connect. Connect channels",
+  );
   const bodies: unknown[] = [];
   const gate: { release?: () => void } = {};
   await page.route("**/api/overlay", async (route) => {
@@ -218,6 +232,7 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   // The chat URL names the source size; the characters row only says it is coming.
   const { w, h } = DEFAULT_LAYERS.chat.rect;
   await expect(page.locator('[data-ov-layer-size="chat"]')).toHaveText(`Source size: ${w} × ${h}`);
+  await expect(page.locator('[data-ov-layer-url="chat"]')).toHaveAccessibleDescription(`Source size: ${w} × ${h}`);
   await expect(page.locator('[data-ov-layer-url="characters"]')).toHaveCount(0);
   await expect(page.locator('[data-ov-layer-row="characters"]')).toContainText("Coming soon");
   await page.reload();
@@ -233,9 +248,7 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
 
 test("the editor screenshot at 1440x900", async ({ browser }) => {
   test.skip(!shot, "Set COMPOSITION_SHOT to save the screenshot.");
-  await runSql("composition-editor-shot", [
-    `UPDATE overlay_state SET layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`,
-  ]);
+  await runSql("composition-editor-shot", [seededAir, chatOn]);
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -244,10 +257,96 @@ test("the editor screenshot at 1440x900", async ({ browser }) => {
   await editor.getByRole("button", { name: "Sample game" }).click();
   await editor.scrollIntoViewIfNeeded();
   await expect(editor.locator(".wl-chat li").first()).toBeVisible();
+  await expect(editor.locator("[data-comp-overlap]")).toHaveText(OVERLAP_NOTE);
   await page.waitForTimeout(1500);
   await editor
     .getByRole("region", { name: "Composition preview" })
     .evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
   await page.screenshot({ path: shot });
+  await close(owner);
+});
+
+test("with reduced motion the preview shows a still set of sample rows", async ({ browser }) => {
+  await runSql("composition-editor-motion", [chatOn]);
+  const owner = await signedIn(browser, "featureowner", MOTION_IP);
+  const page = await newPage(owner);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.install();
+  await page.goto("/overlay-control");
+  const frame = page.getByRole("region", { name: "Composition preview" });
+  const rows = frame.locator('.ov-layer[data-layer="chat"] li.wl-item');
+  await expect(rows.first()).toBeVisible();
+  const count: number = await rows.count();
+  expect(count).toBeGreaterThan(1);
+  const texts: string[] = await rows.locator(".wl-msg").allTextContents();
+  // A moving preview adds a sample row each SAMPLE_INTERVAL_MS. The still one keeps the same rows.
+  await page.clock.runFor(SAMPLE_INTERVAL_MS * 3);
+  await expect(rows).toHaveCount(count);
+  expect(await rows.locator(".wl-msg").allTextContents()).toEqual(texts);
+  await expect(frame.locator('li[data-phase="entering"]')).toHaveCount(0);
+  await close(owner);
+});
+
+test("a note shows while the chat covers the on-air content and goes when the chat moves away", async ({
+  browser,
+}) => {
+  await runSql("composition-editor-overlap", [seededAir, chatOn]);
+  const owner = await signedIn(browser, "featureowner", OVERLAP_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/overlay-control");
+  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const frame = editor.getByRole("region", { name: "Composition preview" });
+  await expect(frame.locator(".ov-stage > *").first()).toBeVisible();
+  // The default chat box (y 372 to 1032) covers the lower part of the poll.
+  const note = editor.locator("[data-comp-overlap]");
+  await expect(note).toHaveText(OVERLAP_NOTE);
+
+  // Below the poll is free: make the chat shorter, then move it down.
+  const fields = editor.locator('[data-comp-fields="chat"]');
+  let save = saved(page);
+  await fields.getByLabel("Height", { exact: true }).fill("400");
+  await fields.getByLabel("Height", { exact: true }).press("Enter");
+  await save;
+  save = saved(page);
+  await fields.getByLabel("Y", { exact: true }).fill("620");
+  await fields.getByLabel("Y", { exact: true }).press("Enter");
+  await save;
+  await expect(note).toHaveCount(0);
+
+  // Back over the poll, the note shows again. A hidden chat covers nothing.
+  save = saved(page);
+  await fields.getByLabel("Y", { exact: true }).fill("300");
+  await fields.getByLabel("Y", { exact: true }).press("Enter");
+  await save;
+  await expect(note).toHaveText(OVERLAP_NOTE);
+  save = saved(page);
+  await editor.locator('[data-comp-layer="chat"]').getByRole("checkbox", { name: "Show on stream" }).uncheck();
+  await save;
+  await expect(note).toHaveCount(0);
+  await close(owner);
+});
+
+test("closing the editor sends an edit that waits for the idle save", async ({ browser }) => {
+  await runSql("composition-editor-leave", [chatOn]);
+  const owner = await signedIn(browser, "featureowner", LEAVE_IP);
+  const page = await newPage(owner);
+  await page.clock.install();
+  await page.goto("/overlay-control");
+  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const x = editor.locator('[data-comp-fields="chat"]').getByLabel("X", { exact: true });
+  await expect(x).toHaveValue(String(DEFAULT_LAYERS.chat.rect.x));
+  await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
+  // A typed value saves after a short idle time. Stop the clock, so only leaving the page can send it.
+  await page.clock.pauseAt(Date.now() + 1000);
+  await x.fill("1000");
+  await page.goto("/settings");
+  // The request left with the page, so read the saved layout from a new page load.
+  await expect
+    .poll(async () => {
+      await page.goto("/overlay-control");
+      return x.inputValue();
+    })
+    .toBe("1000");
   await close(owner);
 });

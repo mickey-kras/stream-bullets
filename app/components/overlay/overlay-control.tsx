@@ -339,12 +339,15 @@ export function OverlayControl({
   const titleId: string = useId();
   const same: boolean = sameSource(state.preview, state.air);
   const view: OverlayScene = { ...scene, overlay: state };
+  // Save responses can arrive out of order; an older revision must not replace a newer one.
+  const keepNewest = (next: OverlayState): void =>
+    setSaved((prev: OverlayState): OverlayState => (next.revision >= prev.revision ? next : prev));
 
   async function send(action: OverlayAction): Promise<void> {
     setBusy(true);
     try {
       const result = await postJson<{ overlay: OverlayState }>("/api/overlay", action);
-      setSaved(result.overlay);
+      keepNewest(result.overlay);
     } catch (error: unknown) {
       toast(errorMessage(error), { tone: "error" });
     } finally {
@@ -528,7 +531,7 @@ export function OverlayControl({
           </details>
         </div>
       </div>
-      <CompositionEditor layers={state.layers} scene={view} source={state.air} onSaved={setSaved} />
+      <CompositionEditor layers={state.layers} scene={view} source={state.air} onSaved={keepNewest} />
       <div className="ov-take-dock">{take}</div>
     </>
   );

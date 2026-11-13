@@ -161,11 +161,8 @@ export function securityHeaders(
   // Overlay URLs carry secret keys; suppress Referer.
   const pathname: string = new URL(request.url).pathname;
   const overlayPage: boolean = /^\/@[^/]+\/overlay$/.test(pathname);
-  // Only the overlay and its composition preview show chat emotes.
-  const emoteHosts: string =
-    overlayPage || pathname === "/overlay-control"
-      ? ` ${EMOTE_HOSTS.map((host: string): string => `https://${host}`).join(" ")}`
-      : "";
+  // The CSP applies per document, and in-app navigation reaches the composition preview without a new document.
+  const emoteHosts: string = EMOTE_HOSTS.map((host: string): string => ` https://${host}`).join("");
   headers.set("Referrer-Policy", overlayPage ? "no-referrer" : "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   headers.set("X-Frame-Options", "DENY");

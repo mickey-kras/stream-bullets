@@ -10,6 +10,7 @@ const OWNER_IP = clientIp("overlay-composition", 240);
 const OBS_IP = clientIp("overlay-composition", 241);
 const GEOMETRY_IP = clientIp("overlay-composition", 242);
 const CHARACTERS_IP = clientIp("overlay-composition", 243);
+const COMMANDS_IP = clientIp("overlay-composition", 244);
 
 const resetLayers = `UPDATE overlay_state SET layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`;
 
@@ -546,7 +547,7 @@ for (const viewport of [
     expect(newest.y).toBeGreaterThanOrEqual(-1);
     expect(newest.x + newest.width).toBeLessThanOrEqual(viewport.width + 1);
     expect(newest.y + newest.height).toBeLessThanOrEqual(viewport.height + 1);
-    await expect(source.page.locator("main.overlay-screen")).toHaveAttribute("data-feed-status", /^(connecting|live)$/);
+    await expect(source.page.locator("main.overlay-screen")).toHaveAttribute("data-feed-status", "live");
     await close(source.page);
   });
 }
@@ -559,8 +560,33 @@ test("a characters-only source opens no sockets while the characters layer canno
   await page.goto("/@feature_host/overlay?key=e2e-key&layer=characters");
   const main = page.locator("main.overlay-screen");
   await expect(main).toHaveAttribute("data-feed-status", "off");
-  // Give a socket time to open if one would.
-  await page.waitForTimeout(500);
+  // The layer box sets data-scaled in an effect, so the page is hydrated and its first effects ran.
+  await expect(main.locator('.ov-layer[data-layer="characters"]')).toHaveAttribute("data-scaled", "true");
+  // Let the effects of that commit finish: the route opens its sockets in the same flush, after its children.
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0))),
+  );
   expect(sockets).toEqual([]);
   await close(page);
+});
+
+test("turning on hide commands removes a command row from an open chat source", async ({ browser }) => {
+  await setLayers("overlay-commands-reset", { chat: { enabled: true, hideCommands: false } });
+  const owner = await signedIn(browser, "featureowner", COMMANDS_IP);
+  const source = await chatSource(browser, () =>
+    snapshot([
+      message({ platform: "kick", id: "h1", user: "Jumper", text: "!jump" }),
+      message({ platform: "twitch", id: "h2", user: "Calm", text: "not a command" }),
+    ]),
+  );
+  await expect.poll(() => rowTexts(source.rows)).toEqual(["!jump", "not a command"]);
+  // Mark the document: a reload would drop the mark.
+  await source.page.evaluate(() => document.documentElement.setAttribute("data-e2e-loaded", "1"));
+  const hide = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { hideCommands: true } } });
+  expect(hide.status()).toBe(200);
+  await expect.poll(() => rowTexts(source.rows)).toEqual(["not a command"]);
+  await expect(source.page.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
+  expect(source.sockets).toHaveLength(1);
+  await close(source.page);
+  await owner.close();
 });

@@ -246,14 +246,20 @@ describe("the overlay page", (): void => {
       .find((part: string): boolean => part.startsWith("img-src "))
       ?.split(" ");
 
-  it("loads emote images only from the emote hosts over HTTPS, and only on the overlay pages", (): void => {
+  // A CSP applies per document, and in-app links reach the composition preview without a new document.
+  it("loads emote images only from the emote hosts over HTTPS, on every page", (): void => {
     const emotes: string[] = EMOTE_HOSTS.map((host: string): string => `https://${host}`);
-    for (const path of ["/@key_page/overlay?key=abc&layer=chat", "/overlay-control"]) {
+    expect(emotes).toContain("https://static-cdn.jtvnw.net");
+    for (const path of [
+      "/",
+      "/@key_page",
+      "/@key_page/overlay?key=abc&layer=chat",
+      "/@key_page/overlay/chat",
+      "/overlay-control",
+      "/settings",
+    ]) {
       expect(imageSources(path)).toEqual(["img-src", "'self'", "blob:", "data:", ...emotes]);
       expect(headers(path).get("Content-Security-Policy")).not.toContain("http://static-cdn.jtvnw.net");
     }
-    expect(emotes).toContain("https://static-cdn.jtvnw.net");
-    for (const path of ["/", "/@key_page", "/@key_page/overlay/chat", "/settings", "/overlay-control/x"])
-      expect(imageSources(path)).toEqual(["img-src", "'self'", "blob:", "data:"]);
   });
 });

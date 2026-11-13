@@ -37,7 +37,7 @@ The rectangle must stay in the frame: `x + w` is at most 1920 and `y + h` is at 
 
 | Layer | Default rectangle | Minimum size |
 | --- | --- | --- |
-| `chat` | `x` 1240, `y` 300, 640 × 660 | 280 × 160 |
+| `chat` | `x` 1240, `y` 372, 640 × 660 | 280 × 160 |
 | `characters` | `x` 0, `y` 760, 1920 × 320 | 640 × 160 |
 
 The page scales the design pixels to the width of the browser source. Thus the layout is the same at all sizes.
@@ -89,10 +89,13 @@ Keep the 16:9 aspect ratio. With a different ratio, the layer heights do not agr
 For a layer source, use the size of its layer rectangle, or the same ratio at a smaller size.
 The editor and the link panel show the size of each layer.
 
+A larger layer source shows the layer larger.
+
 The overlay background is transparent, so you do not need custom CSS.
 
 After you update to the release with the chat layer, refresh each open OBS source one time.
 An OBS source that opened before this release does not show the chat.
+The editor shows this step under **Show on stream** for the chat layer.
 
 ### Live-room seats
 
@@ -116,8 +119,15 @@ To change a layer, do these steps:
 4. Alternatively, type the values in the `X`, `Y`, `Width`, and `Height` fields.
 
 A drag saves when you release the pointer. A key or a field saves after 400 milliseconds without a change.
+If you close the page or go to a different page before then, the editor sends the change at once.
 Each save counts against the write quota of 60 changes each minute.
 If a save fails, the editor shows the saved layers again.
+If two saves finish in a different sequence, the editor keeps the result with the higher revision.
+
+When the chat layer covers part of the on-air content in the preview, a note shows under the preview.
+Move the chat layer to a free area to remove the note. The note does not stop a save.
+The default chat rectangle is in the bottom-right corner, 40 pixels from the right edge and 48 pixels from the bottom edge.
+A poll fills the top of the frame and can go below `y` 372. Thus with a poll on air, the note can show for the default rectangle.
 
 The preview plays sample chat. It opens no activity socket and reads no live chat.
 The samples include all three platforms, Unicode text, emoji, an emote, and a command.
@@ -198,8 +208,10 @@ Thus close the overlay sources that you do not use.
 
 - The chat shows user names, messages, and badge labels as text. It never inserts them as HTML.
 - An emote image loads only from a host in `EMOTE_HOSTS`, over HTTPS. Other emotes show their name as text.
-- On all pages, the Content Security Policy allows images from the site, `blob:` URLs, and `data:` URLs.
-  On the overlay page and on **Overlay control**, it also allows images from `https://static-cdn.jtvnw.net`.
+- On all pages, the Content Security Policy allows images from the site, `blob:` URLs, `data:` URLs,
+  and each host in `EMOTE_HOSTS` over HTTPS (`https://static-cdn.jtvnw.net`).
+  The policy applies to a full page load. A link in the app opens **Overlay control** without a new page load.
+  Thus a policy only for that page does not apply to the preview.
 - The Twitch image CDN gets the IP address of the device that shows an emote. The privacy policy (`/privacy`) names this recipient.
 - The overlay page sends no `Referer`. Thus an emote image does not get the key.
 - The overlay key gives access to the activity feed. Without a valid key or an owner session, the socket gets `403`.

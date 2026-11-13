@@ -9,7 +9,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { t, type MessageId } from "../../i18n";
+import { t, tAround, type MessageId } from "../../i18n";
 import { SAMPLE_CHAT } from "../../lib/chat-feed";
 import {
   diffLayers,
@@ -36,9 +36,10 @@ import {
   type OverlayLayers,
 } from "../../lib/overlay-layers";
 import type { OverlaySourceRef, OverlayState } from "../../types";
-import { errorMessage, postJson } from "../api";
+import { errorMessage, postJson, sendJson } from "../api";
 import { CHARACTERS_READY, OverlayComposition } from "./overlay-composition";
 import type { OverlayScene } from "./overlay-stage";
+import { useChatOverlap } from "./use-chat-overlap";
 import { useDesignScale } from "./use-design-scale";
 
 /** Keyboard and number-field edits save after this much idle time. Drags save on pointer-up. */
@@ -111,12 +112,24 @@ function useLayerDraft(
     savedRef.current = layers;
     savedCallback.current = onSaved;
   }, [layers, onSaved]);
-  useEffect(
-    () => (): void => {
+  // Leaving the page or closing the editor sends the edits not sent yet, without waiting for the answer.
+  useEffect(() => {
+    const leave = (): void => {
       if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
+      timer.current = null;
+      const pending: LayersPatch = unsent.current;
+      if (isEmptyPatch(pending)) return;
+      unsent.current = {};
+      draftRef.current = withoutSent(draftRef.current, pending);
+      setDraft(draftRef.current);
+      sendJson("POST", "/api/overlay", layersAction(pending), { keepalive: true }).catch((): void => undefined);
+    };
+    window.addEventListener("pagehide", leave);
+    return (): void => {
+      window.removeEventListener("pagehide", leave);
+      leave();
+    };
+  }, []);
 
   const setBoth = (next: LayersPatch): void => {
     draftRef.current = next;
@@ -355,6 +368,8 @@ export function CompositionEditor({
   useDesignScale(frame, DESIGN_W);
   const [background, setBackground] = useState<PreviewBackground>("checker");
   const { shown, status, error, edit, flush } = useLayerDraft(layers, onSaved);
+  const covers: boolean = useChatOverlap(frame, shown.chat, source);
+  const [sourceBefore, sourceAfter] = tAround("overlay.comp.chatSource", "link");
   const drag = useRef<Drag | null>(null);
 
   const setRect = (layer: EditableLayer, rect: LayerRect, when: "now" | "idle" | "later"): void =>
@@ -492,6 +507,13 @@ export function CompositionEditor({
           <p className="muted ov-comp-help" id={helpId}>
             {t("overlay.comp.moveHelp")}
           </p>
+          <div aria-live="polite">
+            {chat.enabled && covers && (
+              <p className="ov-comp-help ov-comp-overlap" data-comp-overlap>
+                {t("overlay.comp.overlap")}
+              </p>
+            )}
+          </div>
           {chat.enabled && (
             <p className="muted ov-comp-help" data-comp-sample>
               {t("overlay.comp.sampleChat")}
@@ -505,7 +527,11 @@ export function CompositionEditor({
           <fieldset className="ov-comp-layer" data-comp-layer="chat">
             <legend>{t("overlay.comp.chat")}</legend>
             <p className="muted ov-comp-note" data-comp-chat-source>
-              {t("overlay.comp.chatSource")} <a href="#channels-title">{t("overlay.comp.chatSourceLink")}</a>
+              {sourceBefore}
+              <a className="text-link" href="#channels-title">
+                {t("overlay.comp.chatSourceLink")}
+              </a>
+              {sourceAfter}
             </p>
             <label className="choice">
               <input
@@ -518,6 +544,9 @@ export function CompositionEditor({
               />
               <span>{t("overlay.comp.show")}</span>
             </label>
+            <p className="muted ov-comp-note" data-comp-refresh>
+              {t("overlay.comp.refreshHint")}
+            </p>
             <label className="choice">
               <input
                 type="checkbox"
