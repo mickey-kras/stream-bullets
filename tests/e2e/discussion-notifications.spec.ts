@@ -43,7 +43,7 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     await page.goto(`/@test_host?view=topics&entry=${entryId}`);
     const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
     await composer.fill("Hello @test_host");
-    await expect(page.getByRole("option")).toContainText("@test_host");
+    await expect(page.locator(".mention-option")).toContainText("@test_host");
     await composer.press("Enter");
     await expect(composer).toHaveValue("Hello @owner ");
     await composer.press("End");
@@ -57,10 +57,11 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
 
     await root.getByRole("button", { name: "Edit", exact: true }).click();
     const editor = root.getByRole("textbox", { name: "Edit comment", exact: true });
-    await editor.fill("Hello @owner please check this edited thread.");
+    await editor.press("End");
+    await editor.pressSequentially(" Please confirm.");
     await root.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(root).toContainText("Edited");
-    await expect(root).toContainText("Hello @owner please check this edited thread.");
+    await expect(root.getByText("Edited", { exact: true })).toBeVisible();
+    await expect(root).toContainText("Hello @owner please check this thread. Please confirm.");
     expect(await inbox(owner, rootId)).toHaveLength(1);
 
     await ownerPage.goto("/notifications");
@@ -94,9 +95,11 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     await ownerPage.goto(`/@test_host?entry=${entryId}&comment=${replyId}`);
     const reply = ownerPage.locator(`#cm-${replyId}`);
     await reply.getByRole("button", { name: "Edit", exact: true }).click();
-    await reply.getByRole("textbox", { name: "Edit comment", exact: true }).fill("@viewer this reply was edited.");
+    const replyEditor = reply.getByRole("textbox", { name: "Edit comment", exact: true });
+    await replyEditor.press("End");
+    await replyEditor.pressSequentially(" Please confirm.");
     await reply.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(reply).toContainText("Edited");
+    await expect(reply.getByText("Edited", { exact: true })).toBeVisible();
     await expect(reply.locator(".reply-mention")).toHaveAttribute("href", `#cm-${rootId}`);
     expect(await inbox(viewer, replyId)).toHaveLength(1);
 
@@ -109,7 +112,7 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     await replyNotice.getByRole("link").click();
     await expect(page).toHaveURL(new RegExp(`comment=${replyId}`));
     await expect(page.locator(`#cm-${replyId}`)).toBeVisible();
-    await expect(page.locator(`#cm-${replyId}`)).toContainText("@viewer this reply was edited.");
+    await expect(page.locator(`#cm-${replyId}`)).toContainText("@viewer a reply and mention are one event. Please confirm.");
 
     await page.goto("/notifications");
     await page.getByRole("checkbox", { name: "Replies to my comments", exact: true }).uncheck();
@@ -142,7 +145,7 @@ test("touch selects a stable account mention and notifications survive a new vis
     await page.goto(`/@test_host?entry=${entryId}&discussion=1`);
     const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
     await composer.fill("Touch mention @test_host");
-    await page.getByRole("option").tap();
+    await page.locator(".mention-option").tap();
     await expect(composer).toHaveValue("Touch mention @owner ");
     const created = page.waitForResponse((response) => response.request().method() === "POST" && response.url().endsWith("/api/streamers/test_host"));
     await page.getByRole("button", { name: "Post", exact: true }).tap();
@@ -150,7 +153,7 @@ test("touch selects a stable account mention and notifications survive a new vis
     expect(await inbox(owner, commentId)).toHaveLength(1);
     const ownerPage = await newPage(owner);
     await ownerPage.goto("/streamers");
-    await ownerPage.getByRole("link", { name: /unread notifications/ }).click();
+    await ownerPage.getByRole("link", { name: /Unread notifications:/ }).click();
     const notice = ownerPage.locator(`.notification-link[href*="comment=${commentId}"]`);
     await expect(notice).toContainText("viewer mentioned you");
     await notice.click();

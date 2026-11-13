@@ -169,7 +169,9 @@ export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeade
           <nav aria-label={t("account.nav")}>
             <ul>
               {accountMenuRows(shell, here, streamerHeader).map((group: MenuRow[], index: number) => [
-                index > 0 && <li key={`divider-${group[0].label}`} className="account-menu-divider" aria-hidden="true" />,
+                index > 0 && (
+                  <li key={`divider-${group[0].label}`} className="account-menu-divider" aria-hidden="true" />
+                ),
                 ...group.map((row: MenuRow) => (
                   <li key={row.label}>
                     <Link

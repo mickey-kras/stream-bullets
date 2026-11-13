@@ -48,7 +48,11 @@ export function NotificationLink(): ReactNode {
   return (
     <Link className="notification-nav" to="/notifications" aria-label={label} title={error || label}>
       <Icon name={error ? "warning" : "requests"} size={20} />
-      {unread > 0 && <span className="notification-badge" aria-hidden="true">{unread}</span>}
+      {unread > 0 && (
+        <span className="notification-badge" aria-hidden="true">
+          {unread}
+        </span>
+      )}
       {error && <span className="sr-only">{error}</span>}
     </Link>
   );
@@ -71,7 +75,11 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
       setSnapshot((current: NotificationSnapshot) => ({
         ...next,
         notifications: append
-          ? [...new Map([...current.notifications, ...next.notifications].map((item: NotificationItem) => [item.id, item])).values()]
+          ? [
+              ...new Map(
+                [...current.notifications, ...next.notifications].map((item: NotificationItem) => [item.id, item]),
+              ).values(),
+            ]
           : next.notifications,
       }));
       changed();
@@ -90,7 +98,9 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
       setSnapshot((current: NotificationSnapshot) => ({
         ...current,
         unreadCount: Math.max(0, current.unreadCount + (read ? -1 : 1)),
-        notifications: current.notifications.map((value: NotificationItem) => value.id === item.id ? { ...value, read } : value),
+        notifications: current.notifications.map((value: NotificationItem) =>
+          value.id === item.id ? { ...value, read } : value,
+        ),
       }));
       changed();
       return true;
@@ -137,19 +147,32 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
             {t("notifications.refresh")}
           </button>
         </div>
-        <p role="alert" className="form-error">{error}</p>
-        <p role="status" className="muted">{t("notifications.unread", { count: snapshot.unreadCount })}</p>
+        <p role="alert" className="form-error">
+          {error}
+        </p>
+        <output className="muted">{t("notifications.unread", { count: snapshot.unreadCount })}</output>
         {snapshot.notifications.length === 0 && <p className="empty">{t("notifications.empty")}</p>}
         <ul className="notification-list" aria-busy={busy}>
           {snapshot.notifications.map((item: NotificationItem) => (
             <li className="notification-item" data-unread={!item.read} key={item.id}>
               <Link className="notification-link" to={item.href} onClick={(event) => open(event, item)}>
-                <strong>{t(item.kind === "reply" ? "notifications.reply" : "notifications.mention", { name: item.actor })}</strong>
+                <strong>
+                  {t(item.kind === "reply" ? "notifications.reply" : "notifications.mention", { name: item.actor })}
+                </strong>
                 <time dateTime={new Date(item.createdAt).toISOString()}>
-                  {new Intl.DateTimeFormat(intlLocale(), { dateStyle: "medium", timeStyle: "long", timeZone: "UTC" }).format(item.createdAt)}
+                  {new Intl.DateTimeFormat(intlLocale(), {
+                    dateStyle: "medium",
+                    timeStyle: "long",
+                    timeZone: "UTC",
+                  }).format(item.createdAt)}
                 </time>
               </Link>
-              <button type="button" className="small-button" disabled={busy} onClick={() => void mark(item, !item.read)}>
+              <button
+                type="button"
+                className="small-button"
+                disabled={busy}
+                onClick={() => void mark(item, !item.read)}
+              >
                 {t(item.read ? "notifications.markUnread" : "notifications.markRead")}
               </button>
             </li>
@@ -166,24 +189,34 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
           <legend>{t("notifications.preferences")}</legend>
           <p className="muted">{t("notifications.delivery")}</p>
           <label>
-            <input type="checkbox" checked={preferences.replies} onChange={(event) => {
-              const replies: boolean = event.currentTarget.checked;
-              setPreferences((current: NotificationPreferences) => ({ ...current, replies }));
-              setStatus("");
-            }} />
+            <input
+              type="checkbox"
+              checked={preferences.replies}
+              onChange={(event) => {
+                const replies: boolean = event.currentTarget.checked;
+                setPreferences((current: NotificationPreferences) => ({ ...current, replies }));
+                setStatus("");
+              }}
+            />
             <span>{t("notifications.replies")}</span>
           </label>
           <label>
-            <input type="checkbox" checked={preferences.mentions} onChange={(event) => {
-              const mentions: boolean = event.currentTarget.checked;
-              setPreferences((current: NotificationPreferences) => ({ ...current, mentions }));
-              setStatus("");
-            }} />
+            <input
+              type="checkbox"
+              checked={preferences.mentions}
+              onChange={(event) => {
+                const mentions: boolean = event.currentTarget.checked;
+                setPreferences((current: NotificationPreferences) => ({ ...current, mentions }));
+                setStatus("");
+              }}
+            />
             <span>{t("notifications.mentions")}</span>
           </label>
-          <button className="gold" type="submit">{t("common.save")}</button>
+          <button className="gold" type="submit">
+            {t("common.save")}
+          </button>
         </fieldset>
-        <p role="status">{status}</p>
+        <output>{status}</output>
       </form>
     </>
   );

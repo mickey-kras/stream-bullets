@@ -31,7 +31,7 @@ export const draftSchema = z.object({
     .max(5),
   replyId: z.string().uuid().nullable(),
 });
-export function readDraft(key: string): DiscussionDraft {
+export function readDraft(key: string): { draft: DiscussionDraft; unavailable: boolean } {
   const empty: DiscussionDraft = {
     text: "",
     mentions: [],
@@ -39,13 +39,13 @@ export function readDraft(key: string): DiscussionDraft {
     replyMentions: [],
     replyId: null,
   };
-  if (typeof sessionStorage === "undefined") return empty;
+  if (typeof sessionStorage === "undefined") return { draft: empty, unavailable: false };
   try {
     const value = sessionStorage.getItem(key);
-    if (!value) return empty;
+    if (!value) return { draft: empty, unavailable: false };
     const result = draftSchema.safeParse(JSON.parse(value));
-    return result.success ? result.data : empty;
+    return { draft: result.success ? result.data : empty, unavailable: !result.success };
   } catch {
-    return empty;
+    return { draft: empty, unavailable: true };
   }
 }

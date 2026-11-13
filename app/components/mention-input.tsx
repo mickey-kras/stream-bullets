@@ -19,17 +19,11 @@ export interface TextEdit {
   insertedLength: number;
 }
 
-export function retainedMentions(
-  mentions: MentionSelection[],
-  edit: TextEdit,
-): MentionSelection[] {
+export function retainedMentions(mentions: MentionSelection[], edit: TextEdit): MentionSelection[] {
   const shift = edit.insertedLength - (edit.end - edit.start);
   return mentions.flatMap((mention: MentionSelection): MentionSelection[] => {
     if (mention.end <= edit.start) return [mention];
-    if (mention.start >= edit.end)
-      return [
-        { ...mention, start: mention.start + shift, end: mention.end + shift },
-      ];
+    if (mention.start >= edit.end) return [{ ...mention, start: mention.start + shift, end: mention.end + shift }];
     return [];
   });
 }
@@ -129,14 +123,9 @@ export function MentionInput({
     setLoading(true);
   }
   function select(user: Candidate): void {
-    if (
-      !token ||
-      mentions.some((mention: MentionSelection) => mention.userId === user.id)
-    )
-      return;
+    if (!token || mentions.some((mention: MentionSelection) => mention.userId === user.id)) return;
     const label = `@${user.name}`;
-    const next =
-      value.slice(0, token.start) + label + " " + value.slice(token.end);
+    const next = value.slice(0, token.start) + label + " " + value.slice(token.end);
     if (next.length > 2000) return;
     onMentionsChange([
       ...retainedMentions(mentions, {
@@ -150,15 +139,11 @@ export function MentionInput({
     setToken(null);
     requestAnimationFrame(() => {
       input.current?.focus({ preventScroll: true });
-      input.current?.setSelectionRange(
-        token.start + label.length + 1,
-        token.start + label.length + 1,
-      );
+      input.current?.setSelectionRange(token.start + label.length + 1, token.start + label.length + 1);
     });
   }
   const options = users.filter(
-    (user: Candidate) =>
-      !mentions.some((mention: MentionSelection) => mention.userId === user.id),
+    (user: Candidate) => !mentions.some((mention: MentionSelection) => mention.userId === user.id),
   );
   return (
     <div className="mention-input">
@@ -173,14 +158,8 @@ export function MentionInput({
         aria-label={label}
         placeholder={placeholder}
         aria-controls={token ? id : undefined}
-        aria-autocomplete="list"
-        aria-expanded={Boolean(token)}
-        aria-activedescendant={
-          token && options[active] ? `${id}-${active}` : undefined
-        }
         onBlur={(event) => {
-          if (!event.currentTarget.parentElement?.contains(event.relatedTarget))
-            setToken(null);
+          if (!event.currentTarget.parentElement?.contains(event.relatedTarget)) setToken(null);
         }}
         onClick={(event) => detect(event.currentTarget)}
         onChange={(event) => {
@@ -191,16 +170,11 @@ export function MentionInput({
             let { start, end } = range;
             if (start === end && range.inputType.startsWith("delete")) {
               const removed = value.length - next.length;
-              if (range.inputType.endsWith("Backward"))
-                start = Math.max(0, start - removed);
+              if (range.inputType.endsWith("Backward")) start = Math.max(0, start - removed);
               else end += removed;
             }
             const insertedLength = next.length - value.length + end - start;
-            onMentionsChange(
-              insertedLength >= 0
-                ? retainedMentions(mentions, { start, end, insertedLength })
-                : [],
-            );
+            onMentionsChange(insertedLength >= 0 ? retainedMentions(mentions, { start, end, insertedLength }) : []);
           } else onMentionsChange([]);
           onChange(next);
           detect(event.currentTarget);
@@ -212,15 +186,10 @@ export function MentionInput({
             event.stopPropagation();
             setToken(null);
           }
-          if (
-            options.length &&
-            (event.key === "ArrowDown" || event.key === "ArrowUp")
-          ) {
+          if (options.length && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
             event.preventDefault();
             setActive(
-              (index: number) =>
-                (index + (event.key === "ArrowDown" ? 1 : options.length - 1)) %
-                options.length,
+              (index: number) => (index + (event.key === "ArrowDown" ? 1 : options.length - 1)) % options.length,
             );
           }
           if (event.key === "Enter" && options[active]) {
@@ -231,33 +200,27 @@ export function MentionInput({
       />
       {token && (
         <div className="mention-options">
-          <div
-            role="listbox"
-            id={id}
-            aria-label={t("discussion.mentionPeople")}
-          >
+          <ul id={id} aria-label={t("discussion.mentionPeople")}>
             {options.map((user: Candidate, index: number) => (
-              <button
-                key={user.id}
-                id={`${id}-${index}`}
-                className="mention-option"
-                type="button"
-                role="option"
-                aria-selected={index === active}
-                onPointerDown={(event) => event.preventDefault()}
-                onClick={() => select(user)}
-              >
-                <strong>{user.name}</strong>
-                <span className="mention-label">
-                  {user.handle ? `@${user.handle}` : user.id}
-                </span>
-              </button>
+              <li key={user.id}>
+                <button
+                  className="mention-option"
+                  type="button"
+                  data-active={index === active}
+                  onPointerDown={(event) => event.preventDefault()}
+                  onClick={() => select(user)}
+                >
+                  <strong>{user.name}</strong>
+                  <span className="mention-label">{user.handle ? `@${user.handle}` : user.id}</span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
+          <output className="sr-only">
+            {options[active] ? `${options[active].name} - ${options[active].handle ?? options[active].id}` : ""}
+          </output>
           <output>
-            {loading
-              ? t("discussion.mentionLoading")
-              : error || (options.length ? "" : t("discussion.mentionEmpty"))}
+            {loading ? t("discussion.mentionLoading") : error || (options.length ? "" : t("discussion.mentionEmpty"))}
           </output>
         </div>
       )}

@@ -60,7 +60,7 @@ function commentValue(row: CommentRow): Comment {
     text: removed ? "" : row.text,
     createdAt: row.created_at,
     editedAt: removed ? null : row.edited_at,
-    mentions: removed ? [] : JSON.parse(row.mentions) as NonNullable<Comment["mentions"]>,
+    mentions: removed ? [] : (JSON.parse(row.mentions) as NonNullable<Comment["mentions"]>),
     parentId: row.parent_id,
     likes: removed ? 0 : row.likes,
     liked: !removed && row.liked === 1,
@@ -244,13 +244,15 @@ export async function mutateComment(
     await consumeMutationQuota(env, viewerId, true);
     await validateMentions(env, comment.streamer_id, action.text, action.mentions, action.id);
     const result = await env.DB.batch([
-      env.DB.prepare("UPDATE entry_comments SET text=?,edited_at=? WHERE id=? AND author_id=? AND removed_at IS NULL")
-        .bind(action.text, Date.now(), action.id, viewerId),
+      env.DB.prepare(
+        "UPDATE entry_comments SET text=?,edited_at=? WHERE id=? AND author_id=? AND removed_at IS NULL",
+      ).bind(action.text, Date.now(), action.id, viewerId),
       env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(action.id),
       ...mentionStatements(env, action.id, action.mentions),
       env.DB.prepare(`DELETE FROM notifications WHERE comment_id=? AND kind='mention'
-        AND NOT EXISTS(SELECT 1 FROM comment_mentions m WHERE m.comment_id=notifications.comment_id AND m.user_id=notifications.user_id)`)
-        .bind(action.id),
+        AND NOT EXISTS(SELECT 1 FROM comment_mentions m WHERE m.comment_id=notifications.comment_id AND m.user_id=notifications.user_id)`).bind(
+        action.id,
+      ),
       env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
     ]);
     if (!result[0].meta.changes) throw new HttpError(404, "Comment not found.");
@@ -267,24 +269,48 @@ export async function mutateComment(
   return { id: action.id };
 }
 
-export async function getCommentThread(env: AppEnv, id: string, viewerId: string | null): Promise<{
-  comment: Comment; rootId: string; thread: CommentThread; handle: string; entryId: string;
+export async function getCommentThread(
+  env: AppEnv,
+  id: string,
+  viewerId: string | null,
+): Promise<{
+  comment: Comment;
+  rootId: string;
+  thread: CommentThread;
+  handle: string;
+  entryId: string;
 }> {
-  const row = await env.DB.prepare(`SELECT ${commentColumns} FROM entry_comments c JOIN user u ON u.id=c.author_id WHERE c.id=?`)
-    .bind(viewerId ?? "", viewerId ?? "", id).first<CommentRow>();
+  const row = await env.DB.prepare(
+    `SELECT ${commentColumns} FROM entry_comments c JOIN user u ON u.id=c.author_id WHERE c.id=?`,
+  )
+    .bind(viewerId ?? "", viewerId ?? "", id)
+    .first<CommentRow>();
   if (!row || row.removed_at !== null || !(await getVisibleEntry(env, row.entry_id, viewerId)))
     throw new HttpError(404, "Comment not found.");
   const root = await env.DB.prepare(`WITH RECURSIVE ancestors(id,parent_id) AS (
     SELECT id,parent_id FROM entry_comments WHERE id=?
     UNION ALL SELECT c.id,c.parent_id FROM entry_comments c JOIN ancestors a ON c.id=a.parent_id
-  ) SELECT id FROM ancestors WHERE parent_id IS NULL`).bind(id).first<{ id: string }>();
+  ) SELECT id FROM ancestors WHERE parent_id IS NULL`)
+    .bind(id)
+    .first<{ id: string }>();
   if (!root) throw new HttpError(404, "Comment not found.");
-  const rootRow = await env.DB.prepare(`SELECT ${commentColumns} FROM entry_comments c JOIN user u ON u.id=c.author_id WHERE c.id=?`)
-    .bind(viewerId ?? "", viewerId ?? "", root.id).first<CommentRow>();
-  const page = await env.DB.prepare("SELECT s.handle FROM streamers s JOIN entries e ON e.streamer_id=s.id WHERE e.id=?")
-    .bind(row.entry_id).first<{ handle: string }>();
+  const rootRow = await env.DB.prepare(
+    `SELECT ${commentColumns} FROM entry_comments c JOIN user u ON u.id=c.author_id WHERE c.id=?`,
+  )
+    .bind(viewerId ?? "", viewerId ?? "", root.id)
+    .first<CommentRow>();
+  const page = await env.DB.prepare(
+    "SELECT s.handle FROM streamers s JOIN entries e ON e.streamer_id=s.id WHERE e.id=?",
+  )
+    .bind(row.entry_id)
+    .first<{ handle: string }>();
   if (!rootRow || !page) throw new HttpError(404, "Comment not found.");
   const replies = await threadReplies(env, [root.id], viewerId);
-  return { comment: commentValue(row), rootId: root.id,
-    thread: { ...commentValue(rootRow), replies: replies.get(root.id) ?? [] }, handle: page.handle, entryId: row.entry_id };
+  return {
+    comment: commentValue(row),
+    rootId: root.id,
+    thread: { ...commentValue(rootRow), replies: replies.get(root.id) ?? [] },
+    handle: page.handle,
+    entryId: row.entry_id,
+  };
 }

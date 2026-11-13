@@ -1764,7 +1764,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .mention-input textarea { display: block; width: 100%; }
 .mention-options { position: absolute; inset-inline: 0; top: 100%; z-index: 5; max-height: 200px; overflow-y: auto; margin: 4px 0 0; padding: 4px; list-style: none; border: 1px solid var(--input-border); border-radius: var(--radius-control); background: var(--card); box-shadow: 0 4px 12px #0005; }
 .mention-option { display: flex; flex-wrap: wrap; gap: 4px 8px; width: 100%; padding: 8px; min-height: 44px; overflow-wrap: anywhere; }
-.mention-option[aria-selected="true"] { background: var(--tab); color: var(--gold); }
+.mention-option[data-active="true"] { background: var(--tab); color: var(--gold); }
 .mention-label { font-size: var(--text-meta); color: var(--muted); }
 .comment-editor { display: grid; gap: 8px; min-width: 0; }
 .comment-editor textarea { width: 100%; min-height: 88px; max-height: 180px; padding: 10px; resize: vertical; overflow-y: auto; font-size: 1rem; }
@@ -1808,3 +1808,5 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
   .discussion-focus .poll-discussion > :not(.discussion) { display: none; }
 }
 .notification-nav { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 0 0 auto; min-width: 44px; min-height: 44px; padding: 4px; }
+
+.mention-options ul { list-style: none; margin: 0; padding: 0; }

@@ -15,12 +15,14 @@ export function meta() {
   return [{ title: `${t("notifications.title")} · StreamBullets` }, { name: "robots", content: "noindex" }];
 }
 
-export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs): Promise<NotificationSnapshot> => {
-  const app = context.get(appContext);
-  const viewer = await requestViewer(request, app);
-  if (!viewer) throw redirect("/sign-in?next=/notifications");
-  return listNotifications(app.env, viewer.id);
-});
+export const loader = withRouteErrors(
+  async ({ request, context }: LoaderFunctionArgs): Promise<NotificationSnapshot> => {
+    const app = context.get(appContext);
+    const viewer = await requestViewer(request, app);
+    if (!viewer) throw redirect("/sign-in?next=/notifications");
+    return listNotifications(app.env, viewer.id);
+  },
+);
 
 export default function NotificationsPage(): ReactNode {
   const initial = useLoaderData<typeof loader>();
