@@ -138,10 +138,8 @@ function ScheduleBody({
   );
 }
 
-/**
- * The Schedule tab (item 23): Feed, Day, Week and Month in the viewer's zone. Week and Month need a wide screen;
- * on a phone a shared link to them shows the Feed with a note. The owner schedules, edits, cancels and deletes here.
- */
+// Feed/Day/Week/Month use the viewer's zone. Narrow Week/Month links show Feed with a note. Owners manage
+// streams here.
 export function ScheduleView({
   handle,
   name,
@@ -161,7 +159,7 @@ export function ScheduleView({
   handle: string;
   name: string;
   events: StreamEvent[];
-  /** A shared link's stream outside the loaded range; it never counts towards what the range covers. */
+  // Linked out-of-range stream does not extend loaded coverage.
   linked: StreamEvent | null;
   serverNow: number;
   owner: boolean;
@@ -184,17 +182,14 @@ export function ScheduleView({
   const merged = merge(loaded, linked ? merge(extra, [linked]) : extra);
   const now = useScheduleClock(serverNow, merged);
   const events = statusesAt(merged, now);
-  // Week and Month need a wide screen; a phone shows the Feed.
+  // Narrow screens use Feed instead of Week/Month.
   const effective = (value: ScheduleMode): ScheduleMode =>
     narrow && (value === "week" || value === "month") ? "feed" : value;
   const mode: ScheduleMode = effective(requested);
   const days = mode === "feed" ? [] : visibleDays(mode, anchor, zone);
   const open = openEvent ? (events.find((event: StreamEvent) => event.id === openEvent) ?? null) : null;
 
-  /**
-   * Fetches the range a calendar view shows at `at` when the loader's range does not cover it. `fresh` replaces the
-   * streams fetched before, which a change may have made stale; otherwise the new ones join them.
-   */
+  // Fetch uncovered calendar ranges. Fresh requests replace prior results; others append.
   async function fetchVisible(at: number, fresh: boolean, view: ScheduleMode = mode): Promise<void> {
     const range = view === "feed" ? null : visibleRange(view, at, zone);
     const covered = (from: number, to: number): boolean =>
@@ -213,14 +208,14 @@ export function ScheduleView({
     }
   }
 
-  /** Every change of what a calendar shows (its date or its view) comes here, so the new range is fetched. */
+  // Route all calendar navigation through range loading.
   async function show(at: number, view: ScheduleMode = requested): Promise<void> {
     setAnchor(at);
     if (view !== requested) onMode(view);
     await fetchVisible(at, false, effective(view));
   }
 
-  /** After a change: the loader reloads only its own range, so a range fetched apart is fetched again. */
+  // Refresh separately fetched ranges after mutations.
   async function changed(message: string, at: number = anchor): Promise<void> {
     onOpenEvent(null);
     onCreating(false);

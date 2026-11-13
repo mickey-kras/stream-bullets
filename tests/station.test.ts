@@ -112,8 +112,7 @@ it.each([true, false])(
     buildAtmosphere(kit, scene);
     const hash = createHash("sha256");
     let meshes = 0;
-    // Values are rounded to 0.01 mm so the hash tracks the model, not last-bit Math differences between
-    // V8 releases.
+    // Round to 0.01 mm to ignore last-bit Math differences across V8 versions.
     const round = (values: ArrayLike<number>): number[] =>
       Array.from(values, (value: number): number => Math.round(value * 1e5) || 0);
     scene.traverse((object: THREE.Object3D): void => {

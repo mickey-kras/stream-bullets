@@ -5,24 +5,16 @@ import {
 } from "@simplewebauthn/server";
 import { isoBase64URL, isoCBOR } from "@simplewebauthn/server/helpers";
 
-/**
- * The WebAuthn checks for admin security keys (item 29), delegated to `@simplewebauthn/server`.
- *
- * `@better-auth/passkey` wraps the same library, but its endpoints sign a user in and make a new session. The admin
- * step-up only verifies a key on the current session, with its own policy in stepup.server.ts, so this module calls
- * the library's two verify functions directly:
- * - registration: attestation "none" is requested, so the attestation statement is not a trust anchor (the trust
- *   anchor is the admin's fresh session); only the authenticator data and the credential key count.
- * - authentication: client data type, one-time challenge, exact origin, RP ID hash, user presence and user
- *   verification flags, the signature, and the signature counter.
- * Keys use ES256 (-7), EdDSA (-8) or RS256 (-257).
- */
+// Use `@simplewebauthn/server` verification without creating a new session. Registration requests attestation
+// "none"; trust the fresh admin session, authenticator data, and key. Authentication checks type, challenge,
+// exact origin, RP ID, presence/verification, signature, and counter. Allow ES256 (-7), EdDSA (-8), and RS256
+// (-257).
 
 export const SUPPORTED_ALGORITHMS: readonly number[] = [-7, -8, -257];
 
 export class WebAuthnError extends Error {}
 
-/** Callers write the failure audit row only for a WebAuthnError, so no other error may leave a ceremony. */
+// Callers write the failure audit row only for a WebAuthnError, so no other error may leave a ceremony.
 async function asWebAuthnError<T>(check: () => Promise<T>): Promise<T> {
   try {
     return await check();
@@ -42,7 +34,7 @@ export function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
   return Uint8Array.from(isoBase64URL.toBuffer(value));
 }
 
-/** Attestation "none" checks the algorithm but does not import the key. Validate it before storage. */
+// Attestation "none" checks the algorithm but does not import the key. Validate it before storage.
 async function validatePublicKey(publicKey: Uint8Array<ArrayBuffer>): Promise<void> {
   const key = isoCBOR.decodeFirst<Map<number, unknown>>(publicKey);
   const bytes = (label: number, length?: number): Uint8Array<ArrayBuffer> => {
@@ -80,10 +72,8 @@ async function validatePublicKey(publicKey: Uint8Array<ArrayBuffer>): Promise<vo
   }
 }
 
-/**
- * The library accepts a cross-origin response when the browser sends no `topOrigin` (Safari), and token binding
- * "present". Keys for this site are only ever used top-level on its own origin, so both are refused here first.
- */
+// Reject crossOrigin even without topOrigin (Safari); reject token binding "present".
+// Library checks alone permit these cases. Keys require top-level same-origin use.
 function refuseEmbedded(clientDataJSON: string): void {
   let data: unknown;
   try {
@@ -101,11 +91,11 @@ function refuseEmbedded(clientDataJSON: string): void {
 }
 
 export interface Expected {
-  /** The one-time challenge the server issued, base64url. */
+  // The one-time challenge the server issued, base64url.
   challenge: string;
-  /** The exact page origin, for example https://streambullets.com. */
+  // The exact page origin, for example https://streambullets.com.
   origin: string;
-  /** The relying-party ID: the origin's host name. */
+  // The relying-party ID: the origin's host name.
   rpId: string;
 }
 
@@ -120,7 +110,7 @@ export interface RegistrationCredential {
 
 export interface VerifiedRegistration {
   credentialId: string;
-  /** The COSE public key, base64 (the passkey plugin's storage format). */
+  // The COSE public key, base64 (the passkey plugin's storage format).
   publicKey: string;
   counter: number;
   aaguid: string;
@@ -176,10 +166,8 @@ export interface AuthenticationCredential {
   };
 }
 
-/**
- * Verifies an assertion against a stored key and returns the new signature counter. A counter that does not
- * grow (while either value is non-zero) means a cloned key or a replay, so the assertion is refused.
- */
+// Return the verified signature counter. Reject non-increasing counters when either value is nonzero
+// (clone/replay).
 export function verifyAuthentication(
   credential: AuthenticationCredential,
   expected: Expected,

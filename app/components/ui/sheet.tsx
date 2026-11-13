@@ -4,11 +4,8 @@ import { t } from "../../i18n";
 import { DialogCloseButton, SheetActionsContext, useReturnFocus } from "./dialog";
 import { Icon } from "./icon";
 
-/**
- * Sheet: a dialog for longer content (account dialogs, Contact, Edit your page). A sticky title bar with an
- * optional Back step and the × button, a scrolling body, and a footer pinned under it. On phones it fills the
- * screen; `short` keeps a centred card for brief content.
- */
+// Long-content dialog with sticky title/footer and scrolling body. Fullscreen on phones; short keeps a
+// centered card.
 export function Sheet({
   open,
   onOpenChange,
@@ -24,15 +21,15 @@ export function Sheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  /** Screen-reader description; the body's first paragraph usually says the same thing visibly. */
+  // Screen-reader description, usually repeated visibly in the body.
   description?: string;
   children?: ReactNode;
-  /** The pinned footer, usually a <DialogActions>. A submit button there needs `form="<form id>"`. */
+  // Pinned footer buttons need form="<form id>" to submit the body form.
   actions?: ReactNode;
-  /** Shows "‹ Back" before the title for a multi-step sheet. */
+
   onBack?: () => void;
   short?: boolean;
-  /** Stable hook for styles and tests (data-sheet). */
+  // Stable data-sheet hook for styles/tests.
   name?: string;
   className?: string;
 }>): ReactNode {

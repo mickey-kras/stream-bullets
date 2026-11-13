@@ -13,7 +13,7 @@ function u32le(value: number): number[] {
   return u32be(value).reverse();
 }
 
-/** A JPEG segment: marker, big-endian length (including itself), payload. */
+// JPEG segment: marker, big-endian length including itself, payload.
 function segment(marker: number, payload: number[]): number[] {
   const length = payload.length + 2;
   return [0xff, marker, length >> 8, length & 0xff, ...payload];
@@ -39,7 +39,7 @@ function jpeg(): Uint8Array {
 }
 
 function pngChunk(type: string, data: number[]): number[] {
-  // The CRC is not checked here; image-size and the strip do not read it.
+  // image-size and metadata stripping ignore CRC.
   return [...u32be(data.length), ...ascii(type), ...data, 0, 0, 0, 0];
 }
 
@@ -61,7 +61,7 @@ function riffChunk(type: string, data: number[]): number[] {
 }
 
 function webp(): Uint8Array {
-  // VP8X: flags with EXIF (0x08) and XMP (0x04) set, canvas 7x9 stored as width-1, height-1 in 24 bits.
+  // VP8X: EXIF 0x08, XMP 0x04; 7x9 canvas stored as 24-bit width-1 and height-1.
   const vp8x = [0x08 | 0x04 | 0x20, 0, 0, 0, 6, 0, 0, 8, 0, 0];
   const body = [
     ...ascii("WEBP"),
@@ -125,7 +125,7 @@ describe("image metadata removal", () => {
     for (const text of ["EXIF", "XMP ", "GPS", "creator"]) expect(contains(clean, text)).toBe(false);
     const view = new DataView(clean.buffer, clean.byteOffset, clean.byteLength);
     expect(view.getUint32(4, true)).toBe(clean.length - 8);
-    // The ICC flag (0x20) stays, the EXIF and XMP flags go.
+    // Keep ICC 0x20; clear EXIF and XMP.
     expect(clean[20]).toBe(0x20);
     expect(imageSize(clean)).toMatchObject({ type: "webp", width: 7, height: 9 });
   });

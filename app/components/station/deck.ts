@@ -42,7 +42,7 @@ export function buildDeck(k: Kit, station: THREE.Group): void {
   );
   deck.rotation.x = -Math.PI / 2;
   deck.castShadow = false;
-  // Guard rail around the deck with an open walkway at the front.
+  // Front walkway leaves a guard-rail opening.
   {
     const r = 4.72,
       a0 = 0.42,
@@ -64,7 +64,7 @@ export function buildDeck(k: Kit, station: THREE.Group): void {
       ball(0.075, [x, DECK_Y + 0.95, z], gold, station);
     }
   }
-  // Lamp standards: stepped bell base, fluted column, cup and an opal globe held in a ring cage.
+  // Bell bases, fluted columns and caged opal globes.
   const opal = new THREE.MeshStandardMaterial({
     color: "#ffe9c2",
     emissive: "#ffc070",

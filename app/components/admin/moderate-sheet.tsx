@@ -11,7 +11,6 @@ import { Sheet } from "../ui/sheet";
 import { KeyConfirm } from "./key-confirm";
 import { adminRequest, errorText, needsStepUp } from "./webauthn";
 
-/** The page a moderation action is about, as the admin lists show it. */
 export interface ModeratedPage {
   id: string;
   handle: string;
@@ -49,7 +48,6 @@ const actionCopy: Record<PageAction, { verb: MessageId; title: MessageId; body: 
   },
 };
 
-/** The actions open to a page in its current status. */
 export function pageActions(status: StreamerStatus): PageAction[] {
   if (status === "suspended") return ["unsuspend"];
   if (status === "frozen") return ["unfreeze", "suspend"];
@@ -74,11 +72,8 @@ interface ModerationInput {
   notify: boolean;
 }
 
-/**
- * Freeze, unfreeze, suspend or unsuspend one page with a reason, an internal note and an optional owner notice.
- * Freezing and suspending need a step-up from the last 2 minutes: when the server asks, the sheet shows the key
- * check and then sends the same request again.
- */
+// Moderate with reason, internal note and optional owner notice. Freeze/suspend require step-up within two
+// minutes; prompt and retry when needed.
 export function ModerateSheet({
   page,
   action,

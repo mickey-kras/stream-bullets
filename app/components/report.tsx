@@ -15,7 +15,6 @@ export const reportReasons: readonly { value: ReportReason; label: MessageId; hi
 
 const needsDetails = new Set<ReportReason>(["illegal", "other"]);
 
-/** Lets a signed-in viewer report a topic, poll, or comment for administrator review. */
 export function ReportButton({
   targetKind,
   targetId,
@@ -25,11 +24,11 @@ export function ReportButton({
 }: Readonly<{
   targetKind: ReportTargetKind;
   targetId: string;
-  /** Accessible name of the trigger, for example "Report comment by Alex". */
+  // Trigger's accessible name.
   label: string;
-  /** What is being reported, shown in the dialog. */
+  // Reported item label.
   description: string;
-  /** Runs once the report is saved, so the page can show "Reported" instead of the button. */
+  // Replace Report with Reported after saving.
   onReported?: () => void;
 }>): ReactNode {
   const id = useId();

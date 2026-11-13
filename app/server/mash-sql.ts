@@ -2,21 +2,15 @@ import { z } from "zod";
 import { MASH_PHASES } from "../../db/enums";
 import type { MashState } from "../types";
 
-/**
- * A condition for an `entries` row that keeps Auto's open-poll choice off finished Mash Battles: their entry keeps
- * `ends_at` NULL and `revealed` 0, so only `entry_mash` tells. A battle in setup, countdown or live still counts.
- * `now` is the SQL expression for the current time in milliseconds.
- */
+// Exclude finished Mash Battles from Auto: entries retain NULL `ends_at` and `revealed=0`, so inspect
+// `entry_mash`. Setup/countdown/live count as open; `now` is SQL milliseconds.
 export function notFinishedBattle(now: string): string {
   return `NOT EXISTS (SELECT 1 FROM entry_mash m WHERE m.entry_id=entries.id
     AND (m.phase='finished' OR (m.ends_at IS NOT NULL AND m.ends_at <= ${now})))`;
 }
 
-/**
- * One column, `mash`, for an entry query that names the entry `e`: the battle as JSON, or NULL for
- * an entry with no `entry_mash` row. Totals come from `mash_taps` (risk R1: `entries` keeps kind
- * `choice`). The live room overlays its unwritten taps on top.
- */
+// JSON `mash` column for entry alias `e`, or NULL. Battles keep entry kind `choice`; totals come from
+// `mash_taps`, with unflushed live totals overlaid.
 export const MASH_COLUMN = `(SELECT json_object('durationS',m.duration_s,'phase',m.phase,'startsAt',m.starts_at,
     'endsAt',m.ends_at,'winner',m.winner,
     'totals',json((SELECT json_group_array(json_object('side',t.side,'taps',t.taps)) FROM
@@ -38,7 +32,7 @@ const mashSchema = z.object({
   assisted: count,
 });
 
-/** Parses the `mash` column. Throws on a malformed value so a bad row never reaches a client. */
+// Reject malformed stored Mash data before sending it to clients.
 export function mashValue(raw: string | null | undefined, sides: number): MashState | null {
   if (raw === null || raw === undefined) return null;
   const parsed = mashSchema.parse(JSON.parse(raw));

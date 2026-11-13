@@ -2,10 +2,8 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import type { Animator } from "./kit";
 
-/* Static batching. Most of the station never moves, so its ~1,000 meshes are merged into one mesh per
-   material, which cuts draw calls (and shadow-pass draw calls) by an order of magnitude. Anything that
-   moves, blinks or is driven from outside is left alone: it is found by running every animator at a
-   few sample times and watching which meshes change, plus the roots the caller names. */
+// Merge static meshes by material to reduce draw calls. Sample animators to exclude changing meshes; also
+// exclude caller-pinned roots.
 
 const SAMPLE_TIMES = [0.37, 1.9, 4.3, 7.7, 13.1, 21.4];
 
@@ -21,7 +19,7 @@ function shown(o: THREE.Object3D): boolean {
 
 type Restore = () => void;
 
-/** Everything an animator might touch, so sampling them leaves the station exactly as it was built. */
+// Snapshot animator state so sampling leaves the model unchanged.
 function snapshot(root: THREE.Object3D): Restore {
   const undo: Restore[] = [];
   const seen = new Set<object>();
@@ -75,7 +73,7 @@ function snapshot(root: THREE.Object3D): Restore {
   };
 }
 
-/** Meshes whose world transform or visibility any animator changes. */
+// Meshes with animated world transforms or visibility.
 function movingMeshes(root: THREE.Object3D, animators: readonly Animator[]): Set<THREE.Mesh> {
   const meshes: THREE.Mesh[] = [];
   root.traverse((o: THREE.Object3D): void => {
@@ -103,14 +101,13 @@ function movingMeshes(root: THREE.Object3D, animators: readonly Animator[]): Set
 function eligible(m: THREE.Mesh, moving: Set<THREE.Mesh>, pinned: Set<THREE.Object3D>): boolean {
   if (m instanceof THREE.InstancedMesh || m instanceof THREE.SkinnedMesh) return false;
   if (moving.has(m) || Array.isArray(m.material) || !shown(m) || m.geometry.morphAttributes.position) return false;
-  // Transparent parts are sorted back to front, so only decals (flat, offset onto a surface, no depth
-  // writes) may share a draw; glass and glows keep their own.
+  // Only offset, non-depth-writing decals may batch transparently. Keep glass/glows separate for depth sorting.
   if (m.material.transparent && !(m.material.polygonOffset && !m.material.depthWrite)) return false;
   for (let p: THREE.Object3D | null = m; p; p = p.parent) if (pinned.has(p)) return false;
   return true;
 }
 
-/** Baking a mirrored transform turns faces inside out; swap two corners of every triangle to undo it. */
+// Reverse triangle winding after mirrored transforms.
 function flipWinding(g: THREE.BufferGeometry): void {
   if (g.index) {
     const index = g.index;
@@ -143,7 +140,7 @@ function batchKey(m: THREE.Mesh): string {
   return [material.uuid, m.castShadow, m.receiveShadow, m.renderOrder, g.index ? "i" : "n", attributes].join("|");
 }
 
-/** Fold instanced sets that share a material and a template shape (rivets, mostly) into one set each. */
+// Merge matching material/geometry instances, chiefly rivets.
 function batchInstances(station: THREE.Object3D, moving: Set<THREE.Mesh>, pins: Set<THREE.Object3D>): void {
   const groups = new Map<string, THREE.InstancedMesh[]>();
   station.traverse((o: THREE.Object3D): void => {
@@ -186,10 +183,7 @@ function batchInstances(station: THREE.Object3D, moving: Set<THREE.Mesh>, pins: 
   }
 }
 
-/**
- * Merge every static mesh under `station` into one mesh per material. `pinned` roots (and everything
- * under them) are never merged. Returns the meshes the animators move, which stay separate.
- */
+// Merge static meshes by material; exclude pinned subtrees. Return separate animated meshes.
 export function batchStatic(
   station: THREE.Object3D,
   animators: readonly Animator[],
@@ -234,7 +228,7 @@ export function batchStatic(
     }
   }
   batchInstances(station, moving, pins);
-  // Clones can share a geometry with meshes that stay; only free the ones nothing uses any more.
+  // Dispose shared geometry only when no retained mesh uses it.
   station.traverse((o: THREE.Object3D): void => {
     if (o instanceof THREE.Mesh) removed.delete(o.geometry);
   });

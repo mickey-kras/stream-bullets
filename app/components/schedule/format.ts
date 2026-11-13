@@ -14,15 +14,12 @@ function browserZone(): string {
   }
 }
 
-/**
- * The zone times show in: UTC while the server renders and during hydration, then the viewer's own zone. Reading it
- * through an external store keeps the first client render identical to the server's.
- */
+// Use UTC for SSR/hydration, then the viewer's zone. External-store snapshots preserve hydration equality.
 export function useViewerZone(): string {
   return useSyncExternalStore(noop, browserZone, () => "UTC");
 }
 
-/** Week and Month need width: below 700px (43.75em) the page shows Feed and Day only. */
+// Below 700px (43.75em), offer only Feed and Day.
 export function useNarrow(): boolean {
   return useSyncExternalStore(
     (change: () => void) => {
@@ -110,7 +107,7 @@ export function durationLabel(minutes: number): string {
   return `${unit(Math.floor(minutes / 60), "hour")}${remainder}`;
 }
 
-/** "Tue & Thu" for a weekday bitmask, in the viewer's language. Sunday 1 Nov 2026 anchors the weekday names. */
+// Localize weekday bits using 2026-11-01 (Sunday) as the anchor.
 export function repeatLabel(mask: number): string {
   const names: string[] = [];
   for (let day = 0; day < 7; day += 1)
@@ -118,7 +115,6 @@ export function repeatLabel(mask: number): string {
   return new Intl.ListFormat(intlLocale(), { style: "short", type: "conjunction" }).format(names);
 }
 
-/** "Starts in 2 days", "Starts in 3 hours", "Starts in 20 minutes". */
 export function countdown(start: number, now: number): string {
   const diff = Math.max(0, start - now);
   const relative = new Intl.RelativeTimeFormat(intlLocale(), { numeric: "auto" });

@@ -15,7 +15,7 @@ import {
 import { HttpError } from "./http.server";
 import { commentActionSchema, commentQuerySchema, type CommentQuery } from "./validation";
 
-/** Discussions: listing comments flat or by thread, likes, and removal with the R2 placeholder rules. */
+// Flat/threaded discussions, likes, and removal placeholders.
 
 const COMMENT_PAGE_SIZE = 100;
 
@@ -41,7 +41,7 @@ const commentColumns = `c.*, u.name AS author, u.image AS avatar, u.avatar_prese
       EXISTS(SELECT 1 FROM content_reports cr WHERE cr.target_kind='comment' AND cr.target_id=c.id
         AND cr.reporter_id=? AND cr.status='open') AS reported`;
 
-/** A removed comment keeps its place in the thread but shows no author, text or likes (R2). */
+// A removed comment keeps its place in the thread but shows no author, text or likes.
 function commentValue(row: CommentRow): Comment {
   const removed = row.removed_at !== null;
   return {
@@ -61,7 +61,7 @@ function commentValue(row: CommentRow): Comment {
   };
 }
 
-/** Every reply under the given top-level comments, any depth, oldest first within each thread. */
+// Every reply under the given top-level comments, any depth, oldest first within each thread.
 async function threadReplies(env: AppEnv, rootIds: string[], viewerId: string | null): Promise<Map<string, Comment[]>> {
   if (rootIds.length === 0) return new Map<string, Comment[]>();
   const replies = new Map<string, Comment[]>(rootIds.map((id: string): [string, Comment[]] => [id, []]));
@@ -80,11 +80,8 @@ async function threadReplies(env: AppEnv, rootIds: string[], viewerId: string | 
   return replies;
 }
 
-/**
- * Lists a discussion. The default `flat` view pages every comment newest or most liked first.
- * The `thread` view pages top-level comments the same way and attaches each one's replies, oldest
- * first (item 40). Removed comments with replies come back as placeholders in both views.
- */
+// Page flat comments or top-level threads by newest/likes; attach replies oldest first.
+// Both views retain removed parents as placeholders.
 export async function listComments(
   env: AppEnv,
   entryId: string,
@@ -146,15 +143,11 @@ async function commentPermission(env: AppEnv, id: string): Promise<CommentPermis
   return comment;
 }
 
-/** Text kept in a removed comment's row; the API never shows it. */
+// Text kept in a removed comment's row; the API never shows it.
 export const REMOVED_COMMENT_TEXT = "[removed]";
 
-/**
- * Deletes a comment (R2). A comment with replies becomes a "Comment removed" placeholder: its text
- * is erased, its likes go, and the thread keeps its shape. A comment without replies is deleted, and
- * every placeholder above it left with no replies is deleted with it. Account deletion still removes the
- * account's comments outright; replies under them become top-level comments.
- */
+// With replies, erase text/likes and retain a placeholder. Otherwise delete the row and empty ancestor
+// placeholders. Account deletion removes comments outright and promotes replies to top level.
 async function removeComment(
   env: AppEnv,
   viewerId: string,
@@ -184,8 +177,8 @@ async function removeComment(
     "SELECT c.id FROM entry_comments c JOIN entries e ON e.id=c.entry_id JOIN streamers s ON s.id=e.streamer_id WHERE c.id=? AND (?=1 OR c.author_id=? OR s.owner_id=?)";
   const scope = [id, admin ? 1 : 0, viewerId, viewerId];
   const hasReplies = "EXISTS(SELECT 1 FROM entry_comments r WHERE r.parent_id=entry_comments.id)";
-  // Exactly one of the two changes below applies (a comment either has replies or not). The audit row after each
-  // one is written only when that change happened.
+  // Exactly one of the two changes below applies (a comment either has replies or not). The audit row after
+  // each one is written only when that change happened.
   const audited = audit ? [audit] : [];
   const statements = [
     env.DB.prepare(
@@ -214,7 +207,7 @@ async function removeComment(
   if (placeholder === 0 && deleted === 0) throw new HttpError(404, "Comment not found.");
 }
 
-/** Removes a comment with the same rules as a delete action. Returns the streamer page it belonged to. */
+// Removes a comment with the same rules as a delete action. Returns the streamer page it belonged to.
 export async function deleteComment(
   env: AppEnv,
   viewerId: string,

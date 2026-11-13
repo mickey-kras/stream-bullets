@@ -22,12 +22,8 @@ const titles: Record<
   page: "account.editPage",
 };
 
-/**
- * The account dialogs over any page (item 17): Your profile, Host a community, Your data and Edit your page,
- * opened by `?dialog=<name>` (the account menu links there, and /settings redirects to
- * /streamers?dialog=profile). Signed out, they ask to sign in and come back here. Language and Accessibility &
- * display work signed out too.
- */
+// Account dialogs overlay any page through ?dialog=. Signed-out users return after sign-in; language/display
+// dialogs work signed out.
 export function AccountDialogs(): ReactNode {
   const shell = useShell();
   const { name, close } = useAccountDialog();
@@ -46,7 +42,7 @@ export function AccountDialogs(): ReactNode {
         providers={shell.providers}
       />
     );
-  // Your profile and Your data open straight away from the shell; the sign-in provider fills in when loaded.
+  // Open profile/data immediately; fill provider details after loading.
   if (name === "profile")
     return <ProfileDialog viewer={shell.viewer} provider={me?.signInProvider ?? null} onClose={close} />;
   if (name === "data")
@@ -80,7 +76,7 @@ export function AccountDialogs(): ReactNode {
     );
   const viewer = me.viewer;
   if (name === "host") {
-    // Owners already host a page: send them to Edit your page instead.
+    // Existing owners edit their page instead of applying.
     if (me.streamer)
       return <EditPageDialog streamer={me.streamer} support={me.support} viewer={viewer} onClose={close} />;
     return <HostDialog viewer={viewer} access={me.access} onSaved={reload} onClose={close} />;

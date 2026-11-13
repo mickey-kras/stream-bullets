@@ -1,11 +1,8 @@
-/* ON AIR landing. One screen when space permits: the 3D station fills the stage, copy floats over it on the
-   left behind a soft shade, and a gold rule closes the stage. On phones the copy sits on top and the
-   station fills the rest of the screen, its mast tucked just behind the buttons. */
+/* Wide layout overlays copy on the station; phones stack copy above it, with the mast behind buttons. */
 body:has(.landing-page) {
   padding: 0;
 }
-/* Safari tints its status bar and toolbar from the page background behind them, so the page itself is
-   painted in the landing ink (the app pages keep their lighter gradient). */
+/* Landing background colors Safari chrome; app pages retain their own gradient. */
 html:has(.landing-page),
 body:has(.landing-page) {
   background: #061a1e;
@@ -29,7 +26,7 @@ body:has(.landing-page)::after {
   background: var(--ink);
 }
 
-/* Header floats over the stage; global header rules are neutralised here. */
+/* Override global header layout for a floating header. */
 .landing-page .landing-header {
   position: absolute;
   inset: 0 0 auto;
@@ -53,7 +50,7 @@ body:has(.landing-page)::after {
   align-items: center;
   text-decoration: none;
 }
-/* The full logo needs room beside the account buttons; narrower headers use the antenna icon. */
+/* Use the icon when wordmark/account controls no longer fit. */
 .landing-logo {
   display: block;
   width: auto;
@@ -76,7 +73,7 @@ body:has(.landing-page)::after {
   overflow: visible;
 }
 
-/* Buttons share the mockup's chunky, offset-shadow treatment. */
+/* Chunky buttons with offset shadows. */
 .landing-page .landing-header nav > button,
 .landing-actions button,
 .landing-actions .button-link {
@@ -117,7 +114,6 @@ body:has(.landing-page)::after {
     0 14px 30px #eebd4e2a;
 }
 
-/* Stage */
 .landing-main {
   display: flex;
   flex: 1;
@@ -167,7 +163,7 @@ body:has(.landing-page)::after {
     linear-gradient(0deg, var(--ink) 0%, #061a1e00 16%);
 }
 
-/* Shown on iPhones until motion access is allowed: a tap here is what lets Safari ask. */
+/* iOS motion permission requires a tap. */
 .station-tilt {
   position: absolute;
   z-index: 3;
@@ -193,7 +189,7 @@ body:has(.landing-page)::after {
   border-color: var(--gold);
 }
 
-/* The poster occupies the stage without changing its layout. */
+/* Poster fills the stage without layout shifts. */
 .station-poster {
   position: absolute;
   inset: 0 0 0 auto;
@@ -223,10 +219,7 @@ body:has(.landing-page)::after {
   .station-fallback { left: 16px; right: 16px; bottom: 16px; width: auto; }
 }
 
-/* Loading atom, in CSS only. Each orbit is a circle squashed into an ellipse; a fading conic trail spins
-   round it with the particle at its head. Transforms run on the compositor, so the atom keeps moving
-   while the main thread builds the station. The spin is warped (fast through the middle of the orbit,
-   slow round its ends); the head counter-rotates and un-squashes on the same timing, so it stays round. */
+/* CSS/compositor orbit animation stays responsive during model construction. Ellipse transforms shape the orbit; inverse head transforms preserve round particles. */
 .station-loader {
   position: absolute;
   z-index: 2;
@@ -507,7 +500,7 @@ body:has(.landing-page)::after {
   }
 }
 
-/* Phones: the copy on top, then the station filling the rest of the screen. */
+/* Phones stack copy above the station. */
 @media (max-width: 700px) {
   .landing-page .landing-header {
     padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 16px
@@ -522,14 +515,14 @@ body:has(.landing-page)::after {
     padding: 8px 12px;
     font-size: 17px;
   }
-  /* The station comes first in the markup (it is the backdrop on wide screens); on phones it follows. */
+  /* Reorder the desktop backdrop below copy on phones. */
   .landing-copy {
     order: 1;
     flex: none;
     padding: calc(78px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 8px
       max(16px, env(safe-area-inset-left, 0px));
   }
-  /* The copy fades into the stage so the mast can rise behind the buttons. */
+  /* Fade copy into the stage behind the mast. */
   .landing-copy::before {
     content: "";
     position: absolute;
@@ -558,8 +551,7 @@ body:has(.landing-page)::after {
     overflow-wrap: anywhere;
     line-height: var(--leading-body);
   }
-  /* The scene's vignette darkens its bottom edge; fade it into the page ink so it meets Safari's toolbar
-     without a seam. */
+  /* Blend the vignette into Safari's toolbar background. */
   .landing-station::after {
     content: "";
     position: absolute;
@@ -630,14 +622,14 @@ body:has(.landing-page)::after {
   .station-loader::before {
     animation: none;
   }
-  /* A still atom: each particle rests where its phase puts it, trail behind it. */
+  /* Reduced motion freezes particles at their phase. */
   .atom-spin,
   .atom-head {
     animation-play-state: paused;
   }
 }
 
-/* Short screens need access to the actions below the headline. */
+/* Allow actions to remain reachable on short screens. */
 @media (max-height: 600px) {
   .landing-main {
     overflow-y: auto;

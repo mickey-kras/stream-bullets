@@ -2,8 +2,7 @@ import * as THREE from "three";
 import * as M from "./materials";
 import * as T from "./textures";
 
-/* Every material the station uses. Layer 1 (base tiles) and layer 2 (geometry-driven wear) come together
-   here; layer 3 (decals) is placed on the finished model in decals.ts. */
+// Combine base tiles and geometry wear here; decals.ts adds surface decals.
 
 const paintWear: M.WearOptions = {
   exposed: "#5b3b24",
@@ -32,7 +31,7 @@ const brassWear: M.WearOptions = {
 
 export type Tiles = Record<"teal" | "steel" | "brass" | "ivory", M.Tile>;
 
-/** Enamel over steel: base tile colour and roughness, panel seams and rivets from the UV bump map. */
+// Base color/roughness plus UV seam/rivet bump mapping.
 export function enamel(
   tile: M.Tile,
   seams: T.Surface | null,
@@ -108,8 +107,7 @@ function paints(tiles: Tiles, steelSurface: T.Surface) {
     tealDark: enamel(tiles.teal, T.repeat(seams.dark, 4, 1), "#9fb4ae", paintWear),
     cream: enamel(tiles.ivory, T.repeat(seams.cream, 2, 1), "#ffffff", ivoryWear),
     hallTeal: enamel(tiles.teal, seams.teal, "#ffffff", paintWear),
-    // The fascia carries the signs, so it is kept in better repair: light rust at the seams and rivets,
-    // few chips and almost no rain streaks, instead of the heavy weathering on the walls.
+    // Keep sign fascia less weathered than walls for readability.
     hallFascia: enamel(tiles.teal, seams.teal, "#ffffff", { ...paintWear, edges: 0.28, grime: 0.35, streaks: 0.12 }),
     hallCream: enamel(tiles.ivory, seams.cream, "#ffffff", ivoryWear),
     hallDark: enamel(tiles.teal, seams.dark, "#9fb4ae", paintWear),
@@ -241,7 +239,7 @@ export function createPalette(compact: boolean) {
     ...paints(tiles, steelSurface),
     ...lit,
     ...furnishings(),
-    /** Emissive materials and their lit intensity, for the lights switch. */
+    // Emissive materials and lit intensities for switching.
     lit: [
       [lit.warm, 2.2],
       [lit.warmSoft, 1.1],

@@ -120,8 +120,7 @@ function stubGoogleIdentity(
       const url: string = input instanceof Request ? input.url : String(input);
       if (url === "https://oauth2.googleapis.com/token") {
         tokenRequests.push(new URLSearchParams(await new Request(input, init).text()));
-        // The authorization-code flow reads identity from this backchannel ID token;
-        // userinfo and JWKS fetches belong to other provider authentication paths.
+        // Authorization-code identity comes from the backchannel ID token; this path does not fetch userinfo or JWKS.
         return Response.json({
           access_token: "private-google-access-token",
           refresh_token: "private-google-refresh-token",
@@ -188,6 +187,7 @@ beforeAll(async () => {
     DB: database.db,
     IMAGES: database.bucket,
     POLL_ROOMS: {} as DurableObjectNamespace,
+    CHANNEL_INGEST: {} as DurableObjectNamespace,
     REQUEST_LIMITER: {} as RateLimit,
     APP_ORIGIN: "https://stream.example.test",
     BETTER_AUTH_SECRET: secret,
@@ -571,7 +571,8 @@ describe("OAuth boundary", () => {
         body: JSON.stringify({ provider: "twitch", callbackURL: "/" }),
       }),
     );
-    expect(response.ok).toBe(false);
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ code: "REAUTH_REQUIRED" });
     expect(await env.DB.prepare("SELECT id FROM account WHERE user_id=?").bind("viewer-link").first()).toBeNull();
   });
 
@@ -605,6 +606,8 @@ describe("OAuth boundary", () => {
     expect(result).toHaveProperty("url");
     const url: URL = new URL((result as { url: string }).url);
     expect(url.searchParams.get("redirect_uri")).toBe(`${env.APP_ORIGIN}/api/auth/callback/google`);
+    // Sign-in never asks for incremental authorization, so it never inherits a connected channel's YouTube scope.
+    expect(url.searchParams.has("include_granted_scopes")).toBe(false);
   });
 
   it("cannot use email/password sign-up as a substitute for configured providers", async () => {
@@ -615,7 +618,8 @@ describe("OAuth boundary", () => {
         body: JSON.stringify({ email: "unauthorized@example.test", password: "a-test-password", name: "Unauthorized" }),
       }),
     );
-    expect(response.ok).toBe(false);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ code: "EMAIL_PASSWORD_SIGN_UP_DISABLED" });
     expect(
       await env.DB.prepare("SELECT id FROM user WHERE email=?").bind("unauthorized@example.test").first(),
     ).toBeNull();
@@ -654,7 +658,6 @@ describe("OAuth boundary", () => {
     expect(() => createAuth({ ...all, INSTAGRAM_CLIENT_SECRET: undefined })).toThrow(
       "Both instagram OAuth credentials",
     );
-    // Both providers start an OAuth redirect through the social sign-in endpoint.
     const auth = createAuth(all);
     for (const [provider, host] of [
       ["tiktok", "www.tiktok.com"],
@@ -695,10 +698,7 @@ describe("provider adapters", () => {
     INSTAGRAM_CLIENT_SECRET: "test-instagram-secret",
   });
 
-  /**
-   * The Instagram provider exactly as `createAuth` hands it to better-auth's generic OAuth plugin. That plugin's
-   * `options.config` is internal, so a library upgrade that reshapes it fails here by name, not with a TypeError.
-   */
+  // Inspect the Instagram generic OAuth config; fail clearly if an upgrade changes this internal shape.
   function instagram(): InstagramConfig {
     const plugins: unknown = createAuth(withProviders()).options.plugins;
     const plugin = Array.isArray(plugins)
@@ -716,7 +716,7 @@ describe("provider adapters", () => {
     return config as unknown as InstagramConfig;
   }
 
-  /** Answers each fetch with the next body in the queue. A Response is sent as it is. */
+  // Return queued fetch bodies; preserve supplied Responses.
   function answer(...bodies: unknown[]) {
     const queue = [...bodies];
     return vi.spyOn(globalThis, "fetch").mockImplementation(async (): Promise<Response> => {
@@ -780,7 +780,7 @@ describe("provider adapters", () => {
     try {
       const config = instagram();
       await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toThrow("Instagram sign-in failed.");
-      // An unknown token shape is a parse error (no access_token), not the "sign-in failed" refusal.
+      // Missing access_token is a parse error, not a sign-in refusal.
       await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toBeInstanceOf(ZodError);
     } finally {
       fetchMock.mockRestore();
@@ -819,7 +819,6 @@ describe("provider adapters", () => {
     {
       provider: "tiktok",
       subject: "tiktok-open-1",
-      // The built-in TikTok provider sets its own placeholder domain.
       email: "tiktok-open-1@tiktok.placeholder.invalid",
       routes: {
         "https://open.tiktokapis.com/v2/oauth/token/": {
@@ -870,7 +869,7 @@ describe("provider adapters", () => {
         expect(isPlaceholderEmail(email)).toBe(true);
         const listed: AppEnv = { ...authEnv, ADMIN_EMAILS: email };
         expect(await isAdmin(listed, row?.id ?? "")).toBe(false);
-        // Only the unverified flag keeps the listed placeholder out: a verified row with that address would pass.
+        // Only the unverified flag excludes this placeholder address from admin access.
         await env.DB.prepare("UPDATE user SET email_verified=1 WHERE id=?")
           .bind(row?.id ?? "")
           .run();
@@ -1221,6 +1220,131 @@ describe("explicit login methods", () => {
           .bind(`subject-${condition}`)
           .first(),
       ).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  it.each([
+    ["link-social", "https://attacker.example.test", { code: "INVALID_ORIGIN", message: "Invalid origin" }],
+    ["unlink-account", "https://attacker.example.test", { code: "INVALID_ORIGIN", message: "Invalid origin" }],
+    // Better Auth normalizes these to the trusted origin; the account hook requires the exact configured spelling.
+    ["link-social", "https://stream.example.test/", { message: "Use this site's account settings." }],
+    ["unlink-account", "https://stream.example.test:443", { message: "Use this site's account settings." }],
+  ] as const)("rejects %s from origin %s with a valid fresh session", async (path, origin, error) => {
+    const ownerId: string = `cross-origin-${path}-${oauthClient}`;
+    const token: string = await freshAccount(ownerId);
+    await env.DB.prepare(
+      "INSERT INTO account(id,account_id,provider_id,user_id,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+    )
+      .bind(`${ownerId}-twitch`, `${ownerId}-twitch-subject`, "twitch", ownerId, Date.now(), Date.now())
+      .run();
+    const request: Request = await signedRequest(token);
+    request.headers.set("origin", origin);
+    request.headers.set("content-type", "application/json");
+    request.headers.set("cf-connecting-ip", `192.0.2.${oauthClient++}`);
+    const response: Response = await createAuth(env).handler(
+      new Request(`${env.APP_ORIGIN}/api/auth/${path}`, {
+        method: "POST",
+        headers: request.headers,
+        body: JSON.stringify(
+          path === "link-social"
+            ? { provider: "twitch", callbackURL: "/settings" }
+            : { accountId: `${ownerId}-twitch` },
+        ),
+      }),
+    );
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual(error);
+    expect(response.headers.getSetCookie()).toEqual([]);
+    expect(
+      await env.DB.prepare("SELECT id FROM account WHERE user_id=? ORDER BY id").bind(ownerId).all(),
+    ).toMatchObject({
+      results: [{ id: `${ownerId}-google` }, { id: `${ownerId}-twitch` }],
+    });
+  });
+
+  it.each([
+    ["an ID token", { provider: "twitch", idToken: { token: "attacker-id-token" } }],
+    ["an unconfigured provider", { provider: "tiktok" }],
+    ["an unknown provider", { provider: "attacker" }],
+  ] as const)("rejects linking with %s before issuing provider state", async (label, body) => {
+    const ownerId: string = `link-input-${label.replaceAll(" ", "-")}`;
+    const token: string = await freshAccount(ownerId);
+    const response: Response = await accountRequest(token, "link-social", {
+      ...body,
+      callbackURL: "/settings",
+    });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      message: "Use a configured provider authorization to link an account.",
+    });
+    expect(response.headers.getSetCookie()).toEqual([]);
+    expect(await env.DB.prepare("SELECT id FROM account WHERE user_id=?").bind(ownerId).all()).toMatchObject({
+      results: [{ id: `${ownerId}-google` }],
+    });
+  });
+
+  it("rejects a linking callback from another session of the same user", async () => {
+    const token: string = await freshAccount("callback-same-user");
+    const callback: Request = await linkCallback(token);
+    const second: string = crypto.randomUUID();
+    await env.DB.prepare("INSERT INTO session(id,token,user_id,expires_at,created_at,updated_at) VALUES(?,?,?,?,?,?)")
+      .bind(crypto.randomUUID(), second, "callback-same-user", Date.now() + 604_800_000, Date.now(), Date.now())
+      .run();
+    const signed: Request = await signedRequest(second);
+    const stateCookies: string = (callback.headers.get("cookie") ?? "")
+      .split("; ")
+      .filter((value) => !value.startsWith("__Host-stream-bullets.session_token="))
+      .join("; ");
+    callback.headers.set("cookie", `${signed.headers.get("cookie")}; ${stateCookies}`);
+    const restore: () => void = stubTwitchIdentity("subject-same-user", "callback-same-user@example.test");
+    try {
+      const response: Response = await createAuth(env).handler(callback);
+      expect(response.status).toBe(302);
+      expect(new URL(response.headers.get("location") ?? "", env.APP_ORIGIN).searchParams.get("error")).toBe(
+        "reauth_required",
+      );
+      expect(await env.DB.prepare("SELECT id FROM account WHERE account_id='subject-same-user'").first()).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  it("rejects a linking callback whose provider gives no email", async () => {
+    const token: string = await freshAccount("callback-no-email");
+    const callback: Request = await linkCallback(token);
+    const restore: () => void = stubTwitchIdentity("subject-no-email", null, "Viewer", { verified: false });
+    try {
+      const response: Response = await createAuth(env).handler(callback);
+      expect(response.status).toBe(302);
+      const destination: URL = new URL(response.headers.get("location") ?? "", env.APP_ORIGIN);
+      expect(destination.searchParams.get("error")).toBe("account_not_linked");
+      expect(destination.searchParams.get("error_description")).toBe(
+        "Verify an email with this provider before connecting it.",
+      );
+      expect(await env.DB.prepare("SELECT id FROM account WHERE account_id='subject-no-email'").first()).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  it("rejects a linking callback for a provider that is no longer configured", async () => {
+    const token: string = await freshAccount("callback-disabled");
+    const callback: Request = await linkCallback(token);
+    // Built while Twitch is configured, so the callback route still exists; the gate reads the live configuration.
+    const authEnv: AppEnv = { ...env };
+    const auth = createAuth(authEnv);
+    authEnv.TWITCH_CLIENT_ID = undefined;
+    authEnv.TWITCH_CLIENT_SECRET = undefined;
+    const restore: () => void = stubTwitchIdentity("subject-disabled", "callback-disabled@example.test");
+    try {
+      const response: Response = await auth.handler(callback);
+      expect(response.status).toBe(302);
+      const destination: URL = new URL(response.headers.get("location") ?? "", env.APP_ORIGIN);
+      expect(destination.searchParams.get("error")).toBe("account_not_linked");
+      expect(destination.searchParams.get("error_description")).toBe("Choose a configured login provider.");
+      expect(await env.DB.prepare("SELECT id FROM account WHERE account_id='subject-disabled'").first()).toBeNull();
     } finally {
       restore();
     }

@@ -216,8 +216,7 @@ describe("review queue", (): void => {
   it.each(["pending", "rejected"] as const)(
     "pages %s applications with equal timestamps without overlap",
     async (status: "pending" | "rejected"): Promise<void> => {
-      // Seed with two set-based statements: hundreds of separate prepare() calls each make a
-      // synchronous Miniflare proxy round-trip, which can fall out of step on slow CI runners.
+      // Batch the seed to avoid slow, synchronous Miniflare proxy calls.
       const rows = Array.from({ length: 120 }, (_: unknown, index: number) => ({
         user: `queue_${index}`,
         id: crypto.randomUUID(),
@@ -400,7 +399,7 @@ describe("page moderation status", (): void => {
   const commentId = "00000000-0000-4000-8000-0000000000cc";
   const anonymous = { owner: false, admin: false };
 
-  /** The applicant owns a page with one topic and one comment by the viewer. */
+  // Seed an applicant-owned page with a viewer topic and comment.
   const changedAt = 1_762_300_800_000;
   async function seedPage(status: StreamerStatus): Promise<void> {
     await env.DB.batch([
@@ -458,7 +457,7 @@ describe("page moderation status", (): void => {
     await expect(assertStreamerWritable(env, pageId, "viewer", { moderation: true })).rejects.toMatchObject({
       status: 423,
     });
-    // Visible to everyone; only the owner and admins see the reason and the date.
+    // Only owners and admins see the reason and date.
     expect(await getVisibleStreamer(env, "mod_page", null)).toMatchObject({
       status: "frozen",
       statusReason: null,
@@ -476,7 +475,6 @@ describe("page moderation status", (): void => {
     expect((await listStreamers(env)).streamers[0]).toMatchObject({ statusChangedAt: null });
     expect(await getVisibleEntry(env, topicId, null)).toMatchObject({ id: topicId });
     expect((await listStreamers(env)).streamers.map((page) => page.handle)).toEqual(["mod_page"]);
-    // Every kind of write is refused.
     for (const [user, action] of [
       ["viewer", { action: "react", id: topicId, value: 1 }],
       ["viewer", { action: "comment", id: topicId, text: "Hi" }],
@@ -492,7 +490,6 @@ describe("page moderation status", (): void => {
     await expect(
       saveStreamer(env, "applicant", { handle: "mod_page", name: "Moderated", about: "Changed" }),
     ).rejects.toMatchObject({ status: 423 });
-    // An admin can still remove the comment and the topic.
     const gate = async (): Promise<{ stepUp: string }> => ({ stepUp: "fresh" });
     await mutateComment(env, "admin", { action: "delete", id: commentId }, gate);
     await mutateEntry(env, "admin", pageId, { action: "delete", id: topicId }, gate);
@@ -521,7 +518,6 @@ describe("page moderation status", (): void => {
     });
     expect(await getVisibleEntry(env, topicId, "viewer")).toBeNull();
     expect(await getVisibleEntry(env, topicId, "applicant")).toMatchObject({ id: topicId });
-    // Dropped from the directory, empty in the overlay.
     expect((await listStreamers(env)).streamers).toEqual([]);
     expect((await getOverlaySnapshot(env, pageId, null)).polls).toEqual([]);
     await expect(

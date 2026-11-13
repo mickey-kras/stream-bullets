@@ -7,14 +7,13 @@ export interface TestDatabase {
   dispose: () => Promise<void>;
 }
 
-/** Migration file names in the order wrangler applies them. */
 export async function migrationFiles(): Promise<string[]> {
   return (await readdir(new URL("../../drizzle/", import.meta.url)))
     .filter((file: string): boolean => file.endsWith(".sql"))
     .sort();
 }
 
-/** Runs the given migration files, one statement at a time, like `wrangler d1 migrations apply`. */
+// Apply migrations statement by statement, as Wrangler does.
 export async function applyMigrations(db: D1Database, files: string[]): Promise<void> {
   for (const file of files) {
     const sql = await readFile(new URL(`../../drizzle/${file}`, import.meta.url), "utf8");
@@ -27,7 +26,7 @@ export async function applyMigrations(db: D1Database, files: string[]): Promise<
   }
 }
 
-/** Starts an isolated D1 and R2 pair. `migrate: false` leaves the database empty. */
+// Isolated D1 and R2; migrate:false keeps D1 empty.
 export async function createTestDatabase(options: { migrate?: boolean } = {}): Promise<TestDatabase> {
   const runtime = new Miniflare({
     modules: true,

@@ -1,12 +1,11 @@
 import { useSyncExternalStore, type ReactNode } from "react";
 import { personPicture, portraitStyle, streamerPicture, type PictureSource } from "../../lib/avatars";
 
-/* Uploaded pictures keep their URL (`/images/avatar/{id}`), so after an upload in this tab every <img> of that
-   URL gets a version parameter and loads the new file. */
+// Images retain URLs; tab-local version parameters refresh every instance after replacement.
 let versions: ReadonlyMap<string, number> = new Map();
 const listeners = new Set<() => void>();
 
-/** Call after replacing the image at `url` (avatar, logo or background). */
+// Call after replacing an avatar, logo or background URL.
 export function bumpImage(url: string): void {
   const updated = new Map(versions);
   updated.set(url.split("?")[0], Date.now());
@@ -19,7 +18,7 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
-/** `url` with this tab's version of it, if it was replaced here. */
+// Append this tab's replacement version.
 export function useImageUrl(url: string | null): string | null {
   const map = useSyncExternalStore(
     subscribe,
@@ -37,7 +36,7 @@ function Photo({ url, className }: Readonly<{ url: string; className: string }>)
   return <img className={`user-avatar ${className}`.trim()} src={useImageUrl(url) ?? url} alt="" loading="lazy" />;
 }
 
-/** One round picture: an uploaded image or a preset portrait. Always decorative (the name is next to it). */
+// Decorative image; adjacent text provides the name.
 export function Picture({
   source,
   className = "",
@@ -53,10 +52,7 @@ export function Picture({
   );
 }
 
-/**
- * A person's picture: their upload, else their preset, else the default Space explorer (preset 14, item 9).
- * `name` is kept for call sites; the picture never shows initials any more.
- */
+// Fallback: upload, preset, default Space explorer (14). Keep name for existing callers; never show initials.
 export function Avatar({
   url,
   preset = null,
@@ -70,10 +66,7 @@ export function Avatar({
   return <Picture source={personPicture(url, preset)} className={className} />;
 }
 
-/**
- * A streamer page's picture everywhere it appears (header, About, directory, admin): the uploaded page logo,
- * else the owner's profile picture, else the default Space explorer (item 18).
- */
+// Page image fallback: logo, owner picture, default Space explorer.
 export function StreamerLogo({
   streamer,
   className = "",

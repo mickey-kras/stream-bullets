@@ -1,7 +1,7 @@
 import type { AppEnv } from "../env";
 import type { ModerationTarget } from "../types";
 
-/** One row of the moderation and admin-security audit log (`moderation_actions`, item 29). */
+// Moderation and admin-security audit row.
 export interface AuditEntry {
   targetKind: ModerationTarget;
   targetId: string;
@@ -10,15 +10,13 @@ export interface AuditEntry {
   reason?: string;
   note?: string;
   notifyOwner?: boolean;
-  actorId: string;
+  /** Null for the system (a scheduled job). */
+  actorId: string | null;
   metadata?: Record<string, unknown> | null;
   createdAt?: number;
 }
 
-/**
- * The insert statement for one audit row, so callers can batch it with the change it records. With `afterChange`,
- * the row is written only when the statement just before it in the batch changed a row.
- */
+// Batch audit inserts with their changes. `afterChange` inserts only if the preceding statement changed a row.
 export function auditStatement(
   env: AppEnv,
   entry: AuditEntry,
@@ -47,10 +45,8 @@ export async function recordAudit(env: AppEnv, entry: AuditEntry): Promise<void>
   await auditStatement(env, entry).run();
 }
 
-/**
- * A stable, non-reversible label for a session in the audit log. The raw session id never leaves the session
- * table, so a leaked audit row cannot be matched to a cookie.
- */
+// Hash session IDs for audit labels; raw IDs stay in the session table and cannot be matched from audit rows
+// to cookies.
 export async function sessionLabel(sessionId: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`admin-session:${sessionId}`));
   return Array.from(new Uint8Array(digest), (byte: number): string => byte.toString(16).padStart(2, "0")).join("");

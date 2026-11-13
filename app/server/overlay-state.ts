@@ -2,7 +2,6 @@ import { z } from "zod";
 import { OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES, OVERLAY_SOURCES } from "../../db/enums";
 import type { OverlayPublic, OverlaySourceRef, OverlayState } from "../types";
 
-/** An `overlay_state` row as D1 returns it. */
 export interface OverlayRow {
   air: string;
   preview: string;
@@ -17,10 +16,10 @@ export interface OverlayRow {
 
 export const OVERLAY_COLUMNS = "air,preview,position,size,instant,show_results,message,message_style,revision";
 
-/** The overlay message limit, as the `overlay_state_message_check` constraint sets it. */
+// Match `overlay_state_message_check`.
 export const OVERLAY_MESSAGE_LENGTH = 120;
 
-/** A page with no `overlay_state` row shows Auto: the latest active poll. */
+// A page with no `overlay_state` row shows Auto: the latest active poll.
 export const DEFAULT_OVERLAY: OverlayState = {
   air: { type: "auto", ref: null },
   preview: { type: "auto", ref: null },
@@ -51,7 +50,7 @@ function source(raw: string): OverlaySourceRef {
   return overlaySourceSchema.parse(JSON.parse(raw));
 }
 
-/** Parses a stored row. Throws on a malformed value so a bad row never reaches a client. */
+// Reject malformed stored state before sending it to clients.
 export function overlayValue(row: OverlayRow | null | undefined): OverlayState {
   if (!row) return DEFAULT_OVERLAY;
   const value = rowSchema.parse(row);
@@ -68,7 +67,7 @@ export function overlayValue(row: OverlayRow | null | undefined): OverlayState {
   };
 }
 
-/** What viewers and the OBS page may see: no preview, and no message draft unless it is on air. */
+// Public overlay: exclude preview and unaired message drafts.
 export function overlayPublic(state: OverlayState): OverlayPublic {
   return {
     air: state.air,

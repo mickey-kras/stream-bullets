@@ -5,7 +5,7 @@ import type { AppEnv } from "../env";
 import { PUBLIC_PAGE_PATHS } from "../lib/seo";
 import { getOrigin, HttpError } from "./http.server";
 
-/** Public directory visibility also applies to crawler discovery. */
+// Public directory visibility also applies to crawler discovery.
 export async function sitemapResponse(request: Request, env: AppEnv): Promise<Response> {
   if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
   const origin: string = getOrigin(env);

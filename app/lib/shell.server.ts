@@ -10,10 +10,7 @@ import type { ShellData } from "./shell";
 
 export type ViewerSession = Awaited<ReturnType<typeof getViewerSession>>;
 
-/**
- * The signed-in viewer and their session, looked up once per request. The root loader (shell) and the route loader
- * run in the same request with the same AppContext, so they share one session lookup and one Set-Cookie.
- */
+// Share one session lookup and Set-Cookie across root/route loaders through their request AppContext.
 const sessions = new WeakMap<AppContext, Promise<ViewerSession>>();
 
 export function requestSession(request: Request, app: AppContext): Promise<ViewerSession> {
@@ -29,12 +26,10 @@ export async function requestViewer(request: Request, app: AppContext): Promise<
   return (await requestSession(request, app))?.viewer ?? null;
 }
 
-/** What every header and the account menu need: who is signed in, their role and their own page. */
 export async function loadShell(request: Request, app: AppContext): Promise<ShellData> {
   const viewer: Viewer | null = await requestViewer(request, app);
   const providers = configuredProviders(app.env);
   const locale = requestLocale(request, viewer?.locale ?? null);
-  // entry.server.tsx renders the page in this language.
   app.locale = locale;
   const prefs: DisplayPrefs =
     viewer?.displayPrefs ?? readDisplayPrefs(readCookie(request.headers.get("Cookie"), PREFS_COOKIE)) ?? {};

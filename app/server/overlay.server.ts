@@ -13,9 +13,9 @@ import {
   type OverlayRow,
 } from "./overlay-state";
 
-/** Overlay control (item 33): one OBS URL per page, and the owner switches what it shows. */
+// Owners control one OBS URL per page.
 
-/** `POST /api/overlay`. Every action returns the whole new state. */
+// `POST /api/overlay`. Every action returns the whole new state.
 export const overlayActionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("preview"), source: overlaySourceSchema }).strict(),
   z.object({ action: z.literal("take") }).strict(),
@@ -51,7 +51,7 @@ export async function getOverlayState(env: AppEnv, streamerId: string): Promise<
   return overlayValue(row);
 }
 
-/** Checks that `ref` names something on this page, and drops refs the source does not use. */
+// Checks that `ref` names something on this page, and drops refs the source does not use.
 async function checkedSource(env: AppEnv, streamerId: string, source: OverlaySourceRef): Promise<OverlaySourceRef> {
   if (source.type === "poll" || source.type === "topic") {
     if (source.ref === null) throw new HttpError(400, "Pick a poll or topic.");
@@ -73,7 +73,7 @@ async function checkedSource(env: AppEnv, streamerId: string, source: OverlaySou
   return { type: source.type, ref: null };
 }
 
-/** The state after an action. Pure apart from the source check, so the rules read in one place. */
+// The state after an action. Pure apart from the source check, so the rules read in one place.
 export async function nextOverlayState(
   env: AppEnv,
   streamerId: string,
@@ -98,11 +98,8 @@ export async function nextOverlayState(
   return next;
 }
 
-/**
- * After a change to what some sources show (the schedule for Up next, the links for Support): an overlay with one of
- * `sources` on air or in preview gets a new revision and the live room is told, so the OBS page reloads its data.
- * Other sources are left alone.
- */
+// When source data changes, bump overlays using that source on air/in preview and notify the room. Leave other
+// sources unchanged.
 export async function refreshOverlayFor(
   env: AppEnv,
   ownerId: string,
@@ -111,7 +108,7 @@ export async function refreshOverlayFor(
   await refreshWhere(env, "(SELECT id FROM streamers WHERE owner_id=?2)", ownerId, sources);
 }
 
-/** `refreshOverlayFor` by page id, for writes with no owner request behind them (the cron's series top-up). */
+// Page-ID variant for background writes such as cron top-ups.
 export async function refreshPageOverlay(
   env: AppEnv,
   streamerId: string,
@@ -136,14 +133,11 @@ async function refreshWhere(
   if (row) notifyOverlay(env, row.streamer_id);
 }
 
-/** How many times an action is re-applied when another control tab saved in between. */
+// Retry limit for concurrent overlay saves.
 const OVERLAY_WRITE_ATTEMPTS = 3;
 
-/**
- * Applies an owner action and stores the result. The write only lands on the revision the action was applied to,
- * so two control tabs never overwrite each other: on a lost race the action is applied again to the newer state.
- * The caller then tells the live room (`notifyOverlay`).
- */
+// Compare-and-set the revision. On conflict, reapply the action to current state; callers then
+// `notifyOverlay`.
 export async function updateOverlay(
   env: AppEnv,
   userId: string,
@@ -201,17 +195,14 @@ interface CardRow {
   button_target: string | null;
 }
 
-/** The topics `sources` show, so `getOverlayData` has them even when they are older than the newest 50. */
+// Include referenced topics older than the newest 50.
 export function sourceTopics(...sources: OverlaySourceRef[]): string[] {
   return sources.flatMap((source: OverlaySourceRef): string[] =>
     source.type === "topic" && source.ref !== null ? [source.ref] : [],
   );
 }
 
-/**
- * What the topic, Up next, Community card and Support sources show. `topicIds` (from `sourceTopics`) makes sure the
- * topics on air and in preview resolve even when they are older than the newest 50.
- */
+// Source data for topics, Up next, Community, and Support. Include `topicIds` even outside the newest 50.
 export async function getOverlayData(
   env: AppEnv,
   streamerId: string,

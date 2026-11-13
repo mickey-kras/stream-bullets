@@ -10,10 +10,8 @@ export interface CallOptions {
   type?: string;
 }
 
-/**
- * Calls `/api/{path}` the way React Router does: GET and HEAD go to the loader, everything else to the action.
- * A user `name` signs in with the session token `{name}-session-token`.
- */
+// Route GET/HEAD to the loader and other methods to the action.
+// A user `name` uses session token `{name}-session-token`.
 export function apiCaller(
   getEnv: () => AppEnv,
   origin: string,

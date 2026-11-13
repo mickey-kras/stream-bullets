@@ -11,7 +11,7 @@ const detailsSchema = z
   })
   .strict();
 
-/** Only approved public fields leave the server. Never log the secret or parse errors. */
+// Only approved public fields leave the server. Never log the secret or parse errors.
 export function legalLoader({ context }: LoaderFunctionArgs): LegalDetails {
   const value = context.get(appContext).env.LEGAL_DETAILS;
   if (value === undefined) return { ...legal };

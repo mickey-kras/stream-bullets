@@ -22,7 +22,7 @@ import { actionIcon, actionLabel, ModerateSheet, pageActions, type ModeratedPage
 import { StatusBadge } from "./streamer-pages";
 import { adminRequest, errorText } from "./webauthn";
 
-/* Content reports grouped by streamer page, de-duplicated by item, with an optional By author view (item 27). */
+// Deduplicate reports by item, group by page; optional author view.
 
 export const reportFilters: { value: ReportGroupFilter; label: MessageId }[] = [
   { value: "open", label: "admin.reports.open" },
@@ -56,7 +56,6 @@ function appendReportItems(current: ReportItemList | null, more: ReportItemList)
   return { ...more, items: [...current.items, ...more.items.filter((item) => !seen.has(itemKey(item)))] };
 }
 
-/** "Load more" for a paged list: disabled and showing the loading text while a page is on its way. */
 function LoadMore({
   busy,
   label,
@@ -212,7 +211,7 @@ function ItemList({
   );
 }
 
-/** A confirm button's state: busy while `onConfirm` runs, and the error text when it fails. */
+// Busy/error state for async confirmation.
 function useConfirm(onConfirm: () => Promise<void>): { busy: boolean; error: string; run: () => void } {
   const [busy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -329,7 +328,7 @@ function GroupCard({
     }
   }
 
-  /** Appends the next page of items. Focus stays on the button, or moves to the first new item once it goes. */
+  // Append items; retain button focus or move to first added item if the button disappears.
   async function loadMore(): Promise<void> {
     const cursor = detail?.next;
     if (busy || !cursor) return;
@@ -523,7 +522,6 @@ function GroupCard({
   );
 }
 
-/** The Content reports tab: search by page, status filter, and pages of groups appended by "Load more". */
 export function ReportGroups({
   filter,
   query,
@@ -544,7 +542,7 @@ export function ReportGroups({
   });
   const label = t(reportFilters.find((item) => item.value === filter)?.label ?? "admin.reports.open");
 
-  /** Appends the next page of groups. Focus stays on the button, or moves to the first new group once it goes. */
+  // Append groups; retain button focus or move to first added group if the button disappears.
   async function loadMore(): Promise<void> {
     if (busy || !next) return;
     setBusy(true);

@@ -32,7 +32,7 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
   const head = add(new THREE.Group(), g);
   head.position.set(0, 0.43, 0);
   head.rotation.x = 0.12;
-  // A broadcast "pill" capsule: straight sides with rounded ends (a squared superellipse), not an egg.
+  // Pill-shaped superellipse capsule.
   const radiusAt = (y: number): number => 0.08 * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y / 0.15), 4)), 0.25);
   const capsuleProfile: Array<[number, number]> = [];
   for (let i = 0; i <= 32; i++) {
@@ -54,7 +54,7 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
     body,
     48,
   );
-  // Chrome ribs wrap the grille, the classic look of a mid-century stage microphone.
+  // Chrome grille ribs.
   for (let i = -3; i <= 3; i++) {
     const y = i * 0.034;
     torus([radiusAt(y) + 0.002, 0.0045], [0, y, 0], chrome, body);
@@ -255,8 +255,7 @@ function studioDoor(k: Kit, s: Pick<StudioScope, "studio" | "floorY">): void {
   const { brass, gold, warmSoft } = k;
   const { studio, floorY } = s;
   const g = add(new THREE.Group(), studio);
-  // The porch block juts into the studio; its inner door sits on the block's back face beside the
-  // locker, clear of the desk, so the front door outside opens through a short vestibule.
+  // Inner door sits on the porch block's rear face beside the locker, leaving a vestibule clear of the desk.
   const at = new THREE.Vector3(-0.3, 0, WING_BACK_Z - 0.012)
     .applyAxisAngle(new THREE.Vector3(0, 1, 0), WING_YAW)
     .add(WING_AT)
@@ -415,7 +414,7 @@ function studioPlanters(k: Kit, s: Pick<StudioScope, "hall">): void {
   const { gold, hallCream, soil, plant } = k;
   const { hall } = s;
   for (const [a0, a1, seed] of [
-    // Stops short of the atom statue's plinth.
+    // Clear the atom plinth.
     [-1.5, -1, 17],
     [0.25, 0.62, 19],
   ] as const) {
@@ -432,8 +431,7 @@ function studioPlanters(k: Kit, s: Pick<StudioScope, "hall">): void {
 
 export function buildStudio(k: Kit, hall: THREE.Group): void {
   const { steelSurface, brass, gold, copper, tealDark, cream, warm, wood, practical } = k;
-  // The host faces the street: a curved desk follows the glazing, the microphone points out
-  // through the glass, and the equipment wall (rack, CRT, locker, door) lines the back.
+  // Desk/microphone face the street; equipment lines the rear wall.
   const studio = add(new THREE.Group(), hall);
   const floorY = 0.63;
   const floorGeo = new THREE.ShapeGeometry(planShape(-0.03), 4);
@@ -476,14 +474,14 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
     const spot = mesh(new THREE.CircleGeometry(0.07, 20), warm, [x, 2.425, z], studio, false);
     spot.rotation.x = Math.PI / 2;
   }
-  // Service pipes on the back wall.
+
   tube(loop(1.75, 4.3, -0.16, 2.28, 50), 0.035, brass, studio);
   tube(loop(1.9, 4.2, -0.16, 2.18, 50), 0.025, copper, studio);
   for (const a of [2.15, 3.95, 4.15]) {
     const p = plan(a, -0.16);
     rod(p.clone().setY(floorY), p.clone().setY(2.42), 0.03, brass, studio, 10);
   }
-  // Curved desk with a teal modesty panel and brass-handled drawer pedestals.
+
   const deskTop = floorY + 0.8;
   const deskFrom = -1.8,
     deskTo = 1;
@@ -510,13 +508,13 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
     g.rotation.y = out ? facing(a) : facingIn(a);
     return g;
   };
-  // Classic chrome microphone: heavy round base, stem, yoke and a ribbed pill capsule, facing the street.
+  // Street-facing chrome pill microphone.
   studioMicrophone(k, { onDesk });
-  // Compact mixing console at the left of the desk, angled to the host.
+
   studioConsole(k, { onDesk });
-  // Brass-potted plant on the desk.
+
   studioDeskPlant(k, { studio, deskTop });
-  // Back counter with the CRT and a tape deck; tall equipment rack; louvred locker with a caged lamp; riveted door.
+
   const counterFrom = 2.35,
     counterTo = 3.3,
     counterTop = floorY + 0.74;
@@ -534,15 +532,14 @@ export function buildStudio(k: Kit, hall: THREE.Group): void {
   studioDoor(k, { studio, floorY });
   studioClock(k, { studio });
   studioPoster(k, { studio });
-  // Brass dome pendants over the desk and the counter.
+
   studioPendants(k, { studio });
-  // Swivel chair in tufted tan leather behind the desk, facing the window.
+
   studioChair(k, { studio, floorY });
-  // Floor plant by the glazing.
+
   studioFloorPlant(k, { studio, floorY });
   practical("#ffa858", [4.5, 4.5], [0, 2.1, 0.6], studio);
   practical("#ff9f50", [3, 3.5], [0, 1.6, -1.2], studio);
 
-  // Curved planters hugging the glazing outside.
   studioPlanters(k, { hall });
 }

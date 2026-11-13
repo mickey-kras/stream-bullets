@@ -17,7 +17,7 @@ import { useMashTapper, useMashView, type MashAssist, type MashView } from "./us
 
 type Action = (body: unknown) => void;
 
-/** The score read out to screen readers: your side first, then the others, then the time left. */
+// Announce own side first, then opponents and remaining time.
 export function scoreText(sides: readonly string[], totals: readonly number[], mine: number | null, left: number) {
   const order: number[] = sides.map((_side: string, index: number) => index);
   if (mine !== null) order.sort((a: number, b: number) => Number(b === mine) - Number(a === mine));
@@ -28,14 +28,11 @@ export function scoreText(sides: readonly string[], totals: readonly number[], m
   return `${parts.join(", ")}. ${t("mash.secondsLeft", { n: left })}.`;
 }
 
-/** One empty list, so the announcement effect does not run again on each render before a battle loads. */
+// Stable empty list prevents repeated announcements before loading.
 const NO_TOTALS: readonly number[] = [];
 
-/**
- * Timed screen-reader updates while a battle runs (item 39): "Go" at the start, the score every 2, 5 or 10 seconds
- * (the viewer's choice, or never), 10 and 5 seconds left, and the result. Messages go through the shared live
- * regions, so they survive the card re-rendering 5 times a second.
- */
+// Announce Go, configured 2/5/10-second scores (or none), 10/5-second warnings and results. Shared live
+// regions survive 5 Hz rerenders.
 function useMashAnnouncements(entry: Entry, view: MashView | null, side: number | null): void {
   const { srInterval } = usePrefs();
   const phase = useRef<string | null>(null);
@@ -77,7 +74,7 @@ function useMashAnnouncements(entry: Entry, view: MashView | null, side: number 
   }, [current, left, srInterval, entry.options, side, totals, winner]);
 }
 
-/** The host's first name from the streamer page loader, or "the host" elsewhere. */
+// Host first name; fallback: "the host".
 function useLoaderHost(): string {
   for (const match of useMatches()) {
     const data = match.loaderData as { board?: { streamer?: { name?: string } } } | undefined;
@@ -116,7 +113,7 @@ function Headline({ view, title, titleId }: Readonly<{ view: MashView; title: st
   );
 }
 
-/** The host bar: live stats and Start, End early or Restart. The host does not play. */
+// Host controls replace participation.
 function HostBar({ entry, view, onAction }: Readonly<{ entry: Entry; view: MashView; onAction: Action }>): ReactNode {
   const revalidator = useRevalidator();
   const toast = useToast();
@@ -212,7 +209,7 @@ function HostBar({ entry, view, onAction }: Readonly<{ entry: Entry; view: MashV
   );
 }
 
-/** Before the start: viewers pick a side (their vote) and can change it until the host starts. */
+// Side selection remains editable until the host starts.
 function SetupBody({
   entry,
   host,
@@ -304,7 +301,7 @@ function SetupBody({
   );
 }
 
-/** The big tap target. Space and Enter tap once per press (key repeat is ignored); S reads the score. */
+// Space/Enter taps once; ignore repeats. S announces scores.
 function TapButton({
   entry,
   view,
@@ -320,13 +317,13 @@ function TapButton({
     view.current === "live" && view.msLeft <= MASH_BATCH_MS,
   );
   const button = useRef<HTMLButtonElement | null>(null);
-  // A Space or Enter press already tapped; the click the browser may send for it must not tap again.
+  // Suppress the synthetic click after a counted key press.
   const keyTapped = useRef<boolean>(false);
   const { shortcuts } = usePrefs();
   const mine: number = Math.max(tapper.taps, view.mine ?? 0);
   function hit(): void {
     if (assisted || !tapper.tap() || !button.current) return;
-    // Restart the press animation and float a decorative "+1" (both hidden with reduced motion).
+    // Restart decorative tap feedback; reduced motion hides it.
     const target: HTMLButtonElement = button.current;
     target.classList.remove("punch");
     target.getBoundingClientRect();
@@ -358,10 +355,7 @@ function TapButton({
       hit();
     }
   }
-  /**
-   * Screen readers and switch access often send only a click. A pointer click (`detail` 1 or more) was counted on
-   * pointer down and a key press on key down, so only a click with neither before it taps.
-   */
+  // Count assistive clicks only when pointerdown/keydown has not already counted the tap.
   function click(event: MouseEvent<HTMLButtonElement>): void {
     if (assist === "toggle") {
       tapper.setHolding(!tapper.holding);
@@ -395,14 +389,14 @@ function TapButton({
           if (assist === "hold") tapper.setHolding(false);
         }}
         onBlur={() => {
-          // Tab while holding moves focus on before the key-up, which then never reaches this button.
+          // Tab can move focus away before keyup reaches this button.
           if (assist === "hold") tapper.setHolding(false);
         }}
         onKeyDown={keyDown}
         onKeyUp={(event: KeyboardEvent<HTMLButtonElement>) => {
           if (event.key !== " " && event.key !== "Enter") return;
           if (assist === "hold") tapper.setHolding(false);
-          // A browser that sends no click for the press leaves the mark; drop it after the click would have come.
+          // Clear the key marker after the synthetic-click window.
           setTimeout(() => {
             keyTapped.current = false;
           }, 0);
@@ -436,10 +430,7 @@ function TapButton({
   );
 }
 
-/**
- * One Mash Battle (item 31): pick a side, 3-2-1, tap for the time limit, winner. Totals arrive 5 times
- * a second over the live connection. The host sees stats and controls instead of a side.
- */
+// Pick a side, count down, tap, show winner. Live totals arrive at 5 Hz; hosts get controls instead.
 export function MashCard({
   entry,
   now,
