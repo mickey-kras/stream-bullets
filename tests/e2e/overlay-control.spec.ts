@@ -185,3 +185,66 @@ test("the control page moves Up next on when the stream it shows starts", async 
     await close(owner);
   }
 });
+
+test("the owner sees each channel's connection health and the result of a connection attempt", async ({ browser }) => {
+  const page = "(SELECT id FROM streamers WHERE handle='feature_host')";
+  const youtubeId = randomUUID();
+  const kickId = randomUUID();
+  const now = Date.now();
+  const row = (id: string, platform: string, external: string, name: string, status: string, code: string): string =>
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${id}',${page},'${platform}','${external}','${name}','','${status}','${code}',${now},${now},${now});`;
+  await runSql("channels-seed", [
+    row(youtubeId, "youtube", "UCe2e", "Feature Tube", "error", "quota_exhausted"),
+    row(kickId, "kick", "4242", "Feature Kick", "needs_reauth", "authorization_revoked"),
+    // Disconnect needs a sign-in from the last 10 minutes; a long browser run outlasts the seeded session time.
+    `UPDATE session SET created_at=${now} WHERE user_id=(SELECT id FROM user WHERE name='featureowner');`,
+    // The overlay link test uses the same account's content quota; start this test with a clear one.
+    `DELETE FROM app_rate_limits WHERE key='content:'||(SELECT id FROM user WHERE name='featureowner');`,
+  ]);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 93));
+  try {
+    const control = await newPage(owner);
+    await control.goto("/overlay-control?channel=kick&result=channel_taken");
+    const section = control.getByRole("region", { name: "Channels" });
+    const banner = section.locator(".ch-result");
+    // The result is read once: the banner is a status region with focus, and no toast repeats it.
+    await expect(banner).toHaveText("This Kick channel is already connected to another StreamBullets page.");
+    // An <output> element: a status region by its own role.
+    await expect(section.getByRole("status").and(banner)).toBeVisible();
+    await expect(banner).toBeFocused();
+    await expect(control.locator(".toast").filter({ hasText: "already connected" })).toHaveCount(0);
+    // It leaves the address, so a reload does not show it again.
+    await expect(control).toHaveURL(/\/overlay-control$/);
+    const youtube = section.locator('[data-channel="youtube"]');
+    // YouTube is not set up here, so its notes about the YouTube limits stay hidden.
+    await expect(youtube).not.toContainText("Chat starts when an overlay");
+    await expect(youtube).toContainText("Connected as Feature Tube");
+    // YouTube is not set up on this test server, so its card gives no reconnect advice.
+    await expect(youtube.getByRole("alert")).toHaveCount(0);
+    await expect(youtube).toContainText("Last activity:");
+    await expect(section.getByText("This platform is not set up on this site yet.")).toHaveCount(2);
+    // Kick is set up: its card shows what happened and how to fix it.
+    const kick = section.locator('[data-channel="kick"]');
+    await expect(kick.getByRole("alert")).toHaveText("Access ended. Reconnect to keep receiving chat.");
+    await expect(kick.getByRole("button", { name: "Reconnect Kick", exact: true })).toBeVisible();
+    // Disconnect: after the confirmation, focus lands on the platform's Connect button.
+    await kick.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
+    const dialog = control.getByRole("dialog", { name: "Disconnect Kick?" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
+    await expect(dialog).toBeHidden();
+    await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeFocused();
+    await expect(kick).toContainText("Not connected");
+    // Kick could not confirm the revoke (the stored tokens were seeded without any), so the advice stays.
+    await expect(kick).toContainText("Remove StreamBullets in your Kick settings.");
+    // A platform the site does not offer has no Connect button: focus goes to the section heading.
+    await youtube.getByRole("button", { name: "Disconnect YouTube", exact: true }).click();
+    const youtubeDialog = control.getByRole("dialog", { name: "Disconnect YouTube?" });
+    await youtubeDialog.getByRole("button", { name: "Disconnect YouTube", exact: true }).click();
+    await expect(youtube).toContainText("Not connected");
+    await expect(control.locator("#channels-title")).toBeFocused();
+  } finally {
+    await runSql("channels-seed", [`DELETE FROM channel_connections WHERE id IN ('${youtubeId}','${kickId}');`]);
+    await close(owner);
+  }
+});

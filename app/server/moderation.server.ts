@@ -249,6 +249,9 @@ function historyValue(row: HistoryRow): ModerationEvent {
   };
 }
 
+// Admin actions only: channel and overlay key audit rows are owner or system actions.
+const HISTORY_ACTIONS: readonly string[] = [...PAGE_ACTIONS, "official", "unofficial"];
+
 // Every page for the Streamer pages tab, by handle, with owner, counts and recent moderation history.
 export async function listModerationPages(env: AppEnv, adminId: string, query: PageQuery): Promise<AdminPageList> {
   const value = parsed(pageQuerySchema, query);
@@ -276,10 +279,11 @@ export async function listModerationPages(env: AppEnv, adminId: string, query: P
         SELECT m.id, m.streamer_id, m.action, m.reason, m.note, m.notify_owner, u.name AS actor, m.created_at,
           row_number() OVER (PARTITION BY m.streamer_id ORDER BY m.created_at DESC, m.id DESC) AS position
         FROM moderation_actions m LEFT JOIN user u ON u.id=m.actor_id
-        WHERE m.target_kind='streamer' AND m.streamer_id IN (SELECT value FROM json_each(?))
-      ) WHERE position <= ? ORDER BY created_at DESC, id DESC
+        WHERE m.target_kind='streamer' AND m.streamer_id IN (SELECT value FROM json_each(?1))
+          AND m.action IN (SELECT value FROM json_each(?2))
+      ) WHERE position <= ?3 ORDER BY created_at DESC, id DESC
     `)
-      .bind(JSON.stringify(page.map((row) => row.id)), HISTORY_SIZE)
+      .bind(JSON.stringify(page.map((row) => row.id)), JSON.stringify(HISTORY_ACTIONS), HISTORY_SIZE)
       .all<HistoryRow>();
     for (const event of events) {
       const list = history.get(event.streamer_id) ?? [];

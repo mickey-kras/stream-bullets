@@ -35,6 +35,10 @@ Recovery needs site-operator access to production D1 through Cloudflare.
 
 3. Ask the administrator to sign out, sign in, and register two keys within 5 minutes.
 
+## Channel connections
+
+Streamers can connect Twitch, YouTube, and Kick channels for an activity feed. The server stores provider tokens encrypted with AES-256-GCM under keys in `CHANNEL_TOKEN_KEYS`, separate from `BETTER_AUTH_SECRET`. Connection changes need a recent sign-in. The Worker checks webhook signatures and timestamps on the raw body, and the ingest object drops repeated deliveries. See [Channel connections and activity](docs/channel-connections.md#threat-model) for the threat model, the limits, and the key rotation steps.
+
 ## Dependency licenses
 
 Before release, review each dependency and its runtime dependency licenses. Record the review in the PR.
