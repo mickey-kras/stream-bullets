@@ -88,6 +88,10 @@ beforeAll(async (): Promise<void> => {
   env = {
     DB: database.db,
     IMAGES: database.bucket,
+    CHANNEL_INGEST: {
+      idFromName: (name: string) => name,
+      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+    } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
       get: () => ({

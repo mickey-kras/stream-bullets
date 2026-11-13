@@ -1,3 +1,4 @@
+import { disconnectAllChannels } from "./channels.server";
 import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";
@@ -266,6 +267,16 @@ export interface AccountExport {
     transports: string | null;
     aaguid: string | null;
     createdAt: string | null;
+  }[];
+  /** Channels connected to the page for its activity feed. Their tokens are credentials and stay out. */
+  channelConnections: {
+    platform: string;
+    channelId: string;
+    displayName: string;
+    scopes: string[];
+    status: string;
+    connectedAt: string;
+    lastEventAt: string | null;
   }[];
   streamerPage: {
     handle: string;
@@ -659,6 +670,54 @@ function pageExport(
 }
 
 // Export account data, excluding credentials and other users' data.
+/** The profile part of the export. */
+function accountProfile(account: UserRow): AccountExport["account"] {
+  return {
+    id: account.id,
+    name: account.name,
+    email: account.email,
+    emailVerified: account.email_verified === 1,
+    emailLinkVerified: account.email_link_verified === 1,
+    image: account.image,
+    avatarPreset: account.avatar_preset,
+    locale: account.locale,
+    displayPreferences: parseJson(account.display_prefs),
+    conversionMilestones: {
+      firstVote: account.first_vote_counted === 1,
+      firstTopic: account.first_topic_counted === 1,
+    },
+    createdAt: iso(account.created_at),
+    updatedAt: iso(account.updated_at),
+  };
+}
+
+/** Channels connected to the user's page. Their tokens are credentials and stay out of the export. */
+async function exportChannels(env: AppEnv, userId: string): Promise<AccountExport["channelConnections"]> {
+  const { results } = await env.DB.prepare(
+    `SELECT c.platform,c.external_id,c.display_name,c.scopes,c.status,c.created_at,c.last_event_at
+      FROM channel_connections c JOIN streamers s ON s.id=c.streamer_id WHERE s.owner_id=? ORDER BY c.created_at`,
+  )
+    .bind(userId)
+    .all<{
+      platform: string;
+      external_id: string;
+      display_name: string;
+      scopes: string;
+      status: string;
+      created_at: number;
+      last_event_at: number | null;
+    }>();
+  return results.map((row) => ({
+    platform: row.platform,
+    channelId: row.external_id,
+    displayName: row.display_name,
+    scopes: row.scopes.split(" ").filter(Boolean),
+    status: row.status,
+    connectedAt: iso(row.created_at),
+    lastEventAt: optionalIso(row.last_event_at),
+  }));
+}
+
 export async function exportAccount(env: AppEnv, userId: string): Promise<AccountExport> {
   const origin = getOrigin(env);
   const now = Date.now();
@@ -696,23 +755,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
     signupAcceptance,
     exportedAt: iso(now),
     notes: NOTES,
-    account: {
-      id: account.id,
-      name: account.name,
-      email: account.email,
-      emailVerified: account.email_verified === 1,
-      emailLinkVerified: account.email_link_verified === 1,
-      image: account.image,
-      avatarPreset: account.avatar_preset,
-      locale: account.locale,
-      displayPreferences: parseJson(account.display_prefs),
-      conversionMilestones: {
-        firstVote: account.first_vote_counted === 1,
-        firstTopic: account.first_topic_counted === 1,
-      },
-      createdAt: iso(account.created_at),
-      updatedAt: iso(account.updated_at),
-    },
+    account: accountProfile(account),
     signInMethods: history.providers.map((row: ProviderRow) => ({
       providerId: row.provider_id,
       accountId: row.account_id,
@@ -734,6 +777,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       aaguid: row.aaguid,
       createdAt: optionalIso(row.created_at),
     })),
+    channelConnections: await exportChannels(env, userId),
     streamerPage: streamer ? pageExport(streamer, overlay, history, origin) : null,
     streamerApplication: application
       ? {
@@ -844,6 +888,9 @@ const touchedStreamersMore = `
 // images and refresh rooms.
 export async function deleteAccount(env: AppEnv, userId: string): Promise<void> {
   if (userId === SYSTEM_USER_ID) throw new HttpError(403, "The system principal cannot be deleted.");
+  // Provider grants and subscriptions do not cascade: end them first, best effort and bounded in time.
+  const own = await env.DB.prepare("SELECT id FROM streamers WHERE owner_id=?").bind(userId).all<{ id: string }>();
+  for (const page of own.results) await disconnectAllChannels(env, page.id);
   const statement = (sql: string): D1PreparedStatement => env.DB.prepare(sql).bind(userId);
   const results = await env.DB.batch([
     statement("SELECT id FROM streamers WHERE owner_id=?1"),
