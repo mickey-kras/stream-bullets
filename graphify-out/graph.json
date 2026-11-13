@@ -28185,7 +28185,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_boundfragments",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L59",
+      "source_location": "L61",
       "target": "app_server_channel_normalize_cleantext",
       "weight": 1.0
     },
@@ -28197,7 +28197,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_kickevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L230",
+      "source_location": "L231",
       "target": "app_server_channel_normalize_boundfragments",
       "weight": 1.0
     },
@@ -28209,7 +28209,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_kickevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L241",
+      "source_location": "L242",
       "target": "app_server_channel_normalize_cleantext",
       "weight": 1.0
     },
@@ -28221,7 +28221,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_kickevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L250",
+      "source_location": "L251",
       "target": "app_server_channel_normalize_parsetime",
       "weight": 1.0
     },
@@ -28233,7 +28233,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_kickevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L252",
+      "source_location": "L253",
       "target": "app_lib_activity_islivemessage",
       "weight": 1.0
     },
@@ -28257,7 +28257,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_twitchchatevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L125",
+      "source_location": "L126",
       "target": "app_server_channel_normalize_cleantext",
       "weight": 1.0
     },
@@ -28269,7 +28269,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_twitchchatevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L126",
+      "source_location": "L127",
       "target": "app_server_channel_normalize_twitchemoteurl",
       "weight": 1.0
     },
@@ -28281,7 +28281,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_twitchchatevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L131",
+      "source_location": "L132",
       "target": "app_server_channel_normalize_boundfragments",
       "weight": 1.0
     },
@@ -28293,7 +28293,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_twitchchatevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L151",
+      "source_location": "L152",
       "target": "app_lib_activity_islivemessage",
       "weight": 1.0
     },
@@ -28305,7 +28305,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_twitchevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L179",
+      "source_location": "L180",
       "target": "app_server_channel_normalize_twitchchatevents",
       "weight": 1.0
     },
@@ -28317,7 +28317,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_twitchevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L193",
+      "source_location": "L194",
       "target": "app_server_channel_normalize_twitchmoderationevents",
       "weight": 1.0
     },
@@ -28329,7 +28329,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_twitchmoderationevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L163",
+      "source_location": "L164",
       "target": "app_server_channel_normalize_parsetime",
       "weight": 1.0
     },
@@ -28341,7 +28341,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_youtubeevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L291",
+      "source_location": "L292",
       "target": "app_server_channel_normalize_boundfragments",
       "weight": 1.0
     },
@@ -28353,7 +28353,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_youtubeevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L300",
+      "source_location": "L301",
       "target": "app_server_channel_normalize_cleantext",
       "weight": 1.0
     },
@@ -28365,7 +28365,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_youtubeevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L307",
+      "source_location": "L308",
       "target": "app_server_channel_normalize_parsetime",
       "weight": 1.0
     },
@@ -28377,7 +28377,7 @@
       "relation": "calls",
       "source": "app_server_channel_normalize_youtubeevents",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L309",
+      "source_location": "L310",
       "target": "app_lib_activity_islivemessage",
       "weight": 1.0
     },
@@ -38589,7 +38589,7 @@
       "relation": "calls",
       "source": "tests_channel_normalize_test",
       "source_file": "tests/channel-normalize.test.ts",
-      "source_location": "L221",
+      "source_location": "L242",
       "target": "tests_channel_normalize_test_parse",
       "weight": 1.0
     },
@@ -123045,7 +123045,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L102",
+      "source_location": "L103",
       "target": "app_server_channel_normalize_twitchtarget",
       "weight": 1.0
     },
@@ -123056,7 +123056,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L103",
+      "source_location": "L104",
       "target": "app_server_channel_normalize_twitchmoderate",
       "weight": 1.0
     },
@@ -123067,7 +123067,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L110",
+      "source_location": "L111",
       "target": "app_server_channel_normalize_twitchemoteurl",
       "weight": 1.0
     },
@@ -123078,7 +123078,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L114",
+      "source_location": "L115",
       "target": "app_server_channel_normalize_twitchchatevents",
       "weight": 1.0
     },
@@ -123089,7 +123089,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L156",
+      "source_location": "L157",
       "target": "app_server_channel_normalize_twitchmoderationevents",
       "weight": 1.0
     },
@@ -123100,7 +123100,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L173",
+      "source_location": "L174",
       "target": "app_server_channel_normalize_twitchevents",
       "weight": 1.0
     },
@@ -123111,7 +123111,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L197",
+      "source_location": "L198",
       "target": "app_server_channel_normalize_kickuser",
       "weight": 1.0
     },
@@ -123122,7 +123122,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L198",
+      "source_location": "L199",
       "target": "app_server_channel_normalize_kickchatschema",
       "weight": 1.0
     },
@@ -123133,7 +123133,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L216",
+      "source_location": "L214",
       "target": "app_server_channel_normalize_kickbanschema",
       "weight": 1.0
     },
@@ -123144,7 +123144,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L225",
+      "source_location": "L226",
       "target": "app_server_channel_normalize_kickevents",
       "weight": 1.0
     },
@@ -123166,7 +123166,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L274",
+      "source_location": "L275",
       "target": "app_server_channel_normalize_youtube_badges",
       "weight": 1.0
     },
@@ -123177,7 +123177,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L282",
+      "source_location": "L283",
       "target": "app_server_channel_normalize_youtubeevents",
       "weight": 1.0
     },
@@ -123221,7 +123221,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L46",
+      "source_location": "L48",
       "target": "app_server_channel_normalize_parsetime",
       "weight": 1.0
     },
@@ -123232,7 +123232,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L53",
+      "source_location": "L55",
       "target": "app_server_channel_normalize_boundfragments",
       "weight": 1.0
     },
@@ -123243,7 +123243,7 @@
       "relation": "contains",
       "source": "app_server_channel_normalize",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L76",
+      "source_location": "L78",
       "target": "app_server_channel_normalize_twitchchatschema",
       "weight": 1.0
     },
@@ -132890,7 +132890,7 @@
       "relation": "contains",
       "source": "tests_channel_normalize_test",
       "source_file": "tests/channel-normalize.test.ts",
-      "source_location": "L215",
+      "source_location": "L236",
       "target": "tests_channel_normalize_test_parse",
       "weight": 1.0
     },
@@ -139585,7 +139585,7 @@
       "relation": "indirect_call",
       "source": "tests_channel_normalize_test",
       "source_file": "tests/channel-normalize.test.ts",
-      "source_location": "L178",
+      "source_location": "L188",
       "target": "tests_live_capacity_test_message_6f9b9af3cd6e",
       "weight": 1.0
     },
@@ -140587,10 +140587,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "88e3c74c33eb1a1841577ea5601a508831cdb1e9910b3e329601b90520b16d21",
+    "content_sha256": "d5374324d98e0be910493bf8554659d78bd0de81cf0dfe7aeebe7ecab136e79f",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "08125eed08ff5752e312fc0a41cf755640afdb930e39d06b6fd9b9b2b06c67e4",
+    "source_sha256": "fb50ad3edcaae63fa9ad0a198140d31867c96661324408ffc2322a621cf6de3f",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -157102,7 +157102,7 @@
       "label": "boundFragments()",
       "norm_label": "boundfragments()",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L53"
+      "source_location": "L55"
     },
     {
       "_callable": true,
@@ -157124,7 +157124,7 @@
       "label": "kickEvents()",
       "norm_label": "kickevents()",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L225"
+      "source_location": "L226"
     },
     {
       "_callable": true,
@@ -157135,7 +157135,7 @@
       "label": "parseTime()",
       "norm_label": "parsetime()",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L46"
+      "source_location": "L48"
     },
     {
       "_callable": true,
@@ -157146,7 +157146,7 @@
       "label": "twitchChatEvents()",
       "norm_label": "twitchchatevents()",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L114"
+      "source_location": "L115"
     },
     {
       "_callable": true,
@@ -157157,7 +157157,7 @@
       "label": "twitchEmoteUrl()",
       "norm_label": "twitchemoteurl()",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L110"
+      "source_location": "L111"
     },
     {
       "_callable": true,
@@ -157168,7 +157168,7 @@
       "label": "twitchEvents()",
       "norm_label": "twitchevents()",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L173"
+      "source_location": "L174"
     },
     {
       "_callable": true,
@@ -157179,7 +157179,7 @@
       "label": "twitchModerationEvents()",
       "norm_label": "twitchmoderationevents()",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L156"
+      "source_location": "L157"
     },
     {
       "_callable": true,
@@ -157190,7 +157190,7 @@
       "label": "youtubeEvents()",
       "norm_label": "youtubeevents()",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L282"
+      "source_location": "L283"
     },
     {
       "_callable": true,
@@ -162565,7 +162565,7 @@
       "label": "parse()",
       "norm_label": "parse()",
       "source_file": "tests/channel-normalize.test.ts",
-      "source_location": "L215"
+      "source_location": "L236"
     },
     {
       "_callable": true,
@@ -171018,7 +171018,7 @@
       "label": "kickBanSchema",
       "norm_label": "kickbanschema",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L216"
+      "source_location": "L214"
     },
     {
       "_origin": "ast",
@@ -171028,7 +171028,7 @@
       "label": "kickChatSchema",
       "norm_label": "kickchatschema",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L198"
+      "source_location": "L199"
     },
     {
       "_origin": "ast",
@@ -171038,7 +171038,7 @@
       "label": "kickUser",
       "norm_label": "kickuser",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L197"
+      "source_location": "L198"
     },
     {
       "_origin": "ast",
@@ -171058,7 +171058,7 @@
       "label": "twitchChatSchema",
       "norm_label": "twitchchatschema",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L76"
+      "source_location": "L78"
     },
     {
       "_origin": "ast",
@@ -171068,7 +171068,7 @@
       "label": "twitchModerate",
       "norm_label": "twitchmoderate",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L103"
+      "source_location": "L104"
     },
     {
       "_origin": "ast",
@@ -171078,7 +171078,7 @@
       "label": "twitchTarget",
       "norm_label": "twitchtarget",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L102"
+      "source_location": "L103"
     },
     {
       "_origin": "ast",
@@ -171088,7 +171088,7 @@
       "label": "YOUTUBE_BADGES",
       "norm_label": "youtube_badges",
       "source_file": "app/server/channel-normalize.ts",
-      "source_location": "L274"
+      "source_location": "L275"
     },
     {
       "_origin": "ast",

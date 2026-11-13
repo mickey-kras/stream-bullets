@@ -256,15 +256,15 @@ test("duplicate names retain the selected account through draft reload, rename, 
     const originalText: string = "Identity @Shared participant please reply.";
     await expect(editor).toHaveValue(originalText);
     await editor.press("End");
-    await editor.pressSequentially("!");
-    await expect(editor).toHaveValue(`${originalText}!`);
+    await editor.pressSequentially("!".repeat(100));
+    await expect(editor).toHaveValue(`${originalText}${"!".repeat(100)}`);
     await editor.press("Control+z");
     await expect(editor).toHaveValue(originalText);
     await editor.press("Control+Shift+z");
-    await expect(editor).toHaveValue(`${originalText}!`);
+    await expect(editor).toHaveValue(`${originalText}${"!".repeat(100)}`);
     await comment.getByRole("button", { name: "Save", exact: true }).click();
     await expect(comment.getByText("Edited", { exact: true })).toBeVisible();
-    await expect(comment.locator(".comment-text")).toHaveText(`${originalText}!`);
+    await expect(comment.locator(".comment-text")).toHaveText(`${originalText}${"!".repeat(100)}`);
     const persisted = await viewer.request.get(`/api/comments/${commentId}`);
     expect(persisted.ok()).toBe(true);
     const result = z

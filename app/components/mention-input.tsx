@@ -66,7 +66,7 @@ export function MentionInput({
     }
     state.values.splice(state.index + 1);
     state.values.push({ text: next, mentions: selected });
-    if (state.values.length > 100) state.values.shift();
+    if (state.values.length > 2001) state.values.splice(1, 1);
     state.index = state.values.length - 1;
   }
   function restore(next: string, direction: -1 | 1): MentionSelection[] {
