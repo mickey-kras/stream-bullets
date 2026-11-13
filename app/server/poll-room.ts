@@ -182,41 +182,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     const url = new URL(request.url);
     const streamerId = url.searchParams.get("streamerId");
     if (!this.validStream(url, streamerId)) return response("Invalid stream", 400);
-    if (url.pathname === "/test-reset") {
-      if (this.env.APP_ENV !== "test") return response("Not found", 404);
-      validateTestEnvironment(this.env);
-      if (request.method !== "POST") return response("Method not allowed", 405);
-      await this.ctx.blockConcurrencyWhile(async (): Promise<void> => {
-        this.resetting = true;
-        try {
-          if (this.ticker !== undefined) clearInterval(this.ticker);
-          this.ticker = undefined;
-          this.disconnect();
-          await Promise.all([
-            this.currentTick,
-            this.refreshing,
-            this.pendingSnapshot,
-            ...this.loadingBattles.values(),
-            ...this.pendingHandlers,
-          ]);
-          this.disconnect();
-          if (this.ticker !== undefined) clearInterval(this.ticker);
-          this.ticker = undefined;
-          this.battles.clear();
-          this.loadingBattles.clear();
-          this.notLive.clear();
-          this.buckets.clear();
-          this.latestSnapshot = undefined;
-          this.pendingSnapshot = undefined;
-          this.overlay = undefined;
-          this.ctx.storage.sql.exec("DELETE FROM tap_journal");
-          await this.ctx.storage.deleteAlarm();
-        } finally {
-          this.resetting = false;
-        }
-      });
-      return new Response(null, { status: 204 });
-    }
+    if (url.pathname === "/test-reset") return await this.resetTestState(request);
     const method = ROOM_PATHS[url.pathname];
     if (!method) return response("Not found", 404);
     if (request.method !== method) return response("Method not allowed", 405);
@@ -245,12 +211,52 @@ export class PollRoom extends DurableObject<AppEnv> {
     try {
       return await pending;
     } catch (error: unknown) {
-      this.disconnect();
-      if (!(error instanceof PageSuspended)) return response("Live updates unavailable", 503);
-      return url.pathname === "/subscribe" ? response("Stream not found", 404) : new Response(null, { status: 204 });
+      return this.requestFailure(error, url.pathname);
     } finally {
       this.pendingHandlers.delete(pending);
     }
+  }
+
+  private requestFailure(error: unknown, path: string): Response {
+    this.disconnect();
+    if (!(error instanceof PageSuspended)) return response("Live updates unavailable", 503);
+    return path === "/subscribe" ? response("Stream not found", 404) : new Response(null, { status: 204 });
+  }
+
+  private async resetTestState(request: Request): Promise<Response> {
+    if (this.env.APP_ENV !== "test") return response("Not found", 404);
+    validateTestEnvironment(this.env);
+    if (request.method !== "POST") return response("Method not allowed", 405);
+    await this.ctx.blockConcurrencyWhile(async (): Promise<void> => {
+      this.resetting = true;
+      try {
+        if (this.ticker !== undefined) clearInterval(this.ticker);
+        this.ticker = undefined;
+        this.disconnect();
+        await Promise.all([
+          this.currentTick,
+          this.refreshing,
+          this.pendingSnapshot,
+          ...this.loadingBattles.values(),
+          ...this.pendingHandlers,
+        ]);
+        this.disconnect();
+        if (this.ticker !== undefined) clearInterval(this.ticker);
+        this.ticker = undefined;
+        this.battles.clear();
+        this.loadingBattles.clear();
+        this.notLive.clear();
+        this.buckets.clear();
+        this.latestSnapshot = undefined;
+        this.pendingSnapshot = undefined;
+        this.overlay = undefined;
+        this.ctx.storage.sql.exec("DELETE FROM tap_journal");
+        await this.ctx.storage.deleteAlarm();
+      } finally {
+        this.resetting = false;
+      }
+    });
+    return new Response(null, { status: 204 });
   }
 
   private async handleRequest(

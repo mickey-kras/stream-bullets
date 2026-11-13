@@ -1,6 +1,6 @@
 import { sitemapResponse } from "../app/server/sitemap.server";
 import { createRequestHandler, RouterContextProvider } from "react-router";
-import { appContext, type AppEnv } from "../app/env";
+import { appContext, type AppContext, type AppEnv } from "../app/env";
 import { isStreamerListed } from "../app/server/access.server";
 import { getViewer } from "../app/server/auth.server";
 import { getStreamer } from "../app/server/data.server";
@@ -115,6 +115,62 @@ async function activityResponse(
   return callIngest(env, streamer.id, "subscribe", { init: { headers } });
 }
 
+async function webhookResponse(request: Request, env: AppEnv, path: string, key: string): Promise<Response> {
+  const platform: "twitch" | "kick" = path === "/hooks/twitch" ? "twitch" : "kick";
+  try {
+    // A repeated Kick message id counts against the limit too (see kickWebhook).
+    const countRepeat = async (): Promise<void> => {
+      if (!(await env.REQUEST_LIMITER.limit({ key })).success)
+        throw new HttpError(429, "Too many requests. Please try again in a minute.");
+    };
+    return platform === "twitch"
+      ? await twitchWebhook(request, env)
+      : await kickWebhook(request, env, Date.now(), countRepeat);
+  } catch (error: unknown) {
+    logRejectedWebhook(platform, error);
+    if (error instanceof WebhookRejected && error.forged && !(await env.REQUEST_LIMITER.limit({ key })).success)
+      throw new HttpError(429, "Too many requests. Please try again in a minute.");
+    throw error;
+  }
+}
+
+async function routeResponse(
+  request: Request,
+  path: string,
+  key: string,
+  context: AppContext,
+  origin: string,
+): Promise<Response> {
+  const { env, nonce, responseHeaders } = context;
+  const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
+  const activity = /^\/api\/activity\/([a-z0-9_]{3,30})$/.exec(path);
+  const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
+  if (path === "/__test") {
+    return await testEnvironmentResponse(request, env);
+  } else if (path === "/hooks/kick" && channelsOff(env)) {
+    // Ingestion is off: acknowledge and drop, so Kick does not retry. Twitch still reports revocations.
+    return new Response(null, { status: 204 });
+  } else if (path === "/hooks/twitch" || path === "/hooks/kick") {
+    return await webhookResponse(request, env, path, key);
+  } else if (activity) {
+    if (channelsOff(env)) throw new HttpError(503, "The activity feed is off.");
+    return await activityResponse(request, env, activity[1], nonce, responseHeaders);
+  } else if (path === "/sitemap.xml") {
+    return await sitemapResponse(request, env);
+  } else if (calendar) {
+    return await calendarResponse(request, env, calendar[1], origin);
+  } else if (live) {
+    return await liveResponse(request, env, live[1], key, nonce, responseHeaders);
+  } else if (path.startsWith("/images/")) {
+    if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
+    return await serveImage(env, path.slice("/images/".length), request.method);
+  } else {
+    const routerContext = new RouterContextProvider();
+    routerContext.set(appContext, context);
+    return await handler(request, routerContext);
+  }
+}
+
 export default {
   // Run hourly jobs independently. Log each failure, then throw so cron failure alerts fire.
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
@@ -164,49 +220,7 @@ export default {
       if (!hook && !(await env.REQUEST_LIMITER.limit({ key })).success)
         throw new HttpError(429, "Too many requests. Please try again in a minute.");
       if (path !== "/__test") await requireTestAccess(request, env);
-      const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
-      const activity = /^\/api\/activity\/([a-z0-9_]{3,30})$/.exec(path);
-      const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
-      if (path === "/__test") {
-        response = await testEnvironmentResponse(request, env);
-      } else if (path === "/hooks/kick" && channelsOff(env)) {
-        // Ingestion is off: acknowledge and drop, so Kick does not retry. Twitch still reports revocations.
-        response = new Response(null, { status: 204 });
-      } else if (hook) {
-        const platform = path === "/hooks/twitch" ? "twitch" : "kick";
-        try {
-          // A repeated Kick message id counts against the limit too (see kickWebhook).
-          const countRepeat = async (): Promise<void> => {
-            if (!(await env.REQUEST_LIMITER.limit({ key })).success)
-              throw new HttpError(429, "Too many requests. Please try again in a minute.");
-          };
-          response =
-            platform === "twitch"
-              ? await twitchWebhook(request, env)
-              : await kickWebhook(request, env, Date.now(), countRepeat);
-        } catch (error: unknown) {
-          logRejectedWebhook(platform, error);
-          if (error instanceof WebhookRejected && error.forged && !(await env.REQUEST_LIMITER.limit({ key })).success)
-            throw new HttpError(429, "Too many requests. Please try again in a minute.");
-          throw error;
-        }
-      } else if (activity) {
-        if (channelsOff(env)) throw new HttpError(503, "The activity feed is off.");
-        response = await activityResponse(request, env, activity[1], nonce, responseHeaders);
-      } else if (path === "/sitemap.xml") {
-        response = await sitemapResponse(request, env);
-      } else if (calendar) {
-        response = await calendarResponse(request, env, calendar[1], origin);
-      } else if (live) {
-        response = await liveResponse(request, env, live[1], key, nonce, responseHeaders);
-      } else if (path.startsWith("/images/")) {
-        if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
-        response = await serveImage(env, path.slice("/images/".length), request.method);
-      } else {
-        const context = new RouterContextProvider();
-        context.set(appContext, { env, nonce, responseHeaders, requestId });
-        response = await handler(request, context);
-      }
+      response = await routeResponse(request, path, key, { env, nonce, responseHeaders, requestId }, origin);
     } catch (error) {
       response = errorResponse(error, request, requestId);
       origin = "https://invalid.invalid";

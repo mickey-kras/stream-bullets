@@ -41,7 +41,7 @@ function twitchChat(overrides: Record<string, unknown> = {}): Record<string, unk
 
 describe("cleanText", (): void => {
   it("removes control and bidirectional format characters and bounds the length by UTF-16 code units", (): void => {
-    expect(cleanText("a\u0000b‮c​d\te ")).toBe("abcd e");
+    expect(cleanText("a\u0000b\u202ec\u200bd\te\u2028")).toBe("abcd e");
     // Each emoji is two code units. The limit counts like the activity schema and never splits a pair.
     expect(cleanText("😀".repeat(10), 3)).toBe("😀");
     expect(cleanText("😀".repeat(10), 4)).toBe("😀😀");
@@ -83,6 +83,16 @@ describe("Twitch normalization", (): void => {
     expect(event.text).toBe(filler);
     expect(event.fragments).toHaveLength(1);
     expect(activityEventSchema.safeParse(event).success).toBe(true);
+  });
+
+  it("keeps chat text when optional provider fields are malformed", (): void => {
+    const events = twitchEvents("channel.chat.message", twitchChat({
+      message: { text: "Hello", fragments: "invalid" },
+      badges: "invalid",
+      color: 123,
+    }), now, now);
+    expect(events).toMatchObject([{ text: "Hello", fragments: [{ type: "text", text: "Hello" }], badges: [] }]);
+    expect((events[0] as ActivityChat).user.color).toBeUndefined();
   });
 
   it("maps a chat message with stable ids, fragments, emote URLs built from ids, and badges", (): void => {
@@ -194,6 +204,17 @@ describe("Kick normalization", (): void => {
     ]);
     const bare = { ...message, sender: { user_id: 444, username: "fan", identity: null }, created_at: undefined };
     expect(kickEvents("chat.message.sent", bare, now)).toMatchObject([{ user: { id: "444", displayName: "fan" }, badges: [], sentAt: null }]);
+  });
+
+  it("uses fallbacks for malformed badges, color, and ban metadata", (): void => {
+    const events = kickEvents("chat.message.sent", {
+      ...message,
+      sender: { ...message.sender, identity: { username_color: "invalid", badges: "invalid" } },
+    }, now);
+    expect(events).toMatchObject([{ text: "Hello HYPERCLAP", badges: [] }]);
+    expect((events[0] as ActivityChat).user.color).toBeUndefined();
+    expect(kickEvents("moderation.banned", { banned_user: { user_id: 5 }, metadata: "invalid" }, now))
+      .toMatchObject([{ userId: "5", until: null, bannedAt: null }]);
   });
 
   it("maps bans and timeouts and ignores other events", (): void => {
