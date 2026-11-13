@@ -79,18 +79,39 @@ interface Drag {
   moved: boolean;
 }
 
+/** The half of the frame away from `rect`: the placeholder label sits there, so the chat box never covers it. */
+function sideAwayFrom(rect: LayerRect): "start" | "end" {
+  return rect.x + rect.w / 2 >= DESIGN_W / 2 ? "start" : "end";
+}
+
 type SaveStatus = "idle" | "saving" | "saved";
 
 /** Debounce for the overlap note: it changes only once a move has settled, not during a drag. */
 export const OVERLAP_NOTE_MS = 500;
 
+/** An error to show under the editor. `leaving` marks the error of a change sent while leaving the editor. */
+interface EditorError {
+  message: string;
+  leaving: boolean;
+}
+
+/** A failed change sent while leaving shows in the next editor only within this time. Later it is stale. */
+const LEAVE_FAILURE_MS = 60_000;
+
 /**
- * The error of a change sent while leaving the editor. The editor is gone when the answer comes, so the next editor
- * on this page shows it (after in-app navigation back). After a back-forward cache restore the same editor shows it.
+ * The error of a change sent while leaving the editor, with the local time it came. The editor is gone when the
+ * answer comes, so the next editor on this page shows it (after in-app navigation back), if it opens within
+ * LEAVE_FAILURE_MS. After a back-forward cache restore the same editor shows it.
  */
-let leaveFailure: string | null = null;
+let leaveFailure: { message: string; at: number } | null = null;
 /** The open editors: one that shows when a change sent while leaving fails, if the answer comes after it opened. */
-const leaveListeners = new Set<(message: string) => void>();
+const leaveListeners = new Set<(error: EditorError) => void>();
+
+/** The stored error of a change sent while leaving, unless it is stale. */
+function freshLeaveFailure(): EditorError | null {
+  if (!leaveFailure || Date.now() - leaveFailure.at >= LEAVE_FAILURE_MS) return null;
+  return { message: leaveFailure.message, leaving: true };
+}
 
 /** A save request in flight: the fields it sends and a promise that settles when it is answered. */
 interface Inflight {
@@ -114,14 +135,14 @@ function useLayerDraft(
 ): {
   shown: OverlayLayers;
   status: SaveStatus;
-  error: string | null;
+  error: EditorError | null;
   edit: (change: (current: OverlayLayers) => OverlayLayers, when: "now" | "idle" | "later") => void;
   flush: () => void;
 } {
   // Every unconfirmed local field (sent or not), and the subset not sent yet.
   const [draft, setDraft] = useState<LayersPatch>({});
   const [status, setStatus] = useState<SaveStatus>("idle");
-  const [error, setError] = useState<string | null>(() => leaveFailure);
+  const [error, setError] = useState<EditorError | null>(freshLeaveFailure);
   const draftRef = useRef<LayersPatch>({});
   const unsent = useRef<LayersPatch>({});
   const inflight = useRef<Inflight | null>(null);
@@ -169,8 +190,8 @@ function useLayerDraft(
         (failure: unknown): void => {
           const message: string = errorMessage(failure);
           // An editor that is open (this one after a back-forward cache restore, or the next one) shows it at once.
-          if (leaveListeners.size === 0) leaveFailure = message;
-          for (const listener of leaveListeners) listener(message);
+          if (leaveListeners.size === 0) leaveFailure = { message, at: Date.now() };
+          for (const listener of leaveListeners) listener({ message, leaving: true });
           setBoth(withoutSent(draftRef.current, pending));
         },
       );
@@ -208,7 +229,7 @@ function useLayerDraft(
       setStatus("saved");
     } catch (failure: unknown) {
       // 400, 409, 423, 429 and network errors: these fields show the saved layers again.
-      setError(errorMessage(failure));
+      setError({ message: errorMessage(failure), leaving: false });
       setStatus("idle");
     } finally {
       inflight.current = null;
@@ -497,6 +518,7 @@ export function CompositionEditor({
   const charactersEditable: boolean = CHARACTERS_READY;
   const chat: ChatLayer = shown.chat;
   const characters: CharactersLayer = shown.characters;
+  const labelSide: "start" | "end" | undefined = chat.enabled ? sideAwayFrom(chat.rect) : undefined;
   let statusText: string = "";
   if (status === "saving") statusText = t("overlay.comp.saving");
   else if (status === "saved") statusText = t("overlay.comp.saved");
@@ -536,6 +558,7 @@ export function CompositionEditor({
                 className="ov-comp-placeholder"
                 data-comp-placeholder="characters"
                 data-enabled={characters.enabled || undefined}
+                data-label-side={labelSide}
                 style={{
                   left: characters.rect.x,
                   top: characters.rect.y,
@@ -665,7 +688,7 @@ export function CompositionEditor({
           <output className="ov-comp-status">{statusText}</output>
           {error && (
             <p className="ov-comp-error" role="alert" data-comp-error>
-              {t("overlay.comp.failed", { error })}
+              {t(error.leaving ? "overlay.comp.leaveFailed" : "overlay.comp.failed", { error: error.message })}
             </p>
           )}
         </div>

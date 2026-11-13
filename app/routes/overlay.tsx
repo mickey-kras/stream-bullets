@@ -113,7 +113,8 @@ export default function Overlay(): ReactNode {
       aria-label={label}
       data-feed-status={feed.status}
     >
-      {designed ? <DesignCanvas>{composition}</DesignCanvas> : composition}
+      {/* The same elements with and without the canvas, so a chat toggle never remounts the on-air content. */}
+      <DesignCanvas on={designed}>{composition}</DesignCanvas>
       {/* The overlay never goes offline (it keeps retrying), so it never puts a button on stream. */}
       {content && status !== "live" && (
         <output className="overlay-connection">

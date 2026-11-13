@@ -361,6 +361,37 @@ test("a note shows while the chat covers the on-air content and goes when the ch
   await close(owner);
 });
 
+test("the characters placeholder label stays fully visible beside the default chat box", async ({ browser }) => {
+  await runSql("composition-editor-label", [chatOn]);
+  const owner = await signedIn(browser, "featureowner", OVERLAP_IP);
+  const cases: [string, string, number][] = [
+    ["en", "Characters · Coming soon", 1440],
+    ["de", "Figuren · Demnächst", 1440],
+    ["ja", "キャラクター · 近日公開", 1440],
+    ["en", "Characters · Coming soon", 390],
+    ["de", "Figuren · Demnächst", 390],
+    ["ja", "キャラクター · 近日公開", 390],
+  ];
+  for (const [locale, text, width] of cases) {
+    await owner.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
+    const page = await newPage(owner);
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/overlay-control");
+    const frame = page.locator(".ov-comp-frame");
+    await expect(frame).toHaveAttribute("data-scaled", "true");
+    const label = frame.locator('[data-comp-placeholder="characters"] span');
+    await expect(label).toHaveText(text);
+    const chatBox = await frame.locator('.ov-layer[data-layer="chat"]').boundingBox();
+    const box = await label.boundingBox();
+    if (!chatBox || !box) throw new Error("No chat box or label.");
+    // The label is left of the chat box, and no part of it is cut off.
+    expect(box.x + box.width, `${locale} ${width}`).toBeLessThanOrEqual(chatBox.x);
+    expect(await label.evaluate((element: Element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+    await close(page);
+  }
+  await close(owner);
+});
+
 test("closing the editor sends an edit that waits for the idle save", async ({ browser }) => {
   await runSql("composition-editor-leave", [chatOn]);
   const owner = await signedIn(browser, "featureowner", LEAVE_IP);
@@ -472,30 +503,40 @@ test("leaving the editor during a save sends the newer edit after it, so the new
   await close(owner);
 });
 
-test("a failed edit sent while leaving shows its error when the owner comes back", async ({ browser }) => {
-  await runSql("composition-editor-leave-error", [chatOn]);
-  const owner = await signedIn(browser, "featureowner", NAV_IP);
-  const page = await newPage(owner);
-  await page.clock.install();
-  await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
-  const x = editor.locator('[data-comp-fields="chat"]').getByLabel("X", { exact: true });
-  await expect(x).toHaveValue(String(DEFAULT_LAYERS.chat.rect.x));
-  await page.clock.pauseAt(Date.now() + 1000);
-  await page.route("**/api/overlay", (route) =>
-    route.request().method() === "POST"
-      ? route.fulfill({ status: 429, json: { error: "Too many requests. Wait one minute and try again." } })
-      : route.fallback(),
-  );
-  const failed = page.waitForResponse((response) => new URL(response.url()).pathname === "/api/overlay");
-  await nudgeLeft(page);
-  await leaveInApp(page);
-  expect((await failed).status()).toBe(429);
-  // Back in the app (no page load), the editor shows the error.
-  await page.goBack();
-  await expect(page.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
-  await expect(page.getByRole("region", { name: "Composition", exact: true }).getByRole("alert")).toContainText(
-    "Too many requests",
-  );
-  await close(owner);
-});
+for (const stale of [false, true]) {
+  test(`a failed edit sent while leaving ${stale ? "is not shown after 60 seconds" : "shows its error when the owner comes back"}`, async ({
+    browser,
+  }) => {
+    await runSql("composition-editor-leave-error", [chatOn]);
+    const owner = await signedIn(browser, "featureowner", NAV_IP);
+    const page = await newPage(owner);
+    await page.clock.install();
+    await page.goto("/overlay-control");
+    const editor = page.getByRole("region", { name: "Composition", exact: true });
+    const x = editor.locator('[data-comp-fields="chat"]').getByLabel("X", { exact: true });
+    await expect(x).toHaveValue(String(DEFAULT_LAYERS.chat.rect.x));
+    await page.clock.pauseAt(Date.now() + 1000);
+    await page.route("**/api/overlay", (route) =>
+      route.request().method() === "POST"
+        ? route.fulfill({ status: 429, json: { error: "Too many requests. Wait one minute and try again." } })
+        : route.fallback(),
+    );
+    const failed = page.waitForResponse((response) => new URL(response.url()).pathname === "/api/overlay");
+    await nudgeLeft(page);
+    await leaveInApp(page);
+    expect((await failed).status()).toBe(429);
+    // The error of a change sent while leaving is stale after 60 seconds.
+    if (stale) await page.clock.fastForward(61_000);
+    // Back in the app (no page load), the editor shows the error with its own prefix, unless it is stale.
+    await page.goBack();
+    await expect(page.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
+    const back = page.getByRole("region", { name: "Composition", exact: true });
+    await expect(back.getByLabel("X", { exact: true }).first()).toBeVisible();
+    if (stale) await expect(back.getByRole("alert")).toHaveCount(0);
+    else
+      await expect(back.getByRole("alert")).toHaveText(
+        "Your last change while leaving was not saved: Too many requests. Wait one minute and try again.",
+      );
+    await close(owner);
+  });
+}

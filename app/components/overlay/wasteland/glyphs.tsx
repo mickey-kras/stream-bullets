@@ -1,4 +1,4 @@
-import type { AriaRole, ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { ActivityPlatform } from "../../../lib/activity";
 
 /*
@@ -24,26 +24,22 @@ function IconPaths({ platform }: Readonly<{ platform: ActivityPlatform }>): Reac
   return <path fill="currentColor" d="M3 3h5v7h3V7h3V3h7v6h-4v3h-3v2h3v3h4v4h-7v-3h-3v-3H8v6H3z" />;
 }
 
-/** An inline SVG is an image to assistive technology only with this role (an <img> cannot draw in currentColor). */
-const SVG_IMAGE_ROLE: AriaRole = "img";
-
-/** The platform icon: an image with the platform name as its accessible name. */
+/**
+ * The platform icon. The drawing is hidden from assistive technology; the platform name is visually hidden text
+ * after it, so a screen reader reads the name before the user name.
+ */
 export function PlatformIcon({
   platform,
   label,
   className,
 }: Readonly<{ platform: ActivityPlatform; label: string; className?: string }>): ReactNode {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      role={SVG_IMAGE_ROLE}
-      aria-label={label}
-      focusable="false"
-      data-platform={platform}
-    >
-      <IconPaths platform={platform} />
-    </svg>
+    <>
+      <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-platform={platform}>
+        <IconPaths platform={platform} />
+      </svg>
+      <span className="sr-only">{`${label} `}</span>
+    </>
   );
 }
 

@@ -63,13 +63,17 @@ export function layerSelector(layer: Exclude<OverlayLayer, "content">): string {
  * The 1920x1080 design canvas for an OBS composition: the same `.ov-scaler` markup as the editor preview, scaled to
  * fit the viewport. At a 16:9 source size the scale is viewport width / 1920, as in the preview. At another aspect
  * ratio the whole canvas stays in view and the free space is at the right or bottom.
+ *
+ * With `on` false the two boxes have no class, so the content keeps its responsive layout. The boxes stay in the
+ * page either way: turning the canvas on or off changes classes only, so the content below never remounts (no
+ * flash, no replayed animations).
  */
-export function DesignCanvas({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+export function DesignCanvas({ on, children }: Readonly<{ on: boolean; children: ReactNode }>): ReactNode {
   const frame = useRef<HTMLDivElement | null>(null);
   useDesignScale(frame, DESIGN_W, DESIGN_H);
   return (
-    <div className="ov-design" ref={frame}>
-      <div className="ov-scaler">{children}</div>
+    <div className={on ? "ov-design" : undefined} ref={frame}>
+      <div className={on ? "ov-scaler" : undefined}>{children}</div>
     </div>
   );
 }

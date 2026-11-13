@@ -781,6 +781,7 @@
   "overlay.comp.hideCommandsHint": "! で始まるメッセージは配信に表示されません。",
   "overlay.comp.intro": "1920 × 1080 の画面にチャットとキャラクターを配置します。変更はすぐに配信に反映されます。",
   "overlay.comp.layerSoon": "{layer} · 近日公開",
+  "overlay.comp.leaveFailed": "離れるときの最後の変更は保存されませんでした：{error}",
   "overlay.comp.movable": "移動できるレイヤー",
   "overlay.comp.moveHelp": "レイヤーをドラッグして移動し、角をドラッグしてサイズを変えます。矢印キーで 1 px、Shift + 矢印キーで 10 px 動きます。",
   "overlay.comp.overlap": "チャットがオンエア中のコンテンツの一部を隠しています。空いている場所へ移動してください。",

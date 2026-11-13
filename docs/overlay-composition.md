@@ -129,8 +129,11 @@ A drag saves when you release the pointer. A key or a field saves after 400 mill
 If you close the page or go to a different page before then, the editor sends the change at once.
 
 The editor does not wait for the result of a change that it sends while you leave.
-If that change fails, the editor shows an error when you go back to it.
-The newest value always arrives last, also while an earlier save is in progress.
+If that change fails, the editor shows an error when you go back to it within 60 seconds.
+The error tells you that the editor did not save your last change.
+The editor sends the newest value last, also while an earlier save is in progress.
+A slow earlier save can still arrive after the newest value.
+
 Each save counts against the write quota of 60 changes each minute.
 If a save fails, the editor shows the saved layers again.
 If two saves finish in a different sequence, the editor keeps the result with the higher revision.
@@ -167,7 +170,8 @@ The layer clips rows at the top. The chat keeps the order in which the messages 
 
 In a burst, fresh chat is more important than complete chat.
 When more than 4 messages wait, the chat shows all of them at once, without animation.
-The chat also limits the number of rows that leave at the same time.
+The chat also limits the number of rows that leave at the same time to 8.
+This limit includes the removed rows that fade out. Thus a flood of deleted messages does not fill the layer with empty rows.
 
 ### Chat appearance
 
@@ -179,9 +183,9 @@ The chat uses the approved compact cards of issue #663.
 | Card | Dark teal, `rgba(8, 43, 46, 0.9)`, with a 1-pixel border, `#b89649` |
 | User name | Mustard, `#e5bd54`, weight 750, and a colon |
 | Message | Ivory, `#f4ebce`, weight 500. A long message wraps in its card. |
-| Newest card | Mustard border and a 3-pixel mustard bar on the left edge |
+| Newest card | Mustard border and a 3-pixel mustard bar on the left edge. A removed or leaving card does not get this style. |
 | Badge labels | Small gray text, `#c4c2a8`, before the user name |
-| Removed message | Gray italic text |
+| Removed message | Gray italic text. In Japanese, Chinese, and Hindi, gray upright text. |
 | Top edge | The column fades out in the top 18% |
 
 A new card moves up from below its place and fades in. The other cards move up at the same time.
@@ -192,6 +196,7 @@ The movement uses only `transform` and `opacity`. Thus the browser does no layou
 
 With reduced motion, the cards do not move. The chat uses the **Motion** setting of the site or the setting of the operating system.
 A reconnect snapshot and a burst show their cards at once, without movement.
+When a snapshot removes a card, the card goes at once. Then the column closes with the movement.
 
 ### Moderation
 

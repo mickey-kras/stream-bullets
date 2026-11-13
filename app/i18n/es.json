@@ -795,6 +795,7 @@
   "overlay.comp.hideCommandsHint": "Los mensajes que empiezan con ! no se muestran en el stream.",
   "overlay.comp.intro": "Coloca el chat y los personajes en el cuadro de 1920 × 1080. Los cambios salen en directo al instante.",
   "overlay.comp.layerSoon": "{layer} · Próximamente",
+  "overlay.comp.leaveFailed": "Tu último cambio al salir no se guardó: {error}",
   "overlay.comp.movable": "capa movible",
   "overlay.comp.moveHelp": "Arrastra una capa para moverla y su esquina para cambiar el tamaño. Las flechas la mueven 1 px; Mayús + flecha, 10 px.",
   "overlay.comp.overlap": "El chat tapa parte del contenido al aire. Muévelo a una zona libre.",

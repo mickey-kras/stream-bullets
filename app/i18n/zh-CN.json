@@ -781,6 +781,7 @@
   "overlay.comp.hideCommandsHint": "以 ! 开头的消息不会显示在直播中。",
   "overlay.comp.intro": "在 1920 × 1080 画面中摆放聊天和角色。更改会立即上线。",
   "overlay.comp.layerSoon": "{layer} · 即将推出",
+  "overlay.comp.leaveFailed": "离开时的最后一次更改未保存：{error}",
   "overlay.comp.movable": "可移动图层",
   "overlay.comp.moveHelp": "拖动图层可移动它，拖动它的角可调整大小。方向键每次移动 1 px，Shift + 方向键移动 10 px。",
   "overlay.comp.overlap": "聊天遮住了部分直播内容。请把它移到空白区域。",
