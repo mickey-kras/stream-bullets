@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { AppEnv } from "../env";
+import { EMOTE_HOSTS } from "../lib/activity";
 
 export class HttpError extends Error {
   // `code` is a stable, machine-readable reason (for example `step_up_required`) sent next to the message.
@@ -168,7 +169,7 @@ export function securityHeaders(
       "default-src 'self'",
       `script-src 'self' 'nonce-${nonce}'${development ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' blob: data:",
+      `img-src 'self' blob: data: ${EMOTE_HOSTS.map((host: string): string => `https://${host}`).join(" ")}`,
       "font-src 'self'",
       `connect-src 'self' ${origin.replace(/^http/, "ws")}`,
       "object-src 'none'",

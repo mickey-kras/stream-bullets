@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
+import { EMOTE_HOSTS } from "../app/lib/activity";
 import { securityHeaders } from "../app/server/http.server";
 import {
   constantTimeEqual,
@@ -233,5 +234,24 @@ describe("the overlay page", (): void => {
     expect(headers("/@key_page/overlay?key=abc").get("Referrer-Policy")).toBe("no-referrer");
     expect(headers("/@key_page").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
     expect(headers("/overlay-control").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
+  });
+
+  it("keeps the layer in the query, so a layer URL also sends no Referer", (): void => {
+    expect(headers("/@key_page/overlay?key=abc&layer=chat").get("Referrer-Policy")).toBe("no-referrer");
+    expect(headers("/@key_page/overlay/chat?key=abc").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
+  });
+
+  it("loads emote images only from the emote hosts over HTTPS", (): void => {
+    const policy: string = headers("/@key_page/overlay?key=abc&layer=chat").get("Content-Security-Policy") ?? "";
+    const images: string | undefined = policy.split("; ").find((part: string): boolean => part.startsWith("img-src "));
+    expect(images?.split(" ")).toEqual([
+      "img-src",
+      "'self'",
+      "blob:",
+      "data:",
+      ...EMOTE_HOSTS.map((host: string): string => `https://${host}`),
+    ]);
+    expect(policy).toContain("https://static-cdn.jtvnw.net");
+    expect(policy).not.toContain("http://static-cdn.jtvnw.net");
   });
 });

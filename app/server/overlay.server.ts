@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES } from "../../db/enums";
 import type { AppEnv } from "../env";
+import { charactersPatchSchema, chatPatchSchema, mergeLayers } from "../lib/overlay-layers";
 import type { CardIcon, OverlayData, OverlaySource, OverlaySourceRef, OverlayState, SupportLinkKind } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { HttpError } from "./http.server";
@@ -37,6 +38,14 @@ export const overlayActionSchema = z.discriminatedUnion("action", [
         .max(OVERLAY_MESSAGE_LENGTH)
         .regex(/^[^\p{Cc}]*$/u, "Use a single line."),
       style: z.enum(OVERLAY_MESSAGE_STYLES),
+    })
+    .strict(),
+  // Layer edits go live at once, like `layout`. Rects use the 1920x1080 design space.
+  z
+    .object({
+      action: z.literal("layers"),
+      chat: chatPatchSchema.optional(),
+      characters: charactersPatchSchema.optional(),
     })
     .strict(),
 ]);
@@ -93,6 +102,7 @@ export async function nextOverlayState(
     next.message = action.text;
     next.messageStyle = action.style;
   }
+  if (action.action === "layers") next.layers = mergeLayers(current.layers, action);
   // Instant switch skips the preview: whatever is previewed is on air.
   if (next.instant) next.air = next.preview;
   return next;
@@ -150,10 +160,11 @@ export async function updateOverlay(
     const current = await getOverlayState(env, streamerId);
     const next = await nextOverlayState(env, streamerId, current, action);
     const result = await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,
-        show_results,message,message_style,revision,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+        show_results,message,message_style,layers,revision,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
       ON CONFLICT(streamer_id) DO UPDATE SET air=excluded.air,preview=excluded.preview,position=excluded.position,
         size=excluded.size,instant=excluded.instant,show_results=excluded.show_results,message=excluded.message,
-        message_style=excluded.message_style,revision=excluded.revision,updated_at=excluded.updated_at
+        message_style=excluded.message_style,layers=excluded.layers,revision=excluded.revision,
+        updated_at=excluded.updated_at
       WHERE overlay_state.revision=?`)
       .bind(
         streamerId,
@@ -165,6 +176,7 @@ export async function updateOverlay(
         next.showResults ? 1 : 0,
         next.message,
         next.messageStyle,
+        JSON.stringify(next.layers),
         next.revision,
         Date.now(),
         current.revision,
