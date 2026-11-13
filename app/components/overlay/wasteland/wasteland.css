@@ -1,6 +1,47 @@
 /* Overlay composition and the wasteland theme (docs/design/wasteland-overlays). Layer content is laid out in design
    pixels (1080p) and scaled by --ov-scale. Colours and textures come from the --wl-* properties set by theme.ts. */
 
+/* ---------- OBS design canvas: the editor preview's 1920x1080 .ov-scaler (overlay-composition) ---------- */
+.ov-design-screen {
+  position: relative;
+  height: 100vh;
+  padding: 0;
+}
+.ov-design {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ov-design[data-scaled] > .ov-scaler {
+  visibility: visible;
+}
+/* In a 1920x1080 canvas (OBS and every preview), sizes that follow the viewport follow the canvas instead:
+   1vw is 1% of 1920 px, and the small-screen card rules do not apply. Thus all canvases show the same layout. */
+.ov-scaler {
+  --vw: 19.2px;
+}
+.ov-scaler .overlay-card:not(.mash-overlay) h1 {
+  font-size: clamp(1.75rem, calc(var(--vw) * 4), 3.25rem);
+}
+.ov-scaler .poll-card h2 {
+  font-size: clamp(1.875rem, calc(var(--vw) * 3), 2.812rem);
+}
+@media (max-width: 43.75em) {
+  .ov-scaler .mash-overlay {
+    padding: 36px 40px;
+  }
+  .ov-scaler .mash-ov-head {
+    flex-direction: row;
+  }
+  .ov-scaler .mash-overlay .mash-ring {
+    width: 150px;
+    height: 150px;
+  }
+  .ov-scaler .mash-overlay .mash-ring span {
+    font-size: 60px;
+  }
+}
+
 /* ---------- Composition: characters below content, chat on top ---------- */
 .ov-composition {
   position: absolute;
@@ -161,11 +202,11 @@
 .wl-user {
   font-weight: 700;
   color: var(--wl-user);
-  margin-right: 0.08em;
+  margin-inline-end: 0.08em;
 }
 .wl-chip {
   display: inline-block;
-  margin-right: 0.3em;
+  margin-inline-end: 0.3em;
   padding: 0.18em 0.38em 0.14em;
   border: 2px solid var(--wl-border);
   border-radius: 4px;

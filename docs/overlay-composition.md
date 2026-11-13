@@ -40,7 +40,13 @@ The rectangle must stay in the frame: `x + w` is at most 1920 and `y + h` is at 
 | `chat` | `x` 1240, `y` 372, 640 × 660 | 280 × 160 |
 | `characters` | `x` 0, `y` 760, 1920 × 320 | 640 × 160 |
 
-The page scales the design pixels to the width of the browser source. Thus the layout is the same at all sizes.
+The page scales the design pixels to the size of the browser source.
+
+When the chat layer is on, the composition puts all of its layers, the content too, in one 1920 × 1080 canvas.
+This canvas is the same as the canvas of the editor preview. Thus the layout is the same at all 16:9 sizes, and the same as in the preview.
+
+With a source that is not 16:9, the full canvas stays in the source. The free space is at the right or at the bottom.
+When no feed layer is on, the content layer keeps its responsive layout. Thus an existing OBS scene does not change.
 
 The overlay reads stored and broadcast layers leniently. Thus a value from an older or newer version never stops the page:
 
@@ -84,8 +90,8 @@ If you lost the URL, select **Regenerate link**. Then update all OBS sources.
 
 ## OBS browser source
 
-Use a browser source of 1920 × 1080 for the composition. A size of 1280 × 720 also works.
-Keep the 16:9 aspect ratio. With a different ratio, the layer heights do not agree with their contents.
+Use a browser source of 1920 × 1080 for the composition. A different 16:9 size, such as 1280 × 720, also works.
+Use a 16:9 source. With the chat layer on, all 16:9 sizes show the same layout as the preview.
 For a layer source, use the size of its layer rectangle, or the same ratio at a smaller size.
 The editor and the link panel show the size of each layer.
 
@@ -93,8 +99,8 @@ A larger layer source shows the layer larger.
 
 The overlay background is transparent, so you do not need custom CSS.
 
-After you update to the release with the chat layer, refresh each open OBS source one time.
-An OBS source that opened before this release does not show the chat.
+After the update that added the chat layer, refresh each open OBS source one time.
+You do this step only one time. An OBS source that opened before this update does not show the chat.
 The editor shows this step under **Show on stream** for the chat layer.
 
 ### Live-room seats
@@ -120,12 +126,18 @@ To change a layer, do these steps:
 
 A drag saves when you release the pointer. A key or a field saves after 400 milliseconds without a change.
 If you close the page or go to a different page before then, the editor sends the change at once.
+
+The editor does not wait for the result of a change that it sends while you leave.
+If that change fails, the editor shows an error when you go back to it.
+The newest value always arrives last, also while an earlier save is in progress.
 Each save counts against the write quota of 60 changes each minute.
 If a save fails, the editor shows the saved layers again.
 If two saves finish in a different sequence, the editor keeps the result with the higher revision.
 
 When the chat layer covers part of the on-air content in the preview, a note shows under the preview.
 Move the chat layer to a free area to remove the note. The note does not stop a save.
+
+The note changes only after a move is complete, not during a drag. A screen reader reads it after your first change on the page.
 The default chat rectangle is in the bottom-right corner, 40 pixels from the right edge and 48 pixels from the bottom edge.
 A poll fills the top of the frame and can go below `y` 372. Thus with a poll on air, the note can show for the default rectangle.
 

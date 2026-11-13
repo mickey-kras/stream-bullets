@@ -36,6 +36,11 @@
   border-inline-start: 3px solid var(--gold);
   font-size: 0.9375rem;
 }
+/* The note's live region stays mounted; empty, it takes no space. */
+.ov-comp-overlap:empty {
+  padding: 0;
+  border: 0;
+}
 
 /* ---------- Preview background ---------- */
 .ov-comp-frame {

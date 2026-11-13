@@ -81,6 +81,27 @@ interface Drag {
 
 type SaveStatus = "idle" | "saving" | "saved";
 
+/** Debounce for the overlap note: it changes only once a move has settled, not during a drag. */
+export const OVERLAP_NOTE_MS = 500;
+
+/**
+ * The error of a change sent while leaving the editor. The editor is gone when the answer comes, so the next editor
+ * on this page shows it (after in-app navigation back). After a back-forward cache restore the same editor shows it.
+ */
+let leaveFailure: string | null = null;
+/** The open editors: one that shows when a change sent while leaving fails, if the answer comes after it opened. */
+const leaveListeners = new Set<(message: string) => void>();
+
+/** A save request in flight: the fields it sends and a promise that settles when it is answered. */
+interface Inflight {
+  sent: LayersPatch;
+  done: Promise<void>;
+}
+
+function ignore(): void {
+  // A settled request; its result is handled where it was sent.
+}
+
 /**
  * Optimistic layer edits, tracked per field. Local changes show at once over the newest saved or live layers and save
  * in the background, one request at a time. A request sends only the fields changed since the last request, so an
@@ -100,9 +121,10 @@ function useLayerDraft(
   // Every unconfirmed local field (sent or not), and the subset not sent yet.
   const [draft, setDraft] = useState<LayersPatch>({});
   const [status, setStatus] = useState<SaveStatus>("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => leaveFailure);
   const draftRef = useRef<LayersPatch>({});
   const unsent = useRef<LayersPatch>({});
+  const inflight = useRef<Inflight | null>(null);
   const savedRef = useRef<OverlayLayers>(layers);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busy = useRef<boolean>(false);
@@ -112,29 +134,55 @@ function useLayerDraft(
     savedRef.current = layers;
     savedCallback.current = onSaved;
   }, [layers, onSaved]);
-  // Leaving the page or closing the editor sends the edits not sent yet, without waiting for the answer.
-  useEffect(() => {
-    const leave = (): void => {
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = null;
-      const pending: LayersPatch = unsent.current;
-      if (isEmptyPatch(pending)) return;
-      unsent.current = {};
-      draftRef.current = withoutSent(draftRef.current, pending);
-      setDraft(draftRef.current);
-      sendJson("POST", "/api/overlay", layersAction(pending), { keepalive: true }).catch((): void => undefined);
-    };
-    window.addEventListener("pagehide", leave);
-    return (): void => {
-      window.removeEventListener("pagehide", leave);
-      leave();
-    };
-  }, []);
 
   const setBoth = (next: LayersPatch): void => {
     draftRef.current = next;
     setDraft(next);
   };
+
+  // Leaving the page or closing the editor sends the edits not sent yet, without waiting for the answer. The newest
+  // values must arrive last. Closing the editor (the page stays) sends them after the save in flight is answered.
+  // Leaving the page cannot wait, so it sends the fields in flight again with the newer ones in one request.
+  useEffect(() => {
+    // The error of an earlier editor is now on screen. A later one shows when it comes.
+    leaveFailure = null;
+    leaveListeners.add(setError);
+    const leave = (closing: boolean): void => {
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = null;
+      const pending: LayersPatch = unsent.current;
+      if (isEmptyPatch(pending)) return;
+      unsent.current = {};
+      const active: Inflight | null = inflight.current;
+      const send = (patch: LayersPatch): Promise<{ overlay: OverlayState }> =>
+        sendJson<{ overlay: OverlayState }>("POST", "/api/overlay", layersAction(patch), { keepalive: true });
+      let request: Promise<{ overlay: OverlayState }>;
+      if (!active) request = send(pending);
+      else if (closing) request = active.done.then(() => send(pending));
+      else request = send(mergePatches(active.sent, pending));
+      // The draft keeps the values until the answer, so a restored page shows them meanwhile.
+      request.then(
+        (result: { overlay: OverlayState }): void => {
+          savedCallback.current(result.overlay);
+          setBoth(withoutSent(draftRef.current, pending));
+        },
+        (failure: unknown): void => {
+          const message: string = errorMessage(failure);
+          // An editor that is open (this one after a back-forward cache restore, or the next one) shows it at once.
+          if (leaveListeners.size === 0) leaveFailure = message;
+          for (const listener of leaveListeners) listener(message);
+          setBoth(withoutSent(draftRef.current, pending));
+        },
+      );
+    };
+    const hide = (): void => leave(false);
+    window.addEventListener("pagehide", hide);
+    return (): void => {
+      window.removeEventListener("pagehide", hide);
+      leaveListeners.delete(setError);
+      leave(true);
+    };
+  }, []);
 
   async function save(): Promise<void> {
     if (timer.current) clearTimeout(timer.current);
@@ -148,8 +196,13 @@ function useLayerDraft(
     unsent.current = {};
     busy.current = true;
     setStatus("saving");
+    const request: Promise<{ overlay: OverlayState }> = postJson<{ overlay: OverlayState }>(
+      "/api/overlay",
+      layersAction(sent),
+    );
+    inflight.current = { sent, done: request.then(ignore, ignore) };
     try {
-      const result = await postJson<{ overlay: OverlayState }>("/api/overlay", layersAction(sent));
+      const result = await request;
       savedCallback.current(result.overlay);
       setError(null);
       setStatus("saved");
@@ -158,6 +211,7 @@ function useLayerDraft(
       setError(errorMessage(failure));
       setStatus("idle");
     } finally {
+      inflight.current = null;
       // Either way the sent fields leave the draft, unless they were edited again since.
       setBoth(withoutSent(draftRef.current, sent));
       busy.current = false;
@@ -175,7 +229,11 @@ function useLayerDraft(
   const edit = (change: (current: OverlayLayers) => OverlayLayers, when: "now" | "idle" | "later"): void => {
     const before: OverlayLayers = mergeLayers(savedRef.current, draftRef.current);
     const patch: LayersPatch = diffLayers(before, change(before));
-    if (isEmptyPatch(patch)) return;
+    if (isEmptyPatch(patch)) {
+      // Enter in a field confirms the value it already typed: save the waiting edit now.
+      if (when === "now") flush();
+      return;
+    }
     setBoth(mergePatches(draftRef.current, patch));
     unsent.current = mergePatches(unsent.current, patch);
     if (when === "later") return;
@@ -371,9 +429,24 @@ export function CompositionEditor({
   const covers: boolean = useChatOverlap(frame, shown.chat, source);
   const [sourceBefore, sourceAfter] = tAround("overlay.comp.chatSource", "link");
   const drag = useRef<Drag | null>(null);
+  const [dragging, setDragging] = useState<boolean>(false);
+  // The overlap note follows `covers` once a move settles: never during a drag, and OVERLAP_NOTE_MS after the last
+  // change (a pointer-up, the last arrow key). It speaks only after the owner's first edit, not on page load.
+  const [note, setNote] = useState<boolean>(false);
+  const [armed, setArmed] = useState<boolean>(false);
+  const noteOn: boolean = shown.chat.enabled && covers;
+  useEffect(() => {
+    if (dragging) return;
+    const wait = setTimeout(() => setNote(noteOn), OVERLAP_NOTE_MS);
+    return (): void => clearTimeout(wait);
+  }, [noteOn, dragging]);
 
+  const change = (update: (current: OverlayLayers) => OverlayLayers, when: "now" | "idle" | "later"): void => {
+    setArmed(true);
+    edit(update, when);
+  };
   const setRect = (layer: EditableLayer, rect: LayerRect, when: "now" | "idle" | "later"): void =>
-    edit((current: OverlayLayers) => withRect(current, layer, rect), when);
+    change((current: OverlayLayers) => withRect(current, layer, rect), when);
 
   const pointerDown = (layer: EditableLayer) => (event: PointerEvent<HTMLElement>, mode: Drag["mode"]) => {
     const element: HTMLElement | null = frame.current;
@@ -393,6 +466,7 @@ export function CompositionEditor({
       scale: element.clientWidth / DESIGN_W || 1,
       moved: false,
     };
+    setDragging(true);
   };
   const pointerMove = (event: PointerEvent<HTMLElement>): void => {
     const active: Drag | null = drag.current;
@@ -410,6 +484,7 @@ export function CompositionEditor({
     const active: Drag | null = drag.current;
     if (!active || active.pointerId !== event.pointerId) return;
     drag.current = null;
+    setDragging(false);
     if (active.moved) flush();
   };
   const nudge = (layer: EditableLayer) => (mode: Drag["mode"], dx: number, dy: number) => {
@@ -507,13 +582,10 @@ export function CompositionEditor({
           <p className="muted ov-comp-help" id={helpId}>
             {t("overlay.comp.moveHelp")}
           </p>
-          <div aria-live="polite">
-            {chat.enabled && covers && (
-              <p className="ov-comp-help ov-comp-overlap" data-comp-overlap>
-                {t("overlay.comp.overlap")}
-              </p>
-            )}
-          </div>
+          {/* Always mounted, so a screen reader follows it. Silent until the owner first changes the layout. */}
+          <p className="ov-comp-help ov-comp-overlap" data-comp-overlap aria-live={armed ? "polite" : "off"}>
+            {note ? t("overlay.comp.overlap") : ""}
+          </p>
           {chat.enabled && (
             <p className="muted ov-comp-help" data-comp-sample>
               {t("overlay.comp.sampleChat")}
@@ -539,7 +611,7 @@ export function CompositionEditor({
                 checked={chat.enabled}
                 onChange={(event) => {
                   const enabled: boolean = event.currentTarget.checked;
-                  edit((current) => ({ ...current, chat: { ...current.chat, enabled } }), "now");
+                  change((current) => ({ ...current, chat: { ...current.chat, enabled } }), "now");
                 }}
               />
               <span>{t("overlay.comp.show")}</span>
@@ -554,7 +626,7 @@ export function CompositionEditor({
                 aria-describedby={commandsId}
                 onChange={(event) => {
                   const hideCommands: boolean = event.currentTarget.checked;
-                  edit((current) => ({ ...current, chat: { ...current.chat, hideCommands } }), "now");
+                  change((current) => ({ ...current, chat: { ...current.chat, hideCommands } }), "now");
                 }}
               />
               <span>{t("overlay.comp.hideCommands")}</span>
@@ -575,7 +647,7 @@ export function CompositionEditor({
                 disabled={!charactersEditable}
                 onChange={(event) => {
                   const enabled: boolean = event.currentTarget.checked;
-                  edit((current) => ({ ...current, characters: { ...current.characters, enabled } }), "now");
+                  change((current) => ({ ...current, characters: { ...current.characters, enabled } }), "now");
                 }}
               />
               <span>{t("overlay.comp.show")}</span>
