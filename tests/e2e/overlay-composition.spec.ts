@@ -1,10 +1,13 @@
-import { newPage, test, expect } from "./coverage";
+import type { Locator, WebSocketRoute } from "@playwright/test";
+import { newPage, close, test, expect, type Browser, type Page } from "./coverage";
 import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
-import type { ActivityChat } from "../../app/lib/activity";
+import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../../app/lib/activity";
 
 const OWNER_IP = clientIp("overlay-composition", 240);
+const OBS_IP = clientIp("overlay-composition", 241);
+const GEOMETRY_IP = clientIp("overlay-composition", 242);
 
 const resetLayers = `UPDATE overlay_state SET layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`;
 
@@ -69,4 +72,441 @@ test("an unknown layer renders an empty transparent page", async ({ page }) => {
   await page.goto("/@feature_host/overlay?layer=nope");
   await expect(page.locator("main.overlay-screen")).toBeAttached();
   expect(await page.locator("main.overlay-screen").evaluate((element) => element.childElementCount)).toBe(0);
+});
+
+const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
+const CHAT_RECT = { x: 1460, y: 280, w: 420, h: 640 } as const;
+
+function setLayers(name: string, layers: object): Promise<void> {
+  return runSql(name, [
+    `UPDATE overlay_state SET layers='${JSON.stringify(layers)}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
+  ]);
+}
+
+interface Message {
+  platform: ActivityPlatform;
+  id: string;
+  user: string;
+  text: string;
+  receivedAt?: number;
+  sentAt?: number | null;
+}
+
+function message({ platform, id, user, text, receivedAt, sentAt }: Message): ActivityChat {
+  return {
+    kind: "chat",
+    id: `${platform}:${id}`,
+    platform,
+    channelId: `e2e-${platform}`,
+    messageId: id,
+    user: { id: `${platform}-${user}`, displayName: user },
+    text,
+    fragments: [{ type: "text", text }],
+    badges: [],
+    sentAt: sentAt ?? null,
+    receivedAt: receivedAt ?? Date.now(),
+    live: true,
+  };
+}
+
+function event(value: ActivityEvent): string {
+  return JSON.stringify({ type: "event", event: value });
+}
+
+function snapshot(events: readonly ActivityEvent[]): string {
+  return JSON.stringify({
+    type: "snapshot",
+    events: events.map((item) => ({ ...item, live: false })),
+    replay: true,
+  });
+}
+
+interface ChatSource {
+  page: Page;
+  chat: Locator;
+  rows: Locator;
+  sockets: WebSocketRoute[];
+  /** Sends a frame on the newest activity socket. */
+  send(frame: string): void;
+}
+
+/**
+ * An OBS chat source with a mocked activity feed. `opened(n)` gives the snapshot frame of the nth socket (0-based).
+ */
+async function chatSource(
+  browser: Browser,
+  opened: (index: number) => string = () => snapshot([]),
+  path: string = "/@feature_host/overlay?key=e2e-key&layer=chat",
+  viewport: { width: number; height: number } = { width: 420, height: 640 },
+): Promise<ChatSource> {
+  const page = await newPage(browser, {
+    viewport,
+    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${OBS_IP}` },
+  });
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket("**/api/activity/**", (socket) => {
+    const index: number = sockets.length;
+    sockets.push(socket);
+    socket.send(opened(index));
+  });
+  await page.goto(path);
+  await expect.poll(() => sockets.length).toBe(1);
+  const chat = page.locator("[data-overlay-chat]");
+  await expect(chat).toBeAttached();
+  return {
+    page,
+    chat,
+    rows: chat.locator("li.wl-item"),
+    sockets,
+    send(frame: string): void {
+      const socket: WebSocketRoute | undefined = sockets.at(-1);
+      if (!socket) throw new Error("No activity socket.");
+      socket.send(frame);
+    },
+  };
+}
+
+async function rowTexts(rows: Locator): Promise<string[]> {
+  return rows.locator(".wl-msg").allTextContents();
+}
+
+test.describe("merged chat on the overlay", () => {
+  test.beforeEach(async () => {
+    await setLayers("overlay-chat-reset", { chat: { enabled: true } });
+  });
+
+  test("rows from all three platforms keep arrival order and name their platform", async ({ browser }) => {
+    const source = await chatSource(browser);
+    const now: number = Date.now();
+    // Send times and receive times run backwards: only arrival order counts.
+    source.send(
+      event(
+        message({
+          platform: "twitch",
+          id: "o1",
+          user: "Rust",
+          text: "first in",
+          receivedAt: now,
+          sentAt: now,
+        }),
+      ),
+    );
+    source.send(
+      event(
+        message({
+          platform: "youtube",
+          id: "o2",
+          user: "Ngozi",
+          text: "second in",
+          receivedAt: now - 5_000,
+          sentAt: now - 6_000,
+        }),
+      ),
+    );
+    source.send(
+      event(
+        message({
+          platform: "kick",
+          id: "o3",
+          user: "Maxine",
+          text: "third in",
+          receivedAt: now - 9_000,
+          sentAt: now - 9_500,
+        }),
+      ),
+    );
+    await expect.poll(() => rowTexts(source.rows)).toEqual(["first in", "second in", "third in"]);
+    const names: [number, string][] = [
+      [0, "Twitch"],
+      [1, "YouTube"],
+      [2, "Kick"],
+    ];
+    for (const [index, name] of names) {
+      await expect(source.rows.nth(index).getByRole("img", { name, exact: true })).toBeVisible();
+    }
+    expect(await source.rows.evaluateAll((items) => items.map((item) => item.getAttribute("data-platform")))).toEqual([
+      "twitch",
+      "youtube",
+      "kick",
+    ]);
+    await close(source.page);
+  });
+
+  test("moderation removes a deleted message, then a cleared or banned user's messages", async ({ browser }) => {
+    const now: number = Date.now();
+    const keep = message({
+      platform: "twitch",
+      id: "m-keep",
+      user: "Calm",
+      text: "stays on screen",
+      receivedAt: now,
+    });
+    const gone = message({
+      platform: "twitch",
+      id: "m-gone",
+      user: "Calm",
+      text: "deleted soon",
+      receivedAt: now,
+    });
+    const loud1 = message({
+      platform: "twitch",
+      id: "m-l1",
+      user: "Loud",
+      text: "loud one",
+      receivedAt: now,
+    });
+    const loud2 = message({
+      platform: "twitch",
+      id: "m-l2",
+      user: "Loud",
+      text: "loud two",
+      receivedAt: now,
+    });
+    const kicker = message({
+      platform: "kick",
+      id: "m-k1",
+      user: "Banned",
+      text: "kick spam",
+      receivedAt: now,
+    });
+    const source = await chatSource(browser, () => snapshot([keep, gone, loud1, loud2, kicker]));
+    await expect(source.rows).toHaveCount(5);
+
+    source.send(
+      event({
+        kind: "delete",
+        platform: "twitch",
+        messageId: "m-gone",
+        receivedAt: Date.now(),
+      }),
+    );
+    const deleted = source.chat.locator('li[data-phase="removed"]');
+    await expect(deleted).toHaveCount(1);
+    await expect(deleted).toContainText("message removed by a moderator");
+    await expect(source.chat.getByText("deleted soon")).toHaveCount(0);
+    await expect(source.rows).toHaveCount(4);
+
+    source.send(
+      event({
+        kind: "clear_user",
+        platform: "twitch",
+        userId: "twitch-Loud",
+        receivedAt: Date.now(),
+      }),
+    );
+    await expect(deleted).toHaveCount(2);
+    await expect(deleted.locator(".wl-msg")).toHaveText([
+      "message removed by a moderator",
+      "message removed by a moderator",
+    ]);
+    await expect(source.rows).toHaveCount(2);
+
+    source.send(
+      event({
+        kind: "ban",
+        platform: "kick",
+        userId: "kick-Banned",
+        until: null,
+        receivedAt: Date.now(),
+      }),
+    );
+    await expect(source.rows).toHaveCount(1);
+    await expect(source.rows.locator(".wl-msg")).toHaveText("stays on screen");
+    await close(source.page);
+  });
+
+  test("hide commands hides !jump; turning it off shows !jump", async ({ browser }) => {
+    let source = await chatSource(browser);
+    source.send(event(message({ platform: "kick", id: "c1", user: "Jumper", text: "!jump" })));
+    source.send(
+      event(
+        message({
+          platform: "kick",
+          id: "c2",
+          user: "Jumper",
+          text: "after the command",
+        }),
+      ),
+    );
+    await expect(source.rows).toHaveCount(1);
+    await expect(source.rows.locator(".wl-msg")).toHaveText("after the command");
+    await close(source.page);
+
+    await setLayers("overlay-chat-commands", {
+      chat: { enabled: true, hideCommands: false },
+    });
+    source = await chatSource(browser);
+    source.send(event(message({ platform: "kick", id: "c3", user: "Jumper", text: "!jump" })));
+    source.send(
+      event(
+        message({
+          platform: "kick",
+          id: "c4",
+          user: "Jumper",
+          text: "after the command",
+        }),
+      ),
+    );
+    await expect.poll(() => rowTexts(source.rows)).toEqual(["!jump", "after the command"]);
+    await close(source.page);
+  });
+
+  test("a reconnect snapshot neither animates nor duplicates rows", async ({ browser }) => {
+    const now: number = Date.now();
+    const a = message({
+      platform: "twitch",
+      id: "r-a",
+      user: "Ada",
+      text: "row a",
+      receivedAt: now - 3_000,
+    });
+    const b = message({
+      platform: "youtube",
+      id: "r-b",
+      user: "Bo",
+      text: "row b",
+      receivedAt: now - 2_000,
+    });
+    const c = message({
+      platform: "kick",
+      id: "r-c",
+      user: "Cy",
+      text: "row c",
+      receivedAt: now - 1_000,
+    });
+    const d = message({
+      platform: "twitch",
+      id: "r-d",
+      user: "Di",
+      text: "row d",
+      receivedAt: now + 500,
+    });
+    const source = await chatSource(browser, (index: number) =>
+      index === 0 ? snapshot([a, b]) : snapshot([a, b, c, d]),
+    );
+    await expect(source.rows).toHaveCount(2);
+    // Snapshot rows never slide in.
+    await expect(source.chat.locator("li.wl-in")).toHaveCount(0);
+    await expect(source.chat.locator('li[data-phase="entering"]')).toHaveCount(0);
+
+    // A live row slides in and settles.
+    source.send(event(c));
+    await expect(source.rows).toHaveCount(3);
+    await expect(source.rows.nth(2)).toHaveClass(/\bwl-in\b/);
+    await expect(source.rows.nth(2)).toHaveAttribute("data-phase", "shown");
+    // Mark the rendered rows: a remount (and its animation) would drop the mark.
+    await source.rows.evaluateAll((items) => items.forEach((item) => item.setAttribute("data-e2e-kept", "1")));
+
+    await source.sockets[0].close();
+    await expect.poll(() => source.sockets.length).toBe(2);
+    await expect.poll(() => rowTexts(source.rows)).toEqual(["row a", "row b", "row c", "row d"]);
+    await expect(source.chat.locator("li[data-e2e-kept]")).toHaveCount(3);
+    // The new snapshot row and the old rows show at once, without an entering state.
+    await expect(source.chat.locator('li[data-phase="entering"]')).toHaveCount(0);
+    await expect(source.rows.nth(3)).not.toHaveClass(/\bwl-in\b/);
+    await expect(source.rows.nth(3)).toHaveAttribute("data-phase", "shown");
+    await expect(source.rows.nth(0)).not.toHaveClass(/\bwl-in\b/);
+    await close(source.page);
+  });
+
+  test("an unavailable message clears the chat", async ({ browser }) => {
+    const rows = [
+      message({
+        platform: "twitch",
+        id: "u1",
+        user: "Ada",
+        text: "before the new key",
+      }),
+      message({ platform: "kick", id: "u2", user: "Bo", text: "also before" }),
+    ];
+    const source = await chatSource(browser, (index: number) => snapshot(index === 0 ? rows : []));
+    await expect(source.rows).toHaveCount(2);
+    source.send(JSON.stringify({ type: "unavailable" }));
+    await expect(source.rows).toHaveCount(0);
+    // The source keeps trying, and the next snapshot is empty.
+    await expect.poll(() => source.sockets.length).toBe(2);
+    await expect(source.rows).toHaveCount(0);
+    await close(source.page);
+  });
+
+  test("message text with markup renders as literal text", async ({ browser }) => {
+    const unsafe = "<img src=x onerror=alert(1)>";
+    const source = await chatSource(browser);
+    const dialogs: string[] = [];
+    source.page.on("dialog", (dialog) => {
+      dialogs.push(dialog.type());
+      void dialog.dismiss();
+    });
+    source.send(
+      event(
+        message({
+          platform: "youtube",
+          id: "x1",
+          user: "<b>bold</b>",
+          text: unsafe,
+        }),
+      ),
+    );
+    await expect(source.rows.locator(".wl-msg")).toHaveText(unsafe);
+    await expect(source.rows.locator(".wl-user")).toContainText("<b>bold</b>");
+    await expect(source.chat.locator("img, b")).toHaveCount(0);
+    expect(dialogs).toEqual([]);
+    await close(source.page);
+  });
+});
+
+test("the chat layer has the same geometry on the OBS composition and in the editor preview", async ({ browser }) => {
+  await setLayers("overlay-geometry-reset", {
+    chat: { enabled: true, rect: CHAT_RECT },
+  });
+  const source = await chatSource(
+    browser,
+    () =>
+      snapshot([
+        message({
+          platform: "twitch",
+          id: "g1",
+          user: "Ada",
+          text: "geometry",
+        }),
+      ]),
+    "/@feature_host/overlay?key=e2e-key",
+    { width: 1920, height: 1080 },
+  );
+  const obsLayer = source.page.locator('.ov-layer[data-layer="chat"]');
+  await expect(obsLayer).toHaveAttribute("data-scaled", "true");
+  const obsBox = await obsLayer.boundingBox();
+  if (!obsBox) throw new Error("No chat layer on the OBS page.");
+  expect(Math.abs(obsBox.x - CHAT_RECT.x)).toBeLessThanOrEqual(2);
+  expect(Math.abs(obsBox.y - CHAT_RECT.y)).toBeLessThanOrEqual(2);
+  expect(Math.abs(obsBox.width - CHAT_RECT.w)).toBeLessThanOrEqual(2);
+  expect(Math.abs(obsBox.height - CHAT_RECT.h)).toBeLessThanOrEqual(2);
+  await close(source.page);
+
+  const owner = await signedIn(browser, "featureowner", GEOMETRY_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const activity: string[] = [];
+  page.on("websocket", (socket) => {
+    if (new URL(socket.url()).pathname.startsWith("/api/activity/")) activity.push(socket.url());
+  });
+  await page.goto("/overlay-control");
+  const frame = page.getByRole("region", { name: "Composition preview" });
+  await expect(frame).toHaveAttribute("data-scaled", "true");
+  const layer = frame.locator('.ov-layer[data-layer="chat"]');
+  await expect(layer).toHaveAttribute("data-scaled", "true");
+  await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
+  const scale: number = await frame.evaluate((element: Element) => element.clientWidth / 1920);
+  const scaler = await frame.locator(".ov-scaler").boundingBox();
+  const box = await layer.boundingBox();
+  if (!scaler || !box) throw new Error("No preview geometry.");
+  expect(Math.abs(scaler.width - 1920 * scale)).toBeLessThanOrEqual(2);
+  expect(Math.abs(box.x - scaler.x - CHAT_RECT.x * scale)).toBeLessThanOrEqual(2);
+  expect(Math.abs(box.y - scaler.y - CHAT_RECT.y * scale)).toBeLessThanOrEqual(2);
+  expect(Math.abs(box.width - CHAT_RECT.w * scale)).toBeLessThanOrEqual(2);
+  expect(Math.abs(box.height - CHAT_RECT.h * scale)).toBeLessThanOrEqual(2);
+  // The preview plays sample chat and opens no activity socket.
+  await expect(layer.locator("li.wl-item").first()).toBeVisible();
+  expect(activity).toEqual([]);
+  await owner.close();
 });
