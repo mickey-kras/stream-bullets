@@ -54,6 +54,31 @@ export function MentionInput({
     inputType: string;
   } | null>(null);
   const input = useRef<HTMLTextAreaElement | null>(null);
+  const history = useRef<{ values: { text: string; mentions: MentionSelection[] }[]; index: number }>({
+    values: [{ text: value, mentions }],
+    index: 0,
+  });
+  function remember(next: string, selected: MentionSelection[]): void {
+    const state = history.current;
+    if (state.values[state.index].text !== value) {
+      state.values = [{ text: value, mentions }];
+      state.index = 0;
+    }
+    state.values.splice(state.index + 1);
+    state.values.push({ text: next, mentions: selected });
+    if (state.values.length > 100) state.values.shift();
+    state.index = state.values.length - 1;
+  }
+  function restore(next: string, direction: -1 | 1): MentionSelection[] {
+    const state = history.current;
+    for (let index = state.index + direction; index >= 0 && index < state.values.length; index += direction) {
+      if (state.values[index].text !== next) continue;
+      state.index = index;
+      return state.values[index].mentions;
+    }
+    remember(next, []);
+    return [];
+  }
   const [token, setToken] = useState<{
     start: number;
     end: number;
@@ -127,14 +152,16 @@ export function MentionInput({
     const label = `@${user.name}`;
     const next = value.slice(0, token.start) + label + " " + value.slice(token.end);
     if (next.length > 2000) return;
-    onMentionsChange([
+    const selected: MentionSelection[] = [
       ...retainedMentions(mentions, {
         start: token.start,
         end: token.end,
         insertedLength: label.length + 1,
       }),
       { userId: user.id, start: token.start, end: token.start + label.length },
-    ]);
+    ];
+    remember(next, selected);
+    onMentionsChange(selected);
     onChange(next);
     setToken(null);
     requestAnimationFrame(() => {
@@ -166,16 +193,23 @@ export function MentionInput({
           const next = event.currentTarget.value;
           const range = editRange.current;
           editRange.current = null;
-          if (range && !range.inputType.startsWith("history")) {
-            let { start, end } = range;
-            if (start === end && range.inputType.startsWith("delete")) {
-              const removed = value.length - next.length;
-              if (range.inputType.endsWith("Backward")) start = Math.max(0, start - removed);
-              else end += removed;
-            }
-            const insertedLength = next.length - value.length + end - start;
-            onMentionsChange(insertedLength >= 0 ? retainedMentions(mentions, { start, end, insertedLength }) : []);
-          } else onMentionsChange([]);
+          let selected: MentionSelection[];
+          if (range?.inputType === "historyUndo" || range?.inputType === "historyRedo") {
+            selected = restore(next, range.inputType === "historyUndo" ? -1 : 1);
+          } else {
+            if (range) {
+              let { start, end } = range;
+              if (start === end && range.inputType.startsWith("delete")) {
+                const removed = value.length - next.length;
+                if (range.inputType.endsWith("Backward")) start = Math.max(0, start - removed);
+                else end += removed;
+              }
+              const insertedLength = next.length - value.length + end - start;
+              selected = insertedLength >= 0 ? retainedMentions(mentions, { start, end, insertedLength }) : [];
+            } else selected = [];
+            remember(next, selected);
+          }
+          onMentionsChange(selected);
           onChange(next);
           detect(event.currentTarget);
         }}

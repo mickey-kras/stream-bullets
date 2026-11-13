@@ -126,7 +126,7 @@ Plain `@name` text without a selection does not send a notification.
 
 New replies and selected mentions send in-app notifications. The sender receives no notification.
 If a reply also mentions its parent author, the recipient receives one notification.
-Their delivery preferences determine its type.
+The service uses their delivery preferences to select the notification type.
 
 Edits do not send notifications. If you remove a mention, the service deletes its notification.
 The inbox and exact-comment lookup omit deleted comments and inaccessible pages.

@@ -547,7 +547,8 @@ export function Discussion({
   const [busy, setBusy] = useState<boolean>(false);
   const draftKey = `discussion:${viewer?.id ?? "anonymous"}:${entryId}`;
   const [initial] = useState(() => readDraft(draftKey));
-  const [error, setError] = useState<string>(initial.unavailable ? t("discussion.draftUnavailable") : "");
+  const [error, setError] = useState<string>("");
+  const [draftUnavailable, setDraftUnavailable] = useState<boolean>(initial.unavailable);
   const [draft, setDraft] = useState<DiscussionDraft>(initial.draft);
   const draftRef = useRef<DiscussionDraft>(initial.draft);
   const { text, mentions, replyText, replyMentions, replyId } = draft;
@@ -557,8 +558,9 @@ export function Discussion({
     setDraft(next);
     try {
       sessionStorage.setItem(draftKey, JSON.stringify(next));
+      setDraftUnavailable(false);
     } catch {
-      setError(t("discussion.draftUnavailable"));
+      setDraftUnavailable(true);
     }
   }
   const [reported, setReported] = useState<Set<string>>(new Set());
@@ -808,6 +810,9 @@ export function Discussion({
           <SignInDialog open={signIn} onOpenChange={setSignIn} providers={providers} />
         </p>
       )}
+      <p className="form-error" role="alert">
+        {draftUnavailable ? t("discussion.draftUnavailable") : ""}
+      </p>
       <p className="form-error" role="alert">
         {error}
       </p>
