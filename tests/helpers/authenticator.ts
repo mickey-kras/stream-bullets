@@ -1,7 +1,6 @@
 import { toBase64Url } from "../../app/server/webauthn.server";
 
-/* A software FIDO2 authenticator for unit tests: it builds real attestation objects and signed assertions with
-   Web Crypto, so the server's WebAuthn checks run against genuine bytes. */
+// Software FIDO2 authenticator using genuine Web Crypto attestation and assertion bytes.
 
 export type CborInput = number | string | Uint8Array | CborInput[] | Map<CborInput, CborInput> | boolean | null;
 
@@ -91,7 +90,7 @@ export const AT = 0x40;
 export class SoftKey {
   readonly credentialId: Uint8Array = crypto.getRandomValues(new Uint8Array(32));
   counter = 0;
-  /** Counts up on each assertion unless false (like keys without a counter). */
+  // Increment each assertion unless the key has no counter.
   counting = true;
 
   private constructor(

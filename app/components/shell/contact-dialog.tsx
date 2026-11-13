@@ -8,7 +8,7 @@ import { Icon } from "../ui/icon";
 import { IconButton } from "../ui/icon-button";
 import { Sheet } from "../ui/sheet";
 
-/** Selects the address text so the person can copy it by hand when the clipboard is unavailable. */
+// Select the address for manual copying if clipboard access fails.
 function selectText(element: HTMLElement | null): void {
   if (!element) return;
   const range: Range = document.createRange();
@@ -18,18 +18,15 @@ function selectText(element: HTMLElement | null): void {
   selection?.addRange(range);
 }
 
-/**
- * "Contact us" (approved items 30 and 48): the support address as selectable text with a Copy button that falls
- * back to selecting it, an optional mailto link, and shortcuts to reporting and the legal pages.
- * The legal pages keep their own privacy@ address.
- */
+// Selectable support address, copy/select fallback, optional mailto and report/legal links. Legal pages
+// retain privacy@.
 export function ContactDialog({
   open,
   onOpenChange,
 }: Readonly<{ open: boolean; onOpenChange: (open: boolean) => void }>): ReactNode {
   const address = useRef<HTMLSpanElement | null>(null);
   const [notice, setNotice] = useState<string>("");
-  // Clear the notice when the dialog closes. React allows this state update during render.
+  // Clear notices on close; React permits this render-time update.
   const [wasOpen, setWasOpen] = useState<boolean>(open);
   if (wasOpen !== open) {
     setWasOpen(open);
@@ -56,7 +53,7 @@ export function ContactDialog({
       <p>{t("contact.body")}</p>
       <div className="contact-address">
         <span className="contact-email" ref={address}>
-          {/* On a narrow screen the address breaks after the @, not inside the domain. */}
+          {/* Break narrow addresses after @, never inside the domain. */}
           {contactEmails.support.split("@")[0]}@<wbr />
           {contactEmails.support.split("@")[1]}
         </span>

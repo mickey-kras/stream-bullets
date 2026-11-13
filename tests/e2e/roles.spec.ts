@@ -3,16 +3,13 @@ import { expect, test, type APIRequestContext, type Browser, type BrowserContext
 import { origin, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
-/**
- * The cross-phase role matrix (P8): what each kind of account can see and do on the key routes and APIs.
- * Every check here reads, or expects a write to be refused, so the seeded data stays as other specs expect it.
- */
+// Read-only and refused-write role checks preserve shared fixture data.
 
 type Role = "signed-out" | "viewer" | "owner" | "admin" | "frozenowner" | "suspendedowner";
 
 const NO_ID = "00000000-0000-4000-8000-000000000000";
 
-/** Each role's browser context. Each role gets its own IP for the rate limiter. */
+// Each role uses a separate rate-limit IP.
 async function contextFor(browser: Browser, role: Role, ip: number): Promise<BrowserContext> {
   if (role !== "signed-out") return signedIn(browser, role, ip);
   return browser.newContext({
@@ -21,12 +18,12 @@ async function contextFor(browser: Browser, role: Role, ip: number): Promise<Bro
   });
 }
 
-/** The HTTP status of each admin API for one role, and of a write that every role but admins is refused. */
+// Admin endpoint statuses and an admin-only write for each role.
 async function adminApiStatuses(request: APIRequestContext): Promise<number[]> {
   return Promise.all([
     request.get("/api/admin/streamers").then((response) => response.status()),
     request.get("/api/admin/report-groups").then((response) => response.status()),
-    // A missing page and a missing idea: admins get past the role check to a 404; everyone else stops at it.
+    // Missing targets let admins reach 404; other roles fail authorization first.
     request
       .post(`/api/admin/streamers/${NO_ID}`, { data: { action: "unfreeze", reason: "other" } })
       .then((response) => response.status()),
@@ -36,7 +33,6 @@ async function adminApiStatuses(request: APIRequestContext): Promise<number[]> {
   ]);
 }
 
-/** Opens the account menu and returns its row labels (none when signed out). */
 async function menuRows(page: Page): Promise<string[]> {
   const toggle = page.locator(".account-menu-wrap > button.profile");
   if ((await toggle.count()) === 0) return [];
@@ -99,14 +95,14 @@ for (const row of matrix) {
 
     expect(await adminApiStatuses(context.request)).toEqual(row.admin);
 
-    // /overlay-control: owners only. Signed out it sends you to /streamers; others get a 404.
+    // Overlay control: owners only; signed out redirects to /streamers; others get 404.
     const overlay = await page.goto("/overlay-control");
     expect(overlay?.status()).toBe(row.overlayControl);
     if (row.role === "signed-out") await expect(page).toHaveURL(/\/streamers$/);
     if (row.role === "owner")
       await expect(page.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
 
-    // /admin: a sign-in screen signed out, a 404 for non-admins, the admin tabs for admins.
+    // Admin: sign-in when signed out; 404 for non-admins; tabs for admins.
     const admin = await page.goto("/admin");
     if (row.adminPage === "sign-in")
       await expect(page.getByRole("heading", { name: "Sign in to continue" })).toBeVisible();
@@ -117,7 +113,6 @@ for (const row of matrix) {
       await expect(sections.getByRole("link", { name: /Content reports|Reports/ })).toBeVisible();
     }
 
-    // /streamers and the account menu.
     expect((await page.goto("/streamers"))?.status()).toBe(200);
     const rows = await menuRows(page);
     for (const label of row.menu.has) expect(rows, label).toContain(label);
@@ -125,7 +120,6 @@ for (const row of matrix) {
     if (row.role === "signed-out")
       await expect(page.getByRole("banner").getByRole("button", { name: /Sign in/ })).toBeVisible();
 
-    // Edit your page: owners get the dialog with their page; signed out it asks to sign in.
     await page.goto("/streamers?dialog=page");
     if (row.role === "signed-out") await expect(page.getByRole("dialog", { name: /Sign in/ })).toBeVisible();
     else if (row.ownPage) {
@@ -145,7 +139,7 @@ test("role matrix: the streamer page header action and content tools", async ({ 
   if (!topic) throw new Error("The seeded topics are missing.");
   await close(anonymous);
 
-  // Someone else's page (pagination_host): signed-in people suggest and report; admins also remove.
+  // On another page, members suggest and report; admins also remove.
   const tools: Record<"signed-out" | "viewer" | "owner" | "admin", { signedIn: boolean; remove: boolean }> = {
     "signed-out": { signedIn: false, remove: false },
     viewer: { signedIn: true, remove: false },
@@ -162,22 +156,20 @@ test("role matrix: the streamer page header action and content tools", async ({ 
     await expect(suggest, role).toHaveCount(want.signedIn ? 1 : 0);
     await expect(page.getByRole("button", { name: "Report topic" }), role).toHaveCount(want.signedIn ? 1 : 0);
     await expect(page.getByRole("button", { name: "Delete topic" }), role).toHaveCount(want.remove ? 1 : 0);
-    // Only the page owner adds polls.
     await page.goto("/@pagination_host?view=polls");
     await expect(page.getByRole("button", { name: "New poll" }), role).toHaveCount(0);
 
-    // Reports: signed out is refused; a signed-in report of a missing item gets past the sign-in check.
+    // A signed-in report of a missing item passes authentication; signed out fails.
     const report = await context.request.post("/api/reports", {
       data: { targetKind: "entry", targetId: NO_ID, reason: "spam", details: "" },
     });
     expect(report.status(), role).toBe(role === "signed-out" ? 401 : 404);
-    // Only a page owner may edit a page. The owner's edit keeps test_host's seeded text.
+    // Keep test_host fixture text unchanged when testing owner edits.
     const edit = await context.request.patch("/api/streamer", { data: { about: "A test community." } });
     expect(edit.status(), role).toBe({ "signed-out": 401, viewer: 404, owner: 200, admin: 404 }[role]);
     await close(context);
   }
 
-  // The owner's own page offers New poll on the Polls tab.
   const owner = await signedIn(browser, "owner", clientIp("roles", 208));
   const page = await newPage(owner);
   await page.goto("/@test_host?view=polls");
@@ -212,7 +204,7 @@ const moderated: {
     role: "frozenowner",
     handle: "frozen_host",
     ip: clientIp("roles", 214),
-    // The owner sees when it happened (item 5 of the mockup alignment), then why, then what it means.
+    // Owner notice order: date, reason, effect.
     notice:
       /^Your page was frozen on [A-Z][a-z]{2} \d{1,2}, \d{4}\. Reason: Under review\. Your content stays visible, but no one can post or vote\.$/u,
   },
@@ -234,18 +226,16 @@ for (const row of moderated) {
     expect((await page.goto(`/@${row.handle}`))?.status()).toBe(200);
     await expect(page.locator("#page-banner > span")).toHaveText(row.notice);
     await expect(page.locator("#page-banner").getByRole("button", { name: "Appeal / contact us" })).toBeVisible();
-    // Writes are refused: the header action is off and the API answers 423 Locked.
     await expect(page.getByRole("button", { name: "Suggest a topic", exact: true })).toBeDisabled();
     expect((await context.request.patch("/api/streamer", { data: { about: "Let me back in" } })).status()).toBe(423);
 
-    // R13: the account menu marks the avatar and shows the same notice.
+    // The account menu repeats the notice and marks the avatar.
     const toggle = page.getByRole("button", { name: `Account menu for ${row.role}. Your page needs attention.` });
     await expect(toggle.locator(".notice-dot")).toBeAttached();
     await toggle.click();
     await expect(page.locator(".account-menu .owner-notice")).toHaveText(row.notice);
     await toggle.click();
 
-    // Edit your page opens with the notice on top.
     await page.goto(`/@${row.handle}?dialog=page`);
     const dialog = page.getByRole("dialog", { name: "Edit your page" });
     await expect(dialog.locator(".owner-notice")).toHaveText(row.notice);
@@ -257,24 +247,22 @@ test("role matrix: frozen and suspended pages for everyone else", async ({ brows
   for (const [index, role] of (["signed-out", "viewer", "owner", "admin"] as const).entries()) {
     const context = await contextFor(browser, role, clientIp("roles", 216 + index));
     const page = await newPage(context);
-    // Frozen: public and read-only.
     expect((await page.goto("/@frozen_host"))?.status(), role).toBe(200);
     const banner = page.locator("#page-banner");
     if (role === "admin") {
       await expect(banner).toContainText("This page is frozen. Nobody can post or vote.");
       await expect(banner.getByRole("link", { name: "Open moderation" })).toHaveAttribute("href", "/admin?view=pages");
-      // The mockup's admin banner lifts a freeze in place: Unfreeze opens the moderation sheet.
+      // Unfreeze opens the moderation sheet in place.
       await banner.getByRole("button", { name: "Unfreeze" }).click();
       await expect(page.getByRole("dialog", { name: "Unfreeze @frozen_host?" })).toBeVisible();
       await page.keyboard.press("Escape");
     } else
       await expect(banner).toHaveText("This page is frozen. Viewing only — no new posts, votes, or polls right now.");
     await expect(page.locator(".owner-notice")).toHaveCount(0);
-    // Suspended: hidden from everyone but its owner and admins.
     const suspended = await page.goto("/@suspended_host");
     expect(suspended?.status(), role).toBe(role === "admin" ? 200 : 404);
     if (role === "admin") await expect(banner).toContainText("This page is suspended and hidden from the public.");
-    // Nobody but the owner gets the owner's notice or the needs-attention avatar.
+    // Only owners see the owner notice and attention marker.
     if (role !== "signed-out")
       await expect(page.getByRole("button", { name: /Your page needs attention/ })).toHaveCount(0);
     await close(context);

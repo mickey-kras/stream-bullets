@@ -2,10 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { dialogHref, type AccountDialogName, type DialogState } from "../account/dialog-route";
 
-/**
- * A link that opens one of the `?dialog=` dialogs (account, Language, Accessibility & display) over this page.
- * History state marks it, so closing the dialog steps back instead of adding an entry.
- */
+// Open ?dialog= over this page; history state makes closure navigate back without adding an entry.
 export function DialogLink({
   name,
   children,

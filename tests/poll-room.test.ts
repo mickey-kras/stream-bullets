@@ -16,10 +16,7 @@ import {
 
 vi.mock("cloudflare:workers", () => import("./helpers/room"));
 
-/*
- * The live room in this process with a controlled clock: the runtime's alarm is called by hand, and the 5 Hz ticker
- * only runs when a test advances the fake interval. tests/realtime.test.ts runs the same class in workerd.
- */
+// Use manual alarms and a fake 5 Hz clock. realtime.test.ts runs the same room in workerd.
 
 const origin = "https://streambullets.test";
 const KEY = "a".repeat(64);
@@ -45,7 +42,6 @@ const rows = liveRows(
   () => streamerId,
 );
 
-/** A distinct client key for socket number `index`. */
 function seat(index: number): string {
   return index.toString(16).padStart(64, "0");
 }
@@ -72,7 +68,6 @@ interface Visitor {
   key?: string;
   user?: string;
   owner?: boolean;
-  /** Set by the Worker for a valid overlay key. */
   overlay?: boolean;
 }
 
@@ -84,14 +79,13 @@ function subscribe(visitor: Visitor = {}): Promise<Response> {
   return call("subscribe", { headers });
 }
 
-/** Subscribes and returns the room's socket for the new connection. */
 async function join(visitor: Visitor = {}): Promise<FakeSocket> {
   const response = await subscribe(visitor);
   expect(response.status).toBe(101);
   return serverSocketOf((response as Response & { webSocket: unknown }).webSocket);
 }
 
-/** Joins one socket per visitor, one millisecond apart so their age order is fixed. */
+// Join 1 ms apart to fix admission order.
 async function joinAll(count: number, visitor: (index: number) => Visitor): Promise<FakeSocket[]> {
   const joined: FakeSocket[] = [];
   for (let index = 0; index < count; index += 1) {
@@ -101,7 +95,6 @@ async function joinAll(count: number, visitor: (index: number) => Visitor): Prom
   return joined;
 }
 
-/** Sends a tap batch and returns the room's reply to it, if any. */
 async function tap(
   socket: FakeSocket,
   id: string,
@@ -117,13 +110,12 @@ async function tap(
     .find((message: Reply): boolean => message.type === "mash-ack" || message.type === "mash-denied");
 }
 
-/** Fires the room's alarm now, as the runtime does: the alarm it runs is used up. */
+// Fire and consume the alarm as the runtime does.
 async function fireAlarm(): Promise<void> {
   state().storage.alarm = null;
   await room().alarm();
 }
 
-/** Moves the clock, then fires the alarm. */
 async function alarmAfter(ms: number): Promise<void> {
   vi.setSystemTime(Date.now() + ms);
   await fireAlarm();
@@ -237,7 +229,6 @@ describe("live room admission", (): void => {
     expect(anonymous[0].ofType("unavailable")).toHaveLength(1);
     expect([anonymous[0].closeCode, anonymous[0].closeReason]).toEqual([1013, "Live room is full"]);
     expect(anonymous.slice(1).every((socket) => socket.open)).toBe(true);
-    // A signed-out newcomer takes nobody's seat.
     expect((await subscribe({ key: seat(401) })).status).toBe(503);
   });
 
@@ -251,13 +242,13 @@ describe("live room admission", (): void => {
     const owner = await join({ key: KEY, user: "owner-1", owner: true });
     expect(state().tagsOf(owner)).toEqual(["role:owner"]);
     const members = await joinAll(189, (index) => ({ key: seat(index), user: `member-${index}` }));
-    // 10 signed-out, 1 owner and 189 members fill the room; the owner's next socket takes a signed-out seat.
+    // Full room: 10 guests, one owner, 189 members. A new owner socket evicts a guest.
     const anonymous = state().getWebSockets("role:anonymous");
     await join({ key: KEY, user: "owner-1", owner: true });
     expect(anonymous[0].closeCode).toBe(1013);
     for (const socket of anonymous.slice(1)) socket.close(1000, "Gone");
     await joinAll(9, (index) => ({ key: seat(300 + index), user: `member-x${index}` }));
-    // No signed-out socket is left: the oldest member makes way.
+    // Evict the oldest member when no guest remains.
     await join({ key: KEY, user: "owner-1", owner: true });
     expect(members[0].closeCode).toBe(1013);
     expect(members[1].open).toBe(true);
@@ -274,7 +265,6 @@ describe("live room admission", (): void => {
     const anonymous = await joinAll(90, (index) => ({ key: seat(index) }));
     await joinAll(10, () => ({ key: KEY }));
     await joinAll(100, (index) => ({ key: seat(200 + index), user: `member-${index}` }));
-    // Without the key, the OBS source is one more signed-out socket.
     expect((await subscribe({ key: KEY })).status).toBe(429);
     expect((await subscribe({ key: seat(500) })).status).toBe(503);
     const overlay = await join({ key: KEY, overlay: true });
@@ -420,7 +410,7 @@ describe("live room snapshots", (): void => {
     const second = post("refresh");
     faults.heal();
     release();
-    // The first round failed (and dropped the viewer); the request queued behind it gets its own, working round.
+    // After the failed round drops a viewer, the queued request gets a fresh round.
     expect((await first).status).toBe(503);
     expect((await second).status).toBe(204);
     expect(socket.ofType("unavailable")).toHaveLength(1);
@@ -428,7 +418,7 @@ describe("live room snapshots", (): void => {
 
   it("reloads the overlay at a resync when only the overlay changed", async (): Promise<void> => {
     const socket = await join();
-    // An overlay change whose room notification was lost: only overlay_state.revision moves.
+    // Lost room notification: only overlay_state.revision advances.
     await database.db
       .prepare(
         `INSERT INTO overlay_state (streamer_id, air, preview, position, size, instant, show_results, message, message_style, revision)
@@ -450,7 +440,7 @@ describe("live room snapshots", (): void => {
     const socket = await join({ overlay: true });
     expect(lastOf<LiveSnapshot>(socket, "snapshot")?.polls.map((poll) => poll.id)).toContain(expiring);
     expect(lastOf<LiveSnapshot>(socket, "snapshot")?.polls.map((poll) => poll.id)).not.toContain(remaining);
-    // D1 uses its own real clock; make its deadline pass along with the room's controlled clock.
+    // Advance the real D1 deadline alongside the fake room clock.
     await database.db
       .prepare("UPDATE entries SET ends_at = ? WHERE id = ?")
       .bind(now - 1, expiring)
@@ -485,7 +475,7 @@ describe("live room snapshots", (): void => {
     const socket = await join();
     faults.fail(/WITH recent AS/);
     await alarmAfter(15_000);
-    // No poll query ran (it would have failed), and the viewer still got a fresh resync.
+    // A fresh resync must require no poll query, which would fail.
     expect(socket.open).toBe(true);
     expect(socket.ofType("snapshot")).toHaveLength(2);
     faults.heal();
@@ -580,7 +570,7 @@ describe("live room snapshots", (): void => {
     await alarmAfter(15_000);
     expect(log.mock.calls).toContainEqual(["live_resync_failed", { cause: "Error" }]);
     expect(socket.ofType("unavailable")).toHaveLength(1);
-    // A running battle still ends on time: the next alarm is set although this one failed.
+    // A failed alarm must still schedule the battle deadline.
     expect(state().storage.alarm).not.toBeNull();
     log.mockRestore();
   });
@@ -671,7 +661,7 @@ describe("live room tap messages", (): void => {
     const id = await rows.addBattle({ "player-3": 3 });
     expect(await tap(await join(), id, 1, 1)).toEqual({ type: "mash-denied", id, reason: "sign-in" });
     expect(await tap(await join({ user: "nobody" }), id, 1, 1)).toEqual({ type: "mash-denied", id, reason: "pick" });
-    // Side 3 of a two-sided battle (a vote from before the options changed).
+    // Stale side 3 from before a battle changed to two sides.
     expect(await tap(await join({ user: "player-3" }), id, 1, 1)).toMatchObject({ reason: "pick" });
   });
 
@@ -736,7 +726,6 @@ describe("live room token bucket", (): void => {
     const second = await join({ key: "b".repeat(64), user: "player-1" });
     expect(await tap(first, id, 500, 1)).toEqual({ type: "mash-ack", id, mine: 15, accepted: 15 });
     expect(await tap(second, id, 20, 1)).toEqual({ type: "mash-ack", id, mine: 15, accepted: 0 });
-    // Another account has its own bucket.
     expect(await tap(await join({ key: "c".repeat(64), user: "player-2" }), id, 4, 1)).toMatchObject({ accepted: 4 });
     vi.setSystemTime(Date.now() + 400);
     expect(await tap(second, id, 20, 2)).toMatchObject({ accepted: 6, mine: 21 });
@@ -769,7 +758,7 @@ describe("live room token bucket", (): void => {
     expect(await tap(socket, id, 2, 5)).toBeUndefined();
     expect(await tap(socket, id, 2, 4)).toBeUndefined();
     expect(await tap(socket, id, 1, 6)).toMatchObject({ accepted: 1, mine: 3 });
-    // Batch numbers are per socket: a new socket of the account starts again.
+    // Batch numbers restart on each socket, including the same account.
     expect(await tap(await join({ key: "b".repeat(64), user: "player-1" }), id, 1, 0)).toMatchObject({ mine: 4 });
   });
 
@@ -816,7 +805,7 @@ describe("live room battles", (): void => {
       tps: 5,
       left: 10,
     });
-    // A late joiner sees the counted taps that D1 has not seen yet.
+    // Late joiners must see journaled taps before D1 flush.
     const late = await join({ key: "c".repeat(64) });
     expect(late.messages<LiveSnapshot>()[0].polls[0].mash).toMatchObject({ totals: [3, 2], players: 2, assisted: 1 });
   });
@@ -891,7 +880,7 @@ describe("live room battles", (): void => {
     );
     const flushing = alarmAfter(MASH_FLUSH_MS);
     await vi.waitFor(() => expect(faults.held()).toBe(1));
-    // Taps counted while the failing write is in flight.
+    // Count taps received during the failing write.
     await tap(one, id, 2, 2);
     await tap(two, id, 4, 1);
     release();
@@ -958,7 +947,7 @@ describe("live room battles", (): void => {
       .run();
     expect((await post("refresh")).status).toBe(204);
     await fireAlarm();
-    // Nobody watches, yet the alarm is due at the battle's end.
+    // Schedule the finish alarm even without viewers.
     expect(state().storage.alarm).toBe(Date.now() + 10_000);
     await alarmAfter(10_000);
     expect(await rows.battleRow(id)).toEqual({ phase: "finished", winner: 0 });
@@ -968,7 +957,7 @@ describe("live room battles", (): void => {
     const id = await rows.addBattle({ "player-1": 0, "player-2": 1 });
     await tap(await join({ user: "player-1" }), id, 5, 1);
     expect(await tap(await join({ key: "b".repeat(64), user: "player-2" }), id, 3, 1)).toMatchObject({ accepted: 3 });
-    // A deploy before the first write to D1: the acknowledged taps exist only in the room's storage.
+    // Deploy before the first D1 flush; acknowledged taps exist only in room storage.
     expect(await rows.storedTaps(id)).toEqual([]);
     vi.clearAllTimers();
     rooms.restart(streamerId);
@@ -979,7 +968,6 @@ describe("live room battles", (): void => {
       { user_id: "player-1", side: 0, taps: 5 },
       { user_id: "player-2", side: 1, taps: 3 },
     ]);
-    // The finished battle's journal is gone.
     expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
   });
 
@@ -1007,7 +995,7 @@ describe("live room battles", (): void => {
     vi.clearAllTimers();
     rooms.restart(streamerId);
     await state().ready;
-    // The lightweight room schema does not cascade page deletion.
+    // The minimal room schema has no page-deletion cascade.
     await database.db.prepare("DELETE FROM entries WHERE streamer_id = ?").bind(streamerId).run();
     await database.db.prepare("DELETE FROM streamers WHERE id = ?").bind(streamerId).run();
 
@@ -1025,7 +1013,7 @@ describe("live room battles", (): void => {
     vi.clearAllTimers();
     rooms.restart(streamerId);
     await state().ready;
-    // The owner deleted the battle (or their account) before the room came back.
+    // Delete the battle or account before room recovery.
     await database.db.prepare("DELETE FROM entries WHERE id = ?").bind(deleted).run();
     await alarmAfter(MASH_TICK_MS);
     const journalled = state().storage.sql.exec<{ entry_id: string }>("SELECT DISTINCT entry_id FROM tap_journal");
@@ -1042,7 +1030,7 @@ describe("live room battles", (): void => {
     vi.clearAllTimers();
     rooms.restart(streamerId);
     await post("mash", { id });
-    // The restarted room finds the same totals in its journal and writes them once more.
+    // Recovery rewrites the same journal totals.
     await alarmAfter(MASH_FLUSH_MS);
     expect(await stored()).toEqual({ taps: 4, assisted_taps: 4 });
   });
@@ -1054,7 +1042,7 @@ describe("live room battles", (): void => {
     expect(vi.getTimerCount()).toBe(1);
     socket.close(1000, "Bye");
     await room().webSocketClose(socket as unknown as WebSocket, 1000, "Bye", true);
-    // The next tick writes the last taps, then the ticker stops so the room can hibernate.
+    // Flush the final taps, then stop the ticker for hibernation.
     await alarmAfter(MASH_FLUSH_MS);
     expect(vi.getTimerCount()).toBe(0);
     expect(await rows.storedTaps(id)).toEqual([{ user_id: "player-1", side: 0, taps: 2 }]);
@@ -1071,7 +1059,7 @@ describe("live room battles", (): void => {
     const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
     faults.fail(/INSERT INTO mash_taps/);
     await alarmAfter(10_000);
-    // Without its last taps side 2 would win; the battle stays open instead.
+    // Unflushed taps would change the winner; keep the battle open.
     expect(await rows.battleRow(id)).toEqual({ phase: "live", winner: null });
     faults.heal();
     await alarmAfter(MASH_TICK_MS);
@@ -1127,7 +1115,7 @@ describe("live room battles", (): void => {
     const socket = await join({ user: "player-1" });
     await tap(socket, id, 2, 1);
     await post("mash", { id });
-    // The owner restarted and started again; the room still holds the old run and its unwritten taps.
+    // Restart the battle while the room retains the old run and pending taps.
     const next = Date.now() + MINUTE;
     await database.db.batch([
       database.db.prepare("DELETE FROM mash_taps WHERE entry_id = ?").bind(id),
@@ -1138,7 +1126,7 @@ describe("live room battles", (): void => {
         .bind(next, next + 10_000, id),
     ]);
     const snapshots = socket.ofType("snapshot").length;
-    // Only the ticker runs, so the room never reloads the battle from D1 before the old run ends.
+    // Ticker-only execution cannot reload D1 before the old run ends.
     vi.setSystemTime(Date.now() + 2_500);
     vi.advanceTimersToNextTimer();
     await vi.waitFor(() => expect(socket.ofType("snapshot").length).toBeGreaterThan(snapshots));

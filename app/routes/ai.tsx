@@ -28,7 +28,7 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
 const ALLOWED: readonly MessageId[] = ["ai.can1", "ai.can2", "ai.can3"];
 const NOT_YET: readonly MessageId[] = ["ai.not1", "ai.not2", "ai.not3", "ai.not4"];
 
-/** A message with `{file}` in it, with the file name set as code. */
+// Render the {file} placeholder as code.
 function WithFile({ id, file }: Readonly<{ id: MessageId; file: string }>): ReactNode {
   const [before, after = ""] = t(id).split("{file}");
   return (
@@ -53,7 +53,7 @@ function PolicyList({ items, icon }: Readonly<{ items: readonly MessageId[]; ico
   );
 }
 
-/** The like and dislike counter (item 45). One unverified vote per visitor per day; the IP is never stored. */
+// One unverified vote per visitor per day. Never store raw IPs.
 function Interest({ status }: Readonly<{ status: AiInterestStatus }>): ReactNode {
   const toast = useToast();
   const [totals, setTotals] = useState<AiInterestTotals>(status.totals);
@@ -137,7 +137,6 @@ function Interest({ status }: Readonly<{ status: AiInterestStatus }>): ReactNode
   );
 }
 
-/** "For AI agents" (item 45): the agent policy, the llms.txt pointer and the interest counter. */
 export default function AiPage(): ReactNode {
   const status = useLoaderData<typeof loader>();
   return (

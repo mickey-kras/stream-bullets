@@ -11,7 +11,7 @@ import { Req, RequiredNote } from "./ui/required";
 
 type PollKind = "choice" | "binary" | "mash";
 
-/** The poll types in the order the dialog lists them, with their labels. Mash Battle keeps its own name. */
+// Dialog order and labels; preserve the Mash Battle name.
 const POLL_KINDS: readonly (readonly [PollKind, "create.choice" | "create.binary" | "mash"])[] = [
   ["choice", "create.choice"],
   ["binary", "create.binary"],

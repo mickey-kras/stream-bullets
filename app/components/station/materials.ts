@@ -1,9 +1,8 @@
 import * as THREE from "three";
 import { random, type Random } from "./textures";
 
-/* Layer 1 of the station's look: seamless base tiles that follow the supplied albedo references
-   (worn teal paint, platform steel, aged brass, ivory enamel). Each tile is painted once at start-up
-   from a height field, so the colour, normal and roughness maps share every chip, crack and scratch. */
+// Seamless teal, steel, brass and ivory tiles. Generate color/normal/roughness from one height field so wear
+// aligns.
 
 export interface Tile {
   map: THREE.Texture;
@@ -11,7 +10,7 @@ export interface Tile {
   rough: THREE.Texture;
 }
 
-/** Painting space is always 1024 units; SIZE is the pixel resolution, lowered on phones. */
+// Paint in 1024 units; SIZE controls pixel resolution, reduced on phones.
 const U = 1024;
 let SIZE = 1024;
 export function setTileResolution(pixels: number): void {
@@ -42,7 +41,7 @@ class Field {
   index(x: number, y: number): number {
     return (((Math.trunc(y) % this.h) + this.h) % this.h) * this.w + (((Math.trunc(x) % this.w) + this.w) % this.w);
   }
-  /** Blend a colour into a point given in painting units (wrapping), optionally nudging height and roughness. */
+  // Blend at wrapped painting coordinates; optionally adjust height/roughness.
   paint(
     x: number,
     y: number,
@@ -53,7 +52,7 @@ class Field {
   ): void {
     this.paintPx(x * this.k, y * this.k, rgb, alpha, dh, rough);
   }
-  /** Same, addressed in pixels. */
+  // Pixel-coordinate variant.
   paintPx(
     x: number,
     y: number,
@@ -104,7 +103,7 @@ class Field {
     const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) * this.k));
     for (let i = 0; i <= n; i++) this.paint(x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n, rgb, alpha, dh, rough);
   }
-  /** Low-frequency seamless value noise, for mottling. */
+  // Seamless low-frequency mottling.
   mottle(
     rnd: Random,
     cells: number,
@@ -192,7 +191,7 @@ const rgb = (hex: string): [number, number, number] => {
   return [c >> 16, (c >> 8) & 255, c & 255];
 };
 
-/** Irregular chip: a jagged blob of exposed primer/rust with a slightly raised paint rim. */
+// Jagged rust/primer chip with a raised paint rim.
 function chip(
   f: Field,
   rnd: Random,
@@ -235,7 +234,7 @@ function drip(
   }
 }
 
-/** Worn teal paint: satin teal, faint hairline crazing, small rust chips with short runs beneath. */
+// Teal paint, hairline cracks and rust runs.
 export function tealPaint(seed: number = 1): Tile {
   const rnd = random(seed);
   const f = new Field(SIZE, SIZE, rgb("#1f6a60"), 0.55);
@@ -259,7 +258,7 @@ export function tealPaint(seed: number = 1): Tile {
   return f.toTile(9);
 }
 
-/** Platform steel: warm grey-brown plate with fine scratches and soft rust blooms. */
+// Steel scratches and rust blooms.
 export function platformSteel(seed: number = 2): Tile {
   const rnd = random(seed);
   const f = new Field(SIZE, SIZE, rgb("#776a5b"), 0.5);
@@ -283,7 +282,7 @@ export function platformSteel(seed: number = 2): Tile {
   return f.toTile(7);
 }
 
-/** Aged brass: brushed horizontally, tarnish clouds, dark pitting and bright hairline scratches. */
+// Brushed brass, tarnish, pits and scratches.
 export function agedBrass(seed: number = 3): Tile {
   const rnd = random(seed);
   const f = new Field(SIZE, SIZE, rgb("#b5862f"), 0.4);
@@ -340,14 +339,14 @@ function enamelEdge(x: number, y: number, step: number, cells: number, pts: read
   return d2 - d1;
 }
 
-/** Ivory enamel: warm cream with fine craquelure, rust pits and faint rust runs. */
+// Ivory enamel, cracks, pits and rust runs.
 export function ivoryEnamel(seed: number = 4): Tile {
   const rnd = random(seed);
   const f = new Field(SIZE, SIZE, rgb("#dcc08a"), 0.45);
   f.mottle(rnd, 6, rgb("#e6cd98"), 0.5, 0.15);
   f.mottle(rnd, 16, rgb("#cfb07a"), 0.45, 0.1);
   f.grain(rnd, 6);
-  // Craquelure: borders of a seamless jittered Voronoi diagram.
+  // Cracks follow seamless jittered Voronoi borders.
   const cells = Math.max(16, Math.round((64 * SIZE) / U)),
     step = SIZE / cells;
   const pts: number[] = [];
@@ -369,33 +368,30 @@ export function ivoryEnamel(seed: number = 4): Tile {
   return f.toTile(8);
 }
 
-/* Layer 2: geometry-driven wear, injected into standard materials. It reads the world-space surface
-   (screen-space curvature for edges, height above the deck for grime, facing for dust and scuffs)
-   so wear lands on corners, rims and lower panels instead of repeating with the tile. */
+// World-space curvature, height and facing place edge wear, grime and dust independently of tile repetition.
 export interface WearOptions {
-  /** What shows through where paint is chipped away. */
+  // Exposed substrate.
   exposed: string;
-  /** 0..1 strength of edge chipping / polishing. */
+  // Edge wear strength, 0..1.
   edges: number;
-  /** 0..1 strength of grime near the deck. */
+  // Deck grime strength, 0..1.
   grime: number;
-  /** Exposed-area metalness and roughness. */
+  // Exposed substrate metalness/roughness.
   exposedMetal: number;
   exposedRough: number;
-  /** Height of the deck in model units. */
+  // Deck height in model units.
   ground?: number;
-  /** Vertical rain streaking strength. */
+  // Vertical rain-streak strength.
   streaks?: number;
-  /** Base tile, mapped triplanar in model space so texel density is the same on every part. */
+  // Model-space triplanar mapping preserves texel density.
   tile?: Tile;
-  /** Tiles per model unit. */
+  // Tiles per model unit.
   scale?: number;
-  /** Strength of the tile's normal detail. */
+  // Tile normal strength.
   detail?: number;
 }
 
-/** Model-space frame shared by every worn material: the inverse of the station's world matrix, so
-    textures and wear stay glued to the model while it sways or turns. */
+// Inverse station world matrix keeps wear attached during sway/rotation.
 export const frame = { value: new THREE.Matrix4() };
 export const frameInverse = { value: new THREE.Matrix4() };
 
@@ -535,8 +531,7 @@ export function wear(material: THREE.MeshStandardMaterial, o: WearOptions): THRE
   return material;
 }
 
-/* Layer 3: decals. Small alpha sheets laid over the finished model where the story needs them,
-   painted per pixel from noise so edges flake and drips feather like the reference sheet. */
+// Noise-painted alpha decals add flaked edges and feathered drips.
 export type DecalKind =
   | "chip"
   | "bolts1"
@@ -583,7 +578,7 @@ interface DecalPaint {
 const rust = (v: number): [number, number, number] => [118 + v * 40, 58 + v * 28, 22 + v * 10];
 
 function paintChip({ rnd, fbm, W, H, px }: DecalPaint): void {
-  // Layered flake: lifted teal rim, ivory primer ring, rust core with pits.
+  // Chip layers: teal rim, ivory primer, pitted rust.
   const sx = 0.8 + rnd() * 0.5;
   for (let y = 0; y < H; y++)
     for (let x = 0; x < W; x++) {
@@ -723,7 +718,7 @@ function paintScratch(paint: DecalPaint, { ang, cx, cy, len, bend, wmax }: Scrat
 
 function paintScratches(paint: DecalPaint): void {
   const { kind, rnd, W, H } = paint;
-  // Scratch families: parallel gouges, swirling scuffs and crossed lines.
+  // Parallel, swirling and crossed scratches.
   const lineCounts: Partial<Record<DecalKind, number>> = {
     scuff: 70,
     crossed: 14,

@@ -43,7 +43,7 @@ function parsed<T>(schema: z.ZodType<T>, value: unknown): T {
   return result.data;
 }
 
-/** Parses the operator-managed admin list. Entries are separated by commas or whitespace. */
+// Parses the operator-managed admin list. Entries are separated by commas or whitespace.
 export function adminEmails(env: AppEnv): Set<string> {
   return new Set(
     (env.ADMIN_EMAILS ?? "")
@@ -53,7 +53,7 @@ export function adminEmails(env: AppEnv): Set<string> {
   );
 }
 
-/** An admin has a verified email address that the operator lists in ADMIN_EMAILS. */
+// An admin has a verified email address that the operator lists in ADMIN_EMAILS.
 export async function isAdmin(env: AppEnv, userId: string): Promise<boolean> {
   const admins = adminEmails(env);
   if (admins.size === 0) return false;
@@ -67,14 +67,8 @@ export async function requireAdmin(env: AppEnv, userId: string): Promise<void> {
   if (!(await isAdmin(env, userId))) throw new HttpError(403, "Only administrators can review applications.");
 }
 
-/**
- * Page moderation (item 25).
- * - active: public and writable.
- * - frozen: public and read-only for everyone, the owner included.
- * - suspended: hidden. Anyone but the owner and admins gets 404, the directory drops it, the overlay
- *   shows nothing and live connections are refused. The owner and admins can still read it.
- * Admins may still remove content from a frozen or suspended page (moderation must keep working).
- */
+// Active: public/writable. Frozen: public/read-only, including owners. Suspended: owner/admin reads only;
+// directory/overlay/live hidden. Admin content removal remains allowed.
 export interface StreamerState {
   id: string;
   ownerId: string;
@@ -86,17 +80,15 @@ export interface StreamerRole {
   admin: boolean;
 }
 
-/** Whether a page in this status accepts writes at all. */
 export function isStreamerWritable(status: StreamerStatus): boolean {
   return status === "active";
 }
 
-/** Whether someone in this role may see a page in this status. */
 export function isStreamerVisible(status: StreamerStatus, role: StreamerRole): boolean {
   return status !== "suspended" || role.owner || role.admin;
 }
 
-/** Whether the page shows up in public lists (the directory) and public live surfaces (overlay, live room). */
+// Directory, overlay, and live-room visibility.
 export function isStreamerListed(status: StreamerStatus): boolean {
   return status !== "suspended";
 }
@@ -108,7 +100,7 @@ async function streamerState(env: AppEnv, streamerId: string): Promise<StreamerS
   return row ? { id: row.id, ownerId: row.owner_id, status: row.status } : null;
 }
 
-/** The viewer's role on a page. Anonymous viewers are neither owner nor admin. */
+// Anonymous viewers have no owner/admin role.
 export async function streamerRole(
   env: AppEnv,
   streamer: Pick<StreamerState, "ownerId">,
@@ -118,7 +110,7 @@ export async function streamerRole(
   return { owner: streamer.ownerId === viewerId, admin: await isAdmin(env, viewerId) };
 }
 
-/** Whether the viewer may see the page. Admin rights are only looked up for suspended pages. */
+// Check admin rights only for suspended pages.
 export async function canViewStreamer(
   env: AppEnv,
   streamer: Pick<StreamerState, "ownerId" | "status">,
@@ -128,12 +120,8 @@ export async function canViewStreamer(
   return isStreamerVisible(streamer.status, await streamerRole(env, streamer, viewerId));
 }
 
-/**
- * The one gate for writes to a streamer page and everything on it: entries, votes, reactions,
- * comments, likes, page settings and images, and the later schedule, cards, links, overlay and Mash
- * writes. Throws 404 when the page does not exist or is hidden from the viewer, and 423 when it is
- * frozen or suspended. `moderation: true` lets an admin through, for content removal only.
- */
+// Gate all page writes. Missing/hidden pages return 404; frozen/suspended pages return 423. `moderation: true`
+// allows admin content removal only.
 export async function assertStreamerWritable(
   env: AppEnv,
   streamerId: string,
@@ -173,7 +161,6 @@ export async function getApplication(env: AppEnv, userId: string): Promise<Strea
   return row ? applicationValue(row) : null;
 }
 
-/** Describes what the account may do with streamer profiles. */
 export async function getStreamerAccess(env: AppEnv, userId: string): Promise<StreamerAccess> {
   const [admin, application] = await Promise.all([isAdmin(env, userId), getApplication(env, userId)]);
   return { admin, application, canCreateStreamer: admin || application?.status === "approved" };
@@ -183,10 +170,8 @@ export async function canCreateStreamer(env: AppEnv, userId: string): Promise<bo
   return (await getStreamerAccess(env, userId)).canCreateStreamer;
 }
 
-/**
- * Adds the account to the streamer waitlist, or updates a pending or rejected request.
- * A rejected request returns to the queue as pending. Approved requests cannot change.
- */
+// Create/update pending or rejected applications. Resubmission resets rejection to pending; approved requests
+// cannot change.
 export async function submitApplication(
   env: AppEnv,
   userId: string,
@@ -220,7 +205,7 @@ function decodeQueueCursor(value: string | null): { time: number; id: string } |
   return { time: Number(match[1]), id: match[2] };
 }
 
-/** Lists applications for review. Pending requests come oldest first; reviewed ones newest first. */
+// Lists applications for review. Pending requests come oldest first; reviewed ones newest first.
 export async function listApplications(env: AppEnv, query: ApplicationQuery): Promise<ApplicationQueue> {
   const value = parsed(applicationQuerySchema, query);
   const cursor = decodeQueueCursor(value.cursor);
@@ -254,7 +239,7 @@ export async function listApplications(env: AppEnv, query: ApplicationQuery): Pr
   };
 }
 
-/** Records an admin decision. Approval lets the applicant create one streamer profile. */
+// Records an admin decision. Approval lets the applicant create one streamer profile.
 export async function reviewApplication(
   env: AppEnv,
   reviewerId: string,

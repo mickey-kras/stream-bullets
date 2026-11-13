@@ -1,4 +1,4 @@
-/* Tailwind is used only for its reset (preflight). The design lives in app/styles/. */
+/* Tailwind supplies preflight only. Design styles are in app/styles/. */
 @import "tailwindcss";
 @import "./styles/tokens.css";
 @import "./styles/base.css";

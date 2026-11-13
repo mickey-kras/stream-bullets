@@ -9,10 +9,7 @@ import { Sheet } from "../ui/sheet";
 import { useToast } from "../ui/toast";
 import { StreamerWaitlist } from "../waitlist";
 
-/**
- * "Host a community" (item 17): the waitlist request and its states (pending, not approved), or, once
- * approved (or for an admin), claiming a handle to create the page with `POST /api/streamer`.
- */
+// Show application states until approved; approved users/admins claim a handle through POST /api/streamer.
 export function HostDialog({
   viewer,
   access,
@@ -21,7 +18,7 @@ export function HostDialog({
 }: Readonly<{
   viewer: Viewer;
   access: StreamerAccess | null;
-  /** Reloads the dialog's data after a request is sent. */
+
   onSaved: () => Promise<void>;
   onClose: () => void;
 }>): ReactNode {

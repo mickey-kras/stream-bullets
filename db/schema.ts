@@ -29,7 +29,7 @@ import {
 } from "./enums";
 export * from "./auth-schema";
 
-/** A CHECK that keeps a column inside its enum list, so SQLite enforces the same values as the TypeScript type. */
+// Keep SQLite CHECK values aligned with the TypeScript enum.
 function enumCheck(name: string, column: AnySQLiteColumn, values: readonly (string | number)[]) {
   return check(name, sql`${column} IN (${sql.raw(sqlList(values))})`);
 }
@@ -48,19 +48,19 @@ export const streamers = sqliteTable(
     avatar: text("avatar"),
     background: text("background"),
     revision: integer("revision").notNull().default(0),
-    /** Page logo (`/images/logo/{ownerId}`). Null falls back to the owner's picture, then the default. */
+    // Null falls back to the owner picture, then the default.
     logo: text("logo"),
-    /** Official pages are pinned first in the directory. The system Ideas board is seeded by migration. */
+    // Pin official pages first. A migration seeds the system Ideas board.
     isOfficial: integer("is_official", { mode: "boolean" }).notNull().default(false),
-    /** Last handle change. A handle can change once every 30 days; null until the first change. */
+    // Null until the first change; later changes require 30 days.
     handleChangedAt: integer("handle_changed_at"),
-    /** Moderation state: frozen pages are public and read-only; suspended pages are hidden. */
+    // Moderation state: frozen pages are public and read-only; suspended pages are hidden.
     status: text("status", { enum: STREAMER_STATUSES }).notNull().default("active"),
     statusReason: text("status_reason"),
     statusChangedAt: integer("status_changed_at"),
-    /** Admin who last changed the status. A plain id; cleared when that account is deleted. */
+    // Last status-changing admin ID; cleared on account deletion.
     statusChangedBy: text("status_changed_by"),
-    /** Support links show in About (item 34) and, optionally, as a Community card. */
+    // Support links appear in About and optionally Community.
     supportVisible: integer("support_visible", { mode: "boolean" }).notNull().default(true),
     supportCard: integer("support_card", { mode: "boolean" }).notNull().default(false),
   },
@@ -98,7 +98,7 @@ export const entries = sqliteTable(
     createdAt: integer("created_at").notNull(),
     endsAt: integer("ends_at"),
     revealed: integer("revealed", { mode: "boolean" }).notNull().default(false),
-    /** Ideas board status, set by admins on the official page. Null everywhere else. */
+    // Ideas board status, set by admins on the official page. Null everywhere else.
     status: text("status", { enum: ENTRY_STATUSES }),
     statusReason: text("status_reason"),
     statusChangedAt: integer("status_changed_at"),
@@ -143,10 +143,7 @@ export const entryVotes = sqliteTable(
   ],
 );
 
-/**
- * Votes per option, kept by triggers on `entry_votes` (migration 0019), so the live room and the board read at most
- * six rows per poll instead of every vote.
- */
+// Triggers on `entry_votes` (0019) maintain counts: at most six rows per poll.
 export const entryVoteCounts = sqliteTable(
   "entry_vote_counts",
   {
@@ -193,7 +190,7 @@ export const entryComments = sqliteTable(
     text: text("text").notNull(),
     createdAt: integer("created_at").notNull(),
     parentId: text("parent_id"),
-    /** Set when a comment that has replies is deleted: the row stays as a "Comment removed" placeholder. */
+    // Deleted parents remain as "Comment removed" placeholders.
     removedAt: integer("removed_at"),
   },
   (table) => [
@@ -321,11 +318,8 @@ export const streamerApplications = sqliteTable(
   ],
 );
 
-/**
- * Notices about potentially illegal or rule-breaking content (EU Digital Services Act, Article 16).
- * Targets and streamers are plain identifiers, not foreign keys, so the audit trail survives when
- * the reported content or the whole streamer page is removed. The snapshot keeps the reported text.
- */
+// Content reports (EU Digital Services Act, Article 16). Plain target/page IDs survive deletion; snapshots
+// retain reported text.
 export const contentReports = sqliteTable(
   "content_reports",
   {
@@ -334,8 +328,7 @@ export const contentReports = sqliteTable(
     targetId: text("target_id").notNull(),
     streamerId: text("streamer_id").notNull(),
     reporterId: text("reporter_id").references(() => user.id, { onDelete: "set null" }),
-    // Author of the reported content, kept even after the content is removed, so account deletion can
-    // still find and scrub the copied text. Cleared when that account is deleted.
+    // Keep the author ID to erase copied report text on account deletion; then clear it.
     targetAuthorId: text("target_author_id").references(() => user.id, { onDelete: "set null" }),
     reason: text("reason", { enum: ["illegal", "harassment", "spam", "privacy", "other"] }).notNull(),
     details: text("details").notNull().default(""),
@@ -372,11 +365,7 @@ export const contentReports = sqliteTable(
   ],
 );
 
-/**
- * Admin decisions and security events (item 25, and the audit log of item 29). `streamer_id` and
- * `target_id` are plain identifiers, not foreign keys, so the record survives when the page or the
- * content is deleted. The actor is cleared when that admin account is deleted.
- */
+// Audit target/page IDs survive deletion. Clear the actor on admin account deletion.
 export const moderationActions = sqliteTable(
   "moderation_actions",
   {
@@ -406,11 +395,8 @@ export const moderationActions = sqliteTable(
     ),
   ],
 );
-/**
- * Scheduled streams (item 23). A weekly series is stored as one row per occurrence, generated
- * 12 weeks ahead and topped up by the cron; rows of one series share `series_id`, `repeat_days`
- * (bit 0 = Sunday … bit 6 = Saturday, in `tz`) and `repeat_until`.
- */
+// Store weekly occurrences 12 weeks ahead. Series share `series_id`, `repeat_days` (Sunday bit 0 through
+// Saturday bit 6 in `tz`), and `repeat_until`.
 export const streamEvents = sqliteTable(
   "stream_events",
   {
@@ -430,7 +416,7 @@ export const streamEvents = sqliteTable(
     repeatDays: integer("repeat_days").notNull().default(0),
     repeatUntil: integer("repeat_until"),
     tz: text("tz").notNull(),
-    /** Set on an occurrence edited on its own; the cron never copies it into later occurrences. */
+    // Individually edited occurrences never become cron templates.
     isException: integer("is_exception", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull(),
     updatedAt: integer("updated_at").notNull(),
@@ -458,23 +444,19 @@ export const streamEvents = sqliteTable(
   ],
 );
 
-/**
- * How far each weekly series is written. The cron continues after this, not after the latest stream left, so a
- * stream deleted on its own never comes back. A series written before this table starts from its latest stream.
- */
+// Resume after this watermark, so deleted occurrences stay deleted. Legacy series start at their latest
+// occurrence.
 export const streamSeries = sqliteTable("stream_series", {
   id: text("id").primaryKey(),
   streamerId: text("streamer_id")
     .notNull()
     .references(() => streamers.id, { onDelete: "cascade" }),
   writtenThrough: integer("written_through").notNull(),
-  /** The series' wall-clock time in its zone. A stream in the spring gap is stored an hour later; this is not. */
+  // Original local time; spring-gap occurrences shift one hour, but this template does not.
   hour: integer("hour"),
   minute: integer("minute"),
-  /**
-   * The template new streams copy (0018): kept apart from the streams, so editing one on its own never changes or
-   * hides it. NULL for a series written before 0018; the cron then copies its latest unedited stream.
-   */
+  // Separate series templates (0018) survive occurrence edits/deletions. Legacy NULL templates fall back to
+  // the latest unedited occurrence.
   title: text("title"),
   notes: text("notes"),
   durationMin: integer("duration_min"),
@@ -483,7 +465,7 @@ export const streamSeries = sqliteTable("stream_series", {
   tz: text("tz"),
   repeatDays: integer("repeat_days"),
   repeatUntil: integer("repeat_until"),
-  /** JSON array of topic entry ids. */
+  // JSON array of topic entry ids.
   topics: text("topics"),
 });
 
@@ -504,10 +486,7 @@ export const streamEventTopics = sqliteTable(
 );
 const cardTargets = CARD_TABS.map((tab: string): string => `'tab:${tab}'`).join(", ");
 
-/**
- * Owner-editable Community cards (item 24), at most 8 per page. No rows means the page shows the
- * two default cards; the owner's first save writes them as rows (R18). Saves replace the whole list.
- */
+// At most eight cards per page. No rows shows two defaults; first save persists them. Saves replace the list.
 export const communityCards = sqliteTable(
   "community_cards",
   {
@@ -538,7 +517,7 @@ export const communityCards = sqliteTable(
   ],
 );
 
-/** Support and donation link-outs (item 34), at most 4 per page. StreamBullets never handles money. */
+// Support and donation link-outs, at most 4 per page. StreamBullets never handles money.
 export const streamerLinks = sqliteTable(
   "streamer_links",
   {
@@ -562,10 +541,7 @@ export const streamerLinks = sqliteTable(
 const overlaySourceCheck = (column: unknown) =>
   sql`json_valid(${column}) AND json_type(${column}) = 'object' AND json_extract(${column}, '$.type') IN (${sql.raw(sqlList(OVERLAY_SOURCES))}) AND length(${column}) <= 200`;
 
-/**
- * What the one OBS overlay URL shows (item 33). `air` and `preview` are `{type, ref}`, where `ref`
- * names the poll, topic or card for the sources that need one. A missing row means `auto`.
- */
+// `air` and `preview` use `{type, ref}`; sources use `ref` for a poll, topic, or card. No row means `auto`.
 export const overlayState = sqliteTable(
   "overlay_state",
   {
@@ -601,7 +577,7 @@ export const overlayState = sqliteTable(
   ],
 );
 
-/** The hex SHA-256 of the secret key in the owner's OBS overlay URL. The key itself is never stored. */
+// Store only the overlay key's SHA-256 hash, never the key.
 export const overlayKeys = sqliteTable(
   "overlay_keys",
   {
@@ -616,11 +592,8 @@ export const overlayKeys = sqliteTable(
   ],
 );
 
-/**
- * Mash Battle data for an entry of kind `choice` with 2 to 4 options (item 31, risk R1: `entries`
- * is never rebuilt to add a kind). The API exposes such an entry as `kind: "mash"`. A viewer's side
- * is their `entry_votes` row. `winner` is the side index, -1 for a draw, or null until finished.
- */
+// Mash Battles use `choice` entries with 2-4 options and expose API kind `mash`. `entry_votes` stores viewer
+// sides; `winner` is an index, -1 for draw, or null until finished.
 export const entryMash = sqliteTable(
   "entry_mash",
   {
@@ -667,11 +640,8 @@ export const mashTaps = sqliteTable(
     ),
   ],
 );
-/**
- * The /ai page's like/dislike counter (item 45). `ip_hash` is an HMAC of the IP and the day with a
- * secret key, so raw IPs are never stored and rows cannot be linked across days. The hourly cron
- * prunes rows older than 30 days. Not linked to accounts, so it is outside account export/delete.
- */
+// AI interest keys HMAC the IP and day; raw IPs are never stored and days cannot be linked. Cron prunes after
+// 30 days. No account link or export/deletion.
 export const aiInterest = sqliteTable(
   "ai_interest",
   {
@@ -687,11 +657,7 @@ export const aiInterest = sqliteTable(
   ],
 );
 
-/**
- * Running totals of `ai_interest`, one row per UTC day (security review finding 3). A vote adds to its day's row in
- * the same batch, so the totals read at most 31 small rows instead of every vote. The cron prunes both tables to
- * the same 30-day window.
- */
+// Update UTC-day totals with each vote in one batch; read at most 31 rows. Cron prunes both tables to 30 days.
 export const aiInterestDaily = sqliteTable(
   "ai_interest_daily",
   {
@@ -720,7 +686,7 @@ export const imageVersions = sqliteTable(
   ],
 );
 
-/** Anonymous UTC-day totals. No account, session, IP, URL, or user content. */
+// Anonymous UTC-day totals. No account, session, IP, URL, or user content.
 export const conversionDaily = sqliteTable(
   "conversion_daily",
   {
@@ -734,7 +700,7 @@ export const conversionDaily = sqliteTable(
   ],
 );
 
-/** Random click receipts expire after one day; they cannot identify a visitor. */
+// Random click receipts expire after one day; they cannot identify a visitor.
 export const conversionClicks = sqliteTable(
   "conversion_clicks",
   {

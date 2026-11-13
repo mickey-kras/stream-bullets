@@ -52,7 +52,7 @@ test("the event dialog shows the stream and the .ics feed serves the schedule", 
 });
 
 test("an open Schedule tab moves a stream from upcoming to live to ended", async ({ page }) => {
-  // Mic shootout starts a day after the seed and runs for three hours.
+  // Seeded Mic shootout starts tomorrow and lasts three hours.
   await page.clock.install({ time: Date.now() });
   await page.goto("/@feature_host?view=schedule");
   const hero = page.locator(".sched-hero");
@@ -86,7 +86,6 @@ test("the owner schedules a weekly stream, edits, cancels and deletes it", async
   const context = await signedIn(browser, "featureowner", clientIp("schedule", 125));
   const page = await newPage(context);
   await page.goto("/@feature_host?view=schedule");
-  // The header action matches the tab.
   await page.locator("#suggest").click();
   const form = page.getByRole("dialog", { name: "Schedule a stream" });
   await form.getByLabel("Title").fill("Speedrun practice");
@@ -134,7 +133,7 @@ test("the calendar keeps far-off streams after the owner creates and cancels the
   const context = await signedIn(browser, "featureowner", clientIp("schedule", 128));
   const page = await newPage(context);
   await page.goto("/@feature_host?view=schedule&mode=month");
-  // Five months on, past what the page loads at first: the calendar fetches this range on its own.
+  // Fetch a range five months beyond the initial window.
   for (let step = 0; step < 5; step += 1) await page.getByRole("button", { name: "Next", exact: true }).click();
   const chip = (title: string) => page.locator(".month-chip").filter({ hasText: title });
   const create = async (title: string, days: number): Promise<void> => {
@@ -160,7 +159,6 @@ test("the calendar keeps far-off streams after the owner creates and cancels the
   await expect(page.locator(".sb-toast")).toContainText("Stream cancelled.");
   await expect(page.locator(".month-chip.status-cancelled").filter({ hasText: "Far stream one" })).toBeVisible();
   await expect(chip("Far stream two")).toBeVisible();
-  // Leave the page as it was.
   const range = `from=${Date.now() + 150 * 86_400_000}&to=${Date.now() + 170 * 86_400_000}`;
   const listed = await context.request.get(`/api/streamers/feature_host/events?${range}`);
   for (const event of ((await listed.json()) as { events: { id: string; title: string }[] }).events)
@@ -173,11 +171,11 @@ test("switching from Day to Week far ahead fetches the rest of the week", async 
   const context = await signedIn(browser, "featureowner", clientIp("schedule", 129));
   const page = await newPage(context);
   await page.goto("/@feature_host?view=schedule&mode=week");
-  // 22 weeks on, past what the page loads at first, then the Day view of the same weekday as today.
+  // Open Day view 22 weeks beyond the initial window.
   for (let step = 0; step < 22; step += 1) await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Day", exact: true }).click();
   await expect(page.getByRole("button", { name: "Day", exact: true })).toHaveAttribute("aria-pressed", "true");
-  // A stream two days away in the same week, saved after that week was fetched: only a new fetch can show it.
+  // Add a stream to an already fetched week to require a fresh read.
   const day = new Date(Date.now() + 22 * 7 * 86_400_000);
   day.setDate(day.getDate() + (day.getDay() <= 4 ? 2 : -2));
   const date = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
@@ -201,7 +199,7 @@ test("a page with only far-off streams keeps the calendar open to them", async (
     data: { ...stream, platform: "twitch", url: "https://twitch.tv/x" },
   });
   expect(created.status()).toBe(200);
-  // Nothing falls in the range the page loads: the Feed shows the empty state and the views stay one click away.
+  // An empty Feed must keep the calendar views accessible.
   await page.goto("/@pagination_host?view=schedule");
   await expect(page.getByText("No streams in this date range.")).toBeVisible();
   await page.getByRole("button", { name: "Month", exact: true }).click();
@@ -222,8 +220,7 @@ test("the Day view gives early streams their own rows", async ({ browser }) => {
   const page = await newPage(context);
   await page.goto("/@feature_host?view=schedule&mode=day");
   const tz = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
-  // One daily series (the page owner may create only six streams a minute), then two of its streams moved onto
-  // the first day at 04:00 and 07:00 with "This stream".
+  // Create one daily series to stay within six creations/min; move two streams to 04:00 and 07:00.
   const stream = { title: "Early", date: dateFromToday(2), time: "01:00", tz, durationMin: 60 };
   const link = { platform: "twitch", url: "https://twitch.tv/x" };
   const created = await context.request.post("/api/events", { data: { ...stream, ...link, repeatDays: 127 } });
@@ -246,7 +243,7 @@ test("the Day view gives early streams their own rows", async ({ browser }) => {
   for (let index = 1; index < boxes.length; index += 1)
     expect(boxes[index].y).toBeGreaterThanOrEqual(boxes[index - 1].y + boxes[index - 1].height);
 
-  // A fourth stream moved onto 04:00 sits beside the one there, and a real click on each opens its own stream.
+  // Overlapping streams at 04:00 must each open on click.
   const clash = listed.events.find((event) => event.title === "Early" && ![first.id, ...others.map((o) => o.id)].includes(event.id))!;
   const moved = { action: "edit", scope: "one", ...stream, ...link, time: "04:00", title: "Early clash" };
   expect((await context.request.patch(`/api/events/${clash.id}`, { data: moved })).status()).toBe(200);
@@ -269,7 +266,7 @@ test("the Day view gives early streams their own rows", async ({ browser }) => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   }
 
-  // A fifth stream moved onto 23:00 for four hours goes on at the top of the next day, which has no other stream.
+  // A four-hour stream at 23:00 continues into the otherwise empty next day.
   const used = [first.id, clash.id, ...others.map((other) => other.id)];
   const night = listed.events.find((event) => event.title === "Early" && !used.includes(event.id))!;
   const owl = { title: "Night owl", time: "23:00", durationMin: 240 };

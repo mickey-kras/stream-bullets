@@ -37,7 +37,7 @@ describe("crop maths", (): void => {
     expect(zoomTo({ zoom: 2, x: 10, y: -20 }, 10)).toEqual({ zoom: 4, x: 20, y: -40 });
     const settled = settle(300, landscape, panBy(initialCrop, 500, 0));
     expect(settled).toEqual({ zoom: 1, x: 75, y: 0 });
-    // Moving back starts from the clamped edge, not from the overshoot.
+    // Return from the clamped edge, not the overshoot.
     expect(cropGeometry(300, landscape, panBy(settled, -75, 0)).x).toBe(0);
   });
 });

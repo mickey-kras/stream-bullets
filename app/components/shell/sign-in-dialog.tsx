@@ -23,11 +23,8 @@ export const providerName: Record<Provider, string> = {
   instagram: "Instagram",
 };
 
-/**
- * Back to the page the person signed in from (the OAuth round trip lands there again). A new account lands there
- * too, with Your profile open over it (`?dialog=profile`), so an `?intent=` survives sign-up. A failed round trip
- * lands on /sign-in with that page as `?next=`, so the retry returns there.
- */
+// Preserve the initiating page and intent through OAuth. New accounts open their profile over that page.
+// Failed sign-in carries the destination in ?next= so retries return there.
 function useHere(): string {
   const { pathname, search } = useLocation();
   // On the error landing itself, "here" is the page it carries, not /sign-in with its error.
@@ -35,16 +32,13 @@ function useHere(): string {
   return `${pathname}${search}`;
 }
 
-/** `path` with Your profile open over it, keeping its other parameters (`?intent=`) and hash. */
+// Open Your profile without losing intent or hash.
 function profileOver(path: string): string {
   const url = new URL(path, "https://local.invalid");
   return dialogHref(url, "profile");
 }
 
-/**
- * The provider buttons (Google, TikTok, Twitch, Instagram: only those configured), the YouTube hint under
- * Google, Instagram's account-type note on its button, the age and terms consent line, and any error.
- */
+// Show configured providers, provider restrictions, eligibility consent and errors.
 export function SignIn({
   providers,
   callbackURL,
@@ -62,7 +56,7 @@ export function SignIn({
     setError("");
     setPending(provider);
     try {
-      // Instagram is a generic OAuth provider: the social sign-in endpoint serves it too.
+      // The social endpoint also handles generic OAuth Instagram.
       const result = await authClient.signIn.social({
         provider: provider as "google",
         callbackURL: returnTo,
@@ -156,10 +150,7 @@ export function SignIn({
   );
 }
 
-/**
- * "Sign in or sign up": one OAuth step creates the account or signs in (approved items 1 and 6). `reason`
- * ("Sign in to suggest a topic") leads the description when the dialog interrupts an action.
- */
+// One OAuth flow signs in or creates an account. reason explains interrupted actions.
 export function SignInDialog({
   open,
   onOpenChange,
@@ -186,7 +177,6 @@ export function SignInDialog({
   );
 }
 
-/** The header's sign-in control for signed-out visitors: "Sign in / Sign up" (short "Sign in" on phones). */
 export function SignInButton({
   providers,
   className = "header-signin",

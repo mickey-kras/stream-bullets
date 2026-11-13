@@ -31,7 +31,6 @@ CREATE TABLE `streamer_links` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `streamer_links_position_idx` ON `streamer_links` (`streamer_id`,`position`);--> statement-breakpoint
--- Hand-checked: drizzle-kit wanted to rebuild `streamers`, which would cascade-delete every page's
--- entries, votes and comments. The two flags are added in place.
+-- Add flags in place. Rebuilding streamers would cascade-delete entries, votes, and comments.
 ALTER TABLE `streamers` ADD `support_visible` integer DEFAULT 1 NOT NULL CONSTRAINT "streamers_support_visible_check" CHECK("support_visible" IN (0, 1));--> statement-breakpoint
 ALTER TABLE `streamers` ADD `support_card` integer DEFAULT 0 NOT NULL CONSTRAINT "streamers_support_card_check" CHECK("support_card" IN (0, 1));

@@ -3,7 +3,6 @@ import { t } from "../../i18n";
 import { paths } from "../../lib/shell";
 import { Icon } from "../ui/icon";
 
-/** The magnifier inside the field and the Search button, shared by every streamer search. */
 export function SearchAdornments(): ReactNode {
   return (
     <>
@@ -21,7 +20,6 @@ export function SearchAdornments(): ReactNode {
   );
 }
 
-/** A plain search of the Streamers directory, for pages without it (the 404 page in the mockup). */
 export function StreamerSearch({ id }: Readonly<{ id: string }>): ReactNode {
   return (
     <search className="search directory-search nf-search">

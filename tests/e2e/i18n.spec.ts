@@ -12,9 +12,9 @@ async function inLanguage(context: BrowserContext, locale: string): Promise<void
 
 async function shot(page: Page, name: string): Promise<void> {
   if (!shots) return;
-  // Wait for the page to settle; a capture during a layout change can fail in headless Chromium.
+  // Wait for stable layout before headless Chromium capture.
   await page.waitForLoadState("networkidle");
-  // Screenshots are review artefacts, not assertions: a second try covers a busy GPU process.
+  // Review-only screenshots may retry a busy GPU process.
   await page
     .screenshot({ path: `${shots}/${name}.png`, animations: "disabled" })
     .catch(() => page.screenshot({ path: `${shots}/${name}.png`, animations: "disabled", timeout: 10_000 }));
@@ -32,7 +32,6 @@ test("Accept-Language picks the page language and Intl follows it", async ({ bro
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
   await expect(page).toHaveTitle("Streamer · StreamBullets");
   await expect(page.getByRole("contentinfo").getByRole("link", { name: "Datenschutz" })).toBeVisible();
-  // Hydration loaded the same catalog: client-rendered text is German too.
   await page.getByRole("contentinfo").getByRole("link", { name: "Barrierefreiheit" }).click();
   await expect(page.getByRole("dialog", { name: "Barrierefreiheit & Anzeige" })).toBeVisible();
   await close(context);
@@ -48,7 +47,6 @@ test("the language switcher saves the choice and reloads in it", async ({ page, 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   expect((await context.cookies()).find((cookie) => cookie.name === "sb_locale")?.value).toBe("ru");
   await expect(page.getByRole("link", { name: "Язык: Русский" })).toBeFocused();
-  // Back to English through the same switcher.
   await page.getByRole("contentinfo").getByRole("link", { name: "Язык: Русский" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "English" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
@@ -63,13 +61,13 @@ test("a signed-in choice is saved to the account and wins over the cookie", asyn
   await page.getByRole("dialog").getByRole("button", { name: "Français" }).click();
   expect((await saved).status()).toBe(200);
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");
-  // Another browser with the same account and a different cookie still gets French.
+  // Account language overrides another browser cookie.
   const other = await signedIn(browser, "prefsviewer", clientIp("i18n", 181));
   await inLanguage(other, "pl");
   const second = await newPage(other);
   await second.goto("/streamers");
   await expect(second.locator("html")).toHaveAttribute("lang", "fr");
-  // Forget the saved language again so other specs see English.
+  // Restore English for shared fixtures.
   await second.evaluate(() =>
     fetch("/api/me/locale", {
       method: "PATCH",
@@ -136,11 +134,7 @@ test("streamer pages carry JSON-LD for search engines and agents", async ({ page
   expect(site["@graph"].map((node: { "@type": string }) => node["@type"])).toEqual(["WebSite", "Organization"]);
 });
 
-/**
- * What does not fit a phone: sideways page scroll, and visible text cut off sideways by its own box, a clipping
- * ancestor or the screen edge. Chip rows and tab strips scroll sideways by design, and visually hidden text is
- * for screen readers, so neither counts.
- */
+// Detect page overflow and clipped text. Exclude intentional chip/tab scrolling and screen-reader-only text.
 async function phoneProblems(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const found: string[] = [];
@@ -176,14 +170,13 @@ async function phoneProblems(page: Page): Promise<string[]> {
   });
 }
 
-/** One phone screen: who looks at it, where, and what to open there first. */
 interface PhoneScreen {
   name: string;
   path: string;
   open?: (page: Page) => Promise<void>;
 }
 
-/** Opens the tab's primary action (New poll, Add event, Add card): the header button, the FAB or the add tile. */
+// Open the tab action through its header button, FAB, or add tile.
 const headerAction = async (page: Page): Promise<void> =>
   page.locator("#suggest:visible, button.fab:visible, button.add-card-tile").first().click();
 

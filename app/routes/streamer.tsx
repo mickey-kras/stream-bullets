@@ -65,7 +65,7 @@ import type { Route } from "./+types/streamer";
 
 type View = StreamerView;
 type Dialog = "topic" | "poll" | "idea" | "event" | "card" | null;
-/** History state on a detail opened from the list, so Back returns to that list entry instead of adding one. */
+// Preserve list history so Back returns to the originating entry.
 interface ListReturnState {
   listReturn: true;
 }
@@ -73,7 +73,7 @@ interface ListReturnState {
 function cameFromList(state: unknown): boolean {
   return typeof state === "object" && state !== null && (state as Partial<ListReturnState>).listReturn === true;
 }
-/** The official StreamBullets page is the Ideas board: Ideas, About and Community. */
+// Official board tabs: Ideas, About, Community.
 const officialViews: readonly View[] = ["topics", "about", "community"];
 
 export function meta({ loaderData: data, matches }: Route.MetaArgs) {
@@ -148,7 +148,7 @@ async function pageSchedule(
     ? []
     : await listEvents(env, streamer.id, range.from, range.to, now);
   const openEvent: string | null = params.get("event");
-  // Shared links can open a stream outside the loaded range, but only on its own page.
+  // Resolve linked streams outside the loaded range only on their own page.
   const linkedEvent: StreamEvent | null =
     openEvent && !streamer.isOfficial && !events.some((event: StreamEvent): boolean => event.id === openEvent)
       ? await getEvent(env, openEvent, now, streamer.id)
@@ -165,7 +165,7 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
   const viewer = await requestViewer(request, app);
-  // Suspended pages are 404 for everyone but the owner and admins.
+  // Suspended pages return 404 except to owner and admins.
   const streamer = await getVisibleStreamer(app.env, params.handle.slice(1), viewer?.id ?? null);
   if (!streamer) throw new Response("Streamer not found.", { status: 404 });
   const official = streamer.isOfficial;
@@ -176,7 +176,7 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   const entryId: string | null = url.searchParams.get("entry");
   const owner = viewer?.id === streamer.ownerId;
   const now = Date.now();
-  // Independent reads go out together, so the page waits for the slowest one, not their sum.
+
   const [selected, moderator, support, schedule] = await Promise.all([
     entryId ? getEntry(app.env, entryId, viewer?.id || null) : null,
     viewer ? isAdmin(app.env, viewer.id) : false,
@@ -222,7 +222,7 @@ function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revi
   return update ? { ...entry, ...update } : entry;
 }
 
-/** One primary action per tab (round 16): Topics suggests; the owner's Polls, Schedule and Community add. */
+// Each tab has one primary action.
 function headerAction(view: View, owner: boolean, official: boolean): { dialog: Dialog; label: string } | null {
   if (official) return view === "topics" ? { dialog: "idea", label: t("ideas.suggest") } : null;
   if (view === "topics") return { dialog: "topic", label: t("streamer.suggest") };
@@ -246,7 +246,7 @@ function useIntentDialog(intent: ReturnType<typeof readIntent>, viewer: Viewer |
   };
   const [dialog, setDialog] = useState<Dialog>(intentDialog);
   const [signIn, setSignIn] = useState<boolean>(intent === "suggest" && !viewer);
-  // The intent can also arrive by in-app navigation to this same page, which keeps the component mounted.
+  // Handle intent changes without requiring a remount.
   const [intentSeen, setIntentSeen] = useState<string | null>(intent);
   if (intentSeen !== intent) {
     setIntentSeen(intent);
@@ -310,7 +310,7 @@ export default function StreamerPage(): ReactNode {
   const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
   const [error, setError] = useState<string>("");
   const [extra, setExtra] = useState<Entry[]>([]);
-  /** Spins the polls refresh icon once per click (item 20). */
+
   const [refreshes, setRefreshes] = useState<number>(0);
   const [cursor, setCursor] = useState<string | null>(board.nextCursor);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
@@ -343,7 +343,7 @@ export default function StreamerPage(): ReactNode {
   });
   const selectedBase: Entry | null = loadedSelected || entries[0] || null;
   const selected: Entry | null = mergeLiveEntry(selectedBase, live.snapshot, board.revision);
-  // Wakes exactly at a running battle's start and end, so every viewer sees them on time.
+  // Wake at battle start and end.
   const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
   const pollsClass: string = usePollsMainClass(view === "polls" && loadedSelected ? selected : null, now);
 
@@ -372,7 +372,7 @@ export default function StreamerPage(): ReactNode {
     setSearchParams(params);
   }
 
-  /** Opens an entry from the list. The history entry remembers the list, so Back can return to it. */
+  // Save list history when opening an entry.
   function openFromList(next: View, entryId: string): void {
     if (searchParams.has("entry")) return navigate(next, entryId);
     const params = new URLSearchParams(searchParams);
@@ -388,8 +388,7 @@ export default function StreamerPage(): ReactNode {
     else navigate(next);
   }
 
-  // A create navigates to the new entry, then its dialog closes. That close must not rewrite the URL from the
-  // pre-navigation search params, or the entry would drop out of it.
+  // Dialog closure must not restore old parameters and remove the newly created entry from the URL.
   const created = useRef<boolean>(false);
   function closeIntentDialog(): void {
     setDialog(null);
@@ -492,7 +491,6 @@ export default function StreamerPage(): ReactNode {
     copyText(url).then((copied: boolean) => toast(copied ? t("entry.linkCopied") : url));
   }
 
-  /** The empty Topics state: the owner shares the page; viewers suggest the first topic. */
   function renderEmptyTopics(): ReactNode {
     if (official)
       return (

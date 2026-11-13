@@ -1,4 +1,4 @@
-/** Read only IFD0 orientation; never copy private tags, pointers or thumbnails. */
+// Read only IFD0 orientation; never copy private tags, pointers or thumbnails.
 export function orientationExif(input: Uint8Array): Uint8Array | undefined {
   const prefixed: boolean =
     input.length >= 6 &&

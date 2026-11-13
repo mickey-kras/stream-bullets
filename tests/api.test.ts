@@ -132,10 +132,10 @@ describe("profile, language and preferences", (): void => {
     for (const body of [{}, { avatarPreset: 18 }, { avatarPreset: 1.5 }, { name: "" }, { image: "/x" }]) {
       expect((await call("PATCH", "profile", { user: "viewer", body })).status).toBe(400);
     }
-    // The settings page's endpoints are retired with it: the dialogs use PATCH /api/profile and /api/streamer.
+    // Account dialogs replace the retired settings endpoints.
     expect((await call("POST", "account", { user: "viewer", body: { name: "Legacy" } })).status).toBe(404);
     expect((await call("POST", "profile", { user: "viewer", body: { handle: "x_page", name: "X" } })).status).toBe(405);
-    // Removing an uploaded picture (a preset was chosen) is idempotent for an account without one.
+    // Deleting an absent avatar is idempotent.
     expect(await (await call("DELETE", "images/avatar", { user: "viewer" })).json()).toEqual({ avatar: null });
   });
 
@@ -181,7 +181,7 @@ describe("profile, language and preferences", (): void => {
       "sb_locale=pt-BR; Path=/; Max-Age=31536000; SameSite=Lax; Secure",
       `sb_prefs=${encodeURIComponent(JSON.stringify(prefs))}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`,
     ]);
-    // The server reads the cookie back exactly as the client's Cookie Store API write.
+    // Read back the exact Cookie Store API format.
     expect(readDisplayPrefs(decodeURIComponent(cookies[1].split(";")[0].split("=")[1]))).toEqual(prefs);
     expect(preferenceCookies({ locale: "de" }, false)).toEqual([
       "sb_locale=de; Path=/; Max-Age=31536000; SameSite=Lax",
@@ -266,7 +266,7 @@ describe("directory", (): void => {
     expect(handles).toHaveLength(53);
     expect(new Set(handles).size).toBe(53);
     expect(handles.at(-1)).toBe("zed_page");
-    // A cursor from before official pages existed still works and starts after the official group.
+    // Legacy cursors still start after the official-page group.
     const legacy = (await (await call("GET", "streamers?cursor=page_p50")).json()) as StreamerDirectory;
     expect(legacy.streamers.map((streamer: Streamer) => streamer.handle)).toEqual(["zed_page"]);
   });
@@ -285,7 +285,6 @@ describe("edit your page", (): void => {
     const streamer = ((await renamed.json()) as { streamer: Streamer }).streamer;
     expect(streamer.handle).toBe("zed_tv");
     expect(streamer.handleChangedAt).toEqual(expect.any(Number));
-    // Sending the current handle is not a change.
     expect((await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_tv" } })).status).toBe(200);
     const tooSoon = await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_again" } });
     expect(tooSoon.status).toBe(409);
@@ -353,7 +352,6 @@ describe("threads", (): void => {
       [first, true, [reply, deeper]],
     ]);
     expect(comments[1].replies[1]).toMatchObject({ parentId: reply, text: "Deeper", author: "Name viewer" });
-    // A removed comment can't be liked.
     await call("POST", "comments", { user: "owner", body: { action: "like", id: first, liked: true } });
     expect(await env.DB.prepare("SELECT count(*) AS n FROM comment_likes").first("n")).toBe(0);
     expect((await call("GET", `entries/${ids.topic}/comments?view=tree`)).status).toBe(400);

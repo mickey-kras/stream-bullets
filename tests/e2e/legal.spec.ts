@@ -19,7 +19,6 @@ test("privacy policy and terms render with contents and a draft notice", async (
   await contents.getByRole("link", { name: "Cookies and local storage" }).click();
   await expect(page).toHaveURL(/\/privacy#cookies$/);
   await expect(page.getByRole("heading", { name: "Cookies and local storage" })).toBeInViewport();
-  // Legal pages use the generic header with the real account control and a way back.
   await expect(page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up" })).toHaveCount(1);
   await expect(page.getByRole("link", { name: "Back to Streamers" })).toBeVisible();
 
@@ -56,7 +55,7 @@ for (const [name, path] of [
   ["Terms", "/terms"],
 ] as const) {
   test(`the sign-in dialog links to ${name}`, async ({ page }) => {
-    // Test each link from a fresh dialog instead of sharing back-navigation state.
+    // Use fresh dialogs for each link to isolate navigation state.
     await page.goto("/streamers");
     await page.getByRole("banner").getByRole("button", { name: "Sign in / Sign up", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Sign in or sign up" });

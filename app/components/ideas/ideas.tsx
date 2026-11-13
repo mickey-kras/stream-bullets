@@ -25,7 +25,7 @@ export function categoryLabel(category: string): string {
     : category;
 }
 
-/** "Under review", "Planned"… always an icon and a word, never colour alone. */
+// Pair every status color with an icon and word.
 export function IdeaStatus({ status }: Readonly<{ status: EntryStatus | null }>): ReactNode {
   if (!status) return null;
   return (
@@ -36,7 +36,7 @@ export function IdeaStatus({ status }: Readonly<{ status: EntryStatus | null }>)
   );
 }
 
-/** The status filters above the list. "Shipped" doubles as the changelog. */
+// Shipped filter doubles as changelog.
 export function IdeaFilters({ current }: Readonly<{ current: EntryStatus | null }>): ReactNode {
   return (
     <>
@@ -66,7 +66,6 @@ export function IdeaFilters({ current }: Readonly<{ current: EntryStatus | null 
   );
 }
 
-/** Why an idea is not planned, or when it shipped. */
 export function IdeaOutcome({ entry }: Readonly<{ entry: Entry }>): ReactNode {
   if (entry.status === "declined" && entry.statusReason)
     return (

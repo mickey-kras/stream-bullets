@@ -120,8 +120,7 @@ function stubGoogleIdentity(
       const url: string = input instanceof Request ? input.url : String(input);
       if (url === "https://oauth2.googleapis.com/token") {
         tokenRequests.push(new URLSearchParams(await new Request(input, init).text()));
-        // The authorization-code flow reads identity from this backchannel ID token;
-        // userinfo and JWKS fetches belong to other provider authentication paths.
+        // Authorization-code identity comes from the backchannel ID token; this path does not fetch userinfo or JWKS.
         return Response.json({
           access_token: "private-google-access-token",
           refresh_token: "private-google-refresh-token",
@@ -656,7 +655,6 @@ describe("OAuth boundary", () => {
     expect(() => createAuth({ ...all, INSTAGRAM_CLIENT_SECRET: undefined })).toThrow(
       "Both instagram OAuth credentials",
     );
-    // Both providers start an OAuth redirect through the social sign-in endpoint.
     const auth = createAuth(all);
     for (const [provider, host] of [
       ["tiktok", "www.tiktok.com"],
@@ -697,10 +695,7 @@ describe("provider adapters", () => {
     INSTAGRAM_CLIENT_SECRET: "test-instagram-secret",
   });
 
-  /**
-   * The Instagram provider exactly as `createAuth` hands it to better-auth's generic OAuth plugin. That plugin's
-   * `options.config` is internal, so a library upgrade that reshapes it fails here by name, not with a TypeError.
-   */
+  // Inspect the Instagram generic OAuth config; fail clearly if an upgrade changes this internal shape.
   function instagram(): InstagramConfig {
     const plugins: unknown = createAuth(withProviders()).options.plugins;
     const plugin = Array.isArray(plugins)
@@ -718,7 +713,7 @@ describe("provider adapters", () => {
     return config as unknown as InstagramConfig;
   }
 
-  /** Answers each fetch with the next body in the queue. A Response is sent as it is. */
+  // Return queued fetch bodies; preserve supplied Responses.
   function answer(...bodies: unknown[]) {
     const queue = [...bodies];
     return vi.spyOn(globalThis, "fetch").mockImplementation(async (): Promise<Response> => {
@@ -782,7 +777,7 @@ describe("provider adapters", () => {
     try {
       const config = instagram();
       await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toThrow("Instagram sign-in failed.");
-      // An unknown token shape is a parse error (no access_token), not the "sign-in failed" refusal.
+      // Missing access_token is a parse error, not a sign-in refusal.
       await expect(config.getToken({ code: "c", redirectURI: "r" })).rejects.toBeInstanceOf(ZodError);
     } finally {
       fetchMock.mockRestore();
@@ -821,7 +816,6 @@ describe("provider adapters", () => {
     {
       provider: "tiktok",
       subject: "tiktok-open-1",
-      // The built-in TikTok provider sets its own placeholder domain.
       email: "tiktok-open-1@tiktok.placeholder.invalid",
       routes: {
         "https://open.tiktokapis.com/v2/oauth/token/": {
@@ -872,7 +866,7 @@ describe("provider adapters", () => {
         expect(isPlaceholderEmail(email)).toBe(true);
         const listed: AppEnv = { ...authEnv, ADMIN_EMAILS: email };
         expect(await isAdmin(listed, row?.id ?? "")).toBe(false);
-        // Only the unverified flag keeps the listed placeholder out: a verified row with that address would pass.
+        // Only the unverified flag excludes this placeholder address from admin access.
         await env.DB.prepare("UPDATE user SET email_verified=1 WHERE id=?")
           .bind(row?.id ?? "")
           .run();

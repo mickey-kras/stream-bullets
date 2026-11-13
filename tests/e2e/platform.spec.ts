@@ -163,7 +163,7 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   await expect(overlay.locator(".overlay-total")).toContainText("1 vote");
   await expect(overlay.locator(".option-score")).toHaveCount(0);
   await viewer.getByRole("button", { name: "No", exact: true }).click();
-  // The chosen option carries a check icon (mockup poll card); its name stays the option.
+  // The check icon must not change the selected option name.
   await expect(viewer.getByRole("button", { name: "No", exact: true })).toHaveAttribute("aria-pressed", "true");
   const snapshot = await viewerContext.request.get(`/api/entries/${pollId}`);
   const before = (await snapshot.json()) as { entry: { counts: number[] | null; total: number } };
@@ -266,7 +266,6 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   await host.getByRole("button", { name: "Create your community page" }).click();
   await expect(page.getByText("Your page /@new_host is live.").first()).toBeVisible();
   await expect(host).toBeHidden();
-  // Edit your page: a page background, saved with the page.
   await page.goto("/streamers?dialog=page");
   const edit = page.getByRole("dialog", { name: "Edit your page" });
   await edit
@@ -297,7 +296,7 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.getByRole("button", { name: "Suggest a topic", exact: true })).toBeFocused();
-  // On a phone the owner's empty list offers the page link instead of the header action.
+  // On phones, an empty owner list offers the page link.
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole("button", { name: "Copy page link" })).toBeVisible();
   await close(context);
@@ -375,10 +374,8 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
     await expect(viewer.getByRole("dialog", { name: "Report sent" })).toBeVisible();
     await viewer.getByRole("button", { name: "Close", exact: true }).click();
     await expect(viewer.getByRole("dialog")).toHaveCount(0);
-    // Once reported, one "Reported" marker replaces the button.
     await expect(viewer.getByRole("button", { name: "Report topic" })).toHaveCount(0);
     await expect(viewer.locator(".content-actions .reported-chip")).toHaveText("Reported");
-    // Another topic picked on the same board can still be reported.
     const other = viewer.locator("#topics button.topic").filter({ hasText: "Second topic to report" });
     await other.click();
     await expect(other).toHaveAttribute("aria-pressed", "true");
@@ -404,7 +401,6 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
     await expect(admin).toHaveURL(/view=reports/);
     await expect(admin.getByRole("heading", { name: /Content reports/ })).toBeVisible();
     await expect(admin.getByRole("link", { name: "Open", exact: true })).toHaveAttribute("aria-current", "page");
-    // Reports are grouped by page, then by reported item.
     const group = admin.getByRole("article", { name: "Test host" });
     await group.getByRole("button", { name: /Show \d+ reported items?/ }).click();
     const item = group.getByRole("listitem").filter({ hasText: "Limited offer, click now." });

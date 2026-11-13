@@ -3,11 +3,7 @@ import { Dialog as RadixDialog } from "radix-ui";
 import { t } from "../../i18n";
 import { IconButton } from "./icon-button";
 
-/**
- * Moves focus to the dialog's title when it opens, as the mockup does: screen readers start at the top and no
- * focus ring lands on the × button. Remembers the element that opened the dialog and gives focus back to it on
- * close, even after a re-render.
- */
+// Focus the title on open; restore the opener on close, including after rerenders.
 export function useReturnFocus(): {
   onOpenAutoFocus: (event: Event) => void;
   onCloseAutoFocus: (event: Event) => void;
@@ -25,7 +21,7 @@ export function useReturnFocus(): {
     onCloseAutoFocus: (event: Event) => {
       event.preventDefault();
       const target: HTMLElement | null = opener.current;
-      // An account dialog opens from a menu row that is hidden by then: go back to the avatar button.
+      // Hidden account-menu opener falls back to the avatar button.
       const visible: boolean = Boolean(target?.isConnected && target.getClientRects().length > 0);
       const fallback: HTMLElement | null = document.querySelector<HTMLElement>(".account-menu-wrap > button.profile");
       (visible ? target : fallback)?.focus();
@@ -33,10 +29,10 @@ export function useReturnFocus(): {
   };
 }
 
-/** True inside a Sheet footer: the action bar then docks under the scrolling body. */
+// Sheet footer docks below its scrolling body.
 export const SheetActionsContext = createContext<boolean>(false);
 
-/** The 40px ghost × button (44px on phones) that sits on the title row of every dialog and sheet. */
+// Close target: 40px; 44px on phones.
 export function DialogCloseButton(): ReactNode {
   return (
     <RadixDialog.Close asChild>
@@ -45,10 +41,7 @@ export function DialogCloseButton(): ReactNode {
   );
 }
 
-/**
- * The sticky action bar at the bottom of a dialog: Cancel first, then the primary action(s) last.
- * Pass `cancel={false}` for a bar without Cancel. `onCancel` runs before the dialog closes.
- */
+// Sticky actions: Cancel first, primary last. cancel=false hides Cancel; onCancel runs before closing.
 export function DialogActions({
   children,
   cancel = true,
@@ -77,11 +70,8 @@ export function DialogActions({
   );
 }
 
-/**
- * Modal dialog on Radix: blurred backdrop, title row with the × button, optional description, body and an
- * optional sticky footer (`actions`, usually a <DialogActions>). Focus moves in on open and back to the opener on
- * close; Escape, the × and the backdrop close it.
- */
+// Radix modal with optional description/footer. Restore focus on close; Escape, close button and backdrop
+// dismiss it.
 export function Dialog({
   open,
   onOpenChange,

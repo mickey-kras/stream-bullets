@@ -8,11 +8,7 @@ import { KeyConfirm } from "./key-confirm";
 import type { ModeratedPage } from "./moderate-sheet";
 import { adminRequest, errorText, needsStepUp } from "./webauthn";
 
-/**
- * Marks a page as the official StreamBullets page, or clears the mark (R14). The admin creates @streambullets
- * through the normal flow and then sets it here. The server asks for a fresh security-key check first; the sheet
- * then shows the key check and sends the same request again.
- */
+// Set/clear official-page status. Retry the request after fresh security-key verification when required.
 export function OfficialSheet({
   page,
   official,
@@ -20,7 +16,7 @@ export function OfficialSheet({
   onDone,
 }: Readonly<{
   page: ModeratedPage;
-  /** The value to set. */
+
   official: boolean;
   onClose: () => void;
   onDone: (message: string) => Promise<void>;

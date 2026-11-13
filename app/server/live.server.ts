@@ -1,11 +1,8 @@
 import { waitUntil } from "cloudflare:workers";
 import type { AppEnv } from "../env";
 
-/**
- * Calls the streamer's live room after the response is sent (`waitUntil`), so a mutation never waits for the room
- * to query D1 and broadcast. Failures are logged and never thrown: the mutation is committed, and the room alarm
- * resynchronizes disconnected clients and ends battles on time.
- */
+// Notify rooms through `waitUntil`, after response. Log failures without throwing: mutations already
+// committed; room alarms resync clients and finish battles.
 function callRoom(
   env: AppEnv,
   streamerId: string,
@@ -40,22 +37,22 @@ async function sendToRoom(
   }
 }
 
-/** Asks the streamer's live room to publish a fresh snapshot. */
+// Asks the streamer's live room to publish a fresh snapshot.
 export function notifyRoom(env: AppEnv, streamerId: string): void {
   callRoom(env, streamerId, "refresh");
 }
 
-/** Asks the live room to reload a Mash Battle the API just started, ended or restarted. */
+// Asks the live room to reload a Mash Battle the API just started, ended or restarted.
 export function notifyMash(env: AppEnv, streamerId: string, id: string): void {
   callRoom(env, streamerId, "mash", { id });
 }
 
-/** Asks the live room to send the new overlay state, so the OBS page switches at once. */
+// Asks the live room to send the new overlay state, so the OBS page switches at once.
 export function notifyOverlay(env: AppEnv, streamerId: string): void {
   callRoom(env, streamerId, "overlay");
 }
 
-/** Asks the live room to drop the sockets that came in with a revoked overlay key. */
+// Asks the live room to drop the sockets that came in with a revoked overlay key.
 export function notifyOverlayKey(env: AppEnv, streamerId: string): void {
   callRoom(env, streamerId, "overlay-key");
 }

@@ -10,12 +10,12 @@ import { SignedInWith } from "./profile-dialog";
 
 const CONFIRMATION = "DELETE";
 
-/** Typing "delete" in any case confirms (review m21). */
+// Case-insensitive delete confirmation.
 export function confirmsDeletion(value: string): boolean {
   return value.trim().toUpperCase() === CONFIRMATION;
 }
 
-/** What deleting removes, worded for this account: page owners and viewers have different things (m21). */
+// Describe deletion according to the account's role.
 export function deletionItems(input: { provider: Provider | null; owner: boolean }): string[] {
   const items: string[] = [
     t("data.delete.profile"),
@@ -30,10 +30,7 @@ export function deletionItems(input: { provider: Provider | null; owner: boolean
   return items;
 }
 
-/**
- * "Your data" (item 17): download the JSON export, or step into "Delete your account?" inside the same
- * dialog. The delete step lists what goes (for this account's role) and needs DELETE typed to enable.
- */
+// Export JSON or confirm deletion by typing DELETE. Show role-specific data removal.
 export function DataDialog({
   provider,
   providers,
@@ -44,7 +41,7 @@ export function DataDialog({
   const [confirmation, setConfirmation] = useState<string>("");
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  // The server deletes only after a recent sign-in; then the person signs in again with their provider here.
+  // Deletion requires recent sign-in; reauthenticate with the provider.
   const [reauth, setReauth] = useState<boolean>(false);
   const confirmed: boolean = confirmsDeletion(confirmation);
 

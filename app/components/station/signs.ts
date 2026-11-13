@@ -3,10 +3,10 @@ import type { Kit } from "./kit";
 import { add, box, cyl, tube, plaque, rivets, TAU, DECK_Y } from "./shapes";
 import { ringRadius } from "./mast";
 
-/** Depth of the arm's mount behind the sign face: the flip turns the sign about this point. */
+// Flip pivot depth behind the sign face.
 const MOUNT_Z = -0.16;
 
-/** Builds the three mast signs and returns their flip pivots, one per sign, each turning about its arm. */
+// Return three sign pivots, each rotating around its arm.
 export function buildSigns(k: Kit, station: THREE.Group): THREE.Group[] {
   const { brass, gold, signCream, label } = k;
   const signFamily = (): string => k.family;
@@ -93,7 +93,7 @@ export function buildSigns(k: Kit, station: THREE.Group): THREE.Group[] {
       face,
     );
     box([1.9, 0.06, 0.02], [0, -0.52, -0.04], gold, face, 0.01);
-    // Back of the sign: aged enamel plate with a bolted brass mount where the arm enters.
+    // Enamel back plate and bolted brass arm mount.
     plaque([2.2, 0.9, 0.012, 0.18], [0, 0, -0.124], signCream, face);
     box([0.32, 0.32, 0.04], [0, 0, -0.14], gold, face, 0.02);
     rivets(

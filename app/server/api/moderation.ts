@@ -14,7 +14,6 @@ import {
 } from "../validation";
 import { get, parsedQuery, write, type ApiRoute } from "./router";
 
-/** The streamer waitlist and content reports, for applicants, reporters and admins. */
 export const moderationRoutes: ApiRoute[] = [
   write("POST", /application/, async ({ request, env, viewer }) => {
     const input = await readJson(request, applicationSchema);

@@ -27,7 +27,7 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
   const streamer = await getOwnStreamer(app.env, viewer.id);
   if (!streamer) throw new Response("Page not found.", { status: 404 });
   const state = await getOverlayState(app.env, streamer.id);
-  // The monitors need the polls and topics on air and in preview even when they are older than the newest 50.
+  // Load on-air and preview entries even outside the newest 50.
   const refs = new Set<string | null>([null]);
   for (const source of [state.air, state.preview]) if (source.type === "poll") refs.add(source.ref);
   const [data, ...snapshots] = await Promise.all([
@@ -49,13 +49,12 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
   };
 });
 
-/** The owner's second-screen remote for the one OBS overlay URL (item 33). */
 export default function OverlayControlPage(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
   const { snapshot, status, reconnect } = useLivePolls(loaded.handle);
   const revalidator = useRevalidator();
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
-  // Another control tab changed the overlay: reload the full state (the live message has no preview).
+  // Reload changes from other tabs; live messages omit preview state.
   const liveOverlay = snapshot?.overlay ?? null;
   useLiveRevalidation(
     status,
@@ -65,8 +64,7 @@ export default function OverlayControlPage(): ReactNode {
   );
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const now: number = useServerTime(current.serverNow);
-  // Up next names the next stream at load time; once it starts, the loader names the one after it, as on the OBS
-  // page. Either monitor may switch to Up next without a reload, so this follows the loaded stream either way.
+  // Refresh Up next at the loaded stream's start, even when neither monitor currently shows it.
   useRevalidateAt(loaded.initial.serverNow, loaded.data.next?.startsAt ?? null, revalidator.revalidate);
   const polls: OverlayPoll[] = [...current.polls];
   for (const poll of loaded.initial.polls) if (!polls.some((item) => item.id === poll.id)) polls.push(poll);

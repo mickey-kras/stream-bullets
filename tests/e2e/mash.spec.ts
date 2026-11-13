@@ -3,12 +3,10 @@ import { test, expect, type BrowserContext } from "./coverage";
 import { accounts, runSql } from "./fixtures";
 import { mashId, shots, signedIn } from "./live-helpers";
 
-/** The seeded battle on the feature page, by its seeded title. */
 const battle =
   "(SELECT e.id FROM entries e JOIN streamers s ON s.id=e.streamer_id WHERE s.handle='feature_host' AND e.title='Which boss first?')";
 
-// The first test starts, ends and restarts the seeded battle. Put it back as seeded (in setup, the viewer on Radahn
-// with 25 taps), so a retry starts from the same state.
+// Restore the seeded setup, Radahn side, and 25 viewer taps before each retry.
 test.beforeEach(async () => {
   const viewer: string = (await accounts()).viewer.id;
   await runSql("mash-reset", [
@@ -37,30 +35,28 @@ test("a Mash Battle counts one tap per key press and updates the overlay live", 
   await expect(tap).toBeVisible();
   await expect(obs.locator('[data-overlay-mash="live"]')).toBeVisible();
   const mine = page.locator("[data-mash-mine]");
-  // The seed gave this viewer 25 taps. A held key repeats, but only the first press counts.
+  // Seeded total: 25 taps. Held-key repeats count only the first press.
   await tap.focus();
   for (let index = 0; index < 6; index += 1) await page.keyboard.down(" ");
   await page.keyboard.up(" ");
   await expect(mine).toHaveText("26");
   const total = obs.locator('[data-mash-total="1"]');
-  // The overlay bar follows the 5 Hz totals without a reload.
   await expect(total).toHaveText("26");
   for (let count = 27; count <= 29; count += 1) {
-    // Pace intentional presses below the client limit of 15 taps per second.
+    // Keep intentional presses below 15 taps/s.
     await page.waitForTimeout(100);
     await page.keyboard.press("Enter");
     await expect(mine).toHaveText(String(count));
     await expect(total).toHaveText(String(count));
   }
-  // A click with no pointer or key press before it, as screen readers and switch access send, taps once; a mouse
-  // click and a Space press still tap exactly once each.
+  // Assistive clicks, mouse clicks, and Space presses must each count once.
   const presses: [number, () => Promise<void>][] = [
     [30, () => tap.dispatchEvent("click")],
     [31, () => tap.click()],
     [32, () => page.keyboard.press(" ")],
   ];
   for (const [count, press] of presses) {
-    // An overlay update can arrive immediately after a tap, so it is not a pacing clock.
+    // Overlay updates can follow taps immediately; do not use them for pacing.
     await page.waitForTimeout(100);
     await press();
     await expect(mine).toHaveText(String(count));
@@ -78,7 +74,6 @@ test("a Mash Battle counts one tap per key press and updates the overlay live", 
   await expect(page.locator(".mash-winner-title")).toContainText("Radahn");
   if (shots) await obs.screenshot({ path: `${shots}/overlay-mash-winner.png` });
 
-  // Restart deletes the taps and keeps the sides viewers picked.
   expect((await owner.request.post(`/api/mash/${id}/restart`, { data: {} })).status()).toBe(200);
   await expect(page.getByRole("button", { name: /Radahn/ })).toHaveAttribute("aria-pressed", "true");
   await Promise.all([close(owner), close(viewer), close(obs)]);
@@ -96,7 +91,7 @@ test("only the host runs a battle and signed-out viewers see a sign-in prompt", 
 test("hold-assisted tapping stops when keyboard focus leaves the button", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", 80);
   const viewer = await signedIn(browser, "viewer", 81);
-  // `viewer` is shared and saving replaces every display preference, so its own are put back afterwards.
+  // Restore all shared viewer preferences after replacing them.
   const me = (await (await viewer.request.get("/api/me")).json()) as { viewer: { displayPrefs: object } };
   const save = async (data: object): Promise<void> => {
     expect((await viewer.request.patch("/api/me/preferences", { data })).status()).toBe(200);
@@ -123,11 +118,11 @@ async function holdThenTab(owner: BrowserContext, viewer: BrowserContext): Promi
   await tap.focus();
   await page.keyboard.down(" ");
   await expect.poll(count).toBeGreaterThan(26);
-  // Tab moves focus on before the key comes up, so the button never sees the key-up.
+  // Tab moves focus before key-up, so the button never receives it.
   await page.keyboard.press("Tab");
   await page.keyboard.up(" ");
   await expect(tap).not.toBeFocused();
-  // A tap already counted may still show; after that the count must stay put while focus is elsewhere.
+  // Allow an in-flight tap, then require a stable count while focus is elsewhere.
   await page.waitForTimeout(400);
   const stopped = await count();
   await page.waitForTimeout(1_500);

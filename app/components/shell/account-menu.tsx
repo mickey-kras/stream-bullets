@@ -14,16 +14,12 @@ interface MenuRow {
   label: MessageId;
   icon: IconName;
   current?: boolean;
-  /** Opens an account dialog over this page (history state marks it, so closing steps back). */
+  // History state marks account dialogs so closing navigates back.
   dialog?: AccountDialogName;
 }
 
-/**
- * The rows for this person, in the approved order (item 35): own page tools, then account, then Admin, then
- * Streamers (streamer header only). Your profile, Host a community, Your data and Edit your page open dialogs
- * over the current page (item 17). Suggest an improvement opens the official Ideas board with its dialog (item 46).
- * Language and Accessibility & display open their dialogs too.
- */
+// Order: own-page tools, account, Admin, then Streamers on streamer headers. Account/settings open dialogs;
+// suggestions open the official board dialog.
 export function accountMenuRows(
   shell: ShellData,
   location: Pick<Location, "pathname" | "search" | "hash">,
@@ -68,16 +64,13 @@ export function accountMenuRows(
   return groups;
 }
 
-/**
- * The account control on the right of every header. Signed out: "Sign in / Sign up". Signed in: the avatar is a
- * disclosure button (not a menu button) for a popover list of links. Opening moves focus to the first link;
- * Escape, a click outside, focus leaving, a route change or the avatar close it, and Escape returns focus.
- */
+// Avatar disclosure opens links and focuses the first. Escape, outside click, focus exit, navigation or
+// avatar close it. Escape restores focus.
 export function AccountMenu({ streamerHeader = false }: Readonly<{ streamerHeader?: boolean }>): ReactNode {
   const shell: ShellData = useShell();
   const here = useLocation();
   const { pathname, search, hash } = here;
-  // The menu remembers the location it opened at, so a route change closes it without an effect.
+  // Bind menu visibility to its opening location; navigation closes it without an effect.
   const location = `${pathname}${search}${hash}`;
   const [openAt, setOpenAt] = useState<string | null>(null);
   const open: boolean = openAt === location;

@@ -1,4 +1,4 @@
-/* Shell: site and streamer headers, account menu, back link, footer band, frame band, toasts, page column. */
+/* Site shell and navigation. */
 body::before { content:''; position:fixed; inset:0; z-index:10; border:17px solid transparent; border-image:url('/assets/reference.png') 10 17 17 17 stretch; pointer-events:none; border-image-source: url("/assets/frame-alpha.webp"); }
 body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.1; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23n)' opacity='.5' d='M0 0h180v180H0z'/%3E%3C/svg%3E"); }
 header, main { position:relative; z-index:2; }
@@ -96,7 +96,7 @@ body:has(.landing-page) .site-footer { padding: 6px max(16px, env(safe-area-inse
   .site-footer { font-size: var(--text-meta); padding-top: var(--space-1); }
   .site-footer a { min-height: 28px; }
 }
-/* ---- Approved mockup additions ---- */
+
 body:has(> .site-footer):not(:has(.landing-page)) { padding-bottom: 0; }
 body:not(:has(.landing-page)) > .site-footer { z-index: 11; display: flex; align-items: center; justify-content: center; margin: 0 calc(-1 * var(--frame-pad-x)); padding: var(--frame-band-rag) var(--frame-pad-x) 0; background: url("/assets/frame-band.webp") 0 0 / auto 100% repeat-x; color: var(--frame-ink); font: 600 var(--text-meta)/var(--leading-body) var(--body); letter-spacing: .01em; height: auto; min-height: var(--frame-band); flex: 0 0 auto; }
 body:not(:has(.landing-page)) > .site-footer nav { gap: var(--space-1) var(--space-2); height: 100%; flex-wrap: wrap; justify-content: center; width: fit-content; max-width: 100%; margin: 0 auto; padding: var(--space-1) var(--space-2); border-radius: var(--radius-control); background: var(--footer-plate); }
@@ -376,15 +376,14 @@ header .header-end > a.header-streamers:hover { border-color: var(--gold); color
   .streamer-header .header-end { gap: 6px; }
   .streamer-header .streamer-name { font-size: 1.0625rem; }
 }
-/* ---- App adaptations: the mockup's frame is the viewport here ---- */
-/* Footer buttons (Contact, More) look like the footer links. */
+
 .site-footer .footer-link { display: inline-flex; align-items: center; gap: 2px; min-height: 26px; padding: 0 4px; border: 0; border-radius: 4px; background: none; color: inherit; font: inherit; text-decoration: none; white-space: nowrap; cursor: pointer; }
 body:not(:has(.landing-page)) > .site-footer .footer-link { color: var(--frame-ink); }
 .site-footer .footer-link:hover { background: none; text-decoration: underline 2px; text-underline-offset: 3px; }
 body:not(:has(.landing-page)) > .site-footer .footer-link:focus-visible { outline: 2px solid var(--frame-ink); outline-offset: 1px; }
 body:has(.landing-page) .site-footer .footer-link { text-decoration: underline; text-decoration-color: var(--input-border); text-underline-offset: 4px; }
 .site-footer a[aria-current="page"] { text-decoration: underline 2px; text-underline-offset: 3px; }
-/* Toasts: one Radix viewport, bottom centre, above the footer band; the toast itself flows inside it. */
+/* Single Radix viewport above the footer; bottom-center toasts. */
 .sb-toast-viewport { position: fixed; left: 50%; bottom: 64px; z-index: 60; display: flex; flex-direction: column; align-items: center; gap: 8px; width: max-content; max-width: calc(100vw - 32px); margin: 0; padding: 0; list-style: none; transform: translateX(-50%); outline: none; }
 .sb-toast-viewport:empty { display: none; }
 :root .sb-toast-viewport .sb-toast { position: static; left: auto; bottom: auto; max-width: 100%; transform: none; opacity: 1; pointer-events: auto; display: inline-flex; align-items: center; gap: 12px; }
@@ -395,7 +394,7 @@ body:has(.landing-page) .site-footer .footer-link { text-decoration: underline; 
   .sb-toast-viewport { left: 16px; right: 16px; width: auto; max-width: none; transform: none; }
   :root .sb-toast-viewport .sb-toast { width: 100%; justify-content: center; text-align: center; }
 }
-/* Account menu: Sign out is a button that looks like the rows; the landing header uses the same panel. */
+
 .account-menu li > button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--cream); font: 600 17px/1.2 var(--body); text-transform: none; letter-spacing: 0; text-align: left; box-shadow: none; }
 .account-menu li > button:hover { background: var(--btn-hover); border-color: transparent; }
 .landing-header .account-menu-wrap { position: relative; }
@@ -403,13 +402,13 @@ body:has(.landing-page) .site-footer .footer-link { text-decoration: underline; 
 .landing-header .account-menu :is(a, button) { font: 500 1rem/1.3 var(--body); text-transform: none; letter-spacing: 0; }
 .more-list button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: var(--cream); font-weight: 600; text-align: left; }
 .more-list button:hover { background: var(--btn-hover); }
-/* Phones: the account panel spans the screen under the header with an 8px gutter on each side. */
+/* Phone account panel: full width with 8px side gutters. */
 @media (max-width: 43.75em) {
   .site-header .account-menu, .landing-header .account-menu { left: 8px; right: 8px; width: auto; max-width: none; }
   .landing-header { position: relative; }
   .landing-header .account-menu-wrap { position: static; }
 }
-/* Mash Battle focus on phones */
+
 @media (max-width: 43.75em) {
   body.battle-focus > .site-footer, body.battle-focus .polls-page .page-title, body.battle-focus .mash-fair, body.battle-focus .mash-tools a { display: none; }
 }

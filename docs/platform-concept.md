@@ -1,11 +1,11 @@
 # StreamBullets account concept
 
-Personal use first. Multi-user accounts are future scope.
+Personal accounts first. Multi-user accounts remain future scope.
 
-- Accounts start as viewers without a public URL or reserved handle.
-- In this version, streamer profiles need approval. A viewer joins the waitlist in **Settings** with links to their channels.
-- Administrators review applications at `/admin`. `ADMIN_EMAILS` lists their verified email addresses.
-- After approval, creating a streamer profile explicitly claims an available `/@handle`.
-- The streamer profile enables topics, polls, schedule, about, and community.
-- Keep portrait separate from the logo frame. allow background, color scheme, and font customization.
-- Viewer home recommendation: followed streamers and recent discussions, with a simple empty state.
+- Viewers start without a public URL or reserved handle.
+- **Host a community** accepts waitlist applications with channel links.
+- Administrators review applications at `/admin`. `ADMIN_EMAILS` lists their verified addresses.
+- Approval permits one streamer profile and an available `/@handle`.
+- Profiles give topics, polls, schedule, about, and community tabs.
+- Keep portraits separate from logo frames. Support background, color, and font choices.
+- Proposed viewer home: followed streamers, recent discussions, and a simple empty state.

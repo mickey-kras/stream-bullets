@@ -17,7 +17,6 @@ import { Cropper, type CropperHandle } from "./cropper";
 import { useDiscardGuard } from "./discard";
 import { IMAGE_TYPES, MAX_IMAGE_BYTES, uploadImage } from "./me";
 
-/** "Signed in with Google" (with the provider's mark) at the top of Your profile and Your data. */
 export function SignedInWith({ provider }: Readonly<{ provider: Provider | null }>): ReactNode {
   if (!provider) return null;
   return (
@@ -28,7 +27,7 @@ export function SignedInWith({ provider }: Readonly<{ provider: Provider | null 
   );
 }
 
-/** A file input styled as a button (review m20). Checks type and size before handing the file on. */
+// Validate file type/size before forwarding it.
 export function UploadField({
   label,
   icon = "upload",
@@ -65,7 +64,7 @@ export function UploadField({
 }
 
 interface NewPhoto {
-  /** The original file, for "Adjust your photo". */
+  // Original file for recropping.
   source: string;
   blob: Blob;
   url: string;
@@ -88,11 +87,8 @@ function profilePreview(choice: AvatarChoice, photoUrl: string | null): PictureS
   return { kind: "preset", preset: choice === "photo" ? DEFAULT_AVATAR_PRESET : choice };
 }
 
-/**
- * "Your profile" (items 7, 9, 13, 17): display name and picture with a live preview. Nothing applies until
- * Save. Uploading opens the "Adjust your picture" step in the same dialog; the cropped 512px JPEG becomes the
- * "Your photo" option. Choosing a preset over an uploaded photo removes the upload on Save.
- */
+// Draft name/picture until Save. Crop uploads to 512px JPEG; selecting a preset removes the upload only on
+// Save.
 export function ProfileDialog({
   viewer,
   provider,
@@ -161,7 +157,7 @@ export function ProfileDialog({
       setChoice("photo");
       setCropSource(null);
       setError("");
-      // Back on the profile step, focus the photo option the crop selected.
+      // Restore focus to the crop's selected photo option.
       requestAnimationFrame(() =>
         document.querySelector<HTMLElement>('.avatar-grid [data-avatar="photo"] input')?.focus(),
       );

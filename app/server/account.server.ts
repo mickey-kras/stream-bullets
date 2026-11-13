@@ -4,7 +4,7 @@ import { getOrigin, HttpError } from "./http.server";
 import { deleteImageObjects, imageStorageKey, IMAGE_KINDS, type ImageKind } from "./images.server";
 import { notifyRoom } from "./live.server";
 
-/** Rows read per query while building an export, so memory grows with one page at a time per query. */
+// Bound export memory to one page per query.
 export const EXPORT_PAGE_SIZE = 500;
 
 const NOTES =
@@ -350,7 +350,7 @@ export interface AccountExport {
     text: string;
     createdAt: string;
     parentId: string | null;
-    /** Deleted while it had replies: the text is gone and the thread shows "Comment removed". */
+    // Deleted while it had replies: the text is gone and the thread shows "Comment removed".
     removed: boolean;
   }[];
   reactions: { entryId: string; entryTitle: string; streamerHandle: string; reaction: "like" | "dislike" }[];
@@ -365,7 +365,7 @@ export interface AccountExport {
     taps: number;
     assistedTaps: number;
   }[];
-  /** Admin accounts only: the moderation and security actions this account took. */
+  // Admin accounts only: the moderation and security actions this account took.
   moderationActions: { targetKind: string; targetId: string; action: string; reason: string; createdAt: string }[];
   reports: {
     targetKind: string;
@@ -404,7 +404,7 @@ function optionalIso(value: number | null): string | null {
   return value === null ? null : iso(value);
 }
 
-/** Reads every row for one user in rowid order, one bounded page per query. */
+// Reads every row for one user in rowid order, one bounded page per query.
 async function readAll<T extends PagedRow>(env: AppEnv, sql: string, userId: string): Promise<T[]> {
   const rows: T[] = [];
   let cursor = 0;
@@ -438,7 +438,7 @@ async function imageRecords(env: AppEnv, userId: string, origin: string): Promis
 const entryJoin = "JOIN entries e ON e.id=x.entry_id JOIN streamers s ON s.id=e.streamer_id";
 const page = "x.rowid>?2 ORDER BY x.rowid LIMIT ?3";
 
-/** Reads the paged history tables for one account. */
+// Reads the paged history tables for one account.
 async function readHistory(env: AppEnv, userId: string, now: number) {
   const providers = await readAll<ProviderRow>(
     env,
@@ -524,7 +524,7 @@ async function readHistory(env: AppEnv, userId: string, now: number) {
       FROM moderation_actions x WHERE x.actor_id=?1 AND ${page}`,
     userId,
   );
-  // Everything below belongs to the account's streamer page.
+  // Streamer-page data follows.
   const ownPage = "JOIN streamers s ON s.id=x.streamer_id WHERE s.owner_id=?1";
   const events = await readAll<EventRow>(
     env,
@@ -545,7 +545,7 @@ async function readHistory(env: AppEnv, userId: string, now: number) {
     `SELECT x.rowid AS row_cursor,x.position,x.kind,x.label,x.url FROM streamer_links x ${ownPage} AND ${page}`,
     userId,
   );
-  // The reason is what the owner was told; the admin's internal note and identity are not the owner's data.
+  // Export the owner-visible reason, not internal admin notes or identity.
   const pageModeration = await readAll<PageModerationRow>(
     env,
     `SELECT x.rowid AS row_cursor,x.action,x.reason,x.created_at
@@ -658,7 +658,7 @@ function pageExport(
   };
 }
 
-/** Collects everything stored about the account. Credentials and other people's data are excluded. */
+// Export account data, excluding credentials and other users' data.
 export async function exportAccount(env: AppEnv, userId: string): Promise<AccountExport> {
   const origin = getOrigin(env);
   const now = Date.now();
@@ -826,7 +826,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
   };
 }
 
-// Streamer pages (other than the user's own) whose public counts or lists change when the user's rows go.
+// Other pages whose public counts/lists change on account deletion.
 const touchedStreamers = `
   SELECT e.streamer_id FROM entries e WHERE e.author_id=?1
   UNION SELECT e.streamer_id FROM entry_votes v JOIN entries e ON e.id=v.entry_id WHERE v.user_id=?1
@@ -834,22 +834,14 @@ const touchedStreamers = `
   UNION SELECT e.streamer_id FROM entry_comments c JOIN entries e ON e.id=c.entry_id WHERE c.author_id=?1
   UNION SELECT e.streamer_id FROM comment_likes l JOIN entry_comments c ON c.id=l.comment_id
     JOIN entries e ON e.id=c.entry_id WHERE l.user_id=?1`;
-// D1 allows at most five terms in one compound SELECT, so further sources go in a second list.
+// D1 permits five compound SELECT terms; split further sources.
 const touchedStreamersMore = `
   SELECT e.streamer_id FROM mash_taps m JOIN entries e ON e.id=m.entry_id WHERE m.user_id=?1`;
 
-/**
- * Permanently deletes the account and everything it owns in one atomic D1 batch.
- * Foreign keys cascade from `user` to sessions, sign-in links, security keys, the streamer page
- * (with its entries, scheduled streams, Community cards, support links and overlay state), the
- * user's entries, comments, votes, reactions, likes, Mash Battle taps, and waitlist application.
- * Replies other people wrote under the user's comments are kept as top-level comments: account
- * deletion removes comments outright instead of leaving "Comment removed" placeholders (R2), and a
- * placeholder left with no replies goes too.
- * Moderation records about the user's page keep their plain page id (an audit trail, like reports);
- * records the user made as an admin lose their actor.
- * Uploaded images are removed after the database commit, then affected live rooms are refreshed.
- */
+// Delete the account and owned data in one D1 batch. Cascades remove sessions, links, keys, page data,
+// content, votes, reactions, taps, and applications. Other authors' replies become top-level; empty
+// placeholders disappear. Preserve moderation target IDs; clear deleted admin actors. After commit, remove
+// images and refresh rooms.
 export async function deleteAccount(env: AppEnv, userId: string): Promise<void> {
   if (userId === SYSTEM_USER_ID) throw new HttpError(403, "The system principal cannot be deleted.");
   const statement = (sql: string): D1PreparedStatement => env.DB.prepare(sql).bind(userId);
@@ -872,8 +864,7 @@ export async function deleteAccount(env: AppEnv, userId: string): Promise<void> 
       `DELETE FROM verification WHERE identifier IN (?1,(SELECT email FROM user WHERE id=?1))
         OR instr(value,'"userId":"'||?1||'"')>0`,
     ),
-    // Reports the user made are their personal data. Reports about the user's content keep the
-    // moderation record, but the copied text goes because the content itself is being erased.
+    // Delete authored reports. Retain reports about deleted content but erase copied text.
     statement("DELETE FROM content_reports WHERE reporter_id=?1"),
     statement(
       `UPDATE content_reports SET snapshot='${DELETED_AUTHOR_SNAPSHOT}'
@@ -888,8 +879,7 @@ export async function deleteAccount(env: AppEnv, userId: string): Promise<void> 
   try {
     for (const kind of IMAGE_KINDS) await deleteImageObjects(env, userId, kind);
   } catch (error_: unknown) {
-    // The account is already deleted, so the request still succeeds. Log the error class, not its
-    // message, so operators can remove the leftover images without exposing storage details.
+    // Deletion already committed: succeed and log only the error class for leftover-image cleanup.
     console.error("account_image_delete_failed", { cause: error_ instanceof Error ? error_.name : "unknown" });
   }
   const streamerIds = [...results[0].results, ...results[1].results].map(

@@ -11,7 +11,7 @@ import { installWorkersRuntime, RoomNamespace, serverSocketOf } from "./helpers/
 
 vi.mock("cloudflare:workers", () => import("./helpers/room"));
 
-/** The app's pages stand in for the React Router build, which only exists after `react-router build`. */
+// Stub the generated React Router build.
 const router = vi.hoisted(() => ({
   mode: "",
   build: null as unknown,
@@ -41,9 +41,8 @@ const png = Uint8Array.from(
 
 let database: TestDatabase;
 let env: AppEnv;
-/** Keys the rate limiter saw, and whether it lets the next request through. */
+// Rate-limit keys and the next admission result.
 const limiter = { keys: [] as string[], allow: true };
-/** Requests the Worker forwarded to a live room. */
 let forwarded: Request[] = [];
 
 const { cookie } = apiCaller(() => env, origin, secret);
@@ -57,12 +56,12 @@ function fetchPath(path: string, init: RequestInit = {}): Promise<Response> {
   return worker.fetch(new Request(`${origin}${path}`, init), env);
 }
 
-/** A live connection request as a browser on this site sends it. */
+// Same-origin live connection request.
 function live(handle: string, headers: Record<string, string> = {}, query = ""): Promise<Response> {
   return fetchPath(`/api/live/${handle}${query}`, { headers: { Origin: origin, Upgrade: "websocket", ...headers } });
 }
 
-/** A room that records what the Worker forwarded and accepts the socket. */
+// Record room requests and accept the socket.
 function capturingRooms(): RoomNamespace<{ fetch: (request: Request) => Promise<Response> }> {
   return new RoomNamespace(() => ({
     fetch: async (request: Request): Promise<Response> => {
@@ -282,19 +281,17 @@ describe("Worker live connections", (): void => {
     const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
     await live("zed_page", {}, `?key=${key}`);
     expect(lastForwarded()).toMatchObject({ user: null, owner: null, overlay: "1" });
-    // A wrong or malformed key gets a signed-out seat.
+    // Invalid keys receive signed-out seats.
     for (const query of [`?key=${"A".repeat(43)}`, `?key=${key}x`, "?key=", ""]) {
       await live("zed_page", {}, query);
       expect(lastForwarded()).toMatchObject({ user: null, owner: null, overlay: null });
     }
-    // The signed-in owner counts as the owner already, with or without the key.
+    // Owner sessions need no overlay key.
     await live("zed_page", { Cookie: await cookie("owner") }, `?key=${key}`);
     expect(lastForwarded()).toMatchObject({ user: "owner", owner: "1", overlay: null });
-    // A new key revokes the old one.
     const next = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
     await live("zed_page", {}, `?key=${key}`);
     expect(lastForwarded().overlay).toBeNull();
-    // A frozen page keeps its overlay.
     await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(pageId).run();
     await live("zed_page", {}, `?key=${next}`);
     expect(lastForwarded().overlay).toBe("1");
@@ -343,7 +340,7 @@ describe("Worker live connections", (): void => {
     });
     expect(post.status).toBe(426);
     expect((await live("nobody_here")).status).toBe(404);
-    // A suspended page refuses its owner too.
+    // Suspension blocks owners too.
     expect((await live("hidden_page", { Cookie: await cookie("hidden") })).status).toBe(404);
     expect(forwarded).toHaveLength(0);
   });
@@ -436,7 +433,7 @@ describe("Worker cron", (): void => {
         ),
       ).rejects.toThrow("Cron jobs failed: cleanup");
       expect(log.mock.calls.map((call: unknown[]) => call[0])).toEqual(["cron_cleanup_failed"]);
-      // No heartbeat for a failed run, so the monitor alerts.
+      // Failed runs send no heartbeat, allowing the monitor to alert.
       expect(ping).not.toHaveBeenCalled();
     } finally {
       log.mockRestore();

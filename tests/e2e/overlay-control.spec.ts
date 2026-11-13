@@ -6,7 +6,7 @@ import { origin, shots, signedIn } from "./live-helpers";
 import { clientAddress, clientIp } from "./client-ips";
 
 test.beforeEach(async () => {
-  // Each test and retry starts independently of the previous owner's display changes.
+  // Reset display state before each test and retry.
   await runSql("overlay-control-reset", [
     `UPDATE overlay_state SET air='{"type":"auto","ref":null}', preview=json_object('type','topic','ref',(SELECT id FROM entries WHERE title='Mic shootout' AND kind='topic')), instant=0, position='lower', size='m', show_results=1, message='', message_style='info', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`,
   ]);
@@ -29,9 +29,9 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await expect(obs.locator('[data-overlay-source="topic"]')).toContainText("Mic shootout");
   await expect(control.getByRole("button", { name: /Take/ })).toBeDisabled();
 
-  // Wait for the take request to finish; shortcuts are ignored while saving.
+  // Shortcuts stay disabled until Take completes.
   await expect(control.getByRole("radio", { name: /Message banner/ })).toBeEnabled();
-  // Shortcut 5 picks the message banner. Typing in the field never switches the source.
+  // Shortcut 5 selects the banner; typing must not switch sources.
   await control.locator("body").press("5");
   const message = control.locator("[data-ov-message]");
   await expect(message).toHaveAttribute("maxlength", "120");
@@ -48,7 +48,6 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
 
   await control.getByRole("button", { name: "Top bar" }).click();
   await expect(obs.locator(".ov-stage.pos-top")).toBeVisible();
-  // The box follows the saved state, so it changes once the server answers.
   await control.getByRole("checkbox", { name: "Instant switch (skip preview)" }).click();
   await expect(control.getByRole("checkbox", { name: "Instant switch (skip preview)" })).toBeChecked();
   await expect(control.locator('[data-ov-monitor="prev"]')).toHaveCount(0);
@@ -57,9 +56,9 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await expect(obs.locator('[data-overlay-type="hidden"]')).toBeEmpty();
   if (shots) await obs.screenshot({ path: `${shots}/overlay-hidden.png` });
 
-  // The OBS update can arrive before the save completes and shortcuts become available.
+  // OBS updates can precede save completion and shortcut reactivation.
   await expect(control.getByRole("radio", { name: /^Auto/ })).toBeEnabled();
-  // Back to Auto so the page ends as it started: the newest open poll.
+  // Restore Auto to the newest open poll.
   await control.locator("body").press("1");
   await expect(obs.locator('[data-overlay-type="auto"]')).toBeVisible();
   await control.getByRole("checkbox", { name: "Instant switch (skip preview)" }).click();
@@ -67,7 +66,7 @@ test("the owner previews, takes and switches what the one OBS URL shows", async 
   await Promise.all([close(owner), close(obs)]);
 });
 
-/** Opens `count` live sockets from `page` at once: "open" for each that gets a snapshot, "refused" for each closed. */
+// Open `count` sockets; classify each by snapshot receipt or refusal.
 async function liveSockets(page: Page, count: number, key: string | null = null): Promise<string[]> {
   return page.evaluate(
     ({ count, key }) =>
@@ -102,7 +101,7 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   expect(oldUrl).toBe(await field.inputValue());
   const oldKey: string = new URL(oldUrl).searchParams.get("key") ?? "";
 
-  // OBS is not signed in, and its network already holds the ten signed-out sockets one client may open.
+  // OBS has no session; its network already holds ten guest sockets.
   const obs = await browser.newContext({
     baseURL: origin,
     viewport: { width: 1920, height: 1080 },
@@ -123,7 +122,7 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   await confirm.getByRole("button", { name: "Regenerate link" }).click();
   await expect(field).not.toHaveValue(oldUrl);
   const newKey: string = new URL(await field.inputValue()).searchParams.get("key") ?? "";
-  // The old link now counts as one more signed-out socket, so this full network turns it away.
+  // The revoked link becomes a guest; the full network must refuse it.
   await expect(source.locator(".overlay-connection")).toContainText("Reconnecting");
   expect(await liveSockets(crowd, 1, oldKey)).toEqual(["refused"]);
   expect(await liveSockets(crowd, 1, newKey)).toEqual(["open"]);
@@ -146,7 +145,7 @@ test("overlay control is for the page owner only", async ({ browser, page }) => 
 
 test("a monitor shows its stage only once it is scaled to the frame", async ({ browser }) => {
   const phone = { viewport: { width: 390, height: 844 } };
-  // Without script the stage is never scaled, as before hydration. At its default size it would spill out.
+  // Without JavaScript, hide the unscaled stage to prevent overflow.
   const still = await fixtureSignedIn(browser, "featureowner", 92, { ...phone, javaScriptEnabled: false });
   const before = await newPage(still);
   await before.goto("/overlay-control");
@@ -163,7 +162,7 @@ test("the control page moves Up next on when the stream it shows starts", async 
   const page = "(SELECT id FROM streamers WHERE handle='feature_host')";
   const topic = "(SELECT id FROM entries WHERE title='Mic shootout' AND kind='topic')";
   const preview = (source: string): string => `UPDATE overlay_state SET preview=${source} WHERE streamer_id=${page};`;
-  // A stream that starts in 20 seconds, ahead of the seeded Mic shootout.
+  // Start a stream in 20 s, before the seeded Mic shootout.
   const id = randomUUID();
   const now = Date.now();
   await runSql("upnext-soon", [
@@ -176,7 +175,7 @@ test("the control page moves Up next on when the stream it shows starts", async 
     await control.goto("/overlay-control");
     const monitor = control.locator('[data-ov-monitor="prev"] [data-overlay-source="next"]');
     await expect(monitor).toContainText("Soon stream");
-    // Once it starts, the loader names the stream after it, as the OBS page does.
+    // After start, load the next stream as OBS does.
     await expect(monitor).toContainText("Mic shootout", { timeout: 40_000 });
   } finally {
     await runSql("upnext-soon", [
