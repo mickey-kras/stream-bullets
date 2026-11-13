@@ -1,4 +1,4 @@
-/* Overlay composition and the wasteland theme (docs/design/wasteland-overlays). Layer content is laid out in design
+/* Overlay composition and the wasteland theme. Layer content is laid out in design
    pixels (1080p) and scaled by --ov-scale. Colours and textures come from the --wl-* properties set by theme.ts. */
 
 /* ---------- OBS design canvas: the editor preview's 1920x1080 .ov-scaler (overlay-composition) ---------- */

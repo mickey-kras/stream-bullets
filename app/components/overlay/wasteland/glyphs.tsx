@@ -3,7 +3,7 @@ import type { ActivityPlatform } from "../../../lib/activity";
 import { PLATFORM_COLORS, WASTELAND_COLORS } from "./theme";
 
 /*
- * Original wasteland artwork, drawn in code (docs/design/wasteland-overlays). The platform glyphs are generic
+ * Original wasteland artwork, drawn in code. The platform glyphs are generic
  * shapes, not trademark logos: a play tile, a speech square and a notched K block. Each platform has its own
  * silhouette, so colour is never the only cue.
  */

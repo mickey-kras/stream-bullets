@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { ActivityPlatform } from "../../../lib/activity";
 
 /**
- * The wasteland overlay theme (docs/design/wasteland-overlays). Only colours and textures live here: layout is in
+ * The wasteland overlay theme. Only colours and textures live here: layout is in
  * wasteland.css and behaviour in the chat reducer, so another theme can replace this file alone. These values render
  * on stream, so they do not follow the site's light or dark theme.
  */
