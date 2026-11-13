@@ -114629,6 +114629,72 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L1",
+      "target": "docs_test_environment_test_environment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L106",
+      "target": "docs_test_environment_isolation_and_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L51",
+      "target": "docs_test_environment_deploy_a_revision",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L65",
+      "target": "docs_test_environment_sign_in_and_reset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L7",
+      "target": "docs_test_environment_initial_setup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L90",
+      "target": "docs_test_environment_authorization_checks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "readme",
       "source_file": "README.md",
       "source_location": "L1",
@@ -121682,6 +121748,18 @@
       "_origin": "ast",
       "confidence": "INFERRED",
       "confidence_score": 0.95,
+      "context": "PollRoom",
+      "relation": "references",
+      "source": "docs_test_environment_initial_setup",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L29",
+      "target": "app_server_poll_room_pollroom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
       "context": "Streamer",
       "relation": "references",
       "source": "docs_api_changed_response_shapes",
@@ -121728,10 +121806,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "7e82f24ea7b77633654cf7e0e1f774d8c78a452ea5fab8f08caa51885a91b7b6",
+    "content_sha256": "47fba458d570e59fe96dbf21c64ba8ae86ebbfaa1afbb67472d8b336faf787de",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "e494ea0e41f07697c5764659f436d39a690373858797d88562bd2c868738a19c",
+    "source_sha256": "2bc12c7fe9db73a31ae0c97070038f0be42e7d6681b208e02811de57a1506c59",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -152843,6 +152921,83 @@
       "norm_label": "select the procedure",
       "source_file": "docs/recovery.md",
       "source_location": "L9"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment",
+      "label": "test-environment.md",
+      "node_kind": "page",
+      "norm_label": "test-environment.md",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_authorization_checks",
+      "label": "Authorization checks",
+      "node_kind": "heading",
+      "norm_label": "authorization checks",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L90"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_deploy_a_revision",
+      "label": "Deploy a revision",
+      "node_kind": "heading",
+      "norm_label": "deploy a revision",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L51"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_initial_setup",
+      "label": "Initial setup",
+      "node_kind": "heading",
+      "norm_label": "initial setup",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L7"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_isolation_and_limits",
+      "label": "Isolation and limits",
+      "node_kind": "heading",
+      "norm_label": "isolation and limits",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L106"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_sign_in_and_reset",
+      "label": "Sign in and reset",
+      "node_kind": "heading",
+      "norm_label": "sign in and reset",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L65"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_test_environment",
+      "label": "Test environment",
+      "node_kind": "heading",
+      "norm_label": "test environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",

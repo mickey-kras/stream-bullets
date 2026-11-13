@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
+    "build:test": "CLOUDFLARE_ENV=test react-router build",
     "build:production": "CLOUDFLARE_ENV=production react-router build",
     "start": "wrangler dev --config build/server/wrangler.json --port 5173",
     "check": "react-router typegen && tsc --noEmit",
