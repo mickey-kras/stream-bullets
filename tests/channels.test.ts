@@ -319,6 +319,24 @@ describe("the channel callback", (): void => {
     expect((await channels()).find((item) => item.platform === "twitch")?.connection).toBeNull();
   });
 
+  it("does not revoke the Google grant that another page's YouTube connection still uses", async (): Promise<void> => {
+    expect(await connectChannel("youtube", "rival")).toBe("connected");
+    fake.calls.length = 0;
+    expect(await connectChannel("youtube")).toBe("channel_taken");
+    expect(fake.calls.some((item) => item.url.pathname === "/revoke")).toBe(false);
+    const row = await env.DB.prepare("SELECT status FROM channel_connections WHERE platform='youtube'").first("status");
+    expect(row).toBe("active");
+  });
+
+  it("sends Kick's revocation token in the query string", async (): Promise<void> => {
+    expect(await connectChannel("kick", "rival")).toBe("connected");
+    fake.calls.length = 0;
+    expect(await connectChannel("kick")).toBe("channel_taken");
+    const revoke = fake.calls.find((item) => item.url.pathname === "/oauth/revoke");
+    expect(revoke?.url.searchParams.get("token")).toBeTruthy();
+    expect(revoke?.url.searchParams.get("token_hint_type")).toBe("refresh_token");
+  });
+
   it("keeps the row on reconnect and needs a disconnect before another channel of the same platform", async (): Promise<void> => {
     expect(await connectChannel("twitch")).toBe("connected");
     const before = await env.DB.prepare("SELECT id FROM channel_connections WHERE platform='twitch'").first("id");

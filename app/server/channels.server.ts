@@ -201,7 +201,7 @@ export async function completeConnect(
     return error instanceof ReauthRequired ? "denied" : "failed";
   }
   if (PROVIDERS[platform].scopes.some((scope: string) => !tokens.scopes.includes(scope))) {
-    await revokeToken(env, platform, tokens);
+    await refuseTokens(env, platform, tokens, identity.externalId);
     return "scope_missing";
   }
   const owner = await env.DB.prepare(
@@ -211,18 +211,18 @@ export async function completeConnect(
     .bind(platform, identity.externalId, streamer.id)
     .all<{ id: string; streamer_id: string; external_id: string; status_code: string | null }>();
   if (owner.results.some((row) => row.streamer_id !== streamer.id)) {
-    await revokeToken(env, platform, tokens);
+    await refuseTokens(env, platform, tokens, identity.externalId);
     return "channel_taken";
   }
   const existing = owner.results[0];
   // A disconnect of this channel is still running: a reconnect now would race its final delete.
   if (existing?.status_code === "disconnecting") {
-    await revokeToken(env, platform, tokens);
+    await refuseTokens(env, platform, tokens, identity.externalId);
     return "disconnect_first";
   }
   // Reconnecting keeps the row; a different channel on the same platform needs a disconnect first.
   if (existing && existing.external_id !== identity.externalId) {
-    await revokeToken(env, platform, tokens);
+    await refuseTokens(env, platform, tokens, identity.externalId);
     return "disconnect_first";
   }
   const connectionId = existing?.id ?? crypto.randomUUID();
@@ -265,7 +265,7 @@ export async function completeConnect(
     // No change: a disconnect marked the row after the check above. Its final delete removes the row and tokens.
     written = upsert.meta.changes > 0;
   } catch (error: unknown) {
-    await revokeToken(env, platform, tokens);
+    await refuseTokens(env, platform, tokens, identity.externalId);
     // A parallel callback claimed the channel or the platform slot between the check and the write.
     const message =
       error instanceof Error ? `${error.message} ${error.cause instanceof Error ? error.cause.message : ""}` : "";
@@ -275,7 +275,7 @@ export async function completeConnect(
     return "failed";
   }
   if (!written) {
-    await revokeToken(env, platform, tokens);
+    await refuseTokens(env, platform, tokens, identity.externalId);
     return "disconnect_first";
   }
   // This isolate may have cached the channel as unknown: deliveries start at once here.
@@ -298,6 +298,25 @@ export async function completeConnect(
       error,
     );
   }
+}
+
+/**
+ * Gives back an authorization the callback refused. Google revokes the user's whole grant for this app, so a
+ * YouTube token is not revoked while a stored connection of the same channel still uses that grant.
+ */
+async function refuseTokens(
+  env: AppEnv,
+  platform: ActivityPlatform,
+  tokens: Awaited<ReturnType<typeof exchangeCode>>,
+  externalId: string,
+): Promise<void> {
+  if (platform === "youtube") {
+    const shared = await env.DB.prepare("SELECT 1 FROM channel_connections WHERE platform='youtube' AND external_id=?")
+      .bind(externalId)
+      .first();
+    if (shared) return;
+  }
+  await revokeToken(env, platform, tokens);
 }
 
 /**

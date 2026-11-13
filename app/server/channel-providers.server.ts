@@ -205,10 +205,12 @@ export async function revokeToken(env: AppEnv, platform: ActivityPlatform, token
         token: tokens.refreshToken ?? tokens.accessToken,
       });
     } else {
-      response = await postForm("https://id.kick.com/oauth/revoke", {
+      // Kick documents the parameters in the query string; the form body carries them too.
+      const params = {
         token: tokens.refreshToken ?? tokens.accessToken,
         token_hint_type: tokens.refreshToken ? "refresh_token" : "access_token",
-      });
+      };
+      response = await postForm(`https://id.kick.com/oauth/revoke?${new URLSearchParams(params)}`, params);
     }
     return response.ok;
   } catch {

@@ -326,6 +326,9 @@ The callback stores a new connection as not yet subscribed. It becomes active wh
 subscriptions. If the write fails, the callback revokes the new token. If a parallel callback took the channel
 or the platform first, the callback answers `channel_taken` or `disconnect_first`.
 
+A refused YouTube token is an exception. Google revokes the full grant of the user for the app, not only one
+token. If a stored connection uses the same channel, the callback does not revoke the new token.
+
 If the call to the object fails, the callback revokes the new token. It deletes a new connection.
 For a reconnect, it deletes the tokens and marks the connection `needs_reauth`.
 The cleanup changes the row only while it holds the tokens of this callback. A newer reconnect keeps its tokens.
@@ -481,7 +484,7 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 | Callback in another session | The callback compares the account of the state with the session. A mismatch connects nothing and uses up the state. |
 | Replayed or old state | The server deletes the state on first use. The state expires after 10 minutes. |
 | Stolen authorization code | PKCE S256 for YouTube and Kick. Twitch does not document PKCE for this flow. Thus the Twitch flow relies on the state and the client secret. |
-| Account substitution | A channel can belong to only one page (`UNIQUE(platform, external_id)`). The callback refuses a channel of another page and revokes the new token. |
+| Account substitution | A channel can belong to only one page (`UNIQUE(platform, external_id)`). The callback refuses a channel of another page and revokes the new token, except for a YouTube token (see Callback failures). |
 | Different channel on reconnect | The callback refuses it. The owner must disconnect first. |
 | Redirect abuse | The callback goes only to the fixed path `/overlay-control` with a short result code. It sends no code, state, or token in the URL. |
 | Stolen session cookie | Connect, reconnect, and disconnect need a sign-in from the last 10 minutes (`reauth_required`). |
