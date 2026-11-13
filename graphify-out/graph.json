@@ -74280,6 +74280,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_coverage_expect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_e2e_desktop_layout_spec",
       "source_file": "tests/e2e/desktop-layout.spec.ts",
       "source_location": "L2",
@@ -99748,6 +99772,55 @@
       "source_file": "tests/e2e-coverage.test.ts",
       "source_location": "L4",
       "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L1",
+      "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L2",
+      "target": "ref_node_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L3",
+      "target": "ref_playwright_test",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_design_preview_spec",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_coverage",
       "weight": 1.0
     },
     {
@@ -128177,6 +128250,72 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L1",
+      "target": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L18",
+      "target": "docs_design_wasteland_overlays_readme_controls",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L31",
+      "target": "docs_design_wasteland_overlays_readme_check_the_simulation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L42",
+      "target": "docs_design_wasteland_overlays_readme_artwork",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L55",
+      "target": "docs_design_wasteland_overlays_readme_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L7",
+      "target": "docs_design_wasteland_overlays_readme_open",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "docs_github_rulesets_readme",
       "source_file": "docs/github-rulesets/README.md",
       "source_location": "L1",
@@ -137074,10 +137213,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "e80d3e3bcee7b38a4d7bb9223ab1f7b2082b831d693283c3f2d7799775490c33",
+    "content_sha256": "905b26a1f10e66ebfaca6d42302adf6c3ee0fb864c012bc8ed57c5b7fba6d100",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "5bf66ea9ee5e2c6aa3f96689e336446c684082ac062b7d83c5864f54e55fadc9",
+    "source_sha256": "5437fe789f7b63e7195bc00243b8465cf0eeca46792accb9dcb9d5200c73750e",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -169853,6 +169992,41 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_design_preview_spec",
+      "label": "design-preview.spec.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "abort",
+            "file": "tests/e2e/design-preview.spec.ts",
+            "lang": "typescript",
+            "line": "L15",
+            "receiver_type": "Route"
+          },
+          {
+            "callee": "request",
+            "file": "tests/e2e/design-preview.spec.ts",
+            "lang": "typescript",
+            "line": "L17",
+            "receiver_type": "Route"
+          },
+          {
+            "callee": "fulfill",
+            "file": "tests/e2e/design-preview.spec.ts",
+            "lang": "typescript",
+            "line": "L19",
+            "receiver_type": "Route"
+          }
+        ]
+      },
+      "norm_label": "design-preview.spec.ts",
+      "source_file": "tests/e2e/design-preview.spec.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_desktop_layout_spec",
       "label": "desktop-layout.spec.ts",
       "metadata": {
@@ -172264,6 +172438,83 @@
       "norm_label": "read totals",
       "source_file": "docs/conversion-audit.md",
       "source_location": "L47"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme",
+      "label": "wasteland-overlays/README.md",
+      "node_kind": "page",
+      "norm_label": "wasteland-overlays/readme.md",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_artwork",
+      "label": "Artwork",
+      "node_kind": "heading",
+      "norm_label": "artwork",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L42"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_check_the_simulation",
+      "label": "Check the simulation",
+      "node_kind": "heading",
+      "norm_label": "check the simulation",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L31"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_controls",
+      "label": "Controls",
+      "node_kind": "heading",
+      "norm_label": "controls",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L18"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_limits",
+      "label": "Limits",
+      "node_kind": "heading",
+      "norm_label": "limits",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L55"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_open",
+      "label": "Open",
+      "node_kind": "heading",
+      "norm_label": "open",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L7"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
+      "label": "Wasteland overlay preview",
+      "node_kind": "heading",
+      "norm_label": "wasteland overlay preview",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",

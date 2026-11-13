@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wasteland Overlay Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:ital,wght@0,500;0,600;1,500&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* page chrome (themed) */
+  --bg:#f3efe6; --surface:#fffcf5; --surface-2:#ebe4d4; --ink:#1f1c17; --muted:#5b5447; --line:#d6cdbb;
+  --accent:#7a4f00; --btn:#1f1c17; --btn-ink:#fffcf5; --focus:#0b6e6a; --checker:#e3dccb; --checker-2:#efe9dc;
+  /* overlay tokens (theme-invariant: they render on stream) */
+  --ov-row:rgb(15 59 51 / .94); --ov-row-solid:#0F3B33; --ov-border:#D4B02A; --ov-outline:#12110D; --ov-user:#F2D22E;
+  --ov-text:#F3EAD3; --ov-muted:#A9C2BA; --ov-tag:rgb(29 27 24 / .9); --ov-bubble:#F6ECD2; --ov-bubble-ink:#1D1B18;
+  --yt:#E5322D; --tw:#9146FF; --kick:#53FC18;
+  --font-ui:"Barlow",system-ui,sans-serif; --font-cond:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-ov:"Oswald","Barlow Condensed","Arial Narrow",sans-serif;
+  --ease-out:cubic-bezier(.2,.7,.2,1); --ease-in:cubic-bezier(.5,0,.8,.4);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111413; --surface:#1a1f1e; --surface-2:#232a29; --ink:#ebe5d7; --muted:#a8a294; --line:#323a38;
+    --accent:#f2c230; --btn:#ebe5d7; --btn-ink:#111413; --focus:#5fd4c9; --checker:#262d2c; --checker-2:#1f2524; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111413; --surface:#1a1f1e; --surface-2:#232a29; --ink:#ebe5d7; --muted:#a8a294; --line:#323a38;
+  --accent:#f2c230; --btn:#ebe5d7; --btn-ink:#111413; --focus:#5fd4c9; --checker:#262d2c; --checker-2:#1f2524; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.5 var(--font-ui);overflow-x:hidden}
+main{max-width:1320px;margin:0 auto;padding:24px 16px 72px}
+@media (min-width:768px){main{padding:40px 32px 96px}}
+h1,h2,h3{font-family:var(--font-cond);font-weight:700;line-height:1.1;margin:0}
+h1{font-size:clamp(30px,5vw,44px)}
+h2{font-size:clamp(24px,3.4vw,32px)}
+h3{font-size:19px;letter-spacing:.02em}
+p{margin:0}
+.lede{color:var(--muted);max-width:70ch;margin-top:8px}
+header.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:40px}
+.tag{display:inline-block;font:600 13px/1 var(--font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+section.block{margin-top:56px;padding-top:32px;border-top:1px solid var(--line)}
+.sec-head{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+button,.seg label{font:600 14px/1 var(--font-ui);min-height:40px;padding:0 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{background:var(--surface-2)}
+button:focus-visible,.seg input:focus-visible+span{outline:2px solid var(--focus);outline-offset:2px}
+button.primary{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:3px;background:var(--surface);gap:2px}
+.seg label{border:0;display:inline-flex;align-items:center;padding:0;min-height:34px;background:none}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{padding:9px 12px;border-radius:5px}
+.seg input:checked+span{background:var(--btn);color:var(--btn-ink)}
+.stage{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:#1d1612;border:1px solid var(--line)}
+.frame{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;transform:scale(var(--s,.3))}
+.scene{position:absolute;inset:0;background-size:100% 100%}
+.stage-label{position:absolute;left:8px;top:8px;font:600 11px/1 var(--font-ui);letter-spacing:.06em;text-transform:uppercase;color:#fff;background:rgb(0 0 0/.55);padding:5px 7px;border-radius:4px;z-index:2}
+@media (max-width:600px){.stage-label{font-size:9px;padding:4px 5px;left:6px;top:6px}}
+.specs{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:14px 0 0;font-size:14px}
+.specs dt{color:var(--muted)}
+.specs dd{margin:0;font-variant-numeric:tabular-nums}
+.decide{margin-top:32px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px 20px 20px 24px}
+.decide h3{margin-bottom:10px}
+.decide ol{margin:0;padding-left:20px;display:grid;gap:8px}
+.decide li::marker{color:var(--accent);font-weight:600}
+.decide b{font-weight:600}
+code{font:500 13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:1px solid rgb(0 0 0/.25)}
+.row-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.note{font-size:14px;color:var(--muted);margin-top:10px;max-width:90ch}
+
+/* ---------- Section A: approved compact chat cards ---------- */
+.chat{--chat-mustard:#e5bd54;--chat-ivory:#f4ebce;--chat-card:rgba(8,43,46,.9);position:absolute;right:calc(5% + 19.2px);bottom:calc(5% + 19.2px);width:calc(45% - 38.4px);height:calc(90% - 38.4px);display:flex;flex-direction:column;justify-content:flex-end;gap:.22em;padding:.18em;overflow:hidden;font:26px/1.22 "Segoe UI",Arial,sans-serif;color:var(--chat-ivory);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 18%,#000);mask-image:linear-gradient(to bottom,transparent,#000 18%,#000)}
+.rw{flex:0 0 auto;min-width:0}
+.badge{display:inline-block;flex:none}.badge svg{display:block;width:100%;height:100%}
+.chat .platform-icon svg{display:block;width:100%;height:100%}
+.chat .emote{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.15em;border:1px dashed #c4c2a8;background:repeating-linear-gradient(45deg,#c4c2a84d 0 3px,transparent 3px 7px)}
+.chat .deleted .chat-text{color:#c4c2a8;font-style:italic}
+.row {
+  position: relative;
+  padding: 0.30em 2em 0.32em 0.48em;
+  background-color: var(--chat-card);
+  background-image:
+    radial-gradient(ellipse at 7% 0%, #e5bd5414, transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 3px, #0000000c 3px 4px);
+  border: 1px solid #b89649;
+  border-radius: 0.32em;
+  box-shadow: inset 0 0 0 2px #081f2480, 0 2px 4px #00000030;
+}
+.row::before {
+  content: "";
+  position: absolute; inset: 2px;
+  border: 1px solid #e5bd5429;
+  border-radius: 0.22em;
+  pointer-events: none;
+}
+.rw:last-child .row {
+  border-color: var(--chat-mustard);
+  box-shadow: inset 3px 0 var(--chat-mustard), inset 0 0 0 2px #081f2480, 0 2px 4px #00000030;
+}
+.message { display: block; overflow-wrap: anywhere; white-space: normal; }
+.chat-username { color: var(--chat-mustard); font-weight: 750; }
+.chat-pronouns { color: #c4c2a8; margin-right: 0.25em; font-size: 0.72em; }
+.chat-text { font-weight: 500; }
+.platform-icon {
+  display: inline-block; width: 1.04em; height: 1.04em;
+  vertical-align: -0.14em; margin-right: 0.34em;
+  color: var(--chat-mustard);
+}
+.image { width: auto; height: 1.05em; vertical-align: -0.15em; }
+.badge { margin-right: 0.22em; }
+.chat-avatar { display: none; }
+.chat-emote { margin: 0 0.08em; }
+.vault-mark {
+  position: absolute; right: 0.45em; top: 50%;
+  width: 1.1em; height: 0.8em; transform: translateY(-50%);
+  fill: none; stroke: var(--chat-mustard); stroke-width: 1.7; opacity: 0.55;
+}
+
+
+/* ---------- Section B: playground ---------- */
+.strip{position:absolute;left:0;bottom:0;width:1920px;height:360px}
+.strip canvas{position:absolute;inset:0;width:1920px;height:360px;image-rendering:pixelated}
+.tags{position:absolute;inset:0;pointer-events:none}
+.np{position:absolute;left:0;top:0;display:flex;align-items:center;gap:5px;padding:3px 8px 4px 5px;background:var(--ov-tag);border-radius:6px;
+  color:var(--ov-text);font:500 18px/1 var(--font-ov);white-space:nowrap;transition:opacity .15s;box-shadow:0 0 0 1px rgb(0 0 0/.6)}
+.np::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:var(--ov-tag)}
+.np .badge{width:16px;height:16px}
+.bub{position:absolute;left:0;top:0;max-width:300px;width:max-content;padding:6px 13px 8px;background:var(--ov-bubble);color:var(--ov-bubble-ink);
+  font:500 22px/1.2 var(--font-ov);border:3px solid var(--ov-bubble-ink);border-radius:10px;opacity:0;transition:opacity .18s}
+.bub::after{content:"";position:absolute;left:calc(50% - 4px);bottom:-12px;width:14px;height:14px;background:var(--ov-bubble);
+  border-right:3px solid var(--ov-bubble-ink);border-bottom:3px solid var(--ov-bubble-ink);transform:skewY(-35deg) rotate(25deg);border-bottom-right-radius:2px}
+.bub.on{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+.controls input,.controls select{font:inherit;max-width:100%;min-height:40px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);padding:6px 10px}.controls input[type="number"]{width:85px}.controls input[type="text"]{width:240px}.stage.transparent .scene{display:none}.stage.transparent{background:repeating-conic-gradient(var(--checker) 0 25%,var(--checker-2) 0 50%) 0 0/20px 20px}.controls .sep{width:1px;height:28px;background:var(--line);margin:0 4px}
+.panels{display:grid;gap:24px;margin-top:32px}
+@media (min-width:1100px){.panels{grid-template-columns:minmax(0,1fr) 340px}.panels .wide{grid-column:1/-1}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px}
+@media (min-width:768px){.panel{padding:20px}}
+.panel-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:18px 28px}
+.gallery{display:flex;flex-wrap:wrap;gap:16px 20px;align-items:flex-end}
+figure{margin:0}
+.sheet figcaption,.gallery figcaption,.variants-px figcaption{font-size:13px;color:var(--muted);margin-bottom:6px;line-height:1.3}
+.sheet figcaption b,.gallery figcaption b,.variants-px figcaption b{color:var(--ink);font-weight:600;margin-right:6px}
+.gallery figcaption{margin:6px 0 0;max-width:130px}
+canvas.px{display:block;image-rendering:pixelated;max-width:100%;height:auto;background:repeating-conic-gradient(var(--checker) 0 25%,var(--checker-2) 0 50%) 0 0/16px 16px;border-radius:3px}
+.variants-px{display:flex;flex-wrap:wrap;gap:12px}
+.sub{font:600 13px var(--font-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+.palette{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px 12px;font-size:13px}
+.palette code{background:none;padding:0}
+footer{margin-top:56px;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <!-- Original platform glyphs: each platform has its own silhouette so color is not the only cue -->
+  <symbol id="g-yt" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="5" fill="var(--yt)"/><path d="M9.5 8.2v7.6l6.6-3.8z" fill="#fff"/></symbol>
+  <symbol id="g-tw" viewBox="0 0 24 24"><path d="M2.5 3h19v13.5H11l-5.5 5v-5h-3z" fill="var(--tw)"/><circle cx="7.5" cy="10" r="1.7" fill="#fff"/><circle cx="12" cy="10" r="1.7" fill="#fff"/><circle cx="16.5" cy="10" r="1.7" fill="#fff"/></symbol>
+  <symbol id="g-kick" viewBox="0 0 24 24"><path d="M5 1.5h14l3.5 3.5v14L19 22.5H5L1.5 19V5z" fill="var(--kick)"/><g fill="#0d1f08"><rect x="6.5" y="6" width="3.5" height="12"/><rect x="10" y="10" width="2.5" height="4"/><rect x="12.5" y="8" width="2.5" height="2.5"/><rect x="14.5" y="6" width="3" height="2.5"/><rect x="12.5" y="13.5" width="2.5" height="2.5"/><rect x="14.5" y="15.5" width="3" height="2.5"/></g></symbol>
+<symbol id="chat-twitch" viewBox="0 0 24 24"><path fill="currentColor" d="M4 2h18v13l-6 6h-5l-4 3v-3H2V6zm1 3v12h5v3l3-3h4l3-3V5z"/><path stroke="currentColor" stroke-width="2" d="M11 7v6m5-6v6"/></symbol>
+<symbol id="chat-youtube" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path fill="currentColor" d="m10 8 6 4-6 4z"/></symbol>
+<symbol id="chat-kick" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h5v7h3V7h3V3h7v6h-4v3h-3v2h3v3h4v4h-7v-3h-3v-3H8v6H3z"/></symbol>
+<symbol id="chat-velora" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M12 1 23 12 12 23 1 12z"/><path fill="currentColor" d="m5 7 5 11h4l5-11h-4l-3 7-3-7z"/></symbol>
+<symbol id="chat-vpzone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M3 2h18v20H3z"/><path fill="currentColor" d="m5 7 2 10h3l3-10h-2l-2 7-2-7zm9 0v10h2v-3h3l1-2V9l-1-2zm2 2h2v3h-2z"/></symbol>
+<symbol id="chat-unknown" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path fill="currentColor" d="M7 10h2v4H7zm4 0h2v4h-2zm4 0h2v4h-2z"/></symbol>
+  <!-- Original emblem: a tilted orbit ring crossed by a lightning bolt -->
+  <symbol id="emb" viewBox="0 0 64 40"><ellipse cx="32" cy="20" rx="29" ry="10.5" transform="rotate(-17 32 20)" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M36.5 2 L23 22 H31 L27 38 L42 15.5 H34 L39.5 2Z" fill="currentColor" stroke="#0F3B33" stroke-width="3" stroke-linejoin="round" paint-order="stroke"/></symbol>
+</svg>
+
+<main>
+  <header class="top">
+    <div>
+      <span class="tag">Stream Bullets &middot; interactive design preview</span>
+      <h1>Wasteland overlay mockups</h1>
+      <p class="lede">Merged chat and a shared character playground. The chat uses the approved compact-card reference. The playground is a pixel-art strip built from catwalk tiles, breakable dirt and two bunker doors. Every sample uses a 1080p stage. The original scrap-yard courier wears a copper helmet, workwear and a platform-colored scarf. Local artwork is loaded into pixel-aligned animation cells.</p>
+    </div>
+    <button type="button" id="themeBtn" aria-label="Switch page theme">Page theme: auto</button>
+  </header>
+
+  <!-- ================= SECTION A ================= -->
+  <section class="block" aria-labelledby="secA">
+    <div class="sec-head">
+      <div>
+        <span class="tag">Issue #663 &middot; approved compact cards</span>
+        <h2 id="secA">A. Merged chat</h2>
+        <p class="lede">Compact teal cards with thin mustard borders, ivory text, inline platform icons, and a subtle circular mark. New messages enter at the bottom. The latest card has a mustard left accent. Long messages wrap.</p>
+      </div>
+      <div class="row-tools"><button type="button" id="feedBtn" aria-pressed="false">Pause feed</button></div>
+    </div>
+
+    <div class="stage" data-stage id="chatStage"><span class="stage-label">1080p frame, scaled</span>
+      <div class="frame"><div class="scene"></div><div class="chat" id="chat"></div></div>
+    </div>
+    <dl class="specs">
+      <dt>Reference</dt><dd>Approved Mix It Up compact cards, with a transparent overlay background.</dd>
+      <dt>Layout</dt><dd>Right-center sample, with a 5% safe margin and a half-frame region. The top fade covers 18% of the column.</dd>
+      <dt>Type</dt><dd>Segoe UI, Arial fallback, 26 px at 1080p, line height 1.22. Usernames use weight 750; messages use 500.</dd>
+      <dt>Colors</dt><dd>Card: rgba(8, 43, 46, 0.9). Mustard: #e5bd54. Ivory: #f4ebce. Border: 1 px #b89649.</dd>
+      <dt>Platforms</dt><dd>Twitch, YouTube, Kick, Velora, and VPZone use inline mustard icons.</dd>
+      <dt>Motion</dt><dd>520 ms vertical movement with cubic-bezier(0.22, 1, 0.36, 1). Reduced motion skips movement.</dd>
+    </dl>
+  </section>
+
+  <!-- ================= SECTION B ================= -->
+  <section class="block" aria-labelledby="secB">
+    <div class="sec-head">
+      <div>
+        <span class="tag">Issue #664</span>
+        <h2 id="secB">B. Character playground</h2>
+        <p class="lede">The bottom 360 px of the frame, with a transparent top. The floor is a catwalk of rusty girders, which cannot be broken, and dry dirt, which can, with cables, pillars and a lamp hanging underneath. Viewers materialize in the JOIN door and dematerialize in the EXIT door. Anyone who falls or goes boom comes back on the respawn pad.</p>
+      </div>
+    </div>
+    <div class="stage" data-stage id="playStage"><span class="stage-label">1080p frame, scaled</span>
+      <div class="frame"><div class="scene"></div>
+        <div class="strip"><canvas id="world" width="640" height="120" aria-label="Animated character playground"></canvas><div class="tags" id="tags"></div></div>
+      </div>
+    </div>
+    <div class="controls" role="group" aria-label="Playground controls">
+      <label>Sender <select id="sender" aria-label="Message sender"></select></label><label>Message <input id="message" type="text" maxlength="200" value="Hello from the scrap yard!"></label><button type="button" id="sendMessage">Send message</button><label>Timeout (s) <input id="timeout" type="number" min="10" max="600" value="60"></label><button type="button" id="crowdBurst">Simulate 1,000 viewers</button><button type="button" id="composeBtn" aria-pressed="false">Show chat with playground</button><button type="button" id="backgroundBtn" aria-pressed="false">Transparent background</button><button type="button" class="primary" id="playBtn" aria-pressed="false">Pause</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" data-cmd="jump">!jump</button>
+      <button type="button" data-cmd="dig">!dig</button>
+      <button type="button" data-cmd="build">!build</button>
+      <button type="button" data-cmd="wave">!wave</button>
+      <button type="button" data-cmd="say">chat msg</button>
+      <button type="button" data-cmd="boom">!boom</button>
+      <button type="button" data-cmd="exit">timeout exit</button>
+      <label style="display:inline-flex;gap:6px;align-items:center;font-size:14px;margin-left:4px"><input type="checkbox" id="autoChk" checked> Auto demo</label>
+    </div>
+    <p class="note" id="crowdStatus" role="status"></p><p class="note">Commands use the selected sender. Offscreen senders wait for admission, enter, and then act. Digging uses the ground beneath that sender. On dirt, the tile goes from intact to cracked 1 to cracked 2 to a hole, and rubble falls out. On a girder, digging gives the "unavailable" feedback: a clang spark, a red &times; and a short bubble. Holes and temporary stairs last 30 seconds. Falling or disappearing in a dust poof leads to a 2.5-second respawn delay.</p>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Courier: 12 states &times; 4 frames at 4&times;</h3>
+          <div class="seg" role="radiogroup" aria-label="Sheet color">
+            <label><input type="radio" name="sheetc" value="yt" checked><span>Red</span></label>
+            <label><input type="radio" name="sheetc" value="tw"><span>Purple</span></label>
+            <label><input type="radio" name="sheetc" value="kick"><span>Green</span></label>
+          </div>
+        </div>
+        <p class="note" id="assetStatus" role="status">Loading courier artwork…</p><div class="row-tools"><button type="button" id="exportSheet">Download 4× sheet</button><button type="button" id="exportTerrain">Download terrain atlas</button></div><div class="sheet" id="sheet"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Color variants</h3></div>
+        <div class="variants-px" id="varPx"></div>
+        <p class="sub">One courier, three platform colors</p>
+        <div class="variants-px" id="crowdPx"></div>
+        <p class="sub">Character palette</p>
+        <div class="palette" id="palette"></div>
+      </div>
+      <div class="panel wide">
+        <div class="panel-head"><h3>Tiles &amp; props, each at 3&times;</h3></div>
+        <div class="gallery" id="tiles"></div>
+      </div>
+    </div>
+
+    <div class="decide">
+      <h3>Confirmed playground rules</h3>
+      <ol>
+        <li><b>Movement:</b> continuous walking. After the configured timeout, head to the exit. A message turns an inactivity exit back toward the center.</li>
+        <li><b>Activity:</b> 60-second default, configurable. Any message resets the timer. Offscreen senders enter before their command runs.</li>
+        <li><b>Crowd:</b> at most 40 visible: 30 ranked and 10 rotating. Recent messages determine rank; rapid spam adds no score. Rotation gives occasional chatters a turn.</li>
+        <li><b>Terrain:</b> only dirt breaks. Protected metal remains solid. Holes and stairs affect everyone and expire after 30 seconds.</li>
+        <li><b>Respawn:</b> return after 2.5 seconds if still eligible. Commands affect the sender; no targeted attacks.</li>
+        <li><b>Artwork:</b> one original copper-helmet courier, canvas workwear, dark boots and platform-colored scarf/vest. No green hair, vault suit, franchise numbers or game insignia.</li>
+        <li><b>Theme:</b> wasteland only. Art and animation mapping remain separate from game rules so later themes can replace them.</li>
+        <li><b>Preview limits:</b> local synthetic events only. Channel authorization, moderation delivery, durable state, and account isolation belong to #662 and #664.</li>
+      </ol>
+    </div>
+  </section>
+  <footer>Local design preview for #663 and #664. No live platform accounts are connected. The composition toggle shows a snapshot of merged chat above the playground. Courier and terrain source art was generated for this project; the renderer aligns cells and applies platform colors. This is not a trademark clearance claim.</footer>
+</main>
+
+<script type="module">
+"use strict";
+/* ================= shared: stages, scene, helpers ================= */
+const SCENE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26343b"/><stop offset=".45" stop-color="#7d5640"/><stop offset=".62" stop-color="#d89a5e"/><stop offset=".63" stop-color="#b8784a"/></linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff1cf"/><stop offset=".25" stop-color="#ffd99a" stop-opacity=".9"/><stop offset="1" stop-color="#ffb46a" stop-opacity="0"/></radialGradient>
+<linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6e4a33"/><stop offset="1" stop-color="#2a1b12"/></linearGradient></defs>
+<rect width="1920" height="1080" fill="url(#sky)"/>
+<circle cx="1480" cy="560" r="420" fill="url(#sun)"/><circle cx="1480" cy="560" r="86" fill="#fff0cc"/>
+<path d="M0 640 L120 600 L260 610 L300 560 L470 565 L510 610 L760 620 L900 585 L1010 590 L1050 620 L1300 630 L1420 600 L1600 605 L1640 570 L1800 575 L1840 610 L1920 615 V700 H0Z" fill="#8a5a42" opacity=".75"/>
+<path d="M0 700 L200 660 L420 690 L640 650 L900 700 L1150 670 L1400 705 L1700 665 L1920 690 V780 H0Z" fill="#5a3a2a"/>
+<g fill="#2e211b"><rect x="330" y="560" width="26" height="140"/><rect x="322" y="548" width="42" height="16"/><path d="M356 600 l40 -30 v12 l-40 30z"/>
+<rect x="1180" y="590" width="18" height="110"/><rect x="1230" y="610" width="18" height="90"/><path d="M1170 600 h90 l-8 -40 h-74z"/>
+<path d="M720 700 V520 l14 -6 V700z"/><path d="M700 560 h60 v6 h-60z"/><path d="M706 600 h48 v6 h-48z"/></g>
+<path d="M0 760 Q480 720 960 750 T1920 740 V1080 H0Z" fill="url(#gnd)"/>
+<path d="M860 1080 L940 752 L990 752 L1180 1080Z" fill="#7a5a40" opacity=".55"/>
+<path d="M955 1080 L962 760 L968 760 L1000 1080Z" fill="#d8c08a" opacity=".35"/>
+<g opacity=".85"><rect x="48" y="44" width="360" height="22" rx="3" fill="#000" opacity=".45"/><rect x="52" y="48" width="250" height="14" rx="2" fill="#d9493b"/>
+<rect x="48" y="74" width="260" height="14" rx="3" fill="#000" opacity=".45"/><rect x="51" y="77" width="170" height="8" rx="2" fill="#8fd18a"/>
+<rect x="760" y="40" width="400" height="30" rx="4" fill="#000" opacity=".35"/><g fill="#eadfc6" font-family="sans-serif" font-size="18" font-weight="700"><text x="790" y="62">W</text><text x="950" y="62">N</text><text x="1120" y="62">E</text></g>
+<text x="1700" y="72" font-family="sans-serif" font-size="44" font-weight="700" fill="#f3ead6">24 <tspan font-size="28" fill="#c9bea4">/ 120</tspan></text>
+<g stroke="#fff" stroke-width="3" opacity=".8"><path d="M960 520v14M960 546v14M940 540h14M966 540h14"/></g></g></svg>`;
+const sceneURL = URL.createObjectURL(new Blob([SCENE], {type:"image/svg+xml"}));
+document.querySelectorAll(".scene").forEach(s => s.style.backgroundImage = `url("${sceneURL}")`);
+const ro = new ResizeObserver(es => es.forEach(e => e.target.style.setProperty("--s", e.contentRect.width / 1920)));
+document.querySelectorAll("[data-stage]").forEach(s => ro.observe(s));
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const badge = p => `<span class="badge"><svg aria-hidden="true"><use href="#g-${p}"/></svg></span>`;
+const PNAME = {yt:"YouTube", tw:"Twitch", kick:"Kick"};
+const hash = (a, b) => { let h = (a*374761393 + b*668265263) ^ 0x5bf03635; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+const hex2 = h => [1,3,5].map(i => parseInt(h.slice(i, i+2), 16));
+{
+  const b = document.getElementById("themeBtn"), modes = ["auto","light","dark"]; let i = 0;
+  b.onclick = () => { i = (i + 1) % 3; const m = modes[i];
+    m === "auto" ? document.documentElement.removeAttribute("data-theme") : document.documentElement.setAttribute("data-theme", m);
+    b.textContent = "Page theme: " + m; renderSheet(sheetColor); };
+}
+
+/* ================= Section A: chat ================= */
+const CHAT_PLATFORM = {tw:"twitch",yt:"youtube",kick:"kick",velora:"velora",vpzone:"vpzone"};
+const CHAT_NAMES = {...PNAME,velora:"Velora",vpzone:"VPZone"};
+const FEED = [
+  {p:"tw",u:"Alexei",m:"The bunker door is open!"},
+  {p:"yt",u:"Mira_Dunes",m:"hey everyone"},
+  {p:"kick",u:"RadNomad",m:"Ready for the wasteland."},
+  {p:"velora",u:"kettle_kid",m:"If we route through the old pump station we can save a few minutes. Long messages wrap inside the card."},
+  {p:"vpzone",u:"ScrapQueen",m:"gg [e] clutch play"},
+  {p:"kick",u:"BoltBucket",m:"This message will be removed.",del:true},
+  {p:"yt",u:"N0madicCartographerOfTheEast",m:"!dig"},
+  {p:"tw",u:"tinkerVee",m:"[e][e] the little guy went boom again"}
+];
+let feedPaused = false;
+{
+  const el = document.getElementById("chat"); let i = 0;
+  const motion = {duration:520,easing:"cubic-bezier(0.22, 1, 0.36, 1)"};
+  const reflow = change => {
+    const rows = Array.from(el.children);
+    const before = new Map(rows.map(row => [row,{top:row.getBoundingClientRect().top,opacity:Number(getComputedStyle(row).opacity)}]));
+    rows.forEach(row => row.getAnimations().forEach(animation => animation.cancel()));
+    change();
+    if (reduced) return;
+    const gap = parseFloat(getComputedStyle(el).rowGap);
+    const scale = el.getBoundingClientRect().width / el.offsetWidth;
+    for (const row of el.children) {
+      const rect = row.getBoundingClientRect(), previous = before.get(row);
+      const offset = previous === undefined ? rect.height / scale + gap : (previous.top - rect.top) / scale;
+      row.animate([{transform:`translateY(${offset}px)`,opacity:previous?.opacity ?? 0},{transform:"translateY(0)",opacity:1}],motion);
+    }
+  };
+  const rowEl = d => {
+    const rw = document.createElement("div"); rw.className = "rw";
+    const msg = esc(d.m).replace(/\[e\]/g,'<span class="emote" role="img" aria-label="emote"></span>');
+    rw.innerHTML = `<div class="row" aria-label="${CHAT_NAMES[d.p]} message"><span class="message"><span class="platform-icon" role="img" aria-label="${CHAT_NAMES[d.p]}"><svg aria-hidden="true"><use href="#chat-${CHAT_PLATFORM[d.p]}"/></svg></span><span class="chat-username">${esc(d.u)}: </span><span class="chat-text">${msg}</span></span><svg class="vault-mark" viewBox="0 0 36 24" aria-hidden="true"><path d="M1 9h10M1 15h10M25 9h10M25 15h10"/><circle cx="18" cy="12" r="9"/><circle cx="18" cy="12" r="4"/></svg></div>`;
+    return rw;
+  };
+  const add = anim => {
+    const d = FEED[i++ % FEED.length]; if (!anim && d.del) return;
+    const rw = rowEl(d);
+    const append = () => { el.append(rw); while (el.children.length > 100) el.firstElementChild.remove(); };
+    if (anim) reflow(append); else append();
+    if (d.del && anim) setTimeout(() => {
+      const card = rw.querySelector(".row"); card.classList.add("deleted"); card.querySelector(".chat-text").textContent = "message removed by a moderator";
+      setTimeout(() => {
+        if (reduced) { reflow(() => rw.remove()); return; }
+        const animation = card.animate([{opacity:1},{opacity:0}],{duration:300,easing:"ease-in",fill:"forwards"});
+        animation.onfinish = () => reflow(() => rw.remove());
+      },1400);
+    },1600);
+  };
+  for (let k = 0; k < 5; k++) add(false);
+  setInterval(() => { if (!feedPaused && !document.hidden) add(true); },1700);
+  document.getElementById("feedBtn").onclick = e => { feedPaused = !feedPaused; e.target.textContent = feedPaused ? "Resume feed" : "Pause feed"; e.target.setAttribute("aria-pressed",feedPaused); };
+}
+
+/* ================= Section B: pixel art helpers ================= */
+const mk = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
+function art(w, h, draw){
+  const c = mk(w, h), x = c.getContext("2d");
+  const P = (px, py, pw = 1, ph = 1, col) => { if (typeof pw === "string") { col = pw; pw = ph = 1; } x.fillStyle = col; x.fillRect(px, py, pw, ph); };
+  const L = (x0, y0, x1, y1, col, t = 1) => { const n = Math.max(Math.abs(x1-x0), Math.abs(y1-y0)) || 1; for (let i = 0; i <= n; i++) P(Math.round(x0 + (x1-x0)*i/n), Math.round(y0 + (y1-y0)*i/n), t, t, col); };
+  const O = (cx, cy, r, col, ry = r) => { for (let j = Math.floor(cy-ry); j <= cy+ry; j++) for (let i = Math.floor(cx-r); i <= cx+r; i++) if (((i-cx)/r)**2 + ((j-cy)/ry)**2 <= 1.02) P(i, j, col); };
+  draw({P, L, O, x, w, h}); return c;
+}
+const RU = {hi:"#d0905a", r1:"#b06a38", r2:"#8a4a24", r3:"#6a3a1e", dk:"#3e2414", ink:"#1d1712"};
+const MT = {m1:"#b3ad9f", m2:"#7a756a", m3:"#4f4a42", m4:"#2e2b27"};
+const HZ = ["#e8b830","#2a2018"];
+const GRN = "#3fe06a", GRN_L = "#b8ffc8", AMB = "#ffb02e";
+// pixel font (variable width)
+const FONT = {A:["010","101","111","101","101"],E:["111","100","110","100","111"],I:["111","010","010","010","111"],J:["001","001","001","101","111"],
+  N:["1001","1101","1011","1001","1001"],O:["111","101","101","101","111"],P:["110","101","110","100","100"],R:["110","101","110","101","101"],
+  S:["111","100","111","001","111"],T:["111","010","010","010","010"],W:["10001","10001","10101","10101","01010"],X:["101","101","010","101","101"]};
+const textW = (t, s = 1) => [...t].reduce((a, ch) => a + (FONT[ch][0].length + 1) * s, -s);
+function pixText(P, t, x, y, col, s = 1){ for (const ch of t) { const g = FONT[ch]; g.forEach((row, j) => [...row].forEach((b, i) => b === "1" && P(x + i*s, y + j*s, s, s, col))); x += (g[0].length + 1) * s; } }
+// original emblem: one tilted orbit ring crossed by a lightning bolt (ring breaks around the bolt)
+function emblemPts(w, h, rx, ry, boltRows, bx, by){
+  const cx = (w - 1) / 2, cy = (h - 1) / 2, th = -0.25, ring = new Set();
+  const bolt = boltRows.flatMap((r, y) => [...r].map((ch, x) => ch === "#" ? [bx + x, by + y] : null).filter(Boolean)), bs = new Set(bolt.map(p => p + ""));
+  for (let t = 0; t < 6.3; t += 0.02) { const ex = rx*Math.cos(t), ey = ry*Math.sin(t);
+    ring.add([Math.round(cx + ex*Math.cos(th) - ey*Math.sin(th)), Math.round(cy + ex*Math.sin(th) + ey*Math.cos(th))] + ""); }
+  const nearBolt = k => { const [x, y] = k.split(",").map(Number); for (let u = -1; u <= 1; u++) for (let v = -1; v <= 1; v++) if (bs.has([x+u, y+v] + "")) return true; return false; };
+  return {orb:[...ring].filter(k => !nearBolt(k)).map(k => k.split(",").map(Number)), bolt};
+}
+const EMB = emblemPts(26, 12, 12, 3.2, ["...###","..###.",".###..","######","...###","..###.",".###..",".##...","##....","#....."], 10, 1);
+const EMB_S = emblemPts(17, 9, 7.5, 2.2, ["..###",".###.","#####","..##.",".##..",".#...","#...."], 6, 1);
+const drawEmblem = (P, ox, oy, col, e = EMB) => [...e.orb, ...e.bolt].forEach(([a,b]) => P(ox + a, oy + b, col));
+
+/* ---------- tiles ---------- */
+const TILE = 16;
+const terrainSource = new Image();
+terrainSource.src = "./assets/terrain-source.png";
+try { await terrainSource.decode(); } catch (error) {
+  document.querySelector("#assetStatus").textContent = "Terrain artwork failed to load. Reload or check the local server.";
+  throw error;
+}
+function terrain(rect, width, height){
+  const canvas = mk(width, height), context = canvas.getContext("2d");
+  context.imageSmoothingEnabled = false;
+  const scale = terrainSource.naturalWidth / 1536;
+  context.drawImage(terrainSource, ...rect.map(value => value*scale), 0, 0, width, height);
+  return canvas;
+}
+function girderTileFixed(kind){
+  return terrain({L:[38,64,159,149], M:[213,64,158,149], R:[385,64,151,149]}[kind], 16, 16);
+}
+function dirtTile(variant, stage){
+  const rect = stage === 1 ? [1020,60,152,153] : stage === 2 ? [1182,60,157,153] : [[551,60,142,153],[706,60,149,153],[866,60,147,153]][variant];
+  return terrain(rect, 16, 16);
+}
+const outlined = (w, h, draw) => { const c = art(w, h, draw), x = c.getContext("2d"), d = x.getImageData(0, 0, w, h), o = x.createImageData(w, h);
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { const k = (j*w+i)*4; if (d.data[k+3]) { o.data.set(d.data.slice(k, k+4), k); continue; }
+    if ([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b]) => { const X = i+a, Y = j+b; return X >= 0 && X < w && Y >= 0 && Y < h && d.data[(Y*w+X)*4+3]; })) o.data.set([29,23,18,255], k); }
+  x.putImageData(o, 0, 0); return c; };
+const RUBBLE = outlined(16, 8, ({O}) => { O(4,5,3,"#a06a38"); O(9,4.5,3.2,"#c0844a"); O(13,6,2,"#7f4f28"); O(7,6.5,1.5,"#7f4f28"); O(9,3,1,"#d09050"); });
+const ROCKS_CHUNK = [outlined(5,4,({O})=>{O(2,2,1.6,"#b87a42");O(2,1.5,.8,"#d09050");}), outlined(4,4,({O})=>O(1.5,1.5,1.3,"#8a5a30")), outlined(3,3,({P})=>P(1,1,"#a06a38"))];
+function stairs(n, dir){ // preview canvas of a staircase (world draws steps individually)
+  return art(n*7 + 2, n*4 + 2, ({P}) => { for (let i = 0; i < n; i++) drawStep(P, dir > 0 ? i*7 : (n-1-i)*7, n*4 + 2 - 4*(i+1) - 2 + 2, n*4 + 2, dir); });
+}
+function drawStep(P, x, top, floor, dir){
+  P(x, top, 7, 1, RU.hi); P(x, top+1, 7, 1, RU.r1); P(x, top+2, 7, 1, RU.r3);
+  const px = dir > 0 ? x + 5 : x; P(px, top+3, 2, floor - top - 3, RU.r2); P(px + (dir > 0 ? 1 : 0), top+3, 1, floor - top - 3, RU.dk);
+  P(x + 3, top + 1, RU.dk);
+}
+/* ---------- props ---------- */
+const PROP = {
+  railing:terrain([501,343,222,75],32,9),
+  barrel:terrain([38,847,152,157],12,15), crate:terrain([234,854,163,150],15,12),
+  grass:terrain([431,899,153,105],10,6), shrub:terrain([591,885,107,119],11,12),
+  rocks:terrain([714,933,145,71],14,6), elbow:terrain([893,878,132,126],11,11),
+  antenna:terrain([1060,861,110,143],13,22), sign:terrain([1214,864,134,140],13,16),
+  plate:terrain([1380,929,111,75],12,7), lamp:terrain([1205,299,102,139],7,14),
+  cables:terrain([1000,297,195,110],34,12), pillar:terrain([731,281,88,175],8,18),
+  brace:terrain([855,297,125,144],14,14)
+};
+PROP.signJoin = signboard("JOIN"); PROP.signExit = signboard("EXIT");
+function signboard(t){ return outlined(38, 24, ({P}) => { P(2,0,34,17,"#d8c39a"); P(2,0,34,1,"#efe0bc"); P(2,16,34,1,"#a8916a");
+  for (let k = 0; k < 14; k++) P(2 + (hash(k,9)*34|0), 1 + (hash(k,8)*15|0), hash(k,1) < .6 ? "#b8783a" : "#c9b48a");
+  [[3,1],[34,1],[3,15],[34,15]].forEach(([a,b]) => P(a,b,"#5a3a1e")); if (t) pixText(P, t, 19 - (textW(t, 2) >> 1), 4, "#3a2614", 2);
+  P(7,17,3,7,RU.r2); P(28,17,3,7,RU.r2); P(7,17,1,7,RU.hi); P(28,17,1,7,RU.hi); }); }
+const DOOR_IN = terrain([38,491,490,307], 76, 58);
+const DOOR_OUT = terrain([988,491,502,307], 76, 58);
+const PAD = art(26, 9, ({P}) => { P(0,5,26,4,MT.m3); P(0,5,26,1,MT.m2); P(3,2,20,4,MT.m2); P(3,2,20,1,MT.m1); P(7,1,12,2,"#1f4a2c"); P(8,1,10,1,"#2f8a4a"); P(11,6,4,2,GRN); P(1,7,1,1,MT.m4); P(24,7,1,1,MT.m4); });
+const padActive = art(26, 26, ({P, O, x}) => { x.drawImage(PAD, 0, 17); P(8,18,10,1,GRN);
+  for (let i = 0; i < 26; i++) { const a = i / 26 * Math.PI * 2, X = Math.round(13 + 9*Math.cos(a)), Y = Math.round(6 + 2.2*Math.sin(a)); P(X, Y, GRN); if (Y < 6) P(X, Y, GRN_L); }
+  [[6,10],[10,13],[15,11],[19,14],[9,8],[17,9],[12,15]].forEach(([a,b],i) => P(a, b, i % 2 ? GRN : GRN_L)); });
+function flagArt(t){ return art(26, 24, ({P}) => { P(1,0,2,2,"#d4a62a"); P(1,2,1,22,MT.m3); P(2,2,1,22,MT.m2);
+  for (let x = 0; x < 21; x++) { const off = Math.round(Math.sin(t*0.15 + x*0.5) * (x/21) * 1.4); P(3+x, 2+off, 1, 13, x % 7 === 6 ? "#0c3029" : "#16463d"); P(3+x, 2+off, "#1f5a4e"); P(3+x, 14+off, "#0c3029"); }
+  drawEmblem((px,py,c) => P(3 + px + 2, 2 + py + 1 + Math.round(Math.sin(t*0.15 + (px+2)*0.5) * ((px+2)/21) * 1.4), c), 0, 0, "#e2b62e", EMB_S); }); }
+
+/* ================= Courier artwork ================= */
+// Keep source artwork and frame mapping separate from simulation rules.
+const W = 32, H = 32, OY = 0;
+const PLAT = {yt:["#E5322D","#9C1F1B"], tw:["#9146FF","#5E2BB0"], kick:["#53FC18","#2E9A0C"]};
+const SKINS = [["#dba773", "#b5794c"]];
+const HAIRS = [["#875334", "#553421"]];
+const BASE = {1:"#30231e", 8:"#b8794a", 11:"#4a3020", 12:"#238c8b"};
+const BASE_NAMES = {1:"outline", 8:"copper helmet", 11:"boots", 12:"scarf"};
+const STYLE_OF_HAIR = () => "courier";
+const ORDER = ["idle","walk","entrance","exit","turn","jump","dig","build","wave","fall","explosion","respawn"];
+const notes = ["breathe and blink", "four-step loop", "amber arrival", "wave and depart", "right to left", "crouch, rise, tuck, land", "shovel and soil", "plank and hammer", "friendly wave", "startle and tumble", "dust poof and loose equipment", "amber return"];
+const source = new Image();
+source.src = "./assets/courier-source.png";
+try { await source.decode(); } catch (error) {
+  document.querySelector("#assetStatus").textContent = "Courier artwork failed to load. Reload the page or check the local server.";
+  throw error;
+}
+const ANIMS = {courier:Object.fromEntries(ORDER.map((name, row) => [name, {fps:name === "walk" ? 7.5 : 6, note:notes[row], f:Array.from({length:4}, (_, col) => ({row,col}))}]))};
+// Existing preview panels use this alias; all avatars share the original courier design.
+ANIMS.hair = ANIMS.courier;
+const spriteCache = new WeakMap();
+function sprite(frame, look){
+  let variants = spriteCache.get(frame);
+  if (!variants) { variants = new Map(); spriteCache.set(frame, variants); }
+  if (variants.has(look.p)) return variants.get(look.p);
+  const canvas = mk(W, H), context = canvas.getContext("2d", {willReadFrequently:true});
+  context.imageSmoothingEnabled = false;
+  const cw = source.naturalWidth / 4, ch = source.naturalHeight / 12;
+  context.drawImage(source, frame.col*cw, frame.row*ch, cw, ch, 0, 0, W, H);
+  const pixels = context.getImageData(0, 0, W, H), accent = hex2(PLAT[look.p][0]);
+  for (let i = 0; i < pixels.data.length; i += 4) {
+    const [r,g,b,a] = pixels.data.slice(i, i+4), y = Math.floor(i/4/W);
+    // Recolor the scarf and canvas workwear; preserve face, copper helmet and boots.
+    const scarf = g > r*1.15 && b > r*1.15;
+    const workwear = (frame.row !== 10 || frame.col === 0) && y >= 19 && y <= 25 && r > g && g > b && r-g < 60 && g-b > 10 && r > 110;
+    if (a && (scarf || workwear)) {
+      const shade = Math.max(.45, Math.min(1, (r+g+b)/480));
+      pixels.data.set(accent.map(channel => Math.round(channel*shade)), i);
+    }
+  }
+  // Align grounded feet to a common baseline; preserve airborne/effect motion.
+  const grounded = [0,1,4,6,7,8].includes(frame.row) || (frame.row === 5 && [0,3].includes(frame.col));
+  let bottom = H-1;
+  if (grounded) {
+    bottom = 0;
+    for (let i = 3; i < pixels.data.length; i += 4) if (pixels.data[i] > 100) bottom = Math.max(bottom,Math.floor(i/4/W));
+  }
+  context.clearRect(0,0,W,H);
+  context.putImageData(pixels, 0, grounded ? H-1-bottom : 0);
+  variants.set(look.p, canvas); return canvas;
+}
+document.querySelector("#assetStatus").textContent = "Courier loaded · 12 states · 48 frames · 4× export";
+
+/* ---------- panels: sprite sheet, variants, tiles ---------- */
+let sheetColor = "yt";
+const zoom = () => 4;
+function strip(frames, look, s = zoom(), gap = 4){
+  const cv = mk(frames.length*(W*s + gap) - gap, H*s); cv.className = "px"; const x = cv.getContext("2d"); x.imageSmoothingEnabled = false;
+  frames.forEach((f, i) => x.drawImage(sprite(f, look), i*(W*s + gap), 0, W*s, H*s)); return cv;
+}
+function renderSheet(p){
+  sheetColor = p; const el = document.getElementById("sheet"); el.textContent = "";
+  ORDER.forEach(n => { const a = ANIMS.hair[n], fig = document.createElement("figure");
+    fig.innerHTML = `<figcaption><b>${n}</b>4 frames &middot; ${a.fps} fps &middot; ${a.note}</figcaption>`;
+    fig.append(strip(a.f, {p, s:0, h:0})); el.append(fig); });
+}
+renderSheet("yt");
+document.querySelectorAll('input[name="sheetc"]').forEach(r => r.onchange = () => renderSheet(r.value));
+function big(c, s = 3){ const o = mk(c.width*s, c.height*s); o.className = "px"; const x = o.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(c, 0, 0, o.width, o.height); return o; }
+function buildPanels(){
+  const v = document.getElementById("varPx");
+  Object.keys(PLAT).forEach(p => { const fig = document.createElement("figure"); fig.innerHTML = `<figcaption><b>${PNAME[p]}</b><br><code>${PLAT[p][0]}</code></figcaption>`;
+    fig.append(big(sprite(ANIMS.hair.idle.f[0], {p, s:0, h:0}), 3)); v.append(fig); });
+  const cr = document.getElementById("crowdPx");
+  [[0,0],[0,0],[0,0]].forEach(([h,s],i) => { const st = STYLE_OF_HAIR(h);
+    cr.append(big(sprite(ANIMS[st].idle.f[0], {p:["yt","tw","kick"][i%3], s, h}), 2)); });
+  const sw = (c, n) => `<span><span class="sw" style="background:${c}"></span>${n} <code>${c}</code></span>`;
+  document.getElementById("palette").innerHTML = SKINS.map((s,i) => sw(s[0], "skin " + (i+1))).join("") + HAIRS.map((h,i) => sw(h[0], ["brown","black","ginger","blonde","grey","helmet","beanie olive","beanie rust"][i])).join("")
+    + Object.entries(BASE_NAMES).map(([k,n]) => sw(BASE[k], n)).join("");
+  const T = document.getElementById("tiles"), add = (c, name, note = "") => { const f = document.createElement("figure"); f.append(big(c, 3));
+    const cap = document.createElement("figcaption"); cap.innerHTML = `<b>${name}</b>${note}`; f.append(cap); T.append(f); };
+  add(GIRDER.L, "Girder, left cap", "protected"); add(GIRDER.M, "Girder, middle", "protected"); add(GIRDER.R, "Girder, right cap", "protected");
+  [0,1,2].forEach(v => add(DIRT[v][0], `Dirt ${v+1}`, "intact"));
+  add(DIRT[0][1], "Dirt", "cracked 1"); add(DIRT[0][2], "Dirt", "cracked 2"); add(RUBBLE, "Rubble pile", "hole stage");
+  add(stairs(4, 1), "Stairs", "right-facing"); add(stairs(4, -1), "Stairs", "left-facing");
+  add(PROP.railing, "Railing"); add(PROP.pillar, "Pillar"); add(PROP.brace, "Brace"); add(PROP.cables, "Cables"); add(PROP.lamp, "Hanging lamp");
+  const rc = art(16, 6, ({x}) => ROCKS_CHUNK.forEach((c,i) => x.drawImage(c, i*6, 0))); add(rc, "Rock chunks", "dig particles");
+  add(DOOR_IN, "Entrance door", "green light"); add(DOOR_OUT, "Exit door", "amber light");
+  add(PAD, "Respawn pad", "idle"); add(padActive, "Respawn pad", "active"); add(signboard(""), "Signboard", "blank"); add(PROP.signJoin, "Sign", "JOIN"); add(PROP.signExit, "Sign", "EXIT");
+  add(PROP.barrel, "Barrel"); add(PROP.crate, "Crate"); add(PROP.grass, "Grass tuft"); add(PROP.shrub, "Dead shrub"); add(PROP.rocks, "Rocks");
+  add(PROP.elbow, "Pipe elbow"); add(PROP.antenna, "Antenna"); add(PROP.sign, "Warning sign"); add(PROP.plate, "Metal plate");
+  add(flagArt(0), "Flag", "emblem"); add(art(26, 12, ({P}) => drawEmblem(P, 0, 0, "#d4b02a")), "Emblem", "pixel, large"); add(art(17, 9, ({P}) => drawEmblem(P, 0, 0, "#d4b02a", EMB_S)), "Emblem", "pixel, small");
+}
+
+/* ================= Section B: world ================= */
+const LW = 640, LH = 120, GY = 92, XMIN = 84, XMAX = 556, PADX = 206;
+const GIRDER = {L:girderTileFixed("L"), M:girderTileFixed("M"), R:girderTileFixed("R")};
+const DIRT = [0,1,2].map(v => [0,1,2].map(s => dirtTile(v, s)));
+// tile map: g = girder (protected), d = dirt (breakable)
+const MAP = "gggggg" + "ddddd" + "ggg" + "dddddd" + "ggg" + "dddddd" + "ggg" + "dd" + "gggggg";
+const tiles = [...MAP].map((t, i) => ({t, v:i % 3, stage:0, repairAt:0}));
+const cv = document.getElementById("world"), ctx = cv.getContext("2d");
+const stairsList = [], parts = [], marks = [];
+const STATIC = art(LW, LH, ({P, L, x}) => {
+  // under-structure: pillars and braces under girder runs, cables under dirt runs
+  const runs = []; let s = 0; for (let i = 1; i <= tiles.length; i++) if (i === tiles.length || tiles[i].t !== tiles[s].t) { runs.push({t:tiles[s].t, a:s*TILE, b:i*TILE}); s = i; }
+  runs.forEach((r, ri) => {
+    if (r.t === "g") { const mid = (r.a + r.b >> 1); x.drawImage(PROP.pillar, mid - 4, 104);
+      if (r.b - r.a > 48) { x.drawImage(PROP.brace, mid - 18, 106); x.drawImage(PROP.brace, mid + 4, 106); } }
+    else { const a = r.a - 4, b = r.b + 4; for (let X = a; X < b; X++) { const u = (X - a)/(b - a); P(X, 106 + Math.round(9*4*u*(1-u)), "#221c18"); P(X, 106 + Math.round(5*4*u*(1-u)), "#3a302a"); } }
+  });
+  x.drawImage(PROP.lamp, 340, 107);
+  // girder tiles (static; dirt tiles are drawn live)
+  tiles.forEach((t, i) => { if (t.t !== "g") return; const prev = tiles[i-1], next = tiles[i+1];
+    x.drawImage(!prev || prev.t !== "g" ? GIRDER.L : !next || next.t !== "g" ? GIRDER.R : GIRDER.M, i*TILE, GY); });
+  // doors, signs, props
+  x.drawImage(DOOR_IN, 2, GY - 58); x.drawImage(DOOR_OUT, LW - 78, GY - 58);
+  x.drawImage(PROP.antenna, LW - 30, GY - 58 - 22 + 26);
+  x.drawImage(PROP.signJoin, 78, GY - 24); x.drawImage(PROP.signExit, LW - 116, GY - 24);
+  x.drawImage(PROP.barrel, 177, GY - 15); x.drawImage(PROP.railing, 470, GY - 9);
+});
+// props standing on breakable dirt are drawn live and drop out of view when their tile becomes a hole
+const DECOR = [[PROP.crate, 526, GY - 12], [PROP.sign, 262, GY - 16], [PROP.shrub, 410, GY - 12], [PROP.rocks, 300, GY - 6], [PROP.grass, 150, GY - 6]];
+const BOOT = outlined(6, 5, ({P}) => { P(0,0,2,3,"#4a3020"); P(0,2,5,2,"#4a3020"); P(0,3,5,1,"#2e1e14"); });
+const HELM = outlined(8, 5, ({P}) => { P(1,1,6,3,"#b8794a"); P(2,0,4,1,"#a39d8f"); P(2,1,2,1,"#fffaf0"); P(0,4,8,1,"#5e584d"); });
+const tileAt = x => tiles[Math.floor(x / TILE)];
+const solidAt = x => { const t = tileAt(x); return t && !(t.t === "d" && t.stage === 3); };
+function tops(x){ const t = []; if (solidAt(x)) t.push(GY); stairsList.forEach(s => x >= s.x && x < s.x + 7 && t.push(s.top)); return t; }
+const surface = (x, y, up = 5) => Math.min(Infinity, ...tops(x).filter(t => t >= y - up));
+
+const NAMES = Array.from({length:70}, (_, i) => [i === 0 ? "Misha" : `viewer${String(i+1).padStart(2,"0")}`, ["yt","tw","kick"][i%3]]);
+const LINES = ["who left the door open?","smells like rust out here","found a shiny bolt!","gg chat","brb, salvaging","this dirt looks crumbly"];
+const tagsEl = document.getElementById("tags");
+const sender = document.getElementById("sender");
+const chars = NAMES.map(([name, p], i) => {
+  const option = document.createElement("option"); option.value = String(i); option.textContent = `${name} · ${PNAME[p]}`; sender.append(option);
+  const np = document.createElement("div"); np.className = "np"; np.innerHTML = badge(p) + esc(name);
+  const bub = document.createElement("div"); bub.className = "bub"; tagsEl.append(np, bub);
+  return {name, p, np, bub, look:{p}, st:"courier", x:0, y:GY, vy:0, vx:0, dir:1, state:"away", t:0, wait:0, anim:"idle", fi:0, bubT:0,
+    lastChat:0, score:i < 40 ? 40-i : 0, scoreAt:0, lastScored:-90, admitted:false, admittedAt:0, eligible:false, pending:null};
+});
+let rotation = 0, simulatedViewers = 70;
+let inactivitySeconds = 60;
+const timeoutTicks = () => inactivitySeconds*30;
+function chooseCrowd(){
+  const active = chars.filter(c => tickN-c.lastChat < timeoutTicks() && c.score > 0);
+  const ranked = [...active].sort((a,b) => b.score*Math.exp(-(tickN-b.scoreAt)/1800)-a.score*Math.exp(-(tickN-a.scoreAt)/1800));
+  const top = ranked.slice(0,30), remaining = chars.filter(c => active.includes(c) && !top.includes(c));
+  const rotated = remaining.length ? Array.from({length:Math.min(10, remaining.length)}, (_, i) => remaining[(rotation+i)%remaining.length]) : [];
+  const selected = [...top,...rotated];
+  // Borrow unfilled capacity, without giving a participant two slots.
+  for (const c of ranked) if (selected.length < 40 && !selected.includes(c)) selected.push(c);
+  for (const c of chars) { c.eligible = selected.includes(c); c.slot = top.includes(c) ? "ranked" : "rotating"; }
+  let occupied = chars.filter(c => c.admitted).length;
+  for (const c of selected) if (!c.admitted && occupied < 40) {
+    c.admitted = true; c.admittedAt = tickN; occupied++;
+    setState(c,tickN === 0 ? "walk" : "enter",{x:tickN === 0 ? XMIN+12+(selected.indexOf(c)*13)%(XMAX-XMIN-24) : 40,y:GY,dir:tickN === 0 && selected.indexOf(c)%2 ? -1 : 1,free:tickN !== 0,exitReason:null});
+  }
+  if (tickN%30 === 0) document.getElementById("crowdStatus").textContent = `${simulatedViewers.toLocaleString()} simulated viewers · ${occupied}/40 slots · 30 ranked + 10 rotating · timeout ${timeoutTicks()/30}s`;
+}
+function message(c, text){
+  c.lastChat = tickN;
+  if (tickN-c.lastScored >= 90) { c.score = c.score*Math.exp(-(tickN-c.scoreAt)/1800)+1; c.scoreAt = tickN; c.lastScored = tickN; }
+  if (c.exitReason === "timeout" && ["goto","exit"].includes(c.state)) {
+    setState(c,"walk",{dir:c.x > LW/2 ? -1 : 1,free:false,exitReason:null});
+  }
+  const command = text.trim().match(/^!(jump|dig|build|wave|boom)$/)?.[1];
+  if (command) {
+    if (tickN-(c.lastCommand ?? -90) >= 90) { c.pending = {name:command,expires:tickN+300}; c.lastCommand = tickN; }
+  } else { c.pendingText = text.slice(0,200); }
+  chooseCrowd();
+}
+let tickN = 0, paused = reduced, auto = true;
+const DOORS = {in:0, out:0}; let padT = 0;
+function setState(c, s, extra = {}){ Object.assign(c, {state:s, t:0, fi:0}, extra); }
+function say(c, text, ticks = 120){ const live = chars.filter(o => o.bubT > 0 && o !== c); if (live.length >= 4) live.sort((a,b) => a.bubT - b.bubT)[0].bubT = 0; c.bub.textContent = text; c.bubT = ticks; }
+function play(c, name, rate){ const a = ANIMS[c.st][name]; c.anim = name; c.fi = Math.floor(c.t / (rate || 30 / a.fps)) % 4; }
+function walkStep(c, v = .4 + hash(chars.indexOf(c),7)*.3){
+  const nx = c.x + c.dir * v;
+  if (!c.free && ((nx < XMIN && c.dir < 0) || (nx > XMAX && c.dir > 0))) { setState(c, "turn"); return; }
+  const s = surface(nx, c.y); c.x = nx;
+  if (s === Infinity || s > c.y + .5) { setState(c, "fall", {vy:0, vx:c.dir*.3, fromY:c.y}); if (!solidAt(nx) && c.y === GY) say(c, "oops!", 70); }
+  else c.y = s;
+}
+function physics(c){
+  c.vy += .2; const ny = c.y + c.vy; let nx = c.x + c.vx;
+  if (nx < 60 || nx > 580) { c.vx = 0; nx = c.x; }
+  const land = c.vy > 0 ? tops(nx).filter(t => c.y <= t + .01 && ny >= t).sort((a,b) => a-b)[0] : undefined;
+  c.x = nx;
+  if (land !== undefined) { const h = land - (c.fromY ?? land); c.y = land; c.vy = 0; setState(c, h > 10 ? "flat" : "land"); return; }
+  c.y = ny; if (c.y > LH + 40) setState(c, "gone", {wait:75, next:"respawn"});
+}
+function burst(x, y, n, cols, sprites){ for (let k = 0; k < n; k++) parts.push({x, y, vx:(Math.random()-.5)*1.8, vy:-Math.random()*1.8, g:.15, life:26, c:cols[k % cols.length], img:sprites ? sprites[k % sprites.length] : null}); }
+function tick(){
+  tickN++; if (tickN%450 === 0) rotation += 10; chooseCrowd(); DOORS.in = Math.max(0, DOORS.in - 1); DOORS.out = Math.max(0, DOORS.out - 1); padT = Math.max(0, padT - 1);
+  tiles.forEach(t => { if (t.stage && t.repairAt && tickN >= t.repairAt) { t.stage = 0; t.repairAt = 0; } });
+  for (let i = stairsList.length - 1; i >= 0; i--) if (stairsList[i].until < tickN) { burst(stairsList[i].x + 3, stairsList[i].top + 1, 4, ["#8a4a24"], ROCKS_CHUNK.slice(1)); stairsList.splice(i, 1); }
+  for (let i = parts.length - 1; i >= 0; i--) { const q = parts[i]; q.vy += q.g; q.x += q.vx; q.y += q.vy; q.spin = (q.spin||0) + 1; if (--q.life <= 0) parts.splice(i, 1); }
+  for (let i = marks.length - 1; i >= 0; i--) if (--marks[i].life <= 0) marks.splice(i, 1);
+  for (const c of chars) {
+    c.t++; if (c.bubT > 0) c.bubT--;
+    if (c.pending && c.pending.expires < tickN) c.pending = null;
+    if (c.state === "walk") {
+      if (c.admitted && (!c.eligible || tickN-c.lastChat >= timeoutTicks()) && tickN-c.admittedAt >= 300) {
+        setState(c,"goto",{target:598,after:"exit",free:true,exitReason:tickN-c.lastChat >= timeoutTicks() ? "timeout" : "capacity"});
+      } else if (!c.free) {
+        if (c.pendingText) { say(c,c.pendingText); c.pendingText = null; }
+        if (c.pending) { const pending = c.pending; c.pending = null; perform(c,pending.name); }
+      }
+    }
+    switch (c.state) {
+      case "away": break;
+      case "gone": if (--c.wait <= 0) {
+        if (c.eligible) setState(c,"respawn",{x:PADX,y:GY-6,dir:1});
+        else { c.admitted = false; setState(c,"away"); }
+      } break;
+      case "enter": DOORS.in = 12; play(c, "entrance"); if (c.t >= 24) setState(c, "walk", {free:true}); break;
+      case "respawn": padT = 12; play(c, "respawn", 8); if (c.t >= 32) { c.y = GY; setState(c, "walk"); } break;
+      case "walk": play(c, "walk"); walkStep(c); if (c.free && c.x > XMIN + 4) c.free = false;
+        if (c.state === "walk" && !c.free && Math.random() < .003) setState(c, "turn"); else if (c.state === "walk" && !c.free && Math.random() < .003) setState(c, "idle"); break;
+      case "idle": play(c, "idle"); if (c.t >= 40) setState(c, "walk"); break;
+      case "turn": c.anim = "turn"; c.fi = Math.min(3, c.t / 4 | 0); if (c.t >= 14) { c.dir *= -1; setState(c, "walk"); } break;
+      case "goto": play(c, "walk"); c.dir = c.target > c.x ? 1 : -1; walkStep(c,Math.min(2,Math.abs(c.target-c.x)));
+        if (c.state === "goto" && Math.abs(c.x - c.target) < .7) { c.x = c.target; setState(c, c.after); } break;
+      case "jump": if (c.t < 4) { c.anim = "jump"; c.fi = 0; break; }
+        if (c.t === 4) { c.vy = -3.2; c.vx = c.dir * .9; c.fromY = c.y; }
+        c.anim = "jump"; c.fi = c.vy < 0 ? 1 : 2; physics(c); break;
+      case "fall": c.anim = "fall"; c.fi = c.t < 6 ? 0 : 1 + ((c.t >> 3) % 2); physics(c); break;
+      case "land": c.anim = "jump"; c.fi = 3; if (c.t > 5) setState(c, "walk"); break;
+      case "flat": c.anim = "fall"; c.fi = 3; if (c.t > 30) setState(c, "walk"); break;
+      case "dig": { play(c, "dig"); const t = tileAt(c.x + c.dir*4) || tileAt(c.x);
+        if (c.t % 20 === 15) { if (t.t === "g") { burst(c.x + c.dir*8, GY - 1, 6, ["#fff7c2","#ffc93a"]); marks.push({x:c.x + c.dir*11, y:GY - 4, life:36}); say(c, "clang! too solid", 70); setState(c, "walk"); break; }
+          t.stage = Math.min(3, t.stage + 1); t.repairAt = tickN + 900; burst(c.x + c.dir*8, GY - 2, 4, ["#7a5634"], ROCKS_CHUNK);
+          if (t.stage === 3) { const i = tiles.indexOf(t); burst(i*TILE + 8, GY + 4, 10, ["#a06a38"], ROCKS_CHUNK); t.repairAt = tickN + 900; } }
+        if (c.t >= 60 && c.state === "dig") { setState(c, "walk"); } break; }
+      case "build": play(c, "build");
+        if (c.t === 7) { const i = c.steps, sx = c.dir > 0 ? c.bx + 5 + 7*i : c.bx - 12 - 7*i;
+          if (sx < XMIN - 10 || sx + 7 > XMAX + 10) { setState(c, "walk"); break; }
+          stairsList.push({x:sx, top:c.by - 4*(i+1), dir:c.dir, until:tickN + 900}); c.steps++; c.target = sx + 3; }
+        if (c.t >= 20) setState(c, "bwalk"); break;
+      case "bwalk": play(c, "walk"); walkStep(c, .5);
+        if (c.state === "bwalk" && Math.abs(c.x - c.target) < .5) setState(c, c.steps < 5 ? "build" : "walk"); break;
+      case "wave": c.anim = "wave"; c.fi = (c.t / 6 | 0) % 4; if (c.t >= 54) setState(c, "walk"); break;
+      case "boom": c.anim = "explosion"; c.fi = c.t < 24 ? 0 : Math.min(3, 1 + ((c.t - 24) / 6 | 0));
+        if (c.t === 30) { parts.push({x:c.x - 6, y:c.y - 20, vx:-1.1, vy:-2.6, g:.13, life:46, img:BOOT, flipper:true}, {x:c.x + 4, y:c.y - 22, vx:1.2, vy:-3, g:.13, life:46, img:BOOT, flipper:true}, {x:c.x, y:c.y - 28, vx:.3, vy:-3.4, g:.12, life:50, img:HELM, flipper:true});
+          burst(c.x, c.y - 12, 14, ["#d8c39a","#ae8c60"]); }
+        if (c.t >= 48) setState(c, "gone", {wait:75, next:"respawn"}); break;
+      case "exit": DOORS.out = 12; play(c, "exit"); if (c.t >= 24) { c.admitted = false; setState(c,"away"); } break;
+    }
+  }
+}
+function perform(c, command){
+  if (command === "jump") setState(c,"jump");
+  if (command === "wave") setState(c,"wave");
+  if (command === "boom") setState(c,"boom");
+  if (command === "dig") setState(c,"dig");
+  if (command === "build") {
+    if (c.x > 450) c.dir = -1; else if (c.x < 190) c.dir = 1;
+    setState(c,"build",{steps:0,bx:Math.round(c.x),by:c.y}); c.x = Math.round(c.x);
+  }
+  say(c,`!${command}`,60);
+}
+const selectedCharacter = () => chars[Number(sender.value)];
+const CMDS = Object.fromEntries(["jump","dig","build","wave","boom"].map(name => [name, () => message(selectedCharacter(),`!${name}`)]));
+CMDS.say = () => message(selectedCharacter(),document.getElementById("message").value);
+CMDS.exit = () => { const c = selectedCharacter(); c.lastChat = tickN-timeoutTicks(); chooseCrowd(); };
+document.querySelectorAll("[data-cmd]").forEach(button => button.onclick = () => CMDS[button.dataset.cmd]());
+document.getElementById("sendMessage").onclick = CMDS.say;
+document.getElementById("message").onkeydown = event => { if (event.key === "Enter") CMDS.say(); };
+document.getElementById("timeout").onchange = event => {
+  const value = Number(event.target.value);
+  inactivitySeconds = Number.isFinite(value) ? Math.min(600,Math.max(10,value)) : 60;
+  event.target.value = String(inactivitySeconds);
+  chooseCrowd();
+};
+document.getElementById("crowdBurst").onclick = () => {
+  simulatedViewers = 1000;
+  for (const c of chars) message(c,"Hello from the crowd!");
+  document.getElementById("crowdStatus").textContent = "1,000 simulated viewers; 70 chat participants competing for 40 slots.";
+};
+document.getElementById("backgroundBtn").onclick = event => {
+  const transparent = document.getElementById("playStage").classList.toggle("transparent");
+  document.getElementById("chatStage").classList.toggle("transparent",transparent);
+  event.target.setAttribute("aria-pressed",String(transparent));
+};
+document.getElementById("composeBtn").onclick = event => {
+  const frame = document.querySelector("#playStage .frame"), existing = frame.querySelector(".composed-chat");
+  if (existing) { existing.remove(); event.target.setAttribute("aria-pressed","false"); return; }
+  const chat = document.getElementById("chat").cloneNode(true); chat.removeAttribute("id"); chat.classList.add("composed-chat"); chat.style.bottom = "340px"; chat.style.height = "686px";
+  frame.append(chat); event.target.setAttribute("aria-pressed","true");
+};
+const playBtn = document.getElementById("playBtn");
+const syncPlay = () => { playBtn.textContent = paused ? "Play" : "Pause"; playBtn.setAttribute("aria-pressed", paused); };
+playBtn.onclick = () => { paused = !paused; syncPlay(); }; syncPlay();
+document.getElementById("autoChk").onchange = e => auto = e.target.checked;
+const AUTO = ["dig","jump","build","wave","say","boom","dig","exit","jump","build","dig","say"]; let ai = 0;
+
+function render(){
+  ctx.clearRect(0, 0, LW, LH);
+  ctx.drawImage(STATIC, 0, 0);
+  tiles.forEach((t, i) => { if (t.t !== "d") return; if (t.stage < 3) ctx.drawImage(DIRT[t.v][t.stage], i*TILE, GY);
+    else { ctx.fillStyle = "#3a2214"; ctx.fillRect(i*TILE, GY + 1, 1, 10); ctx.fillRect(i*TILE + 15, GY + 1, 1, 10); } });
+  DECOR.forEach(([img, x, y]) => { if (solidAt(x + img.width / 2)) ctx.drawImage(img, x, y); });
+  stairsList.forEach(s => { const P = (x, y, w = 1, h = 1, c) => { if (typeof w === "string") { c = w; w = h = 1; } ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }; drawStep(P, s.x, s.top, GY, s.dir); });
+  // lamp glows, door lights, flag
+  ctx.fillStyle = "rgba(255,200,90,.18)"; ctx.beginPath(); ctx.arc(343.5, 116, 7, 0, 7); ctx.fill();
+  const blink = (tickN >> 2) % 2;
+  if (DOORS.in && blink) { ctx.fillStyle = GRN_L; ctx.fillRect(2 + 32, GY - 58 + 2, 12, 5); }
+  if (DOORS.out && blink) { ctx.fillStyle = "#ffe0a0"; ctx.fillRect(LW - 78 + 32, GY - 58 + 2, 12, 5); }
+  ctx.drawImage(flagArt(tickN), 6, GY - 58 - 22);
+  // respawn pad
+  ctx.drawImage(PAD, PADX - 13, GY - 9);
+  ctx.fillStyle = `rgba(63,224,106,${.16 + .06*Math.sin(tickN*.15)})`; ctx.beginPath(); ctx.ellipse(PADX, GY - 9, 10, 3, 0, 0, 7); ctx.fill();
+  const rsp = chars.find(c => c.state === "respawn");
+  if (rsp) { const ry = GY - 12 - Math.min(26, rsp.t * 1.2); ctx.fillStyle = "rgba(63,224,106,.14)"; ctx.fillRect(PADX - 9, ry, 18, GY - 9 - ry);
+    for (let i = 0; i < 26; i++) { const a = i/26*Math.PI*2, X = Math.round(PADX + 9*Math.cos(a)), Y = Math.round(ry + 2.2*Math.sin(a)); ctx.fillStyle = Y < ry ? GRN_L : GRN; ctx.fillRect(X, Y, 1, 1); }
+    for (let k = 0; k < 6; k++) { ctx.fillStyle = k % 2 ? GRN : GRN_L; ctx.fillRect(PADX - 8 + (hash(k, rsp.t >> 2)*16|0), ry + (hash(k+9, rsp.t >> 2)*(GY - 10 - ry)|0), 1, 1); } }
+  for (const c of chars) {
+    const vis = c.admitted && !["gone","away"].includes(c.state);
+    c.np.style.opacity = vis && (c.bubT > 0 || c.state !== "walk" || tickN-c.admittedAt < 90) ? 1 : 0; c.bub.classList.toggle("on", vis && c.bubT > 0);
+    if (!vis) continue;
+    const fr = ANIMS[c.st][c.anim].f[c.fi], img = sprite(fr, c.look), sx = Math.round(c.x), sy = Math.round(c.y) - H;
+    ctx.save(); ctx.translate(sx, sy); if (c.dir < 0) ctx.scale(-1, 1); ctx.drawImage(img, -W/2, 0); ctx.restore();
+    const top = (sy + OY) * 3 - 6;
+    c.np.style.transform = `translate(${sx*3}px,${top}px) translate(-50%,-100%)`;
+    c.bub.style.transform = `translate(${sx*3}px,${top - 40}px) translate(-50%,-100%)`;
+  }
+  parts.forEach(q => { if (q.img) { ctx.save(); ctx.translate(Math.round(q.x), Math.round(q.y)); if (q.flipper && (q.spin >> 3) % 2) ctx.scale(-1, 1); ctx.drawImage(q.img, -q.img.width >> 1, -q.img.height >> 1); ctx.restore(); }
+    else { ctx.fillStyle = q.c; ctx.fillRect(Math.round(q.x), Math.round(q.y), 1, 1); } });
+  marks.forEach(m => { ctx.fillStyle = "#1d1712"; for (let i = -2; i <= 2; i++) { ctx.fillRect(m.x + i - 1, m.y + i - 1, 3, 3); ctx.fillRect(m.x + i - 1, m.y - i - 1, 3, 3); }
+    ctx.fillStyle = "#ff4a32"; for (let i = -2; i <= 2; i++) { ctx.fillRect(m.x + i, m.y + i, 1, 1); ctx.fillRect(m.x + i, m.y - i, 1, 1); } });
+}
+let last = performance.now(), acc = 0;
+function loop(now){
+  const dt = Math.min(100, now - last); last = now;
+  if (!paused) { acc += dt; while (acc >= 1000/30) { tick(); acc -= 1000/30; if (auto && tickN % 60 === 0) { const c = chars[Math.floor(Math.random()*chars.length)]; const command = AUTO[ai++ % AUTO.length]; message(c,command === "say" || command === "exit" ? LINES[ai%LINES.length] : `!${command}`); } } }
+  render(); requestAnimationFrame(loop);
+}
+buildPanels();
+chooseCrowd();
+function download(canvas, name){ const link = document.createElement("a"); link.download = name; link.href = canvas.toDataURL("image/png"); link.click(); }
+document.getElementById("exportSheet").onclick = () => {
+  const canvas = mk(W*4*4,H*12*4), context = canvas.getContext("2d"); context.imageSmoothingEnabled = false;
+  ORDER.forEach((name,row) => ANIMS.courier[name].f.forEach((frame,col) => context.drawImage(sprite(frame,{p:sheetColor}),col*W*4,row*H*4,W*4,H*4)));
+  download(canvas,`courier-${sheetColor}-4x.png`);
+};
+document.getElementById("exportTerrain").onclick = () => {
+  const canvas = mk(512,512), context = canvas.getContext("2d"); context.imageSmoothingEnabled = false;
+  [GIRDER.L,GIRDER.M,GIRDER.R,DIRT[0][0],DIRT[0][1],DIRT[0][2],DOOR_IN,DOOR_OUT,PAD,...Object.values(PROP)].forEach((asset,i) => {
+    const x = i%4*128, y = Math.floor(i/4)*64; context.drawImage(asset,x,y,asset.width,asset.height);
+  });
+  download(canvas,"terrain-atlas.png");
+};
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
