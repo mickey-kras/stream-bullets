@@ -1,6 +1,6 @@
 import { consumeMutationQuota } from "../data.server";
 import { json, queryParams, readJson } from "../http.server";
-import { notifyRoom } from "../live.server";
+import { notifyActivityPage, notifyRoom } from "../live.server";
 import {
   isSensitivePageAction,
   listModerationPages,
@@ -102,6 +102,7 @@ export const adminRoutes: ApiRoute[] = [
     await consumeMutationQuota(app.env, admin.viewer.id);
     const page = await moderatePage(app.env, admin, match[1], input);
     notifyRoom(app.env, page.id);
+    notifyActivityPage(app.env, page.id);
     const emailed: boolean = input.notify ? await notifyOwner(app.env, page.id, input.action) : false;
     return json({ page, emailed });
   }),

@@ -41,7 +41,10 @@ await writeFile(configPath, JSON.stringify(config), { mode: 0o600 });
 // A per-run random salt enables /ai voting.
 await writeFile(
   resolve(directory, ".env"),
-  `BETTER_AUTH_SECRET=${secret}\nAI_INTEREST_SALT=${randomBytes(24).toString("hex")}\n`,
+  // Kick credentials and token keys make one channel platform available in the controls. No test calls Kick.
+  `BETTER_AUTH_SECRET=${secret}\nAI_INTEREST_SALT=${randomBytes(24).toString("hex")}\n` +
+    `KICK_CLIENT_ID=e2e-kick-client\nKICK_CLIENT_SECRET=e2e-kick-secret\n` +
+    `CHANNEL_TOKEN_KEYS=e2e:${randomBytes(32).toString("base64")}\n`,
   { mode: 0o600 },
 );
 const wrangler: string = resolve(root, "node_modules/wrangler/bin/wrangler.js");

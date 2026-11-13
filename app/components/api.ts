@@ -88,6 +88,7 @@ const codeMessages: Readonly<Record<string, MessageId>> = {
   invalid_schedule_date: "error.scheduleDate",
   schedule_no_occurrences: "error.scheduleDays",
   idea_not_under_review: "error.ideaDelete",
+  channel_conflict: "channels.conflict",
 };
 
 export function errorMessage(error: unknown): string {

@@ -125,6 +125,18 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
     ),
   },
   {
+    id: "channel-connections",
+    title: "Channel connections",
+    body: (
+      <p>
+        Streamers can connect their own Twitch, YouTube, or Kick channel to show its chat on their overlay. Our YouTube
+        channel connection uses YouTube API Services. By connecting a YouTube channel you agree to be bound by the{" "}
+        <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>. Each platform’s own terms also apply to
+        the channel.
+      </p>
+    ),
+  },
+  {
     id: "ai-agents",
     title: "Automated agents and AI",
     body: (
