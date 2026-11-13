@@ -55,6 +55,15 @@ Never paste secrets into issues, PRs, or chat.
 See [Twitch registration](https://dev.twitch.tv/docs/authentication/register-app/).
 A different provider finds the same profile only with reliable email ownership proofs.
 
+## Channel connections
+
+Channel connections are separate from sign-in. They use their own redirect URIs and Worker secrets.
+See [Channel connections and activity](channel-connections.md#setup) for the steps.
+Add `CHANNEL_TOKEN_KEYS`, `TWITCH_EVENTSUB_SECRET`, `KICK_CLIENT_ID`, and `KICK_CLIENT_SECRET` as Worker secrets.
+Add the channel redirect URIs to the existing Twitch app and Google client.
+
+The YouTube scope `youtube.readonly` is sensitive. Google must check the app before all streamers can use it.
+
 ## Launch checks
 
 1. Sign in as administrator and open `/admin`.

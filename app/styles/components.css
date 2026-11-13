@@ -1736,3 +1736,18 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 }
 
 .pref-group :is(.field, .field-label, .cselect, .pref-options) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+
+/* Channel connections in the overlay controls (docs/channel-connections.md). */
+.ch-section { max-width: 1300px; margin: 24px auto 0; }
+.ch-section > h2 { margin: 0 0 8px; }
+.ch-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 12px; margin: 12px 0 0; padding: 0; list-style: none; }
+.ch-item { min-width: 0; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--modal); }
+.ch-item p { margin: 6px 0; overflow-wrap: anywhere; }
+.ch-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ch-badge { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; font-weight: 600; }
+.ch-problem { display: flex; align-items: flex-start; gap: 6px; }
+.ch-problem .icon { flex: none; margin-top: 2px; color: var(--live); }
+.ch-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ch-result { display: block; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.ch-reauth { margin-top: 12px; }
+.ch-terms { display: block; margin: 6px 0; font-size: 0.875rem; }

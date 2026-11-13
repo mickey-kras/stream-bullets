@@ -187,6 +187,7 @@ beforeAll(async () => {
     DB: database.db,
     IMAGES: database.bucket,
     POLL_ROOMS: {} as DurableObjectNamespace,
+    CHANNEL_INGEST: {} as DurableObjectNamespace,
     REQUEST_LIMITER: {} as RateLimit,
     APP_ORIGIN: "https://stream.example.test",
     BETTER_AUTH_SECRET: secret,
@@ -605,6 +606,8 @@ describe("OAuth boundary", () => {
     expect(result).toHaveProperty("url");
     const url: URL = new URL((result as { url: string }).url);
     expect(url.searchParams.get("redirect_uri")).toBe(`${env.APP_ORIGIN}/api/auth/callback/google`);
+    // Sign-in never asks for incremental authorization, so it never inherits a connected channel's YouTube scope.
+    expect(url.searchParams.has("include_granted_scopes")).toBe(false);
   });
 
   it("cannot use email/password sign-up as a substitute for configured providers", async () => {

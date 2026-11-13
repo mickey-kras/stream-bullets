@@ -355,6 +355,10 @@ beforeAll(async (): Promise<void> => {
   env = {
     DB: database.db,
     IMAGES: database.bucket,
+    CHANNEL_INGEST: {
+      idFromName: (name: string) => name,
+      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+    } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
       get: (name: string) => ({
@@ -559,6 +563,7 @@ describe("account export", (): void => {
     await env.IMAGES.delete("avatar/other");
     const data = await exportAccount(env, "admin");
     expect(data).toMatchObject({
+      channelConnections: [],
       streamerPage: null,
       streamerApplication: null,
       signInMethods: [],
@@ -580,6 +585,34 @@ describe("account export", (): void => {
     const body = (await response.json()) as { account: { email: string } };
     expect(body.account.email).toBe("leaver@example.test");
     expect((await callExport({ "Sec-Fetch-Site": "cross-site" })).status).toBe(403);
+  });
+});
+
+describe("channel connections in the export", (): void => {
+  it("lists the page's connected channels without their tokens", async (): Promise<void> => {
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,status,created_at,updated_at,last_event_at)
+          VALUES ('cc1',?,'kick','333','Leaver Kick','user:read events:subscribe','active',?,?,NULL),
+                 ('cc2',?,'kick','444','Host Kick','user:read','active',?,?,NULL)`,
+      ).bind(ids.leaverPage, now, now, ids.hostPage, now, now),
+      env.DB.prepare(
+        "INSERT INTO channel_tokens (connection_id,key_id,access_token,refresh_token,updated_at) VALUES ('cc1','k','sealed-access','sealed-refresh',1)",
+      ),
+    ]);
+    const data = await exportAccount(env, "leaver");
+    expect(data.channelConnections).toEqual([
+      {
+        platform: "kick",
+        channelId: "333",
+        displayName: "Leaver Kick",
+        scopes: ["user:read", "events:subscribe"],
+        status: "active",
+        connectedAt: new Date(now).toISOString(),
+        lastEventAt: null,
+      },
+    ]);
+    expect(JSON.stringify(data)).not.toContain("sealed-");
   });
 });
 

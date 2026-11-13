@@ -51,10 +51,42 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
           <li>Your provider account ID and a link to your provider profile picture.</li>
           <li>
-            Sign-in tokens from the provider. We store them encrypted and use them only to complete sign-in. We do not
-            post to, or read anything else from, your Google, Twitch, TikTok or Instagram account.
+            Sign-in tokens from the provider. We store them encrypted and use them only to complete sign-in. Sign-in
+            never posts to, or reads anything else from, your Google, Twitch, TikTok or Instagram account.
           </li>
         </ul>
+        <h3>From channels a streamer connects (Twitch, YouTube or Kick)</h3>
+        <p>
+          A streamer can connect their own channels in Overlay control. This is separate from sign-in. For each
+          connected channel we keep:
+        </p>
+        <ul>
+          <li>
+            The platform, the channel ID and the channel name, the permissions granted, and the connection status.
+          </li>
+          <li>
+            Access and refresh tokens from the platform, encrypted with keys kept apart from the database. We use them
+            only to read the channel’s chat and moderation events. We never post, moderate, or change anything on the
+            channel.
+          </li>
+        </ul>
+        <p>
+          While a channel is connected, its chat passes through the service to the streamer’s overlay: each message’s
+          text, the sender’s platform user ID, name, colour and badges, and moderation events such as deletions and
+          bans. This includes chat from viewers who have no StreamBullets account. We keep at most the last 100
+          messages, so an overlay can recover after a reconnect. An overlay never gets a message older than 10 minutes,
+          and we delete it from storage within one more minute. A deleted message, or a message from a banned or
+          timed-out user, leaves that buffer at once. To recognize repeated deliveries, we keep message and delivery
+          IDs, without their text, for up to 16 minutes. We do not keep a chat history.
+        </p>
+        <h3>YouTube channels</h3>
+        <p>
+          The YouTube connection uses YouTube API Services. By connecting a YouTube channel, you agree to the{" "}
+          <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>. Google’s handling of your data follows
+          the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>. You can disconnect the channel in
+          Overlay control at any time. You can also remove StreamBullets’ access in your{" "}
+          <a href="https://security.google.com/settings/security/permissions">Google security settings</a>.
+        </p>
         <p>
           When you register with Google or Twitch, we try to import your provider profile picture as your initial
           avatar. If the import fails, we use the default Space explorer picture.
@@ -212,6 +244,10 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
             privacy policies apply to what they do.
           </li>
           <li>
+            <strong>Twitch</strong>, <strong>Google</strong> (YouTube) and <strong>Kick</strong> send the chat of
+            channels that a streamer connects. They learn that the channel uses StreamBullets.
+          </li>
+          <li>
             Cloudflare Email Routing forwards mail you send to {contactEmails.support} or {legal.contactEmail}. If email
             notices are turned on, Cloudflare also sends a streamer an email when an administrator freezes or suspends
             their page.
@@ -255,6 +291,14 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           <strong>Rate-limit records</strong> are deleted about 24 hours after their last use.
         </li>
         <li>
+          <strong>Channel connections</strong> and their tokens stay until the streamer disconnects the channel or
+          deletes the account. Disconnecting or deleting the account deletes the tokens, removes the event
+          subscriptions, and asks the platform to revoke access. A YouTube connection is also removed 7 days after its
+          access ended, or when its channel data was not read again from YouTube for 30 days; while an overlay is open,
+          we read it again each day. Chat passing through for overlays stays for at most 11 minutes, and IDs of
+          deliveries already received stay for at most 16 minutes.
+        </li>
+        <li>
           <strong>AI interest votes</strong> are deleted after 30 days by the hourly task.
         </li>
         <li>
@@ -268,8 +312,8 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
         <li>
           <strong>Your account</strong> and everything linked to it stay until you delete the account. Deletion removes
           your profile, preferences, sessions, sign-in links, content, votes, reactions, Mash Battle taps, uploaded
-          images, streamer page with its logo, schedule, community cards and support links, waitlist application,
-          security keys, and reports.
+          images, streamer page with its logo, schedule, community cards, support links and channel connections,
+          waitlist application, security keys, and reports.
         </li>
         <li>
           <strong>Reports</strong> stay open until an administrator decides. We keep a resolved report for one year as a
@@ -347,8 +391,9 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
           <li>Audio, electronic, or visual information: images you upload.</li>
           <li>
-            Sensitive personal information: account sign-in data (provider tokens). We use it only to sign you in and
-            keep your account secure, not to infer anything about you.
+            Sensitive personal information: account sign-in data and channel connection tokens (provider tokens). We use
+            them only to sign you in, keep your account secure, and read connected chat, not to infer anything about
+            you.
           </li>
         </ul>
         <p>
@@ -458,7 +503,7 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
       <ul>
         <li>All traffic uses HTTPS. Session cookies are secure, HTTP-only, and limited to this site.</li>
         <li>Every change needs a valid session and must come from this site, which blocks cross-site attacks.</li>
-        <li>Provider sign-in tokens are encrypted in the database.</li>
+        <li>Provider sign-in tokens and channel connection tokens are encrypted in the database.</li>
         <li>Owner and permission checks run on the server. Only administrators can review applications and reports.</li>
         <li>Rate limits slow down abuse. The general limiter keys on a one-way hash of your IP address.</li>
         <li>
