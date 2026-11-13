@@ -7977,7 +7977,7 @@
       "relation": "calls",
       "source": "app_components_overlay_activity_feed_useactivityfeed",
       "source_file": "app/components/overlay/activity-feed.tsx",
-      "source_location": "L100",
+      "source_location": "L101",
       "target": "app_components_overlay_activity_feed_acquire",
       "weight": 1.0
     },
@@ -21465,7 +21465,7 @@
       "relation": "calls",
       "source": "app_lib_overlay_layers_mergelayers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L120",
+      "source_location": "L119",
       "target": "app_lib_overlay_layers_copyrect",
       "weight": 1.0
     },
@@ -118353,6 +118353,17 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
+      "source_location": "L109",
+      "target": "app_lib_overlay_layers_layerspatchschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_overlay_layers",
+      "source_file": "app/lib/overlay-layers.ts",
       "source_location": "L11",
       "target": "app_lib_overlay_layers_layerrect",
       "weight": 1.0
@@ -118364,18 +118375,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L110",
-      "target": "app_lib_overlay_layers_layerspatchschema",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_overlay_layers",
-      "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L114",
+      "source_location": "L113",
       "target": "app_lib_overlay_layers_mergelayers",
       "weight": 1.0
     },
@@ -118386,7 +118386,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L131",
+      "source_location": "L130",
       "target": "app_lib_overlay_layers_parselayerparam",
       "weight": 1.0
     },
@@ -118397,7 +118397,7 @@
       "relation": "contains",
       "source": "app_lib_overlay_layers",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L138",
+      "source_location": "L137",
       "target": "app_lib_overlay_layers_layerurl",
       "weight": 1.0
     },
@@ -140199,10 +140199,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "0244f77d35020d744b93548d61642f3cdd2517064028c9ac5649c4c26d28613b",
+    "content_sha256": "11eea22b576a4b699a9b217a0ba855562150a713cec35c1c2bb4790f8bed2cbe",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "dc56d50970a29d7616e669df1ed399240294f78500cb779f6713e6a6245173c5",
+    "source_sha256": "40cbae8e2d82bf678c86448a1bbecde9d07039aefc4affed0a1116e707c3641a",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -154020,7 +154020,7 @@
       "label": "layerUrl()",
       "norm_label": "layerurl()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L138"
+      "source_location": "L137"
     },
     {
       "_callable": true,
@@ -154031,7 +154031,7 @@
       "label": "mergeLayers()",
       "norm_label": "mergelayers()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L114"
+      "source_location": "L113"
     },
     {
       "_callable": true,
@@ -154053,7 +154053,7 @@
       "label": "parseLayerParam()",
       "norm_label": "parselayerparam()",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L131"
+      "source_location": "L130"
     },
     {
       "_callable": true,
@@ -169523,7 +169523,7 @@
       "label": "layersPatchSchema",
       "norm_label": "layerspatchschema",
       "source_file": "app/lib/overlay-layers.ts",
-      "source_location": "L110"
+      "source_location": "L109"
     },
     {
       "_origin": "ast",

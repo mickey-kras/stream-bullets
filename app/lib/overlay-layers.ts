@@ -106,7 +106,6 @@ export const charactersPatchSchema = z
   .object({ enabled: z.boolean().optional(), rect: charactersRectSchema.optional() })
   .strict();
 
-// API patch: only the given fields change. A rect replaces the whole stored rect.
 export const layersPatchSchema = z
   .object({ chat: chatPatchSchema.optional(), characters: charactersPatchSchema.optional() })
   .strict();
