@@ -182,7 +182,19 @@ async function resetTestRooms(env: AppEnv, ids: string[]): Promise<void> {
 export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<void> {
   await requireTestDatabase(env);
   const now: number = Date.now();
-  const statements: D1PreparedStatement[] = [];
+  const statements: D1PreparedStatement[] = [
+    env.DB.prepare(
+      "CREATE TABLE IF NOT EXISTS test_fixture_revisions (streamer_id TEXT PRIMARY KEY, revision INTEGER NOT NULL CHECK(revision >= 0), overlay_revision INTEGER NOT NULL CHECK(overlay_revision >= 0))",
+    ),
+    env.DB.prepare(`CREATE TRIGGER IF NOT EXISTS test_fixture_revision_delete BEFORE DELETE ON streamers
+      WHEN OLD.id IN (${[1, 2, 3, 4].map((index: number): string => `'${fixtureId(index)}'`).join(",")})
+      BEGIN
+        INSERT INTO test_fixture_revisions(streamer_id,revision,overlay_revision)
+        VALUES(OLD.id,OLD.revision+1,COALESCE((SELECT revision FROM overlay_state WHERE streamer_id=OLD.id),0)+1)
+        ON CONFLICT(streamer_id) DO UPDATE SET revision=MAX(test_fixture_revisions.revision,excluded.revision),
+          overlay_revision=MAX(test_fixture_revisions.overlay_revision,excluded.overlay_revision);
+      END`),
+  ];
   const users: string[] = TEST_ACCOUNTS.map(testAccountId);
   let roomIds: string[] = [];
   if (reset) {
@@ -218,7 +230,15 @@ export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<
       ).bind(JSON.stringify(users), JSON.stringify(users)),
     );
     statements.push(
+      env.DB.prepare(`INSERT INTO test_fixture_revisions(streamer_id,revision,overlay_revision)
+        SELECT s.id,s.revision+1,COALESCE(o.revision,0)+1 FROM streamers s
+        LEFT JOIN overlay_state o ON o.streamer_id=s.id WHERE s.owner_id IN (SELECT value FROM json_each(?))
+        ON CONFLICT(streamer_id) DO UPDATE SET revision=MAX(test_fixture_revisions.revision,excluded.revision),
+          overlay_revision=MAX(test_fixture_revisions.overlay_revision,excluded.overlay_revision)`).bind(
+        JSON.stringify(users),
+      ),
       env.DB.prepare("DELETE FROM user WHERE id IN (SELECT value FROM json_each(?))").bind(JSON.stringify(users)),
+      env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(OFFICIAL_BOARD_ID),
     );
   }
   for (const account of TEST_ACCOUNTS) {
@@ -235,16 +255,24 @@ export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<
     [4, "suspended_owner", "suspended_host", "suspended"],
   ] as const) {
     statements.push(
-      env.DB.prepare("INSERT OR IGNORE INTO streamers(id,owner_id,handle,name,about,status) VALUES(?,?,?,?,?,?)").bind(
+      env.DB.prepare(
+        "INSERT OR IGNORE INTO streamers(id,owner_id,handle,name,about,status,revision) VALUES(?,?,?,?,?,?,COALESCE((SELECT revision FROM test_fixture_revisions WHERE streamer_id=?),0))",
+      ).bind(
         fixtureId(index),
         testAccountId(account),
         handle,
         handle.replaceAll("_", " "),
         "Synthetic test community.",
         status,
+        fixtureId(index),
       ),
     );
   }
+  statements.push(
+    env.DB.prepare(`INSERT OR IGNORE INTO overlay_state(streamer_id,revision,updated_at)
+      SELECT streamer_id,overlay_revision,? FROM test_fixture_revisions
+      WHERE streamer_id IN (SELECT value FROM json_each(?))`).bind(now, JSON.stringify([1, 2, 3, 4].map(fixtureId))),
+  );
   for (const account of ["pending", "approved", "rejected", "owner", "other_owner"] as const) {
     const status: string = account.endsWith("owner") ? "approved" : account;
     statements.push(

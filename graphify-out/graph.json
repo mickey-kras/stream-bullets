@@ -31989,7 +31989,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_checksecret",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L291",
+      "source_location": "L319",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -32121,43 +32121,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L201",
-      "target": "app_server_test_environment_server_resettestrooms",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_test_environment_server_seedtestenvironment",
-      "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L203",
-      "target": "app_server_images_server_deleteimageobjects",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_test_environment_server_seedtestenvironment",
-      "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L228",
-      "target": "app_server_test_environment_server_testaccountid",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_server_test_environment_server_seedtestenvironment",
-      "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L239",
+      "source_location": "L190",
       "target": "app_server_test_environment_server_fixtureid",
       "weight": 1.0
     },
@@ -32169,7 +32133,43 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L266",
+      "source_location": "L213",
+      "target": "app_server_test_environment_server_resettestrooms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_seedtestenvironment",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L215",
+      "target": "app_server_images_server_deleteimageobjects",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_seedtestenvironment",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L248",
+      "target": "app_server_test_environment_server_testaccountid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_seedtestenvironment",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L294",
       "target": "app_server_test_environment_server_communityfixtures",
       "weight": 1.0
     },
@@ -32181,7 +32181,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L295",
+      "source_location": "L323",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
     },
@@ -32193,7 +32193,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L296",
+      "source_location": "L324",
       "target": "app_server_http_server_queryparams",
       "weight": 1.0
     },
@@ -32205,7 +32205,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L310",
+      "source_location": "L338",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -32217,7 +32217,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L311",
+      "source_location": "L339",
       "target": "app_server_http_server_requiresameorigin",
       "weight": 1.0
     },
@@ -32229,7 +32229,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L314",
+      "source_location": "L342",
       "target": "app_server_http_server_readbody",
       "weight": 1.0
     },
@@ -32241,7 +32241,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L321",
+      "source_location": "L349",
       "target": "app_server_test_environment_server_checksecret",
       "weight": 1.0
     },
@@ -32253,7 +32253,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L322",
+      "source_location": "L350",
       "target": "app_server_test_environment_server_accesscookie",
       "weight": 1.0
     },
@@ -32265,7 +32265,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L325",
+      "source_location": "L353",
       "target": "app_server_test_environment_server_seedtestenvironment",
       "weight": 1.0
     },
@@ -32277,7 +32277,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L343",
+      "source_location": "L371",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -36357,7 +36357,7 @@
       "relation": "calls",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L63",
+      "source_location": "L65",
       "target": "tests_test_environment_test_request",
       "weight": 1.0
     },
@@ -71318,7 +71318,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L16",
+      "source_location": "L18",
       "target": "tests_helpers_database_createtestdatabase",
       "weight": 1.0
     },
@@ -71330,7 +71330,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L16",
+      "source_location": "L18",
       "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
@@ -71439,6 +71439,30 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L7",
+      "target": "app_server_overlay_server_getoverlaystate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L8",
+      "target": "app_server_overlay_state_default_overlay",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L9",
       "target": "app_server_test_environment_config_test_origin",
       "weight": 1.0
     },
@@ -71450,7 +71474,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "target": "app_server_test_environment_config_validatetestenvironment",
       "weight": 1.0
     },
@@ -71462,7 +71486,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "target": "app_server_test_environment_server_requiretestaccess",
       "weight": 1.0
     },
@@ -71474,7 +71498,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "target": "app_server_test_environment_server_seedtestenvironment",
       "weight": 1.0
     },
@@ -71486,7 +71510,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "target": "app_server_test_environment_server_test_accounts",
       "weight": 1.0
     },
@@ -71498,7 +71522,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -71510,7 +71534,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "target": "app_server_test_environment_server_testenvironmentresponse",
       "weight": 1.0
     },
@@ -93061,7 +93085,7 @@
       "relation": "imports_from",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L16",
+      "source_location": "L18",
       "target": "tests_helpers_database",
       "weight": 1.0
     },
@@ -93135,6 +93159,30 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L7",
+      "target": "app_server_overlay_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L8",
+      "target": "app_server_overlay_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L9",
       "target": "app_server_test_environment_server",
       "weight": 1.0
     },
@@ -111778,7 +111826,7 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L287",
+      "source_location": "L315",
       "target": "app_server_test_environment_server_checksecret",
       "weight": 1.0
     },
@@ -111789,7 +111837,7 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L294",
+      "source_location": "L322",
       "target": "app_server_test_environment_server_testenvironmentresponse",
       "weight": 1.0
     },
@@ -118939,7 +118987,7 @@
       "relation": "contains",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L22",
+      "source_location": "L24",
       "target": "tests_test_environment_test_fetchroom",
       "weight": 1.0
     },
@@ -118950,8 +118998,19 @@
       "relation": "contains",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L24",
+      "source_location": "L26",
       "target": "tests_test_environment_test_request",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L341",
+      "target": "tests_test_environment_test_get",
       "weight": 1.0
     },
     {
@@ -120775,20 +120834,8 @@
       "relation": "indirect_call",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L186",
+      "source_location": "L198",
       "target": "app_server_test_environment_server_testaccountid",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "relation": "indirect_call",
-      "source": "app_server_test_environment_server_seedtestenvironment",
-      "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L197",
-      "target": "app_server_test_environment_server_fixtureid",
       "weight": 1.0
     },
     {
@@ -121681,10 +121728,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "a0bae49a736b9a75e5fc4db49356defc09c09742b2547569d3e64c1f7758b965",
+    "content_sha256": "7e82f24ea7b77633654cf7e0e1f774d8c78a452ea5fab8f08caa51885a91b7b6",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "47b42ade7c86bbed5ed67c73bd8502ecf77a03b91abfcd08681dbe56149f99b6",
+    "source_sha256": "e494ea0e41f07697c5764659f436d39a690373858797d88562bd2c868738a19c",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -139847,7 +139894,7 @@
       "label": "checkSecret()",
       "norm_label": "checksecret()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L287"
+      "source_location": "L315"
     },
     {
       "_callable": true,
@@ -139935,7 +139982,7 @@
       "label": "testEnvironmentResponse()",
       "norm_label": "testenvironmentresponse()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L294"
+      "source_location": "L322"
     },
     {
       "_callable": true,
@@ -143914,11 +143961,33 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_test_environment_test_get",
+      "label": "get()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "delete",
+            "file": "tests/test-environment.test.ts",
+            "lang": "typescript",
+            "line": "L348",
+            "receiver_type": "R2Bucket"
+          }
+        ]
+      },
+      "norm_label": "get()",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L341"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_test_environment_test_request",
       "label": "request()",
       "norm_label": "request()",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L24"
+      "source_location": "L26"
     },
     {
       "_callable": true,
@@ -151950,7 +152019,7 @@
       "label": "fetchRoom",
       "norm_label": "fetchroom",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L22"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",

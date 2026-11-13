@@ -4,6 +4,8 @@ import type { AppEnv } from "../app/env";
 import { getViewer } from "../app/server/auth.server";
 import { canCreateStreamer, isAdmin, assertStreamerWritable, canViewStreamer } from "../app/server/access.server";
 import { getStreamer, mutateEntry } from "../app/server/data.server";
+import { getOverlayState } from "../app/server/overlay.server";
+import { DEFAULT_OVERLAY } from "../app/server/overlay-state";
 import {
   seedTestEnvironment,
   testEnvironmentResponse,
@@ -74,6 +76,28 @@ describe("test environment isolation", (): void => {
     await expect(seedTestEnvironment(production, false)).rejects.toMatchObject({ status: 404 });
     await expect(testEnvironmentResponse(request(), production)).rejects.toMatchObject({ status: 404 });
     expect(() => validateTestEnvironment({ ...production, TEST_DATABASE_ID: identity })).toThrow("forbidden");
+  });
+  it("cannot create revision metadata without the test environment and database guards", async (): Promise<void> => {
+    const isolated = await createTestDatabase({ migrate: false });
+    try {
+      const production: AppEnv = {
+        ...env,
+        DB: isolated.db,
+        APP_ENV: "production",
+        TEST_ACCESS_SECRET: undefined,
+        TEST_DATABASE_ID: undefined,
+      };
+      await expect(seedTestEnvironment(production, true)).rejects.toMatchObject({ status: 404 });
+      await expect(seedTestEnvironment({ ...env, DB: isolated.db, APP_ENV: undefined }, true)).rejects.toMatchObject({
+        status: 503,
+      });
+      await expect(seedTestEnvironment({ ...env, DB: isolated.db }, true)).rejects.toMatchObject({ status: 503 });
+      expect(
+        await isolated.db.prepare("SELECT name FROM sqlite_master WHERE name LIKE 'test_fixture_%'").first(),
+      ).toBeNull();
+    } finally {
+      await isolated.dispose();
+    }
   });
   it.each([
     { APP_ORIGIN: "https://streambullets.com" },
@@ -290,6 +314,96 @@ describe("synthetic fixtures", (): void => {
     await seedTestEnvironment(env, true);
     expect(observedTitles.slice(0, 5)).toEqual(Array<string>(5).fill("Before reset"));
     expect(observedTitles.slice(5)).toEqual(Array<string>(5).fill("Improve overlay text sizing"));
+  });
+
+  it("keeps fixture and official-board revisions increasing across repeated resets", async (): Promise<void> => {
+    await env.DB.prepare("UPDATE streamers SET revision=revision+50").run();
+    const before = await env.DB.prepare("SELECT id,revision FROM streamers").all<{ id: string; revision: number }>();
+    for (const round of [1, 2]) {
+      await seedTestEnvironment(env, true);
+      for (const row of before.results) {
+        const current = await env.DB.prepare("SELECT revision FROM streamers WHERE id=?")
+          .bind(row.id)
+          .first<{ revision: number }>();
+        expect(current?.revision).toBe(row.revision + round);
+      }
+    }
+  });
+
+  it("captures writes made during asynchronous image cleanup in the reset batch", async (): Promise<void> => {
+    const streamer = (await getStreamer(env, "test_host"))!;
+    const before = (await env.DB.prepare("SELECT revision FROM streamers WHERE id=?")
+      .bind(streamer.id)
+      .first<{ revision: number }>())!.revision;
+    const lateRevision: number = before + 100;
+    let wrote = false;
+    const bucket = new Proxy(env.IMAGES, {
+      get(target: R2Bucket, key: string | symbol): unknown {
+        if (key === "delete")
+          return async (keys: string | string[]): Promise<void> => {
+            if (!wrote) {
+              wrote = true;
+              await env.DB.prepare("UPDATE streamers SET revision=? WHERE id=?").bind(lateRevision, streamer.id).run();
+            }
+            await target.delete(keys);
+          };
+        const value: unknown = Reflect.get(target, key);
+        return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(target) : value;
+      },
+    });
+    await seedTestEnvironment({ ...env, IMAGES: bucket }, true);
+    expect(wrote).toBe(true);
+    expect(
+      (
+        await env.DB.prepare("SELECT revision FROM streamers WHERE id=?")
+          .bind(streamer.id)
+          .first<{ revision: number }>()
+      )?.revision,
+    ).toBe(lateRevision + 1);
+  });
+
+  it("resets overlay contents above the previous revision across repeated resets", async (): Promise<void> => {
+    const streamer = (await getStreamer(env, "test_host"))!;
+    await env.DB.prepare(
+      "INSERT INTO overlay_state(streamer_id,revision,updated_at,message,air) VALUES(?,100,1,'Old overlay',?) ON CONFLICT(streamer_id) DO UPDATE SET revision=revision+100,message=excluded.message,air=excluded.air",
+    )
+      .bind(streamer.id, JSON.stringify({ type: "message", ref: null }))
+      .run();
+    const previous = await getOverlayState(env, streamer.id);
+    for (const round of [1, 2]) {
+      await seedTestEnvironment(env, true);
+      expect(await getOverlayState(env, streamer.id)).toEqual({
+        ...DEFAULT_OVERLAY,
+        revision: previous.revision + round,
+      });
+    }
+  });
+
+  it("retains the last revision when a fixture page was deleted before reset", async (): Promise<void> => {
+    const streamer = (await getStreamer(env, "test_host"))!;
+    await env.DB.prepare("UPDATE streamers SET revision=revision+100 WHERE id=?").bind(streamer.id).run();
+    await env.DB.prepare(
+      "INSERT INTO overlay_state(streamer_id,revision,updated_at) VALUES(?,100,1) ON CONFLICT(streamer_id) DO UPDATE SET revision=revision+100",
+    )
+      .bind(streamer.id)
+      .run();
+    const previousOverlay = await getOverlayState(env, streamer.id);
+    const previous = (await env.DB.prepare("SELECT revision FROM streamers WHERE id=?")
+      .bind(streamer.id)
+      .first<{ revision: number }>())!.revision;
+    await env.DB.prepare("DELETE FROM streamers WHERE id=?").bind(streamer.id).run();
+    await seedTestEnvironment(env, true);
+    expect(
+      (
+        await env.DB.prepare("SELECT revision FROM streamers WHERE id=?")
+          .bind(streamer.id)
+          .first<{ revision: number }>()
+      )?.revision,
+    ).toBe(previous + 1);
+    expect(await getOverlayState(env, streamer.id)).toEqual({
+      ...DEFAULT_OVERLAY,
+      revision: previousOverlay.revision + 1,
+    });
   });
 
   it("stops reset if live state cannot be cleared", async (): Promise<void> => {
