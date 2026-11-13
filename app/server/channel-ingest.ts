@@ -4,7 +4,6 @@ import { z } from "zod";
 import {
   activityEventSchema,
   CHANNEL_STATUS_CODES,
-  MAX_ACTIVITY_MESSAGE_LENGTH,
   quotaDay,
   type ActivityChat,
   type ActivityEvent,
@@ -12,6 +11,8 @@ import {
   type ChannelStatus,
   type ChannelStatusCode,
 } from "../lib/activity";
+import { banKey, eventForBroadcast, snapshotMessage } from "./channel-ingest-events";
+export { snapshotMessage } from "./channel-ingest-events";
 import { youtubeEvents } from "./channel-normalize";
 import {
   channelIdentity,
@@ -100,14 +101,6 @@ const NEW_YOUTUBE_STATE: YoutubeState = { liveChatId: null, pageToken: null, bac
 
 type EventRow = { body: string };
 
-/**
- * The content key of a ban: the same user, end and ban time is one ban, so copies match while a new ban after an
- * unban (a new ban time) does not.
- */
-function banKey(event: Extract<ActivityEvent, { kind: "ban" }>): string {
-  return `ban:${event.platform}:${event.userId}:${event.until ?? "perm"}:${event.bannedAt ?? ""}`;
-}
-
 /** A disconnect or close started while a poll waited: the poll stops and writes nothing. */
 class Superseded extends Error {}
 
@@ -117,20 +110,6 @@ function reply(message: string, status: number): Response {
 
 function isPlatform(value: string | null): value is ActivityPlatform {
   return value !== null && (PLATFORMS as readonly string[]).includes(value);
-}
-
-/**
- * The snapshot as one socket message. The oldest messages are left out until it fits the consumer's message limit,
- * so a reconnecting consumer always gets the newest history.
- */
-export function snapshotMessage(events: readonly ActivityChat[]): string {
-  let start = 0;
-  let message = JSON.stringify({ type: "snapshot", events, replay: true });
-  while (message.length > MAX_ACTIVITY_MESSAGE_LENGTH && start < events.length) {
-    start += Math.max(1, Math.ceil((events.length - start) / 10));
-    message = JSON.stringify({ type: "snapshot", events: events.slice(start), replay: true });
-  }
-  return message;
 }
 
 export class ChannelIngest extends DurableObject<AppEnv> {
@@ -183,13 +162,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const url = new URL(request.url);
     const streamerId = url.searchParams.get("streamerId");
     const platform = url.searchParams.get("platform");
-    if (
-      streamerId === null ||
-      !STREAMER_ID.test(streamerId) ||
-      this.ctx.id.toString() !== this.env.CHANNEL_INGEST.idFromName(streamerId).toString() ||
-      (this.streamerId !== undefined && this.streamerId !== streamerId)
-    )
-      return reply("Invalid stream", 400);
+    if (!this.validStream(streamerId)) return reply("Invalid stream", 400);
     const method = ROUTES[url.pathname];
     if (!method) return reply("Not found", 404);
     if (request.method !== method) return reply("Method not allowed", 405);
@@ -212,6 +185,15 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/connect") return Response.json(await this.connectChannel(platform));
     if (url.pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
     return this.statusChanged(platform, request);
+  }
+
+  private validStream(streamerId: string | null): streamerId is string {
+    return (
+      streamerId !== null &&
+      STREAMER_ID.test(streamerId) &&
+      this.ctx.id.toString() === this.env.CHANNEL_INGEST.idFromName(streamerId).toString() &&
+      (this.streamerId === undefined || this.streamerId === streamerId)
+    );
   }
 
   // Sockets ------------------------------------------------------------------------------------------------------
@@ -469,16 +451,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       } else if (event.kind === "clear") {
         sql.exec("DELETE FROM events WHERE platform=?", event.platform);
       }
-      // Moderation leaves the snapshot before it is sent, so a reconnect never shows a removed message. A timeout
-      // that already ended still removes the user's messages: consumers get a clear_user, not a ban that is over.
-      if (event.kind === "ban" && event.until !== null && event.until <= now)
-        this.broadcast({
-          kind: "clear_user",
-          platform: event.platform,
-          userId: event.userId,
-          receivedAt: event.receivedAt,
-        });
-      else this.broadcast(event);
+      this.broadcast(eventForBroadcast(event, now));
     }
     this.prune(now);
   }
@@ -635,12 +608,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     } catch (error: unknown) {
       const reauth = error instanceof ReauthRequired;
       const code: ChannelStatusCode = reauth ? "authorization_revoked" : "subscribe_failed";
+      const status: ChannelStatus = reauth ? "needs_reauth" : "error";
       if (!reauth)
         console.error("channel_connect_failed", { platform, cause: error instanceof Error ? error.name : "unknown" });
       // A newer connect or a close overtook this one: its outcome stands, so this failure writes nothing.
       if (overtaken()) return { status: "error", code };
-      await this.setStatus(platform, connection, reauth ? "needs_reauth" : "error", code);
-      return { status: reauth ? "needs_reauth" : "error", code };
+      await this.setStatus(platform, connection, status, code);
+      return { status, code };
     }
   }
 
@@ -929,18 +903,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     // Stored YouTube data must be fresh (YouTube API Services policy): read the title again once a day. A failed
     // read is tried again after an hour, a read of another channel after a day; neither stops the chat poll.
     if (now - state.nameAt >= YOUTUBE_NAME_REFRESH_MS) {
-      try {
-        await this.refreshTitle(connection, tokens.accessToken, now);
-        state.nameAt = now;
-      } catch (error: unknown) {
-        if (error instanceof ReauthRequired) throw error;
-        console.warn("channel_name_refresh_failed", {
-          platform: "youtube",
-          cause: error instanceof Error ? error.name : "unknown",
-        });
-        const mismatch = error instanceof ProviderError && error.reason === "channelMismatch";
-        state.nameAt = mismatch ? now : now - YOUTUBE_NAME_REFRESH_MS + YOUTUBE_NAME_RETRY_MS;
-      }
+      await this.refreshPollingTitle(connection, tokens.accessToken, state, now);
       current();
     }
     if (!state.liveChatId) {
@@ -960,6 +923,26 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       return YOUTUBE_IDLE_POLL_MS;
     }
     return Math.max(page.pollingIntervalMillis, YOUTUBE_MIN_POLL_MS);
+  }
+
+  private async refreshPollingTitle(
+    connection: Connection,
+    accessToken: string,
+    state: YoutubeState,
+    now: number,
+  ): Promise<void> {
+    try {
+      await this.refreshTitle(connection, accessToken, now);
+      state.nameAt = now;
+    } catch (error: unknown) {
+      if (error instanceof ReauthRequired) throw error;
+      console.warn("channel_name_refresh_failed", {
+        platform: "youtube",
+        cause: error instanceof Error ? error.name : "unknown",
+      });
+      const mismatch = error instanceof ProviderError && error.reason === "channelMismatch";
+      state.nameAt = mismatch ? now : now - YOUTUBE_NAME_REFRESH_MS + YOUTUBE_NAME_RETRY_MS;
+    }
   }
 
   private async pollFailed(connection: Connection, state: YoutubeState, error: unknown, now: number): Promise<number> {
