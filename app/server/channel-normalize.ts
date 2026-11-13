@@ -37,7 +37,13 @@ const name = z
   .string()
   .max(200)
   .transform((value: string): string => cleanText(value, 100));
-const color = z.catch(z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(), undefined);
+const color = z.catch(
+  z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  undefined,
+);
 
 function parseTime(value: string | undefined | null): number | null {
   if (!value) return null;
