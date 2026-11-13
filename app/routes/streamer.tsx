@@ -36,6 +36,7 @@ import { StreamerHeader, streamerViews, type StreamerView } from "../components/
 import { EntryDetail } from "../components/streamer/entry-detail";
 import { PageBanner } from "../components/streamer/page-banner";
 import { useBoardRefresh } from "../components/streamer/use-board-refresh";
+import { useDiscussionViewport } from "../components/streamer/use-discussion-viewport";
 import { TopicBoard } from "../components/streamer/topic-board";
 import { SupportSection } from "../components/support/support";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
@@ -346,6 +347,9 @@ export default function StreamerPage(): ReactNode {
   // Wake at battle start and end.
   const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
   const pollsClass: string = usePollsMainClass(view === "polls" && loadedSelected ? selected : null, now);
+  const discussionFocus: boolean =
+    searchParams.get("discussion") === "1" && loadedSelected !== null && selected?.kind !== "mash";
+  useDiscussionViewport(discussionFocus, selected?.id ?? null);
 
   const boardKey: string = JSON.stringify([streamer.id, view, sort, query, status, board.nextCursor, board.revision]);
   const [previousBoard, setPreviousBoard] = useState<string>(boardKey);
@@ -468,6 +472,21 @@ export default function StreamerPage(): ReactNode {
     if (!selected) return;
     await deleteEntry(selected.id);
     navigate(view);
+  }
+
+  function openDiscussion(entry: Entry): void {
+    const params = new URLSearchParams(searchParams);
+    params.set("view", entryView(entry));
+    params.set("entry", entry.id);
+    params.set("discussion", "1");
+    setSearchParams(params, { state: { discussionReturn: true } });
+  }
+
+  function closeDiscussion(): void {
+    const state: unknown = here.state;
+    if (typeof state === "object" && state !== null && "discussionReturn" in state && state.discussionReturn === true)
+      go(-1);
+    else setParam("discussion", null);
   }
 
   function renderDiscussion(entry: Entry): ReactNode {
@@ -612,6 +631,7 @@ export default function StreamerPage(): ReactNode {
                 writable={writable}
                 pending={pending.has(selected.id)}
                 onBack={() => backToList("topics")}
+                onDiscuss={() => openDiscussion(selected)}
                 onReact={(value) => act({ action: "react", id: selected.id, value }, selected.id)}
                 onDelete={removeSelected}
                 onStatusSaved={async () => {
@@ -668,6 +688,7 @@ export default function StreamerPage(): ReactNode {
         }}
         onDeleteSelected={removeSelected}
         discussion={renderDiscussion}
+        onDiscussionFocus={openDiscussion}
       />
     );
   }
@@ -805,7 +826,7 @@ export default function StreamerPage(): ReactNode {
   const role = pageRole(owner, moderator);
   return (
     <div
-      className="streamer-shell"
+      className={`streamer-shell${discussionFocus ? " discussion-focus" : ""}`}
       style={
         streamer.background
           ? {
@@ -856,6 +877,15 @@ export default function StreamerPage(): ReactNode {
         <p className="page-error form-error" role="alert">
           {error}
         </p>
+      )}
+      {discussionFocus && selected && (
+        <div className="discussion-focus-bar">
+          <button type="button" className="back" onClick={closeDiscussion}>
+            <Icon name="chevron-left" size={18} />
+            {t(selected.kind === "topic" ? "discussion.backToTopic" : "discussion.backToPoll")}
+          </button>
+          <strong>{selected.title}</strong>
+        </div>
       )}
       {renderPage()}
       {fab && (

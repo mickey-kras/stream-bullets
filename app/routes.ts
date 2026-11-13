@@ -5,6 +5,7 @@ export default [
   route("streamers", "routes/streamers.tsx"),
   route("sign-in", "routes/sign-in.tsx"),
   route("settings", "routes/settings.tsx"),
+  route("notifications", "routes/notifications.tsx"),
   route("admin", "routes/admin.tsx"),
   route("overlay-control", "routes/overlay-control.tsx"),
   route("channels/callback/:platform", "routes/channels-callback.ts"),

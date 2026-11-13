@@ -124,7 +124,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0028", (): void => {
+  it("covers 0006 to 0029", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -149,7 +149,16 @@ describe("migrations 0006 onwards", (): void => {
       "0026",
       "0027",
       "0028",
+      "0029",
     ]);
+  });
+
+  it("adds discussion metadata (0029) without changing existing comment text", async (): Promise<void> => {
+    const row = await db.prepare("SELECT text,edited_at FROM entry_comments WHERE id='c1'").first();
+    expect(row).toEqual({ text: "First", edited_at: null });
+    for (const table of ["comment_mentions", "notifications", "notification_preferences"]) {
+      expect(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").bind(table).first()).toEqual({ name: table });
+    }
   });
 
   it("adds data_read_at (0028) with a default for new rows", async (): Promise<void> => {

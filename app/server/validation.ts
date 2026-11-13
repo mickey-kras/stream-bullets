@@ -45,6 +45,25 @@ export const streamerSchema = z
   })
   .strict();
 
+const commentText = z
+  .string()
+  .min(1)
+  .max(2000)
+  .regex(/^(?:[^\p{Cc}]|[\t\n\r])*$/u)
+  .refine((value: string): boolean => value.trim().length > 0, "Write a comment.");
+export const commentMentionsSchema = z
+  .array(
+    z
+      .object({
+        userId: z.string().min(1).max(128),
+        start: z.number().int().min(0).max(1999),
+        end: z.number().int().min(1).max(2000),
+      })
+      .strict(),
+  )
+  .max(5)
+  .default([]);
+
 export const entryActionSchema = z
   .discriminatedUnion("action", [
     z
@@ -62,7 +81,15 @@ export const entryActionSchema = z
     z.object({ action: z.literal("react"), id, value: z.union([z.literal(-1), z.literal(0), z.literal(1)]) }).strict(),
     z.object({ action: z.literal("reveal"), id }).strict(),
     z.object({ action: z.literal("delete"), id }).strict(),
-    z.object({ action: z.literal("comment"), id, text: text(2000), parentId: id.nullable().optional() }).strict(),
+    z
+      .object({
+        action: z.literal("comment"),
+        id,
+        text: commentText,
+        parentId: id.nullable().optional(),
+        mentions: commentMentionsSchema,
+      })
+      .strict(),
   ])
   .superRefine((value, context) => {
     if (value.action !== "create") return;
@@ -82,6 +109,7 @@ export const entryActionSchema = z
   });
 
 export const commentActionSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("edit"), id, text: commentText, mentions: commentMentionsSchema }).strict(),
   z.object({ action: z.literal("like"), id, liked: z.boolean() }).strict(),
   z.object({ action: z.literal("delete"), id }).strict(),
 ]);
