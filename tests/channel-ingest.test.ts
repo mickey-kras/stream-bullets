@@ -1,10 +1,10 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { MAX_ACTIVITY_MESSAGE_LENGTH, parseActivityMessage, quotaDay, type ActivityChat, type ActivityEvent } from "../app/lib/activity";
+import { ChannelIngest, snapshotMessage } from "../app/server/channel-ingest";
 import {
   ADMISSION_BURST,
   CONNECTION_CACHE_MS,
-  ChannelIngest,
   MODERATION_BURST,
   SEEN_MAX,
   SEEN_TTL_MS,
@@ -17,8 +17,7 @@ import {
   YOUTUBE_NAME_REFRESH_MS,
   YOUTUBE_NAME_RETRY_MS,
   YOUTUBE_PAGE_DAILY_BUDGET,
-  snapshotMessage,
-} from "../app/server/channel-ingest";
+} from "../app/server/channel-ingest-limits";
 import { loadTokens, tokenStatement } from "../app/server/channel-tokens.server";
 
 import { installFakeProviders, youtubeText, type FakeProviders } from "./helpers/channels";
