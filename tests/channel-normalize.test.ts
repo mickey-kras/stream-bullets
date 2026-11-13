@@ -85,6 +85,16 @@ describe("Twitch normalization", (): void => {
     expect(activityEventSchema.safeParse(event).success).toBe(true);
   });
 
+  it("keeps chat text when optional provider fields are malformed", (): void => {
+    const events = twitchEvents("channel.chat.message", twitchChat({
+      message: { text: "Hello", fragments: "invalid" },
+      badges: "invalid",
+      color: 123,
+    }), now, now);
+    expect(events).toMatchObject([{ text: "Hello", fragments: [{ type: "text", text: "Hello" }], badges: [] }]);
+    expect((events[0] as ActivityChat).user.color).toBeUndefined();
+  });
+
   it("maps a chat message with stable ids, fragments, emote URLs built from ids, and badges", (): void => {
     const [event] = twitchEvents("channel.chat.message", twitchChat(), now, now - 5) as ActivityChat[];
     expect(event).toEqual({
@@ -194,6 +204,17 @@ describe("Kick normalization", (): void => {
     ]);
     const bare = { ...message, sender: { user_id: 444, username: "fan", identity: null }, created_at: undefined };
     expect(kickEvents("chat.message.sent", bare, now)).toMatchObject([{ user: { id: "444", displayName: "fan" }, badges: [], sentAt: null }]);
+  });
+
+  it("uses fallbacks for malformed badges, color, and ban metadata", (): void => {
+    const events = kickEvents("chat.message.sent", {
+      ...message,
+      sender: { ...message.sender, identity: { username_color: "invalid", badges: "invalid" } },
+    }, now);
+    expect(events).toMatchObject([{ text: "Hello HYPERCLAP", badges: [] }]);
+    expect((events[0] as ActivityChat).user.color).toBeUndefined();
+    expect(kickEvents("moderation.banned", { banned_user: { user_id: 5 }, metadata: "invalid" }, now))
+      .toMatchObject([{ userId: "5", until: null, bannedAt: null }]);
   });
 
   it("maps bans and timeouts and ignores other events", (): void => {
