@@ -527,17 +527,21 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     // A row that a disconnect marked keeps its mark, so the disconnect's final delete still matches it. The time
     // tells the controls when the status began (for example the quota day) and starts the 7-day removal of a
     // connection that needs a new authorization.
-    await this.env.DB.prepare(
+    const epoch = this.connectionEpoch;
+    const result = await this.env.DB.prepare(
       `UPDATE channel_connections SET status=?1, status_code=?2,
           updated_at = CASE WHEN status IS NOT ?1 OR status_code IS NOT ?2 THEN ?3 ELSE updated_at END
         WHERE id=?4 AND (status_code IS NULL OR status_code <> 'disconnecting')`,
     )
       .bind(status, code, Date.now(), connection.id)
       .run();
-    // A read that started before this write must not cache the old status.
+    // A read that started before this write must not cache the old status. When a cache clear ran during the
+    // write, or the write changed no row (a disconnect marked it), the next use reads the row again.
+    const overtaken = this.connectionEpoch !== epoch || result.meta.changes === 0;
     this.connectionEpoch += 1;
     const cached = this.connections.get(platform);
-    if (cached?.value?.id === connection.id) cached.value = { ...cached.value, status };
+    if (overtaken) this.connections.delete(platform);
+    else if (cached?.value?.id === connection.id) cached.value = { ...cached.value, status };
     // Only the platform and fixed codes: never an id, a name or provider text.
     if (status !== connection.status || status !== "active")
       console.warn("channel_status_changed", { platform, status, code });

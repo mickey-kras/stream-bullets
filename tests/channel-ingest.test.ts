@@ -758,6 +758,50 @@ describe("ChannelIngest load and robustness", (): void => {
     expect(socket.ofType<{ event: { kind: string } }>("event").map((message) => message.event.kind)).toEqual(["status"]);
   });
 
+  it("does not cache an active status that a disconnect overtook while it was written", async (): Promise<void> => {
+    await addConnection("twitch");
+    const socket = await listen();
+    let release = (): void => undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let reached = (): void => undefined;
+    const waiting = new Promise<void>((resolve) => {
+      reached = resolve;
+    });
+    const db = env.DB;
+    let hold = true;
+    const prepare = (query: string): D1PreparedStatement => {
+      const statement = db.prepare(query);
+      if (!hold || !query.includes("UPDATE channel_connections SET status=?1")) return statement;
+      hold = false;
+      return {
+        bind: (...values: unknown[]) => {
+          const bound = statement.bind(...values);
+          return {
+            run: async (): Promise<D1Result> => {
+              reached();
+              await held;
+              return bound.run();
+            },
+          };
+        },
+      } as unknown as D1PreparedStatement;
+    };
+    env.DB = { prepare, batch: (statements: D1PreparedStatement[]) => db.batch(statements) } as unknown as D1Database;
+    // The connect's `active` write waits while a disconnect marks the row and runs to its end.
+    const connect = post("connect", "twitch");
+    await waiting;
+    await db.prepare("UPDATE channel_connections SET status='needs_reauth', status_code='disconnecting'").run();
+    expect((await post("disconnect", "twitch")).status).toBe(200);
+    release();
+    await connect;
+    env.DB = db;
+    expect(await connectionRow("twitch")).toMatchObject({ status: "needs_reauth", status_code: "disconnecting" });
+    await deliver("after", [chat("after")]);
+    expect(socket.ofType<{ event: { kind: string } }>("event").some((message) => message.event.kind === "chat")).toBe(false);
+  });
+
   it("drops a delivery for another channel than the page's connection", async (): Promise<void> => {
     await addConnection("twitch");
     const socket = await listen();
