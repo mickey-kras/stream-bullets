@@ -18,6 +18,7 @@ import { overlayKeyMatches } from "../app/server/overlay-key.server";
 import { visitorPrefix } from "../app/server/ip-prefix";
 import { cleanExpiredData } from "../app/server/cleanup.server";
 import { scheduleCalendar, topUpSeries } from "../app/server/schedule.server";
+import { requireTestAccess, requireTestDatabase, testEnvironmentResponse, validateTestEnvironment } from "../app/server/test-environment.server";
 
 export { PollRoom } from "../app/server/poll-room";
 
@@ -81,6 +82,8 @@ async function liveResponse(
 export default {
   // Run hourly jobs independently. Log each failure, then throw so cron failure alerts fire.
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
+    validateTestEnvironment(env);
+    if (env.APP_ENV === "test") await requireTestDatabase(env);
     const jobs: Record<string, (env: AppEnv, now: number) => Promise<unknown>> = {
       cleanup: cleanExpiredData,
       // Keep weekly series 12 weeks ahead.
@@ -108,15 +111,19 @@ export default {
     let response: Response;
     let origin: string;
     try {
+      validateTestEnvironment(env);
       origin = getOrigin(env);
       if (new URL(request.url).origin !== origin) throw new HttpError(421, "Use the configured application URL.");
       const key = await clientKey(request);
       if (!(await env.REQUEST_LIMITER.limit({ key })).success)
         throw new HttpError(429, "Too many requests. Please try again in a minute.");
       const path = new URL(request.url).pathname;
+      if (path !== "/__test") await requireTestAccess(request, env);
       const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
       const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
-      if (path === "/sitemap.xml") {
+      if (path === "/__test") {
+        response = await testEnvironmentResponse(request, env);
+      } else if (path === "/sitemap.xml") {
         response = await sitemapResponse(request, env);
       } else if (calendar) {
         response = await calendarResponse(request, env, calendar[1], origin);
@@ -135,6 +142,7 @@ export default {
       origin = "https://invalid.invalid";
     }
     const secured = securityHeaders(response, request, nonce, origin, import.meta.env.DEV);
+    if (env.APP_ENV === "test") secured.headers.set("X-Robots-Tag", "noindex, nofollow");
     secured.headers.set("X-Request-ID", requestId);
     for (const value of responseHeaders.getSetCookie()) secured.headers.append("Set-Cookie", value);
     return secured;

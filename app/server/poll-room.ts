@@ -15,6 +15,7 @@ import {
 import type { LiveSnapshot, MashPhase, MashTick, OverlayPublic } from "../types";
 import { LIVE_POLLS_SQL, livePolls, optionsFromJson, type PollRow } from "./live-polls";
 import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from "./overlay-state";
+import { validateTestEnvironment } from "./test-environment-config";
 
 const MAX_CONNECTIONS = 200;
 // Reserve half the room for signed-in viewers.
@@ -162,6 +163,9 @@ export class PollRoom extends DurableObject<AppEnv> {
   private refreshing: Promise<void> | undefined;
   private ticks = 0;
   private ticking = false;
+  private currentTick: Promise<void> | undefined;
+  private resetting = false;
+  private readonly pendingHandlers = new Set<Promise<unknown>>();
 
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
@@ -178,6 +182,34 @@ export class PollRoom extends DurableObject<AppEnv> {
     const url = new URL(request.url);
     const streamerId = url.searchParams.get("streamerId");
     if (!this.validStream(url, streamerId)) return response("Invalid stream", 400);
+    if (url.pathname === "/test-reset") {
+      if (this.env.APP_ENV !== "test") return response("Not found", 404);
+      validateTestEnvironment(this.env);
+      if (request.method !== "POST") return response("Method not allowed", 405);
+      await this.ctx.blockConcurrencyWhile(async (): Promise<void> => {
+        this.resetting = true;
+        try {
+          if (this.ticker !== undefined) clearInterval(this.ticker);
+          this.ticker = undefined;
+          this.disconnect();
+          await Promise.all([this.currentTick, this.refreshing, this.pendingSnapshot, ...this.loadingBattles.values(), ...this.pendingHandlers]);
+          if (this.ticker !== undefined) clearInterval(this.ticker);
+          this.ticker = undefined;
+          this.battles.clear();
+          this.loadingBattles.clear();
+          this.notLive.clear();
+          this.buckets.clear();
+          this.latestSnapshot = undefined;
+          this.pendingSnapshot = undefined;
+          this.overlay = undefined;
+          this.ctx.storage.sql.exec("DELETE FROM tap_journal");
+          await this.ctx.storage.deleteAlarm();
+        } finally {
+          this.resetting = false;
+        }
+      });
+      return new Response(null, { status: 204 });
+    }
     const method = ROOM_PATHS[url.pathname];
     if (!method) return response("Not found", 404);
     if (request.method !== method) return response("Method not allowed", 405);
@@ -193,12 +225,16 @@ export class PollRoom extends DurableObject<AppEnv> {
       if (invalidSubscription) return invalidSubscription;
     }
 
+    const pending: Promise<Response> = this.handleRequest(request, url.pathname, streamerId, clientKey, userId, role, overlayKey);
+    this.pendingHandlers.add(pending);
     try {
-      return await this.handleRequest(request, url.pathname, streamerId, clientKey, userId, role, overlayKey);
+      return await pending;
     } catch (error: unknown) {
       this.disconnect();
       if (!(error instanceof PageSuspended)) return response("Live updates unavailable", 503);
       return url.pathname === "/subscribe" ? response("Stream not found", 404) : new Response(null, { status: 204 });
+    } finally {
+      this.pendingHandlers.delete(pending);
     }
   }
 
@@ -338,6 +374,16 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   async webSocketMessage(socket: WebSocket, message: string | ArrayBuffer): Promise<void> {
+    const pending: Promise<void> = this.handleWebSocketMessage(socket, message);
+    this.pendingHandlers.add(pending);
+    try {
+      await pending;
+    } finally {
+      this.pendingHandlers.delete(pending);
+    }
+  }
+
+  private async handleWebSocketMessage(socket: WebSocket, message: string | ArrayBuffer): Promise<void> {
     const tap = tapMessage(message);
     if (!tap) {
       socket.close(1008, "Unsupported message");
@@ -359,6 +405,16 @@ export class PollRoom extends DurableObject<AppEnv> {
 
   // Recover/end battles and broadcast a snapshot. Reschedule in `finally` so D1 failures cannot stop recovery.
   async alarm(): Promise<void> {
+    const pending: Promise<void> = this.runAlarm();
+    this.pendingHandlers.add(pending);
+    try {
+      await pending;
+    } finally {
+      this.pendingHandlers.delete(pending);
+    }
+  }
+
+  private async runAlarm(): Promise<void> {
     let retry = false;
     try {
       this.expireConnections();
@@ -564,9 +620,10 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   private startTicker(): void {
-    if (this.ticker !== undefined || this.battles.size === 0) return;
+    if (this.resetting || this.ticker !== undefined || this.battles.size === 0) return;
     this.ticker = setInterval((): void => {
-      void this.tick().catch((): void => {
+      if (this.ticking) return;
+      this.currentTick = this.tick().catch((): void => {
         console.error("mash_tick_failed");
       });
     }, MASH_TICK_MS);

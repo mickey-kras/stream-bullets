@@ -175,6 +175,49 @@ describe("Worker request checks", (): void => {
   });
 });
 
+describe("Worker test environment", (): void => {
+  it("protects pages, images and live connections while allowing protected signed-out journeys", async (): Promise<void> => {
+    const testOrigin = "https://test.streambullets.com";
+    const testSecret = "test-access-secret-with-at-least-32-bytes";
+    const identity = "e475eb5b-db31-43bd-8692-5926711e8faa";
+    const testEnv: AppEnv = { ...env, APP_ENV: "test", APP_ORIGIN: testOrigin, ADMIN_EMAILS: "admin@example.test", TEST_ACCESS_SECRET: testSecret, TEST_DATABASE_ID: identity, DEPLOYED_COMMIT: "a".repeat(40) };
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS test_environment_identity(id TEXT PRIMARY KEY)").run();
+    await env.DB.prepare("INSERT OR IGNORE INTO test_environment_identity VALUES(?)").bind(identity).run();
+    const form = await worker.fetch(new Request(`${testOrigin}/__test`), testEnv);
+    expect(form.status).toBe(200);
+    expect(await form.text()).toContain("a".repeat(40));
+    for (const path of ["/", "/images/logo/owner", "/api/live/zed_page"]) {
+      const response = await worker.fetch(new Request(`${testOrigin}${path}`), testEnv);
+      expect(response.status).toBe(403);
+      expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
+    }
+    expect(router.calls).toHaveLength(0);
+    expect(forwarded).toHaveLength(0);
+    const unlock = await worker.fetch(new Request(`${testOrigin}/__test`, {
+      method: "POST", headers: { Origin: testOrigin, "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret: testSecret, action: "login", account: "signedout" }),
+    }), testEnv);
+    expect(unlock.status).toBe(303);
+    const cookie: string = unlock.headers.getSetCookie().find((value: string): boolean => value.startsWith("__Host-sb-test-access="))!.split(";")[0];
+    const page = await worker.fetch(new Request(testOrigin, { headers: { Cookie: cookie } }), testEnv);
+    expect(page.status).toBe(200);
+    expect(page.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
+    expect(await page.text()).toBe("page");
+    const controller: ScheduledController = { scheduledTime: Date.now(), cron: "0 * * * *", noRetry: (): void => undefined };
+    await expect(worker.scheduled(controller, { ...testEnv, TEST_DATABASE_ID: "00000000-0000-4000-8000-000000000000" })).rejects.toMatchObject({ status: 503 });
+    await expect(worker.scheduled(controller, testEnv)).resolves.toBeUndefined();
+  });
+
+  it("rejects production test credentials before router or scheduled jobs", async (): Promise<void> => {
+    const unsafe: AppEnv = { ...env, APP_ENV: "production", TEST_ACCESS_SECRET: "test-secret" };
+    expect((await worker.fetch(new Request(origin), unsafe)).status).toBe(503);
+    expect(router.calls).toHaveLength(0);
+    await expect(worker.scheduled({ scheduledTime: Date.now(), cron: "0 * * * *", noRetry: (): void => undefined }, unsafe)).rejects.toMatchObject({ status: 503 });
+    const hidden = await worker.fetch(new Request(`${origin}/__test`), env);
+    expect(hidden.status).toBe(404);
+  });
+});
+
 describe("Worker pages", (): void => {
   it("hands other paths to React Router with the app context and adds the security headers", async (): Promise<void> => {
     const response = await fetchPath("/streamers?view=all", { headers: { "X-Request-ID": "untrusted-id" } });

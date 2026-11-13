@@ -168,6 +168,22 @@ describe("live room requests", (): void => {
     expect(state().accepted).toHaveLength(0);
   });
 
+  it("allows isolated internal test reset only in a configured test environment", async (): Promise<void> => {
+    expect((await post("test-reset")).status).toBe(404);
+    const testEnv = { DB: faults.db, APP_ENV: "test", APP_ORIGIN: "https://test.streambullets.com", TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes", BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes", TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa", ADMIN_EMAILS: "admin@example.test" } as AppEnv;
+    rooms = new RoomNamespace((roomState) => new PollRoom(roomState as unknown as DurableObjectState, testEnv));
+    testEnv.POLL_ROOMS = rooms as unknown as DurableObjectNamespace;
+    expect((await call("test-reset")).status).toBe(405);
+    const socket = await join();
+    state().storage.sql.exec("INSERT INTO tap_journal VALUES (?, NULL, ?, 0, 2, 0)", crypto.randomUUID(), "viewer");
+    await state().storage.setAlarm(Date.now() + 1000);
+    expect((await post("test-reset")).status).toBe(204);
+    expect(socket.open).toBe(false);
+    expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
+    expect(await state().storage.getAlarm()).toBeNull();
+    expect((await subscribe()).status).toBe(101);
+  });
+
   it("admits a socket from the app's own origin", async (): Promise<void> => {
     const response = await call("subscribe", {
       headers: { Upgrade: "websocket", Origin: origin, "X-Stream-Bullets-Client": KEY },
@@ -832,6 +848,58 @@ describe("live room battles", (): void => {
     await database.db.prepare("UPDATE entry_mash SET phase = 'setup' WHERE entry_id = ?").bind(id).run();
     await post("mash", { id });
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("waits for the original stalled tick before resetting test live state", async (): Promise<void> => {
+    const testEnv = { DB: faults.db, APP_ENV: "test", APP_ORIGIN: "https://test.streambullets.com", TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes", BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes", TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa", ADMIN_EMAILS: "admin@example.test" } as AppEnv;
+    rooms = new RoomNamespace((roomState) => new PollRoom(roomState as unknown as DurableObjectState, testEnv));
+    testEnv.POLL_ROOMS = rooms as unknown as DurableObjectNamespace;
+    const id = await rows.addBattle({ "player-1": 0 });
+    const socket = await join({ user: "player-1" });
+    await tap(socket, id, 2, 1);
+    let release = (): void => undefined;
+    const blocked = new Promise<void>((resolve): void => { release = resolve; });
+    faults.fail(/INSERT INTO mash_taps/, blocked);
+    const errors = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    vi.setSystemTime(Date.now() + MASH_FLUSH_MS);
+    vi.advanceTimersByTime(MASH_TICK_MS);
+    await vi.waitFor(() => expect(faults.held()).toBe(1));
+    vi.advanceTimersByTime(MASH_TICK_MS);
+    let resetDone = false;
+    const reset = post("test-reset").then((response): Response => { resetDone = true; return response; });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(resetDone).toBe(false);
+    release();
+    expect((await reset).status).toBe(204);
+    expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+    errors.mockRestore();
+  });
+
+  it("drains a side lookup before clearing the test tap journal", async (): Promise<void> => {
+    const testEnv = { DB: faults.db, APP_ENV: "test", APP_ORIGIN: "https://test.streambullets.com", TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes", BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes", TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa", ADMIN_EMAILS: "admin@example.test" } as AppEnv;
+    rooms = new RoomNamespace((roomState) => new PollRoom(roomState as unknown as DurableObjectState, testEnv));
+    testEnv.POLL_ROOMS = rooms as unknown as DurableObjectNamespace;
+    const id = await rows.addBattle({ "player-1": 0 });
+    const socket = await join({ user: "player-1" });
+    let release = (): void => undefined;
+    const blocked = new Promise<void>((resolve): void => { release = resolve; });
+    faults.fail(/SELECT choice FROM entry_votes/, blocked);
+    const errors = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    const pendingTap = tap(socket, id, 2, 1);
+    await vi.waitFor(() => expect(faults.held()).toBe(1));
+    let resetDone = false;
+    const reset = post("test-reset").then((response): Response => { resetDone = true; return response; });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(resetDone).toBe(false);
+    release();
+    await pendingTap;
+    expect((await reset).status).toBe(204);
+    expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+    errors.mockRestore();
   });
 
   it("logs a failed tick and keeps ticking", async (): Promise<void> => {
