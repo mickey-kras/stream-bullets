@@ -117,14 +117,25 @@ beforeAll(async (): Promise<void> => {
   ]);
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0026"),
+    applied.filter((file: string): boolean => file >= "0026" && file < "0029"),
+  );
+  // Overlay rows saved before 0029 have no layers.
+  await db
+    .prepare(
+      `INSERT INTO overlay_state (streamer_id,air,position,message,revision,updated_at)
+        VALUES ('page','{"type":"message","ref":null}','top','Back soon',9,1)`,
+    )
+    .run();
+  await applyMigrations(
+    db,
+    applied.filter((file: string): boolean => file >= "0029"),
   );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0028", (): void => {
+  it("covers 0006 to 0029", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -149,7 +160,31 @@ describe("migrations 0006 onwards", (): void => {
       "0026",
       "0027",
       "0028",
+      "0029",
     ]);
+  });
+
+  it("adds overlay layers (0029) in place: old rows keep their values and read {}", async (): Promise<void> => {
+    expect(
+      await db.prepare("SELECT air,position,message,revision,layers FROM overlay_state WHERE streamer_id='page'").first(),
+    ).toEqual({ air: '{"type":"message","ref":null}', position: "top", message: "Back soon", revision: 9, layers: "{}" });
+    const column = await db
+      .prepare("SELECT dflt_value, \"notnull\" AS required FROM pragma_table_info('overlay_state') WHERE name='layers'")
+      .first();
+    expect(column).toEqual({ dflt_value: "'{}'", required: 1 });
+    const rejects = async (layers: string | null): Promise<void> => {
+      await expect(
+        db.prepare("UPDATE overlay_state SET layers=? WHERE streamer_id='page'").bind(layers).run(),
+      ).rejects.toThrow(/constraint failed/);
+    };
+    await rejects("not json");
+    await rejects("[]");
+    await rejects('"text"');
+    await rejects(null);
+    await rejects(JSON.stringify({ chat: { note: "x".repeat(1000) } }));
+    const layers = JSON.stringify({ chat: { enabled: true, rect: { x: 0, y: 0, w: 280, h: 160 }, hideCommands: false } });
+    await db.prepare("UPDATE overlay_state SET layers=? WHERE streamer_id='page'").bind(layers).run();
+    expect(await db.prepare("SELECT layers FROM overlay_state WHERE streamer_id='page'").first()).toEqual({ layers });
   });
 
   it("adds data_read_at (0028) with a default for new rows", async (): Promise<void> => {

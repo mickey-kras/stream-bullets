@@ -1,0 +1,323 @@
+/* Composition editor on Overlay control. The preview reuses .ov-frame / .ov-scaler (1920x1080 scaled by --ov-scale).
+   Boxes inside the scaler use design pixels; their outlines and handles divide by --ov-scale to keep a screen size. */
+
+.ov-comp {
+  max-width: 1300px;
+  margin: 32px auto 0;
+  display: grid;
+  gap: 12px;
+}
+.ov-comp-head h2 {
+  margin: 0;
+}
+.ov-comp-head p {
+  margin: 4px 0 0;
+}
+.ov-comp-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: 16px 24px;
+  align-items: start;
+}
+.ov-comp-stage {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.ov-comp-bg-field {
+  margin: 0;
+}
+.ov-comp-help {
+  margin: 0;
+}
+/* A note, not an error: the layout still saves. */
+.ov-comp-overlap {
+  padding: 6px 10px;
+  border-inline-start: 3px solid var(--gold);
+  font-size: 0.9375rem;
+}
+/* The note's live region stays mounted; empty, it takes no space. */
+.ov-comp-overlap:empty {
+  padding: 0;
+  border: 0;
+}
+
+/* ---------- Preview background ---------- */
+.ov-comp-frame {
+  border-color: var(--gold);
+}
+.ov-comp-frame[data-background="game"] {
+  background: #20140c;
+}
+/* A sample game scene in CSS only: dusk sky, sun, far ridges, near dunes, a road and a HUD. */
+.ov-comp-game {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 70% 46%, #ffd77a 0 70px, rgb(255 190 90 / 0.55) 71px 120px, transparent 260px),
+    linear-gradient(180deg, #2b1a3c 0%, #7a3b4a 32%, #d9764a 52%, #f2b25c 60%, #6b4a2e 61%, #3a2718 100%);
+}
+.ov-comp-game::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 420px;
+  height: 260px;
+  background: linear-gradient(180deg, #4b2f3b, #2c1d22);
+  clip-path: polygon(
+    0 70%,
+    8% 40%,
+    15% 55%,
+    24% 20%,
+    33% 50%,
+    42% 35%,
+    52% 60%,
+    61% 25%,
+    72% 52%,
+    80% 30%,
+    90% 58%,
+    100% 38%,
+    100% 100%,
+    0 100%
+  );
+}
+.ov-comp-game::after {
+  content: "";
+  position: absolute;
+  inset: 600px 0 0;
+  background:
+    repeating-linear-gradient(170deg, rgb(0 0 0 / 0.1) 0 30px, transparent 30px 110px),
+    linear-gradient(180deg, #8a5a32, #4a2f1a);
+  clip-path: polygon(0 18%, 30% 4%, 62% 12%, 100% 2%, 100% 100%, 0 100%);
+}
+
+/* ---------- Characters placeholder and draggable boxes ---------- */
+.ov-comp-placeholder {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border: calc(2px / var(--ov-scale, 1)) dashed rgb(242 210 46 / 0.75);
+  background: repeating-linear-gradient(135deg, rgb(242 210 46 / 0.08) 0 24px, transparent 24px 48px);
+  color: var(--cream);
+  font: 600 calc(14px / var(--ov-scale, 1)) / 1.2 var(--body);
+  text-shadow: 0 0 calc(4px / var(--ov-scale, 1)) #000;
+  pointer-events: none;
+  opacity: 0.6;
+}
+.ov-comp-placeholder[data-enabled] {
+  opacity: 1;
+}
+/* With the chat over the slot, the label sits in the wider free part of the slot beside the chat box, within that
+   free width (--ov-label-free, design pixels). Without room on either side it does not show (labelPlace). */
+.ov-comp-placeholder[data-label-side="start"] {
+  justify-items: start;
+}
+.ov-comp-placeholder[data-label-side="end"] {
+  justify-items: end;
+}
+.ov-comp-placeholder[data-label-side] span {
+  max-width: calc(var(--ov-label-free) - 48px);
+  margin: 0 24px;
+}
+.ov-comp-placeholder[data-label-side="none"] span {
+  display: none;
+}
+.ov-comp-placeholder span {
+  max-width: 90%;
+  padding: 0.2em 0.6em;
+  border-radius: 0.3em;
+  background: rgb(0 0 0 / 0.55);
+  text-align: center;
+  /* A narrow label breaks only at the spaces around "·", never inside a word (also in Japanese and Chinese), and its
+     lines are of near equal length. A word wider than the label still breaks, so no text is cut off. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+.ov-comp-box {
+  position: absolute;
+  z-index: 5;
+}
+.ov-comp-move,
+.ov-comp-resize {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  font: inherit;
+  touch-action: none;
+  user-select: none;
+}
+.ov-comp-move {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: calc(2px / var(--ov-scale, 1)) dashed var(--gold);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: move;
+  transition: background-color 0.15s ease;
+}
+.ov-comp-move:hover,
+.ov-comp-move:focus-visible {
+  background: rgb(212 176 42 / 0.12);
+}
+.ov-comp-move:focus-visible {
+  outline: calc(3px / var(--ov-scale, 1)) solid var(--focus-ring, var(--gold));
+  outline-offset: calc(2px / var(--ov-scale, 1));
+  box-shadow: none;
+}
+.ov-comp-box-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: calc(2px / var(--ov-scale, 1)) calc(6px / var(--ov-scale, 1));
+  background: var(--gold);
+  color: var(--on-gold);
+  font: 700 calc(12px / var(--ov-scale, 1)) / 1.3 var(--body);
+  white-space: nowrap;
+}
+.ov-comp-resize {
+  right: calc(-10px / var(--ov-scale, 1));
+  bottom: calc(-10px / var(--ov-scale, 1));
+  width: calc(20px / var(--ov-scale, 1));
+  height: calc(20px / var(--ov-scale, 1));
+  box-sizing: border-box;
+  border: calc(2px / var(--ov-scale, 1)) solid var(--on-gold);
+  border-radius: calc(4px / var(--ov-scale, 1));
+  background: var(--gold);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+.ov-comp-resize:focus-visible {
+  outline: calc(3px / var(--ov-scale, 1)) solid var(--focus-ring, var(--gold));
+  outline-offset: calc(2px / var(--ov-scale, 1));
+  box-shadow: none;
+}
+
+/* ---------- Layer controls ---------- */
+.ov-comp-layers {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.ov-comp-layer {
+  margin: 0;
+  padding: 12px 14px 14px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-width: 0;
+}
+.ov-comp-layer legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+.ov-comp-layer .choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.ov-comp-layer .choice:has(:disabled) {
+  color: var(--muted);
+}
+.ov-comp-note {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+.ov-comp-soon {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.ov-comp-nums {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.ov-comp-num {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.ov-comp-num input {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--field);
+  color: inherit;
+  font: 500 0.9375rem var(--body);
+  font-variant-numeric: tabular-nums;
+}
+.ov-comp-num input:disabled {
+  color: var(--muted);
+  border-style: dashed;
+}
+.ov-comp-status {
+  display: block;
+  margin: 0;
+  min-height: 1.25em;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.ov-comp-error {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  color: var(--error);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 60em) {
+  .ov-comp-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 30em) {
+  .ov-comp-nums {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ov-comp-move {
+    transition: none;
+  }
+}
+
+/* ---------- Per-layer overlay URLs (overlay-link.tsx) ---------- */
+.ov-url-layers {
+  display: grid;
+  gap: 8px;
+}
+.ov-url-layer {
+  display: grid;
+  gap: 4px;
+}
+.ov-url .ov-url-caption {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.ov-url .ov-url-size {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}

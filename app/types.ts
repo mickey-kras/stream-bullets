@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import type { OverlayLayers } from "./lib/overlay-layers";
 import type {
   CARD_ICONS,
   CARD_TABS,
@@ -230,6 +231,8 @@ export interface OverlayState {
   showResults: boolean;
   message: string;
   messageStyle: OverlayMessageStyle;
+  // Chat and characters layers in the 1920x1080 design space. Public: OBS renders them.
+  layers: OverlayLayers;
   revision: number;
 }
 

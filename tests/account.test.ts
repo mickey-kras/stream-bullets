@@ -2,6 +2,7 @@ import { makeSignature } from "better-auth/crypto";
 import { RouterContextProvider } from "react-router";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { appContext, type AppEnv } from "../app/env";
+import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
 import { action, loader } from "../app/routes/api";
 import { DELETED_AUTHOR_SNAPSHOT, deleteAccount, EXPORT_PAGE_SIZE, exportAccount } from "../app/server/account.server";
 import { mutateEntry } from "../app/server/data.server";
@@ -219,9 +220,10 @@ async function seedNewTables(): Promise<void> {
       ids.hostPage,
     ),
     run(
-      `INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,show_results,message,message_style,revision,updated_at)
-        VALUES (?1,'{"type":"message","ref":null}','{"type":"auto","ref":null}','top','l',1,0,'BRB 5 min','hype',3,?2),
-               (?3,'{"type":"auto","ref":null}','{"type":"hidden","ref":null}','lower','m',0,1,'',  'info',0,?2)`,
+      `INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,show_results,message,message_style,layers,revision,updated_at)
+        VALUES (?1,'{"type":"message","ref":null}','{"type":"auto","ref":null}','top','l',1,0,'BRB 5 min','hype',
+                '{"chat":{"enabled":true,"rect":{"x":40,"y":60,"w":280,"h":160},"theme":"neon"}}',3,?2),
+               (?3,'{"type":"auto","ref":null}','{"type":"hidden","ref":null}','lower','m',0,1,'',  'info','{}',0,?2)`,
       ids.leaverPage,
       now,
       ids.hostPage,
@@ -690,6 +692,11 @@ describe("tables added by migrations 0006–0012", (): void => {
         showResults: false,
         message: "BRB 5 min",
         messageStyle: "hype",
+        // Read leniently: the unknown key is dropped and missing layers take their defaults.
+        layers: {
+          ...DEFAULT_LAYERS,
+          chat: { enabled: true, rect: { x: 40, y: 60, w: 280, h: 160 }, hideCommands: true },
+        },
         updatedAt: new Date(now).toISOString(),
       },
     });

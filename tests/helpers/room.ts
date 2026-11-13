@@ -248,7 +248,7 @@ export const LIVE_SCHEMA = `
   CREATE TABLE user (id TEXT PRIMARY KEY);
   CREATE TABLE entry_mash (entry_id TEXT PRIMARY KEY, duration_s INTEGER NOT NULL, phase TEXT NOT NULL DEFAULT 'setup', starts_at INTEGER, ends_at INTEGER, winner INTEGER);
   CREATE TABLE mash_taps (entry_id TEXT NOT NULL, user_id TEXT NOT NULL, side INTEGER NOT NULL, taps INTEGER NOT NULL DEFAULT 0, assisted_taps INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(entry_id, user_id));
-  CREATE TABLE overlay_state (streamer_id TEXT PRIMARY KEY, air TEXT NOT NULL, preview TEXT NOT NULL, position TEXT NOT NULL, size TEXT NOT NULL, instant INTEGER NOT NULL, show_results INTEGER NOT NULL, message TEXT NOT NULL, message_style TEXT NOT NULL, revision INTEGER NOT NULL);
+  CREATE TABLE overlay_state (streamer_id TEXT PRIMARY KEY, air TEXT NOT NULL, preview TEXT NOT NULL, position TEXT NOT NULL, size TEXT NOT NULL, instant INTEGER NOT NULL, show_results INTEGER NOT NULL, message TEXT NOT NULL, message_style TEXT NOT NULL, revision INTEGER NOT NULL, layers TEXT NOT NULL DEFAULT '{}');
   CREATE TABLE entries (id TEXT PRIMARY KEY, streamer_id TEXT NOT NULL, title TEXT NOT NULL, kind TEXT NOT NULL, options TEXT NOT NULL, ends_at INTEGER, revealed INTEGER NOT NULL, created_at INTEGER NOT NULL);
   CREATE TABLE entry_votes (entry_id TEXT NOT NULL, user_id TEXT NOT NULL, choice INTEGER NOT NULL, PRIMARY KEY(entry_id, user_id));
   CREATE TABLE entry_vote_counts (entry_id TEXT NOT NULL, choice INTEGER NOT NULL, votes INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(entry_id, choice));

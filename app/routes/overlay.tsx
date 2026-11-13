@@ -7,9 +7,20 @@ import { getOverlaySnapshot, getStreamer } from "../server/data.server";
 import { getOverlayData, getOverlayState, sourceTopics } from "../server/overlay.server";
 import { overlayPublic } from "../server/overlay-state";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
-import { OverlayStage, upNextStart, type OverlayPoll, type OverlayScene } from "../components/overlay/overlay-stage";
+import { useActivityFeed } from "../components/overlay/activity-feed";
+import {
+  CHARACTERS_READY,
+  DesignCanvas,
+  OverlayComposition,
+  usesActivityFeed,
+  usesDesignCanvas,
+} from "../components/overlay/overlay-composition";
+import { upNextStart, type OverlayPoll, type OverlayScene } from "../components/overlay/overlay-stage";
 import { useRevalidateAt } from "../components/use-clock";
+import { ServerOffset } from "../lib/clock";
+import { parseLayerParam, type OverlayLayer } from "../lib/overlay-layers";
 import type { LiveSnapshot, OverlayPublic, OverlaySourceRef } from "../types";
+import "../components/overlay/wasteland/wasteland.css";
 
 export const loader = withRouteErrors(async ({ request, context, params }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
@@ -40,14 +51,30 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
 export default function Overlay(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
   const [search] = useSearchParams();
-  const { snapshot, status } = useLivePolls(loaded.handle, true, search.get("key"), true);
+  const key: string | null = search.get("key");
+  // `?layer=` renders one layer alone (a per-layer OBS source). An unknown layer renders an empty page.
+  const layer: OverlayLayer | null | "unknown" = parseLayerParam(search.get("layer"));
+  const known: boolean = layer !== "unknown";
+  const only: OverlayLayer | null = layer === "unknown" ? null : layer;
+  // Every layer reads the live room: it carries the overlay state, so layer changes (show, hide, move, hide
+  // commands) apply at once on a per-layer source too. Only the content layer reloads data for what is on air.
+  // A characters-only source opens no socket while that layer cannot render (#664): it would only hold a seat.
+  const content: boolean = known && (only === null || only === "content");
+  const liveOn: boolean = known && (CHARACTERS_READY || only !== "characters");
+  const { snapshot, status } = useLivePolls(loaded.handle, liveOn, key, true);
   const revalidator = useRevalidator();
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const live: OverlayPublic | null | undefined = snapshot?.overlay;
   const overlay: OverlayPublic = live && live.revision >= loaded.overlay.revision ? live : loaded.overlay;
-  useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
+  useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate, content);
   // Fetch missing content when the on-air source changes.
-  useLiveRevalidation(status, overlay.revision, revalidator.revalidate);
+  useLiveRevalidation(status, overlay.revision, revalidator.revalidate, content);
+  // The activity socket is open only while a rendered layer needs it, so hiding the chat closes it.
+  const feedOn: boolean = known && usesActivityFeed(overlay.layers, only);
+  const feed = useActivityFeed(loaded.handle, key, feedOn);
+  // Server time minus local time, measured once per loader response: chat lifetimes use server receive times.
+  const [offsets] = useState<ServerOffset>(() => new ServerOffset());
+  const serverOffset: number = offsets.for(loaded.initial.serverNow);
   const now: number = useServerTime(current.serverNow);
   const polls: OverlayPoll[] = [...current.polls];
   for (const poll of loaded.initial.polls) if (!polls.some((item) => item.id === poll.id)) polls.push(poll);
@@ -63,11 +90,33 @@ export default function Overlay(): ReactNode {
     data: loaded.data,
     now,
   };
+  const label: string = t("overlay.label", { name: loaded.name });
+  if (!known) return <main className="overlay-screen ov-screen" id="main-content" aria-label={label} />;
+  const composition: ReactNode = (
+    <OverlayComposition
+      scene={scene}
+      source={source}
+      layers={overlay.layers}
+      only={only}
+      feed={feedOn ? feed : null}
+      serverOffset={serverOffset}
+    />
+  );
+  // With a feed layer on, the composition uses the editor preview's 1920x1080 canvas, so OBS shows the same layout
+  // at every source size. The design screen also drops the small-screen content styles of .ov-screen.
+  const designed: boolean = usesDesignCanvas(overlay.layers, only);
   return (
-    <main className="overlay-screen ov-screen" id="main-content" aria-label={t("overlay.label", { name: loaded.name })}>
-      <OverlayStage scene={scene} source={source} />
+    // data-feed-status exposes the activity feed state for checks and support; nothing shows on stream.
+    <main
+      className={designed ? "overlay-screen ov-design-screen" : "overlay-screen ov-screen"}
+      id="main-content"
+      aria-label={label}
+      data-feed-status={feed.status}
+    >
+      {/* The same elements with and without the canvas, so a chat toggle never remounts the on-air content. */}
+      <DesignCanvas on={designed}>{composition}</DesignCanvas>
       {/* The overlay never goes offline (it keeps retrying), so it never puts a button on stream. */}
-      {status !== "live" && (
+      {content && status !== "live" && (
         <output className="overlay-connection">
           {status === "connecting" ? t("overlay.connecting") : t("overlay.reconnecting")}
         </output>

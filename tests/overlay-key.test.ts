@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
+import { EMOTE_HOSTS } from "../app/lib/activity";
 import { securityHeaders } from "../app/server/http.server";
 import {
   constantTimeEqual,
@@ -10,7 +11,6 @@ import {
 } from "../app/server/overlay-key.server";
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
-
 
 const origin = "https://overlay-key.example.test";
 const secret = "test-only-secret-0f9e8d7c6b5a49382716a5b4c3d2e1f0";
@@ -233,5 +233,33 @@ describe("the overlay page", (): void => {
     expect(headers("/@key_page/overlay?key=abc").get("Referrer-Policy")).toBe("no-referrer");
     expect(headers("/@key_page").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
     expect(headers("/overlay-control").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
+  });
+
+  it("keeps the layer in the query, so a layer URL also sends no Referer", (): void => {
+    expect(headers("/@key_page/overlay?key=abc&layer=chat").get("Referrer-Policy")).toBe("no-referrer");
+    expect(headers("/@key_page/overlay/chat?key=abc").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
+  });
+
+  const imageSources = (path: string): string[] | undefined =>
+    (headers(path).get("Content-Security-Policy") ?? "")
+      .split("; ")
+      .find((part: string): boolean => part.startsWith("img-src "))
+      ?.split(" ");
+
+  // A CSP applies per document, and in-app links reach the composition preview without a new document.
+  it("loads emote images only from the emote hosts over HTTPS, on every page", (): void => {
+    const emotes: string[] = EMOTE_HOSTS.map((host: string): string => `https://${host}`);
+    expect(emotes).toContain("https://static-cdn.jtvnw.net");
+    for (const path of [
+      "/",
+      "/@key_page",
+      "/@key_page/overlay?key=abc&layer=chat",
+      "/@key_page/overlay/chat",
+      "/overlay-control",
+      "/settings",
+    ]) {
+      expect(imageSources(path)).toEqual(["img-src", "'self'", "blob:", "data:", ...emotes]);
+      expect(headers(path).get("Content-Security-Policy")).not.toContain("http://static-cdn.jtvnw.net");
+    }
   });
 });

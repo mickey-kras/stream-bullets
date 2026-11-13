@@ -35,11 +35,13 @@ export const liveRoutes: ApiRoute[] = [
     notifyOverlayKey(env, streamer.id);
     return json({ url: `${getOrigin(env)}/@${streamer.handle}/overlay?key=${key}` });
   }),
-  // POST /api/overlay {action: preview|take|layout|message, ...} → {overlay}
+  // POST /api/overlay {action: preview|take|layout|message|layers, ...} → {overlay}
   write("POST", /overlay/, async ({ request, env, viewer }) => {
     const action = await readJson(request, overlayActionSchema);
     const streamer = await getOwnStreamer(env, viewer.id);
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
+    // Layer edits arrive from drag and resize, so they share the write quota.
+    if (action.action === "layers") await consumeMutationQuota(env, viewer.id);
     const overlay = await updateOverlay(env, viewer.id, streamer.id, action);
     notifyOverlay(env, streamer.id);
     return json({ overlay });

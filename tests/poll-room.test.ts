@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { MASH_FLUSH_MS, MASH_TICK_MS } from "../app/lib/mash";
+import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
 import { PollRoom } from "../app/server/poll-room";
 import type { LiveSnapshot } from "../app/types";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -742,14 +743,19 @@ describe("live room snapshots", (): void => {
     const other = await join();
     await database.db
       .prepare(
-        `INSERT INTO overlay_state (streamer_id, air, preview, position, size, instant, show_results, message, message_style, revision)
-        VALUES (?, '{"type":"message","ref":null}', '{"type":"message","ref":null}', 'top', 'l', 0, 1, 'BRB 5 min', 'info', 3)`,
+        `INSERT INTO overlay_state (streamer_id, air, preview, position, size, instant, show_results, message, message_style, revision, layers)
+        VALUES (?, '{"type":"message","ref":null}', '{"type":"message","ref":null}', 'top', 'l', 0, 1, 'BRB 5 min', 'info', 3, ?)`,
       )
-      .bind(streamerId)
+      .bind(streamerId, JSON.stringify({ chat: { enabled: true, hideCommands: false } }))
       .run();
     expect((await post("overlay")).status).toBe(204);
     const update = lastOf<{ overlay: Record<string, unknown> }>(other, "overlay");
     expect(update?.overlay).toMatchObject({ air: { type: "message" }, position: "top", message: "BRB 5 min" });
+    // OBS shows and hides layers from this message, without a reload.
+    expect(update?.overlay.layers).toEqual({
+      ...DEFAULT_LAYERS,
+      chat: { ...DEFAULT_LAYERS.chat, enabled: true, hideCommands: false },
+    });
     expect(update?.overlay).not.toHaveProperty("preview");
     streamerId = page;
     expect(socket.ofType("overlay")).toEqual([]);

@@ -1,0 +1,214 @@
+/* Overlay composition and the wasteland theme. Layer content is laid out in design
+   pixels (1080p) and scaled by --ov-scale. Colours come from the --wl-* properties set by theme.ts. */
+
+/* ---------- OBS design canvas: the editor preview's 1920x1080 .ov-scaler (overlay-composition) ---------- */
+.ov-design-screen {
+  position: relative;
+  height: 100vh;
+  padding: 0;
+}
+.ov-design {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ov-design[data-scaled] > .ov-scaler {
+  visibility: visible;
+}
+/* In a 1920x1080 canvas (OBS and every preview), sizes that follow the viewport follow the canvas instead:
+   1vw is 1% of 1920 px, and the small-screen card rules do not apply. Thus all canvases show the same layout. */
+.ov-scaler {
+  --vw: 19.2px;
+}
+.ov-scaler .overlay-card:not(.mash-overlay) h1 {
+  font-size: clamp(1.75rem, calc(var(--vw) * 4), 3.25rem);
+}
+.ov-scaler .poll-card h2 {
+  font-size: clamp(1.875rem, calc(var(--vw) * 3), 2.812rem);
+}
+@media (max-width: 43.75em) {
+  .ov-scaler .mash-overlay {
+    padding: 36px 40px;
+  }
+  .ov-scaler .mash-ov-head {
+    flex-direction: row;
+  }
+  .ov-scaler .mash-overlay .mash-ring {
+    width: 150px;
+    height: 150px;
+  }
+  .ov-scaler .mash-overlay .mash-ring span {
+    font-size: 60px;
+  }
+}
+
+/* ---------- Composition: characters below content, chat on top ---------- */
+.ov-composition {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ov-composition > .ov-stage {
+  z-index: 2;
+}
+.ov-layer {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ov-layer[data-layer="characters"] {
+  z-index: 1;
+}
+.ov-layer[data-layer="chat"] {
+  z-index: 3;
+}
+.ov-layer-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: scale(var(--ov-scale, 1));
+  transform-origin: 0 0;
+  visibility: hidden;
+}
+.ov-layer[data-scaled] > .ov-layer-canvas {
+  visibility: visible;
+}
+/* A per-layer source: the canvas fits inside the viewport and sits in its bottom-right corner (overlay-composition). */
+.ov-layer[data-alone] > .ov-layer-canvas {
+  left: auto;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  transform-origin: 100% 100%;
+}
+
+/* ---------- Merged chat: the approved compact cards (issue #663) ----------
+   Only transform and opacity animate: use-row-motion.ts moves the rows, and the fades below run on the card. */
+.wl-chat {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0.18em;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.22em;
+  overflow: hidden;
+  /* System fonts only: the overlay loads no web font for the chat. */
+  font:
+    26px / 1.22 "Segoe UI",
+    Arial,
+    sans-serif;
+  color: var(--wl-text);
+  /* Viewers' words are never hyphenated, whatever the page language (the site sets hyphens: auto for German). */
+  hyphens: manual;
+  -webkit-hyphens: manual;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000);
+  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000);
+}
+.wl-item {
+  flex: 0 0 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+.wl-card {
+  position: relative;
+  padding: 0.3em 2em 0.32em 0.48em;
+  background-color: var(--wl-card);
+  background-image:
+    radial-gradient(ellipse at 7% 0%, var(--wl-glow), transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 3px, var(--wl-scan) 3px 4px);
+  border: 1px solid var(--wl-border);
+  border-radius: 0.32em;
+  box-shadow:
+    inset 0 0 0 2px var(--wl-inset),
+    0 2px 4px var(--wl-shadow);
+  /* A card never changes the layout or the paint outside its box (its own shadow still shows). */
+  contain: layout paint;
+}
+.wl-card::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px solid var(--wl-inner);
+  border-radius: 0.22em;
+  pointer-events: none;
+}
+/* The newest active card (data-newest, never a removed, leaving or fading card): an accent border and a left bar. */
+.wl-item[data-newest] .wl-card {
+  border-color: var(--wl-accent);
+  box-shadow:
+    inset 3px 0 var(--wl-accent),
+    inset 0 0 0 2px var(--wl-inset),
+    0 2px 4px var(--wl-shadow);
+}
+.wl-line {
+  display: block;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.wl-icon {
+  display: inline-block;
+  width: 1.04em;
+  height: 1.04em;
+  vertical-align: -0.14em;
+  margin-right: 0.34em;
+  color: var(--wl-accent);
+}
+.wl-badge {
+  margin-right: 0.25em;
+  font-size: 0.72em;
+  color: var(--wl-muted);
+}
+.wl-user {
+  font-weight: 750;
+  color: var(--wl-accent);
+}
+.wl-msg {
+  font-weight: 500;
+  /* No line starts with a small kana or a prolonged sound mark (like "ー") in Japanese. */
+  line-break: strict;
+}
+.wl-emote {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0 0.08em;
+  vertical-align: -0.15em;
+  object-fit: contain;
+}
+.wl-vault {
+  position: absolute;
+  right: 0.45em;
+  top: 50%;
+  width: 1.1em;
+  height: 0.8em;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: var(--wl-accent);
+  stroke-width: 1.7;
+  opacity: 0.55;
+}
+
+/* ---------- Row phases ---------- */
+.wl-item[data-phase="removed"] .wl-msg {
+  font-style: italic;
+  color: var(--wl-muted);
+}
+/* Japanese, Chinese and Hindi fonts have no italic: the browser would only slant the glyphs. */
+:root:is(:lang(ja), :lang(zh), :lang(hi)) .wl-item[data-phase="removed"] .wl-msg {
+  font-style: normal;
+}
+/* A leaving row, and a removed row after its hold, fade out. Then the column closes up (use-row-motion.ts). */
+.wl-item[data-phase="leaving"] .wl-card,
+.wl-item[data-gone] .wl-card {
+  animation: wl-fade-out var(--wl-leave) ease-in both;
+}
+@keyframes wl-fade-out {
+  to {
+    opacity: 0;
+  }
+}
