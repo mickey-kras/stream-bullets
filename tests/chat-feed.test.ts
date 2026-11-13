@@ -388,8 +388,13 @@ describe("chatReducer: live events", () => {
     state = send(state, event(chat()), 0);
     state = send(state, event({ kind: "delete", platform: "kick", messageId: "zz", receivedAt: T0 }), 0);
     expect(state.removed.size).toBe(1);
-    expect(send(state, { type: "unavailable" }, 1)).toEqual(initialChatState());
-    expect(chatReducer(state, { type: "reset" }, options)).toEqual(initialChatState());
+    // Both start a new epoch, so the chat layer starts no fades across them.
+    expect(send(state, { type: "unavailable" }, 1)).toEqual({ ...initialChatState(), epoch: state.epoch + 1, at: 1 });
+    expect(chatReducer(state, { type: "reset" }, options)).toEqual({
+      ...initialChatState(),
+      epoch: state.epoch + 1,
+      at: state.at,
+    });
   });
 });
 

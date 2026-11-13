@@ -5,7 +5,8 @@ import { CHAT_LIMITS } from "../../../lib/chat-feed";
 /**
  * The wasteland overlay theme: the approved compact chat cards of issue #663. Only colours live here, and the fade
  * time, which comes from the chat reducer: layout and motion are in wasteland.css and use-row-motion.ts, and
- * behaviour is in the chat reducer, so another theme can replace this file alone. These values render on stream, so they do not follow the site's light or dark theme.
+ * behaviour is in the chat reducer, so another theme can replace this file alone. These values render on stream,
+ * so they do not follow the site's light or dark theme.
  */
 
 export const WASTELAND_COLORS = {

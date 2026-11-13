@@ -10,8 +10,6 @@ const MOTION_IP = clientIp("composition-editor", 246);
 const OVERLAP_IP = clientIp("composition-editor", 247);
 const LEAVE_IP = clientIp("composition-editor", 248);
 const NAV_IP = clientIp("composition-editor", 249);
-// Set COMPOSITION_SHOT to a file path to save a 1440x900 screenshot of the editor.
-const shot: string | undefined = process.env.COMPOSITION_SHOT;
 
 const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
 const resetLayers = `UPDATE overlay_state SET layers='{}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
@@ -54,6 +52,8 @@ test("the owner places the chat layer by mouse and keyboard, and the layout pers
   await expect(editor.locator('[data-comp-layer="characters"]').getByRole("checkbox")).toBeDisabled();
   await expect(chatLayer.getByRole("checkbox", { name: "Show on stream" })).not.toBeChecked();
   await expect(frame.locator('[data-comp-box="chat"]')).toHaveCount(0);
+  // Beside the toggle: chat on puts the on-air content in the 1920 x 1080 layout of the preview.
+  await expect(chatLayer.locator("[data-comp-scale]")).toContainText("turning on chat changes the size of the on-air");
 
   let save = saved(page);
   await chatLayer.getByRole("checkbox", { name: "Show on stream" }).check();
@@ -253,26 +253,6 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   ]);
 });
 
-test("the editor screenshot at 1440x900", async ({ browser }) => {
-  test.skip(!shot, "Set COMPOSITION_SHOT to save the screenshot.");
-  await runSql("composition-editor-shot", [seededAir, chatOn]);
-  const owner = await signedIn(browser, "featureowner", OWNER_IP);
-  const page = await newPage(owner);
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
-  await editor.getByRole("button", { name: "Sample game" }).click();
-  await editor.scrollIntoViewIfNeeded();
-  await expect(editor.locator(".wl-chat li").first()).toBeVisible();
-  await expect(editor.locator("[data-comp-overlap]")).toHaveText(OVERLAP_NOTE);
-  await page.waitForTimeout(1500);
-  await editor
-    .getByRole("region", { name: "Composition preview" })
-    .evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
-  await page.screenshot({ path: shot });
-  await close(owner);
-});
-
 /** Lets the page run one real task: a MessageChannel message is not a timer, so the fake clock does not hold it. */
 function realTask(page: Page): Promise<void> {
   return page.evaluate(
@@ -387,6 +367,24 @@ test("the characters placeholder label stays fully visible beside the default ch
     // The label is left of the chat box, and no part of it is cut off.
     expect(box.x + box.width, `${locale} ${width}`).toBeLessThanOrEqual(chatBox.x);
     expect(await label.evaluate((element: Element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+    // A line ends only at a space (around "·"), never inside a word ("近日公 / 開", "Coming / soon" are wrong).
+    const breaks: string[] = await label.evaluate((element: Element): string[] => {
+      const node: ChildNode | null = element.firstChild;
+      const text: string = node?.textContent ?? "";
+      const range: Range = document.createRange();
+      const found: string[] = [];
+      let top: number | null = null;
+      for (let index = 0; index < text.length; index += 1) {
+        if (!node || text[index] === " ") continue;
+        range.setStart(node, index);
+        range.setEnd(node, index + 1);
+        const at: number = range.getBoundingClientRect().top;
+        if (top !== null && at - top > 2) found.push(text.slice(0, index));
+        top = at;
+      }
+      return found;
+    });
+    for (const before of breaks) expect(before, `${locale} ${width}: "${text}"`).toMatch(/ $/);
     await close(page);
   }
   await close(owner);
@@ -533,10 +531,14 @@ for (const stale of [false, true]) {
     const back = page.getByRole("region", { name: "Composition", exact: true });
     await expect(back.getByLabel("X", { exact: true }).first()).toBeVisible();
     if (stale) await expect(back.getByRole("alert")).toHaveCount(0);
-    else
-      await expect(back.getByRole("alert")).toHaveText(
-        "Your last change while leaving was not saved: Too many requests. Wait one minute and try again.",
+    else {
+      const alert = back.getByRole("alert");
+      await expect(alert).toHaveText(
+        "Your last change to the “Chat” layer was not saved. Make the change again. Reason: Too many requests. Wait one minute and try again.",
       );
+      // The editor brings the error into view: it sits below the fields.
+      await expect(alert).toBeInViewport();
+    }
     await close(owner);
   });
 }

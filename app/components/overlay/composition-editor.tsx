@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
   type ReactNode,
@@ -14,6 +15,7 @@ import { SAMPLE_CHAT } from "../../lib/chat-feed";
 import {
   diffLayers,
   isEmptyPatch,
+  labelPlace,
   layersAction,
   mergePatches,
   moveRect,
@@ -37,6 +39,7 @@ import {
 } from "../../lib/overlay-layers";
 import type { OverlaySourceRef, OverlayState } from "../../types";
 import { errorMessage, postJson, sendJson } from "../api";
+import { motionReduced } from "../station/motion";
 import { CHARACTERS_READY, OverlayComposition } from "./overlay-composition";
 import type { OverlayScene } from "./overlay-stage";
 import { useChatOverlap } from "./use-chat-overlap";
@@ -79,20 +82,18 @@ interface Drag {
   moved: boolean;
 }
 
-/** The half of the frame away from `rect`: the placeholder label sits there, so the chat box never covers it. */
-function sideAwayFrom(rect: LayerRect): "start" | "end" {
-  return rect.x + rect.w / 2 >= DESIGN_W / 2 ? "start" : "end";
-}
-
 type SaveStatus = "idle" | "saving" | "saved";
 
 /** Debounce for the overlap note: it changes only once a move has settled, not during a drag. */
 export const OVERLAP_NOTE_MS = 500;
 
-/** An error to show under the editor. `leaving` marks the error of a change sent while leaving the editor. */
+/**
+ * An error to show under the editor. `leaving` is the layer of a change sent while leaving the editor, or null for
+ * the error of a save while the editor is open.
+ */
 interface EditorError {
   message: string;
-  leaving: boolean;
+  leaving: EditableLayer | null;
 }
 
 /** A failed change sent while leaving shows in the next editor only within this time. Later it is stale. */
@@ -103,14 +104,14 @@ const LEAVE_FAILURE_MS = 60_000;
  * answer comes, so the next editor on this page shows it (after in-app navigation back), if it opens within
  * LEAVE_FAILURE_MS. After a back-forward cache restore the same editor shows it.
  */
-let leaveFailure: { message: string; at: number } | null = null;
+let leaveFailure: { message: string; layer: EditableLayer; at: number } | null = null;
 /** The open editors: one that shows when a change sent while leaving fails, if the answer comes after it opened. */
 const leaveListeners = new Set<(error: EditorError) => void>();
 
 /** The stored error of a change sent while leaving, unless it is stale. */
 function freshLeaveFailure(): EditorError | null {
   if (!leaveFailure || Date.now() - leaveFailure.at >= LEAVE_FAILURE_MS) return null;
-  return { message: leaveFailure.message, leaving: true };
+  return { message: leaveFailure.message, leaving: leaveFailure.layer };
 }
 
 /** A save request in flight: the fields it sends and a promise that settles when it is answered. */
@@ -189,9 +190,11 @@ function useLayerDraft(
         },
         (failure: unknown): void => {
           const message: string = errorMessage(failure);
+          // The error names the chat layer, or the characters layer when the change has no chat fields.
+          const layer: EditableLayer = pending.chat === undefined && pending.characters ? "characters" : "chat";
           // An editor that is open (this one after a back-forward cache restore, or the next one) shows it at once.
-          if (leaveListeners.size === 0) leaveFailure = { message, at: Date.now() };
-          for (const listener of leaveListeners) listener({ message, leaving: true });
+          if (leaveListeners.size === 0) leaveFailure = { message, layer, at: Date.now() };
+          for (const listener of leaveListeners) listener({ message, leaving: layer });
           setBoth(withoutSent(draftRef.current, pending));
         },
       );
@@ -229,7 +232,7 @@ function useLayerDraft(
       setStatus("saved");
     } catch (failure: unknown) {
       // 400, 409, 423, 429 and network errors: these fields show the saved layers again.
-      setError({ message: errorMessage(failure), leaving: false });
+      setError({ message: errorMessage(failure), leaving: null });
       setStatus("idle");
     } finally {
       inflight.current = null;
@@ -423,6 +426,28 @@ function LayerHandle({
 }
 
 /**
+ * The save error under the editor. The error of a change sent while leaving can show when the editor opens, below
+ * the visible part of the page, so it scrolls into view (at once with reduced motion).
+ */
+function EditorAlert({ error }: Readonly<{ error: EditorError }>): ReactNode {
+  const box = useRef<HTMLParagraphElement | null>(null);
+  const leaving: boolean = error.leaving !== null;
+  useEffect(() => {
+    if (!leaving) return;
+    box.current?.scrollIntoView({ block: "nearest", behavior: motionReduced() ? "auto" : "smooth" });
+  }, [error, leaving]);
+  const text: string =
+    error.leaving === null
+      ? t("overlay.comp.failed", { error: error.message })
+      : t("overlay.comp.leaveFailed", { error: error.message, layer: t(LAYER_NAMES[error.leaving]) });
+  return (
+    <p className="ov-comp-error" role="alert" data-comp-error ref={box}>
+      {text}
+    </p>
+  );
+}
+
+/**
  * The Composition section of Overlay control: a 1920x1080 preview of what OBS shows, with the chat and characters
  * layers placed on it. It plays sample chat and never opens an activity socket.
  */
@@ -518,7 +543,15 @@ export function CompositionEditor({
   const charactersEditable: boolean = CHARACTERS_READY;
   const chat: ChatLayer = shown.chat;
   const characters: CharactersLayer = shown.characters;
-  const labelSide: "start" | "end" | undefined = chat.enabled ? sideAwayFrom(chat.rect) : undefined;
+  // The label sits in the free part of the slot beside the chat box, so the chat never covers it (see labelPlace).
+  const label = labelPlace(characters.rect, chat.enabled ? chat.rect : null);
+  const slotStyle: CSSProperties = {
+    left: characters.rect.x,
+    top: characters.rect.y,
+    width: characters.rect.w,
+    height: characters.rect.h,
+    "--ov-label-free": `${label?.free ?? 0}px`,
+  } as CSSProperties;
   let statusText: string = "";
   if (status === "saving") statusText = t("overlay.comp.saving");
   else if (status === "saved") statusText = t("overlay.comp.saved");
@@ -558,13 +591,8 @@ export function CompositionEditor({
                 className="ov-comp-placeholder"
                 data-comp-placeholder="characters"
                 data-enabled={characters.enabled || undefined}
-                data-label-side={labelSide}
-                style={{
-                  left: characters.rect.x,
-                  top: characters.rect.y,
-                  width: characters.rect.w,
-                  height: characters.rect.h,
-                }}
+                data-label-side={label === null ? "none" : label.side === "center" ? undefined : label.side}
+                style={slotStyle}
               >
                 <span>{t("overlay.comp.layerSoon", { layer: t("overlay.comp.characters") })}</span>
               </div>
@@ -639,6 +667,9 @@ export function CompositionEditor({
               />
               <span>{t("overlay.comp.show")}</span>
             </label>
+            <p className="muted ov-comp-note" data-comp-scale>
+              {t("overlay.comp.scaleNote")}
+            </p>
             <p className="muted ov-comp-note" data-comp-refresh>
               {t("overlay.comp.refreshHint")}
             </p>
@@ -686,11 +717,7 @@ export function CompositionEditor({
             />
           </fieldset>
           <output className="ov-comp-status">{statusText}</output>
-          {error && (
-            <p className="ov-comp-error" role="alert" data-comp-error>
-              {t(error.leaving ? "overlay.comp.leaveFailed" : "overlay.comp.failed", { error: error.message })}
-            </p>
-          )}
+          {error && <EditorAlert error={error} />}
         </div>
       </div>
     </section>

@@ -1,4 +1,4 @@
-import type { ChatLimits, ChatRow } from "./chat-feed";
+import type { ChatLimits, ChatRow, ChatState } from "./chat-feed";
 
 /**
  * The removed rows that fade out after the chat reducer drops them (issue #663), as pure functions. The chat layer
@@ -10,9 +10,12 @@ import type { ChatLimits, ChatRow } from "./chat-feed";
 
 export type FadeLimits = Pick<ChatLimits, "leaveMs" | "maxLeaving" | "removedHoldMs">;
 
+/** The part of the chat state that the fades use: the rows, the reset epoch and the time of the latest change. */
+export type ChatView = Pick<ChatState, "rows" | "epoch" | "at">;
+
 /**
- * A removed row that the reducer dropped, with the local time its fade started: the end of its hold, when the
- * reducer drops it. These functions read no clock, so they can run during a render.
+ * A removed row that the reducer dropped, with the local time its fade started: the time of the reducer change
+ * that dropped it (`ChatState.at`). These functions read no clock, so they can run during a render.
  */
 export interface GoneRow {
   row: ChatRow;
@@ -33,32 +36,44 @@ export function pruneGone(gone: readonly GoneRow[], now: number, limits: FadeLim
 }
 
 /**
- * The faded rows after the reducer changed `prevRows` to `rows`: a removed row that `rows` no longer holds starts its
- * fade, and a row that `rows` holds again stops fading. The newest fade start is the latest time known, so the fades
- * that ended before it go (a timer at goneWakeAt removes the others). When more rows fade than the `maxLeaving` bound
- * allows (less the leaving rows of `rows`), the oldest fades end at once. Returns `prevGone` when nothing changes.
+ * The faded rows after the reducer changed `prev` to `next`. A removed row that `next` no longer holds starts its
+ * fade at `next.at`, so the full fade plays even when the drop came late. These rows go at once, without a fade:
+ * - all rows after a reset (a new epoch): their places in the arrival order are no longer valid;
+ * - a row dropped before the end of its hold (a reconnect snapshot removed it).
+ *
+ * A row that `next` holds again stops fading, and the fades that ended by `next.at` go (a timer at goneWakeAt
+ * removes the others). When more rows fade than the `maxLeaving` bound allows (less the leaving rows of `next`),
+ * the oldest fades end at once. Returns `prevGone` when nothing changes.
  */
 export function nextGone(
   prevGone: readonly GoneRow[],
-  prevRows: readonly ChatRow[],
-  rows: readonly ChatRow[],
+  prev: ChatView,
+  next: ChatView,
   limits: FadeLimits,
 ): readonly GoneRow[] {
-  const ids = new Set<string>(rows.map((row: ChatRow): string => row.id));
+  if (next.epoch !== prev.epoch) return prevGone.length === 0 ? prevGone : [];
+  const ids = new Set<string>(next.rows.map((row: ChatRow): string => row.id));
   const fading = new Set<string>(prevGone.map((item: GoneRow): string => item.row.id));
-  const dropped: GoneRow[] = prevRows
-    .filter((row: ChatRow): boolean => row.phase === "removed" && !ids.has(row.id) && !fading.has(row.id))
-    .map((row: ChatRow): GoneRow => ({ row, goneAt: row.phaseAt + limits.removedHoldMs }));
-  let now: number = Number.NEGATIVE_INFINITY;
-  for (const item of dropped) now = Math.max(now, item.goneAt);
-  const kept: GoneRow[] = pruneGone(prevGone, now, limits).filter((item: GoneRow): boolean => !ids.has(item.row.id));
-  const leaving: number = rows.filter((row: ChatRow): boolean => row.phase === "leaving").length;
+  const dropped: GoneRow[] = prev.rows
+    .filter(
+      (row: ChatRow): boolean =>
+        row.phase === "removed" &&
+        !ids.has(row.id) &&
+        !fading.has(row.id) &&
+        next.at >= row.phaseAt + limits.removedHoldMs,
+    )
+    .map((row: ChatRow): GoneRow => ({ row, goneAt: next.at }));
+  const kept: GoneRow[] = pruneGone(prevGone, next.at, limits).filter(
+    (item: GoneRow): boolean => !ids.has(item.row.id),
+  );
+  const leaving: number = next.rows.filter((row: ChatRow): boolean => row.phase === "leaving").length;
   const room: number = Math.max(0, limits.maxLeaving - leaving);
   const all: GoneRow[] = [...kept, ...dropped];
-  const next: GoneRow[] = all.length > room ? all.slice(all.length - room) : all;
+  const result: GoneRow[] = all.length > room ? all.slice(all.length - room) : all;
   const same: boolean =
-    next.length === prevGone.length && next.every((item: GoneRow, index: number): boolean => item === prevGone[index]);
-  return same ? prevGone : next;
+    result.length === prevGone.length &&
+    result.every((item: GoneRow, index: number): boolean => item === prevGone[index]);
+  return same ? prevGone : result;
 }
 
 /** The local time at which the next fade ends, or null when no row fades. */
