@@ -34,6 +34,7 @@ const ranges = {
   ],
   roles: [[200, 219]],
   "overlay-composition": [[240, 244]],
+  "composition-editor": [[245, 249]],
 } as const satisfies Record<string, readonly (readonly [number, number])[]>;
 
 export type Spec = keyof typeof ranges;

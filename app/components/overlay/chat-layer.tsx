@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
-import { t, type MessageId } from "../../i18n";
+import { t } from "../../i18n";
 import { EMOTE_HOSTS, type ActivityFragment } from "../../lib/activity";
 import { CHAT_LIMITS, type ChatRow } from "../../lib/chat-feed";
 import { Emblem, PlatformGlyph } from "./wasteland/glyphs";
@@ -9,12 +9,6 @@ import { chipOffset, PLATFORM_NAMES, WASTELAND_STYLE } from "./wasteland/theme";
 const MAX_NAME_CHARS = 20;
 /** The removed-message collapse runs at the end of the hold, so it ends when the reducer drops the row. */
 const COLLAPSE_MS = 240;
-
-/** A message by id, or the English fallback while a locale catalog has no entry for it yet. */
-function message(id: string, fallback: string): string {
-  const value: string = t(id as MessageId);
-  return value === id ? fallback : value;
-}
 
 let segmenter: Intl.Segmenter | null = null;
 
@@ -112,12 +106,12 @@ function ChatRowItem({ row, removedText }: Readonly<{ row: ChatRow; removedText:
  * the top. Fills its parent, which sets the size in design pixels. Renders message text as text only.
  */
 export function ChatLayer({ rows, className }: Readonly<{ rows: readonly ChatRow[]; className?: string }>): ReactNode {
-  const removedText: string = message("overlay.chat.removed", "message removed by a moderator");
+  const removedText: string = t("overlay.chat.removed");
   return (
     <ol
       className={className ? `wl-chat ${className}` : "wl-chat"}
       style={WASTELAND_STYLE}
-      aria-label={message("overlay.chat.label", "Chat")}
+      aria-label={t("overlay.chat.label")}
       data-overlay-chat=""
     >
       {rows.map((row: ChatRow) => (

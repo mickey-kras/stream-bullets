@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { MASH_NAME } from "../../lib/mash";
+import { DESIGN_W } from "../../lib/overlay-layers";
 import type {
   OverlayData,
   OverlayMessageStyle,
@@ -17,8 +18,10 @@ import { IconButton } from "../ui/icon-button";
 import { Icon, type IconName } from "../ui/icon";
 import { Select } from "../ui/select";
 import { useToast } from "../ui/toast";
+import { CompositionEditor } from "./composition-editor";
 import { OverlayLink } from "./overlay-link";
 import { OverlayStage, type OverlayScene } from "./overlay-stage";
+import { useDesignScale } from "./use-design-scale";
 
 // Must match overlay_state_message_check.
 export const OVERLAY_MESSAGE_MAX = 120;
@@ -84,6 +87,7 @@ export function controlState(
     showResults: live.showResults,
     message: live.air.type === "message" ? live.message : base.message,
     messageStyle: live.messageStyle,
+    layers: live.layers,
     revision: live.revision,
   };
 }
@@ -111,18 +115,7 @@ function Monitor({
   onEnlarge: () => void;
 }>): ReactNode {
   const frame = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const element: HTMLDivElement | null = frame.current;
-    if (!element) return;
-    const scale = (): void => {
-      element.style.setProperty("--ov-scale", String(element.clientWidth / 1920));
-      element.dataset.scaled = "true";
-    };
-    scale();
-    const observer = new ResizeObserver(scale);
-    observer.observe(element);
-    return (): void => observer.disconnect();
-  }, []);
+  useDesignScale(frame, DESIGN_W);
   const label: string = t(SOURCES.find((item) => item.type === source.type)?.label ?? "overlay.src.auto");
   return (
     <figure className={`ov-monitor ${kind}`} data-ov-monitor={kind}>
@@ -535,6 +528,7 @@ export function OverlayControl({
           </details>
         </div>
       </div>
+      <CompositionEditor layers={state.layers} scene={view} source={state.air} onSaved={setSaved} />
       <div className="ov-take-dock">{take}</div>
     </>
   );
