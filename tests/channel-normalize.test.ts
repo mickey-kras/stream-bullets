@@ -41,7 +41,7 @@ function twitchChat(overrides: Record<string, unknown> = {}): Record<string, unk
 
 describe("cleanText", (): void => {
   it("removes control and bidirectional format characters and bounds the length by UTF-16 code units", (): void => {
-    expect(cleanText("a\u0000b‮c​d\te ")).toBe("abcd e");
+    expect(cleanText("a\u0000b\u202ec\u200bd\te\u2028")).toBe("abcd e");
     // Each emoji is two code units. The limit counts like the activity schema and never splits a pair.
     expect(cleanText("😀".repeat(10), 3)).toBe("😀");
     expect(cleanText("😀".repeat(10), 4)).toBe("😀😀");
