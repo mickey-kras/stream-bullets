@@ -73,47 +73,54 @@ code{font:500 13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:va
 .row-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .note{font-size:14px;color:var(--muted);margin-top:10px;max-width:90ch}
 
-/* ---------- Section A: merged chat (all sizes are 1080p px) ---------- */
-.chat{position:absolute;right:40px;bottom:48px;width:640px;height:660px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;
-  padding:0 4px 6px;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 80px);mask-image:linear-gradient(to bottom,transparent 0,#000 80px)}
-.rw{display:grid;grid-template-rows:1fr}
-.clip{min-height:0;overflow:hidden;padding:9px 3px 3px}
-.row{position:relative;display:flex;align-items:center;gap:12px;min-height:62px;padding:8px 16px 8px 30px;border-radius:16px;
-  background:var(--tex-scratch),var(--tex-grunge),var(--ov-row);border:4px solid var(--ov-border);
-  box-shadow:0 0 0 2px var(--ov-outline),0 4px 0 2px rgb(0 0 0/.35)}
-.row::before{content:"";position:absolute;inset:0;border-radius:12px;pointer-events:none;
-  background:repeating-linear-gradient(to bottom,var(--ov-border) 0 2px,transparent 2px 5px) left 8px top 5px/14px 12px no-repeat,
-             repeating-linear-gradient(to bottom,var(--ov-border) 0 2px,transparent 2px 5px) right 8px top 5px/14px 12px no-repeat,
-             var(--tex-fleck);
-  -webkit-mask:linear-gradient(90deg,#000 0,transparent 16%,transparent 60%,#000 100%),linear-gradient(0deg,#000 0,transparent 35%);
-          mask:linear-gradient(90deg,#000 0,transparent 16%,transparent 60%,#000 100%),linear-gradient(0deg,#000 0,transparent 35%)}
-.row::after{content:"";position:absolute;inset:-4px;border-radius:16px;padding:4px;pointer-events:none;background:var(--tex-chip);background-position:var(--wo,0) 0;
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
-          mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
-.badge{display:inline-block;flex:none}
-.badge svg{display:block;width:100%;height:100%}
-.row .badge{width:34px;height:34px;position:relative;z-index:1}
-.divider{flex:none;width:3px;height:32px;border-radius:1px;background:var(--ov-border);position:relative;z-index:1}
-.txt{flex:1;min-width:0;font:500 28px/1.2 var(--font-ov);color:var(--ov-text);letter-spacing:.005em;overflow-wrap:anywhere;
-  text-shadow:0 2px 0 rgb(0 0 0/.55),0 0 6px rgb(0 0 0/.35);position:relative;z-index:1}
-.user{font-weight:700;color:var(--ov-user);margin-right:.28em}
-.emb{flex:none;width:58px;height:36px;color:var(--ov-border);opacity:.92;position:relative;z-index:1;filter:drop-shadow(0 2px 0 rgb(0 0 0/.45))}
-.emote{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.2em;border:2px dashed var(--ov-muted);border-radius:4px;
-  background:repeating-linear-gradient(45deg,rgb(169 194 186/.3) 0 3px,transparent 3px 7px)}
-.row.deleted .txt{opacity:.7}
-.row.deleted .msg{font-weight:500;font-style:italic;color:var(--ov-muted)}
-.rw.in{animation:grow 180ms var(--ease-out) both}
-.rw.in .row{animation:slideIn 240ms var(--ease-out) 60ms both}
-.rw.out{animation:fadeUp 220ms var(--ease-in) both}
-.rw.gone{animation:shrink 240ms var(--ease-in) both}
-@keyframes grow{from{grid-template-rows:0fr}to{grid-template-rows:1fr}}
-@keyframes shrink{from{grid-template-rows:1fr;opacity:.7}to{grid-template-rows:0fr;opacity:0}}
-@keyframes slideIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
-@keyframes fadeUp{to{opacity:0;transform:translateY(-8px)}}
-@media (prefers-reduced-motion:reduce){
-  .rw.in .row{animation-name:fadeOnly}
-  @keyframes fadeOnly{from{opacity:0}to{opacity:1}}
+/* ---------- Section A: approved compact chat cards ---------- */
+.chat{--chat-mustard:#e5bd54;--chat-ivory:#f4ebce;--chat-card:rgba(8,43,46,.9);position:absolute;right:calc(5% + 19.2px);bottom:calc(5% + 19.2px);width:calc(45% - 38.4px);height:calc(90% - 38.4px);display:flex;flex-direction:column;justify-content:flex-end;gap:.22em;padding:.18em;overflow:hidden;font:26px/1.22 "Segoe UI",Arial,sans-serif;color:var(--chat-ivory);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 18%,#000);mask-image:linear-gradient(to bottom,transparent,#000 18%,#000)}
+.rw{flex:0 0 auto;min-width:0}
+.badge{display:inline-block;flex:none}.badge svg{display:block;width:100%;height:100%}
+.chat .platform-icon svg{display:block;width:100%;height:100%}
+.chat .emote{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.15em;border:1px dashed #c4c2a8;background:repeating-linear-gradient(45deg,#c4c2a84d 0 3px,transparent 3px 7px)}
+.chat .deleted .chat-text{color:#c4c2a8;font-style:italic}
+.row {
+  position: relative;
+  padding: 0.30em 2em 0.32em 0.48em;
+  background-color: var(--chat-card);
+  background-image:
+    radial-gradient(ellipse at 7% 0%, #e5bd5414, transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 3px, #0000000c 3px 4px);
+  border: 1px solid #b89649;
+  border-radius: 0.32em;
+  box-shadow: inset 0 0 0 2px #081f2480, 0 2px 4px #00000030;
 }
+.row::before {
+  content: "";
+  position: absolute; inset: 2px;
+  border: 1px solid #e5bd5429;
+  border-radius: 0.22em;
+  pointer-events: none;
+}
+.rw:last-child .row {
+  border-color: var(--chat-mustard);
+  box-shadow: inset 3px 0 var(--chat-mustard), inset 0 0 0 2px #081f2480, 0 2px 4px #00000030;
+}
+.message { display: block; overflow-wrap: anywhere; white-space: normal; }
+.chat-username { color: var(--chat-mustard); font-weight: 750; }
+.chat-pronouns { color: #c4c2a8; margin-right: 0.25em; font-size: 0.72em; }
+.chat-text { font-weight: 500; }
+.platform-icon {
+  display: inline-block; width: 1.04em; height: 1.04em;
+  vertical-align: -0.14em; margin-right: 0.34em;
+  color: var(--chat-mustard);
+}
+.image { width: auto; height: 1.05em; vertical-align: -0.15em; }
+.badge { margin-right: 0.22em; }
+.chat-avatar { display: none; }
+.chat-emote { margin: 0 0.08em; }
+.vault-mark {
+  position: absolute; right: 0.45em; top: 50%;
+  width: 1.1em; height: 0.8em; transform: translateY(-50%);
+  fill: none; stroke: var(--chat-mustard); stroke-width: 1.7; opacity: 0.55;
+}
+
 
 /* ---------- Section B: playground ---------- */
 .strip{position:absolute;left:0;bottom:0;width:1920px;height:360px}
@@ -155,6 +162,12 @@ footer{margin-top:56px;font-size:14px;color:var(--muted)}
   <symbol id="g-yt" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="5" fill="var(--yt)"/><path d="M9.5 8.2v7.6l6.6-3.8z" fill="#fff"/></symbol>
   <symbol id="g-tw" viewBox="0 0 24 24"><path d="M2.5 3h19v13.5H11l-5.5 5v-5h-3z" fill="var(--tw)"/><circle cx="7.5" cy="10" r="1.7" fill="#fff"/><circle cx="12" cy="10" r="1.7" fill="#fff"/><circle cx="16.5" cy="10" r="1.7" fill="#fff"/></symbol>
   <symbol id="g-kick" viewBox="0 0 24 24"><path d="M5 1.5h14l3.5 3.5v14L19 22.5H5L1.5 19V5z" fill="var(--kick)"/><g fill="#0d1f08"><rect x="6.5" y="6" width="3.5" height="12"/><rect x="10" y="10" width="2.5" height="4"/><rect x="12.5" y="8" width="2.5" height="2.5"/><rect x="14.5" y="6" width="3" height="2.5"/><rect x="12.5" y="13.5" width="2.5" height="2.5"/><rect x="14.5" y="15.5" width="3" height="2.5"/></g></symbol>
+<symbol id="chat-twitch" viewBox="0 0 24 24"><path fill="currentColor" d="M4 2h18v13l-6 6h-5l-4 3v-3H2V6zm1 3v12h5v3l3-3h4l3-3V5z"/><path stroke="currentColor" stroke-width="2" d="M11 7v6m5-6v6"/></symbol>
+<symbol id="chat-youtube" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path fill="currentColor" d="m10 8 6 4-6 4z"/></symbol>
+<symbol id="chat-kick" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h5v7h3V7h3V3h7v6h-4v3h-3v2h3v3h4v4h-7v-3h-3v-3H8v6H3z"/></symbol>
+<symbol id="chat-velora" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M12 1 23 12 12 23 1 12z"/><path fill="currentColor" d="m5 7 5 11h4l5-11h-4l-3 7-3-7z"/></symbol>
+<symbol id="chat-vpzone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M3 2h18v20H3z"/><path fill="currentColor" d="m5 7 2 10h3l3-10h-2l-2 7-2-7zm9 0v10h2v-3h3l1-2V9l-1-2zm2 2h2v3h-2z"/></symbol>
+<symbol id="chat-unknown" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path fill="currentColor" d="M7 10h2v4H7zm4 0h2v4h-2zm4 0h2v4h-2z"/></symbol>
   <!-- Original emblem: a tilted orbit ring crossed by a lightning bolt -->
   <symbol id="emb" viewBox="0 0 64 40"><ellipse cx="32" cy="20" rx="29" ry="10.5" transform="rotate(-17 32 20)" fill="none" stroke="currentColor" stroke-width="3.6"/><path d="M36.5 2 L23 22 H31 L27 38 L42 15.5 H34 L39.5 2Z" fill="currentColor" stroke="#0F3B33" stroke-width="3" stroke-linejoin="round" paint-order="stroke"/></symbol>
 </svg>
@@ -164,7 +177,7 @@ footer{margin-top:56px;font-size:14px;color:var(--muted)}
     <div>
       <span class="tag">Stream Bullets &middot; interactive design preview</span>
       <h1>Wasteland overlay mockups</h1>
-      <p class="lede">Merged chat and a shared character playground. The chat is now the compact row restyled as a 1950s bunker terminal. The playground is a pixel-art strip built from catwalk tiles, breakable dirt and two bunker doors. Every sample uses a 1080p stage. The original scrap-yard courier wears a copper helmet, workwear and a platform-colored scarf. Local artwork is loaded into pixel-aligned animation cells.</p>
+      <p class="lede">Merged chat and a shared character playground. The chat uses the approved compact-card reference. The playground is a pixel-art strip built from catwalk tiles, breakable dirt and two bunker doors. Every sample uses a 1080p stage. The original scrap-yard courier wears a copper helmet, workwear and a platform-colored scarf. Local artwork is loaded into pixel-aligned animation cells.</p>
     </div>
     <button type="button" id="themeBtn" aria-label="Switch page theme">Page theme: auto</button>
   </header>
@@ -173,9 +186,9 @@ footer{margin-top:56px;font-size:14px;color:var(--muted)}
   <section class="block" aria-labelledby="secA">
     <div class="sec-head">
       <div>
-        <span class="tag">Issue #663 &middot; A1 compact, chosen</span>
+        <span class="tag">Issue #663 &middot; approved compact cards</span>
         <h2 id="secA">A. Merged chat</h2>
-        <p class="lede">One-line capsule rows in grimy dark teal. Each row has a thick worn yellow border, yellow spray flecks near the ends and grille ticks in the top corners. Left to right: the platform badge, a yellow divider, "Username:" in yellow, the message in cream, and the emblem. Long messages wrap and the row grows to fit.</p>
+        <p class="lede">Compact teal cards with thin mustard borders, ivory text, inline platform icons, and a subtle circular mark. New messages enter at the bottom. The latest card has a mustard left accent. Long messages wrap.</p>
       </div>
       <div class="row-tools"><button type="button" id="feedBtn" aria-pressed="false">Pause feed</button></div>
     </div>
@@ -184,35 +197,13 @@ footer{margin-top:56px;font-size:14px;color:var(--muted)}
       <div class="frame"><div class="scene"></div><div class="chat" id="chat"></div></div>
     </div>
     <dl class="specs">
-      <dt>Column</dt><dd>640 px wide, 40 px from the right, 48 px from the bottom, 660 px tall, at most 8 rows. Older rows fade under an 80 px mask at the top.</dd>
-      <dt>Row</dt><dd>At least 62 px tall, 16 px corner radius, 4 px worn border in <span class="sw" style="background:#D4B02A"></span>#D4B02A with a 2 px #12110D outer outline. Padding is 8 / 16 / 8 / 30 px, with 9 px between rows.</dd>
-      <dt>Username</dt><dd>Oswald 700, 28 px, <span class="sw" style="background:#F2D22E"></span>#F2D22E, ends in a colon</dd>
-      <dt>Message</dt><dd>Oswald 500, 28 px / 1.2, <span class="sw" style="background:#F3EAD3"></span>#F3EAD3, with a 2 px dark drop shadow</dd>
-      <dt>Badge &middot; divider</dt><dd>34 px badge, then a 3&times;32 px yellow divider</dd>
-      <dt>Emblem</dt><dd>58&times;36 px, right-aligned, border yellow at 92%</dd>
+      <dt>Reference</dt><dd>Approved Mix It Up compact cards, with a transparent overlay background.</dd>
+      <dt>Layout</dt><dd>Right-center sample, with a 5% safe margin and a half-frame region. The top fade covers 18% of the column.</dd>
+      <dt>Type</dt><dd>Segoe UI, Arial fallback, 26 px at 1080p, line height 1.22. Usernames use weight 750; messages use 500.</dd>
+      <dt>Colors</dt><dd>Card: rgba(8, 43, 46, 0.9). Mustard: #e5bd54. Ivory: #f4ebce. Border: 1 px #b89649.</dd>
+      <dt>Platforms</dt><dd>Twitch, YouTube, Kick, Velora, and VPZone use inline mustard icons.</dd>
+      <dt>Motion</dt><dd>520 ms vertical movement with cubic-bezier(0.22, 1, 0.36, 1). Reduced motion skips movement.</dd>
     </dl>
-
-    <div class="decide">
-      <h3>Merged-chat design</h3>
-      <ol>
-        <li><b>Variant:</b> A1 compact (your pick), restyled as a bunker-terminal capsule.</li>
-        <li><b>Typeface:</b> Oswald, 700 for usernames and 500 for messages (Google Fonts, OFL license).</li>
-        <li><b>Row colors:</b>
-          <ul>
-            <li>fill <code>#0F3B33</code> at 94%</li>
-            <li>border <code>#D4B02A</code>, 4 px, with a <code>#12110D</code> outline, 2 px</li>
-            <li>username <code>#F2D22E</code></li>
-            <li>message <code>#F3EAD3</code></li>
-            <li>removed-message text <code>#A9C2BA</code></li>
-          </ul></li>
-        <li><b>Texture:</b> generated in code from SVG noise, with no image files. The fill has dark grunge and faint horizontal scratches. Yellow spray flecks sit near both ends and along the bottom edge, and dark chips break up the border. Each row shifts the chips so no two rows look the same.</li>
-        <li><b>Emblem:</b> an original orbit-and-bolt mark: one tilted orbit ring with a lightning bolt through it. It has no gear or "winged circle" shape. The same mark appears on the chat rows, the bunker doors and the flag in the playground.</li>
-        <li><b>Platform cues:</b> YouTube <span class="sw" style="background:#E5322D"></span><code>#E5322D</code> uses a play tile, Twitch <span class="sw" style="background:#9146FF"></span><code>#9146FF</code> a speech square, and Kick <span class="sw" style="background:#53FC18"></span><code>#53FC18</code> a notched K block. All are original glyphs.</li>
-        <li><b>Motion:</b> A new row opens over 180 ms, then slides 28 px and fades in over 240 ms with ease-out. The oldest row fades and rises 8 px over 220 ms. With reduced motion, rows only fade.</li>
-        <li><b>Removed messages:</b> the text changes to "message removed by a moderator" in muted italics, stays for 1.4 s, then the row collapses over 240 ms.</li>
-        <li><b>Overflow:</b> usernames longer than 20 characters end in an ellipsis. Messages wrap inside the row and never truncate. Emotes are 1.1 em inline, and emoji are native.</li>
-      </ol>
-    </div>
   </section>
 
   <!-- ================= SECTION B ================= -->
@@ -326,54 +317,59 @@ const hex2 = h => [1,3,5].map(i => parseInt(h.slice(i, i+2), 16));
 }
 
 /* ================= Section A: chat ================= */
-{
-  const uri = s => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
-  const noise = (bf, oct, seed, rgb, k, off, w = 260, h = 90) => uri(`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'><filter id='n' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='${bf}' numOctaves='${oct}' seed='${seed}' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 ${rgb[0]} 0 0 0 0 ${rgb[1]} 0 0 0 0 ${rgb[2]} ${k} 0 0 0 ${off}'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>`);
-  const st = document.documentElement.style;
-  st.setProperty("--tex-grunge", noise(".028 .09", 3, 7, [.01,.08,.07], 2.6, -1.2));
-  st.setProperty("--tex-scratch", noise(".006 .8", 2, 4, [.62,.8,.74], 7, -5.1));
-  st.setProperty("--tex-fleck", noise(".75", 2, 3, [.86,.71,.17], 9, -5.7));
-  st.setProperty("--tex-chip", noise(".6", 2, 11, [.06,.2,.17], 10, -6.4));
-}
+const CHAT_PLATFORM = {tw:"twitch",yt:"youtube",kick:"kick",velora:"velora",vpzone:"vpzone"};
+const CHAT_NAMES = {...PNAME,velora:"Velora",vpzone:"VPZone"};
 const FEED = [
-  {p:"tw",  u:"Alexei",      m:"The bunker door is open!"},
-  {p:"yt",  u:"Mira_Dunes",  m:"hey everyone 👋"},
-  {p:"kick",u:"RadNomad",    m:"Ready for the wasteland. LETS GOOO 🔥🔥"},
-  {p:"tw",  u:"kettle_kid",  m:"ok hear me out: if we route through the old pump station we skip the raider camp entirely and save like four minutes, plus the loot there is way better"},
-  {p:"yt",  u:"ScrapQueen",  m:"gg [e] clutch play"},
-  {p:"kick",u:"BoltBucket",  m:"FREE CAPS!! click my profile now", del:true},
-  {p:"yt",  u:"N0madicCartographerOfTheEast", m:"!dig"},
-  {p:"kick",u:"mirage99",    m:"anyone else hear that geiger ticking 👀"},
-  {p:"tw",  u:"tinkerVee",   m:"[e][e] the little guy went boom again 😂"},
-  {p:"yt",  u:"Riley",       m:"Stay safe out there."},
+  {p:"tw",u:"Alexei",m:"The bunker door is open!"},
+  {p:"yt",u:"Mira_Dunes",m:"hey everyone"},
+  {p:"kick",u:"RadNomad",m:"Ready for the wasteland."},
+  {p:"velora",u:"kettle_kid",m:"If we route through the old pump station we can save a few minutes. Long messages wrap inside the card."},
+  {p:"vpzone",u:"ScrapQueen",m:"gg [e] clutch play"},
+  {p:"kick",u:"BoltBucket",m:"This message will be removed.",del:true},
+  {p:"yt",u:"N0madicCartographerOfTheEast",m:"!dig"},
+  {p:"tw",u:"tinkerVee",m:"[e][e] the little guy went boom again"}
 ];
 let feedPaused = false;
 {
-  const el = document.getElementById("chat"), max = 8; let i = 0;
-  const rowEl = d => {
-    const name = d.u.length > 20 ? d.u.slice(0, 19) + "…" : d.u;
-    const msg = esc(d.m).replace(/\[e\]/g, '<span class="emote" role="img" aria-label="emote"></span>');
-    const rw = document.createElement("div"); rw.className = "rw";
-    rw.innerHTML = `<div class="clip"><div class="row" style="--wo:${(Math.random()*200)|0}px" aria-label="${PNAME[d.p]} message">${badge(d.p)}<span class="divider"></span><span class="txt"><span class="user">${esc(name)}:</span><span class="msg">${msg}</span></span><svg class="emb" aria-hidden="true"><use href="#emb"/></svg></div></div>`;
-    return rw;
+  const el = document.getElementById("chat"); let i = 0;
+  const motion = {duration:520,easing:"cubic-bezier(0.22, 1, 0.36, 1)"};
+  const reflow = change => {
+    const rows = Array.from(el.children);
+    const before = new Map(rows.map(row => [row,{top:row.getBoundingClientRect().top,opacity:Number(getComputedStyle(row).opacity)}]));
+    rows.forEach(row => row.getAnimations().forEach(animation => animation.cancel()));
+    change();
+    if (reduced) return;
+    const gap = parseFloat(getComputedStyle(el).rowGap);
+    const scale = el.getBoundingClientRect().width / el.offsetWidth;
+    for (const row of el.children) {
+      const rect = row.getBoundingClientRect(), previous = before.get(row);
+      const offset = previous === undefined ? rect.height / scale + gap : (previous.top - rect.top) / scale;
+      row.animate([{transform:`translateY(${offset}px)`,opacity:previous?.opacity ?? 0},{transform:"translateY(0)",opacity:1}],motion);
+    }
   };
-  const trim = () => {
-    const live = [...el.querySelectorAll(".rw:not(.out):not(.gone)")];
-    live.slice(0, Math.max(0, live.length - max)).forEach(r => { r.classList.add("out"); setTimeout(() => r.remove(), 230); });
-    live.forEach(r => { if (r.offsetTop + r.offsetHeight < -40) r.remove(); });
+  const rowEl = d => {
+    const rw = document.createElement("div"); rw.className = "rw";
+    const msg = esc(d.m).replace(/\[e\]/g,'<span class="emote" role="img" aria-label="emote"></span>');
+    rw.innerHTML = `<div class="row" aria-label="${CHAT_NAMES[d.p]} message"><span class="message"><span class="platform-icon" role="img" aria-label="${CHAT_NAMES[d.p]}"><svg aria-hidden="true"><use href="#chat-${CHAT_PLATFORM[d.p]}"/></svg></span><span class="chat-username">${esc(d.u)}: </span><span class="chat-text">${msg}</span></span><svg class="vault-mark" viewBox="0 0 36 24" aria-hidden="true"><path d="M1 9h10M1 15h10M25 9h10M25 15h10"/><circle cx="18" cy="12" r="9"/><circle cx="18" cy="12" r="4"/></svg></div>`;
+    return rw;
   };
   const add = anim => {
     const d = FEED[i++ % FEED.length]; if (!anim && d.del) return;
-    const rw = rowEl(d); if (anim) rw.classList.add("in"); el.append(rw);
+    const rw = rowEl(d);
+    const append = () => { el.append(rw); while (el.children.length > 100) el.firstElementChild.remove(); };
+    if (anim) reflow(append); else append();
     if (d.del && anim) setTimeout(() => {
-      const r = rw.querySelector(".row"); r.classList.add("deleted"); r.querySelector(".msg").textContent = "message removed by a moderator";
-      setTimeout(() => { rw.classList.add("gone"); setTimeout(() => rw.remove(), 250); }, 1400);
-    }, 1600);
-    trim();
+      const card = rw.querySelector(".row"); card.classList.add("deleted"); card.querySelector(".chat-text").textContent = "message removed by a moderator";
+      setTimeout(() => {
+        if (reduced) { reflow(() => rw.remove()); return; }
+        const animation = card.animate([{opacity:1},{opacity:0}],{duration:300,easing:"ease-in",fill:"forwards"});
+        animation.onfinish = () => reflow(() => rw.remove());
+      },1400);
+    },1600);
   };
-  for (let k = 0; k < 6; k++) add(false);
-  setInterval(() => { if (!feedPaused && !document.hidden) add(true); }, 1700);
-  document.getElementById("feedBtn").onclick = e => { feedPaused = !feedPaused; e.target.textContent = feedPaused ? "Resume feed" : "Pause feed"; e.target.setAttribute("aria-pressed", feedPaused); };
+  for (let k = 0; k < 5; k++) add(false);
+  setInterval(() => { if (!feedPaused && !document.hidden) add(true); },1700);
+  document.getElementById("feedBtn").onclick = e => { feedPaused = !feedPaused; e.target.textContent = feedPaused ? "Resume feed" : "Pause feed"; e.target.setAttribute("aria-pressed",feedPaused); };
 }
 
 /* ================= Section B: pixel art helpers ================= */
@@ -758,7 +754,7 @@ document.getElementById("backgroundBtn").onclick = event => {
 document.getElementById("composeBtn").onclick = event => {
   const frame = document.querySelector("#playStage .frame"), existing = frame.querySelector(".composed-chat");
   if (existing) { existing.remove(); event.target.setAttribute("aria-pressed","false"); return; }
-  const chat = document.getElementById("chat").cloneNode(true); chat.removeAttribute("id"); chat.classList.add("composed-chat"); chat.style.bottom = "340px";
+  const chat = document.getElementById("chat").cloneNode(true); chat.removeAttribute("id"); chat.classList.add("composed-chat"); chat.style.bottom = "340px"; chat.style.height = "686px";
   frame.append(chat); event.target.setAttribute("aria-pressed","true");
 };
 const playBtn = document.getElementById("playBtn");

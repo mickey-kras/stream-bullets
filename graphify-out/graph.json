@@ -127695,7 +127695,7 @@
       "relation": "contains",
       "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
       "source_file": "docs/design/wasteland-overlays/README.md",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "docs_design_wasteland_overlays_readme_controls",
       "weight": 1.0
     },
@@ -127706,7 +127706,18 @@
       "relation": "contains",
       "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
       "source_file": "docs/design/wasteland-overlays/README.md",
-      "source_location": "L30",
+      "source_location": "L31",
+      "target": "docs_design_wasteland_overlays_readme_check_the_simulation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L42",
       "target": "docs_design_wasteland_overlays_readme_artwork",
       "weight": 1.0
     },
@@ -127717,7 +127728,7 @@
       "relation": "contains",
       "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
       "source_file": "docs/design/wasteland-overlays/README.md",
-      "source_location": "L44",
+      "source_location": "L55",
       "target": "docs_design_wasteland_overlays_readme_limits",
       "weight": 1.0
     },
@@ -127728,7 +127739,7 @@
       "relation": "contains",
       "source": "docs_design_wasteland_overlays_readme_wasteland_overlay_preview",
       "source_file": "docs/design/wasteland-overlays/README.md",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "docs_design_wasteland_overlays_readme_open",
       "weight": 1.0
     },
@@ -136568,10 +136579,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "8b611710a73abdb1ce6ea3bff37fbb1a9208b7d9f4b98d5efbc1a87ee70f56ff",
+    "content_sha256": "dbc456163155cfd317b2faec152b818419506fa024d52f7d11ef7b228ae3d272",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "1cc698436bc40734f801f48f0e51080221dd0a16f91ff5856d19ef714faf0425",
+    "source_sha256": "3911ffa2120257c0b207fb6af1514a4851c2f8d557c0252196a216a512da0f9b",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -171604,7 +171615,18 @@
       "node_kind": "heading",
       "norm_label": "artwork",
       "source_file": "docs/design/wasteland-overlays/README.md",
-      "source_location": "L30"
+      "source_location": "L42"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_design_wasteland_overlays_readme_check_the_simulation",
+      "label": "Check the simulation",
+      "node_kind": "heading",
+      "norm_label": "check the simulation",
+      "source_file": "docs/design/wasteland-overlays/README.md",
+      "source_location": "L31"
     },
     {
       "_origin": "ast",
@@ -171615,7 +171637,7 @@
       "node_kind": "heading",
       "norm_label": "controls",
       "source_file": "docs/design/wasteland-overlays/README.md",
-      "source_location": "L17"
+      "source_location": "L18"
     },
     {
       "_origin": "ast",
@@ -171626,7 +171648,7 @@
       "node_kind": "heading",
       "norm_label": "limits",
       "source_file": "docs/design/wasteland-overlays/README.md",
-      "source_location": "L44"
+      "source_location": "L55"
     },
     {
       "_origin": "ast",
@@ -171637,7 +171659,7 @@
       "node_kind": "heading",
       "norm_label": "open",
       "source_file": "docs/design/wasteland-overlays/README.md",
-      "source_location": "L6"
+      "source_location": "L7"
     },
     {
       "_origin": "ast",

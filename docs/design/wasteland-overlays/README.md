@@ -2,6 +2,7 @@
 
 Interactive design preview for merged chat (#663) and the character playground (#664).
 Channel connections and live activity depend on #662.
+Chat cards use the approved compact Mix It Up design: thin mustard borders, Segoe UI, and 520 ms vertical motion.
 
 ## Open
 
@@ -27,13 +28,23 @@ A message resets inactivity and reverses a timeout exit.
 An offscreen sender enters before a queued command runs.
 Respawn waits 2.5 seconds. Terrain changes last 30 seconds.
 
+## Check the simulation
+
+Run the regression checks with Node.js:
+
+```sh
+node --test docs/design/wasteland-overlays/simulation.test.cjs
+```
+
+These checks run the preview's simulation functions with DOM and artwork stubs.
+They do not test browser rendering.
+
 ## Artwork
 
 - `assets/courier-source.png`: generated courier reference, with 12 states and 4 frames per state.
 - `assets/terrain-source.png`: generated terrain and prop reference.
 - `assets/courier-purple-4x.png`: aligned example export, with 128 px cells in a 512 by 1536 px sheet.
 - `playground-render.png`: the canvas renderer with a sample background and 40 characters.
-- `closeup-chat.png`: merged-chat reference.
 
 The courier has a copper helmet, canvas workwear, dark boots, and platform-colored accents.
 YouTube uses red, Twitch uses purple, and Kick uses green.
@@ -53,5 +64,5 @@ Rotation runs every 15 seconds, with a 10-second minimum stay before replacement
 These scheduling values are preview choices for review.
 
 Browser checks confirmed artwork loading, the 12 animation rows, crowd controls, composition, and transparency.
-Browser export checks and new screenshot transfer did not complete. OBS compatibility is unverified.
-Generated references do not establish trademark clearance.
+Browser export checks and new screenshot transfer did not complete.
+OBS checks remain incomplete.
