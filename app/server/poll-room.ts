@@ -192,7 +192,14 @@ export class PollRoom extends DurableObject<AppEnv> {
           if (this.ticker !== undefined) clearInterval(this.ticker);
           this.ticker = undefined;
           this.disconnect();
-          await Promise.all([this.currentTick, this.refreshing, this.pendingSnapshot, ...this.loadingBattles.values(), ...this.pendingHandlers]);
+          await Promise.all([
+            this.currentTick,
+            this.refreshing,
+            this.pendingSnapshot,
+            ...this.loadingBattles.values(),
+            ...this.pendingHandlers,
+          ]);
+          this.disconnect();
           if (this.ticker !== undefined) clearInterval(this.ticker);
           this.ticker = undefined;
           this.battles.clear();
@@ -225,7 +232,15 @@ export class PollRoom extends DurableObject<AppEnv> {
       if (invalidSubscription) return invalidSubscription;
     }
 
-    const pending: Promise<Response> = this.handleRequest(request, url.pathname, streamerId, clientKey, userId, role, overlayKey);
+    const pending: Promise<Response> = this.handleRequest(
+      request,
+      url.pathname,
+      streamerId,
+      clientKey,
+      userId,
+      role,
+      overlayKey,
+    );
     this.pendingHandlers.add(pending);
     try {
       return await pending;

@@ -125,6 +125,69 @@ function lastOf<T>(socket: FakeSocket, type: string): T | undefined {
   return socket.ofType<T>(type).at(-1);
 }
 
+function deferredDatabaseOperation(
+  real: D1Database,
+  operation: "batch" | "side",
+): {
+  db: D1Database;
+  started: Promise<void>;
+  completed: Promise<void>;
+  release: () => void;
+} {
+  let release = (): void => undefined;
+  let entered = (): void => undefined;
+  let finished = (): void => undefined;
+  const completed = new Promise<void>((resolve): void => {
+    finished = resolve;
+  });
+  const blocked = new Promise<void>((resolve): void => {
+    release = resolve;
+  });
+  const started = new Promise<void>((resolve): void => {
+    entered = resolve;
+  });
+  const wait = async (): Promise<void> => {
+    entered();
+    await blocked;
+  };
+  const wrapSide = (statement: D1PreparedStatement): D1PreparedStatement =>
+    new Proxy(statement, {
+      get(target: D1PreparedStatement, key: string | symbol): unknown {
+        if (key === "bind") return (...values: unknown[]): D1PreparedStatement => wrapSide(target.bind(...values));
+        if (key === "first")
+          return async <T>(column?: string): Promise<T | null> => {
+            await wait();
+            const result: T | null = await (column === undefined ? target.first<T>() : target.first<T>(column));
+            finished();
+            return result;
+          };
+        const value: unknown = Reflect.get(target, key);
+        return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(target) : value;
+      },
+    });
+  const db = new Proxy(real, {
+    get(target: D1Database, key: string | symbol): unknown {
+      if (key === "prepare")
+        return (sql: string): D1PreparedStatement => {
+          const statement: D1PreparedStatement = target.prepare(sql);
+          return operation === "side" && sql.startsWith("SELECT choice FROM entry_votes")
+            ? wrapSide(statement)
+            : statement;
+        };
+      if (key === "batch")
+        return async <T>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]> => {
+          if (operation === "batch") await wait();
+          const result: D1Result<T>[] = await target.batch<T>(statements);
+          if (operation === "batch") finished();
+          return result;
+        };
+      const value: unknown = Reflect.get(target, key);
+      return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(target) : value;
+    },
+  });
+  return { db, started, completed, release };
+}
+
 beforeAll(async (): Promise<void> => {
   installWorkersRuntime();
   database = await createTestDatabase({ migrate: false });
@@ -170,7 +233,15 @@ describe("live room requests", (): void => {
 
   it("allows isolated internal test reset only in a configured test environment", async (): Promise<void> => {
     expect((await post("test-reset")).status).toBe(404);
-    const testEnv = { DB: faults.db, APP_ENV: "test", APP_ORIGIN: "https://test.streambullets.com", TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes", BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes", TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa", ADMIN_EMAILS: "admin@example.test" } as AppEnv;
+    const testEnv = {
+      DB: faults.db,
+      APP_ENV: "test",
+      APP_ORIGIN: "https://test.streambullets.com",
+      TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes",
+      BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes",
+      TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa",
+      ADMIN_EMAILS: "admin@example.test",
+    } as AppEnv;
     rooms = new RoomNamespace((roomState) => new PollRoom(roomState as unknown as DurableObjectState, testEnv));
     testEnv.POLL_ROOMS = rooms as unknown as DurableObjectNamespace;
     expect((await call("test-reset")).status).toBe(405);
@@ -182,6 +253,53 @@ describe("live room requests", (): void => {
     expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
     expect(await state().storage.getAlarm()).toBeNull();
     expect((await subscribe()).status).toBe(101);
+  });
+
+  it("closes a subscription accepted while a test reset drains its delayed snapshot", async (): Promise<void> => {
+    let release = (): void => undefined;
+    let entered = (): void => undefined;
+    const blocked = new Promise<void>((resolve): void => {
+      release = resolve;
+    });
+    const started = new Promise<void>((resolve): void => {
+      entered = resolve;
+    });
+    const delayed = new Proxy(database.db, {
+      get(target: D1Database, key: string | symbol): unknown {
+        if (key === "batch")
+          return async <T>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]> => {
+            entered();
+            await blocked;
+            return target.batch<T>(statements);
+          };
+        const value: unknown = Reflect.get(target, key);
+        return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(target) : value;
+      },
+    });
+    const testEnv = {
+      DB: delayed,
+      APP_ENV: "test",
+      APP_ORIGIN: "https://test.streambullets.com",
+      TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes",
+      BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes",
+      TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa",
+      ADMIN_EMAILS: "admin@example.test",
+    } as AppEnv;
+    rooms = new RoomNamespace((roomState) => new PollRoom(roomState as unknown as DurableObjectState, testEnv));
+    testEnv.POLL_ROOMS = rooms as unknown as DurableObjectNamespace;
+    const subscription = subscribe();
+    await started;
+    const reset = post("test-reset");
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(state().accepted).toHaveLength(0);
+    release();
+    const response = await subscription;
+    expect(response.status).toBe(101);
+    const socket = serverSocketOf((response as Response & { webSocket: unknown }).webSocket);
+    expect((await reset).status).toBe(204);
+    expect(socket.open).toBe(false);
+    expect(await state().storage.getAlarm()).toBeNull();
   });
 
   it("admits a socket from the app's own origin", async (): Promise<void> => {
@@ -851,55 +969,84 @@ describe("live room battles", (): void => {
   });
 
   it("waits for the original stalled tick before resetting test live state", async (): Promise<void> => {
-    const testEnv = { DB: faults.db, APP_ENV: "test", APP_ORIGIN: "https://test.streambullets.com", TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes", BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes", TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa", ADMIN_EMAILS: "admin@example.test" } as AppEnv;
+    const testEnv = {
+      DB: database.db,
+      APP_ENV: "test",
+      APP_ORIGIN: "https://test.streambullets.com",
+      TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes",
+      BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes",
+      TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa",
+      ADMIN_EMAILS: "admin@example.test",
+    } as AppEnv;
     rooms = new RoomNamespace((roomState) => new PollRoom(roomState as unknown as DurableObjectState, testEnv));
     testEnv.POLL_ROOMS = rooms as unknown as DurableObjectNamespace;
     const id = await rows.addBattle({ "player-1": 0 });
     const socket = await join({ user: "player-1" });
     await tap(socket, id, 2, 1);
-    let release = (): void => undefined;
-    const blocked = new Promise<void>((resolve): void => { release = resolve; });
-    faults.fail(/INSERT INTO mash_taps/, blocked);
-    const errors = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    const deferred = deferredDatabaseOperation(database.db, "batch");
+    testEnv.DB = deferred.db;
     vi.setSystemTime(Date.now() + MASH_FLUSH_MS);
     vi.advanceTimersByTime(MASH_TICK_MS);
-    await vi.waitFor(() => expect(faults.held()).toBe(1));
+    await deferred.started;
     vi.advanceTimersByTime(MASH_TICK_MS);
     let resetDone = false;
-    const reset = post("test-reset").then((response): Response => { resetDone = true; return response; });
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(resetDone).toBe(false);
-    release();
+    const reset = post("test-reset").then((response): Response => {
+      resetDone = true;
+      return response;
+    });
+    try {
+      await new Promise<void>((resolve): void => {
+        setTimeout(resolve, 10);
+      });
+      expect(resetDone).toBe(false);
+    } finally {
+      deferred.release();
+      await deferred.completed;
+      await reset;
+    }
     expect((await reset).status).toBe(204);
+    expect(await rows.storedTaps(id)).toEqual([{ user_id: "player-1", side: 0, taps: 2 }]);
     expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
     expect(vi.getTimerCount()).toBe(0);
-    errors.mockRestore();
   });
 
-  it("drains a side lookup before clearing the test tap journal", async (): Promise<void> => {
-    const testEnv = { DB: faults.db, APP_ENV: "test", APP_ORIGIN: "https://test.streambullets.com", TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes", BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes", TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa", ADMIN_EMAILS: "admin@example.test" } as AppEnv;
+  it("drains a successful side lookup before clearing the test tap journal", async (): Promise<void> => {
+    const testEnv = {
+      DB: database.db,
+      APP_ENV: "test",
+      APP_ORIGIN: "https://test.streambullets.com",
+      TEST_ACCESS_SECRET: "test-only-access-secret-with-at-least-32-bytes",
+      BETTER_AUTH_SECRET: "test-authentication-secret-with-at-least-32-bytes",
+      TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa",
+      ADMIN_EMAILS: "admin@example.test",
+    } as AppEnv;
     rooms = new RoomNamespace((roomState) => new PollRoom(roomState as unknown as DurableObjectState, testEnv));
     testEnv.POLL_ROOMS = rooms as unknown as DurableObjectNamespace;
     const id = await rows.addBattle({ "player-1": 0 });
     const socket = await join({ user: "player-1" });
-    let release = (): void => undefined;
-    const blocked = new Promise<void>((resolve): void => { release = resolve; });
-    faults.fail(/SELECT choice FROM entry_votes/, blocked);
-    const errors = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    const deferred = deferredDatabaseOperation(database.db, "side");
+    testEnv.DB = deferred.db;
     const pendingTap = tap(socket, id, 2, 1);
-    await vi.waitFor(() => expect(faults.held()).toBe(1));
+    await deferred.started;
     let resetDone = false;
-    const reset = post("test-reset").then((response): Response => { resetDone = true; return response; });
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(resetDone).toBe(false);
-    release();
-    await pendingTap;
+    const reset = post("test-reset").then((response): Response => {
+      resetDone = true;
+      return response;
+    });
+    try {
+      await new Promise<void>((resolve): void => {
+        setTimeout(resolve, 10);
+      });
+      expect(resetDone).toBe(false);
+    } finally {
+      deferred.release();
+      await deferred.completed;
+      await pendingTap;
+      await reset;
+    }
     expect((await reset).status).toBe(204);
     expect(state().storage.sql.exec("SELECT * FROM tap_journal").toArray()).toEqual([]);
     expect(vi.getTimerCount()).toBe(0);
-    errors.mockRestore();
   });
 
   it("logs a failed tick and keeps ticking", async (): Promise<void> => {
