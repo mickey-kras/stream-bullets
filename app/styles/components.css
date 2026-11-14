@@ -1348,6 +1348,10 @@ html[data-reduced="true"] .landing-station .station-tilt { display: none !import
   main.topic-workspace { overflow: hidden; }
   main.topic-workspace .detail { height: 100%; border: 0; border-radius: 0; scrollbar-gutter: auto; }
 }
+@media (max-height: 32em) {
+  main.topic-workspace > .browse { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+  main.topic-workspace #topics { flex: none; }
+}
 .page-banner.suspended > span { flex: 1 1 0; min-width: 0; }
 .page-banner .banner-link { flex-basis: 100%; justify-content: flex-start; margin: 4px 0 0 28px; min-height: 32px; color: var(--gold); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 @media (max-width: 43.75em) {

@@ -5,11 +5,18 @@ import { signedIn } from "./fixtures";
 const widths: readonly number[] = [320, 390, 768, 1050, 1440];
 for (const [languageIndex, locale] of ["en", "de"].entries()) {
   for (const [index, width] of widths.entries()) {
-    test(`${locale} compact board keeps the toolbar, scrolling list and footer within ${width}px`, async ({ browser }) => {
-      const context = await signedIn(browser, "viewer", clientIp("compact-layout", 220 + languageIndex * widths.length + index), {
-        viewport: { width, height: 844 },
-        hasTouch: true,
-      });
+    test(`${locale} compact board keeps the toolbar, scrolling list and footer within ${width}px`, async ({
+      browser,
+    }) => {
+      const context = await signedIn(
+        browser,
+        "viewer",
+        clientIp("compact-layout", 220 + languageIndex * widths.length + index),
+        {
+          viewport: { width, height: 844 },
+          hasTouch: true,
+        },
+      );
       await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
       try {
         const page = await newPage(context);
@@ -64,7 +71,9 @@ test("loaded topics switch before the route response and the latest selection wi
   const context = await signedIn(browser, "viewer", clientIp("compact-layout", 230));
   const page = await newPage(context);
   let release!: () => void;
-  const gate: Promise<void> = new Promise<void>((resolve) => { release = resolve; });
+  const gate: Promise<void> = new Promise<void>((resolve) => {
+    release = resolve;
+  });
   let intercepted: boolean = false;
   try {
     await page.goto("/@pagination_host?view=topics&sort=newest");
@@ -87,3 +96,35 @@ test("loaded topics switch before the route response and the latest selection wi
     await close(context);
   }
 });
+
+for (const viewport of [
+  { width: 670, height: 390 },
+  { width: 390, height: 430 },
+]) {
+  test(`short ${viewport.width}x${viewport.height} board scrolls past the toolbar to every loaded topic`, async ({
+    browser,
+  }) => {
+    const context = await signedIn(browser, "viewer", clientIp("compact-layout", 231), {
+      viewport,
+      hasTouch: true,
+      isMobile: true,
+    });
+    try {
+      const page = await newPage(context);
+      await page.goto("/@pagination_host?view=topics&sort=newest");
+      const last = page.locator("#topics .topic").last();
+      await last.scrollIntoViewIfNeeded();
+      await expect(last).toBeInViewport();
+      await expect
+        .poll(() => page.locator(".browse").evaluate((element: HTMLElement) => element.scrollTop))
+        .toBeGreaterThan(0);
+      await last.click();
+      await expect(page.locator("#detail .detail-title")).toBeFocused();
+      await page.goBack();
+      await expect(last).toBeFocused();
+      await expect(last).toBeInViewport();
+    } finally {
+      await close(context);
+    }
+  });
+}
