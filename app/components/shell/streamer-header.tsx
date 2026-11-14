@@ -26,8 +26,7 @@ const viewLabel: Record<StreamerView, MessageId> = {
   community: "streamer.nav.community",
 };
 
-// Header: home/streamer identity, active tab links, page action and account. Phones use two rows without
-// label wrapping.
+// Narrow headers use icon tabs with accessible names.
 export function StreamerHeader({
   streamer,
   current,
@@ -86,10 +85,16 @@ export function StreamerHeader({
       </div>
       <nav aria-label={t("nav.main")}>
         {views.map((view: StreamerView) => (
-          <Link key={view} className="nav-tab" to={tabHref(view)} aria-current={current === view ? "page" : undefined}>
+          <Link
+            key={view}
+            className="nav-tab"
+            to={tabHref(view)}
+            aria-label={labels[view] ?? t(viewLabel[view])}
+            title={labels[view] ?? t(viewLabel[view])}
+            aria-current={current === view ? "page" : undefined}
+          >
             <Icon name={icons[view] ?? viewIcon[view]} size={20} />
             <span className="nav-label">{labels[view] ?? t(viewLabel[view])}</span>
-            <span className="compact-nav-label">{labels[view] ?? t(viewLabel[view])}</span>
           </Link>
         ))}
       </nav>

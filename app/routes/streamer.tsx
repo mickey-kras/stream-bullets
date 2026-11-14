@@ -10,6 +10,7 @@ import {
   useRevalidator,
   useSearchParams,
   type LoaderFunctionArgs,
+  type ShouldRevalidateFunctionArgs,
 } from "react-router";
 import { ENTRY_STATUSES } from "../../db/enums";
 import { appContext, type AppEnv } from "../env";
@@ -35,7 +36,7 @@ import { useRememberContentRoute } from "../components/shell/back-link";
 import { StreamerHeader, streamerViews, type StreamerView } from "../components/shell/streamer-header";
 import { EntryDetail } from "../components/streamer/entry-detail";
 import { PageBanner } from "../components/streamer/page-banner";
-import { useBoardRefresh } from "../components/streamer/use-board-refresh";
+import { useBoardRefresh, usePendingTopic } from "../components/streamer/use-board-refresh";
 import { useDiscussionViewport } from "../components/streamer/use-discussion-viewport";
 import { TopicBoard } from "../components/streamer/topic-board";
 import { SupportSection } from "../components/support/support";
@@ -76,6 +77,22 @@ function cameFromList(state: unknown): boolean {
 }
 // Official board tabs: Ideas, About, Community.
 const officialViews: readonly View[] = ["topics", "about", "community"];
+
+export function shouldRevalidate({
+  formMethod,
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs): boolean {
+  if (formMethod || currentUrl.href === nextUrl.href) return defaultShouldRevalidate;
+  const current: URL = new URL(currentUrl);
+  const next: URL = new URL(nextUrl);
+  for (const key of ["discussion", "dialog"]) {
+    current.searchParams.delete(key);
+    next.searchParams.delete(key);
+  }
+  return current.href === next.href ? false : defaultShouldRevalidate;
+}
 
 export function meta({ loaderData: data, matches }: Route.MetaArgs) {
   if (!data) return [{ title: "StreamBullets" }];
@@ -226,7 +243,7 @@ function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revi
 // Each tab has one primary action.
 function headerAction(view: View, owner: boolean, official: boolean): { dialog: Dialog; label: string } | null {
   if (official) return view === "topics" ? { dialog: "idea", label: t("ideas.suggest") } : null;
-  if (view === "topics") return { dialog: "topic", label: t("streamer.suggest") };
+  if (view === "topics") return null;
   if (!owner) return null;
   if (view === "polls") return { dialog: "poll", label: t("streamer.newPoll") };
   if (view === "schedule") return { dialog: "event", label: t("schedule.create") };
@@ -235,7 +252,7 @@ function headerAction(view: View, owner: boolean, official: boolean): { dialog: 
 }
 
 function floatingAction(view: View, owner: boolean, official: boolean): ReturnType<typeof headerAction> {
-  if (view === "topics" || (owner && (view === "polls" || view === "schedule")))
+  if ((official && view === "topics") || (owner && (view === "polls" || view === "schedule")))
     return headerAction(view, owner, official);
   return null;
 }
@@ -342,7 +359,8 @@ export default function StreamerPage(): ReactNode {
     const entry: Entry = loadedSelected?.id === cached.id ? loadedSelected : cached;
     return mergeLiveEntry(entry, live.snapshot, board.revision) as Entry;
   });
-  const selectedBase: Entry | null = loadedSelected || entries[0] || null;
+  const topicSelection = usePendingTopic(entries, loadedSelected);
+  const selectedBase: Entry | null = topicSelection.selected || entries[0] || null;
   const selected: Entry | null = mergeLiveEntry(selectedBase, live.snapshot, board.revision);
   // Wake at battle start and end.
   const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
@@ -611,7 +629,7 @@ export default function StreamerPage(): ReactNode {
         name={streamer.name}
         entries={entries}
         selected={selected}
-        hasSelection={searchParams.has("entry") || (data.intent === "discuss" && selected !== null)}
+        hasSelection={topicSelection.hasSelection || (data.intent === "discuss" && selected !== null)}
         official={official}
         status={status}
         sort={sort}
@@ -649,6 +667,21 @@ export default function StreamerPage(): ReactNode {
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onSearch={(next: string) => changeBoard("query", next)}
         onLoadMore={loadMore}
+        action={
+          !official && (
+            <button
+              type="button"
+              className="suggest-topic gold"
+              aria-label={t("streamer.suggest")}
+              title={t("streamer.suggest")}
+              disabled={!writable}
+              onClick={() => (viewer ? setDialog("topic") : setSignIn(true))}
+            >
+              <Icon name="plus" size={18} />
+              <span>{t("streamer.suggest")}</span>
+            </button>
+          )
+        }
       />
     );
   }

@@ -77,11 +77,13 @@ export function SiteFooter(): ReactNode {
         </DialogLink>
       </nav>
       <nav aria-label={t("footer.nav")} className="footer-compact">
-        <Link to={paths.privacy} aria-current={current(paths.privacy)}>
-          {t("legal.privacy")}
+        <Link to={paths.privacy} aria-current={current(paths.privacy)} aria-label={t("legal.privacy")} title={t("legal.privacy")}>
+          <Icon name="privacy" size={18} />
+          <span className="footer-label">{t("legal.privacy")}</span>
         </Link>
-        <Link to={paths.terms} aria-current={current(paths.terms)}>
-          {t("legal.terms")}
+        <Link to={paths.terms} aria-current={current(paths.terms)} aria-label={t("legal.terms")} title={t("legal.terms")}>
+          <Icon name="terms" size={18} />
+          <span className="footer-label">{t("legal.terms")}</span>
         </Link>
         <DialogLink name="a11y" label={t("footer.accessibility")}>
           <Icon name="eye" size={18} />

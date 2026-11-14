@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode, type RefObject } from "react";
 import { useLocation, useNavigation } from "react-router";
-import { ScrollArea } from "radix-ui";
 import { t, tn } from "../../i18n";
 import type { Entry, EntryStatus, SortOrder, StreamEvent } from "../../types";
 import { announce } from "../a11y/announcer";
@@ -197,6 +196,7 @@ export function TopicBoard({
   onSort,
   onSearch,
   onLoadMore,
+  action,
 }: Readonly<{
   name: string;
   entries: Entry[];
@@ -215,6 +215,7 @@ export function TopicBoard({
   onSort: (sort: SortOrder) => void;
   onSearch: (query: string) => void;
   onLoadMore: () => void;
+  action?: ReactNode;
 }>): ReactNode {
   const [split, setSplit] = useState<number>(40);
   const workspace = useRef<HTMLElement>(null);
@@ -290,65 +291,58 @@ export function TopicBoard({
                 {tn("entry.count", entries.length)}
                 {more ? "+" : ""}
               </span>
+              {action}
             </div>
           </>
         )}
-        <ScrollArea.Root className="topic-scroll-root">
-          <ScrollArea.Viewport asChild tabIndex={0} style={{ overflowY: "auto" }}>
-            <section id="topics" aria-label={t(`entry.list.${noun}`)} aria-busy={loading || undefined}>
-              {entries.map((entry: Entry) => (
-                <button
-                  type="button"
-                  key={entry.id}
-                  className={`topic${official ? " idea-row" : ""} ${selected?.id === entry.id ? "selected" : ""}`}
-                  aria-pressed={selected?.id === entry.id}
-                  data-entry-id={entry.id}
-                  onClick={() => {
-                    remember(entry.id);
-                    onSelect(entry.id);
-                  }}
-                >
-                  <span className="topic-icon">
-                    <TopicIcon category={entry.category} />
+        <section id="topics" tabIndex={0} aria-label={t(`entry.list.${noun}`)} aria-busy={loading || undefined}>
+          {entries.map((entry: Entry) => (
+            <button
+              type="button"
+              key={entry.id}
+              className={`topic${official ? " idea-row" : ""} ${selected?.id === entry.id ? "selected" : ""}`}
+              aria-pressed={selected?.id === entry.id}
+              data-entry-id={entry.id}
+              onClick={() => {
+                remember(entry.id);
+                onSelect(entry.id);
+              }}
+            >
+              <span className="topic-icon">
+                <TopicIcon category={entry.category} />
+              </span>
+              <span className="topic-main">
+                <span className="topic-title">{entry.title}</span>
+                {official ? (
+                  <span className="idea-row-meta">
+                    <IdeaStatus status={entry.status} />
+                    <EntryMeta entry={entry} />
                   </span>
-                  <span className="topic-main">
-                    <span className="topic-title">{entry.title}</span>
-                    {official ? (
-                      <span className="idea-row-meta">
-                        <IdeaStatus status={entry.status} />
-                        <EntryMeta entry={entry} />
-                      </span>
-                    ) : (
-                      <EntryMeta entry={entry} />
-                    )}
-                  </span>
-                  <span className="topic-chevron" aria-hidden="true">
-                    <Icon name="chevron-right" size={18} />
-                  </span>
-                </button>
-              ))}
-              {entries.length === 0 && emptyList}
-              {more && (
-                <button className="load-more" type="button" disabled={loadingMore} onClick={onLoadMore}>
-                  {loadingMore ? t("entry.loading") : t(`entry.loadMore.${noun}`)}
-                </button>
-              )}
-            </section>
-          </ScrollArea.Viewport>
-        </ScrollArea.Root>
+                ) : (
+                  <EntryMeta entry={entry} />
+                )}
+              </span>
+              <span className="topic-chevron" aria-hidden="true">
+                <Icon name="chevron-right" size={18} />
+              </span>
+            </button>
+          ))}
+          {entries.length === 0 && emptyList}
+          {more && (
+            <button className="load-more" type="button" disabled={loadingMore} onClick={onLoadMore}>
+              {loadingMore ? t("entry.loading") : t(`entry.loadMore.${noun}`)}
+            </button>
+          )}
+        </section>
       </section>
       {official ? (
         <span className="ideas-gap" aria-hidden="true" />
       ) : (
         <Splitter value={split} onChange={setSplit} workspace={workspace} />
       )}
-      <ScrollArea.Root className="detail-scroll-root">
-        <ScrollArea.Viewport asChild tabIndex={0} style={{ overflowY: "auto" }}>
-          <section className="detail" id="detail" aria-label={t(`entry.selected.${noun}`)}>
-            {detail}
-          </section>
-        </ScrollArea.Viewport>
-      </ScrollArea.Root>
+      <section className="detail" id="detail" tabIndex={0} aria-label={t(`entry.selected.${noun}`)}>
+        {detail}
+      </section>
     </main>
   );
 }

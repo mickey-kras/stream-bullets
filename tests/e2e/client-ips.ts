@@ -35,6 +35,7 @@ const ranges = {
     [232, 235],
   ],
   roles: [[200, 219]],
+  "compact-layout": [[220, 231]],
 } as const satisfies Record<string, readonly (readonly [number, number])[]>;
 
 export type Spec = keyof typeof ranges;
