@@ -243,8 +243,8 @@ function MentionText({ comment }: Readonly<{ comment: Comment }>): ReactNode {
   for (const mention of [...(comment.mentions ?? [])].sort(
     (a: MentionSelection, b: MentionSelection) => a.start - b.start,
   )) {
-    parts.push(comment.text.slice(offset, mention.start));
     parts.push(
+      comment.text.slice(offset, mention.start),
       <strong className="comment-mention" key={mention.userId} title={mention.userId}>
         {comment.text.slice(mention.start, mention.end)}
       </strong>,
@@ -325,7 +325,7 @@ function CommentArticle({
                   setEditing(false);
                   focusActions();
                 })
-                .catch((cause: unknown) => setError(errorMessage(cause)));
+                .catch((error_: unknown) => setError(errorMessage(error_)));
             }}
           >
             <MentionInput
@@ -591,8 +591,8 @@ export function Discussion({
             });
             if (exact.entryId !== entryId) throw new Error(t("discussion.commentUnavailable"));
             values = mergeThreads(values, [exact.thread], sort);
-          } catch (cause: unknown) {
-            targetError = errorMessage(cause);
+          } catch (error_: unknown) {
+            targetError = errorMessage(error_);
           }
         }
         if (controller.signal.aborted) return;
@@ -682,9 +682,7 @@ export function Discussion({
       .then(() => {
         if (parentId) {
           changeDraft({ replyText: "", replyMentions: [], replyId: null });
-        } else {
-          if (draftStore.getSnapshot().draft.text === value) changeDraft({ text: "", mentions: [] });
-        }
+        } else if (draftStore.getSnapshot().draft.text === value) changeDraft({ text: "", mentions: [] });
       })
       .catch(() => undefined);
   }

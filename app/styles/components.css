@@ -41,14 +41,14 @@ button.gold:hover { background:var(--gold-hover); }
 .discussion-head select { width:106px; min-height:36px; font:400 1.125rem/1.2 Figtree,Onest,sans-serif; border-radius:6px; padding:5px 33px 5px 16px; }
 .comment { display:flex; align-items:flex-start; gap:13px; border-bottom:1px solid var(--c-415759); padding:16px 0 18px; }
 .comment-body { flex:1; min-width:0; }
-.comment-meta { display:flex; align-items:center; gap:12px; }
+.comment-meta { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .comment-meta strong { font:600 1.125rem Figtree,Onest,sans-serif; color:var(--gold); }
 .comment-meta small { font:0.6875rem Figtree,Onest,sans-serif; color:var(--c-a8b9b4); }
 .comment p { font:400 1.062rem/1.36 Figtree,Onest,sans-serif; margin:5px 0 8px; color:var(--c-e5e9df); overflow-wrap:anywhere; }
-.comment-actions { display:flex; align-items:center; gap: 14px; flex-wrap: nowrap; }
+.comment-actions { display:flex; align-items:center; gap:4px 14px; flex-wrap:wrap; }
 .comment-actions button { border:0; border-radius:0; padding:0; display:flex; align-items:center; gap:7px; font:400 1rem Figtree,Onest,sans-serif; color:var(--c-e4e5d7); background:none; min-height:24px; }
 .comment-actions button:hover, .comment-actions button[aria-pressed=true] { color:var(--gold); }
-.composer { display:flex; gap:14px; margin-top:14px; align-items: stretch; }
+.composer { display:flex; gap:14px; margin-top:14px; align-items: stretch; min-width:0; }
 .composer textarea { flex:1; min-width:0; max-height:150px; padding:12px 15px; border:1px solid var(--c-637677); border-radius:7px; background:var(--c-162e3255); color:var(--cream); font:400 1.062rem/1.25 Figtree,Onest,sans-serif; min-height: 48px; padding-top: 13px; padding-bottom: 13px; resize: none; overflow-y: auto; }
 .composer > .gold { min-width:80px; font:600 1.312rem Oswald,sans-serif; padding:8px 17px; align-self: stretch; min-height: 48px; flex: 0 0 auto; padding-block: 0; line-height: 1; }
 .replying { font:0.875rem Figtree,Onest,sans-serif; color:var(--gold); margin-top:9px; }
@@ -1755,11 +1755,8 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .discussion-focus-bar { display: none; }
 .open-discussion { display: none; }
 #detail[data-radix-scroll-area-viewport] > div { display: block !important; min-width: 0; width: 100%; }
-.comment-meta { flex-wrap: wrap; }
 .comment-meta strong, .comment-meta time, .reply-mention { min-width: 0; overflow-wrap: anywhere; }
-.comment-actions { flex-wrap: wrap; gap: 4px 14px; }
 .comment-direct { flex-wrap: wrap; gap: 4px 10px; }
-.composer { min-width: 0; }
 .mention-input { position: relative; min-width: 0; flex: 1; }
 .mention-input textarea { display: block; width: 100%; }
 .mention-options { position: absolute; inset-inline: 0; top: 100%; z-index: 5; max-height: 200px; overflow-y: auto; margin: 4px 0 0; padding: 4px; list-style: none; border: 1px solid var(--input-border); border-radius: var(--radius-control); background: var(--card); box-shadow: 0 4px 12px #0005; }

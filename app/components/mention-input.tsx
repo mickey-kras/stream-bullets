@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { t } from "../i18n";
 import { requestJson, errorMessage } from "./api";
 
@@ -122,9 +122,9 @@ export function MentionInput({
             setLoading(false);
           }
         })
-        .catch((cause: unknown) => {
+        .catch((error_: unknown) => {
           if (!controller.signal.aborted) {
-            setError(errorMessage(cause));
+            setError(errorMessage(error_));
             setLoading(false);
           }
         });
@@ -172,6 +172,33 @@ export function MentionInput({
   const options = users.filter(
     (user: Candidate) => !mentions.some((mention: MentionSelection) => mention.userId === user.id),
   );
+  function editedMentions(next: string): MentionSelection[] {
+    const range = editRange.current;
+    editRange.current = null;
+    if (range?.inputType === "historyUndo" || range?.inputType === "historyRedo")
+      return restore(next, range.inputType === "historyUndo" ? -1 : 1);
+    let selected: MentionSelection[] = [];
+    if (range) {
+      let { start, end } = range;
+      if (start === end && range.inputType.startsWith("delete")) {
+        const removed: number = value.length - next.length;
+        if (range.inputType.endsWith("Backward")) start = Math.max(0, start - removed);
+        else end += removed;
+      }
+      const insertedLength: number = next.length - value.length + end - start;
+      if (insertedLength >= 0) selected = retainedMentions(mentions, { start, end, insertedLength });
+    }
+    remember(next, selected);
+    return selected;
+  }
+  function change(event: ChangeEvent<HTMLTextAreaElement>): void {
+    const next: string = event.currentTarget.value;
+    onMentionsChange(editedMentions(next));
+    onChange(next);
+    detect(event.currentTarget);
+  }
+  let mentionStatus: string = error || (options.length ? "" : t("discussion.mentionEmpty"));
+  if (loading) mentionStatus = t("discussion.mentionLoading");
   return (
     <div className="mention-input">
       <textarea
@@ -189,30 +216,7 @@ export function MentionInput({
           if (!event.currentTarget.parentElement?.contains(event.relatedTarget)) setToken(null);
         }}
         onClick={(event) => detect(event.currentTarget)}
-        onChange={(event) => {
-          const next = event.currentTarget.value;
-          const range = editRange.current;
-          editRange.current = null;
-          let selected: MentionSelection[];
-          if (range?.inputType === "historyUndo" || range?.inputType === "historyRedo") {
-            selected = restore(next, range.inputType === "historyUndo" ? -1 : 1);
-          } else {
-            if (range) {
-              let { start, end } = range;
-              if (start === end && range.inputType.startsWith("delete")) {
-                const removed = value.length - next.length;
-                if (range.inputType.endsWith("Backward")) start = Math.max(0, start - removed);
-                else end += removed;
-              }
-              const insertedLength = next.length - value.length + end - start;
-              selected = insertedLength >= 0 ? retainedMentions(mentions, { start, end, insertedLength }) : [];
-            } else selected = [];
-            remember(next, selected);
-          }
-          onMentionsChange(selected);
-          onChange(next);
-          detect(event.currentTarget);
-        }}
+        onChange={change}
         onKeyDown={(event) => {
           if (!token || event.nativeEvent.isComposing) return;
           if (event.key === "Escape") {
@@ -253,9 +257,7 @@ export function MentionInput({
           <output className="sr-only">
             {options[active] ? `${options[active].name} - ${options[active].handle ?? options[active].id}` : ""}
           </output>
-          <output>
-            {loading ? t("discussion.mentionLoading") : error || (options.length ? "" : t("discussion.mentionEmpty"))}
-          </output>
+          <output>{mentionStatus}</output>
         </div>
       )}
     </div>
