@@ -14,7 +14,10 @@ interface BoardSource {
 }
 
 // Show a loaded topic while the router refreshes its server data. Cancellation restores the current selection.
-export function usePendingTopic(entries: Entry[], selected: Entry | null): {
+export function usePendingTopic(
+  entries: Entry[],
+  selected: Entry | null,
+): {
   selected: Entry | null;
   hasSelection: boolean;
 } {

@@ -668,14 +668,16 @@ export default function StreamerPage(): ReactNode {
         onSearch={(next: string) => changeBoard("query", next)}
         onLoadMore={loadMore}
         action={
-          !official && (
+          !official &&
+          viewer && (
             <button
               type="button"
+              id="suggest"
               className="suggest-topic gold"
               aria-label={t("streamer.suggest")}
               title={t("streamer.suggest")}
               disabled={!writable}
-              onClick={() => (viewer ? setDialog("topic") : setSignIn(true))}
+              onClick={() => setDialog("topic")}
             >
               <Icon name="plus" size={18} />
               <span>{t("streamer.suggest")}</span>

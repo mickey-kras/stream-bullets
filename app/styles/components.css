@@ -1720,7 +1720,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .list-toolbar:has(.suggest-topic) { flex-wrap: wrap; gap: 8px; }
 .list-toolbar .list-count { margin-left: auto; }
 .list-toolbar:has(.suggest-topic) .tabs button { padding-inline: 12px; }
-.list-toolbar .suggest-topic { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 0 0 auto; min-width: 44px; padding: 6px 10px; white-space: nowrap; }
+.list-toolbar .suggest-topic { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 0 0 auto; min-width: 44px; min-height: var(--control-size); padding: 6px 10px; white-space: nowrap; }
 @container (max-width: 35em) {
   .suggest-topic > span { display: none; }
   .list-toolbar .suggest-topic { padding: 0; width: 44px; }

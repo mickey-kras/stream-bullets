@@ -295,7 +295,7 @@ export function TopicBoard({
             </div>
           </>
         )}
-        <section id="topics" tabIndex={0} aria-label={t(`entry.list.${noun}`)} aria-busy={loading || undefined}>
+        <section id="topics" tabIndex={-1} aria-label={t(`entry.list.${noun}`)} aria-busy={loading || undefined}>
           {entries.map((entry: Entry) => (
             <button
               type="button"
@@ -340,7 +340,7 @@ export function TopicBoard({
       ) : (
         <Splitter value={split} onChange={setSplit} workspace={workspace} />
       )}
-      <section className="detail" id="detail" tabIndex={0} aria-label={t(`entry.selected.${noun}`)}>
+      <section className="detail" id="detail" tabIndex={-1} aria-label={t(`entry.selected.${noun}`)}>
         {detail}
       </section>
     </main>

@@ -32,6 +32,7 @@ for (const [languageIndex, locale] of ["en", "de"].entries()) {
         const actionBox = await action.boundingBox();
         expect(sort).not.toBeNull();
         expect(actionBox).not.toBeNull();
+        expect(actionBox?.height).toBeGreaterThanOrEqual(44);
         expect(Math.abs((actionBox?.y ?? 0) - (sort?.y ?? 0))).toBeLessThanOrEqual(4);
         const toolbarBox = await toolbar.boundingBox();
         expect(actionBox?.x).toBeGreaterThan(sort!.x + sort!.width);

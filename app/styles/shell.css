@@ -222,10 +222,7 @@ a.nav-tab:hover { border-color: var(--gold); }
 }
 html[data-underline="true"] a:not(.button-link):not(.nav-tab):not(.skip-link) { text-decoration: underline; text-underline-offset: 3px; }
 html[data-font="readable"] :is(h1, h2, h3, .eyebrow, .topic-title, button, .button-link, legend, .nav-label, .compact-nav-label, .sched-title, .poll-card h2) { font-family: var(--body) !important; letter-spacing: .02em !important; }
-html[data-contrast="high"] body::before { border-image: none !important; border-color: var(--gold); }
 html[data-contrast="high"] body::after { display: none; }
-html[data-contrast="high"] body:not(:has(.landing-page)) > .site-footer { background: var(--gold); }
-html[data-contrast="high"] body:not(:has(.landing-page)) > .site-footer a { color: var(--hc-black); }
 html[data-contrast="high"] :is(.sched-hero, .ov-card, .modal-content, .account-menu) { box-shadow: none; }
 @media (forced-colors: active) {
   body::before, body::after { display: none; }
