@@ -820,6 +820,24 @@ export default function StreamerPage(): ReactNode {
     );
   }
 
+  function renderCreateEntry(): ReactNode {
+    return (
+      <CreateEntry
+        key={dialog === "topic" || dialog === "poll" ? dialog : "closed"}
+        mode={dialog === "poll" ? "poll" : "topic"}
+        open={dialog === "topic" || dialog === "poll"}
+        onOpenChange={(open: boolean) => {
+          if (!open) closeIntentDialog();
+        }}
+        onCreate={async (body: unknown) => {
+          const result = await mutate(body);
+          created.current = true;
+          navigate(dialog === "poll" ? "polls" : "topics", result.id);
+        }}
+      />
+    );
+  }
+
   const action = viewer ? headerAction(view, owner, official) : null;
   const showFab: boolean = Boolean(viewer && writable && !pollsClass.includes("mash-page"));
   const fab = showFab ? floatingAction(view, owner, official) : null;
@@ -894,19 +912,7 @@ export default function StreamerPage(): ReactNode {
           {fab.dialog === "idea" ? t("ideas.suggestShort") : fab.label}
         </button>
       )}
-      <CreateEntry
-        key={dialog === "topic" || dialog === "poll" ? dialog : "closed"}
-        mode={dialog === "poll" ? "poll" : "topic"}
-        open={dialog === "topic" || dialog === "poll"}
-        onOpenChange={(open: boolean) => {
-          if (!open) closeIntentDialog();
-        }}
-        onCreate={async (body: unknown) => {
-          const result = await mutate(body);
-          created.current = true;
-          navigate(dialog === "poll" ? "polls" : "topics", result.id);
-        }}
-      />
+      {renderCreateEntry()}
       <SignInDialog
         open={signIn}
         onOpenChange={(open: boolean) => {

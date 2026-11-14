@@ -285,7 +285,7 @@ export async function getCommentThread(
   )
     .bind(viewerId ?? "", viewerId ?? "", id)
     .first<CommentRow>();
-  if (!row || row.removed_at !== null || !(await getVisibleEntry(env, row.entry_id, viewerId)))
+  if (row?.removed_at !== null || !(await getVisibleEntry(env, row.entry_id, viewerId)))
     throw new HttpError(404, "Comment not found.");
   const root = await env.DB.prepare(`WITH RECURSIVE ancestors(id,parent_id) AS (
     SELECT id,parent_id FROM entry_comments WHERE id=?

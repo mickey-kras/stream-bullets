@@ -27,8 +27,8 @@ export function NotificationLink(): ReactNode {
           setUnread(snapshot.unreadCount);
           setError("");
         })
-        .catch((cause: unknown) => {
-          if (!signal.aborted) setError(errorMessage(cause));
+        .catch((error_: unknown) => {
+          if (!signal.aborted) setError(errorMessage(error_));
         });
     };
     refresh();
@@ -83,8 +83,8 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
           : next.notifications,
       }));
       changed();
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
     } finally {
       setBusy(false);
     }
@@ -104,8 +104,8 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
       }));
       changed();
       return true;
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
       return false;
     } finally {
       setBusy(false);
@@ -116,9 +116,11 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || item.read) return;
     event.preventDefault();
     if (busy) return;
-    void mark(item, true).then((saved: boolean) => {
-      if (saved) void navigate(item.href);
-    });
+    mark(item, true)
+      .then(async (saved: boolean): Promise<void> => {
+        if (saved) await navigate(item.href);
+      })
+      .catch((error_: unknown) => setError(errorMessage(error_)));
   }
 
   async function save(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -130,8 +132,8 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
       await postJson("/api/notifications", { action: "preferences", ...preferences });
       setSnapshot((current: NotificationSnapshot) => ({ ...current, preferences }));
       setStatus(t("notifications.saved"));
-    } catch (cause: unknown) {
-      setError(errorMessage(cause));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
     } finally {
       setBusy(false);
     }

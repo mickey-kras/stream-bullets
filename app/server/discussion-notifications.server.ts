@@ -66,7 +66,7 @@ export async function validateMentions(
   const { results } = await env.DB.prepare(`${candidateSelect} AND u.id IN (SELECT value FROM json_each(?))`)
     .bind(streamerId, streamerId, JSON.stringify(mentions.map((mention: CommentMention): string => mention.userId)))
     .all<CandidateRow>();
-  const users = new Map(results.map((row: CandidateRow): [string, string] => [row.id, row.name]));
+  const users = new Map<string, string>(results.map((row: CandidateRow): [string, string] => [row.id, row.name]));
   const previous = previousCommentId
     ? await env.DB.prepare(`SELECT m.user_id,m.start,m.end,c.text
     FROM comment_mentions m JOIN entry_comments c ON c.id=m.comment_id WHERE c.id=? AND c.removed_at IS NULL`)
