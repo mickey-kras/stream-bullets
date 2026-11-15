@@ -65,6 +65,12 @@ function problemText(layer: GridLayer, problem: PlaceProblem): string {
   return t("overlay.grid.small", { layer: name(layer), w: MIN_CELLS[layer].w, h: MIN_CELLS[layer].h });
 }
 
+// "Column 3, row 2: Chat." for the cell under the keyboard cursor.
+function cursorText(cells: LayerCells, cell: Cell): string {
+  const here: GridLayer | null = layerAt(cells, cell);
+  return t("overlay.grid.cursor", { c: cell.c + 1, r: cell.r + 1, what: here ? name(here) : t("overlay.grid.empty") });
+}
+
 function placeText(rect: CellRect): { c: number; r: number; w: number; h: number } {
   return { c: rect.c + 1, r: rect.r + 1, w: rect.w, h: rect.h };
 }
@@ -240,10 +246,7 @@ export function LayoutGrid({
       const cell: Cell = clampCell({ c: cursor.c + arrow[0], r: cursor.r + arrow[1] });
       setCursor(cell);
       if (drag) setDrag(follow(drag, cell));
-      const here: GridLayer | null = layerAt(cells, cell);
-      say(
-        t("overlay.grid.cursor", { c: cell.c + 1, r: cell.r + 1, what: here ? name(here) : t("overlay.grid.empty") }),
-      );
+      say(cursorText(cells, cell));
     } else if (event.key === " " || event.key === "Enter") {
       event.preventDefault();
       activate();
@@ -313,13 +316,14 @@ export function LayoutGrid({
             />
           )}
           {/* The application role makes screen readers leave browse mode here, so the grid button gets the arrow keys,
-              Space and Enter. The role stays on a wrapper: an application element takes no key handlers. */}
+              Space and Enter. The role stays on a wrapper: an application element takes no key handlers. The wrapper
+              names the grid and the button names the cursor cell, so the grid name is read once. */}
           <div role="application" className="ov-grid-app" aria-label={label}>
             <button
               type="button"
               className="ov-grid-input"
               data-comp-grid
-              aria-label={label}
+              aria-label={cursorText(cells, cursor)}
               aria-describedby={helpId}
               onPointerDown={pointerDown}
               onPointerMove={pointerMove}

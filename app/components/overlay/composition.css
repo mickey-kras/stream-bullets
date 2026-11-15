@@ -100,8 +100,8 @@
   margin: 0;
 }
 /* The vertical frame fits the screen height between the site header and the page bottom: about 140 px on a wide
-   screen, and about 270 px with the phone Take dock (header 119 px and dock 131 px at 390 × 844). It never gets
-   narrower than 200 px. */
+   screen, and about 310 px with the phone Take dock (header 119 px, and a dock of up to 168 px at 390 × 844 when its
+   title wraps in German or Russian). It never gets narrower than 200 px. */
 .ov-comp-frame[data-orientation="vertical"] {
   --ov-comp-chrome: 140px;
   aspect-ratio: 9 / 16;
@@ -111,7 +111,7 @@
 }
 @media (max-width: 56.25em) {
   .ov-comp-frame[data-orientation="vertical"] {
-    --ov-comp-chrome: 270px;
+    --ov-comp-chrome: 310px;
   }
 }
 .ov-grid-lines {

@@ -40,8 +40,10 @@ export const liveRoutes: ApiRoute[] = [
     const action = await readJson(request, overlayActionSchema);
     const streamer = await getOwnStreamer(env, viewer.id);
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
-    // Layer edits arrive from grid drags and keys, so they share the write quota with the chat test switch.
-    if (action.action === "layers" || action.action === "chatTest") await consumeMutationQuota(env, viewer.id);
+    // Layer edits arrive from grid drags and keys, so they share the write quota with starting a chat test. Stop
+    // costs no quota, so the owner can always end a test.
+    if (action.action === "layers" || (action.action === "chatTest" && action.on))
+      await consumeMutationQuota(env, viewer.id);
     const { overlay, changed } = await updateOverlay(env, viewer.id, streamer.id, action);
     // An ignored old layer write changed nothing, so the overlay pages need no update.
     if (changed) notifyOverlay(env, streamer.id);

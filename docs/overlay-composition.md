@@ -208,6 +208,7 @@ Use the chat test to see the chat in your real OBS scene before you go live.
 Under the chat layer in **Composition**, select **Start chat test**. The chat layer must be on. If it is off, the server refuses the start.
 
 - The test runs for 60 seconds (`CHAT_TEST_MS`). **Stop** ends it at once.
+- If you set the chat layer to off, the test also stops. It does not continue when the layer is on again.
 - The editor shows the remaining time. A screen reader reads only the start and the end of the test.
 - Each overlay page that shows the chat layer plays sample chat from all three platforms.
   The samples include a message that a moderator removes and a user timeout.
@@ -224,7 +225,7 @@ Each page ends the test with its own timer at the end time. An end time in the p
 During the test, the real chat continues to collect messages, but it does not show.
 When the test ends, the real chat shows again. Its rows show in place, without an entry animation.
 
-The chat test counts against the write quota. Only the signed-in owner of the page can start or stop it.
+A start of the chat test counts against the write quota. A stop does not, so you can always stop the test. Only the signed-in owner of the page can start or stop it.
 
 ## Chat behavior
 

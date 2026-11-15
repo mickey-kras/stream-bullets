@@ -40,6 +40,11 @@ async function storedLayers(page: Page): Promise<OverlayLayers> {
   return ((await response.json()) as { overlay: { layers: OverlayLayers } }).overlay.layers;
 }
 
+/** The grid button inside the application region that carries the grid name. */
+function gridButton(editor: Locator, name: string | RegExp): Locator {
+  return editor.getByRole("application", { name }).getByRole("button");
+}
+
 /** Pointer helpers for the grid: the centre of a cell in screen pixels. */
 async function gridCells(
   grid: Locator,
@@ -82,11 +87,13 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
   await expect(frame).toHaveAttribute("data-orientation", "horizontal");
-  const grid = editor.getByRole("button", { name: "Layout grid, 16 columns by 9 rows" });
-  await expect(grid).toBeVisible();
-  // The grid button sits in an application region, so screen readers pass the keys to it in browse mode.
+  // The grid button sits in an application region, so screen readers pass the keys to it in browse mode. The region
+  // names the grid; the button names the cursor cell, so a screen reader does not read the grid name twice.
   const app = editor.getByRole("application", { name: "Layout grid, 16 columns by 9 rows" });
-  await expect(app.getByRole("button", { name: "Layout grid, 16 columns by 9 rows" })).toHaveCount(1);
+  await expect(app.getByRole("button")).toHaveCount(1);
+  const grid = gridButton(editor, "Layout grid, 16 columns by 9 rows");
+  await expect(grid).toBeVisible();
+  await expect(grid).toHaveAccessibleName("Column 1, row 1: Chat.");
   // The default places: chat on the left, the characters slot along the bottom, the content without a cell.
   await expect(frame.locator('[data-grid-box="chat"]')).toContainText("Chat · 600 × 840");
   await expect(frame.locator('[data-grid-box="characters"]')).toContainText("Characters · Coming soon");
@@ -158,7 +165,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await expect(frame.locator("[data-grid-cursor]")).toBeVisible();
   // Space picks up the content at the cursor, an arrow carries it, Space puts it down.
   await page.keyboard.press("Space");
-  await expect(status).toHaveText("Moving On-air content. Move the cursor, then press Space.");
+  await expect(status).toHaveText("Moving On-air content. Move the cursor, then press Space or Enter.");
   await page.keyboard.press("ArrowDown");
   await expect(status).toHaveText("Column 1, row 2: On-air content.");
   save = saved(page);
@@ -197,12 +204,12 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await editor.getByRole("button", { name: "Vertical 9 × 16" }).click();
   await save;
   await expect(frame).toHaveAttribute("data-orientation", "vertical");
-  await expect(editor.getByRole("button", { name: "Layout grid, 9 columns by 16 rows" })).toBeVisible();
+  await expect(gridButton(editor, "Layout grid, 9 columns by 16 rows")).toBeVisible();
   await expect(frame.locator('[data-grid-box="chat"]')).toContainText("Chat · 1080 × 600");
   await expect(editor.locator("[data-comp-frame-size]")).toHaveText(
     "Set the OBS browser source to 1080 × 1920 for this orientation.",
   );
-  const tall = editor.getByRole("button", { name: "Layout grid, 9 columns by 16 rows" });
+  const tall = gridButton(editor, "Layout grid, 9 columns by 16 rows");
   await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
   at = await gridCells(tall, 9, 16);
   save = saved(page);
@@ -253,12 +260,14 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
       bodies.push(request.postDataJSON());
   });
   await editor.getByRole("button", { name: "On-air content (min. 4 × 2)" }).click();
-  await editor.getByRole("button", { name: "Layout grid, 16 columns by 9 rows" }).focus();
+  await gridButton(editor, "Layout grid, 16 columns by 9 rows").focus();
   // The cursor goes to the last column, and a drawing starts there.
   for (let step = 0; step < 15; step++) await page.keyboard.press("ArrowRight");
   await expect(status).toHaveText("Column 16, row 1: empty.");
   await page.keyboard.press("Space");
-  await expect(status).toHaveText("Drawing On-air content from column 16, row 1. Move the cursor, then press Space.");
+  await expect(status).toHaveText(
+    "Drawing On-air content from column 16, row 1. Move the cursor, then press Space or Enter.",
+  );
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(1);
   // Leaving the grid ends the drawing.
   const save = saved(page);
@@ -266,14 +275,14 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
   await save;
   await expect(status).toHaveText("Cancelled.");
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
-  // The cursor is in the last column of the 9 columns now.
-  const tall = editor.getByRole("button", { name: "Layout grid, 9 columns by 16 rows" });
+  // The cursor is in the last column of the 9 columns now: the first key, Space, draws from there.
+  const tall = gridButton(editor, "Layout grid, 9 columns by 16 rows");
   await tall.focus();
-  await page.keyboard.press("ArrowDown");
-  await expect(status).toHaveText("Column 9, row 2: empty.");
-  await page.keyboard.press("ArrowUp");
-  // Draw from there: every cell stays inside the vertical grid.
   await page.keyboard.press("Space");
+  await expect(status).toHaveText(
+    "Drawing On-air content from column 9, row 1. Move the cursor, then press Space or Enter.",
+  );
+  // Every cell of the drawing stays inside the vertical grid.
   for (const key of ["ArrowLeft", "ArrowLeft", "ArrowLeft", "ArrowDown"]) await page.keyboard.press(key);
   const placed = saved(page);
   await page.keyboard.press("Space");
@@ -286,32 +295,63 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
   expect((await storedLayers(page)).cells.vertical.content).toEqual({ c: 5, r: 0, w: 4, h: 2 });
   // A click without a pointer (a screen reader's activation) acts as Space: it picks up the layer at the cursor.
   await tall.dispatchEvent("click");
-  await expect(status).toHaveText("Moving On-air content. Move the cursor, then press Space.");
+  await expect(status).toHaveText("Moving On-air content. Move the cursor, then press Space or Enter.");
   await page.keyboard.press("Escape");
   await expect(status).toHaveText("Cancelled.");
+  // An orientation change from elsewhere (another tab, here a request) ends an open drawing without a blur.
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await expect(status).toHaveText("Column 6, row 4: empty.");
+  await page.keyboard.press("Space");
+  await expect(frame.locator("[data-grid-preview]")).toHaveCount(1);
+  const switched: number = await page.evaluate(async (): Promise<number> => {
+    const response = await fetch("/api/overlay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "layers", orientation: "horizontal" }),
+    });
+    return response.status;
+  });
+  expect(switched).toBe(200);
+  await expect(frame).toHaveAttribute("data-orientation", "horizontal");
+  const wide = gridButton(editor, "Layout grid, 16 columns by 9 rows");
+  await expect(wide).toBeFocused();
+  await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
+  // Space starts a new drawing, so no drawing from the old grid was still open.
+  await page.keyboard.press("Space");
+  await expect(status).toHaveText(/^Drawing On-air content from column 6, row 4\./);
+  await page.keyboard.press("Escape");
   await close(owner);
 });
 
-test("on a 390 × 844 phone the whole vertical frame fits between the header and the Take dock", async ({ browser }) => {
-  await runSql("composition-editor-vertical", [
-    `UPDATE overlay_state SET layers='{"orientation":"vertical"}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
-  ]);
-  const owner = await signedIn(browser, "featureowner", OWNER_IP);
-  const page = await newPage(owner);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/overlay-control");
-  const frame = page.getByRole("region", { name: "Composition preview" });
-  await expect(frame).toHaveAttribute("data-orientation", "vertical");
-  const space = await page.evaluate(() => {
-    const bottom = (selector: string): number => document.querySelector(selector)?.getBoundingClientRect().bottom ?? 0;
-    const top = (selector: string): number => document.querySelector(selector)?.getBoundingClientRect().top ?? 0;
-    return top(".ov-take-dock") - bottom("header");
+// The Take dock is taller where its title wraps (German, Russian), so check those languages too.
+for (const locale of ["en", "de", "ru"]) {
+  test(`on a 390 × 844 phone the whole vertical frame fits between the header and the Take dock (${locale})`, async ({
+    browser,
+  }) => {
+    await runSql("composition-editor-vertical", [
+      `UPDATE overlay_state SET layers='{"orientation":"vertical"}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
+    ]);
+    const owner = await signedIn(browser, "featureowner", OWNER_IP);
+    await owner.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/", sameSite: "Lax" }]);
+    const page = await newPage(owner);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/overlay-control");
+    await expect(page.locator("html")).toHaveAttribute("lang", locale);
+    const frame = page.locator(".ov-comp-frame");
+    await expect(frame).toHaveAttribute("data-orientation", "vertical");
+    const space = await page.evaluate(() => {
+      const bottom = (selector: string): number =>
+        document.querySelector(selector)?.getBoundingClientRect().bottom ?? 0;
+      const top = (selector: string): number => document.querySelector(selector)?.getBoundingClientRect().top ?? 0;
+      return top(".ov-take-dock") - bottom("header");
+    });
+    const box = await frame.boundingBox();
+    expect(box?.height).toBeGreaterThan(300);
+    expect(box?.height).toBeLessThanOrEqual(space);
+    await close(owner);
   });
-  const box = await frame.boundingBox();
-  expect(box?.height).toBeGreaterThan(300);
-  expect(box?.height).toBeLessThanOrEqual(space);
-  await close(owner);
-});
+}
 
 test("the chat test starts and stops from the editor and shows the time left", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
@@ -332,8 +372,22 @@ test("the chat test starts and stops from the editor and shows the time left", a
   await expect(status).toHaveText("Turn on “Show on stream” to test the chat.");
   // Force: Playwright waits for an aria-disabled button to become enabled.
   await toggle.click({ force: true });
+  // The server checks the saved layer, so the test stays unavailable until the layer save lands.
+  let releaseLayer: (() => void) | undefined;
+  await page.route("**/api/overlay", async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    await new Promise<void>((resolve) => {
+      releaseLayer = resolve;
+    });
+    return route.fallback();
+  });
   let save = saved(page);
-  await chatLayer.getByRole("checkbox", { name: "Show on stream" }).check();
+  const show = chatLayer.getByRole("checkbox", { name: "Show on stream" });
+  await show.check();
+  await expect.poll(() => releaseLayer !== undefined).toBe(true);
+  await expect(toggle).toHaveAttribute("aria-disabled", "true");
+  await page.unroute("**/api/overlay");
+  releaseLayer?.();
   await save;
   expect(withoutWrite(bodies)).toEqual([{ action: "layers", chat: { enabled: true } }]);
   await expect(toggle).toHaveAttribute("aria-disabled", "false");
@@ -374,9 +428,23 @@ test("the chat test starts and stops from the editor and shows the time left", a
   await expect(toggle).toHaveText("Start chat test");
   await expect(toggle).toBeFocused();
   await expect(news).toHaveText("Chat test stopped.");
+  // Turning off the chat layer ends a running test: the server clears the end time.
+  save = saved(page);
+  await page.keyboard.press("Enter");
+  await save;
+  await expect(toggle).toHaveText("Stop");
+  save = saved(page);
+  await show.uncheck();
+  await save;
+  await expect(toggle).toHaveText("Start chat test");
+  await expect(toggle).toHaveAttribute("aria-disabled", "true");
+  await expect(news).toHaveText("Chat test ended.");
+  expect((await storedLayers(page)).chat.enabled).toBe(false);
   expect(withoutWrite(bodies).slice(1)).toEqual([
     { action: "chatTest", on: true },
     { action: "chatTest", on: false },
+    { action: "chatTest", on: true },
+    { action: "layers", chat: { enabled: false } },
   ]);
   await close(owner);
 });
@@ -558,7 +626,7 @@ test("a note shows while the chat covers the on-air content and goes when the ch
 
   // Below the poll is free: draw the chat again in rows 6 and 7, beside its old place.
   await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
-  const grid = editor.getByRole("button", { name: /^Layout grid/ });
+  const grid = gridButton(editor, /^Layout grid/);
   let at = await gridCells(grid, 16, 9);
   let save = saved(page);
   await dragCells(page, at(6, 5), at(11, 6));

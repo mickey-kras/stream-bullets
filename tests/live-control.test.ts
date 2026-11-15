@@ -15,6 +15,7 @@ import {
   getOverlayData,
   getOverlayState,
   nextOverlayState,
+  storedWrites as parseStoredWrites,
   updateOverlay,
   type OverlayUpdate,
 } from "../app/server/overlay.server";
@@ -816,7 +817,8 @@ describe("overlay control", (): void => {
       expect(limited.headers.get("Retry-After")).toBe("60");
       expect(((await storedLayers(page)) as OverlayLayers).chat.enabled).toBe(true);
       expect((await send({ action: "chatTest", on: true })).status).toBe(429);
-      // Other overlay actions do not use the quota.
+      // Stopping a chat test and other overlay actions do not use the quota.
+      expect((await send({ action: "chatTest", on: false })).status).toBe(200);
       expect((await send({ action: "take" })).status).toBe(200);
     });
 
@@ -944,6 +946,23 @@ describe("overlay control", (): void => {
         expect(await chatColumn()).toBe(9);
       });
 
+      it("reads a malformed stored write order as no writes, so overlay actions keep working", async (): Promise<void> => {
+        const warn = vi.spyOn(console, "warn").mockImplementation((): void => {});
+        expect(parseStoredWrites('[["editor-a",3]]')).toEqual([["editor-a", 3]]);
+        for (const raw of ["{", "null", '[["editor-a",0]]', "[1]"]) expect(parseStoredWrites(raw)).toEqual([]);
+        expect(warn).toHaveBeenCalledTimes(4);
+        expect(warn).toHaveBeenCalledWith("overlay_layers_writes_invalid");
+        await moveChat(9, 2);
+        // The column check allows only a JSON array, so a bad entry is the malformed value that can reach the read.
+        await env.DB.prepare("UPDATE overlay_state SET layers_writes=? WHERE streamer_id=?")
+          .bind('[["editor-0000-1111",0]]', page)
+          .run();
+        expect((await send({ action: "take" })).status).toBe(200);
+        expect((await moveChat(5, 1)).changed).toBe(true);
+        expect(await storedWrites()).toEqual([[writer, 1]]);
+        warn.mockRestore();
+      });
+
       it("does not notify the overlay pages for an ignored write", async (): Promise<void> => {
         const cells = { horizontal: { chat: { c: 4, r: 0, w: 3, h: 2 } } };
         expect((await send({ action: "layers", write: { writer, seq: 2 }, cells })).status).toBe(200);
@@ -980,6 +999,17 @@ describe("overlay control", (): void => {
       expect(
         await nextOverlayState(env, page, { ...current, chatTestUntil: 9 }, { action: "chatTest", on: false }, 1),
       ).toEqual({ ...current, revision: 4 });
+    });
+
+    it("ends a running test when the chat layer turns off", async (): Promise<void> => {
+      const layers: OverlayLayers = { ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, enabled: true } };
+      const running: OverlayState = { ...DEFAULT_OVERLAY, layers, chatTestUntil: 9_000, revision: 3 };
+      const off = await nextOverlayState(env, page, running, { action: "layers", chat: { enabled: false } });
+      expect(off).toMatchObject({ chatTestUntil: 0, revision: 4 });
+      expect(off.layers.chat.enabled).toBe(false);
+      // Other layer edits keep the test running.
+      const moved = await nextOverlayState(env, page, running, { action: "layers", chat: { hideCommands: false } });
+      expect(moved.chatTestUntil).toBe(9_000);
     });
 
     it("refuses to start while the chat layer is off, but stops", async (): Promise<void> => {

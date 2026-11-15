@@ -119,8 +119,9 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
 - The change goes live at once. Overlay pages get the new `layers` through the live room.
 - `chatTest` with `on: true` sets `chatTestUntil` to the server time plus 60 seconds. With `on: false` it sets 0.
   `on: true` returns `400` when the chat layer is off. `on: false` always applies.
+  A `layers` action that sets the chat layer to off also sets `chatTestUntil` to 0.
   Overlay pages get the value through the live room. A time in the past means no test.
-- Each `layers` and `chatTest` action counts against the write quota of 60 changes each minute.
+- Each `layers` action and each `chatTest` action with `on: true` counts against the write quota of 60 changes each minute.
 - The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
 - Errors: `400` for an invalid body, a cell outside the grid, or overlapping layers, `401` without sign-in, and `403` for another origin.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.

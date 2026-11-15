@@ -124,8 +124,10 @@ export async function nextOverlayState(
     next.messageStyle = action.style;
   }
   if (action.action === "layers") next.layers = mergedLayers(current.layers, action);
+  // The test plays in the chat layer, so turning the layer off also ends a running test.
+  if (!next.layers.chat.enabled) next.chatTestUntil = 0;
   if (action.action === "chatTest") {
-    // The test plays in the chat layer, so it cannot start while the layer is off. Stop always works.
+    // The test cannot start while the chat layer is off. Stop always works.
     if (action.on && !current.layers.chat.enabled) throw new HttpError(400, "Turn on the chat layer first.");
     next.chatTestUntil = action.on ? now + CHAT_TEST_MS : 0;
   }
@@ -179,6 +181,21 @@ const WRITERS_KEPT = 8;
 const layersWritesSchema = z.array(z.tuple([z.string().max(64), z.number().int().positive()])).max(WRITERS_KEPT);
 type LayersWrites = z.infer<typeof layersWritesSchema>;
 
+// The stored write order. A malformed value reads as no writes and is logged, so it never blocks overlay actions:
+// the next layer write replaces it.
+export function storedWrites(raw: string): LayersWrites {
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    value = undefined;
+  }
+  const parsed = layersWritesSchema.safeParse(value);
+  if (parsed.success) return parsed.data;
+  console.warn("overlay_layers_writes_invalid");
+  return [];
+}
+
 // `writes` with `write` as the most recent entry. The oldest editor drops out after WRITERS_KEPT editors.
 function recordWrite(writes: LayersWrites, write: LayersWrite): LayersWrites {
   const others: LayersWrites = writes.filter(([writer]: [string, number]): boolean => writer !== write.writer);
@@ -215,7 +232,7 @@ export async function updateOverlay(
       .bind(streamerId)
       .first<OverlayRow & { layers_writes: string }>();
     const current = overlayValue(row);
-    const writes: LayersWrites = row ? layersWritesSchema.parse(JSON.parse(row.layers_writes)) : [];
+    const writes: LayersWrites = row ? storedWrites(row.layers_writes) : [];
     if (write && passedWrite(writes, write)) return { overlay: current, changed: false };
     const next = await nextOverlayState(env, streamerId, current, action);
     const applied: LayersWrites = write ? recordWrite(writes, write) : writes;

@@ -60,7 +60,7 @@ function EditorAlert({ error }: Readonly<{ error: EditorError }>): ReactNode {
 /**
  * Start and Stop for the chat test, with the time left. The test needs the chat layer on. The button never takes the
  * `disabled` attribute: it keeps focus during its own request and when the test ends, and ignores presses while it
- * is unavailable. A polite region says when the test starts and stops; the time left is not read each second.
+ * is unavailable. A polite region says when the test starts, stops or ends; the time left is not read each second.
  */
 function ChatTest({
   until,
@@ -71,6 +71,7 @@ function ChatTest({
   until: number;
   /** Server time. */
   now: number;
+  /** The saved chat layer is on. */
   enabled: boolean;
   onSaved: (overlay: OverlayState) => void;
 }>): ReactNode {
@@ -83,17 +84,25 @@ function ChatTest({
   // Empty on page load; set when `running` changes, so the region speaks only for a start or a stop.
   const [news, setNews] = useState<string>("");
   const wasRunning = useRef<boolean>(running);
+  // True from this editor's Stop press until its request fails: the end is then "stopped", not "ended" by the timer,
+  // the chat layer or another tab. The live room can bring the stop before the response.
+  const stoppedHere = useRef<boolean>(false);
   useEffect(() => {
     if (wasRunning.current === running) return;
     wasRunning.current = running;
-    setNews(running ? t("overlay.test.started", { seconds: CHAT_TEST_MS / 1000 }) : t("overlay.test.stopped"));
+    let text: MessageId = "overlay.test.ended";
+    if (running) text = "overlay.test.started";
+    else if (stoppedHere.current) text = "overlay.test.stopped";
+    setNews(t(text));
   }, [running]);
   async function send(on: boolean): Promise<void> {
     setBusy(true);
+    stoppedHere.current = !on;
     try {
       const result = await postJson<{ overlay: OverlayState }>("/api/overlay", { action: "chatTest", on });
       onSaved(result.overlay);
     } catch (failure: unknown) {
+      stoppedHere.current = false;
       toast(t("overlay.test.failed", { error: errorMessage(failure) }), { tone: "error" });
     } finally {
       setBusy(false);
@@ -305,7 +314,8 @@ export function CompositionEditor({
             <p className="muted ov-comp-note" id={commandsId}>
               {t("overlay.comp.hideCommandsHint")}
             </p>
-            <ChatTest until={chatTestUntil} now={scene.now} enabled={shown.chat.enabled} onSaved={onSaved} />
+            {/* The server checks the saved layers, so an unsaved draft does not make the test available. */}
+            <ChatTest until={chatTestUntil} now={scene.now} enabled={layers.chat.enabled} onSaved={onSaved} />
           </fieldset>
           <fieldset className="ov-comp-layer" data-comp-layer="characters" aria-describedby={`${titleId}-soon`}>
             <legend>
