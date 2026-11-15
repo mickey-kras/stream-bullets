@@ -50,6 +50,7 @@ export interface PollsViewProps {
   onDelete: (id: string) => Promise<void>;
   onDeleteSelected: () => Promise<void>;
   discussion: (entry: Entry) => ReactNode;
+  onDiscussionFocus: (entry: Entry) => void;
 }
 
 // Eligible target for Next live poll.
@@ -272,6 +273,10 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
             pending={props.pending.has(selected.id)}
             onDelete={props.onDeleteSelected}
           />
+          <button type="button" className="open-discussion gold" onClick={() => props.onDiscussionFocus(selected)}>
+            <Icon name="comment" size={18} />
+            {t("discussion.open")}
+          </button>
           {props.discussion(selected)}
         </div>
       )}

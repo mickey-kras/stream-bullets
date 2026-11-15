@@ -161,10 +161,19 @@ describe("migrations 0006 onwards", (): void => {
       "0027",
       "0028",
       "0029",
+      "0030",
     ]);
   });
 
-  it("adds overlay layers (0029) in place: old rows keep their values and read {}", async (): Promise<void> => {
+  it("adds discussion metadata (0029) without changing existing comment text", async (): Promise<void> => {
+    const row = await db.prepare("SELECT text,edited_at FROM entry_comments WHERE id='c1'").first();
+    expect(row).toEqual({ text: "First", edited_at: null });
+    for (const table of ["comment_mentions", "notifications", "notification_preferences"]) {
+      expect(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").bind(table).first()).toEqual({ name: table });
+    }
+  });
+
+  it("adds overlay layers (0030) in place: old rows keep their values and read {}", async (): Promise<void> => {
     expect(
       await db.prepare("SELECT air,position,message,revision,layers FROM overlay_state WHERE streamer_id='page'").first(),
     ).toEqual({ air: '{"type":"message","ref":null}', position: "top", message: "Back soon", revision: 9, layers: "{}" });

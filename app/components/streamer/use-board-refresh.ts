@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigation } from "react-router";
 import type { BoardSnapshot, Entry, EntryStatus, SortOrder } from "../../types";
 import { requestJson } from "../api";
 import type { StreamerView } from "../shell/streamer-header";
@@ -10,6 +11,24 @@ interface BoardSource {
   sort: SortOrder;
   query: string;
   status: EntryStatus | null;
+}
+
+// Show a loaded topic while the router refreshes its server data. Cancellation restores the current selection.
+export function usePendingTopic(
+  entries: Entry[],
+  selected: Entry | null,
+): {
+  selected: Entry | null;
+  hasSelection: boolean;
+} {
+  const here = useLocation();
+  const navigation = useNavigation();
+  if (navigation.state === "loading" && navigation.location.pathname === here.pathname) {
+    const id: string | null = new URLSearchParams(navigation.location.search).get("entry");
+    const pending: Entry | undefined = entries.find((entry: Entry) => entry.id === id);
+    if (pending?.kind === "topic") return { selected: pending, hasSelection: true };
+  }
+  return { selected, hasSelection: new URLSearchParams(here.search).has("entry") };
 }
 
 export function useBoardRefresh(source: BoardSource): {

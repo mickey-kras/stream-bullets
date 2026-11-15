@@ -1,3 +1,4 @@
+import { mentionStatements, notificationStatements, validateMentions } from "./discussion-notifications.server";
 import { and, asc, count, desc, eq, getTableColumns, gt, ne, or, sql, type SQL } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
@@ -602,9 +603,11 @@ export async function applyMutation(
   errorStatus: number,
   errorMessage: string,
   allowNoChange = false,
+  after: D1PreparedStatement[] = [],
 ): Promise<void> {
   const result = await env.DB.batch([
     statement,
+    ...after,
     env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(streamerId),
   ]);
   if (!allowNoChange && result[0].meta.changes === 0) throw new HttpError(errorStatus, errorMessage);
@@ -833,19 +836,21 @@ export async function mutateEntry(
       break;
     }
     case "comment": {
+      await validateMentions(env, streamerId, action.text, action.mentions);
       const id = crypto.randomUUID();
+      const now = Date.now();
       await applyMutation(
         env,
         streamerId,
         env.DB.prepare(`INSERT INTO entry_comments (id,entry_id,author_id,text,created_at,parent_id)
         SELECT ?,id,?,?,?,? FROM entries WHERE id=? AND streamer_id=?
-          AND (? IS NULL OR EXISTS(SELECT 1 FROM entry_comments p WHERE p.id=? AND p.entry_id=entries.id))
+          AND (? IS NULL OR EXISTS(SELECT 1 FROM entry_comments p WHERE p.id=? AND p.entry_id=entries.id AND p.removed_at IS NULL))
           AND (SELECT count(*) FROM entry_comments c WHERE c.entry_id=entries.id) < ?
       `).bind(
           id,
           viewerId,
           action.text,
-          Date.now(),
+          now,
           action.parentId ?? null,
           action.id,
           streamerId,
@@ -855,6 +860,8 @@ export async function mutateEntry(
         ),
         400,
         "Reply target is invalid or the discussion has reached 10000 comments.",
+        false,
+        [...mentionStatements(env, id, action.mentions), ...notificationStatements(env, id, viewerId, now)],
       );
       return { id };
     }

@@ -10,6 +10,7 @@ import {
   useRevalidator,
   useSearchParams,
   type LoaderFunctionArgs,
+  type ShouldRevalidateFunctionArgs,
 } from "react-router";
 import { ENTRY_STATUSES } from "../../db/enums";
 import { appContext, type AppEnv } from "../env";
@@ -35,7 +36,8 @@ import { useRememberContentRoute } from "../components/shell/back-link";
 import { StreamerHeader, streamerViews, type StreamerView } from "../components/shell/streamer-header";
 import { EntryDetail } from "../components/streamer/entry-detail";
 import { PageBanner } from "../components/streamer/page-banner";
-import { useBoardRefresh } from "../components/streamer/use-board-refresh";
+import { useBoardRefresh, usePendingTopic } from "../components/streamer/use-board-refresh";
+import { useDiscussionViewport } from "../components/streamer/use-discussion-viewport";
 import { TopicBoard } from "../components/streamer/topic-board";
 import { SupportSection } from "../components/support/support";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
@@ -75,6 +77,22 @@ function cameFromList(state: unknown): boolean {
 }
 // Official board tabs: Ideas, About, Community.
 const officialViews: readonly View[] = ["topics", "about", "community"];
+
+export function shouldRevalidate({
+  formMethod,
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs): boolean {
+  if (formMethod || currentUrl.href === nextUrl.href) return defaultShouldRevalidate;
+  const current: URL = new URL(currentUrl);
+  const next: URL = new URL(nextUrl);
+  for (const key of ["discussion", "dialog"]) {
+    current.searchParams.delete(key);
+    next.searchParams.delete(key);
+  }
+  return current.href === next.href ? false : defaultShouldRevalidate;
+}
 
 export function meta({ loaderData: data, matches }: Route.MetaArgs) {
   if (!data) return [{ title: "StreamBullets" }];
@@ -225,7 +243,7 @@ function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revi
 // Each tab has one primary action.
 function headerAction(view: View, owner: boolean, official: boolean): { dialog: Dialog; label: string } | null {
   if (official) return view === "topics" ? { dialog: "idea", label: t("ideas.suggest") } : null;
-  if (view === "topics") return { dialog: "topic", label: t("streamer.suggest") };
+  if (view === "topics") return null;
   if (!owner) return null;
   if (view === "polls") return { dialog: "poll", label: t("streamer.newPoll") };
   if (view === "schedule") return { dialog: "event", label: t("schedule.create") };
@@ -234,7 +252,7 @@ function headerAction(view: View, owner: boolean, official: boolean): { dialog: 
 }
 
 function floatingAction(view: View, owner: boolean, official: boolean): ReturnType<typeof headerAction> {
-  if (view === "topics" || (owner && (view === "polls" || view === "schedule")))
+  if ((official && view === "topics") || (owner && (view === "polls" || view === "schedule")))
     return headerAction(view, owner, official);
   return null;
 }
@@ -341,11 +359,15 @@ export default function StreamerPage(): ReactNode {
     const entry: Entry = loadedSelected?.id === cached.id ? loadedSelected : cached;
     return mergeLiveEntry(entry, live.snapshot, board.revision) as Entry;
   });
-  const selectedBase: Entry | null = loadedSelected || entries[0] || null;
+  const topicSelection = usePendingTopic(entries, loadedSelected);
+  const selectedBase: Entry | null = topicSelection.selected || entries[0] || null;
   const selected: Entry | null = mergeLiveEntry(selectedBase, live.snapshot, board.revision);
   // Wake at battle start and end.
   const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
   const pollsClass: string = usePollsMainClass(view === "polls" && loadedSelected ? selected : null, now);
+  const discussionFocus: boolean =
+    searchParams.get("discussion") === "1" && loadedSelected !== null && selected?.kind !== "mash";
+  useDiscussionViewport(discussionFocus, selected?.id ?? null);
 
   const boardKey: string = JSON.stringify([streamer.id, view, sort, query, status, board.nextCursor, board.revision]);
   const [previousBoard, setPreviousBoard] = useState<string>(boardKey);
@@ -470,6 +492,21 @@ export default function StreamerPage(): ReactNode {
     navigate(view);
   }
 
+  function openDiscussion(entry: Entry): void {
+    const params = new URLSearchParams(searchParams);
+    params.set("view", entryView(entry));
+    params.set("entry", entry.id);
+    params.set("discussion", "1");
+    setSearchParams(params, { state: { discussionReturn: true } });
+  }
+
+  function closeDiscussion(): void {
+    const state: unknown = here.state;
+    if (typeof state === "object" && state !== null && "discussionReturn" in state && state.discussionReturn === true)
+      go(-1);
+    else setParam("discussion", null);
+  }
+
   function renderDiscussion(entry: Entry): ReactNode {
     return (
       <Discussion
@@ -592,7 +629,7 @@ export default function StreamerPage(): ReactNode {
         name={streamer.name}
         entries={entries}
         selected={selected}
-        hasSelection={searchParams.has("entry") || (data.intent === "discuss" && selected !== null)}
+        hasSelection={topicSelection.hasSelection || (data.intent === "discuss" && selected !== null)}
         official={official}
         status={status}
         sort={sort}
@@ -612,6 +649,7 @@ export default function StreamerPage(): ReactNode {
                 writable={writable}
                 pending={pending.has(selected.id)}
                 onBack={() => backToList("topics")}
+                onDiscuss={() => openDiscussion(selected)}
                 onReact={(value) => act({ action: "react", id: selected.id, value }, selected.id)}
                 onDelete={removeSelected}
                 onStatusSaved={async () => {
@@ -629,6 +667,23 @@ export default function StreamerPage(): ReactNode {
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onSearch={(next: string) => changeBoard("query", next)}
         onLoadMore={loadMore}
+        action={
+          !official &&
+          viewer && (
+            <button
+              type="button"
+              id="suggest"
+              className="suggest-topic gold"
+              aria-label={t("streamer.suggest")}
+              title={t("streamer.suggest")}
+              disabled={!writable}
+              onClick={() => setDialog("topic")}
+            >
+              <Icon name="plus" size={18} />
+              <span>{t("streamer.suggest")}</span>
+            </button>
+          )
+        }
       />
     );
   }
@@ -668,6 +723,7 @@ export default function StreamerPage(): ReactNode {
         }}
         onDeleteSelected={removeSelected}
         discussion={renderDiscussion}
+        onDiscussionFocus={openDiscussion}
       />
     );
   }
@@ -799,13 +855,31 @@ export default function StreamerPage(): ReactNode {
     );
   }
 
+  function renderCreateEntry(): ReactNode {
+    return (
+      <CreateEntry
+        key={dialog === "topic" || dialog === "poll" ? dialog : "closed"}
+        mode={dialog === "poll" ? "poll" : "topic"}
+        open={dialog === "topic" || dialog === "poll"}
+        onOpenChange={(open: boolean) => {
+          if (!open) closeIntentDialog();
+        }}
+        onCreate={async (body: unknown) => {
+          const result = await mutate(body);
+          created.current = true;
+          navigate(dialog === "poll" ? "polls" : "topics", result.id);
+        }}
+      />
+    );
+  }
+
   const action = viewer ? headerAction(view, owner, official) : null;
   const showFab: boolean = Boolean(viewer && writable && !pollsClass.includes("mash-page"));
   const fab = showFab ? floatingAction(view, owner, official) : null;
   const role = pageRole(owner, moderator);
   return (
     <div
-      className="streamer-shell"
+      className={`streamer-shell${discussionFocus ? " discussion-focus" : ""}`}
       style={
         streamer.background
           ? {
@@ -857,6 +931,15 @@ export default function StreamerPage(): ReactNode {
           {error}
         </p>
       )}
+      {discussionFocus && selected && (
+        <div className="discussion-focus-bar">
+          <button type="button" className="back" onClick={closeDiscussion}>
+            <Icon name="chevron-left" size={18} />
+            {t(selected.kind === "topic" ? "discussion.backToTopic" : "discussion.backToPoll")}
+          </button>
+          <strong>{selected.title}</strong>
+        </div>
+      )}
       {renderPage()}
       {fab && (
         <button type="button" className="fab gold" onClick={() => setDialog(fab.dialog)}>
@@ -864,19 +947,7 @@ export default function StreamerPage(): ReactNode {
           {fab.dialog === "idea" ? t("ideas.suggestShort") : fab.label}
         </button>
       )}
-      <CreateEntry
-        key={dialog === "topic" || dialog === "poll" ? dialog : "closed"}
-        mode={dialog === "poll" ? "poll" : "topic"}
-        open={dialog === "topic" || dialog === "poll"}
-        onOpenChange={(open: boolean) => {
-          if (!open) closeIntentDialog();
-        }}
-        onCreate={async (body: unknown) => {
-          const result = await mutate(body);
-          created.current = true;
-          navigate(dialog === "poll" ? "polls" : "topics", result.id);
-        }}
-      />
+      {renderCreateEntry()}
       <SignInDialog
         open={signIn}
         onOpenChange={(open: boolean) => {
