@@ -2,6 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { build } from "esbuild";
 import { Miniflare } from "miniflare";
 import { fileURLToPath } from "node:url";
+import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
 import type { LiveSnapshot } from "../app/types";
 import { LIVE_SCHEMA, liveRows } from "./helpers/room";
 
@@ -626,6 +627,7 @@ describe("overlay updates", (): void => {
       position: "top",
       size: "l",
       message: "BRB 5 min",
+      layers: DEFAULT_LAYERS,
       revision: 3,
     });
     expect((await update).overlay).not.toHaveProperty("preview");

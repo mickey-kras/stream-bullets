@@ -477,6 +477,24 @@ describe("Worker activity feed and provider webhooks", (): void => {
     expect(forwarded).toHaveLength(0);
   });
 
+  it("refuses one page's overlay key on another page's feed", async (): Promise<void> => {
+    env.CHANNEL_INGEST = capturingRooms() as unknown as DurableObjectNamespace;
+    const otherId = "10000000-0000-4000-8000-000000000008";
+    await env.DB.prepare(
+      "INSERT INTO streamers (id,owner_id,handle,name,about,is_official,status) VALUES (?,'viewer','b_page','B','',0,'active')",
+    )
+      .bind(otherId)
+      .run();
+    const keyA = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    const keyB = await regenerateOverlayKey(env, "viewer", { id: otherId, status: "active" });
+    expect((await activity("b_page", {}, `?key=${keyA}`)).status).toBe(403);
+    expect((await activity("zed_page", {}, `?key=${keyB}`)).status).toBe(403);
+    expect((await activity("b_page", { Cookie: await cookie("owner") })).status).toBe(403);
+    expect(forwarded).toHaveLength(0);
+    expect((await activity("b_page", {}, `?key=${keyB}`)).status).toBe(101);
+    expect(lastForwarded().url).toBe(`https://channel-ingest.internal/subscribe?streamerId=${otherId}`);
+  });
+
   it("drops Kick webhooks and refuses the feed while channels are off", async (): Promise<void> => {
     env.CHANNELS_OFF = "1";
     expect((await fetchPath("/hooks/kick", { method: "POST", body: "{}" })).status).toBe(204);

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { z } from "zod";
 import { MASH_PHASES, OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES, OVERLAY_SOURCES } from "../../db/enums";
+import { DEFAULT_LAYERS, storedLayersSchema } from "../lib/overlay-layers";
 import type { LiveSnapshot, MashTick, OverlayPublic } from "../types";
 
 const count = z.number().int().nonnegative();
@@ -22,6 +23,7 @@ const overlaySchema = z.object({
   showResults: z.boolean(),
   message: z.string().max(120),
   messageStyle: z.enum(OVERLAY_MESSAGE_STYLES),
+  layers: storedLayersSchema.default(DEFAULT_LAYERS),
   revision: count,
 });
 const snapshotSchema = z.object({

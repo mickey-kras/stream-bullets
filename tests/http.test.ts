@@ -88,6 +88,10 @@ describe("request boundaries", () => {
     );
     expect(response.headers.get("Content-Security-Policy")).toContain("script-src 'self' 'nonce-nonce-value';");
     expect(response.headers.get("Content-Security-Policy")).not.toContain("unsafe-eval");
+    // Images: this origin, blobs, data URIs and the emote hosts only, over HTTPS.
+    expect(response.headers.get("Content-Security-Policy")).toContain(
+      "img-src 'self' blob: data: https://static-cdn.jtvnw.net;",
+    );
     expect(response.headers.get("Strict-Transport-Security")).toBe("max-age=31536000; includeSubDomains");
     expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
