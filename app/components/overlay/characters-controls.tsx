@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
 import { t, tAround, type MessageId, type MessageVars } from "../../i18n";
 import { CHARACTERS_TIMEOUT } from "../../lib/overlay-layers";
 import { CHARACTERS_TEST_MS } from "../../lib/playground/constants";
@@ -40,10 +40,10 @@ function readStatus(
       setStatus(result);
       setStatusError(null);
     },
-    (failure: unknown): void => {
+    (error_: unknown): void => {
       if (!current) return;
-      if (serverOff(failure)) setOff(true);
-      else setStatusError(errorMessage(failure));
+      if (serverOff(error_)) setOff(true);
+      else setStatusError(errorMessage(error_));
     },
   );
   return (): void => {
@@ -115,6 +115,84 @@ function TimeoutField({
 }
 
 /**
+ * Frames tell a change from another tab, or the end of a test by time or by a layer change. The status follows a
+ * change of the frame mode during render, not in an effect. Returns the frame mode.
+ */
+function useFrameMode(
+  summary: PlaygroundSummary | null,
+  status: PlaygroundStatus | null,
+  setStatus: (status: PlaygroundStatus) => void,
+): ModeView | null {
+  const frameMode: ModeView | null = summary?.mode ?? null;
+  const [seenMode, setSeenMode] = useState<ModeView | null>(frameMode);
+  if (frameMode !== seenMode) {
+    setSeenMode(frameMode);
+    if (frameMode && status)
+      setStatus({ paused: frameMode.paused, testEndsAt: frameMode.test ? status.testEndsAt : null });
+  }
+  return frameMode;
+}
+
+/**
+ * The time left of a test, from the status. When the frames say a test runs but its end is unknown or past, another
+ * tab started or restarted it: it shows as running, without a countdown, and the status is read again.
+ */
+function testTime(
+  status: PlaygroundStatus | null,
+  frameMode: ModeView | null,
+  now: number,
+): { left: number; endUnknown: boolean; running: boolean } {
+  const left: number = status?.testEndsAt ? Math.max(0, status.testEndsAt - now) : 0;
+  const endUnknown: boolean = (frameMode?.test ?? false) && left === 0;
+  return { left, endUnknown, running: left > 0 || endUnknown };
+}
+
+/**
+ * The test news: a start (which also ends a pause), a stop from here, or an end by time or elsewhere. The caller sets
+ * the returned marks before a stop or a start that ends a pause.
+ */
+function useTestNews(
+  running: boolean,
+  setNews: (news: string) => void,
+): { stoppedHereRef: RefObject<boolean>; resumedHereRef: RefObject<boolean> } {
+  const wasRunning = useRef<boolean>(running);
+  const stoppedHereRef = useRef<boolean>(false);
+  const resumedHereRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (wasRunning.current === running) return;
+    wasRunning.current = running;
+    let text: MessageId = "overlay.characters.testEnded";
+    if (running)
+      text = resumedHereRef.current ? "overlay.characters.testStartedResumed" : "overlay.characters.testStarted";
+    else if (stoppedHereRef.current) text = "overlay.characters.testStopped";
+    stoppedHereRef.current = false;
+    resumedHereRef.current = false;
+    setNews(t(text));
+  }, [running, setNews]);
+  return { stoppedHereRef, resumedHereRef };
+}
+
+/**
+ * A removed character leaves the list with its button: focus goes to the next Remove button, the last one when it
+ * was the last, or the list title when the list is empty.
+ */
+function useRemovedFocus(
+  roster: readonly RosterEntry[],
+  removedRef: RefObject<{ id: number; index: number } | null>,
+  list: RefObject<HTMLUListElement | null>,
+  listTitle: RefObject<HTMLHeadingElement | null>,
+): void {
+  useEffect(() => {
+    const gone: { id: number; index: number } | null = removedRef.current;
+    if (gone === null || roster.some((entry: RosterEntry): boolean => entry.id === gone.id)) return;
+    removedRef.current = null;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    const buttons: HTMLButtonElement[] = Array.from(list.current?.querySelectorAll("button") ?? []);
+    (buttons[Math.min(gone.index, buttons.length - 1)] ?? listTitle.current)?.focus();
+  }, [roster, removedRef, list, listTitle]);
+}
+
+/**
  * The characters controls in the editor: timeout, pause, reset, the characters test and the participants with a
  * Remove button. Buttons never take the `disabled` attribute: they keep focus while their request runs and ignore
  * presses while busy or unavailable. A polite region says what changed; the time left is not read each second.
@@ -149,7 +227,7 @@ export function CharactersControls({
   const [news, setNews] = useState<string>("");
   const listTitle = useRef<HTMLHeadingElement | null>(null);
   const list = useRef<HTMLUListElement | null>(null);
-  const removed = useRef<{ id: number; index: number } | null>(null);
+  const removedRef = useRef<{ id: number; index: number } | null>(null);
   const [linkBefore, linkAfter] = tAround("overlay.characters.participantsNone", "link");
 
   // The state after a page load: paused and the test end are not in the saved layers. With the saved layer off the
@@ -158,22 +236,10 @@ export function CharactersControls({
     if (enabled) return readStatus(setStatus, setStatusError, setOff);
   }, [enabled]);
 
-  // Frames tell a change from another tab, or the end of a test by time or by a layer change. The status follows a
-  // change of the frame mode during render, not in an effect.
-  const frameMode: ModeView | null = summary?.mode ?? null;
-  const [seenMode, setSeenMode] = useState<ModeView | null>(frameMode);
-  if (frameMode !== seenMode) {
-    setSeenMode(frameMode);
-    if (frameMode && status)
-      setStatus({ paused: frameMode.paused, testEndsAt: frameMode.test ? status.testEndsAt : null });
-  }
+  const frameMode: ModeView | null = useFrameMode(summary, status, setStatus);
 
   const paused: boolean = status?.paused ?? false;
-  const left: number = status?.testEndsAt ? Math.max(0, status.testEndsAt - now) : 0;
-  // The frames say a test runs but its end is unknown or past: another tab started or restarted it. It shows as
-  // running, without a countdown, and the status is read again.
-  const endUnknown: boolean = (frameMode?.test ?? false) && left === 0;
-  const running: boolean = left > 0 || endUnknown;
+  const { left, endUnknown, running } = testTime(status, frameMode, now);
   useEffect(() => {
     if (enabled && endUnknown) return readStatus(setStatus, setStatusError, setOff);
   }, [enabled, endUnknown]);
@@ -181,33 +247,10 @@ export function CharactersControls({
   // With the saved layer off the playground keeps nothing: pause and reset would do nothing.
   const controlUnavailable: boolean = busy || !enabled;
 
-  // The test news: a start (which also ends a pause), a stop from here, or an end by time or elsewhere.
-  const wasRunning = useRef<boolean>(running);
-  const stoppedHere = useRef<boolean>(false);
-  const resumedHere = useRef<boolean>(false);
-  useEffect(() => {
-    if (wasRunning.current === running) return;
-    wasRunning.current = running;
-    let text: MessageId = "overlay.characters.testEnded";
-    if (running)
-      text = resumedHere.current ? "overlay.characters.testStartedResumed" : "overlay.characters.testStarted";
-    else if (stoppedHere.current) text = "overlay.characters.testStopped";
-    stoppedHere.current = false;
-    resumedHere.current = false;
-    setNews(t(text));
-  }, [running]);
-
-  // A removed character leaves the list with its button: focus goes to the next Remove button, the last one when it
-  // was the last, or the list title when the list is empty.
+  const { stoppedHereRef, resumedHereRef } = useTestNews(running, setNews);
   const roster: readonly RosterEntry[] = summary?.roster ?? NO_ROSTER;
-  useEffect(() => {
-    const gone: { id: number; index: number } | null = removed.current;
-    if (gone === null || roster.some((entry: RosterEntry): boolean => entry.id === gone.id)) return;
-    removed.current = null;
-    if (document.activeElement && document.activeElement !== document.body) return;
-    const buttons: HTMLButtonElement[] = Array.from(list.current?.querySelectorAll("button") ?? []);
-    (buttons[Math.min(gone.index, buttons.length - 1)] ?? listTitle.current)?.focus();
-  }, [roster]);
+  useRemovedFocus(roster, removedRef, list, listTitle);
+  const testHint: MessageId = enabled ? "overlay.characters.testHint" : "overlay.characters.needsLayer";
 
   /** Sends a control. `done` is the news after success; `failed` undoes local marks after a failure. */
   async function send(
@@ -227,9 +270,9 @@ export function CharactersControls({
       setStatusError(null);
       if (options.done) setNews(t(options.done, options.vars));
       options.ok?.(result);
-    } catch (failure: unknown) {
-      if (serverOff(failure)) setOff(true);
-      else toast(t("overlay.characters.failed", { error: errorMessage(failure) }), { tone: "error" });
+    } catch (error_: unknown) {
+      if (serverOff(error_)) setOff(true);
+      else toast(t("overlay.characters.failed", { error: errorMessage(error_) }), { tone: "error" });
       options.failed?.();
     } finally {
       setBusy(false);
@@ -238,14 +281,14 @@ export function CharactersControls({
 
   function toggleTest(): void {
     if (testUnavailable) return;
-    stoppedHere.current = running;
-    resumedHere.current = !running && paused;
+    stoppedHereRef.current = running;
+    resumedHereRef.current = !running && paused;
     void send(
       { op: running ? "stopTest" : "test" },
       {
         failed: (): void => {
-          stoppedHere.current = false;
-          resumedHere.current = false;
+          stoppedHereRef.current = false;
+          resumedHereRef.current = false;
         },
       },
     );
@@ -267,14 +310,14 @@ export function CharactersControls({
   }
 
   function remove(entry: RosterEntry, index: number): void {
-    removed.current = { id: entry.id, index };
+    removedRef.current = { id: entry.id, index };
     void send(
       { op: "remove", id: entry.id },
       {
         done: "overlay.characters.removed",
         vars: { name: entry.name },
         failed: (): void => {
-          removed.current = null;
+          removedRef.current = null;
         },
       },
     );
@@ -333,10 +376,7 @@ export function CharactersControls({
         <p className="muted ov-comp-note" id={testHintId} data-characters-test-status>
           {left > 0
             ? t("overlay.characters.testLeft", { seconds: Math.ceil(left / 1000) })
-            : t(enabled ? "overlay.characters.testHint" : "overlay.characters.needsLayer", {
-                minutes: CHARACTERS_TEST_MS / 60_000,
-                badge: t("overlay.characters.badgeTest"),
-              })}
+            : t(testHint, { minutes: CHARACTERS_TEST_MS / 60_000, badge: t("overlay.characters.badgeTest") })}
           {!running && enabled && paused && ` ${t("overlay.characters.testResumes")}`}
         </p>
       </div>

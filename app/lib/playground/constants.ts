@@ -1,5 +1,5 @@
 import { CELL_PX } from "../overlay-layers";
-import { BUBBLE_GRAPHEMES, FRAME_BUBBLES_MAX, FRAME_CHARS_MAX, FRAME_STAIRS_MAX } from "./protocol";
+import { FRAME_CHARS_MAX } from "./protocol";
 
 /**
  * The rules of the character playground (issue #664, docs/characters.md). Time is in ticks of the rules clock.
@@ -61,8 +61,7 @@ export const COMMAND_EXPIRY_TICKS = 300;
 /** Bubble life for a message, for a command and the most bubbles at once. Extra bubbles drop the oldest. */
 export const BUBBLE_TICKS = 120;
 export const COMMAND_BUBBLE_TICKS = 60;
-export const BUBBLE_MAX = FRAME_BUBBLES_MAX;
-export const BUBBLE_LENGTH = BUBBLE_GRAPHEMES;
+export { FRAME_BUBBLES_MAX as BUBBLE_MAX, BUBBLE_GRAPHEMES as BUBBLE_LENGTH } from "./protocol";
 /** How long the unavailable mark shows. */
 export const MARK_TICKS = 36;
 /** The name label shows this long after admission. */
@@ -71,7 +70,7 @@ export const NEW_TICKS = 90;
 /** Holes repair and stairs go this long (30 s) after the last change. */
 export const TERRAIN_LIFETIME_TICKS = 900;
 /** Temporary stair steps at once. The oldest goes first. */
-export const STAIRS_MAX = FRAME_STAIRS_MAX;
+export { FRAME_STAIRS_MAX as STAIRS_MAX } from "./protocol";
 /** Steps in one build. */
 export const BUILD_STEPS = 5;
 /** A build turns toward the middle when it starts this close to a walking limit. */

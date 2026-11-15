@@ -75,8 +75,8 @@ function loadImage(url: string): Promise<HTMLImageElement> {
   image.src = url;
   return image.decode().then(
     (): HTMLImageElement => image,
-    (cause: unknown): never => {
-      throw new Error(`The playground picture ${url} did not load.`, { cause });
+    (error_: unknown): never => {
+      throw new Error(`The playground picture ${url} did not load.`, { cause: error_ });
     },
   );
 }
