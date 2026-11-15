@@ -39,6 +39,41 @@ export function usesActivityFeed(layers: OverlayLayers, only: OverlayLayer | nul
   return chat || characters;
 }
 
+/**
+ * Whether a composition (all layers, `only` null) lays out in the 1920x1080 design canvas, like the editor preview.
+ * It does when it shows a feed layer: those layers sit at design-space rects, so the content must use the same
+ * space, or the chat covers other parts of the content at another source size. Without a feed layer the content
+ * keeps its responsive layout, so existing OBS scenes do not change.
+ */
+export function usesDesignCanvas(layers: OverlayLayers, only: OverlayLayer | null): boolean {
+  return only === null && (layers.chat.enabled || (CHARACTERS_READY && layers.characters.enabled));
+}
+
+/** The class of the layer boxes; their `data-layer` attribute names the layer. */
+export const LAYER_CLASS = "ov-layer";
+/** The on-air content stage in a composition. */
+export const CONTENT_SELECTOR = ".ov-composition > .ov-stage";
+
+/** The box of one feed layer in a composition. */
+export function layerSelector(layer: Exclude<OverlayLayer, "content">): string {
+  return `.ov-composition > .${LAYER_CLASS}[data-layer="${layer}"]`;
+}
+
+/**
+ * The 1920x1080 design canvas for an OBS composition: the same `.ov-scaler` markup as the editor preview, scaled to
+ * fit the viewport. At a 16:9 source size the scale is viewport width / 1920, as in the preview. At another aspect
+ * ratio the whole canvas stays in view and the free space is at the right or bottom.
+ */
+export function DesignCanvas({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+  const frame = useRef<HTMLDivElement | null>(null);
+  useDesignScale(frame, DESIGN_W, DESIGN_H);
+  return (
+    <div className="ov-design" ref={frame}>
+      <div className="ov-scaler">{children}</div>
+    </div>
+  );
+}
+
 function percent(value: number, total: number): string {
   return `${(value / total) * 100}%`;
 }
@@ -72,7 +107,7 @@ function LayerBox({
         height: percent(rect.h, DESIGN_H),
       };
   return (
-    <div className="ov-layer" data-layer={layer} data-alone={alone || undefined} style={place} ref={box}>
+    <div className={LAYER_CLASS} data-layer={layer} data-alone={alone || undefined} style={place} ref={box}>
       <div className="ov-layer-canvas" style={{ width: rect.w, height: rect.h }}>
         {children}
       </div>

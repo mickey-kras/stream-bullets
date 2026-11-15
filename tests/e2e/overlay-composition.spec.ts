@@ -11,6 +11,9 @@ const OBS_IP = clientIp("overlay-composition", 241);
 const GEOMETRY_IP = clientIp("overlay-composition", 242);
 const CHARACTERS_IP = clientIp("overlay-composition", 243);
 const COMMANDS_IP = clientIp("overlay-composition", 244);
+const DESIGN_IP = clientIp("overlay-composition", 250);
+// Set OBS_SHOT_DIR to a folder to save the OBS composition screenshots of the design-space test.
+const shotDir: string | undefined = process.env.OBS_SHOT_DIR;
 
 const resetLayers = `UPDATE overlay_state SET layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`;
 
@@ -559,6 +562,8 @@ test("a characters-only source opens no sockets while the characters layer canno
   page.on("websocket", (socket) => sockets.push(new URL(socket.url()).pathname));
   await page.goto("/@feature_host/overlay?key=e2e-key&layer=characters");
   const main = page.locator("main.overlay-screen");
+  // This assumes that the route opens its sockets (live room and activity) in effects of its first commit, and that
+  // no later state change opens one. If a socket opened later, for example after a timer, this check would miss it.
   await expect(main).toHaveAttribute("data-feed-status", "off");
   // The layer box sets data-scaled in an effect, so the page is hydrated and its first effects ran.
   await expect(main.locator('.ov-layer[data-layer="characters"]')).toHaveAttribute("data-scaled", "true");
@@ -589,4 +594,109 @@ test("turning on hide commands removes a command row from an open chat source", 
   expect(source.sockets).toHaveLength(1);
   await close(source.page);
   await owner.close();
+});
+
+interface DesignRects {
+  poll: { x: number; y: number; w: number; h: number };
+  chat: { x: number; y: number; w: number; h: number };
+}
+
+/** The design-space (1920-wide) rects of the poll card and the chat box: screen boxes divided by `scale`. */
+async function designRects(
+  poll: Locator,
+  chatBox: Locator,
+  origin: { x: number; y: number },
+  scale: number,
+): Promise<DesignRects> {
+  const toDesign = async (locator: Locator): Promise<DesignRects["poll"]> => {
+    const box = await locator.boundingBox();
+    if (!box) throw new Error("No box.");
+    return {
+      x: (box.x - origin.x) / scale,
+      y: (box.y - origin.y) / scale,
+      w: box.width / scale,
+      h: box.height / scale,
+    };
+  };
+  return { poll: await toDesign(poll), chat: await toDesign(chatBox) };
+}
+
+function expectSameRects(actual: DesignRects, expected: DesignRects): void {
+  for (const key of ["poll", "chat"] as const)
+    for (const side of ["x", "y", "w", "h"] as const)
+      expect(Math.abs(actual[key][side] - expected[key][side]), `${key}.${side}`).toBeLessThanOrEqual(2);
+}
+
+test("with chat on, the OBS composition matches the editor preview at 1280x720 and 1920x1080", async ({ browser }) => {
+  // The seeded on-air poll and the default chat rect, which covers the lower part of the poll.
+  await runSql("overlay-design-air", [
+    `UPDATE overlay_state SET air=json_object('type','poll','ref',(SELECT id FROM entries WHERE streamer_id=${FEATURE_HOST} AND title='Which boss first?')), layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
+  ]);
+  try {
+    const owner = await signedIn(browser, "featureowner", DESIGN_IP);
+    const editor = await newPage(owner);
+    await editor.setViewportSize({ width: 1440, height: 900 });
+    await editor.goto("/overlay-control");
+    const frame = editor.getByRole("region", { name: "Composition preview" });
+    await expect(frame).toHaveAttribute("data-scaled", "true");
+    await expect(frame.locator(".ov-stage > *").first()).toBeVisible();
+    await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
+    const previewScale: number = await frame.evaluate((element: Element) => element.clientWidth / 1920);
+    const scaler = await frame.locator(".ov-scaler").boundingBox();
+    if (!scaler) throw new Error("No preview scaler.");
+    const preview: DesignRects = await designRects(
+      frame.locator(".ov-stage > *").first(),
+      frame.locator('.ov-layer[data-layer="chat"]'),
+      scaler,
+      previewScale,
+    );
+    // The default chat rect, in the preview.
+    const { x, y, w, h } = DEFAULT_LAYERS.chat.rect;
+    expectSameRects(preview, { poll: preview.poll, chat: { x, y, w, h } });
+    await owner.close();
+
+    for (const viewport of [
+      { width: 1280, height: 720 },
+      { width: 1920, height: 1080 },
+    ]) {
+      const rows: ActivityChat[] = [
+        message({ platform: "twitch", id: "d1", user: "Ada", text: "Radahn first, obviously" }),
+        message({ platform: "youtube", id: "d2", user: "Mika", text: "Fire Giant is the real boss 🔥" }),
+        message({ platform: "kick", id: "d3", user: "Rook", text: "Malenia or nothing" }),
+      ];
+      const source = await chatSource(browser, () => snapshot(rows), "/@feature_host/overlay?key=e2e-key", viewport);
+      const page: Page = source.page;
+      await expect(page.locator(".ov-design")).toHaveAttribute("data-scaled", "true");
+      const poll = page.locator(".ov-stage > *").first();
+      await expect(poll).toBeVisible();
+      await expect(source.rows).toHaveCount(rows.length);
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
+      const obs: DesignRects = await designRects(
+        poll,
+        page.locator('.ov-layer[data-layer="chat"]'),
+        { x: 0, y: 0 },
+        viewport.width / 1920,
+      );
+      expectSameRects(obs, preview);
+      if (shotDir) await page.screenshot({ path: `${shotDir}/r3-obs-${viewport.height}.png` });
+      await close(page);
+    }
+  } finally {
+    await runSql("overlay-design-restore", [
+      `UPDATE overlay_state SET air='{"type":"auto","ref":null}', layers='{}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
+    ]);
+  }
+});
+
+test("without a feed layer, the OBS composition keeps the responsive content layout", async ({ browser }) => {
+  await setLayers("overlay-design-off", {});
+  const page = await newPage(browser, {
+    viewport: { width: 1280, height: 720 },
+    extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DESIGN_IP}` },
+  });
+  await page.goto("/@feature_host/overlay?key=e2e-key");
+  await expect(page.locator("main.overlay-screen.ov-screen")).toBeAttached();
+  await expect(page.locator(".ov-design")).toHaveCount(0);
+  await expect(page.locator(".ov-composition > .ov-stage")).toBeAttached();
+  await close(page);
 });

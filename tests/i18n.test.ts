@@ -8,6 +8,7 @@ import {
   loadCatalog,
   setLocaleSource,
   t,
+  tAround,
   tn,
   type Locale,
 } from "../app/i18n";
@@ -169,5 +170,43 @@ describe("locale resolution", () => {
     expect(readCookie(null, "sb_locale")).toBeNull();
     expect(requestLocale(request, null)).toBe("pl");
     expect(requestLocale(request, "hi")).toBe("hi");
+  });
+});
+
+describe("tAround", () => {
+  it("splits a message around a placeholder in the middle and keeps the spacing", () => {
+    expect(tAround("admin.pages.empty", "filter")).toEqual(["No ", " pages"]);
+  });
+
+  it("splits around a placeholder at the start or the end", () => {
+    expect(tAround("overlay.chat.name", "name")).toEqual(["", ": "]);
+    expect(tAround("overlay.comp.chatSource", "link")).toEqual([
+      "Chat shows messages from the channels you connect. ",
+      "",
+    ]);
+  });
+
+  it("returns the whole message before an empty second part when the placeholder is missing", () => {
+    expect(tAround("overlay.comp.chatSource", "missing")).toEqual([
+      "Chat shows messages from the channels you connect. {link}",
+      "",
+    ]);
+  });
+
+  it("fills the other variables and follows the locale", async () => {
+    expect(tAround("overlay.comp.layerSoon", "layer", { other: 1 })).toEqual(["", " · Coming soon"]);
+    await loadCatalog("ja");
+    setLocaleSource((): Locale => "ja");
+    expect(tAround("overlay.chat.name", "name")).toEqual(["", "："]);
+  });
+});
+
+describe("chat name separator", () => {
+  // The name is a separate element, so the separator itself must hold the space before the message.
+  it.each(LOCALES)("%s ends overlay.chat.name with a space or a full-width colon", (locale: Locale) => {
+    const name: string = catalog(locale)["overlay.chat.name"];
+    expect(name.startsWith("{name}")).toBe(true);
+    if (locale === "ja" || locale === "zh-CN") expect(name.endsWith("：")).toBe(true);
+    else expect(name).toMatch(/\s$/u);
   });
 });

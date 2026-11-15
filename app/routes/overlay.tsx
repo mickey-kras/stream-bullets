@@ -8,7 +8,13 @@ import { getOverlayData, getOverlayState, sourceTopics } from "../server/overlay
 import { overlayPublic } from "../server/overlay-state";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { useActivityFeed } from "../components/overlay/activity-feed";
-import { CHARACTERS_READY, OverlayComposition, usesActivityFeed } from "../components/overlay/overlay-composition";
+import {
+  CHARACTERS_READY,
+  DesignCanvas,
+  OverlayComposition,
+  usesActivityFeed,
+  usesDesignCanvas,
+} from "../components/overlay/overlay-composition";
 import { upNextStart, type OverlayPoll, type OverlayScene } from "../components/overlay/overlay-stage";
 import { useRevalidateAt } from "../components/use-clock";
 import { ServerOffset } from "../lib/clock";
@@ -86,17 +92,28 @@ export default function Overlay(): ReactNode {
   };
   const label: string = t("overlay.label", { name: loaded.name });
   if (!known) return <main className="overlay-screen ov-screen" id="main-content" aria-label={label} />;
+  const composition: ReactNode = (
+    <OverlayComposition
+      scene={scene}
+      source={source}
+      layers={overlay.layers}
+      only={only}
+      feed={feedOn ? feed : null}
+      serverOffset={serverOffset}
+    />
+  );
+  // With a feed layer on, the composition uses the editor preview's 1920x1080 canvas, so OBS shows the same layout
+  // at every source size. The design screen also drops the small-screen content styles of .ov-screen.
+  const designed: boolean = usesDesignCanvas(overlay.layers, only);
   return (
     // data-feed-status exposes the activity feed state for checks and support; nothing shows on stream.
-    <main className="overlay-screen ov-screen" id="main-content" aria-label={label} data-feed-status={feed.status}>
-      <OverlayComposition
-        scene={scene}
-        source={source}
-        layers={overlay.layers}
-        only={only}
-        feed={feedOn ? feed : null}
-        serverOffset={serverOffset}
-      />
+    <main
+      className={designed ? "overlay-screen ov-design-screen" : "overlay-screen ov-screen"}
+      id="main-content"
+      aria-label={label}
+      data-feed-status={feed.status}
+    >
+      {designed ? <DesignCanvas>{composition}</DesignCanvas> : composition}
       {/* The overlay never goes offline (it keeps retrying), so it never puts a button on stream. */}
       {content && status !== "live" && (
         <output className="overlay-connection">
