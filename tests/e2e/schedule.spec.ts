@@ -1,6 +1,7 @@
+import { readFile } from "node:fs/promises";
 import { newPage, close } from "./coverage";
 import { expect, test } from "./coverage";
-import { dateFromToday, signedIn } from "./fixtures";
+import { dateFromToday, origin, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
 test("viewers see the feed, the calendar views on desktop only, and a stable column", async ({ page }) => {
@@ -36,7 +37,17 @@ test("the event dialog shows the stream and the .ics feed serves the schedule", 
   await page.locator(".sched-hero").getByRole("button", { name: "Mic shootout" }).click();
   const dialog = page.getByRole("dialog", { name: "Mic shootout" });
   await expect(dialog).toContainText("Bring your questions.");
-  await expect(dialog.getByRole("button", { name: "Add to calendar" })).toBeVisible();
+  const downloading = page.waitForEvent("download");
+  await dialog.getByRole("button", { name: "Add to calendar" }).click();
+  const download = await downloading;
+  expect(download.suggestedFilename()).toBe("Mic-shootout.ics");
+  const path: string | null = await download.path();
+  expect(path).not.toBeNull();
+  expect(await readFile(path!, "utf8")).toContain("SUMMARY:Mic shootout");
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await dialog.getByRole("button", { name: "Copy link" }).click();
+  await expect(page.locator(".sb-toast")).toContainText("Link copied.");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("?view=schedule&event=");
   await expect(dialog.getByRole("button", { name: "Edit" })).toHaveCount(0);
   await expect(page).toHaveURL(/event=/);
   const feed = await request.get("/@feature_host/schedule.ics");
@@ -103,16 +114,28 @@ test("the owner schedules a weekly stream, edits, cancels and deletes it", async
   const dialog = page.getByRole("dialog", { name: "Speedrun practice" });
   await dialog.getByRole("button", { name: "Edit" }).click();
   const edit = page.getByRole("dialog", { name: "Edit stream" });
+  await edit.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Speedrun practice", exact: true })).toBeVisible();
+  await page.getByRole("dialog").getByRole("button", { name: "Edit", exact: true }).click();
   await edit.getByLabel("Title").fill("Speedrun practice night");
   await edit.getByRole("radio", { name: "This and following streams" }).check();
   await edit.getByRole("button", { name: "Save" }).click();
   await expect(page.locator(".sched-row").filter({ hasText: "Speedrun practice night" })).toHaveCount(1);
   await page.locator(".sched-row").filter({ hasText: "Speedrun practice night" }).getByRole("button").first().click();
   await page.getByRole("dialog").getByRole("button", { name: "Cancel stream" }).click();
-  await page
-    .getByRole("dialog", { name: "Cancel this stream?" })
-    .getByRole("button", { name: "Cancel stream" })
-    .click();
+  const cancellation = page.getByRole("dialog", { name: "Cancel this stream?" });
+  await page.route(
+    "**/api/events/*",
+    async (route) => {
+      if (route.request().method() !== "PATCH") return route.continue();
+      await route.fulfill({ status: 503, json: { error: "Cancellation failed. Try again." } });
+    },
+    { times: 1 },
+  );
+  await cancellation.getByRole("button", { name: "Cancel stream" }).click();
+  await expect(cancellation.getByRole("alert")).toHaveText("Cancellation failed. Try again.");
+  await expect(cancellation.getByRole("button", { name: "Cancel stream" })).toBeEnabled();
+  await cancellation.getByRole("button", { name: "Cancel stream" }).click();
   await expect(page.locator(".sb-toast")).toContainText("Stream cancelled.");
   const cancelled = page.locator(".sched-row.status-cancelled").filter({ hasText: "Speedrun practice night" });
   await expect(cancelled).toContainText("Cancelled");
@@ -244,7 +267,9 @@ test("the Day view gives early streams their own rows", async ({ browser }) => {
     expect(boxes[index].y).toBeGreaterThanOrEqual(boxes[index - 1].y + boxes[index - 1].height);
 
   // Overlapping streams at 04:00 must each open on click.
-  const clash = listed.events.find((event) => event.title === "Early" && ![first.id, ...others.map((o) => o.id)].includes(event.id))!;
+  const clash = listed.events.find(
+    (event) => event.title === "Early" && ![first.id, ...others.map((o) => o.id)].includes(event.id),
+  )!;
   const moved = { action: "edit", scope: "one", ...stream, ...link, time: "04:00", title: "Early clash" };
   expect((await context.request.patch(`/api/events/${clash.id}`, { data: moved })).status()).toBe(200);
   await page.reload();
@@ -299,4 +324,161 @@ test("schedule writes are owner-only and refused on frozen pages", async ({ brow
   expect((await frozen.request.post("/api/events", { data: body })).status()).toBe(423);
   await close(viewer);
   await close(frozen);
+});
+
+test("the schedule form keeps edits after a failed save and warns about linked overlapping streams", async ({
+  browser,
+}) => {
+  const context = await signedIn(browser, "featureowner", clientIp("schedule", 125));
+  // New coverage cases own 203.0.113.80–99.
+  await context.setExtraHTTPHeaders({ Origin: origin, "CF-Connecting-IP": "203.0.113.80" });
+  const page = await newPage(context);
+  await page.goto("/@feature_host?view=schedule");
+  const range: string = `from=${Date.now() - 86_400_000}&to=${Date.now() + 7 * 86_400_000}`;
+  const listed = (await (await context.request.get(`/api/streamers/feature_host/events?${range}`)).json()) as {
+    events: { title: string; startsAt: number }[];
+  };
+  const seeded = listed.events.find((event) => event.title === "Mic shootout");
+  expect(seeded).toBeDefined();
+  const instant = new Date(seeded!.startsAt).toISOString();
+  await page.locator(".sched-hero").getByRole("button", { name: "Mic shootout" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Edit", exact: true }).click();
+  const linkedEdit = page.getByRole("dialog", { name: "Edit stream" });
+  await expect(
+    linkedEdit.getByRole("group", { name: "Linked topics" }).getByRole("button", { name: "Mic shootout" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await linkedEdit.getByRole("button", { name: "Back", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await page
+    .locator(".sched-upcoming")
+    .getByRole("button", { name: /Variety night/ })
+    .click();
+  await page.getByRole("dialog").getByRole("button", { name: "Edit", exact: true }).click();
+  await expect(linkedEdit.getByLabel("Ends on (optional)")).not.toHaveValue("");
+  await linkedEdit.getByRole("button", { name: "Back", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await page.locator("#suggest").click();
+  const form = page.getByRole("dialog", { name: "Schedule a stream" });
+  await form.getByLabel("Title").fill("Coverage studio rehearsal");
+  await form.getByLabel("Date").fill(instant.slice(0, 10));
+  await form.getByLabel("Start time").fill(instant.slice(11, 16));
+  await form.getByRole("combobox", { name: /^Time zone/ }).click();
+  await page.getByRole("option", { name: "Europe/London", exact: true }).click();
+  await form.getByRole("combobox", { name: /^Time zone/ }).click();
+  await page.getByRole("option", { name: /^UTC/ }).click();
+  await expect(form.locator(".overlap-warn")).toContainText("Overlaps “Mic shootout”");
+  await form.getByRole("combobox", { name: /^Duration/ }).click();
+  await page.getByRole("option", { name: "30 min", exact: true }).click();
+  await form.getByLabel("Repeat weekly").check();
+  const days = form.getByRole("group", { name: "Repeat on" });
+  const selected = days.getByRole("button", { pressed: true });
+  await expect(selected).toHaveCount(1);
+  await selected.click();
+  await expect(days.getByRole("button", { pressed: true })).toHaveCount(0);
+  await days.getByRole("button").first().click();
+  await form.getByLabel("Ends on (optional)").fill(dateFromToday(14));
+  await form.getByLabel("Ends on (optional)").fill("");
+  await form.getByLabel("Repeat weekly").uncheck();
+  await expect(days).toBeHidden();
+  const topic = form.getByRole("group", { name: "Linked topics" }).getByRole("button", { name: "Mic shootout" });
+  await topic.click();
+  await expect(topic).toHaveAttribute("aria-pressed", "true");
+  await topic.click();
+  await expect(topic).toHaveAttribute("aria-pressed", "false");
+  await topic.click();
+  await form.getByRole("combobox", { name: /^Platform/ }).click();
+  await page.getByRole("option", { name: "Other", exact: true }).click();
+  await expect(form.getByLabel("Channel URL")).toHaveValue("");
+  await form.getByLabel("Channel URL").fill("https://studio.example.test/live");
+  await form.getByRole("combobox", { name: /^Platform/ }).click();
+  await page.getByRole("option", { name: "Kick", exact: true }).click();
+  await expect(form.getByLabel("Channel URL")).toHaveValue("https://studio.example.test/live");
+  await form.getByLabel("Notes (optional)").fill("Bring headphones and a microphone.");
+  await page.route(
+    "**/api/events",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        json: { error: "Schedule unavailable. Your draft is safe." },
+      }),
+    { times: 1 },
+  );
+  await form.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(form.getByRole("alert")).toHaveText("Schedule unavailable. Your draft is safe.");
+  await expect(form.getByLabel("Notes (optional)")).toHaveValue("Bring headphones and a microphone.");
+  await form.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(form).toBeHidden();
+  await page.locator(".sched-row, .sched-hero").getByRole("button", { name: "Coverage studio rehearsal" }).click();
+  const event = page.getByRole("dialog", { name: "Coverage studio rehearsal" });
+  await expect(event).toContainText("Bring headphones and a microphone.");
+  await expect(event.getByRole("link", { name: "Mic shootout" })).toBeVisible();
+  await event.getByRole("button", { name: "Delete", exact: true }).click();
+  const deletion = page.getByRole("dialog", { name: "Delete this stream?" });
+  await page.route(
+    "**/api/events/*",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        json: { error: "Deletion unavailable. Try again." },
+      }),
+    { times: 1 },
+  );
+  await deletion.getByRole("button", { name: "Delete stream" }).click();
+  await expect(deletion.getByRole("alert")).toHaveText("Deletion unavailable. Try again.");
+  await deletion.getByRole("button", { name: "Delete stream" }).click();
+  await expect(deletion).toBeHidden();
+  await expect(page.getByRole("button", { name: "Coverage studio rehearsal" })).toHaveCount(0);
+  await close(context);
+});
+
+test("the owner can retry, change and remove a past stream's replay", async ({ browser }) => {
+  const context = await signedIn(browser, "featureowner", clientIp("schedule", 128));
+  await context.setExtraHTTPHeaders({ Origin: origin, "CF-Connecting-IP": "203.0.113.81" });
+  const page = await newPage(context);
+  await page.goto("/@feature_host?view=schedule");
+  const open = async (): Promise<void> => {
+    await page.locator(".sched-past").getByRole("button", { name: "Desk setup Q&A" }).click();
+  };
+  await open();
+  const event = page.getByRole("dialog", { name: "Desk setup Q&A" });
+  await expect(event.getByRole("link", { name: "Watch replay" })).toHaveAttribute("href", "https://twitch.tv/videos/1");
+  await expect(event.getByRole("button", { name: "Add to calendar" })).toHaveCount(0);
+  await event.getByRole("button", { name: "Change replay link" }).click();
+  const replay = page.getByRole("dialog", { name: "Add replay link" });
+  await replay.getByLabel("Replay URL").fill("https://twitch.tv/videos/749");
+  await page.route(
+    "**/api/events/*",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        json: { error: "Replay unavailable. Retry." },
+      }),
+    { times: 1 },
+  );
+  await replay.getByRole("button", { name: "Save replay link" }).click();
+  await expect(replay.getByRole("alert")).toHaveText("Replay unavailable. Retry.");
+  await expect(replay.getByLabel("Replay URL")).toHaveValue("https://twitch.tv/videos/749");
+  await replay.getByRole("button", { name: "Save replay link" }).click();
+  await expect(replay).toBeHidden();
+  await open();
+  await expect(event.getByRole("link", { name: "Watch replay" })).toHaveAttribute(
+    "href",
+    "https://twitch.tv/videos/749",
+  );
+  await event.getByRole("button", { name: "Change replay link" }).click();
+  await replay.getByLabel("Replay URL").fill("");
+  await replay.getByRole("button", { name: "Save replay link" }).click();
+  await expect(replay).toBeHidden();
+  await open();
+  await expect(event).toContainText("No replay for this stream.");
+  await expect(event.getByRole("link", { name: "Watch replay" })).toHaveCount(0);
+  await event.getByRole("button", { name: "Add replay link" }).click();
+  await expect(replay.getByLabel("Replay URL")).toHaveValue("");
+  await replay.getByLabel("Replay URL").fill("https://twitch.tv/videos/1");
+  await replay.getByRole("button", { name: "Save replay link" }).click();
+  await expect(replay).toBeHidden();
+  await open();
+  await expect(event.getByRole("link", { name: "Watch replay" })).toHaveAttribute("href", "https://twitch.tv/videos/1");
+  await page.keyboard.press("Escape");
+  await close(context);
 });

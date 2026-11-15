@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   BUFFER_SIZE,
   MAX_AHEAD_MS,
@@ -13,15 +13,24 @@ import {
   type BubbleSlot,
   bubbleCap,
   bubbleLines,
+  createMemory,
+  draw,
   frameAt,
   LEADER_MIN,
   layoutBubbles,
   showsLabel,
   tailGeometry,
   textDirection,
+  type DrawOptions,
+  type RenderMemory,
 } from "../app/components/overlay/characters/renderer";
-import { SheetCache, helmetColor } from "../app/components/overlay/characters/sprites";
-import type { CharacterState, CharacterView, PlaygroundView } from "../app/components/overlay/characters/view";
+import { SheetCache, helmetColor, type Atlas } from "../app/components/overlay/characters/sprites";
+import type {
+  CharacterState,
+  CharacterView,
+  PlaygroundView,
+  TileView,
+} from "../app/components/overlay/characters/view";
 import { CHAR_STATES } from "../app/lib/playground/protocol";
 import { GENERIC_GLYPH, glyphOf, PLATFORM_GLYPHS } from "../app/components/overlay/wasteland/glyphs";
 import { WASTELAND_PLAYGROUND as theme, type Sequence } from "../app/components/overlay/wasteland/playground-theme";
@@ -268,5 +277,229 @@ describe("playground helmet sheets", () => {
     cache.get("vpzone");
     expect(built).toEqual(["#9146ff", "#9e9e9e"]);
     expect(cache.size).toBe(2);
+  });
+});
+
+interface CanvasCall {
+  method: string;
+  args: unknown[];
+}
+
+/** A command recorder with deterministic text metrics; the renderer and atlas cache remain real. */
+class RenderCanvas {
+  width = 1920;
+  height = 240;
+  readonly calls: CanvasCall[] = [];
+  readonly context: CanvasRenderingContext2D;
+
+  constructor() {
+    const values: Record<string, unknown> = {
+      canvas: this,
+      measureText: (text: string): Pick<TextMetrics, "width"> => ({ width: [...text].length * 8 }),
+    };
+    this.context = new Proxy(values, {
+      get: (target: Record<string, unknown>, method: string): unknown =>
+        method in target
+          ? target[method]
+          : (...args: unknown[]): void => {
+              this.calls.push({ method, args });
+            },
+    }) as unknown as CanvasRenderingContext2D;
+  }
+
+  getContext(): CanvasRenderingContext2D {
+    return this.context;
+  }
+}
+
+describe("playground canvas rendering", () => {
+  afterEach((): void => {
+    vi.unstubAllGlobals();
+  });
+
+  function renderer(): {
+    canvas: RenderCanvas;
+    memory: RenderMemory;
+    atlas: Atlas;
+    labels: RenderCanvas[];
+    render: (moment: PlaygroundView, now: number, reduced?: boolean) => void;
+  } {
+    const canvas = new RenderCanvas();
+    const labels: RenderCanvas[] = [];
+    vi.stubGlobal("document", {
+      createElement: (tag: string): RenderCanvas => {
+        expect(tag).toBe("canvas");
+        const label = new RenderCanvas();
+        labels.push(label);
+        return label;
+      },
+    });
+    vi.stubGlobal(
+      "Path2D",
+      class {
+        constructor(readonly path: string) {}
+      },
+    );
+    const memory: RenderMemory = createMemory();
+    const atlas: Atlas = {
+      terrain: { width: 256, height: 256 } as HTMLImageElement,
+      sheets: new SheetCache(theme, (): HTMLCanvasElement => new RenderCanvas() as unknown as HTMLCanvasElement),
+    };
+    return {
+      canvas,
+      memory,
+      atlas,
+      labels,
+      render: (moment: PlaygroundView, now: number, reduced: boolean = false): void => {
+        const options: DrawOptions = { reduced, badges: { test: "Test mode", paused: "Paused" } };
+        draw(canvas.context, moment, theme, atlas, now, memory, options);
+      },
+    };
+  }
+
+  const dirt = (): TileView[] => Array.from({ length: 40 }, (): TileView => ({ kind: "dirt", stage: 0 }));
+
+  it("spawns digging debris only on a dirt strike, advances it and removes expired particles", () => {
+    const { render, memory, canvas } = renderer();
+    const moment: PlaygroundView = { ...view([character({ state: "dig", x: 32, t: 14 })]), tiles: dirt() };
+    render(moment, 1000);
+    expect(memory.particles).toHaveLength(0);
+    render({ ...moment, characters: [character({ state: "dig", x: 32, t: 15 })] }, 1000 + 1000 / 30);
+    expect(memory.particles).toHaveLength(7);
+    expect(memory.particles.filter((particle) => particle.picture !== null)).toHaveLength(4);
+    expect(memory.particles.filter((particle) => particle.color !== null)).toHaveLength(3);
+    expect(memory.particles.every((particle) => particle.x === 40 && particle.y === 60)).toBe(true);
+    const x: number = memory.particles[0].x;
+    render({ ...moment, characters: [character({ state: "dig", x: 32, t: 16 })] }, 1000 + 2000 / 30);
+    expect(memory.particles).toHaveLength(7);
+    expect(memory.particles[0].life).toBeCloseTo(25);
+    expect(memory.particles[0].x).not.toBe(x);
+    expect(canvas.calls.some((call) => call.method === "fillRect" && call.args[2] === 1 && call.args[3] === 1)).toBe(
+      true,
+    );
+    for (const now of [2000, 3000, 4000]) render(view([]), now);
+    expect(memory.particles).toHaveLength(0);
+    expect(memory.seen.size).toBe(0);
+
+    const girder: PlaygroundView = { ...moment, tiles: dirt().map(() => ({ kind: "girder", stage: 0 })) };
+    render(girder, 5000);
+    render({ ...girder, characters: [character({ state: "dig", x: 32, t: 15 })] }, 5034);
+    expect(memory.particles).toHaveLength(0);
+  });
+
+  it("emits rocks once when a tile breaks and body pieces once at the explosion frame", () => {
+    const { render, memory, atlas } = renderer();
+    const intact: PlaygroundView = { ...view([character({ state: "boom", t: 29 })]), tiles: dirt() };
+    render(intact, 1000);
+    const broken: TileView[] = dirt();
+    broken[5] = { kind: "dirt", stage: 3 };
+    const blast: PlaygroundView = { ...intact, tiles: broken, characters: [character({ state: "boom", t: 30 })] };
+    render(blast, 1034);
+    expect(memory.particles).toHaveLength(27);
+    expect(memory.particles.filter((particle) => particle.picture?.image === atlas.terrain)).toHaveLength(10);
+    expect(memory.particles.filter((particle) => particle.picture?.image === atlas.sheets.get("twitch"))).toHaveLength(
+      3,
+    );
+    expect(memory.particles.filter((particle) => particle.color !== null)).toHaveLength(14);
+    expect(
+      memory.particles.filter((particle) => particle.life === 48).map((particle) => particle.picture?.rect),
+    ).toEqual([theme.courier.boot, theme.courier.boot, theme.courier.helmet]);
+    render(blast, 1068);
+    expect(memory.particles).toHaveLength(27);
+    render({ ...blast, mode: { test: true, paused: true } }, 1102, true);
+    expect(memory.particles).toHaveLength(0);
+  });
+
+  it("bounds debris during a large terrain collapse instead of growing it with every broken tile", () => {
+    const { render, memory } = renderer();
+    render({ ...view([]), tiles: dirt() }, 1000);
+    render({ ...view([]), tiles: dirt().map(() => ({ kind: "dirt", stage: 3 })) }, 1034);
+    expect(memory.particles).toHaveLength(160);
+    expect(memory.particles.every((particle) => particle.picture !== null)).toBe(true);
+  });
+
+  it("draws cracked tiles, girder ends, stairs, active doors, respawn pads and unavailable marks", () => {
+    const { render, canvas } = renderer();
+    const moment: PlaygroundView = {
+      ...view([
+        character({ state: "enter" }),
+        character({ id: 2, state: "exit", dir: -1 }),
+        character({ id: 3, state: "respawn" }),
+        character({ id: 4, state: "gone" }),
+      ]),
+      tiles: [
+        { kind: "girder", stage: 0 },
+        { kind: "girder", stage: 0 },
+        { kind: "girder", stage: 0 },
+        { kind: "dirt", stage: 1 },
+        { kind: "dirt", stage: 2 },
+        { kind: "dirt", stage: 3 },
+        { kind: "girder", stage: 0 },
+      ],
+      stairs: [
+        { x: 80, top: 45, dir: -1 },
+        { x: 90, top: 59, dir: 1 },
+      ],
+      marks: [{ x: 90.4, y: 20.7 }],
+    };
+    render(moment, theme.blinkMs * 2);
+    const pictures: unknown[][] = canvas.calls
+      .filter((call) => call.method === "drawImage")
+      .map((call) => call.args.slice(1, 5));
+    for (const name of ["girderL", "girderM", "girderR", "crack1", "crack2", "hole", "padActive"] as const) {
+      expect(pictures).toContainEqual([...theme.terrain.rects[name]]);
+    }
+    expect(canvas.calls).toContainEqual({ method: "scale", args: [-1, 1] });
+    expect(canvas.calls.some((call) => call.method === "fillRect" && call.args[2] === 3 && call.args[3] === 3)).toBe(
+      true,
+    );
+    expect(
+      canvas.calls.filter((call) => call.method === "drawImage" && call.args.length === 9 && call.args[8] === 14),
+    ).toHaveLength(1);
+    canvas.calls.length = 0;
+    render({ ...moment, world: { ...moment.world, ground: 10 } }, theme.blinkMs * 3, true);
+    expect(
+      canvas.calls.some(
+        (call) =>
+          call.method === "drawImage" &&
+          JSON.stringify(call.args.slice(1, 5)) === JSON.stringify(theme.terrain.rects.flag0),
+      ),
+    ).toBe(false);
+  });
+
+  it("caches labels, wraps long speech, respects RTL names and keeps badges above low bubbles", () => {
+    const { render, canvas, labels, memory } = renderer();
+    const speaker: CharacterView = character({
+      x: 220,
+      y: 35,
+      name: "שלום עולם",
+      bubble: "One verylongwordwithoutspaces and another sentence that must wrap and be cut.",
+    });
+    const moment: PlaygroundView = {
+      ...view([speaker, character({ id: 2, x: 20, recent: true, platform: "unknown", name: "שלום".repeat(30) })]),
+      speakers: [999, 1],
+      mode: { test: true, paused: true },
+    };
+    canvas.width = 720;
+    render(moment, 1000);
+    expect(memory.labels.size).toBeGreaterThanOrEqual(2);
+    const rendered: string[] = labels.flatMap((label) =>
+      label.calls.filter((call) => call.method === "fillText").map((call) => String(call.args[0])),
+    );
+    expect(rendered).toContain("שלום עולם");
+    expect(rendered.some((text) => text.endsWith("…"))).toBe(true);
+    expect(labels.some((label) => label.context.direction === "rtl")).toBe(true);
+    expect(canvas.calls.filter((call) => call.method === "fillText").map((call) => call.args[0])).toEqual([
+      "Test mode",
+      "Paused",
+    ]);
+    const count: number = labels.length;
+    render(moment, 1034);
+    expect(labels).toHaveLength(count);
+    expect(memory.labels.size).toBeGreaterThanOrEqual(2);
+    for (let id: number = 3; id <= 205; id += 1)
+      render(view([character({ id, recent: true, name: `Viewer ${id}` })]), 1000 + id * 34, true);
+    expect(memory.labels.size).toBeLessThan(200);
+    expect([...memory.labels.keys()].some((key) => key.includes("Viewer 205"))).toBe(true);
   });
 });

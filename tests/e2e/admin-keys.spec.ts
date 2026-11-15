@@ -1,9 +1,12 @@
 import { newPage, close } from "./coverage";
 import { readFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import { test, expect, type Browser, type BrowserContext, type CDPSession, type Page } from "./coverage";
 import { z } from "zod";
 import { clientIp } from "./client-ips";
+import { accounts, runSql } from "./fixtures";
 
+// Added admin coverage owns TEST-NET-3 .60–79; existing setup requests retain their allocated IPs.
 const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
 const boardSchema = z.object({ entries: z.array(z.object({ id: z.string(), title: z.string() })) });
@@ -62,7 +65,7 @@ test("only administrators reach the admin and security-key API", async ({ browse
 });
 
 test("an admin sets up two keys, confirms with a key in another session, and moderates", async ({ browser }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   const context = await signedIn(browser, "keyadmin", clientIp("admin-keys", 121));
   const page = await newPage(context);
   const cdp = await context.newCDPSession(page);
@@ -75,6 +78,25 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await expect(page.getByRole("heading", { name: "Add your first key" })).toBeVisible();
   await expect(page.locator(".key-steps [aria-current=step]")).toHaveText(/Add your first key/);
   await shot(page, "keys-setup-first");
+  await context.setExtraHTTPHeaders({ Origin: origin, "CF-Connecting-IP": "203.0.113.62" });
+  await page.evaluate(() => {
+    Object.defineProperty(window, "PublicKeyCredential", { value: undefined, configurable: true });
+  });
+  await page.getByRole("button", { name: "Register this key" }).click();
+  await expect(page.getByRole("alert")).toContainText("This browser can't use security keys.");
+  await page.reload();
+  await page.route(
+    "**/api/admin/keys/options",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        json: { error: "Registration temporarily unavailable." },
+      }),
+    { times: 1 },
+  );
+  await page.getByRole("button", { name: "Register this key" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "Registration temporarily unavailable." })).toBeVisible();
+  await expect(page.getByLabel("Key name")).toHaveValue("YubiKey – desk");
   await page.getByRole("button", { name: "Register this key" }).click();
   await expect(page.getByRole("heading", { name: "Add a backup key" })).toBeVisible();
 
@@ -82,7 +104,7 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   const { credentials } = await cdp.send("WebAuthn.getCredentials", { authenticatorId: first });
   expect(credentials).toHaveLength(1);
   await cdp.send("WebAuthn.removeVirtualAuthenticator", { authenticatorId: first });
-  await addKey(cdp);
+  const backup = await addKey(cdp);
   await expect(page.getByLabel("Key name")).toHaveValue("YubiKey – safe");
   await page.getByRole("button", { name: "Register this key" }).click();
   await expect(page.getByRole("article", { name: "YubiKey – safe" })).toBeVisible();
@@ -93,6 +115,18 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await page.getByRole("link", { name: "Security keys" }).click();
   await page.getByRole("button", { name: "Rename YubiKey – desk" }).click();
   await page.getByRole("dialog").getByLabel("Key name").fill("YubiKey – keyring");
+  await page.route(
+    "**/api/admin/keys/*",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        json: { error: "Rename temporarily unavailable." },
+      }),
+    { times: 1 },
+  );
+  await page.getByRole("dialog").getByRole("button", { name: "Save" }).click();
+  await expect(page.getByRole("dialog").getByRole("alert")).toHaveText("Rename temporarily unavailable.");
+  await expect(page.getByRole("dialog").getByLabel("Key name")).toHaveValue("YubiKey – keyring");
   await page.getByRole("dialog").getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Renamed" })).toHaveText(
     "Renamed the key to YubiKey – keyring.",
@@ -111,7 +145,27 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await expect(second.getByRole("heading", { name: "Confirm it's you" })).toBeVisible();
   await expect(second.getByRole("article", { name: "Room 48" })).toHaveCount(0);
   await shot(second, "stepup-gate");
+  await other.setExtraHTTPHeaders({ Origin: origin, "CF-Connecting-IP": "203.0.113.63" });
+  await second.evaluate(() => {
+    Object.defineProperty(window, "PublicKeyCredential", { value: undefined, configurable: true });
+  });
   await second.getByRole("button", { name: "Use security key" }).click();
+  await expect(second.getByRole("alert")).toContainText("This browser can't use security keys.");
+  await second.reload();
+  await second.getByText("Lost your keys?", { exact: true }).click();
+  await expect(second.getByText(/If every key is lost, the site operator resets them/)).toBeVisible();
+  await second.route(
+    "**/api/admin/stepup/options",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        json: { error: "Key confirmation temporarily unavailable." },
+      }),
+    { times: 1 },
+  );
+  await second.getByRole("button", { name: "Use security key" }).click();
+  await expect(second.getByRole("alert")).toHaveText("Key confirmation temporarily unavailable.");
+  await second.getByRole("button", { name: "Try again" }).click();
   await expect(second.getByRole("heading", { name: /^Admin\s*:\s*Streamer pages$/ })).toBeVisible();
 
   await second.getByLabel("Search streamer pages").fill("zz_room_48");
@@ -124,7 +178,30 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await second.getByRole("option", { name: "Spam or scam" }).click();
   await sheet.getByLabel("Internal note (optional)").fill("Test freeze from the browser suite.");
   await shot(second, "moderate-sheet");
+  await second.route(
+    "**/api/admin/streamers/*",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        json: { error: "Moderation temporarily unavailable." },
+      }),
+    { times: 1 },
+  );
   await sheet.getByRole("button", { name: "Freeze", exact: true }).click();
+  await expect(sheet.getByRole("alert")).toHaveText("Moderation temporarily unavailable.");
+  await expect(sheet.getByLabel("Internal note (optional)")).toHaveValue("Test freeze from the browser suite.");
+  await second.route(
+    "**/api/admin/streamers/*",
+    (route) =>
+      route.fulfill({
+        status: 403,
+        json: { error: "Confirm again.", code: "step_up_required" },
+      }),
+    { times: 1 },
+  );
+  await sheet.getByRole("button", { name: "Freeze", exact: true }).click();
+  await expect(second.getByRole("dialog", { name: "Confirm it's you" })).toBeVisible();
+  await second.getByRole("dialog").getByRole("button", { name: "Use security key" }).click();
   // Freeze defaults to notification; without NOTIFY_EMAIL, e2e sends no email.
   await expect(second.getByRole("status").filter({ hasText: "Froze" })).toHaveText(
     "Froze @zz_room_48. The owner sees a notice on their page. No email went out.",
@@ -139,6 +216,72 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
   await second.getByRole("option", { name: "Something else" }).click();
   await lift.getByRole("button", { name: "Unfreeze", exact: true }).click();
   await expect(row.locator(".mod-badge")).toHaveText("Active");
+
+  await row.getByRole("button", { name: "Suspend @zz_room_48" }).click();
+  const suspend = second.getByRole("dialog", { name: "Suspend @zz_room_48?" });
+  await suspend.getByRole("combobox", { name: "Reason" }).click();
+  await second.getByRole("option", { name: "Spam or scam" }).click();
+  await suspend.getByRole("checkbox").uncheck();
+  await suspend.getByRole("button", { name: "Suspend", exact: true }).click();
+  await expect(row.locator(".mod-badge")).toHaveText("Suspended");
+  await row.getByRole("button", { name: "Unsuspend @zz_room_48" }).click();
+  const restore = second.getByRole("dialog", { name: "Unsuspend @zz_room_48?" });
+  await restore.getByRole("combobox", { name: "Reason" }).click();
+  await second.getByRole("option", { name: "Something else" }).click();
+  await restore.getByRole("button", { name: "Unsuspend", exact: true }).click();
+  await expect(row.locator(".mod-badge")).toHaveText("Active");
+
+  await row.getByRole("button", { name: "Mark as official @zz_room_48" }).click();
+  const official = second.getByRole("dialog");
+  await second.route(
+    "**/api/admin/streamers/*/official",
+    (route) =>
+      route.fulfill({
+        status: 403,
+        json: { error: "Confirm again.", code: "step_up_required" },
+      }),
+    { times: 1 },
+  );
+  await official.getByRole("button", { name: "Mark as official", exact: true }).click();
+  await expect(official.getByRole("heading", { name: "Confirm it's you" })).toBeVisible();
+  await official.getByRole("button", { name: "Use security key" }).click();
+  await expect(row.locator(".official-badge")).toHaveText("Official");
+  await row.getByRole("button", { name: "Remove official @zz_room_48" }).click();
+  await second.getByRole("dialog").getByRole("button", { name: "Remove official", exact: true }).click();
+  await expect(row.locator(".official-badge")).toHaveCount(0);
+
+  // Add a third key and remove it after confirmation with the retained backup key.
+  const { credentials: backupCredentials } = await cdp.send("WebAuthn.getCredentials", { authenticatorId: backup });
+  await cdp.send("WebAuthn.removeVirtualAuthenticator", { authenticatorId: backup });
+  const travel = await addKey(cdp);
+  await page.getByRole("button", { name: "Add key", exact: true }).click();
+  const add = page.getByRole("dialog", { name: "Add a security key" });
+  await add.getByLabel("Key name").fill("Travel key");
+  await add.getByRole("button", { name: "Touch new key to register" }).click();
+  await expect(page.getByRole("article", { name: "Travel key" })).toBeVisible();
+  await cdp.send("WebAuthn.removeVirtualAuthenticator", { authenticatorId: travel });
+  const retained = await addKey(cdp);
+  await cdp.send("WebAuthn.addCredential", { authenticatorId: retained, credential: backupCredentials[0] });
+  await page.getByRole("button", { name: "Remove Travel key", exact: true }).click();
+  const remove = page.getByRole("dialog", { name: "Remove Travel key?" });
+  await expect(remove.getByText(/YubiKey – safe/)).toBeVisible();
+  await page.route(
+    "**/api/admin/keys/*",
+    (route) =>
+      route.fulfill({
+        status: 503,
+        json: { error: "Removal temporarily unavailable." },
+      }),
+    { times: 1 },
+  );
+  await remove.getByRole("button", { name: "Confirm with another key" }).click();
+  await expect(remove.getByRole("alert").filter({ hasText: "Removal temporarily unavailable." })).toBeVisible();
+  await remove.getByRole("button", { name: "Confirm with another key" }).click();
+  await expect(page.getByRole("article", { name: "Travel key" })).toHaveCount(0);
+  await expect(page.getByRole("status").filter({ hasText: "Removed Travel key." })).toBeVisible();
+  await page.getByRole("button", { name: "Rename YubiKey – safe" }).click();
+  await page.getByRole("dialog").press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 
   await Promise.all([close(context), close(other)]);
 });
@@ -175,4 +318,165 @@ test("reports are grouped by page and resolved per item", async ({ browser }) =>
   await expect(page.getByRole("status").filter({ hasText: "dismissed" })).toHaveText("Reports dismissed.");
   await expect(page.getByRole("article", { name: "Pagination host" })).toHaveCount(0);
   await close(context);
+});
+
+test("report pagination recovers, preserves focus and resolves content and deleted-page reports", async ({
+  browser,
+}) => {
+  test.setTimeout(120_000);
+  const context = await signedIn(browser, "admin", clientIp("admin-keys", 120));
+  await context.setExtraHTTPHeaders({ Origin: origin, "CF-Connecting-IP": "203.0.113.60" });
+  const users = await accounts();
+  const result = z
+    .object({ streamer: z.object({ id: z.string().uuid() }) })
+    .parse(await (await context.request.get("/api/streamers/zz_room_47")).json());
+  const streamerId: string = result.streamer.id;
+  const deletedIds: string[] = Array.from({ length: 100 }, () => randomUUID());
+  const entryIds: string[] = Array.from({ length: 52 }, () => randomUUID());
+  const reportIds: string[] = [];
+  const statements: string[] = [];
+  const now: number = Date.now();
+  function report(target: string, streamer: string, index: number, reporter: string | null): string {
+    const id: string = randomUUID();
+    reportIds.push(id);
+    return `INSERT INTO content_reports(id,target_kind,target_id,streamer_id,reporter_id,target_author_id,reason,details,snapshot,status,created_at) VALUES ('${id}','entry','${target}','${streamer}',${reporter ? `'${reporter}'` : "NULL"},${index % 2 ? `'${users.viewer.id}'` : "NULL"},'spam','${index === 0 ? "Please review the context." : ""}','Review fixture ${index}','open',${now - index});`;
+  }
+  for (const [index, id] of entryIds.entries()) {
+    statements.push(
+      `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${id}','${streamerId}','${users.viewer.id}','topic','Review fixture ${index}','','','[]',${now - index},0);`,
+      report(id, streamerId, index, users.reporter.id),
+    );
+  }
+  // Reports retain deleted reporter identities, and the response bounds per-item reporter details at 50.
+  for (let index: number = 0; index < 51; index += 1) statements.push(report(entryIds[0], streamerId, 0, null));
+  for (const [index, id] of deletedIds.entries()) statements.push(report(randomUUID(), id, index + 100, null));
+  await runSql("admin-report-review-coverage", statements);
+  const page = await newPage(context);
+  try {
+    await page.goto("/admin?view=reports");
+    await page.route(
+      "**/api/admin/report-groups?*",
+      (route) =>
+        route.fulfill({
+          status: 503,
+          json: { error: "More pages temporarily unavailable." },
+        }),
+      { times: 1 },
+    );
+    await page.getByRole("button", { name: "Load more pages", exact: true }).click();
+    await expect(page.getByRole("alert").filter({ hasText: "More pages temporarily unavailable." })).toBeVisible();
+    await page.getByRole("button", { name: "Load more pages", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Load more pages", exact: true })).toHaveCount(0);
+    await expect(page.locator("[data-group]:focus")).toHaveCount(1);
+    await expect(page.getByRole("article", { name: "Deleted page", exact: true })).toHaveCount(100);
+    const deleted = page.getByRole("article", { name: "Deleted page", exact: true }).last();
+    await deleted.getByRole("button", { name: "Show 1 reported item" }).click();
+    await expect(deleted.locator(".report-item")).toHaveCount(1);
+    await expect(deleted.getByRole("link", { name: "Open in context" })).toHaveCount(0);
+    await expect(deleted.locator(".report-item .person strong")).toHaveText("a deleted account");
+    await deleted.getByRole("button", { name: "By author", exact: true }).click();
+    await expect(deleted.locator(".author-head")).toContainText("a deleted account");
+
+    const group = page.getByRole("article", { name: "Room 47", exact: true });
+    await page.route(
+      `**/api/admin/report-groups/${streamerId}?*`,
+      (route) =>
+        route.fulfill({
+          status: 503,
+          json: { error: "Report details temporarily unavailable." },
+        }),
+      { times: 1 },
+    );
+    await group.getByRole("button", { name: "Show 52 reported items" }).click();
+    await expect(group.getByRole("alert")).toHaveText("Report details temporarily unavailable.");
+    await group.getByRole("button", { name: "Hide reported items" }).click();
+    await group.getByRole("button", { name: "Show 52 reported items" }).click();
+    await expect(group.locator(".report-item")).toHaveCount(50);
+    await expect(group.locator(".reporters").first()).toContainText("2 more");
+    await expect(group.getByText(/Please review the context/).first()).toBeVisible();
+    const original = group.locator(".report-item").first();
+    await expect(original.getByRole("link", { name: "Open in context" })).toHaveAttribute(
+      "href",
+      `/@zz_room_47?entry=${entryIds[0]}`,
+    );
+    await page.route(
+      `**/api/admin/report-groups/${streamerId}?*cursor=*`,
+      (route) =>
+        route.fulfill({
+          status: 503,
+          json: { error: "More items temporarily unavailable." },
+        }),
+      { times: 1 },
+    );
+    await group.getByRole("button", { name: "Load more reported items" }).click();
+    await expect(group.getByRole("alert")).toHaveText("More items temporarily unavailable.");
+    await group.getByRole("button", { name: "Load more reported items" }).click();
+    await expect(group.locator(".report-item")).toHaveCount(52);
+    await expect(group.locator(".report-item:focus")).toHaveAttribute("data-item", `entry:${entryIds[50]}`);
+    await group.getByRole("button", { name: "By author", exact: true }).click();
+    await expect(group.locator(".author-group")).toHaveCount(2);
+    await group.getByRole("button", { name: "By item", exact: true }).click();
+    await expect(group.getByRole("button", { name: "By item", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await original.getByRole("button", { name: "Remove content", exact: true }).click();
+    await page.getByRole("dialog").press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await original.getByRole("button", { name: "Remove content", exact: true }).click();
+    await page.route(
+      "**/api/admin/reports/resolve",
+      (route) =>
+        route.fulfill({
+          status: 503,
+          json: { error: "Resolution temporarily unavailable." },
+        }),
+      { times: 1 },
+    );
+    const remove = page.getByRole("dialog", { name: "Remove this content?" });
+    await remove.getByRole("button", { name: "Remove content", exact: true }).click();
+    await expect(remove.getByRole("alert")).toHaveText("Resolution temporarily unavailable.");
+    await remove.getByRole("button", { name: "Remove content", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Content removed and its reports closed." })).toBeVisible();
+    await expect(group.locator(`[data-item="entry:${entryIds[0]}"]`)).toHaveCount(0);
+    await group.getByRole("button", { name: "Freeze @zz_room_47", exact: true }).click();
+    await page.getByRole("dialog").press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await group.getByRole("button", { name: "Freeze @zz_room_47", exact: true }).click();
+    const freeze = page.getByRole("dialog", { name: "Freeze @zz_room_47?" });
+    await freeze.getByRole("combobox", { name: "Reason" }).click();
+    await page.getByRole("option", { name: "Spam or scam" }).click();
+    await freeze.getByRole("checkbox").uncheck();
+    await freeze.getByRole("button", { name: "Freeze", exact: true }).click();
+    await expect(group.locator(".mod-badge")).toHaveText("Frozen");
+    await group.getByRole("button", { name: "Unfreeze @zz_room_47", exact: true }).click();
+    const unfreeze = page.getByRole("dialog", { name: "Unfreeze @zz_room_47?" });
+    await unfreeze.getByRole("combobox", { name: "Reason" }).click();
+    await page.getByRole("option", { name: "Something else" }).click();
+    await unfreeze.getByRole("button", { name: "Unfreeze", exact: true }).click();
+    await expect(group.locator(".mod-badge")).toHaveText("Active");
+    await group.getByRole("button", { name: "Dismiss all open", exact: true }).click();
+    await page.getByRole("dialog").press("Escape");
+    await group.getByRole("button", { name: "Dismiss all open", exact: true }).click();
+    const dismiss = page.getByRole("dialog", { name: "Dismiss all open reports on @zz_room_47?" });
+    await dismiss.getByRole("button", { name: "Dismiss all open", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Dismissed all open reports on Room 47." })).toBeVisible();
+    await expect(group).toHaveCount(0);
+    await page.getByLabel("Search by streamer", { exact: true }).fill("zz_room_47");
+    await page.getByLabel("Search by streamer", { exact: true }).press("Enter");
+    await page
+      .getByRole("navigation", { name: "Report status" })
+      .getByRole("link", { name: "Resolved", exact: true })
+      .click();
+    await group.getByRole("button", { name: "Show 52 reported items" }).click();
+    await expect(group.locator(".resolved-line").filter({ hasText: "Content removed" })).toHaveCount(1);
+    await expect(group.locator(".resolved-line").filter({ hasText: "Dismissed" })).toHaveCount(49);
+    await expect(group.getByRole("button", { name: "Dismiss all open", exact: true })).toHaveCount(0);
+    await expect(group.getByRole("button", { name: "Remove content", exact: true })).toHaveCount(0);
+  } finally {
+    await close(context);
+    await runSql("admin-report-review-cleanup", [
+      `DELETE FROM content_reports WHERE id IN (${reportIds.map((id) => `'${id}'`).join(",")});`,
+      `DELETE FROM entries WHERE id IN (${entryIds.map((id) => `'${id}'`).join(",")});`,
+      `UPDATE streamers SET status='active',status_reason=NULL,status_changed_at=NULL,status_changed_by=NULL WHERE id='${streamerId}';`,
+      `DELETE FROM moderation_actions WHERE streamer_id='${streamerId}' AND created_at>=${now} AND action IN ('freeze','unfreeze');`,
+    ]);
+  }
 });

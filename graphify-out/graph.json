@@ -43975,6 +43975,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L62",
+      "target": "tests_admin_ui_coverage_test_markup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_ai_interest_test",
       "source_file": "tests/ai-interest.test.ts",
       "source_location": "L262",
@@ -45343,6 +45355,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L49",
+      "target": "tests_discussion_ui_coverage_test_render",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
       "source_location": "L110",
@@ -45427,9 +45451,33 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_e2e_account_spec",
+      "source_file": "tests/e2e/account.spec.ts",
+      "source_location": "L118",
+      "target": "tests_e2e_account_spec_accountcontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L56",
+      "source_location": "L347",
+      "target": "tests_e2e_admin_keys_spec_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L59",
       "target": "tests_e2e_admin_keys_spec_signedin",
       "weight": 1.0
     },
@@ -45441,7 +45489,7 @@
       "relation": "calls",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L70",
+      "source_location": "L73",
       "target": "tests_e2e_admin_keys_spec_addkey",
       "weight": 1.0
     },
@@ -45453,7 +45501,7 @@
       "relation": "calls",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L77",
+      "source_location": "L80",
       "target": "tests_e2e_admin_keys_spec_shot",
       "weight": 1.0
     },
@@ -45823,6 +45871,30 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_e2e_community_spec",
+      "source_file": "tests/e2e/community.spec.ts",
+      "source_location": "L35",
+      "target": "tests_e2e_community_spec_seedownercards",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_community_spec_seedownercards",
+      "source_file": "tests/e2e/community.spec.ts",
+      "source_location": "L9",
+      "target": "tests_e2e_fixtures_runsql",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
       "source_location": "L115",
@@ -46065,7 +46137,7 @@
       "relation": "calls",
       "source": "tests_e2e_discussion_history_spec",
       "source_file": "tests/e2e/discussion-history.spec.ts",
-      "source_location": "L58",
+      "source_location": "L59",
       "target": "tests_e2e_discussion_history_spec_seedhistory",
       "weight": 1.0
     },
@@ -46617,20 +46689,8 @@
       "relation": "calls",
       "source": "tests_e2e_profile_spec",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L54",
+      "source_location": "L62",
       "target": "tests_e2e_profile_spec_signedin",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_e2e_profile_spec_signedin",
-      "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L23",
-      "target": "tests_e2e_client_ips_clientaddress",
       "weight": 1.0
     },
     {
@@ -46725,7 +46785,7 @@
       "relation": "calls",
       "source": "tests_e2e_threads_spec",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "tests_e2e_threads_spec_seedthreads",
       "weight": 1.0
     },
@@ -46737,7 +46797,7 @@
       "relation": "calls",
       "source": "tests_e2e_threads_spec_seedthreads",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
@@ -46749,7 +46809,7 @@
       "relation": "calls",
       "source": "tests_e2e_threads_spec_seedthreads",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "tests_e2e_fixtures_accounts",
       "weight": 1.0
     },
@@ -48283,6 +48343,30 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L108",
+      "target": "tests_overlay_ui_coverage_test_poll",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L136",
+      "target": "tests_overlay_ui_coverage_test_stage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_playground_adapter_test",
       "source_file": "tests/playground-adapter.test.ts",
       "source_location": "L106",
@@ -48729,7 +48813,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L180",
+      "source_location": "L189",
       "target": "tests_playground_render_test_expecttidy",
       "weight": 1.0
     },
@@ -48741,7 +48825,19 @@
       "relation": "calls",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L70",
+      "source_location": "L363",
+      "target": "tests_playground_render_test_renderer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L79",
       "target": "tests_playground_render_test_character",
       "weight": 1.0
     },
@@ -48753,7 +48849,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L70",
+      "source_location": "L79",
       "target": "tests_playground_render_test_halfway",
       "weight": 1.0
     },
@@ -48765,7 +48861,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L89",
+      "source_location": "L98",
       "target": "tests_playground_render_test_view",
       "weight": 1.0
     },
@@ -48777,7 +48873,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test_halfway",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L61",
+      "source_location": "L70",
       "target": "app_components_overlay_characters_interpolate_pushframe",
       "weight": 1.0
     },
@@ -48789,7 +48885,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test_halfway",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L61",
+      "source_location": "L70",
       "target": "tests_playground_render_test_view",
       "weight": 1.0
     },
@@ -48801,8 +48897,56 @@
       "relation": "calls",
       "source": "tests_playground_render_test_halfway",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L63",
+      "source_location": "L72",
       "target": "app_components_overlay_characters_interpolate_sampleview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_playground_render_test_renderer",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L327",
+      "target": "tests_playground_render_test_rendercanvas",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_playground_render_test_renderer",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L343",
+      "target": "app_components_overlay_characters_renderer_creatememory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_playground_render_test_renderer",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L346",
+      "target": "app_components_overlay_characters_sprites_sheetcache",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_playground_render_test_renderer",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L355",
+      "target": "app_components_overlay_characters_renderer_draw",
       "weight": 1.0
     },
     {
@@ -49619,6 +49763,66 @@
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L35",
       "target": "tests_route_errors_test_args",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L264",
+      "target": "tests_route_ui_boundaries_test_args",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L278",
+      "target": "tests_route_ui_boundaries_test_signedin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L710",
+      "target": "tests_route_ui_boundaries_test_navigation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L746",
+      "target": "tests_route_ui_boundaries_test_streamermetaargs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_route_ui_boundaries_test_streamermetaargs",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L732",
+      "target": "tests_route_ui_boundaries_test_args",
       "weight": 1.0
     },
     {
@@ -86148,6 +86352,150 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "app_types_adminpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "app_types_reportgroup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "app_types_securitykey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "app_types_stepupstatus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_admin_key_confirm_keyconfirm",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_admin_moderate_sheet_actionicon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_admin_moderate_sheet_actionlabel",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_admin_moderate_sheet_pageactions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L7",
+      "target": "app_components_admin_report_groups_reportgroups",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_components_admin_security_keys_keysetup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_components_admin_security_keys_securitykeys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L9",
+      "target": "app_components_admin_streamer_pages_streamerpages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_ai_interest_test",
       "source_file": "tests/ai-interest.test.ts",
       "source_location": "L11",
@@ -89880,6 +90228,90 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_discussion_deletebutton",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_discussion_discussion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_mention_input_mentioninput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L7",
+      "target": "app_components_notifications_notifications",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_types_notificationsnapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_types_streamerstatus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_types_viewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
       "source_location": "L5",
@@ -90051,6 +90483,30 @@
       "source": "tests_e2e_account_spec",
       "source_file": "tests/e2e/account.spec.ts",
       "source_location": "L3",
+      "target": "tests_e2e_coverage_browser",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_account_spec",
+      "source_file": "tests/e2e/account.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_browsercontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_account_spec",
+      "source_file": "tests/e2e/account.spec.ts",
+      "source_location": "L3",
       "target": "tests_e2e_coverage_expect",
       "weight": 1.0
     },
@@ -90076,6 +90532,18 @@
       "source_file": "tests/e2e/account.spec.ts",
       "source_location": "L5",
       "target": "tests_e2e_client_ips_clientaddress",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_account_spec",
+      "source_file": "tests/e2e/account.spec.ts",
+      "source_location": "L6",
+      "target": "app_components_account_me_me",
       "weight": 1.0
     },
     {
@@ -90110,7 +90578,7 @@
       "relation": "imports",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_browser",
       "weight": 1.0
     },
@@ -90122,7 +90590,7 @@
       "relation": "imports",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_browsercontext",
       "weight": 1.0
     },
@@ -90134,7 +90602,7 @@
       "relation": "imports",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_cdpsession",
       "weight": 1.0
     },
@@ -90146,7 +90614,7 @@
       "relation": "imports",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_expect",
       "weight": 1.0
     },
@@ -90158,7 +90626,7 @@
       "relation": "imports",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_page",
       "weight": 1.0
     },
@@ -90170,7 +90638,7 @@
       "relation": "imports",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
@@ -90182,8 +90650,32 @@
       "relation": "imports",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_client_ips_clientip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L7",
+      "target": "tests_e2e_fixtures_accounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L7",
+      "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
     {
@@ -90556,6 +91048,30 @@
       "source_file": "tests/e2e/community.spec.ts",
       "source_location": "L2",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_community_spec",
+      "source_file": "tests/e2e/community.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_fixtures_origin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_community_spec",
+      "source_file": "tests/e2e/community.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
     {
@@ -91036,6 +91552,54 @@
       "source_file": "tests/e2e/discussion-history.spec.ts",
       "source_location": "L8",
       "target": "tests_e2e_client_ips_clientaddress",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_discussion_history_spec",
+      "source_file": "tests/e2e/discussion-history.spec.ts",
+      "source_location": "L8",
+      "target": "tests_e2e_client_ips_clientip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_discussion_history_spec",
+      "source_file": "tests/e2e/discussion-history.spec.ts",
+      "source_location": "L9",
+      "target": "tests_e2e_fixtures_accounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_discussion_history_spec",
+      "source_file": "tests/e2e/discussion-history.spec.ts",
+      "source_location": "L9",
+      "target": "tests_e2e_fixtures_runsql",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_discussion_history_spec",
+      "source_file": "tests/e2e/discussion-history.spec.ts",
+      "source_location": "L9",
+      "target": "tests_e2e_fixtures_signedin",
       "weight": 1.0
     },
     {
@@ -91648,6 +92212,18 @@
       "source_file": "tests/e2e/moderation.spec.ts",
       "source_location": "L1",
       "target": "tests_e2e_coverage_close",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_moderation_spec",
+      "source_file": "tests/e2e/moderation.spec.ts",
+      "source_location": "L1",
+      "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
     {
@@ -92499,6 +93075,18 @@
       "source": "tests_e2e_profile_spec",
       "source_file": "tests/e2e/profile.spec.ts",
       "source_location": "L4",
+      "target": "tests_e2e_coverage_page",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_profile_spec",
+      "source_file": "tests/e2e/profile.spec.ts",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
@@ -92536,6 +93124,18 @@
       "source_file": "tests/e2e/profile.spec.ts",
       "source_location": "L7",
       "target": "tests_e2e_fixtures_runsql",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_profile_spec",
+      "source_file": "tests/e2e/profile.spec.ts",
+      "source_location": "L8",
+      "target": "app_components_account_me_me",
       "weight": 1.0
     },
     {
@@ -92726,7 +93326,7 @@
       "relation": "imports",
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "target": "tests_e2e_coverage_close",
       "weight": 1.0
     },
@@ -92738,7 +93338,7 @@
       "relation": "imports",
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -92750,7 +93350,7 @@
       "relation": "imports",
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "target": "tests_e2e_coverage_expect",
       "weight": 1.0
     },
@@ -92762,7 +93362,7 @@
       "relation": "imports",
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
@@ -92774,7 +93374,7 @@
       "relation": "imports",
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_fixtures_datefromtoday",
       "weight": 1.0
     },
@@ -92786,8 +93386,8 @@
       "relation": "imports",
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
-      "source_location": "L3",
-      "target": "tests_e2e_fixtures_signedin",
+      "source_location": "L4",
+      "target": "tests_e2e_fixtures_origin",
       "weight": 1.0
     },
     {
@@ -92799,6 +93399,18 @@
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
       "source_location": "L4",
+      "target": "tests_e2e_fixtures_signedin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_schedule_spec",
+      "source_file": "tests/e2e/schedule.spec.ts",
+      "source_location": "L5",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -95592,6 +96204,90 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "app_components_mash_mash_parts_mashbars",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "app_components_mash_mash_parts_mashwinner",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L11",
+      "target": "app_lib_mash_mash_draw",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_community_community_view_communityview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L7",
+      "target": "app_components_schedule_schedule_form_scheduleform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_components_schedule_event_dialog_eventdialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L9",
+      "target": "app_components_mash_mash_card_scoretext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_mention_selection_test",
       "source_file": "tests/mention-selection.test.ts",
       "source_location": "L2",
@@ -96244,6 +96940,150 @@
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L3",
       "target": "app_lib_overlay_layers_storedlayersschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L12",
+      "target": "app_lib_overlay_layers_default_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L13",
+      "target": "app_types_overlaydata",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L13",
+      "target": "app_types_overlaysourceref",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L13",
+      "target": "app_types_overlaystate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L4",
+      "target": "app_components_overlay_overlay_control_controlstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L4",
+      "target": "app_components_overlay_overlay_control_defaultref",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L4",
+      "target": "app_components_overlay_overlay_control_overlaycontrol",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_overlay_overlay_stage_overlaypoll",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_overlay_overlay_stage_overlaypoll_b68c1e94b806",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_overlay_overlay_stage_overlayscene",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_overlay_overlay_stage_overlaystage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_overlay_overlay_stage_upnextstart",
       "weight": 1.0
     },
     {
@@ -97023,6 +97863,42 @@
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
       "source_location": "L10",
+      "target": "app_components_overlay_characters_renderer_creatememory",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L10",
+      "target": "app_components_overlay_characters_renderer_draw",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L10",
+      "target": "app_components_overlay_characters_renderer_drawoptions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L10",
       "target": "app_components_overlay_characters_renderer_frameat",
       "weight": 1.0
     },
@@ -97048,6 +97924,18 @@
       "source_file": "tests/playground-render.test.ts",
       "source_location": "L10",
       "target": "app_components_overlay_characters_renderer_leader_min",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L10",
+      "target": "app_components_overlay_characters_renderer_rendermemory",
       "weight": 1.0
     },
     {
@@ -97166,7 +98054,19 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L23",
+      "source_location": "L27",
+      "target": "app_components_overlay_characters_sprites_atlas",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L27",
       "target": "app_components_overlay_characters_sprites_helmetcolor",
       "weight": 1.0
     },
@@ -97178,7 +98078,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L23",
+      "source_location": "L27",
       "target": "app_components_overlay_characters_sprites_sheetcache",
       "weight": 1.0
     },
@@ -97190,7 +98090,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L24",
+      "source_location": "L28",
       "target": "app_components_overlay_characters_view_characterstate",
       "weight": 1.0
     },
@@ -97202,7 +98102,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L24",
+      "source_location": "L28",
       "target": "app_components_overlay_characters_view_characterview",
       "weight": 1.0
     },
@@ -97214,7 +98114,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L24",
+      "source_location": "L28",
       "target": "app_components_overlay_characters_view_playgroundview",
       "weight": 1.0
     },
@@ -97226,7 +98126,19 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L25",
+      "source_location": "L28",
+      "target": "app_components_overlay_characters_view_tileview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L34",
       "target": "app_lib_playground_protocol_char_states",
       "weight": 1.0
     },
@@ -97238,7 +98150,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L26",
+      "source_location": "L35",
       "target": "app_components_overlay_wasteland_glyphs_generic_glyph",
       "weight": 1.0
     },
@@ -97250,7 +98162,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L26",
+      "source_location": "L35",
       "target": "app_components_overlay_wasteland_glyphs_glyphof",
       "weight": 1.0
     },
@@ -97262,7 +98174,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L26",
+      "source_location": "L35",
       "target": "app_components_overlay_wasteland_glyphs_platform_glyphs",
       "weight": 1.0
     },
@@ -97274,7 +98186,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L27",
+      "source_location": "L36",
       "target": "app_components_overlay_wasteland_playground_theme_sequence",
       "weight": 1.0
     },
@@ -97286,7 +98198,7 @@
       "relation": "imports",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L27",
+      "source_location": "L36",
       "target": "app_components_overlay_wasteland_playground_theme_wasteland_playground",
       "weight": 1.0
     },
@@ -98356,6 +99268,150 @@
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L14",
       "target": "app_server_route_errors_server_withrouteerrors",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L10",
+      "target": "app_server_overlay_state_default_overlay",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L37",
+      "target": "app_i18n_index_loadcatalog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L37",
+      "target": "app_i18n_index_setlocalesource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L8",
+      "target": "app_env_appcontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L8",
+      "target": "app_env_appcontext_54cf5bec59a5",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L8",
+      "target": "app_env_appenv",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L9",
+      "target": "app_types_entry",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L9",
+      "target": "app_types_livesnapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L9",
+      "target": "app_types_stepupstatus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L9",
+      "target": "app_types_streamer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L9",
+      "target": "app_types_streamevent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L9",
+      "target": "app_types_viewer",
       "weight": 1.0
     },
     {
@@ -119703,6 +120759,127 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L1",
+      "target": "ref_react",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L2",
+      "target": "ref_react_dom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L3",
+      "target": "ref_react_router",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L4",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_admin_key_confirm",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_admin_moderate_sheet",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L7",
+      "target": "app_components_admin_report_groups",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_components_admin_security_keys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L9",
+      "target": "app_components_admin_streamer_pages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_ai_interest_test",
       "source_file": "tests/ai-interest.test.ts",
       "source_location": "L1",
@@ -121636,6 +122813,103 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L1",
+      "target": "ref_react",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L2",
+      "target": "ref_react_dom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L3",
+      "target": "ref_react_router",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L4",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_discussion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_mention_input",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L7",
+      "target": "app_components_notifications",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
       "source_location": "L1",
@@ -121816,6 +123090,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_e2e_account_spec",
+      "source_file": "tests/e2e/account.spec.ts",
+      "source_location": "L6",
+      "target": "app_components_account_me",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
       "source_location": "L1",
@@ -121842,8 +123129,8 @@
       "relation": "imports_from",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L4",
-      "target": "ref_zod",
+      "source_location": "L3",
+      "target": "ref_node_crypto",
       "weight": 1.0
     },
     {
@@ -121855,7 +123142,31 @@
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
       "source_location": "L5",
+      "target": "ref_zod",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L6",
       "target": "tests_e2e_client_ips",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L7",
+      "target": "tests_e2e_fixtures",
       "weight": 1.0
     },
     {
@@ -122461,6 +123772,18 @@
       "source_file": "tests/e2e/discussion-history.spec.ts",
       "source_location": "L8",
       "target": "tests_e2e_client_ips",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_discussion_history_spec",
+      "source_file": "tests/e2e/discussion-history.spec.ts",
+      "source_location": "L9",
+      "target": "tests_e2e_fixtures",
       "weight": 1.0
     },
     {
@@ -123363,6 +124686,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_e2e_profile_spec",
+      "source_file": "tests/e2e/profile.spec.ts",
+      "source_location": "L8",
+      "target": "app_components_account_me",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_e2e_roles_spec",
       "source_file": "tests/e2e/roles.spec.ts",
       "source_location": "L1",
@@ -123438,6 +124774,18 @@
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
       "source_location": "L1",
+      "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_schedule_spec",
+      "source_file": "tests/e2e/schedule.spec.ts",
+      "source_location": "L2",
       "target": "tests_e2e_coverage",
       "weight": 1.0
     },
@@ -123449,7 +124797,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_fixtures",
       "weight": 1.0
     },
@@ -123461,7 +124809,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_schedule_spec",
       "source_file": "tests/e2e/schedule.spec.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "target": "tests_e2e_client_ips",
       "weight": 1.0
     },
@@ -123667,6 +125015,18 @@
       "source_file": "tests/e2e/threads.spec.ts",
       "source_location": "L5",
       "target": "tests_e2e_client_ips",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_threads_spec",
+      "source_file": "tests/e2e/threads.spec.ts",
+      "source_location": "L6",
+      "target": "ref_zod",
       "weight": 1.0
     },
     {
@@ -125039,6 +126399,138 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L1",
+      "target": "ref_react",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "app_components_mash_mash_parts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L11",
+      "target": "app_lib_mash",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L2",
+      "target": "ref_react_dom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L3",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L4",
+      "target": "ref_react_router",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "ref_radix_ui",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_community_community_view",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L7",
+      "target": "app_components_schedule_schedule_form",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L8",
+      "target": "app_components_schedule_event_dialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L9",
+      "target": "app_components_mash_mash_card",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_mention_selection_test",
       "source_file": "tests/mention-selection.test.ts",
       "source_location": "L1",
@@ -125310,6 +126802,91 @@
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L3",
       "target": "app_lib_overlay_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L1",
+      "target": "ref_react",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L12",
+      "target": "app_lib_overlay_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L13",
+      "target": "app_types",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L2",
+      "target": "ref_react_dom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L3",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L4",
+      "target": "app_components_overlay_overlay_control",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_overlay_overlay_stage",
       "weight": 1.0
     },
     {
@@ -125732,7 +127309,7 @@
       "relation": "imports_from",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L23",
+      "source_location": "L27",
       "target": "app_components_overlay_characters_sprites",
       "weight": 1.0
     },
@@ -125744,7 +127321,7 @@
       "relation": "imports_from",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L24",
+      "source_location": "L28",
       "target": "app_components_overlay_characters_view",
       "type_only": true,
       "weight": 1.0
@@ -125757,7 +127334,7 @@
       "relation": "imports_from",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L25",
+      "source_location": "L34",
       "target": "app_lib_playground_protocol",
       "weight": 1.0
     },
@@ -125769,7 +127346,7 @@
       "relation": "imports_from",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L26",
+      "source_location": "L35",
       "target": "app_components_overlay_wasteland_glyphs",
       "weight": 1.0
     },
@@ -125781,7 +127358,7 @@
       "relation": "imports_from",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L27",
+      "source_location": "L36",
       "target": "app_components_overlay_wasteland_playground_theme",
       "weight": 1.0
     },
@@ -126379,6 +127956,391 @@
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L3",
       "target": "ref_react_router",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L1",
+      "target": "ref_react_router",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L10",
+      "target": "app_server_overlay_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L11",
+      "target": "app_server_auth_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L12",
+      "target": "app_server_access_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L13",
+      "target": "app_server_stepup_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L14",
+      "target": "app_server_moderation_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L15",
+      "target": "app_server_report_groups_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L16",
+      "target": "app_server_data_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L17",
+      "target": "app_server_schedule_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L18",
+      "target": "app_server_community_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L19",
+      "target": "app_server_support_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L20",
+      "target": "app_server_overlay_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L21",
+      "target": "app_server_overlay_key_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L22",
+      "target": "app_server_channels_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L23",
+      "target": "app_server_api_account",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L24",
+      "target": "app_server_featured_streamer_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L25",
+      "target": "app_server_ai_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L26",
+      "target": "app_routes_admin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L27",
+      "target": "app_routes_streamer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L28",
+      "target": "app_routes_overlay",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L29",
+      "target": "app_routes_overlay_control",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L30",
+      "target": "app_routes_streamers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L31",
+      "target": "app_routes_sign_in",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L32",
+      "target": "app_routes_ai",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L33",
+      "target": "app_root",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L34",
+      "target": "app_routes_home",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L35",
+      "target": "app_routes_privacy",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L36",
+      "target": "app_routes_terms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L37",
+      "target": "app_i18n_index",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L7",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L8",
+      "target": "app_env",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L9",
+      "target": "app_types",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -159741,6 +161703,50 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L12",
+      "target": "tests_admin_ui_coverage_test_status",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L23",
+      "target": "tests_admin_ui_coverage_test_key",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L31",
+      "target": "tests_admin_ui_coverage_test_page",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L48",
+      "target": "tests_admin_ui_coverage_test_markup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "tests_ai_interest_test",
       "source_file": "tests/ai-interest.test.ts",
       "source_location": "L20",
@@ -160819,6 +162825,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L10",
+      "target": "tests_discussion_ui_coverage_test_render",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "tests_e2e_a11y_responsive_spec",
       "source_file": "tests/e2e/a11y-responsive.spec.ts",
       "source_location": "L10",
@@ -160932,6 +162949,17 @@
       "source": "tests_e2e_account_spec",
       "source_file": "tests/e2e/account.spec.ts",
       "source_location": "L10",
+      "target": "tests_e2e_account_spec_boardschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_account_spec",
+      "source_file": "tests/e2e/account.spec.ts",
+      "source_location": "L11",
       "target": "tests_e2e_account_spec_commentsschema",
       "weight": 1.0
     },
@@ -160942,8 +162970,8 @@
       "relation": "contains",
       "source": "tests_e2e_account_spec",
       "source_file": "tests/e2e/account.spec.ts",
-      "source_location": "L8",
-      "target": "tests_e2e_account_spec_sessionschema",
+      "source_location": "L15",
+      "target": "tests_e2e_account_spec_accountcontext",
       "weight": 1.0
     },
     {
@@ -160954,7 +162982,7 @@
       "source": "tests_e2e_account_spec",
       "source_file": "tests/e2e/account.spec.ts",
       "source_location": "L9",
-      "target": "tests_e2e_account_spec_boardschema",
+      "target": "tests_e2e_account_spec_sessionschema",
       "weight": 1.0
     },
     {
@@ -160964,40 +162992,7 @@
       "relation": "contains",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L12",
-      "target": "tests_e2e_admin_keys_spec_signedin",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_admin_keys_spec",
-      "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L35",
-      "target": "tests_e2e_admin_keys_spec_addkey",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_admin_keys_spec",
-      "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L49",
-      "target": "tests_e2e_admin_keys_spec_shot",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_admin_keys_spec",
-      "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L8",
+      "source_location": "L11",
       "target": "tests_e2e_admin_keys_spec_sessionschema",
       "weight": 1.0
     },
@@ -161008,8 +163003,52 @@
       "relation": "contains",
       "source": "tests_e2e_admin_keys_spec",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L9",
+      "source_location": "L12",
       "target": "tests_e2e_admin_keys_spec_boardschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L15",
+      "target": "tests_e2e_admin_keys_spec_signedin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L339",
+      "target": "tests_e2e_admin_keys_spec_report",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L38",
+      "target": "tests_e2e_admin_keys_spec_addkey",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_admin_keys_spec",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L52",
+      "target": "tests_e2e_admin_keys_spec_shot",
       "weight": 1.0
     },
     {
@@ -161336,6 +163375,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "tests_e2e_community_spec",
+      "source_file": "tests/e2e/community.spec.ts",
+      "source_location": "L7",
+      "target": "tests_e2e_community_spec_seedownercards",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "tests_e2e_compact_layout_spec",
       "source_file": "tests/e2e/compact-layout.spec.ts",
       "source_location": "L5",
@@ -161635,7 +163685,7 @@
       "relation": "contains",
       "source": "tests_e2e_discussion_history_spec",
       "source_file": "tests/e2e/discussion-history.spec.ts",
-      "source_location": "L11",
+      "source_location": "L12",
       "target": "tests_e2e_discussion_history_spec_sessionschema",
       "weight": 1.0
     },
@@ -161646,7 +163696,7 @@
       "relation": "contains",
       "source": "tests_e2e_discussion_history_spec",
       "source_file": "tests/e2e/discussion-history.spec.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "target": "tests_e2e_discussion_history_spec_seedhistory",
       "weight": 1.0
     },
@@ -162394,7 +164444,7 @@
       "relation": "contains",
       "source": "tests_e2e_profile_spec",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L10",
+      "source_location": "L11",
       "target": "tests_e2e_profile_spec_sessionschema",
       "weight": 1.0
     },
@@ -162405,7 +164455,7 @@
       "relation": "contains",
       "source": "tests_e2e_profile_spec",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L11",
+      "source_location": "L12",
       "target": "tests_e2e_profile_spec_meschema",
       "weight": 1.0
     },
@@ -162416,7 +164466,7 @@
       "relation": "contains",
       "source": "tests_e2e_profile_spec",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "tests_e2e_profile_spec_signedin",
       "weight": 1.0
     },
@@ -162427,7 +164477,7 @@
       "relation": "contains",
       "source": "tests_e2e_profile_spec",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L31",
+      "source_location": "L39",
       "target": "tests_e2e_profile_spec_presets",
       "weight": 1.0
     },
@@ -162845,7 +164895,7 @@
       "relation": "contains",
       "source": "tests_e2e_threads_spec",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "tests_e2e_threads_spec_seedthreads",
       "weight": 1.0
     },
@@ -164438,6 +166488,61 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L15",
+      "target": "tests_overlay_ui_coverage_test_data",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L16",
+      "target": "tests_overlay_ui_coverage_test_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L29",
+      "target": "tests_overlay_ui_coverage_test_scene",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L39",
+      "target": "tests_overlay_ui_coverage_test_stage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L43",
+      "target": "tests_overlay_ui_coverage_test_poll",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "tests_percent_test",
       "source_file": "tests/percent.test.ts",
       "source_location": "L4",
@@ -164759,7 +166864,7 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L160",
+      "source_location": "L169",
       "target": "tests_playground_render_test_expecttidy",
       "weight": 1.0
     },
@@ -164770,7 +166875,40 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L29",
+      "source_location": "L283",
+      "target": "tests_playground_render_test_canvascall",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L289",
+      "target": "tests_playground_render_test_rendercanvas",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L320",
+      "target": "tests_playground_render_test_renderer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L38",
       "target": "tests_playground_render_test_character",
       "weight": 1.0
     },
@@ -164781,7 +166919,7 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L45",
+      "source_location": "L54",
       "target": "tests_playground_render_test_view",
       "weight": 1.0
     },
@@ -164792,7 +166930,7 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L60",
+      "source_location": "L69",
       "target": "tests_playground_render_test_halfway",
       "weight": 1.0
     },
@@ -165421,6 +167559,116 @@
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L16",
       "target": "tests_route_errors_test_args",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L115",
+      "target": "tests_route_ui_boundaries_test_viewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L123",
+      "target": "tests_route_ui_boundaries_test_streamer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L139",
+      "target": "tests_route_ui_boundaries_test_entry",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L166",
+      "target": "tests_route_ui_boundaries_test_event",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L183",
+      "target": "tests_route_ui_boundaries_test_ready",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L194",
+      "target": "tests_route_ui_boundaries_test_initial",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L196",
+      "target": "tests_route_ui_boundaries_test_args",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L215",
+      "target": "tests_route_ui_boundaries_test_signedin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L692",
+      "target": "tests_route_ui_boundaries_test_navigation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_route_ui_boundaries_test",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L728",
+      "target": "tests_route_ui_boundaries_test_streamermetaargs",
       "weight": 1.0
     },
     {
@@ -168976,6 +171224,28 @@
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_playground_render_test_rendercanvas",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L295",
+      "target": "tests_playground_render_test_rendercanvas_constructor",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "tests_playground_render_test_rendercanvas",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L310",
+      "target": "tests_playground_render_test_rendercanvas_getcontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "relation": "references",
       "source": "agents",
       "source_file": "AGENTS.md",
@@ -169630,6 +171900,66 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L110",
+      "target": "app_components_admin_key_confirm_keyconfirm",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L140",
+      "target": "app_components_admin_streamer_pages_streamerpages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L201",
+      "target": "app_components_admin_report_groups_reportgroups",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L62",
+      "target": "app_components_admin_security_keys_keysetup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_admin_ui_coverage_test",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L95",
+      "target": "app_components_admin_security_keys_securitykeys",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "tests_board_states_test_card",
       "source_file": "tests/board-states.test.ts",
       "source_location": "L148",
@@ -169654,10 +171984,46 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
-      "source": "tests_data_test",
-      "source_file": "tests/data.test.ts",
-      "source_location": "L340",
-      "target": "tests_board_states_test_streamer",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L25",
+      "target": "app_components_discussion_deletebutton",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L50",
+      "target": "app_components_discussion_discussion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L76",
+      "target": "app_components_notifications_notifications",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_discussion_ui_coverage_test",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L85",
+      "target": "app_components_mention_input_mentioninput",
       "weight": 1.0
     },
     {
@@ -169728,18 +172094,6 @@
       "relation": "indirect_call",
       "source": "tests_lib_test",
       "source_file": "tests/lib.test.ts",
-      "source_location": "L207",
-      "target": "tests_board_states_test_streamer",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "relation": "indirect_call",
-      "source": "tests_lib_test",
-      "source_file": "tests/lib.test.ts",
       "source_location": "L64",
       "target": "app_lib_avatars_isavatarpreset",
       "weight": 1.0
@@ -169788,18 +172142,6 @@
       "relation": "indirect_call",
       "source": "tests_live_control_test_seed",
       "source_file": "tests/live-control.test.ts",
-      "source_location": "L85",
-      "target": "tests_channel_ingest_test_poll",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "relation": "indirect_call",
-      "source": "tests_live_control_test_seed",
-      "source_file": "tests/live-control.test.ts",
       "source_location": "L93",
       "target": "tests_board_states_test_card",
       "weight": 1.0
@@ -169834,10 +172176,94 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L109",
+      "target": "app_components_schedule_event_dialog_eventdialog",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L22",
+      "target": "app_components_mash_mash_parts_mashbars",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L51",
+      "target": "app_components_mash_mash_parts_mashwinner",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L71",
+      "target": "app_components_community_community_view_communityview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_mash_ui_coverage_test",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L94",
+      "target": "app_components_schedule_schedule_form_scheduleform",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "tests_mention_selection_test",
       "source_file": "tests/mention-selection.test.ts",
       "source_location": "L111",
       "target": "tests_e2e_composition_editor_spec_saved",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L124",
+      "target": "app_components_overlay_overlay_control_overlaycontrol",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_overlay_ui_coverage_test_stage",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L40",
+      "target": "app_components_overlay_overlay_stage_overlaystage",
       "weight": 1.0
     },
     {
@@ -171130,18 +173556,6 @@
       "confidence_score": 0.85,
       "context": "collection",
       "relation": "indirect_call",
-      "source": "tests_client_api_test",
-      "source_file": "tests/client-api.test.ts",
-      "source_location": "L41",
-      "target": "tests_channel_webhooks_test_status",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "collection",
-      "relation": "indirect_call",
       "source": "tests_directory_ui_test",
       "source_file": "tests/directory-ui.test.ts",
       "source_location": "L12",
@@ -171266,18 +173680,6 @@
       "source_file": "tests/live-control.test.ts",
       "source_location": "L169",
       "target": "tests_layer_geometry_test_layers",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "collection",
-      "relation": "indirect_call",
-      "source": "tests_live_control_test",
-      "source_file": "tests/live-control.test.ts",
-      "source_location": "L348",
-      "target": "tests_channel_ingest_test_poll",
       "weight": 1.0
     },
     {
@@ -171606,10 +174008,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "e92898b77abc2c79085e237b67856532467c59d954c4db898ac7988c3ba3db0a",
+    "content_sha256": "e1e41238661a7f7c038b9051d68c081edd7189b1e585d5626ec3ee18903e4675",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "3ba7111719e0d86c81fa1607d04cd31f4b02b6c0e55a55c9c361389c75f171fd",
+    "source_sha256": "d13d6f425e6914ffa65f1e099b9c33532e80210099dd20f3973ac9ac6a1294a3",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -171708,6 +174110,21 @@
       "norm_label": "channelingest",
       "source_file": "app/server/channel-ingest.ts",
       "source_location": "L119"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "_ts_fields": {
+        "context": "CanvasRenderingContext2D"
+      },
+      "community": null,
+      "file_type": "code",
+      "id": "tests_playground_render_test_rendercanvas",
+      "label": "RenderCanvas",
+      "norm_label": "rendercanvas",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L289"
     },
     {
       "_callable": true,
@@ -177821,6 +180238,18 @@
       "norm_label": "socket",
       "source_file": "tests/live-capacity.test.ts",
       "source_location": "L10"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_playground_render_test_canvascall",
+      "label": "CanvasCall",
+      "norm_label": "canvascall",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L283"
     },
     {
       "_callable": true,
@@ -198850,6 +201279,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_admin_ui_coverage_test_markup",
+      "label": "markup()",
+      "norm_label": "markup()",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L48"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_ai_interest_test_post",
       "label": "post()",
       "norm_label": "post()",
@@ -199752,6 +202192,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_discussion_ui_coverage_test_render",
+      "label": "render()",
+      "norm_label": "render()",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L10"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_a11y_responsive_spec_expectcontained",
       "label": "expectContained()",
       "metadata": {
@@ -199951,6 +202402,28 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_account_spec_accountcontext",
+      "label": "accountContext()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "newContext",
+            "file": "tests/e2e/account.spec.ts",
+            "lang": "typescript",
+            "line": "L18",
+            "receiver_type": "Browser"
+          }
+        ]
+      },
+      "norm_label": "accountcontext()",
+      "source_file": "tests/e2e/account.spec.ts",
+      "source_location": "L15"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_admin_keys_spec_addkey",
       "label": "addKey()",
       "metadata": {
@@ -199959,14 +202432,25 @@
             "callee": "send",
             "file": "tests/e2e/admin-keys.spec.ts",
             "lang": "typescript",
-            "line": "L36",
+            "line": "L39",
             "receiver_type": "CDPSession"
           }
         ]
       },
       "norm_label": "addkey()",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L35"
+      "source_location": "L38"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_admin_keys_spec_report",
+      "label": "report()",
+      "norm_label": "report()",
+      "source_file": "tests/e2e/admin-keys.spec.ts",
+      "source_location": "L339"
     },
     {
       "_callable": true,
@@ -199977,7 +202461,7 @@
       "label": "shot()",
       "norm_label": "shot()",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L49"
+      "source_location": "L52"
     },
     {
       "_callable": true,
@@ -199992,14 +202476,14 @@
             "callee": "newContext",
             "file": "tests/e2e/admin-keys.spec.ts",
             "lang": "typescript",
-            "line": "L16",
+            "line": "L19",
             "receiver_type": "Browser"
           }
         ]
       },
       "norm_label": "signedin()",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L12"
+      "source_location": "L15"
     },
     {
       "_callable": true,
@@ -200231,6 +202715,17 @@
       "norm_label": "clientip()",
       "source_file": "tests/e2e/client-ips.ts",
       "source_location": "L72"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_community_spec_seedownercards",
+      "label": "seedOwnerCards()",
+      "norm_label": "seedownercards()",
+      "source_file": "tests/e2e/community.spec.ts",
+      "source_location": "L7"
     },
     {
       "_callable": true,
@@ -200472,7 +202967,7 @@
       "label": "seedHistory()",
       "norm_label": "seedhistory()",
       "source_file": "tests/e2e/discussion-history.spec.ts",
-      "source_location": "L13"
+      "source_location": "L14"
     },
     {
       "_callable": true,
@@ -201073,14 +203568,14 @@
             "callee": "newContext",
             "file": "tests/e2e/profile.spec.ts",
             "lang": "typescript",
-            "line": "L20",
+            "line": "L27",
             "receiver_type": "Browser"
           }
         ]
       },
       "norm_label": "signedin()",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L16"
+      "source_location": "L17"
     },
     {
       "_callable": true,
@@ -201197,7 +203692,7 @@
       "label": "seedThreads()",
       "norm_label": "seedthreads()",
       "source_file": "tests/e2e/threads.spec.ts",
-      "source_location": "L7"
+      "source_location": "L8"
     },
     {
       "_callable": true,
@@ -202921,6 +205416,28 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_overlay_ui_coverage_test_poll",
+      "label": "poll()",
+      "norm_label": "poll()",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L43"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_ui_coverage_test_stage",
+      "label": "stage()",
+      "norm_label": "stage()",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L39"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_percent_test_sum",
       "label": "sum()",
       "norm_label": "sum()",
@@ -203232,7 +205749,7 @@
       "label": "character()",
       "norm_label": "character()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L29"
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -203243,7 +205760,7 @@
       "label": "expectTidy()",
       "norm_label": "expecttidy()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L160"
+      "source_location": "L169"
     },
     {
       "_callable": true,
@@ -203254,7 +205771,40 @@
       "label": "halfway()",
       "norm_label": "halfway()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L60"
+      "source_location": "L69"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_playground_render_test_rendercanvas_constructor",
+      "label": ".constructor()",
+      "norm_label": ".constructor()",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L295"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_playground_render_test_rendercanvas_getcontext",
+      "label": ".getContext()",
+      "norm_label": ".getcontext()",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L310"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_playground_render_test_renderer",
+      "label": "renderer()",
+      "norm_label": "renderer()",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L320"
     },
     {
       "_callable": true,
@@ -203265,7 +205815,7 @@
       "label": "view()",
       "norm_label": "view()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L45"
+      "source_location": "L54"
     },
     {
       "_callable": true,
@@ -203761,6 +206311,61 @@
       "norm_label": "args()",
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L16"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_args",
+      "label": "args()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "set",
+            "file": "tests/route-ui-boundaries.test.ts",
+            "lang": "typescript",
+            "line": "L203",
+            "receiver_type": "RouterContextProvider"
+          }
+        ]
+      },
+      "norm_label": "args()",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L196"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_navigation",
+      "label": "navigation()",
+      "norm_label": "navigation()",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L692"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_signedin",
+      "label": "signedIn()",
+      "norm_label": "signedin()",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L215"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_streamermetaargs",
+      "label": "streamerMetaArgs()",
+      "norm_label": "streamermetaargs()",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L728"
     },
     {
       "_callable": true,
@@ -213354,6 +215959,46 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_admin_ui_coverage_test",
+      "label": "admin-ui-coverage.test.ts",
+      "norm_label": "admin-ui-coverage.test.ts",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_admin_ui_coverage_test_key",
+      "label": "key",
+      "norm_label": "key",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L23"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_admin_ui_coverage_test_page",
+      "label": "page",
+      "norm_label": "page",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L31"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_admin_ui_coverage_test_status",
+      "label": "status",
+      "norm_label": "status",
+      "source_file": "tests/admin-ui-coverage.test.ts",
+      "source_location": "L12"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_ai_interest_test",
       "label": "ai-interest.test.ts",
       "norm_label": "ai-interest.test.ts",
@@ -213724,6 +216369,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_discussion_ui_coverage_test",
+      "label": "discussion-ui-coverage.test.ts",
+      "norm_label": "discussion-ui-coverage.test.ts",
+      "source_file": "tests/discussion-ui-coverage.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_a11y_responsive_spec",
       "label": "a11y-responsive.spec.ts",
       "metadata": {
@@ -213794,6 +216449,17 @@
       "file_type": "code",
       "id": "tests_e2e_account_spec",
       "label": "account.spec.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "newContext",
+            "file": "tests/e2e/account.spec.ts",
+            "lang": "typescript",
+            "line": "L29",
+            "receiver_type": "Browser"
+          }
+        ]
+      },
       "norm_label": "account.spec.ts",
       "source_file": "tests/e2e/account.spec.ts",
       "source_location": "L1"
@@ -213806,7 +216472,7 @@
       "label": "boardSchema",
       "norm_label": "boardschema",
       "source_file": "tests/e2e/account.spec.ts",
-      "source_location": "L9"
+      "source_location": "L10"
     },
     {
       "_origin": "ast",
@@ -213816,7 +216482,7 @@
       "label": "commentsSchema",
       "norm_label": "commentsschema",
       "source_file": "tests/e2e/account.spec.ts",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "_origin": "ast",
@@ -213826,7 +216492,7 @@
       "label": "sessionSchema",
       "norm_label": "sessionschema",
       "source_file": "tests/e2e/account.spec.ts",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "_origin": "ast",
@@ -213840,7 +216506,7 @@
             "callee": "send",
             "file": "tests/e2e/admin-keys.spec.ts",
             "lang": "typescript",
-            "line": "L69",
+            "line": "L72",
             "receiver_type": "CDPSession"
           }
         ]
@@ -213857,7 +216523,7 @@
       "label": "boardSchema",
       "norm_label": "boardschema",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L9"
+      "source_location": "L12"
     },
     {
       "_origin": "ast",
@@ -213867,7 +216533,7 @@
       "label": "sessionSchema",
       "norm_label": "sessionschema",
       "source_file": "tests/e2e/admin-keys.spec.ts",
-      "source_location": "L8"
+      "source_location": "L11"
     },
     {
       "_origin": "ast",
@@ -214343,7 +217009,7 @@
       "label": "sessionSchema",
       "norm_label": "sessionschema",
       "source_file": "tests/e2e/discussion-history.spec.ts",
-      "source_location": "L11"
+      "source_location": "L12"
     },
     {
       "_origin": "ast",
@@ -214351,6 +217017,17 @@
       "file_type": "code",
       "id": "tests_e2e_discussion_notifications_spec",
       "label": "discussion-notifications.spec.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "setExtraHTTPHeaders",
+            "file": "tests/e2e/discussion-notifications.spec.ts",
+            "lang": "typescript",
+            "line": "L317",
+            "receiver_type": "BrowserContext"
+          }
+        ]
+      },
       "norm_label": "discussion-notifications.spec.ts",
       "source_file": "tests/e2e/discussion-notifications.spec.ts",
       "source_location": "L1"
@@ -214522,6 +217199,17 @@
       "file_type": "code",
       "id": "tests_e2e_mash_spec",
       "label": "mash.spec.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "setExtraHTTPHeaders",
+            "file": "tests/e2e/mash.spec.ts",
+            "lang": "typescript",
+            "line": "L213",
+            "receiver_type": "BrowserContext"
+          }
+        ]
+      },
       "norm_label": "mash.spec.ts",
       "source_file": "tests/e2e/mash.spec.ts",
       "source_location": "L1"
@@ -214843,7 +217531,7 @@
       "label": "meSchema",
       "norm_label": "meschema",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L11"
+      "source_location": "L12"
     },
     {
       "_origin": "ast",
@@ -214853,7 +217541,7 @@
       "label": "PRESETS",
       "norm_label": "presets",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L31"
+      "source_location": "L39"
     },
     {
       "_origin": "ast",
@@ -214863,7 +217551,7 @@
       "label": "sessionSchema",
       "norm_label": "sessionschema",
       "source_file": "tests/e2e/profile.spec.ts",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "_origin": "ast",
@@ -215768,6 +218456,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_mash_ui_coverage_test",
+      "label": "mash-ui-coverage.test.ts",
+      "norm_label": "mash-ui-coverage.test.ts",
+      "source_file": "tests/mash-ui-coverage.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_mention_selection_test",
       "label": "mention-selection.test.ts",
       "norm_label": "mention-selection.test.ts",
@@ -215863,6 +218561,46 @@
       "norm_label": "chatcell",
       "source_file": "tests/overlay-layers.test.ts",
       "source_location": "L29"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_ui_coverage_test",
+      "label": "overlay-ui-coverage.test.ts",
+      "norm_label": "overlay-ui-coverage.test.ts",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_ui_coverage_test_data",
+      "label": "data",
+      "norm_label": "data",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L15"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_ui_coverage_test_scene",
+      "label": "scene",
+      "norm_label": "scene",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L29"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_ui_coverage_test_state",
+      "label": "state",
+      "norm_label": "state",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L16"
     },
     {
       "_origin": "ast",
@@ -216103,6 +218841,76 @@
       "norm_label": "route-errors.test.ts",
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test",
+      "label": "route-ui-boundaries.test.ts",
+      "norm_label": "route-ui-boundaries.test.ts",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_entry",
+      "label": "entry",
+      "norm_label": "entry",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L139"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_event",
+      "label": "event",
+      "norm_label": "event",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L166"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_initial",
+      "label": "initial",
+      "norm_label": "initial",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L194"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_ready",
+      "label": "ready",
+      "norm_label": "ready",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L183"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_streamer",
+      "label": "streamer",
+      "norm_label": "streamer",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L123"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_route_ui_boundaries_test_viewer",
+      "label": "viewer",
+      "norm_label": "viewer",
+      "source_file": "tests/route-ui-boundaries.test.ts",
+      "source_location": "L115"
     },
     {
       "_origin": "ast",

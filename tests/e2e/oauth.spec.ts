@@ -260,3 +260,185 @@ test("unsaved profile edits disable login method changes", async ({ browser }) =
     await close(context);
   }
 });
+
+// Account UI coverage owns 203.0.113.120–139; these isolated OAuth users use .128–131.
+test("login methods recover from reauthentication and preserve the last usable account", async ({ browser }) => {
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    extraHTTPHeaders: { "CF-Connecting-IP": "203.0.113.128" },
+  });
+  try {
+    const page = await newPage(context);
+    await signIn(page, `browser-${++sequence}`);
+    const profile = (await viewer(context)) as { id: string };
+    const db = await runtime.getD1Database("DB");
+    for (const [id, provider] of [
+      [`account-ui-extra-${sequence}`, "twitch"],
+      [`account-ui-disabled-${sequence}`, "retired-provider"],
+    ] as const) {
+      await db
+        .prepare("INSERT INTO account(id,account_id,provider_id,user_id,created_at,updated_at) VALUES(?,?,?,?,?,?)")
+        .bind(id, id, provider, profile.id, Date.now(), Date.now())
+        .run();
+    }
+    await page.goto(`${origin}/streamers?dialog=profile`);
+    const dialog = page.getByRole("dialog", { name: "Your profile" });
+    const methods = dialog.getByRole("region", { name: "Login methods" });
+    const remove = methods.getByRole("button", { name: "Remove Twitch" });
+    await expect(remove).toHaveCount(2);
+    await expect(remove.first()).toBeEnabled();
+    const attempts: unknown[] = [];
+    await page.route("**/api/auth/unlink-account", async (route) => {
+      attempts.push(route.request().postDataJSON() as unknown);
+      await route.fulfill(
+        attempts.length === 1
+          ? { status: 403, json: { message: "A fresh sign-in is required.", code: "REAUTH_REQUIRED" } }
+          : { status: 409, json: { message: "Could not unlink.", code: "UNLINK_FAILED" } },
+      );
+    });
+    await remove.last().click();
+    await expect(methods.getByRole("alert").first()).toHaveText("Sign in again before changing login methods.");
+    await expect(methods.getByRole("button", { name: "Continue with Twitch" })).toBeVisible();
+    await dialog.getByLabel("Display name", { exact: true }).fill("Unsaved login edit");
+    await expect(remove.first()).toBeDisabled();
+    await expect(methods.getByRole("button", { name: "Continue with Twitch" })).toHaveCount(0);
+    await dialog.getByLabel("Display name", { exact: true }).fill("Browser viewer");
+    await expect(methods.getByRole("button", { name: "Continue with Twitch" })).toBeVisible();
+    await remove.last().click();
+    await expect(methods.getByRole("alert")).toHaveText("Could not change login methods. Sign in again, then retry.");
+    await expect(methods.getByRole("button", { name: "Continue with Twitch" })).toHaveCount(0);
+    expect(attempts).toHaveLength(2);
+    expect(attempts[0]).toEqual(attempts[1]);
+    expect(attempts[0]).toMatchObject({ accountId: expect.stringMatching(/.+/) });
+    await page.unroute("**/api/auth/unlink-account");
+    await remove.last().click();
+    await expect(remove).toHaveCount(1);
+    await expect(remove).toBeDisabled();
+    await expect(methods.getByRole("button", { name: /retired-provider/ })).toHaveCount(0);
+    const remaining = (await (await context.request.get(`${origin}/api/auth/list-accounts`)).json()) as {
+      providerId: string;
+    }[];
+    expect(remaining.filter((account) => account.providerId === "twitch")).toHaveLength(1);
+  } finally {
+    await close(context);
+  }
+});
+
+test("linking an unlinked provider retries failures and preserves account settings callbacks", async ({ browser }) => {
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    extraHTTPHeaders: { "CF-Connecting-IP": "203.0.113.129" },
+  });
+  try {
+    const page = await newPage(context);
+    await signIn(page, `browser-${++sequence}`);
+    await page.route("**/api/auth/list-accounts", (route) => route.fulfill({ json: [] }));
+    const links: unknown[] = [];
+    await page.route("**/api/auth/link-social", async (route) => {
+      links.push(route.request().postDataJSON() as unknown);
+      await route.fulfill(
+        links.length === 1
+          ? {
+              status: 409,
+              json: { message: "Account already belongs to another profile.", code: "ACCOUNT_ALREADY_LINKED" },
+            }
+          : { json: { status: true, redirect: false } },
+      );
+    });
+    await page.goto(`${origin}/streamers?dialog=profile`);
+    const dialog = page.getByRole("dialog", { name: "Your profile" });
+    const methods = dialog.getByRole("region", { name: "Login methods" });
+    const link = methods.getByRole("button", { name: "Link Twitch" });
+    await expect(link).toBeEnabled();
+    await link.click();
+    await expect(methods.getByRole("alert")).toHaveText("Could not change login methods. Sign in again, then retry.");
+    await link.click();
+    await expect(methods.getByRole("alert")).toBeEmpty();
+    await expect(link).toBeEnabled();
+    expect(links).toEqual([
+      { provider: "twitch", callbackURL: "/settings", errorCallbackURL: "/sign-in" },
+      { provider: "twitch", callbackURL: "/settings", errorCallbackURL: "/sign-in" },
+    ]);
+    await expect(page).toHaveURL(`${origin}/streamers?dialog=profile`);
+  } finally {
+    await close(context);
+  }
+});
+
+test("account list failures remain visible and late results do not reopen a closed profile", async ({ browser }) => {
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    extraHTTPHeaders: { "CF-Connecting-IP": "203.0.113.130" },
+  });
+  try {
+    const page = await newPage(context);
+    await signIn(page, `browser-${++sequence}`);
+    await page.route("**/api/auth/list-accounts", (route) =>
+      route.fulfill({ status: 503, json: { message: "Account list unavailable." } }),
+    );
+    await page.goto(`${origin}/streamers?dialog=profile`);
+    const dialog = page.getByRole("dialog", { name: "Your profile" });
+    const methods = dialog.getByRole("region", { name: "Login methods" });
+    await expect(methods.getByRole("alert")).toHaveText("Could not change login methods. Sign in again, then retry.");
+    await expect(methods.getByRole("button", { name: "Link Twitch" })).toBeEnabled();
+    await dialog.getByRole("button", { name: "Close dialog" }).click();
+    await page.unroute("**/api/auth/list-accounts");
+    let release!: () => void;
+    const pending: Promise<void> = new Promise<void>((resolve: () => void): void => {
+      release = resolve;
+    });
+    await page.route("**/api/auth/list-accounts", async (route) => {
+      await pending;
+      await route.fulfill({ json: [] });
+    });
+    await page.getByRole("button", { name: "Account menu for Browser viewer" }).click();
+    await Promise.all([
+      page.waitForRequest("**/api/auth/list-accounts"),
+      page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Your profile" }).click(),
+    ]);
+    await expect(methods.getByRole("button", { name: "Link Twitch" })).toBeDisabled();
+    await dialog.getByRole("button", { name: "Close dialog" }).click();
+    const response = page.waitForResponse("**/api/auth/list-accounts");
+    release();
+    await response;
+    await expect(dialog).toHaveCount(0);
+    await expect(page).toHaveURL(`${origin}/streamers`);
+  } finally {
+    await close(context);
+  }
+});
+
+test("deletion recovery shows the signed-in provider and allows keeping the OAuth account", async ({ browser }) => {
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    extraHTTPHeaders: { "CF-Connecting-IP": "203.0.113.131" },
+  });
+  try {
+    const page = await newPage(context);
+    await signIn(page, `browser-${++sequence}`);
+    await page.goto(`${origin}/streamers?dialog=data`);
+    const dialog = page.getByRole("dialog", { name: "Your data" });
+    await expect(dialog.getByText("Signed in with Twitch", { exact: true })).toBeVisible();
+    await dialog.getByRole("button", { name: "Delete my account" }).click();
+    const deleting = page.getByRole("dialog", { name: "Delete your account?" });
+    await expect(deleting).toContainText("Your Twitch sign-in link and every signed-in session");
+    await expect(deleting).toContainText("Your request to host a community, if you sent one");
+    await deleting.getByLabel("Type DELETE to confirm").fill(" DELETE ");
+    await page.route("**/api/account/delete", (route) =>
+      route.fulfill({ status: 403, json: { error: "Sign in again to delete your account.", code: "reauth_required" } }),
+    );
+    await deleting.getByRole("button", { name: "Delete my account", exact: true }).click();
+    await expect(deleting.getByRole("button", { name: "Continue with Twitch" })).toBeVisible();
+    await deleting.getByRole("button", { name: "Keep my account" }).click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Delete my account" }).click();
+    await expect(deleting.getByLabel("Type DELETE to confirm")).toBeEmpty();
+    await expect(deleting.locator("#delete-account-error")).toBeEmpty();
+    await deleting.getByRole("button", { name: "Back", exact: true }).click();
+    await dialog.getByRole("button", { name: "Close dialog" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    expect(await viewer(context)).not.toBeNull();
+  } finally {
+    await close(context);
+  }
+});
