@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import type { OverlayLayers } from "./lib/overlay-layers";
 import type {
   CARD_ICONS,
   CARD_TABS,
@@ -270,6 +271,10 @@ export interface OverlayState {
   showResults: boolean;
   message: string;
   messageStyle: OverlayMessageStyle;
+  // Orientation and grid cells of the chat, characters, and content layers. Public: OBS renders them.
+  layers: OverlayLayers;
+  // Server time when the chat test ends. A time in the past (0 by default) means no test.
+  chatTestUntil: number;
   revision: number;
 }
 

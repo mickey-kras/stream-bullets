@@ -609,6 +609,9 @@ export const streamerLinks = sqliteTable(
 const overlaySourceCheck = (column: unknown) =>
   sql`json_valid(${column}) AND json_type(${column}) = 'object' AND json_extract(${column}, '$.type') IN (${sql.raw(sqlList(OVERLAY_SOURCES))}) AND length(${column}) <= 200`;
 
+// Stored overlay layers. Missing keys take defaults; app/lib/overlay-layers.ts validates the content.
+type StoredLayers = Record<string, unknown>;
+
 // `air` and `preview` use `{type, ref}`; sources use `ref` for a poll, topic, or card. No row means `auto`.
 export const overlayState = sqliteTable(
   "overlay_state",
@@ -632,6 +635,13 @@ export const overlayState = sqliteTable(
     messageStyle: text("message_style", { enum: OVERLAY_MESSAGE_STYLES }).notNull().default("info"),
     revision: integer("revision").notNull().default(0),
     updatedAt: integer("updated_at").notNull(),
+    // Orientation and grid cells of the layers. `{}` reads as the defaults in app/lib/overlay-layers.ts.
+    layers: text("layers", { mode: "json" }).$type<StoredLayers>().notNull().default({}),
+    // Server time when the chat test ends; a past time means no test.
+    chatTestUntil: integer("chat_test_until").notNull().default(0),
+    // The last applied layer write of up to 8 editors: [random editor id, write number] pairs, the most recent
+    // editor first (app/server/overlay.server.ts).
+    layersWrites: text("layers_writes", { mode: "json" }).$type<[string, number][]>().notNull().default([]),
   },
   (table) => [
     check("overlay_state_air_check", overlaySourceCheck(table.air)),
@@ -641,6 +651,15 @@ export const overlayState = sqliteTable(
     check("overlay_state_flags_check", sql`${table.instant} IN (0, 1) AND ${table.showResults} IN (0, 1)`),
     check("overlay_state_message_check", sql`length(${table.message}) <= 120`),
     enumCheck("overlay_state_message_style_check", table.messageStyle, OVERLAY_MESSAGE_STYLES),
+    check(
+      "overlay_state_layers_check",
+      sql`json_valid(${table.layers}) AND json_type(${table.layers}) = 'object' AND length(${table.layers}) <= 1000`,
+    ),
+    check("overlay_state_chat_test_check", sql`${table.chatTestUntil} >= 0`),
+    check(
+      "overlay_state_layers_writes_check",
+      sql`json_valid(${table.layersWrites}) AND json_type(${table.layersWrites}) = 'array' AND json_array_length(${table.layersWrites}) <= 8 AND length(${table.layersWrites}) <= 800`,
+    ),
     check("overlay_state_revision_check", sql`${table.revision} >= 0`),
   ],
 );

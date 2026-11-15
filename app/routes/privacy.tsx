@@ -248,6 +248,11 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
             channels that a streamer connects. They learn that the channel uses StreamBullets.
           </li>
           <li>
+            <strong>Twitch</strong> serves the emote images in chat. The OBS overlay and the composition preview on the
+            overlay control page load these images directly from the Twitch image CDN (static-cdn.jtvnw.net), which
+            receives the IP address of the device that shows them. We send no referrer and no key with these requests.
+          </li>
+          <li>
             Cloudflare Email Routing forwards mail you send to {contactEmails.support} or {legal.contactEmail}. If email
             notices are turned on, Cloudflare also sends a streamer an email when an administrator freezes or suspends
             their page.

@@ -1,0 +1,364 @@
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { t, tAround, type MessageId } from "../../i18n";
+import { CHAT_TEST_MS, chatTestLeft } from "../../lib/chat-test";
+import { withCell } from "../../lib/layer-geometry";
+import {
+  GRID,
+  GRID_LAYERS,
+  MIN_CELLS,
+  ORIENTATIONS,
+  frameSize,
+  layerPixels,
+  type CellRect,
+  type GridLayer,
+  type OverlayLayers,
+  type Orientation,
+} from "../../lib/overlay-layers";
+import type { OverlaySourceRef, OverlayState } from "../../types";
+import { errorMessage, postJson } from "../api";
+import { motionReduced } from "../station/motion";
+import { useToast } from "../ui/toast";
+import { LAYER_NAMES, LayoutGrid, type PreviewBackground } from "./layout-grid";
+import { CHARACTERS_READY } from "./overlay-composition";
+import type { OverlayScene } from "./overlay-stage";
+import { useChatOverlap } from "./use-chat-overlap";
+import { useLayerDraft, type EditorError, type EditTiming } from "./use-layer-draft";
+
+const BACKGROUNDS: readonly (readonly [PreviewBackground, MessageId])[] = [
+  ["checker", "overlay.comp.bgChecker"],
+  ["game", "overlay.comp.bgGame"],
+];
+const ORIENTATION_NAMES: Readonly<Record<Orientation, MessageId>> = {
+  horizontal: "overlay.grid.horizontal",
+  vertical: "overlay.grid.vertical",
+};
+
+/** Debounce for the overlap note: it changes only once a move has settled. */
+const OVERLAP_NOTE_MS = 500;
+
+/**
+ * The save error under the editor. The error of a change sent while leaving can show when the editor opens, below
+ * the visible part of the page, so it scrolls into view (at once with reduced motion).
+ */
+function EditorAlert({ error }: Readonly<{ error: EditorError }>): ReactNode {
+  const box = useRef<HTMLParagraphElement | null>(null);
+  const { leaving } = error;
+  useEffect(() => {
+    if (!leaving) return;
+    box.current?.scrollIntoView({ block: "nearest", behavior: motionReduced() ? "auto" : "smooth" });
+  }, [error, leaving]);
+  const text: string = leaving
+    ? t("overlay.comp.leaveFailed", { error: error.message })
+    : t("overlay.comp.failed", { error: error.message });
+  return (
+    <p className="ov-comp-error" role="alert" data-comp-error ref={box}>
+      {text}
+    </p>
+  );
+}
+
+/**
+ * Start and Stop for the chat test, with the time left. The test needs the chat layer on. The button never takes the
+ * `disabled` attribute: it keeps focus during its own request and when the test ends, and ignores presses while it
+ * is unavailable. A polite region says when the test starts, stops or ends; the time left is not read each second.
+ */
+function ChatTest({
+  until,
+  now,
+  enabled,
+  onSaved,
+}: Readonly<{
+  until: number;
+  /** Server time. */
+  now: number;
+  /** The saved chat layer is on. */
+  enabled: boolean;
+  onSaved: (overlay: OverlayState) => void;
+}>): ReactNode {
+  const toast = useToast();
+  const hintId: string = useId();
+  const [busy, setBusy] = useState<boolean>(false);
+  const left: number = chatTestLeft(until, now);
+  const running: boolean = left > 0;
+  const unavailable: boolean = busy || (!running && !enabled);
+  // Empty on page load; set when `running` changes, so the region speaks only for a start or a stop.
+  const [news, setNews] = useState<string>("");
+  const wasRunning = useRef<boolean>(running);
+  // True from this editor's Stop press until its request fails: the end is then "stopped", not "ended" by the timer,
+  // the chat layer or another tab. The live room can bring the stop before the response.
+  const stoppedHere = useRef<boolean>(false);
+  useEffect(() => {
+    if (wasRunning.current === running) return;
+    wasRunning.current = running;
+    let text: MessageId = "overlay.test.ended";
+    if (running) text = "overlay.test.started";
+    else if (stoppedHere.current) text = "overlay.test.stopped";
+    setNews(t(text));
+  }, [running]);
+  async function send(on: boolean): Promise<void> {
+    setBusy(true);
+    stoppedHere.current = !on;
+    try {
+      const result = await postJson<{ overlay: OverlayState }>("/api/overlay", { action: "chatTest", on });
+      onSaved(result.overlay);
+    } catch (failure: unknown) {
+      stoppedHere.current = false;
+      toast(t("overlay.test.failed", { error: errorMessage(failure) }), { tone: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="ov-comp-test" data-chat-test-control>
+      <button
+        type="button"
+        aria-disabled={unavailable}
+        aria-describedby={hintId}
+        onClick={() => {
+          if (!unavailable) void send(!running);
+        }}
+        data-chat-test-toggle
+      >
+        {t(running ? "overlay.test.stop" : "overlay.test.start")}
+      </button>
+      <p className="muted ov-comp-note" id={hintId} data-chat-test-status>
+        {running
+          ? t("overlay.test.left", { seconds: Math.ceil(left / 1000) })
+          : t(enabled ? "overlay.test.hint" : "overlay.test.needsChat", { seconds: CHAT_TEST_MS / 1000 })}
+      </p>
+      <p className="sr-only" aria-live="polite" data-chat-test-news>
+        {news}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The Composition section of Overlay control: the layout grid of the selected orientation over a preview of what
+ * OBS shows. It plays sample chat and never opens an activity socket. Layer edits go live at once.
+ */
+export function CompositionEditor({
+  layers,
+  scene,
+  source,
+  chatTestUntil,
+  onSaved,
+}: Readonly<{
+  /** The newest saved or live layers. */
+  layers: OverlayLayers;
+  scene: OverlayScene;
+  /** What is on air. */
+  source: OverlaySourceRef;
+  /** Server time when the chat test ends. */
+  chatTestUntil: number;
+  onSaved: (overlay: OverlayState) => void;
+}>): ReactNode {
+  const titleId: string = useId();
+  const commandsId: string = useId();
+  const orientationNoteId: string = useId();
+  const [background, setBackground] = useState<PreviewBackground>("checker");
+  const [selected, setSelected] = useState<GridLayer>("chat");
+  const { shown, status, error, edit } = useLayerDraft(layers, onSaved);
+  const orientation: Orientation = shown.orientation;
+  const content: CellRect | null = shown.cells[orientation].content;
+  const frame = useRef<HTMLDivElement | null>(null);
+  const covers: boolean = useChatOverlap(
+    frame,
+    { enabled: shown.chat.enabled && content === null, rect: layerPixels(shown, "chat") ?? { x: 0, y: 0, w: 0, h: 0 } },
+    source,
+  );
+  const [sourceBefore, sourceAfter] = tAround("overlay.comp.chatSource", "link");
+  // The overlap note follows `covers` OVERLAP_NOTE_MS after the last change. It speaks only after the owner's first
+  // edit, not on page load.
+  const [note, setNote] = useState<boolean>(false);
+  const [armed, setArmed] = useState<boolean>(false);
+  useEffect(() => {
+    const wait = setTimeout(() => setNote(covers), OVERLAP_NOTE_MS);
+    return (): void => clearTimeout(wait);
+  }, [covers]);
+
+  const change = (update: (current: OverlayLayers) => OverlayLayers, when: EditTiming = "now"): void => {
+    setArmed(true);
+    edit(update, when);
+  };
+  const place = (layer: GridLayer, rect: CellRect | null, when: EditTiming): void =>
+    change((current: OverlayLayers) => withCell(current, current.orientation, layer, rect), when);
+
+  let statusText: string = "";
+  if (status === "saving") statusText = t("overlay.comp.saving");
+  else if (status === "saved") statusText = t("overlay.comp.saved");
+
+  return (
+    <section className="ov-comp" aria-labelledby={titleId} data-composition-editor>
+      <div className="ov-comp-head">
+        <h2 id={titleId}>{t("overlay.comp.title")}</h2>
+        <p className="muted">{t("overlay.comp.intro")}</p>
+      </div>
+      <div className="ov-comp-body">
+        <div className="ov-comp-stage" ref={frame}>
+          <div className="ov-comp-bar">
+            <fieldset className="field ov-seg-field">
+              <legend className="field-label">{t("overlay.grid.orientation")}</legend>
+              <div className="seg">
+                {ORIENTATIONS.map((value: Orientation) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={orientation === value}
+                    aria-describedby={orientationNoteId}
+                    onClick={() => change((current) => ({ ...current, orientation: value }))}
+                    data-comp-orientation={value}
+                  >
+                    {t(ORIENTATION_NAMES[value], { cols: GRID[value].cols, rows: GRID[value].rows })}
+                  </button>
+                ))}
+              </div>
+              <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
+                {t("overlay.grid.orientationNote")}
+              </p>
+            </fieldset>
+            <fieldset className="field ov-seg-field">
+              <legend className="field-label">{t("overlay.grid.layer")}</legend>
+              <div className="seg">
+                {GRID_LAYERS.map((layer: GridLayer) => (
+                  <button
+                    key={layer}
+                    type="button"
+                    aria-pressed={selected === layer}
+                    onClick={() => setSelected(layer)}
+                    data-comp-pick={layer}
+                  >
+                    {t("overlay.grid.pick", {
+                      layer: t(LAYER_NAMES[layer]),
+                      w: MIN_CELLS[layer].w,
+                      h: MIN_CELLS[layer].h,
+                    })}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className="field ov-seg-field">
+              <legend className="field-label">{t("overlay.comp.background")}</legend>
+              <div className="seg">
+                {BACKGROUNDS.map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={background === value}
+                    onClick={() => setBackground(value)}
+                  >
+                    {t(label)}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+          <LayoutGrid
+            layers={shown}
+            scene={scene}
+            source={source}
+            background={background}
+            selected={selected}
+            onSelect={setSelected}
+            onPlace={place}
+          />
+          <p className="muted ov-comp-help" data-comp-frame-size>
+            {t("overlay.grid.obsSize", frameSize(orientation))}
+          </p>
+          {/* Always mounted, so a screen reader follows it. Silent until the owner first changes the layout. */}
+          <p className="ov-comp-help ov-comp-overlap" data-comp-overlap aria-live={armed ? "polite" : "off"}>
+            {note ? t("overlay.comp.overlap") : ""}
+          </p>
+          {shown.chat.enabled && (
+            <p className="muted ov-comp-help" data-comp-sample>
+              {t("overlay.comp.sampleChat")}
+            </p>
+          )}
+        </div>
+        <div className="ov-comp-layers">
+          <fieldset className="ov-comp-layer" data-comp-layer="chat">
+            <legend>{t("overlay.comp.chat")}</legend>
+            <p className="muted ov-comp-note" data-comp-chat-source>
+              {sourceBefore}
+              <a className="text-link" href="#channels-title">
+                {t("overlay.comp.chatSourceLink")}
+              </a>
+              {sourceAfter}
+            </p>
+            <label className="choice">
+              <input
+                type="checkbox"
+                checked={shown.chat.enabled}
+                onChange={(event) => {
+                  const enabled: boolean = event.currentTarget.checked;
+                  change((current) => ({ ...current, chat: { ...current.chat, enabled } }));
+                }}
+              />
+              <span>{t("overlay.comp.show")}</span>
+            </label>
+            <p className="muted ov-comp-note" data-comp-scale>
+              {t("overlay.comp.scaleNote")}
+            </p>
+            <label className="choice">
+              <input
+                type="checkbox"
+                checked={shown.chat.hideCommands}
+                aria-describedby={commandsId}
+                onChange={(event) => {
+                  const hideCommands: boolean = event.currentTarget.checked;
+                  change((current) => ({ ...current, chat: { ...current.chat, hideCommands } }));
+                }}
+              />
+              <span>{t("overlay.comp.hideCommands")}</span>
+            </label>
+            <p className="muted ov-comp-note" id={commandsId}>
+              {t("overlay.comp.hideCommandsHint")}
+            </p>
+            {/* The server checks the saved layers, so an unsaved draft does not make the test available. */}
+            <ChatTest until={chatTestUntil} now={scene.now} enabled={layers.chat.enabled} onSaved={onSaved} />
+          </fieldset>
+          <fieldset className="ov-comp-layer" data-comp-layer="characters" aria-describedby={`${titleId}-soon`}>
+            <legend>
+              {t("overlay.comp.characters")} <span className="ov-comp-soon">{t("overlay.comp.soon")}</span>
+            </legend>
+            <label className="choice">
+              <input
+                type="checkbox"
+                checked={shown.characters.enabled}
+                disabled={!CHARACTERS_READY}
+                onChange={(event) => {
+                  const enabled: boolean = event.currentTarget.checked;
+                  change((current) => ({ ...current, characters: { ...current.characters, enabled } }));
+                }}
+              />
+              <span>{t("overlay.comp.show")}</span>
+            </label>
+            <p className="muted ov-comp-note" id={`${titleId}-soon`}>
+              {t("overlay.comp.charactersSoon")}
+            </p>
+          </fieldset>
+          <fieldset className="ov-comp-layer" data-comp-layer="content">
+            <legend>{t("overlay.comp.content")}</legend>
+            {/* Polite: the text changes when the content gets a cell or the Remove button takes it away. */}
+            <p className="muted ov-comp-note" data-comp-content-note aria-live="polite">
+              {t(content ? "overlay.comp.contentCell" : "overlay.comp.contentFull")}
+            </p>
+            {/* aria-disabled, not disabled: the button keeps focus after it removes the cell. */}
+            <button
+              type="button"
+              aria-disabled={content === null}
+              onClick={() => {
+                if (content !== null) place("content", null, "now");
+              }}
+              data-comp-remove
+            >
+              {t("overlay.comp.contentRemove")}
+            </button>
+          </fieldset>
+          <output className="ov-comp-status">{statusText}</output>
+          {error && <EditorAlert error={error} />}
+        </div>
+      </div>
+    </section>
+  );
+}
