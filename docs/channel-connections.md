@@ -77,6 +77,12 @@ Thus the feed uses the time of the webhook message. We did not check that a Twit
 - Double the wait after each failed try, up to 60 seconds. Add a random part (jitter).
 - Reset the wait after a successful connection.
 
+### Overlay chat
+
+The merged chat on the overlay is a consumer of this feed. It follows the rules above.
+It opens an activity socket only while an enabled chat layer shows on the page.
+See [Overlay composition and merged chat](overlay-composition.md) for its limits and its quota effect.
+
 ## Capability matrix
 
 | Capability | Twitch | YouTube | Kick |

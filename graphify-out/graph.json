@@ -39945,8 +39945,116 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L42",
+      "source_location": "L175",
+      "target": "tests_e2e_overlay_composition_spec_setlayers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L179",
+      "target": "tests_e2e_overlay_composition_spec_chatsource_e36cc1a9d931",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L183",
+      "target": "tests_e2e_overlay_composition_spec_event",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L184",
+      "target": "tests_e2e_overlay_composition_spec_message_6f9b9af3cd6e",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L218",
+      "target": "tests_e2e_overlay_composition_spec_rowtexts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L272",
+      "target": "tests_e2e_overlay_composition_spec_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L45",
       "target": "tests_e2e_overlay_composition_spec_chat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec_chatsource",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L142",
+      "target": "tests_e2e_coverage_newpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec_chatsource_e36cc1a9d931",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L142",
+      "target": "tests_e2e_coverage_newpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_overlay_composition_spec_setlayers",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L81",
+      "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
     {
@@ -44569,6 +44677,18 @@
       "source_file": "app/types.ts",
       "source_location": "L61",
       "target": "app_i18n_index_locale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "tests_e2e_overlay_composition_spec_message",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L87",
+      "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
     {
@@ -77954,32 +78074,8 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1",
-      "target": "tests_e2e_coverage_expect",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_e2e_overlay_composition_spec",
-      "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1",
-      "target": "tests_e2e_coverage_newpage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_e2e_overlay_composition_spec",
-      "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L1",
-      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "source_location": "L2",
+      "target": "tests_e2e_coverage_browser",
       "weight": 1.0
     },
     {
@@ -77991,7 +78087,55 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L2",
-      "target": "tests_e2e_fixtures_runsql",
+      "target": "tests_e2e_coverage_close",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L2",
+      "target": "tests_e2e_coverage_expect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L2",
+      "target": "tests_e2e_coverage_newpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L2",
+      "target": "tests_e2e_coverage_page",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L2",
+      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
     {
@@ -78003,7 +78147,7 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L3",
-      "target": "tests_e2e_live_helpers_signedin",
+      "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
     {
@@ -78015,7 +78159,7 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L4",
-      "target": "tests_e2e_client_ips_clientip",
+      "target": "tests_e2e_live_helpers_signedin",
       "weight": 1.0
     },
     {
@@ -78027,7 +78171,43 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L5",
+      "target": "tests_e2e_client_ips_clientip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L6",
       "target": "app_lib_activity_activitychat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L6",
+      "target": "app_lib_activity_activityevent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L6",
+      "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
     {
@@ -104301,7 +104481,8 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L1",
-      "target": "tests_e2e_coverage",
+      "target": "ref_playwright_test",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -104313,7 +104494,7 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L2",
-      "target": "tests_e2e_fixtures",
+      "target": "tests_e2e_coverage",
       "weight": 1.0
     },
     {
@@ -104325,7 +104506,7 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L3",
-      "target": "tests_e2e_live_helpers",
+      "target": "tests_e2e_fixtures",
       "weight": 1.0
     },
     {
@@ -104337,7 +104518,7 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L4",
-      "target": "tests_e2e_client_ips",
+      "target": "tests_e2e_live_helpers",
       "weight": 1.0
     },
     {
@@ -104349,6 +104530,18 @@
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L5",
+      "target": "tests_e2e_client_ips",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L6",
       "target": "app_lib_activity",
       "type_only": true,
       "weight": 1.0
@@ -133221,6 +133414,17 @@
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
       "source_location": "L100",
+      "target": "docs_api_overlay_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_api_api_reference",
+      "source_file": "docs/api.md",
+      "source_location": "L120",
       "target": "docs_api_later_phases",
       "weight": 1.0
     },
@@ -133385,7 +133589,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L101",
+      "source_location": "L107",
       "target": "docs_channel_connections_permissions",
       "weight": 1.0
     },
@@ -133407,7 +133611,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L119",
+      "source_location": "L125",
       "target": "docs_channel_connections_limits_and_retention",
       "weight": 1.0
     },
@@ -133418,7 +133622,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L224",
+      "source_location": "L230",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -133429,7 +133633,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L276",
+      "source_location": "L282",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -133440,7 +133644,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L339",
+      "source_location": "L345",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -133451,19 +133655,8 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L361",
+      "source_location": "L367",
       "target": "docs_channel_connections_overlay_key",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "docs_channel_connections_channel_connections_and_activity",
-      "source_file": "docs/channel-connections.md",
-      "source_location": "L368",
-      "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
     {
@@ -133484,7 +133677,18 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L396",
+      "source_location": "L374",
+      "target": "docs_channel_connections_setup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_channel_connections_channel_connections_and_activity",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L402",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -133495,7 +133699,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L414",
+      "source_location": "L420",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -133506,7 +133710,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L452",
+      "source_location": "L458",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -133517,7 +133721,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L463",
+      "source_location": "L469",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -133528,7 +133732,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L520",
+      "source_location": "L526",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -133539,7 +133743,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L557",
+      "source_location": "L563",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -133550,7 +133754,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L80",
+      "source_location": "L86",
       "target": "docs_channel_connections_capability_matrix",
       "weight": 1.0
     },
@@ -133561,7 +133765,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L302",
+      "source_location": "L308",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -133572,7 +133776,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L315",
+      "source_location": "L321",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -133583,7 +133787,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L323",
+      "source_location": "L329",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -133603,9 +133807,20 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_channel_connections_event_contract",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L80",
+      "target": "docs_channel_connections_overlay_chat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "docs_channel_connections_limits_and_retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L188",
+      "source_location": "L194",
       "target": "docs_channel_connections_youtube_quota",
       "weight": 1.0
     },
@@ -133616,7 +133831,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L465",
+      "source_location": "L471",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -133627,7 +133842,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L473",
+      "source_location": "L479",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -133638,7 +133853,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L481",
+      "source_location": "L487",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -133649,7 +133864,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L509",
+      "source_location": "L515",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -133660,7 +133875,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L265",
+      "source_location": "L271",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -133988,6 +134203,149 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_overlay_composition",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L1",
+      "target": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_chat_behavior",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L120",
+      "target": "docs_overlay_composition_moderation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_chat_behavior",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L131",
+      "target": "docs_overlay_composition_commands",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_chat_behavior",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L137",
+      "target": "docs_overlay_composition_reconnection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L150",
+      "target": "docs_overlay_composition_youtube_quota_and_sockets",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L163",
+      "target": "docs_overlay_composition_security",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L173",
+      "target": "docs_overlay_composition_limits_and_known_gaps",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L21",
+      "target": "docs_overlay_composition_layers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L32",
+      "target": "docs_overlay_composition_design_space",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L45",
+      "target": "docs_overlay_composition_urls",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L70",
+      "target": "docs_overlay_composition_obs_browser_source",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L77",
+      "target": "docs_overlay_composition_editor",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L97",
+      "target": "docs_overlay_composition_chat_behavior",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "docs_platform_concept",
       "source_file": "docs/platform-concept.md",
       "source_location": "L1",
@@ -134133,7 +134491,7 @@
       "relation": "contains",
       "source": "readme_local_use",
       "source_file": "README.md",
-      "source_location": "L107",
+      "source_location": "L108",
       "target": "readme_admin_security_keys",
       "weight": 1.0
     },
@@ -134144,7 +134502,7 @@
       "relation": "contains",
       "source": "readme_quality_gates",
       "source_file": "README.md",
-      "source_location": "L335",
+      "source_location": "L336",
       "target": "readme_board_refreshes_and_public_image_cache",
       "weight": 1.0
     },
@@ -134155,7 +134513,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L139",
+      "source_location": "L140",
       "target": "readme_check_a_change",
       "weight": 1.0
     },
@@ -134166,7 +134524,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L160",
+      "source_location": "L161",
       "target": "readme_deploy_to_cloudflare",
       "weight": 1.0
     },
@@ -134188,7 +134546,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L224",
+      "source_location": "L225",
       "target": "readme_prototype_data",
       "weight": 1.0
     },
@@ -134199,7 +134557,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L230",
+      "source_location": "L231",
       "target": "readme_security_and_operating_limits",
       "weight": 1.0
     },
@@ -134210,7 +134568,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L259",
+      "source_location": "L260",
       "target": "readme_legal_pages",
       "weight": 1.0
     },
@@ -134221,7 +134579,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L272",
+      "source_location": "L273",
       "target": "readme_quality_gates",
       "weight": 1.0
     },
@@ -134232,7 +134590,7 @@
       "relation": "contains",
       "source": "readme_streambullets",
       "source_file": "README.md",
-      "source_location": "L57",
+      "source_location": "L58",
       "target": "readme_local_use",
       "weight": 1.0
     },
@@ -136531,7 +136889,73 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L17",
+      "source_location": "L10",
+      "target": "tests_e2e_overlay_composition_spec_geometry_ip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L112",
+      "target": "tests_e2e_overlay_composition_spec_event",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L116",
+      "target": "tests_e2e_overlay_composition_spec_snapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L124",
+      "target": "tests_e2e_overlay_composition_spec_chatsource",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L136",
+      "target": "tests_e2e_overlay_composition_spec_chatsource_e36cc1a9d931",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L169",
+      "target": "tests_e2e_overlay_composition_spec_rowtexts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L20",
       "target": "tests_e2e_overlay_composition_spec_chat",
       "weight": 1.0
     },
@@ -136542,8 +136966,63 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_composition_spec",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L7",
+      "source_location": "L78",
+      "target": "tests_e2e_overlay_composition_spec_chat_rect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L8",
       "target": "tests_e2e_overlay_composition_spec_owner_ip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L80",
+      "target": "tests_e2e_overlay_composition_spec_setlayers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L86",
+      "target": "tests_e2e_overlay_composition_spec_message",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L9",
+      "target": "tests_e2e_overlay_composition_spec_obs_ip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_overlay_composition_spec",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L95",
+      "target": "tests_e2e_overlay_composition_spec_message_6f9b9af3cd6e",
       "weight": 1.0
     },
     {
@@ -141057,6 +141536,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "method",
+      "source": "tests_e2e_overlay_composition_spec_chatsource",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L130",
+      "target": "tests_e2e_overlay_composition_spec_chatsource_send",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
       "source": "tests_helpers_authenticator_softkey",
       "source_file": "tests/helpers/authenticator.ts",
       "source_location": "L101",
@@ -141587,6 +142077,17 @@
       "relation": "references",
       "source": "docs_api",
       "source_file": "docs/api.md",
+      "source_location": "L118",
+      "target": "docs_overlay_composition",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
+      "source": "docs_api",
+      "source_file": "docs/api.md",
       "source_location": "L98",
       "target": "docs_channel_connections",
       "weight": 1.0
@@ -141607,9 +142108,42 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "references",
+      "source": "docs_channel_connections",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L84",
+      "target": "docs_overlay_composition",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
+      "source": "docs_overlay_composition",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L161",
+      "target": "docs_live_room_capacity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
+      "source": "docs_overlay_composition",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L6",
+      "target": "docs_channel_connections",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
       "source": "readme",
       "source_file": "README.md",
-      "source_location": "L127",
+      "source_location": "L128",
       "target": "security",
       "weight": 1.0
     },
@@ -141631,7 +142165,7 @@
       "relation": "references",
       "source": "readme",
       "source_file": "README.md",
-      "source_location": "L184",
+      "source_location": "L185",
       "target": "docs_recovery",
       "weight": 1.0
     },
@@ -141642,7 +142176,7 @@
       "relation": "references",
       "source": "readme",
       "source_file": "README.md",
-      "source_location": "L243",
+      "source_location": "L244",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -141653,7 +142187,18 @@
       "relation": "references",
       "source": "readme",
       "source_file": "README.md",
-      "source_location": "L92",
+      "source_location": "L38",
+      "target": "docs_overlay_composition",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "references",
+      "source": "readme",
+      "source_file": "README.md",
+      "source_location": "L93",
       "target": "docs_channel_connections",
       "weight": 1.0
     },
@@ -142912,7 +143457,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L281",
+      "source_location": "L287",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -142924,7 +143469,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L267",
+      "source_location": "L273",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -142936,7 +143481,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L454",
+      "source_location": "L460",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -142948,7 +143493,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L387",
+      "source_location": "L393",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -142960,7 +143505,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L493",
+      "source_location": "L499",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -142972,7 +143517,7 @@
       "relation": "references",
       "source": "readme_deploy_to_cloudflare",
       "source_file": "README.md",
-      "source_location": "L218",
+      "source_location": "L219",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -143016,6 +143561,18 @@
       "_origin": "ast",
       "confidence": "INFERRED",
       "confidence_score": 0.95,
+      "context": "OverlayState",
+      "relation": "references",
+      "source": "docs_api_overlay_layers",
+      "source_file": "docs/api.md",
+      "source_location": "L104",
+      "target": "app_types_overlaystate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
       "context": "PollRoom",
       "relation": "references",
       "source": "docs_live_room_capacity_reproduce_locally",
@@ -143044,7 +143601,7 @@
       "relation": "references",
       "source": "readme_deploy_to_cloudflare",
       "source_file": "README.md",
-      "source_location": "L217",
+      "source_location": "L218",
       "target": "app_server_poll_room_pollroom",
       "weight": 1.0
     },
@@ -143080,7 +143637,7 @@
       "relation": "references",
       "source": "docs_api_later_phases",
       "source_file": "docs/api.md",
-      "source_location": "L105",
+      "source_location": "L125",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -143104,16 +143661,16 @@
       "relation": "references",
       "source": "docs_api_later_phases",
       "source_file": "docs/api.md",
-      "source_location": "L104",
+      "source_location": "L124",
       "target": "app_server_api_router_write",
       "weight": 1.0
     }
   ],
   "graph": {
-    "content_sha256": "9596434721820860fb1607b702f6e93d2f114704313d2364ddbb5be01c5f7c7f",
+    "content_sha256": "f0b143bcadfe0e2e4cb00cf0bb69281da00c56d5e62848a574027aea4698afa5",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "efac9f1c36cbf79193f79c7a6b23548d86a25fe61fcca87022d75ec217e162ea",
+    "source_sha256": "2821dd7778df91357e406cbeabf198ef8e5fb993c3312dff0fc66bee4ab84702",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -147928,6 +148485,30 @@
       "norm_label": "phonescreen",
       "source_file": "tests/e2e/i18n.spec.ts",
       "source_location": "L173"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_chatsource",
+      "label": "ChatSource",
+      "norm_label": "chatsource",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L124"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_message",
+      "label": "Message",
+      "norm_label": "message",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L86"
     },
     {
       "_callable": true,
@@ -167023,7 +167604,95 @@
       "label": "chat()",
       "norm_label": "chat()",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L17"
+      "source_location": "L20"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_chatsource_e36cc1a9d931",
+      "label": "chatSource()",
+      "norm_label": "chatsource()",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L136"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_chatsource_send",
+      "label": ".send()",
+      "norm_label": ".send()",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L130"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_event",
+      "label": "event()",
+      "norm_label": "event()",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L112"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_message_6f9b9af3cd6e",
+      "label": "message()",
+      "norm_label": "message()",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L95"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_rowtexts",
+      "label": "rowTexts()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "locator",
+            "file": "tests/e2e/overlay-composition.spec.ts",
+            "lang": "typescript",
+            "line": "L170",
+            "receiver_type": "Locator"
+          }
+        ]
+      },
+      "norm_label": "rowtexts()",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L169"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_setlayers",
+      "label": "setLayers()",
+      "norm_label": "setlayers()",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L80"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_snapshot",
+      "label": "snapshot()",
+      "norm_label": "snapshot()",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L116"
     },
     {
       "_callable": true,
@@ -178162,9 +178831,50 @@
       "file_type": "code",
       "id": "tests_e2e_overlay_composition_spec",
       "label": "overlay-composition.spec.ts",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "scrollIntoView",
+            "file": "tests/e2e/overlay-composition.spec.ts",
+            "lang": "typescript",
+            "line": "L498",
+            "receiver_type": "Element"
+          }
+        ]
+      },
       "norm_label": "overlay-composition.spec.ts",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
       "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_chat_rect",
+      "label": "CHAT_RECT",
+      "norm_label": "chat_rect",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L78"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_geometry_ip",
+      "label": "GEOMETRY_IP",
+      "norm_label": "geometry_ip",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L10"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_overlay_composition_spec_obs_ip",
+      "label": "OBS_IP",
+      "norm_label": "obs_ip",
+      "source_file": "tests/e2e/overlay-composition.spec.ts",
+      "source_location": "L9"
     },
     {
       "_origin": "ast",
@@ -178174,7 +178884,7 @@
       "label": "OWNER_IP",
       "norm_label": "owner_ip",
       "source_file": "tests/e2e/overlay-composition.spec.ts",
-      "source_location": "L7"
+      "source_location": "L8"
     },
     {
       "_origin": "ast",
@@ -179706,7 +180416,7 @@
       "node_kind": "heading",
       "norm_label": "later phases",
       "source_file": "docs/api.md",
-      "source_location": "L100"
+      "source_location": "L120"
     },
     {
       "_origin": "ast",
@@ -179718,6 +180428,17 @@
       "norm_label": "new endpoints",
       "source_file": "docs/api.md",
       "source_location": "L22"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_api_overlay_layers",
+      "label": "Overlay layers",
+      "node_kind": "heading",
+      "norm_label": "overlay layers",
+      "source_file": "docs/api.md",
+      "source_location": "L100"
     },
     {
       "_origin": "ast",
@@ -179860,7 +180581,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L315"
+      "source_location": "L321"
     },
     {
       "_origin": "ast",
@@ -179871,7 +180592,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L473"
+      "source_location": "L479"
     },
     {
       "_origin": "ast",
@@ -179882,7 +180603,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L465"
+      "source_location": "L471"
     },
     {
       "_origin": "ast",
@@ -179893,7 +180614,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L323"
+      "source_location": "L329"
     },
     {
       "_origin": "ast",
@@ -179904,7 +180625,7 @@
       "node_kind": "heading",
       "norm_label": "capability matrix",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L80"
+      "source_location": "L86"
     },
     {
       "_origin": "ast",
@@ -179937,7 +180658,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L276"
+      "source_location": "L282"
     },
     {
       "_origin": "ast",
@@ -179959,7 +180680,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L557"
+      "source_location": "L563"
     },
     {
       "_origin": "ast",
@@ -179970,7 +180691,7 @@
       "node_kind": "heading",
       "norm_label": "limits and retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L119"
+      "source_location": "L125"
     },
     {
       "_origin": "ast",
@@ -179981,7 +180702,18 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L339"
+      "source_location": "L345"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_channel_connections_overlay_chat",
+      "label": "Overlay chat",
+      "node_kind": "heading",
+      "norm_label": "overlay chat",
+      "source_file": "docs/channel-connections.md",
+      "source_location": "L80"
     },
     {
       "_origin": "ast",
@@ -179992,7 +180724,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L361"
+      "source_location": "L367"
     },
     {
       "_origin": "ast",
@@ -180003,7 +180735,7 @@
       "node_kind": "heading",
       "norm_label": "permissions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L101"
+      "source_location": "L107"
     },
     {
       "_origin": "ast",
@@ -180014,7 +180746,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L302"
+      "source_location": "L308"
     },
     {
       "_origin": "ast",
@@ -180025,7 +180757,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L265"
+      "source_location": "L271"
     },
     {
       "_origin": "ast",
@@ -180036,7 +180768,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L509"
+      "source_location": "L515"
     },
     {
       "_origin": "ast",
@@ -180047,7 +180779,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L452"
+      "source_location": "L458"
     },
     {
       "_origin": "ast",
@@ -180069,7 +180801,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L396"
+      "source_location": "L402"
     },
     {
       "_origin": "ast",
@@ -180080,7 +180812,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L368"
+      "source_location": "L374"
     },
     {
       "_origin": "ast",
@@ -180091,7 +180823,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L520"
+      "source_location": "L526"
     },
     {
       "_origin": "ast",
@@ -180102,7 +180834,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L463"
+      "source_location": "L469"
     },
     {
       "_origin": "ast",
@@ -180113,7 +180845,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L481"
+      "source_location": "L487"
     },
     {
       "_origin": "ast",
@@ -180124,7 +180856,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L224"
+      "source_location": "L230"
     },
     {
       "_origin": "ast",
@@ -180135,7 +180867,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L414"
+      "source_location": "L420"
     },
     {
       "_origin": "ast",
@@ -180146,7 +180878,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L188"
+      "source_location": "L194"
     },
     {
       "_origin": "ast",
@@ -180537,6 +181269,160 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_overlay_composition",
+      "label": "overlay-composition.md",
+      "node_kind": "page",
+      "norm_label": "overlay-composition.md",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_chat_behavior",
+      "label": "Chat behavior",
+      "node_kind": "heading",
+      "norm_label": "chat behavior",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L97"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_commands",
+      "label": "Commands",
+      "node_kind": "heading",
+      "norm_label": "commands",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L131"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_design_space",
+      "label": "Design space",
+      "node_kind": "heading",
+      "norm_label": "design space",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L32"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_editor",
+      "label": "Editor",
+      "node_kind": "heading",
+      "norm_label": "editor",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L77"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_layers",
+      "label": "Layers",
+      "node_kind": "heading",
+      "norm_label": "layers",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L21"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_limits_and_known_gaps",
+      "label": "Limits and known gaps",
+      "node_kind": "heading",
+      "norm_label": "limits and known gaps",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L173"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_moderation",
+      "label": "Moderation",
+      "node_kind": "heading",
+      "norm_label": "moderation",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L120"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_obs_browser_source",
+      "label": "OBS browser source",
+      "node_kind": "heading",
+      "norm_label": "obs browser source",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L70"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_overlay_composition_and_merged_chat",
+      "label": "Overlay composition and merged chat",
+      "node_kind": "heading",
+      "norm_label": "overlay composition and merged chat",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_reconnection",
+      "label": "Reconnection",
+      "node_kind": "heading",
+      "norm_label": "reconnection",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L137"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_security",
+      "label": "Security",
+      "node_kind": "heading",
+      "norm_label": "security",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L163"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_urls",
+      "label": "URLs",
+      "node_kind": "heading",
+      "norm_label": "urls",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L45"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_overlay_composition_youtube_quota_and_sockets",
+      "label": "YouTube quota and sockets",
+      "node_kind": "heading",
+      "norm_label": "youtube quota and sockets",
+      "source_file": "docs/overlay-composition.md",
+      "source_location": "L150"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_platform_concept",
       "label": "platform-concept.md",
       "node_kind": "page",
@@ -180707,7 +181593,7 @@
       "node_kind": "heading",
       "norm_label": "admin security keys",
       "source_file": "README.md",
-      "source_location": "L107"
+      "source_location": "L108"
     },
     {
       "_origin": "ast",
@@ -180729,7 +181615,7 @@
       "node_kind": "heading",
       "norm_label": "board refreshes and public image cache",
       "source_file": "README.md",
-      "source_location": "L335"
+      "source_location": "L336"
     },
     {
       "_origin": "ast",
@@ -180740,7 +181626,7 @@
       "node_kind": "heading",
       "norm_label": "check a change",
       "source_file": "README.md",
-      "source_location": "L139"
+      "source_location": "L140"
     },
     {
       "_origin": "ast",
@@ -180751,7 +181637,7 @@
       "node_kind": "heading",
       "norm_label": "deploy to cloudflare",
       "source_file": "README.md",
-      "source_location": "L160"
+      "source_location": "L161"
     },
     {
       "_origin": "ast",
@@ -180762,7 +181648,7 @@
       "node_kind": "heading",
       "norm_label": "legal pages",
       "source_file": "README.md",
-      "source_location": "L259"
+      "source_location": "L260"
     },
     {
       "_origin": "ast",
@@ -180773,7 +181659,7 @@
       "node_kind": "heading",
       "norm_label": "local use",
       "source_file": "README.md",
-      "source_location": "L57"
+      "source_location": "L58"
     },
     {
       "_origin": "ast",
@@ -180784,7 +181670,7 @@
       "node_kind": "heading",
       "norm_label": "prototype data",
       "source_file": "README.md",
-      "source_location": "L224"
+      "source_location": "L225"
     },
     {
       "_origin": "ast",
@@ -180795,7 +181681,7 @@
       "node_kind": "heading",
       "norm_label": "quality gates",
       "source_file": "README.md",
-      "source_location": "L272"
+      "source_location": "L273"
     },
     {
       "_origin": "ast",
@@ -180806,7 +181692,7 @@
       "node_kind": "heading",
       "norm_label": "security and operating limits",
       "source_file": "README.md",
-      "source_location": "L230"
+      "source_location": "L231"
     },
     {
       "_origin": "ast",
