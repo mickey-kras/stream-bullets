@@ -24,11 +24,12 @@ for (const mocked of [false, true]) {
     const context = await browser.newContext({ baseURL: origin });
     const page = await newPage(context);
     const probe: string = `/assets/coverage-navigation-probe.js?run=${randomUUID()}`;
+    const redirect: string = "https://coverage-navigation.example.test/authorize";
     await page.route(`**${probe}`, (route) => route.fulfill({
       contentType: "application/javascript",
       body: "window.coverageNavigationProbe = function coverageNavigationProbe() { return 42; };",
     }));
-    if (mocked) await page.route("**/coverage-navigation-redirect", async (route): Promise<void> => {
+    if (mocked) await page.route(redirect, async (route): Promise<void> => {
       await checkpointNavigation(page, () => route.fulfill({ status: 302, headers: { location: `${origin}/streamers` }, body: "" }));
     });
     await page.goto("/");
@@ -36,7 +37,7 @@ for (const mocked of [false, true]) {
     expect(await page.evaluate((): number => (
       window as unknown as { coverageNavigationProbe: () => number }
     ).coverageNavigationProbe())).toBe(42);
-    await page.goto(mocked ? "/coverage-navigation-redirect" : "/streamers");
+    await page.goto(mocked ? redirect : "/streamers");
     await expect(page).toHaveURL(/\/streamers$/);
     await close(context);
     const files: string[] = (await readdir(directory)).filter((file: string): boolean => file.endsWith(".json") && !before.has(file));

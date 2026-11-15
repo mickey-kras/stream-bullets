@@ -30,6 +30,7 @@ describe("browser coverage lifecycle", (): void => {
         calls.push("close");
       }),
       mainFrame: (): Frame => frame,
+      url: vi.fn((): string => "http://localhost:5173/"),
       route: vi.fn(async (_url: string, value: (route: Route) => Promise<void>): Promise<void> => {
         handler = value;
       }),
@@ -95,6 +96,21 @@ describe("browser coverage lifecycle", (): void => {
     expect(vi.mocked(writeFile).mock.calls[0][1]).toContain('"count":1');
     expect(vi.mocked(writeFile).mock.calls[0][1]).toContain('"count":0');
     expect(calls).toEqual(["start", "stop", "start", "fallback", "stop", "close"]);
+  });
+
+  it("does not profile the empty target during its first document navigation", async (): Promise<void> => {
+    vi.stubEnv("BROWSER_COVERAGE", "1");
+    const { context, page, calls, navigate } = fixture();
+    vi.mocked(page.url).mockReturnValue("about:blank");
+    await newPage(context);
+    await navigate((): void => { vi.mocked(page.url).mockReturnValue("http://localhost:5173/"); });
+    expect(calls).toEqual(["start", "fallback"]);
+    expect(page.coverage.stopJSCoverage).not.toHaveBeenCalled();
+    expect(writeFile).not.toHaveBeenCalled();
+    await navigate();
+    expect(calls).toEqual(["start", "fallback", "stop", "start", "fallback"]);
+    await close(context);
+    expect(writeFile).toHaveBeenCalledTimes(2);
   });
 
   it("checkpoints a document mock that bypasses the installed route", async (): Promise<void> => {

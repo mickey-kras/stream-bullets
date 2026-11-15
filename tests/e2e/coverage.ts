@@ -60,7 +60,8 @@ async function start(page: Page): Promise<void> {
     closing: false,
     route: async (route: Route): Promise<void> => {
       const request = route.request();
-      if (!state.closing && request.isNavigationRequest() && request.frame() === page.mainFrame()) {
+      // The first blank target has no product code; profiling it while its navigation is paused can stall.
+      if (!state.closing && request.isNavigationRequest() && request.frame() === page.mainFrame() && page.url() !== "about:blank") {
         // Flush before the document unloads: Chromium can discard old-context execution counts.
         await checkpointNavigation(page, () => route.fallback());
       } else await route.fallback();

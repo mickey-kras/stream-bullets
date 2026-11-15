@@ -42345,7 +42345,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_close",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "tests_e2e_coverage_collect",
       "weight": 1.0
     },
@@ -42357,7 +42357,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_collect",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L80",
+      "source_location": "L81",
       "target": "tests_e2e_coverage_save",
       "weight": 1.0
     },
@@ -42369,7 +42369,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_newpage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L89",
+      "source_location": "L90",
       "target": "tests_e2e_coverage_start",
       "weight": 1.0
     },
@@ -42381,7 +42381,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_start",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L65",
+      "source_location": "L66",
       "target": "tests_e2e_coverage_checkpointnavigation",
       "weight": 1.0
     },
@@ -42393,7 +42393,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_test_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e-coverage.test.ts",
-      "source_location": "L59",
+      "source_location": "L60",
       "target": "tests_e2e_coverage_test_fixture",
       "weight": 1.0
     },
@@ -42405,7 +42405,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "target": "tests_e2e_coverage_start",
       "weight": 1.0
     },
@@ -42417,7 +42417,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L104",
+      "source_location": "L105",
       "target": "tests_e2e_coverage_collect",
       "weight": 1.0
     },
@@ -146613,6 +146613,17 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L100",
+      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_coverage",
+      "source_file": "tests/e2e/coverage.ts",
       "source_location": "L15",
       "target": "tests_e2e_coverage_pagecoverage",
       "weight": 1.0
@@ -146668,7 +146679,7 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "tests_e2e_coverage_collect",
       "weight": 1.0
     },
@@ -146679,7 +146690,7 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L87",
+      "source_location": "L88",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -146690,19 +146701,8 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L93",
+      "source_location": "L94",
       "target": "tests_e2e_coverage_close",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_coverage",
-      "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L99",
-      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
     {
@@ -154376,10 +154376,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "b3a47114fa1258d5676d4554d14e452e12230c1dfd64994678da34d0db9f5487",
+    "content_sha256": "a99b6c8e815be0b77f8dfd7f460ac958fdee16b9bb434ac9bc93cf0fc94cdad3",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "6b3f57b6fe342505b51ea2eb2848a7c2fa7137686cffe582a705613ca52a2770",
+    "source_sha256": "55167f5f08fbf91e8e47a54f9669994bda99551554c0d8d17686eec0f21422bc",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -179714,7 +179714,7 @@
       "label": "close()",
       "norm_label": "close()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L93"
+      "source_location": "L94"
     },
     {
       "_callable": true,
@@ -179725,7 +179725,7 @@
       "label": "collect()",
       "norm_label": "collect()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L73"
+      "source_location": "L74"
     },
     {
       "_callable": true,
@@ -179736,7 +179736,7 @@
       "label": "newPage()",
       "norm_label": "newpage()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L87"
+      "source_location": "L88"
     },
     {
       "_callable": true,
@@ -179769,7 +179769,7 @@
             "callee": "fallback",
             "file": "tests/e2e/coverage.ts",
             "lang": "typescript",
-            "line": "L65",
+            "line": "L66",
             "receiver_type": "Route"
           }
         ]
@@ -191669,7 +191669,7 @@
       "label": "test",
       "norm_label": "test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L99"
+      "source_location": "L100"
     },
     {
       "_origin": "ast",
