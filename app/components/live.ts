@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { z } from "zod";
+import { catch as fallback, z } from "zod";
 import { MASH_PHASES, OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES, OVERLAY_SOURCES } from "../../db/enums";
 import { storedLayersSchema } from "../lib/overlay-layers";
 import type { LiveSnapshot, MashTick, OverlayPublic } from "../types";
@@ -26,7 +26,7 @@ const overlaySchema = z.object({
   // A missing value (an older server) reads as fresh defaults.
   layers: storedLayersSchema,
   // A missing or bad value (an older server) reads as no chat test.
-  chatTestUntil: count.catch(0),
+  chatTestUntil: fallback(count, 0),
   revision: count,
 });
 const snapshotSchema = z.object({

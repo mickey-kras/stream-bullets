@@ -232,7 +232,7 @@ export async function updateOverlay(
       .bind(streamerId)
       .first<OverlayRow & { layers_writes: string }>();
     const current = overlayValue(row);
-    const writes: LayersWrites = row ? storedWrites(row.layers_writes) : [];
+    const writes: LayersWrites = storedWrites(row?.layers_writes ?? "[]");
     if (write && passedWrite(writes, write)) return { overlay: current, changed: false };
     const next = await nextOverlayState(env, streamerId, current, action);
     const applied: LayersWrites = write ? recordWrite(writes, write) : writes;

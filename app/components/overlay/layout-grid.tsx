@@ -184,7 +184,7 @@ export function LayoutGrid({
     const next: Drag = follow(drag, cell);
     const now: CellRect | null = dragShape(cells, orientation, drag);
     const then: CellRect | null = dragShape(cells, orientation, next);
-    if (now && then && now.c === then.c && now.r === then.r && now.w === then.w && now.h === then.h) return;
+    if (then && now?.c === then.c && now.r === then.r && now.w === then.w && now.h === then.h) return;
     setCursor(cell);
     setDrag(next);
   };

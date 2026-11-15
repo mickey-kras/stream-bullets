@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { catch as fallback, z } from "zod";
 
 // Overlay layers sit on a grid of square cells. The streamer picks the orientation of the frame: horizontal is
 // 1920x1080 (16 x 9 cells), vertical is 1080x1920 (9 x 16 cells). Each orientation keeps its own layout.
@@ -205,36 +205,37 @@ function readCells(orientation: Orientation, value: unknown): LayerCells {
 // Stored and broadcast layers. This schema never throws: older and newer versions must not break the overlay.
 // Missing keys take defaults, so `{}` reads as DEFAULT_LAYERS. Unknown keys are dropped. An invalid field reads as
 // its default (see readCells for the cells). Writes use the strict layersPatchSchema.
-export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = z
-  .object({
-    orientation: z.enum(ORIENTATIONS).catch(DEFAULT_LAYERS.orientation),
-    chat: z
-      .object({
-        enabled: z.boolean().catch(DEFAULT_LAYERS.chat.enabled),
-        hideCommands: z.boolean().catch(DEFAULT_LAYERS.chat.hideCommands),
-      })
-      .catch((): ChatLayer => ({ ...DEFAULT_LAYERS.chat })),
-    characters: z
-      .object({ enabled: z.boolean().catch(DEFAULT_LAYERS.characters.enabled) })
-      .catch((): CharactersLayer => ({ ...DEFAULT_LAYERS.characters })),
-    cells: z
-      .object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() })
-      .catch({ horizontal: undefined, vertical: undefined })
-      .transform(
-        (cells: { horizontal?: unknown; vertical?: unknown }): Record<Orientation, LayerCells> => ({
-          horizontal: readCells("horizontal", cells.horizontal),
-          vertical: readCells("vertical", cells.vertical),
-        }),
-      ),
-  })
-  .catch(
-    (): OverlayLayers => ({
-      orientation: DEFAULT_LAYERS.orientation,
-      chat: { ...DEFAULT_LAYERS.chat },
-      characters: { ...DEFAULT_LAYERS.characters },
-      cells: { horizontal: defaultCells("horizontal"), vertical: defaultCells("vertical") },
-    }),
-  );
+export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
+  z.object({
+    orientation: fallback(z.enum(ORIENTATIONS), DEFAULT_LAYERS.orientation),
+    chat: fallback(
+      z.object({
+        enabled: fallback(z.boolean(), DEFAULT_LAYERS.chat.enabled),
+        hideCommands: fallback(z.boolean(), DEFAULT_LAYERS.chat.hideCommands),
+      }),
+      (): ChatLayer => ({ ...DEFAULT_LAYERS.chat }),
+    ),
+    characters: fallback(
+      z.object({ enabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.enabled) }),
+      (): CharactersLayer => ({ ...DEFAULT_LAYERS.characters }),
+    ),
+    cells: fallback(z.object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() }), {
+      horizontal: undefined,
+      vertical: undefined,
+    }).transform(
+      (cells: { horizontal?: unknown; vertical?: unknown }): Record<Orientation, LayerCells> => ({
+        horizontal: readCells("horizontal", cells.horizontal),
+        vertical: readCells("vertical", cells.vertical),
+      }),
+    ),
+  }),
+  (): OverlayLayers => ({
+    orientation: DEFAULT_LAYERS.orientation,
+    chat: { ...DEFAULT_LAYERS.chat },
+    characters: { ...DEFAULT_LAYERS.characters },
+    cells: { horizontal: defaultCells("horizontal"), vertical: defaultCells("vertical") },
+  }),
+);
 
 // Reads a stored `layers` JSON text. Invalid JSON reads as the defaults, the same as an invalid value.
 export function parseStoredLayers(raw: string): OverlayLayers {

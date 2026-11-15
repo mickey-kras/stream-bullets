@@ -48,6 +48,12 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   };
 });
 
+function mergeOverlayPolls(current: readonly OverlayPoll[], initial: readonly OverlayPoll[]): OverlayPoll[] {
+  const polls: OverlayPoll[] = [...current];
+  for (const poll of initial) if (!polls.some((item: OverlayPoll): boolean => item.id === poll.id)) polls.push(poll);
+  return polls;
+}
+
 export default function Overlay(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
   const [search] = useSearchParams();
@@ -76,8 +82,7 @@ export default function Overlay(): ReactNode {
   const [offsets] = useState<ServerOffset>(() => new ServerOffset());
   const serverOffset: number = offsets.for(loaded.initial.serverNow);
   const now: number = useServerTime(current.serverNow);
-  const polls: OverlayPoll[] = [...current.polls];
-  for (const poll of loaded.initial.polls) if (!polls.some((item) => item.id === poll.id)) polls.push(poll);
+  const polls: OverlayPoll[] = mergeOverlayPolls(current.polls, loaded.initial.polls);
   const source: OverlaySourceRef = loaded.override ? { type: "poll", ref: loaded.override } : overlay.air;
   // Refresh Up next when the displayed stream starts.
   useRevalidateAt(loaded.initial.serverNow, upNextStart(source, loaded.data), revalidator.revalidate);
