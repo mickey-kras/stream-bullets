@@ -197,7 +197,7 @@ describe("overlay source fallbacks", () => {
       feed: null,
       rect: { x: 0, y: 0, w: 720, h: 240 },
     }));
-    expect(html).toContain('class="characters-layer" width="720" height="240" aria-hidden="true"');
+    expect(html).toMatch(/^<div aria-hidden="true"[^>]*><canvas class="characters-layer" width="720" height="240"/);
     expect(html).not.toContain("<img");
     expect(html).not.toContain("<button");
   });

@@ -275,7 +275,8 @@ export class PlaygroundSim {
         : this.clock + Math.ceil(((until - receivedAt) * TICK_HZ) / 1000);
     if (end <= this.clock) return;
     if (this.restrictions.size >= RESTRICTED_MAX && !this.restrictions.has(key)) {
-      const first: [string, number] = [...this.restrictions].reduce((a, b) => (b[1] < a[1] ? b : a));
+      let first: [string, number] = ["", Infinity];
+      for (const entry of this.restrictions) if (entry[1] < first[1]) first = entry;
       this.restrictions.delete(first[0]);
     }
     this.restrictions.set(key, Math.max(end, this.restrictions.get(key) ?? 0));
@@ -469,7 +470,7 @@ export class PlaygroundSim {
     const shown: { owner: Participant; ticks: number }[] = this.list().flatMap((o: Participant) =>
       o !== p && o.bubble ? [{ owner: o, ticks: o.bubble.ticks }] : [],
     );
-    if (shown.length >= BUBBLE_MAX) shown.reduce((a, b) => (b.ticks < a.ticks ? b : a)).owner.bubble = null;
+    if (shown.length >= BUBBLE_MAX) shown.reduce((a, b) => (b.ticks < a.ticks ? b : a), shown[0]).owner.bubble = null;
     p.bubble = { text, ticks, key, at: this.clock };
   }
 
@@ -527,98 +528,93 @@ export class PlaygroundSim {
     if (p.pendingText && p.pendingText.expires < this.clock) p.pendingText = null;
     if (p.state === "away") return;
     p.t += 1;
-    if (p.state === "walk") {
-      const timedOut: boolean = this.clock - p.lastChat >= this.timeoutTicks;
-      if ((!p.eligible || timedOut) && this.clock - p.admittedAt >= MIN_STAY_TICKS) {
-        setState(p, "goto", {
-          target: this.world.exitX,
-          after: "exit",
-          free: true,
-          exitReason: timedOut ? "timeout" : "capacity",
-        });
-      } else if (!p.free) {
-        if (p.pendingText) {
-          this.say(p, p.pendingText.text, BUBBLE_TICKS, p.pendingText.key);
-          p.pendingText = null;
-        }
-        if (p.pending) {
-          const pending = p.pending;
-          p.pending = null;
-          this.perform(p, pending.name, pending.key);
-        }
-      }
-    }
-    this.act(p);
+    if (p.state === "walk") this.walkTurn(p);
+    this.actions[p.state](p);
   }
 
-  private act(p: Participant): void {
-    const world: World = this.world;
-    switch (p.state) {
-      case "gone":
-        if (--p.wait <= 0) {
-          if (p.eligible) setState(p, "respawn", { x: world.padX, y: world.gy - 6, dir: 1 });
-          else this.release(p);
-        }
-        return;
-      case "enter":
-        if (p.t >= DURATION.enter) setState(p, "walk", { free: true });
-        return;
-      case "respawn":
-        if (p.t >= DURATION.respawn) setState(p, "walk", { y: world.gy });
-        return;
-      case "walk":
-        this.walkStep(p, p.speed);
-        if (p.free && p.x > world.xmin + 4) p.free = false;
-        if (p.state === "walk" && !p.free && this.rng() < TURN_CHANCE) setState(p, "turn");
-        else if (p.state === "walk" && !p.free && this.rng() < IDLE_CHANCE) setState(p, "idle");
-        return;
-      case "idle":
-        if (p.t >= DURATION.idle) setState(p, "walk");
-        return;
-      case "turn":
-        if (p.t >= DURATION.turn) setState(p, "walk", { dir: p.dir === 1 ? -1 : 1 });
-        return;
-      case "goto":
-        p.dir = p.target > p.x ? 1 : -1;
-        this.walkStep(p, Math.min(GOTO_SPEED_MAX, Math.abs(p.target - p.x)));
-        if (p.state === "goto" && Math.abs(p.x - p.target) < 0.7) setState(p, p.after, { x: p.target });
-        return;
-      case "jump":
-        if (p.t < DURATION.jumpCrouch) return;
-        if (p.t === DURATION.jumpCrouch) Object.assign(p, { vy: JUMP_VY, vx: p.dir * JUMP_VX, fromY: p.y });
-        this.physics(p);
-        return;
-      case "fall":
-        this.physics(p);
-        return;
-      case "land":
-        if (p.t > DURATION.land) setState(p, "walk");
-        return;
-      case "flat":
-        if (p.t > DURATION.flat) setState(p, "walk");
-        return;
-      case "dig":
-        this.dig(p);
-        return;
-      case "build":
-        this.build(p);
-        return;
-      case "bwalk":
-        this.walkStep(p, STAIR_SPEED);
-        if (p.state === "bwalk" && Math.abs(p.x - p.target) < 0.5)
-          setState(p, p.steps < BUILD_STEPS ? "build" : "walk");
-        return;
-      case "wave":
-        if (p.t >= DURATION.wave) setState(p, "walk");
-        return;
-      case "boom":
-        if (p.t >= DURATION.boom) setState(p, "gone", { wait: RESPAWN_TICKS });
-        return;
-      case "exit":
-        if (p.t >= DURATION.exit) this.release(p);
-        return;
+  /** A walking character leaves when its time is up, or else shows its queued text and starts its queued command. */
+  private walkTurn(p: Participant): void {
+    const timedOut: boolean = this.clock - p.lastChat >= this.timeoutTicks;
+    if ((!p.eligible || timedOut) && this.clock - p.admittedAt >= MIN_STAY_TICKS) {
+      setState(p, "goto", {
+        target: this.world.exitX,
+        after: "exit",
+        free: true,
+        exitReason: timedOut ? "timeout" : "capacity",
+      });
+      return;
+    }
+    if (p.free) return;
+    if (p.pendingText) {
+      this.say(p, p.pendingText.text, BUBBLE_TICKS, p.pendingText.key);
+      p.pendingText = null;
+    }
+    if (p.pending) {
+      const pending = p.pending;
+      p.pending = null;
+      this.perform(p, pending.name, pending.key);
     }
   }
+
+  /** What a character in each state does in a tick. */
+  private readonly actions: Record<CharState, (p: Participant) => void> = {
+    gone: (p: Participant): void => {
+      if (--p.wait > 0) return;
+      if (p.eligible) setState(p, "respawn", { x: this.world.padX, y: this.world.gy - 6, dir: 1 });
+      else this.release(p);
+    },
+    enter: (p: Participant): void => {
+      if (p.t >= DURATION.enter) setState(p, "walk", { free: true });
+    },
+    respawn: (p: Participant): void => {
+      if (p.t >= DURATION.respawn) setState(p, "walk", { y: this.world.gy });
+    },
+    walk: (p: Participant): void => {
+      this.walkStep(p, p.speed);
+      if (p.free && p.x > this.world.xmin + 4) p.free = false;
+      if (p.state !== "walk" || p.free) return;
+      if (this.rng() < TURN_CHANCE) setState(p, "turn");
+      else if (this.rng() < IDLE_CHANCE) setState(p, "idle");
+    },
+    idle: (p: Participant): void => {
+      if (p.t >= DURATION.idle) setState(p, "walk");
+    },
+    turn: (p: Participant): void => {
+      if (p.t >= DURATION.turn) setState(p, "walk", { dir: p.dir === 1 ? -1 : 1 });
+    },
+    goto: (p: Participant): void => {
+      p.dir = p.target > p.x ? 1 : -1;
+      this.walkStep(p, Math.min(GOTO_SPEED_MAX, Math.abs(p.target - p.x)));
+      if (p.state === "goto" && Math.abs(p.x - p.target) < 0.7) setState(p, p.after, { x: p.target });
+    },
+    jump: (p: Participant): void => {
+      if (p.t < DURATION.jumpCrouch) return;
+      if (p.t === DURATION.jumpCrouch) Object.assign(p, { vy: JUMP_VY, vx: p.dir * JUMP_VX, fromY: p.y });
+      this.physics(p);
+    },
+    fall: (p: Participant): void => this.physics(p),
+    land: (p: Participant): void => {
+      if (p.t > DURATION.land) setState(p, "walk");
+    },
+    flat: (p: Participant): void => {
+      if (p.t > DURATION.flat) setState(p, "walk");
+    },
+    dig: (p: Participant): void => this.dig(p),
+    build: (p: Participant): void => this.build(p),
+    bwalk: (p: Participant): void => {
+      this.walkStep(p, STAIR_SPEED);
+      if (p.state === "bwalk" && Math.abs(p.x - p.target) < 0.5) setState(p, p.steps < BUILD_STEPS ? "build" : "walk");
+    },
+    wave: (p: Participant): void => {
+      if (p.t >= DURATION.wave) setState(p, "walk");
+    },
+    boom: (p: Participant): void => {
+      if (p.t >= DURATION.boom) setState(p, "gone", { wait: RESPAWN_TICKS });
+    },
+    exit: (p: Participant): void => {
+      if (p.t >= DURATION.exit) this.release(p);
+    },
+  };
 
   private dig(p: Participant): void {
     if (p.t % DURATION.digEvery === DURATION.digAt) {
@@ -782,17 +778,7 @@ export class PlaygroundSim {
       cellsH: data.cellsH,
       timeoutSeconds: data.timeoutSeconds,
     });
-    const tiles = sim.terrain.tiles;
-    const kinds: boolean =
-      data.ground.length === tiles.length &&
-      tiles.every((tile, i: number): boolean => (tile.kind === "g") === (data.ground[i] === "g"));
-    if (!kinds) throw new Error("playground checkpoint ground does not match its world");
-    for (const [i, tile] of tiles.entries()) if (tile.kind === "d") tile.stage = Number(data.ground[i]);
-    for (const [index, repairAt] of data.repairs) {
-      if (index >= tiles.length) throw new Error(`playground checkpoint repair outside the ground: ${index}`);
-      tiles[index].repairAt = repairAt;
-    }
-    sim.terrain.stairs = data.stairs.map(([x, top, dir, until]) => ({ x, top, dir, until }));
+    restoreTerrain(sim.terrain, data);
     Object.assign(sim, {
       clock: data.clock,
       rotation: data.rotation,
@@ -811,6 +797,21 @@ export class PlaygroundSim {
     for (const p of sim.participants.values()) sim.settle(p);
     return sim;
   }
+}
+
+/** Puts the checkpoint's ground stages, repairs and stairs into a new terrain. Throws when they do not fit it. */
+function restoreTerrain(terrain: Terrain, data: Checkpoint): void {
+  const tiles = terrain.tiles;
+  const kinds: boolean =
+    data.ground.length === tiles.length &&
+    tiles.every((tile, i: number): boolean => (tile.kind === "g") === (data.ground[i] === "g"));
+  if (!kinds) throw new Error("playground checkpoint ground does not match its world");
+  for (const [i, tile] of tiles.entries()) if (tile.kind === "d") tile.stage = Number(data.ground[i]);
+  for (const [index, repairAt] of data.repairs) {
+    if (index >= tiles.length) throw new Error(`playground checkpoint repair outside the ground: ${index}`);
+    tiles[index].repairAt = repairAt;
+  }
+  terrain.stairs = data.stairs.map(([x, top, dir, until]) => ({ x, top, dir, until }));
 }
 
 /** id, platform, user id, name, score, scoreAt, lastScored, lastChat, lastCommand, admitted, admittedAt, x, removed. */

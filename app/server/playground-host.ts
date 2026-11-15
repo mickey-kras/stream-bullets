@@ -173,10 +173,10 @@ export class PlaygroundHost {
       await this.forget();
       return;
     }
-    // A playground saved with the characters layer off keeps nothing: nothing shows it.
-    if (!this.enabled) await this.forget();
     // A kept state always has an alarm, so the layers check and the expiries run also without traffic.
-    else await this.wake();
+    if (this.enabled) await this.wake();
+    // A playground saved with the characters layer off keeps nothing: nothing shows it.
+    else await this.forget();
   }
 
   /**

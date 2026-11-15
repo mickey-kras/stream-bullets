@@ -168,9 +168,9 @@ function fit(parts: readonly string[], maxGraphemes: number, maxUnits: number): 
  */
 export function boundText(text: string, maxGraphemes: number, maxUnits: number, cutMark: string = ""): string {
   const clean: string = text
-    .replace(LONE_SURROGATE, "\uFFFD")
-    .replace(UNSAFE_TEXT_ALL, " ")
-    .replace(/\s+/gu, " ")
+    .replaceAll(LONE_SURROGATE, "\uFFFD")
+    .replaceAll(UNSAFE_TEXT_ALL, " ")
+    .replaceAll(/\s+/gu, " ")
     .trim();
   const parts: string[] = graphemes(clean);
   const whole: string = fit(parts, maxGraphemes, maxUnits);

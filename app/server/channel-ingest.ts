@@ -188,10 +188,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
     if (url.pathname.startsWith("/playground")) return this.playground.request(url.pathname, request);
+    return this.platformRequest(url.pathname, platform, request);
+  }
+  private async platformRequest(pathname: string, platform: string | null, request: Request): Promise<Response> {
     if (!isPlatform(platform)) return reply("Invalid platform", 400);
-    if (url.pathname === "/event") return this.receive(platform, request);
-    if (url.pathname === "/connect") return Response.json(await this.connectChannel(platform));
-    if (url.pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
+    if (pathname === "/event") return this.receive(platform, request);
+    if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
+    if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
     return this.statusChanged(platform, request);
   }
 
