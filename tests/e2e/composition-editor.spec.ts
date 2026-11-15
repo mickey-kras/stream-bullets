@@ -77,11 +77,12 @@ test("the owner places the chat layer by mouse and keyboard, and the layout pers
   save = saved(page);
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
-  await page.mouse.move(from.x - 60, from.y - 20, { steps: 6 });
-  await page.mouse.move(from.x - 120, from.y - 40, { steps: 6 });
+  // The default box starts 73 design pixels below the top edge: a short move up stays in the frame.
+  await page.mouse.move(from.x - 60, from.y - 10, { steps: 6 });
+  await page.mouse.move(from.x - 120, from.y - 20, { steps: 6 });
   await page.mouse.up();
   await save;
-  const moved = { x: start.x + Math.round(-120 / scale), y: start.y + Math.round(-40 / scale) };
+  const moved = { x: start.x + Math.round(-120 / scale), y: start.y + Math.round(-20 / scale) };
   expect(await value(page, "chat", "X")).toBe(moved.x);
   expect(await value(page, "chat", "Y")).toBe(moved.y);
 
@@ -327,7 +328,7 @@ test("a note shows while the chat covers the on-air content and goes when the ch
   const editor = page.getByRole("region", { name: "Composition", exact: true });
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame.locator(".ov-stage > *").first()).toBeVisible();
-  // The default chat box (y 372 to 1032) covers the lower part of the poll.
+  // The default chat box (x 979 to 1805, y 73 to 1007) covers the right part of the poll.
   const note = editor.locator("[data-comp-overlap]");
   await expect(note).toHaveText(OVERLAP_NOTE);
   // The note does not speak on page load, only after a change.

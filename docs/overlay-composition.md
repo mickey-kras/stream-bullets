@@ -14,6 +14,7 @@ The code is in these files:
 | Chat state machine and sample chat | `app/lib/chat-feed.ts` |
 | Activity socket client | `app/lib/activity-socket.ts`, `app/components/overlay/activity-feed.tsx` |
 | Chat rows and the composition | `app/components/overlay/chat-layer.tsx`, `app/components/overlay/overlay-composition.tsx` |
+| Chat appearance and motion | `app/components/overlay/wasteland/`, `app/components/overlay/use-row-motion.ts` |
 | Editor | `app/components/overlay/composition-editor.tsx` |
 | Overlay page | `app/routes/overlay.tsx` |
 | Layer action | `app/server/overlay.server.ts`, `app/server/api/live.ts` |
@@ -37,7 +38,7 @@ The rectangle must stay in the frame: `x + w` is at most 1920 and `y + h` is at 
 
 | Layer | Default rectangle | Minimum size |
 | --- | --- | --- |
-| `chat` | `x` 1240, `y` 372, 640 × 660 | 280 × 160 |
+| `chat` | `x` 979, `y` 73, 826 × 934 | 280 × 160 |
 | `characters` | `x` 0, `y` 760, 1920 × 320 | 640 × 160 |
 
 The page scales the design pixels to the size of the browser source.
@@ -138,18 +139,19 @@ When the chat layer covers part of the on-air content in the preview, a note sho
 Move the chat layer to a free area to remove the note. The note does not stop a save.
 
 The note changes only after a move is complete, not during a drag. A screen reader reads it after your first change on the page.
-The default chat rectangle is in the bottom-right corner, 40 pixels from the right edge and 48 pixels from the bottom edge.
-A poll fills the top of the frame and can go below `y` 372. Thus with a poll on air, the note can show for the default rectangle.
+The default chat rectangle is the right half of the frame, in a safe margin.
+The margin is 5% of the frame plus 19.2 pixels: 115 pixels on the right and 73 pixels at the top and bottom.
+A poll fills the top of the frame. Thus with a poll on air, the note can show for the default rectangle.
 
 The preview plays sample chat. It opens no activity socket and reads no live chat.
 The samples include all three platforms, Unicode text, emoji, an emote, and a command.
 
 ## Chat behavior
 
-The chat shows one row for each message. Each row has a platform badge, the user name, and the message.
-Each platform has its own color: YouTube red, Twitch purple, and Kick green.
-The badge also has a shape and an accessible platform name. Thus the color is not the only cue.
-The newest row is at the bottom.
+The chat shows one card for each message. Each card has a platform icon, the user name, and the message.
+All platform icons have the same mustard color. Each icon has its own shape and an accessible platform name.
+Thus the color is not the only cue.
+The newest card is at the bottom.
 
 The layer clips rows at the top. The chat keeps the order in which the messages arrive. The send time from the platform does not change the order.
 
@@ -167,11 +169,35 @@ In a burst, fresh chat is more important than complete chat.
 When more than 4 messages wait, the chat shows all of them at once, without animation.
 The chat also limits the number of rows that leave at the same time.
 
+### Chat appearance
+
+The chat uses the approved compact cards of issue #663.
+
+| Item | Value |
+| --- | --- |
+| Font | Segoe UI, then Arial. Only system fonts. 26 pixels at 1080p, line height 1.22. |
+| Card | Dark teal, `rgba(8, 43, 46, 0.9)`, with a 1-pixel border, `#b89649` |
+| User name | Mustard, `#e5bd54`, weight 750, and a colon |
+| Message | Ivory, `#f4ebce`, weight 500. A long message wraps in its card. |
+| Newest card | Mustard border and a 3-pixel mustard bar on the left edge |
+| Badge labels | Small gray text, `#c4c2a8`, before the user name |
+| Removed message | Gray italic text |
+| Top edge | The column fades out in the top 18% |
+
+A new card moves up from below its place and fades in. The other cards move up at the same time.
+The movement takes 520 milliseconds. When a card goes, the column closes with the same movement.
+A leaving card fades out in 300 milliseconds.
+
+The movement uses only `transform` and `opacity`. Thus the browser does no layout during the movement.
+
+With reduced motion, the cards do not move. The chat uses the **Motion** setting of the site or the setting of the operating system.
+A reconnect snapshot and a burst show their cards at once, without movement.
+
 ### Moderation
 
 | Event | Result |
 | --- | --- |
-| `delete` | The row shows "message removed by a moderator" for 1.4 seconds. Then the row closes. |
+| `delete` | The row shows "message removed by a moderator" for 1.4 seconds. Then the card fades out and the column closes. |
 | `ban`, `clear_user` | All rows of that user on that platform show the removed state. Then they close. |
 | `clear` | All rows of that platform leave. |
 

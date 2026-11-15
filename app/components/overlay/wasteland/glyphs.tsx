@@ -1,182 +1,59 @@
-import type { ReactNode } from "react";
+import type { AriaRole, ReactNode } from "react";
 import type { ActivityPlatform } from "../../../lib/activity";
-import { PLATFORM_COLORS, WASTELAND_COLORS } from "./theme";
 
 /*
- * Original wasteland artwork, drawn in code. The platform glyphs are generic
- * shapes, not trademark logos: a play tile, a speech square and a notched K block. Each platform has its own
- * silhouette, so colour is never the only cue.
+ * The chat card artwork, drawn in code in currentColor. The platform icons are monochrome outline shapes from the
+ * approved reference (issue #663). Each platform has its own silhouette, so colour is never the only cue.
  */
 
-function GlyphPaths({ platform }: Readonly<{ platform: ActivityPlatform }>): ReactNode {
-  const color: string = PLATFORM_COLORS[platform];
+function IconPaths({ platform }: Readonly<{ platform: ActivityPlatform }>): ReactNode {
   if (platform === "youtube")
     return (
       <>
-        <rect x="1" y="4" width="22" height="16" rx="5" fill={color} />
-        <path d="M9.5 8.2v7.6l6.6-3.8z" fill="#fff" />
+        <rect x="2" y="5" width="20" height="14" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
+        <path fill="currentColor" d="m10 8 6 4-6 4z" />
       </>
     );
   if (platform === "twitch")
     return (
       <>
-        <path d="M2.5 3h19v13.5H11l-5.5 5v-5h-3z" fill={color} />
-        <circle cx="7.5" cy="10" r="1.7" fill="#fff" />
-        <circle cx="12" cy="10" r="1.7" fill="#fff" />
-        <circle cx="16.5" cy="10" r="1.7" fill="#fff" />
+        <path fill="currentColor" d="M4 2h18v13l-6 6h-5l-4 3v-3H2V6zm1 3v12h5v3l3-3h4l3-3V5z" />
+        <path stroke="currentColor" strokeWidth="2" d="M11 7v6m5-6v6" />
       </>
     );
-  return (
-    <>
-      <path d="M5 1.5h14l3.5 3.5v14L19 22.5H5L1.5 19V5z" fill={color} />
-      <g fill="#0d1f08">
-        <rect x="6.5" y="6" width="3.5" height="12" />
-        <rect x="10" y="10" width="2.5" height="4" />
-        <rect x="12.5" y="8" width="2.5" height="2.5" />
-        <rect x="14.5" y="6" width="3" height="2.5" />
-        <rect x="12.5" y="13.5" width="2.5" height="2.5" />
-        <rect x="14.5" y="15.5" width="3" height="2.5" />
-      </g>
-    </>
-  );
+  return <path fill="currentColor" d="M3 3h5v7h3V7h3V3h7v6h-4v3h-3v2h3v3h4v4h-7v-3h-3v-3H8v6H3z" />;
 }
 
-/**
- * The platform glyph. With a label it is an image with that accessible name; without one it is decorative and the
- * caller names the platform another way.
- */
-export function PlatformGlyph({
+/** An inline SVG is an image to assistive technology only with this role (an <img> cannot draw in currentColor). */
+const SVG_IMAGE_ROLE: AriaRole = "img";
+
+/** The platform icon: an image with the platform name as its accessible name. */
+export function PlatformIcon({
   platform,
   label,
   className,
-}: Readonly<{ platform: ActivityPlatform; label?: string; className?: string }>): ReactNode {
-  const named: boolean = label !== undefined;
+}: Readonly<{ platform: ActivityPlatform; label: string; className?: string }>): ReactNode {
   return (
     <svg
       className={className}
       viewBox="0 0 24 24"
-      role={named ? "img" : undefined}
+      role={SVG_IMAGE_ROLE}
       aria-label={label}
-      aria-hidden={named ? undefined : true}
       focusable="false"
       data-platform={platform}
     >
-      <GlyphPaths platform={platform} />
+      <IconPaths platform={platform} />
     </svg>
   );
 }
 
-/** The orbit-and-bolt emblem: one tilted orbit ring crossed by a lightning bolt. Drawn in currentColor. */
-export function Emblem({ className }: Readonly<{ className?: string }>): ReactNode {
+/** The vault mark at the right end of each card: a ring with a hub and two pairs of side ticks. Decorative. */
+export function VaultMark({ className }: Readonly<{ className?: string }>): ReactNode {
   return (
-    <svg className={className} viewBox="0 0 64 40" aria-hidden="true" focusable="false">
-      <ellipse
-        cx="32"
-        cy="20"
-        rx="29"
-        ry="10.5"
-        transform="rotate(-17 32 20)"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3.6"
-      />
-      <path
-        d="M36.5 2 L23 22 H31 L27 38 L42 15.5 H34 L39.5 2Z"
-        fill="currentColor"
-        stroke={WASTELAND_COLORS.fillSolid}
-        strokeWidth="3"
-        strokeLinejoin="round"
-        paintOrder="stroke"
-      />
-    </svg>
-  );
-}
-
-export interface PixelArt {
-  width: number;
-  height: number;
-  /** [x, y] of each lit pixel. */
-  pixels: readonly (readonly [number, number])[];
-}
-
-/**
- * The emblem for pixel art (the playground's doors and flag): a tilted ring with the pixels next to the bolt
- * removed, so the ring breaks around it. `bolt` rows use `#` for a lit pixel.
- */
-export function emblemPixels(
-  width: number,
-  height: number,
-  radiusX: number,
-  radiusY: number,
-  bolt: readonly string[],
-  boltX: number,
-  boltY: number,
-): PixelArt {
-  const centerX: number = (width - 1) / 2;
-  const centerY: number = (height - 1) / 2;
-  const tilt: number = -0.25;
-  const boltPixels: [number, number][] = bolt.flatMap((row: string, y: number): [number, number][] =>
-    [...row].flatMap((cell: string, x: number): [number, number][] => (cell === "#" ? [[boltX + x, boltY + y]] : [])),
-  );
-  const boltKeys = new Set<string>(boltPixels.map(([x, y]) => `${x},${y}`));
-  const ring = new Set<string>();
-  for (let angle = 0; angle < 6.3; angle += 0.02) {
-    const ex: number = radiusX * Math.cos(angle);
-    const ey: number = radiusY * Math.sin(angle);
-    const x: number = Math.round(centerX + ex * Math.cos(tilt) - ey * Math.sin(tilt));
-    const y: number = Math.round(centerY + ex * Math.sin(tilt) + ey * Math.cos(tilt));
-    ring.add(`${x},${y}`);
-  }
-  const nearBolt = (x: number, y: number): boolean => {
-    for (let dx = -1; dx <= 1; dx++)
-      for (let dy = -1; dy <= 1; dy++) if (boltKeys.has(`${x + dx},${y + dy}`)) return true;
-    return false;
-  };
-  const ringPixels: [number, number][] = [...ring]
-    .map((key: string): [number, number] => {
-      const [x, y] = key.split(",").map(Number);
-      return [x, y];
-    })
-    .filter(([x, y]) => !nearBolt(x, y));
-  return { width, height, pixels: [...ringPixels, ...boltPixels] };
-}
-
-/** The 26x12 pixel emblem. */
-export const EMBLEM_PIXELS: PixelArt = emblemPixels(
-  26,
-  12,
-  12,
-  3.2,
-  ["...###", "..###.", ".###..", "######", "...###", "..###.", ".###..", ".##...", "##....", "#....."],
-  10,
-  1,
-);
-
-/** The 17x9 pixel emblem for small plates. */
-export const EMBLEM_PIXELS_SMALL: PixelArt = emblemPixels(
-  17,
-  9,
-  7.5,
-  2.2,
-  ["..###", ".###.", "#####", "..##.", ".##..", ".#...", "#...."],
-  6,
-  1,
-);
-
-/** Pixel art as crisp SVG squares, drawn in currentColor. */
-export function PixelEmblem({
-  art = EMBLEM_PIXELS,
-  className,
-}: Readonly<{ art?: PixelArt; className?: string }>): ReactNode {
-  return (
-    <svg
-      className={className}
-      viewBox={`0 0 ${art.width} ${art.height}`}
-      shapeRendering="crispEdges"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path fill="currentColor" d={art.pixels.map(([x, y]) => `M${x} ${y}h1v1h-1z`).join("")} />
+    <svg className={className} viewBox="0 0 36 24" aria-hidden="true" focusable="false">
+      <path d="M1 9h10M1 15h10M25 9h10M25 15h10" />
+      <circle cx="18" cy="12" r="9" />
+      <circle cx="18" cy="12" r="4" />
     </svg>
   );
 }

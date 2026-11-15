@@ -289,9 +289,11 @@ describe("chatReducer: live events", () => {
 
   it("changes nothing when hideCommands turns off or nothing matches", () => {
     let state = send(initialChatState(), event(chat({ text: "hi" })), 0, showAll);
-    state = runUntil(state, 500, showAll);
-    expect(chatReducer(state, { type: "filter", hideCommands: false, now: 600 }, showAll)).toBe(state);
-    expect(chatReducer(state, { type: "filter", hideCommands: true, now: 600 }, options)).toBe(state);
+    // After the slide-in, so the filter time ends no phase.
+    const settled: number = CHAT_LIMITS.enterMs + 80;
+    state = runUntil(state, settled, showAll);
+    expect(chatReducer(state, { type: "filter", hideCommands: false, now: settled + 100 }, showAll)).toBe(state);
+    expect(chatReducer(state, { type: "filter", hideCommands: true, now: settled + 100 }, options)).toBe(state);
     // Hidden commands are never kept, so turning the option off does not bring them back.
     const hiddenState = send(initialChatState(), event(chat({ text: "!jump" })), 0, options);
     expect(chatReducer(hiddenState, { type: "filter", hideCommands: false, now: 10 }, showAll).rows).toEqual([]);

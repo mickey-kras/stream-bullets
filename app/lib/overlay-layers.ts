@@ -42,10 +42,10 @@ export const MIN_RECT: Record<"chat" | "characters", { w: number; h: number }> =
   characters: { w: 640, h: 160 },
 };
 
-// Chat stays off by default, so existing OBS scenes do not change. The chat box is the approved A1 mockup place:
-// bottom-right, 40 px from the right and 48 px from the bottom.
+// Chat stays off by default, so existing OBS scenes do not change. The chat box is the approved place (issue #663):
+// the right half of the frame inside a 5 % safe margin plus 19.2 px, so 979 + 826 = 1920 - 115 and 73 + 934 = 1080 - 73.
 export const DEFAULT_LAYERS: OverlayLayers = {
-  chat: { enabled: false, rect: { x: 1240, y: 372, w: 640, h: 660 }, hideCommands: true },
+  chat: { enabled: false, rect: { x: 979, y: 73, w: 826, h: 934 }, hideCommands: true },
   characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
 };
 
