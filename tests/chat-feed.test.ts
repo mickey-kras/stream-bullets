@@ -383,6 +383,18 @@ describe("chatReducer: live events", () => {
     expect(send(state, event({ kind: "status", platform: "twitch", status: "error", code: "x" }), 1)).toBe(state);
   });
 
+  it("ignores playground frames, which share the activity socket", () => {
+    const state = send(initialChatState(), event(chat()), 0);
+    const frame: ActivityMessage = {
+      type: "playground",
+      v: 1,
+      full: false,
+      tick: 3,
+      chars: [],
+    };
+    expect(send(state, frame, 1)).toBe(state);
+  });
+
   it("clears everything on unavailable and on reset", () => {
     let state = send(initialChatState(), event(chat()), 0);
     state = send(state, event(chat()), 0);

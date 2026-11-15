@@ -49,7 +49,12 @@ export interface ChatLayer {
 
 export interface CharactersLayer {
   enabled: boolean;
+  /** Seconds without chat before a character walks out (CHARACTERS_TIMEOUT). */
+  timeout: number;
 }
+
+/** The characters inactivity timeout in seconds: the one source for the layers, the editor and the playground. */
+export const CHARACTERS_TIMEOUT = { min: 10, max: 600, default: 60 } as const;
 
 export interface OverlayLayers {
   orientation: Orientation;
@@ -77,7 +82,7 @@ export const MIN_CELLS: Readonly<Record<GridLayer, Readonly<{ w: number; h: numb
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
   chat: { enabled: false, hideCommands: true },
-  characters: { enabled: false },
+  characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default },
   cells: {
     horizontal: { chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 }, content: null },
     vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, characters: { c: 0, r: 13, w: 9, h: 3 }, content: null },
@@ -154,13 +159,15 @@ function cellsPatchSchema(orientation: Orientation): z.ZodType<CellsPatch> {
     .refine((cells: CellsPatch): boolean => overlappingPair(cells) === null, { message: "Layers must not overlap." });
 }
 
+const characterTimeout = z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max);
+
 // Writes are strict: unknown keys, cells outside the grid, below the minimum size or over each other return 400.
 // The server also checks the merged layout, so a cell never covers a saved cell of another layer.
 export const layersPatchSchema = z
   .object({
     orientation: z.enum(ORIENTATIONS).optional(),
     chat: z.object({ enabled: z.boolean().optional(), hideCommands: z.boolean().optional() }).strict().optional(),
-    characters: z.object({ enabled: z.boolean().optional() }).strict().optional(),
+    characters: z.object({ enabled: z.boolean().optional(), timeout: characterTimeout.optional() }).strict().optional(),
     cells: z
       .object({
         horizontal: cellsPatchSchema("horizontal").optional(),
@@ -216,7 +223,10 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
       (): ChatLayer => ({ ...DEFAULT_LAYERS.chat }),
     ),
     characters: fallback(
-      z.object({ enabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.enabled) }),
+      z.object({
+        enabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.enabled),
+        timeout: fallback(characterTimeout, DEFAULT_LAYERS.characters.timeout),
+      }),
       (): CharactersLayer => ({ ...DEFAULT_LAYERS.characters }),
     ),
     cells: fallback(z.object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() }), {
@@ -264,7 +274,10 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
       enabled: patch.chat?.enabled ?? current.chat.enabled,
       hideCommands: patch.chat?.hideCommands ?? current.chat.hideCommands,
     },
-    characters: { enabled: patch.characters?.enabled ?? current.characters.enabled },
+    characters: {
+      enabled: patch.characters?.enabled ?? current.characters.enabled,
+      timeout: patch.characters?.timeout ?? current.characters.timeout,
+    },
     cells: {
       horizontal: mergeCells(current.cells.horizontal, patch.cells?.horizontal),
       vertical: mergeCells(current.cells.vertical, patch.cells?.vertical),

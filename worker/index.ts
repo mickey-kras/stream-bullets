@@ -102,7 +102,11 @@ async function activityResponse(
   responseHeaders: Headers,
 ): Promise<Response> {
   requireSameOrigin(request, env);
-  const overlayKey: string | null = queryParams(request, ["key"]).get("key");
+  const params: URLSearchParams = queryParams(request, ["key", "characters"]);
+  const overlayKey: string | null = params.get("key");
+  // `characters=1` also asks for the character playground frames.
+  const characters: string | null = params.get("characters");
+  if (characters !== null && characters !== "1") throw new HttpError(400, "Invalid query parameters.");
   if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
     throw new HttpError(426, "Use a WebSocket connection.");
   const streamer = await getStreamer(env, handle);
@@ -112,7 +116,7 @@ async function activityResponse(
   else if ((await getViewer(request, { env, nonce, responseHeaders }))?.id === streamer.ownerId)
     headers.set("X-SB-Owner", "1");
   else throw new HttpError(403, "Use the overlay URL with its key.");
-  return callIngest(env, streamer.id, "subscribe", { init: { headers } });
+  return callIngest(env, streamer.id, "subscribe", { init: { headers }, characters: characters === "1" });
 }
 
 async function webhookResponse(request: Request, env: AppEnv, path: string, key: string): Promise<Response> {

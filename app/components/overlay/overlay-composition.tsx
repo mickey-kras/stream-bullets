@@ -13,6 +13,7 @@ import type { ActivityChat } from "../../lib/activity";
 import { chatTestLeft } from "../../lib/chat-test";
 import type { ChatView } from "../../lib/fading-rows";
 import {
+  CELL_PX,
   frameSize,
   layerPixels,
   type LayerRect,
@@ -22,39 +23,57 @@ import {
 } from "../../lib/overlay-layers";
 import type { OverlaySourceRef } from "../../types";
 import type { ActivityFeed } from "./activity-feed";
+import { CharactersLayer } from "./characters/characters-layer";
+import { usePlaygroundSource } from "./characters/use-playground";
 import { ChatLayer } from "./chat-layer";
 import { OverlayStage, type OverlayScene } from "./overlay-stage";
 import { useChat } from "./use-chat";
 import { useDesignScale } from "./use-design-scale";
 
-/** What a feed-driven layer gets. The contract for the characters layer (#664). */
+/** What a feed-driven layer gets. */
 export interface OverlayLayerSlotProps {
-  /** The page's activity feed, or null in the editor preview. */
+  /** The feed with the playground frames, or null for none. */
   feed: ActivityFeed | null;
   /** The layer's cell in design pixels. Its content is laid out in rect.w x rect.h design pixels. */
   rect: LayerRect;
-  /** True on a real overlay with a feed; false in a preview. */
-  live: boolean;
 }
 
 /**
  * Whether the characters layer can render (the playground, #664). The one switch for everything that depends on it:
  * while false the layer reads no activity feed (a socket costs provider quota; YouTube is polled only while one is
  * open), its per-layer source opens no live-room socket, its "Show on stream" control stays disabled and its OBS URL
- * is not offered. Its slot can still take cells on the grid. Set it to true when #664 ships.
+ * is not offered.
  */
-export const CHARACTERS_READY: boolean = false;
+export const CHARACTERS_READY: boolean = true;
 
-/** The characters layer. Empty until the playground ships (#664). */
-export function CharactersSlot(_props: Readonly<OverlayLayerSlotProps>): ReactNode {
-  return null;
+/** A failed characters layer stays empty on stream; the browser console (the OBS log) gets a fixed event. */
+function charactersFailed(error: Error): void {
+  console.error("characters_layer_failed", { cause: error.name });
+}
+
+/** The characters layer: the playground of the feed's frames. */
+export function CharactersSlot({ feed, rect }: Readonly<OverlayLayerSlotProps>): ReactNode {
+  const source = usePlaygroundSource(feed);
+  return (
+    <CharactersLayer
+      columns={rect.w / CELL_PX}
+      rows={rect.h / CELL_PX}
+      source={source}
+      badges={{ test: t("overlay.characters.badgeTest"), paused: t("overlay.characters.badgePaused") }}
+      onError={charactersFailed}
+    />
+  );
+}
+
+/** Whether a page that renders `only` (null: the composition) shows the characters layer, so its feed needs frames. */
+export function usesCharacters(layers: OverlayLayers, only: OverlayLayer | null): boolean {
+  return CHARACTERS_READY && (only === null || only === "characters") && layers.characters.enabled;
 }
 
 /** Whether a page that renders `only` (null: the composition) needs the activity feed for an enabled layer. */
 export function usesActivityFeed(layers: OverlayLayers, only: OverlayLayer | null): boolean {
   const chat: boolean = (only === null || only === "chat") && layers.chat.enabled;
-  const characters: boolean = CHARACTERS_READY && (only === null || only === "characters") && layers.characters.enabled;
-  return chat || characters;
+  return chat || usesCharacters(layers, only);
 }
 
 /**
@@ -267,7 +286,8 @@ const ChatSlot = memo(function ChatSlot({
 /**
  * The overlay: characters at the bottom, then the on-air content, then chat on top. OBS and the editor preview
  * render this same component. `only` renders one layer alone for a per-layer source; null renders them all.
- * `testUntil` is the server time when the chat test ends.
+ * `testUntil` is the server time when the chat test ends. `charactersFeed` replaces `feed` for the characters: the
+ * editor preview plays sample chat but shows the live playground.
  */
 export function OverlayComposition({
   scene,
@@ -275,6 +295,7 @@ export function OverlayComposition({
   layers,
   only,
   feed,
+  charactersFeed = feed,
   samples,
   serverOffset = 0,
   testUntil = 0,
@@ -284,13 +305,13 @@ export function OverlayComposition({
   layers: OverlayLayers;
   only: OverlayLayer | null;
   feed: ActivityFeed | null;
+  charactersFeed?: ActivityFeed | null;
   samples?: readonly ActivityChat[];
   serverOffset?: number;
   testUntil?: number;
 }>): ReactNode {
   const shows = (layer: OverlayLayer): boolean => only === null || only === layer;
   const alone: boolean = only !== null;
-  const live: boolean = feed !== null && samples === undefined;
   const frame = frameSize(layers.orientation);
   const chat: LayerRect | null = layerPixels(layers, "chat");
   const characters: LayerRect | null = layerPixels(layers, "characters");
@@ -299,7 +320,7 @@ export function OverlayComposition({
     <div className="ov-composition" data-overlay-only={only ?? undefined}>
       {shows("characters") && layers.characters.enabled && characters && (
         <LayerBox layer="characters" rect={characters} frame={frame} alone={alone}>
-          <CharactersSlot feed={feed} rect={characters} live={live} />
+          <CharactersSlot feed={charactersFeed} rect={characters} />
         </LayerBox>
       )}
       {shows("content") &&

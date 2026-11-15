@@ -443,6 +443,8 @@ function reduce(state: ChatState, action: Exclude<ChatAction, { type: "reset" }>
     return advance(filterCommands(state, action.hideCommands, action.now), action.now, limits);
   const { message, now } = action;
   if (message.type === "unavailable") return { ...initialChatState(), epoch: state.epoch + 1 };
+  // Other message types (playground frames) are not chat.
+  if (message.type !== "snapshot" && message.type !== "event") return state;
   const next: ChatState =
     message.type === "snapshot"
       ? receiveSnapshot(state, message.events, now, action.serverOffset ?? 0, options)

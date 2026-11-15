@@ -42,6 +42,9 @@ let database: TestDatabase;
 let env: AppEnv;
 // Record room API calls as path?streamerId plus JSON body.
 let roomCalls: { path: string; body: string }[];
+// Record ingest object calls the same way. The playground control answers with `ingestReply`.
+let ingestCalls: { path: string; body: string }[];
+let ingestReply: () => Response;
 
 const { call, cookie, context } = apiCaller(() => env, origin, secret);
 
@@ -100,7 +103,13 @@ beforeAll(async (): Promise<void> => {
     IMAGES: database.bucket,
     CHANNEL_INGEST: {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+      get: () => ({
+        fetch: async (url: string, init: RequestInit): Promise<Response> => {
+          const target = new URL(url);
+          ingestCalls.push({ path: `${target.pathname}${target.search}`, body: String(init.body ?? "") });
+          return target.pathname === "/playground" ? ingestReply() : new Response(null, { status: 204 });
+        },
+      }),
     } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
@@ -123,6 +132,8 @@ afterAll(async (): Promise<void> => database.dispose());
 beforeEach(async (): Promise<void> => {
   vi.restoreAllMocks();
   roomCalls = [];
+  ingestCalls = [];
+  ingestReply = (): Response => Response.json({ paused: false, testEndsAt: null });
   await env.DB.batch([env.DB.prepare("DELETE FROM user"), env.DB.prepare("DELETE FROM app_rate_limits")]);
   await seed();
 });
@@ -744,7 +755,7 @@ describe("overlay control", (): void => {
       expect(second.layers).toEqual({
         orientation: "vertical",
         chat: { enabled: true, hideCommands: false },
-        characters: { enabled: true },
+        characters: { enabled: true, timeout: 60 },
         cells: horizontal({ chat: chatCell, content: { c: 0, r: 0, w: 6, h: 4 } }),
       });
       expect(second.revision).toBe(2);
@@ -757,6 +768,37 @@ describe("overlay control", (): void => {
       const third = await overlay(await send({ action: "layers", cells: { horizontal: { content: null } } }));
       expect(third.layers.cells.horizontal.content).toBeNull();
       expect(roomCalls).toEqual(Array.from({ length: 4 }, () => ({ path: `/overlay?streamerId=${page}`, body: "" })));
+      // The character playground reads the saved layers again after each layers change, not after other actions.
+      expect(ingestCalls).toEqual(
+        Array.from({ length: 3 }, () => ({ path: `/playground-config?streamerId=${page}`, body: "" })),
+      );
+    });
+
+    it("saves the characters timeout, and does not tell the playground while channels are off", async (): Promise<void> => {
+      const saved = await overlay(await send({ action: "layers", characters: { enabled: true, timeout: 120 } }));
+      expect(saved.layers.characters).toEqual({ enabled: true, timeout: 120 });
+      expect(ingestCalls).toEqual([{ path: `/playground-config?streamerId=${page}`, body: "" }]);
+      for (const timeout of [9, 601, 30.5, "60"])
+        expect((await send({ action: "layers", characters: { timeout } })).status).toBe(400);
+      env.CHANNELS_OFF = "1";
+      try {
+        expect(
+          (await overlay(await send({ action: "layers", characters: { timeout: 10 } }))).layers.characters.timeout,
+        ).toBe(10);
+      } finally {
+        env.CHANNELS_OFF = undefined;
+      }
+      expect(ingestCalls).toHaveLength(1);
+      expect(roomCalls).toHaveLength(2);
+      // A deployment without the activity feed (the test environment) has no playground to tell.
+      const binding: DurableObjectNamespace = env.CHANNEL_INGEST;
+      Reflect.deleteProperty(env, "CHANNEL_INGEST");
+      try {
+        expect((await send({ action: "layers", characters: { timeout: 20 } })).status).toBe(200);
+      } finally {
+        env.CHANNEL_INGEST = binding;
+      }
+      expect(ingestCalls).toHaveLength(1);
     });
 
     it("reads a row saved before layers existed as the default layers", async (): Promise<void> => {
@@ -838,7 +880,7 @@ describe("overlay control", (): void => {
     it("changes only the page of the signed-in owner", async (): Promise<void> => {
       await send({ action: "layers", chat: { enabled: true }, cells: { horizontal: { chat: chatCell } } });
       const other = await overlay(await send({ action: "layers", characters: { enabled: true } }, "other"));
-      expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true } });
+      expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60 } });
       expect((await getOverlayState(env, page)).layers).toEqual({
         ...DEFAULT_LAYERS,
         chat: { enabled: true, hideCommands: true },
@@ -970,6 +1012,109 @@ describe("overlay control", (): void => {
         expect(late.status).toBe(200);
         expect(roomCalls).toEqual([{ path: `/overlay?streamerId=${page}`, body: "" }]);
       });
+    });
+  });
+
+  describe("character playground controls", (): void => {
+    function characters(control: unknown, user: string = "owner"): Promise<Response> {
+      return call("POST", "overlay/characters", { user, body: control });
+    }
+
+    async function charactersOn(): Promise<void> {
+      expect((await send({ action: "layers", characters: { enabled: true } })).status).toBe(200);
+      ingestCalls = [];
+    }
+
+    it("forwards each control to the page's playground and answers its status", async (): Promise<void> => {
+      await charactersOn();
+      ingestReply = (): Response => Response.json({ paused: false, testEndsAt: 123 });
+      for (const control of [
+        { op: "status" },
+        { op: "test" },
+        { op: "stopTest" },
+        { op: "pause" },
+        { op: "resume" },
+        { op: "reset" },
+        { op: "remove", id: 7 },
+      ]) {
+        const response = await characters(control);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({ paused: false, testEndsAt: 123 });
+      }
+      expect(ingestCalls.map((entry) => entry.path)).toEqual(
+        Array.from({ length: 7 }, () => `/playground?streamerId=${page}`),
+      );
+      expect(JSON.parse(ingestCalls[6].body)).toEqual({ op: "remove", id: 7 });
+    });
+
+    it("starts a test only with the characters layer saved on", async (): Promise<void> => {
+      const refused = await characters({ op: "test" });
+      expect(refused.status).toBe(400);
+      expect(await refused.json()).toMatchObject({ error: "Turn on the characters layer first." });
+      // The other controls work with the layer off.
+      expect((await characters({ op: "pause" })).status).toBe(200);
+      expect(ingestCalls.map((entry) => JSON.parse(entry.body))).toEqual([{ op: "pause" }]);
+    });
+
+    it("uses the write quota to start a test, reset and remove, never to read, stop or pause", async (): Promise<void> => {
+      await charactersOn();
+      await startOfQuotaWindow(env.DB);
+      await env.DB.prepare(
+        `INSERT INTO app_rate_limits (key,count,window_start)
+          VALUES ('write:owner',60,CAST(strftime('%s','now') AS INTEGER)/60*60000)
+          ON CONFLICT(key) DO UPDATE SET count=60, window_start=excluded.window_start`,
+      ).run();
+      for (const control of [{ op: "test" }, { op: "reset" }, { op: "remove", id: 1 }])
+        expect((await characters(control)).status).toBe(429);
+      for (const control of [{ op: "status" }, { op: "stopTest" }, { op: "pause" }, { op: "resume" }])
+        expect((await characters(control)).status).toBe(200);
+      expect(ingestCalls).toHaveLength(4);
+    });
+
+    it("lets only the owner of a writable page control it", async (): Promise<void> => {
+      expect((await call("POST", "overlay/characters", { body: { op: "pause" } })).status).toBe(401);
+      expect((await characters({ op: "pause" }, "viewer")).status).toBe(404);
+      await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(page).run();
+      expect((await characters({ op: "pause" })).status).toBe(423);
+      expect(ingestCalls).toEqual([]);
+    });
+
+    it("refuses a malformed control, and answers 503 while channels are off", async (): Promise<void> => {
+      for (const control of [{}, { op: "jump" }, { op: "remove" }, { op: "remove", id: 1.5 }, { op: "pause", id: 1 }])
+        expect((await characters(control)).status).toBe(400);
+      env.CHANNELS_OFF = "1";
+      try {
+        expect((await characters({ op: "pause" })).status).toBe(503);
+      } finally {
+        env.CHANNELS_OFF = undefined;
+      }
+      // Without the activity feed binding there is no playground either.
+      const binding: DurableObjectNamespace = env.CHANNEL_INGEST;
+      Reflect.deleteProperty(env, "CHANNEL_INGEST");
+      try {
+        const off = await characters({ op: "status" });
+        expect(off.status).toBe(503);
+        expect(await off.json()).toMatchObject({ error: "Characters are off on this server." });
+      } finally {
+        env.CHANNEL_INGEST = binding;
+      }
+      expect(ingestCalls).toEqual([]);
+    });
+
+    it("passes on a character that is gone and a playground that failed", async (): Promise<void> => {
+      ingestReply = (): Response => Response.json({ error: "Character not found" }, { status: 404 });
+      const gone = await characters({ op: "remove", id: 3 });
+      expect(gone.status).toBe(404);
+      expect(await gone.json()).toMatchObject({ error: "That character is not on the playground." });
+      ingestReply = (): Response => new Response("boom", { status: 500 });
+      expect((await characters({ op: "pause" })).status).toBe(503);
+      // An answer that breaks the status contract is a server error, not passed on.
+      const log = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+      ingestReply = (): Response => Response.json({ paused: "no", testEndsAt: null });
+      expect((await characters({ op: "status" })).status).toBe(500);
+      ingestReply = (): Response => new Response("not json");
+      expect((await characters({ op: "status" })).status).toBe(500);
+      log.mockRestore();
     });
   });
 

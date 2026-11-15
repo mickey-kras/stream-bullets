@@ -109,6 +109,14 @@ describe("activityUrl", () => {
     expect(activityUrl("https://sb.test", "my_handle", "k/1")).toBe("wss://sb.test/api/activity/my_handle?key=k%2F1");
     expect(activityUrl("http://localhost:5173", "h", null)).toBe("ws://localhost:5173/api/activity/h");
   });
+
+  it("asks for the playground frames only with the characters option", () => {
+    expect(activityUrl("https://sb.test", "h", "k", { characters: true })).toBe(
+      "wss://sb.test/api/activity/h?key=k&characters=1",
+    );
+    expect(activityUrl("https://sb.test", "h", null, { characters: true })).toBe("wss://sb.test/api/activity/h?characters=1");
+    expect(activityUrl("https://sb.test", "h", "k", { characters: false })).toBe("wss://sb.test/api/activity/h?key=k");
+  });
 });
 
 describe("backoffMs", () => {

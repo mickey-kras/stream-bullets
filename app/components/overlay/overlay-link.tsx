@@ -106,32 +106,25 @@ export function OverlayLink({
           </p>
           <p className="muted">{t("overlay.layerUrlsHelp")}</p>
           {LAYER_LINKS.map(([layer, label]) => {
-            const soon: boolean = layer === "characters" && !CHARACTERS_READY;
+            if (layer === "characters" && !CHARACTERS_READY) return null;
             // The size in the selected orientation. Content without a cell has no own size.
             const size: LayerRect | null = layerPixels(layers, layer);
             const sizeLine: string | undefined = size ? `${sizeId}-${layer}` : undefined;
             return (
               <div key={layer} className="ov-url-layer" data-ov-layer-row={layer}>
-                <p className="muted ov-url-caption">
-                  {t(label)}
-                  {soon && <span className="ov-comp-soon">{t("overlay.comp.soon")}</span>}
-                </p>
-                {!soon && (
-                  <>
-                    {size && (
-                      <p className="muted ov-url-size" id={sizeLine} data-ov-layer-size={layer}>
-                        {t("overlay.layer.size", { w: size.w, h: size.h })}
-                      </p>
-                    )}
-                    <CopyField
-                      value={layerUrl(url, layer)}
-                      label={t(label)}
-                      copyLabel={t("overlay.copyLayerUrl", { layer: t(label) })}
-                      layer={layer}
-                      describedBy={sizeLine}
-                    />
-                  </>
+                <p className="muted ov-url-caption">{t(label)}</p>
+                {size && (
+                  <p className="muted ov-url-size" id={sizeLine} data-ov-layer-size={layer}>
+                    {t("overlay.layer.size", { w: size.w, h: size.h })}
+                  </p>
                 )}
+                <CopyField
+                  value={layerUrl(url, layer)}
+                  label={t(label)}
+                  copyLabel={t("overlay.copyLayerUrl", { layer: t(label) })}
+                  layer={layer}
+                  describedBy={sizeLine}
+                />
               </div>
             );
           })}

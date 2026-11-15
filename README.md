@@ -36,6 +36,7 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - **Overlay control** creates a private OBS URL with a secret `key`. It grants owner-priority admission, including full rooms.
 - The full URL appears once. The server stores only its SHA-256 key hash. **Regenerate link** revokes the old key. Update OBS afterward.
 - See [overlay composition](docs/overlay-composition.md) for the layers, the per-layer URLs, and the merged chat.
+- See [interactive characters](docs/characters.md) for the character playground, its commands, and its controls.
 - **Schedule** supports one-off and weekly streams, platform links, linked topics, edits, cancellation, deletion, and replay links.
 - Viewers see upcoming and past streams in local time. Desktop adds day, week, and month views.
 - `/@handle/schedule.ics` provides a subscribable calendar feed.
