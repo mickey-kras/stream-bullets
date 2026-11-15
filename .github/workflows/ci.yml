@@ -69,12 +69,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:coverage
-      - run: node --test scripts/browser-coverage.test.ts
+      - run: node --test scripts/browser-coverage.test.ts scripts/deploy-production.test.ts
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         id: coverage
         with:
           name: unit-coverage-${{ github.sha }}-${{ github.run_attempt }}
-          path: coverage/lcov.info
+          path: |
+            coverage/lcov.info
+            coverage/ui-unit/
           if-no-files-found: error
           retention-days: 7
 
@@ -123,6 +125,11 @@ jobs:
         env:
           BROWSER_COVERAGE: "1"
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Check browser coverage navigation
+        run: pnpm exec playwright test tests/e2e/coverage-navigation.spec.ts --max-failures=1 --retries=0 --timeout=30000
+        env:
+          BROWSER_COVERAGE: "1"
+          BROWSER_COVERAGE_SHARD: "1"
       - run: pnpm test:e2e --shard=${{ matrix.shard }}/4
         env:
           BROWSER_COVERAGE: "1"
@@ -148,6 +155,7 @@ jobs:
             blob-report/
             playwright-report/
             test-results/
+            coverage/browser/
           retention-days: 7
 
   verify:
@@ -197,7 +205,7 @@ jobs:
             test "$(cat "$directory/revision.txt")" = "$REVISION"
             cp "$directory"/blob-report/*.zip all-blob-reports/
           done
-          node scripts/merge-browser-coverage.ts coverage/shards/browser-shard-"$REVISION"-"$RUN_ID"-{1,2,3,4}/raw
+          node scripts/merge-browser-coverage.ts coverage/shards/browser-shard-"$REVISION"-"$RUN_ID"-{1,2,3,4}
           test -s coverage/lcov.info
           test -s coverage/browser/lcov.info
           printf '%s\n' "$REVISION" > coverage/revision.txt
@@ -216,6 +224,7 @@ jobs:
           path: |
             coverage/lcov.info
             coverage/browser/lcov.info
+            coverage/browser/product/lcov.info
             coverage/revision.txt
           if-no-files-found: error
           retention-days: 7
@@ -270,14 +279,7 @@ jobs:
             echo '```'
             echo 'D1 restore steps: https://developers.cloudflare.com/d1/reference/time-travel/'
           } >> "$GITHUB_STEP_SUMMARY"
-          pnpm exec wrangler d1 migrations apply DB --env production --remote
-          pnpm exec wrangler deploy --config build/server/wrangler.json --message "commit $GITHUB_SHA"
-      - name: Check production response and assets
-        if: steps.revision.outputs.deploy == 'true'
-        run: |
-          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/ --output /tmp/streambullets.html
-          grep -Fq 'id="landing-title"' /tmp/streambullets.html
-          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/fonts.css --output /dev/null
+          bash scripts/deploy-production.sh
 
   graphify:
     name: Graphify snapshot

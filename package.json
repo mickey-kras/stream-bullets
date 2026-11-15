@@ -15,7 +15,7 @@
     "check": "react-router typegen && tsc --noEmit",
     "lint": "eslint app db worker tests *.ts",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "UI_COVERAGE=1 vitest run --coverage",
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply DB --local",
@@ -58,6 +58,8 @@
     "esbuild": "0.28.2",
     "react-server-dom-webpack": "19.3.1",
     "@types/three": "0.187.0",
-    "monocart-coverage-reports": "3.2.0"
+    "monocart-coverage-reports": "3.2.0",
+    "istanbul-lib-instrument": "6.0.3",
+    "@types/istanbul-lib-instrument": "1.7.8"
   }
 }

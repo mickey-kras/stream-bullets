@@ -58,6 +58,8 @@ async function problems(page: Page): Promise<Problems> {
 
 for (const route of ROUTES) {
   test(`landmarks, names and keyboard entry on ${route}`, async ({ page }) => {
+    // Software WebGL competes with the DOM and keyboard assertions in CI.
+    if (route === "/") await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(route);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(page.locator("main#main-content")).toHaveCount(1);

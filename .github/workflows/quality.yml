@@ -10,7 +10,7 @@ defaults:
   run:
     shell: bash
 env:
-  PINNED: 3e41f00d5be546121b06933f0f4d4777fa6f40d6
+  PINNED: 9ec7bc25a2514270afcec04138bbd4a54f598a4a
 jobs:
   policy:
     runs-on: ubuntu-latest

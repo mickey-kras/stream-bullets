@@ -156,7 +156,10 @@ Local development data and secrets remain separate.
 
 Checks cover authorization, constraints, voting, uploads, overlays, and browser flows.
 Test OAuth redirects and consent separately with real providers. Local tests cannot prove production capacity or global behavior.
-Vitest needs 90% server line, statement, function, and branch coverage.
+
+Vitest needs 90% coverage for server, library, Worker, and station code.
+Combine coverage from unit tests and browser tests for the product UI. The gate needs 90% lines, statements, functions, and branches.
+Unvisited UI and routes count as uncovered. Decorative station code cannot raise the score for product UI.
 Separate runtime tests cover Durable Objects outside V8 coverage in Workerd.
 
 ## Deploy to Cloudflare
