@@ -219,10 +219,10 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
       z.object({ enabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.enabled) }),
       (): CharactersLayer => ({ ...DEFAULT_LAYERS.characters }),
     ),
-    cells: fallback(
-      z.object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() }),
-      { horizontal: undefined, vertical: undefined },
-    ).transform(
+    cells: fallback(z.object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() }), {
+      horizontal: undefined,
+      vertical: undefined,
+    }).transform(
       (cells: { horizontal?: unknown; vertical?: unknown }): Record<Orientation, LayerCells> => ({
         horizontal: readCells("horizontal", cells.horizontal),
         vertical: readCells("vertical", cells.vertical),
