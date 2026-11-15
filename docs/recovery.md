@@ -18,7 +18,7 @@ A Worker rollback does not change D1, R2, or Durable Object storage. A D1 restor
 
 Use this order before the first deployment with the compatibility guard:
 
-1. Merge and deploy [PR #773](https://github.com/mickey-kras/stream-bullets/pull/773) with the existing workflow. It applies additive migration `0031` while the old Worker remains active, then deploys the compatible reader.
+1. Merge and deploy [PR #773](https://github.com/mickey-kras/stream-bullets/pull/773) with the existing workflow. The existing workflow applies additive migration `0031` while the old Worker remains active. It deploys the compatible reader after migration.
 2. Check that the active production Worker returns the compatibility header:
 
    ```bash
@@ -29,7 +29,7 @@ Use this order before the first deployment with the compatibility guard:
    ```
 
 3. Merge [PR #776](https://github.com/mickey-kras/stream-bullets/pull/776) after its checks and policy approval pass. It protects the coverage gate inputs.
-4. Record the active compatible version, then change the base branch of [PR #774](https://github.com/mickey-kras/stream-bullets/pull/774) to `main`. Merge and deploy it after its checks and policy approval pass.
+4. Record the active compatible version. Change the base branch of [PR #774](https://github.com/mickey-kras/stream-bullets/pull/774) to `main`. Merge and deploy it after its checks and policy approval pass.
 5. Merge and deploy [PR #749](https://github.com/mickey-kras/stream-bullets/pull/749) last. Use the compatible reader as its rollback target to preserve vote meanings.
 
 Keep migration `0031` during a Worker rollback. Select a target that returns the compatibility header.
