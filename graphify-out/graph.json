@@ -42331,10 +42331,34 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_e2e_coverage_checkpointnavigation",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L40",
+      "target": "tests_e2e_coverage_save",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_e2e_coverage_close",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L44",
+      "source_location": "L95",
       "target": "tests_e2e_coverage_collect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_coverage_collect",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L80",
+      "target": "tests_e2e_coverage_save",
       "weight": 1.0
     },
     {
@@ -42345,8 +42369,20 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_newpage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L38",
+      "source_location": "L89",
       "target": "tests_e2e_coverage_start",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_coverage_start",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L65",
+      "target": "tests_e2e_coverage_checkpointnavigation",
       "weight": 1.0
     },
     {
@@ -42357,7 +42393,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_test_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e-coverage.test.ts",
-      "source_location": "L43",
+      "source_location": "L59",
       "target": "tests_e2e_coverage_test_fixture",
       "weight": 1.0
     },
@@ -42369,7 +42405,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L50",
+      "source_location": "L101",
       "target": "tests_e2e_coverage_start",
       "weight": 1.0
     },
@@ -42381,7 +42417,7 @@
       "relation": "calls",
       "source": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L53",
+      "source_location": "L104",
       "target": "tests_e2e_coverage_collect",
       "weight": 1.0
     },
@@ -42671,6 +42707,18 @@
       "source_file": "tests/e2e/oauth.spec.ts",
       "source_location": "L136",
       "target": "tests_e2e_oauth_spec_viewer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_oauth_spec_signin",
+      "source_file": "tests/e2e/oauth.spec.ts",
+      "source_location": "L85",
+      "target": "tests_e2e_coverage_checkpointnavigation",
       "weight": 1.0
     },
     {
@@ -82896,6 +82944,90 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L5",
+      "target": "tests_e2e_coverage_checkpointnavigation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L5",
+      "target": "tests_e2e_coverage_close",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L5",
+      "target": "tests_e2e_coverage_expect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L5",
+      "target": "tests_e2e_coverage_newpage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L5",
+      "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L6",
+      "target": "tests_e2e_fixtures_origin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_coverage_test_ts_tests_e2e_coverage_test",
+      "source_file": "tests/e2e-coverage.test.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_coverage_checkpointnavigation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_e2e_coverage_test_ts_tests_e2e_coverage_test",
       "source_file": "tests/e2e-coverage.test.ts",
       "source_location": "L3",
@@ -83884,6 +84016,18 @@
       "source_file": "tests/e2e/mutations.spec.ts",
       "source_location": "L3",
       "target": "tests_e2e_fixtures_signedin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_oauth_spec",
+      "source_file": "tests/e2e/oauth.spec.ts",
+      "source_location": "L6",
+      "target": "tests_e2e_coverage_checkpointnavigation",
       "weight": 1.0
     },
     {
@@ -111708,8 +111852,8 @@
       "relation": "imports_from",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L8",
-      "target": "ref_node_fs",
+      "source_location": "L10",
+      "target": "ref_node_crypto",
       "weight": 1.0
     },
     {
@@ -111721,7 +111865,79 @@
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
       "source_location": "L9",
+      "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L1",
       "target": "ref_node_crypto",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L2",
+      "target": "ref_node_fs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L3",
+      "target": "ref_node_path",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L4",
+      "target": "ref_zod",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L5",
+      "target": "tests_e2e_coverage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L6",
+      "target": "tests_e2e_fixtures",
       "weight": 1.0
     },
     {
@@ -146397,7 +146613,18 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L14",
+      "source_location": "L15",
+      "target": "tests_e2e_coverage_pagecoverage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_coverage",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L21",
       "target": "tests_e2e_coverage_pages",
       "weight": 1.0
     },
@@ -146408,7 +146635,29 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L16",
+      "source_location": "L23",
+      "target": "tests_e2e_coverage_save",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_coverage",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L32",
+      "target": "tests_e2e_coverage_checkpointnavigation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_coverage",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L49",
       "target": "tests_e2e_coverage_start",
       "weight": 1.0
     },
@@ -146419,7 +146668,7 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L28",
+      "source_location": "L73",
       "target": "tests_e2e_coverage_collect",
       "weight": 1.0
     },
@@ -146430,7 +146679,7 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L36",
+      "source_location": "L87",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -146441,7 +146690,7 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L42",
+      "source_location": "L93",
       "target": "tests_e2e_coverage_close",
       "weight": 1.0
     },
@@ -146452,8 +146701,19 @@
       "relation": "contains",
       "source": "tests_e2e_coverage",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L48",
+      "source_location": "L99",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_coverage_navigation_spec",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L8",
+      "target": "tests_e2e_coverage_navigation_spec_rawcoverageschema",
       "weight": 1.0
     },
     {
@@ -154116,10 +154376,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "0059950ab1e01f8d0f2b3a8c480608bf62948fdc4211329cd91f6e4afeba1b11",
+    "content_sha256": "b3a47114fa1258d5676d4554d14e452e12230c1dfd64994678da34d0db9f5487",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "df2a9031a7fac800f21b3bb18b832c267f52981a6d96cf9a21d328837ad71ed8",
+    "source_sha256": "6b3f57b6fe342505b51ea2eb2848a7c2fa7137686cffe582a705613ca52a2770",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -159294,6 +159554,18 @@
       "norm_label": "spec",
       "source_file": "tests/e2e/client-ips.ts",
       "source_location": "L46"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_coverage_pagecoverage",
+      "label": "PageCoverage",
+      "norm_label": "pagecoverage",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L15"
     },
     {
       "_callable": true,
@@ -179427,11 +179699,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_coverage_checkpointnavigation",
+      "label": "checkpointNavigation()",
+      "norm_label": "checkpointnavigation()",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L32"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_coverage_close",
       "label": "close()",
       "norm_label": "close()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L42"
+      "source_location": "L93"
     },
     {
       "_callable": true,
@@ -179442,7 +179725,7 @@
       "label": "collect()",
       "norm_label": "collect()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L28"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -179453,7 +179736,18 @@
       "label": "newPage()",
       "norm_label": "newpage()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L36"
+      "source_location": "L87"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_coverage_save",
+      "label": "save()",
+      "norm_label": "save()",
+      "source_file": "tests/e2e/coverage.ts",
+      "source_location": "L23"
     },
     {
       "_callable": true,
@@ -179462,9 +179756,27 @@
       "file_type": "code",
       "id": "tests_e2e_coverage_start",
       "label": "start()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "request",
+            "file": "tests/e2e/coverage.ts",
+            "lang": "typescript",
+            "line": "L62",
+            "receiver_type": "Route"
+          },
+          {
+            "callee": "fallback",
+            "file": "tests/e2e/coverage.ts",
+            "lang": "typescript",
+            "line": "L65",
+            "receiver_type": "Route"
+          }
+        ]
+      },
       "norm_label": "start()",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L16"
+      "source_location": "L49"
     },
     {
       "_callable": true,
@@ -191313,11 +191625,31 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_coverage_navigation_spec",
+      "label": "coverage-navigation.spec.ts",
+      "norm_label": "coverage-navigation.spec.ts",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_coverage_navigation_spec_rawcoverageschema",
+      "label": "rawCoverageSchema",
+      "norm_label": "rawcoverageschema",
+      "source_file": "tests/e2e/coverage-navigation.spec.ts",
+      "source_location": "L8"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_coverage_pages",
       "label": "pages",
       "norm_label": "pages",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L14"
+      "source_location": "L21"
     },
     {
       "_origin": "ast",
@@ -191337,7 +191669,7 @@
       "label": "test",
       "norm_label": "test",
       "source_file": "tests/e2e/coverage.ts",
-      "source_location": "L48"
+      "source_location": "L99"
     },
     {
       "_origin": "ast",

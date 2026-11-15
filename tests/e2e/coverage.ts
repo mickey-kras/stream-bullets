@@ -4,33 +4,84 @@ import {
   type BrowserContext,
   type BrowserContextOptions,
   type Page,
+  type Route,
 } from "@playwright/test";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rename, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 
 export { expect } from "@playwright/test";
 export type { APIRequestContext, Browser, BrowserContext, CDPSession, Page } from "@playwright/test";
 
-const pages: Set<Page> = new Set();
+interface PageCoverage {
+  pending: Promise<void>;
+  closing: boolean;
+  route: (route: Route) => Promise<void>;
+}
+
+const pages: Map<Page, PageCoverage> = new Map();
+
+async function save(page: Page): Promise<void> {
+  const entries: Awaited<ReturnType<Page["coverage"]["stopJSCoverage"]>> = await page.coverage.stopJSCoverage();
+  await mkdir("coverage/browser/raw", { recursive: true });
+  const file: string = `coverage/browser/raw/${randomUUID()}.json`;
+  await writeFile(`${file}.tmp`, JSON.stringify(entries));
+  await rename(`${file}.tmp`, file);
+}
+
+// Document mocks must checkpoint before fulfilling or continuing past the collector's route.
+export async function checkpointNavigation(page: Page, resume: () => Promise<void>): Promise<void> {
+  const state: PageCoverage | undefined = pages.get(page);
+  if (!state || state.closing) {
+    await resume();
+    return;
+  }
+  state.pending = state.pending.then(async (): Promise<void> => {
+    try {
+      await save(page);
+      await page.coverage.startJSCoverage({ resetOnNavigation: true });
+    } finally {
+      await resume();
+    }
+  });
+  await state.pending;
+}
 
 async function start(page: Page): Promise<void> {
   if (process.env.BROWSER_COVERAGE !== "1") return;
   try {
-    await page.coverage.startJSCoverage({ resetOnNavigation: false });
+    await page.coverage.startJSCoverage({ resetOnNavigation: true });
   } catch (error: unknown) {
     // JavaScript-disabled contexts have no script execution to measure.
     if (error instanceof Error && error.message.includes("Script execution is prohibited")) return;
     throw error;
   }
-  pages.add(page);
+  const state: PageCoverage = {
+    pending: Promise.resolve(),
+    closing: false,
+    route: async (route: Route): Promise<void> => {
+      const request = route.request();
+      if (!state.closing && request.isNavigationRequest() && request.frame() === page.mainFrame()) {
+        // Flush before the document unloads: Chromium can discard old-context execution counts.
+        await checkpointNavigation(page, () => route.fallback());
+      } else await route.fallback();
+    },
+  };
+  await page.route("**/*", state.route);
+  pages.set(page, state);
 }
 
 async function collect(page: Page): Promise<void> {
-  if (!pages.has(page)) return;
-  const entries = await page.coverage.stopJSCoverage();
-  await mkdir("coverage/browser/raw", { recursive: true });
-  await writeFile(`coverage/browser/raw/${randomUUID()}.json`, JSON.stringify(entries));
-  pages.delete(page);
+  const state: PageCoverage | undefined = pages.get(page);
+  if (!state) return;
+  if (!state.closing) {
+    state.closing = true;
+    state.pending = state.pending.then(async (): Promise<void> => {
+      await page.unroute("**/*", state.route);
+      await save(page);
+      pages.delete(page);
+    });
+  }
+  await state.pending;
 }
 
 export async function newPage(context: BrowserContext | Browser, options?: BrowserContextOptions): Promise<Page> {
@@ -55,7 +106,7 @@ export const test = base.extend<{ coverage: void }>({
   coverage: [
     async ({ browser: _browser }, use): Promise<void> => {
       await use();
-      for (const page of pages) await collect(page);
+      for (const page of pages.keys()) await collect(page);
     },
     { auto: true },
   ],
