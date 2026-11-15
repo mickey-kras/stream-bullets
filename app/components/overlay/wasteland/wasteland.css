@@ -119,13 +119,13 @@
   padding: 0.3em 2em 0.32em 0.48em;
   background-color: var(--wl-card);
   background-image:
-    radial-gradient(ellipse at 7% 0%, #e5bd5414, transparent 55%),
-    repeating-linear-gradient(0deg, transparent 0 3px, #0000000c 3px 4px);
+    radial-gradient(ellipse at 7% 0%, var(--wl-glow), transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 3px, var(--wl-scan) 3px 4px);
   border: 1px solid var(--wl-border);
   border-radius: 0.32em;
   box-shadow:
-    inset 0 0 0 2px #081f2480,
-    0 2px 4px #00000030;
+    inset 0 0 0 2px var(--wl-inset),
+    0 2px 4px var(--wl-shadow);
   /* A card never changes the layout or the paint outside its box (its own shadow still shows). */
   contain: layout paint;
 }
@@ -133,17 +133,17 @@
   content: "";
   position: absolute;
   inset: 2px;
-  border: 1px solid #e5bd5429;
+  border: 1px solid var(--wl-inner);
   border-radius: 0.22em;
   pointer-events: none;
 }
-/* The newest card: an accent border and a bar on its left edge. */
-.wl-item:last-child .wl-card {
+/* The newest active card (data-newest, never a removed, leaving or fading card): an accent border and a left bar. */
+.wl-item[data-newest] .wl-card {
   border-color: var(--wl-accent);
   box-shadow:
     inset 3px 0 var(--wl-accent),
-    inset 0 0 0 2px #081f2480,
-    0 2px 4px #00000030;
+    inset 0 0 0 2px var(--wl-inset),
+    0 2px 4px var(--wl-shadow);
 }
 .wl-line {
   display: block;
@@ -169,6 +169,8 @@
 }
 .wl-msg {
   font-weight: 500;
+  /* No line starts with a small kana or a prolonged sound mark (like "ー") in Japanese. */
+  line-break: strict;
 }
 .wl-emote {
   display: inline-block;
@@ -196,10 +198,14 @@
   font-style: italic;
   color: var(--wl-muted);
 }
+/* Japanese, Chinese and Hindi fonts have no italic: the browser would only slant the glyphs. */
+:root:is(:lang(ja), :lang(zh), :lang(hi)) .wl-item[data-phase="removed"] .wl-msg {
+  font-style: normal;
+}
 /* A leaving row, and a removed row after its hold, fade out. Then the column closes up (use-row-motion.ts). */
 .wl-item[data-phase="leaving"] .wl-card,
 .wl-item[data-gone] .wl-card {
-  animation: wl-fade-out 300ms ease-in both;
+  animation: wl-fade-out var(--wl-leave) ease-in both;
 }
 @keyframes wl-fade-out {
   to {

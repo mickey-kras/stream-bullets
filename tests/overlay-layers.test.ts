@@ -30,7 +30,7 @@ describe("layer defaults", (): void => {
       characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
     });
     expect(MIN_RECT).toEqual({ chat: { w: 280, h: 160 }, characters: { w: 640, h: 160 } });
-    // The A1 mockup place: 40 px from the right edge and 48 px from the bottom edge.
+    // The safe area: 5% of the frame plus a 19.2 px margin, so 115 px from the right edge and 73 px from the bottom.
     expect(DESIGN_W - DEFAULT_LAYERS.chat.rect.x - DEFAULT_LAYERS.chat.rect.w).toBe(115);
     expect(DESIGN_H - DEFAULT_LAYERS.chat.rect.y - DEFAULT_LAYERS.chat.rect.h).toBe(73);
     for (const layer of ["chat", "characters"] as const) {

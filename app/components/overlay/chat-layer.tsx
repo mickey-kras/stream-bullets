@@ -2,6 +2,15 @@ import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "reac
 import { t, tAround } from "../../i18n";
 import type { ActivityFragment } from "../../lib/activity";
 import { CHAT_LIMITS, graphemes, safeEmoteUrl, type ChatRow } from "../../lib/chat-feed";
+import {
+  goneWakeAt,
+  nextGone,
+  pruneGone,
+  shownRows,
+  type FadeLimits,
+  type GoneRow,
+  type ShownRow,
+} from "../../lib/fading-rows";
 import { motionReduced } from "../station/motion";
 import { useRowMotion } from "./use-row-motion";
 import { PlatformIcon, VaultMark } from "./wasteland/glyphs";
@@ -9,8 +18,12 @@ import { PLATFORM_NAMES, WASTELAND_STYLE } from "./wasteland/theme";
 
 /** User names longer than this many characters end in an ellipsis. */
 const MAX_NAME_CHARS = 20;
-/** A removed row fades out for this long after its hold, like a leaving row (the fade in wasteland.css). */
-const FADE_MS: number = CHAT_LIMITS.leaveMs;
+/** A removed row fades out for leaveMs after its hold, like a leaving row; at most maxLeaving rows fade at once. */
+const FADE_LIMITS: FadeLimits = {
+  leaveMs: CHAT_LIMITS.leaveMs,
+  maxLeaving: CHAT_LIMITS.maxLeaving,
+  removedHoldMs: CHAT_LIMITS.removedHoldMs,
+};
 
 /** Cuts a name to `max` user-perceived characters, never inside an emoji sequence or a combining mark. */
 export function shortName(name: string, max: number = MAX_NAME_CHARS): string {
@@ -57,42 +70,32 @@ function Fragment({ fragment }: Readonly<{ fragment: ActivityFragment }>): React
   return <Emote name={fragment.name} url={fragment.url} />;
 }
 
-/** A row on screen. `gone` marks a removed row that the reducer dropped after its hold: it fades out. */
-interface ShownRow {
-  row: ChatRow;
-  gone: boolean;
-}
-
 /**
- * The rows to render: the reducer's rows plus, for FADE_MS, the removed rows that it just dropped, in arrival order.
- * The reducer drops a removed row at the end of its hold (CHAT_LIMITS.removedHoldMs); the fade runs after that, and
- * then the column closes up. With reduced motion a dropped row goes at once.
+ * The rows to render: the reducer's rows plus the removed rows that it just dropped, each for leaveMs while its card
+ * fades (see fading-rows.ts), in arrival order. The reducer drops a removed row at the end of its hold
+ * (CHAT_LIMITS.removedHoldMs); the fade runs after that, and then the column closes up. With reduced motion a dropped
+ * row goes at once.
  */
 function useFadingRows(rows: readonly ChatRow[]): ShownRow[] {
   const [seen, setSeen] = useState<readonly ChatRow[]>(rows);
-  const [gone, setGone] = useState<readonly ChatRow[]>([]);
+  const [gone, setGone] = useState<readonly GoneRow[]>([]);
   if (seen !== rows) {
     // Derived from the previous rows during render, so a dropped row keeps its element (no remount, no flash).
-    const ids = new Set<string>(rows.map((row: ChatRow): string => row.id));
-    const dropped: ChatRow[] = motionReduced()
-      ? []
-      : seen.filter((row: ChatRow): boolean => row.phase === "removed" && !ids.has(row.id));
-    const kept: ChatRow[] = gone.filter((row: ChatRow): boolean => !ids.has(row.id));
+    const next: readonly GoneRow[] = motionReduced() ? [] : nextGone(gone, seen, rows, FADE_LIMITS);
     setSeen(rows);
-    if (dropped.length > 0 || kept.length !== gone.length) setGone([...kept, ...dropped]);
+    if (next !== gone && (next.length > 0 || gone.length > 0)) setGone(next);
   }
   useEffect(() => {
-    if (gone.length === 0) return;
-    const timer = setTimeout((): void => setGone([]), FADE_MS);
+    // One timer, for the fade that ends first.
+    const wake: number | null = goneWakeAt(gone, FADE_LIMITS);
+    if (wake === null) return;
+    const timer = setTimeout(
+      (): void => setGone((current) => pruneGone(current, Math.max(Date.now(), wake), FADE_LIMITS)),
+      Math.max(0, wake - Date.now()),
+    );
     return (): void => clearTimeout(timer);
   }, [gone]);
-  return useMemo((): ShownRow[] => {
-    const shown: ShownRow[] = rows.map((row: ChatRow): ShownRow => ({ row, gone: false }));
-    if (gone.length === 0) return shown;
-    return [...shown, ...gone.map((row: ChatRow): ShownRow => ({ row, gone: true }))].sort(
-      (a: ShownRow, b: ShownRow): number => a.row.seq - b.row.seq,
-    );
-  }, [rows, gone]);
+  return useMemo((): ShownRow[] => shownRows(rows, gone), [rows, gone]);
 }
 
 /**
@@ -102,10 +105,11 @@ function useFadingRows(rows: readonly ChatRow[]): ShownRow[] {
 const ChatRowItem = memo(function ChatRowItem({
   row,
   gone,
+  newest,
   removedText,
   before,
   after,
-}: Readonly<{ row: ChatRow; gone: boolean; removedText: string } & NameFrame>): ReactNode {
+}: Readonly<{ row: ChatRow; gone: boolean; newest: boolean; removedText: string } & NameFrame>): ReactNode {
   const removed: boolean = row.phase === "removed";
   return (
     <li
@@ -115,6 +119,7 @@ const ChatRowItem = memo(function ChatRowItem({
       data-platform={row.platform}
       data-enter={row.animate || undefined}
       data-gone={gone || undefined}
+      data-newest={newest || undefined}
     >
       <div className="wl-card">
         <span className="wl-line">
@@ -171,8 +176,16 @@ export const ChatLayer = memo(function ChatLayer({
       aria-label={t("overlay.chat.label")}
       data-overlay-chat=""
     >
-      {shown.map(({ row, gone }: ShownRow) => (
-        <ChatRowItem key={row.id} row={row} gone={gone} removedText={removedText} before={before} after={after} />
+      {shown.map(({ row, gone, newest }: ShownRow) => (
+        <ChatRowItem
+          key={row.id}
+          row={row}
+          gone={gone}
+          newest={newest}
+          removedText={removedText}
+          before={before}
+          after={after}
+        />
       ))}
     </ol>
   );

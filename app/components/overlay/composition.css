@@ -109,6 +109,17 @@
 .ov-comp-placeholder[data-enabled] {
   opacity: 1;
 }
+/* With the chat on, the label sits at the side of the slot away from the chat box (composition-editor.tsx). */
+.ov-comp-placeholder[data-label-side="start"] {
+  justify-items: start;
+}
+.ov-comp-placeholder[data-label-side="end"] {
+  justify-items: end;
+}
+.ov-comp-placeholder[data-label-side] span {
+  max-width: 45%;
+  margin: 0 24px;
+}
 .ov-comp-placeholder span {
   max-width: 90%;
   padding: 0.2em 0.6em;

@@ -55,7 +55,9 @@ test("a per-layer chat source shows and hides the chat live when the owner chang
   await expect(chatLayer.getByText("Hello from the bunker 1")).toBeVisible();
   // A chat source renders the chat alone: no on-air content.
   await expect(obs.locator(".ov-stage")).toHaveCount(0);
-  await expect(obs.getByRole("img", { name: "Twitch" })).toBeVisible();
+  // The icon is hidden from assistive technology; screen readers read the platform name as text.
+  await expect(chatLayer.locator("svg.wl-icon")).toHaveAttribute("aria-hidden", "true");
+  await expect(chatLayer.locator("li.wl-item")).toContainText("Twitch");
   // Mark the document: a reload would drop the mark.
   await obs.evaluate(() => document.documentElement.setAttribute("data-e2e-loaded", "1"));
 
@@ -173,6 +175,22 @@ async function chatSource(
   };
 }
 
+/** The running animations of each chat row, read in the first frame that shows `count` rows. */
+function animationsWhenRows(page: Page, count: number): Promise<number[]> {
+  return page.evaluate(
+    (expected: number) =>
+      new Promise<number[]>((resolve) => {
+        const check = (): void => {
+          const items: Element[] = [...document.querySelectorAll("[data-overlay-chat] li.wl-item")];
+          if (items.length === expected) resolve(items.map((item: Element): number => item.getAnimations().length));
+          else requestAnimationFrame(check);
+        };
+        check();
+      }),
+    count,
+  );
+}
+
 async function rowTexts(rows: Locator): Promise<string[]> {
   return rows.locator(".wl-msg").allTextContents();
 }
@@ -229,7 +247,8 @@ test.describe("merged chat on the overlay", () => {
       [2, "Kick"],
     ];
     for (const [index, name] of names) {
-      await expect(source.rows.nth(index).getByRole("img", { name, exact: true })).toBeVisible();
+      await expect(source.rows.nth(index).locator(".sr-only")).toHaveText(name);
+      await expect(source.rows.nth(index).locator("svg.wl-icon")).toHaveAttribute("aria-hidden", "true");
     }
     expect(await source.rows.evaluateAll((items) => items.map((item) => item.getAttribute("data-platform")))).toEqual([
       "twitch",
@@ -279,6 +298,21 @@ test.describe("merged chat on the overlay", () => {
     const source = await chatSource(browser, () => snapshot([keep, gone, loud1, loud2, kicker]));
     await expect(source.rows).toHaveCount(5);
 
+    // Watched in the page on every DOM change: the fade lasts only 300 ms.
+    const fadeSeen: Promise<number> = source.page.evaluate(
+      () =>
+        new Promise<number>((resolve) => {
+          const list: Element | null = document.querySelector("[data-overlay-chat]");
+          if (!list) return resolve(0);
+          const observer = new MutationObserver((): void => {
+            const card: Element | null = list.querySelector("li[data-gone] .wl-card");
+            if (!card) return;
+            observer.disconnect();
+            resolve(card.getAnimations().length);
+          });
+          observer.observe(list, { subtree: true, childList: true, attributes: true });
+        }),
+    );
     source.send(
       event({
         kind: "delete",
@@ -291,7 +325,10 @@ test.describe("merged chat on the overlay", () => {
     await expect(deleted).toHaveCount(1);
     await expect(deleted).toContainText("message removed by a moderator");
     await expect(source.chat.getByText("deleted soon")).toHaveCount(0);
+    // After its hold the removed row fades out (data-gone, with a running fade) before it goes.
+    expect(await fadeSeen).toBeGreaterThanOrEqual(1);
     await expect(source.rows).toHaveCount(4);
+    await expect(source.chat.locator("li[data-gone]")).toHaveCount(0);
 
     source.send(
       event({
@@ -319,6 +356,81 @@ test.describe("merged chat on the overlay", () => {
     );
     await expect(source.rows).toHaveCount(1);
     await expect(source.rows.locator(".wl-msg")).toHaveText("stays on screen");
+    await close(source.page);
+  });
+
+  test("after a live layer resize, the next row moves the old rows by one row only", async ({ browser }) => {
+    await setLayers("overlay-chat-resize", { chat: { enabled: true, rect: CHAT_RECT } });
+    const owner = await signedIn(browser, "featureowner", OWNER_IP);
+    const long = "a long message that wraps onto more than one line in a narrow chat layer";
+    const rows: ActivityChat[] = [1, 2, 3].map((index: number) =>
+      message({ platform: "twitch", id: `rs-${index}`, user: `Wrap ${index}`, text: `${long} ${index}` }),
+    );
+    const source = await chatSource(browser, () => snapshot(rows));
+    try {
+      await expect(source.rows).toHaveCount(3);
+      const canvas = source.page.locator(".ov-layer-canvas");
+      const resized = await owner.request.post("/api/overlay", {
+        data: { action: "layers", chat: { enabled: true, rect: { x: 1200, y: 80, w: 700, h: 840 } } },
+      });
+      expect(resized.status()).toBe(200);
+      await expect(canvas).toHaveCSS("height", "840px");
+      await expect(canvas).toHaveCSS("width", "700px");
+      // Let the resize settle (the resize observer runs before the next paint).
+      await source.page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+      const starts: Promise<{ offsets: number[]; step: number }> = source.page.evaluate(
+        () =>
+          new Promise<{ offsets: number[]; step: number }>((resolve) => {
+            const check = (): void => {
+              const items: HTMLElement[] = [
+                ...document.querySelectorAll<HTMLElement>("[data-overlay-chat] li.wl-item"),
+              ];
+              if (items.length < 4) {
+                requestAnimationFrame(check);
+                return;
+              }
+              const list: Element | null = document.querySelector("[data-overlay-chat]");
+              const gap: number = list ? Number.parseFloat(getComputedStyle(list).rowGap) || 0 : 0;
+              const offsets: number[] = items.map((item: HTMLElement): number => {
+                const effect = item.getAnimations()[0]?.effect;
+                const first = effect instanceof KeyframeEffect ? effect.getKeyframes()[0] : undefined;
+                const transform: string = typeof first?.transform === "string" ? first.transform : "";
+                return Number.parseFloat(/translateY\((-?[\d.]+)px\)/.exec(transform)?.[1] ?? "NaN");
+              });
+              resolve({ offsets, step: (items.at(-1)?.offsetHeight ?? 0) + gap });
+            };
+            check();
+          }),
+      );
+      source.send(event(message({ platform: "kick", id: "rs-4", user: "Short", text: "short" })));
+      const { offsets, step } = await starts;
+      // Every row, old or new, starts one new row (its height and the gap) below its place.
+      for (const offset of offsets) expect(Math.abs(offset - step)).toBeLessThanOrEqual(1);
+    } finally {
+      await close(source.page);
+      await close(owner);
+    }
+  });
+
+  test("with reduced motion, a live row and a removed row do not animate", async ({ browser }) => {
+    const first = message({ platform: "twitch", id: "rm-1", user: "Still", text: "still one" });
+    const second = message({ platform: "youtube", id: "rm-2", user: "Still", text: "still two" });
+    const source = await chatSource(browser, () => snapshot([first, second]));
+    // The page reads the setting when it loads.
+    await source.page.emulateMedia({ reducedMotion: "reduce" });
+    await source.page.reload();
+    await expect.poll(() => source.sockets.length).toBe(2);
+    await expect(source.page.locator("html")).toHaveAttribute("data-reduced", "true");
+    await expect(source.rows).toHaveCount(2);
+    const motion: Promise<number[]> = animationsWhenRows(source.page, 3);
+    source.send(event(message({ platform: "kick", id: "rm-3", user: "Still", text: "still three" })));
+    expect(await motion).toEqual([0, 0, 0]);
+    source.send(event({ kind: "delete", platform: "twitch", messageId: "rm-1", receivedAt: Date.now() }));
+    await expect(source.chat.locator('li[data-phase="removed"]')).toHaveCount(1);
+    // Without motion the removed row goes at the end of its hold, without a fade.
+    await expect(source.rows).toHaveCount(2);
+    await expect(source.chat.locator("li[data-gone]")).toHaveCount(0);
+    expect(await source.rows.evaluateAll((items) => items.map((item) => item.getAnimations().length))).toEqual([0, 0]);
     await close(source.page);
   });
 
@@ -396,8 +508,10 @@ test.describe("merged chat on the overlay", () => {
     await expect(source.chat.locator("li[data-enter]")).toHaveCount(0);
     await expect(source.chat.locator('li[data-phase="entering"]')).toHaveCount(0);
 
-    // A live row slides in and settles.
+    // A live row slides in and the rows above it move up: each row has a running animation in the first frame.
+    const motion: Promise<number[]> = animationsWhenRows(source.page, 3);
     source.send(event(c));
+    expect((await motion).every((count: number): boolean => count >= 1)).toBe(true);
     await expect(source.rows).toHaveCount(3);
     await expect(source.rows.nth(2)).toHaveAttribute("data-enter", "true");
     await expect(source.rows.nth(2)).toHaveAttribute("data-phase", "shown");
@@ -701,6 +815,23 @@ test("without a feed layer, the OBS composition keeps the responsive content lay
   await page.goto("/@feature_host/overlay?key=e2e-key");
   await expect(page.locator("main.overlay-screen.ov-screen")).toBeAttached();
   await expect(page.locator(".ov-design")).toHaveCount(0);
-  await expect(page.locator(".ov-composition > .ov-stage")).toBeAttached();
-  await close(page);
+  const stage = page.locator(".ov-composition > .ov-stage");
+  await expect(stage).toBeAttached();
+  // Mark the on-air stage element: a remount would replace it, flash it and replay its animations.
+  await stage.evaluate((element: Element) => Object.assign(element, { e2eKept: true }));
+
+  // The owner turns the chat on live: the page changes to the design canvas without a remount.
+  const owner = await signedIn(browser, "featureowner", DESIGN_IP);
+  try {
+    const on = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { enabled: true } } });
+    expect(on.status()).toBe(200);
+    await expect(page.locator("main.overlay-screen.ov-design-screen")).toBeAttached();
+    await expect(page.locator(".ov-design")).toHaveAttribute("data-scaled", "true");
+    await expect(page.locator('.ov-layer[data-layer="chat"]')).toBeAttached();
+    expect(await stage.evaluate((element: Element) => "e2eKept" in element)).toBe(true);
+  } finally {
+    await setLayers("overlay-design-off-restore", {});
+    await close(owner);
+    await close(page);
+  }
 });

@@ -795,6 +795,7 @@
   "overlay.comp.hideCommandsHint": "Les messages qui commencent par ! n’apparaissent pas à l’écran.",
   "overlay.comp.intro": "Placez le chat et les personnages sur l’image 1920 × 1080. Les changements passent en direct aussitôt.",
   "overlay.comp.layerSoon": "{layer} · Bientôt",
+  "overlay.comp.leaveFailed": "Votre dernière modification au moment de quitter n’a pas été enregistrée : {error}",
   "overlay.comp.movable": "calque déplaçable",
   "overlay.comp.moveHelp": "Faites glisser un calque pour le déplacer et son coin pour le redimensionner. Les flèches le déplacent de 1 px, Maj + flèche de 10 px.",
   "overlay.comp.overlap": "Le chat masque une partie du contenu à l’antenne. Déplacez-le vers une zone libre.",

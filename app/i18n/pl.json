@@ -823,6 +823,7 @@
   "overlay.comp.hideCommandsHint": "Wiadomości zaczynające się od ! nie pojawiają się na streamie.",
   "overlay.comp.intro": "Umieść czat i postacie w kadrze 1920 × 1080. Zmiany od razu trafiają na stream.",
   "overlay.comp.layerSoon": "{layer} · Wkrótce",
+  "overlay.comp.leaveFailed": "Twoja ostatnia zmiana przy wychodzeniu nie została zapisana: {error}",
   "overlay.comp.movable": "przesuwana warstwa",
   "overlay.comp.moveHelp": "Przeciągnij warstwę, aby ją przesunąć, a jej róg, aby zmienić rozmiar. Strzałki przesuwają o 1 px, Shift + strzałka o 10 px.",
   "overlay.comp.overlap": "Czat zasłania część treści na antenie. Przenieś go w wolne miejsce.",

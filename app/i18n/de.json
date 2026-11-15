@@ -795,6 +795,7 @@
   "overlay.comp.hideCommandsHint": "Nachrichten, die mit ! beginnen, erscheinen nicht im Stream.",
   "overlay.comp.intro": "Platziere Chat und Figuren im 1920 × 1080-Bild. Änderungen gehen sofort live.",
   "overlay.comp.layerSoon": "{layer} · Demnächst",
+  "overlay.comp.leaveFailed": "Ihre letzte Änderung beim Verlassen wurde nicht gespeichert: {error}",
   "overlay.comp.movable": "verschiebbare Ebene",
   "overlay.comp.moveHelp": "Ziehe eine Ebene, um sie zu verschieben, und ihre Ecke, um die Größe zu ändern. Pfeiltasten verschieben um 1 px, Umschalt + Pfeil um 10 px.",
   "overlay.comp.overlap": "Der Chat verdeckt einen Teil des Inhalts auf Sendung. Verschieb ihn in einen freien Bereich.",
