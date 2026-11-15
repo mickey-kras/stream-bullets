@@ -11,16 +11,33 @@ With `ADMIN_STEP_UP=enforce`, every admin endpoint and page loader also checks a
 Admin content removal uses the same check and records a `moderation_actions` row.
 Authors and page owners need no key to remove their content.
 
-The default mode, `report`, permits access without a key check.
+Missing or invalid `ADMIN_STEP_UP` values enforce checks. Production pins `enforce` in `wrangler.jsonc`.
+Explicit `report` permits access without a key check.
 Unchecked calls to admin endpoints record `step_up_missing`, the administrator, and the route.
 
 - Challenges use 32 random bytes, expire after 2 minutes, and bind to a session and purpose. First use consumes them.
 - Assertions must match `APP_ORIGIN` and its host's relying party ID hash. Keys must confirm user presence and verification through PIN or biometrics.
 - Reported signature counters must increase. Compare-and-set updates prevent parallel assertion reuse.
 - Step-up applies only to the session. Sign-out or session expiry ends it.
-- First-key registration needs sign-in within 5 minutes. Later registrations need a key check within 2 minutes.
+- First-key registration needs sign-in within 5 minutes, operator approval for that exact session, and a successful email send. Localhost and isolated tests omit the last two requirements.
+- Later registrations need a key check within 2 minutes.
 - Key removal needs a different key. The server refuses removal of the last key.
 - `moderation_actions` records successful and failed checks, key changes, and moderation. It stores hashed session IDs.
+
+### First-key enrollment
+
+The operator confirms the administrator's identity through another channel.
+The administrator signs in and opens `/admin?view=keys`. The page shows a session fingerprint.
+Approve only that fingerprint and account for 5 minutes:
+
+```sh
+pnpm exec wrangler d1 execute DB --env production --remote --command "INSERT INTO verification (id, identifier, value, expires_at, created_at, updated_at) VALUES (lower(hex(randomblob(16))), 'admin-key-enrollment:<SESSION_FINGERPRINT>', '<USER_ID>', (unixepoch()+300)*1000, unixepoch()*1000, unixepoch()*1000);"
+```
+
+First-key registration consumes the approval in the same transaction that stores the key.
+An expired approval or a different session cannot use it.
+Configure `NOTIFY_EMAIL` and `NOTIFY_FROM` before enrollment. The server sends a notice to the administrator's verified email before storing the first key.
+If email fails, registration fails and keeps the approval for a retry. Never disable enforcement for enrollment.
 
 ### Recovery when the administrator loses every key
 
@@ -30,10 +47,10 @@ Recovery needs site-operator access to production D1 through Cloudflare.
 2. Delete the keys and record the reset:
 
    ```sh
-   pnpm exec wrangler d1 execute DB --env production --remote --command "DELETE FROM passkey WHERE user_id='<USER_ID>'; INSERT INTO moderation_actions (id, target_kind, target_id, action, reason, actor_id, created_at) VALUES (lower(hex(randomblob(16))), 'passkey', '<USER_ID>', 'keys_reset', 'operator recovery', NULL, unixepoch()*1000);"
+   pnpm exec wrangler d1 execute DB --env production --remote --command "DELETE FROM session WHERE user_id='<USER_ID>'; DELETE FROM verification WHERE identifier LIKE 'admin-key-enrollment:%' AND value='<USER_ID>'; DELETE FROM passkey WHERE user_id='<USER_ID>'; INSERT INTO moderation_actions (id, target_kind, target_id, action, reason, actor_id, created_at) VALUES (lower(hex(randomblob(16))), 'passkey', '<USER_ID>', 'keys_reset', 'operator recovery', NULL, unixepoch()*1000);"
    ```
 
-3. Ask the administrator to sign out, sign in, and register two keys within 5 minutes.
+3. Ask the administrator to sign in again. Follow [first-key enrollment](#first-key-enrollment) and register two keys within 5 minutes.
 
 ## Channel connections
 

@@ -1,5 +1,7 @@
 import type { AppContext } from "../env";
-import { readCookie, requestLocale } from "../i18n/resolve";
+import { isLocale } from "../i18n";
+import { LOCALE_COOKIE, readCookie, requestLocale } from "../i18n/resolve";
+import { preferenceCookies } from "../server/api/cookies";
 import { isAdmin } from "../server/access.server";
 import { configuredProviders, getViewerSession } from "../server/auth.server";
 import { getOwnStreamer } from "../server/data.server";
@@ -33,6 +35,14 @@ export async function loadShell(request: Request, app: AppContext): Promise<Shel
   app.locale = locale;
   const prefs: DisplayPrefs =
     viewer?.displayPrefs ?? readDisplayPrefs(readCookie(request.headers.get("Cookie"), PREFS_COOKIE)) ?? {};
+  const cookieHeader: string | null = request.headers.get("Cookie");
+  const savedLocale: string | null = readCookie(cookieHeader, LOCALE_COOKIE);
+  const savedPrefs: DisplayPrefs | null = readDisplayPrefs(readCookie(cookieHeader, PREFS_COOKIE));
+  for (const cookie of preferenceCookies(
+    { ...(isLocale(savedLocale) ? { locale: savedLocale } : {}), ...(savedPrefs ? { prefs: savedPrefs } : {}) },
+    app.env.APP_ORIGIN.startsWith("https:"),
+  ))
+    app.responseHeaders.append("Set-Cookie", cookie);
   const page = { providers, locale, prefs, origin: app.env.APP_ORIGIN };
   if (!viewer) return { viewer: null, admin: false, ownStreamer: null, ...page };
   const [admin, own] = await Promise.all([isAdmin(app.env, viewer.id), getOwnStreamer(app.env, viewer.id)]);

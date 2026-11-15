@@ -1,7 +1,9 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+import { uiCoveragePlugin } from "./scripts/ui-coverage-plugin.ts";
 
 export default defineConfig({
+  plugins: process.env.UI_COVERAGE === "1" ? [uiCoveragePlugin("unit")] : [],
   resolve: {
     // Outside workerd, `cloudflare:workers` resolves to a stub. Tests that need the Durable Object runtime mock it
     // with tests/helpers/room.ts instead.
@@ -9,6 +11,7 @@ export default defineConfig({
   },
   test: {
     include: ["tests/**/*.test.ts"],
+    setupFiles: process.env.UI_COVERAGE === "1" ? ["./scripts/ui-coverage-setup.ts"] : [],
     testTimeout: 30_000,
     hookTimeout: 30_000,
     coverage: {

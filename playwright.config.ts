@@ -14,7 +14,11 @@ export default defineConfig({
     ["html", { open: "never" }],
     ...(process.env.BROWSER_COVERAGE === "1" ? [["./scripts/browser-coverage-reporter.ts"] as [string]] : []),
   ],
-  use: { baseURL: "http://localhost:5173", trace: "retain-on-failure", screenshot: "only-on-failure" },
+  use: {
+    baseURL: "http://localhost:5173",
+    trace: { mode: "retain-on-failure", screenshots: false },
+    screenshot: "only-on-failure",
+  },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: "node tests/e2e-server.ts",

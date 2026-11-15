@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { t, type MessageId } from "../i18n";
+import { getLocale, t, type MessageId } from "../i18n";
 import { Modal } from "./common";
 import { errorMessage } from "./api";
 import { MASH_NAME } from "../lib/mash";
@@ -8,6 +8,7 @@ import { topicCategoryLabel } from "./topic-icon";
 import { DialogActions } from "./ui/dialog";
 import { Select, type SelectOption } from "./ui/select";
 import { Req, RequiredNote } from "./ui/required";
+import { binaryOptions } from "../lib/polls";
 
 type PollKind = "choice" | "binary" | "mash";
 
@@ -86,7 +87,7 @@ export function CreateEntry({
           title: textField("title"),
           options:
             kind === "binary"
-              ? ["Yes", "No"]
+              ? [textField("binary-first").trim(), textField("binary-second").trim()]
               : textField("options")
                   .split("\n")
                   .map((option: string) => option.trim())
@@ -179,7 +180,25 @@ export function CreateEntry({
                 <small id="options-help">{t("create.optionsHelp")}</small>
               </label>
             )}
-            {kind === "binary" && <p className="muted">{t("create.binaryHelp")}</p>}
+            {kind === "binary" && (
+              <>
+                <p className="muted">{t("create.binaryHelp")}</p>
+                {binaryOptions(getLocale()).map((label: string, index: number) => (
+                  <label key={index === 0 ? "first" : "second"}>
+                    <span>
+                      {t("create.binaryOption", { number: index + 1 })}
+                      <Req />
+                    </span>
+                    <input
+                      name={index === 0 ? "binary-first" : "binary-second"}
+                      defaultValue={label}
+                      required
+                      maxLength={80}
+                    />
+                  </label>
+                ))}
+              </>
+            )}
             <div className="field" hidden={kind === "mash"}>
               <span className="field-label" id="poll-duration-label">
                 {t("create.votingTime")}

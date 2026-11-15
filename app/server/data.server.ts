@@ -4,7 +4,8 @@ import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
 import { streamers, user } from "../../db/schema";
 import type { AppEnv } from "../env";
-import type { Locale } from "../i18n";
+import { isLocale, type Locale } from "../i18n";
+import { binaryOptions } from "../lib/polls";
 import type {
   BoardSnapshot,
   DisplayPrefs,
@@ -66,6 +67,7 @@ interface EntryRow {
   body: string;
   category: string;
   options: string;
+  binary_labels: string | null;
   created_at: number;
   ends_at: number | null;
   revealed: number;
@@ -296,8 +298,13 @@ function handleConflict(error: unknown): never {
 function handleChange(current: typeof streamers.$inferSelect, handle: string | undefined, now: number): number | null {
   if (handle === undefined || handle === current.handle) return current.handleChangedAt;
   if (current.handleChangedAt !== null && now - current.handleChangedAt < HANDLE_CHANGE_INTERVAL) {
-    const next = new Date(current.handleChangedAt + HANDLE_CHANGE_INTERVAL).toISOString().slice(0, 10);
-    throw new HttpError(409, `You can change your handle once every 30 days. Try again on ${next}.`);
+    const retryAt = new Date(current.handleChangedAt + HANDLE_CHANGE_INTERVAL).toISOString();
+    throw new HttpError(
+      409,
+      `You can change your handle once every 30 days. Try again on ${retryAt.slice(0, 10)}.`,
+      "handle_cooldown",
+      { retryAt },
+    );
   }
   return now;
 }
@@ -411,22 +418,23 @@ export async function setDisplayPrefs(env: AppEnv, userId: string, input: unknow
 
 const entrySelect = `
   SELECT e.*, u.name AS author, u.image AS avatar, u.avatar_preset,
-    (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=1) AS likes,
-    (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=-1) AS dislikes,
-    (SELECT count(*) FROM entry_comments c WHERE c.entry_id=e.id AND c.removed_at IS NULL) AS comments,
+    activity.likes, activity.dislikes, activity.comments,
     (SELECT json_group_array(json_object('choice',choice,'count',votes)) FROM entry_vote_counts vc
       WHERE vc.entry_id=e.id AND vc.votes>0) AS vote_counts,
-    COALESCE((SELECT value FROM entry_reactions r WHERE r.entry_id=e.id AND r.user_id=?),0) AS reaction,
-    (SELECT choice FROM entry_votes v WHERE v.entry_id=e.id AND v.user_id=?) AS my_vote,
-    COALESCE((SELECT sum(value) FROM entry_reactions r WHERE r.entry_id=e.id),0) AS score,
+    COALESCE(viewer_reaction.value,0) AS reaction,
+    viewer_vote.choice AS my_vote,
+    activity.likes-activity.dislikes AS score,
     EXISTS(SELECT 1 FROM content_reports cr WHERE cr.target_kind='entry' AND cr.target_id=e.id
       AND cr.reporter_id=? AND cr.status='open') AS reported,
     ${MASH_COLUMN}
   FROM entries e JOIN user u ON u.id=e.author_id
+  JOIN entry_activity_counts activity ON activity.entry_id=e.id
+  LEFT JOIN entry_reactions viewer_reaction ON viewer_reaction.entry_id=e.id AND viewer_reaction.user_id=?
+  LEFT JOIN entry_votes viewer_vote ON viewer_vote.entry_id=e.id AND viewer_vote.user_id=?
 `;
 
 function entryValue(row: EntryRow): Entry {
-  const options = z.array(z.string()).parse(JSON.parse(row.options));
+  const options = z.array(z.string()).parse(JSON.parse(row.binary_labels ?? row.options));
   const grouped = z
     .array(z.object({ choice: z.number().int(), count: z.number().int().nonnegative() }))
     .parse(JSON.parse(row.vote_counts));
@@ -736,6 +744,13 @@ async function createEntry(
   action: Extract<EntryAction, { action: "create" }>,
 ): Promise<{ id: string }> {
   const id = crypto.randomUUID();
+  let binaryLabels: readonly string[] | null = null;
+  if (action.kind === "binary") {
+    const owner = await env.DB.prepare("SELECT locale FROM user WHERE id=?")
+      .bind(userId)
+      .first<{ locale: string | null }>();
+    binaryLabels = action.options ?? binaryOptions(isLocale(owner?.locale) ? owner.locale : "en");
+  }
   const options = action.kind === "binary" ? ["Yes", "No"] : (action.options ?? []);
   const now = Date.now();
   const status = await newEntryStatus(env, streamerId, action);
@@ -743,8 +758,8 @@ async function createEntry(
     env,
     streamerId,
     env.DB.prepare(`
-    INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed,status)
-    SELECT ?,s.id,?,?,?,?,?,?,?,?,0,? FROM streamers s WHERE s.id=? AND (?='topic' OR s.owner_id=?)
+    INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,binary_labels,created_at,ends_at,revealed,status)
+    SELECT ?,s.id,?,?,?,?,?,?,?,?,?,0,? FROM streamers s WHERE s.id=? AND (?='topic' OR s.owner_id=?)
       AND (SELECT count(*) FROM entries e WHERE e.streamer_id=s.id) < ?
   `).bind(
       id,
@@ -754,6 +769,7 @@ async function createEntry(
       action.kind === "topic" ? (action.body ?? "") : "",
       action.kind === "topic" ? (action.category ?? "") : "",
       JSON.stringify(action.kind === "topic" ? [] : options),
+      binaryLabels === null ? null : JSON.stringify(binaryLabels),
       now,
       action.kind !== "topic" && action.duration > 0 ? now + action.duration * 1000 : null,
       status,

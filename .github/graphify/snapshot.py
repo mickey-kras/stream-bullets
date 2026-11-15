@@ -93,7 +93,10 @@ def build() -> dict[str, object]:
             raise ValueError(f"Documentation extraction failed: {docs['failed_sources']}")
         merged = merge_graphs([graph, docs], directed=True, dedup=False, root=scan)
         merged_path = Path(temporary) / "merged.json"
-        if not to_json(merged, {}, str(merged_path), force=True, original_links=graph["edges"] + docs["edges"]):
+        # Git hooks export GIT_DIR, which otherwise adds their previous HEAD to the graph.
+        # Source and tool hashes bind the snapshot without this checkout-dependent provenance.
+        if not to_json(merged, {}, str(merged_path), force=True, built_at_commit="",
+                       original_links=graph["edges"] + docs["edges"]):
             raise ValueError("Graph export failed")
         graph = json.loads(merged_path.read_text())
         graph["edges"] = graph.pop("links")

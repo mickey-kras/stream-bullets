@@ -803,7 +803,7 @@ for (const stale of [false, true]) {
     else {
       const alert = back.getByRole("alert");
       await expect(alert).toHaveText(
-        "Your last layout change was not saved. Make the change again. Reason: Too many requests. Wait one minute and try again.",
+        "Your last layout change was not saved. Make the change again. Reason: Too many requests. Wait a minute and try again.",
       );
       // The editor brings the error into view: it sits below the layer controls.
       await expect(alert).toBeInViewport();

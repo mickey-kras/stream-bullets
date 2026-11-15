@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import type { LoaderFunctionArgs, ServerBuild } from "react-router";
 import type { AppContext, AppEnv } from "../app/env";
 import { appContext } from "../app/env";
 import { hashOverlayKey, regenerateOverlayKey } from "../app/server/overlay-key.server";
@@ -144,6 +145,12 @@ beforeEach(async (): Promise<void> => {
 });
 
 describe("Worker request checks", (): void => {
+  it("advertises binary label reader compatibility after migration", async (): Promise<void> => {
+    const response = await fetchPath("/");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-StreamBullets-Binary-Labels")).toBe("1");
+  });
+
   it("answers 421 for another host name, with the error origin in the policy", async (): Promise<void> => {
     const response = await worker.fetch(new Request("https://other.example.test/"), env);
     expect(response.status).toBe(421);
@@ -158,20 +165,121 @@ describe("Worker request checks", (): void => {
 
   it("rate limits by the hashed IPv4 address, IPv6 /64, or 'local' without one", async (): Promise<void> => {
     for (const ip of ["198.51.100.4", "2001:db8:1:2::1", "2001:DB8:1:2:aaaa:bbbb:cccc:dddd", "::ffff:198.51.100.4"])
-      await fetchPath("/", { headers: { "CF-Connecting-IP": ip } });
-    await fetchPath("/");
+      await fetchPath("/api/auth/get-session", { headers: { "CF-Connecting-IP": ip } });
+    await fetchPath("/api/auth/get-session");
     expect(limiter.keys).toEqual([
-      await sha256("198.51.100.4"),
-      await sha256("2001:db8:1:2::/64"),
-      await sha256("2001:db8:1:2::/64"),
-      await sha256("198.51.100.4"),
-      await sha256("local"),
+      `auth:${await sha256("198.51.100.4")}`,
+      `auth:${await sha256("2001:db8:1:2::/64")}`,
+      `auth:${await sha256("2001:db8:1:2::/64")}`,
+      `auth:${await sha256("198.51.100.4")}`,
+      `auth:${await sha256("local")}`,
     ]);
+  });
+
+  it("keeps public pages, API reads, and images available behind an exhausted shared IP", async (): Promise<void> => {
+    limiter.allow = false;
+    for (let index = 0; index < 150; index++) {
+      expect((await fetchPath("/@zed_page")).status).toBe(200);
+      expect((await fetchPath("/api/streamers")).status).toBe(200);
+      const image = await fetchPath("/images/logo/owner");
+      expect(image.status).toBe(200);
+      expect(image.headers.get("Cache-Control")).toBe("public, max-age=60, must-revalidate");
+      await image.arrayBuffer();
+    }
+    expect(limiter.keys).toEqual([]);
+    expect((await fetchPath("/images/logo/missing")).headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("separates mutation, authentication, private reads, and socket admission budgets", async (): Promise<void> => {
+    await fetchPath("/api/topics", { method: "POST" });
+    await fetchPath("/api/auth/get-session");
+    await fetchPath("/api/account/export");
+    await live("zed_page");
+    expect(limiter.keys).toEqual(
+      await Promise.all(["write", "auth", "private-read", "connect"].map(async (scope: string): Promise<string> => `${scope}:${await sha256("local")}`)),
+    );
+  });
+
+  it("applies export admission to the equivalent React Router data URL", async (): Promise<void> => {
+    const { createRequestHandler: actualHandler, RouterContextProvider } =
+      await vi.importActual<typeof import("react-router")>("react-router");
+    const paths: string[] = [];
+    const build: ServerBuild = {
+      entry: { module: { default: (): Response => new Response("document") } },
+      routes: {
+        root: { id: "root", path: "", module: { default: (): null => null } },
+        api: {
+          id: "api",
+          parentId: "root",
+          path: "api/*",
+          module: {
+            default: (): null => null,
+            loader: ({ params }: LoaderFunctionArgs): Response => {
+              paths.push(params["*"] ?? "");
+              return new Response("export");
+            },
+          },
+        },
+      },
+      assets: { entry: { imports: [], module: "" }, routes: {}, url: "", version: "test" },
+      publicPath: "/",
+      assetsBuildDirectory: "build/client",
+      future: {},
+      ssr: true,
+      isSpaMode: false,
+      prerender: [],
+      routeDiscovery: { mode: "initial", manifestPath: "/__manifest" },
+    };
+    const handle: ReturnType<typeof actualHandler> = actualHandler(build, "production");
+    for (const path of ["/api/account/export", "/api/account/export.data", "/api/account/export/_.data"]) {
+      const response: Response = await handle(new Request(`${origin}${path}`), new RouterContextProvider());
+      expect(response.status).toBe(200);
+      await response.arrayBuffer();
+    }
+    expect(paths).toEqual(["account/export", "account/export", "account/export/"]);
+    for (const path of ["/api/account/export", "/api/account/export.data"])
+      expect((await fetchPath(path)).status).toBe(200);
+    expect(router.calls).toHaveLength(2);
+    const key: string = `private-read:${await sha256("local")}`;
+    expect(limiter.keys).toEqual([key, key]);
+    router.calls = [];
+    limiter.keys = [];
+    limiter.allow = false;
+    for (const path of ["/api/account/export", "/api/account/export.data"]) {
+      const response: Response = await fetchPath(path);
+      expect(response.status).toBe(429);
+      expect(response.headers.get("Retry-After")).toBe("60");
+    }
+    expect(limiter.keys).toEqual([key, key]);
+    expect(router.calls).toHaveLength(0);
+  });
+
+  it.each([
+    ["/api/%61dmin/keys", "private-read"],
+    ["/api%2Fadmin%2Fkeys", "private-read"],
+    ["/api%252fadmin%252fkeys", "private-read"],
+    ["/API/AdMiN/keys", "private-read"],
+    ["/api/account%2Fexport", "private-read"],
+    ["/api/account%252Fexport", "private-read"],
+    ["/%61pi/auth/get-session", "auth"],
+    ["/API/Auth/get-session", "auth"],
+    ["/api%252fauth%252fget-session", "auth"],
+  ] as const)("does not bypass %s admission with encoded separators or route casing", async (path, scope): Promise<void> => {
+    limiter.allow = false;
+    expect((await fetchPath(path)).status).toBe(429);
+    expect(limiter.keys).toEqual([`${scope}:${await sha256("local")}`]);
+    expect(router.calls).toHaveLength(0);
+  });
+
+  it.each(["/api/%", "/api/%zz", "/api/%E0%A4%A"])("rejects malformed path encoding in %s", async (path: string): Promise<void> => {
+    expect((await fetchPath(path)).status).toBe(400);
+    expect(limiter.keys).toEqual([]);
+    expect(router.calls).toHaveLength(0);
   });
 
   it("answers 429 with Retry-After once the limiter says no, before any route runs", async (): Promise<void> => {
     limiter.allow = false;
-    const response = await fetchPath("/");
+    const response = await fetchPath("/api/topics", { method: "POST" });
     expect(response.status).toBe(429);
     expect(response.headers.get("Retry-After")).toBe("60");
     expect(router.calls).toHaveLength(0);
@@ -221,6 +329,10 @@ describe("Worker test environment", (): void => {
     expect(page.status).toBe(200);
     expect(page.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
     expect(await page.text()).toBe("page");
+    const image = await worker.fetch(new Request(`${testOrigin}/images/logo/owner`, { headers: { Cookie: cookie } }), testEnv);
+    expect(image.status).toBe(200);
+    expect(image.headers.get("Cache-Control")).toBe("private, no-cache");
+    await image.arrayBuffer();
     const controller: ScheduledController = {
       scheduledTime: Date.now(),
       cron: "0 * * * *",

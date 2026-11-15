@@ -140,6 +140,15 @@ describe("submitting reports", (): void => {
     });
   });
 
+  it("copies host binary labels into the moderation snapshot", async (): Promise<void> => {
+    const entry = await mutateEntry(env, "owner", streamer.id, {
+      action: "create", kind: "binary", title: "Продолжить?", options: ["Да", "Нет"],
+    });
+    await report("reporter", { targetKind: "entry", targetId: entry.id });
+    const queue = await listReports(env, "admin", {});
+    expect(queue.reports[0].snapshot).toBe("Продолжить?\n\nOptions: Да · Нет");
+  });
+
   it("keeps one open report per reporter and target", async (): Promise<void> => {
     const topic = await seedEntry();
     const first = await report("reporter", { targetKind: "entry", targetId: topic });

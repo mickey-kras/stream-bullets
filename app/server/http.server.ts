@@ -8,6 +8,7 @@ export class HttpError extends Error {
     public readonly status: number,
     message: string,
     public readonly code?: string,
+    public readonly details?: Readonly<Record<string, string>>,
   ) {
     super(message);
   }
@@ -92,7 +93,14 @@ export async function readJson<T>(request: Request, schema: z.ZodType<T>): Promi
     throw new HttpError(400, "Send valid JSON.");
   }
   const result = schema.safeParse(value);
-  if (!result.success) throw new HttpError(400, result.error.issues[0]?.message ?? "Invalid request.");
+  if (!result.success) {
+    const issue: z.core.$ZodIssue | undefined = result.error.issues[0];
+    const code: string | undefined =
+      issue?.code === "custom" && issue.params?.apiCode === "binary_options_invalid"
+        ? "binary_options_invalid"
+        : undefined;
+    throw new HttpError(400, issue?.message ?? "Invalid request.", code);
+  }
   return result.data;
 }
 
@@ -135,7 +143,11 @@ export function logError(event: string, error: unknown, request?: Request, reque
 export function errorResponse(error: unknown, request?: Request, requestId?: string): Response {
   if (error instanceof HttpError) {
     const response = json(
-      error.code ? { error: error.message, code: error.code } : { error: error.message },
+      {
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.details ? { details: error.details } : {}),
+      },
       error.status,
     );
     if (error.status === 429) response.headers.set("Retry-After", "60");

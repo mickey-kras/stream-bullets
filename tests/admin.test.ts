@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import type { AdminPageList, ReportGroup, ReportItemList, SecurityKey, StepUpStatus, StreamerDirectory, Viewer } from "../app/types";
 import type { AppEnv } from "../app/env";
 import type { CreationOptions, RequestOptions } from "../app/server/stepup.server";
+import { sessionLabel } from "../app/server/audit.server";
 import { auditStatement } from "../app/server/audit.server";
 import {
   adminPerson,
@@ -119,7 +120,10 @@ afterAll(async (): Promise<void> => database.dispose());
 beforeEach(async (): Promise<void> => {
   vi.restoreAllMocks();
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
-  env.ADMIN_STEP_UP = undefined;
+  env.ADMIN_STEP_UP = "report";
+  env.APP_ENV = "test";
+  env.NOTIFY_EMAIL = undefined;
+  env.NOTIFY_FROM = undefined;
   await env.DB.batch([
     env.DB.prepare("DELETE FROM user"),
     env.DB.prepare("DELETE FROM app_rate_limits"),
@@ -226,8 +230,8 @@ describe("admin authorisation", (): void => {
 
   it("reads the step-up mode and fails closed on unknown values", (): void => {
     const mode = (value: string | undefined): string => stepUpMode({ ...env, ADMIN_STEP_UP: value });
-    expect(mode(undefined)).toBe("report");
-    expect(mode("")).toBe("report");
+    expect(mode(undefined)).toBe("enforce");
+    expect(mode("")).toBe("enforce");
     expect(mode(" Report ")).toBe("report");
     expect(mode("off")).toBe("off");
     expect(mode("enforce")).toBe("enforce");
@@ -235,7 +239,7 @@ describe("admin authorisation", (): void => {
     expect(mode("yes")).toBe("enforce");
   });
 
-  it("lets the owner in before any key exists in the default mode, and logs the missing step-up", async (): Promise<void> => {
+  it("lets the owner in before any key exists in explicit report mode, and logs the missing step-up", async (): Promise<void> => {
     const status = await body<StepUpStatus>(await asAdmin("GET", "admin/stepup"));
     expect(status).toMatchObject({ mode: "report", keys: 0, need: "none", canRegister: true, verifiedAt: null });
     expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
@@ -291,6 +295,102 @@ describe("admin authorisation", (): void => {
     env.ADMIN_STEP_UP = "off";
     expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
     expect(console.warn).not.toHaveBeenCalled();
+  });
+});
+
+describe("first-key operator approval", (): void => {
+  beforeEach((): void => {
+    env.APP_ENV = "production";
+    env.ADMIN_STEP_UP = "enforce";
+  });
+
+  async function approve(sessionId = "s-admin", expires = Date.now() + minute): Promise<void> {
+    const now = Date.now();
+    await env.DB.prepare(
+      "INSERT INTO verification (id,identifier,value,expires_at,created_at,updated_at) VALUES (?,?,?,?,?,?)",
+    ).bind(crypto.randomUUID(), `admin-key-enrollment:${await sessionLabel(sessionId)}`, "admin", expires, now, now).run();
+  }
+
+  it("denies admin access when enforcement configuration is lost", async (): Promise<void> => {
+    env.ADMIN_STEP_UP = undefined;
+    const refused = await asAdmin("GET", "admin/streamers");
+    expect(refused.status).toBe(403);
+    expect(await body<{ code: string }>(refused)).toMatchObject({ code: "keys_required" });
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  it("does not let a fresh session bootstrap keys without exact-session approval", async (): Promise<void> => {
+    const status = await body<StepUpStatus>(await asAdmin("GET", "admin/stepup"));
+    expect(status).toMatchObject({ canRegister: false, registerBlock: "operator_approval", enrollmentSession: await sessionLabel("s-admin") });
+    expect((await addKey(await SoftKey.create(), "Unapproved")).status).toBe(403);
+    await approve("s-admin2");
+    expect((await addKey(await SoftKey.create(), "Other session")).status).toBe(403);
+    await approve("s-admin", Date.now() - 1);
+    expect((await addKey(await SoftKey.create(), "Expired")).status).toBe(403);
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM passkey").first("n")).toBe(0);
+  });
+
+  it("rejects an approval that expires while its enrollment notice is pending", async (): Promise<void> => {
+    // Keep request time behind D1's live clock to model expiry without a real-time wait.
+    const requestTime: number = Date.now() - minute;
+    vi.spyOn(Date, "now").mockReturnValue(requestTime);
+    await approve("s-admin", requestTime + 2 * minute);
+    let releaseNotice!: () => void;
+    let noticeStarted!: () => void;
+    const noticePending: Promise<void> = new Promise<void>((resolve): void => {
+      releaseNotice = resolve;
+    });
+    const sendingNotice: Promise<void> = new Promise<void>((resolve): void => {
+      noticeStarted = resolve;
+    });
+    env.NOTIFY_FROM = "security@stream.example.test";
+    const send = vi.fn(async (): Promise<void> => {
+      noticeStarted();
+      await noticePending;
+    });
+    env.NOTIFY_EMAIL = { send } as unknown as SendEmail;
+    const registration: Promise<Response> = addKey(await SoftKey.create(), "Expired during notice");
+    try {
+      await sendingNotice;
+      await env.DB.prepare("UPDATE verification SET expires_at=? WHERE identifier=?")
+        .bind(requestTime + minute / 2, `admin-key-enrollment:${await sessionLabel("s-admin")}`)
+        .run();
+    } finally {
+      releaseNotice();
+    }
+    const response: Response = await registration;
+    expect(response.status).toBe(403);
+    expect(await body<{ code: string }>(response)).toMatchObject({ code: "enrollment_required" });
+    expect(send).toHaveBeenCalledOnce();
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM passkey").first("n")).toBe(0);
+    expect(
+      await env.DB.prepare("SELECT admin_verified_at FROM session WHERE id='s-admin'").first("admin_verified_at"),
+    ).toBeNull();
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM moderation_actions WHERE action='key_added'").first("n")).toBe(
+      0,
+    );
+    expect(
+      await env.DB.prepare("SELECT count(*) AS n FROM verification WHERE identifier LIKE 'admin-key-enrollment:%'").first(
+        "n",
+      ),
+    ).toBe(1);
+  });
+
+  it("requires a successful out-of-band notice before consuming approval and registering", async (): Promise<void> => {
+    await approve();
+    expect((await addKey(await SoftKey.create(), "Missing alert")).status).toBe(503);
+    env.NOTIFY_FROM = "security@stream.example.test";
+    const send = vi.fn().mockRejectedValue(new Error("provider secret"));
+    env.NOTIFY_EMAIL = { send } as unknown as SendEmail;
+    expect((await addKey(await SoftKey.create(), "Failed alert")).status).toBe(503);
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM passkey").first("n")).toBe(0);
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM verification WHERE identifier LIKE 'admin-key-enrollment:%'").first("n")).toBe(1);
+    send.mockResolvedValue(undefined);
+    expect((await addKey(await SoftKey.create(), "Approved first")).status).toBe(201);
+    expect(send).toHaveBeenLastCalledWith(expect.objectContaining({ to: "admin@example.test", subject: "StreamBullets administrator security key enrollment" }));
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM verification WHERE identifier LIKE 'admin-key-enrollment:%'").first("n")).toBe(0);
+    env.NOTIFY_EMAIL = undefined;
+    expect((await addKey(await SoftKey.create(), "Confirmed backup")).status).toBe(201);
   });
 });
 
@@ -478,6 +578,7 @@ describe("security-key ceremonies", (): void => {
     expect((await addKey(key, "Key one")).status).toBe(201);
     const again = await addKey(key, "Same key");
     expect(again.status).toBe(409);
+    expect(await body<{ code: string }>(again)).toMatchObject({ code: "key_conflict" });
     const options = await body<CreationOptions>(await asAdmin("POST", "admin/keys/options", { body: {} }));
     const credential = await (await SoftKey.create()).register({ ...options, challenge: "AAAA" }, origin);
     const wrong = await asAdmin("POST", "admin/keys", { body: { name: "Wrong", credential } });

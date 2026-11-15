@@ -97,6 +97,7 @@ export const entries = sqliteTable(
     body: text("body").notNull().default(""),
     category: text("category").notNull().default(""),
     options: text("options", { mode: "json" }).$type<string[]>().notNull().default([]),
+    binaryLabels: text("binary_labels", { mode: "json" }).$type<string[]>(),
     createdAt: integer("created_at").notNull(),
     endsAt: integer("ends_at"),
     revealed: integer("revealed", { mode: "boolean" }).notNull().default(false),
@@ -123,7 +124,29 @@ export const entries = sqliteTable(
       "entries_options_check",
       sql`json_valid(${table.options}) AND json_type(${table.options}) = 'array' AND ((${table.kind} = 'topic' AND json_array_length(${table.options}) = 0) OR (${table.kind} = 'choice' AND json_array_length(${table.options}) BETWEEN 2 AND 6) OR (${table.kind} = 'binary' AND ${table.options} = '["Yes","No"]'))`,
     ),
+    check(
+      "entries_binary_labels_check",
+      sql`${table.binaryLabels} IS NULL OR (${table.kind} = 'binary' AND json_valid(${table.binaryLabels}) AND json_type(${table.binaryLabels}) = 'array' AND json_array_length(${table.binaryLabels}) = 2 AND json_type(${table.binaryLabels}, '$[0]') = 'text' AND json_type(${table.binaryLabels}, '$[1]') = 'text' AND length(trim(json_extract(${table.binaryLabels}, '$[0]'))) BETWEEN 1 AND 80 AND length(trim(json_extract(${table.binaryLabels}, '$[1]'))) BETWEEN 1 AND 80 AND json_extract(${table.binaryLabels}, '$[0]') <> json_extract(${table.binaryLabels}, '$[1]'))`,
+    ),
     check("entries_deadline_check", sql`${table.endsAt} IS NULL OR ${table.endsAt} > ${table.createdAt}`),
+  ],
+);
+
+export const entryActivityCounts = sqliteTable(
+  "entry_activity_counts",
+  {
+    entryId: text("entry_id")
+      .primaryKey()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    likes: integer("likes").notNull().default(0),
+    dislikes: integer("dislikes").notNull().default(0),
+    comments: integer("comments").notNull().default(0),
+  },
+  (table) => [
+    check(
+      "entry_activity_counts_check",
+      sql`${table.likes} >= 0 AND ${table.dislikes} >= 0 AND ${table.comments} >= 0`,
+    ),
   ],
 );
 

@@ -88,12 +88,12 @@ Each complete pair enables its sign-in button. Do not commit secrets or database
 | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Instagram Login credentials. Requires Meta review and a creator or business account. No provider email. |
 | `ADMIN_EMAILS` | Case-insensitive administrator emails, separated by commas or spaces. |
 | `AI_INTEREST_SALT` | Worker secret, at least 16 random characters. Keys the daily IP hash. The counter never stores raw IPs. Absence disables the counter and buttons. |
-| `ADMIN_STEP_UP` | `off`, `report` (default), or `enforce`. Unknown values enforce. See [Admin security keys](#admin-security-keys). |
+| `ADMIN_STEP_UP` | `off`, `report`, or `enforce` (default). Missing and unknown values enforce. See [Admin security keys](#admin-security-keys). |
 | `LEGAL_DETAILS` | Worker secret: JSON with `operatorName`, `operatorCountry`, and `policyEffectiveDate` (`YYYY-MM-DD`). Values appear publicly. Missing values show a draft. Invalid values return 503. |
 | `CRON_HEARTBEAT_URL` | Optional uptime-service URL. Successful hourly jobs send POST. Configure alerts for missed calls. |
 | `CHANNEL_TOKEN_KEYS`, `TWITCH_EVENTSUB_SECRET`, `KICK_CLIENT_ID`, `KICK_CLIENT_SECRET` | Worker secrets for channel connections. See [setup](docs/channel-connections.md#setup). |
 | `CHANNELS_OFF` | Optional Worker secret. `1` turns channel ingestion off. Never a dashboard variable. See [Turn the feature off](docs/channel-connections.md#turn-the-feature-off). |
-| `NOTIFY_EMAIL`, `NOTIFY_FROM` | Optional `send_email` binding and sender. Both enable selected owner notifications for page freezing, suspension, or restoration. In-app notices always appear. |
+| `NOTIFY_EMAIL`, `NOTIFY_FROM` | Needed for the first admin-key enrollment on deployed hosts. Optional for selected owner notifications for page freezing, suspension, or restoration. In-app notices always appear. |
 
 Administrators need a verified email in `ADMIN_EMAILS`.
 TikTok and Instagram placeholder addresses cannot qualify. Without administrators, nobody can approve applications or create new profiles.
@@ -117,13 +117,21 @@ Freezing, suspension, and key changes need a check within 2 minutes.
 | `enforce` | Requires two registered keys and a session check within 15 minutes. |
 | `off` | Disables checks. Local development only. |
 
-Configure enforcement:
+Production pins `ADMIN_STEP_UP=enforce` in `env.production.vars`. Missing or invalid values also enforce.
+Do not set this policy only in dashboard variables. A deployment replaces those values.
 
-1. Deploy with `report` or no value.
-2. Sign out. Then sign in as administrator.
-3. Within 5 minutes, open `/admin?view=keys` and register the first key. Register the backup key.
-4. In a second session, confirm both keys pass the prompt.
-5. Set `ADMIN_STEP_UP=enforce` in `env.production.vars` or a Worker secret. Then deploy.
+Register the first keys:
+
+1. Production binds `NOTIFY_EMAIL`. Open **Compute > Email Service > Email Sending** in Cloudflare and select **Onboard Domain** for the sender domain.
+   Follow [Cloudflare's sending setup](https://developers.cloudflare.com/email-service/get-started/send-emails/). Set `NOTIFY_FROM` as a Worker secret to an address on that domain.
+   Check the administrator address as a Cloudflare destination and in the application. Confirm that the enrollment notice reaches that inbox.
+2. Sign in as administrator and open `/admin?view=keys` within 5 minutes.
+3. Give the displayed session fingerprint to the site operator through another channel.
+4. The operator verifies your identity and [approves that session](SECURITY.md#first-key-enrollment).
+5. Register the first key and its backup. The first registration must send an email to your verified address.
+6. In a second session, confirm both keys pass the prompt.
+
+Localhost and the isolated test environment let you register the first key without operator approval or email.
 
 Keys bind to the `APP_ORIGIN` host. Localhost keys cannot authenticate in production.
 See [key recovery](SECURITY.md#recovery-when-the-administrator-loses-every-key).
@@ -156,7 +164,10 @@ Local development data and secrets remain separate.
 
 Checks cover authorization, constraints, voting, uploads, overlays, and browser flows.
 Test OAuth redirects and consent separately with real providers. Local tests cannot prove production capacity or global behavior.
-Vitest needs 90% server line, statement, function, and branch coverage.
+
+Vitest needs 90% coverage for server, library, Worker, and station code.
+Combine coverage from unit tests and browser tests for the product UI. The gate needs 90% lines, statements, functions, and branches.
+Unvisited UI and routes count as uncovered. Decorative station code cannot raise the score for product UI.
 Separate runtime tests cover Durable Objects outside V8 coverage in Workerd.
 
 ## Deploy to Cloudflare
@@ -177,8 +188,10 @@ One-time setup:
 - Make the checks mandatory and block direct pushes. See [Quality gates](#quality-gates).
 
 Deployment records a bookmark for D1 Time Travel, applies migrations, uploads Worker and assets, and checks the homepage and stylesheet.
-Migration failure stops deployment. Smoke failure fails the run without automatic schema rollback.
-Keep migrations compatible with the live Worker. Time Travel keeps 7 days on Free and 30 days on Paid.
+Migration failure stops deployment. Deploy or smoke failure restores the captured previous Worker version and checks it again.
+The run still fails after recovery. D1 migrations stay in place.
+
+Recovery does not reverse them. Keep migrations compatible with the live Worker. Time Travel keeps 7 days on Free and 30 days on Paid.
 
 After fixing a missing secret, rerun the failed job.
 For code rollback, revert through a PR after checking schema compatibility. Never rerun an old successful deployment over newer code.
@@ -341,7 +354,9 @@ Shell, support, and schedule stay loaded. New reads and navigation cancel older 
 
 Workers cache image bodies for one hour per data center.
 Every read checks the D1 reference and upload version before cache lookup. Cache hits skip R2.
-Browsers receive `Cache-Control: no-store` to force access checks. Deleted references fail before cache lookup.
+Public images use `Cache-Control: public, max-age=60, must-revalidate`. Browsers can reuse them for one minute.
+
+Private test images use `Cache-Control: private, no-cache`. Deleted references fail when requests reach the Worker.
 
 Migration `0021_image_versions.sql` adds versions. Old images bypass cache until re-uploaded.
 Replacement stores an immutable R2 object, then publishes its reference and version atomically.

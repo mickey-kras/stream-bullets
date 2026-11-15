@@ -399,6 +399,19 @@ beforeEach(async (): Promise<void> => {
 });
 
 describe("account export", (): void => {
+  it.each([
+    ["Russian", ["Да", "Нет"]],
+    ["custom", ["Ship it", "Keep draft"]],
+  ] as const)("exports saved %s binary labels for authored entries and votes", async (_name, labels): Promise<void> => {
+    await env.DB.batch([
+      env.DB.prepare("UPDATE entries SET kind='binary',options='[\"Yes\",\"No\"]',binary_labels=? WHERE id IN (?,?)")
+        .bind(JSON.stringify(labels), ids.leaverTopic, ids.hostPoll),
+    ]);
+    const data = await exportAccount(env, "leaver");
+    expect(data.entries.find((entry) => entry.id === ids.leaverTopic)?.options).toEqual(labels);
+    expect(data.votes.find((vote) => vote.entryId === ids.hostPoll)?.option).toBe(labels[1]);
+  });
+
   it("includes everything held about the account", async (): Promise<void> => {
     const data = await exportAccount(env, "leaver");
     expect(Date.parse(data.exportedAt)).toBeGreaterThanOrEqual(now);
@@ -765,6 +778,29 @@ describe("tables added by migrations 0006–0012", (): void => {
 });
 
 describe("account deletion", (): void => {
+  it("deletes exact verification ownership across JSON serialization and session challenges", async (): Promise<void> => {
+    const rows: readonly (readonly [string, string, string])[] = [
+      ["spaced", "oauth-spaced", '{ "link": { "userId": "leaver" } }'],
+      ["escaped", "channel-escaped", '{"userId":"lea\\u0076er"}'],
+      ["root", "channel-root", '{"userId":"leaver","codeVerifier":"secret"}'],
+      ["enrollment", "admin-key-enrollment:session-hash", "leaver"],
+      ["reset", "reset-password:random-token", "leaver"],
+      ["delete", "delete-account-random-token", "leaver"],
+      ["register", "admin-webauthn:register:s1", "random-challenge"],
+      ["stepup", "admin-webauthn:stepup:s1", "random-challenge"],
+      ["malformed", "not-json", '{"userId":"leaver"'],
+      ["unrelated", "unrelated", '{"note":"userId", "nested":{"userId":"leaver"}}'],
+      ["prefix", "prefix", '{"link":{"userId":"leaver-extra"}}'],
+      ["other-challenge", "admin-webauthn:register:other-session", "random-challenge"],
+    ];
+    await env.DB.batch(rows.map(([id, identifier, value]) => env.DB.prepare(
+      "INSERT INTO verification (id,identifier,value,expires_at,created_at,updated_at) VALUES (?,?,?,?,?,?)",
+    ).bind(id, identifier, value, now + day, now, now)));
+    await deleteAccount(env, "leaver");
+    const remaining = await env.DB.prepare("SELECT id FROM verification ORDER BY id").all<{ id: string }>();
+    expect(remaining.results.map((row) => row.id)).toEqual(["malformed", "other-challenge", "prefix", "unrelated", "v3"]);
+  });
+
   it("removes every row linked to the account and keeps other people's data", async (): Promise<void> => {
     const otherBefore = await linkedRows("other");
     await deleteAccount(env, "leaver");
@@ -849,7 +885,7 @@ describe("account deletion", (): void => {
   });
 
   it("keeps no copy of a removed topic's title in the moderation records", async (): Promise<void> => {
-    const admins: AppEnv = { ...env, ADMIN_EMAILS: "admin@example.test" };
+    const admins: AppEnv = { ...env, ADMIN_EMAILS: "admin@example.test", ADMIN_STEP_UP: "report" };
     const gate = async (): Promise<{ stepUp: string }> => ({ stepUp: "fresh" });
     await mutateEntry(admins, "admin", ids.hostPage, { action: "delete", id: ids.leaverTopic }, gate);
     await deleteAccount(env, "leaver");

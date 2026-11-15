@@ -1,5 +1,6 @@
 """Check input selection, extraction, and output safety."""
 import importlib.util
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -39,6 +40,23 @@ class SnapshotTests(unittest.TestCase):
                 self.assertTrue(any(edge["relation"] == "calls" for edge in graph["edges"]))
                 self.assertTrue(any(edge["relation"] == "references" and edge["source_file"] == "docs/api.md"
                                     for edge in graph["edges"]))
+
+    def test_snapshot_is_identical_inside_and_outside_git_hooks(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "app").mkdir()
+            (root / "app/a.ts").write_text("export const value = 1;\n")
+            stage(root)
+            subprocess.run(
+                ["git", "-c", "user.name=Test", "-c", "user.email=test@example.test",
+                 "commit", "--quiet", "-m", "Fixture"], cwd=root, check=True,
+            )
+            with patch.object(snapshot, "ROOT", root):
+                outside_hook = snapshot.build()
+                with patch.dict(os.environ, {"GIT_DIR": str(root / ".git")}):
+                    inside_hook = snapshot.build()
+            self.assertNotIn("built_at_commit", inside_hook)
+            self.assertEqual(inside_hook, outside_hook)
 
     def test_sources_come_from_the_index_not_unstaged_edits(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

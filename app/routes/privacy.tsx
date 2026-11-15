@@ -157,12 +157,12 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
         </ul>
         <p>
-          Cloudflare Web Analytics measures visits and page performance. We also keep daily totals of landing-page
-          clicks, completed sign-ins, streamer applications, and first votes and topic submissions for 90 days. These
-          totals contain no account identifiers, IP addresses, page URLs, or user content. Random click receipts expire
-          after one day. Two flags on your account prevent repeated first-vote and first-topic counts; they are included
-          in your data export and removed with your account. We do not use advertising trackers or build advertising
-          profiles.
+          We do not load Cloudflare Web Analytics or a third-party analytics beacon. We keep daily totals of
+          landing-page clicks, completed sign-ins, streamer applications, and first votes and topic submissions for 90
+          days. These totals contain no account identifiers, IP addresses, page URLs, or user content. Random click
+          receipts expire after one day. Two flags on your account prevent repeated first-vote and first-topic counts;
+          they are included in your data export and removed with your account. We do not use advertising trackers or
+          build advertising profiles.
         </p>
       </>
     ),
@@ -441,10 +441,12 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
     body: (
       <>
         <p>
-          We use only cookies that are strictly necessary to sign you in, keep your account secure, and remember the
-          language and display settings you choose. We do not use analytics, advertising, or third-party tracking
-          cookies. Because of this, the site does not show a cookie consent banner. If we ever want to add a cookie that
-          is not strictly necessary, we will ask for your consent first.
+          We use authentication and security cookies to keep you signed in and protect your account. When you choose a
+          language or display setting, we set session cookies to apply that choice as you browse. These preference
+          cookies have no fixed expiry and last for your browser session; a browser that restores sessions may keep them
+          longer. Signed-in preferences also stay on your account until you change them or delete your account. We do
+          not use cookies for analytics, advertising, or third-party tracking. The daily service totals described above
+          use server records, not tracking cookies. We will ask for consent before setting optional tracking cookies.
         </p>
         <div className="legal-table">
           <table>
@@ -485,7 +487,7 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
                   <code>sb_locale</code>
                 </td>
                 <td>Remembers the language you picked. Set only when you pick one.</td>
-                <td>1 year.</td>
+                <td>Browser session.</td>
               </tr>
               <tr>
                 <td>
@@ -495,7 +497,7 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
                   Remembers your Accessibility &amp; display settings, so text size and contrast apply before the page
                   shows. Set only when you change a setting.
                 </td>
-                <td>1 year.</td>
+                <td>Browser session.</td>
               </tr>
             </tbody>
           </table>
@@ -558,8 +560,9 @@ export default function Privacy(): ReactNode {
       title="Privacy Policy"
       summary={
         <p>
-          The short version: we collect what we need to run StreamBullets, we use only strictly necessary cookies, we
-          never sell your data, and you can download or delete everything from Your data in the account menu.
+          The short version: we collect what we need to run StreamBullets, we use security and requested preference
+          cookies, we never sell your data, and you can download or delete everything from Your data in the account
+          menu.
         </p>
       }
       legal={legal}

@@ -207,7 +207,9 @@ export async function serveImage(
     }
     if (!response) throw new HttpError(404, "Image not found.");
     const headers = new Headers(response.headers);
-    headers.set("Cache-Control", "no-store");
+    // Stable public URLs may change or be removed. Bound browser staleness to one minute;
+    // the Worker still checks the live reference before using an immutable object cache.
+    headers.set("Cache-Control", "public, max-age=60, must-revalidate");
     return new Response(method === "HEAD" ? null : response.body, { headers });
   }
 }

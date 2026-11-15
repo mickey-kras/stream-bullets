@@ -106,6 +106,18 @@ export const entryActionSchema = z
     ) {
       context.addIssue({ code: z.ZodIssueCode.custom, message: "Add 2 to 6 different poll options." });
     }
+    if (
+      value.kind === "binary" &&
+      value.options !== undefined &&
+      (value.options.length !== 2 ||
+        new Set(value.options.map((option: string): string => option.toLowerCase())).size !== 2)
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Add two different poll options.",
+        params: { apiCode: "binary_options_invalid" },
+      });
+    }
   });
 
 export const commentActionSchema = z.discriminatedUnion("action", [

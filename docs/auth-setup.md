@@ -66,14 +66,14 @@ The YouTube scope `youtube.readonly` is sensitive. Google must check the app bef
 
 ## Launch checks
 
-1. Sign in as administrator and open `/admin`.
-2. Create a personal profile through the account menu.
-3. Confirm `/streamers` shows it while signed out.
-4. Confirm `/@streambullets` loads the Ideas board.
-5. With a separate viewer, submit and vote on an idea.
-6. Change its status in Admin and confirm the public result.
-7. Register two keys at `/admin?view=keys` using the README procedure.
-8. Test both before setting `ADMIN_STEP_UP=enforce`.
+1. Sign in as administrator and open `/admin?view=keys`.
+2. Register two keys. For operator approval and email setup, see [Admin security keys](../README.md#admin-security-keys).
+3. Test both keys with production enforcement active.
+4. Create a personal profile through the account menu.
+5. Confirm `/streamers` shows it while signed out.
+6. Confirm `/@streambullets` loads the Ideas board.
+7. With a separate viewer, submit and vote on an idea.
+8. Change its status in Admin and confirm the public result.
 
 Administrators need no waitlist approval. Other accounts start as viewers. Streamer applications need approval.
 

@@ -37,6 +37,33 @@ test("Accept-Language picks the page language and Intl follows it", async ({ bro
   await close(context);
 });
 
+test("a host can replace localized binary labels and the overlay uses them", async ({ browser }) => {
+  const context = await signedIn(browser, "otherowner", clientIp("i18n", 235));
+  await inLanguage(context, "pl");
+  const page = await newPage(context);
+  await page.goto("/@other_host?view=polls");
+  await page.locator(".page-title").getByRole("button", { name: "Utwórz ankietę", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Utwórz ankietę", exact: true });
+  await dialog.getByRole("radio", { name: "Tak / Nie", exact: true }).check();
+  await expect(dialog.getByRole("textbox", { name: "Opcja 1" })).toHaveValue("Tak");
+  await expect(dialog.getByRole("textbox", { name: "Opcja 2" })).toHaveValue("Nie");
+  await dialog.getByRole("textbox", { name: "Pytanie", exact: true }).fill("Zostajemy czy zmieniamy?");
+  await dialog.getByRole("textbox", { name: "Opcja 1" }).fill("Zostajemy");
+  await dialog.getByRole("textbox", { name: "Opcja 2" }).fill("Zmieniamy");
+  await dialog.getByRole("button", { name: "Rozpocznij ankietę", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page).toHaveURL(/entry=/);
+  const pollId: string | null = new URL(page.url()).searchParams.get("entry");
+  if (!pollId) throw new Error("Created poll link is missing.");
+  const response = await context.request.get(`/api/entries/${pollId}`);
+  expect(response.status()).toBe(200);
+  expect(await response.json()).toMatchObject({ entry: { options: ["Zostajemy", "Zmieniamy"] } });
+  await page.goto(`/@other_host/overlay?poll=${pollId}`);
+  await expect(page.getByText("Zostajemy", { exact: true })).toBeVisible();
+  await expect(page.getByText("Zmieniamy", { exact: true })).toBeVisible();
+  await close(context);
+});
+
 test("the language switcher saves the choice and reloads in it", async ({ page, context }) => {
   await page.goto("/streamers");
   await page.getByRole("contentinfo").getByRole("link", { name: "Language: English" }).click();

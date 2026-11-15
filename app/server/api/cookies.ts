@@ -11,12 +11,10 @@ export const preferenceCookiesSchema = z
   .object({ locale: z.enum(LOCALES).optional(), prefs: displayPrefsSchema.optional() })
   .strict();
 
-const ONE_YEAR_S = 31_536_000;
-
 // Match Cookie Store API names, encoding, and lifetime.
 export function preferenceCookies(value: z.infer<typeof preferenceCookiesSchema>, secure: boolean): string[] {
   const cookie = (name: string, text: string): string =>
-    `${name}=${encodeURIComponent(text)}; Path=/; Max-Age=${ONE_YEAR_S}; SameSite=Lax${secure ? "; Secure" : ""}`;
+    `${name}=${encodeURIComponent(text)}; Path=/; SameSite=Lax${secure ? "; Secure" : ""}`;
   const cookies: string[] = [];
   if (value.locale) cookies.push(cookie(LOCALE_COOKIE, value.locale));
   if (value.prefs) cookies.push(cookie(PREFS_COOKIE, JSON.stringify(value.prefs)));

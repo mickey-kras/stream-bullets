@@ -43,6 +43,9 @@ async function clientKey(request: Request): Promise<string> {
   return sha256(visitorPrefix(request.headers.get("CF-Connecting-IP") ?? "local"));
 }
 
+const BINARY_LABELS_COMPATIBILITY_HEADER: string = "X-StreamBullets-Binary-Labels";
+const BINARY_LABELS_COMPATIBILITY_VERSION: string = "1";
+
 const handler = createRequestHandler(() => import("virtual:react-router/server-build"), import.meta.env.MODE);
 
 async function calendarResponse(request: Request, env: AppEnv, handle: string, origin: string): Promise<Response> {
@@ -167,7 +170,9 @@ async function routeResponse(
     return await liveResponse(request, env, live[1], key, nonce, responseHeaders);
   } else if (path.startsWith("/images/")) {
     if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
-    return await serveImage(env, path.slice("/images/".length), request.method);
+    const response = await serveImage(env, path.slice("/images/".length), request.method);
+    if (env.APP_ENV === "test") response.headers.set("Cache-Control", "private, no-cache");
+    return response;
   } else {
     const routerContext = new RouterContextProvider();
     routerContext.set(appContext, context);
@@ -221,7 +226,29 @@ export default {
       // A forged request still costs a body read and a signature check. The ingest object's admission buckets
       // bound signed deliveries.
       const hook = path === "/hooks/twitch" || path === "/hooks/kick";
-      if (!hook && !(await env.REQUEST_LIMITER.limit({ key })).success)
+      let admissionPath: string;
+      try {
+        // React Router data URLs reach the same API loader as their document paths.
+        admissionPath = decodeURIComponent(path)
+          .toLowerCase()
+          .replaceAll("%2f", "/")
+          .replace(/\/_\.data$/, "/")
+          .replace(/\.data$/, "");
+      } catch {
+        throw new HttpError(400, "Invalid URL path.");
+      }
+      // Normal browsing shares no per-IP quota. Keep separate budgets for abuse-sensitive requests;
+      // writes and exports also enforce account quotas in their handlers.
+      const scope: string | null = admissionPath.startsWith("/api/auth/")
+        ? "auth"
+        : request.headers.get("Upgrade")?.toLowerCase() === "websocket"
+          ? "connect"
+          : !["GET", "HEAD", "OPTIONS"].includes(request.method)
+            ? "write"
+            : /^\/api\/(admin(?:\/|$)|account\/export$)/.test(admissionPath)
+              ? "private-read"
+              : null;
+      if (!hook && scope && !(await env.REQUEST_LIMITER.limit({ key: `${scope}:${key}` })).success)
         throw new HttpError(429, "Too many requests. Please try again in a minute.");
       if (path !== "/__test") await requireTestAccess(request, env);
       response = await routeResponse(request, path, key, { env, nonce, responseHeaders, requestId }, origin);
@@ -232,6 +259,7 @@ export default {
     const secured = securityHeaders(response, request, nonce, origin, import.meta.env.DEV);
     if (env.APP_ENV === "test") secured.headers.set("X-Robots-Tag", "noindex, nofollow");
     secured.headers.set("X-Request-ID", requestId);
+    secured.headers.set(BINARY_LABELS_COMPATIBILITY_HEADER, BINARY_LABELS_COMPATIBILITY_VERSION);
     for (const value of responseHeaders.getSetCookie()) secured.headers.append("Set-Cookie", value);
     return secured;
   },

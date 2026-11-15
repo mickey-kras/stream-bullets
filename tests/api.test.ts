@@ -79,6 +79,7 @@ beforeAll(async (): Promise<void> => {
     APP_ORIGIN: origin,
     BETTER_AUTH_SECRET: secret,
     ADMIN_EMAILS: "admin@example.test",
+    ADMIN_STEP_UP: "report",
   };
 });
 
@@ -182,17 +183,29 @@ describe("profile, language and preferences", (): void => {
     expect(response.status).toBe(204);
     const cookies = response.headers.getSetCookie();
     expect(cookies).toEqual([
-      "sb_locale=pt-BR; Path=/; Max-Age=31536000; SameSite=Lax; Secure",
-      `sb_prefs=${encodeURIComponent(JSON.stringify(prefs))}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`,
+      "sb_locale=pt-BR; Path=/; SameSite=Lax; Secure",
+      `sb_prefs=${encodeURIComponent(JSON.stringify(prefs))}; Path=/; SameSite=Lax; Secure`,
     ]);
     // Read back the exact Cookie Store API format.
     expect(readDisplayPrefs(decodeURIComponent(cookies[1].split(";")[0].split("=")[1]))).toEqual(prefs);
     expect(preferenceCookies({ locale: "de" }, false)).toEqual([
-      "sb_locale=de; Path=/; Max-Age=31536000; SameSite=Lax",
+      "sb_locale=de; Path=/; SameSite=Lax",
     ]);
     expect((await call("POST", "preference-cookies", { body: { locale: "xx" } })).status).toBe(400);
     expect((await call("POST", "preference-cookies", { body: { prefs: { text: "999" } } })).status).toBe(400);
     expect((await call("POST", "preference-cookies", { body: { theme: "dark" } })).status).toBe(400);
+  });
+
+  it("replaces existing persistent preferences with session cookies when the page loads", async (): Promise<void> => {
+    const responseHeaders = new Headers();
+    const request = new Request(`${origin}/`, { headers: { Cookie: 'sb_locale=de; sb_prefs=%7B%22text%22%3A%22130%22%7D' } });
+    const shell = await loadShell(request, { env, nonce: "nonce", responseHeaders });
+    expect(shell.locale).toBe("de");
+    expect(shell.prefs).toEqual({ text: "130" });
+    expect(responseHeaders.getSetCookie()).toEqual([
+      "sb_locale=de; Path=/; SameSite=Lax; Secure",
+      "sb_prefs=%7B%22text%22%3A%22130%22%7D; Path=/; SameSite=Lax; Secure",
+    ]);
   });
 
   it("skips prototype keys in a crafted prefs cookie instead of failing the page (security review finding 5)", async (): Promise<void> => {

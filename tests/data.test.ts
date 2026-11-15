@@ -302,6 +302,20 @@ describe("topics and polls", (): void => {
     ).rejects.toMatchObject({ status: 409 });
   });
 
+  it("stores localized binary defaults and host labels without changing vote indexes", async (): Promise<void> => {
+    await env.DB.prepare("UPDATE user SET locale='ru' WHERE id='owner'").run();
+    const localized = await mutateEntry(env, "owner", streamer.id, { action: "create", kind: "binary", title: "Продолжить?" });
+    expect(await getEntry(env, localized.id, null)).toMatchObject({ options: ["Да", "Нет"], counts: null, total: 0 });
+    const custom = await mutateEntry(env, "owner", streamer.id, {
+      action: "create", kind: "binary", title: "Continue?", options: ["Keep going", "Stop here"],
+    });
+    await mutateEntry(env, "viewer", streamer.id, { action: "vote", id: custom.id, choice: 1 });
+    await mutateEntry(env, "owner", streamer.id, { action: "reveal", id: custom.id });
+    expect(await getEntry(env, custom.id, null)).toMatchObject({ options: ["Keep going", "Stop here"], counts: [0, 1], total: 1 });
+    const stored = await env.DB.prepare("SELECT options,binary_labels FROM entries WHERE id=?").bind(custom.id).first();
+    expect(stored).toEqual({ options: '["Yes","No"]', binary_labels: '["Keep going","Stop here"]' });
+  });
+
   it("reveals binary results only through the owner and then closes voting", async (): Promise<void> => {
     const id = await seedEntry("binary");
     await mutateEntry(env, "viewer", streamer.id, { action: "vote", id, choice: 0 });

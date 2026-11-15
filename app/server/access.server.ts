@@ -139,6 +139,7 @@ export async function assertStreamerWritable(
     state.status === "frozen"
       ? "This page is frozen. It stays visible, but nothing on it can change."
       : "This page is suspended. Nothing on it can change.",
+    state.status === "frozen" ? "page_frozen" : "page_suspended",
   );
 }
 

@@ -109,6 +109,26 @@ export function KeySetup({
         </Link>
       </>
     );
+  } else if (status.registerBlock === "operator_approval") {
+    body = (
+      <>
+        <h2>{t("keys.stepFirst")}</h2>
+        <p className="form-error" role="alert">
+          {t("keys.operatorApproval")}
+        </p>
+        <code style={{ overflowWrap: "anywhere", minWidth: 0 }}>{status.enrollmentSession}</code>
+        <button
+          type="button"
+          disabled={revalidator.state !== "idle"}
+          aria-busy={revalidator.state !== "idle"}
+          onClick={() => {
+            void reload();
+          }}
+        >
+          {t("common.refresh")}
+        </button>
+      </>
+    );
   } else if (status.registerBlock === "sign_in_again") {
     body = (
       <>

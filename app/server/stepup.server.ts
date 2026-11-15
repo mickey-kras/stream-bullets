@@ -15,8 +15,8 @@ import {
 } from "./webauthn.server";
 
 // Verify FIDO2 keys on the current session; passkey sign-in would create another session. Stamp
-// `session.admin_verified_at`: 15 minutes for ordinary actions, 2 for sensitive actions. Unset `ADMIN_STEP_UP`
-// means `report`; `enforce` requires two keys plus fresh step-up. Unknown modes fail closed.
+// `session.admin_verified_at`: 15 minutes for ordinary actions, 2 for sensitive actions. Missing or unknown
+// `ADMIN_STEP_UP` enforces two keys plus fresh step-up.
 
 export const STEP_UP_WINDOW_MS = 15 * 60_000;
 export const SENSITIVE_WINDOW_MS = 2 * 60_000;
@@ -60,7 +60,7 @@ export interface CreationOptions {
 
 export function stepUpMode(env: AppEnv): StepUpMode {
   const value = (env.ADMIN_STEP_UP ?? "").trim().toLowerCase();
-  if (value === "" || value === "report") return "report";
+  if (value === "report") return "report";
   if (value === "off") return "off";
   return "enforce";
 }
@@ -114,6 +114,24 @@ function isFresh(verifiedAt: number | null, window: number, now: number): boolea
   return verifiedAt !== null && verifiedAt <= now && now - verifiedAt < window;
 }
 
+function operatorEnrollmentRequired(env: AppEnv): boolean {
+  const host = new URL(getOrigin(env)).hostname;
+  return env.APP_ENV !== "test" && !["localhost", "127.0.0.1", "[::1]"].includes(host);
+}
+
+async function enrollmentIdentifier(sessionId: string): Promise<string> {
+  return `admin-key-enrollment:${await sessionLabel(sessionId)}`;
+}
+
+async function enrollmentApproved(env: AppEnv, userId: string, sessionId: string, now: number): Promise<boolean> {
+  const row = await env.DB.prepare(
+    "SELECT 1 AS approved FROM verification WHERE identifier=? AND value=? AND expires_at>?",
+  )
+    .bind(await enrollmentIdentifier(sessionId), userId, now)
+    .first<{ approved: number }>();
+  return row?.approved === 1;
+}
+
 function registerBlock(keys: number, session: SessionRow, now: number): StepUpStatus["registerBlock"] {
   if (keys >= MAX_KEYS) return "limit";
   if (keys === 0) return now - session.created_at < ONBOARDING_WINDOW_MS ? "none" : "sign_in_again";
@@ -129,7 +147,14 @@ function need(mode: StepUpMode, keys: number, verifiedAt: number | null, now: nu
 async function status(env: AppEnv, userId: string, sessionId: string, now: number): Promise<StepUpStatus> {
   const [session, keys] = await Promise.all([sessionRow(env, sessionId), keyCount(env, userId)]);
   const verifiedAt = session.admin_verified_at;
-  const block = registerBlock(keys, session, now);
+  let block = registerBlock(keys, session, now);
+  if (
+    keys === 0 &&
+    block === "none" &&
+    operatorEnrollmentRequired(env) &&
+    !(await enrollmentApproved(env, userId, sessionId, now))
+  )
+    block = "operator_approval";
   return {
     mode: stepUpMode(env),
     keys,
@@ -139,6 +164,7 @@ async function status(env: AppEnv, userId: string, sessionId: string, now: numbe
       isFresh(verifiedAt, STEP_UP_WINDOW_MS, now) && verifiedAt !== null ? verifiedAt + STEP_UP_WINDOW_MS : null,
     canRegister: block === "none",
     registerBlock: block,
+    ...(keys === 0 && operatorEnrollmentRequired(env) ? { enrollmentSession: await sessionLabel(sessionId) } : {}),
     need: need(stepUpMode(env), keys, verifiedAt, now),
     serverNow: now,
   };
@@ -380,6 +406,12 @@ export async function verifyStepUp(
 
 function registrationRefused(block: StepUpStatus["registerBlock"]): HttpError {
   if (block === "limit") return new HttpError(409, `You can register up to ${MAX_KEYS} keys.`, "key_limit");
+  if (block === "operator_approval")
+    return new HttpError(
+      403,
+      "Ask the site operator to approve this session before you register your first security key.",
+      "enrollment_required",
+    );
   if (block === "sign_in_again")
     return new HttpError(403, "Sign out, sign in again, and add your first key within 5 minutes.", "sign_in_again");
   return new HttpError(403, "Confirm with a key you already registered, then add the new key.", "step_up_required");
@@ -419,7 +451,7 @@ export async function registrationOptions(
   };
 }
 
-// First key requires sign-in within 5 minutes; later keys require step-up within 2 minutes. Registration
+// First key requires recent sign-in and operator approval on deployed hosts; later keys require step-up. Registration
 // stamps this session.
 export async function registerKey(
   env: AppEnv,
@@ -442,11 +474,35 @@ export async function registerKey(
   const id = crypto.randomUUID();
   const keyTransports = (input.credential.response.transports ?? []).join(",") || null;
   const label = await sessionLabel(admin.sessionId);
+  const firstDeployedKey = current.keys === 0 && operatorEnrollmentRequired(env);
+  if (firstDeployedKey) {
+    if (!env.NOTIFY_EMAIL || !env.NOTIFY_FROM?.trim())
+      throw new HttpError(503, "Security key enrollment notifications are not configured.", "enrollment_unavailable");
+    const recipient = await env.DB.prepare("SELECT email FROM user WHERE id=? AND email_verified=1")
+      .bind(admin.viewer.id)
+      .first<{ email: string }>();
+    if (!recipient) throw new HttpError(403, "Verify your email before you register a security key.");
+    try {
+      await env.NOTIFY_EMAIL.send({
+        from: env.NOTIFY_FROM.trim(),
+        to: recipient.email,
+        subject: "StreamBullets administrator security key enrollment",
+        text: "A first administrator security key is being registered for your account. If you did not approve this, contact the site operator immediately to revoke all sessions and reset the keys.",
+      });
+    } catch {
+      throw new HttpError(
+        503,
+        "The security key enrollment notice could not be sent. Contact the site operator.",
+        "enrollment_unavailable",
+      );
+    }
+  }
   const [inserted] = await env.DB.batch([
     env.DB.prepare(`
       INSERT INTO passkey (id, name, public_key, user_id, credential_id, counter, device_type, backed_up, transports, created_at, aaguid)
       SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
       WHERE (SELECT count(*) FROM passkey WHERE user_id=?) = ?
+        AND (?=0 OR EXISTS (SELECT 1 FROM verification WHERE identifier=? AND value=? AND expires_at>unixepoch('subsec') * 1000))
       ON CONFLICT(credential_id) DO NOTHING
     `).bind(
       id,
@@ -462,6 +518,9 @@ export async function registerKey(
       key.aaguid,
       admin.viewer.id,
       current.keys,
+      firstDeployedKey ? 1 : 0,
+      await enrollmentIdentifier(admin.sessionId),
+      admin.viewer.id,
     ),
     env.DB.prepare(`
       UPDATE session SET admin_verified_at=?
@@ -471,13 +530,28 @@ export async function registerKey(
       INSERT INTO moderation_actions (id, target_kind, target_id, action, actor_id, metadata, created_at)
       SELECT ?, 'passkey', ?, 'key_added', ?, ?, ? WHERE EXISTS (SELECT 1 FROM passkey WHERE id=?)
     `).bind(crypto.randomUUID(), id, admin.viewer.id, JSON.stringify({ session: label, name: input.name }), now, id),
+    env.DB.prepare("DELETE FROM verification WHERE identifier=? AND EXISTS (SELECT 1 FROM passkey WHERE id=?)").bind(
+      await enrollmentIdentifier(admin.sessionId),
+      id,
+    ),
   ]);
-  if (inserted.meta.changes !== 1)
+  if (inserted.meta.changes !== 1) {
+    if (firstDeployedKey) {
+      const approvalRequired: { required: number } | null = await env.DB.prepare(`
+        SELECT 1 AS required
+        WHERE NOT EXISTS (SELECT 1 FROM passkey WHERE user_id=? OR credential_id=?)
+          AND NOT EXISTS (SELECT 1 FROM verification WHERE identifier=? AND value=? AND expires_at>unixepoch('subsec') * 1000)
+      `)
+        .bind(admin.viewer.id, key.credentialId, await enrollmentIdentifier(admin.sessionId), admin.viewer.id)
+        .first<{ required: number }>();
+      if (approvalRequired) throw registrationRefused("operator_approval");
+    }
     throw new HttpError(
       409,
       "That key is already registered, or your keys changed. Reload and try again.",
       "key_conflict",
     );
+  }
   return {
     id,
     name: input.name,

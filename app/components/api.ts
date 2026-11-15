@@ -1,4 +1,4 @@
-import { getLocale, t, type MessageId } from "../i18n";
+import { getLocale, intlLocale, t, type MessageId } from "../i18n";
 
 // API error with a stable optional server code.
 export class ApiError extends Error {
@@ -6,6 +6,7 @@ export class ApiError extends Error {
     message: string,
     readonly status: number,
     readonly code: string | null,
+    readonly details: Readonly<Record<string, string>> = {},
   ) {
     super(message);
   }
@@ -15,7 +16,13 @@ export class ApiError extends Error {
 export function apiError(status: number, body: unknown, fallback: string): ApiError {
   const record: Record<string, unknown> = typeof body === "object" && body !== null ? { ...body } : {};
   const message: string = typeof record.error === "string" ? record.error : fallback;
-  return new ApiError(message, status, typeof record.code === "string" ? record.code : null);
+  const details: Record<string, string> = {};
+  if (typeof record.details === "object" && record.details !== null) {
+    for (const [key, value] of Object.entries(record.details)) {
+      if (typeof value === "string") details[key] = value;
+    }
+  }
+  return new ApiError(message, status, typeof record.code === "string" ? record.code : null, details);
 }
 
 const NOT_JSON: unique symbol = Symbol("not JSON");
@@ -68,7 +75,6 @@ const statusMessages: Readonly<Partial<Record<number, MessageId>>> = {
   413: "error.tooLarge",
   415: "error.invalid",
   422: "error.invalid",
-  429: "error.rateLimit",
 };
 
 const codeMessages: Readonly<Record<string, MessageId>> = {
@@ -83,17 +89,39 @@ const codeMessages: Readonly<Record<string, MessageId>> = {
   other_key_required: "keys.confirmRemove",
   last_key: "keys.onlyKey",
   bug_template_empty: "ideas.form.fillTemplate",
+  binary_options_invalid: "error.binaryOptions",
   invalid_image: "upload.invalid",
   handle_taken: "error.handleTaken",
   invalid_schedule_date: "error.scheduleDate",
   schedule_no_occurrences: "error.scheduleDays",
   idea_not_under_review: "error.ideaDelete",
   channel_conflict: "channels.conflict",
+  page_frozen: "error.pageFrozen",
+  page_suspended: "error.pageSuspended",
+  enrollment_required: "keys.operatorApproval",
+  enrollment_unavailable: "keys.enrollmentUnavailable",
 };
 
 export function errorMessage(error: unknown): string {
-  if (error instanceof ApiError && getLocale() !== "en") {
-    return t((error.code ? codeMessages[error.code] : undefined) ?? statusMessages[error.status] ?? "common.failed");
+  if (error instanceof ApiError) {
+    if (error.code === "handle_cooldown") {
+      const retryAt: string | undefined = error.details.retryAt;
+      const retryTime: number = retryAt ? Date.parse(retryAt) : Number.NaN;
+      return Number.isFinite(retryTime)
+        ? t("error.handleCooldownDate", {
+            date: new Intl.DateTimeFormat(intlLocale(), { dateStyle: "long", timeZone: "UTC" }).format(retryTime),
+          })
+        : t("error.handleCooldown");
+    }
+    const id: MessageId | undefined = error.code ? codeMessages[error.code] : undefined;
+    if (id) return t(id);
+    if (error.status === 423) return t("error.pageLocked");
+    if (error.status === 429) return t("error.rateLimit");
+    if (error.status >= 400 && error.status < 500) {
+      if (getLocale() !== "en") return t(statusMessages[error.status] ?? "common.failed");
+      if (error.message) return error.message;
+    }
+    return t("common.failed");
   }
   if (error instanceof TypeError || error instanceof DOMException) return t("common.failed");
   return error instanceof Error ? error.message : t("common.failed");

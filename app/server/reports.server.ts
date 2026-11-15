@@ -68,7 +68,7 @@ async function reportTarget(env: AppEnv, kind: ReportTargetKind, id: string): Pr
       ? env.DB.prepare(`SELECT streamer_id, author_id,
           title || CASE WHEN body <> '' THEN char(10) || char(10) || body ELSE '' END ||
           CASE WHEN kind <> 'topic' THEN char(10) || char(10) || 'Options: ' ||
-            (SELECT group_concat(value, ' · ') FROM json_each(options)) ELSE '' END AS snapshot
+            (SELECT group_concat(value, ' · ') FROM json_each(COALESCE(binary_labels, options))) ELSE '' END AS snapshot
         FROM entries WHERE id=?`)
       : env.DB.prepare(`SELECT e.streamer_id, c.author_id, c.text AS snapshot
         FROM entry_comments c JOIN entries e ON e.id=c.entry_id WHERE c.id=? AND c.removed_at IS NULL`);

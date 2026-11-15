@@ -28,7 +28,7 @@ const config: BuildConfig = {
   ...(build.assets
     ? { assets: { ...build.assets, directory: resolve(dirname(buildPath), build.assets.directory) } }
     : {}),
-  vars: { APP_ORIGIN: "http://localhost:5173", ADMIN_EMAILS: "admin@example.test keyadmin@example.test" },
+  vars: { APP_ORIGIN: "http://localhost:5173", ADMIN_EMAILS: "admin@example.test keyadmin@example.test", ADMIN_STEP_UP: "report" },
   d1_databases: build.d1_databases.map((database) => ({
     ...database,
     database_id: databaseId,
@@ -44,7 +44,8 @@ await writeFile(
   // Kick credentials and token keys make one channel platform available in the controls. No test calls Kick.
   `BETTER_AUTH_SECRET=${secret}\nAI_INTEREST_SALT=${randomBytes(24).toString("hex")}\n` +
     `KICK_CLIENT_ID=e2e-kick-client\nKICK_CLIENT_SECRET=e2e-kick-secret\n` +
-    `CHANNEL_TOKEN_KEYS=e2e:${randomBytes(32).toString("base64")}\n`,
+    `CHANNEL_TOKEN_KEYS=e2e:${randomBytes(32).toString("base64")}\n` +
+    `TWITCH_EVENTSUB_SECRET=${randomBytes(32).toString("hex")}\n`,
   { mode: 0o600 },
 );
 const wrangler: string = resolve(root, "node_modules/wrangler/bin/wrangler.js");

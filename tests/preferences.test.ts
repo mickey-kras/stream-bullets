@@ -49,7 +49,7 @@ describe("the preference cookies", (): void => {
     vi.stubGlobal("cookieStore", { set });
     vi.stubGlobal("fetch", fetcher);
     await saveLocaleCookie("de");
-    expect(set).toHaveBeenCalledWith(expect.objectContaining({ name: "sb_locale", value: "de", path: "/" }));
+    expect(set).toHaveBeenCalledWith({ name: "sb_locale", value: "de", path: "/", sameSite: "lax" });
     expect(fetcher).not.toHaveBeenCalled();
   });
 

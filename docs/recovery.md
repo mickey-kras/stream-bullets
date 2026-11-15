@@ -14,9 +14,33 @@ Each command in this runbook changes production. Read each step before you run i
 
 A Worker rollback does not change D1, R2, or Durable Object storage. A D1 restore does not change the Worker, R2, or Durable Object storage.
 
+## Deploy the compatible reader first
+
+Use this order before the first deployment with the compatibility guard:
+
+1. Merge and deploy [PR #773](https://github.com/mickey-kras/stream-bullets/pull/773) with the existing workflow. The existing workflow applies additive migration `0031` while the old Worker remains active. It deploys the compatible reader after migration.
+2. Check that the active production Worker returns the compatibility header:
+
+   ```bash
+   set -o pipefail
+   curl --fail --silent --show-error --header 'Cache-Control: no-cache' \
+     --dump-header - --output /dev/null https://streambullets.com/ |
+     grep -Ei '^X-StreamBullets-Binary-Labels:[[:space:]]*1[[:space:]]*$'
+   ```
+
+3. Merge [PR #776](https://github.com/mickey-kras/stream-bullets/pull/776) after its checks and policy approval pass. It protects the coverage gate inputs.
+4. Record the active compatible version. Change the base branch of [PR #774](https://github.com/mickey-kras/stream-bullets/pull/774) to `main`. Merge and deploy it after its checks and policy approval pass.
+5. Merge and deploy [PR #749](https://github.com/mickey-kras/stream-bullets/pull/749) last. Use the compatible reader as its rollback target to preserve vote meanings.
+
+Keep migration `0031` during a Worker rollback. Select a target that returns the compatibility header.
+
 ## Roll back the Worker
 
+After migration `0031`, `X-StreamBullets-Binary-Labels: 1` identifies a Worker that preserves custom binary labels during rollback.
+
 The deployment job applies migrations before it deploys the Worker. Thus, the schema can be newer than an old Worker version.
+CI captures the active Worker version before upload. A failed upload or smoke check restores it and repeats the smoke check.
+CI does not reverse D1 migrations. Use this procedure if automatic recovery fails or a defect passes the smoke check.
 
 1. List the recent versions:
 

@@ -33,7 +33,7 @@ export interface AppEnv {
   /** `1` turns channel ingestion off: webhooks are dropped, polls stop, and nobody can connect or listen. */
   CHANNELS_OFF?: string;
   ADMIN_EMAILS?: string;
-  // Admin step-up: `off`, `report` (default), or `enforce`. See README and SECURITY.md.
+  // Admin step-up: `off`, `report`, or `enforce` (default). See README and SECURITY.md.
   ADMIN_STEP_UP?: string;
   // Secret for daily visitor hashes. Required to enable the AI counter.
   AI_INTEREST_SALT?: string;

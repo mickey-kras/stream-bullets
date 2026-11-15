@@ -1,3 +1,4 @@
+import { isbot } from "isbot";
 import { renderToReadableStream } from "react-dom/server";
 import { ServerRouter, type EntryContext, type HandleErrorFunction, type RouterContextProvider } from "react-router";
 import { appContext } from "./env";
@@ -37,7 +38,7 @@ export default async function handleRequest(
         },
       },
     );
-    await stream.allReady;
+    if (isbot(request.headers.get("User-Agent")) || routerContext.isSpaMode) await stream.allReady;
     headers.set("Content-Type", "text/html; charset=utf-8");
     headers.set("Content-Language", locale);
     return new Response(stream, { status, headers });

@@ -451,7 +451,8 @@ export interface StepUpStatus {
   freshUntil: number | null;
   // Key registration eligibility and refusal reason.
   canRegister: boolean;
-  registerBlock: "none" | "sign_in_again" | "step_up" | "limit";
+  enrollmentSession?: string;
+  registerBlock: "none" | "sign_in_again" | "step_up" | "limit" | "operator_approval";
   need: StepUpNeed;
   serverNow: number;
 }

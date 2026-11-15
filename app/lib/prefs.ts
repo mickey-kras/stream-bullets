@@ -62,7 +62,7 @@ export function applyPrefs(prefs: DisplayPrefs): void {
   globalThis.window?.sbApplyPrefs?.(prefs);
 }
 
-// One-year cookie makes preferences available before paint.
+// Session cookie makes preferences available before paint.
 export async function savePrefsCookie(prefs: DisplayPrefs): Promise<void> {
   try {
     await setPreferenceCookie(PREFS_COOKIE, JSON.stringify(prefs), { prefs });
@@ -75,7 +75,7 @@ export function saveLocaleCookie(locale: string): Promise<void> {
   return setPreferenceCookie(LOCALE_COOKIE, locale, { locale });
 }
 
-// Set a one-year first-party cookie through Cookie Store or POST /api/preference-cookies. Never write
+// Set a session cookie through Cookie Store or POST /api/preference-cookies. Never write
 // document.cookie.
 export async function setPreferenceCookie(name: string, value: string, fallback: object): Promise<void> {
   const store = globalThis.cookieStore;
@@ -85,7 +85,6 @@ export async function setPreferenceCookie(name: string, value: string, fallback:
       value: encodeURIComponent(value),
       path: "/",
       sameSite: "lax",
-      expires: Date.now() + 31_536_000_000,
     });
     return;
   }

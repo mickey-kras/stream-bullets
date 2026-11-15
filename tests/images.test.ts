@@ -98,7 +98,7 @@ describe("owned image storage", () => {
     expect(first.body).toBeNull();
     const second = await serveImage(env, "avatar/viewer", "GET", cache);
     expect(new Uint8Array(await second.arrayBuffer())).toEqual(png);
-    expect(second.headers.get("Cache-Control")).toBe("no-store");
+    expect(second.headers.get("Cache-Control")).toBe("public, max-age=60, must-revalidate");
     expect(get).toHaveBeenCalledTimes(1);
     expect(cache.put).toHaveBeenCalledTimes(1);
     await deleteAvatar(env, "viewer");
