@@ -176,13 +176,13 @@ test("profile validation keeps drafts through failed saves and rejects invalid i
       patches.push(route.request().postDataJSON() as unknown);
       await route.fulfill(
         patches.length === 1
-          ? { status: 503, json: { error: "Profile temporarily unavailable." } }
+          ? { status: 503, json: { error: "The request failed. Please try again." } }
           : { json: { saved: true } },
       );
     });
     await name.fill("  Reporter retry  ");
     await dialog.getByRole("button", { name: "Save profile" }).click();
-    await expect(dialog.getByRole("alert").first()).toHaveText("Profile temporarily unavailable.");
+    await expect(dialog.getByRole("alert").first()).toHaveText("The request failed. Please try again.");
     await expect(name).toHaveValue("  Reporter retry  ");
     await expect(dialog.getByRole("button", { name: "Save profile" })).toBeEnabled();
     await dialog.getByRole("button", { name: "Save profile" }).click();
@@ -411,7 +411,7 @@ test("page drafts validate uploads and support links, recover from failed saves,
       patches.push(route.request().postDataJSON() as unknown);
       await route.fulfill(
         patches.length === 1
-          ? { status: 503, json: { error: "Page temporarily unavailable." } }
+          ? { status: 503, json: { error: "The request failed. Please try again." } }
           : { json: { streamer: { ...streamer, name: "Draft community", about: "Draft description" } } },
       );
     });
@@ -480,7 +480,7 @@ test("page drafts validate uploads and support links, recover from failed saves,
     await expect(dialog.getByRole("checkbox", { name: "Also add a Support card to Community" })).not.toBeChecked();
     await dialog.getByRole("checkbox", { name: "Show on About page" }).check();
     await dialog.getByRole("button", { name: "Save page" }).click();
-    await expect(dialog.getByRole("alert")).toHaveText("Page temporarily unavailable.");
+    await expect(dialog.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await expect(dialog.getByLabel("Page name")).toHaveValue("  Draft community  ");
     await dialog.getByRole("button", { name: "Save page" }).click();
     await expect(dialog).toBeHidden();

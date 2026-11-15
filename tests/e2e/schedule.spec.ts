@@ -160,7 +160,10 @@ test("the owner schedules a weekly stream, edits, cancels and deletes it", async
   } finally {
     if (created) {
       const series: string = created.seriesId ? ` OR series_id='${created.seriesId}'` : "";
-      await runSql("schedule-weekly-cleanup", [`DELETE FROM stream_events WHERE id='${created.id}'${series};`]);
+      await runSql("schedule-weekly-cleanup", [
+        `DELETE FROM stream_events WHERE id='${created.id}'${series};`,
+        ...(created.seriesId ? [`DELETE FROM stream_series WHERE id='${created.seriesId}';`] : []),
+      ]);
     }
     await close(context);
   }

@@ -328,14 +328,14 @@ test("notification refresh, pagination and failed writes preserve the inbox for 
       const action: string =
         request.method() === "GET" ? "load" : z.object({ action: z.string() }).parse(request.postDataJSON()).action;
       if (action === failedAction) {
-        await route.fulfill({ status: 503, json: { error: `Retry notification ${action}.` } });
+        await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
         return;
       }
       await route.continue();
     });
     const alert = page.locator(".notifications-page .form-error");
     await page.getByRole("button", { name: "Refresh notifications", exact: true }).click();
-    await expect(alert).toHaveText("Retry notification load.");
+    await expect(alert).toHaveText("The request failed. Please try again.");
     await expect(notices).toHaveCount(50);
     failedAction = null;
     await page.getByRole("button", { name: "Refresh notifications", exact: true }).click();
@@ -346,10 +346,10 @@ test("notification refresh, pagination and failed writes preserve the inbox for 
     const notice = notices.first();
     failedAction = "read";
     await notice.getByRole("button", { name: "Mark read", exact: true }).click();
-    await expect(alert).toHaveText("Retry notification read.");
+    await expect(alert).toHaveText("The request failed. Please try again.");
     await expect(notice).toHaveAttribute("data-unread", "true");
     await notice.getByRole("link").click();
-    await expect(alert).toHaveText("Retry notification read.");
+    await expect(alert).toHaveText("The request failed. Please try again.");
     await expect(page).toHaveURL(/\/notifications$/u);
     failedAction = null;
     await notice.getByRole("button", { name: "Mark read", exact: true }).click();
@@ -363,7 +363,7 @@ test("notification refresh, pagination and failed writes preserve the inbox for 
     await mentions.uncheck();
     failedAction = "preferences";
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(alert).toHaveText("Retry notification preferences.");
+    await expect(alert).toHaveText("The request failed. Please try again.");
     await expect(mentions).not.toBeChecked();
     failedAction = null;
     await page.getByRole("button", { name: "Save", exact: true }).click();
@@ -397,14 +397,14 @@ test("mention lookup recovers and keyboard edits keep only intact account select
     let failLookup: boolean = true;
     await page.route(`**/api/entries/${entryId}/mention-candidates?**`, async (route) => {
       if (failLookup) {
-        await route.fulfill({ status: 503, json: { error: "People lookup unavailable." } });
+        await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
         return;
       }
       await route.continue();
     });
     const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
     await composer.fill("@test_host");
-    await expect(page.locator(".mention-options")).toContainText("People lookup unavailable.");
+    await expect(page.locator(".mention-options")).toContainText("The request failed. Please try again.");
     await composer.press("Escape");
     await expect(page.locator(".mention-options")).toHaveCount(0);
     failLookup = false;

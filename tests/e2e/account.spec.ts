@@ -131,7 +131,7 @@ test("a pending account deletion stays open and can recover without deleting dat
     await page.route("**/api/account/delete", async (route) => {
       expect(route.request().postDataJSON() as unknown).toEqual({ confirm: "DELETE" });
       await pending;
-      await route.fulfill({ status: 503, json: { error: "Deletion temporarily unavailable." } });
+      await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
     });
     await deleting.getByRole("button", { name: "Delete my account", exact: true }).click();
     await expect(deleting.getByRole("button", { name: "Deleting…" })).toBeDisabled();
@@ -142,7 +142,7 @@ test("a pending account deletion stays open and can recover without deleting dat
     const response = page.waitForResponse("**/api/account/delete");
     release();
     await response;
-    await expect(deleting.getByRole("alert")).toHaveText("Deletion temporarily unavailable.");
+    await expect(deleting.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await expect(deleting.getByRole("button", { name: "Delete my account", exact: true })).toBeEnabled();
     await deleting.getByRole("button", { name: "Keep my account" }).click();
     await expect(data).toBeVisible();
@@ -183,7 +183,7 @@ test("a pending host application keeps edits on failure and reloads its updated 
       const input = route.request().postDataJSON() as { links: string[]; note: string };
       submissions.push(input);
       if (submissions.length === 1) {
-        await route.fulfill({ status: 503, json: { error: "Applications temporarily unavailable." } });
+        await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
       } else {
         application = { ...application, ...input, updatedAt: Date.now() };
         await route.fulfill({ json: { application } });
@@ -205,7 +205,7 @@ test("a pending host application keeps edits on failure and reloads its updated 
     await dialog.getByRole("textbox", { name: "Channel link 2", exact: true }).fill("https://youtube.com/@account_ui");
     await dialog.getByLabel("Anything else we should know? (optional)").fill("  Updated schedule  ");
     await dialog.getByRole("button", { name: "Update request" }).click();
-    await expect(dialog.getByRole("alert")).toHaveText("Applications temporarily unavailable.");
+    await expect(dialog.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await expect(dialog.getByRole("textbox", { name: "Channel link 2", exact: true })).toHaveValue(
       "https://youtube.com/@account_ui",
     );
@@ -303,11 +303,11 @@ test("account loading errors can be dismissed and stale responses do not replace
     const page = await newPage(context);
     const me = (await (await context.request.get("/api/me")).json()) as Me;
     await page.route("**/api/me", (route) =>
-      route.fulfill({ status: 503, json: { error: "Account settings temporarily unavailable." } }),
+      route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } }),
     );
     await page.goto("/streamers?dialog=host");
     const host = page.getByRole("dialog", { name: "Host a community" });
-    await expect(host.getByRole("alert")).toHaveText("Account settings temporarily unavailable.");
+    await expect(host.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await host.getByRole("button", { name: "Close dialog" }).click();
     await expect(host).toHaveCount(0);
     await page.unroute("**/api/me");

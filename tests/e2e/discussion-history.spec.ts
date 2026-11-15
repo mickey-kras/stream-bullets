@@ -244,14 +244,14 @@ test("comment loading and pagination recover without dropping the loaded history
     await page.route(`**/api/entries/${entryId}/comments?**`, async (route) => {
       const paginating: boolean = new URL(route.request().url()).searchParams.has("cursor");
       if (failure === "initial" || (failure === "page" && paginating)) {
-        await route.fulfill({ status: 503, json: { error: "Comment history is temporarily unavailable." } });
+        await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
         return;
       }
       await route.continue();
     });
     await page.goto(`/@test_host?entry=${entryId}`);
     const alert = page.locator(".discussion > .form-error");
-    await expect(alert).toHaveText("Comment history is temporarily unavailable.");
+    await expect(alert).toHaveText("The request failed. Please try again.");
     await expect(page.getByText("Loading comments…", { exact: true })).toHaveCount(0);
     const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
     await composer.fill("Keep this draft through history retries.");
@@ -263,7 +263,7 @@ test("comment loading and pagination recover without dropping the loaded history
     failure = "page";
     const more = page.getByRole("button", { name: "Load more comments", exact: true });
     await more.click();
-    await expect(alert).toHaveText("Comment history is temporarily unavailable.");
+    await expect(alert).toHaveText("The request failed. Please try again.");
     await expect(roots).toHaveCount(100);
     await expect(more).toBeEnabled();
     await expect(composer).toHaveValue("Keep this draft through history retries.");

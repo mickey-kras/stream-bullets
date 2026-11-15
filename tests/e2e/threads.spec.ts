@@ -103,7 +103,7 @@ test("failed comment actions keep drafts and editors available for retry", async
       if (route.request().method() === "POST") {
         const { action } = z.object({ action: z.string() }).parse(route.request().postDataJSON());
         if (action === failedAction) {
-          await route.fulfill({ status: 503, json: { error: `Retry ${action}.` } });
+          await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
           return;
         }
       }
@@ -112,7 +112,7 @@ test("failed comment actions keep drafts and editors available for retry", async
     const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
     await composer.fill("A recoverable comment draft.");
     await page.getByRole("button", { name: "Post", exact: true }).click();
-    await expect(page.locator(".discussion > .form-error")).toHaveText("Retry comment.");
+    await expect(page.locator(".discussion > .form-error")).toHaveText("The request failed. Please try again.");
     await expect(composer).toHaveValue("A recoverable comment draft.");
     failedAction = null;
     await page.getByRole("button", { name: "Post", exact: true }).click();
@@ -131,7 +131,7 @@ test("failed comment actions keep drafts and editors available for retry", async
     await editor.fill("Root comment after retry");
     failedAction = "edit";
     await root.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(root.getByRole("alert")).toHaveText("Retry edit.");
+    await expect(root.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await expect(editor).toHaveValue("Root comment after retry");
     failedAction = null;
     await root.getByRole("button", { name: "Save", exact: true }).click();
@@ -166,7 +166,7 @@ test("failed comment actions keep drafts and editors available for retry", async
     await ownReply.getByRole("button", { name: "Delete comment", exact: true }).click();
     failedAction = "delete";
     await dialog.getByRole("button", { name: "Delete comment", exact: true }).click();
-    await expect(dialog.getByRole("alert")).toHaveText("Retry delete.");
+    await expect(dialog.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await expect(ownReply).toBeVisible();
     failedAction = null;
     await dialog.getByRole("button", { name: "Delete comment", exact: true }).click();

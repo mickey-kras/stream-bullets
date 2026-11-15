@@ -374,7 +374,7 @@ test("account list failures remain visible and late results do not reopen a clos
     const page = await newPage(context);
     await signIn(page, `browser-${++sequence}`);
     await page.route("**/api/auth/list-accounts", (route) =>
-      route.fulfill({ status: 503, json: { message: "Account list unavailable." } }),
+      route.fulfill({ status: 503, json: { message: "The request failed. Please try again." } }),
     );
     await page.goto(`${origin}/streamers?dialog=profile`);
     const dialog = page.getByRole("dialog", { name: "Your profile" });
