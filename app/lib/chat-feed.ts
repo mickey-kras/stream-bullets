@@ -140,6 +140,17 @@ export function safeEmoteUrl(url: string): string | null {
   }
 }
 
+function sourceFragments(chat: ActivityChat): ActivityFragment[] {
+  if (chat.fragments.length > 0) return chat.fragments;
+  return chat.text ? [{ type: "text", text: chat.text }] : [];
+}
+
+function safeDisplayFragment(fragment: ActivityFragment): ActivityFragment {
+  return fragment.type === "emote" && safeEmoteUrl(fragment.url) === null
+    ? { type: "text", text: fragment.name }
+    : fragment;
+}
+
 /**
  * The fragments to show, cut to `maxChars` user-perceived characters. A cut never splits an emoji sequence or a
  * combining mark. An emote counts as one character. An emote with a URL outside EMOTE_HOSTS becomes its name as
@@ -149,15 +160,11 @@ export function displayFragments(
   chat: ActivityChat,
   maxChars: number,
 ): { fragments: ActivityFragment[]; truncated: boolean } {
-  const source: ActivityFragment[] =
-    chat.fragments.length > 0 ? chat.fragments : chat.text ? [{ type: "text", text: chat.text }] : [];
+  const source: ActivityFragment[] = sourceFragments(chat);
   const fragments: ActivityFragment[] = [];
   let left: number = Math.max(0, Math.floor(maxChars));
   for (const fragment of source) {
-    const part: ActivityFragment =
-      fragment.type === "emote" && safeEmoteUrl(fragment.url) === null
-        ? { type: "text", text: fragment.name }
-        : fragment;
+    const part: ActivityFragment = safeDisplayFragment(fragment);
     if (part.type === "emote") {
       if (left === 0) return { fragments, truncated: true };
       fragments.push(part);
@@ -241,6 +248,14 @@ function lastPromotion(rows: readonly ChatRow[]): number {
   return latest;
 }
 
+function advanceRow(row: ChatRow, now: number, limits: ChatLimits): ChatRow | null {
+  if (row.phase === "leaving" && now - row.phaseAt >= limits.leaveMs) return null;
+  if (row.phase === "removed" && now - row.phaseAt >= limits.removedHoldMs) return null;
+  if (active(row) && now - row.shownAt >= limits.lifetimeMs) return { ...row, phase: "leaving", phaseAt: now };
+  if (row.phase === "entering" && now - row.phaseAt >= limits.enterMs) return { ...row, phase: "shown", phaseAt: now };
+  return row;
+}
+
 /**
  * Moves time forward: ends finished phases, retires expired rows, promotes queued messages and enforces the row
  * bound. Returns the same object when nothing changes.
@@ -249,25 +264,9 @@ function advance(state: ChatState, now: number, limits: ChatLimits): ChatState {
   let changed = false;
   let rows: ChatRow[] = [];
   for (const row of state.rows) {
-    if (row.phase === "leaving" && now - row.phaseAt >= limits.leaveMs) {
-      changed = true;
-      continue;
-    }
-    if (row.phase === "removed" && now - row.phaseAt >= limits.removedHoldMs) {
-      changed = true;
-      continue;
-    }
-    if (active(row) && now - row.shownAt >= limits.lifetimeMs) {
-      rows.push({ ...row, phase: "leaving", phaseAt: now });
-      changed = true;
-      continue;
-    }
-    if (row.phase === "entering" && now - row.phaseAt >= limits.enterMs) {
-      rows.push({ ...row, phase: "shown", phaseAt: now });
-      changed = true;
-      continue;
-    }
-    rows.push(row);
+    const next: ChatRow | null = advanceRow(row, now, limits);
+    if (next !== row) changed = true;
+    if (next !== null) rows.push(next);
   }
   let pending: ChatRow[] = state.pending;
   if (pending.length > 0 && now - lastPromotion(rows) >= limits.enterIntervalMs) {

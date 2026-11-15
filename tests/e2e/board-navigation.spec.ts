@@ -52,6 +52,7 @@ test("phone list and detail: Back and browser Back keep filters, scroll position
   // Keyboard and the browser's Back do the same.
   await target.press("Enter");
   await expect(title).toBeFocused();
+  await expect(page).toHaveURL(/entry=/);
   await page.goBack();
   await expect(page).not.toHaveURL(/entry=/);
   await expect(target).toBeFocused();
@@ -95,7 +96,10 @@ test("desktop Ideas filter without results offers All ideas in the detail pane",
     "href",
     "/@streambullets",
   );
-  await page.getByRole("navigation", { name: "Filter by status" }).getByRole("link", { name: "Planned", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Filter by status" })
+    .getByRole("link", { name: "Planned", exact: true })
+    .click();
   await expect(page.locator("#sb-announce-polite")).toHaveText(/^\d+ ideas?$/);
   await page.getByRole("navigation", { name: "Filter by status" }).getByRole("link", { name: "In progress" }).click();
   await detail.getByRole("link", { name: "All ideas" }).click();

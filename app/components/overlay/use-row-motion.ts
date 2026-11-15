@@ -47,6 +47,16 @@ function places(root: HTMLElement): {
   return { items, bottoms, heights };
 }
 
+/** Read the visible offsets before cancelling the current animations. */
+function currentShifts(items: readonly HTMLElement[], running: ReadonlyMap<string, Animation>): Map<string, Shift> {
+  const shifts = new Map<string, Shift>();
+  for (const item of items) {
+    const id: string = rowId(item) ?? "";
+    if (running.get(id)?.playState === "running") shifts.set(id, shiftOf(item));
+  }
+  return shifts;
+}
+
 /**
  * FLIP motion for the chat rows, the children of `list` with `data-row-id`. After each change of `version`, rows
  * that moved slide from where they showed to their new place, and a new row with `data-enter` slides up from one
@@ -86,11 +96,7 @@ export function useRowMotion(list: RefObject<HTMLElement | null>, version: unkno
     if (!moved) return;
 
     // Where each sliding row shows now, then stop the slides in flight.
-    const shifts = new Map<string, Shift>();
-    for (const item of items) {
-      const id: string = rowId(item) ?? "";
-      if (running.current.get(id)?.playState === "running") shifts.set(id, shiftOf(item));
-    }
+    const shifts: Map<string, Shift> = currentShifts(items, running.current);
     const gap: number = Number.parseFloat(getComputedStyle(root).rowGap) || 0;
     for (const animation of running.current.values()) animation.cancel();
     running.current.clear();

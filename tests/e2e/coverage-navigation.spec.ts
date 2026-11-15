@@ -22,6 +22,11 @@ for (const mocked of [false, true]) {
       throw error;
     }));
     const context = await browser.newContext({ baseURL: origin });
+    await context.route("**/coverage-navigation-start", (route) => route.fulfill({
+      contentType: "text/html",
+      headers: { "Cross-Origin-Opener-Policy": "same-origin" },
+      body: "<!doctype html><html lang=\"en\"><title>Coverage navigation probe</title><body>Coverage probe</body></html>",
+    }));
     const page = await newPage(context);
     const probe: string = `/assets/coverage-navigation-probe.js?run=${randomUUID()}`;
     const redirect: string = "https://coverage-navigation.example.test/authorize";
@@ -32,7 +37,7 @@ for (const mocked of [false, true]) {
     if (mocked) await page.route(redirect, async (route): Promise<void> => {
       await checkpointNavigation(page, () => route.fulfill({ status: 302, headers: { location: `${origin}/streamers` }, body: "" }));
     });
-    await page.goto("/");
+    await page.goto("/coverage-navigation-start");
     await page.addScriptTag({ url: probe });
     expect(await page.evaluate((): number => (
       window as unknown as { coverageNavigationProbe: () => number }
