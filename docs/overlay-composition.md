@@ -132,9 +132,8 @@ A larger layer source shows the layer larger.
 
 The overlay background is transparent, so you do not need custom CSS.
 
-After the update that added the chat layer, refresh each open OBS source one time.
-You do this step only one time. An OBS source that opened before this update does not show the chat.
-The editor shows this step under **Show on stream** for the chat layer.
+Upgrade note: after you deploy the release that added the chat layer, refresh each open OBS source one time.
+An OBS source that opened before this release does not show the chat.
 
 ### Live-room seats
 
@@ -154,6 +153,7 @@ Under **Preview background**, select **Transparent** or **Sample game**.
 To change the layout, do these steps:
 
 1. Under **Screen orientation**, select **Horizontal 16 × 9** or **Vertical 9 × 16**.
+   OBS changes to the new orientation at once. Each orientation keeps its own layout.
 2. Under **Layer**, select the layer to draw.
 3. To draw the selected layer, drag across empty cells. The layer moves to the new cells.
 4. To move a placed layer, drag it. This also selects the layer.
@@ -172,6 +172,8 @@ You can use the keyboard on the grid:
 | Escape | Cancels a move or a drawing. |
 
 A screen reader reads each result from a polite live region under the grid.
+The grid is in a region with the `application` role. Thus a screen reader sends the keys to the grid, also in browse mode.
+If the orientation changes or the grid loses focus during a move or a drawing, the editor cancels it.
 
 **Remove from grid** removes the content cell. Then the content uses the full frame again.
 The chat layer and the characters layer cannot leave the grid. Use **Show on stream** to show or hide them.
@@ -185,9 +187,9 @@ The error tells you to make the change again and gives the reason.
 The page scrolls to the error, so that you can see it.
 
 Each editor has a random ID. Each layer save sends this ID and a number that increases with each save.
-The server keeps the ID and the number of the last save that it applied.
-It ignores a save of the same editor with a number that is not larger. The answer is the current state, not an error.
-Thus when you leave during a save, the newer value stays, also if the older save arrives last.
+The server keeps the largest applied number of each of the last 8 editors.
+It ignores a save with a number that is not larger than the kept number of its editor. The answer is the current state, not an error.
+Thus when you leave during a save, the newer value stays, also if a different tab saves before the older save arrives.
 
 Each save counts against the write quota of 60 changes each minute.
 If a save fails, the editor shows the saved layers again.
@@ -203,10 +205,10 @@ The samples include all three platforms, Unicode text, emoji, an emote, and a co
 ## Chat test
 
 Use the chat test to see the chat in your real OBS scene before you go live.
-Under the chat layer in **Composition**, select **Start chat test**. The chat layer must be on.
+Under the chat layer in **Composition**, select **Start chat test**. The chat layer must be on. If it is off, the server refuses the start.
 
 - The test runs for 60 seconds (`CHAT_TEST_MS`). **Stop** ends it at once.
-- The editor shows the remaining time.
+- The editor shows the remaining time. A screen reader reads only the start and the end of the test.
 - Each overlay page that shows the chat layer plays sample chat from all three platforms.
   The samples include a message that a moderator removes and a user timeout.
 - A **TEST** tag shows in the top-right corner of the chat layer.
@@ -214,6 +216,7 @@ Under the chat layer in **Composition**, select **Start chat test**. The chat la
 
 The overlay page makes the sample messages itself. Nothing goes to Twitch, YouTube, or Kick, and the server stores no messages.
 The server stores only the end time of the test, in the overlay state.
+The end time and the write sequence of the editors are technical values. The account export does not include them.
 
 The live room sends the end time to each open overlay page. Thus an OBS source that opens during the test also shows it.
 Each page ends the test with its own timer at the end time. An end time in the past means no test.

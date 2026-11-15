@@ -112,12 +112,13 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
 - The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for `content`.
 - After the merge, no two layers can overlap in an orientation. A content layer without a cell does not count.
 - `write` is `{writer, seq}`. `writer` is a random ID of 8 to 64 letters, digits, `_` or `-`. `seq` is a positive integer.
-  The server keeps the `write` of the last applied change. It ignores a change with the same `writer` and a `seq` that is not larger.
-  The server then answers `200` with the current state. A change without `write` always applies.
+  The server keeps the largest applied `seq` of each of the last 8 writers. It ignores a change with a `seq` that is not larger than the kept `seq` of its `writer`.
+  The server then answers `200` with the current state and does not notify the overlay pages. A change without `write` always applies.
 - The body changes only the fields that it names. The API merges each field into the saved layers.
   Thus send only the fields that you change. Unknown fields return `400`.
 - The change goes live at once. Overlay pages get the new `layers` through the live room.
 - `chatTest` with `on: true` sets `chatTestUntil` to the server time plus 60 seconds. With `on: false` it sets 0.
+  `on: true` returns `400` when the chat layer is off. `on: false` always applies.
   Overlay pages get the value through the live room. A time in the past means no test.
 - Each `layers` and `chatTest` action counts against the write quota of 60 changes each minute.
 - The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.

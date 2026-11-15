@@ -46,12 +46,29 @@ describe("grid edits", () => {
 
   it("refuses a cell over another layer or below the minimum size, and allows the layer's own place", () => {
     const cells = DEFAULT_LAYERS.cells.horizontal;
-    expect(placeProblem(cells, "content", cell)).toBeNull();
-    expect(placeProblem(cells, "content", { c: 4, r: 0, w: 4, h: 2 })).toEqual({ kind: "overlap", other: "chat" });
-    expect(placeProblem(cells, "chat", { c: 0, r: 5, w: 5, h: 3 })).toEqual({ kind: "overlap", other: "characters" });
-    expect(placeProblem(cells, "chat", { c: 1, r: 1, w: 5, h: 5 })).toBeNull();
-    expect(placeProblem(cells, "content", { c: 10, r: 0, w: 3, h: 2 })).toEqual({ kind: "small" });
-    expect(placeProblem(cells, "characters", { c: 6, r: 0, w: 5, h: 2 })).toEqual({ kind: "small" });
+    expect(placeProblem("horizontal", cells, "content", cell)).toBeNull();
+    expect(placeProblem("horizontal", cells, "content", { c: 4, r: 0, w: 4, h: 2 })).toEqual({
+      kind: "overlap",
+      other: "chat",
+    });
+    expect(placeProblem("horizontal", cells, "chat", { c: 0, r: 5, w: 5, h: 3 })).toEqual({
+      kind: "overlap",
+      other: "characters",
+    });
+    expect(placeProblem("horizontal", cells, "chat", { c: 1, r: 1, w: 5, h: 5 })).toBeNull();
+    expect(placeProblem("horizontal", cells, "content", { c: 10, r: 0, w: 3, h: 2 })).toEqual({ kind: "small" });
+    expect(placeProblem("horizontal", cells, "characters", { c: 6, r: 0, w: 5, h: 2 })).toEqual({ kind: "small" });
+  });
+
+  it("refuses a cell outside the grid of the orientation", () => {
+    const cells = DEFAULT_LAYERS.cells.horizontal;
+    // A horizontal cell at column 10 does not fit the 9 columns of the vertical grid.
+    expect(placeProblem("vertical", DEFAULT_LAYERS.cells.vertical, "content", cell)).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "content", { c: 12, r: 0, w: 5, h: 2 })).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "content", { c: 10, r: 5, w: 4, h: 5 })).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "content", { c: -1, r: 0, w: 4, h: 2 })).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "content", { c: 6, r: -1, w: 4, h: 2 })).toEqual({ kind: "outside" });
+    expect(placeProblem("horizontal", cells, "content", { c: 12, r: 0, w: 4, h: 2 })).toBeNull();
   });
 
   it("replaces one layer's cell in one orientation and removes a content cell", () => {

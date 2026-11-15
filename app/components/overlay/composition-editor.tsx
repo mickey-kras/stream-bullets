@@ -24,8 +24,6 @@ import type { OverlayScene } from "./overlay-stage";
 import { useChatOverlap } from "./use-chat-overlap";
 import { useLayerDraft, type EditorError, type EditTiming } from "./use-layer-draft";
 
-export { SAVE_IDLE_MS } from "./use-layer-draft";
-
 const BACKGROUNDS: readonly (readonly [PreviewBackground, MessageId])[] = [
   ["checker", "overlay.comp.bgChecker"],
   ["game", "overlay.comp.bgGame"],
@@ -36,7 +34,7 @@ const ORIENTATION_NAMES: Readonly<Record<Orientation, MessageId>> = {
 };
 
 /** Debounce for the overlap note: it changes only once a move has settled. */
-export const OVERLAP_NOTE_MS = 500;
+const OVERLAP_NOTE_MS = 500;
 
 /**
  * The save error under the editor. The error of a change sent while leaving can show when the editor opens, below
@@ -59,7 +57,11 @@ function EditorAlert({ error }: Readonly<{ error: EditorError }>): ReactNode {
   );
 }
 
-/** Start and Stop for the chat test, with the time left. The test needs the chat layer on. */
+/**
+ * Start and Stop for the chat test, with the time left. The test needs the chat layer on. The button never takes the
+ * `disabled` attribute: it keeps focus during its own request and when the test ends, and ignores presses while it
+ * is unavailable. A polite region says when the test starts and stops; the time left is not read each second.
+ */
 function ChatTest({
   until,
   now,
@@ -77,6 +79,15 @@ function ChatTest({
   const [busy, setBusy] = useState<boolean>(false);
   const left: number = chatTestLeft(until, now);
   const running: boolean = left > 0;
+  const unavailable: boolean = busy || (!running && !enabled);
+  // Empty on page load; set when `running` changes, so the region speaks only for a start or a stop.
+  const [news, setNews] = useState<string>("");
+  const wasRunning = useRef<boolean>(running);
+  useEffect(() => {
+    if (wasRunning.current === running) return;
+    wasRunning.current = running;
+    setNews(running ? t("overlay.test.started", { seconds: CHAT_TEST_MS / 1000 }) : t("overlay.test.stopped"));
+  }, [running]);
   async function send(on: boolean): Promise<void> {
     setBusy(true);
     try {
@@ -92,9 +103,11 @@ function ChatTest({
     <div className="ov-comp-test" data-chat-test-control>
       <button
         type="button"
-        disabled={busy || (!running && !enabled)}
+        aria-disabled={unavailable}
         aria-describedby={hintId}
-        onClick={() => void send(!running)}
+        onClick={() => {
+          if (!unavailable) void send(!running);
+        }}
         data-chat-test-toggle
       >
         {t(running ? "overlay.test.stop" : "overlay.test.start")}
@@ -103,6 +116,9 @@ function ChatTest({
         {running
           ? t("overlay.test.left", { seconds: Math.ceil(left / 1000) })
           : t(enabled ? "overlay.test.hint" : "overlay.test.needsChat", { seconds: CHAT_TEST_MS / 1000 })}
+      </p>
+      <p className="sr-only" aria-live="polite" data-chat-test-news>
+        {news}
       </p>
     </div>
   );
@@ -130,6 +146,7 @@ export function CompositionEditor({
 }>): ReactNode {
   const titleId: string = useId();
   const commandsId: string = useId();
+  const orientationNoteId: string = useId();
   const [background, setBackground] = useState<PreviewBackground>("checker");
   const [selected, setSelected] = useState<GridLayer>("chat");
   const { shown, status, error, edit } = useLayerDraft(layers, onSaved);
@@ -179,6 +196,7 @@ export function CompositionEditor({
                     key={value}
                     type="button"
                     aria-pressed={orientation === value}
+                    aria-describedby={orientationNoteId}
                     onClick={() => change((current) => ({ ...current, orientation: value }))}
                     data-comp-orientation={value}
                   >
@@ -186,6 +204,9 @@ export function CompositionEditor({
                   </button>
                 ))}
               </div>
+              <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
+                {t("overlay.grid.orientationNote")}
+              </p>
             </fieldset>
             <fieldset className="field ov-seg-field">
               <legend className="field-label">{t("overlay.grid.layer")}</legend>
@@ -268,9 +289,6 @@ export function CompositionEditor({
             </label>
             <p className="muted ov-comp-note" data-comp-scale>
               {t("overlay.comp.scaleNote")}
-            </p>
-            <p className="muted ov-comp-note" data-comp-refresh>
-              {t("overlay.comp.refreshHint")}
             </p>
             <label className="choice">
               <input

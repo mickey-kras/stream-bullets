@@ -30,6 +30,7 @@ const layersWriteSchema = z
     seq: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
   })
   .strict();
+type LayersWrite = z.infer<typeof layersWriteSchema>;
 
 // `POST /api/overlay`. Every action returns the whole new state.
 export const overlayActionSchema = z.discriminatedUnion("action", [
@@ -123,7 +124,11 @@ export async function nextOverlayState(
     next.messageStyle = action.style;
   }
   if (action.action === "layers") next.layers = mergedLayers(current.layers, action);
-  if (action.action === "chatTest") next.chatTestUntil = action.on ? now + CHAT_TEST_MS : 0;
+  if (action.action === "chatTest") {
+    // The test plays in the chat layer, so it cannot start while the layer is off. Stop always works.
+    if (action.on && !current.layers.chat.enabled) throw new HttpError(400, "Turn on the chat layer first.");
+    next.chatTestUntil = action.on ? now + CHAT_TEST_MS : 0;
+  }
   // Instant switch skips the preview: whatever is previewed is on air.
   if (next.instant) next.air = next.preview;
   return next;
@@ -167,42 +172,60 @@ async function refreshWhere(
 // Retry limit for concurrent overlay saves.
 const OVERLAY_WRITE_ATTEMPTS = 3;
 
-// The last applied layer write: the editor id and its write number.
-const lastWriteSchema = z.object({ layers_writer: z.string().max(64), layers_seq: z.number().int().nonnegative() });
-type LastWrite = z.infer<typeof lastWriteSchema>;
+// The number of editors whose last applied layer write the server keeps (`overlay_state.layers_writes`).
+const WRITERS_KEPT = 8;
 
-// Compare-and-set the revision. On conflict, reapply the action to current state; callers then
-// `notifyOverlay`. A layer write that an editor already passed (same writer, a seq not above the last applied one)
-// changes nothing and returns the current state: a request that a slower network delivers late never overwrites
-// the newer layers of the same editor.
+// The last applied layer write of each recent editor, as [writer, seq] pairs, the most recent editor first.
+const layersWritesSchema = z.array(z.tuple([z.string().max(64), z.number().int().positive()])).max(WRITERS_KEPT);
+type LayersWrites = z.infer<typeof layersWritesSchema>;
+
+// `writes` with `write` as the most recent entry. The oldest editor drops out after WRITERS_KEPT editors.
+function recordWrite(writes: LayersWrites, write: LayersWrite): LayersWrites {
+  const others: LayersWrites = writes.filter(([writer]: [string, number]): boolean => writer !== write.writer);
+  const latest: [string, number] = [write.writer, write.seq];
+  return [latest, ...others].slice(0, WRITERS_KEPT);
+}
+
+// True when the editor of `write` already has an applied write with the same or a larger number.
+function passedWrite(writes: LayersWrites, write: LayersWrite): boolean {
+  return writes.some(([writer, seq]: [string, number]): boolean => writer === write.writer && write.seq <= seq);
+}
+
+/** The result of `updateOverlay`. `changed` is false when the server ignored an old layer write. */
+export interface OverlayUpdate {
+  overlay: OverlayState;
+  changed: boolean;
+}
+
+// Compare-and-set the revision. On conflict, reapply the action to current state; callers then `notifyOverlay` if
+// `changed`. A layer write that its editor already passed (a seq not above the last applied seq of that writer)
+// changes nothing and returns the current state: a request that a slower network delivers late never overwrites the
+// newer layers of the same editor, also when other editors saved in between.
 export async function updateOverlay(
   env: AppEnv,
   userId: string,
   streamerId: string,
   action: OverlayAction,
-): Promise<OverlayState> {
+): Promise<OverlayUpdate> {
   const page = await assertStreamerWritable(env, streamerId, userId);
   if (page.ownerId !== userId) throw new HttpError(403, "Only the streamer can control the overlay.");
-  const write = action.action === "layers" ? action.write : undefined;
+  const write: LayersWrite | undefined = action.action === "layers" ? action.write : undefined;
   for (let attempt = 0; attempt < OVERLAY_WRITE_ATTEMPTS; attempt++) {
-    const row = await env.DB.prepare(
-      `SELECT ${OVERLAY_COLUMNS},layers_writer,layers_seq FROM overlay_state WHERE streamer_id=?`,
-    )
+    const row = await env.DB.prepare(`SELECT ${OVERLAY_COLUMNS},layers_writes FROM overlay_state WHERE streamer_id=?`)
       .bind(streamerId)
-      .first<OverlayRow & LastWrite>();
+      .first<OverlayRow & { layers_writes: string }>();
     const current = overlayValue(row);
-    const last: LastWrite = row ? lastWriteSchema.parse(row) : { layers_writer: "", layers_seq: 0 };
-    if (write && write.writer === last.layers_writer && write.seq <= last.layers_seq) return current;
+    const writes: LayersWrites = row ? layersWritesSchema.parse(JSON.parse(row.layers_writes)) : [];
+    if (write && passedWrite(writes, write)) return { overlay: current, changed: false };
     const next = await nextOverlayState(env, streamerId, current, action);
-    const applied: LastWrite = write ? { layers_writer: write.writer, layers_seq: write.seq } : last;
+    const applied: LayersWrites = write ? recordWrite(writes, write) : writes;
     const result = await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,
-        show_results,message,message_style,layers,chat_test_until,layers_writer,layers_seq,revision,updated_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        show_results,message,message_style,layers,chat_test_until,layers_writes,revision,updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       ON CONFLICT(streamer_id) DO UPDATE SET air=excluded.air,preview=excluded.preview,position=excluded.position,
         size=excluded.size,instant=excluded.instant,show_results=excluded.show_results,message=excluded.message,
         message_style=excluded.message_style,layers=excluded.layers,chat_test_until=excluded.chat_test_until,
-        layers_writer=excluded.layers_writer,layers_seq=excluded.layers_seq,revision=excluded.revision,
-        updated_at=excluded.updated_at
+        layers_writes=excluded.layers_writes,revision=excluded.revision,updated_at=excluded.updated_at
       WHERE overlay_state.revision=?`)
       .bind(
         streamerId,
@@ -216,14 +239,13 @@ export async function updateOverlay(
         next.messageStyle,
         JSON.stringify(next.layers),
         next.chatTestUntil,
-        applied.layers_writer,
-        applied.layers_seq,
+        JSON.stringify(applied),
         next.revision,
         Date.now(),
         current.revision,
       )
       .run();
-    if (result.meta.changes > 0) return next;
+    if (result.meta.changes > 0) return { overlay: next, changed: true };
   }
   throw new HttpError(409, "The overlay changed in another tab. Try again.");
 }

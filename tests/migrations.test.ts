@@ -117,9 +117,9 @@ beforeAll(async (): Promise<void> => {
   ]);
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0026" && file < "0029"),
+    applied.filter((file: string): boolean => file >= "0026" && file < "0030"),
   );
-  // Overlay rows saved before 0029 have no layers.
+  // Overlay rows saved before 0030 have no layers.
   await db
     .prepare(
       `INSERT INTO overlay_state (streamer_id,air,position,message,revision,updated_at)
@@ -128,14 +128,14 @@ beforeAll(async (): Promise<void> => {
     .run();
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0029"),
+    applied.filter((file: string): boolean => file >= "0030"),
   );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0029", (): void => {
+  it("covers 0006 to 0030", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -198,8 +198,8 @@ describe("migrations 0006 onwards", (): void => {
 
   it("adds the chat test end and the layer write order (0030) with defaults for old rows", async (): Promise<void> => {
     expect(
-      await db.prepare("SELECT chat_test_until,layers_writer,layers_seq FROM overlay_state WHERE streamer_id='page'").first(),
-    ).toEqual({ chat_test_until: 0, layers_writer: "", layers_seq: 0 });
+      await db.prepare("SELECT chat_test_until,layers_writes FROM overlay_state WHERE streamer_id='page'").first(),
+    ).toEqual({ chat_test_until: 0, layers_writes: "[]" });
     const rejects = async (column: string, value: number | string | null): Promise<void> => {
       await expect(
         db.prepare(`UPDATE overlay_state SET ${column}=? WHERE streamer_id='page'`).bind(value).run(),
@@ -207,12 +207,16 @@ describe("migrations 0006 onwards", (): void => {
     };
     await rejects("chat_test_until", -1);
     await rejects("chat_test_until", null);
-    await rejects("layers_writer", "x".repeat(65));
-    await rejects("layers_writer", null);
-    await rejects("layers_seq", -1);
+    await rejects("layers_writes", null);
+    await rejects("layers_writes", "not json");
+    await rejects("layers_writes", "{}");
+    const pair = (index: number): [string, number] => [`${index}`.padStart(64, "w"), Number.MAX_SAFE_INTEGER];
+    await rejects("layers_writes", JSON.stringify(Array.from({ length: 9 }, (_, index: number) => [`w${index}`, 1])));
+    // Eight pairs of the longest writer and the largest number fit.
+    const full: string = JSON.stringify(Array.from({ length: 8 }, (_, index: number) => pair(index)));
     await db
-      .prepare("UPDATE overlay_state SET chat_test_until=?,layers_writer=?,layers_seq=? WHERE streamer_id='page'")
-      .bind(1_800_000_000_000, "w".repeat(64), 3)
+      .prepare("UPDATE overlay_state SET chat_test_until=?,layers_writes=? WHERE streamer_id='page'")
+      .bind(1_800_000_000_000, full)
       .run();
   });
 

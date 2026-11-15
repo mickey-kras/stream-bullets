@@ -2322,21 +2322,13 @@
           "autoincrement": false,
           "default": 0
         },
-        "layers_writer": {
-          "name": "layers_writer",
+        "layers_writes": {
+          "name": "layers_writes",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "''"
-        },
-        "layers_seq": {
-          "name": "layers_seq",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
+          "default": "'[]'"
         }
       },
       "indexes": {},
@@ -2394,13 +2386,9 @@
           "name": "overlay_state_chat_test_check",
           "value": "\"overlay_state\".\"chat_test_until\" >= 0"
         },
-        "overlay_state_layers_writer_check": {
-          "name": "overlay_state_layers_writer_check",
-          "value": "length(\"overlay_state\".\"layers_writer\") <= 64"
-        },
-        "overlay_state_layers_seq_check": {
-          "name": "overlay_state_layers_seq_check",
-          "value": "\"overlay_state\".\"layers_seq\" >= 0"
+        "overlay_state_layers_writes_check": {
+          "name": "overlay_state_layers_writes_check",
+          "value": "json_valid(\"overlay_state\".\"layers_writes\") AND json_type(\"overlay_state\".\"layers_writes\") = 'array' AND json_array_length(\"overlay_state\".\"layers_writes\") <= 8 AND length(\"overlay_state\".\"layers_writes\") <= 800"
         },
         "overlay_state_revision_check": {
           "name": "overlay_state_revision_check",

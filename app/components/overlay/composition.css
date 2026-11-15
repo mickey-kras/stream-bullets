@@ -24,9 +24,6 @@
   gap: 10px;
   min-width: 0;
 }
-.ov-comp-bg-field {
-  margin: 0;
-}
 .ov-comp-help {
   margin: 0;
 }
@@ -102,11 +99,20 @@
 .ov-comp-bar .field {
   margin: 0;
 }
+/* The vertical frame fits the screen height between the site header and the page bottom: about 140 px on a wide
+   screen, and about 270 px with the phone Take dock (header 119 px and dock 131 px at 390 × 844). It never gets
+   narrower than 200 px. */
 .ov-comp-frame[data-orientation="vertical"] {
+  --ov-comp-chrome: 140px;
   aspect-ratio: 9 / 16;
   width: 100%;
-  max-width: min(100%, 420px);
+  max-width: min(100%, 420px, max(200px, calc((100dvh - var(--ov-comp-chrome)) * 9 / 16)));
   justify-self: center;
+}
+@media (max-width: 56.25em) {
+  .ov-comp-frame[data-orientation="vertical"] {
+    --ov-comp-chrome: 270px;
+  }
 }
 .ov-grid-lines {
   position: absolute;
@@ -148,14 +154,16 @@
   background: var(--gold);
   color: var(--on-gold);
   font: 700 calc(12px / var(--ov-scale, 1)) / 1.3 var(--body);
-  white-space: nowrap;
+  /* A narrow box wraps the label instead of letting it spill past the box. */
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 .ov-grid-soon {
   justify-self: center;
   align-self: center;
   background: rgb(0 0 0 / 0.55);
   color: var(--cream);
-  white-space: normal;
   text-align: center;
 }
 .ov-grid-preview {
@@ -170,10 +178,14 @@
   border-color: var(--error);
   background: rgb(226 87 76 / 0.25);
 }
-.ov-grid-input {
+.ov-grid-app {
   position: absolute;
   inset: 0;
   z-index: 7;
+}
+.ov-grid-input {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   margin: 0;

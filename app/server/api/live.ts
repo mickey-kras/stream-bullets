@@ -42,8 +42,9 @@ export const liveRoutes: ApiRoute[] = [
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
     // Layer edits arrive from grid drags and keys, so they share the write quota with the chat test switch.
     if (action.action === "layers" || action.action === "chatTest") await consumeMutationQuota(env, viewer.id);
-    const overlay = await updateOverlay(env, viewer.id, streamer.id, action);
-    notifyOverlay(env, streamer.id);
+    const { overlay, changed } = await updateOverlay(env, viewer.id, streamer.id, action);
+    // An ignored old layer write changed nothing, so the overlay pages need no update.
+    if (changed) notifyOverlay(env, streamer.id);
     return json({ overlay });
   }),
 ];

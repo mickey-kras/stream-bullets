@@ -1,8 +1,8 @@
 import {
   GRID,
   GRID_LAYERS,
-  MIN_CELLS,
   ORIENTATIONS,
+  cellFits,
   cellsOverlap,
   copyCell,
   type CellRect,
@@ -179,14 +179,23 @@ export function layerAt(cells: LayerCells, cell: Cell): GridLayer | null {
   return null;
 }
 
-export type PlaceProblem = { kind: "overlap"; other: GridLayer } | { kind: "small" };
+export type PlaceProblem = { kind: "outside" } | { kind: "overlap"; other: GridLayer } | { kind: "small" };
 
-/** Why `rect` cannot be the cell of `layer` (it touches another layer or is below the minimum), or null. */
-export function placeProblem(cells: LayerCells, layer: GridLayer, rect: CellRect): PlaceProblem | null {
+/**
+ * Why `rect` cannot be the cell of `layer` in `orientation` (it leaves the grid, touches another layer or is below
+ * the minimum), or null. The server refuses the same cells.
+ */
+export function placeProblem(
+  orientation: Orientation,
+  cells: LayerCells,
+  layer: GridLayer,
+  rect: CellRect,
+): PlaceProblem | null {
+  const { cols, rows } = GRID[orientation];
+  if (rect.c < 0 || rect.r < 0 || rect.c + rect.w > cols || rect.r + rect.h > rows) return { kind: "outside" };
   for (const other of GRID_LAYERS) {
     const place: CellRect | null = cells[other];
     if (other !== layer && place && cellsOverlap(rect, place)) return { kind: "overlap", other };
   }
-  const min = MIN_CELLS[layer];
-  return rect.w < min.w || rect.h < min.h ? { kind: "small" } : null;
+  return cellFits(orientation, layer, rect) ? null : { kind: "small" };
 }

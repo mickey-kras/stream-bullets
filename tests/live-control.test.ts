@@ -11,7 +11,13 @@ import { DEFAULT_LAYERS, type CellRect, type OverlayLayers } from "../app/lib/ov
 import { mashValue } from "../app/server/mash-sql";
 import { runMashAction } from "../app/server/mash.server";
 import { DEFAULT_OVERLAY, overlayPublic, overlayValue, type OverlayRow } from "../app/server/overlay-state";
-import { getOverlayData, getOverlayState, nextOverlayState, updateOverlay } from "../app/server/overlay.server";
+import {
+  getOverlayData,
+  getOverlayState,
+  nextOverlayState,
+  updateOverlay,
+  type OverlayUpdate,
+} from "../app/server/overlay.server";
 import type { OverlayData, OverlayState, StreamEvent } from "../app/types";
 import { controlState } from "../app/components/overlay/overlay-control";
 import { loader as controlLoader } from "../app/routes/overlay-control";
@@ -661,9 +667,10 @@ describe("overlay control", (): void => {
 
   it("re-applies an action when another tab saved in between, so neither change is lost", async (): Promise<void> => {
     await updateOverlay(env, "owner", page, { action: "message", text: "Hi", style: "info" });
-    const other = (): Promise<OverlayState> => updateOverlay(env, "owner", page, { action: "layout", position: "top" });
+    const other = (): Promise<OverlayUpdate> =>
+      updateOverlay(env, "owner", page, { action: "layout", position: "top" });
     const raced = racingEnv(other, 1);
-    const state = await updateOverlay(raced, "owner", page, {
+    const { overlay: state } = await updateOverlay(raced, "owner", page, {
       action: "message",
       text: "Be right back",
       style: "hype",
@@ -676,7 +683,7 @@ describe("overlay control", (): void => {
   it("answers 409 when other tabs keep saving first", async (): Promise<void> => {
     let size = 0;
     const sizes = ["s", "m", "l"] as const;
-    const other = (): Promise<OverlayState> =>
+    const other = (): Promise<OverlayUpdate> =>
       updateOverlay(env, "owner", page, { action: "layout", size: sizes[size++ % 3] });
     await expect(
       updateOverlay(racingEnv(other, 3), "owner", page, { action: "layout", position: "center" }),
@@ -855,25 +862,56 @@ describe("overlay control", (): void => {
 
     describe("write order of one editor", (): void => {
       const writer = "editor-0000-1111";
-      const moveChat = (c: number, seq: number, by: string = writer) =>
+      const moveChat = async (c: number, seq: number, by: string = writer): Promise<OverlayUpdate> =>
         updateOverlay(env, "owner", page, {
           action: "layers",
           write: { writer: by, seq },
           cells: { horizontal: { chat: { c, r: 0, w: 3, h: 2 } } },
         });
       const chatColumn = async (): Promise<number> => (await getOverlayState(env, page)).layers.cells.horizontal.chat.c;
+      const storedWrites = async (): Promise<unknown> =>
+        JSON.parse(
+          (
+            await env.DB.prepare("SELECT layers_writes FROM overlay_state WHERE streamer_id=?")
+              .bind(page)
+              .first<{ layers_writes: string }>()
+          )?.layers_writes ?? "null",
+        );
 
       it("ignores an older write of the same editor that arrives after a newer one", async (): Promise<void> => {
         // The pagehide request (seq 2) commits first; the earlier save (seq 1) arrives late.
         const newer = await moveChat(9, 2);
         const older = await moveChat(5, 1);
         expect(await chatColumn()).toBe(9);
-        // The late write succeeds with the current state and changes nothing.
-        expect(older).toEqual(newer);
-        expect(older.revision).toBe(1);
+        // The late write succeeds with the current state, changes nothing and reports that.
+        expect(older).toEqual({ overlay: newer.overlay, changed: false });
+        expect(older.overlay.revision).toBe(1);
         // The same number again is also old.
-        expect(await moveChat(6, 2)).toEqual(newer);
+        expect(await moveChat(6, 2)).toEqual({ overlay: newer.overlay, changed: false });
         expect(await chatColumn()).toBe(9);
+      });
+
+      it("ignores a late write of an editor also when another editor saved in between", async (): Promise<void> => {
+        // Editor A: N+1 (pagehide) lands, then tab B saves, then A's late write N arrives.
+        await moveChat(9, 2);
+        await moveChat(12, 1, "editor-2222-3333");
+        expect((await moveChat(5, 1)).changed).toBe(false);
+        expect(await chatColumn()).toBe(12);
+        expect(await storedWrites()).toEqual([
+          ["editor-2222-3333", 1],
+          [writer, 2],
+        ]);
+      });
+
+      it("keeps the last write of the 8 most recent editors", async (): Promise<void> => {
+        for (let index = 0; index < 9; index++) await moveChat(index, 5, `editor-${index}-abcd`);
+        const writes = (await storedWrites()) as [string, number][];
+        expect(writes.map(([by]) => by)).toEqual(
+          Array.from({ length: 8 }, (_, index: number) => `editor-${8 - index}-abcd`),
+        );
+        // The oldest editor dropped out, so its next write applies again.
+        expect((await moveChat(13, 1, "editor-0-abcd")).changed).toBe(true);
+        expect((await storedWrites()) as [string, number][]).toHaveLength(8);
       });
 
       it("applies writes in order, and writes of another editor or without an order", async (): Promise<void> => {
@@ -885,19 +923,19 @@ describe("overlay control", (): void => {
         expect(await chatColumn()).toBe(7);
         await updateOverlay(env, "owner", page, { action: "layers", cells: { horizontal: { chat: chatCell } } });
         expect(await chatColumn()).toBe(10);
-        // Other actions keep the last write.
+        // Other actions keep the last writes.
         await updateOverlay(env, "owner", page, { action: "layout", size: "s" });
-        expect((await moveChat(8, 1, "editor-2222-3333")).layers.cells.horizontal.chat.c).toBe(10);
-        const stored = await env.DB.prepare("SELECT layers_writer,layers_seq FROM overlay_state WHERE streamer_id=?")
-          .bind(page)
-          .first();
-        expect(stored).toEqual({ layers_writer: "editor-2222-3333", layers_seq: 1 });
+        expect((await moveChat(8, 1, "editor-2222-3333")).overlay.layers.cells.horizontal.chat.c).toBe(10);
+        expect(await storedWrites()).toEqual([
+          ["editor-2222-3333", 1],
+          [writer, 2],
+        ]);
       });
 
       it("checks the order again when a concurrent save makes it retry", async (): Promise<void> => {
         // The newer write lands between the read and the save of the older one.
         const raced = racingEnv(() => moveChat(9, 2), 1);
-        const state = await updateOverlay(raced, "owner", page, {
+        const { overlay: state } = await updateOverlay(raced, "owner", page, {
           action: "layers",
           write: { writer, seq: 1 },
           cells: { horizontal: { chat: { c: 5, r: 0, w: 3, h: 2 } } },
@@ -905,11 +943,20 @@ describe("overlay control", (): void => {
         expect(state.layers.cells.horizontal.chat.c).toBe(9);
         expect(await chatColumn()).toBe(9);
       });
+
+      it("does not notify the overlay pages for an ignored write", async (): Promise<void> => {
+        const cells = { horizontal: { chat: { c: 4, r: 0, w: 3, h: 2 } } };
+        expect((await send({ action: "layers", write: { writer, seq: 2 }, cells })).status).toBe(200);
+        const late = await send({ action: "layers", write: { writer, seq: 1 }, cells });
+        expect(late.status).toBe(200);
+        expect(roomCalls).toEqual([{ path: `/overlay?streamerId=${page}`, body: "" }]);
+      });
     });
   });
 
   describe("chat test", (): void => {
     it("stores the end time, broadcasts it and stops at once", async (): Promise<void> => {
+      await updateOverlay(env, "owner", page, { action: "layers", chat: { enabled: true } });
       const before: number = Date.now();
       const started = await overlay(await send({ action: "chatTest", on: true }));
       expect(started.chatTestUntil).toBeGreaterThanOrEqual(before + CHAT_TEST_MS);
@@ -923,7 +970,8 @@ describe("overlay control", (): void => {
     });
 
     it("uses the server time of the action and keeps the other values", async (): Promise<void> => {
-      const current: OverlayState = { ...DEFAULT_OVERLAY, message: "Hi", revision: 3 };
+      const layers: OverlayLayers = { ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, enabled: true } };
+      const current: OverlayState = { ...DEFAULT_OVERLAY, message: "Hi", layers, revision: 3 };
       expect(await nextOverlayState(env, page, current, { action: "chatTest", on: true }, 5_000)).toEqual({
         ...current,
         chatTestUntil: 5_000 + CHAT_TEST_MS,
@@ -932,6 +980,15 @@ describe("overlay control", (): void => {
       expect(
         await nextOverlayState(env, page, { ...current, chatTestUntil: 9 }, { action: "chatTest", on: false }, 1),
       ).toEqual({ ...current, revision: 4 });
+    });
+
+    it("refuses to start while the chat layer is off, but stops", async (): Promise<void> => {
+      const refused = await send({ action: "chatTest", on: true });
+      expect(refused.status).toBe(400);
+      expect(await body<{ error: string }>(refused)).toEqual({ error: "Turn on the chat layer first." });
+      expect((await getOverlayState(env, page)).chatTestUntil).toBe(0);
+      expect((await overlay(await send({ action: "chatTest", on: false }))).chatTestUntil).toBe(0);
+      expect(roomCalls).toHaveLength(1);
     });
 
     it("refuses a bad body and a viewer", async (): Promise<void> => {

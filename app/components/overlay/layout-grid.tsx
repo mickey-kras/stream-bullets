@@ -4,6 +4,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent,
+  type MouseEvent,
   type PointerEvent,
   type ReactNode,
 } from "react";
@@ -19,6 +20,7 @@ import {
   type CellRect,
   type GridLayer,
   type LayerCells,
+  type Orientation,
   type OverlayLayers,
 } from "../../lib/overlay-layers";
 import type { OverlaySourceRef } from "../../types";
@@ -47,7 +49,7 @@ type Drag =
   | { mode: "move"; layer: GridLayer; grab: Cell; at: Cell };
 
 /** The cell a drag would give its layer. */
-function dragShape(cells: LayerCells, orientation: OverlayLayers["orientation"], drag: Drag): CellRect | null {
+function dragShape(cells: LayerCells, orientation: Orientation, drag: Drag): CellRect | null {
   if (drag.mode === "paint") return spanCells(drag.from, drag.to);
   const rect: CellRect | null = cells[drag.layer];
   return rect ? moveCell(orientation, rect, drag.grab, drag.at) : null;
@@ -58,6 +60,7 @@ function name(layer: GridLayer): string {
 }
 
 function problemText(layer: GridLayer, problem: PlaceProblem): string {
+  if (problem.kind === "outside") return t("overlay.grid.outside");
   if (problem.kind === "overlap") return t("overlay.grid.touches", { layer: name(problem.other) });
   return t("overlay.grid.small", { layer: name(layer), w: MIN_CELLS[layer].w, h: MIN_CELLS[layer].h });
 }
@@ -73,9 +76,11 @@ function boxStyle(rect: CellRect): CSSProperties {
 
 /**
  * The layout grid of the selected orientation over a live preview of the composition. Pointer: drag on empty cells to
- * draw the selected layer, drag a placed layer to move it. Keyboard (the grid is one native button): arrow keys move
- * a cursor, Space or Enter picks up and puts down (draw or move), Shift + arrow moves the selected layer one cell and
- * Escape cancels. A shape that touches another layer or is below the minimum size shows red and is not kept. A polite
+ * draw the selected layer, drag a placed layer to move it. Keyboard (the grid is one native button inside an element
+ * with role "application", so screen readers pass the keys through): arrow keys move a cursor, Space or Enter picks
+ * up and puts down (draw or move), Shift + arrow moves the selected layer one cell and Escape cancels. A click without
+ * a pointer (an assistive technology's activation) acts as Space. A new orientation or leaving the grid ends a drag.
+ * A shape that touches another layer or is below the minimum size shows red and is not kept. A polite
  * live region tells the result.
  */
 export function LayoutGrid({
@@ -97,22 +102,32 @@ export function LayoutGrid({
   /** Keeps a valid cell for a layer. `when` is "idle" for Shift + arrow steps. */
   onPlace: (layer: GridLayer, rect: CellRect, when: "now" | "idle") => void;
 }>): ReactNode {
-  const orientation = layers.orientation;
+  const orientation: Orientation = layers.orientation;
   const { cols, rows } = GRID[orientation];
   const cells: LayerCells = layers.cells[orientation];
   const frame = useRef<HTMLElement | null>(null);
   useDesignScale(frame, cols * CELL_PX);
   const helpId: string = useId();
+  const label: string = t("overlay.grid.label", { cols, rows });
   const [drag, setDrag] = useState<Drag | null>(null);
   const [cursor, setCursor] = useState<Cell>({ c: 0, r: 0 });
   const [focused, setFocused] = useState<boolean>(false);
   const [status, setStatus] = useState<{ text: string; bad: boolean }>({ text: "", bad: false });
-  const say = (text: string, bad: boolean = false): void => setStatus({ text, bad });
+  // The same text again gets a zero-width space at its end, so the live region changes and speaks it again.
+  const say = (text: string, bad: boolean = false): void =>
+    setStatus((last) => ({ text: last.text === text ? `${text}\u200b` : text, bad }));
 
   const clampCell = (cell: Cell): Cell => ({
     c: Math.max(0, Math.min(cols - 1, cell.c)),
     r: Math.max(0, Math.min(rows - 1, cell.r)),
   });
+  // A new orientation ends a drag and brings the cursor into its grid, before a key or a pointer can use them.
+  const [seen, setSeen] = useState<Orientation>(orientation);
+  if (seen !== orientation) {
+    setSeen(orientation);
+    setDrag(null);
+    setCursor(clampCell(cursor));
+  }
 
   const start = (cell: Cell): Drag => {
     const hit: GridLayer | null = layerAt(cells, cell);
@@ -130,7 +145,7 @@ export function LayoutGrid({
     setDrag(null);
     const rect: CellRect | null = dragShape(cells, orientation, active);
     if (!rect) return;
-    const problem: PlaceProblem | null = placeProblem(cells, active.layer, rect);
+    const problem: PlaceProblem | null = placeProblem(orientation, cells, active.layer, rect);
     const key: MessageId = active.mode === "move" ? "overlay.grid.notMoved" : "overlay.grid.notPlaced";
     if (problem) {
       say(`${t(key)} ${problemText(active.layer, problem)}`, true);
@@ -172,6 +187,31 @@ export function LayoutGrid({
   };
   const pointerCancel = (): void => setDrag(null);
 
+  // Space, Enter, or a click without a pointer: put down the drag, or pick up at the cursor.
+  const activate = (): void => {
+    if (drag) {
+      commit(drag);
+      return;
+    }
+    const next: Drag = start(cursor);
+    setDrag(next);
+    say(
+      next.mode === "move"
+        ? t("overlay.grid.moving", { layer: name(next.layer) })
+        : t("overlay.grid.drawing", { layer: name(next.layer), c: cursor.c + 1, r: cursor.r + 1 }),
+    );
+  };
+  // A screen reader's activation sends a click with no pointer (`detail` 0). A mouse click already ran pointerUp.
+  const click = (event: MouseEvent<HTMLButtonElement>): void => {
+    if (event.detail === 0) activate();
+  };
+  const blur = (): void => {
+    setFocused(false);
+    if (!drag) return;
+    setDrag(null);
+    say(t("overlay.grid.cancelled"));
+  };
+
   const keyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     const arrow: readonly [number, number] | undefined = ARROWS[event.key];
@@ -189,7 +229,7 @@ export function LayoutGrid({
         { c: 0, r: 0 },
         { c: rect.c + arrow[0], r: rect.r + arrow[1] },
       );
-      const problem: PlaceProblem | null = placeProblem(cells, selected, next);
+      const problem: PlaceProblem | null = placeProblem(orientation, cells, selected, next);
       if (problem) say(`${t("overlay.grid.notMoved")} ${problemText(selected, problem)}`, true);
       else {
         onPlace(selected, next, "idle");
@@ -206,17 +246,7 @@ export function LayoutGrid({
       );
     } else if (event.key === " " || event.key === "Enter") {
       event.preventDefault();
-      if (drag) {
-        commit(drag);
-        return;
-      }
-      const next: Drag = start(cursor);
-      setDrag(next);
-      say(
-        next.mode === "move"
-          ? t("overlay.grid.moving", { layer: name(next.layer) })
-          : t("overlay.grid.drawing", { layer: name(next.layer), c: cursor.c + 1, r: cursor.r + 1 }),
-      );
+      activate();
     } else if (event.key === "Escape" && drag) {
       event.preventDefault();
       setDrag(null);
@@ -225,7 +255,8 @@ export function LayoutGrid({
   };
 
   const shape: CellRect | null = drag ? dragShape(cells, orientation, drag) : null;
-  const invalid: boolean = drag !== null && shape !== null && placeProblem(cells, drag.layer, shape) !== null;
+  const invalid: boolean =
+    drag !== null && shape !== null && placeProblem(orientation, cells, drag.layer, shape) !== null;
   const lifted: GridLayer | null = drag?.mode === "move" ? drag.layer : null;
 
   return (
@@ -281,24 +312,29 @@ export function LayoutGrid({
               style={boxStyle(shape)}
             />
           )}
-          <button
-            type="button"
-            className="ov-grid-input"
-            data-comp-grid
-            aria-label={t("overlay.grid.label", { cols, rows })}
-            aria-describedby={helpId}
-            onPointerDown={pointerDown}
-            onPointerMove={pointerMove}
-            onPointerUp={pointerUp}
-            onPointerCancel={pointerCancel}
-            onKeyDown={keyDown}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-          >
-            {focused && (
-              <span className="ov-grid-cursor" data-grid-cursor style={boxStyle({ ...cursor, w: 1, h: 1 })} />
-            )}
-          </button>
+          {/* The application role makes screen readers leave browse mode here, so the grid button gets the arrow keys,
+              Space and Enter. The role stays on a wrapper: an application element takes no key handlers. */}
+          <div role="application" className="ov-grid-app" aria-label={label}>
+            <button
+              type="button"
+              className="ov-grid-input"
+              data-comp-grid
+              aria-label={label}
+              aria-describedby={helpId}
+              onPointerDown={pointerDown}
+              onPointerMove={pointerMove}
+              onPointerUp={pointerUp}
+              onPointerCancel={pointerCancel}
+              onClick={click}
+              onKeyDown={keyDown}
+              onFocus={() => setFocused(true)}
+              onBlur={blur}
+            >
+              {focused && (
+                <span className="ov-grid-cursor" data-grid-cursor style={boxStyle({ ...cursor, w: 1, h: 1 })} />
+              )}
+            </button>
+          </div>
         </div>
       </section>
       <p className="muted ov-comp-help" id={helpId}>
