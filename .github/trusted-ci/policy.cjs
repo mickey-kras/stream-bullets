@@ -8,6 +8,9 @@ const { DEPENDENCY_FILES, applicationDependenciesOnly } = require("./policy-depe
 function isPolicyPath(name) {
   return (
     /^(?:\.github|\.vale|scripts)\//.test(name) ||
+    /^tests\/(?:e2e\/(?:coverage|coverage-navigation\.spec)|e2e-coverage\.test)(?:$|\.(?:[cm]?[jt]s|[jt]sx)$|\/)/.test(
+      name,
+    ) ||
     /^\.[^/]+$/.test(name) ||
     /^[^/]*(?:config|lock)[^/]*$/.test(name) ||
     [
