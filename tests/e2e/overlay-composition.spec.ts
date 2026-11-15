@@ -4,7 +4,8 @@ import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../../app/lib/activity";
-import { DEFAULT_LAYERS } from "../../app/lib/overlay-layers";
+import { CHAT_TEST_MS } from "../../app/lib/chat-test";
+import { DEFAULT_LAYERS, cellPixels, type CellRect, type LayerRect } from "../../app/lib/overlay-layers";
 
 const OWNER_IP = clientIp("overlay-composition", 240);
 const OBS_IP = clientIp("overlay-composition", 241);
@@ -69,7 +70,7 @@ test("a per-layer chat source shows and hides the chat live when the owner chang
   await expect(chatLayer).toHaveCount(0);
 
   const show = await owner.request.post("/api/overlay", {
-    data: { action: "layers", chat: { enabled: true, rect: CHAT_RECT } },
+    data: { action: "layers", ...chatAt(CHAT_CELL) },
   });
   expect(show.status()).toBe(200);
   await expect(chatLayer.getByText("Hello from the bunker 1")).toBeVisible();
@@ -86,7 +87,11 @@ test("an unknown layer renders an empty transparent page", async ({ page }) => {
 });
 
 const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
-const CHAT_RECT = { x: 1460, y: 280, w: 420, h: 640 } as const;
+// A chat cell at the right edge, clear of the default characters cells (rows 7 and 8).
+const CHAT_CELL: CellRect = { c: 12, r: 2, w: 4, h: 5 };
+const CHAT_RECT: LayerRect = cellPixels(CHAT_CELL);
+const chatAt = (cell: CellRect) => ({ chat: { enabled: true }, cells: { horizontal: { chat: cell } } });
+const DEFAULT_CHAT: LayerRect = cellPixels(DEFAULT_LAYERS.cells.horizontal.chat);
 
 function setLayers(name: string, layers: object): Promise<void> {
   return runSql(name, [
@@ -149,7 +154,7 @@ async function chatSource(
   opened: (index: number) => string = () => snapshot([]),
   path: string = "/@feature_host/overlay?key=e2e-key&layer=chat",
   // A source sized like the default chat layer.
-  viewport: { width: number; height: number } = { width: DEFAULT_LAYERS.chat.rect.w, height: DEFAULT_LAYERS.chat.rect.h },
+  viewport: { width: number; height: number } = { width: DEFAULT_CHAT.w, height: DEFAULT_CHAT.h },
 ): Promise<ChatSource> {
   const page = await newPage(browser, {
     viewport,
@@ -383,7 +388,7 @@ test.describe("merged chat on the overlay", () => {
   });
 
   test("after a live layer resize, the next row moves the old rows by one row only", async ({ browser }) => {
-    await setLayers("overlay-chat-resize", { chat: { enabled: true, rect: CHAT_RECT } });
+    await setLayers("overlay-chat-resize", chatAt(CHAT_CELL));
     const owner = await signedIn(browser, "featureowner", OWNER_IP);
     const long = "a long message that wraps onto more than one line in a narrow chat layer";
     const rows: ActivityChat[] = [1, 2, 3].map((index: number) =>
@@ -394,11 +399,11 @@ test.describe("merged chat on the overlay", () => {
       await expect(source.rows).toHaveCount(3);
       const canvas = source.page.locator(".ov-layer-canvas");
       const resized = await owner.request.post("/api/overlay", {
-        data: { action: "layers", chat: { enabled: true, rect: { x: 1200, y: 80, w: 700, h: 840 } } },
+        data: { action: "layers", ...chatAt({ c: 10, r: 0, w: 6, h: 7 }) },
       });
       expect(resized.status()).toBe(200);
       await expect(canvas).toHaveCSS("height", "840px");
-      await expect(canvas).toHaveCSS("width", "700px");
+      await expect(canvas).toHaveCSS("width", "720px");
       // Let the resize settle (the resize observer runs before the next paint).
       await source.page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
       const starts: Promise<{ offsets: number[]; step: number }> = withTimeout(
@@ -607,9 +612,7 @@ test.describe("merged chat on the overlay", () => {
 });
 
 test("the chat layer has the same geometry on the OBS composition and in the editor preview", async ({ browser }) => {
-  await setLayers("overlay-geometry-reset", {
-    chat: { enabled: true, rect: CHAT_RECT },
-  });
+  await setLayers("overlay-geometry-reset", chatAt(CHAT_CELL));
   const source = await chatSource(
     browser,
     () =>
@@ -669,8 +672,8 @@ for (const viewport of [
   test(`a per-layer chat source at ${viewport.width}x${viewport.height} fits the layer and keeps the newest row in view`, async ({
     browser,
   }) => {
-    // The OBS source ratio differs from the layer's 420:640: the layer scales to fit and sits bottom-right.
-    await setLayers("overlay-fit-reset", { chat: { enabled: true, rect: CHAT_RECT } });
+    // The OBS source ratio differs from the layer's 480:600: the layer scales to fit and sits bottom-right.
+    await setLayers("overlay-fit-reset", chatAt(CHAT_CELL));
     const now: number = Date.now();
     const rows: ActivityChat[] = Array.from({ length: 24 }, (_, index: number) =>
       message({
@@ -776,7 +779,7 @@ function expectSameRects(actual: DesignRects, expected: DesignRects): void {
 }
 
 test("with chat on, the OBS composition matches the editor preview at 1280x720 and 1920x1080", async ({ browser }) => {
-  // The seeded on-air poll and the default chat rect, which covers the lower part of the poll.
+  // The seeded on-air poll and the default chat cell, which covers the left part of the poll.
   await runSql("overlay-design-air", [
     `UPDATE overlay_state SET air=json_object('type','poll','ref',(SELECT id FROM entries WHERE streamer_id=${FEATURE_HOST} AND title='Which boss first?')), layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
   ]);
@@ -798,9 +801,8 @@ test("with chat on, the OBS composition matches the editor preview at 1280x720 a
       scaler,
       previewScale,
     );
-    // The default chat rect, in the preview.
-    const { x, y, w, h } = DEFAULT_LAYERS.chat.rect;
-    expectSameRects(preview, { poll: preview.poll, chat: { x, y, w, h } });
+    // The default chat cell, in the preview.
+    expectSameRects(preview, { poll: preview.poll, chat: DEFAULT_CHAT });
     await close(owner);
 
     for (const viewport of [
@@ -863,5 +865,143 @@ test("without a feed layer, the OBS composition keeps the responsive content lay
     await setLayers("overlay-design-off-restore", {});
     await close(owner);
     await close(page);
+  }
+});
+
+const seededPoll = `(SELECT id FROM entries WHERE streamer_id=${FEATURE_HOST} AND title='Which boss first?')`;
+
+test("a vertical layout fills a 1080x1920 source and shows the content inside its cell", async ({ browser }) => {
+  const layers = {
+    orientation: "vertical",
+    chat: { enabled: true },
+    cells: { vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, content: { c: 1, r: 1, w: 7, h: 4 } } },
+  };
+  await runSql("overlay-vertical", [
+    `UPDATE overlay_state SET air=json_object('type','poll','ref',${seededPoll}), layers='${JSON.stringify(layers)}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
+  ]);
+  try {
+    // Half of 1080x1920: every design pixel is half a screen pixel.
+    const source = await chatSource(
+      browser,
+      () => snapshot([message({ platform: "youtube", id: "v1", user: "Tall", text: "vertical chat" })]),
+      "/@feature_host/overlay?key=e2e-key",
+      { width: 540, height: 960 },
+    );
+    const page: Page = source.page;
+    await expect(page.locator(".ov-design")).toHaveAttribute("data-scaled", "true");
+    await expect(source.rows).toHaveCount(1);
+    const near = (actual: number, expected: number): void => expect(Math.abs(actual - expected)).toBeLessThanOrEqual(2);
+    const scaler = await page.locator(".ov-scaler").boundingBox();
+    const chatBox = await page.locator('.ov-layer[data-layer="chat"]').boundingBox();
+    const contentBox = await page.locator('.ov-layer[data-layer="content"]').boundingBox();
+    if (!scaler || !chatBox || !contentBox) throw new Error("No vertical geometry.");
+    near(scaler.width, 540);
+    near(scaler.height, 960);
+    for (const [box, rect] of [
+      [chatBox, { x: 0, y: 960, w: 1080, h: 600 }],
+      [contentBox, { x: 120, y: 120, w: 840, h: 480 }],
+    ] as const) {
+      near(box.x, rect.x / 2);
+      near(box.y, rect.y / 2);
+      near(box.width, rect.w / 2);
+      near(box.height, rect.h / 2);
+    }
+    // The content sits in its cell: no full-frame stage, and the poll card fits inside the cell.
+    await expect(page.locator(".ov-composition > .ov-stage")).toHaveCount(0);
+    const card = page.locator('.ov-layer[data-layer="content"] .ov-stage > *').first();
+    await expect(card).toBeVisible();
+    await expect
+      .poll(async () => {
+        const box = await card.boundingBox();
+        return box !== null && box.y >= contentBox.y - 1 && box.y + box.height <= contentBox.y + contentBox.height + 1;
+      })
+      .toBe(true);
+    await close(page);
+
+    // A content source shows the content cell alone.
+    const alone = await newPage(browser, {
+      viewport: { width: 840, height: 480 },
+      extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DESIGN_IP}` },
+    });
+    await alone.goto("/@feature_host/overlay?key=e2e-key&layer=content");
+    await expect(alone.locator('.ov-layer[data-layer="content"][data-alone]')).toHaveAttribute("data-scaled", "true");
+    await expect(alone.locator('.ov-layer[data-layer="content"] .ov-stage > *').first()).toBeVisible();
+    await expect(alone.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
+    await close(alone);
+  } finally {
+    await runSql("overlay-vertical-restore", [
+      `UPDATE overlay_state SET air='{"type":"auto","ref":null}', layers='{}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
+    ]);
+  }
+});
+
+const setTestEnd = (until: number): Promise<void> =>
+  runSql("overlay-test-end", [
+    `UPDATE overlay_state SET chat_test_until=${until}, revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
+  ]);
+
+test("a chat test plays sample chat with a TEST tag in OBS, then the real chat comes back without entering again", async ({
+  browser,
+}) => {
+  await setLayers("overlay-test-reset", { chat: { enabled: true } });
+  const owner = await signedIn(browser, "featureowner", OWNER_IP);
+  const real: ActivityChat = message({ platform: "twitch", id: "t1", user: "Real", text: "real chat stays" });
+  const source = await chatSource(browser, () => snapshot([real]));
+  const tag = source.page.locator("[data-chat-test]");
+  try {
+    await expect.poll(() => rowTexts(source.rows)).toEqual(["real chat stays"]);
+    await expect(tag).toHaveCount(0);
+    const before: number = Date.now();
+    const started = await owner.request.post("/api/overlay", { data: { action: "chatTest", on: true } });
+    expect(started.status()).toBe(200);
+    const until: number = ((await started.json()) as { overlay: { chatTestUntil: number } }).overlay.chatTestUntil;
+    expect(until).toBeGreaterThanOrEqual(before + CHAT_TEST_MS - 5_000);
+
+    // The live room carries the test: sample chat replaces the real chat, with a TEST tag.
+    await expect(tag).toHaveText("TEST");
+    await expect(source.chat.getByText("Wasteland radio is live. Grab a seat by the fire!")).toBeVisible();
+    await expect(source.chat.getByText("real chat stays")).toHaveCount(0);
+    // Real chat keeps arriving underneath, but does not show during the test.
+    source.send(event(message({ platform: "kick", id: "t2", user: "Real", text: "real chat during the test" })));
+    // The test plays a moderator removal too.
+    await expect(source.chat.getByText("message removed by a moderator")).toBeVisible({ timeout: 15_000 });
+    await expect(source.chat.getByText("real chat during the test")).toHaveCount(0);
+
+    // A source opened during the test shows it too.
+    const late = await chatSource(browser, () => snapshot([]));
+    await expect(late.page.locator("[data-chat-test]")).toHaveText("TEST");
+    await close(late.page);
+
+    // Stop ends it at once. The real rows show again, without an entry animation.
+    const shown: Promise<number[]> = animationsWhenRows(source.page, 2);
+    const stopped = await owner.request.post("/api/overlay", { data: { action: "chatTest", on: false } });
+    expect(stopped.status()).toBe(200);
+    expect(await shown).toEqual([0, 0]);
+    await expect(tag).toHaveCount(0);
+    expect(await rowTexts(source.rows)).toEqual(["real chat stays", "real chat during the test"]);
+  } finally {
+    await setTestEnd(0);
+    await close(source.page);
+    await close(owner);
+  }
+});
+
+test("a chat test ends by itself at its end time, and a past end time shows no test", async ({ browser }) => {
+  await setLayers("overlay-test-expiry", { chat: { enabled: true } });
+  try {
+    await setTestEnd(Date.now() - 1_000);
+    const stale = await chatSource(browser);
+    await expect(stale.page.locator("main.overlay-screen")).toHaveAttribute("data-feed-status", "live");
+    await expect(stale.page.locator("[data-chat-test]")).toHaveCount(0);
+    await close(stale.page);
+
+    // No server message ends the test: the page's own timer does.
+    await setTestEnd(Date.now() + 4_000);
+    const source = await chatSource(browser);
+    await expect(source.page.locator("[data-chat-test]")).toHaveText("TEST");
+    await expect(source.page.locator("[data-chat-test]")).toHaveCount(0, { timeout: 10_000 });
+    await close(source.page);
+  } finally {
+    await setTestEnd(0);
   }
 });

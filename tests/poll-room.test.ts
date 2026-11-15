@@ -756,6 +756,8 @@ describe("live room snapshots", (): void => {
       ...DEFAULT_LAYERS,
       chat: { ...DEFAULT_LAYERS.chat, enabled: true, hideCommands: false },
     });
+    // The chat test end time reaches OBS the same way: 0 is no test.
+    expect(update?.overlay.chatTestUntil).toBe(0);
     expect(update?.overlay).not.toHaveProperty("preview");
     streamerId = page;
     expect(socket.ofType("overlay")).toEqual([]);

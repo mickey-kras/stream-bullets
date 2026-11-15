@@ -1,7 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { copyText } from "../../lib/clipboard";
-import { layerUrl, type LayerRect, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
+import { layerPixels, layerUrl, type LayerRect, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
 import { errorMessage, postJson } from "../api";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { IconButton } from "../ui/icon-button";
@@ -14,13 +14,6 @@ const LAYER_LINKS: readonly (readonly [OverlayLayer, MessageId])[] = [
   ["content", "overlay.layer.content"],
   ["characters", "overlay.layer.characters"],
 ];
-
-/** The design size of a layer's own source. The content layer fills the whole frame. */
-function layerSize(layers: OverlayLayers, layer: OverlayLayer): LayerRect | null {
-  if (layer === "chat") return layers.chat.rect;
-  if (layer === "characters") return layers.characters.rect;
-  return null;
-}
 
 function CopyField({
   value,
@@ -114,7 +107,8 @@ export function OverlayLink({
           <p className="muted">{t("overlay.layerUrlsHelp")}</p>
           {LAYER_LINKS.map(([layer, label]) => {
             const soon: boolean = layer === "characters" && !CHARACTERS_READY;
-            const size: LayerRect | null = layerSize(layers, layer);
+            // The size in the selected orientation. Content without a cell has no own size.
+            const size: LayerRect | null = layerPixels(layers, layer);
             const sizeLine: string | undefined = size ? `${sizeId}-${layer}` : undefined;
             return (
               <div key={layer} className="ov-url-layer" data-ov-layer-row={layer}>

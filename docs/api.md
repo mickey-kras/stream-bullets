@@ -101,22 +101,32 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
 
 | Endpoint | Body | Response |
 | --- | --- | --- |
-| `POST /api/overlay` | `{action: "layers", chat?: {enabled?, rect?, hideCommands?}, characters?: {enabled?, rect?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?}, characters?: {enabled?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
 | `GET /@handle/overlay?key&layer` | Optional `layer`: `content`, `chat`, or `characters` | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that layer alone. An unknown value shows an empty page. |
 
-- `rect` holds `{x, y, w, h}`: whole pixels of the 1920 × 1080 design space.
-  `x + w` is at most 1920, and `y + h` is at most 1080.
-- The minimum size is 280 × 160 for `chat` and 640 × 160 for `characters`.
+- `orientation` is `horizontal` (a grid of 16 × 9 cells) or `vertical` (9 × 16 cells). A cell is 120 pixels.
+- Each orientation in `cells` holds `{chat?, characters?, content?}`. Each value is a cell rectangle `{c, r, w, h}` of whole cells.
+  `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
+- `content` accepts `null`. Then the content uses the full frame and its position and size settings.
+- The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for `content`.
+- After the merge, no two layers can overlap in an orientation. A content layer without a cell does not count.
+- `write` is `{writer, seq}`. `writer` is a random ID of 8 to 64 letters, digits, `_` or `-`. `seq` is a positive integer.
+  The server keeps the `write` of the last applied change. It ignores a change with the same `writer` and a `seq` that is not larger.
+  The server then answers `200` with the current state. A change without `write` always applies.
 - The body changes only the fields that it names. The API merges each field into the saved layers.
   Thus send only the fields that you change. Unknown fields return `400`.
 - The change goes live at once. Overlay pages get the new `layers` through the live room.
-- Each `layers` action counts against the write quota of 60 changes each minute.
+- `chatTest` with `on: true` sets `chatTestUntil` to the server time plus 60 seconds. With `on: false` it sets 0.
+  Overlay pages get the value through the live room. A time in the past means no test.
+- Each `layers` and `chatTest` action counts against the write quota of 60 changes each minute.
 - The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
-- Errors: `400` for an invalid body or a rectangle outside the frame, `401` without sign-in, and `403` for another origin.
+- Errors: `400` for an invalid body, a cell outside the grid, or overlapping layers, `401` without sign-in, and `403` for another origin.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
-- `OverlayState.layers` and `OverlayPublic.layers` are `{chat: {enabled, rect, hideCommands}, characters: {enabled, rect}}`.
+- `OverlayState.layers` and `OverlayPublic.layers` are `{orientation, chat: {enabled, hideCommands}, characters: {enabled}, cells: {horizontal, vertical}}`.
+  Each orientation in `cells` is `{chat, characters, content}`. `content` is a cell or `null`.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value. Chat and characters are off by default, and `hideCommands` is on.
-- See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, and the chat limits.
+- See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the chat test, and the chat limits.
 
 ## Later phases
 

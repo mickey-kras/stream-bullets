@@ -1,13 +1,33 @@
 import { z } from "zod";
 
-// Overlay layers share one fixed 1920x1080 design space. Rects use whole design pixels.
-export const DESIGN_W = 1920;
-export const DESIGN_H = 1080;
+// Overlay layers sit on a grid of square cells. The streamer picks the orientation of the frame: horizontal is
+// 1920x1080 (16 x 9 cells), vertical is 1080x1920 (9 x 16 cells). Each orientation keeps its own layout.
+export const CELL_PX = 120;
+
+export const ORIENTATIONS = ["horizontal", "vertical"] as const;
+export type Orientation = (typeof ORIENTATIONS)[number];
+
+export const GRID: Readonly<Record<Orientation, Readonly<{ cols: number; rows: number }>>> = {
+  horizontal: { cols: 16, rows: 9 },
+  vertical: { cols: 9, rows: 16 },
+};
 
 export const OVERLAY_LAYERS = ["content", "chat", "characters"] as const;
 export type OverlayLayer = (typeof OVERLAY_LAYERS)[number];
 
-// Integers. `x + w <= DESIGN_W` and `y + h <= DESIGN_H`.
+/** The layers on the grid, in the order the lenient read resolves them. */
+export const GRID_LAYERS = ["chat", "characters", "content"] as const;
+export type GridLayer = (typeof GRID_LAYERS)[number];
+
+/** A place in whole cells: column, row, width and height. `c + w <= cols` and `r + h <= rows`. */
+export interface CellRect {
+  c: number;
+  r: number;
+  w: number;
+  h: number;
+}
+
+/** A place in design pixels. */
 export interface LayerRect {
   x: number;
   y: number;
@@ -15,106 +35,206 @@ export interface LayerRect {
   h: number;
 }
 
+/** The cells of one orientation. Content null: it fills the whole frame and keeps its position and size settings. */
+export interface LayerCells {
+  chat: CellRect;
+  characters: CellRect;
+  content: CellRect | null;
+}
+
 export interface ChatLayer {
   enabled: boolean;
-  rect: LayerRect;
   hideCommands: boolean;
 }
 
 export interface CharactersLayer {
   enabled: boolean;
-  rect: LayerRect;
 }
 
-// The content layer keeps its `position` and `size` settings and has no rect.
 export interface OverlayLayers {
+  orientation: Orientation;
   chat: ChatLayer;
   characters: CharactersLayer;
+  cells: Record<Orientation, LayerCells>;
 }
+
+export type CellsPatch = Partial<LayerCells>;
 
 export interface LayersPatch {
+  orientation?: Orientation;
   chat?: Partial<ChatLayer>;
   characters?: Partial<CharactersLayer>;
+  cells?: Partial<Record<Orientation, CellsPatch>>;
 }
 
-export const MIN_RECT: Record<"chat" | "characters", { w: number; h: number }> = {
-  chat: { w: 280, h: 160 },
-  characters: { w: 640, h: 160 },
+export const MIN_CELLS: Readonly<Record<GridLayer, Readonly<{ w: number; h: number }>>> = {
+  chat: { w: 3, h: 2 },
+  characters: { w: 6, h: 2 },
+  content: { w: 4, h: 2 },
 };
 
-// Chat stays off by default, so existing OBS scenes do not change. The chat box is the approved place (issue #663):
-// the right half of the frame inside a 5 % safe margin plus 19.2 px, so 979 + 826 = 1920 - 115 and 73 + 934 = 1080 - 73.
+// Chat and characters stay off by default, so existing OBS scenes do not change. Content has no cell by default.
 export const DEFAULT_LAYERS: OverlayLayers = {
-  chat: { enabled: false, rect: { x: 979, y: 73, w: 826, h: 934 }, hideCommands: true },
-  characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
+  orientation: "horizontal",
+  chat: { enabled: false, hideCommands: true },
+  characters: { enabled: false },
+  cells: {
+    horizontal: { chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 }, content: null },
+    vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, characters: { c: 0, r: 13, w: 9, h: 3 }, content: null },
+  },
 };
 
-const coordinate = z.number().int().nonnegative();
-const size = z.number().int().positive();
+/** The design size of a frame. */
+export function frameSize(orientation: Orientation): { w: number; h: number } {
+  return { w: GRID[orientation].cols * CELL_PX, h: GRID[orientation].rows * CELL_PX };
+}
 
-// A rect inside the design space.
-export const layerRectSchema = z
-  .object({ x: coordinate, y: coordinate, w: size, h: size })
-  .strict()
-  .refine((rect: LayerRect): boolean => rect.x + rect.w <= DESIGN_W && rect.y + rect.h <= DESIGN_H, {
-    message: "Keep the layer inside the 1920x1080 frame.",
+export function cellPixels(rect: CellRect): LayerRect {
+  return { x: rect.c * CELL_PX, y: rect.r * CELL_PX, w: rect.w * CELL_PX, h: rect.h * CELL_PX };
+}
+
+export function copyCell(rect: CellRect): CellRect {
+  return { c: rect.c, r: rect.r, w: rect.w, h: rect.h };
+}
+
+export function cellsOverlap(a: CellRect, b: CellRect): boolean {
+  return a.c < b.c + b.w && b.c < a.c + a.w && a.r < b.r + b.h && b.r < a.r + a.h;
+}
+
+/** Inside the grid of `orientation` and at least the minimum size of `layer`. */
+export function cellFits(orientation: Orientation, layer: GridLayer, rect: CellRect): boolean {
+  const { cols, rows } = GRID[orientation];
+  const min = MIN_CELLS[layer];
+  return rect.c + rect.w <= cols && rect.r + rect.h <= rows && rect.w >= min.w && rect.h >= min.h;
+}
+
+/** The first pair of placed layers that overlap, or null. */
+export function overlappingPair(cells: Partial<LayerCells>): [GridLayer, GridLayer] | null {
+  const placed = GRID_LAYERS.flatMap((layer: GridLayer): [GridLayer, CellRect][] => {
+    const rect: CellRect | null | undefined = cells[layer];
+    return rect ? [[layer, rect]] : [];
   });
-
-function minimumRect(layer: "chat" | "characters"): z.ZodType<LayerRect> {
-  const min = MIN_RECT[layer];
-  return layerRectSchema.refine((rect: LayerRect): boolean => rect.w >= min.w && rect.h >= min.h, {
-    message: `Make the layer at least ${min.w}x${min.h}.`,
-  });
+  for (let i = 0; i < placed.length; i += 1)
+    for (let j = i + 1; j < placed.length; j += 1)
+      if (cellsOverlap(placed[i][1], placed[j][1])) return [placed[i][0], placed[j][0]];
+  return null;
 }
 
-const chatRectSchema = minimumRect("chat");
-const charactersRectSchema = minimumRect("characters");
-
-function copyRect(rect: LayerRect): LayerRect {
-  return { x: rect.x, y: rect.y, w: rect.w, h: rect.h };
+/** The design-pixel place of a layer in the selected orientation. Null for content without a cell. */
+export function layerPixels(layers: OverlayLayers, layer: GridLayer): LayerRect | null {
+  const rect: CellRect | null = layers.cells[layers.orientation][layer];
+  return rect ? cellPixels(rect) : null;
 }
 
-function defaultChat(): ChatLayer {
-  return { ...DEFAULT_LAYERS.chat, rect: copyRect(DEFAULT_LAYERS.chat.rect) };
-}
+const cellShape = {
+  c: z.number().int().nonnegative(),
+  r: z.number().int().nonnegative(),
+  w: z.number().int().positive(),
+  h: z.number().int().positive(),
+};
 
-function defaultCharacters(): CharactersLayer {
-  return { ...DEFAULT_LAYERS.characters, rect: copyRect(DEFAULT_LAYERS.characters.rect) };
-}
-
-// A stored rect: unknown keys are dropped, and an invalid rect reads as the layer's default rect.
-function storedRectSchema(layer: "chat" | "characters"): z.ZodType<LayerRect, unknown> {
-  const min = MIN_RECT[layer];
+function cellSchema(orientation: Orientation, layer: GridLayer): z.ZodType<CellRect> {
+  const min = MIN_CELLS[layer];
   return z
-    .object({ x: coordinate, y: coordinate, w: size, h: size })
-    .refine(
-      (rect: LayerRect): boolean =>
-        rect.x + rect.w <= DESIGN_W && rect.y + rect.h <= DESIGN_H && rect.w >= min.w && rect.h >= min.h,
-    )
-    .catch(() => copyRect(DEFAULT_LAYERS[layer].rect));
+    .object(cellShape)
+    .strict()
+    .refine((rect: CellRect): boolean => cellFits(orientation, layer, rect), {
+      message: `Keep the layer inside the ${GRID[orientation].cols}x${GRID[orientation].rows} grid, at least ${min.w}x${min.h} cells.`,
+    });
+}
+
+function cellsPatchSchema(orientation: Orientation): z.ZodType<CellsPatch> {
+  return z
+    .object({
+      chat: cellSchema(orientation, "chat").optional(),
+      characters: cellSchema(orientation, "characters").optional(),
+      content: cellSchema(orientation, "content").nullable().optional(),
+    })
+    .strict()
+    .refine((cells: CellsPatch): boolean => overlappingPair(cells) === null, { message: "Layers must not overlap." });
+}
+
+// Writes are strict: unknown keys, cells outside the grid, below the minimum size or over each other return 400.
+// The server also checks the merged layout, so a cell never covers a saved cell of another layer.
+export const layersPatchSchema = z
+  .object({
+    orientation: z.enum(ORIENTATIONS).optional(),
+    chat: z.object({ enabled: z.boolean().optional(), hideCommands: z.boolean().optional() }).strict().optional(),
+    characters: z.object({ enabled: z.boolean().optional() }).strict().optional(),
+    cells: z
+      .object({
+        horizontal: cellsPatchSchema("horizontal").optional(),
+        vertical: cellsPatchSchema("vertical").optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+const storedCell = z.object(cellShape);
+
+/** A stored cell of `layer`, or null when it is not a valid cell of this grid. */
+function readCell(orientation: Orientation, layer: GridLayer, value: unknown): CellRect | null {
+  const parsed = storedCell.safeParse(value);
+  return parsed.success && cellFits(orientation, layer, parsed.data) ? copyCell(parsed.data) : null;
+}
+
+function defaultCells(orientation: Orientation): LayerCells {
+  const cells: LayerCells = DEFAULT_LAYERS.cells[orientation];
+  return { chat: copyCell(cells.chat), characters: copyCell(cells.characters), content: null };
+}
+
+/**
+ * A stored layout. An invalid chat or characters cell takes its default. When the chat and characters cells overlap,
+ * both take their defaults. A content cell that is invalid or overlaps another layer reads as no cell.
+ */
+function readCells(orientation: Orientation, value: unknown): LayerCells {
+  const raw: Record<string, unknown> = typeof value === "object" && value !== null ? { ...value } : {};
+  const fallback: LayerCells = defaultCells(orientation);
+  let chat: CellRect = readCell(orientation, "chat", raw.chat) ?? fallback.chat;
+  let characters: CellRect = readCell(orientation, "characters", raw.characters) ?? fallback.characters;
+  if (cellsOverlap(chat, characters)) {
+    chat = fallback.chat;
+    characters = fallback.characters;
+  }
+  const content: CellRect | null = readCell(orientation, "content", raw.content);
+  const free: boolean = content !== null && !cellsOverlap(content, chat) && !cellsOverlap(content, characters);
+  return { chat, characters, content: free ? content : null };
 }
 
 // Stored and broadcast layers. This schema never throws: older and newer versions must not break the overlay.
-// Missing keys take defaults too, so `{}` reads as DEFAULT_LAYERS. Unknown keys are dropped.
-// An invalid field reads as its default. An invalid layer, or an invalid whole value, reads as its defaults.
-// Writes use the strict layersPatchSchema.
+// Missing keys take defaults, so `{}` reads as DEFAULT_LAYERS. Unknown keys are dropped. An invalid field reads as
+// its default (see readCells for the cells). Writes use the strict layersPatchSchema.
 export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = z
   .object({
+    orientation: z.enum(ORIENTATIONS).catch(DEFAULT_LAYERS.orientation),
     chat: z
       .object({
         enabled: z.boolean().catch(DEFAULT_LAYERS.chat.enabled),
-        rect: storedRectSchema("chat"),
         hideCommands: z.boolean().catch(DEFAULT_LAYERS.chat.hideCommands),
       })
-      .catch(defaultChat),
+      .catch((): ChatLayer => ({ ...DEFAULT_LAYERS.chat })),
     characters: z
-      .object({
-        enabled: z.boolean().catch(DEFAULT_LAYERS.characters.enabled),
-        rect: storedRectSchema("characters"),
-      })
-      .catch(defaultCharacters),
+      .object({ enabled: z.boolean().catch(DEFAULT_LAYERS.characters.enabled) })
+      .catch((): CharactersLayer => ({ ...DEFAULT_LAYERS.characters })),
+    cells: z
+      .object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() })
+      .catch({ horizontal: undefined, vertical: undefined })
+      .transform(
+        (cells: { horizontal?: unknown; vertical?: unknown }): Record<Orientation, LayerCells> => ({
+          horizontal: readCells("horizontal", cells.horizontal),
+          vertical: readCells("vertical", cells.vertical),
+        }),
+      ),
   })
-  .catch((): OverlayLayers => ({ chat: defaultChat(), characters: defaultCharacters() }));
+  .catch(
+    (): OverlayLayers => ({
+      orientation: DEFAULT_LAYERS.orientation,
+      chat: { ...DEFAULT_LAYERS.chat },
+      characters: { ...DEFAULT_LAYERS.characters },
+      cells: { horizontal: defaultCells("horizontal"), vertical: defaultCells("vertical") },
+    }),
+  );
 
 // Reads a stored `layers` JSON text. Invalid JSON reads as the defaults, the same as an invalid value.
 export function parseStoredLayers(raw: string): OverlayLayers {
@@ -127,30 +247,26 @@ export function parseStoredLayers(raw: string): OverlayLayers {
   return storedLayersSchema.parse(value);
 }
 
-export const chatPatchSchema = z
-  .object({ enabled: z.boolean().optional(), rect: chatRectSchema.optional(), hideCommands: z.boolean().optional() })
-  .strict();
-
-export const charactersPatchSchema = z
-  .object({ enabled: z.boolean().optional(), rect: charactersRectSchema.optional() })
-  .strict();
-
-export const layersPatchSchema = z
-  .object({ chat: chatPatchSchema.optional(), characters: charactersPatchSchema.optional() })
-  .strict();
+function mergeCells(current: LayerCells, patch: CellsPatch | undefined): LayerCells {
+  const content: CellRect | null = patch?.content === undefined ? current.content : patch.content;
+  return {
+    chat: copyCell(patch?.chat ?? current.chat),
+    characters: copyCell(patch?.characters ?? current.characters),
+    content: content ? copyCell(content) : null,
+  };
+}
 
 export function mergeLayers(current: OverlayLayers, patch: LayersPatch): OverlayLayers {
-  const chat: Partial<ChatLayer> = patch.chat ?? {};
-  const characters: Partial<CharactersLayer> = patch.characters ?? {};
   return {
+    orientation: patch.orientation ?? current.orientation,
     chat: {
-      enabled: chat.enabled ?? current.chat.enabled,
-      rect: copyRect(chat.rect ?? current.chat.rect),
-      hideCommands: chat.hideCommands ?? current.chat.hideCommands,
+      enabled: patch.chat?.enabled ?? current.chat.enabled,
+      hideCommands: patch.chat?.hideCommands ?? current.chat.hideCommands,
     },
-    characters: {
-      enabled: characters.enabled ?? current.characters.enabled,
-      rect: copyRect(characters.rect ?? current.characters.rect),
+    characters: { enabled: patch.characters?.enabled ?? current.characters.enabled },
+    cells: {
+      horizontal: mergeCells(current.cells.horizontal, patch.cells?.horizontal),
+      vertical: mergeCells(current.cells.vertical, patch.cells?.vertical),
     },
   };
 }

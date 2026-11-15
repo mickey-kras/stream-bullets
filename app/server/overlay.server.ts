@@ -1,7 +1,14 @@
 import { z } from "zod";
 import { OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES } from "../../db/enums";
 import type { AppEnv } from "../env";
-import { charactersPatchSchema, chatPatchSchema, mergeLayers } from "../lib/overlay-layers";
+import { CHAT_TEST_MS } from "../lib/chat-test";
+import {
+  ORIENTATIONS,
+  layersPatchSchema,
+  mergeLayers,
+  overlappingPair,
+  type OverlayLayers,
+} from "../lib/overlay-layers";
 import type { CardIcon, OverlayData, OverlaySource, OverlaySourceRef, OverlayState, SupportLinkKind } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { HttpError } from "./http.server";
@@ -15,6 +22,14 @@ import {
 } from "./overlay-state";
 
 // Owners control one OBS URL per page.
+
+// An editor's random id and the number of its layer write. Numbers go up for each write of the editor.
+const layersWriteSchema = z
+  .object({
+    writer: z.string().regex(/^[\w-]{8,64}$/),
+    seq: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  })
+  .strict();
 
 // `POST /api/overlay`. Every action returns the whole new state.
 export const overlayActionSchema = z.discriminatedUnion("action", [
@@ -40,14 +55,10 @@ export const overlayActionSchema = z.discriminatedUnion("action", [
       style: z.enum(OVERLAY_MESSAGE_STYLES),
     })
     .strict(),
-  // Layer edits go live at once, like `layout`. Rects use the 1920x1080 design space.
-  z
-    .object({
-      action: z.literal("layers"),
-      chat: chatPatchSchema.optional(),
-      characters: charactersPatchSchema.optional(),
-    })
-    .strict(),
+  // Layer edits go live at once, like `layout`. `write` orders the writes of one editor (see updateOverlay).
+  layersPatchSchema.extend({ action: z.literal("layers"), write: layersWriteSchema.optional() }),
+  // Starts (`on`) or stops the chat test. The overlay pages play sample chat until the stored end time.
+  z.object({ action: z.literal("chatTest"), on: z.boolean() }).strict(),
 ]);
 export type OverlayAction = z.infer<typeof overlayActionSchema>;
 
@@ -82,12 +93,21 @@ async function checkedSource(env: AppEnv, streamerId: string, source: OverlaySou
   return { type: source.type, ref: null };
 }
 
-// The state after an action. Pure apart from the source check, so the rules read in one place.
+// Merged layers must not overlap in either orientation: a patch can move a cell onto a saved cell.
+function mergedLayers(current: OverlayLayers, patch: Extract<OverlayAction, { action: "layers" }>): OverlayLayers {
+  const next: OverlayLayers = mergeLayers(current, patch);
+  for (const orientation of ORIENTATIONS)
+    if (overlappingPair(next.cells[orientation]) !== null) throw new HttpError(400, "Layers must not overlap.");
+  return next;
+}
+
+// The state after an action at server time `now`. Pure apart from the source check, so the rules read in one place.
 export async function nextOverlayState(
   env: AppEnv,
   streamerId: string,
   current: OverlayState,
   action: OverlayAction,
+  now: number = Date.now(),
 ): Promise<OverlayState> {
   const next: OverlayState = { ...current, revision: current.revision + 1 };
   if (action.action === "preview") next.preview = await checkedSource(env, streamerId, action.source);
@@ -102,7 +122,8 @@ export async function nextOverlayState(
     next.message = action.text;
     next.messageStyle = action.style;
   }
-  if (action.action === "layers") next.layers = mergeLayers(current.layers, action);
+  if (action.action === "layers") next.layers = mergedLayers(current.layers, action);
+  if (action.action === "chatTest") next.chatTestUntil = action.on ? now + CHAT_TEST_MS : 0;
   // Instant switch skips the preview: whatever is previewed is on air.
   if (next.instant) next.air = next.preview;
   return next;
@@ -146,8 +167,14 @@ async function refreshWhere(
 // Retry limit for concurrent overlay saves.
 const OVERLAY_WRITE_ATTEMPTS = 3;
 
+// The last applied layer write: the editor id and its write number.
+const lastWriteSchema = z.object({ layers_writer: z.string().max(64), layers_seq: z.number().int().nonnegative() });
+type LastWrite = z.infer<typeof lastWriteSchema>;
+
 // Compare-and-set the revision. On conflict, reapply the action to current state; callers then
-// `notifyOverlay`.
+// `notifyOverlay`. A layer write that an editor already passed (same writer, a seq not above the last applied one)
+// changes nothing and returns the current state: a request that a slower network delivers late never overwrites
+// the newer layers of the same editor.
 export async function updateOverlay(
   env: AppEnv,
   userId: string,
@@ -156,14 +183,25 @@ export async function updateOverlay(
 ): Promise<OverlayState> {
   const page = await assertStreamerWritable(env, streamerId, userId);
   if (page.ownerId !== userId) throw new HttpError(403, "Only the streamer can control the overlay.");
+  const write = action.action === "layers" ? action.write : undefined;
   for (let attempt = 0; attempt < OVERLAY_WRITE_ATTEMPTS; attempt++) {
-    const current = await getOverlayState(env, streamerId);
+    const row = await env.DB.prepare(
+      `SELECT ${OVERLAY_COLUMNS},layers_writer,layers_seq FROM overlay_state WHERE streamer_id=?`,
+    )
+      .bind(streamerId)
+      .first<OverlayRow & LastWrite>();
+    const current = overlayValue(row);
+    const last: LastWrite = row ? lastWriteSchema.parse(row) : { layers_writer: "", layers_seq: 0 };
+    if (write && write.writer === last.layers_writer && write.seq <= last.layers_seq) return current;
     const next = await nextOverlayState(env, streamerId, current, action);
+    const applied: LastWrite = write ? { layers_writer: write.writer, layers_seq: write.seq } : last;
     const result = await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,
-        show_results,message,message_style,layers,revision,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+        show_results,message,message_style,layers,chat_test_until,layers_writer,layers_seq,revision,updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       ON CONFLICT(streamer_id) DO UPDATE SET air=excluded.air,preview=excluded.preview,position=excluded.position,
         size=excluded.size,instant=excluded.instant,show_results=excluded.show_results,message=excluded.message,
-        message_style=excluded.message_style,layers=excluded.layers,revision=excluded.revision,
+        message_style=excluded.message_style,layers=excluded.layers,chat_test_until=excluded.chat_test_until,
+        layers_writer=excluded.layers_writer,layers_seq=excluded.layers_seq,revision=excluded.revision,
         updated_at=excluded.updated_at
       WHERE overlay_state.revision=?`)
       .bind(
@@ -177,6 +215,9 @@ export async function updateOverlay(
         next.message,
         next.messageStyle,
         JSON.stringify(next.layers),
+        next.chatTestUntil,
+        applied.layers_writer,
+        applied.layers_seq,
         next.revision,
         Date.now(),
         current.revision,

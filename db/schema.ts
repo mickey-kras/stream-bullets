@@ -635,8 +635,13 @@ export const overlayState = sqliteTable(
     messageStyle: text("message_style", { enum: OVERLAY_MESSAGE_STYLES }).notNull().default("info"),
     revision: integer("revision").notNull().default(0),
     updatedAt: integer("updated_at").notNull(),
-    // Chat and characters layers. `{}` reads as the defaults in app/lib/overlay-layers.ts.
+    // Orientation and grid cells of the layers. `{}` reads as the defaults in app/lib/overlay-layers.ts.
     layers: text("layers", { mode: "json" }).$type<StoredLayers>().notNull().default({}),
+    // Server time when the chat test ends; a past time means no test.
+    chatTestUntil: integer("chat_test_until").notNull().default(0),
+    // The last applied layer write: a random editor id and its write number (app/server/overlay.server.ts).
+    layersWriter: text("layers_writer").notNull().default(""),
+    layersSeq: integer("layers_seq").notNull().default(0),
   },
   (table) => [
     check("overlay_state_air_check", overlaySourceCheck(table.air)),
@@ -650,6 +655,9 @@ export const overlayState = sqliteTable(
       "overlay_state_layers_check",
       sql`json_valid(${table.layers}) AND json_type(${table.layers}) = 'object' AND length(${table.layers}) <= 1000`,
     ),
+    check("overlay_state_chat_test_check", sql`${table.chatTestUntil} >= 0`),
+    check("overlay_state_layers_writer_check", sql`length(${table.layersWriter}) <= 64`),
+    check("overlay_state_layers_seq_check", sql`${table.layersSeq} >= 0`),
     check("overlay_state_revision_check", sql`${table.revision} >= 0`),
   ],
 );

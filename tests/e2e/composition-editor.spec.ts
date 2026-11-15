@@ -2,8 +2,9 @@ import { newPage, close, test, expect, type Page } from "./coverage";
 import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
-import { DEFAULT_LAYERS } from "../../app/lib/overlay-layers";
+import { DEFAULT_LAYERS, cellPixels, type OverlayLayers } from "../../app/lib/overlay-layers";
 import { SAMPLE_INTERVAL_MS } from "../../app/components/overlay/use-chat";
+import type { Locator } from "@playwright/test";
 
 const OWNER_IP = clientIp("composition-editor", 245);
 const MOTION_IP = clientIp("composition-editor", 246);
@@ -33,11 +34,45 @@ function saved(page: Page): Promise<unknown> {
   );
 }
 
-async function value(page: Page, layer: string, label: string): Promise<number> {
-  return Number(await page.locator(`[data-comp-fields="${layer}"]`).getByLabel(label, { exact: true }).inputValue());
+/** The saved layers, read through the API with the page's session. */
+async function storedLayers(page: Page): Promise<OverlayLayers> {
+  const response = await page.request.get("/api/overlay");
+  return ((await response.json()) as { overlay: { layers: OverlayLayers } }).overlay.layers;
 }
 
-test("the owner places the chat layer by mouse and keyboard, and the layout persists", async ({ browser }) => {
+/** Pointer helpers for the grid: the centre of a cell in screen pixels. */
+async function gridCells(
+  grid: Locator,
+  cols: number,
+  rows: number,
+): Promise<(c: number, r: number) => { x: number; y: number }> {
+  const box = await grid.boundingBox();
+  if (!box) throw new Error("No grid.");
+  return (c: number, r: number) => ({
+    x: Math.round(box.x + ((c + 0.5) * box.width) / cols),
+    y: Math.round(box.y + ((r + 0.5) * box.height) / rows),
+  });
+}
+
+async function dragCells(page: Page, from: { x: number; y: number }, to: { x: number; y: number }): Promise<void> {
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move((from.x + to.x) / 2, (from.y + to.y) / 2, { steps: 4 });
+  await page.mouse.move(to.x, to.y, { steps: 4 });
+  await page.mouse.up();
+}
+
+/** Strips the write order from request bodies: each editor sends its own random id. */
+function withoutWrite(bodies: unknown[]): unknown[] {
+  return bodies.map((value) => Object.fromEntries(Object.entries(value as object).filter(([key]) => key !== "write")));
+}
+
+/** The write order of each request body. */
+function writes(bodies: unknown[]): { writer: string; seq: number }[] {
+  return bodies.map((value) => (value as { write: { writer: string; seq: number } }).write);
+}
+
+test("the owner places layers on the grid by mouse and keyboard, and the layout persists", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -46,85 +81,131 @@ test("the owner places the chat layer by mouse and keyboard, and the layout pers
   await expect(editor).toBeVisible();
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
-  await expect(frame.locator('[data-comp-placeholder="characters"]')).toContainText("Characters");
+  await expect(frame).toHaveAttribute("data-orientation", "horizontal");
+  const grid = editor.getByRole("button", { name: "Layout grid, 16 columns by 9 rows" });
+  await expect(grid).toBeVisible();
+  // The default places: chat on the left, the characters slot along the bottom, the content without a cell.
+  await expect(frame.locator('[data-grid-box="chat"]')).toContainText("Chat · 600 × 840");
+  await expect(frame.locator('[data-grid-box="characters"]')).toContainText("Characters · Coming soon");
+  await expect(frame.locator('[data-grid-box="content"]')).toHaveCount(0);
   // Characters wait for the playground; chat is off by default.
   const chatLayer = editor.locator('[data-comp-layer="chat"]');
   await expect(editor.locator('[data-comp-layer="characters"]').getByRole("checkbox")).toBeDisabled();
   await expect(chatLayer.getByRole("checkbox", { name: "Show on stream" })).not.toBeChecked();
-  await expect(frame.locator('[data-comp-box="chat"]')).toHaveCount(0);
-  // Beside the toggle: chat on puts the on-air content in the 1920 x 1080 layout of the preview.
+  await expect(frame.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
+  // Beside the toggle: chat on puts the on-air content in the layout of the preview.
   await expect(chatLayer.locator("[data-comp-scale]")).toContainText("turning on chat changes the size of the on-air");
+  await expect(editor.locator("[data-comp-frame-size]")).toHaveText(
+    "Set the OBS browser source to 1920 × 1080 for this orientation.",
+  );
 
   let save = saved(page);
   await chatLayer.getByRole("checkbox", { name: "Show on stream" }).check();
   await save;
-  const box = frame.locator('[data-comp-box="chat"]');
-  await expect(box).toBeVisible();
   // The preview plays sample chat without an activity socket.
   await expect(frame.locator('.ov-layer[data-layer="chat"] .wl-chat')).toBeVisible();
 
   // Keep the whole preview clear of the sticky header and footer.
   await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
-  // The scaler measures the frame's inner width.
-  const scale: number = await frame.evaluate((element: Element) => element.clientWidth / 1920);
-  const start = { x: await value(page, "chat", "X"), y: await value(page, "chat", "Y") };
-  const size = { w: await value(page, "chat", "Width"), h: await value(page, "chat", "Height") };
+  let at = await gridCells(grid, 16, 9);
+  const status = editor.locator("[data-grid-status]");
 
-  // Drag to move: screen pixels convert to design pixels by the preview scale.
-  const area = await box.boundingBox();
-  if (!area) throw new Error("No chat box.");
-  const from = { x: Math.round(area.x + area.width / 2), y: Math.round(area.y + area.height / 2) };
+  // Drag a placed layer to move it: grabbed at its cell (2, 3), it moves 10 columns right.
   save = saved(page);
-  await page.mouse.move(from.x, from.y);
+  await dragCells(page, at(2, 3), at(12, 3));
+  await save;
+  await expect(status).toHaveText("Chat moved to column 11, row 1, 5 × 7 cells.");
+  expect((await storedLayers(page)).cells.horizontal.chat).toEqual({ c: 10, r: 0, w: 5, h: 7 });
+
+  // A move onto the characters slot shows red and is not kept.
+  await page.mouse.move(at(12, 3).x, at(12, 3).y);
   await page.mouse.down();
-  // The default box starts 73 design pixels below the top edge: a short move up stays in the frame.
-  await page.mouse.move(from.x - 60, from.y - 10, { steps: 6 });
-  await page.mouse.move(from.x - 120, from.y - 20, { steps: 6 });
+  await page.mouse.move(at(12, 6).x, at(12, 6).y, { steps: 4 });
+  await expect(frame.locator("[data-grid-preview]")).toHaveAttribute("data-invalid", "true");
   await page.mouse.up();
-  await save;
-  const moved = { x: start.x + Math.round(-120 / scale), y: start.y + Math.round(-20 / scale) };
-  expect(await value(page, "chat", "X")).toBe(moved.x);
-  expect(await value(page, "chat", "Y")).toBe(moved.y);
+  await expect(status).toHaveText("Not moved. It touches Characters.");
+  await expect(status).toHaveAttribute("data-bad", "true");
+  await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
+  expect((await storedLayers(page)).cells.horizontal.chat).toEqual({ c: 10, r: 0, w: 5, h: 7 });
 
-  // Drag the corner to resize.
-  const handle = frame.locator('[data-comp-resize="chat"]');
-  const corner = await handle.boundingBox();
-  if (!corner) throw new Error("No resize handle.");
-  const grip = { x: Math.round(corner.x + corner.width / 2), y: Math.round(corner.y + corner.height / 2) };
+  // Drag on empty cells to draw the selected layer: the content gets a cell.
+  const content = editor.locator('[data-comp-layer="content"]');
+  await expect(content.locator("[data-comp-content-note]")).toContainText("The content has no cell.");
+  await editor.getByRole("button", { name: "On-air content (min. 4 × 2)" }).click();
+  // The click scrolls the layer buttons into view: centre the preview again and measure the grid.
+  await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
+  at = await gridCells(grid, 16, 9);
   save = saved(page);
-  await page.mouse.move(grip.x, grip.y);
-  await page.mouse.down();
-  await page.mouse.move(grip.x + 30, grip.y - 40, { steps: 8 });
-  await page.mouse.up();
+  await dragCells(page, at(0, 0), at(5, 2));
   await save;
-  const resized = { w: size.w + Math.round(30 / scale), h: size.h + Math.round(-40 / scale) };
-  expect(await value(page, "chat", "Width")).toBe(resized.w);
-  expect(await value(page, "chat", "Height")).toBe(resized.h);
+  await expect(status).toHaveText("On-air content placed at column 1, row 1, 6 × 3 cells.");
+  await expect(frame.locator('[data-grid-box="content"]')).toContainText("On-air content · 720 × 360");
+  await expect(content.locator("[data-comp-content-note]")).toContainText(
+    "The position setting applies only when the content has no cell.",
+  );
+  // A shape below the minimum size is not kept.
+  await dragCells(page, at(0, 4), at(1, 5));
+  await expect(status).toHaveText("Not placed. On-air content needs at least 4 × 2 cells.");
+  expect((await storedLayers(page)).cells.horizontal.content).toEqual({ c: 0, r: 0, w: 6, h: 3 });
 
-  // Arrow keys nudge the focused layer: 1 px, Shift 10 px. One save after a short pause.
+  // Keyboard: the cursor starts at the first cell after a new page load.
+  await page.reload();
+  await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
+  await grid.focus();
+  await expect(frame.locator("[data-grid-cursor]")).toBeVisible();
+  // Space picks up the content at the cursor, an arrow carries it, Space puts it down.
+  await page.keyboard.press("Space");
+  await expect(status).toHaveText("Moving On-air content. Move the cursor, then press Space.");
+  await page.keyboard.press("ArrowDown");
+  await expect(status).toHaveText("Column 1, row 2: On-air content.");
   save = saved(page);
-  await box.focus();
-  await page.keyboard.press("ArrowLeft");
-  await page.keyboard.press("ArrowLeft");
-  await page.keyboard.press("Shift+ArrowUp");
+  await page.keyboard.press("Space");
   await save;
-  const nudged = { x: moved.x - 2, y: moved.y - 10 };
-  expect(await value(page, "chat", "X")).toBe(nudged.x);
-  expect(await value(page, "chat", "Y")).toBe(nudged.y);
-  await expect(box).toHaveAccessibleName(`Chat: x ${nudged.x}, y ${nudged.y}, ${resized.w} × ${resized.h}`);
+  await expect(status).toHaveText("On-air content moved to column 1, row 2, 6 × 3 cells.");
+  // Escape cancels a pick.
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Escape");
+  await expect(status).toHaveText("Cancelled.");
+  // Shift + arrow moves the selected layer one cell; it saves after a short pause.
+  await editor.getByRole("button", { name: "Chat (min. 3 × 2)" }).click();
+  await grid.focus();
+  save = saved(page);
+  await page.keyboard.press("Shift+ArrowRight");
+  await save;
+  await expect(status).toHaveText("Chat moved to column 12, row 1, 5 × 7 cells.");
+  await page.keyboard.press("Shift+ArrowRight");
+  await expect(status).toHaveText("Chat moved to column 12, row 1, 5 × 7 cells.");
+  expect((await storedLayers(page)).cells.horizontal).toMatchObject({
+    chat: { c: 11, r: 0, w: 5, h: 7 },
+    content: { c: 0, r: 1, w: 6, h: 3 },
+  });
 
-  // A layer never leaves the frame.
+  // Remove takes the content off the grid: it uses the full frame again.
   save = saved(page);
-  const width = page.locator('[data-comp-fields="chat"]').getByLabel("Width", { exact: true });
-  await width.fill("5000");
-  await width.press("Enter");
+  await content.getByRole("button", { name: "Remove from grid" }).click();
   await save;
-  expect(await value(page, "chat", "Width")).toBe(1920);
-  expect(await value(page, "chat", "X")).toBe(0);
+  await expect(content.locator("[data-comp-content-note]")).toContainText("The content has no cell.");
+  await expect(content.getByRole("button", { name: "Remove from grid" })).toHaveAttribute("aria-disabled", "true");
+  await expect(content.getByRole("button", { name: "Remove from grid" })).toBeFocused();
+
+  // The vertical orientation has its own layout and frame. The horizontal layout stays.
   save = saved(page);
-  await width.fill(String(resized.w));
-  await width.press("Enter");
+  await editor.getByRole("button", { name: "Vertical 9 × 16" }).click();
   await save;
+  await expect(frame).toHaveAttribute("data-orientation", "vertical");
+  await expect(editor.getByRole("button", { name: "Layout grid, 9 columns by 16 rows" })).toBeVisible();
+  await expect(frame.locator('[data-grid-box="chat"]')).toContainText("Chat · 1080 × 600");
+  await expect(editor.locator("[data-comp-frame-size]")).toHaveText(
+    "Set the OBS browser source to 1080 × 1920 for this orientation.",
+  );
+  const tall = editor.getByRole("button", { name: "Layout grid, 9 columns by 16 rows" });
+  await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
+  at = await gridCells(tall, 9, 16);
+  save = saved(page);
+  await dragCells(page, at(4, 9), at(4, 1));
+  await save;
+  expect((await storedLayers(page)).cells.vertical.chat).toEqual({ c: 0, r: 0, w: 9, h: 5 });
 
   save = saved(page);
   await chatLayer.getByRole("checkbox", { name: "Hide chat commands (!jump)" }).uncheck();
@@ -132,12 +213,50 @@ test("the owner places the chat layer by mouse and keyboard, and the layout pers
   await expect(editor.getByRole("status")).toHaveText("Layout saved.");
 
   await page.reload();
+  await expect(frame).toHaveAttribute("data-orientation", "vertical");
   await expect(chatLayer.getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
   await expect(chatLayer.getByRole("checkbox", { name: "Hide chat commands (!jump)" })).not.toBeChecked();
-  expect(await value(page, "chat", "X")).toBe(0);
-  expect(await value(page, "chat", "Y")).toBe(nudged.y);
-  expect(await value(page, "chat", "Width")).toBe(resized.w);
-  expect(await value(page, "chat", "Height")).toBe(resized.h);
+  save = saved(page);
+  await editor.getByRole("button", { name: "Horizontal 16 × 9" }).click();
+  await save;
+  const layers: OverlayLayers = await storedLayers(page);
+  expect(layers.orientation).toBe("horizontal");
+  expect(layers.cells.horizontal).toEqual({
+    chat: { c: 11, r: 0, w: 5, h: 7 },
+    characters: DEFAULT_LAYERS.cells.horizontal.characters,
+    content: null,
+  });
+  expect(layers.cells.vertical.chat).toEqual({ c: 0, r: 0, w: 9, h: 5 });
+  await close(owner);
+});
+
+test("the chat test starts and stops from the editor and shows the time left", async ({ browser }) => {
+  const owner = await signedIn(browser, "featureowner", OWNER_IP);
+  const page = await newPage(owner);
+  await page.goto("/overlay-control");
+  const chatLayer = page.locator('[data-comp-layer="chat"]');
+  const toggle = chatLayer.locator("[data-chat-test-toggle]");
+  const status = chatLayer.locator("[data-chat-test-status]");
+  // The test needs the chat layer on.
+  await expect(toggle).toHaveText("Start chat test");
+  await expect(toggle).toBeDisabled();
+  await expect(status).toHaveText("Turn on “Show on stream” to test the chat.");
+  let save = saved(page);
+  await chatLayer.getByRole("checkbox", { name: "Show on stream" }).check();
+  await save;
+  await expect(toggle).toBeEnabled();
+  await expect(toggle).toHaveAccessibleDescription(
+    "Shows sample chat in OBS for 60 seconds. Nothing goes to your channels.",
+  );
+  save = saved(page);
+  await toggle.click();
+  await save;
+  await expect(toggle).toHaveText("Stop");
+  await expect(status).toHaveText(/^Sample chat shows in OBS\. (60|59|58) s left\.$/);
+  save = saved(page);
+  await toggle.click();
+  await save;
+  await expect(toggle).toHaveText("Start chat test");
   await close(owner);
 });
 
@@ -161,7 +280,7 @@ test("a rejected layer save rolls back and shows an error", async ({ browser }) 
   await show.click();
   await expect(editor.getByRole("alert")).toContainText("Too many requests");
   await expect(show).not.toBeChecked();
-  await expect(editor.locator('[data-comp-box="chat"]')).toHaveCount(0);
+  await expect(editor.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
   await close(owner);
 });
 
@@ -211,10 +330,14 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   // Only the failed field rolls back. The later edit is kept and saved on its own.
   await expect.poll(() => bodies.length).toBe(2);
   gate.next?.();
-  expect(bodies).toEqual([
+  expect(withoutWrite(bodies)).toEqual([
     { action: "layers", chat: { enabled: true } },
     { action: "layers", chat: { hideCommands: false } },
   ]);
+  // One editor id, and each request a higher number.
+  const [first, second] = writes(bodies);
+  expect(second.writer).toBe(first.writer);
+  expect(second.seq).toBeGreaterThan(first.seq);
   await expect(show).not.toBeChecked();
   await expect(hide).not.toBeChecked();
   await expect(editor.getByRole("status")).toHaveText("Layout saved.");
@@ -237,7 +360,7 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   for (const layer of ["chat", "content"])
     await expect(page.locator(`[data-ov-layer-url="${layer}"]`)).toHaveValue(`${url}&layer=${layer}`);
   // The chat URL names the source size; the characters row only says it is coming.
-  const { w, h } = DEFAULT_LAYERS.chat.rect;
+  const { w, h } = cellPixels(DEFAULT_LAYERS.cells.horizontal.chat);
   await expect(page.locator('[data-ov-layer-size="chat"]')).toHaveText(`Source size: ${w} × ${h}`);
   await expect(page.locator('[data-ov-layer-url="chat"]')).toHaveAccessibleDescription(`Source size: ${w} × ${h}`);
   await expect(page.locator('[data-ov-layer-url="characters"]')).toHaveCount(0);
@@ -297,9 +420,7 @@ for (const reduced of [true, false]) {
   });
 }
 
-test("a note shows while the chat covers the on-air content and goes when the chat moves away", async ({
-  browser,
-}) => {
+test("a note shows while the chat covers the on-air content and goes when the chat moves away", async ({ browser }) => {
   await runSql("composition-editor-overlap", [seededAir, chatOn]);
   const owner = await signedIn(browser, "featureowner", OVERLAP_IP);
   const page = await newPage(owner);
@@ -308,21 +429,18 @@ test("a note shows while the chat covers the on-air content and goes when the ch
   const editor = page.getByRole("region", { name: "Composition", exact: true });
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame.locator(".ov-stage > *").first()).toBeVisible();
-  // The default chat box (x 979 to 1805, y 73 to 1007) covers the right part of the poll.
+  // The default chat cell (columns 1 to 5, rows 1 to 7) covers the left part of the poll.
   const note = editor.locator("[data-comp-overlap]");
   await expect(note).toHaveText(OVERLAP_NOTE);
   // The note does not speak on page load, only after a change.
   await expect(note).toHaveAttribute("aria-live", "off");
 
-  // Below the poll is free: make the chat shorter, then move it down.
-  const fields = editor.locator('[data-comp-fields="chat"]');
+  // Below the poll is free: draw the chat again in rows 6 and 7, beside its old place.
+  await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
+  const grid = editor.getByRole("button", { name: /^Layout grid/ });
+  let at = await gridCells(grid, 16, 9);
   let save = saved(page);
-  await fields.getByLabel("Height", { exact: true }).fill("400");
-  await fields.getByLabel("Height", { exact: true }).press("Enter");
-  await save;
-  save = saved(page);
-  await fields.getByLabel("Y", { exact: true }).fill("620");
-  await fields.getByLabel("Y", { exact: true }).press("Enter");
+  await dragCells(page, at(6, 5), at(11, 6));
   await save;
   // The note stays mounted as a live region; it is empty when nothing is covered.
   await expect(note).toHaveText("");
@@ -330,18 +448,30 @@ test("a note shows while the chat covers the on-air content and goes when the ch
 
   // Back over the poll, the note shows again. A hidden chat covers nothing.
   save = saved(page);
-  await fields.getByLabel("Y", { exact: true }).fill("300");
-  await fields.getByLabel("Y", { exact: true }).press("Enter");
+  await dragCells(page, at(8, 6), at(8, 1));
   await save;
   await expect(note).toHaveText(OVERLAP_NOTE);
   save = saved(page);
   await editor.locator('[data-comp-layer="chat"]').getByRole("checkbox", { name: "Show on stream" }).uncheck();
   await save;
   await expect(note).toHaveText("");
+  // With a content cell, the content has its own place: the chat cannot cover it.
+  save = saved(page);
+  await editor.locator('[data-comp-layer="chat"]').getByRole("checkbox", { name: "Show on stream" }).check();
+  await save;
+  await expect(note).toHaveText(OVERLAP_NOTE);
+  await editor.getByRole("button", { name: "On-air content (min. 4 × 2)" }).click();
+  // The clicks above can scroll the page: measure the grid again.
+  await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
+  at = await gridCells(grid, 16, 9);
+  save = saved(page);
+  await dragCells(page, at(0, 0), at(5, 4));
+  await save;
+  await expect(note).toHaveText("");
   await close(owner);
 });
 
-test("the characters placeholder label stays fully visible beside the default chat box", async ({ browser }) => {
+test("the characters slot label stays fully visible in its cell", async ({ browser }) => {
   await runSql("composition-editor-label", [chatOn]);
   const owner = await signedIn(browser, "featureowner", OVERLAP_IP);
   const cases: [string, string, number][] = [
@@ -359,32 +489,16 @@ test("the characters placeholder label stays fully visible beside the default ch
     await page.goto("/overlay-control");
     const frame = page.locator(".ov-comp-frame");
     await expect(frame).toHaveAttribute("data-scaled", "true");
-    const label = frame.locator('[data-comp-placeholder="characters"] span');
+    const slot = frame.locator('[data-grid-box="characters"]');
+    const label = slot.locator(".ov-grid-soon");
     await expect(label).toHaveText(text);
-    const chatBox = await frame.locator('.ov-layer[data-layer="chat"]').boundingBox();
     const box = await label.boundingBox();
-    if (!chatBox || !box) throw new Error("No chat box or label.");
-    // The label is left of the chat box, and no part of it is cut off.
-    expect(box.x + box.width, `${locale} ${width}`).toBeLessThanOrEqual(chatBox.x);
+    const cell = await slot.boundingBox();
+    if (!box || !cell) throw new Error("No characters slot or label.");
+    // The label is inside its slot, and no part of it is cut off.
+    expect(box.x, `${locale} ${width}`).toBeGreaterThanOrEqual(cell.x - 1);
+    expect(box.x + box.width, `${locale} ${width}`).toBeLessThanOrEqual(cell.x + cell.width + 1);
     expect(await label.evaluate((element: Element) => element.scrollWidth <= element.clientWidth)).toBe(true);
-    // A line ends only at a space (around "·"), never inside a word ("近日公 / 開", "Coming / soon" are wrong).
-    const breaks: string[] = await label.evaluate((element: Element): string[] => {
-      const node: ChildNode | null = element.firstChild;
-      const text: string = node?.textContent ?? "";
-      const range: Range = document.createRange();
-      const found: string[] = [];
-      let top: number | null = null;
-      for (let index = 0; index < text.length; index += 1) {
-        if (!node || text[index] === " ") continue;
-        range.setStart(node, index);
-        range.setEnd(node, index + 1);
-        const at: number = range.getBoundingClientRect().top;
-        if (top !== null && at - top > 2) found.push(text.slice(0, index));
-        top = at;
-      }
-      return found;
-    });
-    for (const before of breaks) expect(before, `${locale} ${width}: "${text}"`).toMatch(/ $/);
     await close(page);
   }
   await close(owner);
@@ -397,20 +511,13 @@ test("closing the editor sends an edit that waits for the idle save", async ({ b
   await page.clock.install();
   await page.goto("/overlay-control");
   const editor = page.getByRole("region", { name: "Composition", exact: true });
-  const x = editor.locator('[data-comp-fields="chat"]').getByLabel("X", { exact: true });
-  await expect(x).toHaveValue(String(DEFAULT_LAYERS.chat.rect.x));
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
-  // A typed value saves after a short idle time. Stop the clock, so only leaving the page can send it.
+  // A key edit saves after a short idle time. Stop the clock, so only leaving the page can send it.
   await page.clock.pauseAt(Date.now() + 1000);
-  await x.fill("1000");
+  await nudgeRight(page);
   await page.goto("/settings");
   // The request left with the page, so read the saved layout from a new page load.
-  await expect
-    .poll(async () => {
-      await page.goto("/overlay-control");
-      return x.inputValue();
-    })
-    .toBe("1000");
+  await expect.poll(() => storedChatColumn(page)).toBe(1);
   await close(owner);
 });
 
@@ -422,15 +529,22 @@ async function leaveInApp(page: Page): Promise<void> {
   await expect(page.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
 }
 
-/** Moves the chat layer 10 px left with the keyboard: a change that waits for the idle save. */
-async function nudgeLeft(page: Page): Promise<void> {
-  await page.locator('[data-comp-box="chat"]').focus();
-  await page.keyboard.press("Shift+ArrowLeft");
+/** Moves the selected chat layer one cell right with the keyboard: a change that waits for the idle save. */
+async function nudgeRight(page: Page): Promise<void> {
+  await page.locator("[data-comp-grid]").focus();
+  await page.keyboard.press("Shift+ArrowRight");
 }
 
-async function storedX(page: Page): Promise<string> {
-  await page.goto("/overlay-control");
-  return page.locator('[data-comp-fields="chat"]').getByLabel("X", { exact: true }).inputValue();
+/** Picks up the chat at the cursor cell, carries it one cell right and puts it down: a change that saves at once. */
+async function carryRight(page: Page): Promise<void> {
+  await page.locator("[data-comp-grid]").focus();
+  await page.keyboard.press("Space");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Space");
+}
+
+async function storedChatColumn(page: Page): Promise<number> {
+  return (await storedLayers(page)).cells.horizontal.chat.c;
 }
 
 test("leaving the editor by an in-app link sends the edit that waits for the idle save", async ({ browser }) => {
@@ -440,19 +554,16 @@ test("leaving the editor by an in-app link sends the edit that waits for the idl
   await page.clock.install();
   await page.goto("/overlay-control");
   const editor = page.getByRole("region", { name: "Composition", exact: true });
-  const x = editor.locator('[data-comp-fields="chat"]').getByLabel("X", { exact: true });
-  await expect(x).toHaveValue(String(DEFAULT_LAYERS.chat.rect.x));
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
-  // Stop the clock, so only closing the editor can send the typed value.
+  // Stop the clock, so only closing the editor can send the key edit.
   await page.clock.pauseAt(Date.now() + 1000);
   const sent = page.waitForResponse(
     (response) => response.request().method() === "POST" && new URL(response.url()).pathname === "/api/overlay",
   );
-  // Arrow keys save after an idle time. (A typed field value saves when the field loses focus, so it would not wait.)
-  await nudgeLeft(page);
+  await nudgeRight(page);
   await leaveInApp(page);
   expect((await sent).ok()).toBe(true);
-  await expect.poll(() => storedX(page)).toBe(String(DEFAULT_LAYERS.chat.rect.x - 10));
+  await expect.poll(() => storedChatColumn(page)).toBe(1);
   await close(owner);
 });
 
@@ -465,8 +576,7 @@ test("leaving the editor during a save sends the newer edit after it, so the new
   await page.clock.install();
   await page.goto("/overlay-control");
   const editor = page.getByRole("region", { name: "Composition", exact: true });
-  const x = editor.locator('[data-comp-fields="chat"]').getByLabel("X", { exact: true });
-  await expect(x).toHaveValue(String(DEFAULT_LAYERS.chat.rect.x));
+  await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
   await page.clock.pauseAt(Date.now() + 1000);
   const bodies: unknown[] = [];
   const gate: { release?: () => void } = {};
@@ -480,24 +590,23 @@ test("leaving the editor during a save sends the newer edit after it, so the new
       });
     return route.fallback();
   });
-  await x.fill("900");
-  await x.press("Enter");
+  const chatBox = editor.locator('[data-grid-box="chat"]');
+  await carryRight(page);
   await expect.poll(() => bodies.length).toBe(1);
-  await expect(x).toHaveValue("900");
-  await nudgeLeft(page);
-  await expect(x).toHaveValue("890");
+  await nudgeRight(page);
+  await expect(chatBox).toHaveCSS("left", "240px");
   await leaveInApp(page);
   // The newer edit waits for the save in flight.
   expect(bodies).toHaveLength(1);
   gate.release?.();
   await expect.poll(() => bodies.length).toBe(2);
-  const rect = { ...DEFAULT_LAYERS.chat.rect };
-  expect(bodies).toEqual([
-    { action: "layers", chat: { rect: { ...rect, x: 900 } } },
-    { action: "layers", chat: { rect: { ...rect, x: 890 } } },
+  const chat = (c: number) => ({ cells: { horizontal: { chat: { ...DEFAULT_LAYERS.cells.horizontal.chat, c } } } });
+  expect(withoutWrite(bodies)).toEqual([
+    { action: "layers", ...chat(1) },
+    { action: "layers", ...chat(2) },
   ]);
   await page.unroute("**/api/overlay");
-  await expect.poll(() => storedX(page)).toBe("890");
+  await expect.poll(() => storedChatColumn(page)).toBe(2);
   await close(owner);
 });
 
@@ -511,8 +620,7 @@ for (const stale of [false, true]) {
     await page.clock.install();
     await page.goto("/overlay-control");
     const editor = page.getByRole("region", { name: "Composition", exact: true });
-    const x = editor.locator('[data-comp-fields="chat"]').getByLabel("X", { exact: true });
-    await expect(x).toHaveValue(String(DEFAULT_LAYERS.chat.rect.x));
+    await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
     await page.clock.pauseAt(Date.now() + 1000);
     await page.route("**/api/overlay", (route) =>
       route.request().method() === "POST"
@@ -520,7 +628,7 @@ for (const stale of [false, true]) {
         : route.fallback(),
     );
     const failed = page.waitForResponse((response) => new URL(response.url()).pathname === "/api/overlay");
-    await nudgeLeft(page);
+    await nudgeRight(page);
     await leaveInApp(page);
     expect((await failed).status()).toBe(429);
     // The error of a change sent while leaving is stale after 60 seconds.
@@ -529,14 +637,14 @@ for (const stale of [false, true]) {
     await page.goBack();
     await expect(page.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
     const back = page.getByRole("region", { name: "Composition", exact: true });
-    await expect(back.getByLabel("X", { exact: true }).first()).toBeVisible();
+    await expect(back.locator("[data-comp-grid]")).toBeVisible();
     if (stale) await expect(back.getByRole("alert")).toHaveCount(0);
     else {
       const alert = back.getByRole("alert");
       await expect(alert).toHaveText(
-        "Your last change to the “Chat” layer was not saved. Make the change again. Reason: Too many requests. Wait one minute and try again.",
+        "Your last layout change was not saved. Make the change again. Reason: Too many requests. Wait one minute and try again.",
       );
-      // The editor brings the error into view: it sits below the fields.
+      // The editor brings the error into view: it sits below the layer controls.
       await expect(alert).toBeInViewport();
     }
     await close(owner);

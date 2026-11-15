@@ -1,5 +1,5 @@
-/* Composition editor on Overlay control. The preview reuses .ov-frame / .ov-scaler (1920x1080 scaled by --ov-scale).
-   Boxes inside the scaler use design pixels; their outlines and handles divide by --ov-scale to keep a screen size. */
+/* Composition editor on Overlay control. The preview reuses .ov-frame / .ov-scaler (the frame of the orientation,
+   scaled by --ov-scale). Boxes inside the scaler use design pixels; their outlines divide by --ov-scale. */
 
 .ov-comp {
   max-width: 1300px;
@@ -92,112 +92,125 @@
   clip-path: polygon(0 18%, 30% 4%, 62% 12%, 100% 2%, 100% 100%, 0 100%);
 }
 
-/* ---------- Characters placeholder and draggable boxes ---------- */
-.ov-comp-placeholder {
+/* ---------- Layout grid (layout-grid.tsx) ----------
+   The grid boxes sit in the scaler in design pixels: a cell is 120 px. Lines and labels divide by --ov-scale. */
+.ov-comp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.ov-comp-bar .field {
+  margin: 0;
+}
+.ov-comp-frame[data-orientation="vertical"] {
+  aspect-ratio: 9 / 16;
+  width: 100%;
+  max-width: min(100%, 420px);
+  justify-self: center;
+}
+.ov-grid-lines {
   position: absolute;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  border: calc(2px / var(--ov-scale, 1)) dashed rgb(242 210 46 / 0.75);
-  background: repeating-linear-gradient(135deg, rgb(242 210 46 / 0.08) 0 24px, transparent 24px 48px);
-  color: var(--cream);
-  font: 600 calc(14px / var(--ov-scale, 1)) / 1.2 var(--body);
-  text-shadow: 0 0 calc(4px / var(--ov-scale, 1)) #000;
+  inset: 0;
+  z-index: 4;
   pointer-events: none;
-  opacity: 0.6;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.18) calc(1px / var(--ov-scale, 1)), transparent 0),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.18) calc(1px / var(--ov-scale, 1)), transparent 0);
+  background-size: 120px 120px;
 }
-.ov-comp-placeholder[data-enabled] {
-  opacity: 1;
-}
-/* With the chat over the slot, the label sits in the wider free part of the slot beside the chat box, within that
-   free width (--ov-label-free, design pixels). Without room on either side it does not show (labelPlace). */
-.ov-comp-placeholder[data-label-side="start"] {
-  justify-items: start;
-}
-.ov-comp-placeholder[data-label-side="end"] {
-  justify-items: end;
-}
-.ov-comp-placeholder[data-label-side] span {
-  max-width: calc(var(--ov-label-free) - 48px);
-  margin: 0 24px;
-}
-.ov-comp-placeholder[data-label-side="none"] span {
-  display: none;
-}
-.ov-comp-placeholder span {
-  max-width: 90%;
-  padding: 0.2em 0.6em;
-  border-radius: 0.3em;
-  background: rgb(0 0 0 / 0.55);
-  text-align: center;
-  /* A narrow label breaks only at the spaces around "·", never inside a word (also in Japanese and Chinese), and its
-     lines are of near equal length. A word wider than the label still breaks, so no text is cut off. */
-  word-break: keep-all;
-  overflow-wrap: break-word;
-  text-wrap: balance;
-}
-.ov-comp-box {
+.ov-grid-box {
   position: absolute;
   z-index: 5;
-}
-.ov-comp-move,
-.ov-comp-resize {
-  position: absolute;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-  min-height: 0;
   box-sizing: border-box;
-  font: inherit;
-  touch-action: none;
-  user-select: none;
+  display: grid;
+  align-content: space-between;
+  justify-items: start;
+  border: calc(2px / var(--ov-scale, 1)) solid var(--gold);
+  pointer-events: none;
 }
-.ov-comp-move {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: calc(2px / var(--ov-scale, 1)) dashed var(--gold);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  cursor: move;
-  transition: background-color 0.15s ease;
+.ov-grid-box[data-off] {
+  border-style: dashed;
+  opacity: 0.7;
 }
-.ov-comp-move:hover,
-.ov-comp-move:focus-visible {
-  background: rgb(212 176 42 / 0.12);
+.ov-grid-box[data-grid-box="characters"] {
+  background: repeating-linear-gradient(135deg, rgb(242 210 46 / 0.08) 0 24px, transparent 24px 48px);
 }
-.ov-comp-move:focus-visible {
-  outline: calc(3px / var(--ov-scale, 1)) solid var(--focus-ring, var(--gold));
-  outline-offset: calc(2px / var(--ov-scale, 1));
-  box-shadow: none;
+.ov-grid-box[data-selected] {
+  outline: calc(3px / var(--ov-scale, 1)) solid var(--cream);
+  outline-offset: calc(-6px / var(--ov-scale, 1));
 }
-.ov-comp-box-label {
-  position: absolute;
-  left: 0;
-  top: 0;
+.ov-grid-box[data-lifted] {
+  opacity: 0.35;
+}
+.ov-grid-tag,
+.ov-grid-soon {
   padding: calc(2px / var(--ov-scale, 1)) calc(6px / var(--ov-scale, 1));
   background: var(--gold);
   color: var(--on-gold);
   font: 700 calc(12px / var(--ov-scale, 1)) / 1.3 var(--body);
   white-space: nowrap;
 }
-.ov-comp-resize {
-  right: calc(-10px / var(--ov-scale, 1));
-  bottom: calc(-10px / var(--ov-scale, 1));
-  width: calc(20px / var(--ov-scale, 1));
-  height: calc(20px / var(--ov-scale, 1));
-  box-sizing: border-box;
-  border: calc(2px / var(--ov-scale, 1)) solid var(--on-gold);
-  border-radius: calc(4px / var(--ov-scale, 1));
-  background: var(--gold);
-  cursor: nwse-resize;
-  touch-action: none;
+.ov-grid-soon {
+  justify-self: center;
+  align-self: center;
+  background: rgb(0 0 0 / 0.55);
+  color: var(--cream);
+  white-space: normal;
+  text-align: center;
 }
-.ov-comp-resize:focus-visible {
-  outline: calc(3px / var(--ov-scale, 1)) solid var(--focus-ring, var(--gold));
-  outline-offset: calc(2px / var(--ov-scale, 1));
+.ov-grid-preview {
+  position: absolute;
+  z-index: 6;
+  box-sizing: border-box;
+  border: calc(3px / var(--ov-scale, 1)) dashed var(--gold);
+  background: rgb(212 176 42 / 0.2);
+  pointer-events: none;
+}
+.ov-grid-preview[data-invalid] {
+  border-color: var(--error);
+  background: rgb(226 87 76 / 0.25);
+}
+.ov-grid-input {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+.ov-grid-input:focus-visible {
+  outline: calc(3px / var(--ov-scale, 1)) solid var(--focus-ring, var(--gold));
+  outline-offset: calc(-3px / var(--ov-scale, 1));
+  box-shadow: none;
+}
+.ov-grid-cursor {
+  position: absolute;
+  box-sizing: border-box;
+  border: calc(3px / var(--ov-scale, 1)) solid var(--cream);
+  box-shadow: 0 0 0 calc(2px / var(--ov-scale, 1)) #000;
+}
+.ov-grid-status {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 0.9375rem;
+}
+.ov-grid-status[data-bad] {
+  color: var(--error);
+}
+.ov-comp-test {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
 }
 
 /* ---------- Layer controls ---------- */
@@ -243,34 +256,6 @@
   font-weight: 600;
   vertical-align: middle;
 }
-.ov-comp-nums {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-.ov-comp-num {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-.ov-comp-num input {
-  width: 100%;
-  min-width: 0;
-  min-height: 40px;
-  padding: 6px 8px;
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  background: var(--field);
-  color: inherit;
-  font: 500 0.9375rem var(--body);
-  font-variant-numeric: tabular-nums;
-}
-.ov-comp-num input:disabled {
-  color: var(--muted);
-  border-style: dashed;
-}
 .ov-comp-status {
   display: block;
   margin: 0;
@@ -290,16 +275,6 @@
 @media (max-width: 60em) {
   .ov-comp-body {
     grid-template-columns: minmax(0, 1fr);
-  }
-}
-@media (max-width: 30em) {
-  .ov-comp-nums {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ov-comp-move {
-    transition: none;
   }
 }
 

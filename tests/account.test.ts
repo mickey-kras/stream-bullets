@@ -222,7 +222,7 @@ async function seedNewTables(): Promise<void> {
     run(
       `INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,show_results,message,message_style,layers,revision,updated_at)
         VALUES (?1,'{"type":"message","ref":null}','{"type":"auto","ref":null}','top','l',1,0,'BRB 5 min','hype',
-                '{"chat":{"enabled":true,"rect":{"x":40,"y":60,"w":280,"h":160},"theme":"neon"}}',3,?2),
+                '{"chat":{"enabled":true,"theme":"neon"},"cells":{"horizontal":{"chat":{"c":10,"r":0,"w":3,"h":2}}}}',3,?2),
                (?3,'{"type":"auto","ref":null}','{"type":"hidden","ref":null}','lower','m',0,1,'',  'info','{}',0,?2)`,
       ids.leaverPage,
       now,
@@ -695,7 +695,11 @@ describe("tables added by migrations 0006–0012", (): void => {
         // Read leniently: the unknown key is dropped and missing layers take their defaults.
         layers: {
           ...DEFAULT_LAYERS,
-          chat: { enabled: true, rect: { x: 40, y: 60, w: 280, h: 160 }, hideCommands: true },
+          chat: { enabled: true, hideCommands: true },
+          cells: {
+            ...DEFAULT_LAYERS.cells,
+            horizontal: { ...DEFAULT_LAYERS.cells.horizontal, chat: { c: 10, r: 0, w: 3, h: 2 } },
+          },
         },
         updatedAt: new Date(now).toISOString(),
       },

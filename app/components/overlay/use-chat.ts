@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import type { ActivityChat, ActivityMessage } from "../../lib/activity";
+import type { ActivityChat, ActivityEvent, ActivityMessage } from "../../lib/activity";
 import {
   chatReducer,
   initialChatState,
@@ -8,11 +8,12 @@ import {
   type ChatOptions,
   type ChatState,
 } from "../../lib/chat-feed";
+import { CHAT_TEST_SCRIPT } from "../../lib/chat-test";
 import type { ChatView } from "../../lib/fading-rows";
 import { motionReduced, watchMotion } from "../station/motion";
 import type { ActivityFeed } from "./activity-feed";
 
-/** The editor preview adds one sample message this often. */
+/** The editor preview and the chat test add one sample event this often. */
 export const SAMPLE_INTERVAL_MS = 2_400;
 
 export interface UseChatOptions {
@@ -23,14 +24,25 @@ export interface UseChatOptions {
   hideCommands: boolean;
   /** Server time minus local time, when known. */
   serverOffset?: number;
+  /** A chat test runs: show the test chat (CHAT_TEST_SCRIPT). The real chat keeps its state and shows again after. */
+  test?: boolean;
 }
 
 const STILL_LIMITS: ChatOptions["limits"] = { lifetimeMs: Number.POSITIVE_INFINITY };
 
-/** A sample as a fresh message: a new id each round, so the dedupe never hides the loop. */
-function sampleEvent(sample: ActivityChat, round: number, now: number): ActivityChat {
-  const messageId = `${sample.messageId}-${round}`;
-  return { ...sample, messageId, id: `${sample.platform}:${messageId}`, receivedAt: now, sentAt: null, live: false };
+/**
+ * A sample as a fresh event: a new message id each round, so the dedupe never hides the loop, and a delete of the
+ * same round matches it. The `until` of a sample ban is the length of the timeout.
+ */
+function sampleEvent(sample: ActivityEvent, round: number, now: number): ActivityEvent {
+  if (sample.kind === "chat") {
+    const messageId = `${sample.messageId}-${round}`;
+    return { ...sample, messageId, id: `${sample.platform}:${messageId}`, receivedAt: now, sentAt: null, live: false };
+  }
+  if (sample.kind === "delete") return { ...sample, messageId: `${sample.messageId}-${round}`, receivedAt: now };
+  if (sample.kind === "ban")
+    return { ...sample, until: sample.until === null ? null : now + sample.until, receivedAt: now };
+  return sample;
 }
 
 function subscribeMotion(onChange: () => void): () => void {
@@ -47,16 +59,27 @@ function useMotionReduced(): boolean {
   return useSyncExternalStore(subscribeMotion, motionReduced, (): boolean => false);
 }
 
+/** Where a chat state gets its events: the activity feed, or samples (shown at once if `prefill`, then on a loop). */
+interface ChatSource {
+  feed: ActivityFeed | null;
+  samples?: readonly ActivityEvent[];
+  prefill: boolean;
+}
+
 /**
- * The merged chat: its rows, reset epoch and latest change time (see ChatView). It feeds the activity feed (or the samples) through `chatReducer` and wakes once at
- * `nextWakeAt` to move animations and lifetimes forward. A changed `hideCommands` applies to the rows on screen.
+ * One chat state: it feeds the activity feed (or the samples) through `chatReducer` and wakes once at `nextWakeAt` to
+ * move animations and lifetimes forward. A changed `hideCommands` applies to the rows on screen.
  *
- * Samples play on a loop, except with reduced motion: then they show once, as a still snapshot.
+ * Prefilled samples play on a loop, except with reduced motion: then they show once, as a still snapshot.
  */
-export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOptions): ChatView {
+function useChatState(
+  { feed, samples, prefill }: ChatSource,
+  hideCommands: boolean,
+  serverOffset: number | undefined,
+): ChatState {
   const [state, setState] = useState<ChatState>(initialChatState);
   // A still sample snapshot never expires, so the preview never empties.
-  const still: boolean = useMotionReduced() && samples !== undefined;
+  const still: boolean = useMotionReduced() && samples !== undefined && prefill;
   const options: ChatOptions = still ? { hideCommands, limits: STILL_LIMITS } : { hideCommands };
   const optionsRef = useRef<ChatOptions>(options);
   const offsetRef = useRef<number | undefined>(serverOffset);
@@ -77,20 +100,22 @@ export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOp
     dispatch({ type: "reset" });
     if (samples) {
       if (samples.length === 0) return;
-      const now: number = Date.now();
-      dispatch({
-        type: "message",
-        message: {
-          type: "snapshot",
-          replay: true,
-          events: samples.map((s, i) => sampleEvent(s, 0, now - (samples.length - i) * 1000)),
-        },
-        now,
-      });
-      if (still) return;
       let index = 0;
       let round = 1;
-      const timer = setInterval(() => {
+      if (prefill) {
+        const now: number = Date.now();
+        dispatch({
+          type: "message",
+          message: {
+            type: "snapshot",
+            replay: true,
+            events: samples.map((s, i) => sampleEvent(s, 0, now - (samples.length - i) * 1000)),
+          },
+          now,
+        });
+        if (still) return;
+      }
+      const play = (): void => {
         const at: number = Date.now();
         dispatch({
           type: "message",
@@ -102,14 +127,17 @@ export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOp
           index = 0;
           round += 1;
         }
-      }, SAMPLE_INTERVAL_MS);
+      };
+      // Without a prefill the first event comes at once, so the chat does not wait empty.
+      if (!prefill) play();
+      const timer = setInterval(play, SAMPLE_INTERVAL_MS);
       return (): void => clearInterval(timer);
     }
     if (!subscribe) return;
     return subscribe((message: ActivityMessage): void => {
       dispatch({ type: "message", message, now: Date.now(), serverOffset: offsetRef.current });
     });
-  }, [subscribe, samples, dispatch, still]);
+  }, [subscribe, samples, prefill, dispatch, still]);
 
   const wakeAt: number | null = nextWakeAt(state, options);
   useEffect(() => {
@@ -123,4 +151,19 @@ export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOp
   }, [wakeAt, dispatch]);
 
   return state;
+}
+
+/**
+ * The merged chat: its rows, reset epoch and latest change time (see ChatView), from the activity feed or the editor
+ * samples. During a chat test it returns the test chat instead. The real chat keeps reading the feed underneath, so
+ * it is current when the test ends.
+ */
+export function useChat({ feed, samples, hideCommands, serverOffset, test = false }: UseChatOptions): ChatView {
+  const chat: ChatState = useChatState({ feed, samples, prefill: true }, hideCommands, serverOffset);
+  const trial: ChatState = useChatState(
+    { feed: null, samples: test ? CHAT_TEST_SCRIPT : undefined, prefill: false },
+    hideCommands,
+    serverOffset,
+  );
+  return test ? trial : chat;
 }

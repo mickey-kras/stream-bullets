@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { MASH_NAME } from "../../lib/mash";
-import { DESIGN_W } from "../../lib/overlay-layers";
+import { frameSize } from "../../lib/overlay-layers";
 import type {
   OverlayData,
   OverlayMessageStyle,
@@ -88,6 +88,7 @@ export function controlState(
     message: live.air.type === "message" ? live.message : base.message,
     messageStyle: live.messageStyle,
     layers: live.layers,
+    chatTestUntil: live.chatTestUntil,
     revision: live.revision,
   };
 }
@@ -98,6 +99,9 @@ type MonitorKind = "prev" | "air";
 function openOnWideScreens(element: HTMLDetailsElement | null): void {
   if (element && globalThis.matchMedia?.("(min-width: 43.75em)").matches) element.open = true;
 }
+
+// The monitors show the content alone in the 1920x1080 frame.
+const MONITOR_W: number = frameSize("horizontal").w;
 
 // Scale a 1920x1080 stage through CSS. Hide until measured to prevent overflow. Enlarge uses full width on
 // narrow screens.
@@ -115,7 +119,7 @@ function Monitor({
   onEnlarge: () => void;
 }>): ReactNode {
   const frame = useRef<HTMLDivElement | null>(null);
-  useDesignScale(frame, DESIGN_W);
+  useDesignScale(frame, MONITOR_W);
   const label: string = t(SOURCES.find((item) => item.type === source.type)?.label ?? "overlay.src.auto");
   return (
     <figure className={`ov-monitor ${kind}`} data-ov-monitor={kind}>
@@ -531,7 +535,13 @@ export function OverlayControl({
           </details>
         </div>
       </div>
-      <CompositionEditor layers={state.layers} scene={view} source={state.air} onSaved={keepNewest} />
+      <CompositionEditor
+        layers={state.layers}
+        scene={view}
+        source={state.air}
+        chatTestUntil={state.chatTestUntil}
+        onSaved={keepNewest}
+      />
       <div className="ov-take-dock">{take}</div>
     </>
   );

@@ -191,9 +191,29 @@ describe("migrations 0006 onwards", (): void => {
     await rejects('"text"');
     await rejects(null);
     await rejects(JSON.stringify({ chat: { note: "x".repeat(1000) } }));
-    const layers = JSON.stringify({ chat: { enabled: true, rect: { x: 0, y: 0, w: 280, h: 160 }, hideCommands: false } });
+    const layers = JSON.stringify({ chat: { enabled: true }, cells: { horizontal: { chat: { c: 0, r: 0, w: 3, h: 2 } } } });
     await db.prepare("UPDATE overlay_state SET layers=? WHERE streamer_id='page'").bind(layers).run();
     expect(await db.prepare("SELECT layers FROM overlay_state WHERE streamer_id='page'").first()).toEqual({ layers });
+  });
+
+  it("adds the chat test end and the layer write order (0030) with defaults for old rows", async (): Promise<void> => {
+    expect(
+      await db.prepare("SELECT chat_test_until,layers_writer,layers_seq FROM overlay_state WHERE streamer_id='page'").first(),
+    ).toEqual({ chat_test_until: 0, layers_writer: "", layers_seq: 0 });
+    const rejects = async (column: string, value: number | string | null): Promise<void> => {
+      await expect(
+        db.prepare(`UPDATE overlay_state SET ${column}=? WHERE streamer_id='page'`).bind(value).run(),
+      ).rejects.toThrow(/constraint failed/);
+    };
+    await rejects("chat_test_until", -1);
+    await rejects("chat_test_until", null);
+    await rejects("layers_writer", "x".repeat(65));
+    await rejects("layers_writer", null);
+    await rejects("layers_seq", -1);
+    await db
+      .prepare("UPDATE overlay_state SET chat_test_until=?,layers_writer=?,layers_seq=? WHERE streamer_id='page'")
+      .bind(1_800_000_000_000, "w".repeat(64), 3)
+      .run();
   });
 
   it("adds data_read_at (0028) with a default for new rows", async (): Promise<void> => {

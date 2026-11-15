@@ -100,10 +100,12 @@ export default function Overlay(): ReactNode {
       only={only}
       feed={feedOn ? feed : null}
       serverOffset={serverOffset}
+      testUntil={overlay.chatTestUntil}
     />
   );
-  // With a feed layer on, the composition uses the editor preview's 1920x1080 canvas, so OBS shows the same layout
-  // at every source size. The design screen also drops the small-screen content styles of .ov-screen.
+  // With a feed layer on or a content cell, the composition uses the editor preview's canvas of the selected
+  // orientation, so OBS shows the same layout at every source size of that aspect ratio. The design screen also drops
+  // the small-screen content styles of .ov-screen.
   const designed: boolean = usesDesignCanvas(overlay.layers, only);
   return (
     // data-feed-status exposes the activity feed state for checks and support; nothing shows on stream.
@@ -114,7 +116,9 @@ export default function Overlay(): ReactNode {
       data-feed-status={feed.status}
     >
       {/* The same elements with and without the canvas, so a chat toggle never remounts the on-air content. */}
-      <DesignCanvas on={designed}>{composition}</DesignCanvas>
+      <DesignCanvas on={designed} orientation={overlay.layers.orientation}>
+        {composition}
+      </DesignCanvas>
       {/* The overlay never goes offline (it keeps retrying), so it never puts a button on stream. */}
       {content && status !== "live" && (
         <output className="overlay-connection">

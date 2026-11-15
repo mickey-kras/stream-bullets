@@ -628,6 +628,7 @@ describe("overlay updates", (): void => {
       size: "l",
       message: "BRB 5 min",
       layers: DEFAULT_LAYERS,
+      chatTestUntil: 0,
       revision: 3,
     });
     expect((await update).overlay).not.toHaveProperty("preview");

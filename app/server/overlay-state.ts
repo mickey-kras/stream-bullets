@@ -13,10 +13,12 @@ export interface OverlayRow {
   message: string;
   message_style: string;
   layers: string;
+  chat_test_until: number;
   revision: number;
 }
 
-export const OVERLAY_COLUMNS = "air,preview,position,size,instant,show_results,message,message_style,layers,revision";
+export const OVERLAY_COLUMNS =
+  "air,preview,position,size,instant,show_results,message,message_style,layers,chat_test_until,revision";
 
 // Match `overlay_state_message_check`.
 export const OVERLAY_MESSAGE_LENGTH = 120;
@@ -32,6 +34,7 @@ export const DEFAULT_OVERLAY: OverlayState = {
   message: "",
   messageStyle: "info",
   layers: DEFAULT_LAYERS,
+  chatTestUntil: 0,
   revision: 0,
 };
 
@@ -46,6 +49,7 @@ const rowSchema = z.object({
   show_results: z.union([z.literal(0), z.literal(1)]),
   message: z.string().max(OVERLAY_MESSAGE_LENGTH),
   message_style: z.enum(OVERLAY_MESSAGE_STYLES),
+  chat_test_until: z.number().int().nonnegative(),
   revision: z.number().int().nonnegative(),
 });
 
@@ -67,6 +71,7 @@ export function overlayValue(row: OverlayRow | null | undefined): OverlayState {
     message: value.message,
     messageStyle: value.message_style,
     layers: parseStoredLayers(row.layers),
+    chatTestUntil: value.chat_test_until,
     revision: value.revision,
   };
 }
@@ -81,6 +86,7 @@ export function overlayPublic(state: OverlayState): OverlayPublic {
     message: state.air.type === "message" ? state.message : "",
     messageStyle: state.messageStyle,
     layers: state.layers,
+    chatTestUntil: state.chatTestUntil,
     revision: state.revision,
   };
 }

@@ -1,64 +1,69 @@
 import { describe, expect, it } from "vitest";
 import {
-  clampRect,
   diffLayers,
   isEmptyPatch,
-  labelPlace,
+  layerAt,
   layersAction,
-  MIN_LABEL_FREE,
   mergePatches,
-  moveRect,
-  resizeRect,
-  sameRect,
-  setRectField,
+  moveCell,
+  placeProblem,
+  spanCells,
+  withCell,
   withoutSent,
-  withRect,
 } from "../app/lib/layer-geometry";
-import type { LayersPatch, OverlayLayers } from "../app/lib/overlay-layers";
+import { DEFAULT_LAYERS, type CellRect, type LayersPatch, type OverlayLayers } from "../app/lib/overlay-layers";
 
-const MIN = { w: 280, h: 160 };
+const write = { writer: "editor-1234", seq: 1 };
+const cell: CellRect = { c: 10, r: 0, w: 6, h: 4 };
 
 function layers(): OverlayLayers {
-  return {
-    chat: { enabled: true, rect: { x: 100, y: 100, w: 400, h: 600 }, hideCommands: true },
-    characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
-  };
+  return structuredClone({ ...DEFAULT_LAYERS, chat: { enabled: true, hideCommands: true } });
 }
 
-describe("rect geometry", () => {
-  it("clamps a rect into the frame in whole pixels, moving a too-wide rect left", () => {
-    expect(clampRect({ x: 10.4, y: 20.6, w: 300.2, h: 200.7 }, MIN)).toEqual({ x: 10, y: 21, w: 300, h: 201 });
-    expect(clampRect({ x: 1800, y: 1000, w: 400, h: 300 }, MIN)).toEqual({ x: 1520, y: 780, w: 400, h: 300 });
-    expect(clampRect({ x: -5, y: -5, w: 10, h: 10 }, MIN)).toEqual({ x: 0, y: 0, w: 280, h: 160 });
-    expect(clampRect({ x: 0, y: 0, w: 5000, h: 5000 }, MIN)).toEqual({ x: 0, y: 0, w: 1920, h: 1080 });
+describe("grid edits", () => {
+  it("spans the rectangle between two cells in either direction", () => {
+    expect(spanCells({ c: 2, r: 3 }, { c: 5, r: 4 })).toEqual({ c: 2, r: 3, w: 4, h: 2 });
+    expect(spanCells({ c: 5, r: 4 }, { c: 2, r: 3 })).toEqual({ c: 2, r: 3, w: 4, h: 2 });
+    expect(spanCells({ c: 1, r: 1 }, { c: 1, r: 1 })).toEqual({ c: 1, r: 1, w: 1, h: 1 });
   });
 
-  it("moves a rect and keeps its size inside the frame", () => {
-    const rect = { x: 100, y: 100, w: 400, h: 600 };
-    expect(moveRect(rect, 10, -20)).toEqual({ x: 110, y: 80, w: 400, h: 600 });
-    expect(moveRect(rect, 5000, 5000)).toEqual({ x: 1520, y: 480, w: 400, h: 600 });
+  it("moves a cell by the grabbed cell and keeps it inside the grid", () => {
+    expect(moveCell("horizontal", cell, { c: 1, r: 1 }, { c: 4, r: 3 })).toEqual({ c: 3, r: 2, w: 6, h: 4 });
+    expect(moveCell("horizontal", cell, { c: 0, r: 0 }, { c: 15, r: 8 })).toEqual({ c: 10, r: 5, w: 6, h: 4 });
+    expect(moveCell("vertical", cell, { c: 0, r: 0 }, { c: 8, r: 15 })).toEqual({ c: 3, r: 12, w: 6, h: 4 });
+    expect(moveCell("horizontal", cell, { c: 2, r: 2 }, { c: 0, r: 0 })).toEqual({ c: 0, r: 0, w: 6, h: 4 });
   });
 
-  it("resizes from the bottom-right corner within the frame and the minimum", () => {
-    const rect = { x: 100, y: 100, w: 400, h: 600 };
-    expect(resizeRect(rect, 20.4, -30, MIN)).toEqual({ x: 100, y: 100, w: 420, h: 570 });
-    expect(resizeRect(rect, -1000, -1000, MIN)).toEqual({ x: 100, y: 100, w: 280, h: 160 });
-    expect(resizeRect(rect, 5000, 5000, MIN)).toEqual({ x: 100, y: 100, w: 1820, h: 980 });
+  it("finds the layer at a cell", () => {
+    const cells = { ...DEFAULT_LAYERS.cells.horizontal, content: cell };
+    expect(layerAt(cells, { c: 0, r: 0 })).toBe("chat");
+    expect(layerAt(cells, { c: 4, r: 6 })).toBe("chat");
+    expect(layerAt(cells, { c: 5, r: 6 })).toBeNull();
+    expect(layerAt(cells, { c: 15, r: 8 })).toBe("characters");
+    expect(layerAt(cells, { c: 12, r: 2 })).toBe("content");
+    expect(layerAt(DEFAULT_LAYERS.cells.horizontal, { c: 12, r: 2 })).toBeNull();
   });
 
-  it("sets one field and keeps the rect in the frame", () => {
-    const rect = { x: 1500, y: 100, w: 400, h: 600 };
-    expect(setRectField(rect, "y", 50, MIN)).toEqual({ x: 1500, y: 50, w: 400, h: 600 });
-    expect(setRectField(rect, "w", 1000, MIN)).toEqual({ x: 920, y: 100, w: 1000, h: 600 });
+  it("refuses a cell over another layer or below the minimum size, and allows the layer's own place", () => {
+    const cells = DEFAULT_LAYERS.cells.horizontal;
+    expect(placeProblem(cells, "content", cell)).toBeNull();
+    expect(placeProblem(cells, "content", { c: 4, r: 0, w: 4, h: 2 })).toEqual({ kind: "overlap", other: "chat" });
+    expect(placeProblem(cells, "chat", { c: 0, r: 5, w: 5, h: 3 })).toEqual({ kind: "overlap", other: "characters" });
+    expect(placeProblem(cells, "chat", { c: 1, r: 1, w: 5, h: 5 })).toBeNull();
+    expect(placeProblem(cells, "content", { c: 10, r: 0, w: 3, h: 2 })).toEqual({ kind: "small" });
+    expect(placeProblem(cells, "characters", { c: 6, r: 0, w: 5, h: 2 })).toEqual({ kind: "small" });
   });
 
-  it("compares rects by value and replaces one layer's rect", () => {
-    expect(sameRect({ x: 1, y: 2, w: 3, h: 4 }, { x: 1, y: 2, w: 3, h: 4 })).toBe(true);
-    expect(sameRect({ x: 1, y: 2, w: 3, h: 4 }, { x: 1, y: 2, w: 3, h: 5 })).toBe(false);
-    const rect = { x: 0, y: 0, w: 640, h: 200 };
-    expect(withRect(layers(), "chat", rect).chat).toEqual({ ...layers().chat, rect });
-    expect(withRect(layers(), "characters", rect).characters).toEqual({ ...layers().characters, rect });
-    expect(withRect(layers(), "characters", rect).chat).toEqual(layers().chat);
+  it("replaces one layer's cell in one orientation and removes a content cell", () => {
+    const placed: OverlayLayers = withCell(layers(), "vertical", "content", { c: 0, r: 0, w: 9, h: 4 });
+    expect(placed.cells.vertical.content).toEqual({ c: 0, r: 0, w: 9, h: 4 });
+    expect(placed.cells.horizontal).toEqual(DEFAULT_LAYERS.cells.horizontal);
+    expect(withCell(placed, "vertical", "content", null).cells.vertical.content).toBeNull();
+    expect(withCell(placed, "horizontal", "chat", cell).cells.horizontal.chat).toEqual(cell);
+    // Chat and characters always keep a cell.
+    expect(withCell(placed, "horizontal", "chat", null).cells.horizontal.chat).toEqual(
+      DEFAULT_LAYERS.cells.horizontal.chat,
+    );
   });
 });
 
@@ -67,95 +72,103 @@ describe("field-level patches", () => {
     const before = layers();
     expect(diffLayers(before, layers())).toEqual({});
     const after: OverlayLayers = {
-      chat: { enabled: false, rect: { x: 1, y: 2, w: 300, h: 200 }, hideCommands: false },
-      characters: { enabled: true, rect: { x: 0, y: 0, w: 640, h: 160 } },
+      orientation: "vertical",
+      chat: { enabled: false, hideCommands: false },
+      characters: { enabled: true },
+      cells: {
+        horizontal: { ...before.cells.horizontal, chat: cell, content: { c: 5, r: 0, w: 4, h: 2 } },
+        vertical: before.cells.vertical,
+      },
     };
-    expect(diffLayers(before, after)).toEqual(after);
+    expect(diffLayers(before, after)).toEqual({
+      orientation: "vertical",
+      chat: { enabled: false, hideCommands: false },
+      characters: { enabled: true },
+      cells: { horizontal: { chat: cell, content: { c: 5, r: 0, w: 4, h: 2 } } },
+    });
+    expect(
+      diffLayers(after, {
+        ...after,
+        cells: { ...after.cells, horizontal: { ...after.cells.horizontal, content: null } },
+      }),
+    ).toEqual({
+      cells: { horizontal: { content: null } },
+    });
     expect(diffLayers(before, { ...before, chat: { ...before.chat, hideCommands: false } })).toEqual({
       chat: { hideCommands: false },
     });
   });
 
   it("merges patches with the newer field winning, and checks emptiness", () => {
-    const merged = mergePatches({ chat: { enabled: true, hideCommands: true } }, { chat: { enabled: false } });
-    expect(merged).toEqual({ chat: { enabled: false, hideCommands: true } });
+    const merged = mergePatches(
+      { chat: { enabled: true, hideCommands: true }, cells: { horizontal: { chat: cell, content: null } } },
+      { chat: { enabled: false }, orientation: "vertical", cells: { horizontal: { content: cell } } },
+    );
+    expect(merged).toEqual({
+      orientation: "vertical",
+      chat: { enabled: false, hideCommands: true },
+      cells: { horizontal: { chat: cell, content: cell } },
+    });
+    expect(mergePatches({ orientation: "vertical" }, {})).toEqual({ orientation: "vertical" });
     expect(mergePatches({}, { characters: { enabled: true } })).toEqual({ characters: { enabled: true } });
     expect(mergePatches({}, {})).toEqual({});
     expect(isEmptyPatch({})).toBe(true);
+    expect(isEmptyPatch({ chat: {}, cells: { vertical: {} } })).toBe(true);
     expect(isEmptyPatch({ chat: { enabled: true } })).toBe(false);
-    expect(isEmptyPatch({ characters: { enabled: true } })).toBe(false);
+    expect(isEmptyPatch({ orientation: "horizontal" })).toBe(false);
+    expect(isEmptyPatch({ cells: { vertical: { content: null } } })).toBe(false);
   });
 
   it("drops the sent fields that still hold the sent value and keeps later edits", () => {
-    const rect = { x: 1, y: 2, w: 300, h: 200 };
-    const sent = { chat: { enabled: true, rect, hideCommands: false }, characters: { enabled: true, rect } };
-    expect(withoutSent(sent, sent)).toEqual({});
-    const later = {
-      chat: { enabled: true, rect: { ...rect, x: 9 }, hideCommands: false },
-      characters: { enabled: false, rect },
+    const sent: LayersPatch = {
+      orientation: "vertical",
+      chat: { enabled: true, hideCommands: false },
+      characters: { enabled: true },
+      cells: { horizontal: { chat: cell, content: null } },
     };
-    expect(withoutSent(later, sent)).toEqual({ chat: { rect: { ...rect, x: 9 } }, characters: { enabled: false } });
+    expect(withoutSent(sent, sent)).toEqual({});
+    const later: LayersPatch = {
+      orientation: "horizontal",
+      chat: { enabled: true, hideCommands: true },
+      characters: { enabled: false },
+      cells: { horizontal: { chat: { ...cell, c: 9 }, content: null }, vertical: { content: cell } },
+    };
+    expect(withoutSent(later, sent)).toEqual({
+      orientation: "horizontal",
+      chat: { hideCommands: true },
+      characters: { enabled: false },
+      cells: { horizontal: { chat: { ...cell, c: 9 } }, vertical: { content: cell } },
+    });
     expect(withoutSent({ chat: { hideCommands: true } }, {})).toEqual({ chat: { hideCommands: true } });
     expect(withoutSent({}, sent)).toEqual({});
+    // The draft itself does not change.
+    expect(later.cells?.horizontal?.content).toBeNull();
   });
 
   it("drops a field edited back to its in-flight value, and the unsent patch still saves that value", () => {
-    const rect = { x: 1, y: 2, w: 300, h: 200 };
-    const inFlight = { chat: { rect } };
+    const inFlight: LayersPatch = { cells: { horizontal: { chat: cell } } };
     // While the request runs, the field is edited away and back.
-    let draft: LayersPatch = mergePatches(inFlight, { chat: { rect: { ...rect, x: 9 } } });
-    let unsent: LayersPatch = { chat: { rect: { ...rect, x: 9 } } };
-    draft = mergePatches(draft, { chat: { rect: { ...rect } } });
-    unsent = mergePatches(unsent, { chat: { rect: { ...rect } } });
+    let draft: LayersPatch = mergePatches(inFlight, { cells: { horizontal: { chat: { ...cell, c: 9 } } } });
+    let unsent: LayersPatch = { cells: { horizontal: { chat: { ...cell, c: 9 } } } };
+    draft = mergePatches(draft, { cells: { horizontal: { chat: { ...cell } } } });
+    unsent = mergePatches(unsent, { cells: { horizontal: { chat: { ...cell } } } });
     expect(draft).toEqual(inFlight);
     // The answer leaves no draft for the field: it shows the saved value. The next request sends it again.
     expect(withoutSent(draft, inFlight)).toEqual({});
-    expect(layersAction(unsent)).toEqual({ action: "layers", chat: { rect } });
+    expect(layersAction(unsent, write)).toEqual({ action: "layers", write, cells: { horizontal: { chat: cell } } });
   });
 
-  it("builds a request with only the patch fields and copies rects", () => {
-    const rect = { x: 1, y: 2, w: 300, h: 200 };
-    const action = layersAction({ chat: { rect }, characters: { rect } });
-    expect(action).toEqual({ action: "layers", chat: { rect }, characters: { rect } });
-    expect(action.chat?.rect).not.toBe(rect);
-    expect(action.characters?.rect).not.toBe(rect);
-    expect(layersAction({ chat: { enabled: true }, characters: { enabled: false } })).toEqual({
+  it("builds a request with only the patch fields, the write order and copied cells", () => {
+    const patch: LayersPatch = { cells: { vertical: { characters: cell } }, chat: { enabled: true } };
+    const action = layersAction(patch, write);
+    expect(action).toEqual({
       action: "layers",
+      write,
       chat: { enabled: true },
-      characters: { enabled: false },
+      cells: { vertical: { characters: cell } },
     });
-    expect(layersAction({})).toEqual({ action: "layers" });
-  });
-});
-
-describe("labelPlace", () => {
-  const slot = { x: 0, y: 760, w: 1920, h: 320 };
-
-  it("centres the label when no box overlaps the slot", () => {
-    expect(labelPlace(slot, null)).toEqual({ side: "center", free: 1920 });
-    expect(labelPlace(slot, { x: 1460, y: 100, w: 420, h: 640 })).toEqual({ side: "center", free: 1920 });
-    expect(labelPlace({ ...slot, w: 900 }, { x: 900, y: 760, w: 420, h: 320 })).toEqual({ side: "center", free: 900 });
-    expect(labelPlace(slot, { x: 0, y: 1080, w: 420, h: 0 })).toEqual({ side: "center", free: 1920 });
-    expect(labelPlace({ ...slot, x: 500, w: 900 }, { x: 0, y: 760, w: 500, h: 100 })).toEqual({
-      side: "center",
-      free: 900,
-    });
-  });
-
-  it("puts the label on the side with more free width outside the box", () => {
-    // The default chat box on the right: the label goes left.
-    expect(labelPlace(slot, { x: 1460, y: 280, w: 420, h: 640 })).toEqual({ side: "start", free: 1460 });
-    expect(labelPlace(slot, { x: 40, y: 280, w: 420, h: 640 })).toEqual({ side: "end", free: 1460 });
-    // A wide chat whose centre is right of the middle still leaves more room at the right.
-    expect(labelPlace(slot, { x: 100, y: 600, w: 1100, h: 400 })).toEqual({ side: "end", free: 720 });
-  });
-
-  it("hides the label when neither side has room", () => {
-    expect(labelPlace(slot, { x: 600, y: 280, w: 1200, h: 640 })).toBeNull();
-    expect(labelPlace(slot, { x: 0, y: 760, w: 1920 - MIN_LABEL_FREE + 1, h: 320 })).toBeNull();
-    expect(labelPlace(slot, { x: 0, y: 760, w: 1920 - MIN_LABEL_FREE, h: 320 })).toEqual({
-      side: "end",
-      free: MIN_LABEL_FREE,
-    });
+    expect(action.cells?.vertical?.characters).not.toBe(cell);
+    expect(action.write).not.toBe(write);
+    expect(layersAction({}, write)).toEqual({ action: "layers", write });
   });
 });

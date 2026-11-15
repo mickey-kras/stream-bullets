@@ -25,6 +25,8 @@ const overlaySchema = z.object({
   messageStyle: z.enum(OVERLAY_MESSAGE_STYLES),
   // A missing value (an older server) reads as fresh defaults.
   layers: storedLayersSchema,
+  // A missing or bad value (an older server) reads as no chat test.
+  chatTestUntil: count.catch(0),
   revision: count,
 });
 const snapshotSchema = z.object({

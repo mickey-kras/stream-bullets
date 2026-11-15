@@ -1,64 +1,87 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
+  CELL_PX,
   DEFAULT_LAYERS,
-  DESIGN_H,
-  DESIGN_W,
-  MIN_RECT,
+  GRID,
+  GRID_LAYERS,
+  MIN_CELLS,
+  ORIENTATIONS,
   OVERLAY_LAYERS,
-  layerRectSchema,
+  cellFits,
+  cellPixels,
+  frameSize,
+  layerPixels,
   layerUrl,
   layersPatchSchema,
   mergeLayers,
+  overlappingPair,
   parseLayerParam,
   parseStoredLayers,
   storedLayersSchema,
-  type LayerRect,
+  type CellRect,
   type OverlayLayers,
 } from "../app/lib/overlay-layers";
 
-// Pure rules for overlay layers: rects, stored values, patches and layer URLs.
+// Pure rules for overlay layers: the grid, stored values, patches and layer URLs.
 
-const inside = (rect: LayerRect): boolean => rect.x + rect.w <= DESIGN_W && rect.y + rect.h <= DESIGN_H;
+const chatCell: CellRect = { c: 10, r: 0, w: 6, h: 5 };
 
-describe("layer defaults", (): void => {
-  it("keeps chat and characters off, inside the frame and above their minimum size", (): void => {
+describe("grid and defaults", (): void => {
+  it("has a 16 x 9 horizontal and a 9 x 16 vertical grid of 120 px cells", (): void => {
     expect(OVERLAY_LAYERS).toEqual(["content", "chat", "characters"]);
-    expect([DESIGN_W, DESIGN_H]).toEqual([1920, 1080]);
+    expect(CELL_PX).toBe(120);
+    expect(frameSize("horizontal")).toEqual({ w: 1920, h: 1080 });
+    expect(frameSize("vertical")).toEqual({ w: 1080, h: 1920 });
+    expect(MIN_CELLS).toEqual({ chat: { w: 3, h: 2 }, characters: { w: 6, h: 2 }, content: { w: 4, h: 2 } });
+  });
+
+  it("keeps chat and characters off, content without a cell, and valid default cells that do not overlap", (): void => {
     expect(DEFAULT_LAYERS).toEqual({
-      chat: { enabled: false, rect: { x: 979, y: 73, w: 826, h: 934 }, hideCommands: true },
-      characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
+      orientation: "horizontal",
+      chat: { enabled: false, hideCommands: true },
+      characters: { enabled: false },
+      cells: {
+        horizontal: { chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 }, content: null },
+        vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, characters: { c: 0, r: 13, w: 9, h: 3 }, content: null },
+      },
     });
-    expect(MIN_RECT).toEqual({ chat: { w: 280, h: 160 }, characters: { w: 640, h: 160 } });
-    // The safe area: 5% of the frame plus a 19.2 px margin, so 115 px from the right edge and 73 px from the bottom.
-    expect(DESIGN_W - DEFAULT_LAYERS.chat.rect.x - DEFAULT_LAYERS.chat.rect.w).toBe(115);
-    expect(DESIGN_H - DEFAULT_LAYERS.chat.rect.y - DEFAULT_LAYERS.chat.rect.h).toBe(73);
-    for (const layer of ["chat", "characters"] as const) {
-      const rect: LayerRect = DEFAULT_LAYERS[layer].rect;
-      expect(inside(rect)).toBe(true);
-      expect(rect.w).toBeGreaterThanOrEqual(MIN_RECT[layer].w);
-      expect(rect.h).toBeGreaterThanOrEqual(MIN_RECT[layer].h);
+    for (const orientation of ORIENTATIONS) {
+      const cells = DEFAULT_LAYERS.cells[orientation];
+      expect(cellFits(orientation, "chat", cells.chat)).toBe(true);
+      expect(cellFits(orientation, "characters", cells.characters)).toBe(true);
+      expect(overlappingPair(cells)).toBeNull();
     }
   });
-});
 
-describe("layer rects", (): void => {
-  it("accepts whole design pixels inside the frame, up to the edges", (): void => {
-    expect(layerRectSchema.parse({ x: 0, y: 0, w: 1920, h: 1080 })).toEqual({ x: 0, y: 0, w: 1920, h: 1080 });
-    expect(layerRectSchema.parse({ x: 1919, y: 1079, w: 1, h: 1 })).toEqual({ x: 1919, y: 1079, w: 1, h: 1 });
+  it("converts cells to design pixels and finds the place of a layer in the selected orientation", (): void => {
+    expect(cellPixels({ c: 1, r: 2, w: 3, h: 4 })).toEqual({ x: 120, y: 240, w: 360, h: 480 });
+    expect(layerPixels(DEFAULT_LAYERS, "chat")).toEqual({ x: 0, y: 0, w: 600, h: 840 });
+    expect(layerPixels({ ...DEFAULT_LAYERS, orientation: "vertical" }, "characters")).toEqual({
+      x: 0,
+      y: 1560,
+      w: 1080,
+      h: 360,
+    });
+    expect(layerPixels(DEFAULT_LAYERS, "content")).toBeNull();
   });
 
-  it.each([
-    ["past the right edge", { x: 1, y: 0, w: 1920, h: 10 }],
-    ["past the bottom edge", { x: 0, y: 1, w: 10, h: 1080 }],
-    ["negative x", { x: -1, y: 0, w: 10, h: 10 }],
-    ["zero width", { x: 0, y: 0, w: 0, h: 10 }],
-    ["fractions", { x: 0.5, y: 0, w: 10, h: 10 }],
-    ["text", { x: "0", y: 0, w: 10, h: 10 }],
-    ["a missing field", { x: 0, y: 0, w: 10 }],
-    ["an unknown field", { x: 0, y: 0, w: 10, h: 10, z: 1 }],
-  ])("refuses %s", (_name: string, rect: Record<string, unknown>): void => {
-    expect(layerRectSchema.safeParse(rect).success).toBe(false);
+  it("checks the grid edges and minimum sizes per orientation", (): void => {
+    expect(cellFits("horizontal", "chat", { c: 13, r: 7, w: 3, h: 2 })).toBe(true);
+    expect(cellFits("horizontal", "chat", { c: 14, r: 7, w: 3, h: 2 })).toBe(false);
+    expect(cellFits("horizontal", "chat", { c: 0, r: 8, w: 3, h: 2 })).toBe(false);
+    expect(cellFits("vertical", "characters", { c: 0, r: 0, w: 9, h: 2 })).toBe(true);
+    expect(cellFits("vertical", "characters", { c: 0, r: 0, w: 10, h: 2 })).toBe(false);
+    expect(cellFits("horizontal", "content", { c: 0, r: 0, w: 3, h: 2 })).toBe(false);
+    expect(cellFits("horizontal", "characters", { c: 0, r: 0, w: 6, h: 1 })).toBe(false);
+  });
+
+  it("finds overlapping layers and ignores content without a cell and shared edges", (): void => {
+    const cells = DEFAULT_LAYERS.cells.horizontal;
+    expect(overlappingPair({ ...cells, content: { c: 5, r: 0, w: 4, h: 2 } })).toBeNull();
+    expect(overlappingPair({ ...cells, content: { c: 4, r: 0, w: 4, h: 2 } })).toEqual(["chat", "content"]);
+    expect(overlappingPair({ ...cells, characters: { c: 0, r: 6, w: 16, h: 2 } })).toEqual(["chat", "characters"]);
+    expect(overlappingPair({})).toBeNull();
   });
 });
 
@@ -69,86 +92,99 @@ describe("stored layers", (): void => {
       ...DEFAULT_LAYERS,
       chat: { ...DEFAULT_LAYERS.chat, enabled: true },
     });
-    expect(storedLayersSchema.parse({ characters: {} })).toEqual(DEFAULT_LAYERS);
+    expect(storedLayersSchema.parse({ characters: {}, cells: {} })).toEqual(DEFAULT_LAYERS);
   });
 
   it("returns fresh defaults, so editing one result never changes another", (): void => {
     const first: OverlayLayers = storedLayersSchema.parse({});
-    first.chat.rect.x = 0;
-    expect(storedLayersSchema.parse({}).chat.rect.x).toBe(979);
-    expect(DEFAULT_LAYERS.chat.rect.x).toBe(979);
+    first.cells.horizontal.chat.c = 3;
+    first.chat.enabled = true;
+    expect(storedLayersSchema.parse({})).toEqual(DEFAULT_LAYERS);
+    expect(DEFAULT_LAYERS.cells.horizontal.chat.c).toBe(0);
+    const fallback: OverlayLayers = parseStoredLayers("null");
+    fallback.cells.vertical.chat.r = 0;
+    expect(DEFAULT_LAYERS.cells.vertical.chat.r).toBe(8);
   });
 
   it("reads a missing value, also as a missing key of an enclosing object, as fresh defaults", (): void => {
     expect(storedLayersSchema.parse(undefined)).toEqual(DEFAULT_LAYERS);
     const message = z.object({ layers: storedLayersSchema });
-    const first: OverlayLayers = message.parse({}).layers;
-    expect(first).toEqual(DEFAULT_LAYERS);
-    first.chat.rect.x = 0;
     expect(message.parse({}).layers).toEqual(DEFAULT_LAYERS);
-    expect(DEFAULT_LAYERS.chat.rect.x).toBe(979);
   });
 
-  it("drops unknown keys from older or newer versions", (): void => {
-    expect(storedLayersSchema.parse({ future: { enabled: true }, chat: { theme: "neon" } })).toEqual(DEFAULT_LAYERS);
+  it("keeps valid cells of both orientations and the selected orientation", (): void => {
+    const stored = {
+      orientation: "vertical",
+      chat: { enabled: true, hideCommands: false },
+      characters: { enabled: true },
+      cells: {
+        horizontal: { chat: chatCell, characters: { c: 0, r: 7, w: 16, h: 2 }, content: { c: 0, r: 0, w: 6, h: 4 } },
+        vertical: { chat: { c: 0, r: 0, w: 9, h: 4 }, characters: { c: 0, r: 14, w: 9, h: 2 }, content: null },
+      },
+    };
+    expect(storedLayersSchema.parse(stored)).toEqual(stored);
   });
 
-  it("drops unknown keys inside a layer and inside a rect", (): void => {
-    const rect: LayerRect = { x: 0, y: 0, w: 280, h: 160 };
-    expect(storedLayersSchema.parse({ chat: { enabled: true, rect: { ...rect, z: 1, radius: 4 } } })).toEqual({
+  it("drops unknown keys from older or newer versions, also the old pixel rects", (): void => {
+    expect(
+      storedLayersSchema.parse({
+        future: { enabled: true },
+        chat: { theme: "neon", rect: { x: 0, y: 0, w: 280, h: 160 } },
+        cells: { horizontal: { chat: { ...chatCell, z: 1 }, extra: chatCell }, diagonal: {} },
+      }),
+    ).toEqual({
       ...DEFAULT_LAYERS,
-      chat: { ...DEFAULT_LAYERS.chat, enabled: true, rect },
+      cells: { ...DEFAULT_LAYERS.cells, horizontal: { ...DEFAULT_LAYERS.cells.horizontal, chat: chatCell } },
     });
   });
 
   it.each([
-    ["past the right edge", { x: 1800, y: 0, w: 280, h: 160 }],
-    ["past the bottom edge", { x: 0, y: 1000, w: 280, h: 160 }],
-    ["negative", { x: -1, y: 0, w: 280, h: 160 }],
-    ["below the minimum width", { x: 0, y: 0, w: 279, h: 160 }],
-    ["below the minimum height", { x: 0, y: 0, w: 280, h: 159 }],
-    ["fractions", { x: 0.5, y: 0, w: 280, h: 160 }],
-    ["text", { x: "0", y: 0, w: 280, h: 160 }],
-    ["partial", { x: 0, y: 0, w: 280 }],
+    ["past the right edge", { c: 14, r: 0, w: 3, h: 2 }],
+    ["past the bottom edge", { c: 0, r: 8, w: 3, h: 2 }],
+    ["negative", { c: -1, r: 0, w: 3, h: 2 }],
+    ["below the minimum", { c: 0, r: 0, w: 2, h: 2 }],
+    ["fractions", { c: 0.5, r: 0, w: 3, h: 2 }],
+    ["text", { c: "0", r: 0, w: 3, h: 2 }],
+    ["partial", { c: 0, r: 0, w: 3 }],
     ["not an object", "full"],
-  ])("reads a chat rect %s as the default rect and keeps the other fields", (_name: string, rect: unknown): void => {
-    expect(storedLayersSchema.parse({ chat: { enabled: true, hideCommands: false, rect } })).toEqual({
-      ...DEFAULT_LAYERS,
-      chat: { enabled: true, rect: DEFAULT_LAYERS.chat.rect, hideCommands: false },
-    });
+  ])("reads a chat cell %s as the default cell and keeps the other fields", (_name: string, cell: unknown): void => {
+    const layers = storedLayersSchema.parse({ chat: { enabled: true }, cells: { horizontal: { chat: cell } } });
+    expect(layers).toEqual({ ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, enabled: true } });
   });
 
-  it("applies the minimum size of each layer", (): void => {
-    const rect: LayerRect = { x: 0, y: 0, w: 639, h: 160 };
-    expect(storedLayersSchema.parse({ chat: { rect }, characters: { enabled: true, rect } })).toEqual({
-      chat: { ...DEFAULT_LAYERS.chat, rect },
-      characters: { ...DEFAULT_LAYERS.characters, enabled: true },
-    });
+  it("reads overlapping chat and characters cells as both defaults", (): void => {
+    const cells = { chat: { c: 0, r: 5, w: 16, h: 4 }, characters: { c: 0, r: 7, w: 16, h: 2 } };
+    expect(storedLayersSchema.parse({ cells: { horizontal: cells } })).toEqual(DEFAULT_LAYERS);
+  });
+
+  it("reads an invalid or overlapping content cell as no cell", (): void => {
+    const read = (content: unknown) =>
+      storedLayersSchema.parse({ cells: { horizontal: { content } } }).cells.horizontal.content;
+    expect(read({ c: 6, r: 0, w: 4, h: 2 })).toEqual({ c: 6, r: 0, w: 4, h: 2 });
+    expect(read({ c: 4, r: 0, w: 4, h: 2 })).toBeNull();
+    expect(read({ c: 6, r: 6, w: 4, h: 2 })).toBeNull();
+    expect(read({ c: 6, r: 0, w: 3, h: 2 })).toBeNull();
+    expect(read("cell")).toBeNull();
   });
 
   it("reads each field of the wrong type as its default", (): void => {
     expect(
       storedLayersSchema.parse({
-        chat: { enabled: "yes", hideCommands: 0, rect: { x: 0, y: 0, w: 280, h: 160 } },
+        orientation: "diagonal",
+        chat: { enabled: "yes", hideCommands: 0 },
         characters: { enabled: null },
+        cells: { horizontal: [], vertical: 3 },
       }),
-    ).toEqual({ ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, rect: { x: 0, y: 0, w: 280, h: 160 } } });
+    ).toEqual(DEFAULT_LAYERS);
   });
 
   it.each([
     ["null", null],
     ["a string", "layers"],
     ["an array", []],
-    ["layers of the wrong type", { chat: "on", characters: 1 }],
+    ["layers of the wrong type", { chat: "on", characters: 1, cells: "none" }],
   ])("reads %s as the default layers and never throws", (_name: string, value: unknown): void => {
     expect(storedLayersSchema.parse(value)).toEqual(DEFAULT_LAYERS);
-  });
-
-  it("reads one bad layer as its defaults and keeps the other layer", (): void => {
-    expect(storedLayersSchema.parse({ chat: [], characters: { enabled: true } })).toEqual({
-      ...DEFAULT_LAYERS,
-      characters: { ...DEFAULT_LAYERS.characters, enabled: true },
-    });
   });
 
   it("reads stored JSON text and reads invalid JSON as the defaults", (): void => {
@@ -158,9 +194,17 @@ describe("stored layers", (): void => {
     });
     expect(parseStoredLayers("{")).toEqual(DEFAULT_LAYERS);
     expect(parseStoredLayers("")).toEqual(DEFAULT_LAYERS);
-    const fallback: OverlayLayers = parseStoredLayers("null");
-    fallback.chat.rect.x = 0;
-    expect(DEFAULT_LAYERS.chat.rect.x).toBe(979);
+  });
+
+  it("stays short enough for the 1000-character column limit with every cell set", (): void => {
+    const full: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      cells: {
+        horizontal: { ...DEFAULT_LAYERS.cells.horizontal, content: { c: 10, r: 0, w: 6, h: 7 } },
+        vertical: { ...DEFAULT_LAYERS.cells.vertical, content: { c: 0, r: 0, w: 9, h: 8 } },
+      },
+    };
+    expect(JSON.stringify(full).length).toBeLessThan(1000);
   });
 });
 
@@ -168,37 +212,60 @@ describe("layer patches", (): void => {
   it("accepts any subset of the known fields", (): void => {
     expect(layersPatchSchema.parse({})).toEqual({});
     expect(layersPatchSchema.parse({ chat: { hideCommands: false } })).toEqual({ chat: { hideCommands: false } });
-    const rect: LayerRect = { x: 0, y: 0, w: 640, h: 160 };
-    expect(layersPatchSchema.parse({ characters: { enabled: true, rect } })).toEqual({
-      characters: { enabled: true, rect },
+    expect(layersPatchSchema.parse({ orientation: "vertical", characters: { enabled: true } })).toEqual({
+      orientation: "vertical",
+      characters: { enabled: true },
     });
+    expect(layersPatchSchema.parse({ cells: { horizontal: { chat: chatCell, content: null }, vertical: {} } })).toEqual(
+      { cells: { horizontal: { chat: chatCell, content: null }, vertical: {} } },
+    );
   });
 
   it.each([
     ["an unknown layer", { content: { enabled: true } }],
     ["an unknown chat field", { chat: { color: "red" } }],
-    ["an unknown characters field", { characters: { hideCommands: true } }],
-    ["a chat rect below the minimum", { chat: { rect: { x: 0, y: 0, w: 280, h: 159 } } }],
-    ["a characters rect below the minimum", { characters: { rect: { x: 0, y: 0, w: 639, h: 320 } } }],
-    ["a rect outside the frame", { chat: { rect: { x: 1700, y: 0, w: 280, h: 160 } } }],
-    ["a partial rect", { chat: { rect: { x: 0, y: 0 } } }],
+    ["an old pixel rect", { chat: { rect: { x: 0, y: 0, w: 280, h: 160 } } }],
+    ["an unknown orientation", { orientation: "square" }],
+    ["an unknown grid", { cells: { square: {} } }],
+    ["an unknown cell key", { cells: { horizontal: { chat: { ...chatCell, z: 1 } } } }],
+    ["a chat cell below the minimum", { cells: { horizontal: { chat: { c: 0, r: 0, w: 2, h: 2 } } } }],
+    ["a characters cell below the minimum", { cells: { vertical: { characters: { c: 0, r: 0, w: 5, h: 2 } } } }],
+    ["a cell outside the grid", { cells: { vertical: { chat: { c: 7, r: 0, w: 3, h: 2 } } } }],
+    ["a null chat cell", { cells: { horizontal: { chat: null } } }],
+    ["fractions", { cells: { horizontal: { content: { c: 0.5, r: 0, w: 4, h: 2 } } } }],
+    [
+      "overlapping cells",
+      { cells: { horizontal: { chat: { c: 0, r: 0, w: 4, h: 4 }, content: { c: 3, r: 3, w: 4, h: 2 } } } },
+    ],
     ["a null value", { chat: { enabled: null } }],
   ])("refuses %s", (_name: string, patch: Record<string, unknown>): void => {
     expect(layersPatchSchema.safeParse(patch).success).toBe(false);
   });
 
-  it("changes only the given fields and replaces the whole rect", (): void => {
-    const rect: LayerRect = { x: 10, y: 20, w: 300, h: 200 };
-    const next: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { chat: { enabled: true, rect } });
-    expect(next).toEqual({ ...DEFAULT_LAYERS, chat: { enabled: true, rect, hideCommands: true } });
-    expect(next.chat.rect).not.toBe(rect);
-    expect(next.characters.rect).not.toBe(DEFAULT_LAYERS.characters.rect);
-    expect(mergeLayers(next, { characters: { enabled: true } })).toEqual({
-      chat: next.chat,
-      characters: { ...DEFAULT_LAYERS.characters, enabled: true },
+  it("changes only the given fields, copies each cell whole and removes a content cell with null", (): void => {
+    const next: OverlayLayers = mergeLayers(DEFAULT_LAYERS, {
+      orientation: "vertical",
+      chat: { enabled: true },
+      cells: { horizontal: { chat: chatCell, content: { c: 0, r: 0, w: 4, h: 2 } } },
     });
+    expect(next).toEqual({
+      ...DEFAULT_LAYERS,
+      orientation: "vertical",
+      chat: { enabled: true, hideCommands: true },
+      cells: {
+        horizontal: { ...DEFAULT_LAYERS.cells.horizontal, chat: chatCell, content: { c: 0, r: 0, w: 4, h: 2 } },
+        vertical: DEFAULT_LAYERS.cells.vertical,
+      },
+    });
+    expect(next.cells.horizontal.chat).not.toBe(chatCell);
+    expect(next.cells.vertical.chat).not.toBe(DEFAULT_LAYERS.cells.vertical.chat);
+    const removed: OverlayLayers = mergeLayers(next, { cells: { horizontal: { content: null } } });
+    expect(removed.cells.horizontal.content).toBeNull();
+    expect(mergeLayers(next, { characters: { enabled: true } }).characters).toEqual({ enabled: true });
     expect(mergeLayers(next, {})).toEqual(next);
     expect(DEFAULT_LAYERS.chat.enabled).toBe(false);
+    for (const orientation of ORIENTATIONS) expect(GRID[orientation].cols * GRID[orientation].rows).toBe(144);
+    expect(GRID_LAYERS).toEqual(["chat", "characters", "content"]);
   });
 });
 

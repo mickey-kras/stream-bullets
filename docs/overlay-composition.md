@@ -10,12 +10,14 @@ The code is in these files:
 
 | Part | File |
 | --- | --- |
-| Layer model, limits, and URL helpers | `app/lib/overlay-layers.ts` |
+| Layer model, grid, limits, and URL helpers | `app/lib/overlay-layers.ts` |
+| Grid edits and save patches | `app/lib/layer-geometry.ts` |
 | Chat state machine and sample chat | `app/lib/chat-feed.ts` |
+| Chat test | `app/lib/chat-test.ts` |
 | Activity socket client | `app/lib/activity-socket.ts`, `app/components/overlay/activity-feed.tsx` |
 | Chat rows and the composition | `app/components/overlay/chat-layer.tsx`, `app/components/overlay/overlay-composition.tsx` |
 | Chat appearance and motion | `app/components/overlay/wasteland/`, `app/components/overlay/use-row-motion.ts` |
-| Editor | `app/components/overlay/composition-editor.tsx` |
+| Editor | `app/components/overlay/composition-editor.tsx`, `layout-grid.tsx`, `use-layer-draft.ts` |
 | Overlay page | `app/routes/overlay.tsx` |
 | Layer action | `app/server/overlay.server.ts`, `app/server/api/live.ts` |
 
@@ -24,38 +26,60 @@ The code is in these files:
 The composition has three layers. This list starts at the bottom layer:
 
 1. `characters`: the interactive characters. This layer comes with issue #664. Until then it shows nothing.
-2. `content`: the on-air poll, topic, card, or message. It keeps its own position and size settings.
+2. `content`: the on-air poll, topic, card, or message.
 3. `chat`: the merged chat. It is on top of the other layers.
 
 The chat layer and the characters layer are off by default. Thus an existing OBS scene does not change.
 The theme is separate from the layout and the behavior. The overlay has one theme, the wasteland theme.
 
-## Design space
+## Grid and orientation
 
-All layers use one fixed design space of 1920 × 1080 pixels.
-A layer rectangle has four integers: `x`, `y`, `w`, and `h`.
-The rectangle must stay in the frame: `x + w` is at most 1920 and `y + h` is at most 1080.
+The streamer selects the orientation of the frame. Each orientation has a grid of square cells of 120 pixels:
 
-| Layer | Default rectangle | Minimum size |
+| Orientation | Frame | Grid |
 | --- | --- | --- |
-| `chat` | `x` 979, `y` 73, 826 × 934 | 280 × 160 |
-| `characters` | `x` 0, `y` 760, 1920 × 320 | 640 × 160 |
+| `horizontal` (default) | 1920 × 1080 | 16 columns × 9 rows |
+| `vertical` | 1080 × 1920 | 9 columns × 16 rows |
+
+Each layer has one cell rectangle in each orientation. A rectangle has four integers: column `c`, row `r`, width `w`, and height `h`, all in cells.
+The rectangle must stay in the grid: `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
+Two layers must not overlap. A shared edge is not an overlap.
+
+Each orientation keeps its own layout. When you change the orientation, the layout of the other orientation stays.
+The overlay shows only the selected orientation.
+
+| Layer | Default cells, horizontal | Default cells, vertical | Minimum size |
+| --- | --- | --- | --- |
+| `chat` | `c` 0, `r` 0, 5 × 7 | `c` 0, `r` 8, 9 × 5 | 3 × 2 |
+| `characters` | `c` 0, `r` 7, 16 × 2 | `c` 0, `r` 13, 9 × 3 | 6 × 2 |
+| `content` | No cell | No cell | 4 × 2 |
+
+The chat layer and the characters layer always have a cell. The characters cell is a slot until issue #664.
+
+The content layer can have no cell. Then it uses the full frame and its **Position** and **Size** settings, as before.
+A content layer without a cell does not count for the overlap rule.
+
+When the content has a cell, it shows in the middle of the cell. The **Position** setting does not apply then.
+The **Size** setting still applies. If the content is larger than the cell, it becomes smaller until it fits.
 
 The page scales the design pixels to the size of the browser source.
 
-When the chat layer is on, the composition puts all of its layers, the content too, in one 1920 × 1080 canvas.
-This canvas is the same as the canvas of the editor preview. Thus the layout is the same at all 16:9 sizes, and the same as in the preview.
-If the source is not 1920 × 1080, the on-air content changes size when the chat layer comes on.
+When the chat layer is on, or the content has a cell, the composition puts all of its layers in one canvas.
+The canvas has the frame size of the selected orientation. It is the same as the canvas of the editor preview.
+Thus the layout is the same at all source sizes with the same aspect ratio, and the same as in the preview.
+If the source does not have the frame size, the on-air content changes size when the chat layer comes on.
 The editor shows this note under **Show on stream** for the chat layer.
 
-With a source that is not 16:9, the full canvas stays in the source. The free space is at the right or at the bottom.
-When no feed layer is on, the content layer keeps its responsive layout. Thus an existing OBS scene does not change.
+With a source of a different aspect ratio, the full canvas stays in the source. The free space is at the right or at the bottom.
+When no feed layer is on and the content has no cell, the content keeps its responsive layout. Thus an existing OBS scene does not change.
 
 The overlay reads stored and broadcast layers leniently. Thus a value from an older or newer version never stops the page:
 
 - It ignores unknown fields.
 - A field with an incorrect value takes its default value.
-- A rectangle outside the frame or below the minimum size takes the default rectangle of its layer.
+- A chat or characters cell outside the grid or below the minimum size takes the default cell of its layer.
+- If the chat cell and the characters cell overlap, both take their default cells.
+- An incorrect content cell, or a content cell that overlaps another layer, reads as no cell.
 - A layer with an incorrect value takes the defaults of that layer.
 
 The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
@@ -76,7 +100,8 @@ https://<origin>/@<handle>/overlay?key=<key>&layer=content
 https://<origin>/@<handle>/overlay?key=<key>&layer=characters
 ```
 
-A layer source keeps the aspect ratio of its layer and uses as much of the viewport as possible.
+A layer source keeps the aspect ratio of its cell and uses as much of the viewport as possible.
+A content source without a cell keeps its responsive layout.
 It aligns the layer with the bottom-right corner of the viewport. Thus the newest chat rows are always visible.
 The free space stays transparent, at the left or at the top.
 
@@ -93,9 +118,14 @@ If you lost the URL, select **Regenerate link**. Then update all OBS sources.
 
 ## OBS browser source
 
-Use a browser source of 1920 × 1080 for the composition. A different 16:9 size, such as 1280 × 720, also works.
-Use a 16:9 source. With the chat layer on, all 16:9 sizes show the same layout as the preview.
-For a layer source, use the size of its layer rectangle, or the same ratio at a smaller size.
+Set the size of the browser source for the composition to the frame size of the selected orientation:
+
+- For the horizontal orientation, use 1920 × 1080. A different 16:9 size, such as 1280 × 720, also works.
+- For the vertical orientation, use 1080 × 1920. A different 9:16 size, such as 720 × 1280, also works.
+
+With the chat layer on, all sizes with the correct aspect ratio show the same layout as the preview.
+The editor shows the correct size under the grid.
+For a layer source, use the size of its cell, or the same ratio at a smaller size.
 The editor and the link panel show the size of each layer.
 
 A larger layer source shows the layer larger.
@@ -116,41 +146,82 @@ See [live capacity](live-room-capacity.md).
 
 ## Editor
 
-The **Composition** section of **Overlay control** shows a preview of the 1920 × 1080 frame.
+The **Composition** section of **Overlay control** shows the grid of the selected orientation on a preview of the frame.
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.
+Each placed layer shows its name and its size in pixels.
 Under **Preview background**, select **Transparent** or **Sample game**.
 
-To change a layer, do these steps:
+To change the layout, do these steps:
 
-1. Select **Show on stream** for the layer.
-2. Drag the layer to move it. Drag its corner to change its size.
-3. Alternatively, use the arrow keys. An arrow key moves the layer 1 pixel. Shift and an arrow key move it 10 pixels.
-4. Alternatively, type the values in the `X`, `Y`, `Width`, and `Height` fields.
+1. Under **Screen orientation**, select **Horizontal 16 × 9** or **Vertical 9 × 16**.
+2. Under **Layer**, select the layer to draw.
+3. To draw the selected layer, drag across empty cells. The layer moves to the new cells.
+4. To move a placed layer, drag it. This also selects the layer.
 
-A drag saves when you release the pointer. A key or a field saves after 400 milliseconds without a change.
+During a drag, a dashed rectangle shows the new cells.
+If the new cells touch another layer or are smaller than the minimum size, the rectangle is red.
+Then the editor does not keep the change. A message under the grid gives the reason.
+
+You can use the keyboard on the grid:
+
+| Key | Result |
+| --- | --- |
+| Arrow key | Moves the cursor one cell. |
+| Space or Enter | Starts to move the layer at the cursor, or starts to draw the selected layer on an empty cell. The next press keeps the change. |
+| Shift and arrow key | Moves the selected layer one cell. |
+| Escape | Cancels a move or a drawing. |
+
+A screen reader reads each result from a polite live region under the grid.
+
+**Remove from grid** removes the content cell. Then the content uses the full frame again.
+The chat layer and the characters layer cannot leave the grid. Use **Show on stream** to show or hide them.
+
+A drag or a key that puts down a layer saves at once. Shift and an arrow key save after 400 milliseconds without a change.
 If you close the page or go to a different page before then, the editor sends the change at once.
 
 The editor does not wait for the result of a change that it sends while you leave.
 If that change fails, the editor shows an error when you go back to it within 60 seconds.
-The error names the layer of your last change, tells you to make the change again, and gives the reason.
+The error tells you to make the change again and gives the reason.
 The page scrolls to the error, so that you can see it.
-The editor sends the newest value last, also while an earlier save is in progress.
-A slow earlier save can still arrive after the newest value.
+
+Each editor has a random ID. Each layer save sends this ID and a number that increases with each save.
+The server keeps the ID and the number of the last save that it applied.
+It ignores a save of the same editor with a number that is not larger. The answer is the current state, not an error.
+Thus when you leave during a save, the newer value stays, also if the older save arrives last.
 
 Each save counts against the write quota of 60 changes each minute.
 If a save fails, the editor shows the saved layers again.
 If two saves finish in a different sequence, the editor keeps the result with the higher revision.
 
-When the chat layer covers part of the on-air content in the preview, a note shows under the preview.
-Move the chat layer to a free area to remove the note. The note does not stop a save.
-
-The note changes only after a move is complete, not during a drag. A screen reader reads it after your first change on the page.
-The default chat rectangle is the right half of the frame, in a safe margin.
-The margin is 5% of the frame plus 19.2 pixels: 115 pixels on the right and 73 pixels at the top and bottom.
-A poll fills the top of the frame. Thus with a poll on air, the note can show for the default rectangle.
+When the content has no cell and the chat layer covers part of the on-air content in the preview, a note shows under the preview.
+Move the chat layer to a free area, or give the content a cell, to remove the note. The note does not stop a save.
+The note changes 500 milliseconds after a change. A screen reader reads it after your first change on the page.
 
 The preview plays sample chat. It opens no activity socket and reads no live chat.
 The samples include all three platforms, Unicode text, emoji, an emote, and a command.
+
+## Chat test
+
+Use the chat test to see the chat in your real OBS scene before you go live.
+Under the chat layer in **Composition**, select **Start chat test**. The chat layer must be on.
+
+- The test runs for 60 seconds (`CHAT_TEST_MS`). **Stop** ends it at once.
+- The editor shows the remaining time.
+- Each overlay page that shows the chat layer plays sample chat from all three platforms.
+  The samples include a message that a moderator removes and a user timeout.
+- A **TEST** tag shows in the top-right corner of the chat layer.
+- The samples use the normal chat behavior and motion.
+
+The overlay page makes the sample messages itself. Nothing goes to Twitch, YouTube, or Kick, and the server stores no messages.
+The server stores only the end time of the test, in the overlay state.
+
+The live room sends the end time to each open overlay page. Thus an OBS source that opens during the test also shows it.
+Each page ends the test with its own timer at the end time. An end time in the past means no test.
+
+During the test, the real chat continues to collect messages, but it does not show.
+When the test ends, the real chat shows again. Its rows show in place, without an entry animation.
+
+The chat test counts against the write quota. Only the signed-in owner of the page can start or stop it.
 
 ## Chat behavior
 
@@ -269,9 +340,9 @@ Thus close the overlay sources that you do not use.
 
 ## Limits and known gaps
 
-- The characters layer shows nothing until issue #664. Its editor control stays disabled until then.
-- In the preview, the label of the characters slot shows in the wider free part of the slot beside the chat layer.
-  If the chat layer leaves less than 640 pixels free on each side, the label does not show.
+- The characters layer shows nothing until issue #664. Its **Show on stream** control stays disabled until then.
+  You can still place its cell on the grid.
+- The server orders only the saves of one editor. If two editors save almost together, their saves can arrive in a different sequence.
 - The overlay has one theme. There is no theme selection.
 - Layer edits go live at once. They have no preview and take step.
 - Kick has no message deletion events. YouTube has no clear events. See the capability matrix in

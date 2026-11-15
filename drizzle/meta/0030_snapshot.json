@@ -2313,6 +2313,30 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'{}'"
+        },
+        "chat_test_until": {
+          "name": "chat_test_until",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "layers_writer": {
+          "name": "layers_writer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "layers_seq": {
+          "name": "layers_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         }
       },
       "indexes": {},
@@ -2365,6 +2389,18 @@
         "overlay_state_layers_check": {
           "name": "overlay_state_layers_check",
           "value": "json_valid(\"overlay_state\".\"layers\") AND json_type(\"overlay_state\".\"layers\") = 'object' AND length(\"overlay_state\".\"layers\") <= 1000"
+        },
+        "overlay_state_chat_test_check": {
+          "name": "overlay_state_chat_test_check",
+          "value": "\"overlay_state\".\"chat_test_until\" >= 0"
+        },
+        "overlay_state_layers_writer_check": {
+          "name": "overlay_state_layers_writer_check",
+          "value": "length(\"overlay_state\".\"layers_writer\") <= 64"
+        },
+        "overlay_state_layers_seq_check": {
+          "name": "overlay_state_layers_seq_check",
+          "value": "\"overlay_state\".\"layers_seq\" >= 0"
         },
         "overlay_state_revision_check": {
           "name": "overlay_state_revision_check",
