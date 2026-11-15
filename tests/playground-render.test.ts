@@ -24,7 +24,7 @@ import {
   type DrawOptions,
   type RenderMemory,
 } from "../app/components/overlay/characters/renderer";
-import { SheetCache, helmetColor, type Atlas } from "../app/components/overlay/characters/sprites";
+import { SheetCache, helmetColor, loadAtlas, type Atlas } from "../app/components/overlay/characters/sprites";
 import type {
   CharacterState,
   CharacterView,
@@ -231,6 +231,12 @@ describe("playground bubble layout", () => {
 
   it("returns nothing for no bubbles", () => {
     expect(layoutBubbles([], 1920, 360)).toEqual([]);
+  });
+
+  it("keeps arrival order when speakers share the same position", () => {
+    const slots: BubbleSlot[] = layoutBubbles([{ x: 300, width: 120 }, { x: 300, width: 120 }], 720, 240);
+    expect(slots.map((slot: BubbleSlot) => slot.index)).toEqual([0, 1]);
+    expectTidy(slots, 720);
   });
 });
 
@@ -501,5 +507,64 @@ describe("playground canvas rendering", () => {
       render(view([character({ id, recent: true, name: `Viewer ${id}` })]), 1000 + id * 34, true);
     expect(memory.labels.size).toBeLessThan(200);
     expect([...memory.labels.keys()].some((key) => key.includes("Viewer 205"))).toBe(true);
+  });
+
+  it("omits scenery over a broken dirt run and adds the flag when the world has enough sky", () => {
+    const { render, canvas } = renderer();
+    const moment: PlaygroundView = {
+      ...view([]),
+      world: { width: 640, height: 120, ground: 100 },
+      tiles: [{ kind: "girder", stage: 0 }, { kind: "dirt", stage: 3 }, { kind: "girder", stage: 0 }],
+    };
+    canvas.height = 360;
+    render(moment, 1000, true);
+    const pictures: unknown[][] = canvas.calls
+      .filter((call: CanvasCall) => call.method === "drawImage")
+      .map((call: CanvasCall) => call.args.slice(1, 5));
+    expect(pictures).toContainEqual([...theme.terrain.rects.flag0]);
+    expect(pictures).not.toContainEqual([...theme.terrain.rects[theme.terrain.dirtProps[0]]]);
+  });
+
+  it("wraps an unbroken word and cuts cleanly when a space fills the last available line", () => {
+    const { render, canvas, labels } = renderer();
+    canvas.width = 720;
+    const speaker: CharacterView = character({ name: "Speaker", x: 100, bubble: "W".repeat(80) });
+    render({ ...view([speaker]), speakers: [speaker.id] }, 1000);
+    const texts = (): string[] => labels.flatMap((label: RenderCanvas) =>
+      label.calls.filter((call: CanvasCall) => call.method === "fillText").map((call: CanvasCall) => String(call.args[0])),
+    );
+    expect(texts()).toContain("W".repeat(26));
+    expect(texts()).toContain(`${"W".repeat(25)}…`);
+    labels.length = 0;
+    render({ ...view([{ ...speaker, y: 35, bubble: `${"X".repeat(26)} second` }]), speakers: [speaker.id] }, 1034);
+    expect(texts()).toContain(`${"X".repeat(25)}…`);
+    expect(texts()).not.toContain("second");
+  });
+
+  it("hides a name tag covered by a speech bubble but keeps one above the bubble", () => {
+    const { render, canvas, memory } = renderer();
+    const speaker: CharacterView = character({ bubble: "Hello", x: 100 });
+    const covered: CharacterView = character({ id: 2, recent: true, name: "Covered", x: 100 });
+    const above: CharacterView = character({ id: 3, recent: true, name: "Above", x: 100, y: 20 });
+    render({ ...view([speaker, covered, above]), speakers: [speaker.id] }, 1000);
+    const coveredTag: HTMLCanvasElement | undefined = memory.labels.get(JSON.stringify(["n", "twitch", "Covered"]));
+    const aboveTag: HTMLCanvasElement | undefined = memory.labels.get(JSON.stringify(["n", "twitch", "Above"]));
+    expect(coveredTag).toBeDefined();
+    expect(aboveTag).toBeDefined();
+    const images: unknown[] = canvas.calls.filter((call: CanvasCall) => call.method === "drawImage").map((call: CanvasCall) => call.args[0]);
+    expect(images).not.toContain(coveredTag);
+    expect(images).toContain(aboveTag);
+  });
+
+  it("reports unavailable label and sprite canvas contexts instead of returning partially drawn resources", async () => {
+    const { render } = renderer();
+    vi.stubGlobal("document", { createElement: (): { getContext: () => null } => ({ getContext: (): null => null }) });
+    expect(() => render(view([character({ recent: true })]), 1000)).toThrow("no 2D canvas context for a label");
+    vi.stubGlobal("Image", class {
+      src: string = "";
+      async decode(): Promise<void> {}
+    });
+    const atlas: Atlas = await loadAtlas(theme);
+    expect(() => atlas.sheets.get("twitch")).toThrow("no 2D canvas context for the character sheet");
   });
 });

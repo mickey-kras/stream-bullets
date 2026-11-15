@@ -2,6 +2,9 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { controlState, defaultRef, OverlayControl } from "../app/components/overlay/overlay-control";
+import { ChatLayer, shortName } from "../app/components/overlay/chat-layer";
+import { CharactersSlot, CONTENT_SELECTOR, layerSelector } from "../app/components/overlay/overlay-composition";
+import { chatCoversContent } from "../app/components/overlay/use-chat-overlap";
 import {
   OverlayStage,
   overlayPoll,
@@ -10,6 +13,7 @@ import {
   type OverlayScene,
 } from "../app/components/overlay/overlay-stage";
 import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
+import type { ChatRow } from "../app/lib/chat-feed";
 import type { OverlayData, OverlaySourceRef, OverlayState } from "../app/types";
 
 const data: OverlayData = { polls: [], topics: [], cards: [], next: null, support: null };
@@ -169,5 +173,87 @@ describe("overlay source fallbacks", () => {
     expect(
       stage({ type: "message", ref: null }, { overlay: { ...state, message: "Back soon", messageStyle: "hype" } }),
     ).toContain("style-hype");
+  });
+
+  it("uses the default community card while a disconnected control still offers its card picker", () => {
+    const populated: OverlayData = {
+      ...data,
+      cards: [{ id: "card", icon: null, title: "Card", body: "", label: null, target: null }],
+    };
+    const html: string = renderToStaticMarkup(createElement(OverlayControl, {
+      initial: { ...state, preview: { type: "card", ref: null } },
+      scene: { ...scene, data: populated },
+      hasOverlayKey: false,
+      connected: false,
+    }));
+    expect(html).toContain('role="combobox"');
+    expect(html).toContain('data-overlay-source="card"');
+    expect(html).toContain("Overlay disconnected, retrying");
+    expect(html).not.toContain(">Reconnect</button>");
+  });
+
+  it("renders a transparent characters canvas at the cell's design dimensions before a feed is available", () => {
+    const html: string = renderToStaticMarkup(createElement(CharactersSlot, {
+      feed: null,
+      rect: { x: 0, y: 0, w: 720, h: 240 },
+    }));
+    expect(html).toContain('class="characters-layer" width="720" height="240" aria-hidden="true"');
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("<button");
+  });
+
+  it("keeps long chat names intact at grapheme boundaries and renders unsafe emotes as text", () => {
+    const family: string = "👨‍👩‍👧‍👦";
+    expect(shortName(family.repeat(21))).toBe(`${family.repeat(19)}…`);
+    const row: ChatRow = {
+      id: "chat-1", seq: 1, platform: "twitch", userId: "viewer", name: family.repeat(21), badges: [],
+      fragments: [{ type: "emote", id: "unsafe", name: "Unsafe emote", url: "https://untrusted.example.test/emote.png" }],
+      truncated: false, receivedAt: 1000, shownAt: 1000, phase: "shown", phaseAt: 1000, animate: false, command: false,
+    };
+    const html: string = renderToStaticMarkup(createElement(ChatLayer, {
+      chat: { rows: [row], epoch: 0, at: 1000 },
+      className: "editor-chat",
+    }));
+    expect(html).toContain('class="wl-chat editor-chat"');
+    expect(html).toContain(`${family.repeat(19)}…`);
+    expect(html).toContain("Unsafe emote");
+    expect(html).not.toContain("<img");
+  });
+});
+
+describe("chat overlap measurements", () => {
+  function rect(left: number, top: number, width: number, height: number): DOMRect {
+    return {
+      x: left, y: top, left, top, width, height, right: left + width, bottom: top + height,
+      toJSON: (): object => ({ left, top, width, height }),
+    };
+  }
+
+  function composition(chat: DOMRect | null, content: readonly DOMRect[] | null): HTMLElement {
+    const element = (bounds: DOMRect): Element => ({ getBoundingClientRect: (): DOMRect => bounds }) as Element;
+    const stage = content === null ? null : { children: content.map(element) } as unknown as Element;
+    return {
+      querySelector: (selector: string): Element | null => {
+        if (selector === CONTENT_SELECTOR) return stage;
+        expect(selector).toBe(layerSelector("chat"));
+        return chat === null ? null : element(chat);
+      },
+    } as unknown as HTMLElement;
+  }
+
+  it("ignores missing and zero-sized content rather than reporting an invisible overlap", () => {
+    const chat: DOMRect = rect(0, 0, 100, 100);
+    expect(chatCoversContent(composition(chat, null))).toBe(false);
+    expect(chatCoversContent(composition(chat, [rect(0, 0, 0, 20), rect(0, 0, 20, 0)]))).toBe(false);
+    expect(chatCoversContent(composition(null, [chat]))).toBe(false);
+  });
+
+  it("measures the union of visible content and treats shared edges or subpixel contact as clear", () => {
+    const content: DOMRect[] = [rect(0, 0, 100, 100), rect(150, 150, 100, 100), rect(300, 300, 0, 0)];
+    expect(chatCoversContent(composition(rect(200, 200, 100, 100), content))).toBe(true);
+    expect(chatCoversContent(composition(rect(250, 0, 100, 100), content))).toBe(false);
+    expect(chatCoversContent(composition(rect(249, 0, 100, 100), content))).toBe(false);
+    expect(chatCoversContent(composition(rect(248, 0, 100, 100), content))).toBe(true);
+    expect(chatCoversContent(composition(rect(0, 249, 100, 100), content))).toBe(false);
   });
 });

@@ -82,6 +82,8 @@ test("card recovery preserves drafts and order across failed moves, edits and de
   // This recovery case owns 203.0.113.87.
   await context.setExtraHTTPHeaders({ Origin: origin, "CF-Connecting-IP": "203.0.113.87" });
   const page = await newPage(context);
+  // Keep the two card rows visible together so dragging never scrolls content under a held pointer.
+  await page.setViewportSize({ width: 1280, height: 1400 });
   await page.goto("/@feature_host?view=community");
   const titles = page.locator(".community-grid .community-card h2");
   await expect(titles).toHaveText(["Bring an idea", "Clip of the week", "Join the Discord", "Support Feature"]);
@@ -105,11 +107,14 @@ test("card recovery preserves drafts and order across failed moves, edits and de
   await page.waitForLoadState("networkidle");
   await expect(titles).toHaveText(["Bring an idea", "Join the Discord", "Clip of the week", "Support Feature"]);
   const clip = page.locator(".community-grid .community-card").filter({ hasText: "Clip of the week" });
+  const handle = clip.locator(".drag-handle");
+  const first = page.locator(".community-grid .community-card").first();
+  await expect(handle).toBeInViewport({ ratio: 1 });
+  await expect(first).toBeInViewport({ ratio: 1 });
   const dropped = page.waitForResponse(
     (response) => response.url().endsWith("/api/community-cards") && response.request().method() === "PUT",
   );
-  // Native dragging needs a move after dragenter so the card can accept dragover before release.
-  await clip.locator(".drag-handle").dragTo(page.locator(".community-grid .community-card").first(), { steps: 10 });
+  await handle.dragTo(first, { steps: 10, scroll: "none" });
   expect((await dropped).status()).toBe(200);
   await page.waitForLoadState("networkidle");
   await page.reload();
@@ -138,6 +143,7 @@ test("card recovery preserves drafts and order across failed moves, edits and de
   await page.getByRole("button", { name: "Edit Weekly clips" }).click();
   await edit.getByRole("button", { name: "Delete", exact: true }).click();
   const deletion = page.getByRole("dialog", { name: /Delete.*Weekly clips/ });
+  await expect(deletion).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(deletion).toBeHidden();
   await expect(edit).toBeVisible();

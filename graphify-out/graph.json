@@ -45441,7 +45441,7 @@
       "relation": "calls",
       "source": "tests_e2e_a11y_spec",
       "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L66",
+      "source_location": "L68",
       "target": "tests_e2e_a11y_spec_problems_d6d2076ce386",
       "weight": 1.0
     },
@@ -48345,7 +48345,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L108",
+      "source_location": "L112",
       "target": "tests_overlay_ui_coverage_test_poll",
       "weight": 1.0
     },
@@ -48357,8 +48357,44 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L136",
+      "source_location": "L140",
       "target": "tests_overlay_ui_coverage_test_stage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L245",
+      "target": "tests_overlay_ui_coverage_test_rect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L246",
+      "target": "tests_overlay_ui_coverage_test_composition",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_overlay_ui_coverage_test_composition",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L238",
+      "target": "app_components_overlay_overlay_composition_layerselector",
       "weight": 1.0
     },
     {
@@ -48825,7 +48861,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L363",
+      "source_location": "L369",
       "target": "tests_playground_render_test_renderer",
       "weight": 1.0
     },
@@ -48909,7 +48945,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test_renderer",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L327",
+      "source_location": "L333",
       "target": "tests_playground_render_test_rendercanvas",
       "weight": 1.0
     },
@@ -48921,7 +48957,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test_renderer",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L343",
+      "source_location": "L349",
       "target": "app_components_overlay_characters_renderer_creatememory",
       "weight": 1.0
     },
@@ -48933,7 +48969,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test_renderer",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L346",
+      "source_location": "L352",
       "target": "app_components_overlay_characters_sprites_sheetcache",
       "weight": 1.0
     },
@@ -48945,7 +48981,7 @@
       "relation": "calls",
       "source": "tests_playground_render_test_renderer",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L355",
+      "source_location": "L361",
       "target": "app_components_overlay_characters_renderer_draw",
       "weight": 1.0
     },
@@ -96962,7 +96998,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L12",
+      "source_location": "L15",
       "target": "app_lib_overlay_layers_default_layers",
       "weight": 1.0
     },
@@ -96974,7 +97010,19 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L13",
+      "source_location": "L16",
+      "target": "app_lib_chat_feed_chatrow",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L17",
       "target": "app_types_overlaydata",
       "weight": 1.0
     },
@@ -96986,7 +97034,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L13",
+      "source_location": "L17",
       "target": "app_types_overlaysourceref",
       "weight": 1.0
     },
@@ -96998,7 +97046,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L13",
+      "source_location": "L17",
       "target": "app_types_overlaystate",
       "weight": 1.0
     },
@@ -97047,6 +97095,78 @@
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
       "source_location": "L5",
+      "target": "app_components_overlay_chat_layer_chatlayer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L5",
+      "target": "app_components_overlay_chat_layer_shortname",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_overlay_overlay_composition_charactersslot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_overlay_overlay_composition_content_selector",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_overlay_overlay_composition_layerselector",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L7",
+      "target": "app_components_overlay_use_chat_overlap_chatcoverscontent",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L8",
       "target": "app_components_overlay_overlay_stage_overlaypoll",
       "weight": 1.0
     },
@@ -97058,7 +97178,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L5",
+      "source_location": "L8",
       "target": "app_components_overlay_overlay_stage_overlaypoll_b68c1e94b806",
       "weight": 1.0
     },
@@ -97070,7 +97190,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L5",
+      "source_location": "L8",
       "target": "app_components_overlay_overlay_stage_overlayscene",
       "weight": 1.0
     },
@@ -97082,7 +97202,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L5",
+      "source_location": "L8",
       "target": "app_components_overlay_overlay_stage_overlaystage",
       "weight": 1.0
     },
@@ -97094,7 +97214,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L5",
+      "source_location": "L8",
       "target": "app_components_overlay_overlay_stage_upnextstart",
       "weight": 1.0
     },
@@ -98080,6 +98200,18 @@
       "source_file": "tests/playground-render.test.ts",
       "source_location": "L27",
       "target": "app_components_overlay_characters_sprites_helmetcolor",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L27",
+      "target": "app_components_overlay_characters_sprites_loadatlas",
       "weight": 1.0
     },
     {
@@ -126836,7 +126968,7 @@
       "relation": "imports_from",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L12",
+      "source_location": "L15",
       "target": "app_lib_overlay_layers",
       "weight": 1.0
     },
@@ -126848,7 +126980,20 @@
       "relation": "imports_from",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L13",
+      "source_location": "L16",
+      "target": "app_lib_chat_feed",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L17",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -126898,6 +127043,42 @@
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
       "source_location": "L5",
+      "target": "app_components_overlay_chat_layer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L6",
+      "target": "app_components_overlay_overlay_composition",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L7",
+      "target": "app_components_overlay_use_chat_overlap",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L8",
       "target": "app_components_overlay_overlay_stage",
       "weight": 1.0
     },
@@ -166502,7 +166683,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L15",
+      "source_location": "L19",
       "target": "tests_overlay_ui_coverage_test_data",
       "weight": 1.0
     },
@@ -166513,7 +166694,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L16",
+      "source_location": "L20",
       "target": "tests_overlay_ui_coverage_test_state",
       "weight": 1.0
     },
@@ -166524,7 +166705,29 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L29",
+      "source_location": "L225",
+      "target": "tests_overlay_ui_coverage_test_rect",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L232",
+      "target": "tests_overlay_ui_coverage_test_composition",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L33",
       "target": "tests_overlay_ui_coverage_test_scene",
       "weight": 1.0
     },
@@ -166535,7 +166738,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L39",
+      "source_location": "L43",
       "target": "tests_overlay_ui_coverage_test_stage",
       "weight": 1.0
     },
@@ -166546,7 +166749,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L43",
+      "source_location": "L47",
       "target": "tests_overlay_ui_coverage_test_poll",
       "weight": 1.0
     },
@@ -166887,7 +167090,7 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L283",
+      "source_location": "L289",
       "target": "tests_playground_render_test_canvascall",
       "weight": 1.0
     },
@@ -166898,7 +167101,7 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L289",
+      "source_location": "L295",
       "target": "tests_playground_render_test_rendercanvas",
       "weight": 1.0
     },
@@ -166909,7 +167112,7 @@
       "relation": "contains",
       "source": "tests_playground_render_test",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L320",
+      "source_location": "L326",
       "target": "tests_playground_render_test_renderer",
       "weight": 1.0
     },
@@ -166933,6 +167136,17 @@
       "source_file": "tests/playground-render.test.ts",
       "source_location": "L54",
       "target": "tests_playground_render_test_view",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_playground_render_test",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L565",
+      "target": "tests_playground_render_test_decode",
       "weight": 1.0
     },
     {
@@ -171239,7 +171453,7 @@
       "relation": "method",
       "source": "tests_playground_render_test_rendercanvas",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L295",
+      "source_location": "L301",
       "target": "tests_playground_render_test_rendercanvas_constructor",
       "weight": 1.0
     },
@@ -171250,7 +171464,7 @@
       "relation": "method",
       "source": "tests_playground_render_test_rendercanvas",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L310",
+      "source_location": "L316",
       "target": "tests_playground_render_test_rendercanvas_getcontext",
       "weight": 1.0
     },
@@ -172262,8 +172476,20 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L124",
+      "source_location": "L128",
       "target": "app_components_overlay_overlay_control_overlaycontrol",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L196",
+      "target": "app_components_overlay_overlay_composition_charactersslot",
       "weight": 1.0
     },
     {
@@ -172274,7 +172500,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_stage",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L40",
+      "source_location": "L44",
       "target": "app_components_overlay_overlay_stage_overlaystage",
       "weight": 1.0
     },
@@ -174020,10 +174246,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "3c636ce9f514a48542a7aded362813668a4c60e90f16b429acddbdabc9f9e31c",
+    "content_sha256": "8f26dd96e493fc8b01363f05bad8447d28fd4b8a36c382616a2cd4979d23a0cd",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "090f68d8b03f409c87fe8a7746903158419008585f7db099d600f5d028f7ead7",
+    "source_sha256": "bbd3e72e9fea2e07639bb0a083fa195a2d2a71bd894953d551ef39845a4e704b",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -174136,7 +174362,7 @@
       "label": "RenderCanvas",
       "norm_label": "rendercanvas",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L289"
+      "source_location": "L295"
     },
     {
       "_callable": true,
@@ -180261,7 +180487,7 @@
       "label": "CanvasCall",
       "norm_label": "canvascall",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L283"
+      "source_location": "L289"
     },
     {
       "_callable": true,
@@ -202396,7 +202622,7 @@
       "label": ".getItem()",
       "norm_label": ".getitem()",
       "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L239"
+      "source_location": "L241"
     },
     {
       "_callable": true,
@@ -202407,7 +202633,7 @@
       "label": ".setItem()",
       "norm_label": ".setitem()",
       "source_file": "tests/e2e/a11y.spec.ts",
-      "source_location": "L245"
+      "source_location": "L247"
     },
     {
       "_callable": true,
@@ -205428,11 +205654,33 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_overlay_ui_coverage_test_composition",
+      "label": "composition()",
+      "norm_label": "composition()",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L232"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_overlay_ui_coverage_test_poll",
       "label": "poll()",
       "norm_label": "poll()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L43"
+      "source_location": "L47"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_overlay_ui_coverage_test_rect",
+      "label": "rect()",
+      "norm_label": "rect()",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L225"
     },
     {
       "_callable": true,
@@ -205443,7 +205691,7 @@
       "label": "stage()",
       "norm_label": "stage()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L39"
+      "source_location": "L43"
     },
     {
       "_callable": true,
@@ -205768,6 +206016,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_playground_render_test_decode",
+      "label": "decode()",
+      "norm_label": "decode()",
+      "source_file": "tests/playground-render.test.ts",
+      "source_location": "L565"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_playground_render_test_expecttidy",
       "label": "expectTidy()",
       "norm_label": "expecttidy()",
@@ -205794,7 +206053,7 @@
       "label": ".constructor()",
       "norm_label": ".constructor()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L295"
+      "source_location": "L301"
     },
     {
       "_callable": true,
@@ -205805,7 +206064,7 @@
       "label": ".getContext()",
       "norm_label": ".getcontext()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L310"
+      "source_location": "L316"
     },
     {
       "_callable": true,
@@ -205816,7 +206075,7 @@
       "label": "renderer()",
       "norm_label": "renderer()",
       "source_file": "tests/playground-render.test.ts",
-      "source_location": "L320"
+      "source_location": "L326"
     },
     {
       "_callable": true,
@@ -218592,7 +218851,7 @@
       "label": "data",
       "norm_label": "data",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L15"
+      "source_location": "L19"
     },
     {
       "_origin": "ast",
@@ -218602,7 +218861,7 @@
       "label": "scene",
       "norm_label": "scene",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L29"
+      "source_location": "L33"
     },
     {
       "_origin": "ast",
@@ -218612,7 +218871,7 @@
       "label": "state",
       "norm_label": "state",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L16"
+      "source_location": "L20"
     },
     {
       "_origin": "ast",
