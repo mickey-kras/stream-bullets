@@ -334,6 +334,38 @@ export interface ProviderSubscription {
   type: string;
 }
 
+async function listTwitchSubscriptions(
+  env: AppEnv,
+  externalId: string,
+  callbackOrigin: string,
+): Promise<ProviderSubscription[] | null> {
+  const headers = {
+    Authorization: `Bearer ${await twitchAppToken(env)}`,
+    "Client-Id": providerClient(env, "twitch").id,
+  };
+  const subscriptions: ProviderSubscription[] = [];
+  let cursor: string | undefined;
+  // At most 10 pages of 100: far more than the five subscriptions of one channel.
+  for (let page = 0; page < 10; page++) {
+    const url = new URL(TWITCH_SUBSCRIPTIONS_URL);
+    url.searchParams.set("user_id", externalId);
+    if (cursor) url.searchParams.set("after", cursor);
+    const response = await fetch(url, { headers });
+    if (!response.ok) return null;
+    const body = twitchListSchema.parse(await response.json());
+    for (const item of body.data)
+      if (
+        item.transport.method === "webhook" &&
+        item.transport.callback === `${callbackOrigin}/hooks/twitch` &&
+        item.condition.broadcaster_user_id === externalId
+      )
+        subscriptions.push({ id: item.id, type: item.type });
+    cursor = body.pagination?.cursor;
+    if (!cursor) return subscriptions;
+  }
+  return subscriptions;
+}
+
 /**
  * This app's webhook subscriptions for the channel at the provider, or null when the list cannot be
  * read. Twitch filters by user id with the app token; Kick by broadcaster with the broadcaster's token. Twitch
@@ -359,34 +391,49 @@ export async function listSubscriptions(
         .data.filter((item) => item.method === "webhook" && String(item.broadcaster_user_id) === externalId)
         .map((item) => ({ id: item.id, type: item.event }));
     }
-    const headers = {
-      Authorization: `Bearer ${await twitchAppToken(env)}`,
-      "Client-Id": providerClient(env, platform).id,
-    };
-    const subscriptions: ProviderSubscription[] = [];
-    let cursor: string | undefined;
-    // At most 10 pages of 100: far more than the five subscriptions of one channel.
-    for (let page = 0; page < 10; page++) {
-      const url = new URL(TWITCH_SUBSCRIPTIONS_URL);
-      url.searchParams.set("user_id", externalId);
-      if (cursor) url.searchParams.set("after", cursor);
-      const response = await fetch(url, { headers });
-      if (!response.ok) return null;
-      const body = twitchListSchema.parse(await response.json());
-      for (const item of body.data)
-        if (
-          item.transport.method === "webhook" &&
-          item.transport.callback === `${callbackOrigin}/hooks/twitch` &&
-          item.condition.broadcaster_user_id === externalId
-        )
-          subscriptions.push({ id: item.id, type: item.type });
-      cursor = body.pagination?.cursor;
-      if (!cursor) return subscriptions;
-    }
-    return subscriptions;
+    return await listTwitchSubscriptions(env, externalId, callbackOrigin);
   } catch {
     return null;
   }
+}
+
+async function subscribeTwitch(
+  env: AppEnv,
+  externalId: string,
+  callbackOrigin: string,
+  created: string[],
+): Promise<{ conflicts: string[] }> {
+  const token = await twitchAppToken(env);
+  const conflicts: string[] = [];
+  for (const subscription of twitchSubscriptions(externalId)) {
+    const response = await fetch(TWITCH_SUBSCRIPTIONS_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Client-Id": providerClient(env, "twitch").id,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...subscription,
+        transport: {
+          method: "webhook",
+          callback: `${callbackOrigin}/hooks/twitch`,
+          secret: env.TWITCH_EVENTSUB_SECRET,
+        },
+      }),
+    });
+    if (response.status === 409) {
+      conflicts.push(subscription.type);
+      continue;
+    }
+    if (response.status === 401 || response.status === 403) throw new ReauthRequired();
+    if (!response.ok) throw new ProviderError(response.status);
+    const body = z
+      .object({ data: z.array(z.object({ id: z.string().min(1).max(64) })).min(1) })
+      .parse(await response.json());
+    created.push(body.data[0].id);
+  }
+  return { conflicts };
 }
 
 /**
@@ -404,39 +451,7 @@ export async function subscribe(
   created: string[],
 ): Promise<{ conflicts: string[] }> {
   if (platform === "youtube") return { conflicts: [] };
-  if (platform === "twitch") {
-    const token = await twitchAppToken(env);
-    const conflicts: string[] = [];
-    for (const subscription of twitchSubscriptions(externalId)) {
-      const response = await fetch(TWITCH_SUBSCRIPTIONS_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Client-Id": providerClient(env, platform).id,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...subscription,
-          transport: {
-            method: "webhook",
-            callback: `${callbackOrigin}/hooks/twitch`,
-            secret: env.TWITCH_EVENTSUB_SECRET,
-          },
-        }),
-      });
-      if (response.status === 409) {
-        conflicts.push(subscription.type);
-        continue;
-      }
-      if (response.status === 401 || response.status === 403) throw new ReauthRequired();
-      if (!response.ok) throw new ProviderError(response.status);
-      const body = z
-        .object({ data: z.array(z.object({ id: z.string().min(1).max(64) })).min(1) })
-        .parse(await response.json());
-      created.push(body.data[0].id);
-    }
-    return { conflicts };
-  }
+  if (platform === "twitch") return subscribeTwitch(env, externalId, callbackOrigin, created);
   const response = await fetch(KICK_SUBSCRIPTIONS_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },

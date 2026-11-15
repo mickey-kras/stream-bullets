@@ -200,6 +200,18 @@ export async function completeConnect(
     if (!(error instanceof ReauthRequired)) logError("channel_callback_failed", error);
     return error instanceof ReauthRequired ? "denied" : "failed";
   }
+  return connectAuthorizedChannel(env, userId, streamer.id, platform, tokens, identity, now);
+}
+
+async function connectAuthorizedChannel(
+  env: AppEnv,
+  userId: string,
+  streamerId: string,
+  platform: ActivityPlatform,
+  tokens: Awaited<ReturnType<typeof exchangeCode>>,
+  identity: { externalId: string; displayName: string },
+  now: number,
+): Promise<ConnectResult> {
   if (PROVIDERS[platform].scopes.some((scope: string) => !tokens.scopes.includes(scope))) {
     await refuseTokens(env, platform, tokens, identity.externalId);
     return "scope_missing";
@@ -208,20 +220,15 @@ export async function completeConnect(
     `SELECT id, streamer_id, external_id, status_code FROM channel_connections
       WHERE platform=? AND (external_id=? OR streamer_id=?)`,
   )
-    .bind(platform, identity.externalId, streamer.id)
+    .bind(platform, identity.externalId, streamerId)
     .all<{ id: string; streamer_id: string; external_id: string; status_code: string | null }>();
-  if (owner.results.some((row) => row.streamer_id !== streamer.id)) {
+  if (owner.results.some((row) => row.streamer_id !== streamerId)) {
     await refuseTokens(env, platform, tokens, identity.externalId);
     return "channel_taken";
   }
   const existing = owner.results[0];
-  // A disconnect of this channel is still running: a reconnect now would race its final delete.
-  if (existing?.status_code === "disconnecting") {
-    await refuseTokens(env, platform, tokens, identity.externalId);
-    return "disconnect_first";
-  }
-  // Reconnecting keeps the row; a different channel on the same platform needs a disconnect first.
-  if (existing && existing.external_id !== identity.externalId) {
+  // Reconnecting keeps the same channel's row and must not race a pending disconnect.
+  if (existing && (existing.status_code === "disconnecting" || existing.external_id !== identity.externalId)) {
     await refuseTokens(env, platform, tokens, identity.externalId);
     return "disconnect_first";
   }
@@ -240,7 +247,7 @@ export async function completeConnect(
           WHERE channel_connections.status_code IS NOT 'disconnecting'`,
       ).bind(
         connectionId,
-        streamer.id,
+        streamerId,
         platform,
         identity.externalId,
         identity.displayName,
@@ -251,8 +258,8 @@ export async function completeConnect(
         env,
         {
           targetKind: "streamer",
-          targetId: streamer.id,
-          streamerId: streamer.id,
+          targetId: streamerId,
+          streamerId: streamerId,
           action: existing ? "channel_reconnected" : "channel_connected",
           actorId: userId,
           metadata: { platform },
@@ -266,13 +273,7 @@ export async function completeConnect(
     written = upsert.meta.changes > 0;
   } catch (error: unknown) {
     await refuseTokens(env, platform, tokens, identity.externalId);
-    // A parallel callback claimed the channel or the platform slot between the check and the write.
-    const message =
-      error instanceof Error ? `${error.message} ${error.cause instanceof Error ? error.cause.message : ""}` : "";
-    if (message.includes("channel_connections.platform, channel_connections.external_id")) return "channel_taken";
-    if (message.includes("channel_connections.streamer_id, channel_connections.platform")) return "disconnect_first";
-    logError("channel_callback_failed", error);
-    return "failed";
+    return connectionWriteFailure(error);
   }
   if (!written) {
     await refuseTokens(env, platform, tokens, identity.externalId);
@@ -281,7 +282,7 @@ export async function completeConnect(
   // This isolate may have cached the channel as unknown: deliveries start at once here.
   forgetRoutes(platform, identity.externalId);
   try {
-    const response = await callIngest(env, streamer.id, "connect", { platform });
+    const response = await callIngest(env, streamerId, "connect", { platform });
     if (!response.ok) throw new Error(`Ingest answered ${response.status}`);
     const result = z
       .object({ status: z.string() })
@@ -298,6 +299,18 @@ export async function completeConnect(
       error,
     );
   }
+}
+
+function connectionWriteFailure(error: unknown): ConnectResult {
+  // A parallel callback claimed the channel or the platform slot between the check and the write.
+  if (error instanceof Error) {
+    const cause: string = error.cause instanceof Error ? error.cause.message : "";
+    const message: string = `${error.message} ${cause}`;
+    if (message.includes("channel_connections.platform, channel_connections.external_id")) return "channel_taken";
+    if (message.includes("channel_connections.streamer_id, channel_connections.platform")) return "disconnect_first";
+  }
+  logError("channel_callback_failed", error);
+  return "failed";
 }
 
 /**
