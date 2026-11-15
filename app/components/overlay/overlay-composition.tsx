@@ -1,14 +1,7 @@
 import { memo, useRef, type CSSProperties, type ReactNode } from "react";
 import type { ActivityChat } from "../../lib/activity";
 import type { ChatRow } from "../../lib/chat-feed";
-import {
-  DESIGN_H,
-  DESIGN_W,
-  type ChatLayer as ChatLayerSettings,
-  type LayerRect,
-  type OverlayLayer,
-  type OverlayLayers,
-} from "../../lib/overlay-layers";
+import { DESIGN_H, DESIGN_W, type LayerRect, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
 import type { OverlaySourceRef } from "../../types";
 import type { ActivityFeed } from "./activity-feed";
 import { ChatLayer } from "./chat-layer";
@@ -90,16 +83,17 @@ function LayerBox({
 /** Memoised, so a page re-render (like the 1 s server clock tick) does not re-render the chat. */
 const ChatSlot = memo(function ChatSlot({
   feed,
-  settings,
+  hideCommands,
   samples,
   serverOffset,
 }: Readonly<{
   feed: ActivityFeed | null;
-  settings: ChatLayerSettings;
+  /** A boolean, not the layer object: a new layers snapshot (a poll update) keeps the memo when the flag is the same. */
+  hideCommands: boolean;
   samples?: readonly ActivityChat[];
   serverOffset: number;
 }>): ReactNode {
-  const rows: ChatRow[] = useChat({ feed, samples, hideCommands: settings.hideCommands, serverOffset });
+  const rows: ChatRow[] = useChat({ feed, samples, hideCommands, serverOffset });
   return <ChatLayer rows={rows} />;
 });
 
@@ -137,7 +131,7 @@ export function OverlayComposition({
       {shows("content") && <OverlayStage scene={scene} source={source} />}
       {shows("chat") && layers.chat.enabled && (
         <LayerBox layer="chat" rect={layers.chat.rect} alone={alone}>
-          <ChatSlot feed={feed} settings={layers.chat} samples={samples} serverOffset={serverOffset} />
+          <ChatSlot feed={feed} hideCommands={layers.chat.hideCommands} samples={samples} serverOffset={serverOffset} />
         </LayerBox>
       )}
     </div>

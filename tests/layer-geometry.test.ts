@@ -12,7 +12,7 @@ import {
   withoutSent,
   withRect,
 } from "../app/lib/layer-geometry";
-import type { OverlayLayers } from "../app/lib/overlay-layers";
+import type { LayersPatch, OverlayLayers } from "../app/lib/overlay-layers";
 
 const MIN = { w: 280, h: 160 };
 
@@ -95,6 +95,20 @@ describe("field-level patches", () => {
     expect(withoutSent(later, sent)).toEqual({ chat: { rect: { ...rect, x: 9 } }, characters: { enabled: false } });
     expect(withoutSent({ chat: { hideCommands: true } }, {})).toEqual({ chat: { hideCommands: true } });
     expect(withoutSent({}, sent)).toEqual({});
+  });
+
+  it("drops a field edited back to its in-flight value, and the unsent patch still saves that value", () => {
+    const rect = { x: 1, y: 2, w: 300, h: 200 };
+    const inFlight = { chat: { rect } };
+    // While the request runs, the field is edited away and back.
+    let draft: LayersPatch = mergePatches(inFlight, { chat: { rect: { ...rect, x: 9 } } });
+    let unsent: LayersPatch = { chat: { rect: { ...rect, x: 9 } } };
+    draft = mergePatches(draft, { chat: { rect: { ...rect } } });
+    unsent = mergePatches(unsent, { chat: { rect: { ...rect } } });
+    expect(draft).toEqual(inFlight);
+    // The answer leaves no draft for the field: it shows the saved value. The next request sends it again.
+    expect(withoutSent(draft, inFlight)).toEqual({});
+    expect(layersAction(unsent)).toEqual({ action: "layers", chat: { rect } });
   });
 
   it("builds a request with only the patch fields and copies rects", () => {

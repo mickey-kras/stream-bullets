@@ -1,5 +1,5 @@
 import { memo, useState, type CSSProperties, type ReactNode } from "react";
-import { t } from "../../i18n";
+import { t, tAround } from "../../i18n";
 import type { ActivityFragment } from "../../lib/activity";
 import { CHAT_LIMITS, graphemes, safeEmoteUrl, type ChatRow } from "../../lib/chat-feed";
 import { Emblem, PlatformGlyph } from "./wasteland/glyphs";
@@ -16,16 +16,18 @@ export function shortName(name: string, max: number = MAX_NAME_CHARS): string {
   return chars.length > max ? `${chars.slice(0, max - 1).join("")}…` : name;
 }
 
-/** The text before and after the user name ("{name}:" in English, "{name} :" in French, "{name}：" in Japanese). */
+/**
+ * The text before and after the user name, with the separator to the message: "{name}: " in English, "{name} : " in
+ * French, "{name}：" in Japanese (a full-width colon, no space). A trailing space inside the name element still
+ * separates it from the message, because the next text does not start with a space.
+ */
 interface NameFrame {
   before: string;
   after: string;
 }
 
-const NAME_MARK = "\u0000";
-
 function nameFrame(): NameFrame {
-  const [before = "", after = ""] = t("overlay.chat.name", { name: NAME_MARK }).split(NAME_MARK);
+  const [before, after] = tAround("overlay.chat.name", "name");
   return { before, after };
 }
 
@@ -90,7 +92,7 @@ const ChatRowItem = memo(function ChatRowItem({
               {before}
               <bdi>{shortName(row.name)}</bdi>
               {after}
-            </span>{" "}
+            </span>
             <span className="wl-msg" dir="auto">
               {removed ? (
                 removedText

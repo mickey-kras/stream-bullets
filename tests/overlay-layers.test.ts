@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import {
   DEFAULT_LAYERS,
   DESIGN_H,
@@ -25,10 +26,13 @@ describe("layer defaults", (): void => {
     expect(OVERLAY_LAYERS).toEqual(["content", "chat", "characters"]);
     expect([DESIGN_W, DESIGN_H]).toEqual([1920, 1080]);
     expect(DEFAULT_LAYERS).toEqual({
-      chat: { enabled: false, rect: { x: 1240, y: 300, w: 640, h: 660 }, hideCommands: true },
+      chat: { enabled: false, rect: { x: 1240, y: 372, w: 640, h: 660 }, hideCommands: true },
       characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
     });
     expect(MIN_RECT).toEqual({ chat: { w: 280, h: 160 }, characters: { w: 640, h: 160 } });
+    // The A1 mockup place: 40 px from the right edge and 48 px from the bottom edge.
+    expect(DESIGN_W - DEFAULT_LAYERS.chat.rect.x - DEFAULT_LAYERS.chat.rect.w).toBe(40);
+    expect(DESIGN_H - DEFAULT_LAYERS.chat.rect.y - DEFAULT_LAYERS.chat.rect.h).toBe(48);
     for (const layer of ["chat", "characters"] as const) {
       const rect: LayerRect = DEFAULT_LAYERS[layer].rect;
       expect(inside(rect)).toBe(true);
@@ -72,6 +76,16 @@ describe("stored layers", (): void => {
     const first: OverlayLayers = storedLayersSchema.parse({});
     first.chat.rect.x = 0;
     expect(storedLayersSchema.parse({}).chat.rect.x).toBe(1240);
+    expect(DEFAULT_LAYERS.chat.rect.x).toBe(1240);
+  });
+
+  it("reads a missing value, also as a missing key of an enclosing object, as fresh defaults", (): void => {
+    expect(storedLayersSchema.parse(undefined)).toEqual(DEFAULT_LAYERS);
+    const message = z.object({ layers: storedLayersSchema });
+    const first: OverlayLayers = message.parse({}).layers;
+    expect(first).toEqual(DEFAULT_LAYERS);
+    first.chat.rect.x = 0;
+    expect(message.parse({}).layers).toEqual(DEFAULT_LAYERS);
     expect(DEFAULT_LAYERS.chat.rect.x).toBe(1240);
   });
 

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { copyText } from "../../lib/clipboard";
 import { layerUrl, type LayerRect, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
@@ -27,7 +27,15 @@ function CopyField({
   label,
   copyLabel,
   layer,
-}: Readonly<{ value: string; label: string; copyLabel: string; layer: OverlayLayer | null }>): ReactNode {
+  describedBy,
+}: Readonly<{
+  value: string;
+  label: string;
+  copyLabel: string;
+  layer: OverlayLayer | null;
+  /** The id of a text that describes the field, like the source size of a layer URL. */
+  describedBy?: string;
+}>): ReactNode {
   const toast = useToast();
   async function copy(): Promise<void> {
     toast((await copyText(value)) ? t("overlay.copied") : t("contact.copyFallback"));
@@ -40,6 +48,7 @@ function CopyField({
         readOnly
         value={value}
         aria-label={label}
+        aria-describedby={describedBy}
         spellCheck={false}
         autoComplete="off"
         data-ov-url={layer === null ? "" : undefined}
@@ -55,7 +64,8 @@ export function OverlayLink({
   hasKey,
   layers,
 }: Readonly<{
-  hasKey: boolean /** The newest saved or live layers, for the source sizes. */;
+  hasKey: boolean;
+  /** The newest saved or live layers, for the source sizes. */
   layers: OverlayLayers;
 }>): ReactNode {
   const toast = useToast();
@@ -63,6 +73,7 @@ export function OverlayLink({
   const [made, setMade] = useState<boolean>(hasKey);
   const [confirming, setConfirming] = useState<boolean>(false);
   const [busy, setBusy] = useState<boolean>(false);
+  const sizeId: string = useId();
 
   async function regenerate(): Promise<void> {
     setBusy(true);
@@ -104,6 +115,7 @@ export function OverlayLink({
           {LAYER_LINKS.map(([layer, label]) => {
             const soon: boolean = layer === "characters" && !CHARACTERS_READY;
             const size: LayerRect | null = layerSize(layers, layer);
+            const sizeLine: string | undefined = size ? `${sizeId}-${layer}` : undefined;
             return (
               <div key={layer} className="ov-url-layer" data-ov-layer-row={layer}>
                 <p className="muted ov-url-caption">
@@ -113,7 +125,7 @@ export function OverlayLink({
                 {!soon && (
                   <>
                     {size && (
-                      <p className="muted ov-url-size" data-ov-layer-size={layer}>
+                      <p className="muted ov-url-size" id={sizeLine} data-ov-layer-size={layer}>
                         {t("overlay.layer.size", { w: size.w, h: size.h })}
                       </p>
                     )}
@@ -122,6 +134,7 @@ export function OverlayLink({
                       label={t(label)}
                       copyLabel={t("overlay.copyLayerUrl", { layer: t(label) })}
                       layer={layer}
+                      describedBy={sizeLine}
                     />
                   </>
                 )}

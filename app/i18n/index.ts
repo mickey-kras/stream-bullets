@@ -79,6 +79,17 @@ export function t(id: MessageId, vars?: MessageVars): string {
   return format(lookup(id) ?? en[id] ?? id, vars);
 }
 
+const SLOT_MARK = "\u0000";
+
+/**
+ * A message split around one placeholder, for a message that wraps an element (a link, a styled name). The
+ * translation keeps the word order and the spacing around the element: "{name}: " in English, "{name}：" in Japanese.
+ */
+export function tAround(id: MessageId, slot: string, vars?: MessageVars): readonly [string, string] {
+  const [before = "", after = ""] = t(id, { ...vars, [slot]: SLOT_MARK }).split(SLOT_MARK);
+  return [before, after];
+}
+
 type PluralBase = MessageId extends infer Id ? (Id extends `${infer Base}.other` ? Base : never) : never;
 
 const english: Readonly<Record<string, string>> = en;
