@@ -19,6 +19,8 @@ import type { OverlayPoll } from "../components/overlay/overlay-stage";
 import { SiteHeader } from "../components/shell/site-header";
 import { useRevalidateAt } from "../components/use-clock";
 import type { LiveSnapshot } from "../types";
+import "../components/overlay/wasteland/wasteland.css";
+import "../components/overlay/composition.css";
 
 export function meta() {
   return [{ title: `${t("overlay.controlTitle")} · StreamBullets` }, { name: "robots", content: "noindex" }];
