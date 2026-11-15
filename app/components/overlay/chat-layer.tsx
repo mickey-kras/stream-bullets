@@ -1,7 +1,7 @@
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { memo, useState, type CSSProperties, type ReactNode } from "react";
 import { t } from "../../i18n";
-import { EMOTE_HOSTS, type ActivityFragment } from "../../lib/activity";
-import { CHAT_LIMITS, type ChatRow } from "../../lib/chat-feed";
+import type { ActivityFragment } from "../../lib/activity";
+import { CHAT_LIMITS, graphemes, safeEmoteUrl, type ChatRow } from "../../lib/chat-feed";
 import { Emblem, PlatformGlyph } from "./wasteland/glyphs";
 import { chipOffset, PLATFORM_NAMES, WASTELAND_STYLE } from "./wasteland/theme";
 
@@ -10,26 +10,26 @@ const MAX_NAME_CHARS = 20;
 /** The removed-message collapse runs at the end of the hold, so it ends when the reducer drops the row. */
 const COLLAPSE_MS = 240;
 
-let segmenter: Intl.Segmenter | null = null;
-
 /** Cuts a name to `max` user-perceived characters, never inside an emoji sequence or a combining mark. */
 export function shortName(name: string, max: number = MAX_NAME_CHARS): string {
-  segmenter ??= new Intl.Segmenter(undefined, { granularity: "grapheme" });
-  const chars: string[] = Array.from(segmenter.segment(name), (part: Intl.SegmentData): string => part.segment);
+  const chars: string[] = graphemes(name);
   return chars.length > max ? `${chars.slice(0, max - 1).join("")}…` : name;
 }
 
-/** Emote images load only over HTTPS from EMOTE_HOSTS. Anything else shows the emote name as text. */
-export function safeEmoteUrl(url: string): string | null {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "https:" && EMOTE_HOSTS.includes(parsed.hostname) ? parsed.href : null;
-  } catch {
-    return null;
-  }
+/** The text before and after the user name ("{name}:" in English, "{name} :" in French, "{name}：" in Japanese). */
+interface NameFrame {
+  before: string;
+  after: string;
 }
 
-/** An emote image; its name as text when the URL is not allowed or the image fails to load. */
+const NAME_MARK = "\u0000";
+
+function nameFrame(): NameFrame {
+  const [before = "", after = ""] = t("overlay.chat.name", { name: NAME_MARK }).split(NAME_MARK);
+  return { before, after };
+}
+
+/** An emote image; its name as text when the URL is not allowed (see safeEmoteUrl) or the image fails to load. */
 function Emote({ name, url }: Readonly<{ name: string; url: string }>): ReactNode {
   const [failed, setFailed] = useState<boolean>(false);
   const src: string | null = safeEmoteUrl(url);
@@ -58,7 +58,16 @@ function rowClass(row: ChatRow): string {
   return entering ? "wl-item wl-in" : "wl-item";
 }
 
-function ChatRowItem({ row, removedText }: Readonly<{ row: ChatRow; removedText: string }>): ReactNode {
+/**
+ * One row. Memoised: the reducer keeps a row object until the row changes, so a page re-render (like the server
+ * clock tick) does not re-render every row.
+ */
+const ChatRowItem = memo(function ChatRowItem({
+  row,
+  removedText,
+  before,
+  after,
+}: Readonly<{ row: ChatRow; removedText: string } & NameFrame>): ReactNode {
   const removed: boolean = row.phase === "removed";
   const style = {
     "--wl-chip-offset": `${chipOffset(row.id)}px`,
@@ -78,7 +87,9 @@ function ChatRowItem({ row, removedText }: Readonly<{ row: ChatRow; removedText:
                 </span>
               ))}
             <span className="wl-user">
-              <bdi>{shortName(row.name)}</bdi>:
+              {before}
+              <bdi>{shortName(row.name)}</bdi>
+              {after}
             </span>{" "}
             <span className="wl-msg" dir="auto">
               {removed ? (
@@ -99,7 +110,7 @@ function ChatRowItem({ row, removedText }: Readonly<{ row: ChatRow; removedText:
       </div>
     </li>
   );
-}
+});
 
 /**
  * The merged chat in the wasteland theme: one capsule row per message, newest at the bottom, overflow clipped at
@@ -107,6 +118,7 @@ function ChatRowItem({ row, removedText }: Readonly<{ row: ChatRow; removedText:
  */
 export function ChatLayer({ rows, className }: Readonly<{ rows: readonly ChatRow[]; className?: string }>): ReactNode {
   const removedText: string = t("overlay.chat.removed");
+  const { before, after }: NameFrame = nameFrame();
   return (
     <ol
       className={className ? `wl-chat ${className}` : "wl-chat"}
@@ -115,7 +127,7 @@ export function ChatLayer({ rows, className }: Readonly<{ rows: readonly ChatRow
       data-overlay-chat=""
     >
       {rows.map((row: ChatRow) => (
-        <ChatRowItem key={row.id} row={row} removedText={removedText} />
+        <ChatRowItem key={row.id} row={row} removedText={removedText} before={before} after={after} />
       ))}
     </ol>
   );

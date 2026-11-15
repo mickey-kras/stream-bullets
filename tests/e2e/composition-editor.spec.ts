@@ -2,6 +2,7 @@ import { newPage, close, test, expect, type Page } from "./coverage";
 import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
+import { DEFAULT_LAYERS } from "../../app/lib/overlay-layers";
 
 const OWNER_IP = clientIp("composition-editor", 245);
 // Set COMPOSITION_SHOT to a file path to save a 1440x900 screenshot of the editor.
@@ -153,6 +154,52 @@ test("a rejected layer save rolls back and shows an error", async ({ browser }) 
   await close(owner);
 });
 
+test("a save sends only the changed fields, and a failure rolls back only its own fields", async ({ browser }) => {
+  const owner = await signedIn(browser, "featureowner", OWNER_IP);
+  const page = await newPage(owner);
+  await page.goto("/overlay-control");
+  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const chatLayer = editor.locator('[data-comp-layer="chat"]');
+  const show = chatLayer.getByRole("checkbox", { name: "Show on stream" });
+  const hide = chatLayer.getByRole("checkbox", { name: "Hide chat commands (!jump)" });
+  await expect(show).not.toBeChecked();
+  await expect(hide).toBeChecked();
+  // The chat source note links to the channel connections on the same page.
+  await expect(chatLayer.getByRole("link", { name: "Connect channels" })).toHaveAttribute("href", "#channels-title");
+  const bodies: unknown[] = [];
+  const gate: { release?: () => void } = {};
+  await page.route("**/api/overlay", async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    bodies.push(route.request().postDataJSON());
+    if (bodies.length === 1) {
+      // Hold the first save, then fail it while a later edit waits.
+      await new Promise<void>((resolve) => {
+        gate.release = resolve;
+      });
+      return route.fulfill({ status: 429, json: { error: "Too many requests. Wait one minute and try again." } });
+    }
+    return route.fallback();
+  });
+  await show.click();
+  await expect.poll(() => bodies.length).toBe(1);
+  await hide.click();
+  await expect(show).toBeChecked();
+  await expect(hide).not.toBeChecked();
+  expect(gate.release).toBeDefined();
+  gate.release?.();
+  await expect(editor.getByRole("alert")).toContainText("Too many requests");
+  // Only the failed field rolls back. The later edit is kept and saved on its own.
+  await expect.poll(() => bodies.length).toBe(2);
+  expect(bodies).toEqual([
+    { action: "layers", chat: { enabled: true } },
+    { action: "layers", chat: { hideCommands: false } },
+  ]);
+  await expect(show).not.toBeChecked();
+  await expect(hide).not.toBeChecked();
+  await expect(editor.getByRole("status")).toHaveText("Layout saved.");
+  await close(owner);
+});
+
 test("a new overlay link lists one URL per layer", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
@@ -166,9 +213,13 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   if (await confirm.isVisible()) await confirm.getByRole("button", { name: "Regenerate link" }).click();
   const url: string = await page.locator("[data-ov-url]").inputValue();
   expect(url).toMatch(/\/@feature_host\/overlay\?key=/);
-  for (const layer of ["chat", "content", "characters"])
+  for (const layer of ["chat", "content"])
     await expect(page.locator(`[data-ov-layer-url="${layer}"]`)).toHaveValue(`${url}&layer=${layer}`);
-  await expect(page.locator("[data-ov-layer-urls]")).toContainText("Coming soon");
+  // The chat URL names the source size; the characters row only says it is coming.
+  const { w, h } = DEFAULT_LAYERS.chat.rect;
+  await expect(page.locator('[data-ov-layer-size="chat"]')).toHaveText(`Source size: ${w} × ${h}`);
+  await expect(page.locator('[data-ov-layer-url="characters"]')).toHaveCount(0);
+  await expect(page.locator('[data-ov-layer-row="characters"]')).toContainText("Coming soon");
   await page.reload();
   await page.getByText("Setup", { exact: true }).click();
   await expect(page.locator(".ov-url")).toContainText("&layer=chat");

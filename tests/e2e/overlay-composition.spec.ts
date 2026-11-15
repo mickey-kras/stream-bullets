@@ -4,10 +4,12 @@ import { runSql } from "./fixtures";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../../app/lib/activity";
+import { DEFAULT_LAYERS } from "../../app/lib/overlay-layers";
 
 const OWNER_IP = clientIp("overlay-composition", 240);
 const OBS_IP = clientIp("overlay-composition", 241);
 const GEOMETRY_IP = clientIp("overlay-composition", 242);
+const CHARACTERS_IP = clientIp("overlay-composition", 243);
 
 const resetLayers = `UPDATE overlay_state SET layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`;
 
@@ -58,7 +60,7 @@ test("a per-layer chat source shows and hides the chat live when the owner chang
   await expect(chatLayer).toHaveCount(0);
 
   const show = await owner.request.post("/api/overlay", {
-    data: { action: "layers", chat: { enabled: true, rect: { x: 1460, y: 280, w: 420, h: 640 } } },
+    data: { action: "layers", chat: { enabled: true, rect: CHAT_RECT } },
   });
   expect(show.status()).toBe(200);
   await expect(chatLayer.getByText("Hello from the bunker 1")).toBeVisible();
@@ -137,7 +139,8 @@ async function chatSource(
   browser: Browser,
   opened: (index: number) => string = () => snapshot([]),
   path: string = "/@feature_host/overlay?key=e2e-key&layer=chat",
-  viewport: { width: number; height: number } = { width: 420, height: 640 },
+  // A source sized like the default chat layer.
+  viewport: { width: number; height: number } = { width: DEFAULT_LAYERS.chat.rect.w, height: DEFAULT_LAYERS.chat.rect.h },
 ): Promise<ChatSource> {
   const page = await newPage(browser, {
     viewport,
@@ -509,4 +512,55 @@ test("the chat layer has the same geometry on the OBS composition and in the edi
   await expect(layer.locator("li.wl-item").first()).toBeVisible();
   expect(activity).toEqual([]);
   await owner.close();
+});
+
+for (const viewport of [
+  { width: 800, height: 600 },
+  { width: 1920, height: 1080 },
+]) {
+  test(`a per-layer chat source at ${viewport.width}x${viewport.height} fits the layer and keeps the newest row in view`, async ({
+    browser,
+  }) => {
+    // The OBS source ratio differs from the layer's 420:640: the layer scales to fit and sits bottom-right.
+    await setLayers("overlay-fit-reset", { chat: { enabled: true, rect: CHAT_RECT } });
+    const now: number = Date.now();
+    const rows: ActivityChat[] = Array.from({ length: 24 }, (_, index: number) =>
+      message({ platform: "kick", id: `fit-${index}`, user: `Scav ${index}`, text: `row ${index}`, receivedAt: now - 24_000 + index * 1000 }),
+    );
+    const source = await chatSource(browser, () => snapshot(rows), undefined, viewport);
+    const layer = source.page.locator('.ov-layer[data-layer="chat"]');
+    await expect(layer).toHaveAttribute("data-scaled", "true");
+    await expect(source.rows.last()).toContainText("row 23");
+    const scale: number = Math.min(viewport.width / CHAT_RECT.w, viewport.height / CHAT_RECT.h);
+    const canvas = await layer.locator(".ov-layer-canvas").boundingBox();
+    if (!canvas) throw new Error("No chat canvas.");
+    // Contain scaling, anchored to the bottom-right corner.
+    expect(Math.abs(canvas.width - CHAT_RECT.w * scale)).toBeLessThanOrEqual(2);
+    expect(Math.abs(canvas.height - CHAT_RECT.h * scale)).toBeLessThanOrEqual(2);
+    expect(Math.abs(canvas.x + canvas.width - viewport.width)).toBeLessThanOrEqual(2);
+    expect(Math.abs(canvas.y + canvas.height - viewport.height)).toBeLessThanOrEqual(2);
+    // The newest row is whole and inside the viewport.
+    const newest = await source.rows.last().boundingBox();
+    if (!newest) throw new Error("No newest row.");
+    expect(newest.x).toBeGreaterThanOrEqual(-1);
+    expect(newest.y).toBeGreaterThanOrEqual(-1);
+    expect(newest.x + newest.width).toBeLessThanOrEqual(viewport.width + 1);
+    expect(newest.y + newest.height).toBeLessThanOrEqual(viewport.height + 1);
+    await expect(source.page.locator("main.overlay-screen")).toHaveAttribute("data-feed-status", /^(connecting|live)$/);
+    await close(source.page);
+  });
+}
+
+test("a characters-only source opens no sockets while the characters layer cannot render", async ({ browser }) => {
+  await setLayers("overlay-characters-reset", { chat: { enabled: true }, characters: { enabled: true } });
+  const page = await newPage(browser, { extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${CHARACTERS_IP}` } });
+  const sockets: string[] = [];
+  page.on("websocket", (socket) => sockets.push(new URL(socket.url()).pathname));
+  await page.goto("/@feature_host/overlay?key=e2e-key&layer=characters");
+  const main = page.locator("main.overlay-screen");
+  await expect(main).toHaveAttribute("data-feed-status", "off");
+  // Give a socket time to open if one would.
+  await page.waitForTimeout(500);
+  expect(sockets).toEqual([]);
+  await close(page);
 });

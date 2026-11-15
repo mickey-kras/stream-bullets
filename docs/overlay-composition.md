@@ -37,10 +37,19 @@ The rectangle must stay in the frame: `x + w` is at most 1920 and `y + h` is at 
 
 | Layer | Default rectangle | Minimum size |
 | --- | --- | --- |
-| `chat` | `x` 1460, `y` 280, 420 × 640 | 280 × 160 |
+| `chat` | `x` 1240, `y` 300, 640 × 660 | 280 × 160 |
 | `characters` | `x` 0, `y` 760, 1920 × 320 | 640 × 160 |
 
 The page scales the design pixels to the width of the browser source. Thus the layout is the same at all sizes.
+
+The overlay reads stored and broadcast layers leniently. Thus a value from an older or newer version never stops the page:
+
+- It ignores unknown fields.
+- A field with an incorrect value takes its default value.
+- A rectangle outside the frame or below the minimum size takes the default rectangle of its layer.
+- A layer with an incorrect value takes the defaults of that layer.
+
+The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
 
 ## URLs
 
@@ -58,9 +67,15 @@ https://<origin>/@<handle>/overlay?key=<key>&layer=content
 https://<origin>/@<handle>/overlay?key=<key>&layer=characters
 ```
 
-A layer source fills its viewport with the layer. It scales the layer from its stored width.
+A layer source keeps the aspect ratio of its layer and uses as much of the viewport as possible.
+It aligns the layer with the bottom-right corner of the viewport. Thus the newest chat rows are always visible.
+The free space stays transparent, at the left or at the top.
+
 An unknown `layer` value shows an empty transparent page. It never shows an error.
 The `poll` parameter still selects a poll for the content layer.
+
+The characters layer URL shows nothing until issue #664. Until then, it opens no live-room socket,
+and **Overlay control** does not show it.
 
 **Overlay control** shows the full URL and the layer URLs once, when you make a new key.
 The server keeps only the SHA-256 hash of the key. Thus it cannot show the URL again.
@@ -72,7 +87,20 @@ If you lost the URL, select **Regenerate link**. Then update all OBS sources.
 Use a browser source of 1920 × 1080 for the composition. A size of 1280 × 720 also works.
 Keep the 16:9 aspect ratio. With a different ratio, the layer heights do not agree with their contents.
 For a layer source, use the size of its layer rectangle, or the same ratio at a smaller size.
+The editor and the link panel show the size of each layer.
+
 The overlay background is transparent, so you do not need custom CSS.
+
+After you update to the release with the chat layer, refresh each open OBS source one time.
+An OBS source that opened before this release does not show the chat.
+
+### Live-room seats
+
+Each OBS source with the overlay key uses one of the 10 owner seats of the live room.
+The signed-in tabs of the streamer use the same seats.
+When all 10 seats are full, a new connection replaces the oldest owner connection.
+Thus, where possible, use one composition source for each scene, not one source for each layer.
+See [live capacity](live-room-capacity.md).
 
 ## Editor
 
@@ -131,7 +159,10 @@ The chat keeps the IDs of removed messages. Thus a late copy of a removed messag
 ### Commands
 
 The chat hides commands by default. A command is a message that starts with `!` and a word, such as `!jump`.
+The full-width `！` also starts a command. A message that starts with `!` and no word, such as `! hi` or `!!!`, is not a command.
+
 To show commands, clear **Hide chat commands (!jump)** in the editor.
+When you select the option again, the chat also hides the command rows that are on the screen.
 The chat never runs a command. It only shows or hides the message.
 
 ### Reconnection
@@ -147,6 +178,9 @@ The chat adds only the snapshot rows that are newer than the newest row on scree
 An `unavailable` message clears the chat. The server sends it when the key changes or when an administrator suspends the page.
 The page then keeps trying with a longer wait.
 
+For troubleshooting, the root element of the overlay page has the `data-feed-status` attribute.
+It shows the status of the activity feed.
+
 ## YouTube quota and sockets
 
 The server polls YouTube chat only while at least one activity socket of the page is open.
@@ -156,15 +190,17 @@ Thus close the overlay sources that you do not use.
 - The page opens an activity socket only when it shows an enabled chat layer. Hide the chat layer to close it.
 - The editor preview opens no activity socket.
 - Each browser source opens its own sockets. A layer source uses one live-room socket.
-  A chat source also uses one activity socket.
+  A chat source also uses one activity socket. The characters layer source opens no socket until issue #664.
 - A page can have at most 20 activity sockets (`MAX_SOCKETS`).
-- Valid-key overlays and the owner share ten priority seats in the live room. See [live capacity](live-room-capacity.md).
+- Valid-key overlays and the owner share 10 owner seats in the live room. See [Live-room seats](#live-room-seats).
 
 ## Security
 
 - The chat shows user names, messages, and badge labels as text. It never inserts them as HTML.
 - An emote image loads only from a host in `EMOTE_HOSTS`, over HTTPS. Other emotes show their name as text.
-- The Content Security Policy allows images only from the site and from `https://static-cdn.jtvnw.net`.
+- On all pages, the Content Security Policy allows images from the site, `blob:` URLs, and `data:` URLs.
+  On the overlay page and on **Overlay control**, it also allows images from `https://static-cdn.jtvnw.net`.
+- The Twitch image CDN gets the IP address of the device that shows an emote. The privacy policy (`/privacy`) names this recipient.
 - The overlay page sends no `Referer`. Thus an emote image does not get the key.
 - The overlay key gives access to the activity feed. Without a valid key or an owner session, the socket gets `403`.
 - **Regenerate link** makes a new key. The old key stops at once, and its open sockets close.

@@ -21,6 +21,8 @@ import {
 export const CHAT_LIMITS = {
   maxRows: 40,
   maxPending: 8,
+  /** Rows in their exit animation at once. Extra leaving rows vanish at once. */
+  maxLeaving: 8,
   lifetimeMs: 120_000,
   removedHoldMs: 1_400,
   enterMs: 420,
@@ -60,6 +62,8 @@ export interface ChatRow {
   phaseAt: number;
   /** True only for a row that slides in. Snapshot rows and burst rows never animate. */
   animate: boolean;
+  /** True when the message is a chat command (`!word`), so turning on hideCommands can remove it later. */
+  command: boolean;
 }
 
 export interface ChatState {
@@ -80,36 +84,53 @@ export interface ChatOptions {
 /**
  * `now` is local time (Date.now()). `serverOffset` is server time minus local time; it places snapshot rows in
  * local time for their lifetime. Without it the clocks are taken as equal.
+ *
+ * `filter` applies a changed hideCommands setting to what is already on screen. Turning it on sends shown command
+ * rows to `leaving` and drops queued ones. Turning it off changes nothing: hidden commands were never kept, so only
+ * new messages show commands again.
  */
 export type ChatAction =
   | { type: "message"; message: ActivityMessage; now: number; serverOffset?: number }
   | { type: "tick"; now: number }
+  | { type: "filter"; hideCommands: boolean; now: number }
   | { type: "reset" };
 
 export function initialChatState(): ChatState {
   return { seq: 0, rows: [], pending: [], removed: new Set<string>() };
 }
 
-const COMMAND = /^\s*![\p{L}\p{N}_-]{1,32}(?:\s|$)/u;
+// Leading white space and invisible format characters (ZWJ, BOM, bidi marks) are skipped. "！" is the full-width "!".
+const COMMAND = /^[\s\p{Cf}]*[!！][\p{L}\p{N}_-]{1,32}(?:\s|$)/u;
 
-/** A message whose first non-space text is `!word` (like `!jump`). The overlay can hide these. */
+/** A message whose first visible text is `!word` (like `!jump` or `！jump`). The overlay can hide these. */
 export function isChatCommand(text: string): boolean {
   return COMMAND.test(text);
 }
 
 let segmenter: Intl.Segmenter | null = null;
 
-function graphemes(text: string): string[] {
+/** The user-perceived characters of a text: an emoji sequence or a letter with combining marks is one. */
+export function graphemes(text: string): string[] {
   segmenter ??= new Intl.Segmenter(undefined, { granularity: "grapheme" });
   return Array.from(segmenter.segment(text), (part: Intl.SegmentData): string => part.segment);
 }
 
-function allowedEmote(url: string): boolean {
+/**
+ * The URL of an emote image, or null when it must not load: only HTTPS on the default port from EMOTE_HOSTS, with
+ * no user name or password.
+ */
+export function safeEmoteUrl(url: string): string | null {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "https:" && EMOTE_HOSTS.includes(parsed.hostname);
+    const allowed: boolean =
+      parsed.protocol === "https:" &&
+      EMOTE_HOSTS.includes(parsed.hostname) &&
+      parsed.port === "" &&
+      parsed.username === "" &&
+      parsed.password === "";
+    return allowed ? parsed.href : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -128,7 +149,9 @@ export function displayFragments(
   let left: number = Math.max(0, Math.floor(maxChars));
   for (const fragment of source) {
     const part: ActivityFragment =
-      fragment.type === "emote" && !allowedEmote(fragment.url) ? { type: "text", text: fragment.name } : fragment;
+      fragment.type === "emote" && safeEmoteUrl(fragment.url) === null
+        ? { type: "text", text: fragment.name }
+        : fragment;
     if (part.type === "emote") {
       if (left === 0) return { fragments, truncated: true };
       fragments.push(part);
@@ -167,11 +190,26 @@ function toRow(chat: ActivityChat, seq: number, limits: ChatLimits): ChatRow {
     phase: "shown",
     phaseAt: 0,
     animate: false,
+    command: isChatCommand(chat.text),
   };
 }
 
 function hidden(chat: ActivityChat, options: ChatOptions): boolean {
   return options.hideCommands && isChatCommand(chat.text);
+}
+
+/** Applies a turned-on hideCommands to shown and queued rows (see ChatAction `filter`). */
+function filterCommands(state: ChatState, hideCommands: boolean, now: number): ChatState {
+  if (!hideCommands) return state;
+  let changed = false;
+  const rows: ChatRow[] = state.rows.map((row: ChatRow): ChatRow => {
+    if (!row.command || !active(row)) return row;
+    changed = true;
+    return { ...row, phase: "leaving", phaseAt: now, animate: false };
+  });
+  const pending: ChatRow[] = state.pending.filter((row: ChatRow): boolean => !row.command);
+  if (pending.length !== state.pending.length) changed = true;
+  return changed ? { ...state, rows, pending } : state;
 }
 
 function active(row: ChatRow): boolean {
@@ -248,7 +286,7 @@ function advance(state: ChatState, now: number, limits: ChatLimits): ChatState {
 
 /**
  * At most `maxRows` rows that are not leaving: the oldest extra rows leave (or vanish at once when `animate` is
- * false). Leaving rows are capped at `maxPending`, so a burst never piles up exit animations.
+ * false). Leaving rows are capped at `maxLeaving`, so a burst never piles up exit animations.
  */
 function bound(rows: ChatRow[], now: number, limits: ChatLimits, animate: boolean): ChatRow[] {
   const leavingOf = (list: readonly ChatRow[]): number =>
@@ -266,7 +304,7 @@ function bound(rows: ChatRow[], now: number, limits: ChatLimits, animate: boolea
       next.push(row);
     }
   }
-  let drop: number = leavingOf(next) - limits.maxPending;
+  let drop: number = leavingOf(next) - limits.maxLeaving;
   if (drop <= 0) return next;
   return next.filter((row: ChatRow): boolean => {
     if (drop <= 0 || row.phase !== "leaving") return true;
@@ -386,6 +424,8 @@ export function chatReducer(state: ChatState, action: ChatAction, options: ChatO
   if (action.type === "reset") return initialChatState();
   const limits: ChatLimits = limitsOf(options);
   if (action.type === "tick") return advance(state, action.now, limits);
+  if (action.type === "filter")
+    return advance(filterCommands(state, action.hideCommands, action.now), action.now, limits);
   const { message, now } = action;
   if (message.type === "unavailable") return initialChatState();
   const next: ChatState =

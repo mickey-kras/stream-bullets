@@ -12,7 +12,6 @@ import {
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
-
 const origin = "https://overlay-key.example.test";
 const secret = "test-only-secret-0f9e8d7c6b5a49382716a5b4c3d2e1f0";
 const day = 86_400_000;
@@ -241,17 +240,20 @@ describe("the overlay page", (): void => {
     expect(headers("/@key_page/overlay/chat?key=abc").get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
   });
 
-  it("loads emote images only from the emote hosts over HTTPS", (): void => {
-    const policy: string = headers("/@key_page/overlay?key=abc&layer=chat").get("Content-Security-Policy") ?? "";
-    const images: string | undefined = policy.split("; ").find((part: string): boolean => part.startsWith("img-src "));
-    expect(images?.split(" ")).toEqual([
-      "img-src",
-      "'self'",
-      "blob:",
-      "data:",
-      ...EMOTE_HOSTS.map((host: string): string => `https://${host}`),
-    ]);
-    expect(policy).toContain("https://static-cdn.jtvnw.net");
-    expect(policy).not.toContain("http://static-cdn.jtvnw.net");
+  const imageSources = (path: string): string[] | undefined =>
+    (headers(path).get("Content-Security-Policy") ?? "")
+      .split("; ")
+      .find((part: string): boolean => part.startsWith("img-src "))
+      ?.split(" ");
+
+  it("loads emote images only from the emote hosts over HTTPS, and only on the overlay pages", (): void => {
+    const emotes: string[] = EMOTE_HOSTS.map((host: string): string => `https://${host}`);
+    for (const path of ["/@key_page/overlay?key=abc&layer=chat", "/overlay-control"]) {
+      expect(imageSources(path)).toEqual(["img-src", "'self'", "blob:", "data:", ...emotes]);
+      expect(headers(path).get("Content-Security-Policy")).not.toContain("http://static-cdn.jtvnw.net");
+    }
+    expect(emotes).toContain("https://static-cdn.jtvnw.net");
+    for (const path of ["/", "/@key_page", "/@key_page/overlay/chat", "/settings", "/overlay-control/x"])
+      expect(imageSources(path)).toEqual(["img-src", "'self'", "blob:", "data:"]);
   });
 });

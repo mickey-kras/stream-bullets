@@ -10,6 +10,7 @@ import {
   layersPatchSchema,
   mergeLayers,
   parseLayerParam,
+  parseStoredLayers,
   storedLayersSchema,
   type LayerRect,
   type OverlayLayers,
@@ -24,7 +25,7 @@ describe("layer defaults", (): void => {
     expect(OVERLAY_LAYERS).toEqual(["content", "chat", "characters"]);
     expect([DESIGN_W, DESIGN_H]).toEqual([1920, 1080]);
     expect(DEFAULT_LAYERS).toEqual({
-      chat: { enabled: false, rect: { x: 1460, y: 280, w: 420, h: 640 }, hideCommands: true },
+      chat: { enabled: false, rect: { x: 1240, y: 300, w: 640, h: 660 }, hideCommands: true },
       characters: { enabled: false, rect: { x: 0, y: 760, w: 1920, h: 320 } },
     });
     expect(MIN_RECT).toEqual({ chat: { w: 280, h: 160 }, characters: { w: 640, h: 160 } });
@@ -70,20 +71,82 @@ describe("stored layers", (): void => {
   it("returns fresh defaults, so editing one result never changes another", (): void => {
     const first: OverlayLayers = storedLayersSchema.parse({});
     first.chat.rect.x = 0;
-    expect(storedLayersSchema.parse({}).chat.rect.x).toBe(1460);
-    expect(DEFAULT_LAYERS.chat.rect.x).toBe(1460);
+    expect(storedLayersSchema.parse({}).chat.rect.x).toBe(1240);
+    expect(DEFAULT_LAYERS.chat.rect.x).toBe(1240);
   });
 
   it("drops unknown keys from older or newer versions", (): void => {
     expect(storedLayersSchema.parse({ future: { enabled: true }, chat: { theme: "neon" } })).toEqual(DEFAULT_LAYERS);
   });
 
-  it("throws on invalid values so they never reach a client", (): void => {
-    expect(() => storedLayersSchema.parse(null)).toThrow();
-    expect(() => storedLayersSchema.parse({ chat: { enabled: "yes" } })).toThrow();
-    expect(() => storedLayersSchema.parse({ chat: { rect: { x: 1800, y: 0, w: 280, h: 160 } } })).toThrow();
-    expect(() => storedLayersSchema.parse({ chat: { rect: { x: 0, y: 0, w: 279, h: 160 } } })).toThrow();
-    expect(() => storedLayersSchema.parse({ characters: { rect: { x: 0, y: 0, w: 639, h: 160 } } })).toThrow();
+  it("drops unknown keys inside a layer and inside a rect", (): void => {
+    const rect: LayerRect = { x: 0, y: 0, w: 280, h: 160 };
+    expect(storedLayersSchema.parse({ chat: { enabled: true, rect: { ...rect, z: 1, radius: 4 } } })).toEqual({
+      ...DEFAULT_LAYERS,
+      chat: { ...DEFAULT_LAYERS.chat, enabled: true, rect },
+    });
+  });
+
+  it.each([
+    ["past the right edge", { x: 1800, y: 0, w: 280, h: 160 }],
+    ["past the bottom edge", { x: 0, y: 1000, w: 280, h: 160 }],
+    ["negative", { x: -1, y: 0, w: 280, h: 160 }],
+    ["below the minimum width", { x: 0, y: 0, w: 279, h: 160 }],
+    ["below the minimum height", { x: 0, y: 0, w: 280, h: 159 }],
+    ["fractions", { x: 0.5, y: 0, w: 280, h: 160 }],
+    ["text", { x: "0", y: 0, w: 280, h: 160 }],
+    ["partial", { x: 0, y: 0, w: 280 }],
+    ["not an object", "full"],
+  ])("reads a chat rect %s as the default rect and keeps the other fields", (_name: string, rect: unknown): void => {
+    expect(storedLayersSchema.parse({ chat: { enabled: true, hideCommands: false, rect } })).toEqual({
+      ...DEFAULT_LAYERS,
+      chat: { enabled: true, rect: DEFAULT_LAYERS.chat.rect, hideCommands: false },
+    });
+  });
+
+  it("applies the minimum size of each layer", (): void => {
+    const rect: LayerRect = { x: 0, y: 0, w: 639, h: 160 };
+    expect(storedLayersSchema.parse({ chat: { rect }, characters: { enabled: true, rect } })).toEqual({
+      chat: { ...DEFAULT_LAYERS.chat, rect },
+      characters: { ...DEFAULT_LAYERS.characters, enabled: true },
+    });
+  });
+
+  it("reads each field of the wrong type as its default", (): void => {
+    expect(
+      storedLayersSchema.parse({
+        chat: { enabled: "yes", hideCommands: 0, rect: { x: 0, y: 0, w: 280, h: 160 } },
+        characters: { enabled: null },
+      }),
+    ).toEqual({ ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, rect: { x: 0, y: 0, w: 280, h: 160 } } });
+  });
+
+  it.each([
+    ["null", null],
+    ["a string", "layers"],
+    ["an array", []],
+    ["layers of the wrong type", { chat: "on", characters: 1 }],
+  ])("reads %s as the default layers and never throws", (_name: string, value: unknown): void => {
+    expect(storedLayersSchema.parse(value)).toEqual(DEFAULT_LAYERS);
+  });
+
+  it("reads one bad layer as its defaults and keeps the other layer", (): void => {
+    expect(storedLayersSchema.parse({ chat: [], characters: { enabled: true } })).toEqual({
+      ...DEFAULT_LAYERS,
+      characters: { ...DEFAULT_LAYERS.characters, enabled: true },
+    });
+  });
+
+  it("reads stored JSON text and reads invalid JSON as the defaults", (): void => {
+    expect(parseStoredLayers('{"chat":{"enabled":true}}')).toEqual({
+      ...DEFAULT_LAYERS,
+      chat: { ...DEFAULT_LAYERS.chat, enabled: true },
+    });
+    expect(parseStoredLayers("{")).toEqual(DEFAULT_LAYERS);
+    expect(parseStoredLayers("")).toEqual(DEFAULT_LAYERS);
+    const fallback: OverlayLayers = parseStoredLayers("null");
+    fallback.chat.rect.x = 0;
+    expect(DEFAULT_LAYERS.chat.rect.x).toBe(1240);
   });
 });
 

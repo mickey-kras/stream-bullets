@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ActivityChat, ActivityMessage } from "../../lib/activity";
 import {
   chatReducer,
@@ -9,6 +9,7 @@ import {
   type ChatRow,
   type ChatState,
 } from "../../lib/chat-feed";
+import { motionReduced, watchMotion } from "../station/motion";
 import type { ActivityFeed } from "./activity-feed";
 
 /** The editor preview adds one sample message this often. */
@@ -24,6 +25,8 @@ export interface UseChatOptions {
   serverOffset?: number;
 }
 
+const STILL_LIMITS: ChatOptions["limits"] = { lifetimeMs: Number.POSITIVE_INFINITY };
+
 /** A sample as a fresh message: a new id each round, so the dedupe never hides the loop. */
 function sampleEvent(sample: ActivityChat, round: number, now: number): ActivityChat {
   const messageId = `${sample.messageId}-${round}`;
@@ -31,22 +34,43 @@ function sampleEvent(sample: ActivityChat, round: number, now: number): Activity
 }
 
 /**
+ * The page's effective reduced-motion setting (the site's Motion preference, or the OS setting), kept current.
+ * False on the server and before the first effect.
+ */
+function subscribeMotion(onChange: () => void): () => void {
+  const stop = new AbortController();
+  watchMotion((): void => onChange(), stop.signal);
+  return (): void => stop.abort();
+}
+
+function useMotionReduced(): boolean {
+  return useSyncExternalStore(subscribeMotion, motionReduced, (): boolean => false);
+}
+
+/**
  * The rows of the merged chat. It feeds the activity feed (or the samples) through `chatReducer` and wakes once at
- * `nextWakeAt` to move animations and lifetimes forward.
+ * `nextWakeAt` to move animations and lifetimes forward. A changed `hideCommands` applies to the rows on screen.
+ *
+ * Samples play on a loop, except with reduced motion: then they show once, as a still snapshot.
  */
 export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOptions): ChatRow[] {
   const [state, setState] = useState<ChatState>(initialChatState);
-  const options: ChatOptions = { hideCommands };
+  // A still sample snapshot never expires, so the preview never empties.
+  const still: boolean = useMotionReduced() && samples !== undefined;
+  const options: ChatOptions = still ? { hideCommands, limits: STILL_LIMITS } : { hideCommands };
   const optionsRef = useRef<ChatOptions>(options);
   const offsetRef = useRef<number | undefined>(serverOffset);
-  useEffect(() => {
-    optionsRef.current = { hideCommands };
-    offsetRef.current = serverOffset;
-  }, [hideCommands, serverOffset]);
-
   const dispatch = useCallback((action: ChatAction): void => {
     setState((current: ChatState): ChatState => chatReducer(current, action, optionsRef.current));
   }, []);
+  const appliedHide = useRef<boolean>(hideCommands);
+  useEffect(() => {
+    optionsRef.current = still ? { hideCommands, limits: STILL_LIMITS } : { hideCommands };
+    offsetRef.current = serverOffset;
+    if (appliedHide.current === hideCommands) return;
+    appliedHide.current = hideCommands;
+    dispatch({ type: "filter", hideCommands, now: Date.now() });
+  }, [hideCommands, serverOffset, still, dispatch]);
 
   const subscribe = feed?.subscribe ?? null;
   useEffect(() => {
@@ -63,6 +87,7 @@ export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOp
         },
         now,
       });
+      if (still) return;
       let index = 0;
       let round = 1;
       const timer = setInterval(() => {
@@ -84,7 +109,7 @@ export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOp
     return subscribe((message: ActivityMessage): void => {
       dispatch({ type: "message", message, now: Date.now(), serverOffset: offsetRef.current });
     });
-  }, [subscribe, samples, dispatch]);
+  }, [subscribe, samples, dispatch, still]);
 
   const wakeAt: number | null = nextWakeAt(state, options);
   useEffect(() => {

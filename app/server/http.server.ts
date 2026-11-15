@@ -159,7 +159,13 @@ export function securityHeaders(
   const headers = new Headers(response.headers);
   headers.set("X-Content-Type-Options", "nosniff");
   // Overlay URLs carry secret keys; suppress Referer.
-  const overlayPage: boolean = /^\/@[^/]+\/overlay$/.test(new URL(request.url).pathname);
+  const pathname: string = new URL(request.url).pathname;
+  const overlayPage: boolean = /^\/@[^/]+\/overlay$/.test(pathname);
+  // Only the overlay and its composition preview show chat emotes.
+  const emoteHosts: string =
+    overlayPage || pathname === "/overlay-control"
+      ? ` ${EMOTE_HOSTS.map((host: string): string => `https://${host}`).join(" ")}`
+      : "";
   headers.set("Referrer-Policy", overlayPage ? "no-referrer" : "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   headers.set("X-Frame-Options", "DENY");
@@ -169,7 +175,7 @@ export function securityHeaders(
       "default-src 'self'",
       `script-src 'self' 'nonce-${nonce}'${development ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      `img-src 'self' blob: data: ${EMOTE_HOSTS.map((host: string): string => `https://${host}`).join(" ")}`,
+      `img-src 'self' blob: data:${emoteHosts}`,
       "font-src 'self'",
       `connect-src 'self' ${origin.replace(/^http/, "ws")}`,
       "object-src 'none'",

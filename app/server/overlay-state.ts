@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES, OVERLAY_SOURCES } from "../../db/enums";
-import { DEFAULT_LAYERS, storedLayersSchema } from "../lib/overlay-layers";
+import { DEFAULT_LAYERS, parseStoredLayers } from "../lib/overlay-layers";
 import type { OverlayPublic, OverlaySourceRef, OverlayState } from "../types";
 
 export interface OverlayRow {
@@ -53,7 +53,7 @@ function source(raw: string): OverlaySourceRef {
   return overlaySourceSchema.parse(JSON.parse(raw));
 }
 
-// Reject malformed stored state before sending it to clients.
+// Reject malformed stored state before sending it to clients. Invalid layers read as their defaults.
 export function overlayValue(row: OverlayRow | null | undefined): OverlayState {
   if (!row) return DEFAULT_OVERLAY;
   const value = rowSchema.parse(row);
@@ -66,7 +66,7 @@ export function overlayValue(row: OverlayRow | null | undefined): OverlayState {
     showResults: value.show_results === 1,
     message: value.message,
     messageStyle: value.message_style,
-    layers: storedLayersSchema.parse(JSON.parse(row.layers)),
+    layers: parseStoredLayers(row.layers),
     revision: value.revision,
   };
 }

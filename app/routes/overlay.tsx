@@ -8,7 +8,7 @@ import { getOverlayData, getOverlayState, sourceTopics } from "../server/overlay
 import { overlayPublic } from "../server/overlay-state";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { useActivityFeed } from "../components/overlay/activity-feed";
-import { OverlayComposition, usesActivityFeed } from "../components/overlay/overlay-composition";
+import { CHARACTERS_READY, OverlayComposition, usesActivityFeed } from "../components/overlay/overlay-composition";
 import { upNextStart, type OverlayPoll, type OverlayScene } from "../components/overlay/overlay-stage";
 import { useRevalidateAt } from "../components/use-clock";
 import { ServerOffset } from "../lib/clock";
@@ -52,8 +52,10 @@ export default function Overlay(): ReactNode {
   const only: OverlayLayer | null = layer === "unknown" ? null : layer;
   // Every layer reads the live room: it carries the overlay state, so layer changes (show, hide, move, hide
   // commands) apply at once on a per-layer source too. Only the content layer reloads data for what is on air.
+  // A characters-only source opens no socket while that layer cannot render (#664): it would only hold a seat.
   const content: boolean = known && (only === null || only === "content");
-  const { snapshot, status } = useLivePolls(loaded.handle, known, key, true);
+  const liveOn: boolean = known && (CHARACTERS_READY || only !== "characters");
+  const { snapshot, status } = useLivePolls(loaded.handle, liveOn, key, true);
   const revalidator = useRevalidator();
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const live: OverlayPublic | null | undefined = snapshot?.overlay;
@@ -85,7 +87,8 @@ export default function Overlay(): ReactNode {
   const label: string = t("overlay.label", { name: loaded.name });
   if (!known) return <main className="overlay-screen ov-screen" id="main-content" aria-label={label} />;
   return (
-    <main className="overlay-screen ov-screen" id="main-content" aria-label={label}>
+    // data-feed-status exposes the activity feed state for checks and support; nothing shows on stream.
+    <main className="overlay-screen ov-screen" id="main-content" aria-label={label} data-feed-status={feed.status}>
       <OverlayComposition
         scene={scene}
         source={source}
