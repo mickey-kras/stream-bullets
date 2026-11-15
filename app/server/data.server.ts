@@ -66,6 +66,7 @@ interface EntryRow {
   body: string;
   category: string;
   options: string;
+  binary_labels: string | null;
   created_at: number;
   ends_at: number | null;
   revealed: number;
@@ -426,7 +427,7 @@ const entrySelect = `
 `;
 
 function entryValue(row: EntryRow): Entry {
-  const options = z.array(z.string()).parse(JSON.parse(row.options));
+  const options = z.array(z.string()).parse(JSON.parse(row.binary_labels ?? row.options));
   const grouped = z
     .array(z.object({ choice: z.number().int(), count: z.number().int().nonnegative() }))
     .parse(JSON.parse(row.vote_counts));

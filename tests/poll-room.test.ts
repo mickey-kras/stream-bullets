@@ -621,9 +621,10 @@ describe("live room snapshots", (): void => {
 
   it("hides the counts of a binary poll until it is revealed", async (): Promise<void> => {
     const id = await rows.addPoll("binary");
+    await database.db.prepare("UPDATE entries SET binary_labels=? WHERE id=?").bind('["No","Yes"]', id).run();
     await rows.vote(id, 0);
     const socket = await join();
-    expect(socket.messages<LiveSnapshot>()[0].polls[0]).toMatchObject({ kind: "binary", counts: null, total: 1 });
+    expect(socket.messages<LiveSnapshot>()[0].polls[0]).toMatchObject({ kind: "binary", options: ["No", "Yes"], counts: null, total: 1 });
     await database.db.prepare("UPDATE entries SET revealed = 1 WHERE id = ?").bind(id).run();
     await rows.vote(id, 1);
     await post("refresh");

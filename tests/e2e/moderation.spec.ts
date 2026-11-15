@@ -1,4 +1,4 @@
-import { close } from "./coverage";
+import { close, newPage } from "./coverage";
 import { readFile } from "node:fs/promises";
 import { test, expect, type Browser, type BrowserContext } from "./coverage";
 import { z } from "zod";
@@ -102,5 +102,68 @@ test("profile settings are saved per account", async ({ browser }) => {
     ];
     await close(viewer);
     expect(restored, "restores the shared viewer's locale and avatar").toEqual([200, 200]);
+  }
+});
+
+// Additional admin UI coverage owns TEST-NET-3 .61, separate from the existing moderation cases.
+test("admin page pagination recovers and filtered searches preserve their query", async ({ browser }) => {
+  const context = await signedIn(browser, "admin", clientIp("moderation", 62));
+  await context.setExtraHTTPHeaders({ Origin: origin, "CF-Connecting-IP": "203.0.113.61" });
+  const page = await newPage(context);
+  try {
+    await page.goto("/admin?view=pages");
+    await expect(page.getByRole("button", { name: "Load more pages", exact: true })).toBeVisible();
+    await page.route(
+      "**/api/admin/streamers?*",
+      (route) =>
+        route.fulfill({
+          status: 503,
+          json: { error: "The request failed. Please try again." },
+        }),
+      { times: 1 },
+    );
+    await page.getByRole("button", { name: "Load more pages", exact: true }).click();
+    await expect(page.getByRole("alert")).toHaveText("The request failed. Please try again.");
+    for (let remaining: number = 4; remaining > 0; remaining -= 1) {
+      const more = page.getByRole("button", { name: "Load more pages", exact: true });
+      if (!(await more.isVisible())) break;
+      const count: number = await page.locator(".page-row").count();
+      await more.click();
+      await expect.poll(() => page.locator(".page-row").count()).toBeGreaterThan(count);
+    }
+    await expect(page.getByRole("article", { name: "Room 48", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Load more pages", exact: true })).toHaveCount(0);
+    await page.getByLabel("Search streamer pages").fill("zz_room_46");
+    await page.getByLabel("Search streamer pages").press("Enter");
+    const row = page.getByRole("article", { name: "Room 46", exact: true });
+    await expect(row).toBeVisible();
+    const filters = page.getByRole("navigation", { name: "Page status" });
+    await filters.getByRole("link", { name: "Suspended", exact: true }).click();
+    await expect(page.getByLabel("Search streamer pages")).toHaveValue("zz_room_46");
+    await expect(page.getByRole("heading", { name: "No suspended pages" })).toBeVisible();
+    await filters.getByRole("link", { name: "Active", exact: true }).click();
+    await expect(row).toBeVisible();
+    await row.getByRole("button", { name: "Mark as official @zz_room_46" }).click();
+    const official = page.getByRole("dialog");
+    await page.route(
+      "**/api/admin/streamers/*/official",
+      (route) =>
+        route.fulfill({
+          status: 503,
+          json: { error: "The request failed. Please try again." },
+        }),
+      { times: 1 },
+    );
+    await official.getByRole("button", { name: "Mark as official", exact: true }).click();
+    await expect(official.getByRole("alert")).toHaveText("The request failed. Please try again.");
+    await official.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(row.getByRole("button", { name: "Mark as official @zz_room_46" })).toBeFocused();
+    await row.getByRole("button", { name: "Freeze @zz_room_46" }).click();
+    await page.getByRole("dialog").press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(row.getByRole("button", { name: "Freeze @zz_room_46" })).toBeFocused();
+  } finally {
+    await close(context);
   }
 });
