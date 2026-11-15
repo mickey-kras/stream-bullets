@@ -28,14 +28,14 @@ export function PollResults({
   onVote?: (choice: number) => void;
 }>): ReactNode {
   const closed: boolean = poll.revealed || (poll.endsAt !== null && poll.endsAt <= now);
-  // Largest-remainder shares always total exactly 100 (item 49).
+  // Largest-remainder shares total 100.
   const shares: number[] = largestRemainder(poll.counts ?? []);
   return (
     <div className={poll.kind === "binary" ? "poll-choices binary-votes" : "poll-choices"}>
       {poll.options.map((option: string, index: number) => {
         const count: number | undefined = poll.counts?.[index];
         const percentage: number = shares[index] ?? 0;
-        // The fill ends inside its own track; the score sits in a fixed column outside it (mockup M1, round 13).
+        // Keep fill inside its track and scores in a separate fixed column.
         const content: ReactNode = (
           <>
             <span className="opt-track">
@@ -74,7 +74,7 @@ export function PollResults({
   );
 }
 
-/** Time left as the mockup words it: "1 h 55 min left", "55 min left", "40 s left". */
+// Format remaining time: h/min/s.
 export function timeLeft(seconds: number): string {
   if (seconds < 60) return t("poll.leftSeconds", { s: seconds });
   const minutes: number = Math.ceil(seconds / 60);
@@ -90,7 +90,7 @@ export function PollStatus({ poll, now }: Readonly<{ poll: PublicPoll; now: numb
       <span>{t("poll.votingLive")}</span>
     </>
   );
-  // A revealed choice poll was ended by the host; a revealed Yes/No poll shows its results.
+  // Revealed choice polls are closed; revealed binary polls show results.
   if (poll.revealed)
     badge =
       poll.kind === "binary" ? (
@@ -130,7 +130,6 @@ export function PollStatus({ poll, now }: Readonly<{ poll: PublicPoll; now: numb
   );
 }
 
-/** The line under a poll's results: what this viewer can do now. */
 function votingMessage(entry: Entry, closed: boolean, signedIn: boolean, owner: boolean): string {
   if (entry.kind === "binary" && !entry.revealed) return t("poll.privateUntilReveal");
   if (entry.revealed && entry.kind === "binary") return t("poll.finalResults");
@@ -140,7 +139,6 @@ function votingMessage(entry: Entry, closed: boolean, signedIn: boolean, owner: 
   return entry.myVote === null ? t("poll.tapToVote") : t("poll.canChange");
 }
 
-/** The owner's ⋯ menu on a poll (round 9): end voting or reveal the results, and delete. */
 function PollMenu({
   entry,
   closed,
@@ -154,7 +152,7 @@ function PollMenu({
   onAction: (body: unknown) => void;
   onDelete: () => Promise<void>;
 }>): ReactNode {
-  // Revealing ends a choice poll, so "End voting" and "Reveal results" are the same action here.
+  // Reveal and End voting are equivalent for choice polls.
   let reveal: string | null = null;
   if (!entry.revealed) {
     if (entry.kind === "binary") reveal = t("poll.revealResults");
@@ -178,7 +176,6 @@ function PollMenu({
   );
 }
 
-/** A Mash Battle in the polls list: a short row that opens the battle's own view (mockup M2, round 9). */
 export function MashTeaser({ entry, now }: Readonly<{ entry: Entry; now: number }>): ReactNode {
   const view = useMashView(entry, now);
   const phase: string = view?.current ?? "setup";

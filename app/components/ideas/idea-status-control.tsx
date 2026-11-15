@@ -8,10 +8,10 @@ import { Icon } from "../ui/icon";
 import { Select, type SelectOption } from "../ui/select";
 import { statusIcons, statusLabel } from "./ideas";
 
-/** The longest "Why not planned" reason the server accepts. */
+// Server reason-length limit.
 const MAX_REASON = 500;
 
-/** Built while rendering, so the labels follow the request's language. */
+// Build labels during render to follow the request locale.
 function statusOptions(): SelectOption[] {
   return ENTRY_STATUSES.map((status: EntryStatus) => ({
     value: status,
@@ -20,11 +20,8 @@ function statusOptions(): SelectOption[] {
   }));
 }
 
-/**
- * "Status (admins only)" under an idea on the official page (item 46). Not planned needs a reason that everyone
- * sees. Saving goes through `POST /api/admin/entries/:id/status`, so a stale security-key check asks for the key
- * first and then saves again.
- */
+// Admin-only idea status. Declined needs a public reason. POST /api/admin/entries/:id/status retries after
+// fresh step-up when required.
 export function IdeaStatusControl({
   entry,
   onSaved,

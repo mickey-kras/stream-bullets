@@ -1,5 +1,4 @@
-/* Base: element defaults, focus ring, the page frame and noise, icons. Ported from the approved mockup
-   (scratchpad/mocksrc: the app stylesheet, mock.css, icons.css and a11y.css). */
+/* Element defaults, focus, page frame, noise and icons. */
 * { box-sizing:border-box; }
 html { height:100%; overflow:hidden; }
 body { height:100vh; height:100dvh; margin:0; padding:14px 16px 16px; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at 30% 0,var(--c-21424755),transparent 60%),var(--bg); color:var(--cream); font:400 var(--text-body)/var(--leading-body) var(--body); }
@@ -34,7 +33,7 @@ html, body { min-width: 320px; }
 @media(prefers-reduced-motion:reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
-/* ---- Approved mockup additions ---- */
+
 @media (max-width:43.75em) {
   body { --frame-band: 34px; --frame-band-rag: 10px; --frame-pad-x: 10px; }
 }

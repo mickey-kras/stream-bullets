@@ -4,7 +4,7 @@ import { AVATAR_ORDER, avatarName, DEFAULT_AVATAR_PRESET } from "../../lib/avata
 import { Picture } from "../ui/avatar";
 import { Icon } from "../ui/icon";
 
-/** The picker's value: a preset number, or "photo" for the person's own (uploaded or newly cropped) picture. */
+// Preset number or photo for uploaded/newly cropped image.
 export type AvatarChoice = number | "photo";
 
 function optionLabel(choice: AvatarChoice): string {
@@ -14,11 +14,8 @@ function optionLabel(choice: AvatarChoice): string {
     : avatarName(choice);
 }
 
-/**
- * "Choose a picture": the person's photo first (when there is one), then the 18 presets in the approved
- * order, 6 per row (4 on phones). Native radio buttons, so the arrow keys move the choice and one Tab
- * reaches the group.
- */
+// Photo first, then 18 presets; six columns, four on phones. Native radios provide arrow navigation and one
+// Tab stop.
 export function AvatarPicker({
   value,
   photo,
@@ -26,10 +23,10 @@ export function AvatarPicker({
   onAdjust,
 }: Readonly<{
   value: AvatarChoice;
-  /** The photo option's image, or null when the person has none. */
+  // Null without a photo.
   photo: string | null;
   onChange: (choice: AvatarChoice) => void;
-  /** Shown as "Adjust your photo" when there is a photo. */
+
   onAdjust?: () => void;
 }>): ReactNode {
   const options: AvatarChoice[] = [...(photo ? (["photo"] as const) : []), ...AVATAR_ORDER];

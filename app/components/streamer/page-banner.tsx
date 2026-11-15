@@ -8,10 +8,7 @@ import { ModerateSheet, type ModeratedPage } from "../admin/moderate-sheet";
 import { ContactDialog } from "../shell/contact-dialog";
 import { Icon } from "../ui/icon";
 
-/**
- * The owner's notice for a frozen or suspended page outside the page itself (R13): in the account menu and the
- * Edit your page dialog, so the owner learns about it wherever they are. Renders nothing for an active page.
- */
+// Show moderation notices outside the page in the account menu and edit dialog; active pages show nothing.
 export function OwnerNotice({
   status,
   reason,
@@ -26,10 +23,7 @@ export function OwnerNotice({
   );
 }
 
-/**
- * The frozen or suspended notice above a moderated page (item 25). Viewers of a frozen page learn it is read-only.
- * The owner sees the reason and a way to appeal; admins see that they can lift it.
- */
+// Frozen pages are read-only. Owners get reason/appeal; admins can lift moderation.
 export function PageBanner({
   status,
   reason,
@@ -41,7 +35,7 @@ export function PageBanner({
   reason: string | null;
   changedAt?: number | null;
   role: "owner" | "admin" | "viewer";
-  /** The page itself, so an admin can lift a freeze from the banner. */
+  // Page data lets admins lift moderation from the banner.
   page: ModeratedPage;
 }>): ReactNode {
   const [contact, setContact] = useState<boolean>(false);

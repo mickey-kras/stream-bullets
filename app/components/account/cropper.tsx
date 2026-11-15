@@ -26,11 +26,11 @@ import {
 } from "./crop";
 
 export interface CropperHandle {
-  /** The circle's square at 512 × 512, as a JPEG ready for `PUT /api/images/{avatar|logo}`. */
+  // 512x512 JPEG for PUT /api/images/{avatar|logo}.
   exportBlob: () => Promise<Blob>;
 }
 
-/** Preview size in CSS pixels, with its caption for a profile picture and for a page logo. */
+// Preview size in CSS pixels and context label.
 const PREVIEWS: readonly (readonly [
   number,
   "crop.comments" | "crop.header",
@@ -56,11 +56,8 @@ function coarsePointer(): boolean {
   return typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
 }
 
-/**
- * The circular cropper (item 13): drag to pan, zoom 1–4× with the slider, the ± buttons, the wheel or a
- * pinch; arrow keys move (Shift for bigger steps) and + / − zoom. Live previews at comment (48px) and header
- * (32px) size. "Fine-tune position" buttons are open by default except on touch devices.
- */
+// Pan/zoom crop from 1x to 4x. Support pointer, pinch, wheel, slider, arrows (Shift accelerates) and +/-
+// keys. Preview at 48px/32px. Fine-position controls default open except on touch.
 export const Cropper = forwardRef<
   CropperHandle,
   { src: string; kind: "profile" | "page"; onError: (message: string) => void }
@@ -73,7 +70,7 @@ export const Cropper = forwardRef<
   const [size, setSize] = useState<number>(0);
   const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
   const [crop, setCrop] = useState<CropState>(initialCrop);
-  // The cropper only renders in the browser (inside a dialog), so reading the pointer type here is safe.
+  // Browser-only dialog can inspect pointer type safely.
   const [nudgeOpen, setNudgeOpen] = useState<boolean>(() => !coarsePointer());
 
   useEffect(() => {
@@ -82,7 +79,7 @@ export const Cropper = forwardRef<
     const observer = new ResizeObserver(() => setSize(element.clientWidth));
     observer.observe(element);
     setSize(element.clientWidth);
-    // The wheel zooms; React's wheel listener is passive, so this one is added by hand.
+    // Attach a non-passive wheel listener manually; React's is passive.
     const wheel = (event: WheelEvent): void => {
       event.preventDefault();
       setCrop((current: CropState) => zoomTo(current, current.zoom * Math.exp(-event.deltaY * 0.0015)));

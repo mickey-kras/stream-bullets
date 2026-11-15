@@ -11,7 +11,7 @@ import { TopicIcon, topicCategoryLabel } from "../topic-icon";
 import { Icon } from "../ui/icon";
 import { VoteButtons } from "./vote-buttons";
 
-/** Delete for the author (ideas: only while under review), the streamer and admins. Report, or "Reported", for others. */
+// Authors may delete ideas only under review. Owners/admins may delete; others report or see Reported.
 export function EntryActions({
   entry,
   viewer,
@@ -25,12 +25,12 @@ export function EntryActions({
   viewer: Viewer | null;
   owner: boolean;
   moderator: boolean;
-  /** False on a frozen or suspended page, where only admins can still remove content (mockup m14, round 2). */
+  // Only admins may delete on moderated pages.
   writable: boolean;
   pending: boolean;
   onDelete: () => Promise<void>;
 }>): ReactNode {
-  // The entry reported from here: the panel stays mounted while the viewer selects other entries.
+  // Track the reported entry while selection changes without remounting.
   const [reportedId, setReportedId] = useState<string | null>(null);
   if (!viewer) return null;
   let noun: "idea" | "topic" | "poll" = entry.kind === "topic" ? "topic" : "poll";
@@ -62,7 +62,6 @@ export function EntryActions({
   );
 }
 
-/** A topic or idea: category, title, author, details, votes and actions. The discussion follows it. */
 export function EntryDetail({
   entry,
   viewer,
@@ -84,7 +83,7 @@ export function EntryDetail({
   onBack: () => void;
   onReact: (value: -1 | 0 | 1) => void;
   onDelete: () => Promise<void>;
-  /** Reloads the board after an admin sets an idea's status. */
+
   onStatusSaved: () => Promise<void>;
 }>): ReactNode {
   const idea = entry.status !== null;

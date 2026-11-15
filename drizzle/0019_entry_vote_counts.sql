@@ -9,10 +9,10 @@ CREATE TABLE `entry_vote_counts` (
 --> statement-breakpoint
 CREATE INDEX `poll_reactions_user_idx` ON `poll_reactions` (`user_id`);--> statement-breakpoint
 CREATE INDEX `poll_votes_user_idx` ON `poll_votes` (`user_id`);--> statement-breakpoint
--- Backfill: the counts start from the votes already stored.
+-- Initialize counts from stored votes.
 INSERT INTO `entry_vote_counts` (`entry_id`, `choice`, `votes`) SELECT `entry_id`, `choice`, count(*) FROM `entry_votes` GROUP BY `entry_id`, `choice`;--> statement-breakpoint
--- Every write to entry_votes, including cascades from deleted accounts and entries, keeps the counts in step.
--- No OR IGNORE: inside a trigger, the conflict policy of the statement that fired it (the vote upsert) wins.
+-- Keep counts in sync, including cascades from account and entry deletion.
+-- The vote upsert's conflict policy overrides OR IGNORE inside triggers.
 CREATE TRIGGER `entry_votes_count_insert` AFTER INSERT ON `entry_votes` BEGIN
 	INSERT INTO `entry_vote_counts` (`entry_id`, `choice`, `votes`) SELECT NEW.`entry_id`, NEW.`choice`, 0
 		WHERE NOT EXISTS (SELECT 1 FROM `entry_vote_counts` WHERE `entry_id` = NEW.`entry_id` AND `choice` = NEW.`choice`);

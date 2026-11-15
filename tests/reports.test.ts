@@ -129,7 +129,7 @@ describe("submitting reports", (): void => {
       snapshot: "Comment by author",
       entryId: topic,
     });
-    // The content author is stored so account deletion can find the report after the content is gone.
+    // Keep the author ID so account deletion finds reports after content removal.
     const authors = await env.DB.prepare(
       "SELECT target_id,target_author_id FROM content_reports ORDER BY target_id",
     ).all<{ target_id: string; target_author_id: string }>();
@@ -241,8 +241,7 @@ describe("reviewing reports", (): void => {
   });
 
   it("pages through each status queue in a stable order", async (): Promise<void> => {
-    // Insert the queue with one set-based statement. Hundreds of separate prepare() calls each need a
-    // synchronous Miniflare proxy round-trip, which can fall out of step on slow CI runners.
+    // Batch the seed to avoid slow, synchronous Miniflare proxy calls.
     const topic = await seedEntry();
     const rows = Array.from({ length: 120 }, () => crypto.randomUUID());
     await env.DB.prepare(`INSERT INTO content_reports
@@ -328,7 +327,6 @@ describe("reviewing reports", (): void => {
       [reply, parent, false],
       [parent, null, true],
     ]);
-    // A placeholder cannot be reported again.
     await expect(report("reporter", { targetKind: "comment", targetId: parent, reason: "spam" })).rejects.toMatchObject(
       { status: 404 },
     );
@@ -371,7 +369,7 @@ describe("reviewing reports", (): void => {
 });
 
 describe("moderation rights", (): void => {
-  /** A step-up gate that passes, as `requireAdminSession` does after a fresh key check. */
+  // Simulate a fresh admin key check.
   const fresh = (): ReturnType<typeof vi.fn<() => Promise<{ stepUp: string }>>> =>
     vi.fn(async (): Promise<{ stepUp: string }> => ({ stepUp: "fresh" }));
 
@@ -422,7 +420,7 @@ describe("moderation rights", (): void => {
         metadata: JSON.stringify({ via: "page", stepUp: "fresh" }),
       },
     ]);
-    // Admin routes run the gate themselves and write their own row.
+    // Admin routes check step-up and log their own action.
     await deleteEntry(env, "admin", streamer.id, topic, "checked");
     expect(await env.DB.prepare("SELECT count(*) AS n FROM entries").first("n")).toBe(0);
     expect(await auditRows()).toHaveLength(3);
@@ -456,7 +454,7 @@ describe("moderation rights", (): void => {
     const comment = await seedComment(topic);
     const gate = fresh();
     await mutateComment(env, "admin", { action: "delete", id: comment }, gate);
-    // The comment is gone, so a repeat finds nothing (404 from the lookup) and logs nothing new.
+    // Repeated deletion returns 404 and adds no audit row.
     await expect(mutateComment(env, "admin", { action: "delete", id: comment }, gate)).rejects.toMatchObject({
       status: 404,
     });

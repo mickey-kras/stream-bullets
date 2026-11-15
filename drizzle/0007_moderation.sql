@@ -1,5 +1,4 @@
--- Hand-checked: drizzle-kit wanted to rebuild `entries` and `streamers`, which would delete every
--- vote, reaction and comment through ON DELETE CASCADE (risk R1). The new columns are added in place.
+-- ADD COLUMN avoids cascade deletion of votes, reactions, and comments during table rebuilds.
 ALTER TABLE `streamers` ADD `status` text DEFAULT 'active' NOT NULL CONSTRAINT "streamers_status_check" CHECK("status" IN ('active', 'frozen', 'suspended'));--> statement-breakpoint
 ALTER TABLE `streamers` ADD `status_reason` text CONSTRAINT "streamers_status_reason_check" CHECK("status_reason" IS NULL OR length("status_reason") <= 500);--> statement-breakpoint
 ALTER TABLE `streamers` ADD `status_changed_at` integer;--> statement-breakpoint

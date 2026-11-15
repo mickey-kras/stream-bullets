@@ -1,4 +1,4 @@
-/** Fixed labels only: never pass a handle, URL, account ID, or user content. */
+// Fixed labels only. No handles, URLs, account IDs or user content.
 export const CTA_EVENTS = [
   "cta_browse",
   "cta_suggest",
@@ -9,7 +9,7 @@ export const CTA_EVENTS = [
 ] as const;
 export type CtaEvent = (typeof CTA_EVENTS)[number];
 
-/** One receipt per click, with no cookies, browser storage, or automatic retry. */
+// One receipt per click. No cookies, storage or retries.
 export function trackCta(event: CtaEvent): void {
   void fetch("/api/conversions", {
     method: "POST",

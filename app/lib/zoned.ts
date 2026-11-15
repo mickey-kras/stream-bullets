@@ -1,8 +1,8 @@
-// Times are UTC milliseconds. A local date is a calendar day in an IANA zone.
+// UTC milliseconds; local dates are calendar days in an IANA zone.
 
 export interface LocalDate {
   year: number;
-  /** 1–12 */
+  // 1..12
   month: number;
   day: number;
 }
@@ -10,7 +10,7 @@ export interface LocalDate {
 export interface ZonedParts extends LocalDate {
   hour: number;
   minute: number;
-  /** 0 = Sunday … 6 = Saturday */
+  // 0 = Sunday; 6 = Saturday
   weekday: number;
 }
 
@@ -36,7 +36,6 @@ function formatter(zone: string): Intl.DateTimeFormat {
   return value;
 }
 
-/** Whether the runtime knows this IANA zone name. */
 export function isValidZone(zone: string): boolean {
   if (!zone || zone.length > 64) return false;
   try {
@@ -47,7 +46,6 @@ export function isValidZone(zone: string): boolean {
   }
 }
 
-/** The calendar fields of a moment in a zone. */
 export function zonedParts(time: number, zone: string): ZonedParts & { second: number } {
   const parts: Record<string, string> = {};
   for (const part of formatter(zone).formatToParts(new Date(time))) parts[part.type] = part.value;
@@ -62,19 +60,15 @@ export function zonedParts(time: number, zone: string): ZonedParts & { second: n
   };
 }
 
-/** The zone's offset from UTC at a moment, in milliseconds (local minus UTC). */
+// UTC offset in milliseconds: local minus UTC.
 export function zoneOffset(time: number, zone: string): number {
   const p = zonedParts(time, zone);
   const local = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
   return local - Math.floor(time / 1000) * 1000;
 }
 
-/**
- * The UTC moment of a wall-clock time in a zone. Across a daylight-saving change the offset is re-read at the
- * result, so 19:00 in Berlin stays 19:00 on both sides of the switch. A time that does not exist (the hour skipped
- * in spring) moves forward by the gap. A time that occurs twice (the hour repeated in autumn) takes the offset in
- * force at that wall-clock time read as UTC: the earlier moment west of UTC, the later one east of it.
- */
+// Resolve zoned wall time to UTC. Spring gaps move forward by the gap. Repeated autumn times use the offset
+// at wall time interpreted as UTC: earlier west of UTC, later east.
 export function zonedTime(date: LocalDate, hour: number, minute: number, zone: string): number {
   const guess = Date.UTC(date.year, date.month - 1, date.day, hour, minute);
   const first = zoneOffset(guess, zone);
@@ -84,7 +78,7 @@ export function zonedTime(date: LocalDate, hour: number, minute: number, zone: s
   const candidate = guess - second;
   const local = zonedParts(candidate, zone);
   if (local.hour === hour && local.minute === minute) return candidate;
-  // The time falls in the gap: the smaller offset gives the later moment, past the gap.
+  // Use the smaller offset to move past a spring gap.
   return guess - Math.min(first, second);
 }
 
@@ -93,7 +87,7 @@ export function addDays(date: LocalDate, days: number): LocalDate {
   return { year: value.getUTCFullYear(), month: value.getUTCMonth() + 1, day: value.getUTCDate() };
 }
 
-/** 0 = Sunday … 6 = Saturday, for a calendar day (independent of any zone). */
+// Zone-independent weekday: 0 = Sunday; 6 = Saturday.
 export function weekdayOf(date: LocalDate): number {
   return new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay();
 }
@@ -107,12 +101,12 @@ export function localDateOf(time: number, zone: string): LocalDate {
   return { year, month, day };
 }
 
-/** `YYYY-MM-DD` */
+// YYYY-MM-DD
 export function formatDate(date: LocalDate): string {
   return `${String(date.year).padStart(4, "0")}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
 }
 
-/** Parses `YYYY-MM-DD`; null when it is not a real calendar day. */
+// Parse a real YYYY-MM-DD date; otherwise null.
 export function parseDate(value: string): LocalDate | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return null;

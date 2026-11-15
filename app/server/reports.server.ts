@@ -42,9 +42,9 @@ interface TargetRow {
 
 export interface ReportResult {
   status: ReportStatus;
-  /** Open reports about the same content that this decision closed. */
+  // Open reports about the same content that this decision closed.
   resolved: number;
-  /** The streamer page that changed, so live viewers can refresh. Null when nothing was removed. */
+  // The streamer page that changed, so live viewers can refresh. Null when nothing was removed.
   streamerId: string | null;
 }
 
@@ -61,7 +61,7 @@ function clip(value: string): string {
     : characters.join("");
 }
 
-/** Reads the reported content and copies its text, so admins can review it after edits or deletion. */
+// Reads the reported content and copies its text, so admins can review it after edits or deletion.
 async function reportTarget(env: AppEnv, kind: ReportTargetKind, id: string): Promise<TargetRow> {
   const statement =
     kind === "entry"
@@ -77,11 +77,7 @@ async function reportTarget(env: AppEnv, kind: ReportTargetKind, id: string): Pr
   return row;
 }
 
-/**
- * Records a notice about content that may be illegal or break the community rules.
- * Only signed-in accounts can report, which keeps notices accountable and limits abuse.
- * A repeated report about the same content updates the reporter's open notice.
- */
+// Signed-in reports identify reporters and limit abuse. Repeated reports update the reporter's open notice.
 export async function submitReport(
   env: AppEnv,
   reporterId: string,
@@ -140,7 +136,7 @@ function reportValue(row: ReportRow): ContentReport {
   };
 }
 
-/** Lists reports for administrators. Open reports come oldest first; resolved ones newest first. */
+// Lists reports for administrators. Open reports come oldest first; resolved ones newest first.
 export async function listReports(env: AppEnv, adminId: string, query: ReportQuery): Promise<ReportQueue> {
   await requireAdmin(env, adminId);
   const value = parsed(reportQuerySchema, query);
@@ -189,16 +185,14 @@ async function removeTarget(env: AppEnv, adminId: string, report: ReportRow): Pr
   }
 }
 
-/** Who resolves, and how their request met the step-up policy (for the audit row). */
+// Who resolves, and how their request met the step-up policy (for the audit row).
 export interface Resolver {
   actorId: string;
   stepUp: string;
 }
 
-/**
- * Closes every open report about one item. Removal deletes the content with the usual deletion rules (a removed
- * comment with replies stays as a "Comment removed" placeholder). Writes one audit row.
- */
+// Close all open item reports and write one audit row. Removal uses normal deletion rules, including comment
+// placeholders.
 export async function resolveOpenReports(
   env: AppEnv,
   resolver: Resolver,
@@ -233,7 +227,8 @@ export async function resolveOpenReports(
   return { status, resolved: result.meta.changes, streamerId };
 }
 
-/** Records an administrator decision on one report. Either decision closes every open report about the same content. */
+// Records an administrator decision on one report. Either decision closes every open report about the same
+// content.
 export async function resolveReport(
   env: AppEnv,
   adminId: string,

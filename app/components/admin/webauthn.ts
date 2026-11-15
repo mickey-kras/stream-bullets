@@ -2,10 +2,7 @@ import type { SecurityKey } from "../../types";
 import { t } from "../../i18n";
 import { ApiError, requestJson, errorMessage } from "../api";
 
-/**
- * Browser side of the admin security-key ceremonies. The server sends WebAuthn options as JSON with base64url
- * fields; these helpers turn them into bytes for `navigator.credentials` and send the response back the same way.
- */
+// Convert WebAuthn base64url JSON to navigator.credentials bytes and encode responses back.
 
 export { ApiError as AdminRequestError, needsStepUp } from "../api";
 
@@ -68,7 +65,7 @@ function descriptors(list: Descriptor[]): PublicKeyCredentialDescriptor[] {
   }));
 }
 
-/** Why a ceremony failed, as the gate says it. Cancelling and timing out look the same to the browser. */
+// Browser cannot distinguish cancellation from timeout.
 export function ceremonyError(error: unknown): string {
   if (error instanceof ApiError) return errorMessage(error);
   if (error instanceof DOMException) {
@@ -83,7 +80,7 @@ export function webAuthnAvailable(): boolean {
   return globalThis.window !== undefined && typeof globalThis.PublicKeyCredential === "function";
 }
 
-/** Asks the key for an assertion and stamps this session. Throws on failure. */
+// Verify a key and stamp this session; throw on failure.
 export async function confirmWithKey(): Promise<void> {
   const options = await adminRequest<RequestJson>("/api/admin/stepup/options", "POST", {});
   const credential = (await navigator.credentials.get({
@@ -108,7 +105,7 @@ export async function confirmWithKey(): Promise<void> {
   });
 }
 
-/** Registers a new key under `name`. Throws on failure. */
+// Register a named key; throw on failure.
 export async function registerKey(name: string): Promise<SecurityKey> {
   const options = await adminRequest<CreationJson>("/api/admin/keys/options", "POST", {});
   const credential = (await navigator.credentials.create({

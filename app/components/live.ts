@@ -68,17 +68,17 @@ const overlayMessageSchema = z.object({ type: z.literal("overlay"), overlay: ove
 export type LiveStatus = "connecting" | "live" | "reconnecting" | "offline";
 export type MashDenial = z.infer<typeof deniedSchema>["reason"];
 
-/** Live Mash Battle state shared by every component on the page: ticks, your accepted taps, refusals. */
+// Shared live battle state: totals, accepted taps and refusals.
 export interface MashLive {
   ticks: Readonly<Record<string, MashTick>>;
   mine: Readonly<Record<string, number>>;
   denied: Readonly<Record<string, MashDenial>>;
-  /** The start of the run `mine` and `denied` belong to, as the last snapshot showed it (null before a start). */
+  // Run start associated with mine/denied; null before starting.
   runs: Readonly<Record<string, number | null>>;
 }
 
 const emptyMash: MashLive = { ticks: {}, mine: {}, denied: {}, runs: {} };
-/** The client pings this often, so the room knows the socket is in use and does not close it as idle. */
+// Ping interval prevents idle disconnection.
 const PING_INTERVAL_MS = 20_000;
 /** A page reloads its data at most this often from live changes, plus jitter, so busy rooms stay under the IP limit. */
 export const REVALIDATE_INTERVAL_MS = 5000;
@@ -94,10 +94,7 @@ function setMashLive(change: (current: MashLive) => MashLive): void {
   for (const listener of mashListeners) listener();
 }
 
-/**
- * Forgets your taps and refusals for a battle whose run changed in this snapshot (a restart sets it back to setup,
- * and a new start gives it a new start time), so "Your taps" never carries over from the last round.
- */
+// Clear taps/refusals when the run changes; never carry scores into a restart.
 export function withSnapshotRuns(current: MashLive, snapshot: Pick<LiveSnapshot, "polls">): MashLive {
   let next: MashLive = current;
   for (const poll of snapshot.polls) {
@@ -120,7 +117,6 @@ function subscribeMash(listener: () => void): () => void {
   };
 }
 
-/** Mash Battle ticks and acknowledgements from the page's live connection. */
 export function useMashLive(): MashLive {
   return useSyncExternalStore(
     subscribeMash,
@@ -129,14 +125,14 @@ export function useMashLive(): MashLive {
   );
 }
 
-/** Sends a message over the page's live connection. False when it is not connected. */
+// Return false when disconnected.
 export function sendLive(message: object): boolean {
   if (liveSocket?.readyState !== WebSocket.OPEN) return false;
   liveSocket.send(JSON.stringify(message));
   return true;
 }
 
-/** Handles the small messages next to snapshots. True when the message was one of them. */
+// Handle non-snapshot messages; return whether one matched.
 function handleSideMessage(message: unknown, onOverlay: (overlay: OverlayPublic) => void): boolean {
   const tick = tickSchema.safeParse(message);
   if (tick.success) {
@@ -167,7 +163,7 @@ function handleSideMessage(message: unknown, onOverlay: (overlay: OverlayPublic)
 export function useLivePolls(
   handle: string,
   enabled = true,
-  /** The owner's overlay key from the OBS URL, so the socket keeps the owner's seat. */
+  // OBS URL key reserves an owner seat.
   overlayKey: string | null = null,
   /** Never goes offline: keeps retrying (an unattended OBS source has nobody to press Reconnect). */
   persistent = false,
@@ -341,7 +337,7 @@ export function useLiveRevalidation(
       timer.current = null;
       const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
       next.current = Date.now() + REVALIDATE_INTERVAL_MS + jitter * REVALIDATE_JITTER_MS;
-      void latest.current();
+      latest.current();
     }, delay);
   }, [status, revision, enabled]);
   const disconnected: boolean = enabled && status !== "live";

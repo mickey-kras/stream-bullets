@@ -2,13 +2,9 @@
 
 ## Scope and tone
 
-System UI uses the active locale. Brand names, handles, and user content stay unchanged.
-
-Use direct instructions. Russian and Ukrainian use polite plural address throughout.
-German uses `du`. French uses `vous`. Spanish and Brazilian Portuguese use familiar, direct instructions.
-
-Idea status labels agree with the word for idea where the language requires gender agreement.
-A like or dislike is a reaction. A vote selects one poll option. These actions are distinct.
+Localize system UI only. Preserve brands, handles, and user content.
+Use direct instructions: polite plural in Russian and Ukrainian, `du` in German, `vous` in French, familiar address in Spanish and Brazilian Portuguese.
+Match idea-status gender where needed. Likes and dislikes are reactions. Poll choices are votes.
 
 ## Glossary
 
@@ -26,14 +22,12 @@ A like or dislike is a reaction. A vote selects one poll option. These actions a
 | zh-CN | 话题 | 建议 | 投票 | 票 | 赞 | 踩 | 评论 | 主播 | 社区 |
 | ja | 話題 | アイデア | アンケート | 票 | いいね | よくないね | コメント | 配信者 | コミュニティ |
 
-Chinese uses 投票 for the poll and the act of voting. Counts use 票.
-Keep English product terms that the target locale commonly uses.
-Translate labels in context. Do not replace words in user content.
+Chinese uses 投票 for polls and voting, 票 for counts.
+Keep commonly used English product terms. Translate labels in context. Never replace user-content words.
 
 ## Roadmap statuses
 
-`review` means awaiting a product decision. `planned` means accepted for future work.
-`progress` means active work. `shipped` means available to users. `declined` means not planned.
+`review`: awaiting decision. `planned`: accepted future work. `progress`: active work. `shipped`: available. `declined`: not planned.
 
 | Locale | Review | Planned | In progress | Shipped | Not planned |
 | --- | --- | --- | --- | --- | --- |
@@ -51,39 +45,33 @@ Translate labels in context. Do not replace words in user content.
 
 ## Reports and errors
 
-Bug reports are public ideas. The optional metadata adds browser version and screen size.
-It does not add the page URL, query string, fragment, screenshot, cookies, or account fields.
+Bug reports are public ideas. Optional metadata includes browser version and screen size only.
+It excludes URLs, queries, fragments, screenshots, cookies, and account fields.
+Users must review text before posting. The app does not redact it.
 
-The app does not redact report text. Users must review it before posting.
-Bug templates exist for every locale. The server rejects an untouched template from any locale.
+All locales have templates. The server rejects untouched templates in every locale.
 
-API response messages remain English for compatibility. Non-English UI translates known error codes first.
-This includes handle conflicts, empty bug templates, image formats, schedule dates, and security-key actions.
-
-Unknown codes use translated HTTP status guidance. Other languages do not show internal validation details.
-Status and machine-readable error codes remain available to callers.
-Schedule, community, and admin screens use the same error formatter as other forms.
+API messages stay English. Non-English UI translates known codes, including handles, templates, images, dates, and security keys.
+Unknown codes use translated HTTP-status guidance without internal validation details.
+HTTP status and machine codes remain available. Schedule, community, and admin forms share the error formatter.
 
 ## Legal translation gaps
 
-Terms and privacy disclosures remain in English, with the existing translated language notice.
-There are no reviewed legal translations for de, es, fr, pl, pt-BR, ru, uk, hi, zh-CN, or ja.
-Do not treat translated UI notices or this glossary as translations of legal disclosures.
+Terms and privacy remain English with a translated language notice.
+No reviewed legal translations exist for de, es, fr, pl, pt-BR, ru, uk, hi, zh-CN, or ja.
+UI notices and this glossary do not translate legal disclosures.
 
 ## Verification and native review
 
-Catalog checks cover keys, placeholders, and integer plural categories.
-Context tests cover bug templates, error fallback, mixed-script draft text, and counts.
-Browser checks cover official labels, narrow layouts, and language changes with filters and fragments.
+- Catalog checks: keys, placeholders, integer plural categories.
+- Context tests: bug templates, error fallback, mixed-script drafts, counts.
+- Browser checks: official labels, narrow layouts, locale changes with filters and fragments.
 
-Canonical URLs keep the existing SEO behavior. Locale selection does not add a URL prefix.
-Dates and counts use the active locale through `Intl`.
+Locale selection adds no URL prefix and preserves canonical SEO behavior. `Intl` formats dates and counts.
+Bundled fonts cover Latin and Cyrillic. CJK and Devanagari rely on system fonts.
+One operating system cannot prove device-wide glyph coverage.
+Before release, check Hindi shaping, Chinese and Japanese glyphs, and enlarged mixed-script names on Windows, macOS, Android, and iOS.
 
-The bundled fonts cover Latin and Cyrillic. CJK and Devanagari depend on system font fallback.
-A browser test on one operating system cannot certify glyph coverage on all supported devices.
-Review Hindi shaping and Chinese and Japanese glyphs on Windows, macOS, Android, and iOS before release.
-Review long mixed-script user names at enlarged text settings on those platforms.
-
-Native speakers must review Hindi status wording, Japanese participation headlines, and Chinese poll terminology.
-Also confirm regional tone in Spanish, Brazilian Portuguese, and French, including feminine idea status labels.
-These changes are source-based corrections, not a claim of native-speaker certification.
+Native review remains needed for Hindi statuses, Japanese participation headlines, and Chinese poll terms.
+Confirm Spanish, Brazilian Portuguese, and French tone and feminine idea-status labels.
+Source corrections do not prove native-speaker certification.

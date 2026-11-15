@@ -10,9 +10,9 @@ export interface ApiContext {
   request: Request;
   app: AppContext;
   env: AppEnv;
-  /** The match of the route's `path` against the part after `/api/`. Groups hold the path parameters. */
+  // Match against the path after `/api/`; groups hold parameters.
   match: RegExpExecArray;
-  /** The signed-in account, or null. Always set for writes. */
+  // The signed-in account, or null. Always set for writes.
   viewer: Viewer | null;
 }
 
@@ -20,11 +20,8 @@ export interface WriteContext extends ApiContext {
   viewer: Viewer;
 }
 
-/**
- * One endpoint. Reads (`GET`, which also answers `HEAD`) run for anyone and parse their own query.
- * Writes run only for a signed-in viewer on a same-origin request with no query string; the router
- * checks that before the handler runs.
- */
+// GET/HEAD reads are public. The router requires sign-in, same origin, and no query string before write
+// handlers run.
 export type ApiRoute =
   | { method: "GET"; path: RegExp; handler: (context: ApiContext) => Promise<Response> }
   | { method: Exclude<Method, "GET">; path: RegExp; handler: (context: WriteContext) => Promise<Response> }
@@ -42,10 +39,7 @@ export function write(
   return { method, path, handler };
 }
 
-/**
- * A write anyone may send, signed in or not, from this site or from a non-browser client (the AI interest
- * counter). Browsers on other sites are refused, so no other page can send it in a visitor's name.
- */
+// Public writes allow signed-out/non-browser clients but refuse cross-origin browser requests.
 export function openWrite(
   method: Exclude<Method, "GET">,
   path: RegExp,
@@ -54,7 +48,7 @@ export function openWrite(
   return { method, path, open: true, handler };
 }
 
-/** Parses the query string with a schema. Unknown or repeated keys are rejected. */
+// Parses the query string with a schema. Unknown or repeated keys are rejected.
 export function parsedQuery<T>(request: Request, keys: string[], schema: z.ZodType<T>): T {
   const result = schema.safeParse(Object.fromEntries(queryParams(request, keys)));
   if (!result.success) throw new HttpError(400, "Invalid query parameters.");
@@ -71,10 +65,7 @@ function anchored(path: RegExp, value: string): RegExpExecArray | null {
   return match?.index === 0 && match[0].length === value.length ? match : null;
 }
 
-/**
- * Runs the endpoint for `path` (the part after `/api/`). Unknown paths answer 404 before any sign-in check;
- * a known path with another method answers 405.
- */
+// Match paths after `/api/`. Unknown paths return 404 before auth; unsupported methods return 405.
 export async function dispatch(
   routes: readonly ApiRoute[],
   request: Request,

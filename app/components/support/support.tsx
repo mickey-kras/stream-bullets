@@ -7,7 +7,7 @@ import { Icon } from "../ui/icon";
 import { IconButton } from "../ui/icon-button";
 import { Select, type SelectOption } from "../ui/select";
 
-/** "Support {name}" in About (item 34): up to four link-outs. StreamBullets never handles the payment. */
+// Up to four external support links; no payment handling.
 export function SupportSection({ name, support }: Readonly<{ name: string; support: SupportSettings }>): ReactNode {
   if (!support.visible || support.links.length === 0) return null;
   return (
@@ -48,7 +48,7 @@ function rowError(row: Row, index: number): string {
   return "";
 }
 
-/** Built while rendering, so the labels follow the request's language. */
+// Build labels during render for the request locale.
 function providerOptions(): SelectOption[] {
   return SUPPORT_LINK_KINDS.map((kind: SupportLinkKind) => ({
     value: kind,
@@ -132,7 +132,6 @@ function LinkRow({
   );
 }
 
-/** The editor's working copy of the support settings. */
 export interface SupportDraft {
   rows: Row[];
   visible: boolean;
@@ -153,7 +152,7 @@ export function useSupportDraft(support: SupportSettings): SupportDraft {
   return { rows, visible, card, setRows, setVisible: show, setCard };
 }
 
-/** The `PUT /api/support-links` body for a draft. */
+// PUT /api/support-links draft body.
 export function supportPayload(draft: SupportDraft): {
   links: { kind: SupportLinkKind; label: string | null; url: string }[];
   visible: boolean;
@@ -167,12 +166,11 @@ export function supportPayload(draft: SupportDraft): {
   return { links, visible: draft.visible, card: draft.card };
 }
 
-/** The first problem in a draft, or an empty string. The server checks the same rules again. */
+// First validation error, or empty string. Server repeats validation.
 export function supportDraftError(draft: SupportDraft): string {
   return draft.rows.map((row: Row, index: number) => rowError(row, index)).find(Boolean) ?? "";
 }
 
-/** Whether a draft differs from the saved settings. */
 export function supportChanged(draft: SupportDraft, support: SupportSettings): boolean {
   const saved = JSON.stringify({
     links: support.links.map(({ kind, label, url }) => ({ kind, label: kind === "other" ? label : null, url })),
@@ -182,10 +180,8 @@ export function supportChanged(draft: SupportDraft, support: SupportSettings): b
   return JSON.stringify(supportPayload(draft)) !== saved;
 }
 
-/**
- * The Support links section of Edit your page (item 34): up to 4 links, https only, each on its provider's own
- * domain (checked again on the server), plus whether they show in About and as a Community card.
- */
+// Up to four HTTPS links, constrained to provider domains and validated server-side. Configure About and
+// Community visibility.
 export function SupportFields({ draft }: Readonly<{ draft: SupportDraft }>): ReactNode {
   const { rows, setRows } = draft;
 

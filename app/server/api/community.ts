@@ -7,7 +7,7 @@ import { refreshOverlayFor } from "../overlay.server";
 import { saveSupport } from "../support.server";
 import { write, type ApiRoute } from "./router";
 
-/** The owner's Community cards (item 24) and support links (item 34). Both replace the whole list. */
+// Community cards and support links replace their entire lists.
 export const communityRoutes: ApiRoute[] = [
   // PUT /api/community-cards {cards: [{id?, icon, title, body, buttonLabel, buttonTarget}] (≤ 8)} → {cards}
   write("PUT", /community-cards/, async ({ request, env, viewer }) => {

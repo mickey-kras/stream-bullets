@@ -92,7 +92,7 @@ export const entryQuerySchema = z
     sort: z.enum(["newest", "top"]).default("newest"),
     query: z.string().trim().max(100).default(""),
     cursor: z.string().max(1024).nullable().default(null),
-    /** Ideas board filter (official page): only entries with this status. */
+    // Ideas board filter (official page): only entries with this status.
     status: z.enum(ENTRY_STATUSES).nullable().default(null),
   })
   .strict();
@@ -101,12 +101,12 @@ export const commentQuerySchema = z
   .object({
     sort: z.enum(["newest", "top"]).default("newest"),
     cursor: z.string().max(1024).nullable().default(null),
-    /** `flat` (default) lists every comment; `thread` pages top-level comments with their replies. */
+    // `flat` (default) lists every comment; `thread` pages top-level comments with their replies.
     view: z.enum(["flat", "thread"]).default("flat"),
   })
   .strict();
 
-/** `GET /api/streamers`: official pages first, then by handle. `query` matches the name or handle. */
+// `GET /api/streamers`: official pages first, then by handle. `query` matches the name or handle.
 export const directoryQuerySchema = z
   .object({
     cursor: z
@@ -203,7 +203,7 @@ export const handleSchema = z
   .string()
   .regex(/^[a-z0-9_]{3,30}$/u, "Use 3 to 30 lowercase letters, numbers or underscores.");
 
-/** `PATCH /api/profile`: the account's display name and preset avatar (null clears the preset). */
+// `PATCH /api/profile`: the account's display name and preset avatar (null clears the preset).
 export const profileSchema = z
   .object({
     name: displayNameSchema.optional(),
@@ -218,10 +218,10 @@ export const profileSchema = z
   .strict()
   .refine((value): boolean => value.name !== undefined || value.avatarPreset !== undefined, "Nothing to save.");
 
-/** `PATCH /api/me/locale`. Null forgets the saved language. */
+// `PATCH /api/me/locale`. Null forgets the saved language.
 export const localeSchema = z.object({ locale: z.enum(LOCALES).nullable() }).strict();
 
-/** `PATCH /api/me/preferences`: the whole preferences object, replacing what was saved. */
+// `PATCH /api/me/preferences`: the whole preferences object, replacing what was saved.
 export const displayPrefsSchema = z
   .object({
     cvd: z.enum(["default", "pd", "tri"]),
@@ -237,7 +237,7 @@ export const displayPrefsSchema = z
   .partial()
   .strict();
 
-/** Reads saved preferences. Keys or values a later release no longer knows are dropped one by one. */
+// Drop obsolete stored preference keys/values individually.
 export function readDisplayPrefs(value: unknown): z.infer<typeof displayPrefsSchema> | null {
   if (typeof value !== "string") return null;
   let saved: unknown;
@@ -258,7 +258,7 @@ export function readDisplayPrefs(value: unknown): z.infer<typeof displayPrefsSch
   return result as z.infer<typeof displayPrefsSchema>;
 }
 
-/** `PATCH /api/streamer`: edit your page. `logoMode: "profile"` drops the uploaded logo. */
+// `PATCH /api/streamer`: edit your page. `logoMode: "profile"` drops the uploaded logo.
 export const streamerEditSchema = z
   .object({
     name: displayNameSchema.optional(),
@@ -276,14 +276,14 @@ export const accountDeletionSchema = z
   .object({ confirm: z.literal("DELETE", { error: "Type DELETE to confirm." }) })
   .strict();
 
-/** An https link with no credentials, port, control characters or whitespace, at most 500 characters. */
+// An https link with no credentials, port, control characters or whitespace, at most 500 characters.
 export function isHttpsLink(value: string): boolean {
   if (value.length > 500 || !isPlainUrlText(value) || !URL.canParse(value)) return false;
   const url = new URL(value);
   return url.protocol === "https:" && !url.username && !url.password && !url.port && url.hostname.includes(".");
 }
 
-/** Stores the parsed form, so what is saved is exactly what a browser or calendar app reads. */
+// Store canonical URLs as browsers/calendar clients read them.
 const httpsLink = z
   .string()
   .trim()
@@ -294,7 +294,7 @@ const httpsLink = z
 
 const localDate = z.string().refine((value: string): boolean => parseDate(value) !== null, "Pick a valid date.");
 
-/** `POST /api/events` and the edit action: a stream in the owner's zone. `repeatDays` 0 means one-off. */
+// `POST /api/events` and the edit action: a stream in the owner's zone. `repeatDays` 0 means one-off.
 export const eventInputSchema = z
   .object({
     title: line(100),
@@ -324,7 +324,7 @@ export const eventPatchSchema = z.discriminatedUnion("action", [
 
 export const eventDeleteSchema = z.object({ scope: z.enum(["one", "following"]).default("one") }).strict();
 
-/** `GET /api/streamers/:handle/events?from&to` (UTC ms, at most 200 days apart). */
+// `GET /api/streamers/:handle/events?from&to` (UTC ms, at most 200 days apart).
 export const eventRangeSchema = z
   .object({
     from: z.coerce.number().int().min(0).max(8_640_000_000_000),
@@ -338,14 +338,14 @@ export const eventRangeSchema = z
 
 const cardTabTargets = new Set<string>(CARD_TABS.map((tab): string => `tab:${tab}`));
 
-/** A card button goes to a tab of the page (`tab:topics`) or an https link. */
+// A card button goes to a tab of the page (`tab:topics`) or an https link.
 export function isCardTarget(value: string): boolean {
   return cardTabTargets.has(value) || isHttpsLink(value);
 }
 
 export const communityCardSchema = z
   .object({
-    /** A saved card's id keeps it (and an overlay showing it) across saves; new cards leave it out. */
+    // Keep saved card IDs so overlay references survive; new cards omit IDs.
     id: z.string().min(1).max(64).optional(),
     icon: z.enum(CARD_ICONS).nullable().default(null),
     title: line(60),
@@ -367,7 +367,7 @@ export const communityCardSchema = z
     "A button needs both a label and where it goes.",
   );
 
-/** `PUT /api/community-cards`: the whole ordered list. */
+// `PUT /api/community-cards`: the whole ordered list.
 export const communityCardsSchema = z
   .object({ cards: z.array(communityCardSchema).max(MAX_COMMUNITY_CARDS, "Use up to 8 cards.") })
   .strict();
@@ -380,7 +380,7 @@ export const supportLinkInputSchema = z
   })
   .strict();
 
-/** `PUT /api/support-links`: the whole ordered list plus where it shows. */
+// `PUT /api/support-links`: the whole ordered list plus where it shows.
 export const supportSettingsSchema = z
   .object({
     links: z.array(supportLinkInputSchema).max(MAX_SUPPORT_LINKS, "Use up to 4 links."),
@@ -394,7 +394,7 @@ export type EventPatch = z.infer<typeof eventPatchSchema>;
 export type CommunityCardInput = z.infer<typeof communityCardSchema>;
 export type SupportLinkInput = z.infer<typeof supportLinkInputSchema>;
 
-/** The non-routable addresses TikTok and Instagram accounts get (R5). Never shown or mailed. */
+// TikTok/Instagram placeholder addresses are never shown or mailed.
 export function isPlaceholderEmail(email: string): boolean {
   return /@(?:[a-z0-9-]+\.)?(?:tiktok|instagram)(?:\.placeholder)?\.invalid$/iu.test(email);
 }

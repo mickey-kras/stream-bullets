@@ -40,7 +40,7 @@ function IconPicker({
   );
 }
 
-/** Add card / Edit card: a live preview above the form. A new card starts without a button. */
+// Live preview; new cards start without buttons.
 export function CardDialog({
   card,
   onClose,

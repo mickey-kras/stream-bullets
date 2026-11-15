@@ -3,18 +3,13 @@ import { Select as RadixSelect } from "radix-ui";
 import { Icon, type IconName } from "./icon";
 
 export interface SelectOption {
-  /** Must not be empty (Radix reserves "" for "no value"). */
+  // Non-empty: Radix reserves "" for no value.
   value: string;
   label: string;
   icon?: IconName;
 }
 
-/**
- * Custom select on Radix Select (a select-only combobox with a listbox): the category picker with icons, comment
- * sort, poll duration and report reasons all use it (approved item 19). Give it a visible label through
- * `labelledBy` (the label element's id) or an `aria-label` through `label`. `name` adds a hidden native input so it
- * works inside a plain <form>.
- */
+// Radix select-only combobox. Supply labelledBy or label for accessibility. Name adds a hidden form input.
 export function Select({
   id,
   options,

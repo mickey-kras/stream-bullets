@@ -18,16 +18,27 @@ import { overlayKeyMatches } from "../app/server/overlay-key.server";
 import { visitorPrefix } from "../app/server/ip-prefix";
 import { cleanExpiredData } from "../app/server/cleanup.server";
 import { scheduleCalendar, topUpSeries } from "../app/server/schedule.server";
+import {
+  requireTestAccess,
+  requireTestDatabase,
+  testEnvironmentResponse,
+  validateTestEnvironment,
+} from "../app/server/test-environment.server";
+
+import { WebhookRejected, kickWebhook, logRejectedWebhook, twitchWebhook } from "../app/server/channel-webhooks.server";
+import { channelsOff } from "../app/server/channel-tokens.server";
+import { expireYoutubeConnections } from "../app/server/channels.server";
+import { callIngest } from "../app/server/ingest-call.server";
 
 export { PollRoom } from "../app/server/poll-room";
+export { ChannelIngest } from "../app/server/channel-ingest";
 
-/** The hex SHA-256 of a string. */
 async function sha256(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(bytes), (byte: number) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-/** The key a visitor is counted by: the hashed IPv4 address or IPv6 /64 (an IPv4-mapped address counts as IPv4). */
+// Hash an IPv4 address or IPv6 /64; IPv4-mapped IPv6 counts as IPv4.
 async function clientKey(request: Request): Promise<string> {
   return sha256(visitorPrefix(request.headers.get("CF-Connecting-IP") ?? "local"));
 }
@@ -38,7 +49,7 @@ async function calendarResponse(request: Request, env: AppEnv, handle: string, o
   if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
   queryParams(request, []);
   const streamer = await getStreamer(env, handle);
-  // Suspended pages have no public calendar, the owner's included.
+  // Suspension blocks calendars, including the owner's.
   if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
   const body = await scheduleCalendar(env, streamer, origin);
   return new Response(request.method === "HEAD" ? null : body, {
@@ -63,10 +74,9 @@ async function liveResponse(
   if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
     throw new HttpError(426, "Use a WebSocket connection.");
   const streamer = await getStreamer(env, handle);
-  // Suspended pages refuse live connections, the owner's included.
+  // Suspension blocks live connections, including the owner's.
   if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
-  // The room trusts only these headers for who taps in a Mash Battle and who owns the page; a client-sent copy
-  // never reaches it.
+  // Overwrite client identity headers before forwarding to the room.
   const viewer = await getViewer(request, { env, nonce, responseHeaders });
   const headers = new Headers({
     Upgrade: "websocket",
@@ -74,22 +84,48 @@ async function liveResponse(
   });
   if (viewer) headers.set("X-SB-User", viewer.id);
   if (viewer?.id === streamer.ownerId) headers.set("X-SB-Owner", "1");
-  // A wrong or revoked overlay key is no error: the OBS source then joins like any signed-out viewer.
+  // Invalid/revoked keys join as signed-out viewers.
   else if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
   const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(streamer.id));
   return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
 }
 
+/**
+ * The page's activity feed (docs/channel-connections.md): only an OBS source with the current overlay key, or the
+ * signed-in owner, may listen. The key grants this read-only feed and the live room, nothing else.
+ */
+async function activityResponse(
+  request: Request,
+  env: AppEnv,
+  handle: string,
+  nonce: string,
+  responseHeaders: Headers,
+): Promise<Response> {
+  requireSameOrigin(request, env);
+  const overlayKey: string | null = queryParams(request, ["key"]).get("key");
+  if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
+    throw new HttpError(426, "Use a WebSocket connection.");
+  const streamer = await getStreamer(env, handle);
+  if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
+  const headers = new Headers({ Upgrade: "websocket" });
+  if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
+  else if ((await getViewer(request, { env, nonce, responseHeaders }))?.id === streamer.ownerId)
+    headers.set("X-SB-Owner", "1");
+  else throw new HttpError(403, "Use the overlay URL with its key.");
+  return callIngest(env, streamer.id, "subscribe", { init: { headers } });
+}
+
 export default {
-  /**
-   * The hourly jobs run side by side, so a failed cleanup never skips the schedule top-up. Each failure is logged;
-   * the run then throws, so the Cron Trigger is recorded as failed and an alert on failed cron runs fires.
-   */
+  // Run hourly jobs independently. Log each failure, then throw so cron failure alerts fire.
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
+    validateTestEnvironment(env);
+    if (env.APP_ENV === "test") await requireTestDatabase(env);
     const jobs: Record<string, (env: AppEnv, now: number) => Promise<unknown>> = {
       cleanup: cleanExpiredData,
-      // Weekly series are written 12 weeks ahead; keep them topped up.
+      // Keep weekly series 12 weeks ahead.
       schedule_top_up: topUpSeries,
+      // Stored YouTube API data must not outlive its refresh window.
+      youtube_expiry: expireYoutubeConnections,
     };
     const names: string[] = Object.keys(jobs);
     const results = await Promise.allSettled(names.map((name: string) => jobs[name](env, controller.scheduledTime)));
@@ -100,7 +136,7 @@ export default {
       logError(`cron_${names[index]}_failed`, result.reason);
     }
     if (failed.length > 0) throw new Error(`Cron jobs failed: ${failed.join(", ")}`);
-    // A dead man's switch: the monitor alerts when this ping stops, which also catches a cron that never ran.
+    // Heartbeat alerts also detect cron jobs that never run.
     if (env.CRON_HEARTBEAT_URL) {
       const ping = await fetch(env.CRON_HEARTBEAT_URL, { method: "POST" });
       if (!ping.ok) console.error("cron_heartbeat_failed", { status: ping.status });
@@ -113,15 +149,51 @@ export default {
     let response: Response;
     let origin: string;
     try {
+      validateTestEnvironment(env);
       origin = getOrigin(env);
       if (new URL(request.url).origin !== origin) throw new HttpError(421, "Use the configured application URL.");
-      const key = await clientKey(request);
-      if (!(await env.REQUEST_LIMITER.limit({ key })).success)
-        throw new HttpError(429, "Too many requests. Please try again in a minute.");
       const path = new URL(request.url).pathname;
+      const key = await clientKey(request);
+      // Provider webhooks come from a few shared provider addresses, so the per-address limit would drop real
+      // deliveries. Only a failed check that a forger causes (a bad signature, size, method or query) counts against
+      // the limit. A stale or unparsable signed Twitch delivery does not: only Twitch has our secret. For Kick, a
+      // stale or unparsable copy and a repeated message id do count: Kick signs every app's webhooks with one key.
+      // A forged request still costs a body read and a signature check. The ingest object's admission buckets
+      // bound signed deliveries.
+      const hook = path === "/hooks/twitch" || path === "/hooks/kick";
+      if (!hook && !(await env.REQUEST_LIMITER.limit({ key })).success)
+        throw new HttpError(429, "Too many requests. Please try again in a minute.");
+      if (path !== "/__test") await requireTestAccess(request, env);
       const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
+      const activity = /^\/api\/activity\/([a-z0-9_]{3,30})$/.exec(path);
       const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
-      if (path === "/sitemap.xml") {
+      if (path === "/__test") {
+        response = await testEnvironmentResponse(request, env);
+      } else if (path === "/hooks/kick" && channelsOff(env)) {
+        // Ingestion is off: acknowledge and drop, so Kick does not retry. Twitch still reports revocations.
+        response = new Response(null, { status: 204 });
+      } else if (hook) {
+        const platform = path === "/hooks/twitch" ? "twitch" : "kick";
+        try {
+          // A repeated Kick message id counts against the limit too (see kickWebhook).
+          const countRepeat = async (): Promise<void> => {
+            if (!(await env.REQUEST_LIMITER.limit({ key })).success)
+              throw new HttpError(429, "Too many requests. Please try again in a minute.");
+          };
+          response =
+            platform === "twitch"
+              ? await twitchWebhook(request, env)
+              : await kickWebhook(request, env, Date.now(), countRepeat);
+        } catch (error: unknown) {
+          logRejectedWebhook(platform, error);
+          if (error instanceof WebhookRejected && error.forged && !(await env.REQUEST_LIMITER.limit({ key })).success)
+            throw new HttpError(429, "Too many requests. Please try again in a minute.");
+          throw error;
+        }
+      } else if (activity) {
+        if (channelsOff(env)) throw new HttpError(503, "The activity feed is off.");
+        response = await activityResponse(request, env, activity[1], nonce, responseHeaders);
+      } else if (path === "/sitemap.xml") {
         response = await sitemapResponse(request, env);
       } else if (calendar) {
         response = await calendarResponse(request, env, calendar[1], origin);
@@ -140,6 +212,7 @@ export default {
       origin = "https://invalid.invalid";
     }
     const secured = securityHeaders(response, request, nonce, origin, import.meta.env.DEV);
+    if (env.APP_ENV === "test") secured.headers.set("X-Robots-Tag", "noindex, nofollow");
     secured.headers.set("X-Request-ID", requestId);
     for (const value of responseHeaders.getSetCookie()) secured.headers.append("Set-Cookie", value);
     return secured;

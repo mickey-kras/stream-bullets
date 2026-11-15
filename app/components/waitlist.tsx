@@ -11,7 +11,7 @@ interface LinkRow {
   value: string;
 }
 
-/** Formats a timestamp the same way on the server and in the browser, so hydration matches. */
+// Use identical timestamp formatting during SSR and hydration.
 export function formatDate(time: number): string {
   return new Date(time).toLocaleDateString(intlLocale(), { timeZone: "UTC", dateStyle: "medium" });
 }
@@ -42,7 +42,6 @@ function ApplicationStatusNote({ application }: Readonly<{ application: Streamer
   );
 }
 
-/** The waitlist form for accounts that cannot create a streamer profile yet. */
 export function StreamerWaitlist({
   application,
   disabled,
@@ -57,7 +56,7 @@ export function StreamerWaitlist({
     (application?.links.length ? application.links : [""]).map((value: string) => makeRow(value)),
   );
   const [note, setNote] = useState<string>(application?.note ?? "");
-  // Focus moves from event handlers: an added row focuses itself when it mounts.
+  // New rows take focus on mount.
   const pendingFocus = useRef<string | null>(null);
   const inputs = useRef<Map<string, HTMLInputElement>>(new Map());
 

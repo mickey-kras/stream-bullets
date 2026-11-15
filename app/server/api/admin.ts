@@ -1,6 +1,6 @@
 import { consumeMutationQuota } from "../data.server";
 import { json, queryParams, readJson } from "../http.server";
-import { notifyRoom } from "../live.server";
+import { notifyActivityPage, notifyRoom } from "../live.server";
 import {
   isSensitivePageAction,
   listModerationPages,
@@ -40,10 +40,8 @@ import {
 } from "../stepup.server";
 import { get, parsedQuery, write, type ApiRoute } from "./router";
 
-/**
- * Admin moderation and security keys (Phase 6). Every handler authorises on the server: the step-up endpoints
- * need an admin; everything else goes through requireAdminSession (admin + the ADMIN_STEP_UP policy).
- */
+// Step-up handlers require admin rights. Other handlers use `requireAdminSession` to enforce admin rights and
+// `ADMIN_STEP_UP`.
 
 const ID = "([0-9a-f-]{36})";
 const path = (pattern: string): RegExp => new RegExp(pattern, "u");
@@ -104,12 +102,13 @@ export const adminRoutes: ApiRoute[] = [
     await consumeMutationQuota(app.env, admin.viewer.id);
     const page = await moderatePage(app.env, admin, match[1], input);
     notifyRoom(app.env, page.id);
+    notifyActivityPage(app.env, page.id);
     const emailed: boolean = input.notify ? await notifyOwner(app.env, page.id, input.action) : false;
     return json({ page, emailed });
   }),
   write("POST", path(`admin/streamers/${ID}/official`), async ({ request, app, match }) => {
     const input = await readJson(request, officialSchema);
-    // Who counts as StreamBullets itself is as sensitive as a suspension: it needs a fresh security-key check.
+    // Official-page changes require the same fresh key check as suspensions.
     const admin = await requireAdminSession(request, app, { sensitive: true });
     await consumeMutationQuota(app.env, admin.viewer.id);
     const page = await setOfficial(app.env, admin, match[1], input);

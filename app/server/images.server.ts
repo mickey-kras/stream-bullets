@@ -10,7 +10,7 @@ import { stripImageMetadata } from "./image-metadata";
 const types: Readonly<Record<string, string>> = { png: "image/png", jpg: "image/jpeg", webp: "image/webp" };
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-/** Account picture, page background and page logo use stable public addresses and immutable R2 versions. */
+// Account picture, page background and page logo use stable public addresses and immutable R2 versions.
 export const IMAGE_KINDS = ["avatar", "background", "logo"] as const;
 export type ImageKind = (typeof IMAGE_KINDS)[number];
 
@@ -79,10 +79,7 @@ export async function uploadImage(request: Request, env: AppEnv, userId: string,
   return url;
 }
 
-/**
- * `DELETE /api/images/avatar`: drops the uploaded profile picture (the profile dialog does this when a preset is
- * chosen, because an upload wins over a preset). The page keeps working: its logo falls back to the preset.
- */
+// Remove the upload so the preset wins; page logos also fall back to it.
 export async function deleteAvatar(env: AppEnv, userId: string): Promise<void> {
   const url = `/images/avatar/${userId}`;
   const key = await imageStorageKey(env, userId, "avatar");
@@ -97,7 +94,7 @@ export async function deleteAvatar(env: AppEnv, userId: string): Promise<void> {
   await env.IMAGES.delete([...new Set([key, `avatar/${userId}`])]);
 }
 
-/** `DELETE /api/images/logo`: the page goes back to the owner's profile picture. */
+// `DELETE /api/images/logo`: the page goes back to the owner's profile picture.
 export async function deleteLogo(env: AppEnv, userId: string): Promise<void> {
   const db = drizzle(env.DB);
   const profile = (await db.select().from(streamers).where(eq(streamers.ownerId, userId)).limit(1))[0];

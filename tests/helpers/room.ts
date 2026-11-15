@@ -1,21 +1,13 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { vi } from "vitest";
 
-/**
- * Just enough of the Workers runtime to run the live room in this process, where V8 coverage can see it. Storage,
- * alarms and hibernatable sockets are kept in memory; D1 stays a real Miniflare database.
- */
+// In-process Workers stub for V8 coverage. Memory holds sockets, alarms, and storage; D1 uses real Miniflare.
 
-/**
- * `waitUntil` for code under test that tells the room something after the response. It cannot come from the
- * vitest.workers-stub.config.ts stub: vitest.config.ts aliases `cloudflare:workers` to that file, so a test that
- * mocks the module with this one would import itself.
- */
+// Keep waitUntil separate from the aliased workers stub to avoid a self-import in mocked tests.
 export function waitUntil(promise: Promise<unknown>): void {
   void promise;
 }
 
-/** Stands in for `cloudflare:workers` (the test file mocks the module with this one). */
 export class DurableObject<Env = unknown> {
   protected readonly ctx: DurableObjectState;
   protected readonly env: Env;
@@ -29,13 +21,13 @@ export class DurableObject<Env = unknown> {
 const OPEN = 1;
 const CLOSED = 3;
 
-/** The room's end of a live connection. `sent` holds what the room sent, as the viewer would receive it. */
+// Room-side socket; sent contains viewer-bound messages.
 export class FakeSocket {
   readyState: number = OPEN;
   readonly sent: string[] = [];
   closeCode: number | null = null;
   closeReason = "";
-  /** A send that throws, as on a connection the network already dropped. */
+  // Simulate a network-dropped socket.
   failSends = false;
   private attachment: unknown;
 
@@ -59,12 +51,10 @@ export class FakeSocket {
     return structuredClone(this.attachment);
   }
 
-  /** Every message the room sent, parsed. */
   messages<T = Record<string, unknown>>(): T[] {
     return this.sent.map((message: string): T => JSON.parse(message) as T);
   }
 
-  /** The messages of one type. */
   ofType<T = Record<string, unknown>>(type: string): T[] {
     return this.messages<{ type: string }>().filter((message) => message.type === type) as T[];
   }
@@ -85,7 +75,6 @@ class FakeSocketPair {
   }
 }
 
-/** The room's socket for the client socket an upgrade response carries. */
 const peers = new WeakMap<FakeSocket, FakeSocket>();
 
 export function serverSocketOf(client: unknown): FakeSocket {
@@ -101,7 +90,7 @@ class FakeResponsePair {
   ) {}
 }
 
-/** Node refuses status 101; the Workers runtime answers an upgrade with it and the client socket. */
+// Node rejects status 101; Workers upgrades need it and a client socket.
 class UpgradeResponse extends Response {
   readonly webSocket: WebSocket | null;
 
@@ -113,14 +102,14 @@ class UpgradeResponse extends Response {
   }
 }
 
-/** Installs the runtime globals the room and the Worker use. Undo with vi.unstubAllGlobals(). */
+// Install runtime globals; undo with vi.unstubAllGlobals().
 export function installWorkersRuntime(): void {
   vi.stubGlobal("WebSocketPair", FakeSocketPair);
   vi.stubGlobal("WebSocketRequestResponsePair", FakeResponsePair);
   vi.stubGlobal("Response", UpgradeResponse);
 }
 
-/** The Durable Object SQL API on an in-memory SQLite database: `exec` with bound values and `toArray()`. */
+// In-memory SQLite implementation of bound exec and toArray().
 class RoomSql {
   readonly db = new DatabaseSync(":memory:");
 
@@ -143,6 +132,17 @@ class RoomStorage {
     this.values.set(key, value);
   }
 
+  async delete(key: string): Promise<boolean> {
+    return this.values.delete(key);
+  }
+
+  /** Deletes every key and every SQL table, as the runtime's deleteAll does. Like the runtime, it keeps the alarm. */
+  async deleteAll(): Promise<void> {
+    this.values.clear();
+    const tables = this.sql.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
+    for (const { name } of tables as { name: string }[]) this.sql.db.exec(`DROP TABLE "${name}"`);
+  }
+
   async getAlarm(): Promise<number | null> {
     return this.alarm;
   }
@@ -156,11 +156,10 @@ class RoomStorage {
   }
 }
 
-/** A Durable Object's state: storage, alarm, and the hibernation API for tagged sockets. */
 export class RoomState {
   readonly storage = new RoomStorage();
   readonly accepted: { socket: FakeSocket; tags: string[] }[] = [];
-  /** When each socket last got the automatic "pong". */
+  // Last automatic pong per socket.
   readonly pings = new Map<FakeSocket, Date>();
   autoResponse: FakeResponsePair | null = null;
   ready: Promise<unknown> = Promise.resolve();
@@ -193,7 +192,7 @@ export class RoomState {
     return this.accepted.find((entry) => entry.socket === socket)?.tags ?? [];
   }
 
-  /** The viewer sent "ping" and the runtime answered without waking the room. */
+  // Simulate a runtime pong without waking the room.
   ping(socket: FakeSocket, at: number = Date.now()): void {
     if (this.autoResponse?.request !== "ping") throw new Error("The room set no ping auto-response");
     this.pings.set(socket, new Date(at));
@@ -204,7 +203,7 @@ interface RoomLike {
   fetch(request: Request): Promise<Response>;
 }
 
-/** A Durable Object namespace whose rooms live in this process, one per name. */
+// One in-process room per namespace name.
 export class RoomNamespace<Room extends RoomLike> {
   private readonly rooms = new Map<string, { state: RoomState; room: Room }>();
 
@@ -224,10 +223,7 @@ export class RoomNamespace<Room extends RoomLike> {
     };
   }
 
-  /**
-   * The runtime restarts the room (an eviction or a deploy): a new instance on the same storage. Its memory, the
-   * sockets and the ticker are gone.
-   */
+  // Restart on existing storage; discard memory, sockets, and ticker.
   restart(name: string): void {
     const entry = this.rooms.get(name);
     if (!entry) throw new Error(`No room ${name}`);
@@ -246,7 +242,7 @@ export class RoomNamespace<Room extends RoomLike> {
   }
 }
 
-/** The tables the live room reads, without the rest of the app's schema. */
+// Minimal schema for room reads.
 export const LIVE_SCHEMA = `
   CREATE TABLE streamers (id TEXT PRIMARY KEY, revision INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'active');
   CREATE TABLE user (id TEXT PRIMARY KEY);
@@ -262,7 +258,6 @@ export const LIVE_SCHEMA = `
   CREATE INDEX entries_streamer ON entries(streamer_id, created_at, id);
 `;
 
-/** Rows for the live room's tables, on one page. */
 export function liveRows(db: () => D1Database, streamerId: () => string) {
   async function addPoll(
     kind: "choice" | "binary" = "choice",
@@ -287,7 +282,6 @@ export function liveRows(db: () => D1Database, streamerId: () => string) {
     return id;
   }
 
-  /** A Mash Battle in `phase` from `startsAt` to `endsAt`, with viewers on their sides. */
   async function addBattle(
     picks: Record<string, number>,
     times: { phase?: "countdown" | "live"; startsAt?: number; endsAt?: number } = {},
@@ -336,15 +330,12 @@ export function liveRows(db: () => D1Database, streamerId: () => string) {
   return { addPoll, addBattle, vote, battleRow, storedTaps };
 }
 
-/**
- * A D1 database that fails on demand: every query or batch that touches SQL matching a pattern throws, as D1 does
- * when it is down. The database itself is real.
- */
+// Real D1 with injected failures for queries and batches matching a pattern.
 export function faultyDatabase(real: D1Database): {
   db: D1Database;
   fail: (pattern: RegExp, until?: Promise<unknown>) => void;
   heal: () => void;
-  /** Queries held by a failure that waits for its `until`. */
+  // Queries paused until their failure releases `until`.
   held: () => number;
 } {
   const faults: { pattern: RegExp; until?: Promise<unknown> }[] = [];

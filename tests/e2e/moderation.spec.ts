@@ -95,7 +95,7 @@ test("profile settings are saved per account", async ({ browser }) => {
     const after = (await (await viewer.request.get("/api/me")).json()) as { viewer: Record<string, unknown> };
     expect(after.viewer).toMatchObject({ avatarPreset: 14, locale: "de" });
   } finally {
-    // `viewer` is a shared account: restore it even after a failure so later specs still see English.
+    // Restore the shared viewer language even on failure.
     const restored = [
       (await viewer.request.patch("/api/me/locale", { data: { locale: "en" } })).status(),
       (await viewer.request.patch("/api/profile", { data: { avatarPreset: 3 } })).status(),

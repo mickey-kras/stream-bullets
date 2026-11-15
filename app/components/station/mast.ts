@@ -4,14 +4,14 @@ import * as T from "./textures";
 import type { Kit } from "./kit";
 import { add, box, ball, torus, rod, tube, lathe, rivets, TAU, profile } from "./shapes";
 
-/** Half-width of the tower at height y: splayed feet, tapering to the spire. */
+// Tower half-width at y; splayed base, tapered spire.
 const half = (y: number): number => 0.06 + 0.6 * Math.pow(1 - Math.min(y, 2.95) / 3, 1.45);
 const corner = (i: number, y: number): THREE.Vector3 => {
   const a = (i / 4) * TAU + Math.PI / 4,
     r = half(y) * Math.SQRT2;
   return new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r);
 };
-/** Radius of the brass ring around the tower at height y; the sign arms leave from it. */
+// Brass sign-arm ring radius at y.
 export const ringRadius = (y: number): number => half(y) * Math.SQRT2 + 0.1;
 
 function buildTower(k: Kit, mast: THREE.Group): void {
@@ -77,7 +77,7 @@ function buildTower(k: Kit, mast: THREE.Group): void {
   lathe(profile(0, 0, 0.07, 0, 0.05, 0.1, 0.025, 0.35, 0.015, 0.42, 0, 0.42), gold, [0, 2.86, 0], mast, 20);
 }
 
-/** Brass orb, the three glowing signal rings that lean toward the viewer, and arcs. */
+// Orb, signal rings and arcs.
 function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
   const { tiles, animators, onLights, halo, practical } = k;
   const orbMaterial = new THREE.MeshStandardMaterial({
@@ -91,11 +91,11 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
   ball(0.16, [0, mastTop + 0.45, 0], orbMaterial, mast, 32);
   halo([0, mastTop + 0.45, 0], 1, "#ffd08a", 0.35, mast);
   const orbLight = practical("#ffcf86", [5, 6], [0, mastTop + 0.45, 0], mast);
-  // The ring set leans toward whoever is looking, so it always reads as open ellipses.
+  // Face signal rings toward the camera to preserve visible ellipses.
   const tilt = add(new THREE.Group(), mast);
   tilt.position.set(0, mastTop + 0.45, 0);
   tilt.rotation.order = "YXZ";
-  // Three rings that pulse outward in turn, swelling and flaring like a broadcast going out.
+  // Sequential outward ring pulses.
   const lit = new THREE.Color("#ffc865");
   const dim = new THREE.Color("#6d5a35");
   const signalRings: Array<[THREE.Mesh, THREE.MeshBasicMaterial]> = [];
@@ -114,7 +114,7 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
       else glow.color.copy(dim);
     }),
   );
-  // Electric arcs flicking off the orb.
+
   const arcGeometry = new THREE.BufferGeometry();
   const arcPositions = new Float32Array(3 * 2 * 3 * 8);
   arcGeometry.setAttribute("position", new THREE.BufferAttribute(arcPositions, 3));
@@ -128,7 +128,7 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
     }),
   );
   arcs.position.set(0, mastTop + 0.45, 0);
-  // Hidden until the animation first places them, so a still frame never shows stale arcs.
+  // Hide arcs until first positioned, preventing stale still frames.
   arcs.visible = false;
   mast.add(arcs);
   const arcRandom = T.random(99);
@@ -167,8 +167,7 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
 }
 
 export function buildMast(k: Kit, hall: THREE.Group): THREE.Group {
-  // Four splayed steel legs on bolted brass feet, brass X-bracing, three brass rings that carry the
-  // sign arms, and a spire capped with a brass ball inside the signal rings.
+  // Splayed steel tower, brass bracing/sign rings and orb-capped spire.
   const mast = add(new THREE.Group(), hall);
   mast.position.set(0, 3.98, 0);
   mast.scale.setScalar(1.12);

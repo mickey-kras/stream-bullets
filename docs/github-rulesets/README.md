@@ -1,20 +1,14 @@
 # GitHub rulesets
 
 Import both JSON files through **Settings > Rules > Rulesets > New ruleset > Import a ruleset**.
-Set the enforcement to **Active** when you save each rule.
-A merge of these files does not activate protection.
+Set each rule to **Active**. Merging the files does not activate protection.
 
-The rule for the default branch requires a **pull request**, resolved review threads, and successful checks on an up-to-date branch.
-It permits squash merges and blocks deletion and force pushes.
-Nobody can bypass the rule.
+Default-branch protection needs a PR, resolved threads, and passing checks on an up-to-date branch.
+It allows squash merges, blocks deletion and force pushes, and permits no bypass.
+Required results include CodeQL, Trivy, **GitHub code quality**, and Copilot reviews.
+Status names match repository workflows. Aislop needs a status because it uploads no SARIF report.
 
-It also requires results from CodeQL and Trivy, checks from **GitHub code quality**, and reviews from Copilot.
-The names of the status checks match the workflows in this repository.
-The Aislop status check is mandatory because this repository does not upload its SARIF report.
+Branch names follow **GPU Workload Supervisor** rules: `main`, Dependabot, and `feat`, `fix`, `refactor`, `docs`, `ci`, `security`, or `release` prefixes.
+The rules also allow `graph`, used by the earlier **Publish graph** workflow.
 
-The rule for branch names matches the rule in **GPU Workload Supervisor**.
-It permits `main`, Dependabot, and the `feat`, `fix`, `refactor`, `docs`, `ci`, `security`, and `release` prefixes.
-It also permits the `graph` branch. The **Publish graph** workflow writes the code graph to that branch.
-
-SonarQube remains a gate for deployment from `main`, as in **GPU Workload Supervisor**.
-The rule does not need its status on a **pull request** because that job does not run there.
+SonarQube gates deployment from `main`. PR rules do not need its status because the job runs only on `main`.

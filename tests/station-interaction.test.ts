@@ -10,7 +10,7 @@ afterEach((): void => {
   vi.restoreAllMocks();
 });
 
-/** A stand-in for the station wrapper: an event target with a fixed 1000 x 500 box. */
+// Station event target with a fixed 1000 x 500 box.
 function host(): HTMLElement {
   return Object.assign(new EventTarget(), {
     getBoundingClientRect: (): object => ({ left: 0, top: 0, width: 1000, height: 500 }),
@@ -50,7 +50,6 @@ describe("look-around", (): void => {
     wrap.dispatchEvent(pointer("pointermove", "mouse", 1000, 500));
     for (let i = 0; i < 60; i++) look.step(0.016, true);
     look.apply(cam, target);
-    // Mouse to the right moves the camera right; mouse down moves it lower.
     expect(cam.position.x).toBeGreaterThan(0.5);
     expect(cam.position.y).toBeLessThan(-0.2);
     expect(cam.position.length()).toBeCloseTo(10, 5);
@@ -87,7 +86,7 @@ describe("look-around", (): void => {
       tilt(null, null);
       tilt(40, 0);
       look.step(0.016, true);
-      // With a gyroscope the mouse no longer steers the lean.
+      // The gyroscope takes over mouse steering.
       wrap.dispatchEvent(pointer("pointermove", "mouse", 1000, 500));
       wrap.dispatchEvent(new Event("pointerleave"));
       tilt(40 + 25, 25);
@@ -117,7 +116,7 @@ describe("look-around", (): void => {
     expect(swing).toBeGreaterThan(35);
     expect(swing).toBeLessThan(46);
     look.restore(cam, target);
-    // Tipping the phone right over cannot carry the camera past the pole.
+    // A full phone tilt must not move the camera past the pole.
     tilt(40 - 170, 0);
     for (let i = 0; i < 60; i++) look.step(0.016, true);
     look.apply(cam, target);
@@ -154,7 +153,7 @@ describe("sign flips", (): void => {
     const flips = createFlips(pivots, wrap, canvas, lifecycle.signal, onActivate);
     return { pivots, wrap, canvas, flips, cam: camera(), lifecycle };
   }
-  // Screen positions of the two signs in a 1000 x 500 view from z = 10.
+  // Sign positions in a 1000 x 500 view from z = 10.
   const LEFT: [number, number] = [349, 250];
   const MISS: [number, number] = [500, 40];
 
@@ -168,7 +167,6 @@ describe("sign flips", (): void => {
     expect(pivots[1].rotation.x).toBe(0);
     for (let i = 0; i < 20; i++) flips.update(cam, 0.05, true);
     expect(pivots[0].rotation.x).toBe(0);
-    // Still hovering: no second turn.
     expect(flips.update(cam, 0.016, true)).toBe(false);
     wrap.dispatchEvent(pointer("pointermove", "mouse", ...MISS));
     flips.update(cam, 0.016, true);
@@ -197,7 +195,6 @@ describe("sign flips", (): void => {
     wrap.dispatchEvent(pointer("pointerup", "touch", ...LEFT, 120));
     expect(flips.update(cam, 0.016, true)).toBe(true);
     expect(pivots[0].rotation.x).toBeGreaterThan(0);
-    // The sign activates once its turn is over, not before.
     expect(activated).toEqual([]);
     for (let i = 0; i < 30; i++) flips.update(cam, 0.05, true);
     expect(activated).toEqual([0]);
@@ -211,7 +208,6 @@ describe("sign flips", (): void => {
     expect(flips.update(cam, 0.016, true)).toBe(true);
     for (let i = 0; i < 30; i++) flips.update(cam, 0.05, true);
     expect(activated).toEqual([0]);
-    // Motion off: no turn, straight on.
     wrap.dispatchEvent(pointer("pointerdown", "touch", ...LEFT, 0));
     wrap.dispatchEvent(pointer("pointerup", "touch", ...LEFT, 120));
     expect(flips.update(cam, 0.016, false)).toBe(false);
@@ -241,7 +237,7 @@ describe("static batching", (): void => {
     add(shared, paint, 0);
     const mirrored = add(new THREE.BoxGeometry(1, 1, 1), paint, 2);
     mirrored.scale.x = -1;
-    // Non-indexed geometry is batched separately from indexed geometry and mirrored the same way.
+    // Batch indexed and non-indexed geometry separately; mirror both.
     const flat = new THREE.BoxGeometry(1, 1, 1).toNonIndexed();
     add(flat, paint, 4);
     add(flat.clone(), paint, 6).scale.x = -1;
@@ -280,13 +276,13 @@ describe("static batching", (): void => {
     const before = new THREE.Box3().setFromObject(station);
     const moving = batchStatic(station, animators, [pinned]);
     expect([...moving]).toEqual(expect.arrayContaining([spinner, blinker]));
-    // Sampling the animators leaves every value as it was built.
+    // Animator sampling must preserve all initial values.
     expect(spinner.rotation.y).toBe(0);
     expect(blinker.visible).toBe(true);
     expect(glow.color.getHexString()).toBe("ffcc66");
     expect(lamp.intensity).toBe(3);
     const batches = station.children.filter((o: THREE.Object3D): boolean => o.name === "static-batch");
-    // Indexed paint, non-indexed paint, the decals, and the two rivet sets.
+    // Indexed paint, non-indexed paint, decals, and two rivet sets.
     expect(batches).toHaveLength(4);
     expect(batches.some((o: THREE.Object3D): boolean => o instanceof THREE.InstancedMesh)).toBe(true);
     expect(station.children).toContain(keeper);
@@ -296,7 +292,7 @@ describe("static batching", (): void => {
     expect(station.children.filter((o: THREE.Object3D): boolean => (o as THREE.Mesh).material === glass)).toHaveLength(
       2,
     );
-    // The shared geometry is still in use by the unmerged glow mesh, so it was not disposed.
+    // Unmerged glow still owns the shared geometry; do not dispose it.
     expect(keeper.geometry.attributes.position.count).toBeGreaterThan(0);
     const after = new THREE.Box3().setFromObject(station);
     expect(after.min.distanceTo(before.min)).toBeLessThan(1e-6);
@@ -311,9 +307,8 @@ describe("phone framing", (): void => {
     const covered = fitPhone(40, 0.4);
     expect(covered.radius).toBeGreaterThan(open.radius);
     expect(covered.target.y).toBeGreaterThan(open.target.y);
-    // A wide field of view never brings the camera closer than the hero distance.
     expect(fitPhone(90, 0).radius).toBe(17.5);
-    // Coverage is clamped, so a broken measurement cannot push the model off the stage.
+    // Clamp coverage so invalid measurements cannot move the model off stage.
     expect(fitPhone(40, 5).radius).toBe(fitPhone(40, 0.6).radius);
     expect(fitPhone(40, -1).radius).toBe(open.radius);
   });

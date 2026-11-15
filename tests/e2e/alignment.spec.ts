@@ -3,7 +3,6 @@ import { test, expect } from "./coverage";
 import { clientIp } from "./client-ips";
 import { signedIn } from "./fixtures";
 
-/* Behaviour that follows the approved mockup after the alignment pass (fix/mockup-alignment). */
 
 test("the Polls tab: a Mash Battle is a teaser row that opens the battle's own view", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("alignment", 140), {
@@ -14,7 +13,6 @@ test("the Polls tab: a Mash Battle is a teaser row that opens the battle's own v
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Feature host: Polls");
   await expect(page.getByText("One question. Everyone has a say.")).toBeAttached();
   await expect(page.locator(".connection-status output")).toBeVisible();
-  // The list shows a short teaser, not the battle card.
   await expect(page.locator(".mash-card")).toHaveCount(0);
   const teaser = page.getByRole("link", { name: /Which boss first\?/ });
   await expect(teaser).toContainText("Mash Battle · starting soon");
@@ -23,7 +21,6 @@ test("the Polls tab: a Mash Battle is a teaser row that opens the battle's own v
   await expect(page).toHaveURL(/entry=/u);
   await expect(page.locator(".mash-card")).toBeVisible();
   await expect(page.locator("main")).toHaveClass(/mash-page mash-at-waiting/u);
-  // The battle view drops the lead, the live-updates status and the floating New poll button.
   await expect(page.getByText("One question. Everyone has a say.")).toHaveCount(0);
   await expect(page.locator(".connection-status")).toHaveCount(0);
   await expect(page.locator(".fab")).toHaveCount(0);
@@ -61,7 +58,7 @@ test("Edit your page marks its required fields", async ({ browser }) => {
   const dialog = page.getByRole("dialog", { name: "Edit your page" });
   await expect(dialog.locator(".req-note")).toHaveText("* required");
   await expect(dialog.locator("label:has(.req)")).toHaveCount(2);
-  // The marker is hidden from assistive technology, so the field names stay as they were.
+  // Hide the required marker from assistive technology to preserve field names.
   await expect(dialog.getByRole("textbox", { name: "Page name", exact: true })).toBeVisible();
   await close(owner);
 });
@@ -73,7 +70,7 @@ test("Edit your page reopens with what was just saved, and a second save keeps i
   const dialog = page.getByRole("dialog", { name: "Edit your page" });
   const name = dialog.getByRole("textbox", { name: "Page name", exact: true });
   const about = dialog.getByRole("textbox", { name: "About your stream" });
-  // Reopened from the account menu, in the same page: the dialogs' data is not loaded afresh by a navigation.
+  // Reopen dialogs without navigation to verify fresh data.
   const reopen = async (): Promise<void> => {
     await page.getByRole("button", { name: /^Account menu for / }).click();
     await page.getByRole("link", { name: "Edit your page" }).click();
@@ -92,7 +89,6 @@ test("Edit your page reopens with what was just saved, and a second save keeps i
   await reopen();
   await expect(name).toHaveValue("Test host renamed");
   await expect(about).toHaveValue("A test community, renamed.");
-  // Leave the page as the other specs expect it.
   await name.fill("Test host");
   await about.fill("A test community.");
   await save();

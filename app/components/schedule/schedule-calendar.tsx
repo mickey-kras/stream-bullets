@@ -21,14 +21,14 @@ import {
 export type CalendarMode = "day" | "week" | "month";
 
 const HOUR_PX = 48;
-/** The mockup's grid: 8 AM to midnight, widened only for streams outside it. */
+// Default grid: 08:00..24:00; expand for outlying streams.
 const FIRST_HOUR = 8;
 const LAST_HOUR = 24;
 const MINUTE_MS = 60_000;
 
 type Timed = Pick<StreamEvent, "startsAt" | "durationMin">;
 
-/** 0 = Sunday. English starts the week on Sunday; Intl week info covers other locales where available. */
+// Sunday = 0. Use Intl locale week starts where available; English starts Sunday.
 function firstWeekday(): number {
   const info = (new Intl.Locale(intlLocale()) as Intl.Locale & { weekInfo?: { firstDay: number } }).weekInfo;
   return info ? info.firstDay % 7 : 0;
@@ -38,12 +38,11 @@ function dayStart(date: LocalDate, zone: string): number {
   return zonedTime(date, 0, 0, zone);
 }
 
-/** The next local midnight after the day that starts at `start`: a day is 23 or 25 hours long across a clock change. */
+// Use local midnights; DST days may span 23 or 25 hours.
 function dayEnd(start: number, zone: string): number {
   return dayStart(addDays(localDateOf(start, zone), 1), zone);
 }
 
-/** The local days a view shows, as their midnights. */
 export function visibleDays(mode: CalendarMode, anchor: number, zone: string): number[] {
   const date = localDateOf(anchor, zone);
   if (mode === "day") return [dayStart(date, zone)];
@@ -56,13 +55,12 @@ export function visibleDays(mode: CalendarMode, anchor: number, zone: string): n
   return Array.from({ length: 42 }, (_, index: number) => dayStart(addDays(first, index), zone));
 }
 
-/** The span a view's events are fetched for: from its first midnight to the end of its last day. */
+// Fetch from the first local midnight through the last day's end.
 export function visibleRange(mode: CalendarMode, anchor: number, zone: string): { from: number; to: number } {
   const days = visibleDays(mode, anchor, zone);
   return { from: days[0], to: dayEnd(days.at(-1)!, zone) };
 }
 
-/** Moves the anchor one day, week or month. */
 export function stepAnchor(mode: CalendarMode, anchor: number, zone: string, direction: number): number {
   const date = localDateOf(anchor, zone);
   if (mode === "month") {
@@ -76,13 +74,13 @@ function endOf(event: Timed): number {
   return event.startsAt + event.durationMin * MINUTE_MS;
 }
 
-/** The streams on air for any part of the local day that starts at `start`, including one from the night before. */
+// Include streams overlapping any part of the local day, including overnight streams.
 export function eventsOn<T extends Timed>(events: readonly T[], start: number, zone: string): T[] {
   const end = dayEnd(start, zone);
   return events.filter((event: T) => event.startsAt < end && (event.startsAt >= start || endOf(event) > start));
 }
 
-/** The part of a stream that falls on the local day starting at `start`: one from the night before begins at 0:00. */
+// Clip overnight starts to local midnight.
 export function sliceOn(event: Timed, start: number): Timed {
   if (event.startsAt >= start) return event;
   return { startsAt: start, durationMin: (endOf(event) - start) / MINUTE_MS };
@@ -125,31 +123,26 @@ export function CalendarNav({
   );
 }
 
-/** The hours a Day or Week grid shows, as hours from the start of the local day. */
 export interface GridHours {
   first: number;
   last: number;
 }
 
-/** A stream's start and end in local hours of its own day; the end can pass 24. */
+// Local end hour may exceed 24.
 function localHours(event: Timed, zone: string): [number, number] {
   const local = zonedParts(event.startsAt, zone);
   const start = local.hour + local.minute / 60;
   return [start, start + event.durationMin / 60];
 }
 
-/**
- * The hours a grid shows: 8 AM to midnight, as in the mockup, widened to the earliest start of the day slices it
- * shows (see `sliceOn`), so none is pinned to the top over another. A stream that runs past midnight stops at
- * the bottom of its own day and goes on at the top of the next.
- */
+// Expand 08:00..24:00 to fit visible day slices. Split overnight streams at midnight instead of overlapping
+// the next day's top.
 export function gridHours(slices: readonly Timed[], zone: string): GridHours {
   let first = FIRST_HOUR;
   for (const slice of slices) first = Math.min(first, Math.floor(localHours(slice, zone)[0]));
   return { first, last: LAST_HOUR };
 }
 
-/** Where a stream's block sits in the grid, in pixels from its top. */
 export function blockPosition(event: Timed, zone: string, hours: GridHours): { top: number; height: number } {
   const top = Math.max(0, (localHours(event, zone)[0] - hours.first) * HOUR_PX);
   const height = Math.max(28, Math.min((event.durationMin / 60) * HOUR_PX, (hours.last - hours.first) * HOUR_PX - top));
@@ -161,10 +154,8 @@ export interface BlockLane {
   lanes: number;
 }
 
-/**
- * Side-by-side lanes for blocks that overlap in a grid column, so no block covers another. Blocks that touch through
- * a chain of overlaps share one count of lanes; each block takes the first lane that is free at its top.
- */
+// Overlap chains share a lane count. Assign each block the first lane free at its start, preventing
+// occlusion.
 export function blockLanes(blocks: readonly { top: number; height: number }[]): BlockLane[] {
   const order: number[] = blocks.map((_, index: number) => index);
   order.sort((a: number, b: number) => blocks[a].top - blocks[b].top || blocks[b].height - blocks[a].height);
@@ -240,7 +231,7 @@ function EventBlock({
   );
 }
 
-/** Day and Week: an hour grid from 8 AM to midnight in the viewer's zone, wider for streams outside it. */
+// Zoned Day/Week grid; expand beyond 08:00..24:00 when needed.
 export function TimeGrid({
   days,
   events,

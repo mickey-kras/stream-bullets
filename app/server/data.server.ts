@@ -134,14 +134,11 @@ function ownedImage(kind: "background" | "logo", ownerId: string, value: string 
   return value === `/images/${kind}/${encodeURIComponent(ownerId)}` ? value : null;
 }
 
-/**
- * Shapes a page for the API. `privileged` (the owner, or an admin on a moderated page) adds the
- * moderation reason and the last handle change.
- */
-/** A streamers row with the owner's preset avatar, which the page logo falls back to (item 18). */
+// Privileged API views add moderation reason and last handle change.
+// A streamers row with the owner's preset avatar, which the page logo falls back to.
 type StreamerRow = typeof streamers.$inferSelect & { ownerAvatarPreset?: number | null };
 
-/** Every streamers column plus the owner's `avatar_preset`. */
+// Every streamers column plus the owner's `avatar_preset`.
 const streamerColumns = {
   ...getTableColumns(streamers),
   ownerAvatarPreset: sql<number | null>`(SELECT avatar_preset FROM user WHERE user.id = ${streamers.ownerId})`,
@@ -169,13 +166,13 @@ function streamerValue(row: StreamerRow, privileged = false): Streamer {
 
 function directoryCursor(value: string | null): { official: boolean; handle: string } | null {
   if (value === null) return null;
-  // Plain handles are cursors from before official pages existed; they always sit after official pages.
+  // Legacy plain-handle cursors follow official pages.
   const match = /^(?:([01])\.)?([a-z0-9_]{3,30})$/u.exec(value);
   if (!match) throw new HttpError(400, "Invalid page cursor.");
   return { official: match[1] === "1", handle: match[2] };
 }
 
-/** Pages the public directory lists: not suspended, and matching `query` by name or handle. */
+// Pages the public directory lists: not suspended, and matching `query` by name or handle.
 function directoryFilter(query: string): SQL | undefined {
   const escapedQuery: string = query.replaceAll(/[\\%_]/gu, String.raw`\$&`);
   const pattern: string = `%${escapedQuery}%`;
@@ -187,18 +184,15 @@ function directoryFilter(query: string): SQL | undefined {
   );
 }
 
-/** How many pages the directory lists for `query` ("Showing 8 of 10 pages"). */
+// How many pages the directory lists for `query` ("Showing 8 of 10 pages").
 export async function countStreamers(env: AppEnv, query: DirectoryQuery["query"] = ""): Promise<number> {
   const input = parsed(directoryQuerySchema, { query });
   const [row] = await drizzle(env.DB).select({ total: count() }).from(streamers).where(directoryFilter(input.query));
   return row?.total ?? 0;
 }
 
-/**
- * The public directory: official pages first, then by handle. Suspended pages are left out.
- * `query` matches the page name or handle. The cursor is the last handle, prefixed `1.` while the
- * page is still in the official group.
- */
+// Official pages first, then handle; exclude suspended pages. Search name/handle. Prefix official-group
+// cursors with `1.`.
 export async function listStreamers(
   env: AppEnv,
   cursor: string | null = null,
@@ -238,16 +232,14 @@ async function streamerRow(env: AppEnv, handle: string): Promise<StreamerRow | n
   return row ?? null;
 }
 
-/**
- * Any page by handle, whatever its status. Use it only where status is enforced separately
- * (writes go through assertStreamerWritable); everything a viewer reads goes through getVisibleStreamer.
- */
+// Unfiltered lookup: enforce status separately (`assertStreamerWritable` for writes, `getVisibleStreamer` for
+// reads).
 export async function getStreamer(env: AppEnv, handle: string): Promise<Streamer | null> {
   const row = await streamerRow(env, handle);
   return row ? streamerValue(row) : null;
 }
 
-/** A page as the viewer may see it: null when it does not exist or is suspended and the viewer is not its owner or an admin. */
+// Return null for missing pages or suspensions hidden from this viewer.
 export async function getVisibleStreamer(
   env: AppEnv,
   handle: string,
@@ -298,10 +290,8 @@ function handleConflict(error: unknown): never {
   throw error;
 }
 
-/**
- * A handle can change once every 30 days (R11). Old links and the overlay URL stop working; there
- * are no redirects. Returns the new `handle_changed_at`, or the current one when the handle is unchanged.
- */
+// Handle changes require 30 days and break old/overlay links without redirects. Return the current timestamp
+// if unchanged.
 function handleChange(current: typeof streamers.$inferSelect, handle: string | undefined, now: number): number | null {
   if (handle === undefined || handle === current.handle) return current.handleChangedAt;
   if (current.handleChangedAt !== null && now - current.handleChangedAt < HANDLE_CHANGE_INTERVAL) {
@@ -325,7 +315,7 @@ async function ownStreamerRow(env: AppEnv, userId: string): Promise<typeof strea
   return row ?? null;
 }
 
-/** Creates the account's page, or replaces its handle, name and about (the original settings form). */
+// Creates the account's page, or replaces its handle, name and about (the original settings form).
 export async function saveStreamer(env: AppEnv, userId: string, input: StreamerInput): Promise<Streamer> {
   const value = parsed(streamerSchema, input);
   await consumeMutationQuota(env, userId);
@@ -353,11 +343,7 @@ export async function saveStreamer(env: AppEnv, userId: string, input: StreamerI
   }
 }
 
-/**
- * `PATCH /api/streamer` ("Edit your page", item 18): changes only the fields sent.
- * `logoMode: "profile"` drops the uploaded logo so the page shows the owner's picture again;
- * `logoMode: "logo"` keeps the uploaded logo and needs one (upload it with `PUT /api/images/logo`).
- */
+// Patch supplied fields only. `logoMode: "profile"` drops the logo; `"logo"` requires an upload.
 export async function updateStreamer(env: AppEnv, userId: string, input: StreamerEdit): Promise<Streamer> {
   const value = parsed(streamerEditSchema, input);
   const current = await ownStreamerRow(env, userId);
@@ -383,7 +369,7 @@ export async function updateStreamer(env: AppEnv, userId: string, input: Streame
   return streamerValue({ ...row, ownerAvatarPreset: await ownerAvatarPreset(env, userId) }, true);
 }
 
-/** `PATCH /api/profile`: the display name and preset avatar. A preset does not remove an uploaded picture. */
+// `PATCH /api/profile`: the display name and preset avatar. A preset does not remove an uploaded picture.
 export async function updateProfile(
   env: AppEnv,
   userId: string,
@@ -403,7 +389,7 @@ export async function updateProfile(
   return row;
 }
 
-/** `PATCH /api/me/locale`. Null forgets the saved language. */
+// `PATCH /api/me/locale`. Null forgets the saved language.
 export async function setLocale(env: AppEnv, userId: string, input: unknown): Promise<Locale | null> {
   const { locale } = parsed(localeSchema, input);
   await consumeMutationQuota(env, userId);
@@ -411,7 +397,7 @@ export async function setLocale(env: AppEnv, userId: string, input: unknown): Pr
   return locale;
 }
 
-/** `PATCH /api/me/preferences`. Replaces the saved preferences; the client debounces by one second. */
+// `PATCH /api/me/preferences`. Replaces the saved preferences; the client debounces by one second.
 export async function setDisplayPrefs(env: AppEnv, userId: string, input: unknown): Promise<DisplayPrefs> {
   const preferences = parsed(displayPrefsSchema, input);
   await consumeMutationQuota(env, userId);
@@ -484,7 +470,7 @@ export async function getEntry(env: AppEnv, id: string, viewerId: string | null)
   return row ? entryValue(row) : null;
 }
 
-/** A topic or poll, or null when it does not exist or its page is suspended and hidden from the viewer. */
+// A topic or poll, or null when it does not exist or its page is suspended and hidden from the viewer.
 export async function getVisibleEntry(env: AppEnv, id: string, viewerId: string | null): Promise<Entry | null> {
   const entry = await getEntry(env, id, viewerId);
   if (!entry) return null;
@@ -544,7 +530,8 @@ export async function getOverlaySnapshot(
   };
 }
 
-/** An entry's Ideas status. Ideas from before statuses existed have none: they count as new on the official page. */
+// An entry's Ideas status. Ideas from before statuses existed have none: they count as new on the official
+// page.
 const IDEA_STATUS_SQL = `coalesce(e.status, CASE WHEN e.kind='topic'
   AND EXISTS(SELECT 1 FROM streamers o WHERE o.id=e.streamer_id AND o.is_official=1) THEN ? END)`;
 
@@ -633,26 +620,18 @@ async function entryPermission(env: AppEnv, id: string, streamerId: string): Pro
   return row;
 }
 
-/**
- * The step-up gate for a removal that relies on administrator rights (security review finding 1).
- * - A function: the generic delete endpoints pass `requireAdminSession`. It runs only for an admin removal, and the
- *   removal then writes a `moderation_actions` row in the same batch.
- * - `"checked"`: an admin route that already ran `requireAdminSession` and writes its own audit row.
- * - Absent: an admin removal is refused, so no caller can skip the gate by accident.
- */
+// Admin removal requires a gate: callback runs `requireAdminSession` and batches an audit row; `"checked"`
+// means the caller already checked/audits; absent means refuse.
 export type AdminRemovalGate = StepUpGate | "checked";
 
-/** Runs the admin step-up check and says how the request met the policy, for the audit row. */
+// Runs the admin step-up check and says how the request met the policy, for the audit row.
 export type StepUpGate = () => Promise<{ stepUp: string }>;
 
-/** What an admin removal records: the audit row without its actor and step-up state. */
+// Removal audit data excludes actor and step-up state.
 export type RemovalAudit = Omit<AuditEntry, "actorId" | "createdAt">;
 
-/**
- * Authors and the streamer may remove their content without a step-up. Administrators may remove anything for
- * moderation, through the gate. Returns whether the removal relies on administrator rights, and the audit
- * statement to batch right after the delete (it writes only when the delete changed a row).
- */
+// Authors/owners delete without step-up. Admin removals require the gate. Return admin-rights usage and an
+// audit statement conditional on the preceding deletion.
 export async function adminRemoval(
   env: AppEnv,
   viewerId: string,
@@ -717,7 +696,7 @@ async function removeEntry(
   if (removed.meta.changes === 0) throw new HttpError(404, "Topic or poll not found.");
 }
 
-/** Removes a topic or poll with the same rules as a delete action, without consuming the caller's quota. */
+// Removes a topic or poll with the same rules as a delete action, without consuming the caller's quota.
 export async function deleteEntry(
   env: AppEnv,
   viewerId: string,

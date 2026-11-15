@@ -6,15 +6,14 @@ import { SiteHeader } from "./shell/site-header";
 import { Dialog } from "./ui/dialog";
 import { Icon, type IconName } from "./ui/icon";
 
-/* Shared pieces now live in ./ui (primitives) and ./shell (headers, menu, footer). These re-exports keep the
-   existing imports working; new code imports from ./ui and ./shell directly. */
+// Compatibility exports. New imports use ./ui and ./shell directly.
 export { Avatar } from "./ui/avatar";
 export { SignIn, SignInDialog } from "./shell/sign-in-dialog";
 export { SiteHeader } from "./shell/site-header";
 export { SiteFooter } from "./shell/footer";
 export type { Provider } from "../lib/shell";
 
-/** A plain dialog with a title, a description and free-form content. New code uses <Dialog> from ./ui/dialog. */
+// Legacy dialog. New code uses Dialog from ./ui/dialog.
 export function Modal({
   open,
   onOpenChange,
@@ -35,7 +34,7 @@ export function Modal({
   );
 }
 
-/** An empty list or page. `action` (a button or link) sits inside the panel, under the text. */
+// Place the optional action below the empty-state text.
 export function EmptyState({
   title,
   icon,
@@ -58,7 +57,7 @@ export interface LegalSection {
   body: ReactNode;
 }
 
-/** Shared layout for the privacy policy and terms: header, back link, draft notice, contents, and sections. */
+// Shared privacy/terms layout.
 export function LegalDocument({
   title,
   summary,

@@ -166,7 +166,7 @@ describe("cards, links and the Ideas board in storage", (): void => {
     await updateOverlay(env, "owner", page, { action: "preview", source: { type: "card", ref: first[1].id } });
     await updateOverlay(env, "owner", page, { action: "take" });
     const before = (await getOverlayState(env, page)).revision;
-    // Edit card 2, move it first and add a card; ids the page does not own get new ones.
+    // Edit, reorder, and add cards; replace IDs not owned by this page.
     const edited = (await saveCards(env, "owner", {
       cards: [
         { ...card("Two, edited"), id: first[1].id },
@@ -188,9 +188,7 @@ describe("cards, links and the Ideas board in storage", (): void => {
     expect(edited[4].id).toBe(first[2].id);
     let overlay = await getOverlayState(env, page);
     expect(overlay.air).toEqual({ type: "card", ref: first[1].id });
-    // The revision moves, so the OBS page reloads the card's new text.
     expect(overlay.revision).toBeGreaterThan(before);
-    // Removing the card on air takes it off air instead of showing another card.
     await saveCards(env, "owner", { cards: edited.filter((value: CommunityCard) => value.id !== first[1].id) });
     overlay = await getOverlayState(env, page);
     expect(overlay.air).toEqual({ type: "hidden", ref: null });
@@ -212,7 +210,7 @@ describe("cards, links and the Ideas board in storage", (): void => {
       ["other", "Merch"],
     ]);
     expect(saved.card).toBe(true);
-    // The Community card leads to the links in About, so hiding them there turns the card off as well.
+    // Hiding About support links must also hide their Community card.
     const links = saved.links.map(({ kind, label, url }) => ({ kind, label, url }));
     const hidden = await saveSupport(env, "owner", { links, visible: false, card: true });
     expect(hidden).toMatchObject({ visible: false, card: false });
@@ -290,7 +288,7 @@ describe("cards, links and the Ideas board in storage", (): void => {
       status: "planned",
     });
     expect(filtered.entries.map((entry) => entry.title)).toEqual(["Light theme"]);
-    // An idea from before statuses existed has none, and is listed as new.
+    // Pre-status ideas have no status and appear as new.
     await env.DB.prepare(
       "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,created_at) VALUES (?,?,'viewer','topic','Old idea','b','design',1)",
     )

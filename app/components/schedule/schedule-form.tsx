@@ -66,7 +66,7 @@ function initial(
   };
 }
 
-/** The other stream this one would overlap, if any (cancelled streams do not count). */
+// Overlap excludes cancelled streams.
 function overlapping(body: EventBody, events: StreamEvent[], editing: string | null): StreamEvent | null {
   const date = parseDate(body.date);
   if (!date || !/^\d{2}:\d{2}$/.test(body.time)) return null;
@@ -183,7 +183,7 @@ function TopicPicker({
   );
 }
 
-/** "Schedule a stream" and "Edit stream": one form in a sheet; the parent sends it. */
+// Shared create/edit form; parent submits it.
 export function ScheduleForm({
   formId,
   event,

@@ -31,7 +31,7 @@ export function meta({ matches }: MetaArgs) {
 export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
   const url = new URL(request.url);
-  // "@handle" searches the handle: the @ is how people write it, not part of it.
+  // Strip the user-facing @ prefix from handle searches.
   const query: string = (url.searchParams.get("query") ?? "").trim().replace(/^@/u, "").slice(0, 60);
   const [page, total, featured] = await Promise.all([
     listStreamers(app.env, null, query),
@@ -133,11 +133,8 @@ function directoryCount(shown: number, total: number): string {
   return shown < total ? t("streamers.showingOf", { shown, total }) : tn("streamers.showing", shown);
 }
 
-/**
- * The Streamers directory (item 2): official pages first, then by handle, 20 at a time with "Load more", and a
- * search by name or @handle. From a landing sign (`?then=suggest|vote|discuss`, item 5) a dismissible prompt
- * says what to do and every card goes straight to that action.
- */
+// Official pages first, then handles; 20 per page. Landing intents add a dismissible prompt and direct each
+// card to the requested action.
 export default function Streamers(): ReactNode {
   const data = useLoaderData<typeof loader>();
   const shell = useShell();
@@ -154,12 +151,12 @@ export default function Streamers(): ReactNode {
   const focusCard = useRef<number | null>(null);
   useRememberContentRoute("/streamers", t("nav.streamers"));
 
-  // A new search (or a new intent) starts again from the first page.
+  // Reset pagination when search or intent changes.
   const key = `${data.query}\n${data.intent ?? ""}`;
   const more = extra?.key === key ? extra : null;
   const streamers: Streamer[] = [...data.streamers, ...(more?.streamers ?? [])];
   const nextCursor: string | null = more ? more.nextCursor : data.nextCursor;
-  // Follow the URL (Back, Clear search), but never overwrite what someone is still typing.
+  // Follow URL changes without overwriting active input.
   const [shownQuery, setShownQuery] = useState<string>(data.query);
   if (shownQuery !== data.query) {
     setShownQuery(data.query);
@@ -218,7 +215,7 @@ export default function Streamers(): ReactNode {
       if (data.query) params.set("query", data.query);
       const page = await requestJson<StreamerDirectory>(`/api/streamers?${params.toString()}`);
       setExtra({ key, streamers: [...(more?.streamers ?? []), ...page.streamers], nextCursor: page.nextCursor });
-      // Keyboard users continue from the first new card once it renders.
+      // Move keyboard focus to the first new card.
       focusCard.current = shown;
     } catch (error_: unknown) {
       setError(errorMessage(error_));

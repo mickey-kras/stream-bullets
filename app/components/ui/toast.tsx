@@ -17,9 +17,9 @@ export interface ToastAction {
 }
 
 export interface ToastOptions {
-  /** An action such as Undo. A toast with an action stays for at least 10 s. */
+  // Actions such as Undo remain at least 10 seconds.
   action?: ToastAction;
-  /** Errors are announced assertively; everything else politely. */
+  // Errors announce assertively; other messages politely.
   tone?: "status" | "error";
 }
 
@@ -31,10 +31,10 @@ interface ToastState extends ToastOptions {
   open: boolean;
 }
 
-/** Undo and other actions stay at least this long (approved review round 13). */
+// Minimum action duration.
 export const ACTION_TOAST_MS = 10_000;
 
-/** How long a toast stays: 5 s plus 60 ms per character (a11y M9), at least 10 s with an action. */
+// Duration: 5 s + 60 ms/character; action minimum: 10 s.
 export function toastDuration(message: string, hasAction: boolean): number {
   const reading: number = 5000 + 60 * message.length;
   return hasAction ? Math.max(ACTION_TOAST_MS, reading) : reading;
@@ -42,15 +42,12 @@ export function toastDuration(message: string, hasAction: boolean): number {
 
 const ToastContext = createContext<ShowToast>(() => undefined);
 
-/** `const toast = useToast(); toast("Copied.")` or `toast("Topic deleted.", { action: { label: "Undo", onClick } })`. */
+// useToast()("Copied.") or toast("Deleted.", {action: {label: "Undo", onClick}}).
 export function useToast(): ShowToast {
   return useContext(ToastContext);
 }
 
-/**
- * Keeps a slot for the visible toast in the page layout, just above the footer band, so the toast never
- * covers content: the page's scroll area shrinks by the toast's height while it shows.
- */
+// Reserve toast height above the footer; shrink scrolling content instead of covering it.
 function useReservedSlot(visible: boolean): RefObject<HTMLOListElement | null> {
   const viewport = useRef<HTMLOListElement | null>(null);
   useEffect(() => {
@@ -82,10 +79,7 @@ function useReservedSlot(visible: boolean): RefObject<HTMLOListElement | null> {
   return viewport;
 }
 
-/**
- * Toasts on Radix Toast: one at a time, bottom centre in a reserved area that never covers content.
- * The timer pauses while the pointer is over the toast or focus is inside it (Radix), and F8 jumps to it.
- */
+// One bottom-center Radix toast. Hover/focus pauses expiry; F8 focuses it.
 export function ToastProvider({ children }: Readonly<{ children: ReactNode }>): ReactNode {
   const [toast, setToast] = useState<ToastState | null>(null);
   const sequence = useRef<number>(0);

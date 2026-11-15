@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
-/** Migration 0019: triggers keep `entry_vote_counts` equal to a count of `entry_votes`. */
+// Migration 0019 keeps entry_vote_counts equal to entry_votes totals.
 
 let database: TestDatabase;
 let db: D1Database;

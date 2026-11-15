@@ -10,15 +10,12 @@ export const reasonLabels: Record<ModerationReason, MessageId> = {
   other: "moderation.reason.other",
 };
 
-/** A stored reason in words. Older rows may hold free text, which shows as written. */
+// Translate known reasons; preserve legacy free text.
 export function reasonText(reason: string): string {
   return reason in reasonLabels ? t(reasonLabels[reason as ModerationReason]) : reason;
 }
 
-/**
- * The owner's notice for a moderated page (R13): what happened, when and why, as far as known. Empty for an active
- * page. With a date it reads like the mockup: "Your page was frozen on {date}. Reason: {reason}. {effect}"
- */
+// Owner notice: action, date, reason and effect when known. Empty for active pages.
 export function ownerNotice(status: StreamerStatus, reason: string | null, changedAt: number | null = null): string {
   if (status === "active") return "";
   const frozen: boolean = status === "frozen";

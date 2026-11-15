@@ -11,7 +11,6 @@ import {
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
-/** The private OBS overlay link: its key, how it is stored, and who may make a new one. */
 
 const origin = "https://overlay-key.example.test";
 const secret = "test-only-secret-0f9e8d7c6b5a49382716a5b4c3d2e1f0";
@@ -64,6 +63,10 @@ beforeAll(async (): Promise<void> => {
   env = {
     DB: database.db,
     IMAGES: database.bucket,
+    CHANNEL_INGEST: {
+      idFromName: (name: string) => name,
+      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+    } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
       get: () => ({
@@ -147,7 +150,6 @@ describe("making and checking the overlay key", (): void => {
     expect(row).toEqual({ streamer_id: page, key_hash: await hashOverlayKey(key), created_at: expect.any(Number) });
     expect(JSON.stringify(row)).not.toContain(key);
     expect(await overlayKeyMatches(env, page, key)).toBe(true);
-    // Overlay control never sends the key or its hash back.
     const state = await call("GET", "overlay", { user: "owner" });
     const text = await state.text();
     expect(text).not.toContain(key);

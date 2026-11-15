@@ -17,10 +17,7 @@ import {
   type KeyKind,
 } from "./helpers/authenticator";
 
-/*
- * The verification itself is @simplewebauthn/server's. These tests pin the properties the admin step-up relies on,
- * so a library update that loosens one of them fails here.
- */
+// Pin the @simplewebauthn/server guarantees required by admin step-up.
 
 const origin = "https://stream.example.test";
 const rpId = "stream.example.test";

@@ -20,10 +20,7 @@ import { HttpError } from "./http.server";
 import type { AdminSession } from "./stepup.server";
 import { isPlaceholderEmail } from "./validation";
 
-/**
- * Page moderation (item 25) and Ideas status (item 46). Every change is one atomic batch with its audit row in
- * `moderation_actions`. Status rules are in access.server.ts (assertStreamerWritable and the visibility helpers).
- */
+// Batch moderation/Ideas changes atomically with `moderation_actions`; access.server.ts owns status rules.
 
 const PAGE_SIZE = 30;
 const HISTORY_SIZE = 10;
@@ -73,7 +70,7 @@ function parsed<T>(schema: z.ZodType<T>, value: unknown): T {
   return result.data;
 }
 
-/** Which statuses each action leaves from, and where it goes. */
+// Which statuses each action leaves from, and where it goes.
 const transitions: Record<PageAction, { from: readonly StreamerStatus[]; to: StreamerStatus; verb: string }> = {
   freeze: { from: ["active"], to: "frozen", verb: "frozen" },
   unfreeze: { from: ["frozen"], to: "active", verb: "active" },
@@ -81,16 +78,13 @@ const transitions: Record<PageAction, { from: readonly StreamerStatus[]; to: Str
   unsuspend: { from: ["suspended"], to: "active", verb: "active" },
 };
 
-/** Freezing and suspending need a step-up from the last 2 minutes; lifting them needs the normal 15. */
+// Freezing and suspending need a step-up from the last 2 minutes; lifting them needs the normal 15.
 export function isSensitivePageAction(action: unknown): boolean {
   return action === "freeze" || action === "suspend";
 }
 
-/**
- * Freezes, suspends or restores a page. The reason is stored on the page (the owner sees it in their banner);
- * the note stays in the audit log for admins. `notify` records that the owner asked to be told: the app shows
- * the in-app banner, and email goes out only once outbound email is configured (risk R13).
- */
+// Store the owner-visible reason on the page and admin-only note in the audit log. Record notification intent;
+// always show the banner and send email only when configured.
 export async function moderatePage(
   env: AppEnv,
   admin: AdminSession,
@@ -137,11 +131,8 @@ export async function moderatePage(
 export const officialSchema = z.object({ official: z.boolean() }).strict();
 export type OfficialInput = z.input<typeof officialSchema>;
 
-/**
- * Marks a page as the official StreamBullets page, or clears it (R14): the admin creates @streambullets through the
- * normal flow, then sets the flag here. The change and its audit row are one batch; setting the current value is a
- * 409, so the log only holds real changes. The route asks for a fresh step-up, like Freeze and Suspend.
- */
+// Set/clear official status atomically with an audit row. Unchanged status returns 409. Require fresh step-up,
+// as for Freeze/Suspend.
 export async function setOfficial(
   env: AppEnv,
   admin: AdminSession,
@@ -218,7 +209,7 @@ interface HistoryRow {
   created_at: number;
 }
 
-/** Only the uploaded picture under our own path is shown; provider picture URLs are never echoed. */
+// Show only local uploaded images; never echo provider URLs.
 export function adminPicture(userId: string | null, image: string | null): string | null {
   return userId && image === `/images/avatar/${encodeURIComponent(userId)}` ? image : null;
 }
@@ -258,7 +249,10 @@ function historyValue(row: HistoryRow): ModerationEvent {
   };
 }
 
-/** Every page for the Streamer pages tab, by handle, with owner, counts and recent moderation history. */
+// Admin actions only: channel and overlay key audit rows are owner or system actions.
+const HISTORY_ACTIONS: readonly string[] = [...PAGE_ACTIONS, "official", "unofficial"];
+
+// Every page for the Streamer pages tab, by handle, with owner, counts and recent moderation history.
 export async function listModerationPages(env: AppEnv, adminId: string, query: PageQuery): Promise<AdminPageList> {
   const value = parsed(pageQuerySchema, query);
   await requireAdmin(env, adminId);
@@ -285,10 +279,11 @@ export async function listModerationPages(env: AppEnv, adminId: string, query: P
         SELECT m.id, m.streamer_id, m.action, m.reason, m.note, m.notify_owner, u.name AS actor, m.created_at,
           row_number() OVER (PARTITION BY m.streamer_id ORDER BY m.created_at DESC, m.id DESC) AS position
         FROM moderation_actions m LEFT JOIN user u ON u.id=m.actor_id
-        WHERE m.target_kind='streamer' AND m.streamer_id IN (SELECT value FROM json_each(?))
-      ) WHERE position <= ? ORDER BY created_at DESC, id DESC
+        WHERE m.target_kind='streamer' AND m.streamer_id IN (SELECT value FROM json_each(?1))
+          AND m.action IN (SELECT value FROM json_each(?2))
+      ) WHERE position <= ?3 ORDER BY created_at DESC, id DESC
     `)
-      .bind(JSON.stringify(page.map((row) => row.id)), HISTORY_SIZE)
+      .bind(JSON.stringify(page.map((row) => row.id)), JSON.stringify(HISTORY_ACTIONS), HISTORY_SIZE)
       .all<HistoryRow>();
     for (const event of events) {
       const list = history.get(event.streamer_id) ?? [];
@@ -326,10 +321,7 @@ export async function listModerationPages(env: AppEnv, adminId: string, query: P
   };
 }
 
-/**
- * Removes a topic or poll for moderation, on any page status. Closes every open report about it and records
- * the decision with the item's ID only. The log keeps no copy of the content.
- */
+// Moderation removal ignores page status and closes open reports. Audit only the item ID, never content.
 export async function removeEntryAsAdmin(
   env: AppEnv,
   admin: AdminSession,
@@ -365,10 +357,7 @@ export async function removeEntryAsAdmin(
   return { streamerId: entry.streamer_id, resolved: closed.meta.changes };
 }
 
-/**
- * Sets the Ideas status of an item on the official page (Under review, Planned, In progress, Shipped, Not
- * planned with a reason). Null clears it. Other pages have no Ideas status.
- */
+// Set/clear official-page Ideas status; Not planned needs a reason. Other pages have no Ideas status.
 export async function setEntryStatus(
   env: AppEnv,
   admin: AdminSession,

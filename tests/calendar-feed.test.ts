@@ -13,7 +13,7 @@ import {
 import { communityCardSchema, eventInputSchema, eventPatchSchema, isHttpsLink } from "../app/server/validation";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
-/** Security review finding 2 (.ics injection) and code review m11 (SEQUENCE) and m12 (which streams the feed holds). */
+// Calendar injection, revision ordering, and feed selection checks.
 
 const day = 86_400_000;
 const INJECTED =
@@ -33,7 +33,7 @@ function event(extra: Partial<IcsEvent> = {}): IcsEvent {
   };
 }
 
-/** The content lines of a calendar, with folding undone. */
+// Calendar content lines with folding removed.
 function contentLines(text: string): string[] {
   return text.replaceAll("\r\n ", "").split("\r\n").filter(Boolean);
 }
@@ -90,11 +90,11 @@ describe("calendar content lines", (): void => {
     expect(lines).toContain(
       "URL:https://twitch.tv/xEND:VEVENTBEGIN:VEVENTSUMMARY:Free subsBEGIN:VALARMACTION:DISPLAYEND:VALARM",
     );
-    // A bare CR in TEXT becomes an escaped line break, and other control characters go.
+    // Escape bare CR as a line break; remove other control characters.
     expect(lines).toContain(String.raw`SUMMARY:Line\nbreak`);
     expect(lines).toContain(String.raw`DESCRIPTION:One\ntwo\nthree\nfour`);
     expect(lines).toContain("UID:e1X:1@streambullets.com");
-    // Every physical line ends in CRLF and holds no other CR or LF.
+    // Every physical line must end with CRLF and contain no other CR/LF.
     for (const line of text.split("\r\n")) expect(/[\r\n]/u.test(line)).toBe(false);
   });
 
@@ -106,7 +106,7 @@ describe("calendar content lines", (): void => {
     expect(first).toContain(`SEQUENCE:${sequence}`);
     const later = contentLines(buildCalendar("Nova", [event({ updatedAt: Date.UTC(2026, 10, 1, 0, 0, 5) })], { now }));
     expect(later).toContain(`SEQUENCE:${sequence + 5}`);
-    // A change in the future of `now` never moves DTSTAMP past `now`.
+    // Clamp future changes to now for DTSTAMP.
     expect(contentLines(buildCalendar("Nova", [event({ updatedAt: now + day })], { now }))).toContain(
       "DTSTAMP:20261102T000000Z",
     );
@@ -190,7 +190,7 @@ describe("the calendar feed", (): void => {
           now,
         ),
       );
-    // 150 past streams in the last 30 days, and 450 upcoming ones in the next 12 weeks.
+    // 150 past streams within 30 days; 450 upcoming within 12 weeks.
     await env.DB.batch(rows(150, now - 29 * day, 4 * 3_600_000, "past"));
     await env.DB.batch(rows(450, now + 3_600_000, 4 * 3_600_000, "next"));
     const uids = (await feed(now)).filter((line: string): boolean => line.startsWith("UID:"));
@@ -198,7 +198,6 @@ describe("the calendar feed", (): void => {
     expect(uids).toContain("UID:next-449@streambullets.com");
     expect(uids).toContain("UID:past-149@streambullets.com");
     expect(uids).not.toContain("UID:past-000@streambullets.com");
-    // Oldest first, as before.
     expect(uids[0]).toBe(`UID:past-${String(150 - FEED_PAST_LIMIT).padStart(3, "0")}@streambullets.com`);
     expect(uids.at(-1)).toBe("UID:next-449@streambullets.com");
     expect(UPCOMING_LIMIT).toBeGreaterThanOrEqual(400);

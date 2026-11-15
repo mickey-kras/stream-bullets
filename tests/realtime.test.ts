@@ -76,7 +76,7 @@ async function connect(key: string = clientKey): Promise<{ socket: LiveSocket; s
   return { socket, snapshot: await first };
 }
 
-/** Waits for the next message that matches, skipping snapshots and ticks it does not want. */
+// Skip unrelated snapshots and ticks until a matching message arrives.
 function nextMessage<T extends { type: string }>(
   socket: LiveSocket,
   match: (message: T) => boolean,
@@ -120,12 +120,11 @@ async function connectAs(
   return { socket, snapshot: await first };
 }
 
-/** A distinct client key for socket number `index`. */
 function seat(index: number): string {
   return index.toString(16).padStart(64, "0");
 }
 
-/** Opens `count` subscriptions at once, each with its client key, account and owner flag, and accepts the sockets. */
+// Open and accept `count` sockets with distinct client keys and supplied identities.
 async function subscribeMany(
   count: number,
   spec: (index: number) => { key: string; user?: string; owner?: boolean },
@@ -148,12 +147,10 @@ async function subscribeMany(
   return responses;
 }
 
-/** How many sockets the room holds open, all of them or one client's. */
 async function openCount(key: string = ""): Promise<number> {
   return (await (await request("open-count", "POST", streamerId, key)).json()) as number;
 }
 
-/** The next message as text, without parsing it. */
 function nextRaw(socket: LiveSocket): Promise<string> {
   return new Promise((resolve): void => {
     socket.addEventListener("message", (event): void => resolve(String(event.data)), { once: true });
@@ -428,7 +425,6 @@ describe("public poll updates", (): void => {
     const responses = await subscribeMany(101, (index) => ({ key: seat(index) }));
     expect(responses.filter((result) => result.status === 101)).toHaveLength(100);
     expect(responses.filter((result) => result.status === 503)).toHaveLength(1);
-    // Signed-in viewers still find a seat.
     expect((await subscribeMany(1, () => ({ key: "b".repeat(64), user: "member-1" })))[0].status).toBe(101);
   });
 
@@ -437,7 +433,7 @@ describe("public poll updates", (): void => {
     await subscribeMany(10, () => ({ key: clientKey }));
     await subscribeMany(100, (index) => ({ key: seat(200 + index), user: `member-${index}` }));
     expect((await subscribeMany(1, () => ({ key: clientKey, user: "member-x" })))[0].status).toBe(429);
-    // The OBS overlay and the dashboard of the owner, from the same network as ten other sockets.
+    // Owner and OBS share a network already holding ten viewer sockets.
     const owner = await subscribeMany(3, () => ({ key: clientKey, user: "owner-1", owner: true }));
     expect(owner.map((result) => result.status)).toEqual([101, 101, 101]);
     expect(await openCount()).toBe(200);
@@ -582,7 +578,7 @@ describe("Mash Battle taps", (): void => {
     const secondReply = mashReply(second.socket);
     tap(second.socket, id, 20, 1);
     const secondAck = await secondReply;
-    // The bucket holds one second at 15 a second. The second socket finds it empty.
+    // The 15 taps/s bucket starts full; a second socket shares the empty bucket.
     expect(firstAck).toMatchObject({ type: "mash-ack", accepted: 15, mine: 15 });
     expect(secondAck.accepted).toBeLessThanOrEqual(1);
     expect(secondAck.mine).toBeLessThanOrEqual(16);
@@ -633,7 +629,7 @@ describe("overlay updates", (): void => {
       revision: 3,
     });
     expect((await update).overlay).not.toHaveProperty("preview");
-    // One room sends in order, so a leaked update would arrive before this refresh's snapshot.
+    // Ordered delivery puts leaked updates before the refresh snapshot.
     streamerId = otherId;
     const refreshed = nextMessage<{ type: string }>(socket, (message) => message.type === "snapshot");
     expect((await request("refresh")).status).toBe(204);

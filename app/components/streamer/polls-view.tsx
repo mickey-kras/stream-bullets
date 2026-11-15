@@ -20,7 +20,7 @@ const liveLabels: Record<LiveStatus, MessageId> = {
   offline: "live.offline",
 };
 
-/** No Mash Battle on screen: a stand-in for the hook, which every render must call. */
+// Stable placeholder preserves unconditional hook order.
 const NO_BATTLE: Pick<Entry, "id" | "mash"> = { id: "", mash: null };
 
 export interface PollsViewProps {
@@ -30,7 +30,7 @@ export interface PollsViewProps {
   moderator: boolean;
   writable: boolean;
   entries: Entry[];
-  /** The poll opened with `?entry=`, or null for the list. */
+  // Opened ?entry= poll; null shows the list.
   selected: Entry | null;
   now: number;
   sort: SortOrder;
@@ -52,12 +52,12 @@ export interface PollsViewProps {
   discussion: (entry: Entry) => ReactNode;
 }
 
-/** A poll viewers can still vote in, for the "Next live poll" link after a battle. */
+// Eligible target for Next live poll.
 function isOpenPoll(entry: Entry, now: number): boolean {
   return entry.kind !== "mash" && !entry.revealed && (entry.endsAt === null || entry.endsAt > now);
 }
 
-/** While a battle counts down or runs, phones hide the rest of the page around it (mockup battle focus). */
+// Focus phone layouts on countdown/live battles.
 function useBattleFocus(on: boolean): void {
   useEffect(() => {
     if (!on) return;
@@ -120,10 +120,7 @@ function PollToolbarStart({
   return toolbarStart;
 }
 
-/**
- * Back from one poll to the list, by its Back control or the browser: focus returns to the poll that was open,
- * instead of the page, because the Back control is gone.
- */
+// Returning to the list restores focus to the poll because its Back control disappears.
 function useReturnFocus(selectedId: string | null): void {
   const previous = useRef<string | null>(selectedId);
   useEffect(() => {
@@ -138,7 +135,7 @@ function useReturnFocus(selectedId: string | null): void {
   }, [selectedId]);
 }
 
-/** The Polls tab: the list, one poll with its discussion, or one Mash Battle on its own page. */
+// Polls shows the list, a discussion, or a Mash Battle.
 export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
   const { name, viewer, owner, writable, entries, selected, now, live } = props;
   useReturnFocus(selected?.id ?? null);
@@ -282,14 +279,13 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
   );
 }
 
-/** The battle's phase as the mockup names it (waiting, countdown, live, finished). */
 function useBattlePhase(battle: Entry | null, now: number): string {
   const view = useMashView(battle ?? NO_BATTLE, now);
   if (!view || view.current === "setup") return "waiting";
   return view.current;
 }
 
-/** The `<main>` classes for the Polls tab, so the mockup's polls and battle layouts apply. */
+// Main layout classes for poll and battle views.
 export function usePollsMainClass(selected: Entry | null, now: number): string {
   const battle: Entry | null = selected?.kind === "mash" ? selected : null;
   const phase: string = useBattlePhase(battle, now);

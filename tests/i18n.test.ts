@@ -21,7 +21,7 @@ function catalog(locale: Locale): Catalog {
 
 const english: Catalog = catalog("en");
 const PLURAL_FORMS = new Set(["one", "few", "many", "other"]);
-/** Message ids with plural forms: the id without `.one` / `.other`. */
+// Plural message IDs without the `.one` / `.other` suffix.
 const pluralBases = new Set(
   Object.keys(english)
     .filter((id: string) => id.endsWith(".other") && `${id.slice(0, -6)}.one` in english)
@@ -33,10 +33,7 @@ const variables = (text: string): string =>
     .sort()
     .join(",");
 
-/**
- * The plural forms a language needs for whole numbers (CLDR), plus `other`, the fallback every language keeps.
- * The `many` form some languages use only for millions is left out.
- */
+// CLDR integer plural forms plus `other`; exclude million-only `many` forms.
 function requiredForms(locale: Locale): string[] {
   const forms = new Set<string>(["other"]);
   for (let count = 0; count <= 200; count += 1) forms.add(new Intl.PluralRules(intlLocale(locale)).select(count));

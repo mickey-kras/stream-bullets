@@ -14,11 +14,11 @@ import { consumeMutationQuota } from "./data.server";
 import { HttpError } from "./http.server";
 import { line } from "./validation";
 
-/** Mash Battle owner actions (item 31). Taps never come here: they go over the live WebSocket (R16). */
+// Owner actions use HTTP; taps use the live WebSocket.
 
 const MAX_ENTRIES = 1000;
 
-/** The create action for a Mash Battle, sent to `POST /api/streamers/:handle` like any poll. */
+// The create action for a Mash Battle, sent to `POST /api/streamers/:handle` like any poll.
 export const mashCreateSchema = z
   .object({
     action: z.literal("create"),
@@ -41,7 +41,7 @@ export const mashCreateSchema = z
   );
 export type MashCreate = z.infer<typeof mashCreateSchema>;
 
-/** `POST /api/mash/:id/start`. `countdown: true` starts with 3-2-1. */
+// `POST /api/mash/:id/start`. `countdown: true` starts with 3-2-1.
 export const mashStartSchema = z.object({ countdown: z.boolean().default(true) }).strict();
 export const mashActions = ["start", "end", "restart"] as const;
 export type MashAction = (typeof mashActions)[number];
@@ -55,7 +55,7 @@ interface BattleRow {
   owner_id: string;
 }
 
-/** Creates a Mash Battle: an entry of kind `choice` plus its `entry_mash` row (R1), in one batch. */
+// Creates a Mash Battle: an entry of kind `choice` plus its `entry_mash` row, in one batch.
 export async function createMash(
   env: AppEnv,
   userId: string,
@@ -105,11 +105,7 @@ function mashUpdate(env: AppEnv, sql: string, ...params: (string | number | null
   return env.DB.prepare(sql).bind(...params);
 }
 
-/**
- * Start, end or restart a battle. Each writes D1 first; the caller then asks the live room to reload
- * it (`notifyMash`). Ending a battle in its countdown cancels it back to setup. Restart deletes the taps
- * and keeps the sides viewers picked.
- */
+// Write D1 before `notifyMash`. Ending countdown returns to setup. Restart clears taps but keeps chosen sides.
 export async function runMashAction(
   env: AppEnv,
   userId: string,

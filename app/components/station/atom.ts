@@ -4,8 +4,7 @@ import { add, mesh, cyl, ball, torus, tube, polar, lathe, TAU, DECK_Y, profile }
 
 export function buildAtom(k: Kit, station: THREE.Group): void {
   const { brassSurface, brass, gold, red, animators } = k;
-  // All brass: stepped base with a red enamel band, a tall cone ringed by blade spikes, a single
-  // sphere nucleus and three wire orbits carrying brass electrons.
+  // Brass atom: red-banded base, spiked cone, nucleus and three electron orbits.
   const atom = add(new THREE.Group(), station);
   {
     atom.position.copy(polar(3.95, -0.98)).setY(DECK_Y);

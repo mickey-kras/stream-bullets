@@ -38,10 +38,13 @@ const config: BuildConfig = {
 const configPath: string = resolve(directory, "wrangler.json");
 const statePath: string = resolve(directory, "state");
 await writeFile(configPath, JSON.stringify(config), { mode: 0o600 });
-// A random salt per run turns on the AI interest counter on /ai.
+// A per-run random salt enables /ai voting.
 await writeFile(
   resolve(directory, ".env"),
-  `BETTER_AUTH_SECRET=${secret}\nAI_INTEREST_SALT=${randomBytes(24).toString("hex")}\n`,
+  // Kick credentials and token keys make one channel platform available in the controls. No test calls Kick.
+  `BETTER_AUTH_SECRET=${secret}\nAI_INTEREST_SALT=${randomBytes(24).toString("hex")}\n` +
+    `KICK_CLIENT_ID=e2e-kick-client\nKICK_CLIENT_SECRET=e2e-kick-secret\n` +
+    `CHANNEL_TOKEN_KEYS=e2e:${randomBytes(32).toString("base64")}\n`,
   { mode: 0o600 },
 );
 const wrangler: string = resolve(root, "node_modules/wrangler/bin/wrangler.js");
@@ -83,11 +86,10 @@ for (const role of [
     `INSERT INTO session(id,token,user_id,expires_at,created_at,updated_at) VALUES ('${randomUUID()}','${token}','${id}',${now + 86_400_000},${now},${now});`,
   );
 }
-// The security-key admin (admin-keys.spec.ts). A first key may be added only within 5 minutes of sign-in, so
-// this session counts as new for the whole run. A second session of the same account checks that a key check
-// stays with the session that made it.
+// Keep the key-admin sign-in fresh for the five-minute enrollment window.
+// Its second session verifies that step-up remains session-specific.
 statements.push(`UPDATE session SET created_at=${now + 3_600_000} WHERE user_id='${users.keyadmin.id}';`);
-// Account deletion needs a sign-in from the last 10 minutes (account.spec.ts), however long the run takes.
+// Keep deletion sign-in within ten minutes throughout the run.
 statements.push(`UPDATE session SET created_at=${now + 3_600_000} WHERE user_id='${users.leaver.id}';`);
 {
   const token: string = randomBytes(24).toString("hex");
@@ -115,7 +117,7 @@ for (let index: number = 1; index <= 55; index += 1) {
     `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${randomUUID()}','${paginationStreamId}','${users.paginationowner.id}','topic','Archive topic ${String(index).padStart(2, "0")}','An older conversation.','Tech & setups','[]',${now + index},0);`,
   );
 }
-// The leaver deletes their account in the browser tests: a page they own, and a comment with someone else's reply.
+// Deletion fixture: owned page and comment with another user's reply.
 const leaverCommentId: string = randomUUID();
 statements.push(
   `INSERT INTO streamers(id,owner_id,handle,name,about,revision) VALUES ('${randomUUID()}','${users.leaver.id}','leaver_host','Leaver host','A community that is closing.',0);`,
@@ -123,11 +125,11 @@ statements.push(
   `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at) SELECT '${leaverCommentId}',id,'${users.leaver.id}','Leaver comment',${now} FROM entries WHERE title='Leaver discussion';`,
   `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id) SELECT '${randomUUID()}',id,'${users.viewer.id}','Reply that stays',${now + 1},'${leaverCommentId}' FROM entries WHERE title='Leaver discussion';`,
 );
-// Profile settings from migration 0006. The viewer picked a preset avatar, a language and display preferences.
+// Viewer fixture: saved avatar preset, locale, and display preferences.
 statements.push(
   `UPDATE user SET avatar_preset=3, locale='en', display_prefs='{"contrast":"high","text":"115"}' WHERE id='${users.viewer.id}';`,
 );
-// Moderated pages (item 25): a frozen page stays public and read-only; a suspended page is hidden.
+// Frozen pages stay public and read-only; suspended pages are hidden.
 const frozenStreamId: string = randomUUID();
 const suspendedStreamId: string = randomUUID();
 statements.push(
@@ -139,13 +141,12 @@ statements.push(
   `INSERT INTO moderation_actions(id,target_kind,target_id,streamer_id,action,reason,note,notify_owner,actor_id,created_at) VALUES ('${randomUUID()}','streamer','${frozenStreamId}','${frozenStreamId}','freeze','Under review','Seeded for tests',1,'${users.admin.id}',${now});`,
   `INSERT INTO moderation_actions(id,target_kind,target_id,streamer_id,action,reason,note,notify_owner,actor_id,created_at) VALUES ('${randomUUID()}','streamer','${suspendedStreamId}','${suspendedStreamId}','suspend','Repeated spam','Seeded for tests',0,'${users.admin.id}',${now});`,
 );
-// Migration 0020 supplies the official Ideas board. Seed only its test content.
+// Seed content only; migration 0020 creates the official board.
 const officialStreamId: string = OFFICIAL_BOARD_ID;
 statements.push(
   `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed,status,status_reason,status_changed_at) VALUES ('${randomUUID()}','${officialStreamId}','${users.viewer.id}','topic','Dark mode for the overlay','Please.','design','[]',${now},0,'planned',NULL,${now});`,
 );
-// Enough pages for the Streamers directory to need "Load more" (50 per page). Their handles sort after every
-// other seeded page, so the first page still holds those.
+// Exceed the 50-page directory page size. Sort extra handles after fixtures to preserve the first page.
 for (let index = 1; index <= 48; index++) {
   const number: string = String(index).padStart(2, "0");
   const ownerId: string = randomUUID();
@@ -155,7 +156,7 @@ for (let index = 1; index <= 48; index++) {
   );
 }
 
-// A page that uses every feature table from migrations 0008–0010, kept apart from the pages other specs count.
+// Keep full-feature fixtures separate from counted pages.
 const featureStreamId: string = randomUUID();
 const featureTopicId: string = randomUUID();
 const mashPollId: string = randomUUID();

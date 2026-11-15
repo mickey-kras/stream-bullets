@@ -1,12 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { applyMigrations, createTestDatabase, migrationFiles, type TestDatabase } from "./helpers/database";
 
-/**
- * Applies 0000–0005, writes data the way the released app did, then applies 0006 onwards.
- * 0000–0005 are the migrations on main (7bf63c1, byte for byte the same files); 0006 is the first new one.
- * A migration that rebuilt `user`, `streamers`, `entries` or `entry_comments` would drop the old
- * table and fire ON DELETE CASCADE, so every count below would fall to zero (risk R1).
- */
+// Seed released schema 0000-0005 (7bf63c1), then apply 0006 onward.
+// Rebuilding user, streamers, entries, or entry_comments can trigger destructive ON DELETE CASCADE.
 
 const TABLES = [
   "user",
@@ -98,7 +94,7 @@ beforeAll(async (): Promise<void> => {
   await applyMigrations(db, released);
   await seedReleasedData();
   before = await counts();
-  // A series written before 0017 keeps its row and gets no stored time of day or template.
+  // Pre-0017 series retain their rows without a stored time or template.
   await applyMigrations(
     db,
     applied.filter((file: string): boolean => file < "0017"),
@@ -128,7 +124,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0026", (): void => {
+  it("covers 0006 to 0028", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -151,7 +147,27 @@ describe("migrations 0006 onwards", (): void => {
       "0024",
       "0025",
       "0026",
+      "0027",
+      "0028",
     ]);
+  });
+
+  it("adds data_read_at (0028) with a default for new rows", async (): Promise<void> => {
+    const columns = await db.prepare("SELECT name, dflt_value FROM pragma_table_info('channel_connections') WHERE name='data_read_at'").all();
+    expect(columns.results).toEqual([{ name: "data_read_at", dflt_value: "0" }]);
+  });
+
+  it("adds channel connections (0027) that keep one channel per page and platform", async (): Promise<void> => {
+    const insert = (id: string, external: string): D1PreparedStatement =>
+      db
+        .prepare(
+          `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,created_at,updated_at)
+            VALUES (?,'page','twitch',?,'Host','user:read:chat',1,1)`,
+        )
+        .bind(id, external);
+    await insert("c1", "111").run();
+    await expect(insert("c2", "222").run()).rejects.toThrow(/UNIQUE/);
+    await db.prepare("DELETE FROM channel_connections WHERE id='c1'").run();
   });
 
   it("normalizes existing email addresses without changing user identity", async () => {

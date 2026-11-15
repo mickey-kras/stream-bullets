@@ -9,8 +9,8 @@ import { getSupport } from "../support.server";
 import { accountDeletionSchema, displayPrefsSchema, localeSchema, profileSchema } from "../validation";
 import { get, write, type ApiRoute } from "./router";
 
-/** The provider this account signs in with ("Signed in with TikTok" in Your profile and Your data). */
-async function signInProvider(env: AppEnv, userId: string): Promise<Provider | null> {
+// Provider label for Your profile and Your data.
+export async function signInProvider(env: AppEnv, userId: string): Promise<Provider | null> {
   const row = await env.DB.prepare("SELECT provider_id FROM account WHERE user_id=? ORDER BY created_at LIMIT 1")
     .bind(userId)
     .first<{ provider_id: string }>();
@@ -36,15 +36,14 @@ async function exportResponse(request: Request, env: AppEnv, viewerId: string | 
   });
 }
 
-/** Ends the deleted account's browser session. Better Auth expires its cookies with their original attributes. */
+// Expire deleted-account cookies with Better Auth's original attributes.
 async function endSession(request: Request, app: AppContext): Promise<void> {
   const { headers } = await createAuth(app.env).api.signOut({ headers: request.headers, returnHeaders: true });
-  // Drop any refreshed session cookie that was queued while reading the viewer.
+  // Discard any session refresh queued during viewer lookup.
   app.responseHeaders.delete("Set-Cookie");
   for (const cookie of headers.getSetCookie()) app.responseHeaders.append("Set-Cookie", cookie);
 }
 
-/** The signed-in account: profile, language, display preferences, data export and deletion. */
 export const accountRoutes: ApiRoute[] = [
   get(/me/, async ({ request, env, viewer }) => {
     queryParams(request, []);

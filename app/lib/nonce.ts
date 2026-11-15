@@ -1,9 +1,7 @@
 import { createContext, useContext } from "react";
 
-/**
- * The request's CSP nonce, provided by entry.server.tsx while it renders. The browser hides nonces from the DOM,
- * so on the client this is undefined and hydration keeps the attribute the server sent.
- */
+// CSP nonce from server rendering. Browsers hide DOM nonces; undefined preserves the server attribute during
+// hydration.
 export const NonceContext = createContext<string | undefined>(undefined);
 
 export function useNonce(): string | undefined {

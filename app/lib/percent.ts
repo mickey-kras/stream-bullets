@@ -1,11 +1,5 @@
-/**
- * Whole-number percentages that always total exactly 100 (largest-remainder rounding).
- *
- * Each share starts at its rounded-down percentage. The points still missing go, one each, to the shares with the
- * largest remainders; equal remainders go to the option listed first. With no votes every share is 0.
- * The maths uses integers only, so remainders compare exactly. Polls, results, the overlay and Mash Battle shares
- * all use this one helper.
- */
+// Largest-remainder rounding totals 100 using integers. Ties favor earlier options. No votes yields all zeros.
+// Shared by polls, overlays and battles.
 export function largestRemainder(counts: readonly number[]): number[] {
   const votes: number[] = counts.map((count: number): number =>
     Number.isFinite(count) && count > 0 ? Math.floor(count) : 0,

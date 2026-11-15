@@ -1,6 +1,5 @@
-// A page clock that follows the server's time and wakes only when the display changes.
-
-/** The next instant after `now` that a mark, or a whole `step` before it, falls on. Null with no mark ahead. */
+// Server-synchronized clock; wakes only for display changes.
+// Next mark or step boundary after now; null without a future mark.
 export function nextMark(now: number, marks: readonly number[], step: number): number | null {
   let next: number | null = null;
   for (const mark of marks) {
@@ -11,10 +10,7 @@ export function nextMark(now: number, marks: readonly number[], step: number): n
   return next;
 }
 
-/**
- * The server's lead over this device's clock, measured once for each server time a page receives. A clock that
- * restarts later with the same server time (new marks, say) keeps the measure instead of taking that time as now.
- */
+// Measure offset once per server timestamp. Reuse it when restarting with the same timestamp.
 export class ServerOffset {
   private source: number | null = null;
   private offset: number = 0;
@@ -28,10 +24,10 @@ export class ServerOffset {
   }
 }
 
-/** The longest single timer wait: a day, well under the 2^31 - 1 ms that setTimeout can hold. */
+// One-day maximum wait avoids setTimeout's 2^31 - 1 ms limit.
 const MAX_STEP_MS = 86_400_000;
 
-/** Calls `onReach` once when the server clock reaches `at`. Returns a function that cancels it. */
+// Call onReach once at server time at. Return cancellation.
 export function atMark(
   serverNow: number,
   at: number,
@@ -41,11 +37,8 @@ export function atMark(
   return startClock(serverNow, (now: number): number | null => (now < at ? at : null), onReach, offsets);
 }
 
-/**
- * Calls `onTick` with the server time at each instant `next` names, measured from `serverNow` and the local clock's
- * offset to it. A caller that restarts its clock passes the same `offsets`, so the offset is measured once per
- * server time. Stops when `next` returns null. Returns a function that cancels the pending timer.
- */
+// Tick at next's server timestamps. Reuse offsets across restarts. Null stops the clock; the return value
+// cancels its timer.
 export function startClock(
   serverNow: number,
   next: (now: number) => number | null,
@@ -55,7 +48,7 @@ export function startClock(
   const offset: number = offsets.for(serverNow);
   let timer: ReturnType<typeof setTimeout> | undefined;
   function wait(now: number, at: number): void {
-    // A longer delay overflows setTimeout and fires at once, so a far mark is reached in steps.
+    // Split long waits to prevent setTimeout overflow.
     const partial: boolean = at - now > MAX_STEP_MS;
     timer = setTimeout(
       () => {
@@ -63,7 +56,7 @@ export function startClock(
           wait(Date.now() + offset, at);
           return;
         }
-        // A timer can fire a moment early; the clock still reads the mark it was set for.
+        // Clamp early timer callbacks to their scheduled mark.
         const reached: number = Math.max(Date.now() + offset, at);
         onTick(reached);
         schedule(reached);

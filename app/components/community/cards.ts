@@ -28,7 +28,7 @@ export const tabIcons: Record<CardTab, IconName> = {
 
 export const cardTabs: readonly CardTab[] = CARD_TABS;
 
-/** The two cards a page shows until its owner saves any (R18). */
+// Two defaults until the owner's first save.
 export function defaultCards(): CommunityCard[] {
   return [
     {
@@ -50,7 +50,7 @@ export function defaultCards(): CommunityCard[] {
   ];
 }
 
-/** The body `PUT /api/community-cards` takes for each card. The id keeps a saved card on the overlay. */
+// PUT /api/community-cards body. IDs preserve overlay references.
 export function cardInput(card: CommunityCard): CommunityCard {
   return {
     id: card.id,

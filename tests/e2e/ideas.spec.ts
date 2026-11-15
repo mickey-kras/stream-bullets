@@ -22,7 +22,7 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   await expect(page.locator(".changelog-note")).toBeVisible();
   await expect(page.locator("#topics .idea-row")).toHaveCount(0);
 
-  // The footer link opens the board with Suggest an improvement open (`?intent=suggest`).
+  // The footer opens the idea form through ?intent=suggest.
   await page.locator(".site-footer .footer-full").getByRole("link", { name: "Suggest an improvement" }).click();
   await expect(page).toHaveURL(/intent=suggest/);
   const dialog = page.getByRole("dialog", { name: "Suggest an improvement" });
@@ -58,7 +58,6 @@ test("the Ideas board files a suggestion under review and handles the bug templa
   const planned = await context.request.get("/api/streamers/streambullets?status=planned");
   const ideas = (await planned.json()) as { entries: { title: string; status: string }[] };
   expect(ideas.entries.map((entry) => entry.status)).toEqual(["planned"]);
-  // The author may delete an idea while it is under review.
   await detail.getByRole("button", { name: "Delete idea" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Delete idea" }).click();
   await expect(page.locator("#topics .idea-row")).toHaveCount(1);
@@ -97,7 +96,7 @@ test("an admin sets an idea's status from the detail view", async ({ browser }) 
   await expect(detail.getByLabel("Reason shown to everyone")).toHaveCount(0);
   await detail.getByRole("button", { name: "Save status" }).click();
   await expect(detail.locator(".idea-status")).toHaveText("Planned");
-  // The status choices follow the page language, both as the server renders them and once the list opens.
+  // Localize status labels in both server output and the open list.
   await admin.addCookies([{ name: "sb_locale", value: "de", domain: "localhost", path: "/", sameSite: "Lax" }]);
   await page.reload();
   const german = page.locator("#detail").getByRole("combobox", { name: "Status (nur Admins)" });

@@ -21,7 +21,6 @@ import {
 } from "../validation";
 import { get, parsedQuery, write, type ApiRoute } from "./router";
 
-/** The directory, a page's board, page edits, and the topic and poll actions on a page. */
 export const streamerRoutes: ApiRoute[] = [
   // GET /api/streamers?cursor&query → {streamers, nextCursor}. Official pages first; suspended pages left out.
   get(/streamers/, async ({ request, env }) => {
@@ -38,8 +37,8 @@ export const streamerRoutes: ApiRoute[] = [
     const input = await readJson(request, mashCreateSchema.or(entryActionSchema));
     const streamer = await getStreamer(env, match[1]);
     if (!streamer) throw new HttpError(404, "Streamer not found.");
-    // Both check the page status (assertStreamerWritable). A Mash Battle is a choice entry plus a side table (R1).
-    // An admin removal of someone else's item passes the same step-up gate as the admin routes.
+    // Both call `assertStreamerWritable`. Mash Battles use a choice entry plus a side table.
+    // Admin removals require the admin routes' step-up check.
     const result =
       input.action === "create" && input.kind === "mash"
         ? await createMash(env, viewer.id, streamer.id, input)
@@ -51,8 +50,7 @@ export const streamerRoutes: ApiRoute[] = [
   write("PATCH", /streamer/, async ({ request, env, viewer }) =>
     json({ streamer: await updateStreamer(env, viewer.id, await readJson(request, streamerEditSchema)) }),
   ),
-  // POST /api/streamer {handle, name, about} → {streamer}: claims the handle and creates the page (approved
-  // accounts and admins). Later edits go through PATCH /api/streamer.
+  // POST /api/streamer creates a page for approved accounts/admins. PATCH handles later edits.
   write("POST", /streamer/, async ({ request, env, viewer }) => {
     const input = await readJson(request, streamerSchema);
     if (await getOwnStreamer(env, viewer.id)) throw new HttpError(409, "You already have a streamer page.");

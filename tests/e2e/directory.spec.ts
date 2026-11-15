@@ -26,12 +26,12 @@ test("the Streamers directory pins the official page, pages with Load more, and 
   await expect(page).toHaveTitle("Streamers · StreamBullets");
   await expect(page.getByRole("heading", { level: 1, name: "Streamers" })).toBeVisible();
   const cards = page.locator(".streamer-card");
-  // The official page comes first, with its badge; suspended pages are left out; frozen pages say so.
+  // Official first; suspended omitted; frozen labeled.
   await expect(cards.first()).toContainText("StreamBullets");
   await expect(cards.first()).toContainText("Official");
   await expect(page.getByRole("link", { name: /Suspended host/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /Frozen host/ })).toContainText("Frozen");
-  // Every page has a picture: logo, else the owner's picture, else the default Space explorer.
+  // Picture fallback: logo, owner avatar, Space explorer.
   await expect(page.getByRole("link", { name: /Test host/ }).locator(".user-avatar.portrait")).toHaveAttribute(
     "data-preset",
     "14",
@@ -44,7 +44,6 @@ test("the Streamers directory pins the official page, pages with Load more, and 
   const total = Number(/of (\d+)/.exec((await count.textContent()) ?? "")?.[1]);
   await page.getByRole("button", { name: "Load more streamers" }).click();
   await expect(cards).toHaveCount(total);
-  // Focus moves to the first new card, and the button goes when everything is shown.
   await expect(cards.nth(50)).toBeFocused();
   await expect(page.getByRole("button", { name: "Load more streamers" })).toHaveCount(0);
   await expect(count).toHaveText(`Showing ${total} pages`);
@@ -108,7 +107,7 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
     "href",
     "/@test_host?view=topics&sort=top&intent=discuss",
   );
-  // The intent survives a search, and the × clears only the prompt.
+  // Search preserves intent; clearing removes only the prompt.
   const search = page.getByRole("searchbox", { name: "Search streamers" });
   await search.fill("test_h");
   await search.press("Enter");
@@ -119,7 +118,7 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
   await page.goto("/streamers?then=nonsense");
   await expect(page.locator(".intent-prompt")).toHaveCount(0);
 
-  // Signed-in viewers without a page are offered Host a community; /settings opens Your profile here.
+  // Page-less viewers get Host a community; /settings opens Your profile.
   const context = await signedIn(browser, "viewer");
   const viewer = await newPage(context);
   await viewer.goto("/streamers");

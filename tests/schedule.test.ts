@@ -42,7 +42,7 @@ const day = 86_400_000;
 
 describe("time zones and weekly series", (): void => {
   it("keeps the wall-clock time across a daylight-saving change (Europe/Berlin)", (): void => {
-    // Berlin leaves summer time on Sunday 25 October 2026: 19:00 is 17:00 UTC before, 18:00 UTC after.
+    // Berlin DST ends 25 Oct 2026: 19:00 shifts from 17:00 to 18:00 UTC.
     const starts = expandSeries(
       {
         first: { year: 2026, month: 10, day: 20 },
@@ -75,7 +75,7 @@ describe("time zones and weekly series", (): void => {
       },
       Date.UTC(2027, 0, 1),
     );
-    // Thu 29 Oct (EDT, UTC-4), Tue 3 Nov and Thu 5 Nov (EST, UTC-5). The end date is inclusive.
+    // 29 Oct is EDT (UTC-4); 3 and 5 Nov are EST (UTC-5). Include the end date.
     expect(starts.map((time: number): string => new Date(time).toISOString())).toEqual([
       "2026-10-30T00:30:00.000Z",
       "2026-11-04T01:30:00.000Z",
@@ -84,7 +84,7 @@ describe("time zones and weekly series", (): void => {
   });
 
   it("moves a time skipped in spring forward and stops at the horizon", (): void => {
-    // 02:30 does not exist in Berlin on 29 March 2026; it becomes 03:30 local (01:30 UTC).
+    // Berlin skips 02:30 on 29 Mar 2026; use 03:30 local (01:30 UTC).
     expect(new Date(zonedTime({ year: 2026, month: 3, day: 29 }, 2, 30, "Europe/Berlin")).toISOString()).toBe(
       "2026-03-29T01:30:00.000Z",
     );
@@ -104,13 +104,13 @@ describe("time zones and weekly series", (): void => {
   }
 
   it("moves a time skipped in spring forward by the gap in every zone", (): void => {
-    // West of UTC: 02:30 does not exist on 8 March 2026; it becomes 03:30 daylight time.
+    // New York skips 02:30 on 8 Mar 2026; use 03:30 daylight time.
     expect(at("America/New_York", "2026-03-08", "02:30")).toBe("2026-03-08T07:30:00.000Z");
     expect(at("America/Los_Angeles", "2026-03-08", "02:30")).toBe("2026-03-08T10:30:00.000Z");
-    // East of UTC and in the southern hemisphere (Sydney springs forward in October).
+    // Sydney springs forward in October.
     expect(at("Europe/Berlin", "2026-03-29", "02:30")).toBe("2026-03-29T01:30:00.000Z");
     expect(at("Australia/Sydney", "2026-10-04", "02:30")).toBe("2026-10-03T16:30:00.000Z");
-    // Lord Howe Island moves by 30 minutes: 02:15 becomes 02:45 (UTC+11).
+    // Lord Howe shifts 30 min: 02:15 becomes 02:45 (UTC+11).
     expect(at("Australia/Lord_Howe", "2026-10-04", "02:15")).toBe("2026-10-03T15:45:00.000Z");
   });
 
@@ -134,8 +134,7 @@ describe("time zones and weekly series", (): void => {
     expect(at("Europe/Berlin", "2026-10-25", "03:30")).toBe("2026-10-25T02:30:00.000Z");
     expect(at("Australia/Sydney", "2026-04-05", "01:30")).toBe("2026-04-04T14:30:00.000Z");
     expect(at("Australia/Sydney", "2026-04-05", "03:30")).toBe("2026-04-04T17:30:00.000Z");
-    // A time that occurs twice takes the offset in force at that wall-clock time read as UTC: west of UTC that is
-    // still daylight time (the earlier moment), east of UTC already standard time (the later one).
+    // Repeated times use the offset at that wall-clock value interpreted as UTC: earlier west of UTC, later east.
     expect(at("America/New_York", "2026-11-01", "01:30")).toBe("2026-11-01T05:30:00.000Z");
     expect(at("America/Los_Angeles", "2026-11-01", "01:30")).toBe("2026-11-01T08:30:00.000Z");
     expect(at("Europe/Berlin", "2026-10-25", "02:30")).toBe("2026-10-25T01:30:00.000Z");
@@ -155,7 +154,7 @@ describe("time zones and weekly series", (): void => {
       },
       Date.UTC(2027, 0, 1),
     );
-    // 02:30 EST, then 03:30 EDT on the day 02:30 is skipped, then 02:30 EDT.
+    // 02:30 EST becomes 03:30 EDT on the gap day, then returns to 02:30 EDT.
     expect(starts.map((time: number): string => new Date(time).toISOString())).toEqual([
       "2026-03-07T07:30:00.000Z",
       "2026-03-08T07:30:00.000Z",
@@ -166,15 +165,15 @@ describe("time zones and weekly series", (): void => {
   it("asks for a calendar range that ends at the next local midnight, whatever the day's length", (): void => {
     const zone = "America/New_York";
     const late = (date: string): number => zonedTime(parseDate(date)!, 23, 30, zone);
-    // Clocks fall back on 7 November 2027: the day is 25 hours long and midnight after it is 05:00 UTC.
+    // 7 Nov 2027 lasts 25 hours; the next midnight is 05:00 UTC.
     const fall = visibleRange("day", late("2027-11-07"), zone);
     expect(new Date(fall.from).toISOString()).toBe("2027-11-07T04:00:00.000Z");
     expect(new Date(fall.to).toISOString()).toBe("2027-11-08T05:00:00.000Z");
     expect(late("2027-11-07")).toBeLessThan(fall.to);
-    // Clocks spring forward on 14 March 2027: a 23-hour day still ends at its own midnight.
+    // 14 Mar 2027 lasts 23 hours; end at the next local midnight.
     const spring = visibleRange("day", late("2027-03-14"), zone);
     expect(new Date(spring.to).toISOString()).toBe("2027-03-15T04:00:00.000Z");
-    // A week or month ends at the midnight after its last day too.
+    // Weeks and months also end at the next local midnight.
     const week = visibleRange("week", late("2027-11-07"), zone);
     expect(zonedParts(week.to, zone)).toMatchObject({ hour: 0, minute: 0 });
     expect(Math.round((week.to - week.from) / 3_600_000)).toBe(7 * 24 + 1);
@@ -194,11 +193,11 @@ describe("time zones and weekly series", (): void => {
     const tops = early.map((event) => blockPosition(event, zone, hours).top);
     expect(tops).toEqual([0, 3 * 48, 6 * 48]);
     for (const event of early) expect(blockPosition(event, zone, hours).height).toBe(48);
-    // A late stream that runs past midnight stops at the bottom of its day: the next day shows the rest.
+    // Split overnight streams at midnight.
     const late = gridHours([at(10), at(22, 180)] as StreamEvent[], zone);
     expect(late).toEqual({ first: 8, last: 24 });
     expect(blockPosition(at(22, 180), zone, late)).toEqual({ top: 14 * 48, height: 2 * 48 });
-    // Streams from 10:00 to 22:00 keep the mockup's 8 AM to midnight.
+    // Streams at 10:00-22:00 retain the 08:00-midnight range.
     expect(gridHours([at(10), at(21)] as StreamEvent[], zone)).toEqual({ first: 8, last: 24 });
     expect(gridHours([], zone)).toEqual({ first: 8, last: 24 });
   });
@@ -210,7 +209,7 @@ describe("time zones and weekly series", (): void => {
       startsAt: zonedTime(parseDate(date)!, hour, 0, zone),
       durationMin,
     });
-    // 23:00 to 03:00: on its own day and on the next, where its block starts at 0:00 and runs three hours.
+    // 23:00-03:00 spans its own day and 00:00-03:00 the next day.
     const night = stream("2027-02-03", 23, 240);
     expect(eventsOn([night], day("2027-02-03"), zone)).toEqual([night]);
     expect(eventsOn([night], day("2027-02-04"), zone)).toEqual([night]);
@@ -221,11 +220,9 @@ describe("time zones and weekly series", (): void => {
     const hours = gridHours([rest], zone);
     expect(hours).toEqual({ first: 0, last: 24 });
     expect(blockPosition(rest, zone, hours)).toEqual({ top: 0, height: 3 * 48 });
-    // On its own day the block stops at midnight.
     expect(blockPosition(night, zone, gridHours([night], zone))).toEqual({ top: 15 * 48, height: 48 });
-    // A stream that ends exactly at midnight stays on its own day.
     expect(eventsOn([stream("2027-02-03", 22, 120)], day("2027-02-04"), zone)).toEqual([]);
-    // Clocks spring forward on 14 March 2027: 23:00 for three hours ends at 03:00, two hours after midnight.
+    // DST on 14 Mar 2027: three hours from 23:00 ends at 03:00, two hours after midnight.
     const spring = stream("2027-03-13", 23, 180);
     expect(eventsOn([spring], day("2027-03-14"), zone)).toEqual([spring]);
     expect(sliceOn(spring, day("2027-03-14"))).toEqual({ startsAt: day("2027-03-14"), durationMin: 120 });
@@ -233,12 +230,11 @@ describe("time zones and weekly series", (): void => {
 
   it("puts overlapping Day and Week blocks side by side, so none covers another", (): void => {
     const block = (hour: number, hours = 1) => ({ top: hour * 48, height: hours * 48 });
-    // Two streams at the same time split the column.
     expect(blockLanes([block(10), block(10)])).toEqual([
       { lane: 0, lanes: 2 },
       { lane: 1, lanes: 2 },
     ]);
-    // A chain of overlaps shares one count of lanes, a freed lane is reused, and a later stream gets the full width.
+    // Overlapping chains share lane counts, reuse free lanes, then restore full width.
     expect(blockLanes([block(10, 3), block(11), block(12), block(14), block(20)])).toEqual([
       { lane: 0, lanes: 2 },
       { lane: 1, lanes: 2 },
@@ -246,7 +242,7 @@ describe("time zones and weekly series", (): void => {
       { lane: 0, lanes: 1 },
       { lane: 0, lanes: 1 },
     ]);
-    // Input order does not matter, and a stream that ends as the next starts does not overlap it.
+    // Ignore input order; touching endpoints do not overlap.
     expect(blockLanes([block(12), block(11)])).toEqual([
       { lane: 0, lanes: 1 },
       { lane: 0, lanes: 1 },
@@ -295,7 +291,6 @@ describe("the schedule clock", (): void => {
   it("wakes a whole step before each mark ahead, and not at all with none", (): void => {
     expect(nextMark(1_000, [61_000], 30_000)).toBe(31_000);
     expect(nextMark(31_000, [61_000], 30_000)).toBe(61_000);
-    // The nearest step of any mark wins.
     expect(nextMark(1_000, [61_000, 200_000], 30_000)).toBe(20_000);
     expect(nextMark(61_000, [61_000, 200_000], 30_000)).toBe(80_000);
     expect(nextMark(200_000, [61_000, 200_000], 30_000)).toBeNull();
@@ -311,13 +306,12 @@ describe("the schedule clock", (): void => {
     expect(liveEventAt(loaded, 60_000)).toEqual({ ...loaded[1], status: "live" });
     expect(liveEventAt(loaded, 119_999)?.id).toBe("next");
     expect(liveEventAt(loaded, 120_000)).toBeNull();
-    // A stream stored as live ends with the clock too.
     expect(liveEventAt([{ ...loaded[1], status: "live" as const }], 120_000)).toBeNull();
   });
 
   it("moves a stream from upcoming to live to ended as the clock crosses its start and end", (): void => {
     vi.useFakeTimers();
-    // The local clock runs 5 seconds behind the server; the schedule follows the server.
+    // The local clock is 5 s behind; use server time.
     vi.setSystemTime(1_000_000 - 5_000);
     const serverNow = 1_000_000;
     const loaded = [
@@ -342,7 +336,6 @@ describe("the schedule clock", (): void => {
     expect(seen.map((tick) => tick.now - serverNow)).toEqual([
       10_000, 40_000, 70_000, 100_000, 130_000, 160_000, 190_000,
     ]);
-    // Nothing is ahead once the stream ends, so the clock sleeps.
     expect(vi.getTimerCount()).toBe(0);
     stop();
     expect(statusesAt(loaded, serverNow)[1]).toBe(loaded[1]);
@@ -361,7 +354,7 @@ describe("the schedule clock", (): void => {
     vi.advanceTimersByTime(60 * day);
     expect(reached).toHaveBeenCalledTimes(1);
     expect(vi.getTimerCount()).toBe(0);
-    // The schedule clock's wakes are just as far apart: the first step before a stream 40 days ahead.
+    // The first wake precedes a stream 40 days away.
     const ticks: number[] = [];
     startClock(
       serverNow,
@@ -386,13 +379,12 @@ describe("the schedule clock", (): void => {
       );
     const first = run([serverNow + 60 * 60_000]);
     vi.advanceTimersByTime(10 * 60_000);
-    // New marks (a range fetched later) restart the clock ten minutes after the page loaded.
+    // New range marks restart the clock ten minutes after page load.
     first();
     run([serverNow + 60 * 60_000, serverNow + 2 * 60 * 60_000]);
     ticks.length = 0;
     vi.advanceTimersByTime(SCHEDULE_STEP_MS);
     expect(ticks).toEqual([10 * 60_000 + SCHEDULE_STEP_MS]);
-    // A new server time is measured afresh.
     expect(offsets.for(Date.now() + 1_000)).toBe(1_000);
   });
 
@@ -564,7 +556,7 @@ describe("schedule storage", (): void => {
       .bind(first.seriesId)
       .first<{ n: number }>();
     expect(rows!.n).toBe(3);
-    // A series written to its end date is marked finished, so the cron never picks it again.
+    // Finished series must not be selected again.
     const mark = await env.DB.prepare("SELECT written_through FROM stream_series WHERE id=?")
       .bind(first.seriesId)
       .first<{ written_through: number }>();
@@ -575,7 +567,7 @@ describe("schedule storage", (): void => {
   it("skips finished series so open-ended ones still get topped up", async (): Promise<void> => {
     const now = Date.now();
     const rows: D1PreparedStatement[] = [];
-    // 50 series that have written every stream up to their end date (the end of its last local day).
+    // 50 series already written through the final local day.
     for (let index = 0; index < 50; index += 1) {
       const last = now + 10 * day + index * 60_000;
       const end = new Date(last);
@@ -586,7 +578,7 @@ describe("schedule storage", (): void => {
           'https://twitch.tv/nova','scheduled',?,?,'UTC',?,?)`).bind(
           crypto.randomUUID(),
           streamerId,
-          // Series ids sort ahead of the open-ended one's, as the cron's query reads them.
+          // IDs sort before the open-ended series in the cron query.
           `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
           last,
           1 << end.getUTCDay(),
@@ -605,7 +597,6 @@ describe("schedule storage", (): void => {
     const before = await count();
     expect(await topUpSeries(env, now + 7 * day)).toBeGreaterThanOrEqual(6);
     expect(await count()).toBeGreaterThan(before);
-    // The finished ones are marked as written through their end date and are not picked again.
     const marked = await env.DB.prepare(
       "SELECT count(*) AS n FROM stream_series WHERE id LIKE '00000000-%' AND written_through >= ?",
     )
@@ -621,7 +612,7 @@ describe("schedule storage", (): void => {
     const rows: D1PreparedStatement[] = [
       env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES (?,'viewer','full_page','Full')").bind(full),
     ];
-    // A page at the cap, 25 of its upcoming streams from open-ended series that sort ahead of every other series.
+    // Full page: 25 upcoming streams from series sorting ahead of all others.
     for (let index = 0; index < MAX_UPCOMING_EVENTS; index += 1) {
       const series = index < 25 ? `00000000-0000-4000-8000-${String(index).padStart(12, "0")}` : null;
       rows.push(
@@ -645,7 +636,7 @@ describe("schedule storage", (): void => {
         .bind(open.seriesId)
         .first<{ n: number }>())!.n;
     const before = await count();
-    // One series a page and 20 pages a run: before, the 25 full-page series took every page.
+    // Select one series/page and 20 pages/run to avoid starvation by 25 full-page series.
     await topUpSeries(env, at, 1);
     expect(await count()).toBeGreaterThan(before);
   });
@@ -733,7 +724,6 @@ describe("schedule storage", (): void => {
     expect(await topUpSeries(env, Date.now() + 7 * day)).toBe(1);
     const starts = (await seriesRows()).map((row) => row.starts_at);
     expect(starts).toEqual([...all.slice(0, -1).map((event) => event.startsAt), all.at(-1)!.startsAt + 7 * day]);
-    // A series with no streams left loses its mark on the next run.
     const marks = async (): Promise<unknown> =>
       env.DB.prepare("SELECT count(*) AS n FROM stream_series WHERE streamer_id=?").bind(streamerId).first("n");
     expect(await marks()).toBe(1);
@@ -757,7 +747,7 @@ describe("schedule storage", (): void => {
   });
 
   it("keeps extending a far-off series after its only stream is edited on its own", async (): Promise<void> => {
-    // Fourteen weeks out, past the 12-week horizon: the series is written as that one stream.
+    // A series starting in 14 weeks exceeds the 12-week horizon; write only its first stream.
     const start = new Date(Date.now() + 14 * 7 * day);
     const first = await createEvents(env, "owner", input(start, { repeatDays: 1 << start.getUTCDay() }));
     expect(await seriesRows()).toHaveLength(1);
@@ -768,7 +758,7 @@ describe("schedule storage", (): void => {
       title: "Season opener",
       time: "20:00",
     });
-    // Near its start, the series goes on from the template, not from the stream edited on its own.
+    // Extend from the template, not an individually edited stream.
     expect(await topUpSeries(env, first.startsAt - day)).toBeGreaterThanOrEqual(11);
     const rows = await seriesRows();
     expect(rows[0].title).toBe("Season opener");
@@ -780,13 +770,13 @@ describe("schedule storage", (): void => {
     const start = new Date(Date.now() + 14 * 7 * day);
     const kept = await createEvents(env, "owner", input(start, { repeatDays: 1 << start.getUTCDay() }));
     await deleteEvent(env, "owner", kept.id, { scope: "one" });
-    // The hourly cleanup runs now; the series still has its template and goes on near its start.
+    // Cleanup must preserve the template for later expansion.
     expect(await topUpSeries(env, Date.now())).toBe(0);
     expect(await topUpSeries(env, kept.startsAt - day)).toBeGreaterThanOrEqual(11);
     const rows = await seriesRows();
     expect(rows[0].starts_at).toBe(kept.startsAt + 7 * day);
     expect(rows.every((row) => row.series_id === kept.seriesId)).toBe(true);
-    // A series deleted with this and the following from its first stream writes nothing again.
+    // Deleting the entire series must prevent regeneration.
     await env.DB.prepare("DELETE FROM stream_events").run();
     const ended = await createEvents(env, "owner", input(start, { repeatDays: 1 << start.getUTCDay() }));
     await deleteEvent(env, "owner", ended.id, { scope: "following" });
@@ -799,13 +789,12 @@ describe("schedule storage", (): void => {
   });
 
   it("stops topping up at the page's cap, so every upcoming stream stays listed", async (): Promise<void> => {
-    // Seven daily series that start past the horizon each pass the cap with one stream; together they would make
-    // 7 × 84 = 588 upcoming streams near their start.
+    // Seven daily series start beyond the horizon; expanding them fully would create 588 streams (7 x 84).
     const start = new Date(Date.now() + 13 * 7 * day);
     const series: StreamEvent[] = [];
     for (let index = 0; index < 7; index += 1) {
       const time = `${String(10 + index).padStart(2, "0")}:00`;
-      // Six creations a minute is the owner's limit; the test is not about that.
+      // Avoid the six-creations/min quota; this test checks capacity.
       await env.DB.prepare("DELETE FROM app_rate_limits").run();
       series.push(await createEvents(env, "owner", input(start, { repeatDays: 127, time })));
     }
@@ -818,7 +807,7 @@ describe("schedule storage", (): void => {
     const listed = await listEvents(env, streamerId, range.from, range.to, now);
     expect(listed.filter((event: StreamEvent): boolean => event.startsAt >= now)).toHaveLength(upcoming);
     expect(UPCOMING_LIMIT).toBeGreaterThanOrEqual(MAX_UPCOMING_EVENTS);
-    // The streams already written are kept, and the next run goes on from them as the page has room again.
+    // Keep written streams; resume expansion as capacity becomes available.
     expect(await topUpSeries(env, now)).toBe(0);
   });
 
@@ -848,13 +837,13 @@ describe("schedule storage", (): void => {
       status: 409,
       message: `A schedule can hold up to ${MAX_UPCOMING_EVENTS} upcoming streams.`,
     });
-    // Edits that keep the count, an upcoming one (cancelled too) or a past one that stays past, go through.
+    // Allow edits that preserve the upcoming count, including cancelled and past streams.
     expect(await edit(upcoming[5], new Date(now + 3 * day), { title: "Moved" })).toMatchObject({ title: "Moved" });
     expect(await edit(upcoming[0], new Date(now + 4 * day))).toMatchObject({ status: "cancelled" });
     expect(await edit(past, new Date(now - 2 * day), { title: "Renamed" })).toMatchObject({ title: "Renamed" });
   });
 
-  /** Adds one-off streams from `after` on until the page holds `MAX_UPCOMING_EVENTS` upcoming streams. */
+  // Fill the page to MAX_UPCOMING_EVENTS with one-off streams after `after`.
   async function fillToCap(page: string, after: number): Promise<void> {
     const row = await env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE streamer_id=? AND starts_at >= ?")
       .bind(page, after)
@@ -870,10 +859,7 @@ describe("schedule storage", (): void => {
       .run();
   }
 
-  /**
-   * `env` with another writer filling `page` to the cap right after a capacity check reads its count, as a request
-   * that commits between that check and this one's writes would.
-   */
+  // Simulate another writer filling `page` after the capacity read and before writes.
   function racingEnv(page: string): AppEnv {
     const check = "SELECT count(*) AS n FROM stream_events WHERE streamer_id=? AND starts_at >= ?";
     const db = new Proxy(env.DB, {
@@ -989,7 +975,7 @@ describe("schedule storage", (): void => {
     expect(await upcomingOf(streamerId, now)).toBe(MAX_UPCOMING_EVENTS);
   });
 
-  /** `env` whose cron runs `change` right after it reads the series to top up, before it writes any of them. */
+  // Run `change` after cron reads the series and before it writes.
   function ownerRacesCron(change: () => Promise<unknown>): AppEnv {
     let pending = true;
     const db = new Proxy(env.DB, {
@@ -1033,7 +1019,7 @@ describe("schedule storage", (): void => {
     const seriesId = all[0].seriesId;
     const daily = input(new Date(Date.now() + day), { repeatDays: 127, time: "09:00" });
     const other = await createEvents(env, "owner", daily);
-    // A series written before 0018 has no stored template; the cron copies its latest stream.
+    // Pre-0018 series lack templates; copy their latest stream.
     if (kind === "legacy") await env.DB.prepare("DELETE FROM stream_series WHERE id=?").bind(seriesId).run();
     const otherBefore = (await streamsOf(other.seriesId)).length;
     const racing = ownerRacesCron(() => deleteEvent(env, "owner", all[4].id, { scope: "following" }));
@@ -1081,8 +1067,7 @@ describe("schedule storage", (): void => {
   });
 
   it("keeps a series' own time after a stream that fell in the spring gap", async (): Promise<void> => {
-    // Created in December, a Sunday 02:30 New York series is first written only up to 8 March 2026, the day 02:30
-    // does not exist (that stream is at 03:30 EDT). The next ones go back to 02:30.
+    // The initial New York 02:30 horizon ends in the 8 Mar 2026 gap at 03:30 EDT; later streams return to 02:30.
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(Date.UTC(2025, 11, 1));
     try {
@@ -1175,7 +1160,7 @@ describe("schedule storage", (): void => {
     const events = await listEvents(env, streamerId, range.from, range.to, now);
     expect(events.filter((event: StreamEvent): boolean => event.startsAt >= now)).toHaveLength(n);
     expect(n).toBeGreaterThanOrEqual(332);
-    // Recent history comes too, newest kept, and the list stays in time order.
+    // Keep newest history, then return events in time order.
     expect(events.some((event: StreamEvent): boolean => event.startsAt < now && event.startsAt > now - day)).toBe(true);
     expect(events.map((event: StreamEvent): number => event.startsAt)).toEqual(
       events.map((event: StreamEvent): number => event.startsAt).sort((a: number, b: number): number => a - b),

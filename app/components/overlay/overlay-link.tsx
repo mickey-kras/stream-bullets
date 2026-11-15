@@ -6,10 +6,7 @@ import { Dialog, DialogActions } from "../ui/dialog";
 import { IconButton } from "../ui/icon-button";
 import { useToast } from "../ui/toast";
 
-/**
- * The private OBS URL. The server keeps only a hash of its key, so the full URL shows once, right after it is made.
- * A new link revokes the old one, so the owner confirms first.
- */
+// Show private URL once; store only its key hash. Confirm regeneration because it revokes the old link.
 export function OverlayLink({ hasKey }: Readonly<{ hasKey: boolean }>): ReactNode {
   const toast = useToast();
   const [url, setUrl] = useState<string | null>(null);

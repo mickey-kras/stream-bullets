@@ -175,7 +175,7 @@ function Hero({
   );
 }
 
-/** Feed: the live or next stream, upcoming streams by day (a series once, as its next date), past streams. */
+// Live/next hero, upcoming dates (once per series), then past streams.
 export function ScheduleFeed({
   events,
   zone,

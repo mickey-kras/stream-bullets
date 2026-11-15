@@ -5,7 +5,7 @@ import { openWrite, type ApiRoute } from "./router";
 
 const clickSchema = z.strictObject({ id: z.string().uuid(), event: z.enum(CTA_EVENTS) });
 
-/** Clients can report clicks only. Completion counts come from committed database writes. */
+// Clients can report clicks only. Completion counts come from committed database writes.
 export const conversionRoutes: ApiRoute[] = [
   openWrite("POST", /conversions/, async ({ request, env }) => {
     requireSameOrigin(request, env);

@@ -1,4 +1,4 @@
-/** A save that waits for the last change, and that can be sent at once when the dialog closes or the page goes. */
+// Debounce saves; flush on dialog close or page exit.
 export interface PendingSave<T> {
   schedule: (value: T) => void;
   flush: () => void;

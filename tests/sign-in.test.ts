@@ -15,6 +15,19 @@ describe("sign-in recovery", () => {
     expect(loader({ context, request: new Request(url), url, pattern: "/sign-in", params: {} })).toEqual({
       providers: ["twitch"],
       error: "loginMethods.failed",
+      next: "/settings",
     });
+  });
+
+  it("returns the retry to a same-origin `next` only", () => {
+    const context = new RouterContextProvider();
+    context.set(appContext, { env: {} as AppEnv, nonce: "test", responseHeaders: new Headers() });
+    const next = (value: string): string => {
+      const url = new URL(`https://example.test/sign-in?error=x&next=${encodeURIComponent(value)}`);
+      return loader({ context, request: new Request(url), url, pattern: "/sign-in", params: {} }).next;
+    };
+    expect(next("/@alice?intent=suggest")).toBe("/@alice?intent=suggest");
+    expect(next("//evil.example")).toBe("/settings");
+    expect(next("https://evil.example/")).toBe("/settings");
   });
 });

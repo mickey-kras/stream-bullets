@@ -21,13 +21,13 @@ export function DeleteButton({
   label: string;
   onDelete: () => Promise<void>;
   disabled?: boolean;
-  /** Visible text when it differs from the accessible name (for example "Delete" in a comment menu). */
+  // Visible label when different from the accessible name.
   text?: string;
 }>): ReactNode {
   const [open, setOpen] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  // An admin who removes someone else's content may need a fresh security-key check first, as in the Admin tab.
+  // Admin removals can require fresh step-up.
   const [stepUp, setStepUp] = useState<boolean>(false);
   async function remove(): Promise<void> {
     setPending(true);
@@ -76,7 +76,7 @@ export function DeleteButton({
   );
 }
 
-/** Grows a composer textarea with its text, up to the CSS max-height. */
+// Grow textarea to its CSS maximum height.
 function grow(element: HTMLTextAreaElement): void {
   element.style.height = "auto";
   element.style.height = `${element.scrollHeight + 2}px`;
@@ -91,7 +91,6 @@ const timeUnits: [number, number, Intl.RelativeTimeFormatUnit][] = [
   [Number.POSITIVE_INFINITY, 31_536_000, "year"],
 ];
 
-/** "3 hours ago" in the viewer's language. */
 function relativeTime(time: number): string {
   const seconds = Math.round((time - Date.now()) / 1000);
   const [, size, unit] = timeUnits.find(([limit]) => Math.abs(seconds) < limit) ?? timeUnits[5];
@@ -164,7 +163,7 @@ interface CommentRules {
 function CommentActions({ comment, rules }: Readonly<{ comment: Comment; rules: CommentRules }>): ReactNode {
   const { viewer } = rules;
   const reported = comment.reported || rules.reported.has(comment.id);
-  // On a frozen or suspended page only admins can still remove content (mockup m14, round 2).
+  // Only admins can remove content from moderated pages.
   const canDelete = Boolean(
     viewer && (rules.moderator || (rules.writable && (comment.authorId === viewer.id || rules.ownerId === viewer.id))),
   );
@@ -286,7 +285,7 @@ function Thread({
   const { shown, hidden: more } = visibleReplies(thread.replies, expanded);
   const replying =
     replyTo !== null && (replyTo.id === thread.id || thread.replies.some((reply: Comment) => reply.id === replyTo.id));
-  // Reply opens its box inside the replies list, so a thread whose replies were hidden shows them again.
+  // Reveal hidden replies when opening an inline reply form.
   const target: string | null = replying && replyTo ? replyTo.id : null;
   const [opened, setOpened] = useState<string | null>(target);
   if (opened !== target) {
@@ -372,13 +371,12 @@ async function fetchThreads(
   return { threads: mergeThreads([], threads, sort), cursor, pages: loaded };
 }
 
-/** The loaded threads plus a new page, each thread once, in the list's order. */
+// Append threads without duplicates; preserve list order.
 function mergeThreads(current: CommentThread[], page: CommentThread[], sort: SortOrder): CommentThread[] {
   const unique = [...new Map([...current, ...page].map((thread: CommentThread) => [thread.id, thread])).values()];
   return orderThreads(unique, sort);
 }
 
-/** Find a comment anywhere in the loaded threads. */
 function findComment(threads: CommentThread[], id: string): Comment | null {
   for (const thread of threads) {
     if (thread.id === id) return thread;
@@ -395,11 +393,8 @@ function updateComment(threads: CommentThread[], id: string, change: (comment: C
   }));
 }
 
-/**
- * The discussion under a topic, poll or idea (item 40): one comment box on top, threads with replies under their
- * top-level comment (oldest first, collapsed after two), one inline reply box, and "Comment removed" placeholders
- * that keep a thread together. Frozen and suspended pages show it read-only.
- */
+// Root comments with oldest-first replies; collapse after two. Keep deleted-parent placeholders. Moderated
+// pages are read-only.
 export function Discussion({
   entryId,
   viewer,
@@ -414,7 +409,7 @@ export function Discussion({
   handle: string;
   viewer: Viewer | null;
   ownerId: string;
-  /** The viewer is an administrator and may remove any comment. */
+  // Admin may remove any comment.
   moderator?: boolean;
   status?: StreamerStatus;
   refreshKey: number;
@@ -473,7 +468,7 @@ export function Discussion({
       setRevision((value: number) => value + 1);
       onChanged();
     } catch (error_: unknown) {
-      // The delete dialog asks for the security key itself, so the step-up request is not a page error.
+      // The delete dialog handles step-up locally, not as a page error.
       if (!needsStepUp(error_)) setError(errorMessage(error_));
       throw error_;
     } finally {
@@ -616,7 +611,7 @@ export function Discussion({
           className="load-more"
           disabled={loading || loadingMore}
           onClick={() => {
-            // Pagination belongs to the current discussion request, including refreshes.
+            // Bind pagination to the current request, including refreshes.
             const controller = requestController.current;
             if (!controller || controller.signal.aborted) return;
             setLoadingMoreKey(requestKey);

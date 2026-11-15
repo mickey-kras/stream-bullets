@@ -1,9 +1,6 @@
 import type { Entry, StreamEvent, Streamer } from "../types";
 
-/**
- * JSON-LD for search engines and AI agents (item 45), returned from route `meta` as `script:ld+json` entries.
- * Only public facts go in: names, page links, schedule times and public topic text.
- */
+// Route metadata uses script:ld+json. Include public names, links, schedule times and topic text only.
 export type JsonLd = Record<string, unknown>;
 
 const CONTEXT = "https://schema.org";
@@ -15,7 +12,6 @@ const PLATFORM_NAMES: Readonly<Record<string, string>> = {
   other: "Online",
 };
 
-/** The home page: the site and the organisation behind it. */
 export function siteJsonLd(origin: string): JsonLd {
   return {
     "@context": CONTEXT,
@@ -39,7 +35,6 @@ export function siteJsonLd(origin: string): JsonLd {
   };
 }
 
-/** A streamer page. */
 export function personJsonLd(streamer: Pick<Streamer, "name" | "handle" | "about">, origin: string): JsonLd {
   return {
     "@context": CONTEXT,
@@ -51,7 +46,7 @@ export function personJsonLd(streamer: Pick<Streamer, "name" | "handle" | "about
   };
 }
 
-/** Upcoming streams, at most `limit`. Ended and cancelled streams are left out. */
+// Exclude ended/cancelled streams; return at most limit.
 export function eventsJsonLd(
   events: readonly StreamEvent[],
   streamer: Pick<Streamer, "name" | "handle">,
@@ -81,7 +76,7 @@ export function eventsJsonLd(
     );
 }
 
-/** One topic or poll opened with `?entry=`. */
+// Opened entry selected by ?entry=.
 export function postingJsonLd(
   entry: Pick<Entry, "id" | "kind" | "title" | "body" | "author" | "createdAt" | "comments" | "likes">,
   streamer: Pick<Streamer, "handle">,

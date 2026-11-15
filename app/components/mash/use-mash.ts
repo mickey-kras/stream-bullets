@@ -6,15 +6,14 @@ import { useMarkClock } from "../use-clock";
 
 export type MashAssist = "off" | "hold" | "toggle";
 
-/** The battle as the page shows it now: the newest of the loader, the snapshot and the 5 Hz ticks. */
+// Use the newest loader, snapshot or 5 Hz tick state.
 export interface MashView extends MashState {
-  /** The phase at `now`. */
   current: MashPhase;
   left: number;
-  /** Milliseconds left in a live battle, 0 otherwise. */
+  // Live milliseconds remaining; zero otherwise.
   msLeft: number;
   tps: number;
-  /** Your taps the room accepted, when known. */
+  // Accepted tap count, when known.
   mine: number | null;
   denied: MashDenial | null;
 }
@@ -24,7 +23,7 @@ export function useMashView(entry: Pick<Entry, "id" | "mash">, now: number): Mas
   const mash = entry.mash;
   if (!mash) return null;
   const tick = live.ticks[entry.id];
-  // A tick belongs to this run of the battle only while the stored phase is still running.
+  // Accept ticks only for the current running battle.
   const running = mash.phase === "countdown" || mash.phase === "live";
   const fresh = running && tick !== undefined && tick.endsAt !== null && tick.endsAt === mash.endsAt;
   const view: MashState = fresh
@@ -42,11 +41,7 @@ export function useMashView(entry: Pick<Entry, "id" | "mash">, now: number): Mas
   };
 }
 
-/**
- * The instants a running battle's display changes: its start, its end, and the start of its last batch window.
- * The clock also wakes each whole second before them, so the countdown and the seconds
- * left change on time too.
- */
+// Wake at start, end, final batch window and intervening whole seconds.
 export function battleMarks(entries: readonly (Pick<Entry, "mash"> | null)[]): number[] {
   const marks: number[] = [];
   for (const entry of entries) {
@@ -58,19 +53,12 @@ export function battleMarks(entries: readonly (Pick<Entry, "mash"> | null)[]): n
   return marks;
 }
 
-/**
- * The server clock for a page with Mash Battles. With no battle running it ticks once a second. While one runs,
- * it wakes exactly at each mark from `battleMarks`, so a battle starts and ends on time for every viewer instead
- * of on their next one-second tick.
- */
+// Idle battles tick each second. Running battles also wake at exact battleMarks boundaries.
 export function useBattleClock(serverNow: number, marks: readonly number[]): number {
   return useMarkClock(serverNow, marks, 1_000, 1_000);
 }
 
-/**
- * Taps waiting to be sent. At most MASH_MAX_BATCH wait: while the socket is down, more taps are dropped instead
- * of piling up, so one message never carries more than the room counts.
- */
+// Bound pending taps to MASH_MAX_BATCH; drop excess while disconnected.
 export class TapBatch {
   private unsent: number = 0;
 
@@ -78,14 +66,14 @@ export class TapBatch {
     return this.unsent;
   }
 
-  /** Adds one tap. False when the batch is full and the tap was dropped. */
+  // Return false when the batch is full.
   add(): boolean {
     if (this.unsent >= MASH_MAX_BATCH) return false;
     this.unsent += 1;
     return true;
   }
 
-  /** Sends the waiting taps in one message. They keep waiting when `send` fails (the socket is down). */
+  // Retain pending taps if send fails.
   flush(send: (n: number) => boolean): void {
     if (this.unsent === 0) return;
     const n: number = Math.min(this.unsent, MASH_MAX_BATCH);
@@ -95,7 +83,6 @@ export class TapBatch {
 
 let sequence = 0;
 
-/** Sends `n` taps for battle `id` over the page's live connection. */
 function tapSender(id: string, assisted: boolean): (n: number) => boolean {
   return (n: number): boolean => {
     sequence += 1;
@@ -103,13 +90,8 @@ function tapSender(id: string, assisted: boolean): (n: number) => boolean {
   };
 }
 
-/**
- * Counts your taps and sends them in one message every 200 ms. Taps faster than the per-account
- * cap (15 a second, 6 with assisted tapping) are dropped here as well as on the server. `tap()` returns
- * whether the tap counted locally. With assisted tapping, `setHolding(true)` taps on its own at 6 a second.
- * In the `final` batch window before the end, each tap goes out at once, so the last taps reach the room before
- * the battle ends. Taps still waiting when tapping stops are sent too.
- */
+// Batch every 200 ms; enforce 15/s manual or 6/s assisted locally and server-side. tap() reports local
+// acceptance. Holding assists at 6/s. Send immediately in the final window and flush when tapping stops.
 export function useMashTapper(
   id: string,
   enabled: boolean,
@@ -132,7 +114,7 @@ export function useMashTapper(
     return true;
   }
 
-  // `final` restarts this effect on purpose: the cleanup sends what waits as the last window opens.
+  // Changing final flushes pending taps through effect cleanup.
   useEffect(() => {
     if (!enabled) return;
     const send = tapSender(id, assisted);

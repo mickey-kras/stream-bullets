@@ -3,11 +3,8 @@ import { expect, test, type Page } from "./coverage";
 import { signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
-/*
- * Accessibility checks on every page route. @axe-core/playwright is not a dependency, so these are structural
- * checks: landmarks, one h1, the skip link, named controls, alt text, unique ids and <html lang>.
- */
-/* The landing page and its WebGL station have their own keyboard checks in landing.spec.ts. */
+// Structural accessibility checks: landmarks, one h1, skip link, named controls, alt text, unique IDs, and lang.
+// Landing keyboard checks are in landing.spec.ts.
 const ROUTES: readonly string[] = [
   "/",
   "/streamers",
@@ -67,7 +64,6 @@ for (const route of ROUTES) {
     await expect(page.getByRole("contentinfo")).toHaveCount(1);
     await expect(page.locator("h1")).toHaveCount(1);
     expect(await problems(page)).toEqual({ unnamed: [], noAlt: 0, duplicateIds: [] });
-    // The first Tab reaches the skip link, and it moves focus into the page.
     await page.keyboard.press("Tab");
     const skip = page.getByRole("link", { name: "Skip to content" });
     await expect(skip).toBeFocused();
@@ -78,7 +74,7 @@ for (const route of ROUTES) {
 }
 
 test("display preferences apply before the first paint and persist", async ({ page, context }) => {
-  // Record <html>'s attributes the moment <body> appears, before anything can paint.
+  // Capture html attributes before first paint, when body appears.
   await page.addInitScript(() => {
     new MutationObserver((_records, observer) => {
       if (!document.body) return;
@@ -111,7 +107,6 @@ test("display preferences apply before the first paint and persist", async ({ pa
     cvd: "pd",
   });
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe("20.8px");
-  // Reset to defaults puts everything back.
   await page.getByRole("contentinfo").getByRole("link", { name: "Accessibility" }).click();
   await page.getByRole("button", { name: "Reset to defaults" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-text", "100");
@@ -128,7 +123,7 @@ test("signed in, display preferences save to the account", async ({ browser }) =
   );
   await dialog.getByRole("checkbox", { name: "Underline all links" }).check();
   expect((await saved).status()).toBe(200);
-  // A fresh browser with only the session (no preference cookie) gets the saved settings.
+  // A new browser has the session but no preference cookie.
   const other = await signedIn(browser, "prefsviewer", clientIp("a11y", 178));
   const second = await newPage(other);
   await second.goto("/streamers");

@@ -6,7 +6,7 @@ import { Icon } from "../ui/icon";
 import { Select } from "../ui/select";
 import { sideStyle } from "./mash-parts";
 
-/** The Mash Battle part of the create poll form: 2–4 sides and the battle length. */
+// Mash form: 2..4 sides and duration.
 export function MashFields(): ReactNode {
   const [sides, setSides] = useState<number[]>([0, 1]);
   const [next, setNext] = useState<number>(2);

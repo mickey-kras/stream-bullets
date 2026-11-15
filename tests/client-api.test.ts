@@ -3,7 +3,7 @@ import { adminRequest, webAuthnAvailable } from "../app/components/admin/webauth
 import { ApiError, needsStepUp, postJson, requestJson } from "../app/components/api";
 import { copyText } from "../app/lib/clipboard";
 
-/** The page's delete buttons and the Admin tab read the same `step_up_required` code (security review finding 1). */
+// Delete controls and Admin share `step_up_required`.
 describe("client API errors", (): void => {
   afterEach((): void => {
     vi.unstubAllGlobals();
@@ -83,7 +83,7 @@ describe("copyText", (): void => {
     expect(writeText).toHaveBeenCalledWith("https://streambullets.test/@zed");
     writeText.mockRejectedValueOnce(new DOMException("Denied", "NotAllowedError"));
     expect(await copyText("x")).toBe(false);
-    // An insecure origin has no clipboard at all.
+    // Insecure origins have no clipboard.
     vi.stubGlobal("navigator", {});
     expect(await copyText("x")).toBe(false);
   });

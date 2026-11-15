@@ -33,7 +33,7 @@ test("JSON-LD remains readable under the production CSP on page loads and naviga
       ).toContainEqual(expect.objectContaining({ "@type": "DiscussionForumPosting", headline: "Mic shootout" }));
     }
     expect(await page.locator("html").getAttribute("data-csp-violations")).toBeNull();
-    // A positive control proves that the same document blocks executable inline scripts.
+    // Positive control: the same document blocks executable inline scripts.
     await page.evaluate((): void => {
       const script: HTMLScriptElement = document.createElement("script");
       script.textContent = "document.documentElement.dataset.cspBypassed = 'yes'";

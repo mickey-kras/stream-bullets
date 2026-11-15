@@ -2,18 +2,15 @@ import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Icon, type IconName, type IconSize } from "./icon";
 
 export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "aria-label"> {
-  /** The icon-only button's accessible name. It is also the mouse tooltip unless `title` is set. */
+  // Accessible name; also the tooltip unless title overrides it.
   label: string;
   icon: IconName;
   iconSize?: IconSize;
-  /** Spins the icon once (refresh) each time this number goes up; 0 means no spin. Focus stays on the button. */
+  // Increasing value restarts the icon spin without moving focus; zero disables it.
   spin?: number;
 }
 
-/**
- * Square icon-only button (approved item 37): the glyph is centred with inline-grid, the target is 40px
- * (44px on phones) and never below 24px. Always named by `label`.
- */
+// Named icon button: 40px target, 44px on phones, never below 24px.
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
   { label, icon, iconSize = 20, spin = 0, className = "", title, type = "button", ...rest },
   ref,

@@ -21,7 +21,7 @@ describe("server route error logging", () => {
     });
     expect(log).toHaveBeenCalledTimes(1);
     const [event, details] = log.mock.calls[0] as [string, { cause: string; frames: string[]; ray: string | null }];
-    // Enough to find the failure: the class, where it was thrown and the Ray ID to match the request.
+    // Retain the error class, throw location, and request Ray ID.
     expect(event).toBe("server_request_failed");
     expect(details.cause).toBe("TypeError");
     expect(details.frames.length).toBeGreaterThan(0);

@@ -24,18 +24,16 @@ import { loadShell } from "./lib/shell.server";
 import { type ShellData } from "./lib/shell";
 import "./styles.css";
 
-/** Routes without site chrome. The OBS overlay is a browser source, so it shows only the poll. */
+// OBS routes omit site chrome.
 const bareRoutes: ReadonlySet<string> = new Set(["routes/overlay"]);
 
-/** Shell data for every header, the account menu and the footer (see app/lib/shell.ts). */
+// Shared header, account menu and footer data.
 export const loader = withRouteErrors(async ({ request, context }: LoaderFunctionArgs): Promise<ShellData> => {
   return loadShell(request, context.get(appContext));
 });
 
-/**
- * The shell changes only when the session or the person's role changes: after a form submission, an explicit
- * revalidate() (same URL) or a full reload. Plain navigations reuse it.
- */
+// Reuse shell data across navigation. Refresh after submissions, explicit same-URL revalidation or full
+// reload.
 export function shouldRevalidate({
   formMethod,
   currentUrl,
@@ -46,11 +44,8 @@ export function shouldRevalidate({
   return false;
 }
 
-/**
- * Applies the saved display preferences (text size, contrast, colour vision, motion, links, font) to <html>
- * before first paint. It is the one inline script; it carries the request's CSP nonce, and its code is a fixed
- * string (app/lib/prefs.ts) that reads the preferences from `data-prefs`, so no request data becomes code.
- */
+// Apply saved preferences before paint. The fixed script reads data-prefs and uses the CSP nonce; request
+// data never becomes code.
 function PrefsScript(): ReactNode {
   const nonce: string | undefined = useNonce();
   const shell = useRouteLoaderData<ShellData>("root");
@@ -62,7 +57,7 @@ function PrefsScript(): ReactNode {
 }
 
 export function Layout({ children }: Readonly<{ children: ReactNode }>): ReactNode {
-  // The head script sets the preference attributes on <html> before React hydrates, so they never match.
+  // The head script changes these attributes before hydration.
   return (
     <html lang={getLocale()} suppressHydrationWarning>
       <head>
@@ -132,7 +127,6 @@ export default function App(): ReactNode {
   );
 }
 
-/** The 404 page and the error page: the generic header, a streamer search (404) and a way on, as in the mockup. */
 export function ErrorBoundary(): ReactNode {
   return (
     <ToastProvider>

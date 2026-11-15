@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { t } from "../../i18n";
 
-/**
- * "Discard changes?" over a dialog with unsaved edits (review m1, round 3): it names what would be lost.
- * Keep editing has focus. Escape keeps editing (useDiscardGuard turns the dialog's close request into that).
- */
+// Describe unsaved changes. Focus Keep editing; Escape retains edits.
 export function DiscardConfirm({
   changes,
   onKeep,
@@ -48,10 +45,7 @@ export function DiscardConfirm({
   );
 }
 
-/**
- * Wraps a dialog's close: with unsaved `changes` it asks first. Pass `onOpenChange` to the Sheet and render
- * `confirm` inside it.
- */
+// Pass onOpenChange to Sheet and render confirm inside it to guard dirty closure.
 export function useDiscardGuard(
   changes: readonly string[],
   close: () => void,

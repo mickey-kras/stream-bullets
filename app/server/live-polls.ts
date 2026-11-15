@@ -1,7 +1,6 @@
 import type { LiveSnapshot } from "../types";
 import { MASH_COLUMN, mashValue, notFinishedBattle } from "./mash-sql";
 
-/** One row of LIVE_POLLS_SQL. */
 export type PollRow = {
   id: string;
   title: string;
@@ -19,10 +18,7 @@ export type PollRow = {
   mash: string | null;
 };
 
-/**
- * The polls of a live snapshot: the 50 newest choice and binary entries, plus the open one when it is older, with their
- * vote counts. Binds the streamer id twice.
- */
+// Read the 50 newest choice/binary polls plus any older open poll, with counts. Bind streamer ID twice.
 export const LIVE_POLLS_SQL = `
   WITH recent AS (
     SELECT id, title, kind, options, ends_at, revealed, created_at

@@ -1,14 +1,12 @@
 import * as THREE from "three";
 import { add, mesh, TAU, DECK_Y } from "./shapes";
 
-/* The broadcast hall stands on a superellipse plan: round-ish, with a broad, flattened, glazed front.
-   Angles run from +z (the street) toward +x; `grow` pushes a point outward from the wall line. */
+// Superellipse hall plan. Angles run +z to +x; grow offsets outward from the wall.
 
 const HX = 2.75;
 const HZ = 2.05;
 const SE = 3.2;
 
-/** Where the hall stands on the station deck. */
 export const HALL_AT = new THREE.Vector3(-0.7, DECK_Y, -0.25);
 
 export const GLASS_FROM = -2.05;
@@ -24,7 +22,7 @@ export function plan(a: number, grow = 0, y = 0): THREE.Vector3 {
   );
 }
 
-/** Outward-facing yaw of the wall at angle a, for mounting things flush on it. */
+// Outward wall yaw for flush mounts.
 export function facing(a: number): number {
   const p = plan(a - 0.003);
   const q = plan(a + 0.003);
@@ -42,14 +40,14 @@ export function loop(a0: number, a1: number, grow: number, y: number, n = 96, cl
 }
 
 export interface BandOptions {
-  /** Faces point into the hall instead of out of it. */
+  // Inward-facing geometry.
   inward?: boolean;
   segments?: number;
-  /** UVs span 0..1 across the band (decals) instead of metres. */
+  // Decal UVs use 0..1 across the band, not meters.
   unit?: boolean;
 }
 
-/** A vertical strip of wall following the plan between angles `range` and heights `heights`. */
+// Vertical wall band between angle and height ranges.
 export function band(
   range: readonly [number, number],
   heights: readonly [number, number],
@@ -97,14 +95,14 @@ export function planShape(grow: number): THREE.Shape {
   return s;
 }
 
-/** A flat plate in the plan's shape, `h` thick, starting at height `y`. */
+// Plan-shaped plate, h thick, starting at y.
 export function capSlab(grow: number, y: number, h: number, mat: THREE.Material, parent: THREE.Object3D): THREE.Mesh {
   const g = new THREE.ExtrudeGeometry(planShape(grow), { depth: h, bevelEnabled: false, curveSegments: 4 });
   g.rotateX(-Math.PI / 2);
   return mesh(g, mat, [0, y, 0], parent);
 }
 
-/** A curved block between angles `range` and outward offsets `grows`, `h` tall, starting at height `y`. */
+// Curved block bounded by angles/offsets, h tall, starting at y.
 export function planSector(
   range: readonly [number, number],
   grows: readonly [number, number],
@@ -131,7 +129,6 @@ export function planSector(
   return mesh(g, mat, [0, y, 0], parent);
 }
 
-/** Low roof dome over the plan. */
 export function dome(grow: number, y: number, h: number, mat: THREE.Material, parent: THREE.Object3D): THREE.Mesh {
   const J = 10;
   const n = 128;
@@ -161,7 +158,7 @@ export function dome(grow: number, y: number, h: number, mat: THREE.Material, pa
   return mesh(g, mat, [0, 0, 0], parent);
 }
 
-/** A group mounted flush on the wall at angle a, height y, `out` metres proud of it. */
+// Flush wall mount at angle a, height y, out meters from the wall.
 export function onWall(hall: THREE.Object3D, a: number, y: number, out = 0): THREE.Group {
   const g = add(new THREE.Group(), hall);
   g.position.copy(plan(a, out, y));
@@ -169,9 +166,8 @@ export function onWall(hall: THREE.Object3D, a: number, y: number, out = 0): THR
   return g;
 }
 
-/** Where a pipe leaving point p (in a frame where the hall sits at `hall`) meets the hall wall square-on:
-    a point `stand` metres off the wall, then the wall face itself (where the flange shows), both at p's height.
-    `face` is how far that face stands proud of the plan line (the upper fascia is 0.22). */
+// Find the wall-normal pipe endpoint and flange face at p's height. Stand offsets the endpoint; face offsets
+// the wall surface (upper fascia: 0.22).
 export function wallEntry(
   p: THREE.Vector3,
   hall: THREE.Vector3,

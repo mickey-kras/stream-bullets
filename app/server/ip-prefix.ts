@@ -1,4 +1,4 @@
-/** The eight 16-bit groups of an IPv6 address, or null when the text is not one. */
+// The eight 16-bit groups of an IPv6 address, or null when the text is not one.
 function ipv6Groups(address: string): number[] | null {
   // A dotted IPv4 tail (`::ffff:192.0.2.1`) becomes its two hex groups.
   const dotted = /(^|:)(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/u.exec(address);
@@ -21,13 +21,8 @@ function ipv6Groups(address: string): number[] | null {
   return all.map((group: string): number => Number.parseInt(group, 16));
 }
 
-/**
- * The network a visitor's address belongs to, for counting and rate limits. An IPv4 address is its own key. An IPv6
- * address becomes its /64: one home or one server gets a whole /64, so keying the full address would give a single
- * attacker 2^64 identities (security review finding 3). An IPv4-mapped IPv6 address counts as the IPv4 address in
- * any spelling (`::ffff:192.0.2.1`, `::ffff:c000:201`, `0:0:0:0:0:ffff:c000:201`). Text that is not an address comes
- * back unchanged, which is no worse than keying the raw value.
- */
+// Rate-limit key: full IPv4 or IPv6 /64, preventing 2^64 identities per network. Canonicalize IPv4-mapped IPv6
+// in all spellings. Invalid input stays unchanged.
 export function visitorPrefix(ip: string): string {
   const address: string = ip.trim().toLowerCase().split("%")[0];
   if (!address.includes(":")) return address;

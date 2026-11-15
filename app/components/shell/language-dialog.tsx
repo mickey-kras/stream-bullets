@@ -8,7 +8,7 @@ import { sendJson, errorMessage } from "../api";
 import { Icon } from "../ui/icon";
 import { Sheet } from "../ui/sheet";
 
-/** English first, then the others by their own names (as the approved mockup lists them). */
+// English first; remaining languages sort by native name.
 const ORDERED: readonly Locale[] = [
   DEFAULT_LOCALE,
   ...LOCALES.filter((locale: Locale) => locale !== DEFAULT_LOCALE).sort((a: Locale, b: Locale) =>
@@ -16,26 +16,23 @@ const ORDERED: readonly Locale[] = [
   ),
 ];
 
-/**
- * Saves the language and reloads the page in it. Signed in, the account keeps it (`PATCH /api/me/locale`);
- * the cookie keeps it for this browser either way.
- */
+// Save locale to account when signed in and browser cookie; reload to apply it.
 export async function chooseLocale(locale: Locale, signedIn: boolean, fromAccount: boolean = false): Promise<void> {
   if (signedIn) await sendJson("PATCH", "/api/me/locale", { locale });
   await saveLocaleCookie(locale);
-  // Reload the same page without `?dialog=language`, so the list does not open again.
+  // Remove dialog=language before reload to avoid reopening.
   const url = new URL(globalThis.location.href);
   url.searchParams.delete("dialog");
   try {
     sessionStorage.setItem("sb-language-opener", fromAccount ? "account" : "footer");
     sessionStorage.setItem("sb-language-focus", url.href);
   } catch {
-    // Blocked storage must not prevent applying the saved language.
+    // Blocked storage must not prevent locale changes.
   }
   globalThis.location.replace(url.href);
 }
 
-/** The language list (item 38). Each name shows in its own language and script. */
+// Display names in each language's own script.
 export function LanguageDialog({ onClose }: Readonly<{ onClose: () => void }>): ReactNode {
   const shell = useShell();
   const location = useLocation();

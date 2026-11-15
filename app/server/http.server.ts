@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 
 export class HttpError extends Error {
-  /** `code` is a stable, machine-readable reason (for example `step_up_required`) sent next to the message. */
+  // `code` is a stable, machine-readable reason (for example `step_up_required`) sent next to the message.
   constructor(
     public readonly status: number,
     message: string,
@@ -37,10 +37,7 @@ export function requireSameOrigin(request: Request, env: AppEnv): void {
   }
 }
 
-/**
- * Refuses browser requests from other sites. Requests without an Origin header (curl, scripts, agents) pass:
- * they carry no visitor's cookies by accident, so they cannot act in someone else's name.
- */
+// Refuse cross-origin browsers. No-Origin clients pass because they do not implicitly carry visitor cookies.
 export function requireNotCrossSite(request: Request, env: AppEnv): void {
   const origin: string | null = request.headers.get("Origin");
   if ((origin !== null && origin !== getOrigin(env)) || request.headers.get("Sec-Fetch-Site") === "cross-site") {
@@ -111,10 +108,8 @@ export function json(value: unknown, status = 200): Response {
   return Response.json(value, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-/**
- * The "at ..." lines of an error's stack. The message is left out on purpose, all of it: driver and SQL errors can
- * quote tokens or personal data, also on later lines. A stack that does not start with the message gives no frames.
- */
+// Keep only stack frames, never messages: SQL/driver errors can expose secrets or PII across lines.
+// Non-message-prefixed stacks yield no frames.
 function stackFrames(error: Error): string[] {
   const header: string = String(error);
   if (!error.stack?.startsWith(header)) return [];
@@ -125,7 +120,7 @@ function stackFrames(error: Error): string[] {
     .filter((line: string): boolean => line.startsWith("at "));
 }
 
-/** Logs an unexpected error so it can be diagnosed: its class, its stack frames and the Cloudflare Ray ID. */
+// Log unexpected error class, stack frames, and Cloudflare Ray ID.
 export function logError(event: string, error: unknown, request?: Request, requestId?: string): void {
   const frames: string[] = error instanceof Error ? stackFrames(error) : [];
   console.error(event, {
@@ -162,7 +157,7 @@ export function securityHeaders(
 ): Response {
   const headers = new Headers(response.headers);
   headers.set("X-Content-Type-Options", "nosniff");
-  // The overlay URL carries the owner's overlay key, so the overlay page sends no Referer at all.
+  // Overlay URLs carry secret keys; suppress Referer.
   const overlayPage: boolean = /^\/@[^/]+\/overlay$/.test(new URL(request.url).pathname);
   headers.set("Referrer-Policy", overlayPage ? "no-referrer" : "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
@@ -182,7 +177,7 @@ export function securityHeaders(
       "frame-ancestors 'none'",
     ].join("; "),
   );
-  // No `preload`: joining the browser preload list is a separate, slow-to-undo decision for the whole domain.
+  // HSTS preload requires a separate, domain-wide decision and is slow to undo.
   if (new URL(request.url).protocol === "https:")
     headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   if (!headers.has("Cache-Control")) headers.set("Cache-Control", "no-store");

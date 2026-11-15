@@ -7,27 +7,56 @@
   "vars": { "APP_ORIGIN": "http://localhost:5173" },
   "d1_databases": [{ "binding": "DB", "database_name": "stream-bullets", "database_id": "REPLACE_WITH_D1_DATABASE_ID", "migrations_dir": "drizzle" }],
   "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "stream-bullets-images" }],
-  "durable_objects": { "bindings": [{ "name": "POLL_ROOMS", "class_name": "PollRoom" }] },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PollRoom"] }],
-  // Rate-limit counters are shared by every binding with the same namespace_id in the account, so the default
-  // (development) Worker uses its own namespace and never throttles production visitors.
+  "durable_objects": {
+    "bindings": [
+      { "name": "POLL_ROOMS", "class_name": "PollRoom" },
+      { "name": "CHANNEL_INGEST", "class_name": "ChannelIngest" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["PollRoom"] },
+    { "tag": "v2", "new_sqlite_classes": ["ChannelIngest"] }
+  ],
+  // Bindings share counters by namespace_id. Isolate development from production rate limits.
   "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1002", "simple": { "limit": 120, "period": 60 } }],
-  // Workers Logs keep the structured error logs (class, stack frames, Ray ID); Issues groups production failures.
-  // Source maps turn the logged frames into source lines.
+  // Logs store error classes, frames, and Ray IDs. Issues groups failures; source maps resolve frames.
   "observability": { "enabled": true, "head_sampling_rate": 1, "issues": { "enabled": true } },
   "upload_source_maps": true,
   "triggers": { "crons": ["17 * * * *"] },
   "env": {
+    "test": {
+      "name": "stream-bullets-test",
+      "account_id": "4c8f932bbf73d6901fbb40f559f6e1f4",
+      "workers_dev": false,
+      "preview_urls": false,
+      "routes": [{ "pattern": "test.streambullets.com", "custom_domain": true }],
+      "vars": {
+        "APP_ORIGIN": "https://test.streambullets.com",
+        "APP_ENV": "test",
+        "ADMIN_EMAILS": "admin@example.test",
+        "TEST_DATABASE_ID": "e475eb5b-db31-43bd-8692-5926711e8faa"
+      },
+      "d1_databases": [{ "binding": "DB", "database_name": "stream-bullets-test", "database_id": "e475eb5b-db31-43bd-8692-5926711e8faa", "migrations_dir": "drizzle" }],
+      "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "stream-bullets-test-images" }],
+      "durable_objects": { "bindings": [{ "name": "POLL_ROOMS", "class_name": "PollRoom" }] },
+      "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1003", "simple": { "limit": 120, "period": 60 } }],
+      "triggers": { "crons": [] }
+    },
     "production": {
       "name": "stream-bullets",
       "account_id": "4c8f932bbf73d6901fbb40f559f6e1f4",
       "workers_dev": false,
       "preview_urls": false,
       "routes": [{ "pattern": "streambullets.com", "custom_domain": true }],
-      "vars": { "APP_ORIGIN": "https://streambullets.com" },
+      "vars": { "APP_ORIGIN": "https://streambullets.com", "APP_ENV": "production" },
       "d1_databases": [{ "binding": "DB", "database_name": "stream-bullets", "database_id": "9d80f5b9-9099-4efc-9797-c5ca1314bfbf", "migrations_dir": "drizzle" }],
       "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "stream-bullets-images" }],
-      "durable_objects": { "bindings": [{ "name": "POLL_ROOMS", "class_name": "PollRoom" }] },
+      "durable_objects": {
+        "bindings": [
+          { "name": "POLL_ROOMS", "class_name": "PollRoom" },
+          { "name": "CHANNEL_INGEST", "class_name": "ChannelIngest" }
+        ]
+      },
       "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }]
     }
   }

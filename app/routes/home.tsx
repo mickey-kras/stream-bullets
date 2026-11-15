@@ -35,7 +35,7 @@ export default function Home(): ReactNode {
   const location = useLocation();
   const navigate = useNavigate();
   const [signInOpen, setSignInOpen] = useState<boolean>(false);
-  // A sign on the station (item 4): it flips, then the Streamers list opens with that intent.
+  // Flip the station sign before opening its directory intent.
   const openSign = useCallback(
     (index: number): void => {
       const intent: Intent | undefined = SIGN_INTENTS[index];
@@ -115,7 +115,7 @@ export default function Home(): ReactNode {
                 </>
               )}
             </div>
-            {/* The station's signs as plain links, for keyboards, screen readers and anyone without WebGL. */}
+            {/* Plain-link fallback for keyboards, screen readers and missing WebGL. */}
             <ul className="landing-start" aria-label={t("landing.getStarted")}>
               {SIGN_INTENTS.map((intent: Intent) => (
                 <li key={intent}>

@@ -13,8 +13,7 @@ export const user = sqliteTable(
     image: text("image"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
-    // Written only by our own endpoints; Better Auth reads them as additionalFields with input: false.
-    // A null preset renders the default preset, so there is no backfill.
+    // Only app endpoints write these fields (`input: false`). Null uses the default preset without backfill.
     avatarPreset: integer("avatar_preset"),
     locale: text("locale", { enum: LOCALES }),
     displayPrefs: text("display_prefs"),
@@ -49,13 +48,13 @@ export const session = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    /** Last security-key step-up in this session (item 29). Per session, never per user. */
+    // Last security-key step-up in this session. Per session, never per user.
     adminVerifiedAt: integer("admin_verified_at", { mode: "timestamp_ms" }),
   },
   (table) => [index("session_user_idx").on(table.userId), index("session_expiry_idx").on(table.expiresAt)],
 );
 
-/** WebAuthn credentials, in the shape of Better Auth's passkey plugin (admin security keys). */
+// WebAuthn credentials, in the shape of Better Auth's passkey plugin (admin security keys).
 export const passkey = sqliteTable(
   "passkey",
   {

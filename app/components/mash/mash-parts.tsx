@@ -6,7 +6,7 @@ import { Icon } from "../ui/icon";
 
 const MASH_COLORS = ["mash-a", "mash-b", "mash-c", "mash-d"] as const;
 
-/** The side colour as a CSS variable, plus a pattern class so colour is never the only cue. */
+// Pair side colors with patterns; never rely on color alone.
 export function sideStyle(side: number): CSSProperties {
   return { "--c": `var(--${MASH_COLORS[side] ?? MASH_COLORS[0]})` } as CSSProperties;
 }
@@ -15,12 +15,12 @@ export function formatCount(value: number): string {
   return new Intl.NumberFormat(intlLocale()).format(value);
 }
 
-/** A whole-number share as the language writes percentages ("29%", "29 %"). */
+// Localized integer percentage.
 export function formatPercent(share: number): string {
   return new Intl.NumberFormat(intlLocale(), { style: "percent", maximumFractionDigits: 0 }).format(share / 100);
 }
 
-/** The tug-of-war bar and the per-side totals. Shares use largest-remainder rounding, so they total 100. */
+// Side totals and tug-of-war; rounded shares total 100.
 export function MashBars({
   sides,
   totals,
@@ -66,7 +66,7 @@ export function MashBars({
   );
 }
 
-/** The sides alone, for an overlay with results hidden: no bar, no totals, no shares. */
+// Hidden results omit bars, totals and shares.
 export function MashSides({ sides }: Readonly<{ sides: string[] }>): ReactNode {
   return (
     <div className="mash-bars big">
@@ -82,7 +82,6 @@ export function MashSides({ sides }: Readonly<{ sides: string[] }>): ReactNode {
   );
 }
 
-/** The seconds-left ring. */
 export function MashRing({ left, duration }: Readonly<{ left: number; duration: number }>): ReactNode {
   const style = { "--p": (left / duration) * 100 } as CSSProperties;
   return (
@@ -94,7 +93,6 @@ export function MashRing({ left, duration }: Readonly<{ left: number; duration: 
   );
 }
 
-/** The winner banner with its confetti burst, or "Draw" (R9). */
 export function MashWinner({
   sides,
   winner,

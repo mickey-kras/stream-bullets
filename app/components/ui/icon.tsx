@@ -62,7 +62,7 @@ import {
 } from "lucide-react";
 import { localIcons, type LocalIconName } from "./icon-paths";
 
-/** Icons drawn by Lucide (stroke 1.8). Names follow the approved set in scratchpad/icons/mapping.md. */
+// Lucide icons use 1.8 stroke.
 const lucideIcons = {
   streamers: Tv,
   "your-page": RadioTower,
@@ -127,11 +127,8 @@ const lucideIcons = {
 export type IconName = keyof typeof lucideIcons | LocalIconName;
 export type IconSize = 14 | 16 | 18 | 20 | 24 | 40;
 
-/**
- * One decorative icon: `aria-hidden`, colour from `currentColor`. Put the accessible name on the control
- * (visible text, or `aria-label` on an icon-only button). Sizes follow mapping.md: 16 meta and footer,
- * 18 buttons and menus, 20 header nav and dialog close, 24 category chips and votes, 40 empty states.
- */
+// Decorative currentColor icons; label the control. Sizes: 16 metadata/footer, 18 buttons/menus, 20
+// navigation/close, 24 categories/votes, 40 empty states.
 export function Icon({
   name,
   size = 18,

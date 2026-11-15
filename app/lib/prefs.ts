@@ -2,10 +2,9 @@ import { t } from "../i18n";
 import { LOCALE_COOKIE } from "../i18n/resolve";
 import type { DisplayPrefs } from "../types";
 
-/** Display preferences for signed-out visitors (and a copy for signed-in ones, so signing out keeps them). */
+// Browser copy preserves preferences after sign-out.
 export const PREFS_COOKIE = "sb_prefs";
 
-/** The defaults the "Accessibility & display" dialog starts from and resets to. */
 export const DEFAULT_PREFS: Required<DisplayPrefs> = {
   cvd: "default",
   contrast: "default",
@@ -22,13 +21,8 @@ export function withDefaults(prefs: DisplayPrefs | null | undefined): Required<D
   return { ...DEFAULT_PREFS, ...prefs };
 }
 
-/**
- * The inline head script. It runs before first paint, so a saved text size or contrast never flashes. It reads
- * the saved preferences from its own `data-prefs` attribute and sets the `data-*` hooks on <html> that the
- * styles use (app/styles/tokens.css and base.css). "Follow system" settings track the media queries live.
- * It also exposes the same function as `window.sbApplyPrefs`, so the preferences dialog applies a change
- * with exactly this code.
- */
+// Apply data-prefs to html before paint. Follow-system settings track media queries. Expose the same function
+// as sbApplyPrefs for dialog updates.
 export const PREFS_SCRIPT: string = `(function () {
   var root = document.documentElement;
   var script = document.currentScript;
@@ -64,29 +58,25 @@ declare global {
   }
 }
 
-/** Applies preferences to the page now, with the head script's own function. */
 export function applyPrefs(prefs: DisplayPrefs): void {
   globalThis.window?.sbApplyPrefs?.(prefs);
 }
 
-/** Saves preferences in a cookie for this browser (one year, readable by the server for the first paint). */
+// One-year cookie makes preferences available before paint.
 export async function savePrefsCookie(prefs: DisplayPrefs): Promise<void> {
   try {
     await setPreferenceCookie(PREFS_COOKIE, JSON.stringify(prefs), { prefs });
   } catch {
-    // The page already shows the change, and a signed-in account keeps it; the next change tries again.
+    // Keep the applied/account change; retry cookie storage on the next change.
   }
 }
 
-/** Saves the visitor's language in a cookie for this browser. */
 export function saveLocaleCookie(locale: string): Promise<void> {
   return setPreferenceCookie(LOCALE_COOKIE, locale, { locale });
 }
 
-/**
- * Sets a first-party preference cookie for one year through the Cookie Store API. Browsers without it ask the
- * server to set the cookie (`POST /api/preference-cookies`), since this code base never writes `document.cookie`.
- */
+// Set a one-year first-party cookie through Cookie Store or POST /api/preference-cookies. Never write
+// document.cookie.
 export async function setPreferenceCookie(name: string, value: string, fallback: object): Promise<void> {
   const store = globalThis.cookieStore;
   if (store) {
@@ -109,10 +99,7 @@ export async function setPreferenceCookie(name: string, value: string, fallback:
   if (!response.ok) throw new Error(t("common.failed"));
 }
 
-/*
- * The preferences changed in this page view. The shell's loader data holds what was saved when the page loaded;
- * a change made in the dialog updates this store, and usePrefs() reads it first.
- */
+// Dialog changes override the shell loader's initial preferences for this page view.
 let changed: DisplayPrefs | null = null;
 const listeners = new Set<() => void>();
 

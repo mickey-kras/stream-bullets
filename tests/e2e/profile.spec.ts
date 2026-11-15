@@ -59,7 +59,7 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   const dialog = page.getByRole("dialog", { name: "Your profile" });
   await expect(dialog).toBeVisible();
 
-  // 18 presets, Space explorer (the default) first, then three rows of six; no "Use my initial".
+  // 18 presets, default Space explorer first; three rows of six; no initial option.
   const picker = dialog.getByRole("group", { name: "Choose a picture" });
   await expect(picker.getByRole("radio")).toHaveCount(18);
   const labels = await picker.getByRole("radio").evaluateAll((inputs) => inputs.map((input) => input.ariaLabel));
@@ -68,7 +68,6 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   await expect(dialog.getByText(/initial/i)).toHaveCount(0);
   await expect(page.locator(".avatar-grid")).toHaveCSS("grid-template-columns", /^(\S+ ){5}\S+$/);
 
-  // Unsaved edits ask before closing.
   await dialog.getByLabel("Display name").fill("Reporter Two");
   await expect(dialog.locator(".preview-name")).toHaveText("Reporter Two");
   await expect(dialog.getByText("Save or discard your profile changes before changing login methods.")).toBeVisible();
@@ -79,7 +78,6 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   await expect(discard).toHaveCount(0);
   await dialog.getByLabel("Display name").fill("reporter");
 
-  // Upload: the crop step, zoom, then "Your photo" is chosen and first.
   await dialog.getByLabel("Or upload your own").setInputFiles("public/apple-touch-icon.png");
   const crop = page.getByRole("dialog", { name: "Adjust your picture" });
   await expect(crop.getByRole("button", { name: "Picture position" })).toBeVisible();
@@ -101,7 +99,7 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   expect(saved.viewer.avatar).toMatch(/^\/images\/avatar\//);
   const image = await context.request.get(saved.viewer.avatar ?? "");
   expect(image.headers()["content-type"]).toBe("image/jpeg");
-  // The browser uploads the circle's square at 512 x 512.
+  // Upload the circular crop as a 512 x 512 square.
   const bytes = await image.body();
   const sof = bytes.findIndex((byte, index) => byte === 0xff && bytes[index + 1] === 0xc0);
   expect(sof).toBeGreaterThan(0);
@@ -111,7 +109,6 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
     /^\/images\/avatar\//,
   );
 
-  // Choosing a preset over the photo removes the upload on Save.
   await page.goto("/streamers?dialog=profile");
   await expect(dialog.getByRole("radio", { name: "Your photo" })).toBeChecked();
   await dialog.locator('label[data-avatar="17"]').click();
@@ -121,7 +118,7 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   const after = meSchema.parse(await (await context.request.get("/api/me")).json());
   expect(after.viewer).toMatchObject({ avatar: null, avatarPreset: 17 });
 
-  // The preset follows the reporter into a discussion: their topic's byline, the composer and their comment.
+  // Use the preset in topic bylines, composer, and comments.
   const entryId = randomUUID();
   await runSql("profile-topic", [
     `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${entryId}',id,'${(await accounts()).reporter.id}','topic','Preset pictures','Do they show?','Just chatting',${Date.now()} FROM streamers WHERE handle='other_host';`,
@@ -160,7 +157,6 @@ test("Edit your page: handle warning, a cropped logo, then the profile picture a
   await expect(crop.getByText("Page header")).toBeVisible();
   await crop.getByRole("button", { name: "Use this picture" }).click();
   await expect(dialog.getByRole("button", { name: "Adjust the logo" })).toBeVisible();
-  // Closing now would lose the logo: it asks first.
   await dialog.getByRole("button", { name: "Close dialog" }).click();
   const discard = page.getByRole("alertdialog", { name: "Discard changes?" });
   await expect(discard).toContainText("Page logo");
@@ -169,7 +165,6 @@ test("Edit your page: handle warning, a cropped logo, then the profile picture a
   await expect(page.getByText("Streamer page saved.").first()).toBeVisible();
   const saved = meSchema.parse(await (await context.request.get("/api/me")).json());
   expect(saved.streamer?.logo).toMatch(/^\/images\/logo\//);
-  // The page header shows the logo.
   await expect(page.locator(".streamer-home .brand-avatar")).toHaveAttribute("src", /^\/images\/logo\//);
 
   await page.goto("/@other_host?dialog=page");
@@ -178,10 +173,9 @@ test("Edit your page: handle warning, a cropped logo, then the profile picture a
   await expect(dialog).toBeHidden();
   const reverted = meSchema.parse(await (await context.request.get("/api/me")).json());
   expect(reverted.streamer?.logo).toBeNull();
-  // Without a logo or an uploaded picture, the page shows the default Space explorer.
   await expect(page.locator(".streamer-home .brand-avatar")).toHaveAttribute("data-preset", "14");
 
-  // A new handle saved from the page moves to the new address, and the shell's links follow it at once.
+  // A handle change must update the URL and shell links immediately.
   const restore =
     "UPDATE streamers SET handle='other_host', handle_changed_at=NULL WHERE handle IN ('other_host','other_host_2');";
   await runSql("rename-reset", [restore]);

@@ -31,7 +31,6 @@ function EntryMeta({ entry }: Readonly<{ entry: Entry }>): ReactNode {
   );
 }
 
-/** "Live now: {title} · Watch on Twitch" above the topic list while a stream is live. */
 export function LiveStrip({ event }: Readonly<{ event: StreamEvent | null }>): ReactNode {
   if (!event) return null;
   return (
@@ -179,10 +178,7 @@ function useResultAnnouncement(
   }, [filter, count, more, official, status]);
 }
 
-/**
- * The Topics tab (and the Ideas board on the official page): the searchable, sortable list on the left, the
- * selected entry and its discussion on the right, with a resizable split.
- */
+// Searchable list and selected discussion share a resizable split.
 export function TopicBoard({
   name,
   entries,

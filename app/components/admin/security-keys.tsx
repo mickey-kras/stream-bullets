@@ -9,11 +9,11 @@ import { DateTime } from "../waitlist";
 import { KeyConfirm } from "./key-confirm";
 import { adminRequest, ceremonyError, errorText, registerKey, webAuthnAvailable } from "./webauthn";
 
-/* Security keys (item 29): first-time setup with two keys, then the Security keys tab (add, rename, remove). */
+// Two-key setup followed by add/rename/remove management.
 
 const NAME_MAX = 40;
 
-/** The name field and the "touch your key" button. Registers on submit and reloads the admin data. */
+// Register on submit, then reload Admin data.
 function RegisterForm({
   defaultName,
   submitLabel,
@@ -74,7 +74,7 @@ function RegisterForm({
   );
 }
 
-/** First-time setup: add a first key, then a backup key. Admin stays locked (under enforce) until both exist. */
+// Enforce mode stays locked until both keys exist.
 export function KeySetup({
   status,
   keys,
@@ -360,7 +360,6 @@ function KeyCard({
   );
 }
 
-/** The Security keys tab once setup is done. */
 export function SecurityKeys({ status, keys }: Readonly<{ status: StepUpStatus; keys: SecurityKey[] }>): ReactNode {
   const revalidator = useRevalidator();
   const [dialog, setDialog] = useState<KeyDialog>(null);

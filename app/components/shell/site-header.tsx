@@ -6,7 +6,7 @@ import { Icon } from "../ui/icon";
 import { AccountMenu } from "./account-menu";
 import { useFitHeader } from "./fit-header";
 
-/** The StreamBullets logo link: the wordmark, or the icon on phones. It always goes home (logo rule). */
+// Home link uses the wordmark, or icon on phones.
 export function SiteLogo(): ReactNode {
   return (
     <Link className="brand site-logo" to={paths.home} aria-label={t("nav.home")}>
@@ -16,10 +16,7 @@ export function SiteLogo(): ReactNode {
   );
 }
 
-/**
- * The generic header for Settings, Admin, the legal pages and errors: logo, then Streamers (plus Your page for
- * owners and Admin for admins) with aria-current on the active one, then the account control.
- */
+// Shared header with active route, role-specific links and account control.
 export function SiteHeader(): ReactNode {
   const shell: ShellData = useShell();
   const { pathname } = useLocation();

@@ -1,16 +1,10 @@
-/**
- * Contact addresses (approved item 48). General contact (the Contact dialog, footer, support and ideas) uses
- * support@; the privacy policy, terms and data requests use privacy@. Both are routed by Cloudflare Email Routing.
- */
+// Cloudflare routes general contact to support@ and legal/data requests to privacy@.
 export const contactEmails = {
   support: "support@streambullets.com",
   privacy: "privacy@streambullets.com",
 } as const;
 
-/**
- * Public legal fields. Runtime configuration supplies operator details on the legal routes.
- * The defaults keep unconfigured deployments visibly in draft without personal data in source.
- */
+// Runtime operator details keep unconfigured legal pages in draft without exposing personal data in source.
 export interface LegalDetails {
   operatorName: string;
   operatorCountry: string;

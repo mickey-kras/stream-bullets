@@ -6,12 +6,8 @@ import { contactEmails } from "../legal";
 import { ownerNotice } from "../lib/moderation";
 import { isPlaceholderEmail } from "./validation";
 
-/**
- * The optional owner email for page moderation (R13). The owner always sees the in-app notice (the page banner,
- * the account menu and Edit your page). Email goes out only when the admin ticks "Notify the owner" and both the
- * `NOTIFY_EMAIL` send_email binding and the `NOTIFY_FROM` sender address are configured. A failed send never
- * undoes the moderation action.
- */
+// Moderation email requires admin selection, `NOTIFY_EMAIL`, and `NOTIFY_FROM`. Always show in-app notices.
+// Send failures never undo moderation.
 
 export interface NotifyMessage {
   to: string;
@@ -34,7 +30,7 @@ interface OwnerRow {
   locale: string | null;
 }
 
-/** The email for the page's owner in their language, or null when there is no real address to write to. */
+// The email for the page's owner in their language, or null when there is no real address to write to.
 export async function ownerEmail(env: AppEnv, streamerId: string, action: PageAction): Promise<NotifyMessage | null> {
   const row = await env.DB.prepare(`
     SELECT s.handle, s.status, s.status_reason, u.email, u.locale
@@ -55,7 +51,7 @@ export async function ownerEmail(env: AppEnv, streamerId: string, action: PageAc
   });
 }
 
-/** Emails the owner about a moderation action. Returns whether an email went out. */
+// Emails the owner about a moderation action. Returns whether an email went out.
 export async function notifyOwner(env: AppEnv, streamerId: string, action: PageAction): Promise<boolean> {
   if (!env.NOTIFY_EMAIL || !env.NOTIFY_FROM?.trim()) return false;
   try {

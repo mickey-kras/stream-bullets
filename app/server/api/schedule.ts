@@ -13,7 +13,7 @@ function eventId(match: RegExpExecArray): string {
   return match[1];
 }
 
-/** The stream schedule (item 23). Reads are public; writes are the page owner's. */
+// Schedule reads are public; only the owner writes.
 export const scheduleRoutes: ApiRoute[] = [
   // GET /api/streamers/:handle/events?from&to → {events, serverNow}
   get(/streamers\/([a-z0-9_]{3,30})\/events/, async ({ request, env, match, viewer }) => {
@@ -23,14 +23,14 @@ export const scheduleRoutes: ApiRoute[] = [
     const now = Date.now();
     return json({ events: await listEvents(env, streamer.id, range.from, range.to, now), serverNow: now });
   }),
-  // Every write below may change the next stream, so an overlay showing Up next reloads after it.
-  // POST /api/events {title, notes, date, time, tz, durationMin, platform, url, repeatDays, repeatUntil, topicIds} → {event}
+  // Schedule writes refresh overlays showing Up next.
   write("POST", /events/, async ({ request, env, viewer }) => {
     const event = await createEvents(env, viewer.id, await readJson(request, z.unknown()));
     await refreshOverlayFor(env, viewer.id, ["next"]);
     return json({ event });
   }),
-  // PATCH /api/events/:id {action: "edit", scope, ...} | {action: "cancel"} | {action: "replay", vodUrl} → {event}
+  // PATCH /api/events/:id {action: "edit", scope, ...} | {action: "cancel"} | {action: "replay", vodUrl} →
+  // {event}
   write("PATCH", eventPath, async ({ request, env, match, viewer }) => {
     const event = await patchEvent(env, viewer.id, eventId(match), await readJson(request, z.unknown()));
     await refreshOverlayFor(env, viewer.id, ["next"]);

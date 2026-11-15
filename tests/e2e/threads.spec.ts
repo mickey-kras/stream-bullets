@@ -37,7 +37,6 @@ test("replies collapse after two, removed comments keep their thread, one reply 
   await expect(replies).toHaveCount(4);
   await thread.getByRole("button", { name: "Hide replies (4)" }).click();
   await expect(thread.locator(".replies")).toBeHidden();
-  // Reply on the root of a collapsed thread shows its replies and the reply box.
   await thread.locator("article.comment").first().getByRole("button", { name: "Reply", exact: true }).click();
   await expect(thread.locator(".inline-reply")).toBeVisible();
   await expect(replies).toHaveCount(4);
@@ -63,7 +62,6 @@ test("replies collapse after two, removed comments keep their thread, one reply 
   await expect(posted).toBeVisible();
   await expect(posted.locator(".reply-mention")).toHaveText("Reply to reporter");
 
-  // Reporting a comment leaves one "Reported" marker and no second Report button.
   const reported = replies.nth(1);
   await reported.getByRole("button", { name: "Report comment by reporter" }).click();
   const dialog = page.getByRole("dialog");

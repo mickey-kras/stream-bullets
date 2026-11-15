@@ -85,6 +85,20 @@ it.each([true, false])(
     vi.stubGlobal("matchMedia", (query: string): EventTarget =>
       query === "(max-width: 700px)" ? compact : media,
     );
+    // The head script's effective Motion setting (app/lib/prefs.ts), which the scene follows.
+    const root = { dataset: { reduced: String(reduced) } };
+    Object.assign(document, { documentElement: root });
+    let motionChanged: () => void = (): void => {};
+    vi.stubGlobal(
+      "MutationObserver",
+      class {
+        constructor(callback: () => void) {
+          motionChanged = callback;
+        }
+        observe(): void {}
+        disconnect(): void {}
+      },
+    );
     vi.stubGlobal("devicePixelRatio", 2);
     let frame: FrameRequestCallback = (): void => {
       throw new Error("Animation not scheduled");
@@ -185,8 +199,8 @@ it.each([true, false])(
     gpu.controls.dispatchEvent(new Event("end"));
     gpu.controls.dispatchEvent(new Event("change"));
     host.dispatchEvent(new Event("pointerleave"));
-    media.matches = !reduced;
-    media.dispatchEvent(new Event("change"));
+    root.dataset.reduced = String(!reduced);
+    motionChanged();
     controller.view("hero");
     frame(2150);
     controller.lights(false);

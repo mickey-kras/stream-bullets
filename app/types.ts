@@ -15,10 +15,10 @@ import type {
   SUPPORT_LINK_KINDS,
 } from "../db/enums";
 
-/** Sign-in providers, in the order the sign-in dialog lists them. */
+// Sign-in dialog provider order.
 export type Provider = "google" | "tiktok" | "twitch" | "instagram";
 
-/** `mash` is a `choice` entry with an `entry_mash` row (R1). The API reports it as its own kind. */
+// The API exposes `choice` entries with an `entry_mash` row as `mash`.
 export type EntryKind = "topic" | "choice" | "binary" | "mash";
 export type SortOrder = "newest" | "top";
 export type Reaction = -1 | 0 | 1;
@@ -36,7 +36,7 @@ export type OverlaySize = (typeof OVERLAY_SIZES)[number];
 export type OverlayMessageStyle = (typeof OVERLAY_MESSAGE_STYLES)[number];
 export type MashPhase = (typeof MASH_PHASES)[number];
 
-/** "Accessibility & display" preferences (item 39). Every key is optional; missing keys use the default. */
+// Optional display settings. Missing keys use defaults.
 export interface DisplayPrefs {
   cvd?: "default" | "pd" | "tri";
   contrast?: "default" | "high";
@@ -52,13 +52,13 @@ export interface DisplayPrefs {
 export interface Viewer {
   id: string;
   name: string;
-  /** Uploaded picture, or null. */
+
   avatar: string | null;
-  /** Preset 0..17, or null. With no upload and no preset the client shows preset 14 (DEFAULT_AVATAR_PRESET). */
+  // Preset 0..17 or null. Without an upload or preset, use DEFAULT_AVATAR_PRESET (14).
   avatarPreset: number | null;
-  /** Saved language, or null to follow the cookie and the browser. */
+  // Null uses the cookie or browser locale.
   locale: Locale | null;
-  /** Saved display preferences, or null when the account never saved any. */
+  // Null until preferences are saved.
   displayPrefs: DisplayPrefs | null;
 }
 
@@ -67,23 +67,23 @@ export interface Streamer {
   handle: string;
   name: string;
   about: string;
-  /** The owner's uploaded picture, copied to the page. */
+  // Owner's uploaded picture.
   avatar: string | null;
   background: string | null;
   ownerId: string;
-  /** Page logo. The client falls back to `avatar`, then `ownerAvatarPreset`, then the default spaceman. */
+  // Logo fallback: `avatar`, `ownerAvatarPreset`, default spaceman.
   logo: string | null;
-  /** The owner's preset picture (0..17), part of "the owner's profile picture" when there is no upload. */
+  // Owner's preset (0..17), used without an upload.
   ownerAvatarPreset: number | null;
-  /** The official StreamBullets page, pinned first in the directory. */
+  // Official page; pinned first in the directory.
   isOfficial: boolean;
-  /** `frozen` pages are public and read-only. `suspended` pages reach only their owner and admins. */
+  // Frozen: public, read-only. Suspended: owner and admins only.
   status: StreamerStatus;
-  /** Why the page is frozen or suspended. Only set for the owner and admins; null for everyone else. */
+  // Owner and admins only; null for other viewers.
   statusReason: string | null;
-  /** When the page was last frozen or suspended (ms). Only set for the owner and admins; null for everyone else. */
+  // Last freeze or suspension (ms). Owner and admins only; null otherwise.
   statusChangedAt: number | null;
-  /** Last handle change, for the owner (a handle can change once every 30 days). Null for everyone else. */
+  // Owner only; null otherwise. Handle changes require 30 days between updates.
   handleChangedAt: number | null;
 }
 
@@ -98,7 +98,7 @@ export interface Entry {
   authorId: string;
   author: string;
   avatar: string | null;
-  /** The author's preset 0..17, or null (see `Viewer.avatarPreset`). */
+  // Author preset (0..17) or null.
   avatarPreset: number | null;
   kind: EntryKind;
   title: string;
@@ -115,56 +115,56 @@ export interface Entry {
   comments: number;
   reaction: Reaction;
   myVote: number | null;
-  /** Ideas board status on the official page; null elsewhere. */
+  // Official Ideas board only; null elsewhere.
   status: EntryStatus | null;
-  /** Shown with `declined` ("Not planned"). */
+  // Reason shown for `declined`.
   statusReason: string | null;
-  /** The viewer has an open report on this topic or poll. */
+  // Viewer has an open report.
   reported: boolean;
-  /** Mash Battle state when `kind` is `mash`, else null. `counts` then holds the players on each side. */
+  // Mash state; null for other kinds. `counts` holds players per side.
   mash: MashState | null;
 }
 
-/** A Mash Battle (item 31). Sides are the entry's `options`; a viewer's side is their vote. */
+// Sides use entry options; each viewer's vote selects their side.
 export interface MashState {
   durationS: number;
-  /** As stored. Use `mashPhaseAt()` from app/lib/mash.ts for the phase at a given time. */
+  // Stored phase. Use mashPhaseAt() for the current phase.
   phase: MashPhase;
   startsAt: number | null;
   endsAt: number | null;
-  /** Winning side, -1 for a draw, or null until the battle ends. */
+  // Winning side; -1 for a draw, null until finished.
   winner: number | null;
-  /** Taps per side. */
+
   totals: number[];
-  /** Accounts with at least one tap. */
+  // Accounts with at least one tap.
   players: number;
-  /** Accounts that used assisted tapping. */
+
   assisted: number;
 }
 
 export interface Comment {
   id: string;
   entryId: string;
-  /** Empty when `removed`. */
+  // Empty when removed.
   authorId: string;
-  /** Empty when `removed`. */
+  // Empty when removed.
   author: string;
   avatar: string | null;
-  /** The author's preset 0..17, or null (always null when `removed`). */
+  // Author preset (0..17); null when removed.
   avatarPreset: number | null;
-  /** Empty when `removed`. */
+  // Empty when removed.
   text: string;
   createdAt: number;
   parentId: string | null;
   likes: number;
   liked: boolean;
-  /** A deleted comment that still has replies: render "Comment removed" and keep the thread. */
+  // Deleted parent with replies. Render "Comment removed" and retain the thread.
   removed: boolean;
-  /** The viewer has an open report on this comment: show "Reported" once and no Report action. */
+  // Show "Reported" and hide Report when true.
   reported: boolean;
 }
 
-/** A top-level comment with its whole reply tree, flattened oldest first (`?view=thread`). */
+// Top-level comment with replies flattened oldest first (`?view=thread`).
 export interface CommentThread extends Comment {
   replies: Comment[];
 }
@@ -182,7 +182,7 @@ export interface DiscussionSnapshot {
   nextCursor: string | null;
 }
 
-/** `GET /api/entries/:id/comments?view=thread`: top-level comments paged, each with its replies. */
+// Paged top-level comments with their replies (`?view=thread`).
 export interface ThreadSnapshot {
   comments: CommentThread[];
   nextCursor: string | null;
@@ -193,39 +193,39 @@ export interface LiveSnapshot {
   revision: number;
   serverNow: number;
   polls: Pick<Entry, "id" | "title" | "kind" | "options" | "endsAt" | "revealed" | "counts" | "total" | "mash">[];
-  /** What the OBS overlay shows. The live room always sends it; loaders may leave it out. */
+  // Always sent by the live room; optional in loaders.
   overlay?: OverlayPublic | null;
 }
 
-/** `{type:"mash"}`: live totals, 5 times a second while a battle runs. */
+// Live Mash totals at 5 Hz during a battle.
 export interface MashTick {
   type: "mash";
   id: string;
   phase: MashPhase;
   totals: number[];
-  /** Whole seconds left. */
+  // Whole seconds.
   left: number;
   endsAt: number | null;
   players: number;
   assisted: number;
-  /** Taps a second across all players, for the host. */
+  // Host's tap rate across all players.
   tps: number;
   serverNow: number;
 }
 
-/** One overlay source: `ref` is a poll or topic id, a Community card id, or null. */
+// `ref`: poll, topic or Community card ID, or null.
 export interface OverlaySourceRef {
   type: OverlaySource;
   ref: string | null;
 }
 
-/** The owner's overlay control state (`GET /api/overlay`). */
+// Owner control state (`GET /api/overlay`).
 export interface OverlayState {
   air: OverlaySourceRef;
   preview: OverlaySourceRef;
   position: OverlayPosition;
   size: OverlaySize;
-  /** Instant switch: every preview change goes on air at once. */
+  // Publish preview changes immediately.
   instant: boolean;
   showResults: boolean;
   message: string;
@@ -233,7 +233,7 @@ export interface OverlayState {
   revision: number;
 }
 
-/** The overlay state anyone may see. `message` is empty unless the message banner is on air. */
+// Public state. `message` is empty unless its banner is on air.
 export type OverlayPublic = Omit<OverlayState, "preview" | "instant">;
 
 export type ApplicationStatus = "pending" | "approved" | "rejected";
@@ -279,11 +279,11 @@ export interface ContentReport {
   status: ReportStatus;
   createdAt: number;
   resolvedAt: number | null;
-  /** Null when the reporter deleted their account. */
+  // Null after reporter account deletion.
   reporterName: string | null;
-  /** Null when the streamer page no longer exists. */
+  // Null after page deletion.
   streamerHandle: string | null;
-  /** The topic or poll that holds the reported content, or null once the content is gone. */
+  // Containing topic or poll; null after deletion.
   entryId: string | null;
 }
 
@@ -292,14 +292,13 @@ export interface ReportQueue {
   nextCursor: string | null;
 }
 
-/** A linked topic shown on a stream ("Linked topics"). */
 export interface EventTopic {
   id: string;
   title: string;
   category: string;
 }
 
-/** One scheduled stream (item 23). A weekly series is one row per occurrence sharing `seriesId`. */
+// One occurrence per row; weekly occurrences share `seriesId`.
 export interface StreamEvent {
   id: string;
   seriesId: string | null;
@@ -309,17 +308,17 @@ export interface StreamEvent {
   durationMin: number;
   platform: StreamPlatform;
   url: string;
-  /** What it shows as now: upcoming (`scheduled`), `live`, `ended` or `cancelled`. */
+  // Current status: scheduled, live, ended or cancelled.
   status: StreamEventStatus;
   vodUrl: string | null;
-  /** Weekday bitmask (bit 0 = Sunday). 0 for a one-off stream. */
+  // Weekday bits: 0 = Sunday. Zero means one-off.
   repeatDays: number;
-  /** Last moment a series may occur, or null. */
+  // Last allowed series occurrence; null if unlimited.
   repeatUntil: number | null;
-  /** The zone the owner scheduled it in. Viewers see it in their own zone. */
+  // Owner's scheduling zone. Viewers use their own zone.
   tz: string;
   topics: EventTopic[];
-  /** Last change. "Add to calendar" uses it for DTSTAMP and SEQUENCE, the same as the .ics feed. */
+  // Last change; shared by download and feed DTSTAMP/SEQUENCE.
   updatedAt: number;
 }
 
@@ -328,7 +327,7 @@ export interface ScheduleSnapshot {
   serverNow: number;
 }
 
-/** A Community card (item 24). `buttonTarget` is `tab:<view>` or an https link. */
+// `buttonTarget`: `tab:<view>` or HTTPS URL.
 export interface CommunityCard {
   id: string;
   icon: CardIcon | null;
@@ -338,7 +337,7 @@ export interface CommunityCard {
   buttonTarget: string | null;
 }
 
-/** A support or donation link-out (item 34). `label` is only set for `other`. */
+// External support link. `label` applies only to `other`.
 export interface SupportLink {
   id: string;
   kind: SupportLinkKind;
@@ -348,15 +347,15 @@ export interface SupportLink {
 
 export interface SupportSettings {
   links: SupportLink[];
-  /** Show the links in About. */
+
   visible: boolean;
-  /** Also show a Support card in Community. */
+
   card: boolean;
 }
 
-/** Content the overlay sources other than polls show. Every field is already public on the streamer page. */
+// Public content for non-poll overlay sources.
 export interface OverlayData {
-  /** The newest polls and Mash Battles, for the poll picker. */
+  // Newest polls and Mash Battles for the picker.
   polls: { id: string; title: string; mash: boolean }[];
   topics: {
     id: string;
@@ -375,43 +374,37 @@ export interface OverlayData {
     label: string | null;
     target: string | null;
   }[];
-  /** The next scheduled stream, or null. */
+
   next: { title: string; startsAt: number } | null;
-  /** The first support link, or null. */
+
   support: { kind: SupportLinkKind; label: string | null; url: string } | null;
 }
 
-/* Admin and admin-security API shapes. */
-
 export type ModerationTarget = (typeof MODERATION_TARGETS)[number];
 
-/** Why an admin froze or suspended a page: the viewer report reasons plus impersonation. */
+// Viewer report reasons plus impersonation.
 export const MODERATION_REASONS = ["illegal", "harassment", "spam", "privacy", "impersonation", "other"] as const;
 export type ModerationReason = (typeof MODERATION_REASONS)[number];
 
 export const PAGE_ACTIONS = ["freeze", "unfreeze", "suspend", "unsuspend"] as const;
 export type PageAction = (typeof PAGE_ACTIONS)[number];
 
-/** `ADMIN_STEP_UP`: `off` skips step-up, `report` allows admin work and logs a missing step-up, `enforce` blocks it. */
+// `off`: skip; `report`: allow and log missing step-up; `enforce`: block.
 export type StepUpMode = "off" | "report" | "enforce";
 
-/**
- * What the admin's session needs before admin data opens.
- * - `none`: nothing (or the mode does not block).
- * - `keys`: fewer than two security keys are registered (enforce only).
- * - `step_up`: no step-up in this session in the last 15 minutes (enforce only).
- */
+// `none`: allowed. `keys`: fewer than two keys. `step_up`: no check in 15 minutes. Blocking states apply only
+// in enforce mode.
 export type StepUpNeed = "none" | "keys" | "step_up";
 
 export interface StepUpStatus {
   mode: StepUpMode;
   keys: number;
   requiredKeys: number;
-  /** Last step-up in this session, or null. */
+  // Session step-up time; null if absent.
   verifiedAt: number | null;
-  /** When the 15-minute step-up ends, or null when it is not fresh. */
+  // Step-up expiry (15 minutes); null if stale.
   freshUntil: number | null;
-  /** Whether this session may register a key now, and why not when it may not. */
+  // Key registration eligibility and refusal reason.
   canRegister: boolean;
   registerBlock: "none" | "sign_in_again" | "step_up" | "limit";
   need: StepUpNeed;
@@ -427,7 +420,7 @@ export interface SecurityKey {
   transports: string[];
 }
 
-/** A person as admin screens show them: name and picture only, with the email when it is real. */
+// Admin-visible identity; omit placeholder emails.
 export interface AdminPerson {
   id: string | null;
   name: string;
@@ -459,7 +452,7 @@ export interface AdminPage {
   owner: AdminPerson & { email: string };
   topics: number;
   polls: number;
-  /** Newest first, at most 10. */
+  // Newest first; maximum 10.
   history: ModerationEvent[];
 }
 
@@ -473,9 +466,9 @@ export type ReportGroupFilter = "open" | "resolved" | "all";
 export interface ReportGroup {
   streamer: Pick<AdminPage, "id" | "handle" | "name" | "logo" | "avatar" | "ownerAvatarPreset" | "status"> | null;
   streamerId: string;
-  /** Reports in the filter. */
+
   reports: number;
-  /** Distinct reported items in the filter. */
+
   items: number;
   open: number;
   last30Days: number;
@@ -485,7 +478,7 @@ export interface ReportGroup {
 
 export interface ReportGroupList {
   groups: ReportGroup[];
-  /** Cursor for the next page of groups, or null on the last page. */
+  // Null on the last page.
   next: string | null;
 }
 
@@ -498,29 +491,29 @@ export interface ReportItemReport {
   reporter: AdminPerson | null;
 }
 
-/** All reports about one topic, poll or comment ("Reported by N people"). */
+// Reports grouped by topic, poll or comment.
 export interface ReportItem {
   targetKind: ReportTargetKind;
   targetId: string;
-  /** The topic or poll that holds it, or null once it is gone. */
+  // Containing entry; null after deletion.
   entryId: string | null;
   snapshot: string;
   author: AdminPerson | null;
-  /** `open` while any report is open, else how the item was resolved. */
+  // Open while any report is open; otherwise the resolution.
   status: ReportStatus;
   resolvedAt: number | null;
-  /** Every report about the item in the filter, though `reports` holds only the newest ones. */
+  // Total filtered reports; `reports` includes only the newest.
   reportCount: number;
   openCount: number;
   reasons: { reason: ReportReason; count: number }[];
-  /** The newest reports, up to a fixed limit. */
+  // Newest reports, bounded by a fixed limit.
   reports: ReportItemReport[];
 }
 
 export interface ReportItemList {
   streamer: ReportGroup["streamer"];
   items: ReportItem[];
-  /** Cursor for the next page of items, or null on the last page. */
+  // Null on the last page.
   next: string | null;
 }
 

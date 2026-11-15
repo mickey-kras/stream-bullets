@@ -18,7 +18,7 @@ async function seedHistory(userId: string): Promise<{ entryId: string; remotePar
   const statements: string[] = [
     `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${entryId}',id,'${userId}','topic','Historical discussion','A discussion with more than one page.','Just chatting',${now} FROM streamers WHERE handle='test_host';`,
   ];
-  // 110 top-level comments: the threaded view pages them 100 at a time.
+  // 110 root comments cross the 100-comment page boundary.
   for (let index = 1; index <= 112; index += 1) {
     const id: string = index === 1 ? parentId : index === 3 ? remoteParentId : randomUUID();
     const parent: string = index === 2 ? `'${parentId}'` : index === 4 ? `'${remoteParentId}'` : "NULL";
@@ -108,7 +108,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     await page.getByRole("dialog").getByRole("button", { name: "Delete comment", exact: true }).click();
     await expect(oldest).toHaveCount(0);
     await expect(reply).toBeVisible();
-    // R2: the deleted parent stays as a "Comment removed" placeholder, so the reply keeps its thread.
+    // Deleted parents remain as placeholders to preserve threads.
     await expect(page.getByRole("article", { name: "Comment removed" })).toHaveCount(1);
     await expect(reply.locator(".replying")).toContainText("a removed comment");
     await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
@@ -152,10 +152,10 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
     await expect(remoteParent).toHaveCount(0);
     await expect(remoteReply).toBeVisible();
-    // R2: a deleted comment with replies stays as a "Comment removed" placeholder, so the reply keeps its parent.
+    // Deleted parents remain as placeholders to preserve threads.
     await expect(remoteReply.locator(".replying")).toContainText("a removed comment");
     await expect(reply).toBeVisible();
-    // The placeholder is still a valid reply target, so the open reply stays until the viewer cancels it.
+    // The placeholder remains a reply target until the viewer cancels.
     await page.getByRole("button", { name: "Cancel reply", exact: true }).click();
     await expect(page.getByRole("button", { name: "Cancel reply", exact: true })).toHaveCount(0);
     await expect(page.getByRole("textbox", { name: "Write a comment" })).toHaveValue("Keep this unsent draft.");

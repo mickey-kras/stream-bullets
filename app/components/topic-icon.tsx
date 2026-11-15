@@ -15,7 +15,6 @@ const icons: Record<string, IconName> = {
   lang: "globe",
 };
 
-/** The icon for a topic category or an Ideas board category. */
 export function categoryIcon(category: string): IconName {
   return icons[category] ?? "cat-tech";
 }
@@ -31,7 +30,7 @@ const TOPIC_CATEGORY_LABELS: Readonly<Record<string, MessageId>> = {
   "Just chatting": "category.chatting",
 };
 
-/** A topic category's name in the page language. Categories are stored in English. */
+// Translate stored English category names.
 export function topicCategoryLabel(category: string): string {
   const id: MessageId | undefined = TOPIC_CATEGORY_LABELS[category];
   return id ? t(id) : category;

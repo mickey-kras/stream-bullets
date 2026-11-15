@@ -26,7 +26,7 @@ let database: TestDatabase;
 let env: AppEnv;
 let rooms: string[];
 
-/** Users and every kind of row the account can own, written in one batch. */
+// Seed users and all owned row types in one batch.
 async function seed(): Promise<void> {
   const run = (sql: string, ...values: (string | number | null)[]): D1PreparedStatement =>
     env.DB.prepare(sql).bind(...values);
@@ -102,7 +102,7 @@ async function seed(): Promise<void> {
       ids.leaverTopic,
       ids.hostTopic,
     ),
-    // A reply chain: leaver -> other -> leaver -> other, plus unrelated comments.
+    // Reply chain: leaver -> other -> leaver -> other, plus unrelated comments.
     run(
       `INSERT INTO entry_comments (id,entry_id,author_id,text,created_at,parent_id) VALUES
         ('c-leaver',?,'leaver','Leaver says hi',?,NULL),
@@ -173,7 +173,7 @@ async function seed(): Promise<void> {
   }
 }
 
-/** Rows in the tables added by migrations 0006–0012, for the leaver and, to check they survive, for others. */
+// Seed 0006-0012 data for the leaver and surviving accounts.
 async function seedNewTables(): Promise<void> {
   const run = (sql: string, ...values: (string | number | null)[]): D1PreparedStatement =>
     env.DB.prepare(sql).bind(...values);
@@ -186,7 +186,7 @@ async function seedNewTables(): Promise<void> {
       now,
       ids.leaverPage,
     ),
-    // The leaver changed the status of the host page as an admin once; the record keeps no actor afterwards.
+    // The audit record must clear its deleted admin actor.
     run("UPDATE streamers SET status_changed_by='leaver' WHERE id=?", ids.hostPage),
     run(
       `INSERT INTO passkey (id,name,public_key,user_id,credential_id,counter,device_type,backed_up,transports,created_at,aaguid)
@@ -250,7 +250,7 @@ async function seedNewTables(): Promise<void> {
 
 const ownPage = "JOIN streamers s ON s.id=x.streamer_id WHERE s.owner_id=?1";
 
-/** Counts rows linked to a user in every table that can hold them. */
+// Count all rows linked to a user.
 async function linkedRows(userId: string): Promise<Record<string, number>> {
   const queries: Record<string, string> = {
     user: "SELECT count(*) AS n FROM user WHERE id=?1",
@@ -355,6 +355,10 @@ beforeAll(async (): Promise<void> => {
   env = {
     DB: database.db,
     IMAGES: database.bucket,
+    CHANNEL_INGEST: {
+      idFromName: (name: string) => name,
+      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+    } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
       get: (name: string) => ({
@@ -559,6 +563,7 @@ describe("account export", (): void => {
     await env.IMAGES.delete("avatar/other");
     const data = await exportAccount(env, "admin");
     expect(data).toMatchObject({
+      channelConnections: [],
       streamerPage: null,
       streamerApplication: null,
       signInMethods: [],
@@ -580,6 +585,34 @@ describe("account export", (): void => {
     const body = (await response.json()) as { account: { email: string } };
     expect(body.account.email).toBe("leaver@example.test");
     expect((await callExport({ "Sec-Fetch-Site": "cross-site" })).status).toBe(403);
+  });
+});
+
+describe("channel connections in the export", (): void => {
+  it("lists the page's connected channels without their tokens", async (): Promise<void> => {
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,status,created_at,updated_at,last_event_at)
+          VALUES ('cc1',?,'kick','333','Leaver Kick','user:read events:subscribe','active',?,?,NULL),
+                 ('cc2',?,'kick','444','Host Kick','user:read','active',?,?,NULL)`,
+      ).bind(ids.leaverPage, now, now, ids.hostPage, now, now),
+      env.DB.prepare(
+        "INSERT INTO channel_tokens (connection_id,key_id,access_token,refresh_token,updated_at) VALUES ('cc1','k','sealed-access','sealed-refresh',1)",
+      ),
+    ]);
+    const data = await exportAccount(env, "leaver");
+    expect(data.channelConnections).toEqual([
+      {
+        platform: "kick",
+        channelId: "333",
+        displayName: "Leaver Kick",
+        scopes: ["user:read", "events:subscribe"],
+        status: "active",
+        connectedAt: new Date(now).toISOString(),
+        lastEventAt: null,
+      },
+    ]);
+    expect(JSON.stringify(data)).not.toContain("sealed-");
   });
 });
 
@@ -708,14 +741,14 @@ describe("tables added by migrations 0006–0012", (): void => {
     expect(
       await env.DB.prepare("SELECT status_changed_by FROM streamers WHERE id=?").bind(ids.hostPage).first(),
     ).toEqual({ status_changed_by: null });
-    // Moderation records keep the plain page id; the deleted admin is no longer named as the actor.
+    // Keep the page ID; clear the deleted admin actor.
     const actions = await env.DB.prepare("SELECT id,streamer_id,actor_id FROM moderation_actions ORDER BY id").all();
     expect(actions.results).toEqual([
       { id: "ma1", streamer_id: ids.leaverPage, actor_id: "admin" },
       { id: "ma2", streamer_id: ids.hostPage, actor_id: null },
     ]);
     expect(await env.IMAGES.head("logo/leaver")).toBeNull();
-    // The leaver's taps changed the host page's Mash Battle totals, so its live room refreshes.
+    // Refresh the host room after deleting taps that affected its battle totals.
     expect(rooms.sort()).toEqual([ids.leaverPage, ids.hostPage].sort());
   });
 });
@@ -729,7 +762,7 @@ describe("account deletion", (): void => {
       id: string;
       parent_id: string | null;
     }>();
-    // Replies under the leaver's comments stay as top-level comments; discussions under deleted entries go.
+    // Keep replies to deleted comments as roots; delete discussions under removed entries.
     expect(comments.results).toEqual([
       { id: "c-other", parent_id: null },
       { id: "c-reply", parent_id: null },
@@ -793,7 +826,7 @@ describe("account deletion", (): void => {
   });
 
   it("strips copied text from reports about the user's content even after that content was removed", async (): Promise<void> => {
-    // The reported topic is already gone (removed by its author or an administrator) before the account is deleted.
+    // Remove the reported topic before deleting its author.
     await env.DB.prepare(
       `INSERT INTO content_reports (id,target_kind,target_id,streamer_id,reporter_id,target_author_id,reason,details,snapshot,status,created_at,resolved_at)
         VALUES ('r-removed','entry','00000000-0000-4000-8000-00000000dead','page','other','leaver','spam','','Removed topic text','actioned',1,2)`,

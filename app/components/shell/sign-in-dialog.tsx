@@ -4,7 +4,8 @@ import { authClient } from "../../auth-client";
 import { t } from "../../i18n";
 import { signupPolicy } from "../../signup-policy";
 import { legal } from "../../legal";
-import { paths, type Provider } from "../../lib/shell";
+import { localPath, paths, type Provider } from "../../lib/shell";
+import { dialogHref } from "../account/dialog-route";
 import { errorMessage } from "../api";
 import { Dialog } from "../ui/dialog";
 import { Icon, type IconName } from "../ui/icon";
@@ -22,16 +23,22 @@ export const providerName: Record<Provider, string> = {
   instagram: "Instagram",
 };
 
-/** Back to the page the person signed in from (the OAuth round trip lands there again). */
+// Preserve the initiating page and intent through OAuth. New accounts open their profile over that page.
+// Failed sign-in carries the destination in ?next= so retries return there.
 function useHere(): string {
   const { pathname, search } = useLocation();
+  // On the error landing itself, "here" is the page it carries, not /sign-in with its error.
+  if (pathname === "/sign-in") return localPath(new URLSearchParams(search).get("next")) ?? "/settings";
   return `${pathname}${search}`;
 }
 
-/**
- * The provider buttons (Google, TikTok, Twitch, Instagram: only those configured), the YouTube hint under
- * Google, Instagram's account-type note on its button, the age and terms consent line, and any error.
- */
+// Open Your profile without losing intent or hash.
+function profileOver(path: string): string {
+  const url = new URL(path, "https://local.invalid");
+  return dialogHref(url, "profile");
+}
+
+// Show configured providers, provider restrictions, eligibility consent and errors.
 export function SignIn({
   providers,
   callbackURL,
@@ -44,16 +51,17 @@ export function SignIn({
   const [displayName, setDisplayName] = useState<string>("");
   const [pending, setPending] = useState<Provider | null>(null);
   const [error, setError] = useState<string>("");
+  const returnTo: string = callbackURL ?? here;
   async function signIn(provider: Provider): Promise<void> {
     setError("");
     setPending(provider);
     try {
-      // Instagram is a generic OAuth provider: the social sign-in endpoint serves it too.
+      // The social endpoint also handles generic OAuth Instagram.
       const result = await authClient.signIn.social({
         provider: provider as "google",
-        callbackURL: callbackURL ?? here,
-        errorCallbackURL: "/sign-in",
-        newUserCallbackURL: paths.profile,
+        callbackURL: returnTo,
+        errorCallbackURL: `/sign-in?${new URLSearchParams({ next: returnTo }).toString()}`,
+        newUserCallbackURL: profileOver(returnTo),
         additionalData: { acceptance: { accepted, ...signupPolicy }, ...(displayName.trim() ? { displayName } : {}) },
       });
       if (result.error)
@@ -142,10 +150,7 @@ export function SignIn({
   );
 }
 
-/**
- * "Sign in or sign up": one OAuth step creates the account or signs in (approved items 1 and 6). `reason`
- * ("Sign in to suggest a topic") leads the description when the dialog interrupts an action.
- */
+// One OAuth flow signs in or creates an account. reason explains interrupted actions.
 export function SignInDialog({
   open,
   onOpenChange,
@@ -172,7 +177,6 @@ export function SignInDialog({
   );
 }
 
-/** The header's sign-in control for signed-out visitors: "Sign in / Sign up" (short "Sign in" on phones). */
 export function SignInButton({
   providers,
   className = "header-signin",

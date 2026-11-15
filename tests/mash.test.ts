@@ -20,7 +20,7 @@ import { battleMarks, TapBatch } from "../app/components/mash/use-mash";
 import { nextMark } from "../app/lib/clock";
 import type { Entry, LiveSnapshot, MashPhase } from "../app/types";
 
-/** Sends `perBatch` taps every 200 ms for `seconds` and returns how many the bucket accepted. */
+// Send `perBatch` taps every 200 ms for `seconds`; return the accepted count.
 function simulate(perBatch: number, seconds: number, assisted: boolean): number {
   let bucket: TokenBucket | undefined;
   let accepted = 0;
@@ -35,7 +35,7 @@ function simulate(perBatch: number, seconds: number, assisted: boolean): number 
 describe("Mash Battle token bucket", (): void => {
   it("holds a fast tapper to 15 taps a second", (): void => {
     const accepted = simulate(20, 10, false);
-    // The first batch spends the full bucket. After that the refill is the limit.
+    // The first batch empties the bucket; later batches depend on refill.
     expect(accepted).toBeLessThanOrEqual(MASH_RATE * 10 + bucketCapacity(false));
     expect(accepted).toBeGreaterThanOrEqual(MASH_RATE * 10 - 1);
   });
@@ -47,7 +47,6 @@ describe("Mash Battle token bucket", (): void => {
   });
 
   it("counts every tap of a viewer under the limit", (): void => {
-    // 2 taps every 200 ms is 10 a second.
     expect(simulate(2, 5, false)).toBe(50);
   });
 
@@ -61,8 +60,7 @@ describe("Mash Battle token bucket", (): void => {
   });
 
   it("counts every tap of an honest tapper when network jitter bunches batches", (): void => {
-    // 3 taps every 200 ms is the 15 a second cap. Batches 2 and 3 arrive together, 400 ms after batch 1, and
-    // batch 5 waits behind batch 6.
+    // At the 15 taps/s cap, batches 2 and 3 arrive together after 400 ms; batch 5 follows batch 6.
     const arrivals = [0, 400, 400, 600, 1_000, 1_000, 1_200];
     let bucket: TokenBucket | undefined = takeTaps(undefined, 15, false, -1_000).bucket;
     let accepted = 0;
@@ -151,7 +149,7 @@ describe("Mash Battle phases and winner", (): void => {
 describe("Mash Battle runs", (): void => {
   it("writes taps only into the run they were made in", (): void => {
     const [statement] = tapUpserts("battle", 5_000, [{ userId: "user-1", side: 0, taps: 2, assisted: 0 }]);
-    // A restart deletes the taps and a new start gives a new start time, so a late write of the old run is skipped.
+    // Restart clears taps and changes the start time, rejecting late writes from the old run.
     expect(statement.sql).toContain("JOIN entry_mash m ON m.entry_id=v.column1 AND m.starts_at IS ?");
     expect(statement.sql).toContain("m.phase IN ('countdown','live')");
     expect(statement.params.at(-1)).toBe(5_000);
@@ -194,7 +192,7 @@ describe("Mash Battle clock", (): void => {
   it("wakes exactly at the start, the last batch window and the end of a running battle", (): void => {
     const marks = battleMarks([battle("countdown", 3_000, 13_000), battle("setup", null, null), null]);
     expect(marks).toEqual([3_000, 13_000, 13_000 - MASH_BATCH_MS]);
-    // The old 1 Hz clock woke at a random point in each second, so the start showed up to 1 s late.
+    // The old 1 Hz clock could delay the start by 1 s.
     expect(nextMark(2_400, marks, 1_000)).toBe(2_800);
     expect(nextMark(2_800, marks, 1_000)).toBe(3_000);
     expect(nextMark(3_000, marks, 1_000)).toBe(3_800);
@@ -228,7 +226,7 @@ describe("Mash Battle taps across a restart", (): void => {
   it("forgets your taps and refusals when the battle restarts", (): void => {
     let state: MashLive = withSnapshotRuns({ ticks: {}, mine: {}, denied: {}, runs: {} }, snapshot("live", 1_000));
     state = { ...state, mine: { battle: 12 }, denied: { battle: "closed" } };
-    // The same run again (a reconnect, the finish) keeps them, and the very same object comes back.
+    // Reconnect and finish preserve the same run object.
     expect(withSnapshotRuns(state, snapshot("finished", 1_000))).toBe(state);
     const restarted = withSnapshotRuns(state, snapshot("setup", 1_000));
     expect(restarted.mine).toEqual({});

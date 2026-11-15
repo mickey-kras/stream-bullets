@@ -29,7 +29,7 @@ async function signedIn(browser: Browser, role: string, options: { width?: numbe
   return context;
 }
 
-/** Every visible text label in the header sits on one line (a label never breaks mid-way). */
+// Header labels must remain on one line.
 async function headerLabelsDoNotWrap(page: Page): Promise<void> {
   const wrapped: string[] = await page.locator("header").evaluate((header: Element) => {
     const walker = document.createTreeWalker(header, NodeFilter.SHOW_TEXT);
@@ -60,7 +60,6 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   await page.keyboard.press("Enter");
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   await expect(menu).toBeVisible();
-  // Focus moves to the first link; the owner's own page comes first, then the account rows.
   const links = menu.getByRole("link");
   await expect(links.first()).toBeFocused();
   await expect(links).toHaveText([
@@ -78,13 +77,11 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
     "/@streambullets?intent=suggest",
   );
   await expect(menu.getByRole("link", { name: "Your page", exact: true })).toHaveAttribute("href", "/@test_host");
-  // Account rows open dialogs over the current page (item 17).
   await expect(menu.getByRole("link", { name: "Your profile" })).toHaveAttribute("href", "/streamers?dialog=profile");
   await expect(menu.getByRole("link", { name: "Edit your page" })).toHaveAttribute("aria-haspopup", "dialog");
   await expect(menu.getByRole("button", { name: "Sign out" })).toBeVisible();
   await expect(page.locator(".account-id")).toContainText("Streamer · @test_host");
 
-  // Tab walks the rows; Escape closes and returns focus to the avatar.
   await page.keyboard.press("Tab");
   await expect(links.nth(1)).toBeFocused();
   await page.keyboard.press("Escape");
@@ -92,12 +89,11 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   await expect(menu).toBeHidden();
   await expect(toggle).toBeFocused();
 
-  // A click outside closes it; following a row navigates and closes it.
   await toggle.click();
   await expect(menu).toBeVisible();
   await page.locator("main h1").click();
   await expect(menu).toBeHidden();
-  // A dialog row opens the dialog; closing it goes back to the page and the avatar gets focus.
+  // Closing an account dialog restores the page and avatar focus.
   await toggle.click();
   await menu.getByRole("link", { name: "Your profile" }).click();
   const profile = page.getByRole("dialog", { name: "Your profile" });
@@ -112,7 +108,6 @@ test("the account menu is a keyboard-operable disclosure of links", async ({ bro
   await expect(page).toHaveURL(/\/@test_host$/);
   await expect(page.getByRole("navigation", { name: "Account" })).toBeHidden();
 
-  // On a streamer page the menu also offers Streamers.
   await page.getByRole("button", { name: "Account menu for owner" }).click();
   await expect(
     page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Streamers" }),
@@ -136,14 +131,12 @@ test("logos go home, the streamer picture goes to its topics, and navigation mar
   await expect(page).toHaveURL(/view=about/);
   await expect(tabs.getByRole("link", { name: "About" })).toHaveAttribute("aria-current", "page");
 
-  // The generic header: logo home, Streamers and Admin, with Admin current on the admin page.
   await page.goto("/admin");
   const generic = page.getByRole("banner");
   await expect(generic.getByRole("link", { name: "StreamBullets home" })).toHaveAttribute("href", "/");
   const main = generic.getByRole("navigation", { name: "Main navigation" });
   await expect(main.getByRole("link", { name: "Admin" })).toHaveAttribute("aria-current", "page");
   await expect(main.getByRole("link", { name: "Streamers" })).not.toHaveAttribute("aria-current", "page");
-  // The back link returns to the last streamer page.
   await expect(page.getByRole("link", { name: "Back to Test host" })).toHaveAttribute("href", "/@test_host");
   await close(context);
 });
@@ -198,7 +191,6 @@ test("the 404 page has the site header, a streamer search and a way on", async (
   expect(response?.status()).toBe(404);
   await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
   await expect(page.getByRole("banner").getByRole("link", { name: "StreamBullets home" })).toBeVisible();
-  // The mockup's 404 offers a streamer search instead of a back link.
   await expect(page.getByRole("link", { name: "Back to Streamers" })).toHaveCount(0);
   await page.getByRole("searchbox", { name: "Search streamers" }).fill("feature");
   await page.getByRole("button", { name: "Search streamers" }).click();
@@ -227,7 +219,7 @@ test("the Contact dialog copies the support address", async ({ browser }) => {
   await expect(dialog).toBeHidden();
   await expect(opener).toBeFocused();
 
-  // Without clipboard access the address is selected so it can be copied by hand.
+  // Without clipboard access, select the address for manual copying.
   await page.evaluate(() => {
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: () => Promise.reject(new Error("denied")) },

@@ -73,7 +73,7 @@ const SR_INTERVALS: readonly [Prefs["srInterval"], MessageId][] = [
   ["off", "prefs.srOff"],
 ];
 
-/** Percentages and other labels that are the same in every language are not message ids. */
+// Language-independent labels are not message IDs.
 function label(value: string): string {
   return value.startsWith("prefs.") ? t(value as MessageId) : value;
 }
@@ -122,13 +122,8 @@ function Check({
   );
 }
 
-/**
- * "Accessibility & display" (item 39): colour-vision palettes, contrast, text size, a readable font, link
- * underlines, motion, and the Mash Battle options (screen-reader updates, shortcuts, assisted tapping).
- * A change applies at once through the head script's function and is kept in a cookie for this browser.
- * Signed in, it is also saved to the account, one second after the last change, or at once when the dialog
- * closes or the page goes away (the account value wins over the cookie on the next load).
- */
+// Apply preferences immediately and save a browser cookie. Debounce signed-in account saves by one second;
+// flush on close/exit. Saved account values win on reload.
 export function PreferencesDialog({ onClose }: Readonly<{ onClose: () => void }>): ReactNode {
   const shell = useShell();
   const toast = useToast();
@@ -155,7 +150,7 @@ export function PreferencesDialog({ onClose }: Readonly<{ onClose: () => void }>
     account.flush();
     onClose();
   };
-  // A reload or a link followed within the second still saves the last change. Unmounting sends it too.
+  // Flush pending saves on navigation, reload and unmount.
   useEffect(() => {
     const flush = (): void => account.flush();
     globalThis.addEventListener("pagehide", flush);

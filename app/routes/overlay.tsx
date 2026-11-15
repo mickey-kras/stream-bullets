@@ -15,9 +15,9 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
   const streamer = await getStreamer(app.env, params.handle.slice(1));
-  // A suspended page shows nothing in the overlay.
+  // Suspended pages have no overlay.
   if (!streamer || streamer.status === "suspended") throw new Response("Streamer not found.", { status: 404 });
-  // `?poll=` stays as an override of the overlay control state (item 33).
+  // `?poll=` overrides overlay control state.
   const override: string | null = new URL(request.url).searchParams.get("poll") || null;
   const overlay: OverlayPublic = overlayPublic(await getOverlayState(app.env, streamer.id));
   const pollId: string | null = override ?? (overlay.air.type === "poll" ? overlay.air.ref : null);
@@ -37,7 +37,6 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   };
 });
 
-/** The one OBS browser source URL. It shows whatever the owner puts on air from Overlay control. */
 export default function Overlay(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
   const [search] = useSearchParams();
@@ -47,13 +46,13 @@ export default function Overlay(): ReactNode {
   const live: OverlayPublic | null | undefined = snapshot?.overlay;
   const overlay: OverlayPublic = live && live.revision >= loaded.overlay.revision ? live : loaded.overlay;
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
-  // A new source on air may need data the page does not have yet (a topic, a card, an older poll).
+  // Fetch missing content when the on-air source changes.
   useLiveRevalidation(status, overlay.revision, revalidator.revalidate);
   const now: number = useServerTime(current.serverNow);
   const polls: OverlayPoll[] = [...current.polls];
   for (const poll of loaded.initial.polls) if (!polls.some((item) => item.id === poll.id)) polls.push(poll);
   const source: OverlaySourceRef = loaded.override ? { type: "poll", ref: loaded.override } : overlay.air;
-  // Up next names the next stream at load time; once it starts, the loader names the one after it.
+  // Refresh Up next when the displayed stream starts.
   useRevalidateAt(loaded.initial.serverNow, upNextStart(source, loaded.data), revalidator.revalidate);
   const scene: OverlayScene = {
     name: loaded.name,
@@ -98,9 +97,12 @@ export function ErrorBoundary(): ReactNode {
     const attempt: number = attempts.current;
     const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
     const delay: number = Math.min(60_000, 5000 * 2 ** (Math.min(attempt, 8) - 1)) * (0.5 + jitter * 0.5);
+    function finishAttempt(): void {
+      setSettled((value: number) => value + 1);
+    }
     const timer = setTimeout(() => {
       if (attempt > ERROR_RELOAD_AFTER) globalThis.location.reload();
-      else void retry.current().finally(() => setSettled((value: number) => value + 1));
+      else retry.current().finally(finishAttempt);
     }, delay);
     return (): void => clearTimeout(timer);
   }, [settled]);

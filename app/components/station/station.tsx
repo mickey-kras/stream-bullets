@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { t } from "../../i18n";
+import { motionReduced, watchMotion } from "./motion";
 import { askForTilt, onFirstMotion, tiltPillWanted } from "./tilt";
 import type { StationController } from "./scene.client";
 
@@ -9,21 +10,21 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
   const host = useRef<HTMLDivElement>(null);
   const controller = useRef<StationController | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
-  /** Set once the tilt button is no longer wanted: motion arrived, or the person answered. */
+  // Hide Tilt after motion arrives or permission is answered.
   const [tiltDone, setTiltDone] = useState<boolean>(false);
-  /** The latest sign handler, so the scene (built once) always calls the current one. */
+  // Keep the one-time scene bound to the latest handler.
   const signHandler = useRef<typeof onSign>(onSign);
   useEffect(() => {
     signHandler.current = onSign;
   }, [onSign]);
 
-  // Motion arriving on its own means access is already allowed, so the button can go.
+  // Incoming motion proves permission; hide the button.
   useEffect(() => onFirstMotion((): void => setTiltDone(true)), []);
 
   useEffect(() => {
     if (!host.current) return;
     const wide: MediaQueryList = globalThis.matchMedia("(min-width: 701px)");
-    const reduced: MediaQueryList = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
+    const lifecycle = new AbortController();
     let disposed: boolean = false;
     function fail(): void {
       controller.current?.dispose();
@@ -41,33 +42,30 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
           family: DISPLAY_FONT,
           shift: (width: number): number => (wide.matches && width > 900 ? 0.24 : 0),
           onSign: (index: number): void => signHandler.current?.(index),
-          // On phones the copy overlaps the top of the stage; the mast may rise behind the buttons.
+          // Phone mast may overlap buttons above the stage.
           overlap: (): number => {
             const actions = document.querySelector(".landing-actions")?.getBoundingClientRect();
             const stage = host.current?.getBoundingClientRect();
             return actions && stage ? Math.max(0, actions.top - stage.top) : 0;
           },
         });
-        // The page may have moved on while the station was building.
+        // Discard completed builds after navigation.
         if (disposed) {
           station.dispose();
           return;
         }
         controller.current = station;
-        station.motion(!reduced.matches);
+        station.motion(!motionReduced());
         setStatus("ready");
       } catch {
         if (!disposed) fail();
       }
     }
     void start();
-    function preference(): void {
-      controller.current?.motion(!reduced.matches);
-    }
-    reduced.addEventListener("change", preference);
+    watchMotion((reduced: boolean): void => controller.current?.motion(!reduced), lifecycle.signal);
     return () => {
       disposed = true;
-      reduced.removeEventListener("change", preference);
+      lifecycle.abort();
       controller.current?.dispose();
       controller.current = null;
     };
@@ -86,7 +84,7 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
         />
       )}
       <div className="landing-canvas" ref={host} />
-      {/* Only after the station is ready (which happens in the browser), so server and client agree. */}
+      {/* Wait for browser readiness to preserve hydration equality. */}
       {status === "ready" && !tiltDone && tiltPillWanted() && (
         <button
           type="button"

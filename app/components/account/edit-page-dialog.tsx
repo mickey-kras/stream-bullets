@@ -19,11 +19,11 @@ import { uploadImage } from "./me";
 import { UploadField } from "./profile-dialog";
 import { Req, RequiredNote } from "../ui/required";
 
-/** A handle can change once every 30 days (R11). */
+// Handle changes require 30 days between updates.
 export const HANDLE_CHANGE_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** When the handle can next change, or null when it can change now. */
+// Next allowed change; null means now.
 export function nextHandleChange(handleChangedAt: number | null, now: number): number | null {
   if (handleChangedAt === null) return null;
   const next: number = handleChangedAt + HANDLE_CHANGE_DAYS * DAY_MS;
@@ -111,12 +111,8 @@ function PageActions({
   );
 }
 
-/**
- * "Edit your page" (item 18): page name, handle (with the URL-change warning, once every 30 days), about,
- * the page logo (use my profile picture, or upload one through the circle cropper), the support links (item 34)
- * and the page background.
- * Everything, the cropped logo included, is a draft until Save; closing with changes asks first.
- */
+// Draft page fields, cropped logo, support and background until Save. Warn that handle changes break URLs;
+// allow one per 30 days. Confirm discarded edits on close.
 export function EditPageDialog({
   streamer,
   support,
@@ -193,8 +189,7 @@ export function EditPageDialog({
       toast(t("page.saved"));
       const moved = renamedPath(location.pathname, streamer.handle, saved.handle);
       if (saved.handle !== streamer.handle && moved) {
-        // The old address stops working (no redirects): move to the new one. The root loader skips plain
-        // navigations, so the shell's links to the page are reloaded as well.
+        // Old URLs have no redirects. Navigate to the new handle and revalidate shell links, which plain navigation otherwise reuses.
         await navigate(moved, { replace: true });
         await revalidator.revalidate();
         return;

@@ -1,15 +1,15 @@
 import { DEFAULT_LOCALE, LOCALES, isLocale, type Locale } from "./index";
 
-/** The language a signed-out visitor picked. Signed-in accounts also save it (`PATCH /api/me/locale`). */
+// Browser locale cookie; signed-in accounts also save /api/me/locale.
 export const LOCALE_COOKIE = "sb_locale";
 
-/** Maps a BCP 47 tag to a supported language: `de-AT` to `de`, `pt` to `pt-BR`, `zh-Hans` to `zh-CN`. */
+// Map supported BCP 47 variants: de-AT -> de, pt -> pt-BR, zh-Hans -> zh-CN.
 export function matchLocale(tag: string): Locale | null {
   const parts: string[] = tag.trim().toLowerCase().split(/[-_]/);
   const [language] = parts;
   if (!language) return null;
   if (language === "zh") {
-    // Traditional Chinese readers are better served by English than by Simplified Chinese.
+    // Traditional Chinese falls back to English rather than Simplified Chinese.
     const traditional: boolean = parts.some((part: string) => ["hant", "tw", "hk", "mo"].includes(part));
     return traditional ? null : "zh-CN";
   }
@@ -17,7 +17,7 @@ export function matchLocale(tag: string): Locale | null {
   return LOCALES.find((locale: Locale) => locale.toLowerCase() === language) ?? null;
 }
 
-/** The first supported language in an Accept-Language header, by quality, then by order. */
+// First supported Accept-Language entry, ordered by quality then position.
 export function acceptedLocale(header: string | null): Locale | null {
   if (!header) return null;
   const ranges = header
@@ -38,7 +38,7 @@ export function acceptedLocale(header: string | null): Locale | null {
   return null;
 }
 
-/** One cookie's value from a Cookie header, or null. */
+// Cookie value; null if absent.
 export function readCookie(header: string | null, name: string): string | null {
   if (!header) return null;
   for (const part of header.split(";")) {
@@ -54,7 +54,7 @@ export function readCookie(header: string | null, name: string): string | null {
   return null;
 }
 
-/** The request's language: the account's saved language, then the cookie, then Accept-Language, then English. */
+// Locale priority: account, cookie, Accept-Language, English.
 export function resolveLocale(input: {
   saved: Locale | null;
   cookie: string | null;

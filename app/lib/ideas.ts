@@ -1,21 +1,19 @@
 import { BUG_TEMPLATES } from "./bug-templates";
 import type { EntryStatus } from "../types";
 
-/** Topic categories on a normal streamer page. */
 export const TOPIC_CATEGORIES = ["Tech & setups", "Gaming", "Creative", "Just chatting"] as const;
 
-/** Categories on the official Ideas board (item 46). Stored in `entries.category`. */
+// Official Ideas board categories stored in entries.category.
 export const IDEA_CATEGORIES = ["feature", "bug", "design", "a11y", "lang"] as const;
 export type IdeaCategory = (typeof IDEA_CATEGORIES)[number];
 
-/** Pre-filled Details for a bug report. Submitting it untouched is refused. */
+// Reject unchanged bug-report templates.
 export const BUG_TEMPLATE = BUG_TEMPLATES.en;
 
-/** True when the text is empty or still exactly the bug template (whitespace aside). */
+// Empty or unchanged template, ignoring whitespace.
 export function isUntouchedTemplate(body: string): boolean {
   const value = body.trim();
   return value === "" || Object.values(BUG_TEMPLATES).some((template: string): boolean => value === template.trim());
 }
 
-/** The status a new idea starts in. */
 export const NEW_IDEA_STATUS: EntryStatus = "review";

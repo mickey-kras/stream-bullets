@@ -11,21 +11,18 @@ interface ContentRoute {
   label: string;
 }
 
-/**
- * Records the last content route (a streamer page now, the Streamers directory in P3) so a back link on Settings,
- * Admin, the legal pages or a 404 returns there. Call it from content routes with their exact URL and name.
- */
+// Remember exact content-route URL/name for back links from account, Admin, legal and error pages.
 export function useRememberContentRoute(href: string, label: string): void {
   useEffect(() => {
     try {
       sessionStorage.setItem(storageKey, JSON.stringify({ href, label } satisfies ContentRoute));
     } catch {
-      // Storage can be unavailable (private mode, blocked site data); the link then falls back to Streamers.
+      // Blocked storage falls back to Streamers.
     }
   }, [href, label]);
 }
 
-/** The stored JSON string. A string snapshot stays stable between renders, unlike a parsed object. */
+// String snapshots remain stable across renders.
 function storedContentRoute(): string | null {
   try {
     return sessionStorage.getItem(storageKey);
@@ -34,7 +31,7 @@ function storedContentRoute(): string | null {
   }
 }
 
-/** The back link reads storage once at mount, so it does not subscribe to changes. */
+// Read once on mount; no subscription.
 function noSubscription(): () => void {
   return () => undefined;
 }
@@ -52,14 +49,13 @@ function parseContentRoute(stored: string | null): ContentRoute | null {
     )
       return value as ContentRoute;
   } catch {
-    // Fall back to Streamers.
+    // Invalid or blocked storage falls back to Streamers.
   }
   return null;
 }
 
-/** "‹ Back to {name}": the first element of the page column on Settings, Admin, the legal pages and 404. */
 export function BackLink(): ReactNode {
-  // The server snapshot is null, so the hydrated markup matches and the stored route appears after hydration.
+  // Null server snapshot preserves hydration; restore the route afterward.
   const stored: string | null = useSyncExternalStore(noSubscription, storedContentRoute, () => null);
   const target: ContentRoute | null = parseContentRoute(stored);
   return (

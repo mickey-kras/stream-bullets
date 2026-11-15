@@ -1,51 +1,41 @@
 import type { MashPhase } from "../types";
 
-/**
- * Mash Battle rules shared by the live room (app/server/poll-room.ts), the API and the client.
- * Everything here is pure, so the unit tests run it without a Worker runtime.
- */
-
-/** The product name. Rename here only (R9). */
+// Pure Mash rules shared by live room, API and client; testable without Workers.
+// Single source for the product name.
 export const MASH_NAME = "Mash Battle";
-/** Taps a second one account can score, and the rate with assisted tapping (hold or toggle). */
+// Per-account tap rates: manual and assisted.
 export const MASH_RATE = 15;
 export const MASH_ASSISTED_RATE = 6;
-/** The client sends its taps in one message every this many milliseconds. */
+// Client tap batch interval (ms).
 export const MASH_BATCH_MS = 200;
-/** The most taps one message may carry. The token bucket then decides how many count. */
+// Maximum taps per message; token bucket determines accepted taps.
 export const MASH_MAX_BATCH = 20;
-/** The room broadcasts totals this often while a battle is live (5 Hz). */
+// Live broadcast interval (5 Hz).
 export const MASH_TICK_MS = 200;
-/** The room writes the tap deltas to D1 this often. */
+// D1 flush interval.
 export const MASH_FLUSH_MS = 1_000;
-/** The 3-2-1 countdown before a battle goes live. */
+// 3-2-1 countdown.
 export const MASH_COUNTDOWN_MS = 3_000;
-/** Battle lengths the create dialog offers, in seconds. The database allows 10 to 120. */
+// Offered durations (seconds). Database range: 10..120.
 export const MASH_DURATIONS = [10, 15, 30, 45, 60, 120] as const;
 export const MASH_MIN_SIDES = 2;
 export const MASH_MAX_SIDES = 4;
 export const MASH_SIDE_LENGTH = 24;
-/** `winner` for a tie at the top, or a battle with no taps (R9: "Draw"). */
+// Tie or no-tap winner value.
 export const MASH_DRAW = -1;
 
-/** Per-account rate limit state. `tokens` may be fractional so slow taps still add up. */
+// Fractional tokens preserve slow taps.
 export interface TokenBucket {
   tokens: number;
   at: number;
 }
 
-/**
- * The burst one account may spend at once: one second at the full rate. Batches that network jitter delays and then
- * delivers together still count, and the long-run rate stays at 15 (or 6) a second.
- */
+// One-second burst tolerates network jitter while retaining the 15/s manual or 6/s assisted average.
 export function bucketCapacity(assisted: boolean): number {
   return assisted ? MASH_ASSISTED_RATE : MASH_RATE;
 }
 
-/**
- * Spends up to `requested` taps from the bucket and returns how many count. The bucket refills at
- * 15 taps a second (6 when `assisted`) up to one second of taps. Sockets of one account share one bucket.
- */
+// Shared account bucket refills at 15/s, or 6/s assisted, capped at one second. Return accepted taps.
 export function takeTaps(
   bucket: TokenBucket | undefined,
   requested: number,
@@ -61,7 +51,7 @@ export function takeTaps(
   return { bucket: { tokens: tokens - accepted, at: now }, accepted };
 }
 
-/** The phase a battle is in at `now`. A missed end (the room was offline) still reads as finished. */
+// Derive phase at now, including ends missed while offline.
 export function mashPhaseAt(
   mash: { phase: MashPhase; startsAt: number | null; endsAt: number | null },
   now: number,
@@ -72,7 +62,7 @@ export function mashPhaseAt(
   return "live";
 }
 
-/** The winning side, or MASH_DRAW for a tie at the top or no taps at all. */
+// Return MASH_DRAW for tied leaders or no taps.
 export function mashWinner(totals: readonly number[]): number {
   const best: number = Math.max(0, ...totals);
   if (best === 0) return MASH_DRAW;
@@ -80,12 +70,12 @@ export function mashWinner(totals: readonly number[]): number {
   return leaders.length === 1 ? leaders[0] : MASH_DRAW;
 }
 
-/** Whole seconds left in a live battle. */
+// Whole seconds remaining.
 export function secondsLeft(endsAt: number | null, now: number): number {
   return endsAt === null ? 0 : Math.max(0, Math.ceil((endsAt - now) / 1_000));
 }
 
-/** One account's running totals in a battle, to write to D1. */
+// Per-account running totals for D1.
 export interface TapDelta {
   userId: string;
   side: number;
@@ -93,16 +83,11 @@ export interface TapDelta {
   assisted: number;
 }
 
-/** D1 binds at most 100 parameters per statement. Each row takes 5, and the run's start takes 1. */
+// D1 limit: 100 parameters; five per row plus one run start.
 export const TAP_ROWS_PER_STATEMENT = 19;
 
-/**
- * The statements that write the running totals to `mash_taps`, at most 19 rows each. A total only ever grows, so
- * writing it again (a retried flush after an eviction) changes nothing. Rows for an account or
- * battle deleted since the tap are skipped (the joins), so one deletion never fails the batch. So are rows
- * for a run that is over: `startsAt` must still be the battle's start, and the battle must still be running,
- * so a late write from an ended run never lands in a restarted one.
- */
+// Write at most 19 totals per statement. Monotonic totals make retries idempotent. Joins skip deleted
+// accounts/battles and stale or ended runs, preventing late writes into a restart.
 export function tapUpserts(
   entryId: string,
   startsAt: number | null,

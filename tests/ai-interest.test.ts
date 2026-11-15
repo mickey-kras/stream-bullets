@@ -21,7 +21,7 @@ const NOW = Date.UTC(2026, 10, 7, 12);
 
 let database: TestDatabase;
 let env: AppEnv;
-/** REQUEST_LIMITER keys seen, and whether the stub lets the next request through. */
+// REQUEST_LIMITER keys and the next admission result.
 let limiterKeys: string[] = [];
 let limiterOpen = true;
 
@@ -82,7 +82,7 @@ describe("AI interest counter", () => {
       counted: true,
       totals: { up: 1, down: 0 },
     });
-    // The same visitor later that day, even with the other vote, changes nothing.
+    // Same-day repeat votes, including the opposite vote, do not count.
     expect(await recordAiInterest(env, visitor("198.51.100.1"), "down", NOW + 3_600_000)).toEqual({
       counted: false,
       totals: { up: 1, down: 0 },
@@ -91,7 +91,6 @@ describe("AI interest counter", () => {
       counted: true,
       totals: { up: 1, down: 1 },
     });
-    // The next day the first visitor may vote again.
     expect((await recordAiInterest(env, visitor("198.51.100.1"), "down", NOW + DAY)).totals).toEqual({
       up: 1,
       down: 2,
@@ -146,13 +145,12 @@ describe("AI interest counter abuse (security review finding 3)", () => {
     expect(visitorPrefix("fe80::1%eth0")).toBe("fe80:0:0:0::/64");
     expect(visitorPrefix("2001:db8:1:2:3:4:192.0.2.1")).toBe("2001:db8:1:2::/64");
     expect(visitorPrefix("::ffff:192.0.2.1")).toBe("192.0.2.1");
-    // An IPv4-mapped address counts as its IPv4 address in every spelling, not as the shared ::/64.
+    // All IPv4-mapped spellings use their IPv4 key, not ::/64.
     expect(visitorPrefix("::ffff:7f00:1")).toBe("127.0.0.1");
     expect(visitorPrefix("::FFFF:C000:0201")).toBe("192.0.2.1");
     expect(visitorPrefix("0:0:0:0:0:ffff:c000:201")).toBe("192.0.2.1");
     expect(visitorPrefix("0:0:0:0:0:ffff:192.0.2.1")).toBe("192.0.2.1");
     expect(visitorPrefix("::ffff:7f00:1")).not.toBe(visitorPrefix("::ffff:7f00:2"));
-    // Not an address: unchanged.
     for (const value of [
       "local",
       "1:2:3",
@@ -171,7 +169,7 @@ describe("AI interest counter abuse (security review finding 3)", () => {
     expect(await rows()).toHaveLength(1);
     expect((await recordAiInterest(env, visitor("2001:db8:aa:bc::1"), "up", NOW)).totals).toEqual({ up: 2, down: 0 });
     expect((await aiInterestStatus(env, visitor("2001:db8:aa:bb:ffff::9"), NOW)).mine).toBe("up");
-    // Every address of one /64 shares one rate-limit key, and the key never holds the address.
+    // One /64 shares a hashed key; it never contains the address.
     expect(new Set(limiterKeys.slice(0, 20)).size).toBe(1);
     expect(limiterKeys[0]).toMatch(new RegExp(`^${AI_INTEREST_LIMIT_KEY}:[0-9a-f]{64}$`));
     expect(limiterKeys[20]).not.toBe(limiterKeys[0]);
@@ -193,12 +191,12 @@ describe("AI interest counter abuse (security review finding 3)", () => {
       { day: interestDay(NOW - DAY), up: 0, down: 1 },
       { day: interestDay(NOW), up: 1, down: 0 },
     ]);
-    // A vote row with no running count does not show: the totals never scan ai_interest.
+    // Totals must not scan ai_interest, even for rows without running counts.
     await env.DB.prepare("INSERT INTO ai_interest (day, ip_hash, value) VALUES (?, ?, 1)")
       .bind(interestDay(NOW), "f".repeat(64))
       .run();
     expect((await aiInterestStatus(env, visitor("192.0.2.9"), NOW)).totals).toEqual({ up: 1, down: 1 });
-    // Days the cron has not pruned yet still drop out of the totals after 30 days.
+    // Totals exclude days older than 30 days before cleanup runs.
     expect((await aiInterestStatus(env, visitor("192.0.2.9"), NOW + 30 * DAY)).totals).toEqual({ up: 1, down: 0 });
     await env.DB.batch(pruneAiInterest(env, NOW + 31 * DAY));
     expect((await env.DB.prepare("SELECT count(*) AS n FROM ai_interest_daily").first<{ n: number }>())?.n).toBe(0);
@@ -236,7 +234,7 @@ describe("AI interest counter abuse (security review finding 3)", () => {
 describe("POST /api/ai-interest", () => {
   const api = apiCaller(() => env, ORIGIN, "x".repeat(32));
 
-  /** A POST with exactly these headers (the helper adds this site's Origin, which agents do not send). */
+  // Send exact headers without the helper-added Origin that agents omit.
   async function post(headers: Record<string, string>, body: unknown = { vote: "up" }): Promise<Response> {
     const request = new Request(`${ORIGIN}/api/ai-interest`, {
       method: "POST",
