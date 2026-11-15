@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActivityMessage } from "../../lib/activity";
 import {
   activityUrl,
@@ -46,11 +46,11 @@ function acquire(url: string, onMessage: Listener, onStatus: (status: ActivitySo
     created.socket = openActivitySocket({
       url,
       onMessage: (message: ActivityMessage): void => {
-        for (const listener of [...listeners]) listener(message);
+        for (const listener of Array.from(listeners)) listener(message);
       },
       onStatus: (status: ActivitySocketStatus): void => {
         created.status = status;
-        for (const listener of [...statusListeners]) listener(status);
+        for (const listener of Array.from(statusListeners)) listener(status);
       },
     });
     const wake = (): void => {
@@ -87,7 +87,7 @@ function acquire(url: string, onMessage: Listener, onStatus: (status: ActivitySo
 export function useActivityFeed(handle: string, key: string | null, enabled: boolean): ActivityFeed {
   const on: boolean = enabled && Boolean(key);
   const [status, setStatus] = useState<ActivityFeedStatus>(on ? "connecting" : "off");
-  const listeners = useMemo<Set<Listener>>(() => new Set<Listener>(), []);
+  const listenersRef = useRef<Set<Listener>>(new Set<Listener>());
   const [session, setSession] = useState<string>(`${handle}:${key}:${on}`);
   const current = `${handle}:${key}:${on}`;
   if (session !== current) {
@@ -97,23 +97,24 @@ export function useActivityFeed(handle: string, key: string | null, enabled: boo
   useEffect(() => {
     if (!on || !key) return;
     const url: string = activityUrl(globalThis.location.origin, handle, key);
+    const listeners: Set<Listener> = listenersRef.current;
     return acquire(
       url,
       (message: ActivityMessage): void => {
-        for (const listener of [...listeners]) listener(message);
+        for (const listener of Array.from(listeners)) listener(message);
       },
       setStatus,
     );
-  }, [handle, key, on, listeners]);
+  }, [handle, key, on]);
   const subscribe = useMemo(
     () =>
       (listener: Listener): (() => void) => {
-        listeners.add(listener);
+        listenersRef.current.add(listener);
         return (): void => {
-          listeners.delete(listener);
+          listenersRef.current.delete(listener);
         };
       },
-    [listeners],
+    [],
   );
   return useMemo<ActivityFeed>(() => ({ subscribe, status }), [subscribe, status]);
 }
