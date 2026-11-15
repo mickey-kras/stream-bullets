@@ -48,7 +48,8 @@ test("a per-layer chat source shows and hides the chat live when the owner chang
   let activitySockets: number = 0;
   await obs.routeWebSocket("**/api/activity/**", (socket) => {
     activitySockets += 1;
-    socket.send(JSON.stringify({ type: "snapshot", events: [chat(1, Date.now())], replay: true }));
+    const first: ActivityChat = { ...chat(1, Date.now()), badges: [{ id: "moderator", label: "MOD" }] };
+    socket.send(JSON.stringify({ type: "snapshot", events: [first], replay: true }));
   });
   await obs.goto("/@feature_host/overlay?key=e2e-key&layer=chat");
   const chatLayer = obs.locator("[data-overlay-chat]");
@@ -58,6 +59,8 @@ test("a per-layer chat source shows and hides the chat live when the owner chang
   // The icon is hidden from assistive technology; screen readers read the platform name as text.
   await expect(chatLayer.locator("svg.wl-icon")).toHaveAttribute("aria-hidden", "true");
   await expect(chatLayer.locator("li.wl-item")).toContainText("Twitch");
+  // A screen reader reads the badge label as its own word before the name ("MOD Scav 1", not "MODScav 1").
+  expect(await chatLayer.locator("li.wl-item").ariaSnapshot()).toContain("Twitch MOD Scav 1");
   // Mark the document: a reload would drop the mark.
   await obs.evaluate(() => document.documentElement.setAttribute("data-e2e-loaded", "1"));
 
@@ -175,9 +178,25 @@ async function chatSource(
   };
 }
 
+/** How long an in-page probe may wait for what it watches. */
+const PROBE_MS = 4_000;
+
+/** `probe`, or a rejection that names what it waited for when it does not settle within PROBE_MS. */
+async function withTimeout<T>(probe: Promise<T>, what: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`No ${what} within ${PROBE_MS} ms.`)), PROBE_MS);
+  });
+  try {
+    return await Promise.race([probe, late]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** The running animations of each chat row, read in the first frame that shows `count` rows. */
 function animationsWhenRows(page: Page, count: number): Promise<number[]> {
-  return page.evaluate(
+  const probe: Promise<number[]> = page.evaluate(
     (expected: number) =>
       new Promise<number[]>((resolve) => {
         const check = (): void => {
@@ -189,6 +208,7 @@ function animationsWhenRows(page: Page, count: number): Promise<number[]> {
       }),
     count,
   );
+  return withTimeout(probe, `frame with ${count} chat rows`);
 }
 
 async function rowTexts(rows: Locator): Promise<string[]> {
@@ -299,19 +319,22 @@ test.describe("merged chat on the overlay", () => {
     await expect(source.rows).toHaveCount(5);
 
     // Watched in the page on every DOM change: the fade lasts only 300 ms.
-    const fadeSeen: Promise<number> = source.page.evaluate(
-      () =>
-        new Promise<number>((resolve) => {
-          const list: Element | null = document.querySelector("[data-overlay-chat]");
-          if (!list) return resolve(0);
-          const observer = new MutationObserver((): void => {
-            const card: Element | null = list.querySelector("li[data-gone] .wl-card");
-            if (!card) return;
-            observer.disconnect();
-            resolve(card.getAnimations().length);
-          });
-          observer.observe(list, { subtree: true, childList: true, attributes: true });
-        }),
+    const fadeSeen: Promise<number> = withTimeout(
+      source.page.evaluate(
+        () =>
+          new Promise<number>((resolve) => {
+            const list: Element | null = document.querySelector("[data-overlay-chat]");
+            if (!list) return resolve(0);
+            const observer = new MutationObserver((): void => {
+              const card: Element | null = list.querySelector("li[data-gone] .wl-card");
+              if (!card) return;
+              observer.disconnect();
+              resolve(card.getAnimations().length);
+            });
+            observer.observe(list, { subtree: true, childList: true, attributes: true });
+          }),
+      ),
+      "fading removed card",
     );
     source.send(
       event({
@@ -378,29 +401,32 @@ test.describe("merged chat on the overlay", () => {
       await expect(canvas).toHaveCSS("width", "700px");
       // Let the resize settle (the resize observer runs before the next paint).
       await source.page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
-      const starts: Promise<{ offsets: number[]; step: number }> = source.page.evaluate(
-        () =>
-          new Promise<{ offsets: number[]; step: number }>((resolve) => {
-            const check = (): void => {
-              const items: HTMLElement[] = [
-                ...document.querySelectorAll<HTMLElement>("[data-overlay-chat] li.wl-item"),
-              ];
-              if (items.length < 4) {
-                requestAnimationFrame(check);
-                return;
-              }
-              const list: Element | null = document.querySelector("[data-overlay-chat]");
-              const gap: number = list ? Number.parseFloat(getComputedStyle(list).rowGap) || 0 : 0;
-              const offsets: number[] = items.map((item: HTMLElement): number => {
-                const effect = item.getAnimations()[0]?.effect;
-                const first = effect instanceof KeyframeEffect ? effect.getKeyframes()[0] : undefined;
-                const transform: string = typeof first?.transform === "string" ? first.transform : "";
-                return Number.parseFloat(/translateY\((-?[\d.]+)px\)/.exec(transform)?.[1] ?? "NaN");
-              });
-              resolve({ offsets, step: (items.at(-1)?.offsetHeight ?? 0) + gap });
-            };
-            check();
-          }),
+      const starts: Promise<{ offsets: number[]; step: number }> = withTimeout(
+        source.page.evaluate(
+          () =>
+            new Promise<{ offsets: number[]; step: number }>((resolve) => {
+              const check = (): void => {
+                const items: HTMLElement[] = [
+                  ...document.querySelectorAll<HTMLElement>("[data-overlay-chat] li.wl-item"),
+                ];
+                if (items.length < 4) {
+                  requestAnimationFrame(check);
+                  return;
+                }
+                const list: Element | null = document.querySelector("[data-overlay-chat]");
+                const gap: number = list ? Number.parseFloat(getComputedStyle(list).rowGap) || 0 : 0;
+                const offsets: number[] = items.map((item: HTMLElement): number => {
+                  const effect = item.getAnimations()[0]?.effect;
+                  const first = effect instanceof KeyframeEffect ? effect.getKeyframes()[0] : undefined;
+                  const transform: string = typeof first?.transform === "string" ? first.transform : "";
+                  return Number.parseFloat(/translateY\((-?[\d.]+)px\)/.exec(transform)?.[1] ?? "NaN");
+                });
+                resolve({ offsets, step: (items.at(-1)?.offsetHeight ?? 0) + gap });
+              };
+              check();
+            }),
+        ),
+        "frame with 4 chat rows after the resize",
       );
       source.send(event(message({ platform: "kick", id: "rs-4", user: "Short", text: "short" })));
       const { offsets, step } = await starts;
@@ -647,7 +673,13 @@ for (const viewport of [
     await setLayers("overlay-fit-reset", { chat: { enabled: true, rect: CHAT_RECT } });
     const now: number = Date.now();
     const rows: ActivityChat[] = Array.from({ length: 24 }, (_, index: number) =>
-      message({ platform: "kick", id: `fit-${index}`, user: `Scav ${index}`, text: `row ${index}`, receivedAt: now - 24_000 + index * 1000 }),
+      message({
+        platform: "kick",
+        id: `fit-${index}`,
+        user: `Scav ${index}`,
+        text: `row ${index}`,
+        receivedAt: now - 24_000 + index * 1000,
+      }),
     );
     const source = await chatSource(browser, () => snapshot(rows), undefined, viewport);
     const layer = source.page.locator('.ov-layer[data-layer="chat"]');
@@ -686,9 +718,7 @@ test("a characters-only source opens no sockets while the characters layer canno
   // The layer box sets data-scaled in an effect, so the page is hydrated and its first effects ran.
   await expect(main.locator('.ov-layer[data-layer="characters"]')).toHaveAttribute("data-scaled", "true");
   // Let the effects of that commit finish: the route opens its sockets in the same flush, after its children.
-  await page.evaluate(
-    () => new Promise<void>((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0))),
-  );
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0))));
   expect(sockets).toEqual([]);
   await close(page);
 });

@@ -136,3 +136,29 @@ export function layersAction(patch: LayersPatch): LayersAction {
   if (patch.characters) action.characters = copyCharacters(patch.characters);
   return action;
 }
+
+/** The characters placeholder label needs at least this much free width (design pixels) beside the chat box. */
+export const MIN_LABEL_FREE = 640;
+
+/**
+ * Where the placeholder label of a layer slot goes, so a box over the slot (the chat) never covers it. `center`
+ * when the box does not overlap the slot; else the side of the slot with more free width outside the box, with that
+ * width. Null when neither side has MIN_LABEL_FREE: then the label does not show.
+ */
+export function labelPlace(
+  slot: LayerRect,
+  cover: LayerRect | null,
+): { side: "center" | "start" | "end"; free: number } | null {
+  if (cover === null) return { side: "center", free: slot.w };
+  const apart: boolean =
+    cover.x >= slot.x + slot.w ||
+    cover.x + cover.w <= slot.x ||
+    cover.y >= slot.y + slot.h ||
+    cover.y + cover.h <= slot.y;
+  if (apart) return { side: "center", free: slot.w };
+  const before: number = Math.max(0, cover.x - slot.x);
+  const after: number = Math.max(0, slot.x + slot.w - (cover.x + cover.w));
+  const free: number = Math.max(before, after);
+  if (free < MIN_LABEL_FREE) return null;
+  return { side: after > before ? "end" : "start", free };
+}

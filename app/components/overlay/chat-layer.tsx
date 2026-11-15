@@ -7,6 +7,7 @@ import {
   nextGone,
   pruneGone,
   shownRows,
+  type ChatView,
   type FadeLimits,
   type GoneRow,
   type ShownRow,
@@ -18,7 +19,7 @@ import { PLATFORM_NAMES, WASTELAND_STYLE } from "./wasteland/theme";
 
 /** User names longer than this many characters end in an ellipsis. */
 const MAX_NAME_CHARS = 20;
-/** A removed row fades out for leaveMs after its hold, like a leaving row; at most maxLeaving rows fade at once. */
+/** A removed row fades out for leaveMs after the reducer drops it, like a leaving row; at most maxLeaving fade at once. */
 const FADE_LIMITS: FadeLimits = {
   leaveMs: CHAT_LIMITS.leaveMs,
   maxLeaving: CHAT_LIMITS.maxLeaving,
@@ -73,16 +74,17 @@ function Fragment({ fragment }: Readonly<{ fragment: ActivityFragment }>): React
 /**
  * The rows to render: the reducer's rows plus the removed rows that it just dropped, each for leaveMs while its card
  * fades (see fading-rows.ts), in arrival order. The reducer drops a removed row at the end of its hold
- * (CHAT_LIMITS.removedHoldMs); the fade runs after that, and then the column closes up. With reduced motion a dropped
- * row goes at once.
+ * (CHAT_LIMITS.removedHoldMs); the fade starts at the time of that drop (`ChatView.at`), so the full fade plays, and
+ * then the column closes up. A row that a snapshot drops before its hold ends, the rows of a reset, and with reduced
+ * motion every dropped row, go at once.
  */
-function useFadingRows(rows: readonly ChatRow[]): ShownRow[] {
-  const [seen, setSeen] = useState<readonly ChatRow[]>(rows);
+function useFadingRows(chat: ChatView): ShownRow[] {
+  const [seen, setSeen] = useState<ChatView>(chat);
   const [gone, setGone] = useState<readonly GoneRow[]>([]);
-  if (seen !== rows) {
-    // Derived from the previous rows during render, so a dropped row keeps its element (no remount, no flash).
-    const next: readonly GoneRow[] = motionReduced() ? [] : nextGone(gone, seen, rows, FADE_LIMITS);
-    setSeen(rows);
+  if (seen !== chat) {
+    // Derived from the previous state during render, so a dropped row keeps its element (no remount, no flash).
+    const next: readonly GoneRow[] = motionReduced() ? [] : nextGone(gone, seen, chat, FADE_LIMITS);
+    setSeen(chat);
     if (next !== gone && (next.length > 0 || gone.length > 0)) setGone(next);
   }
   useEffect(() => {
@@ -95,6 +97,7 @@ function useFadingRows(rows: readonly ChatRow[]): ShownRow[] {
     );
     return (): void => clearTimeout(timer);
   }, [gone]);
+  const rows: readonly ChatRow[] = chat.rows;
   return useMemo((): ShownRow[] => shownRows(rows, gone), [rows, gone]);
 }
 
@@ -126,8 +129,10 @@ const ChatRowItem = memo(function ChatRowItem({
           <PlatformIcon className="wl-icon" platform={row.platform} label={PLATFORM_NAMES[row.platform]} />
           {!removed &&
             row.badges.slice(0, CHAT_LIMITS.maxBadges).map((badge) => (
+              // Like PlatformIcon: the label for screen readers ends in a space, so it never runs into the name.
               <span className="wl-badge" key={badge.id}>
-                {badge.label}
+                <span aria-hidden="true">{badge.label}</span>
+                <span className="sr-only">{`${badge.label} `}</span>
               </span>
             ))}
           <span className="wl-user">
@@ -160,12 +165,12 @@ const ChatRowItem = memo(function ChatRowItem({
  * clipped at the top. Fills its parent, which sets the size in design pixels. Renders message text as text only.
  */
 export const ChatLayer = memo(function ChatLayer({
-  rows,
+  chat,
   className,
-}: Readonly<{ rows: readonly ChatRow[]; className?: string }>): ReactNode {
+}: Readonly<{ chat: ChatView; className?: string }>): ReactNode {
   const removedText: string = t("overlay.chat.removed");
   const { before, after }: NameFrame = nameFrame();
-  const shown: ShownRow[] = useFadingRows(rows);
+  const shown: ShownRow[] = useFadingRows(chat);
   const list = useRef<HTMLOListElement>(null);
   useRowMotion(list, shown);
   return (

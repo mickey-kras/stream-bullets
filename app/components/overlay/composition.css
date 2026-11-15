@@ -109,7 +109,8 @@
 .ov-comp-placeholder[data-enabled] {
   opacity: 1;
 }
-/* With the chat on, the label sits at the side of the slot away from the chat box (composition-editor.tsx). */
+/* With the chat over the slot, the label sits in the wider free part of the slot beside the chat box, within that
+   free width (--ov-label-free, design pixels). Without room on either side it does not show (labelPlace). */
 .ov-comp-placeholder[data-label-side="start"] {
   justify-items: start;
 }
@@ -117,8 +118,11 @@
   justify-items: end;
 }
 .ov-comp-placeholder[data-label-side] span {
-  max-width: 45%;
+  max-width: calc(var(--ov-label-free) - 48px);
   margin: 0 24px;
+}
+.ov-comp-placeholder[data-label-side="none"] span {
+  display: none;
 }
 .ov-comp-placeholder span {
   max-width: 90%;
@@ -126,6 +130,11 @@
   border-radius: 0.3em;
   background: rgb(0 0 0 / 0.55);
   text-align: center;
+  /* A narrow label breaks only at the spaces around "·", never inside a word (also in Japanese and Chinese), and its
+     lines are of near equal length. A word wider than the label still breaks, so no text is cut off. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 .ov-comp-box {
   position: absolute;

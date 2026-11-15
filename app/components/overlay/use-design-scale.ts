@@ -7,11 +7,24 @@ import { useEffect, type RefObject } from "react";
  *
  * Without `designHeight` the scale is element width / designWidth. With it the content fits inside the element
  * ("contain"): the smaller of the width and height ratios, so no part is cut off when the aspect ratios differ.
+ *
+ * With `enabled` false the element is not measured and has no scale (a design canvas that is off).
  */
-export function useDesignScale(ref: RefObject<HTMLElement | null>, designWidth: number, designHeight?: number): void {
+export function useDesignScale(
+  ref: RefObject<HTMLElement | null>,
+  designWidth: number,
+  designHeight?: number,
+  enabled: boolean = true,
+): void {
   useEffect(() => {
     const element: HTMLElement | null = ref.current;
-    if (!element || designWidth <= 0) return;
+    if (!element) return;
+    if (!enabled) {
+      element.style.removeProperty("--ov-scale");
+      delete element.dataset.scaled;
+      return;
+    }
+    if (designWidth <= 0) return;
     const scale = (): void => {
       const byWidth: number = element.clientWidth / designWidth;
       const value: number =
@@ -25,5 +38,5 @@ export function useDesignScale(ref: RefObject<HTMLElement | null>, designWidth: 
     const observer = new ResizeObserver(scale);
     observer.observe(element);
     return (): void => observer.disconnect();
-  }, [ref, designWidth, designHeight]);
+  }, [ref, designWidth, designHeight, enabled]);
 }

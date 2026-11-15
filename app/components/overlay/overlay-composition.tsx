@@ -1,6 +1,6 @@
 import { memo, useRef, type CSSProperties, type ReactNode } from "react";
 import type { ActivityChat } from "../../lib/activity";
-import type { ChatRow } from "../../lib/chat-feed";
+import type { ChatView } from "../../lib/fading-rows";
 import { DESIGN_H, DESIGN_W, type LayerRect, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
 import type { OverlaySourceRef } from "../../types";
 import type { ActivityFeed } from "./activity-feed";
@@ -70,7 +70,8 @@ export function layerSelector(layer: Exclude<OverlayLayer, "content">): string {
  */
 export function DesignCanvas({ on, children }: Readonly<{ on: boolean; children: ReactNode }>): ReactNode {
   const frame = useRef<HTMLDivElement | null>(null);
-  useDesignScale(frame, DESIGN_W, DESIGN_H);
+  // Off, the frame is not measured: it may have no height, and the content keeps its own layout.
+  useDesignScale(frame, DESIGN_W, DESIGN_H, on);
   return (
     <div className={on ? "ov-design" : undefined} ref={frame}>
       <div className={on ? "ov-scaler" : undefined}>{children}</div>
@@ -132,8 +133,8 @@ const ChatSlot = memo(function ChatSlot({
   samples?: readonly ActivityChat[];
   serverOffset: number;
 }>): ReactNode {
-  const rows: ChatRow[] = useChat({ feed, samples, hideCommands, serverOffset });
-  return <ChatLayer rows={rows} />;
+  const chat: ChatView = useChat({ feed, samples, hideCommands, serverOffset });
+  return <ChatLayer chat={chat} />;
 });
 
 /**

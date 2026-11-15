@@ -3,7 +3,9 @@ import {
   clampRect,
   diffLayers,
   isEmptyPatch,
+  labelPlace,
   layersAction,
+  MIN_LABEL_FREE,
   mergePatches,
   moveRect,
   resizeRect,
@@ -123,5 +125,37 @@ describe("field-level patches", () => {
       characters: { enabled: false },
     });
     expect(layersAction({})).toEqual({ action: "layers" });
+  });
+});
+
+describe("labelPlace", () => {
+  const slot = { x: 0, y: 760, w: 1920, h: 320 };
+
+  it("centres the label when no box overlaps the slot", () => {
+    expect(labelPlace(slot, null)).toEqual({ side: "center", free: 1920 });
+    expect(labelPlace(slot, { x: 1460, y: 100, w: 420, h: 640 })).toEqual({ side: "center", free: 1920 });
+    expect(labelPlace({ ...slot, w: 900 }, { x: 900, y: 760, w: 420, h: 320 })).toEqual({ side: "center", free: 900 });
+    expect(labelPlace(slot, { x: 0, y: 1080, w: 420, h: 0 })).toEqual({ side: "center", free: 1920 });
+    expect(labelPlace({ ...slot, x: 500, w: 900 }, { x: 0, y: 760, w: 500, h: 100 })).toEqual({
+      side: "center",
+      free: 900,
+    });
+  });
+
+  it("puts the label on the side with more free width outside the box", () => {
+    // The default chat box on the right: the label goes left.
+    expect(labelPlace(slot, { x: 1460, y: 280, w: 420, h: 640 })).toEqual({ side: "start", free: 1460 });
+    expect(labelPlace(slot, { x: 40, y: 280, w: 420, h: 640 })).toEqual({ side: "end", free: 1460 });
+    // A wide chat whose centre is right of the middle still leaves more room at the right.
+    expect(labelPlace(slot, { x: 100, y: 600, w: 1100, h: 400 })).toEqual({ side: "end", free: 720 });
+  });
+
+  it("hides the label when neither side has room", () => {
+    expect(labelPlace(slot, { x: 600, y: 280, w: 1200, h: 640 })).toBeNull();
+    expect(labelPlace(slot, { x: 0, y: 760, w: 1920 - MIN_LABEL_FREE + 1, h: 320 })).toBeNull();
+    expect(labelPlace(slot, { x: 0, y: 760, w: 1920 - MIN_LABEL_FREE, h: 320 })).toEqual({
+      side: "end",
+      free: MIN_LABEL_FREE,
+    });
   });
 });

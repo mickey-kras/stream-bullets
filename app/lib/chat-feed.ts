@@ -69,6 +69,10 @@ export interface ChatRow {
 }
 
 export interface ChatState {
+  /** Goes up at each reset (a `reset` action or an `unavailable` message). Rows from an earlier epoch never fade. */
+  epoch: number;
+  /** Local time of the latest action that changed the state: the time a row that this action dropped went. */
+  at: number;
   seq: number;
   /** Visible rows, oldest first. */
   rows: ChatRow[];
@@ -98,7 +102,7 @@ export type ChatAction =
   | { type: "reset" };
 
 export function initialChatState(): ChatState {
-  return { seq: 0, rows: [], pending: [], removed: new Set<string>() };
+  return { epoch: 0, at: 0, seq: 0, rows: [], pending: [], removed: new Set<string>() };
 }
 
 // Leading white space and invisible format characters (ZWJ, BOM, bidi marks) are skipped. "！" is the full-width "!".
@@ -422,14 +426,24 @@ function receiveSnapshot(
   return { ...state, seq, rows, pending: [] };
 }
 
+/**
+ * The next chat state. A `reset` and an `unavailable` message start a new epoch with no rows. Every action that
+ * changes the state records its `now` as `at`.
+ */
 export function chatReducer(state: ChatState, action: ChatAction, options: ChatOptions): ChatState {
-  if (action.type === "reset") return initialChatState();
+  if (action.type === "reset") return { ...initialChatState(), epoch: state.epoch + 1, at: state.at };
+  const now: number = action.now;
+  const next: ChatState = reduce(state, action, options);
+  return next === state ? state : { ...next, at: now };
+}
+
+function reduce(state: ChatState, action: Exclude<ChatAction, { type: "reset" }>, options: ChatOptions): ChatState {
   const limits: ChatLimits = limitsOf(options);
   if (action.type === "tick") return advance(state, action.now, limits);
   if (action.type === "filter")
     return advance(filterCommands(state, action.hideCommands, action.now), action.now, limits);
   const { message, now } = action;
-  if (message.type === "unavailable") return initialChatState();
+  if (message.type === "unavailable") return { ...initialChatState(), epoch: state.epoch + 1 };
   const next: ChatState =
     message.type === "snapshot"
       ? receiveSnapshot(state, message.events, now, action.serverOffset ?? 0, options)

@@ -6,9 +6,9 @@ import {
   nextWakeAt,
   type ChatAction,
   type ChatOptions,
-  type ChatRow,
   type ChatState,
 } from "../../lib/chat-feed";
+import type { ChatView } from "../../lib/fading-rows";
 import { motionReduced, watchMotion } from "../station/motion";
 import type { ActivityFeed } from "./activity-feed";
 
@@ -48,12 +48,12 @@ function useMotionReduced(): boolean {
 }
 
 /**
- * The rows of the merged chat. It feeds the activity feed (or the samples) through `chatReducer` and wakes once at
+ * The merged chat: its rows, reset epoch and latest change time (see ChatView). It feeds the activity feed (or the samples) through `chatReducer` and wakes once at
  * `nextWakeAt` to move animations and lifetimes forward. A changed `hideCommands` applies to the rows on screen.
  *
  * Samples play on a loop, except with reduced motion: then they show once, as a still snapshot.
  */
-export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOptions): ChatRow[] {
+export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOptions): ChatView {
   const [state, setState] = useState<ChatState>(initialChatState);
   // A still sample snapshot never expires, so the preview never empties.
   const still: boolean = useMotionReduced() && samples !== undefined;
@@ -122,5 +122,5 @@ export function useChat({ feed, samples, hideCommands, serverOffset }: UseChatOp
     return (): void => clearTimeout(timer);
   }, [wakeAt, dispatch]);
 
-  return state.rows;
+  return state;
 }

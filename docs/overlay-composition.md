@@ -45,6 +45,8 @@ The page scales the design pixels to the size of the browser source.
 
 When the chat layer is on, the composition puts all of its layers, the content too, in one 1920 × 1080 canvas.
 This canvas is the same as the canvas of the editor preview. Thus the layout is the same at all 16:9 sizes, and the same as in the preview.
+If the source is not 1920 × 1080, the on-air content changes size when the chat layer comes on.
+The editor shows this note under **Show on stream** for the chat layer.
 
 With a source that is not 16:9, the full canvas stays in the source. The free space is at the right or at the bottom.
 When no feed layer is on, the content layer keeps its responsive layout. Thus an existing OBS scene does not change.
@@ -130,7 +132,8 @@ If you close the page or go to a different page before then, the editor sends th
 
 The editor does not wait for the result of a change that it sends while you leave.
 If that change fails, the editor shows an error when you go back to it within 60 seconds.
-The error tells you that the editor did not save your last change.
+The error names the layer of your last change, tells you to make the change again, and gives the reason.
+The page scrolls to the error, so that you can see it.
 The editor sends the newest value last, also while an earlier save is in progress.
 A slow earlier save can still arrive after the newest value.
 
@@ -198,6 +201,9 @@ With reduced motion, the cards do not move. The chat uses the **Motion** setting
 A reconnect snapshot and a burst show their cards at once, without movement.
 When a snapshot removes a card, the card goes at once. Then the column closes with the movement.
 
+When the activity feed is not available, the chat starts again with no cards. All cards go at once, without a fade.
+A removed card fades out in 300 milliseconds from the time that it leaves the chat, also when the page is slow.
+
 ### Moderation
 
 | Event | Result |
@@ -264,6 +270,8 @@ Thus close the overlay sources that you do not use.
 ## Limits and known gaps
 
 - The characters layer shows nothing until issue #664. Its editor control stays disabled until then.
+- In the preview, the label of the characters slot shows in the wider free part of the slot beside the chat layer.
+  If the chat layer leaves less than 640 pixels free on each side, the label does not show.
 - The overlay has one theme. There is no theme selection.
 - Layer edits go live at once. They have no preview and take step.
 - Kick has no message deletion events. YouTube has no clear events. See the capability matrix in
