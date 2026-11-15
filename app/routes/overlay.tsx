@@ -50,9 +50,10 @@ export default function Overlay(): ReactNode {
   const layer: OverlayLayer | null | "unknown" = parseLayerParam(search.get("layer"));
   const known: boolean = layer !== "unknown";
   const only: OverlayLayer | null = layer === "unknown" ? null : layer;
-  // Only the content layer reads the live room; a chat or characters source does not take a seat in it.
+  // Every layer reads the live room: it carries the overlay state, so layer changes (show, hide, move, hide
+  // commands) apply at once on a per-layer source too. Only the content layer reloads data for what is on air.
   const content: boolean = known && (only === null || only === "content");
-  const { snapshot, status } = useLivePolls(loaded.handle, content, key, true);
+  const { snapshot, status } = useLivePolls(loaded.handle, known, key, true);
   const revalidator = useRevalidator();
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const live: OverlayPublic | null | undefined = snapshot?.overlay;
