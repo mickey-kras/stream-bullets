@@ -16,6 +16,8 @@ A Worker rollback does not change D1, R2, or Durable Object storage. A D1 restor
 
 ## Roll back the Worker
 
+After migration `0031`, `X-StreamBullets-Binary-Labels: 1` identifies a Worker that preserves custom binary labels during rollback.
+
 The deployment job applies migrations before it deploys the Worker. Thus, the schema can be newer than an old Worker version.
 
 1. List the recent versions:

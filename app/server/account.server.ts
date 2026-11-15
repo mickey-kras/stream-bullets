@@ -468,7 +468,7 @@ async function readHistory(env: AppEnv, userId: string, now: number) {
   ).filter((row: SessionRow): boolean => row.expires_at > now);
   const entries = await readAll<EntryRow>(
     env,
-    `SELECT x.rowid AS row_cursor,x.id,s.handle,x.kind,x.title,x.body,x.category,x.options,x.created_at,x.ends_at,x.revealed
+    `SELECT x.rowid AS row_cursor,x.id,s.handle,x.kind,x.title,x.body,x.category,COALESCE(x.binary_labels,x.options) AS options,x.created_at,x.ends_at,x.revealed
       FROM entries x JOIN streamers s ON s.id=x.streamer_id WHERE x.author_id=?1 AND ${page}`,
     userId,
   );
@@ -487,7 +487,7 @@ async function readHistory(env: AppEnv, userId: string, now: number) {
   const votes = await readAll<VoteRow>(
     env,
     `SELECT x.rowid AS row_cursor,x.entry_id,e.title AS entry_title,s.handle,x.choice,
-        json_extract(e.options,'$['||x.choice||']') AS option
+        json_extract(COALESCE(e.binary_labels,e.options),'$['||x.choice||']') AS option
       FROM entry_votes x ${entryJoin} WHERE x.user_id=?1 AND ${page}`,
     userId,
   );

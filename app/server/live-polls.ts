@@ -21,11 +21,11 @@ export type PollRow = {
 // Read the 50 newest choice/binary polls plus any older open poll, with counts. Bind streamer ID twice.
 export const LIVE_POLLS_SQL = `
   WITH recent AS (
-    SELECT id, title, kind, options, ends_at, revealed, created_at
+    SELECT id, title, kind, COALESCE(binary_labels, options) AS options, ends_at, revealed, created_at
     FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary')
     ORDER BY created_at DESC, id DESC LIMIT 50
   ), active AS (
-    SELECT id, title, kind, options, ends_at, revealed, created_at
+    SELECT id, title, kind, COALESCE(binary_labels, options) AS options, ends_at, revealed, created_at
     FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary')
       AND revealed = 0 AND (ends_at IS NULL OR ends_at > unixepoch('subsec') * 1000)
       AND ${notFinishedBattle("unixepoch('subsec') * 1000")}

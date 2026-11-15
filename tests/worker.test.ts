@@ -144,6 +144,12 @@ beforeEach(async (): Promise<void> => {
 });
 
 describe("Worker request checks", (): void => {
+  it("advertises binary label reader compatibility after migration", async (): Promise<void> => {
+    const response = await fetchPath("/");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-StreamBullets-Binary-Labels")).toBe("1");
+  });
+
   it("answers 421 for another host name, with the error origin in the policy", async (): Promise<void> => {
     const response = await worker.fetch(new Request("https://other.example.test/"), env);
     expect(response.status).toBe(421);

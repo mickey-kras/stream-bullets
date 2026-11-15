@@ -107,6 +107,7 @@ beforeAll(async (): Promise<void> => {
     applied.filter((file: string): boolean => file >= "0017" && file < "0026"),
   );
   // Entry removal records written before 0026 kept a copy of the entry title.
+  await db.prepare("UPDATE user SET locale='ru' WHERE id='host'").run();
   await db.batch([
     db.prepare(
       `INSERT INTO moderation_actions (id,target_kind,target_id,action,metadata,created_at) VALUES
@@ -135,7 +136,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0030", (): void => {
+  it("covers 0006 to 0031", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -162,7 +163,20 @@ describe("migrations 0006 onwards", (): void => {
       "0028",
       "0029",
       "0030",
+      "0031",
     ]);
+  });
+
+  it("localizes existing fixed binary labels from the host locale (0031)", async (): Promise<void> => {
+    expect(await db.prepare("SELECT options,binary_labels FROM entries WHERE id='binary'").first())
+      .toEqual({ options: '["Yes","No"]', binary_labels: '["Да","Нет"]' });
+  });
+
+  it("backfills entry activity counts (0031) without losing replies or reactions", async (): Promise<void> => {
+    const result = await db.prepare("SELECT likes,dislikes,comments FROM entry_activity_counts WHERE entry_id='topic'").first();
+    expect(result).toEqual({ likes: 1, dislikes: 1, comments: 3 });
+    expect(await db.prepare("SELECT likes,dislikes,comments FROM entry_activity_counts WHERE entry_id='poll'").first())
+      .toEqual({ likes: 0, dislikes: 0, comments: 0 });
   });
 
   it("adds discussion metadata (0029) without changing existing comment text", async (): Promise<void> => {
