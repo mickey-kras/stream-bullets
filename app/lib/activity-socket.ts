@@ -48,11 +48,20 @@ export interface ActivitySocket {
   wake(): void;
 }
 
-/** The socket URL of a page's activity feed: `ws(s)://origin/api/activity/:handle?key=K`. */
-export function activityUrl(origin: string, handle: string, key: string | null): string {
+/**
+ * The socket URL of a page's activity feed: `ws(s)://origin/api/activity/:handle?key=K`. With `characters` the
+ * socket also gets the playground frames (`&characters=1`).
+ */
+export function activityUrl(
+  origin: string,
+  handle: string,
+  key: string | null,
+  options: { characters?: boolean } = {},
+): string {
   const url = new URL(`/api/activity/${encodeURIComponent(handle)}`, origin);
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   if (key) url.searchParams.set("key", key);
+  if (options.characters) url.searchParams.set("characters", "1");
   return url.toString();
 }
 

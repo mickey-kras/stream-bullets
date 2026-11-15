@@ -24,7 +24,8 @@ import {
   type OverlayLayers,
 } from "../../lib/overlay-layers";
 import type { OverlaySourceRef } from "../../types";
-import { CHARACTERS_READY, OverlayComposition, frameStyle } from "./overlay-composition";
+import type { ActivityFeed } from "./activity-feed";
+import { OverlayComposition, frameStyle } from "./overlay-composition";
 import type { OverlayScene } from "./overlay-stage";
 import { useDesignScale } from "./use-design-scale";
 
@@ -94,6 +95,7 @@ export function LayoutGrid({
   scene,
   source,
   background,
+  charactersFeed,
   selected,
   onSelect,
   onPlace,
@@ -103,6 +105,8 @@ export function LayoutGrid({
   scene: OverlayScene;
   source: OverlaySourceRef;
   background: PreviewBackground;
+  /** The owner's live characters feed, or null while the characters layer is off. */
+  charactersFeed: ActivityFeed | null;
   selected: GridLayer;
   onSelect: (layer: GridLayer) => void;
   /** Keeps a valid cell for a layer. `when` is "idle" for Shift + arrow steps. */
@@ -279,6 +283,7 @@ export function LayoutGrid({
             layers={layers}
             only={null}
             feed={null}
+            charactersFeed={charactersFeed}
             samples={SAMPLE_CHAT}
           />
           <div className="ov-grid-lines" aria-hidden="true" />
@@ -301,9 +306,6 @@ export function LayoutGrid({
                 <span className="ov-grid-tag">
                   {name(layer)} · {px.w} × {px.h}
                 </span>
-                {layer === "characters" && !CHARACTERS_READY && (
-                  <span className="ov-grid-soon">{t("overlay.comp.layerSoon", { layer: name(layer) })}</span>
-                )}
               </div>
             );
           })}

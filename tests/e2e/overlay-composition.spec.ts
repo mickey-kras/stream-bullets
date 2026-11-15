@@ -10,7 +10,6 @@ import { DEFAULT_LAYERS, cellPixels, type CellRect, type LayerRect } from "../..
 const OWNER_IP = clientIp("overlay-composition", 240);
 const OBS_IP = clientIp("overlay-composition", 241);
 const GEOMETRY_IP = clientIp("overlay-composition", 242);
-const CHARACTERS_IP = clientIp("overlay-composition", 243);
 const COMMANDS_IP = clientIp("overlay-composition", 244);
 const DESIGN_IP = clientIp("overlay-composition", 250);
 // Set OBS_SHOT_DIR to a folder to save the OBS composition screenshots of the design-space test.
@@ -659,7 +658,8 @@ test("the chat layer has the same geometry on the OBS composition and in the edi
   expect(Math.abs(box.y - scaler.y - CHAT_RECT.y * scale)).toBeLessThanOrEqual(2);
   expect(Math.abs(box.width - CHAT_RECT.w * scale)).toBeLessThanOrEqual(2);
   expect(Math.abs(box.height - CHAT_RECT.h * scale)).toBeLessThanOrEqual(2);
-  // The preview plays sample chat and opens no activity socket.
+  // The preview plays sample chat. With the characters layer off it opens no activity socket (characters.spec.ts
+  // checks the owner's characters socket while that layer is on).
   await expect(layer.locator("li.wl-item").first()).toBeVisible();
   expect(activity).toEqual([]);
   await close(owner);
@@ -707,24 +707,6 @@ for (const viewport of [
     await close(source.page);
   });
 }
-
-test("a characters-only source opens no sockets while the characters layer cannot render", async ({ browser }) => {
-  await setLayers("overlay-characters-reset", { chat: { enabled: true }, characters: { enabled: true } });
-  const page = await newPage(browser, { extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${CHARACTERS_IP}` } });
-  const sockets: string[] = [];
-  page.on("websocket", (socket) => sockets.push(new URL(socket.url()).pathname));
-  await page.goto("/@feature_host/overlay?key=e2e-key&layer=characters");
-  const main = page.locator("main.overlay-screen");
-  // This assumes that the route opens its sockets (live room and activity) in effects of its first commit, and that
-  // no later state change opens one. If a socket opened later, for example after a timer, this check would miss it.
-  await expect(main).toHaveAttribute("data-feed-status", "off");
-  // The layer box sets data-scaled in an effect, so the page is hydrated and its first effects ran.
-  await expect(main.locator('.ov-layer[data-layer="characters"]')).toHaveAttribute("data-scaled", "true");
-  // Let the effects of that commit finish: the route opens its sockets in the same flush, after its children.
-  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0))));
-  expect(sockets).toEqual([]);
-  await close(page);
-});
 
 test("turning on hide commands removes a command row from an open chat source", async ({ browser }) => {
   await setLayers("overlay-commands-reset", { chat: { enabled: true, hideCommands: false } });

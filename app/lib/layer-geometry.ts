@@ -78,6 +78,8 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
   if (before.chat.hideCommands !== after.chat.hideCommands)
     patch.chat = { ...patch.chat, hideCommands: after.chat.hideCommands };
   if (before.characters.enabled !== after.characters.enabled) patch.characters = { enabled: after.characters.enabled };
+  if (before.characters.timeout !== after.characters.timeout)
+    patch.characters = { ...patch.characters, timeout: after.characters.timeout };
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch = {};
     for (const layer of GRID_LAYERS) {

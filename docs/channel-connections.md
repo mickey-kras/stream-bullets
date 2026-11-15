@@ -83,6 +83,14 @@ The merged chat on the overlay is a consumer of this feed. It follows the rules 
 It opens an activity socket only while an enabled chat layer shows on the page.
 See [Overlay composition and merged chat](overlay-composition.md) for its limits and its quota effect.
 
+### Interactive characters
+
+The character playground is also a consumer of this feed. Its sockets ask for frames with `characters=1`.
+The `ChannelIngest` object tags these sockets `characters`. Each one counts as a consumer, like a chat socket.
+Thus an open characters source keeps the YouTube poll alive, and each poll costs YouTube quota.
+
+The playground runs only while at least one characters socket is open. See [Interactive characters](characters.md).
+
 ## Capability matrix
 
 | Capability | Twitch | YouTube | Kick |
@@ -193,7 +201,10 @@ Deleted message IDs are in their own table, so a burst of new IDs cannot push th
 
 ### YouTube quota
 
-YouTube polls run only while a consumer listens. Thus a page that has no open overlay uses no quota.
+YouTube polls run only while a consumer listens. A consumer is an open activity socket of the page.
+Chat sources, characters sources, and composition sources open one. The editor preview opens one with the characters layer on.
+Thus a page that has no open overlay uses no quota.
+
 The object also ingests the first page after a connect or a reconnect. The messages on it that YouTube got more
 than 30 seconds before are not live, so no old command runs. A poll never runs before its stored time.
 A new consumer, a cleanup alarm, or a reconnect cannot skip a backoff, the polling interval, or a quota wait.

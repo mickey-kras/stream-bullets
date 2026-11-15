@@ -194,7 +194,7 @@ describe("tAround", () => {
   });
 
   it("fills the other variables and follows the locale", async () => {
-    expect(tAround("overlay.comp.layerSoon", "layer", { other: 1 })).toEqual(["", " · Coming soon"]);
+    expect(tAround("mash.teaserLive", "name", { other: 1 })).toEqual(["", " · LIVE"]);
     await loadCatalog("ja");
     setLocaleSource((): Locale => "ja");
     expect(tAround("overlay.chat.name", "name")).toEqual(["", "："]);

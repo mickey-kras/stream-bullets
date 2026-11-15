@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   CELL_PX,
+  CHARACTERS_TIMEOUT,
   DEFAULT_LAYERS,
   GRID,
   GRID_LAYERS,
@@ -40,7 +41,7 @@ describe("grid and defaults", (): void => {
     expect(DEFAULT_LAYERS).toEqual({
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: true },
-      characters: { enabled: false },
+      characters: { enabled: false, timeout: 60 },
       cells: {
         horizontal: { chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 }, content: null },
         vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, characters: { c: 0, r: 13, w: 9, h: 3 }, content: null },
@@ -116,7 +117,7 @@ describe("stored layers", (): void => {
     const stored = {
       orientation: "vertical",
       chat: { enabled: true, hideCommands: false },
-      characters: { enabled: true },
+      characters: { enabled: true, timeout: 60 },
       cells: {
         horizontal: { chat: chatCell, characters: { c: 0, r: 7, w: 16, h: 2 }, content: { c: 0, r: 0, w: 6, h: 4 } },
         vertical: { chat: { c: 0, r: 0, w: 9, h: 4 }, characters: { c: 0, r: 14, w: 9, h: 2 }, content: null },
@@ -199,6 +200,9 @@ describe("stored layers", (): void => {
   it("stays short enough for the 1000-character column limit with every cell set", (): void => {
     const full: OverlayLayers = {
       ...DEFAULT_LAYERS,
+      orientation: "horizontal",
+      chat: { enabled: false, hideCommands: false },
+      characters: { enabled: false, timeout: 600 },
       cells: {
         horizontal: { ...DEFAULT_LAYERS.cells.horizontal, content: { c: 10, r: 0, w: 6, h: 7 } },
         vertical: { ...DEFAULT_LAYERS.cells.vertical, content: { c: 0, r: 0, w: 9, h: 8 } },
@@ -261,11 +265,46 @@ describe("layer patches", (): void => {
     expect(next.cells.vertical.chat).not.toBe(DEFAULT_LAYERS.cells.vertical.chat);
     const removed: OverlayLayers = mergeLayers(next, { cells: { horizontal: { content: null } } });
     expect(removed.cells.horizontal.content).toBeNull();
-    expect(mergeLayers(next, { characters: { enabled: true } }).characters).toEqual({ enabled: true });
+    expect(mergeLayers(next, { characters: { enabled: true } }).characters).toEqual({ enabled: true, timeout: 60 });
     expect(mergeLayers(next, {})).toEqual(next);
     expect(DEFAULT_LAYERS.chat.enabled).toBe(false);
     for (const orientation of ORIENTATIONS) expect(GRID[orientation].cols * GRID[orientation].rows).toBe(144);
     expect(GRID_LAYERS).toEqual(["chat", "characters", "content"]);
+  });
+});
+
+describe("characters timeout", (): void => {
+  it("allows 10 to 600 seconds and defaults to 60 seconds", (): void => {
+    expect(CHARACTERS_TIMEOUT).toEqual({ min: 10, max: 600, default: 60 });
+    expect(DEFAULT_LAYERS.characters.timeout).toBe(60);
+  });
+
+  it("reads a stored timeout leniently: a missing or invalid one is the default", (): void => {
+    const read = (timeout: unknown): number => storedLayersSchema.parse({ characters: { timeout } }).characters.timeout;
+    expect(read(120)).toBe(120);
+    expect(read(10)).toBe(10);
+    expect(read(600)).toBe(600);
+    for (const value of [undefined, 9, 601, 30.5, "60", null]) expect(read(value)).toBe(60);
+    expect(storedLayersSchema.parse({ characters: { enabled: true, timeout: 5 } }).characters).toEqual({
+      enabled: true,
+      timeout: 60,
+    });
+  });
+
+  it("accepts only whole seconds from 10 to 600 in a patch, and merges them", (): void => {
+    for (const timeout of [10, 90, 600])
+      expect(layersPatchSchema.parse({ characters: { timeout } })).toEqual({ characters: { timeout } });
+    for (const timeout of [9, 601, 30.5, "60", null, Number.NaN])
+      expect(layersPatchSchema.safeParse({ characters: { timeout } }).success).toBe(false);
+    const enabled: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { characters: { enabled: true } });
+    expect(mergeLayers(enabled, { characters: { timeout: 300 } }).characters).toEqual({ enabled: true, timeout: 300 });
+    expect(
+      mergeLayers({ ...enabled, characters: { enabled: true, timeout: 300 } }, { characters: { enabled: false } })
+        .characters,
+    ).toEqual({
+      enabled: false,
+      timeout: 300,
+    });
   });
 });
 

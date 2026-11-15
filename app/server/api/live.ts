@@ -1,7 +1,11 @@
+import { assertStreamerWritable } from "../access.server";
+import { activityAvailable } from "../channel-tokens.server";
 import { consumeMutationQuota, getOwnStreamer } from "../data.server";
 import { HttpError, getOrigin, json, readJson } from "../http.server";
-import { notifyMash, notifyOverlay, notifyOverlayKey } from "../live.server";
+import { notifyMash, notifyOverlay, notifyOverlayKey, notifyPlayground } from "../live.server";
 import { mashStartSchema, runMashAction, type MashAction } from "../mash.server";
+import { callIngest } from "../ingest-call.server";
+import { playgroundControlSchema, playgroundStatusSchema } from "../../lib/playground/protocol";
 import { overlayKeySchema, regenerateOverlayKey } from "../overlay-key.server";
 import { getOverlayData, getOverlayState, overlayActionSchema, sourceTopics, updateOverlay } from "../overlay.server";
 import { get, requireViewer, write, type ApiRoute } from "./router";
@@ -35,6 +39,28 @@ export const liveRoutes: ApiRoute[] = [
     notifyOverlayKey(env, streamer.id);
     return json({ url: `${getOrigin(env)}/@${streamer.handle}/overlay?key=${key}` });
   }),
+  // POST /api/overlay/characters {op: status|test|stopTest|pause|resume|reset|remove, id?} → {paused, testEndsAt}: the
+  // character playground. `status` only reads. Starting a test, a reset and a removal use the write quota; the others
+  // never do, so the owner can always read, stop or pause.
+  write("POST", /overlay\/characters/, async ({ request, env, viewer }) => {
+    const control = await readJson(request, playgroundControlSchema);
+    const streamer = await getOwnStreamer(env, viewer.id);
+    if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
+    await assertStreamerWritable(env, streamer.id, viewer.id);
+    if (!activityAvailable(env)) throw new HttpError(503, "Characters are off on this server.");
+    if (control.op === "test" && !(await getOverlayState(env, streamer.id)).layers.characters.enabled)
+      throw new HttpError(400, "Turn on the characters layer first.");
+    if (control.op === "test" || control.op === "reset" || control.op === "remove")
+      await consumeMutationQuota(env, viewer.id);
+    const response = await callIngest(env, streamer.id, "playground", {
+      init: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(control) },
+    });
+    if (response.status === 404) throw new HttpError(404, "That character is not on the playground.");
+    if (!response.ok) throw new HttpError(503, "The character playground is not available. Try again.");
+    const status = playgroundStatusSchema.safeParse(await response.json().catch((): null => null));
+    if (!status.success) throw new Error("playground status invalid");
+    return json(status.data);
+  }),
   // POST /api/overlay {action: preview|take|layout|message|layers|chatTest, ...} → {overlay}
   write("POST", /overlay/, async ({ request, env, viewer }) => {
     const action = await readJson(request, overlayActionSchema);
@@ -47,6 +73,8 @@ export const liveRoutes: ApiRoute[] = [
     const { overlay, changed } = await updateOverlay(env, viewer.id, streamer.id, action);
     // An ignored old layer write changed nothing, so the overlay pages need no update.
     if (changed) notifyOverlay(env, streamer.id);
+    // Only the layers configure the character playground.
+    if (changed && action.action === "layers") notifyPlayground(env, streamer.id);
     return json({ overlay });
   }),
 ];

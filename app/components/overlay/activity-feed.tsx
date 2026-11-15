@@ -18,7 +18,7 @@ export interface ActivityFeed {
 type Listener = (message: ActivityMessage) => void;
 
 /**
- * One activity socket per page and URL, shared by every layer that reads it (chat now, characters later). Each
+ * One activity socket per page and URL, shared by every layer that reads it (chat and characters). Each
  * socket costs provider quota (YouTube is polled only while one is open), so a second reader never opens another.
  */
 interface SharedSocket {
@@ -80,23 +80,36 @@ function acquire(url: string, onMessage: Listener, onStatus: (status: ActivitySo
   };
 }
 
+/** `characters` adds the playground frames. `owner` connects without a key: the signed-in owner's editor. */
+export interface ActivityFeedOptions {
+  characters?: boolean;
+  owner?: boolean;
+}
+
 /**
- * The activity feed of a page for its overlay layers. It connects only while `enabled` and a key is present, and
- * closes the socket when disabled, so hiding the chat layer stops the feed.
+ * The activity feed of a page for its overlay layers. It connects only while `enabled` and a key is present (or
+ * `owner` is set), and closes the socket when disabled, so hiding the chat layer stops the feed. A feed with
+ * characters is its own socket, so the playground runs only while a characters layer listens.
  */
-export function useActivityFeed(handle: string, key: string | null, enabled: boolean): ActivityFeed {
-  const on: boolean = enabled && Boolean(key);
+export function useActivityFeed(
+  handle: string,
+  key: string | null,
+  enabled: boolean,
+  options: ActivityFeedOptions = {},
+): ActivityFeed {
+  const characters: boolean = options.characters === true;
+  const on: boolean = enabled && (Boolean(key) || options.owner === true);
   const [status, setStatus] = useState<ActivityFeedStatus>(on ? "connecting" : "off");
   const listenersRef = useRef<Set<Listener>>(new Set<Listener>());
-  const [session, setSession] = useState<string>(`${handle}:${key}:${on}`);
-  const current = `${handle}:${key}:${on}`;
+  const [session, setSession] = useState<string>(`${handle}:${key}:${on}:${characters}`);
+  const current = `${handle}:${key}:${on}:${characters}`;
   if (session !== current) {
     setSession(current);
     setStatus(on ? "connecting" : "off");
   }
   useEffect(() => {
-    if (!on || !key) return;
-    const url: string = activityUrl(globalThis.location.origin, handle, key);
+    if (!on) return;
+    const url: string = activityUrl(globalThis.location.origin, handle, key, { characters });
     const listeners: Set<Listener> = listenersRef.current;
     return acquire(
       url,
@@ -105,7 +118,7 @@ export function useActivityFeed(handle: string, key: string | null, enabled: boo
       },
       setStatus,
     );
-  }, [handle, key, on]);
+  }, [handle, key, on, characters]);
   const subscribe = useMemo(
     () =>
       (listener: Listener): (() => void) => {

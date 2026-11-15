@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CHANNEL_PLATFORMS, CHANNEL_STATUSES } from "../../db/enums";
+import { type PlaygroundFrame, parseFrame } from "./playground/protocol";
 import { addDays, formatDate, localDateOf, zonedTime } from "./zoned";
 
 /**
@@ -181,13 +182,17 @@ export const activityEventSchema: z.ZodType<ActivityEvent> = z.union([
   }),
 ]);
 
-/** A message on the activity socket: the reconnect snapshot first, then one live event at a time. */
+/**
+ * A message on the activity socket: the reconnect snapshot first, then one live event at a time. A socket that asked
+ * for characters (`?characters=1`) also gets playground frames (playground/protocol.ts).
+ */
 export type ActivityMessage =
   | { type: "snapshot"; events: ActivityEvent[]; replay: true }
   | { type: "event"; event: ActivityEvent }
-  | { type: "unavailable" };
+  | { type: "unavailable" }
+  | PlaygroundFrame;
 
-const messageSchema: z.ZodType<ActivityMessage> = z.union([
+const messageSchema: z.ZodType<Exclude<ActivityMessage, PlaygroundFrame>> = z.union([
   z.object({ type: z.literal("snapshot"), events: z.array(activityEventSchema).max(200), replay: z.literal(true) }),
   z.object({ type: z.literal("event"), event: activityEventSchema }),
   z.object({ type: z.literal("unavailable") }),
@@ -205,6 +210,9 @@ export function parseActivityMessage(raw: unknown): ActivityMessage | null {
   } catch {
     return null;
   }
+  // Frames have their own contract, with bounds on names, text and sizes.
+  if (typeof value === "object" && value !== null && (value as { type?: unknown }).type === "playground")
+    return parseFrame(raw);
   const result = messageSchema.safeParse(value);
   return result.success ? result.data : null;
 }

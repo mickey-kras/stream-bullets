@@ -1,5 +1,6 @@
 import { waitUntil } from "cloudflare:workers";
 import type { AppEnv } from "../env";
+import { activityAvailable } from "./channel-tokens.server";
 import { callIngest } from "./ingest-call.server";
 
 // Notify rooms through `waitUntil`, after response. Log failures without throwing: mutations already
@@ -53,6 +54,11 @@ export function notifyOverlay(env: AppEnv, streamerId: string): void {
   callRoom(env, streamerId, "overlay");
 }
 
+// Asks the character playground to read the saved layers again. Without the activity feed there is no playground.
+export function notifyPlayground(env: AppEnv, streamerId: string): void {
+  if (activityAvailable(env)) waitUntil(callActivity(env, streamerId, "playground-config"));
+}
+
 // Asks the live room and the activity feed to drop the sockets that came in with a revoked overlay key.
 export function notifyOverlayKey(env: AppEnv, streamerId: string): void {
   callRoom(env, streamerId, "overlay-key");
@@ -64,7 +70,11 @@ export function notifyActivityPage(env: AppEnv, streamerId: string): void {
   waitUntil(callActivity(env, streamerId, "page-status"));
 }
 
-async function callActivity(env: AppEnv, streamerId: string, path: "overlay-key" | "page-status"): Promise<void> {
+async function callActivity(
+  env: AppEnv,
+  streamerId: string,
+  path: "overlay-key" | "page-status" | "playground-config",
+): Promise<void> {
   try {
     const result = await callIngest(env, streamerId, path);
     if (!result.ok) console.error("activity_notify_failed", { path, status: result.status });

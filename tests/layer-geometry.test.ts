@@ -91,7 +91,7 @@ describe("field-level patches", () => {
     const after: OverlayLayers = {
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false },
-      characters: { enabled: true },
+      characters: { enabled: true, timeout: 90 },
       cells: {
         horizontal: { ...before.cells.horizontal, chat: cell, content: { c: 5, r: 0, w: 4, h: 2 } },
         vertical: before.cells.vertical,
@@ -100,7 +100,7 @@ describe("field-level patches", () => {
     expect(diffLayers(before, after)).toEqual({
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false },
-      characters: { enabled: true },
+      characters: { enabled: true, timeout: 90 },
       cells: { horizontal: { chat: cell, content: { c: 5, r: 0, w: 4, h: 2 } } },
     });
     expect(

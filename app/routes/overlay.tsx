@@ -13,6 +13,7 @@ import {
   DesignCanvas,
   OverlayComposition,
   usesActivityFeed,
+  usesCharacters,
   usesDesignCanvas,
 } from "../components/overlay/overlay-composition";
 import { upNextStart, type OverlayPoll, type OverlayScene } from "../components/overlay/overlay-stage";
@@ -75,9 +76,10 @@ export default function Overlay(): ReactNode {
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate, content);
   // Fetch missing content when the on-air source changes.
   useLiveRevalidation(status, overlay.revision, revalidator.revalidate, content);
-  // The activity socket is open only while a rendered layer needs it, so hiding the chat closes it.
+  // The activity socket is open only while a rendered layer needs it, so hiding the chat closes it. One socket carries
+  // chat and, while the characters layer shows, the playground frames: the playground runs only while one listens.
   const feedOn: boolean = known && usesActivityFeed(overlay.layers, only);
-  const feed = useActivityFeed(loaded.handle, key, feedOn);
+  const feed = useActivityFeed(loaded.handle, key, feedOn, { characters: usesCharacters(overlay.layers, only) });
   // Server time minus local time, measured once per loader response: chat lifetimes use server receive times.
   const [offsets] = useState<ServerOffset>(() => new ServerOffset());
   const serverOffset: number = offsets.for(loaded.initial.serverNow);

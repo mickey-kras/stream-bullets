@@ -18,6 +18,8 @@ import type { OverlaySourceRef, OverlayState } from "../../types";
 import { errorMessage, postJson } from "../api";
 import { motionReduced } from "../station/motion";
 import { useToast } from "../ui/toast";
+import { type ActivityFeed, useActivityFeed } from "./activity-feed";
+import { CharactersControls } from "./characters-controls";
 import { LAYER_NAMES, LayoutGrid, type PreviewBackground } from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
 import type { OverlayScene } from "./overlay-stage";
@@ -137,7 +139,8 @@ function ChatTest({
 
 /**
  * The Composition section of Overlay control: the layout grid of the selected orientation over a preview of what
- * OBS shows. It plays sample chat and never opens an activity socket. Layer edits go live at once.
+ * OBS shows. It plays sample chat. While the characters layer is on, it opens the owner's characters socket and shows
+ * the live playground. Layer edits go live at once.
  */
 export function CompositionEditor({
   layers,
@@ -162,6 +165,12 @@ export function CompositionEditor({
   const [selected, setSelected] = useState<GridLayer>("chat");
   const { shown, status, error, edit } = useLayerDraft(layers, onSaved);
   const orientation: Orientation = shown.orientation;
+  // The preview shows the live playground while the characters layer is on: the owner's own characters socket.
+  const charactersOn: boolean = CHARACTERS_READY && shown.characters.enabled;
+  const charactersFeed: ActivityFeed = useActivityFeed(scene.handle, null, charactersOn, {
+    characters: true,
+    owner: true,
+  });
   const content: CellRect | null = shown.cells[orientation].content;
   const frame = useRef<HTMLDivElement | null>(null);
   const covers: boolean = useChatOverlap(
@@ -260,6 +269,7 @@ export function CompositionEditor({
             scene={scene}
             source={source}
             background={background}
+            charactersFeed={charactersOn ? charactersFeed : null}
             selected={selected}
             onSelect={setSelected}
             onPlace={place}
@@ -319,10 +329,9 @@ export function CompositionEditor({
             {/* The server checks the saved layers, so an unsaved draft does not make the test available. */}
             <ChatTest until={chatTestUntil} now={scene.now} enabled={layers.chat.enabled} onSaved={onSaved} />
           </fieldset>
-          <fieldset className="ov-comp-layer" data-comp-layer="characters" aria-describedby={`${titleId}-soon`}>
-            <legend>
-              {t("overlay.comp.characters")} <span className="ov-comp-soon">{t("overlay.comp.soon")}</span>
-            </legend>
+          <fieldset className="ov-comp-layer" data-comp-layer="characters">
+            <legend>{t("overlay.comp.characters")}</legend>
+            <p className="muted ov-comp-note">{t("overlay.characters.intro")}</p>
             <label className="choice">
               <input
                 type="checkbox"
@@ -335,9 +344,16 @@ export function CompositionEditor({
               />
               <span>{t("overlay.comp.show")}</span>
             </label>
-            <p className="muted ov-comp-note" id={`${titleId}-soon`}>
-              {t("overlay.comp.charactersSoon")}
-            </p>
+            {/* The server checks the saved layers, so an unsaved draft does not make the test available. */}
+            <CharactersControls
+              feed={charactersOn ? charactersFeed : null}
+              enabled={layers.characters.enabled}
+              timeout={shown.characters.timeout}
+              onTimeout={(timeout: number) =>
+                change((current) => ({ ...current, characters: { ...current.characters, timeout } }))
+              }
+              now={scene.now}
+            />
           </fieldset>
           <fieldset className="ov-comp-layer" data-comp-layer="content">
             <legend>{t("overlay.comp.content")}</legend>
