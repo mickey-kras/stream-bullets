@@ -1,0 +1,272 @@
+/* Overlay composition and the wasteland theme (docs/design/wasteland-overlays). Layer content is laid out in design
+   pixels (1080p) and scaled by --ov-scale. Colours and textures come from the --wl-* properties set by theme.ts. */
+
+/* ---------- Composition: characters below content, chat on top ---------- */
+.ov-composition {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ov-composition > .ov-stage {
+  z-index: 2;
+}
+.ov-layer {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ov-layer[data-layer="characters"] {
+  z-index: 1;
+}
+.ov-layer[data-layer="chat"] {
+  z-index: 3;
+}
+.ov-layer-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: scale(var(--ov-scale, 1));
+  transform-origin: 0 0;
+  visibility: hidden;
+}
+.ov-layer[data-scaled] > .ov-layer-canvas {
+  visibility: visible;
+}
+
+/* ---------- Merged chat: A1 compact capsule rows ---------- */
+.wl-chat {
+  --wl-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --wl-ease-in: cubic-bezier(0.5, 0, 0.8, 0.4);
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0 4px 6px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  font:
+    500 28px / 1.2 "Oswald",
+    "Arial Narrow",
+    sans-serif;
+  color: var(--wl-text);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 min(80px, 25%));
+  mask-image: linear-gradient(to bottom, transparent 0, #000 min(80px, 25%));
+}
+.wl-item {
+  display: grid;
+  grid-template-rows: 1fr;
+  flex: none;
+  margin: 0;
+  padding: 0;
+}
+.wl-clip {
+  min-height: 0;
+  overflow: hidden;
+  padding: 9px 3px 3px;
+}
+.wl-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 8px 16px 8px 30px;
+  border-radius: 16px;
+  border: 4px solid var(--wl-border);
+  background: var(--wl-tex-scratch), var(--wl-tex-grunge), var(--wl-fill);
+  box-shadow:
+    0 0 0 2px var(--wl-outline),
+    0 4px 0 2px rgb(0 0 0 / 0.35);
+}
+/* Grille ticks in the top corners and spray flecks near both ends and along the bottom edge. */
+.wl-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, var(--wl-border) 0 2px, transparent 2px 5px) left 8px top 5px / 14px 12px
+    no-repeat,
+    repeating-linear-gradient(to bottom, var(--wl-border) 0 2px, transparent 2px 5px) right 8px top 5px / 14px 12px
+    no-repeat,
+    var(--wl-tex-fleck);
+  -webkit-mask:
+    linear-gradient(90deg, #000 0, transparent 16%, transparent 60%, #000 100%),
+    linear-gradient(0deg, #000 0, transparent 35%);
+  mask:
+    linear-gradient(90deg, #000 0, transparent 16%, transparent 60%, #000 100%),
+    linear-gradient(0deg, #000 0, transparent 35%);
+}
+/* Dark chips in the border. --wl-chip-offset shifts them per row. */
+.wl-row::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 16px;
+  padding: 4px;
+  pointer-events: none;
+  background: var(--wl-tex-chip);
+  background-position: var(--wl-chip-offset, 0) 0;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+.wl-badge {
+  flex: none;
+  display: block;
+  width: 34px;
+  height: 34px;
+  position: relative;
+  z-index: 1;
+}
+.wl-divider {
+  flex: none;
+  width: 3px;
+  height: 32px;
+  border-radius: 1px;
+  background: var(--wl-border);
+  position: relative;
+  z-index: 1;
+}
+.wl-txt {
+  flex: 1;
+  min-width: 0;
+  letter-spacing: 0.005em;
+  overflow-wrap: anywhere;
+  position: relative;
+  z-index: 1;
+  text-shadow:
+    0 2px 0 rgb(0 0 0 / 0.55),
+    0 0 6px rgb(0 0 0 / 0.35);
+}
+.wl-user {
+  font-weight: 700;
+  color: var(--wl-user);
+  margin-right: 0.08em;
+}
+.wl-chip {
+  display: inline-block;
+  margin-right: 0.3em;
+  padding: 0.18em 0.38em 0.14em;
+  border: 2px solid var(--wl-border);
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.28);
+  color: var(--wl-user);
+  font:
+    600 0.6em / 1 "Oswald",
+    "Arial Narrow",
+    sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 0.2em;
+  text-shadow: none;
+  white-space: nowrap;
+}
+.wl-emote {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.2em;
+  object-fit: contain;
+  overflow: hidden;
+}
+.wl-emblem {
+  flex: none;
+  width: 58px;
+  height: 36px;
+  color: var(--wl-border);
+  opacity: 0.92;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.45));
+}
+
+/* ---------- Row phases ---------- */
+.wl-item.wl-in {
+  animation: wl-open 180ms var(--wl-ease-out) both;
+}
+.wl-item.wl-in .wl-row {
+  animation: wl-slide-in 240ms var(--wl-ease-out) 180ms both;
+}
+.wl-item[data-phase="leaving"] {
+  animation: wl-fade-up 220ms var(--wl-ease-in) both;
+}
+.wl-item[data-phase="removed"] .wl-txt {
+  opacity: 0.7;
+}
+.wl-item[data-phase="removed"] .wl-msg {
+  font-style: italic;
+  color: var(--wl-muted);
+}
+.wl-item[data-phase="removed"] {
+  animation: wl-collapse 240ms var(--wl-ease-in) var(--wl-hold, 1160ms) both;
+}
+@keyframes wl-open {
+  from {
+    grid-template-rows: 0fr;
+  }
+  to {
+    grid-template-rows: 1fr;
+  }
+}
+@keyframes wl-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes wl-fade-up {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes wl-collapse {
+  from {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  to {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+}
+@keyframes wl-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes wl-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wl-item.wl-in {
+    animation: wl-fade-in 240ms linear both;
+  }
+  .wl-item.wl-in .wl-row {
+    animation: none;
+  }
+  .wl-item[data-phase="leaving"] {
+    animation: wl-fade-out 220ms linear both;
+  }
+  .wl-item[data-phase="removed"] {
+    animation: wl-fade-out 240ms linear var(--wl-hold, 1160ms) both;
+  }
+}
