@@ -120,6 +120,7 @@ for (const viewport of [
         .toBeGreaterThan(0);
       await last.click();
       await expect(page.locator("#detail .detail-title")).toBeFocused();
+      await expect(page).toHaveURL(/entry=/);
       await page.goBack();
       await expect(last).toBeFocused();
       await expect(last).toBeInViewport();
