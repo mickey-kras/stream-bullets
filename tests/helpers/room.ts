@@ -132,6 +132,17 @@ class RoomStorage {
     this.values.set(key, value);
   }
 
+  async delete(key: string): Promise<boolean> {
+    return this.values.delete(key);
+  }
+
+  /** Deletes every key and every SQL table, as the runtime's deleteAll does. Like the runtime, it keeps the alarm. */
+  async deleteAll(): Promise<void> {
+    this.values.clear();
+    const tables = this.sql.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
+    for (const { name } of tables as { name: string }[]) this.sql.db.exec(`DROP TABLE "${name}"`);
+  }
+
   async getAlarm(): Promise<number | null> {
     return this.alarm;
   }

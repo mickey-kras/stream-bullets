@@ -14,6 +14,8 @@ import { user } from "./auth-schema";
 import {
   CARD_ICONS,
   CARD_TABS,
+  CHANNEL_PLATFORMS,
+  CHANNEL_STATUSES,
   ENTRY_STATUSES,
   MASH_PHASES,
   MODERATION_TARGETS,
@@ -710,3 +712,55 @@ export const conversionClicks = sqliteTable(
   },
   (table) => [index("conversion_clicks_created_idx").on(table.createdAt)],
 );
+
+/**
+ * A streaming channel connected to a page for its activity feed (docs/channel-connections.md). It is separate from
+ * the sign-in `account` table. One channel belongs to at most one page, so nobody can claim another streamer's
+ * channel. `status_code` is a short machine code for the controls, never provider text.
+ */
+export const channelConnections = sqliteTable(
+  "channel_connections",
+  {
+    id: text("id").primaryKey(),
+    streamerId: text("streamer_id")
+      .notNull()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    platform: text("platform", { enum: CHANNEL_PLATFORMS }).notNull(),
+    externalId: text("external_id").notNull(),
+    displayName: text("display_name").notNull(),
+    scopes: text("scopes").notNull(),
+    status: text("status", { enum: CHANNEL_STATUSES }).notNull().default("active"),
+    statusCode: text("status_code"),
+    createdAt: integer("created_at").notNull(),
+    /** When the status or its code last changed, or a disconnect marked the row. The 7-day removal uses it. */
+    updatedAt: integer("updated_at").notNull(),
+    /** When the channel data (the name) was last read from the platform: at each connect and title refresh. */
+    dataReadAt: integer("data_read_at").notNull().default(0),
+    /** When the last event arrived, written at most each 30 seconds. */
+    lastEventAt: integer("last_event_at"),
+  },
+  (table) => [
+    uniqueIndex("channel_connections_streamer_platform_idx").on(table.streamerId, table.platform),
+    uniqueIndex("channel_connections_platform_external_idx").on(table.platform, table.externalId),
+    enumCheck("channel_connections_platform_check", table.platform, CHANNEL_PLATFORMS),
+    enumCheck("channel_connections_status_check", table.status, CHANNEL_STATUSES),
+    check("channel_connections_external_check", sql`length(${table.externalId}) BETWEEN 1 AND 64`),
+    check("channel_connections_name_check", sql`length(${table.displayName}) BETWEEN 1 AND 100`),
+    check("channel_connections_code_check", sql`${table.statusCode} IS NULL OR length(${table.statusCode}) <= 40`),
+  ],
+);
+
+/**
+ * Provider tokens, encrypted with AES-256-GCM (app/server/channel-tokens.server.ts). Each value is
+ * `base64url(iv).base64url(ciphertext)`; `key_id` names the key in CHANNEL_TOKEN_KEYS. No other module reads it.
+ */
+export const channelTokens = sqliteTable("channel_tokens", {
+  connectionId: text("connection_id")
+    .primaryKey()
+    .references(() => channelConnections.id, { onDelete: "cascade" }),
+  keyId: text("key_id").notNull(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  expiresAt: integer("expires_at"),
+  updatedAt: integer("updated_at").notNull(),
+});

@@ -3,8 +3,8 @@ import { Dialog as RadixDialog } from "radix-ui";
 import { t } from "../../i18n";
 import { IconButton } from "./icon-button";
 
-// Focus the title on open; restore the opener on close, including after rerenders.
-export function useReturnFocus(): {
+// Focus the title on open; restore the opener on close (when `returnFocus`), including after rerenders.
+export function useReturnFocus(returnFocus: boolean = true): {
   onOpenAutoFocus: (event: Event) => void;
   onCloseAutoFocus: (event: Event) => void;
 } {
@@ -20,6 +20,8 @@ export function useReturnFocus(): {
     },
     onCloseAutoFocus: (event: Event) => {
       event.preventDefault();
+      // The caller moves focus itself, for example when the opener goes away with the action.
+      if (!returnFocus) return;
       const target: HTMLElement | null = opener.current;
       // Hidden account-menu opener falls back to the avatar button.
       const visible: boolean = Boolean(target?.isConnected && target.getClientRects().length > 0);
@@ -80,6 +82,7 @@ export function Dialog({
   children,
   actions,
   className = "",
+  returnFocus = true,
 }: Readonly<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -88,8 +91,10 @@ export function Dialog({
   children?: ReactNode;
   actions?: ReactNode;
   className?: string;
+  /** False when the caller moves focus after closing, because the opener does not stay. */
+  returnFocus?: boolean;
 }>): ReactNode {
-  const focus = useReturnFocus();
+  const focus = useReturnFocus(returnFocus);
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>

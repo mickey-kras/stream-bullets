@@ -389,6 +389,9 @@ export function createAuth(env: AppEnv): ReturnType<typeof betterAuth> {
             google: {
               clientId: env.GOOGLE_CLIENT_ID,
               clientSecret: env.GOOGLE_CLIENT_SECRET,
+              // Without this, Better Auth asks Google for incremental authorization, and the sign-in token would
+              // also carry the YouTube scope of a connected channel.
+              includeGrantedScopes: false,
               mapProfileToUser: (profile) => ({
                 email: profile.email?.trim().toLowerCase(),
                 emailVerified: profile.email_verified === true,
@@ -475,19 +478,24 @@ export async function getViewerSession(
   return { viewer: viewerValue(response.user), sessionId: response.session.id };
 }
 
-// Fresh-session window for account deletion.
+// Fresh-session window for account deletion and channel connection changes.
 export const RECENT_SIGN_IN_MS = 10 * 60 * 1000;
 
-// Require a session newer than `RECENT_SIGN_IN_MS`; stolen old cookies cannot delete accounts. Return 403
-// `reauth_required` for client reauthentication.
-export async function requireRecentSignIn(request: Request, env: AppEnv, now: number = Date.now()): Promise<void> {
+// Require a session newer than `RECENT_SIGN_IN_MS`; stolen old cookies cannot delete accounts or change channels.
+// Return 403 `reauth_required` with `message` for client reauthentication.
+export async function requireRecentSignIn(
+  request: Request,
+  env: AppEnv,
+  now: number = Date.now(),
+  message: string = "Sign in again to delete your account.",
+): Promise<void> {
   const result = await createAuth(env).api.getSession({
     headers: request.headers,
     query: { disableCookieCache: true },
   });
   if (!result) throw new HttpError(401, "Sign in to continue.");
   if (now - result.session.createdAt.getTime() > RECENT_SIGN_IN_MS)
-    throw new HttpError(403, "Sign in again to delete your account.", "reauth_required");
+    throw new HttpError(403, message, "reauth_required");
 }
 
 export async function getViewer(request: Request, context: AppContext): Promise<Viewer | null> {

@@ -10,7 +10,8 @@ export interface AuditEntry {
   reason?: string;
   note?: string;
   notifyOwner?: boolean;
-  actorId: string;
+  /** Null for the system (a scheduled job). */
+  actorId: string | null;
   metadata?: Record<string, unknown> | null;
   createdAt?: number;
 }

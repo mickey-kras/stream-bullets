@@ -124,7 +124,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0026", (): void => {
+  it("covers 0006 to 0028", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -147,7 +147,27 @@ describe("migrations 0006 onwards", (): void => {
       "0024",
       "0025",
       "0026",
+      "0027",
+      "0028",
     ]);
+  });
+
+  it("adds data_read_at (0028) with a default for new rows", async (): Promise<void> => {
+    const columns = await db.prepare("SELECT name, dflt_value FROM pragma_table_info('channel_connections') WHERE name='data_read_at'").all();
+    expect(columns.results).toEqual([{ name: "data_read_at", dflt_value: "0" }]);
+  });
+
+  it("adds channel connections (0027) that keep one channel per page and platform", async (): Promise<void> => {
+    const insert = (id: string, external: string): D1PreparedStatement =>
+      db
+        .prepare(
+          `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,created_at,updated_at)
+            VALUES (?,'page','twitch',?,'Host','user:read:chat',1,1)`,
+        )
+        .bind(id, external);
+    await insert("c1", "111").run();
+    await expect(insert("c2", "222").run()).rejects.toThrow(/UNIQUE/);
+    await db.prepare("DELETE FROM channel_connections WHERE id='c1'").run();
   });
 
   it("normalizes existing email addresses without changing user identity", async () => {

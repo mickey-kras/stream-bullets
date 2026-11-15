@@ -76,6 +76,27 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
 - `GET /api/streamers/:handle` accepts an Ideas `status` filter.
 - `Entry.reported` and `Comment.reported` show the viewer's open report. Show "Reported" without another Report button.
 
+## Channel connections
+
+| Endpoint | Body | Response |
+|---|---|---|
+| `GET /api/channels` | none | `{channels: [{platform, available, connection, capabilities}]}` for the owner's page. `connection` is null or `{displayName, status, code, connectedAt, lastEventAt, updatedAt}`. `updatedAt` is when the status or its code last changed. It never holds tokens or scopes. |
+| `POST /api/channels/:platform/connect` | `{}` | `{authorizeUrl}`. The browser then goes to the provider. |
+| `POST /api/channels/:platform/reconnect` | `{}` | `{authorizeUrl}`. The connection row stays. |
+| `DELETE /api/channels/:platform` | none, or `{}` | `{revoked}`: true when the provider confirmed the revoke. `404` when the page has no connection for the platform. `409` (`channel_conflict`) when the row changed during the disconnect. A reconnect replaced it, or another disconnect or the expiry job removed it. |
+| `GET /channels/callback/:platform` | provider query | A redirect to `/overlay-control?channel=<platform>&result=<code>`. |
+| `GET /api/activity/:handle` | WebSocket upgrade, optional `key` | The activity feed. Only the current overlay key or the signed-in owner can connect. `426` without a WebSocket upgrade, `403` without a valid key or owner session, `404` for a missing or suspended page, `503` while the `CHANNELS_OFF` secret exists. |
+| `POST /hooks/twitch`, `POST /hooks/kick` | signed provider webhook | `204`, or `200` with the challenge for a Twitch subscription check. `410` for a signed Twitch notification of an unknown channel. Twitch counts it as a failed delivery. It revokes the subscription after repeated failures. `403` for a bad signature or an old timestamp. `413` for a large body. `429` when an address with too many forged webhooks reaches the per-address limit. `503` when the server cannot check the webhook. |
+
+- `:platform` is `twitch`, `youtube` or `kick`.
+- The writes need a session from the last 10 minutes. Otherwise they answer `403` with the code
+  `reauth_required`. They count against the content quota of 6 changes each minute.
+- A connect answers `423` for a frozen or suspended page. A disconnect works on a frozen page too.
+- A platform without credentials answers `503` with the code `platform_unavailable`.
+- The callback result is `connected`, `denied`, `state_invalid`, `session_mismatch`, `channel_taken`,
+  `disconnect_first`, `scope_missing` or `failed`.
+- See [Channel connections and activity](channel-connections.md) for the event contract and the limits.
+
 ## Later phases
 
 Overlay, Mash Battle, admin, step-up, and AI-interest handlers now exist in the registry.

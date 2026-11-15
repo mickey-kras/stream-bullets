@@ -3,9 +3,11 @@ import type { AppContext, AppEnv } from "../app/env";
 import { appContext } from "../app/env";
 import { hashOverlayKey, regenerateOverlayKey } from "../app/server/overlay-key.server";
 import { PollRoom } from "../app/server/poll-room";
+import { resetKickKey, resetRoutes } from "../app/server/channel-webhooks.server";
 import { createEvents } from "../app/server/schedule.server";
 import worker from "../worker";
 import { apiCaller } from "./helpers/api";
+import { installFakeProviders } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import { installWorkersRuntime, RoomNamespace, serverSocketOf } from "./helpers/room";
 
@@ -96,6 +98,7 @@ beforeAll(async (): Promise<void> => {
     DB: database.db,
     IMAGES: database.bucket,
     POLL_ROOMS: capturingRooms() as unknown as DurableObjectNamespace,
+    CHANNEL_INGEST: capturingRooms() as unknown as DurableObjectNamespace,
     REQUEST_LIMITER: {
       limit: async ({ key }: { key: string }): Promise<{ success: boolean }> => {
         limiter.keys.push(key);
@@ -445,6 +448,205 @@ describe("Worker live connections into the room", (): void => {
     expect((await live("zed_page", { "CF-Connecting-IP": "192.0.2.1" }, `?key=${key}`)).status).toBe(101);
     await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
     expect((await live("zed_page", { "CF-Connecting-IP": "192.0.2.1" }, `?key=${key}`)).status).toBe(429);
+  });
+});
+
+describe("Worker activity feed and provider webhooks", (): void => {
+  function activity(handle: string, headers: Record<string, string> = {}, query = ""): Promise<Response> {
+    return fetchPath(`/api/activity/${handle}${query}`, { headers: { Origin: origin, Upgrade: "websocket", ...headers } });
+  }
+
+  it("forwards the feed only with the current overlay key or the owner's session", async (): Promise<void> => {
+    env.CHANNEL_INGEST = capturingRooms() as unknown as DurableObjectNamespace;
+    const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    expect((await activity("zed_page", {}, `?key=${key}`)).status).toBe(101);
+    expect(lastForwarded()).toMatchObject({ overlay: "1", owner: null });
+    expect(lastForwarded().url).toBe(`https://channel-ingest.internal/subscribe?streamerId=${pageId}`);
+    expect((await activity("zed_page", { Cookie: await cookie("owner") })).status).toBe(101);
+    expect(lastForwarded()).toMatchObject({ overlay: null, owner: "1" });
+    forwarded = [];
+    // Viewers, wrong keys, revoked keys and client-sent identity headers get nothing.
+    expect((await activity("zed_page", { Cookie: await cookie("viewer"), "X-SB-Owner": "1" })).status).toBe(403);
+    expect((await activity("zed_page", {}, `?key=${"A".repeat(43)}`)).status).toBe(403);
+    await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
+    expect((await activity("zed_page", {}, `?key=${key}`)).status).toBe(403);
+    expect((await activity("hidden_page", { Cookie: await cookie("hidden") })).status).toBe(404);
+    expect((await activity("zed_page", { Origin: "https://evil.example" }, `?key=${key}`)).status).toBe(403);
+    expect((await activity("zed_page", {}, "?other=1")).status).toBe(400);
+    expect((await fetchPath("/api/activity/zed_page", { headers: { Origin: origin } })).status).toBe(426);
+    expect(forwarded).toHaveLength(0);
+  });
+
+  it("drops Kick webhooks and refuses the feed while channels are off", async (): Promise<void> => {
+    env.CHANNELS_OFF = "1";
+    expect((await fetchPath("/hooks/kick", { method: "POST", body: "{}" })).status).toBe(204);
+    expect((await activity("zed_page", { Cookie: await cookie("owner") })).status).toBe(503);
+    env.CHANNELS_OFF = undefined;
+  });
+
+  it("forwards a signed Kick delivery once and counts its repeats against the per-address limit", async (): Promise<void> => {
+    resetRoutes();
+    resetKickKey();
+    env.CHANNEL_INGEST = capturingRooms() as unknown as DurableObjectNamespace;
+    await env.DB.prepare(
+      `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,created_at,updated_at)
+        VALUES ('kick-conn',?,'kick','333','Host','',1,1)`,
+    )
+      .bind(pageId)
+      .run();
+    const keys = (await crypto.subtle.generateKey(
+      { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
+      true,
+      ["sign", "verify"],
+    )) as CryptoKeyPair;
+    const spki = btoa(String.fromCodePoint(...new Uint8Array(await crypto.subtle.exportKey("spki", keys.publicKey))));
+    // The fake for Kick's public key endpoint, as in tests/channel-webhooks.test.ts.
+    const fake = installFakeProviders();
+    fake.kickPublicKey = `-----BEGIN PUBLIC KEY-----\n${spki}\n-----END PUBLIC KEY-----`;
+    const body = JSON.stringify({
+      message_id: "k-repeat",
+      broadcaster: { user_id: 333, username: "host" },
+      sender: { user_id: 444, username: "fan", identity: null },
+      content: "hello",
+      created_at: new Date().toISOString(),
+    });
+    const id = "kick-repeat-id";
+    const timestamp = new Date().toISOString();
+    const signature = btoa(
+      String.fromCodePoint(
+        ...new Uint8Array(
+          await crypto.subtle.sign({ name: "RSASSA-PKCS1-v1_5" }, keys.privateKey, new TextEncoder().encode(`${id}.${timestamp}.${body}`)),
+        ),
+      ),
+    );
+    const deliver = (): Promise<Response> =>
+      fetchPath("/hooks/kick", {
+        method: "POST",
+        body,
+        headers: {
+          "CF-Connecting-IP": "203.0.113.210",
+          "Kick-Event-Message-Id": id,
+          "Kick-Event-Message-Timestamp": timestamp,
+          "Kick-Event-Signature": signature,
+          "Kick-Event-Type": "chat.message.sent",
+        },
+      });
+    try {
+      // The first copy reaches the page's ingest object, and the limiter is not asked.
+      expect((await deliver()).status).toBe(204);
+      expect(forwarded.map((request) => new URL(request.url).pathname)).toEqual(["/event"]);
+      expect(limiter.keys).toEqual([]);
+      // Repeats are answered at once, never reach the object, and each one counts.
+      expect((await deliver()).status).toBe(204);
+      expect((await deliver()).status).toBe(204);
+      expect(forwarded).toHaveLength(1);
+      expect(limiter.keys).toHaveLength(2);
+      // Once the limiter is exhausted, a repeat answers 429.
+      limiter.allow = false;
+      expect((await deliver()).status).toBe(429);
+      expect(forwarded).toHaveLength(1);
+    } finally {
+      vi.unstubAllGlobals();
+      installWorkersRuntime();
+      await env.DB.prepare("DELETE FROM channel_connections WHERE id='kick-conn'").run();
+    }
+  });
+
+  it("counts only rejected webhooks against the per-address limit", async (): Promise<void> => {
+    limiter.allow = false;
+    const secret = "eventsub-secret-0123456789abcdef0123";
+    env.TWITCH_EVENTSUB_SECRET = secret;
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    // A signed delivery passes without touching the limiter, even when it is exhausted.
+    const body = JSON.stringify({
+      subscription: { type: "channel.chat.clear", condition: { broadcaster_user_id: "424242" } },
+      event: {},
+    });
+    const id = "delivery-1";
+    const timestamp = new Date().toISOString();
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [
+      "sign",
+    ]);
+    const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(id + timestamp + body)));
+    const signature = `sha256=${Array.from(mac, (byte: number): string => byte.toString(16).padStart(2, "0")).join("")}`;
+    const signed = await fetchPath("/hooks/twitch", {
+      method: "POST",
+      body,
+      headers: {
+        "Twitch-Eventsub-Message-Id": id,
+        "Twitch-Eventsub-Message-Timestamp": timestamp,
+        "Twitch-Eventsub-Message-Signature": signature,
+        "Twitch-Eventsub-Message-Type": "notification",
+      },
+    });
+    // The channel is unknown here: 410 tells Twitch to drop the subscription. It is not a rejection.
+    expect(signed.status).toBe(410);
+    expect(limiter.keys).toEqual([]);
+    // A server-side failure (no secret) is not the sender's fault: it never counts.
+    env.TWITCH_EVENTSUB_SECRET = undefined;
+    expect((await fetchPath("/hooks/twitch", { method: "POST", body: "{}" })).status).toBe(503);
+    expect(limiter.keys).toEqual([]);
+    env.TWITCH_EVENTSUB_SECRET = secret;
+    // A forged one counts, and the exhausted limiter answers 429.
+    const forged = (path: string, init: RequestInit = {}): Promise<Response> =>
+      fetchPath(path, { method: "POST", body: "{}", ...init, headers: { "CF-Connecting-IP": "203.0.113.200", ...init.headers } });
+    expect((await forged("/hooks/twitch")).status).toBe(429);
+    expect(limiter.keys).toHaveLength(1);
+    // A large body and a wrong method count too.
+    const kickHeaders = { "Kick-Event-Message-Id": "m", "Kick-Event-Message-Timestamp": "1", "Kick-Event-Signature": "c2ln" };
+    expect((await forged("/hooks/kick", { body: "x".repeat(70_000), headers: kickHeaders })).status).toBe(429);
+    expect((await forged("/hooks/kick", { method: "PUT" })).status).toBe(429);
+    expect(limiter.keys).toHaveLength(3);
+    // A stale signed delivery comes from the provider: it never counts, also with an exhausted limiter.
+    const old = new Date(Date.now() - 11 * 60_000).toISOString();
+    const staleMac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(id + old + body)));
+    const stale = await fetchPath("/hooks/twitch", {
+      method: "POST",
+      body,
+      headers: {
+        "Twitch-Eventsub-Message-Id": id,
+        "Twitch-Eventsub-Message-Timestamp": old,
+        "Twitch-Eventsub-Message-Signature": `sha256=${Array.from(staleMac, (byte: number): string => byte.toString(16).padStart(2, "0")).join("")}`,
+        "Twitch-Eventsub-Message-Type": "notification",
+      },
+    });
+    expect(stale.status).toBe(403);
+    expect(limiter.keys).toHaveLength(3);
+    // A signed but unparsable Twitch delivery comes from Twitch: it never counts.
+    const junk = "{not json";
+    const junkMac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${id}x${timestamp}${junk}`)));
+    const unparsable = await fetchPath("/hooks/twitch", {
+      method: "POST",
+      body: junk,
+      headers: {
+        "Twitch-Eventsub-Message-Id": `${id}x`,
+        "Twitch-Eventsub-Message-Timestamp": timestamp,
+        "Twitch-Eventsub-Message-Signature": `sha256=${Array.from(junkMac, (byte: number): string => byte.toString(16).padStart(2, "0")).join("")}`,
+        "Twitch-Eventsub-Message-Type": "notification",
+      },
+    });
+    expect(unparsable.status).toBe(400);
+    expect(limiter.keys).toHaveLength(3);
+    // With room in the limiter, a forged webhook gets its own answer.
+    limiter.allow = true;
+    const kick = await fetchPath("/hooks/kick", { method: "POST", body: "{}" });
+    expect(kick.status).toBe(403);
+    expect(await kick.json()).toEqual({ error: "Invalid signature." });
+    // At most one rejection log a minute, with no header or body.
+    // One log a minute for each platform and reason, with no header or body.
+    expect(warn.mock.calls.filter((call) => call[0] === "channel_webhook_rejected")).toEqual([
+      ["channel_webhook_rejected", { platform: "twitch", reason: "unavailable" }],
+      ["channel_webhook_rejected", { platform: "twitch", reason: "signature" }],
+      ["channel_webhook_rejected", { platform: "kick", reason: "size" }],
+      ["channel_webhook_rejected", { platform: "kick", reason: "method" }],
+      ["channel_webhook_rejected", { platform: "twitch", reason: "stale" }],
+      ["channel_webhook_rejected", { platform: "twitch", reason: "payload" }],
+      ["channel_webhook_rejected", { platform: "kick", reason: "signature" }],
+    ]);
+    // Other paths keep the normal limit.
+    limiter.allow = false;
+    expect((await fetchPath("/hooks/other", { method: "POST" })).status).toBe(429);
+    env.TWITCH_EVENTSUB_SECRET = undefined;
   });
 });
 

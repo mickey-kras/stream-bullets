@@ -25,7 +25,13 @@ import {
   validateTestEnvironment,
 } from "../app/server/test-environment.server";
 
+import { WebhookRejected, kickWebhook, logRejectedWebhook, twitchWebhook } from "../app/server/channel-webhooks.server";
+import { channelsOff } from "../app/server/channel-tokens.server";
+import { expireYoutubeConnections } from "../app/server/channels.server";
+import { callIngest } from "../app/server/ingest-call.server";
+
 export { PollRoom } from "../app/server/poll-room";
+export { ChannelIngest } from "../app/server/channel-ingest";
 
 async function sha256(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -84,6 +90,31 @@ async function liveResponse(
   return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
 }
 
+/**
+ * The page's activity feed (docs/channel-connections.md): only an OBS source with the current overlay key, or the
+ * signed-in owner, may listen. The key grants this read-only feed and the live room, nothing else.
+ */
+async function activityResponse(
+  request: Request,
+  env: AppEnv,
+  handle: string,
+  nonce: string,
+  responseHeaders: Headers,
+): Promise<Response> {
+  requireSameOrigin(request, env);
+  const overlayKey: string | null = queryParams(request, ["key"]).get("key");
+  if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
+    throw new HttpError(426, "Use a WebSocket connection.");
+  const streamer = await getStreamer(env, handle);
+  if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
+  const headers = new Headers({ Upgrade: "websocket" });
+  if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
+  else if ((await getViewer(request, { env, nonce, responseHeaders }))?.id === streamer.ownerId)
+    headers.set("X-SB-Owner", "1");
+  else throw new HttpError(403, "Use the overlay URL with its key.");
+  return callIngest(env, streamer.id, "subscribe", { init: { headers } });
+}
+
 export default {
   // Run hourly jobs independently. Log each failure, then throw so cron failure alerts fire.
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
@@ -93,6 +124,8 @@ export default {
       cleanup: cleanExpiredData,
       // Keep weekly series 12 weeks ahead.
       schedule_top_up: topUpSeries,
+      // Stored YouTube API data must not outlive its refresh window.
+      youtube_expiry: expireYoutubeConnections,
     };
     const names: string[] = Object.keys(jobs);
     const results = await Promise.allSettled(names.map((name: string) => jobs[name](env, controller.scheduledTime)));
@@ -119,15 +152,47 @@ export default {
       validateTestEnvironment(env);
       origin = getOrigin(env);
       if (new URL(request.url).origin !== origin) throw new HttpError(421, "Use the configured application URL.");
-      const key = await clientKey(request);
-      if (!(await env.REQUEST_LIMITER.limit({ key })).success)
-        throw new HttpError(429, "Too many requests. Please try again in a minute.");
       const path = new URL(request.url).pathname;
+      const key = await clientKey(request);
+      // Provider webhooks come from a few shared provider addresses, so the per-address limit would drop real
+      // deliveries. Only a failed check that a forger causes (a bad signature, size, method or query) counts against
+      // the limit. A stale or unparsable signed Twitch delivery does not: only Twitch has our secret. For Kick, a
+      // stale or unparsable copy and a repeated message id do count: Kick signs every app's webhooks with one key.
+      // A forged request still costs a body read and a signature check. The ingest object's admission buckets
+      // bound signed deliveries.
+      const hook = path === "/hooks/twitch" || path === "/hooks/kick";
+      if (!hook && !(await env.REQUEST_LIMITER.limit({ key })).success)
+        throw new HttpError(429, "Too many requests. Please try again in a minute.");
       if (path !== "/__test") await requireTestAccess(request, env);
       const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
+      const activity = /^\/api\/activity\/([a-z0-9_]{3,30})$/.exec(path);
       const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
       if (path === "/__test") {
         response = await testEnvironmentResponse(request, env);
+      } else if (path === "/hooks/kick" && channelsOff(env)) {
+        // Ingestion is off: acknowledge and drop, so Kick does not retry. Twitch still reports revocations.
+        response = new Response(null, { status: 204 });
+      } else if (hook) {
+        const platform = path === "/hooks/twitch" ? "twitch" : "kick";
+        try {
+          // A repeated Kick message id counts against the limit too (see kickWebhook).
+          const countRepeat = async (): Promise<void> => {
+            if (!(await env.REQUEST_LIMITER.limit({ key })).success)
+              throw new HttpError(429, "Too many requests. Please try again in a minute.");
+          };
+          response =
+            platform === "twitch"
+              ? await twitchWebhook(request, env)
+              : await kickWebhook(request, env, Date.now(), countRepeat);
+        } catch (error: unknown) {
+          logRejectedWebhook(platform, error);
+          if (error instanceof WebhookRejected && error.forged && !(await env.REQUEST_LIMITER.limit({ key })).success)
+            throw new HttpError(429, "Too many requests. Please try again in a minute.");
+          throw error;
+        }
+      } else if (activity) {
+        if (channelsOff(env)) throw new HttpError(503, "The activity feed is off.");
+        response = await activityResponse(request, env, activity[1], nonce, responseHeaders);
       } else if (path === "/sitemap.xml") {
         response = await sitemapResponse(request, env);
       } else if (calendar) {

@@ -1,15 +1,19 @@
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
 import type { ReactNode } from "react";
-import { redirect, useLoaderData, useRevalidator, type LoaderFunctionArgs } from "react-router";
+import { redirect, useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
 import { t } from "../i18n";
 import { paths } from "../lib/shell";
 import { requestViewer } from "../lib/shell.server";
+import { signInProvider } from "../server/api/account";
+import { configuredProviders } from "../server/auth.server";
+import { listConnections } from "../server/channels.server";
 import { getOverlaySnapshot, getOwnStreamer } from "../server/data.server";
 import { hasOverlayKey } from "../server/overlay-key.server";
 import { getOverlayData, getOverlayState, sourceTopics } from "../server/overlay.server";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
+import { ChannelPanel, resultMessage } from "../components/channels/channel-panel";
 import { OverlayControl } from "../components/overlay/overlay-control";
 import type { OverlayPoll } from "../components/overlay/overlay-stage";
 import { SiteHeader } from "../components/shell/site-header";
@@ -43,6 +47,9 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
     name: streamer.name,
     host: new URL(origin).host,
     hasOverlayKey: await hasOverlayKey(app.env, streamer.id),
+    channels: await listConnections(app.env, streamer.id),
+    providers: configuredProviders(app.env),
+    signInProvider: await signInProvider(app.env, viewer.id),
     state,
     data,
     initial: { ...snapshots[0], polls } satisfies LiveSnapshot,
@@ -53,6 +60,7 @@ export default function OverlayControlPage(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
   const { snapshot, status, reconnect } = useLivePolls(loaded.handle);
   const revalidator = useRevalidator();
+  const [search] = useSearchParams();
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
   // Reload changes from other tabs; live messages omit preview state.
   const liveOverlay = snapshot?.overlay ?? null;
@@ -80,6 +88,17 @@ export default function OverlayControlPage(): ReactNode {
           reconnect={status === "offline" ? reconnect : undefined}
           scene={{ name: loaded.name, handle: loaded.handle, host: loaded.host, polls, data: loaded.data, now }}
         />
+        <section className="ch-section" aria-labelledby="channels-title">
+          <h2 id="channels-title" tabIndex={-1}>
+            {t("channels.title")}
+          </h2>
+          <ChannelPanel
+            channels={loaded.channels}
+            providers={loaded.providers}
+            signInProvider={loaded.signInProvider}
+            result={resultMessage(search.get("channel"), search.get("result"))}
+          />
+        </section>
       </main>
     </>
   );

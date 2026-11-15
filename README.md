@@ -89,6 +89,8 @@ Each complete pair enables its sign-in button. Do not commit secrets or database
 | `ADMIN_STEP_UP` | `off`, `report` (default), or `enforce`. Unknown values enforce. See [Admin security keys](#admin-security-keys). |
 | `LEGAL_DETAILS` | Worker secret: JSON with `operatorName`, `operatorCountry`, and `policyEffectiveDate` (`YYYY-MM-DD`). Values appear publicly. Missing values show a draft. Invalid values return 503. |
 | `CRON_HEARTBEAT_URL` | Optional uptime-service URL. Successful hourly jobs send POST. Configure alerts for missed calls. |
+| `CHANNEL_TOKEN_KEYS`, `TWITCH_EVENTSUB_SECRET`, `KICK_CLIENT_ID`, `KICK_CLIENT_SECRET` | Worker secrets for channel connections. See [setup](docs/channel-connections.md#setup). |
+| `CHANNELS_OFF` | Optional Worker secret. `1` turns channel ingestion off. Never a dashboard variable. See [Turn the feature off](docs/channel-connections.md#turn-the-feature-off). |
 | `NOTIFY_EMAIL`, `NOTIFY_FROM` | Optional `send_email` binding and sender. Both enable selected owner notifications for page freezing, suspension, or restoration. In-app notices always appear. |
 
 Administrators need a verified email in `ADMIN_EMAILS`.
@@ -212,7 +214,9 @@ For manual deployment, authenticate Wrangler:
 
 Smoke checks reject missing or invalid `BETTER_AUTH_SECRET`. They do not test OAuth. A new Worker fails until this secret exists.
 
-`pnpm deploy` builds with `CLOUDFLARE_ENV=production`. Durable Object migration `v1` runs during upload.
+`pnpm deploy` builds with `CLOUDFLARE_ENV=production`. Durable Object migrations `v1` (`PollRoom`) and `v2`
+(`ChannelIngest`) run during upload. Never remove a class a migration added. See
+[rollback](docs/channel-connections.md#rollback).
 
 Make a backup of D1 before later schema changes. Roll back only to compatible Worker code.
 Never remove migration records or apply old schema files to live data.
