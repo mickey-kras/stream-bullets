@@ -1,10 +1,44 @@
+const { readFileSync } = require("node:fs");
+const { resolve } = require("node:path");
 const { inspect, isPolicyPath, isApplicationPath } = require("./policy.cjs");
 
 const { DEPENDENCY_FILES, applicationDependenciesOnly } = require("./policy-dependencies.cjs");
 const { admittedDependabot } = require("./policy-dependabot.cjs");
 
-const OWNER = { login: "mickey-kras", id: 24433677 };
 const SHA = /^[a-f0-9]{40}$/;
+
+// Trusted reviewers are data, not code: the list is policy input, so changing it
+// requires the same exact-head or exact-tree admission as any other policy change.
+// Fail closed: a missing or malformed list aborts every guard entry point at load.
+function loadTrustedReviewers() {
+  const raw = readFileSync(resolve(__dirname, "..", "trusted-reviewers.json"), "utf8");
+  const parsed = JSON.parse(raw);
+  if (
+    !parsed ||
+    !Array.isArray(parsed.reviewers) ||
+    parsed.reviewers.length === 0 ||
+    !parsed.reviewers.every(
+      (reviewer) =>
+        typeof reviewer?.login === "string" &&
+        reviewer.login.length > 0 &&
+        Number.isSafeInteger(reviewer.id) &&
+        reviewer.id > 0,
+    )
+  ) {
+    throw new Error("trusted-reviewers.json must contain at least one {login, id} reviewer");
+  }
+  return parsed.reviewers;
+}
+
+const TRUSTED_REVIEWERS = loadTrustedReviewers();
+
+// Numeric id is authoritative; login is only a fallback when a provider omits ids.
+function isTrustedReviewer(user) {
+  if (!user || user.type !== "User") return false;
+  return TRUSTED_REVIEWERS.some((reviewer) =>
+    Number.isSafeInteger(user.id) ? user.id === reviewer.id : user.login === reviewer.login,
+  );
+}
 
 // A repository owner cannot approve their own PR. An explicit comment is an
 // admission bound to the candidate, current base and trusted policy.
@@ -13,9 +47,7 @@ function commentAdmission(comments, head, base, trusted, tree) {
   const decisive = comments.filter(
     (comment) =>
       Number.isSafeInteger(comment.id) &&
-      comment.user?.login === OWNER.login &&
-      comment.user?.id === OWNER.id &&
-      comment.user?.type === "User" &&
+      isTrustedReviewer(comment.user) &&
       prefix.test(comment.body || ""),
   );
   decisive.sort((a, b) => b.id - a.id);

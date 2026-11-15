@@ -338,8 +338,12 @@ test("trusted workflow covers comment revocation and base retarget without execu
   const checkout = steps.find((step) => step.uses?.startsWith("actions/checkout@"));
   assert.equal(checkout.with.ref, `\${{ github.workflow_sha }}`);
   assert.equal(checkout.with["persist-credentials"], false);
-  assert.match(workflow.jobs.guard.if, /comment.user.id == 24433677/);
-  assert.match(workflow.jobs.guard.if, /comment.user.login == 'mickey-kras'/);
+  assert.match(workflow.jobs.guard.if, /needs\.trust\.outputs\.trusted == 'true'/);
+  assert.equal(workflow.jobs.trust.outputs.trusted, "${{ steps.reviewers.outputs.trusted }}");
+  const trustCheckout = workflow.jobs.trust.steps.find((step) => step.uses?.startsWith("actions/checkout@"));
+  assert.equal(trustCheckout.with.ref, `\${{ github.workflow_sha }}`);
+  assert.equal(trustCheckout.with["persist-credentials"], false);
+  assert.match(trustCheckout.with["sparse-checkout"], /^\.github$/);
   assert.ok(!steps.some((step) => String(step.run || "").includes("candidate")));
 });
 
