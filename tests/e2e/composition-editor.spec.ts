@@ -96,11 +96,14 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await expect(grid).toHaveAccessibleName("Column 1, row 1: Chat.");
   // The default places: chat on the left, the characters slot along the bottom, the content without a cell.
   await expect(frame.locator('[data-grid-box="chat"]')).toContainText("Chat · 600 × 840");
-  await expect(frame.locator('[data-grid-box="characters"]')).toContainText("Characters · Coming soon");
+  const charactersCell = cellPixels(DEFAULT_LAYERS.cells.horizontal.characters);
+  await expect(frame.locator('[data-grid-box="characters"]')).toHaveText(
+    `Characters · ${charactersCell.w} × ${charactersCell.h}`,
+  );
   await expect(frame.locator('[data-grid-box="content"]')).toHaveCount(0);
-  // Characters wait for the playground; chat is off by default.
+  // Chat and characters are off by default.
   const chatLayer = editor.locator('[data-comp-layer="chat"]');
-  await expect(editor.locator('[data-comp-layer="characters"]').getByRole("checkbox")).toBeDisabled();
+  await expect(editor.locator('[data-comp-layer="characters"]').getByRole("checkbox")).not.toBeChecked();
   await expect(chatLayer.getByRole("checkbox", { name: "Show on stream" })).not.toBeChecked();
   await expect(frame.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
   // Beside the toggle: chat on puts the on-air content in the layout of the preview.
@@ -546,14 +549,16 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   if (await confirm.isVisible()) await confirm.getByRole("button", { name: "Regenerate link" }).click();
   const url: string = await page.locator("[data-ov-url]").inputValue();
   expect(url).toMatch(/\/@feature_host\/overlay\?key=/);
-  for (const layer of ["chat", "content"])
+  for (const layer of ["chat", "characters", "content"])
     await expect(page.locator(`[data-ov-layer-url="${layer}"]`)).toHaveValue(`${url}&layer=${layer}`);
-  // The chat URL names the source size; the characters row only says it is coming.
+  // Each layer URL with a cell names the source size.
   const { w, h } = cellPixels(DEFAULT_LAYERS.cells.horizontal.chat);
   await expect(page.locator('[data-ov-layer-size="chat"]')).toHaveText(`Source size: ${w} × ${h}`);
   await expect(page.locator('[data-ov-layer-url="chat"]')).toHaveAccessibleDescription(`Source size: ${w} × ${h}`);
-  await expect(page.locator('[data-ov-layer-url="characters"]')).toHaveCount(0);
-  await expect(page.locator('[data-ov-layer-row="characters"]')).toContainText("Coming soon");
+  const characters = cellPixels(DEFAULT_LAYERS.cells.horizontal.characters);
+  await expect(page.locator('[data-ov-layer-size="characters"]')).toHaveText(
+    `Source size: ${characters.w} × ${characters.h}`,
+  );
   await page.reload();
   await page.getByText("Setup", { exact: true }).click();
   await expect(page.locator(".ov-url")).toContainText("&layer=chat");
@@ -657,39 +662,6 @@ test("a note shows while the chat covers the on-air content and goes when the ch
   await dragCells(page, at(0, 0), at(5, 4));
   await save;
   await expect(note).toHaveText("");
-  await close(owner);
-});
-
-test("the characters slot label stays fully visible in its cell", async ({ browser }) => {
-  await runSql("composition-editor-label", [chatOn]);
-  const owner = await signedIn(browser, "featureowner", OVERLAP_IP);
-  const cases: [string, string, number][] = [
-    ["en", "Characters · Coming soon", 1440],
-    ["de", "Figuren · Demnächst", 1440],
-    ["ja", "キャラクター · 近日公開", 1440],
-    ["en", "Characters · Coming soon", 390],
-    ["de", "Figuren · Demnächst", 390],
-    ["ja", "キャラクター · 近日公開", 390],
-  ];
-  for (const [locale, text, width] of cases) {
-    await owner.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
-    const page = await newPage(owner);
-    await page.setViewportSize({ width, height: 900 });
-    await page.goto("/overlay-control");
-    const frame = page.locator(".ov-comp-frame");
-    await expect(frame).toHaveAttribute("data-scaled", "true");
-    const slot = frame.locator('[data-grid-box="characters"]');
-    const label = slot.locator(".ov-grid-soon");
-    await expect(label).toHaveText(text);
-    const box = await label.boundingBox();
-    const cell = await slot.boundingBox();
-    if (!box || !cell) throw new Error("No characters slot or label.");
-    // The label is inside its slot, and no part of it is cut off.
-    expect(box.x, `${locale} ${width}`).toBeGreaterThanOrEqual(cell.x - 1);
-    expect(box.x + box.width, `${locale} ${width}`).toBeLessThanOrEqual(cell.x + cell.width + 1);
-    expect(await label.evaluate((element: Element) => element.scrollWidth <= element.clientWidth)).toBe(true);
-    await close(page);
-  }
   await close(owner);
 });
 

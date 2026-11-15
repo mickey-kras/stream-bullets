@@ -25,7 +25,7 @@ The code is in these files:
 
 The composition has three layers. This list starts at the bottom layer:
 
-1. `characters`: the interactive characters. This layer comes with issue #664. Until then it shows nothing.
+1. `characters`: the interactive characters. See [Interactive characters](characters.md).
 2. `content`: the on-air poll, topic, card, or message.
 3. `chat`: the merged chat. It is on top of the other layers.
 
@@ -54,7 +54,11 @@ The overlay shows only the selected orientation.
 | `characters` | `c` 0, `r` 7, 16 × 2 | `c` 0, `r` 13, 9 × 3 | 6 × 2 |
 | `content` | No cell | No cell | 4 × 2 |
 
-The chat layer and the characters layer always have a cell. The characters cell is a slot until issue #664.
+The chat layer and the characters layer always have a cell.
+The characters cell sets the size of the playground world: each cell is 40 × 40 world pixels.
+A wide cell gives a long ground. A tall cell gives more sky above the ground.
+In a small cell, such as the minimum of 6 × 2 cells, up to 40 characters stand close together on a short ground.
+Give the characters a wide cell when your chat is busy.
 
 The content layer can have no cell. Then it uses the full frame and its **Position** and **Size** settings, as before.
 A content layer without a cell does not count for the overlap rule.
@@ -107,9 +111,6 @@ The free space stays transparent, at the left or at the top.
 
 An unknown `layer` value shows an empty transparent page. It never shows an error.
 The `poll` parameter still selects a poll for the content layer.
-
-The characters layer URL shows nothing until issue #664. Until then, it opens no live-room socket,
-and **Overlay control** does not show it.
 
 **Overlay control** shows the full URL and the layer URLs once, when you make a new key.
 The server keeps only the SHA-256 hash of the key. Thus it cannot show the URL again.
@@ -321,10 +322,13 @@ The server polls YouTube chat only while at least one activity socket of the pag
 Each open activity socket keeps the poll alive, and each poll costs YouTube quota.
 Thus close the overlay sources that you do not use.
 
-- The page opens an activity socket only when it shows an enabled chat layer. Hide the chat layer to close it.
-- The editor preview opens no activity socket.
+- The page opens an activity socket only when it shows an enabled chat layer or an enabled characters layer.
+  Hide both layers to close it.
+- A page that shows the characters layer asks its socket for the playground frames (`characters=1`).
+  Chat and characters then share that one socket.
+- The editor preview opens an activity socket only while the characters layer is on. The chat preview shows sample messages.
 - Each browser source opens its own sockets. A layer source uses one live-room socket.
-  A chat source also uses one activity socket. The characters layer source opens no socket until issue #664.
+  A chat source and a characters source also use one activity socket each.
 - A page can have at most 20 activity sockets (`MAX_SOCKETS`).
 - Valid-key overlays and the owner share 10 owner seats in the live room. See [Live-room seats](#live-room-seats).
 
@@ -344,8 +348,6 @@ Thus close the overlay sources that you do not use.
 
 ## Limits and known gaps
 
-- The characters layer shows nothing until issue #664. Its **Show on stream** control stays disabled until then.
-  You can still place its cell on the grid.
 - The server orders only the saves of one editor. If two editors save almost together, their saves can arrive in a different sequence.
 - The overlay has one theme. There is no theme selection.
 - Layer edits go live at once. They have no preview and take step.

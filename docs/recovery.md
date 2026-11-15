@@ -28,8 +28,9 @@ Use this order before the first deployment with the compatibility guard:
      grep -Ei '^X-StreamBullets-Binary-Labels:[[:space:]]*1[[:space:]]*$'
    ```
 
-3. Record the active compatible version, then change the base branch of [PR #774](https://github.com/mickey-kras/stream-bullets/pull/774) to `main`. Merge and deploy it after its checks and policy approval pass.
-4. Merge and deploy [PR #749](https://github.com/mickey-kras/stream-bullets/pull/749) last. Use the compatible reader as its rollback target to preserve vote meanings.
+3. Merge [PR #776](https://github.com/mickey-kras/stream-bullets/pull/776) after its checks and policy approval pass. It protects the coverage gate inputs.
+4. Record the active compatible version, then change the base branch of [PR #774](https://github.com/mickey-kras/stream-bullets/pull/774) to `main`. Merge and deploy it after its checks and policy approval pass.
+5. Merge and deploy [PR #749](https://github.com/mickey-kras/stream-bullets/pull/749) last. Use the compatible reader as its rollback target to preserve vote meanings.
 
 Keep migration `0031` during a Worker rollback. Select a target that returns the compatibility header.
 

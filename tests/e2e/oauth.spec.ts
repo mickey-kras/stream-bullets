@@ -3,7 +3,7 @@ import { readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Miniflare, Response as RuntimeResponse, type Request as RuntimeRequest } from "miniflare";
 import type { BrowserContext, Page, Response } from "@playwright/test";
-import { test, expect, newPage, close, checkpointNavigation } from "./coverage";
+import { test, expect, newPage, close } from "./coverage";
 import { applyMigrations, migrationFiles } from "../helpers/database";
 import { clientAddress } from "./client-ips";
 
@@ -82,7 +82,7 @@ async function signIn(page: Page, code: string): Promise<Response> {
       code === "wrong-state" ? "unrelated-state" : (url.searchParams.get("state") ?? ""),
     );
     callback.searchParams.set("code", code);
-    await checkpointNavigation(page, () => route.fulfill({ status: 302, headers: { location: callback.href }, body: "" }));
+    await route.fulfill({ status: 302, headers: { location: callback.href }, body: "" });
   });
   await page.goto(`${origin}/streamers?dialog=profile`);
   const [, callbackResponse] = await Promise.all([

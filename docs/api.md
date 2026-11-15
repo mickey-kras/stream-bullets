@@ -85,7 +85,7 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
 | `POST /api/channels/:platform/reconnect` | `{}` | `{authorizeUrl}`. The connection row stays. |
 | `DELETE /api/channels/:platform` | none, or `{}` | `{revoked}`: true when the provider confirmed the revoke. `404` when the page has no connection for the platform. `409` (`channel_conflict`) when the row changed during the disconnect. A reconnect replaced it, or another disconnect or the expiry job removed it. |
 | `GET /channels/callback/:platform` | provider query | A redirect to `/overlay-control?channel=<platform>&result=<code>`. |
-| `GET /api/activity/:handle` | WebSocket upgrade, optional `key` | The activity feed. Only the current overlay key or the signed-in owner can connect. `426` without a WebSocket upgrade, `403` without a valid key or owner session, `404` for a missing or suspended page, `503` while the `CHANNELS_OFF` secret exists. |
+| `GET /api/activity/:handle` | WebSocket upgrade, optional `key`, optional `characters=1` | The activity feed. Only the current overlay key or the signed-in owner can connect. With `characters=1` the socket also gets the character playground frames. `400` for another `characters` value or another parameter. `426` without a WebSocket upgrade, `403` without a valid key or owner session, `404` for a missing or suspended page, `503` while the `CHANNELS_OFF` secret exists. |
 | `POST /hooks/twitch`, `POST /hooks/kick` | signed provider webhook | `204`, or `200` with the challenge for a Twitch subscription check. `410` for a signed Twitch notification of an unknown channel. Twitch counts it as a failed delivery. It revokes the subscription after repeated failures. `403` for a bad signature or an old timestamp. `413` for a large body. `429` when an address with too many forged webhooks reaches the per-address limit. `503` when the server cannot check the webhook. |
 
 - `:platform` is `twitch`, `youtube` or `kick`.
@@ -101,8 +101,9 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
 
 | Endpoint | Body | Response |
 | --- | --- | --- |
-| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?}, characters?: {enabled?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?}, characters?: {enabled?, timeout?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
+| `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
 | `GET /@handle/overlay?key&layer` | Optional `layer`: `content`, `chat`, or `characters` | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that layer alone. An unknown value shows an empty page. |
 
 - `orientation` is `horizontal` (a grid of 16 × 9 cells) or `vertical` (9 × 16 cells). A cell is 120 pixels.
@@ -121,11 +122,22 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
   `on: true` returns `400` when the chat layer is off. `on: false` always applies.
   A `layers` action that sets the chat layer to off also sets `chatTestUntil` to 0.
   Overlay pages get the value through the live room. A time in the past means no test.
+- `characters.timeout` is the time in seconds without chat before a character walks out. It is a whole number from 10 to 600. The default is 60.
 - Each `layers` action and each `chatTest` action with `on: true` counts against the write quota of 60 changes each minute.
+- `POST /api/overlay/characters` controls the character playground of the page:
+  - `status` changes nothing. It only returns the state.
+  - `test` starts the characters test for 5 minutes, or starts it again. It also ends a pause.
+    It returns `400` when the saved characters layer is off.
+  - With the saved characters layer off, the playground keeps nothing. Then each operation returns `{paused: false, testEndsAt: null}`, and `remove` returns `404`.
+  - `stopTest` stops the test. `pause` and `resume` stop and start the playground. `reset` removes all characters.
+  - `remove` removes the character with the frame `id`. It returns `404` when no character has that `id`.
+  - `testEndsAt` is the server time at which the test ends, or `null` when no test runs.
+  - `test`, `reset`, and `remove` count against the write quota. The other operations do not.
+  - It returns `503` while the `CHANNELS_OFF` secret exists, when the deployment has no `CHANNEL_INGEST` binding, or when the playground cannot answer.
 - The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
 - Errors: `400` for an invalid body, a cell outside the grid, or overlapping layers, `401` without sign-in, and `403` for another origin.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
-- `OverlayState.layers` and `OverlayPublic.layers` are `{orientation, chat: {enabled, hideCommands}, characters: {enabled}, cells: {horizontal, vertical}}`.
+- `OverlayState.layers` and `OverlayPublic.layers` are `{orientation, chat: {enabled, hideCommands}, characters: {enabled, timeout}, cells: {horizontal, vertical}}`.
   Each orientation in `cells` is `{chat, characters, content}`. `content` is a cell or `null`.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value. Chat and characters are off by default, and `hideCommands` is on.
 - See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the chat test, and the chat limits.

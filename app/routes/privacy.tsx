@@ -79,6 +79,14 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           timed-out user, leaves that buffer at once. To recognize repeated deliveries, we keep message and delivery
           IDs, without their text, for up to 16 minutes. We do not keep a chat history.
         </p>
+        <p>
+          If the streamer turns on the characters layer, each chatting viewer gets a character on the overlay. For this
+          character playground we keep a list of viewers: the platform user ID, the display name, an activity score and
+          the time of the last message, but no message text. We keep a viewer on this list for up to 30 minutes after
+          their last message. When a viewer is banned or timed out, we keep their platform user ID until the ban or
+          timeout ends, or for 30 minutes if it has no end, so their character stays off. When the streamer turns the
+          characters layer off, we delete the list at once, or at the latest within a minute.
+        </p>
         <h3>YouTube channels</h3>
         <p>
           The YouTube connection uses YouTube API Services. By connecting a YouTube channel, you agree to the{" "}
@@ -301,7 +309,8 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           subscriptions, and asks the platform to revoke access. A YouTube connection is also removed 7 days after its
           access ended, or when its channel data was not read again from YouTube for 30 days; while an overlay is open,
           we read it again each day. Chat passing through for overlays stays for at most 11 minutes, and IDs of
-          deliveries already received stay for at most 16 minutes.
+          deliveries already received stay for at most 16 minutes. The viewer list of the character playground keeps
+          each viewer for at most 30 minutes after their last message, and a ban or timeout until it ends.
         </li>
         <li>
           <strong>AI interest votes</strong> are deleted after 30 days by the hourly task.

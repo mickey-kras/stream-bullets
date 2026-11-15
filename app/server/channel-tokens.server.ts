@@ -44,6 +44,14 @@ export function channelsOff(env: AppEnv): boolean {
   return env.CHANNELS_OFF === "1";
 }
 
+/**
+ * Whether the activity feed can run: channels are on and the deployment has the CHANNEL_INGEST binding. The test
+ * environment has no binding, so its feed and character playground are off.
+ */
+export function activityAvailable(env: AppEnv): boolean {
+  return !channelsOff(env) && (env as Partial<AppEnv>).CHANNEL_INGEST !== undefined;
+}
+
 /** Whether channel connections can store tokens. Without valid keys the feature is off (503), never plaintext. */
 export function tokenKeysConfigured(env: AppEnv): boolean {
   if (channelsOff(env)) return false;

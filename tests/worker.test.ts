@@ -470,7 +470,11 @@ describe("Worker activity feed and provider webhooks", (): void => {
     expect(lastForwarded().url).toBe(`https://channel-ingest.internal/subscribe?streamerId=${pageId}`);
     expect((await activity("zed_page", { Cookie: await cookie("owner") })).status).toBe(101);
     expect(lastForwarded()).toMatchObject({ overlay: null, owner: "1" });
+    // `characters=1` asks the ingest object for the playground frames too.
+    expect((await activity("zed_page", {}, `?key=${key}&characters=1`)).status).toBe(101);
+    expect(lastForwarded().url).toBe(`https://channel-ingest.internal/subscribe?streamerId=${pageId}&characters=1`);
     forwarded = [];
+    expect((await activity("zed_page", {}, `?key=${key}&characters=0`)).status).toBe(400);
     // Viewers, wrong keys, revoked keys and client-sent identity headers get nothing.
     expect((await activity("zed_page", { Cookie: await cookie("viewer"), "X-SB-Owner": "1" })).status).toBe(403);
     expect((await activity("zed_page", {}, `?key=${"A".repeat(43)}`)).status).toBe(403);
