@@ -144,6 +144,7 @@ test("card recovery preserves drafts and order across failed moves, edits and de
   await edit.getByRole("button", { name: "Delete", exact: true }).click();
   const deletion = page.getByRole("dialog", { name: /Delete.*Weekly clips/ });
   await expect(deletion).toBeVisible();
+  await expect(deletion.getByRole("heading")).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(deletion).toBeHidden();
   await expect(edit).toBeVisible();
