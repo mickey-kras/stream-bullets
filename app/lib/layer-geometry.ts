@@ -102,6 +102,12 @@ export function mergePatches(base: LayersPatch, next: LayersPatch): LayersPatch 
   });
 }
 
+function removeSentCells(layout: CellsPatch, sent: CellsPatch): void {
+  for (const layer of GRID_LAYERS)
+    if (layout[layer] !== undefined && sent[layer] !== undefined && sameCell(layout[layer], sent[layer]))
+      delete layout[layer];
+}
+
 /**
  * `draft` without the fields that still hold the value `sent` saved (or failed to save). A field edited again
  * since then has another value and stays.
@@ -120,9 +126,7 @@ export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch 
     const layout: CellsPatch | undefined = result.cells?.[orientation];
     const done: CellsPatch | undefined = sent.cells?.[orientation];
     if (!layout || !done) continue;
-    for (const layer of GRID_LAYERS)
-      if (layout[layer] !== undefined && done[layer] !== undefined && sameCell(layout[layer], done[layer]))
-        delete layout[layer];
+    removeSentCells(layout, done);
   }
   return compact(result);
 }

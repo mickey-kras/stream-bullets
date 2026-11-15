@@ -101,13 +101,17 @@ function ChatTest({
     try {
       const result = await postJson<{ overlay: OverlayState }>("/api/overlay", { action: "chatTest", on });
       onSaved(result.overlay);
-    } catch (failure: unknown) {
+    } catch (error_: unknown) {
       stoppedHere.current = false;
-      toast(t("overlay.test.failed", { error: errorMessage(failure) }), { tone: "error" });
+      toast(t("overlay.test.failed", { error: errorMessage(error_) }), { tone: "error" });
     } finally {
       setBusy(false);
     }
   }
+  const idleStatus: string = t(enabled ? "overlay.test.hint" : "overlay.test.needsChat", {
+    seconds: CHAT_TEST_MS / 1000,
+  });
+  const statusText: string = running ? t("overlay.test.left", { seconds: Math.ceil(left / 1000) }) : idleStatus;
   return (
     <div className="ov-comp-test" data-chat-test-control>
       <button
@@ -122,9 +126,7 @@ function ChatTest({
         {t(running ? "overlay.test.stop" : "overlay.test.start")}
       </button>
       <p className="muted ov-comp-note" id={hintId} data-chat-test-status>
-        {running
-          ? t("overlay.test.left", { seconds: Math.ceil(left / 1000) })
-          : t(enabled ? "overlay.test.hint" : "overlay.test.needsChat", { seconds: CHAT_TEST_MS / 1000 })}
+        {statusText}
       </p>
       <p className="sr-only" aria-live="polite" data-chat-test-news>
         {news}

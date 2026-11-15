@@ -114,6 +114,7 @@ const ChatRowItem = memo(function ChatRowItem({
   after,
 }: Readonly<{ row: ChatRow; gone: boolean; newest: boolean; removedText: string } & NameFrame>): ReactNode {
   const removed: boolean = row.phase === "removed";
+  const occurrences = new Map<string, number>();
   return (
     <li
       className="wl-item"
@@ -145,10 +146,12 @@ const ChatRowItem = memo(function ChatRowItem({
               removedText
             ) : (
               <>
-                {row.fragments.map((fragment: ActivityFragment, index: number) => (
-                  // Fragments never reorder within a row.
-                  <Fragment key={index} fragment={fragment} />
-                ))}
+                {row.fragments.map((fragment: ActivityFragment) => {
+                  const content: string = JSON.stringify(fragment);
+                  const occurrence: number = occurrences.get(content) ?? 0;
+                  occurrences.set(content, occurrence + 1);
+                  return <Fragment key={`${content}:${occurrence}`} fragment={fragment} />;
+                })}
                 {row.truncated && "…"}
               </>
             )}

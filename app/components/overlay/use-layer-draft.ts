@@ -138,8 +138,8 @@ export function useLayerDraft(
           savedCallback.current(result.overlay);
           setBoth(withoutSent(draftRef.current, pending));
         },
-        (failure: unknown): void => {
-          const message: string = errorMessage(failure);
+        (error_: unknown): void => {
+          const message: string = errorMessage(error_);
           // An editor that is open (this one after a back-forward cache restore, or the next one) shows it at once.
           if (leaveListeners.size === 0) leaveFailure = { message, at: Date.now() };
           for (const listener of leaveListeners) listener({ message, leaving: true });
@@ -179,9 +179,9 @@ export function useLayerDraft(
       savedCallback.current(result.overlay);
       setError(null);
       setStatus("saved");
-    } catch (failure: unknown) {
+    } catch (error_: unknown) {
       // 400, 409, 423, 429 and network errors: these fields show the saved layers again.
-      setError({ message: errorMessage(failure), leaving: false });
+      setError({ message: errorMessage(error_), leaving: false });
       setStatus("idle");
     } finally {
       inflight.current = null;
