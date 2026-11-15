@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createStaticHandler, createStaticRouter, StaticRouterProvider } from "react-router";
 import { describe, expect, it } from "vitest";
-import StreamerPage from "../app/routes/streamer";
+import StreamerPage, { shouldRevalidate } from "../app/routes/streamer";
 import { PollCard } from "../app/components/poll";
 import type { Entry, EntryStatus, SortOrder, Streamer } from "../app/types";
 
@@ -182,5 +182,27 @@ describe("poll states", (): void => {
       const markup: string = card(poll);
       expect(markup).toContain("Voting is closed");
     }
+  });
+});
+
+
+describe("discussion navigation data", () => {
+  it.each([
+    ["?entry=one", "?entry=one&discussion=1", undefined, false],
+    ["?entry=one&discussion=1", "?entry=one", undefined, false],
+    ["?entry=one", "?entry=one&dialog=language", undefined, false],
+    ["?entry=one", "?entry=two", undefined, true],
+    ["?entry=one", "?sort=newest", undefined, true],
+    ["?entry=one", "?entry=one", undefined, true],
+    ["?entry=one", "?entry=one&discussion=1", "POST", true],
+  ] as const)("revalidates %s -> %s with method %s: %s", (from, to, formMethod, expected) => {
+    expect(shouldRevalidate({
+      currentUrl: new URL(`https://example.test/@host${from}`),
+      nextUrl: new URL(`https://example.test/@host${to}`),
+      currentParams: { handle: "@host" },
+      nextParams: { handle: "@host" },
+      defaultShouldRevalidate: true,
+      formMethod,
+    })).toBe(expected);
   });
 });

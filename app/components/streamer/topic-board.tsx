@@ -197,6 +197,7 @@ export function TopicBoard({
   onSort,
   onSearch,
   onLoadMore,
+  action,
 }: Readonly<{
   name: string;
   entries: Entry[];
@@ -215,6 +216,7 @@ export function TopicBoard({
   onSort: (sort: SortOrder) => void;
   onSearch: (query: string) => void;
   onLoadMore: () => void;
+  action?: ReactNode;
 }>): ReactNode {
   const [split, setSplit] = useState<number>(40);
   const workspace = useRef<HTMLElement>(null);
@@ -290,6 +292,7 @@ export function TopicBoard({
                 {tn("entry.count", entries.length)}
                 {more ? "+" : ""}
               </span>
+              {action}
             </div>
           </>
         )}

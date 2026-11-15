@@ -242,7 +242,7 @@ button.gold:hover { background:var(--gold-hover); }
 .settings-page form { max-width: 600px; }
 .settings-page .upload-field { max-width: 600px; margin-top: 26px; }
 .background-preview { max-width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; }
-.topic-workspace { padding-bottom: 0; }
+.topic-workspace { padding-bottom: 12px; }
 .topic-icon svg, .category svg { fill: none; stroke: currentColor; stroke-width: 1.7; }
 .search .search-button { padding: 5px 8px; font-size: 0.875rem; min-height: 34px; flex: 0 0 auto; }
 .list-count { font: 0.75rem Figtree,Onest,sans-serif; color: var(--muted); }
@@ -290,9 +290,10 @@ html:has(.overlay-screen) { background: transparent; }
 @media(max-width:560px) {
   .streamer-card { padding: 20px; }
 }
-.topic-scroll-root, .detail-scroll-root { display:contents; }
-#topics[data-radix-scroll-area-viewport], #detail[data-radix-scroll-area-viewport] { scrollbar-width:thin!important; }
-#topics[data-radix-scroll-area-viewport]::-webkit-scrollbar, #detail[data-radix-scroll-area-viewport]::-webkit-scrollbar { display:initial!important; }
+.topic-scroll-root, .detail-scroll-root { display: contents; }
+#topics[data-radix-scroll-area-viewport], #detail[data-radix-scroll-area-viewport] { scrollbar-width: thin !important; }
+#topics[data-radix-scroll-area-viewport]::-webkit-scrollbar, #detail[data-radix-scroll-area-viewport]::-webkit-scrollbar { display: initial !important; }
+.topic-workspace [data-radix-scroll-area-viewport] > div { display: block !important; width: 100%; min-width: 0 !important; }
 input#splitter { appearance:none; height:100%; min-width:0; margin:0; padding:0; border:0; border-radius:0; background:linear-gradient(var(--input-border),var(--input-border)) center/3px 42px no-repeat; outline-offset:-2px; width: 24px; }
 input#splitter::-webkit-slider-thumb { appearance:none; width:3px; height:42px; border:0; border-radius:3px; background:transparent; }
 input#splitter::-moz-range-thumb { width:3px; height:42px; border:0; border-radius:3px; background:transparent; }
@@ -1178,8 +1179,7 @@ table.month-grid tr { display: table-row; }
 .ai-list li svg { display: inline-block; vertical-align: -3px; margin-right: 8px; }
 h1[tabindex="-1"]:focus, h1[tabindex="-1"]:focus-visible, .mash-winner-title:focus-visible, main[tabindex="-1"]:focus-visible, :focus:not(:focus-visible) { outline: none; box-shadow: none; }
 @media (max-width: 43.75em) {
-  .topic-workspace:not(.has-selection) .browse { overflow-y: auto; overscroll-behavior: contain; }
-  .topic-workspace:not(.has-selection) #topics { flex: none; overflow: visible; }
+  .topic-workspace > .browse { height: 100%; overflow: hidden; }
 }
 button.fab.fab { display: none; }
 @media (max-width: 43.75em) {
@@ -1345,10 +1345,12 @@ html[data-reduced="true"] .landing-station .station-tilt { display: none !import
   :is(.filter-chips, .reason-chips, .topic-chips, .status-tabs.level-2) > * { flex: none; }
 }
 @media (max-width: 43.75em) {
-  main.topic-workspace { overflow-y: auto; overscroll-behavior: contain; }
-  main.topic-workspace.has-selection { display: block; }
-  main.topic-workspace.has-selection > .detail, main.topic-workspace > .browse { overflow: visible; height: auto; max-height: none; min-height: 0; }
-  main.topic-workspace:not(.has-selection) { display: block; }
+  main.topic-workspace { overflow: hidden; }
+  main.topic-workspace .detail { height: 100%; border: 0; border-radius: 0; scrollbar-gutter: auto; }
+}
+@media (max-height: 32em) {
+  main.topic-workspace > .browse { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+  main.topic-workspace #topics { flex: none; }
 }
 .page-banner.suspended > span { flex: 1 1 0; min-width: 0; }
 .page-banner .banner-link { flex-basis: 100%; justify-content: flex-start; margin: 4px 0 0 28px; min-height: 32px; color: var(--gold); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
@@ -1722,6 +1724,15 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .modal-content h2[tabindex="-1"]:focus { outline: none; box-shadow: none; }
 
 :is(header nav, .header-end, .tabs, .modal-content, .poll-toolbar, .page-title, .info-card, .composer, .votes) :is(button, a.button-link, a.nav-tab), .cselect-trigger { font-family: var(--body); font-size: var(--text-control); line-height: var(--leading-body); text-transform: none; letter-spacing: normal; min-height: var(--control-size); white-space: normal; overflow-wrap: anywhere; }
+.site-header > nav > .nav-tab, .site-header > .header-end > button { white-space: nowrap; overflow-wrap: normal; flex-shrink: 0; }
+.list-toolbar:has(.suggest-topic) { flex-wrap: wrap; gap: 8px; }
+.list-toolbar .list-count { margin-left: auto; }
+.list-toolbar:has(.suggest-topic) .tabs button { padding-inline: 12px; }
+.list-toolbar .suggest-topic { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 0 0 auto; min-width: 44px; min-height: var(--control-size); padding: 6px 10px; white-space: nowrap; }
+@container (max-width: 35em) {
+  .suggest-topic > span { display: none; }
+  .list-toolbar .suggest-topic { padding: 0; width: 44px; }
+}
 :is(.topic-title, .selected .topic-title, .topic-meta, .comment-text, .description) { font-family: var(--body); line-height: var(--leading-body); }
 .sheet-body .pref-group legend { max-width: 100%; font: 600 var(--text-control)/var(--leading-body) var(--body); text-transform: none; letter-spacing: normal; padding: 0; }
 .pref-group .choice { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-control); cursor: pointer; font-weight: 600; min-height: var(--control-size); border-color: var(--input-border); font-size: var(--text-control); }
@@ -1754,7 +1765,6 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 
 .discussion-focus-bar { display: none; }
 .open-discussion { display: none; }
-#detail[data-radix-scroll-area-viewport] > div { display: block !important; min-width: 0; width: 100%; }
 .comment-meta strong, .comment-meta time, .reply-mention { min-width: 0; overflow-wrap: anywhere; }
 .comment-direct { flex-wrap: wrap; gap: 4px 10px; }
 .mention-input { position: relative; min-width: 0; flex: 1; }
