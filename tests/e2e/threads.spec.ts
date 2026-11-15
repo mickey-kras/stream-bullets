@@ -203,7 +203,7 @@ test("signed-out readers can expand a removed-parent thread and return from sign
     await signIn.click();
     const dialog = page.getByRole("dialog", { name: "Sign in or sign up", exact: true });
     await expect(dialog).toBeVisible();
-    await dialog.getByRole("button", { name: "Close", exact: true }).click();
+    await dialog.getByRole("button", { name: "Close dialog", exact: true }).click();
     await expect(dialog).toHaveCount(0);
     await expect(signIn).toBeFocused();
     await expect(root).toBeVisible();

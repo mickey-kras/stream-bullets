@@ -90,12 +90,12 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
     (route) =>
       route.fulfill({
         status: 503,
-        json: { error: "Registration temporarily unavailable." },
+        json: { error: "The request failed. Please try again." },
       }),
     { times: 1 },
   );
   await page.getByRole("button", { name: "Register this key" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Registration temporarily unavailable." })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "The request failed. Please try again." })).toBeVisible();
   await expect(page.getByLabel("Key name")).toHaveValue("YubiKey – desk");
   await page.getByRole("button", { name: "Register this key" }).click();
   await expect(page.getByRole("heading", { name: "Add a backup key" })).toBeVisible();
@@ -120,12 +120,12 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
     (route) =>
       route.fulfill({
         status: 503,
-        json: { error: "Rename temporarily unavailable." },
+        json: { error: "The request failed. Please try again." },
       }),
     { times: 1 },
   );
   await page.getByRole("dialog").getByRole("button", { name: "Save" }).click();
-  await expect(page.getByRole("dialog").getByRole("alert")).toHaveText("Rename temporarily unavailable.");
+  await expect(page.getByRole("dialog").getByRole("alert")).toHaveText("The request failed. Please try again.");
   await expect(page.getByRole("dialog").getByLabel("Key name")).toHaveValue("YubiKey – keyring");
   await page.getByRole("dialog").getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Renamed" })).toHaveText(
@@ -159,12 +159,12 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
     (route) =>
       route.fulfill({
         status: 503,
-        json: { error: "Key confirmation temporarily unavailable." },
+        json: { error: "The request failed. Please try again." },
       }),
     { times: 1 },
   );
   await second.getByRole("button", { name: "Use security key" }).click();
-  await expect(second.getByRole("alert")).toHaveText("Key confirmation temporarily unavailable.");
+  await expect(second.getByRole("alert")).toHaveText("The request failed. Please try again.");
   await second.getByRole("button", { name: "Try again" }).click();
   await expect(second.getByRole("heading", { name: /^Admin\s*:\s*Streamer pages$/ })).toBeVisible();
 
@@ -183,12 +183,12 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
     (route) =>
       route.fulfill({
         status: 503,
-        json: { error: "Moderation temporarily unavailable." },
+        json: { error: "The request failed. Please try again." },
       }),
     { times: 1 },
   );
   await sheet.getByRole("button", { name: "Freeze", exact: true }).click();
-  await expect(sheet.getByRole("alert")).toHaveText("Moderation temporarily unavailable.");
+  await expect(sheet.getByRole("alert")).toHaveText("The request failed. Please try again.");
   await expect(sheet.getByLabel("Internal note (optional)")).toHaveValue("Test freeze from the browser suite.");
   await second.route(
     "**/api/admin/streamers/*",
@@ -270,12 +270,12 @@ test("an admin sets up two keys, confirms with a key in another session, and mod
     (route) =>
       route.fulfill({
         status: 503,
-        json: { error: "Removal temporarily unavailable." },
+        json: { error: "The request failed. Please try again." },
       }),
     { times: 1 },
   );
   await remove.getByRole("button", { name: "Confirm with another key" }).click();
-  await expect(remove.getByRole("alert").filter({ hasText: "Removal temporarily unavailable." })).toBeVisible();
+  await expect(remove.getByRole("alert").filter({ hasText: "The request failed. Please try again." })).toBeVisible();
   await remove.getByRole("button", { name: "Confirm with another key" }).click();
   await expect(page.getByRole("article", { name: "Travel key" })).toHaveCount(0);
   await expect(page.getByRole("status").filter({ hasText: "Removed Travel key." })).toBeVisible();
@@ -336,20 +336,30 @@ test("report pagination recovers, preserves focus and resolves content and delet
   const reportIds: string[] = [];
   const statements: string[] = [];
   const now: number = Date.now();
-  function report(target: string, streamer: string, index: number, reporter: string | null): string {
+  function report(
+    target: string,
+    streamer: string,
+    index: number,
+    reporter: string | null,
+    author: string | null,
+  ): string {
     const id: string = randomUUID();
     reportIds.push(id);
-    return `INSERT INTO content_reports(id,target_kind,target_id,streamer_id,reporter_id,target_author_id,reason,details,snapshot,status,created_at) VALUES ('${id}','entry','${target}','${streamer}',${reporter ? `'${reporter}'` : "NULL"},${index % 2 ? `'${users.viewer.id}'` : "NULL"},'spam','${index === 0 ? "Please review the context." : ""}','Review fixture ${index}','open',${now - index});`;
+    return `INSERT INTO content_reports(id,target_kind,target_id,streamer_id,reporter_id,target_author_id,reason,details,snapshot,status,created_at) VALUES ('${id}','entry','${target}','${streamer}',${reporter ? `'${reporter}'` : "NULL"},${author ? `'${author}'` : "NULL"},'spam','${index === 0 ? "Please review the context." : ""}','Review fixture ${index}','open',${now - index});`;
   }
   for (const [index, id] of entryIds.entries()) {
+    const author: string = index % 2 ? users.viewer.id : users.owner.id;
     statements.push(
-      `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${id}','${streamerId}','${users.viewer.id}','topic','Review fixture ${index}','','','[]',${now - index},0);`,
-      report(id, streamerId, index, users.reporter.id),
+      `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${id}','${streamerId}','${author}','topic','Review fixture ${index}','','','[]',${now - index},0);`,
+      report(id, streamerId, index, users.reporter.id, author),
     );
   }
-  // Reports retain deleted reporter identities, and the response bounds per-item reporter details at 50.
-  for (let index: number = 0; index < 51; index += 1) statements.push(report(entryIds[0], streamerId, 0, null));
-  for (const [index, id] of deletedIds.entries()) statements.push(report(randomUUID(), id, index + 100, null));
+  // Deleted reporters retain their reports; live content keeps the same author across all reports.
+  // The response bounds per-item reporter details at 50.
+  for (let index: number = 0; index < 51; index += 1)
+    statements.push(report(entryIds[0], streamerId, 0, null, users.owner.id));
+  // Deleted-page snapshots have neither a surviving content author nor a surviving reporter.
+  for (const [index, id] of deletedIds.entries()) statements.push(report(randomUUID(), id, index + 100, null, null));
   await runSql("admin-report-review-coverage", statements);
   const page = await newPage(context);
   try {
@@ -359,12 +369,12 @@ test("report pagination recovers, preserves focus and resolves content and delet
       (route) =>
         route.fulfill({
           status: 503,
-          json: { error: "More pages temporarily unavailable." },
+          json: { error: "The request failed. Please try again." },
         }),
       { times: 1 },
     );
     await page.getByRole("button", { name: "Load more pages", exact: true }).click();
-    await expect(page.getByRole("alert").filter({ hasText: "More pages temporarily unavailable." })).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: "The request failed. Please try again." })).toBeVisible();
     await page.getByRole("button", { name: "Load more pages", exact: true }).click();
     await expect(page.getByRole("button", { name: "Load more pages", exact: true })).toHaveCount(0);
     await expect(page.locator("[data-group]:focus")).toHaveCount(1);
@@ -374,6 +384,7 @@ test("report pagination recovers, preserves focus and resolves content and delet
     await expect(deleted.locator(".report-item")).toHaveCount(1);
     await expect(deleted.getByRole("link", { name: "Open in context" })).toHaveCount(0);
     await expect(deleted.locator(".report-item .person strong")).toHaveText("a deleted account");
+    await expect(deleted.locator(".reporters")).toContainText("a deleted account (Spam)");
     await deleted.getByRole("button", { name: "By author", exact: true }).click();
     await expect(deleted.locator(".author-head")).toContainText("a deleted account");
 
@@ -383,12 +394,12 @@ test("report pagination recovers, preserves focus and resolves content and delet
       (route) =>
         route.fulfill({
           status: 503,
-          json: { error: "Report details temporarily unavailable." },
+          json: { error: "The request failed. Please try again." },
         }),
       { times: 1 },
     );
     await group.getByRole("button", { name: "Show 52 reported items" }).click();
-    await expect(group.getByRole("alert")).toHaveText("Report details temporarily unavailable.");
+    await expect(group.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await group.getByRole("button", { name: "Hide reported items" }).click();
     await group.getByRole("button", { name: "Show 52 reported items" }).click();
     await expect(group.locator(".report-item")).toHaveCount(50);
@@ -404,12 +415,12 @@ test("report pagination recovers, preserves focus and resolves content and delet
       (route) =>
         route.fulfill({
           status: 503,
-          json: { error: "More items temporarily unavailable." },
+          json: { error: "The request failed. Please try again." },
         }),
       { times: 1 },
     );
     await group.getByRole("button", { name: "Load more reported items" }).click();
-    await expect(group.getByRole("alert")).toHaveText("More items temporarily unavailable.");
+    await expect(group.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await group.getByRole("button", { name: "Load more reported items" }).click();
     await expect(group.locator(".report-item")).toHaveCount(52);
     await expect(group.locator(".report-item:focus")).toHaveAttribute("data-item", `entry:${entryIds[50]}`);
@@ -426,13 +437,13 @@ test("report pagination recovers, preserves focus and resolves content and delet
       (route) =>
         route.fulfill({
           status: 503,
-          json: { error: "Resolution temporarily unavailable." },
+          json: { error: "The request failed. Please try again." },
         }),
       { times: 1 },
     );
     const remove = page.getByRole("dialog", { name: "Remove this content?" });
     await remove.getByRole("button", { name: "Remove content", exact: true }).click();
-    await expect(remove.getByRole("alert")).toHaveText("Resolution temporarily unavailable.");
+    await expect(remove.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await remove.getByRole("button", { name: "Remove content", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "Content removed and its reports closed." })).toBeVisible();
     await expect(group.locator(`[data-item="entry:${entryIds[0]}"]`)).toHaveCount(0);

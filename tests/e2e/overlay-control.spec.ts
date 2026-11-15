@@ -174,30 +174,34 @@ test("source pickers preserve preview, hide poll results and recover from a fail
     await expect(control.locator(".ov-grid.enlarge-air")).toBeVisible();
     await air.getByRole("button", { name: "Enlarge the on-air monitor" }).click();
 
-    await control.getByRole("radio", { name: /A specific poll/ }).check();
+    // Source radios are controlled by the saved API response, so wait for that state after selecting.
+    await control.getByRole("radio", { name: /A specific poll/ }).click();
     await control.getByRole("combobox", { name: "Poll", exact: true }).click();
     await expect(control.getByRole("option", { name: "Mash Battle: Which boss first?", exact: true })).toBeVisible();
     await control.getByRole("option", { name: "Overlay picker poll", exact: true }).click();
+    await expect(control.getByRole("radio", { name: /A specific poll/ })).toBeChecked();
     await expect(preview.getByRole("heading", { name: "Overlay picker poll" })).toBeVisible();
-    await control.getByRole("checkbox", { name: "Show results", exact: true }).uncheck();
+    await control.getByRole("checkbox", { name: "Show results", exact: true }).click();
+    await expect(control.getByRole("checkbox", { name: "Show results", exact: true })).not.toBeChecked();
     await expect(preview).toContainText("Results hidden");
     await control.getByRole("button", { name: /Take/ }).click();
     await expect(air).toContainText("Overlay picker poll");
     await expect(air).toContainText("Results hidden");
 
-    await control.getByRole("radio", { name: /^Community card/ }).check();
+    await control.getByRole("radio", { name: /^Community card/ }).click();
     await control.getByRole("combobox", { name: "Community card", exact: true }).click();
     await control.getByRole("option", { name: "Join the Discord", exact: true }).click();
+    await expect(control.getByRole("radio", { name: /^Community card/ })).toBeChecked();
     await expect(preview).toContainText("discord.gg/feature_host");
     await expect(air).toContainText("Overlay picker poll");
     await control.getByRole("button", { name: "Corner", exact: true }).click();
     await expect(preview.locator(".ov-stage")).toHaveClass(/pos-corner/);
     await control.route("**/api/overlay", async (route) => {
       if (route.request().method() !== "POST") return route.continue();
-      await route.fulfill({ status: 503, json: { error: "Overlay save failed. Try again." } });
+      await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
     });
     await control.getByRole("button", { name: "L", exact: true }).click();
-    await expect(control.locator(".sb-toast").filter({ hasText: "Overlay save failed. Try again." })).toBeVisible();
+    await expect(control.locator(".sb-toast")).toHaveText("The request failed. Please try again.");
     await expect(control.getByRole("button", { name: "L", exact: true })).toBeEnabled();
     await expect(preview.locator(".ov-stage")).toHaveClass(/size-m/);
     await control.unroute("**/api/overlay");
@@ -205,7 +209,8 @@ test("source pickers preserve preview, hide poll results and recover from a fail
     await expect(preview.locator(".ov-stage")).toHaveClass(/size-l/);
     await control.getByRole("button", { name: "Center", exact: true }).click();
     await expect(preview.locator(".ov-stage")).toHaveClass(/pos-center/);
-    await control.getByRole("radio", { name: /^Support banner/ }).check();
+    await control.getByRole("radio", { name: /^Support banner/ }).click();
+    await expect(control.getByRole("radio", { name: /^Support banner/ })).toBeChecked();
     await expect(preview.locator('[data-overlay-source="support"]')).toContainText("ko-fi.com/feature_host");
   } finally {
     await close(owner);
@@ -290,6 +295,7 @@ test("an unattended OBS error stays transparent, retries and reloads into recove
     const page = await newPage(context);
     const now: number = Date.now();
     await page.clock.install({ time: now });
+    await page.clock.pauseAt(now + 60_000);
     let failedLoads: number = 0;
     let recoveredDocuments: number = 0;
     await page.route("**/@feature_host/overlay*", async (route) => {
@@ -310,7 +316,6 @@ test("an unattended OBS error stays transparent, retries and reloads into recove
     const screen = page.locator("main.overlay-screen");
     await expect(screen).toHaveAttribute("aria-busy", "true");
     await expect(screen).toBeEmpty();
-    await page.clock.pauseAt(await page.evaluate(() => Date.now()));
     for (let attempt: number = 1; attempt <= 6; attempt += 1) {
       const response = page.waitForResponse((result) => new URL(result.url()).pathname.endsWith("/overlay.data"));
       await page.clock.runFor(60_001);
@@ -401,10 +406,10 @@ test("the owner sees each channel's connection health and the result of a connec
     await expect(kick.getByRole("button", { name: "Reconnect Kick", exact: true })).toBeVisible();
     // A failed provider handoff restores the controls and clears the callback banner.
     await control.route("**/api/channels/kick/reconnect", async (route) => {
-      await route.fulfill({ status: 503, json: { error: "Kick is temporarily unavailable." } });
+      await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
     });
     await kick.getByRole("button", { name: "Reconnect Kick", exact: true }).click();
-    await expect(control.locator(".sb-toast").filter({ hasText: "Kick is temporarily unavailable." })).toBeVisible();
+    await expect(control.locator(".sb-toast")).toHaveText("The request failed. Please try again.");
     await expect(kick.getByRole("button", { name: "Reconnect Kick", exact: true })).toBeEnabled();
     await expect(banner).toHaveCount(0);
     await control.unroute("**/api/channels/kick/reconnect");

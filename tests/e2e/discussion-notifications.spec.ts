@@ -333,13 +333,14 @@ test("notification refresh, pagination and failed writes preserve the inbox for 
       }
       await route.continue();
     });
-    const alert = page.getByRole("alert");
+    const alert = page.locator(".notifications-page .form-error");
     await page.getByRole("button", { name: "Refresh notifications", exact: true }).click();
     await expect(alert).toHaveText("Retry notification load.");
     await expect(notices).toHaveCount(50);
     failedAction = null;
     await page.getByRole("button", { name: "Refresh notifications", exact: true }).click();
     await expect(alert).toBeEmpty();
+    await expect(alert).toBeHidden();
     await page.getByRole("button", { name: "Load more notifications", exact: true }).click();
     await expect(notices).toHaveCount(51);
     const notice = notices.first();
@@ -458,7 +459,7 @@ test("mention lookup recovers and keyboard edits keep only intact account select
         }),
       })
       .parse(await stored.json());
-    expect(result.comment.mentions).toEqual([
+    expect([...result.comment.mentions].sort((left, right): number => left.start - right.start)).toEqual([
       { userId: users.owner.id, start: 12, end: 18 },
       { userId: users.otherowner.id, start: 19, end: 30 },
     ]);

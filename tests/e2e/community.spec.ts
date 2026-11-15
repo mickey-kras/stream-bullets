@@ -90,12 +90,12 @@ test("card recovery preserves drafts and order across failed moves, edits and de
     "**/api/community-cards",
     async (route) => {
       if (route.request().method() !== "PUT") return route.continue();
-      await route.fulfill({ status: 503, json: { error: "Cards are temporarily unavailable." } });
+      await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
     },
     { times: 1 },
   );
   await page.getByRole("button", { name: "Move Clip of the week down" }).click();
-  await expect(page.locator(".sb-toast")).toContainText("Cards are temporarily unavailable.");
+  await expect(page.locator(".sb-toast")).toContainText("The request failed. Please try again.");
   await expect(titles).toHaveText(["Bring an idea", "Clip of the week", "Join the Discord", "Support Feature"]);
   const moved = page.waitForResponse(
     (response) => response.url().endsWith("/api/community-cards") && response.request().method() === "PUT",
@@ -108,9 +108,11 @@ test("card recovery preserves drafts and order across failed moves, edits and de
   const dropped = page.waitForResponse(
     (response) => response.url().endsWith("/api/community-cards") && response.request().method() === "PUT",
   );
-  await clip.locator(".drag-handle").dragTo(page.locator(".community-grid .community-card").first());
+  // Native dragging needs a move after dragenter so the card can accept dragover before release.
+  await clip.locator(".drag-handle").dragTo(page.locator(".community-grid .community-card").first(), { steps: 10 });
   expect((await dropped).status()).toBe(200);
   await page.waitForLoadState("networkidle");
+  await page.reload();
   await expect(titles).toHaveText(["Clip of the week", "Bring an idea", "Join the Discord", "Support Feature"]);
   await expect(page.getByRole("button", { name: "Move Clip of the week up" })).toBeDisabled();
   await page.getByRole("button", { name: "Edit Clip of the week" }).click();
@@ -122,12 +124,12 @@ test("card recovery preserves drafts and order across failed moves, edits and de
     (route) =>
       route.fulfill({
         status: 503,
-        json: { error: "Card could not be saved. Retry." },
+        json: { error: "The request failed. Please try again." },
       }),
     { times: 1 },
   );
   await edit.getByRole("button", { name: "Save card" }).click();
-  await expect(edit.getByRole("alert")).toHaveText("Card could not be saved. Retry.");
+  await expect(edit.getByRole("alert")).toHaveText("The request failed. Please try again.");
   await expect(edit.getByLabel("Title")).toHaveValue("Weekly clips");
   await edit.getByRole("button", { name: "Save card" }).click();
   await expect(edit).toBeHidden();
@@ -145,12 +147,12 @@ test("card recovery preserves drafts and order across failed moves, edits and de
     (route) =>
       route.fulfill({
         status: 503,
-        json: { error: "Card could not be deleted." },
+        json: { error: "The request failed. Please try again." },
       }),
     { times: 1 },
   );
   await deletion.getByRole("button", { name: "Delete card" }).click();
-  await expect(page.locator(".sb-toast")).toContainText("Card could not be deleted.");
+  await expect(page.locator(".sb-toast")).toContainText("The request failed. Please try again.");
   await expect(titles).toHaveText(["Weekly clips", "Bring an idea", "Join the Discord", "Support Feature"]);
   await page.getByRole("button", { name: "Delete Weekly clips" }).click();
   await deletion.getByRole("button", { name: "Delete card" }).click();

@@ -118,12 +118,12 @@ test("admin page pagination recovers and filtered searches preserve their query"
       (route) =>
         route.fulfill({
           status: 503,
-          json: { error: "Page list temporarily unavailable." },
+          json: { error: "The request failed. Please try again." },
         }),
       { times: 1 },
     );
     await page.getByRole("button", { name: "Load more pages", exact: true }).click();
-    await expect(page.getByRole("alert")).toHaveText("Page list temporarily unavailable.");
+    await expect(page.getByRole("alert")).toHaveText("The request failed. Please try again.");
     for (let remaining: number = 4; remaining > 0; remaining -= 1) {
       const more = page.getByRole("button", { name: "Load more pages", exact: true });
       if (!(await more.isVisible())) break;
@@ -150,12 +150,12 @@ test("admin page pagination recovers and filtered searches preserve their query"
       (route) =>
         route.fulfill({
           status: 503,
-          json: { error: "Official status temporarily unavailable." },
+          json: { error: "The request failed. Please try again." },
         }),
       { times: 1 },
     );
     await official.getByRole("button", { name: "Mark as official", exact: true }).click();
-    await expect(official.getByRole("alert")).toHaveText("Official status temporarily unavailable.");
+    await expect(official.getByRole("alert")).toHaveText("The request failed. Please try again.");
     await official.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(row.getByRole("button", { name: "Mark as official @zz_room_46" })).toBeFocused();

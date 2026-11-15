@@ -148,7 +148,8 @@ test("a pending account deletion stays open and can recover without deleting dat
     await expect(data).toBeVisible();
     await data.getByRole("button", { name: "Delete my account" }).click();
     await expect(deleting.getByLabel("Type DELETE to confirm")).toBeEmpty();
-    await expect(deleting.getByRole("alert")).toBeEmpty();
+    await expect(deleting.locator("#delete-account-error")).toBeEmpty();
+    await expect(deleting.locator("#delete-account-error")).toBeHidden();
     await deleting.getByRole("button", { name: "Back", exact: true }).click();
     await data.getByRole("button", { name: "Close dialog" }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -196,19 +197,22 @@ test("a pending host application keeps edits on failure and reloads its updated 
     await expect(dialog.getByText("You can add up to 5 links.", { exact: true })).toBeVisible();
     await expect(dialog.getByRole("button", { name: "Add another link" })).toHaveCount(0);
     await dialog.getByRole("button", { name: "Remove channel link 5" }).click();
-    await expect(dialog.getByLabel("Channel link 4")).toBeFocused();
+    await expect(dialog.getByRole("textbox", { name: "Channel link 4", exact: true })).toBeFocused();
     for (const index of [4, 3, 2]) await dialog.getByRole("button", { name: `Remove channel link ${index}` }).click();
     await expect(dialog.getByRole("button", { name: /Remove channel link/ })).toHaveCount(0);
     await dialog.getByRole("button", { name: "Add another link" }).click();
-    await expect(dialog.getByLabel("Channel link 2")).toBeFocused();
-    await dialog.getByLabel("Channel link 2").fill("https://youtube.com/@account_ui");
+    await expect(dialog.getByRole("textbox", { name: "Channel link 2", exact: true })).toBeFocused();
+    await dialog.getByRole("textbox", { name: "Channel link 2", exact: true }).fill("https://youtube.com/@account_ui");
     await dialog.getByLabel("Anything else we should know? (optional)").fill("  Updated schedule  ");
     await dialog.getByRole("button", { name: "Update request" }).click();
     await expect(dialog.getByRole("alert")).toHaveText("Applications temporarily unavailable.");
-    await expect(dialog.getByLabel("Channel link 2")).toHaveValue("https://youtube.com/@account_ui");
+    await expect(dialog.getByRole("textbox", { name: "Channel link 2", exact: true })).toHaveValue(
+      "https://youtube.com/@account_ui",
+    );
     await dialog.getByRole("button", { name: "Update request" }).click();
     await expect(page.getByText("Request updated.", { exact: true })).toBeVisible();
-    await expect(dialog.getByRole("alert")).toBeEmpty();
+    await expect(dialog.locator(".form-error[role=alert]")).toBeEmpty();
+    await expect(dialog.locator(".form-error[role=alert]")).toBeHidden();
     expect(submissions).toEqual([
       { links: ["https://twitch.tv/account_ui", "https://youtube.com/@account_ui"], note: "Updated schedule" },
       { links: ["https://twitch.tv/account_ui", "https://youtube.com/@account_ui"], note: "Updated schedule" },
@@ -264,15 +268,15 @@ test("approved hosts can retry a handle claim and administrators see their direc
     await page.goto("/streamers?dialog=host");
     const dialog = page.getByRole("dialog", { name: "Host a community" });
     await expect(dialog).toContainText("You're approved to host a community.");
-    await dialog.getByLabel("Handle", { exact: true }).fill("bad-handle");
+    await dialog.getByRole("textbox", { name: "Handle", exact: true }).fill("bad-handle");
     await dialog.getByRole("button", { name: "Create your community page" }).click();
     expect(claims).toHaveLength(0);
     expect(
       await dialog
-        .getByLabel("Handle", { exact: true })
+        .getByRole("textbox", { name: "Handle", exact: true })
         .evaluate((input: HTMLInputElement): boolean => input.validity.patternMismatch),
     ).toBe(true);
-    await dialog.getByLabel("Handle", { exact: true }).fill("account_ui_claim");
+    await dialog.getByRole("textbox", { name: "Handle", exact: true }).fill("account_ui_claim");
     await dialog.getByLabel("Streamer name").fill("  Account UI community  ");
     await dialog.getByLabel("About your stream").fill("  Account UI description  ");
     await dialog.getByRole("button", { name: "Create your community page" }).click();

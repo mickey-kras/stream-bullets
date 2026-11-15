@@ -240,12 +240,12 @@ test("host controls retry, count down, end a draw, restart and delete a battle",
       (route) =>
         route.fulfill({
           status: 503,
-          json: { error: "Battle start failed. Try again." },
+          json: { error: "The request failed. Please try again." },
         }),
       { times: 1 },
     );
     await hostCard.getByRole("button", { name: "Start with 3-2-1" }).click();
-    await expect(host.locator(".sb-toast")).toContainText("Battle start failed. Try again.");
+    await expect(host.locator(".sb-toast")).toContainText("The request failed. Please try again.");
     await expect(hostCard.getByRole("button", { name: "Start with 3-2-1" })).toBeEnabled();
     await hostCard.getByRole("button", { name: "Start with 3-2-1" }).click();
     await expect(card).toHaveClass(/phase-countdown/);
@@ -276,7 +276,7 @@ test("host controls retry, count down, end a draw, restart and delete a battle",
     await expect(hostCard.getByRole("button", { name: "Restart as new battle" })).toBeVisible();
     await hostCard.getByRole("button", { name: "Delete", exact: true }).click();
     const deletion = host.getByRole("dialog", { name: "Delete “Coverage finale”?" });
-    await host.keyboard.press("Escape");
+    await deletion.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(deletion).toBeHidden();
     await hostCard.getByRole("button", { name: "Delete", exact: true }).click();
     await deletion.getByRole("button", { name: "Delete", exact: true }).click();

@@ -299,10 +299,10 @@ test("login methods recover from reauthentication and preserve the last usable a
     await remove.last().click();
     await expect(methods.getByRole("alert").first()).toHaveText("Sign in again before changing login methods.");
     await expect(methods.getByRole("button", { name: "Continue with Twitch" })).toBeVisible();
-    await dialog.getByLabel("Display name", { exact: true }).fill("Unsaved login edit");
+    await dialog.getByRole("textbox", { name: "Display name", exact: true }).fill("Unsaved login edit");
     await expect(remove.first()).toBeDisabled();
     await expect(methods.getByRole("button", { name: "Continue with Twitch" })).toHaveCount(0);
-    await dialog.getByLabel("Display name", { exact: true }).fill("Browser viewer");
+    await dialog.getByRole("textbox", { name: "Display name", exact: true }).fill("Browser viewer");
     await expect(methods.getByRole("button", { name: "Continue with Twitch" })).toBeVisible();
     await remove.last().click();
     await expect(methods.getByRole("alert")).toHaveText("Could not change login methods. Sign in again, then retry.");
