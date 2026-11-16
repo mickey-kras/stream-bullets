@@ -45,10 +45,7 @@ function isTrustedReviewer(user) {
 function commentAdmission(comments, head, base, trusted, tree) {
   const prefix = /^(Approve|Reject) CI policy: /;
   const decisive = comments.filter(
-    (comment) =>
-      Number.isSafeInteger(comment.id) &&
-      isTrustedReviewer(comment.user) &&
-      prefix.test(comment.body || ""),
+    (comment) => Number.isSafeInteger(comment.id) && isTrustedReviewer(comment.user) && prefix.test(comment.body || ""),
   );
   decisive.sort((a, b) => b.id - a.id);
   if (!decisive.length) return undefined;
