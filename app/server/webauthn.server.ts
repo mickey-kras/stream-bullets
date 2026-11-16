@@ -1,7 +1,6 @@
 import {
   verifyAuthenticationResponse,
   verifyRegistrationResponse,
-  type RegistrationResponseJSON,
 } from "@simplewebauthn/server";
 import { isoBase64URL, isoCBOR } from "@simplewebauthn/server/helpers";
 
@@ -133,7 +132,7 @@ export function verifyRegistration(
         response: {
           clientDataJSON: credential.response.clientDataJSON,
           attestationObject: credential.response.attestationObject,
-          transports: credential.response.transports as RegistrationResponseJSON["response"]["transports"],
+          transports: credential.response.transports,
         },
       },
       expectedChallenge: expected.challenge,

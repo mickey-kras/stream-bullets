@@ -804,7 +804,8 @@ describe("frames", () => {
     // After a full frame, the next tick frame repeats every section.
     sim.fullFrame();
     sim.resendSections();
-    expect(sim.tickFrame()).toMatchObject({ roster: expect.any(Array), mode: { paused: false, test: false } });
+    const expectedRoster: unknown = expect.any(Array);
+    expect(sim.tickFrame()).toMatchObject({ roster: expectedRoster, mode: { paused: false, test: false } });
   });
 
   it("never puts a platform user id in a frame", () => {

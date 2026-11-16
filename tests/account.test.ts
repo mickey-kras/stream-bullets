@@ -359,14 +359,14 @@ beforeAll(async (): Promise<void> => {
     IMAGES: database.bucket,
     CHANNEL_INGEST: {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })) }),
     } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
       get: (name: string) => ({
-        fetch: async (): Promise<Response> => {
+        fetch: (): Promise<Response> => {
           rooms.push(name);
-          return new Response(null, { status: 204 });
+          return Promise.resolve(new Response(null, { status: 204 }));
         },
       }),
     } as unknown as DurableObjectNamespace,
@@ -584,7 +584,7 @@ describe("account export", (): void => {
     );
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(response.headers.get("Content-Type")).toBe("application/json; charset=utf-8");
-    const body = (await response.json()) as { account: { email: string } };
+    const body = await response.json<{ account: { email: string } }>();
     expect(body.account.email).toBe("leaver@example.test");
     expect((await callExport({ "Sec-Fetch-Site": "cross-site" })).status).toBe(403);
   });
@@ -850,7 +850,7 @@ describe("account deletion", (): void => {
 
   it("keeps no copy of a removed topic's title in the moderation records", async (): Promise<void> => {
     const admins: AppEnv = { ...env, ADMIN_EMAILS: "admin@example.test" };
-    const gate = async (): Promise<{ stepUp: string }> => ({ stepUp: "fresh" });
+    const gate = (): Promise<{ stepUp: string }> => Promise.resolve(({ stepUp: "fresh" }));
     await mutateEntry(admins, "admin", ids.hostPage, { action: "delete", id: ids.leaverTopic }, gate);
     await deleteAccount(env, "leaver");
     const rows = await env.DB.prepare(
@@ -945,7 +945,7 @@ describe("account deletion", (): void => {
       url: new URL(`${origin}/api/me`),
       pattern: "/api/*",
     });
-    expect(((await me.json()) as { viewer: unknown }).viewer).toBeNull();
+    expect((await me.json<{ viewer: unknown }>()).viewer).toBeNull();
     expect((await callExport()).status).toBe(401);
   });
 });

@@ -1,5 +1,5 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LoaderFunctionArgs } from "react-router";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { ChannelIngest } from "../app/server/channel-ingest";
 import { loadTokens, tokenStatement } from "../app/server/channel-tokens.server";
@@ -68,20 +68,20 @@ async function staleSession(user: string): Promise<void> {
 async function startConnect(platform: string, user = "owner"): Promise<URL> {
   const response = await call("POST", `channels/${platform}/connect`, { user, body: {} });
   expect(response.status).toBe(200);
-  return new URL(((await response.json()) as { authorizeUrl: string }).authorizeUrl);
+  return new URL((await response.json<{ authorizeUrl: string }>()).authorizeUrl);
 }
 
 /** The provider redirects the browser back to the callback. Returns the result code of the redirect. */
 async function callback(platform: string, query: Record<string, string>, user: string | null = "owner"): Promise<string | null> {
   const url = `${origin}/channels/callback/${platform}?${new URLSearchParams(query)}`;
   const request = new Request(url, { headers: user ? { cookie: await cookie(user) } : {} });
-  const response = (await callbackLoader({
+  const response = await callbackLoader({
     request,
     params: { platform },
     context: context(),
     url: new URL(url),
     pattern: "/channels/callback/:platform",
-  } as unknown as LoaderFunctionArgs)) as Response;
+  });
   expect(response.status).toBe(302);
   const location = new URL(response.headers.get("Location") ?? "", origin);
   expect(location.pathname).toBe("/overlay-control");
@@ -98,7 +98,7 @@ async function connectChannel(platform: string, user = "owner"): Promise<string 
 async function channels(user = "owner"): Promise<Record<string, unknown>[]> {
   const response = await call("GET", "channels", { user });
   expect(response.status).toBe(200);
-  return ((await response.json()) as { channels: Record<string, unknown>[] }).channels;
+  return (await response.json<{ channels: Record<string, unknown>[] }>()).channels;
 }
 
 function ingestState(streamerId: string = page): RoomState {
@@ -342,7 +342,7 @@ describe("the channel callback", (): void => {
     const before = await env.DB.prepare("SELECT id FROM channel_connections WHERE platform='twitch'").first("id");
     await env.DB.prepare("UPDATE channel_connections SET data_read_at=1").run();
     const reconnect = await call("POST", "channels/twitch/reconnect", { user: "owner", body: {} });
-    const state = new URL(((await reconnect.json()) as { authorizeUrl: string }).authorizeUrl).searchParams.get("state") ?? "";
+    const state = new URL((await reconnect.json<{ authorizeUrl: string }>()).authorizeUrl).searchParams.get("state") ?? "";
     expect(await callback("twitch", { state, code: "c" })).toBe("connected");
     expect(await env.DB.prepare("SELECT id FROM channel_connections WHERE platform='twitch'").first("id")).toBe(before);
     // The reconnect read the channel again, so its data clock starts again.
@@ -438,7 +438,7 @@ describe("callback failures", (): void => {
     const working = env.CHANNEL_INGEST;
     env.CHANNEL_INGEST = {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 503 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 503 })) }),
     } as unknown as DurableObjectNamespace;
     expect(await connectChannel("kick")).toBe("failed");
     expect(await env.DB.prepare("SELECT count(*) AS n FROM channel_connections").first("n")).toBe(0);
@@ -521,16 +521,16 @@ describe("callback failures", (): void => {
     env.CHANNEL_INGEST = {
       idFromName: (name: string) => name,
       get: () => ({
-        fetch: async (): Promise<Response> => {
+        fetch: (): Promise<Response> => {
           // The database goes away as the ingest call fails.
           env.DB = { ...real, prepare: real.prepare.bind(real), batch: () => Promise.reject(new Error("D1 down")) } as unknown as D1Database;
-          return new Response(null, { status: 503 });
+          return Promise.resolve(new Response(null, { status: 503 }));
         },
       }),
     } as unknown as DurableObjectNamespace;
     expect(await callback("kick", { state: authorize.searchParams.get("state") ?? "", code: "c" })).toBe("failed");
     env.DB = real;
-    expect(errors.mock.calls.map((call) => call[0])).toContain("channel_connect_cleanup_failed");
+    expect(errors.mock.calls.map((call): unknown => call[0])).toContain("channel_connect_cleanup_failed");
   });
 
   it("does not overwrite a row that a disconnect marked between the check and the write", async (): Promise<void> => {
@@ -863,7 +863,7 @@ describe("YouTube data retention", (): void => {
     await expireYoutubeConnections(env, later);
     expect(await platforms()).toEqual([]);
     const reasons = await env.DB.prepare("SELECT metadata FROM moderation_actions WHERE action='channel_expired' ORDER BY rowid").all();
-    expect(reasons.results.map((row) => JSON.parse(row.metadata as string).reason)).toEqual(["reauth", "stale"]);
+    expect(reasons.results.map((row) => (JSON.parse(row.metadata as string) as { reason: string }).reason)).toEqual(["reauth", "stale"]);
   });
 
   it("keeps a connection that was reconnected after its refresh found the access revoked", async (): Promise<void> => {

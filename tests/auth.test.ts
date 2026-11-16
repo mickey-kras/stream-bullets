@@ -1,3 +1,4 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { generateKeyPairSync, sign } from "node:crypto";
 import { makeSignature, symmetricDecrypt } from "better-auth/crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -16,6 +17,9 @@ import { signupPolicy } from "../app/signup-policy";
 import type { Viewer } from "../app/types";
 import type { Provider } from "../app/types";
 import { applyMigrations, createTestDatabase, migrationFiles } from "./helpers/database";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 const secret: string = "test-only-secret-71cbbad72594467d8bcd83e4e0f42d04";
 let database: Awaited<ReturnType<typeof createTestDatabase>>;
@@ -73,7 +77,7 @@ async function oauthCallback(
     }),
   );
   expect(response.status).toBe(200);
-  const result: { url: string } = (await response.json()) as { url: string };
+  const result: { url: string } = await response.json<{ url: string }>();
   const state: string | null = new URL(result.url).searchParams.get("state");
   expect(state).not.toBeNull();
   return new Request(
@@ -671,7 +675,7 @@ describe("OAuth boundary", () => {
         }),
       );
       expect(response.status).toBe(200);
-      const { url } = (await response.json()) as { url: string };
+      const { url } = await response.json<{ url: string }>();
       expect(new URL(url).host).toBe(host);
     }
   });
@@ -719,9 +723,9 @@ describe("provider adapters", () => {
   // Return queued fetch bodies; preserve supplied Responses.
   function answer(...bodies: unknown[]) {
     const queue = [...bodies];
-    return vi.spyOn(globalThis, "fetch").mockImplementation(async (): Promise<Response> => {
+    return vi.spyOn(globalThis, "fetch").mockImplementation((): Promise<Response> => {
       const next = queue.shift();
-      return next instanceof Response ? next : Response.json(next);
+      return Promise.resolve(next instanceof Response ? next : Response.json(next));
     });
   }
 
@@ -760,7 +764,7 @@ describe("provider adapters", () => {
       const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
       expect(url).toBe("https://api.instagram.com/oauth/access_token");
       expect(init.method).toBe("POST");
-      expect(Object.fromEntries(new URLSearchParams(String(init.body)))).toEqual({
+      expect(Object.fromEntries(new URLSearchParams(await new Response(init.body).text()))).toEqual({
         client_id: "test-instagram-client",
         client_secret: "test-instagram-secret",
         grant_type: "authorization_code",
@@ -922,7 +926,7 @@ async function linkCallback(token: string, provider: Provider = "twitch", authEn
     authEnv,
   );
   expect(response.status).toBe(200);
-  const body = (await response.json()) as { url: string };
+  const body = await response.json<{ url: string }>();
   const state: string = new URL(body.url).searchParams.get("state") ?? "";
   const sessionRequest: Request = await signedRequest(token);
   const cookies: string = response.headers

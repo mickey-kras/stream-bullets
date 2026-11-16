@@ -162,7 +162,7 @@ export function ErrorBoundary(): ReactNode {
     }
     const timer = setTimeout(() => {
       if (attempt > ERROR_RELOAD_AFTER) globalThis.location.reload();
-      else retry.current().finally(finishAttempt);
+      else retry.current().then(finishAttempt, finishAttempt);
     }, delay);
     return (): void => clearTimeout(timer);
   }, [settled]);

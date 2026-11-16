@@ -490,7 +490,7 @@ describe("page moderation status", (): void => {
     await expect(
       saveStreamer(env, "applicant", { handle: "mod_page", name: "Moderated", about: "Changed" }),
     ).rejects.toMatchObject({ status: 423 });
-    const gate = async (): Promise<{ stepUp: string }> => ({ stepUp: "fresh" });
+    const gate = (): Promise<{ stepUp: string }> => Promise.resolve(({ stepUp: "fresh" }));
     await mutateComment(env, "admin", { action: "delete", id: commentId }, gate);
     await mutateEntry(env, "admin", pageId, { action: "delete", id: topicId }, gate);
     expect(await env.DB.prepare("SELECT count(*) AS n FROM entries").first("n")).toBe(0);

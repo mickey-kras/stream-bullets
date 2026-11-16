@@ -27,7 +27,7 @@ export function createKit(compact: boolean, family: string) {
     // Part-specific light-switch callbacks.
     onLights: [] as Array<(on: boolean) => void>,
 
-    halo(at: P, size: number, color: string, opacity: number, parent: THREE.Object3D): THREE.Sprite {
+    halo(this: void, at: P, size: number, color: string, opacity: number, parent: THREE.Object3D): THREE.Sprite {
       const material = new THREE.SpriteMaterial({
         map: glowTexture,
         color,
@@ -45,7 +45,7 @@ export function createKit(compact: boolean, family: string) {
       return s;
     },
     // Switchable light; power = [intensity, distance].
-    practical(color: string, power: readonly [number, number], at: P, parent: THREE.Object3D): THREE.PointLight {
+    practical(this: void, color: string, power: readonly [number, number], at: P, parent: THREE.Object3D): THREE.PointLight {
       const l = new THREE.PointLight(color, power[0], power[1], 2);
       l.position.set(at[0], at[1], at[2]);
       parent.add(l);
@@ -54,6 +54,7 @@ export function createKit(compact: boolean, family: string) {
     },
     // Repaint on typeface changes; size = [width, height].
     label(
+      this: void,
       draw: Draw,
       size: readonly [number, number],
       at: P,
@@ -88,7 +89,7 @@ export function createKit(compact: boolean, family: string) {
       return mesh(new THREE.PlaneGeometry(w, h), mat, at, parent, false);
     },
 
-    plant(at: P, count: number, length: number, parent: THREE.Object3D, seed: number): void {
+    plant(this: void, at: P, count: number, length: number, parent: THREE.Object3D, seed: number): void {
       const rnd = T.random(seed);
       for (let i = 0; i < count; i++) {
         const base: P = [at[0] + (rnd() - 0.5) * 0.08, at[1], at[2] + (rnd() - 0.5) * 0.08];
@@ -98,7 +99,7 @@ export function createKit(compact: boolean, family: string) {
       }
     },
     // Animated instrument; amber dials are backlit VU meters.
-    gauge(at: P, rot: number, size: number, parent: THREE.Object3D, amber = false, high = false): void {
+    gauge(this: void, at: P, rot: number, size: number, parent: THREE.Object3D, amber = false, high = false): void {
       const g = add(new THREE.Group(), parent);
       g.position.set(at[0], at[1], at[2]);
       g.rotation.y = rot;
@@ -139,7 +140,7 @@ export function createKit(compact: boolean, family: string) {
       });
     },
 
-    valve(at: P, rot: THREE.Euler, size: number, parent: THREE.Object3D): void {
+    valve(this: void, at: P, rot: THREE.Euler, size: number, parent: THREE.Object3D): void {
       const g = add(new THREE.Group(), parent);
       g.position.set(at[0], at[1], at[2]);
       g.rotation.copy(rot);

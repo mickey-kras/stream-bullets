@@ -202,7 +202,7 @@ export default function Streamers(): ReactNode {
     else params.delete("query");
     const qs: string = params.toString();
     const target: string = qs ? `/streamers?${qs}` : "/streamers";
-    navigate(target, { replace, preventScrollReset: true });
+    void navigate(target, { replace, preventScrollReset: true });
   }
 
   async function loadMore(): Promise<void> {

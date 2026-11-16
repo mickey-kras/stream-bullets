@@ -33,8 +33,8 @@ describe("traceable route failures", () => {
   it("renders the logged request ID without exception details", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     const input: LoaderFunctionArgs = args();
-    const loader = withRouteErrors(async (): Promise<never> => {
-      throw new TypeError("D1 query failed for private@example.test with session=secret");
+    const loader = withRouteErrors((): Promise<never> => {
+      return Promise.reject(new TypeError("D1 query failed for private@example.test with session=secret"));
     });
     const handler = createStaticHandler([
       { id: "directory", path: "/streamers", loader, ErrorBoundary: RouteErrorBoundary },
@@ -54,7 +54,7 @@ describe("traceable route failures", () => {
   });
 
   it("keeps one ID across loaders and separate IDs across requests", async () => {
-    const loader = withRouteErrors(async (): Promise<string> => "loaded");
+    const loader = withRouteErrors((): Promise<string> => Promise.resolve("loaded"));
     const first: LoaderFunctionArgs = args();
     await loader(first);
     const id: string | undefined = first.context.get(appContext).requestId;
@@ -68,8 +68,8 @@ describe("traceable route failures", () => {
   it("preserves redirects and expected HTTP statuses without logging them", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     const redirect = new Response(null, { status: 302, headers: { Location: "/streamers" } });
-    await expect(withRouteErrors(async (): Promise<never> => { throw redirect; })(args())).rejects.toBe(redirect);
-    await expect(withRouteErrors(async (): Promise<never> => { throw new HttpError(403, "Forbidden."); })(args()))
+    await expect(withRouteErrors(vi.fn<() => Promise<never>>().mockRejectedValue(redirect))(args())).rejects.toBe(redirect);
+    await expect(withRouteErrors((): Promise<never> => { return Promise.reject(new HttpError(403, "Forbidden.")); })(args()))
       .rejects.toMatchObject({ status: 403 });
     expect(log).not.toHaveBeenCalled();
   });
@@ -80,7 +80,7 @@ describe("traceable route failures", () => {
     const controller = new AbortController();
     controller.abort();
     input.request = new Request(input.request, { signal: controller.signal });
-    await expect(withRouteErrors(async (): Promise<never> => { throw new Error("cancelled"); })(input))
+    await expect(withRouteErrors((): Promise<never> => { return Promise.reject(new Error("cancelled")); })(input))
       .rejects.toMatchObject({ status: 500 });
     expect(log).not.toHaveBeenCalled();
   });

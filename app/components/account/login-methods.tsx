@@ -41,11 +41,11 @@ export function LoginMethods({ blocked }: Readonly<{ blocked: boolean }>): React
     setPending(true);
     setError("");
     try {
-      const result: Awaited<ReturnType<typeof authClient.unlinkAccount> | ReturnType<typeof authClient.linkSocial>> =
+      const result: { error?: { code?: string } | null } =
         accountId
           ? await authClient.unlinkAccount({ accountId })
           : await authClient.linkSocial({
-              provider: provider as "google",
+              provider,
               callbackURL: "/settings",
               errorCallbackURL: "/sign-in",
             });

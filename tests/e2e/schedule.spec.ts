@@ -43,7 +43,7 @@ test("the event dialog shows the stream and the .ics feed serves the schedule", 
   expect(download.suggestedFilename()).toBe("Mic-shootout.ics");
   const path: string | null = await download.path();
   expect(path).not.toBeNull();
-  expect(await readFile(path!, "utf8")).toContain("SUMMARY:Mic shootout");
+  expect(await readFile(path, "utf8")).toContain("SUMMARY:Mic shootout");
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   await dialog.getByRole("button", { name: "Copy link" }).click();
   await expect(page.locator(".sb-toast")).toContainText("Link copied.");

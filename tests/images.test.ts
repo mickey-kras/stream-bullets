@@ -1,3 +1,4 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   deleteAvatar,
@@ -10,6 +11,9 @@ import {
 } from "../app/server/images.server";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import type { AppEnv } from "../app/env";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 const png = Uint8Array.from(
   Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64"),
@@ -80,12 +84,17 @@ describe("owned image storage", () => {
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(png);
     expect((await serveImage(env, "avatar/viewer", "HEAD")).body).toBeNull();
   });
+  const cacheKey = (key: RequestInfo | URL): string => (key instanceof Request ? key.url : String(key));
+
   function imageCache(): Pick<Cache, "match" | "put"> {
     const entries = new Map<string, Response>();
     return {
-      match: vi.fn(async (key: RequestInfo | URL): Promise<Response | undefined> => entries.get(String(key))?.clone()),
-      put: vi.fn(async (key: RequestInfo | URL, response: Response): Promise<void> => {
-        entries.set(String(key), response.clone());
+      match: vi.fn((key: RequestInfo | URL): Promise<Response | undefined> =>
+        Promise.resolve(entries.get(cacheKey(key))?.clone()),
+      ),
+      put: vi.fn((key: RequestInfo | URL, response: Response): Promise<void> => {
+        entries.set(cacheKey(key), response.clone());
+        return Promise.resolve();
       }),
     };
   }
@@ -133,7 +142,7 @@ describe("owned image storage", () => {
     const latest = await serveImage(env, "avatar/viewer", "GET", cache);
     expect(latest.headers.get("ETag")).toBe(replacementTag);
     expect(get).not.toHaveBeenCalled();
-    const keys = vi.mocked(cache.put).mock.calls.map(([key]) => String(key));
+    const keys = vi.mocked(cache.put).mock.calls.map(([key]) => cacheKey(key));
     expect(new Set(keys).size).toBe(2);
   });
 

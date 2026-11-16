@@ -78,7 +78,7 @@ async function openContact(page: Page): Promise<void> {
 for (const locale of LOCALES) {
   test(`${locale} shared fallback layout and dialogs fit every viewport`, async ({ page, context }) => {
     await page.addInitScript(() => {
-      const original = HTMLCanvasElement.prototype.getContext;
+      const original = Reflect.get<HTMLCanvasElement, "getContext">(HTMLCanvasElement.prototype, "getContext");
       Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
         value: function (this: HTMLCanvasElement, contextId: string, options?: unknown): RenderingContext | null {
           return contextId.startsWith("webgl") ? null : original.call(this, contextId, options);
@@ -236,7 +236,7 @@ test.describe("configured-provider mobile dialogs", () => {
         throw new Error("Mobile layout tests must not contact external services.");
       },
     });
-    await applyMigrations((await runtime.getD1Database("DB")) as unknown as D1Database, await migrationFiles());
+    await applyMigrations(await runtime.getD1Database("DB"), await migrationFiles());
     await runtime.ready;
   });
 

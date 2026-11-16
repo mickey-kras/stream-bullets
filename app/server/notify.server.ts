@@ -40,14 +40,14 @@ export async function ownerEmail(env: AppEnv, streamerId: string, action: PageAc
     .first<OwnerRow>();
   if (!row?.email || isPlaceholderEmail(row.email)) return null;
   const locale = isLocale(row.locale) ? row.locale : DEFAULT_LOCALE;
-  return withLocale(locale, async () => {
+  return withLocale(locale, () => {
     const pageUrl = `${env.APP_ORIGIN}/@${row.handle}`;
     const lines: string[] = [
       row.status === "active" ? t("notify.activeBody") : ownerNotice(row.status, row.status_reason),
       t("notify.pageLine", { url: pageUrl }),
       t("notify.contactLine", { email: contactEmails.support }),
     ];
-    return { to: row.email, subject: t(subjects[action], { handle: row.handle }), text: lines.join("\n\n") };
+    return Promise.resolve({ to: row.email, subject: t(subjects[action], { handle: row.handle }), text: lines.join("\n\n") });
   });
 }
 

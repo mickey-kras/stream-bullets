@@ -127,7 +127,8 @@ it.each([true, false])(
       );
       if (object instanceof THREE.Mesh) {
         meshes++;
-        const positions = object.geometry.getAttribute("position");
+        const geometry = object.geometry as THREE.BufferGeometry;
+        const positions = geometry.getAttribute("position");
         expect(Array.from(positions.array).every(Number.isFinite)).toBe(true);
         hash.update(JSON.stringify(round(positions.array)));
       }
@@ -151,8 +152,9 @@ it.each([true, false])(
     for (const repaint of kit.repaints) repaint();
     scene.traverse((object: THREE.Object3D): void => {
       if (!(object instanceof THREE.Mesh)) return;
-      object.geometry.dispose();
-      const materials: THREE.Material[] = Array.isArray(object.material) ? object.material : [object.material];
+      const mesh = object as THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>;
+      mesh.geometry.dispose();
+      const materials: THREE.Material[] = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       for (const material of materials) material.dispose();
     });
   },

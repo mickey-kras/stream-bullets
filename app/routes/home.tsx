@@ -41,7 +41,7 @@ export default function Home(): ReactNode {
       const intent: Intent | undefined = SIGN_INTENTS[index];
       if (intent) {
         trackCta(`cta_${intent}`);
-        navigate(directoryHref(intent));
+        void navigate(directoryHref(intent));
       }
     },
     [navigate],

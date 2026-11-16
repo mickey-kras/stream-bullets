@@ -406,7 +406,7 @@ export default function StreamerPage(): ReactNode {
 
   /** Back to the list: the previous history entry when the list opened this detail, so filters, scroll and focus stay. */
   function backToList(next: View): void {
-    if (cameFromList(here.state)) go(-1);
+    if (cameFromList(here.state)) void go(-1);
     else navigate(next);
   }
 
@@ -503,7 +503,7 @@ export default function StreamerPage(): ReactNode {
   function closeDiscussion(): void {
     const state: unknown = here.state;
     if (typeof state === "object" && state !== null && "discussionReturn" in state && state.discussionReturn === true)
-      go(-1);
+      void go(-1);
     else setParam("discussion", null);
   }
 
@@ -518,14 +518,17 @@ export default function StreamerPage(): ReactNode {
         moderator={moderator}
         status={streamer.status}
         refreshKey={board.revision}
-        onChanged={refreshBoard}
+        onChanged={() => void refreshBoard()}
       />
     );
   }
 
   function copyPageLink(): void {
     const url = `${location.origin}/@${streamer.handle}`;
-    copyText(url).then((copied: boolean) => toast(copied ? t("entry.linkCopied") : url));
+    copyText(url).then(
+      (copied: boolean) => toast(copied ? t("entry.linkCopied") : url),
+      () => toast(url),
+    );
   }
 
   function renderEmptyTopics(): ReactNode {
@@ -666,7 +669,7 @@ export default function StreamerPage(): ReactNode {
         onSelect={(id: string) => openFromList("topics", id)}
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onSearch={(next: string) => changeBoard("query", next)}
-        onLoadMore={loadMore}
+        onLoadMore={() => void loadMore()}
         action={
           !official &&
           viewer && (
@@ -712,9 +715,9 @@ export default function StreamerPage(): ReactNode {
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onRefresh={() => {
           setRefreshes((value: number) => value + 1);
-          refreshBoard();
+          void refreshBoard();
         }}
-        onLoadMore={loadMore}
+        onLoadMore={() => void loadMore()}
         onAction={act}
         onDelete={async (id: string) => {
           if (loadedSelected?.id === id) return removeSelected();

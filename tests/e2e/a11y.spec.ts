@@ -237,13 +237,13 @@ for (const failure of ["read", "write"] as const) {
   test(`blocked focus storage ${failure} does not break the page or language switching`, async ({ page }) => {
     await page.addInitScript((mode: "read" | "write"): void => {
       if (mode === "read") {
-        const getItem = Storage.prototype.getItem;
+        const getItem = Reflect.get<Storage, "getItem">(Storage.prototype, "getItem");
         Storage.prototype.getItem = function (key: string): string | null {
           if (key === "sb-language-focus") throw new DOMException("Blocked", "SecurityError");
           return getItem.call(this, key);
         };
       } else {
-        const setItem = Storage.prototype.setItem;
+        const setItem = Reflect.get<Storage, "setItem">(Storage.prototype, "setItem");
         Storage.prototype.setItem = function (key: string, value: string): void {
           if (key === "sb-language-focus") throw new DOMException("Full", "QuotaExceededError");
           setItem.call(this, key, value);
