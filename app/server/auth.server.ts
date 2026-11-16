@@ -145,10 +145,10 @@ function reliableProviderEmail(provider: string | undefined, profile: unknown): 
   return null;
 }
 
-async function addSignInContext(
-  additionalData: unknown,
-): Promise<void> {
-  const context = z.object({ acceptance: z.unknown().optional(), displayName: z.unknown().optional() }).safeParse(additionalData);
+async function addSignInContext(additionalData: unknown): Promise<void> {
+  const context = z
+    .object({ acceptance: z.unknown().optional(), displayName: z.unknown().optional() })
+    .safeParse(additionalData);
   if (!context.success) return;
   const acceptance = z
     .object({
@@ -194,7 +194,11 @@ function authRequestHooks(env: AppEnv, origin: string): NonNullable<BetterAuthOp
         });
       }
       if (ctx.path === "/link-social") {
-        if ((typeof fields.provider !== "string" || !configuredProviders(env).some((provider) => provider === fields.provider)) || fields.idToken) {
+        if (
+          typeof fields.provider !== "string" ||
+          !configuredProviders(env).some((provider) => provider === fields.provider) ||
+          fields.idToken
+        ) {
           throw new APIError("BAD_REQUEST", {
             message: "Use a configured provider authorization to link an account.",
           });

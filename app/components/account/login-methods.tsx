@@ -41,14 +41,13 @@ export function LoginMethods({ blocked }: Readonly<{ blocked: boolean }>): React
     setPending(true);
     setError("");
     try {
-      const result: { error?: { code?: string } | null } =
-        accountId
-          ? await authClient.unlinkAccount({ accountId })
-          : await authClient.linkSocial({
-              provider,
-              callbackURL: "/settings",
-              errorCallbackURL: "/sign-in",
-            });
+      const result: { error?: { code?: string } | null } = accountId
+        ? await authClient.unlinkAccount({ accountId })
+        : await authClient.linkSocial({
+            provider,
+            callbackURL: "/settings",
+            errorCallbackURL: "/sign-in",
+          });
       if (result.error) {
         setReauth(result.error.code === "REAUTH_REQUIRED");
         setError(result.error.code === "REAUTH_REQUIRED" ? t("loginMethods.reauthenticate") : t("loginMethods.failed"));

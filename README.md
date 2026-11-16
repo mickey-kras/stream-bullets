@@ -288,7 +288,7 @@ PRs need `Required quality gates` and `Trusted CI policy`. Production also needs
 | CodeQL | Analysis failure. Code scanning rules must block findings |
 | Policy | Unpinned action, ignored failure, missing gate, or mixed CI/application change |
 
-Type-aware ESLint checks application code, tests, and TypeScript scripts. Run `pnpm check` before `pnpm lint`.
+ESLint uses types to check application code, tests, and scripts written in TypeScript. Run `pnpm check` before `pnpm lint`.
 CI sends its ESLint JSON report to SonarQube from the same verified revision.
 The lint job still blocks findings before merge.
 
