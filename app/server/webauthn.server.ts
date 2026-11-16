@@ -1,7 +1,4 @@
-import {
-  verifyAuthenticationResponse,
-  verifyRegistrationResponse,
-} from "@simplewebauthn/server";
+import { verifyAuthenticationResponse, verifyRegistrationResponse } from "@simplewebauthn/server";
 import { isoBase64URL, isoCBOR } from "@simplewebauthn/server/helpers";
 
 // Use `@simplewebauthn/server` verification without creating a new session. Registration requests attestation

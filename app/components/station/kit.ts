@@ -45,7 +45,13 @@ export function createKit(compact: boolean, family: string) {
       return s;
     },
     // Switchable light; power = [intensity, distance].
-    practical(this: void, color: string, power: readonly [number, number], at: P, parent: THREE.Object3D): THREE.PointLight {
+    practical(
+      this: void,
+      color: string,
+      power: readonly [number, number],
+      at: P,
+      parent: THREE.Object3D,
+    ): THREE.PointLight {
       const l = new THREE.PointLight(color, power[0], power[1], 2);
       l.position.set(at[0], at[1], at[2]);
       parent.add(l);

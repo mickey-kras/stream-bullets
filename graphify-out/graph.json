@@ -1,4 +1,5 @@
 {
+  "built_at_commit": "21c9e46d5b9106d7778b45e328b8fd46ae0e2429",
   "directed": true,
   "edges": [
     {
@@ -1593,7 +1594,7 @@
       "relation": "calls",
       "source": "app_components_account_login_methods_loginmethods",
       "source_file": "app/components/account/login-methods.tsx",
-      "source_location": "L83",
+      "source_location": "L82",
       "target": "app_components_account_login_methods_loginmethods_change",
       "weight": 1.0
     },
@@ -1605,7 +1606,7 @@
       "relation": "calls",
       "source": "app_components_account_login_methods_loginmethods",
       "source_file": "app/components/account/login-methods.tsx",
-      "source_location": "L98",
+      "source_location": "L97",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -1617,7 +1618,7 @@
       "relation": "calls",
       "source": "app_components_account_login_methods_loginmethods_change",
       "source_file": "app/components/account/login-methods.tsx",
-      "source_location": "L54",
+      "source_location": "L53",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -16665,32 +16666,20 @@
       "relation": "calls",
       "source": "app_components_station_kit_createkit",
       "source_file": "app/components/station/kit.ts",
-      "source_location": "L103",
+      "source_location": "L104",
+      "target": "app_components_station_shapes_frond",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_kit_createkit",
+      "source_file": "app/components/station/kit.ts",
+      "source_location": "L109",
       "target": "app_components_station_shapes_add",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_kit_createkit",
-      "source_file": "app/components/station/kit.ts",
-      "source_location": "L106",
-      "target": "app_components_station_shapes_cyl",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_kit_createkit",
-      "source_file": "app/components/station/kit.ts",
-      "source_location": "L107",
-      "target": "app_components_station_shapes_torus",
       "weight": 1.0
     },
     {
@@ -16713,7 +16702,31 @@
       "relation": "calls",
       "source": "app_components_station_kit_createkit",
       "source_file": "app/components/station/kit.ts",
-      "source_location": "L122",
+      "source_location": "L112",
+      "target": "app_components_station_shapes_cyl",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_kit_createkit",
+      "source_file": "app/components/station/kit.ts",
+      "source_location": "L113",
+      "target": "app_components_station_shapes_torus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_kit_createkit",
+      "source_file": "app/components/station/kit.ts",
+      "source_location": "L128",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -16725,7 +16738,7 @@
       "relation": "calls",
       "source": "app_components_station_kit_createkit",
       "source_file": "app/components/station/kit.ts",
-      "source_location": "L151",
+      "source_location": "L157",
       "target": "app_components_station_shapes_rod",
       "weight": 1.0
     },
@@ -16737,7 +16750,7 @@
       "relation": "calls",
       "source": "app_components_station_kit_createkit",
       "source_file": "app/components/station/kit.ts",
-      "source_location": "L160",
+      "source_location": "L166",
       "target": "app_components_station_shapes_ball",
       "weight": 1.0
     },
@@ -16749,20 +16762,8 @@
       "relation": "calls",
       "source": "app_components_station_kit_createkit",
       "source_file": "app/components/station/kit.ts",
-      "source_location": "L89",
+      "source_location": "L95",
       "target": "app_components_station_shapes_mesh",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_kit_createkit",
-      "source_file": "app/components/station/kit.ts",
-      "source_location": "L98",
-      "target": "app_components_station_shapes_frond",
       "weight": 1.0
     },
     {
@@ -31653,7 +31654,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_authdatabasehooks",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L340",
+      "source_location": "L344",
       "target": "app_server_provider_avatar_server_importproviderphoto",
       "weight": 1.0
     },
@@ -31677,7 +31678,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_authrequesthooks",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L197",
+      "source_location": "L199",
       "target": "app_server_auth_server_configuredproviders",
       "weight": 1.0
     },
@@ -31713,7 +31714,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L376",
+      "source_location": "L380",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -31725,7 +31726,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L379",
+      "source_location": "L383",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -31737,7 +31738,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L381",
+      "source_location": "L385",
       "target": "app_server_auth_server_configuredproviders",
       "weight": 1.0
     },
@@ -31749,7 +31750,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L390",
+      "source_location": "L394",
       "target": "app_server_auth_server_authrequesthooks",
       "weight": 1.0
     },
@@ -31761,7 +31762,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L391",
+      "source_location": "L395",
       "target": "app_server_auth_server_authuseroptions",
       "weight": 1.0
     },
@@ -31773,7 +31774,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L392",
+      "source_location": "L396",
       "target": "app_server_auth_server_authdatabasehooks",
       "weight": 1.0
     },
@@ -31785,7 +31786,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L429",
+      "source_location": "L433",
       "target": "app_server_auth_server_instagramprovider",
       "weight": 1.0
     },
@@ -31797,7 +31798,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewer",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L509",
+      "source_location": "L513",
       "target": "app_server_auth_server_getviewersession",
       "weight": 1.0
     },
@@ -31809,7 +31810,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewersession",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L476",
+      "source_location": "L480",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -31821,7 +31822,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewersession",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L485",
+      "source_location": "L489",
       "target": "app_server_auth_server_viewervalue",
       "weight": 1.0
     },
@@ -31833,7 +31834,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_requirerecentsignin",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L499",
+      "source_location": "L503",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -31845,7 +31846,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_requirerecentsignin",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L503",
+      "source_location": "L507",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -31857,7 +31858,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_viewervalue",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L522",
+      "source_location": "L526",
       "target": "app_server_validation_readdisplayprefs",
       "weight": 1.0
     },
@@ -38037,7 +38038,7 @@
       "relation": "calls",
       "source": "app_server_notify_server_notifyowner",
       "source_file": "app/server/notify.server.ts",
-      "source_location": "L58",
+      "source_location": "L62",
       "target": "app_server_notify_server_owneremail",
       "weight": 1.0
     },
@@ -43461,7 +43462,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_aswebauthnerror",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L23",
+      "source_location": "L20",
       "target": "app_server_webauthn_server_webauthnerror",
       "weight": 1.0
     },
@@ -43473,7 +43474,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_frombase64url",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L32",
+      "source_location": "L29",
       "target": "app_server_webauthn_server_webauthnerror",
       "weight": 1.0
     },
@@ -43485,7 +43486,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_refuseembedded",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L81",
+      "source_location": "L78",
       "target": "app_server_webauthn_server_webauthnerror",
       "weight": 1.0
     },
@@ -43497,7 +43498,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_validatepublickey",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L42",
+      "source_location": "L39",
       "target": "app_server_webauthn_server_webauthnerror",
       "weight": 1.0
     },
@@ -43509,7 +43510,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_validatepublickey",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L51",
+      "source_location": "L48",
       "target": "app_server_webauthn_server_tobase64url",
       "weight": 1.0
     },
@@ -43521,7 +43522,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_verifyauthentication",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L175",
+      "source_location": "L172",
       "target": "app_server_webauthn_server_aswebauthnerror",
       "weight": 1.0
     },
@@ -43533,7 +43534,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_verifyauthentication",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L176",
+      "source_location": "L173",
       "target": "app_server_webauthn_server_refuseembedded",
       "weight": 1.0
     },
@@ -43545,7 +43546,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_verifyauthentication",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L199",
+      "source_location": "L196",
       "target": "app_server_webauthn_server_webauthnerror",
       "weight": 1.0
     },
@@ -43557,7 +43558,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_verifyregistration",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L124",
+      "source_location": "L121",
       "target": "app_server_webauthn_server_aswebauthnerror",
       "weight": 1.0
     },
@@ -43569,7 +43570,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_verifyregistration",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L125",
+      "source_location": "L122",
       "target": "app_server_webauthn_server_refuseembedded",
       "weight": 1.0
     },
@@ -43581,7 +43582,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_verifyregistration",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L145",
+      "source_location": "L142",
       "target": "app_server_webauthn_server_webauthnerror",
       "weight": 1.0
     },
@@ -43593,7 +43594,7 @@
       "relation": "calls",
       "source": "app_server_webauthn_server_verifyregistration",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L147",
+      "source_location": "L144",
       "target": "app_server_webauthn_server_validatepublickey",
       "weight": 1.0
     },
@@ -139746,7 +139747,7 @@
       "relation": "contains",
       "source": "app_components_station_kit",
       "source_file": "app/components/station/kit.ts",
-      "source_location": "L166",
+      "source_location": "L172",
       "target": "app_components_station_kit_kit",
       "weight": 1.0
     },
@@ -151571,7 +151572,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L228",
+      "source_location": "L232",
       "target": "app_server_auth_server_authuseroptions",
       "weight": 1.0
     },
@@ -151593,7 +151594,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L303",
+      "source_location": "L307",
       "target": "app_server_auth_server_authdatabasehooks",
       "weight": 1.0
     },
@@ -151604,7 +151605,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L375",
+      "source_location": "L379",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -151637,7 +151638,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L472",
+      "source_location": "L476",
       "target": "app_server_auth_server_getviewersession",
       "weight": 1.0
     },
@@ -151648,7 +151649,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L489",
+      "source_location": "L493",
       "target": "app_server_auth_server_recent_sign_in_ms",
       "weight": 1.0
     },
@@ -151659,7 +151660,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L493",
+      "source_location": "L497",
       "target": "app_server_auth_server_requirerecentsignin",
       "weight": 1.0
     },
@@ -151670,7 +151671,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L508",
+      "source_location": "L512",
       "target": "app_server_auth_server_getviewer",
       "weight": 1.0
     },
@@ -151681,7 +151682,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L512",
+      "source_location": "L516",
       "target": "app_server_auth_server_viewervalue",
       "weight": 1.0
     },
@@ -155751,7 +155752,7 @@
       "relation": "contains",
       "source": "app_server_notify_server",
       "source_file": "app/server/notify.server.ts",
-      "source_location": "L55",
+      "source_location": "L59",
       "target": "app_server_notify_server_notifyowner",
       "weight": 1.0
     },
@@ -158787,18 +158788,7 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L101",
-      "target": "app_server_webauthn_server_registrationcredential",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_webauthn_server",
-      "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L110",
+      "source_location": "L107",
       "target": "app_server_webauthn_server_verifiedregistration",
       "weight": 1.0
     },
@@ -158809,8 +158799,8 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L12",
-      "target": "app_server_webauthn_server_supported_algorithms",
+      "source_location": "L11",
+      "target": "app_server_webauthn_server_webauthnerror",
       "weight": 1.0
     },
     {
@@ -158820,7 +158810,7 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L120",
+      "source_location": "L117",
       "target": "app_server_webauthn_server_verifyregistration",
       "weight": 1.0
     },
@@ -158832,28 +158822,6 @@
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
       "source_location": "L14",
-      "target": "app_server_webauthn_server_webauthnerror",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_webauthn_server",
-      "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L159",
-      "target": "app_server_webauthn_server_authenticationcredential",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_webauthn_server",
-      "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L17",
       "target": "app_server_webauthn_server_aswebauthnerror",
       "weight": 1.0
     },
@@ -158864,7 +158832,18 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L170",
+      "source_location": "L156",
+      "target": "app_server_webauthn_server_authenticationcredential",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_webauthn_server",
+      "source_file": "app/server/webauthn.server.ts",
+      "source_location": "L167",
       "target": "app_server_webauthn_server_verifyauthentication",
       "weight": 1.0
     },
@@ -158875,7 +158854,7 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L27",
+      "source_location": "L24",
       "target": "app_server_webauthn_server_tobase64url",
       "weight": 1.0
     },
@@ -158886,7 +158865,7 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L31",
+      "source_location": "L28",
       "target": "app_server_webauthn_server_frombase64url",
       "weight": 1.0
     },
@@ -158897,7 +158876,7 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L37",
+      "source_location": "L34",
       "target": "app_server_webauthn_server_validatepublickey",
       "weight": 1.0
     },
@@ -158908,7 +158887,7 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L76",
+      "source_location": "L73",
       "target": "app_server_webauthn_server_refuseembedded",
       "weight": 1.0
     },
@@ -158919,8 +158898,30 @@
       "relation": "contains",
       "source": "app_server_webauthn_server",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L92",
+      "source_location": "L89",
       "target": "app_server_webauthn_server_expected",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_webauthn_server",
+      "source_file": "app/server/webauthn.server.ts",
+      "source_location": "L9",
+      "target": "app_server_webauthn_server_supported_algorithms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_webauthn_server",
+      "source_file": "app/server/webauthn.server.ts",
+      "source_location": "L98",
+      "target": "app_server_webauthn_server_registrationcredential",
       "weight": 1.0
     },
     {
@@ -174974,10 +174975,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "d396a7d6eaa4ae2d45031e111d453df5e5b59284c8d226651cb9186f40eef98a",
+    "content_sha256": "aa976d799446863f3a8732e7a76abe517de6abc336cae5343fa20445fc8afe76",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "34da5ca3de002a8ff4db7f79112ff4a0e00b7ea158be142a77c668953cf25c2e",
+    "source_sha256": "af76d9ebff0acc63111680b2acc6185ce95698a1e3aea0ff1829be97d00eb2ad",
     "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
   },
   "hyperedges": [],
@@ -176499,7 +176500,7 @@
       "label": "Kit",
       "norm_label": "kit",
       "source_file": "app/components/station/kit.ts",
-      "source_location": "L166"
+      "source_location": "L172"
     },
     {
       "_callable": true,
@@ -179931,7 +179932,7 @@
       "label": "AuthenticationCredential",
       "norm_label": "authenticationcredential",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L159"
+      "source_location": "L156"
     },
     {
       "_callable": true,
@@ -179943,7 +179944,7 @@
       "label": "Expected",
       "norm_label": "expected",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L92"
+      "source_location": "L89"
     },
     {
       "_callable": true,
@@ -179955,7 +179956,7 @@
       "label": "RegistrationCredential",
       "norm_label": "registrationcredential",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L101"
+      "source_location": "L98"
     },
     {
       "_callable": true,
@@ -179967,7 +179968,7 @@
       "label": "VerifiedRegistration",
       "norm_label": "verifiedregistration",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L110"
+      "source_location": "L107"
     },
     {
       "_callable": true,
@@ -179979,7 +179980,7 @@
       "label": "WebAuthnError",
       "norm_label": "webauthnerror",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L14"
+      "source_location": "L11"
     },
     {
       "_callable": true,
@@ -195904,7 +195905,7 @@
       "label": "authDatabaseHooks()",
       "norm_label": "authdatabasehooks()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L303"
+      "source_location": "L307"
     },
     {
       "_callable": true,
@@ -195926,7 +195927,7 @@
       "label": "authUserOptions()",
       "norm_label": "authuseroptions()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L228"
+      "source_location": "L232"
     },
     {
       "_callable": true,
@@ -195948,7 +195949,7 @@
       "label": "createAuth()",
       "norm_label": "createauth()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L375"
+      "source_location": "L379"
     },
     {
       "_callable": true,
@@ -195959,7 +195960,7 @@
       "label": "getViewer()",
       "norm_label": "getviewer()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L508"
+      "source_location": "L512"
     },
     {
       "_callable": true,
@@ -195970,7 +195971,7 @@
       "label": "getViewerSession()",
       "norm_label": "getviewersession()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L472"
+      "source_location": "L476"
     },
     {
       "_callable": true,
@@ -196036,7 +196037,7 @@
       "label": "requireRecentSignIn()",
       "norm_label": "requirerecentsignin()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L493"
+      "source_location": "L497"
     },
     {
       "_callable": true,
@@ -196058,7 +196059,7 @@
       "label": "viewerValue()",
       "norm_label": "viewervalue()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L512"
+      "source_location": "L516"
     },
     {
       "_callable": true,
@@ -199336,7 +199337,7 @@
       "label": "notifyOwner()",
       "norm_label": "notifyowner()",
       "source_file": "app/server/notify.server.ts",
-      "source_location": "L55"
+      "source_location": "L59"
     },
     {
       "_callable": true,
@@ -201924,7 +201925,7 @@
       "label": "asWebAuthnError()",
       "norm_label": "aswebauthnerror()",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L17"
+      "source_location": "L14"
     },
     {
       "_callable": true,
@@ -201935,7 +201936,7 @@
       "label": "fromBase64Url()",
       "norm_label": "frombase64url()",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L31"
+      "source_location": "L28"
     },
     {
       "_callable": true,
@@ -201946,7 +201947,7 @@
       "label": "refuseEmbedded()",
       "norm_label": "refuseembedded()",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L76"
+      "source_location": "L73"
     },
     {
       "_callable": true,
@@ -201957,7 +201958,7 @@
       "label": "toBase64Url()",
       "norm_label": "tobase64url()",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L27"
+      "source_location": "L24"
     },
     {
       "_callable": true,
@@ -201968,7 +201969,7 @@
       "label": "validatePublicKey()",
       "norm_label": "validatepublickey()",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L37"
+      "source_location": "L34"
     },
     {
       "_callable": true,
@@ -201979,7 +201980,7 @@
       "label": "verifyAuthentication()",
       "norm_label": "verifyauthentication()",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L170"
+      "source_location": "L167"
     },
     {
       "_callable": true,
@@ -201990,7 +201991,7 @@
       "label": "verifyRegistration()",
       "norm_label": "verifyregistration()",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L120"
+      "source_location": "L117"
     },
     {
       "_callable": true,
@@ -214062,7 +214063,7 @@
       "label": "RECENT_SIGN_IN_MS",
       "norm_label": "recent_sign_in_ms",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L489"
+      "source_location": "L493"
     },
     {
       "_origin": "ast",
@@ -216232,7 +216233,7 @@
       "label": "SUPPORTED_ALGORITHMS",
       "norm_label": "supported_algorithms",
       "source_file": "app/server/webauthn.server.ts",
-      "source_location": "L12"
+      "source_location": "L9"
     },
     {
       "_origin": "ast",

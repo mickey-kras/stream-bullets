@@ -47,7 +47,11 @@ export async function ownerEmail(env: AppEnv, streamerId: string, action: PageAc
       t("notify.pageLine", { url: pageUrl }),
       t("notify.contactLine", { email: contactEmails.support }),
     ];
-    return Promise.resolve({ to: row.email, subject: t(subjects[action], { handle: row.handle }), text: lines.join("\n\n") });
+    return Promise.resolve({
+      to: row.email,
+      subject: t(subjects[action], { handle: row.handle }),
+      text: lines.join("\n\n"),
+    });
   });
 }
 
