@@ -37,6 +37,7 @@ export function StreamerHeader({
   icons = {},
   brand,
   badge,
+  ticker,
   className = "",
 }: Readonly<{
   streamer: {
@@ -54,6 +55,8 @@ export function StreamerHeader({
   icons?: Partial<Record<StreamerView, IconName>>;
   brand?: ReactNode;
   badge?: ReactNode;
+  // Full-width on-air strip rendered below the header bar while a stream is live.
+  ticker?: ReactNode;
   className?: string;
 }>): ReactNode {
   const header = useRef<HTMLElement | null>(null);
@@ -108,6 +111,7 @@ export function StreamerHeader({
         {action}
         <AccountMenu streamerHeader />
       </div>
+      {ticker && <div className="onair-ticker">{ticker}</div>}
     </header>
   );
 }
