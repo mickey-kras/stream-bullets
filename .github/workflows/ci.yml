@@ -22,6 +22,8 @@ jobs:
     name: Static application checks
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      analysis-id: ${{ steps.analysis.outputs.artifact-id }}
     steps:
       - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
         with:
@@ -36,7 +38,20 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      - run: pnpm lint
+      - name: Type-aware lint report
+        run: pnpm lint --format json --output-file reports/eslint.json
+      - name: Verify typed lint rules
+        run: node --test scripts/typed-lint.test.ts
+      - name: Bind analyzer report to this revision
+        run: printf '%s\n' "$GITHUB_SHA" > reports/revision.txt
+      - name: Upload analyzer report
+        id: analysis
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: eslint-${{ github.sha }}-${{ github.run_attempt }}
+          path: reports/
+          if-no-files-found: error
+          retention-days: 7
       - name: Check migrations match the schema
         run: |
           pnpm exec drizzle-kit generate --name schema_drift
@@ -320,7 +335,7 @@ jobs:
 
   sonar:
     name: SonarQube quality gate
-    needs: [checks, verify]
+    needs: [checks, verify, static]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -347,6 +362,18 @@ jobs:
           path: coverage/
       - name: Verify coverage revision
         run: test "$(cat coverage/revision.txt)" = "$GITHUB_SHA" && test -s coverage/lcov.info && test -s coverage/browser/lcov.info
+      - name: Require analyzer artifact
+        env:
+          ARTIFACT_ID: ${{ needs.static.outputs.analysis-id }}
+        shell: bash
+        run: '[[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]'
+      - name: Download analyzer report
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          artifact-ids: ${{ needs.static.outputs.analysis-id }}
+          path: reports/
+      - name: Verify analyzer revision
+        run: test "$(cat reports/revision.txt)" = "$GITHUB_SHA" && test -s reports/eslint.json
       - name: Mask configured SonarQube endpoint
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

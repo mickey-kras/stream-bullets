@@ -288,6 +288,10 @@ PRs need `Required quality gates` and `Trusted CI policy`. Production also needs
 | CodeQL | Analysis failure. Code scanning rules must block findings |
 | Policy | Unpinned action, ignored failure, missing gate, or mixed CI/application change |
 
+Type-aware ESLint checks application code, tests, and TypeScript scripts. Run `pnpm check` before `pnpm lint`.
+CI sends its ESLint JSON report to SonarQube from the same verified revision.
+The lint job still blocks findings before merge.
+
 Scanners use immutable `PINNED` tooling. Candidate configuration cannot select tools.
 Promote tools and pins in a separate CI PR. Keep changes to CI policy separate from application changes.
 Aislop compatibility settings keep Workers globals and virtual modules. `pnpm audit` owns dependency auditing.
