@@ -146,21 +146,7 @@ test("card recovery preserves drafts and order across failed moves, edits and de
   await expect(deletion).toBeVisible();
   await expect(deletion.getByRole("heading")).toBeFocused();
   await page.keyboard.press("Escape");
-  // Escape cancels the delete sheet, but on a saturated CI runner the
-  // dismiss gesture can be dropped or applied to the wrong layer, leaving the
-  // sheet open (or reopened by a replayed click). Re-issue the gesture while
-  // the sheet is still attached instead of failing a 10s hidden poll.
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    if (!(await deletion.isVisible().catch(() => false))) break;
-    await page.keyboard.press("Escape");
-  }
   await expect(deletion).toBeHidden();
-  // The edit dialog normally survives cancelling the sheet. If the runner also
-  // dropped the sheet-open click, the dialog is closed; reopen it to continue
-  // the recovery flow.
-  if (!(await edit.isVisible().catch(() => false))) {
-    await page.getByRole("button", { name: "Edit Weekly clips" }).click();
-  }
   await expect(edit).toBeVisible();
   await edit.getByRole("button", { name: "Delete", exact: true }).click();
   await page.route(
