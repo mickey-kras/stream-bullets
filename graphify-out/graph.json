@@ -1,5 +1,4 @@
 {
-  "built_at_commit": "21c9e46d5b9106d7778b45e328b8fd46ae0e2429",
   "directed": true,
   "edges": [
     {
@@ -174975,11 +174974,11 @@
     }
   ],
   "graph": {
-    "content_sha256": "aa976d799446863f3a8732e7a76abe517de6abc336cae5343fa20445fc8afe76",
+    "content_sha256": "1e54e868e1a60f05acda9584821e3ea2ccfc0ae26be3bff1b99ff418058c7521",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
     "source_sha256": "af76d9ebff0acc63111680b2acc6185ce95698a1e3aea0ff1829be97d00eb2ad",
-    "tool_sha256": "928fa394ef50a5048ade9e90c8749a54b9e7965650ce085432e8fc22ff48945d"
+    "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
   "multigraph": true,
