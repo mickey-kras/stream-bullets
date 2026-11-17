@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
+    "build:test": "CLOUDFLARE_ENV=test react-router build",
     "build:production": "CLOUDFLARE_ENV=production react-router build",
     "start": "wrangler dev --config build/server/wrangler.json --port 5173",
     "check": "react-router typegen && tsc --noEmit",
@@ -36,7 +37,7 @@
     "three": "0.187.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.66.0",
+    "@cloudflare/vite-plugin": "1.68.0",
     "@cloudflare/workers-types": "5.20261106.1",
     "@react-router/dev": "8.5.0",
     "@tailwindcss/vite": "4.3.5",
@@ -48,7 +49,7 @@
     "typescript-eslint": "8.72.1",
     "eslint": "10.14.0",
     "@eslint/js": "10.0.1",
-    "vite": "8.3.6",
+    "vite": "8.3.7",
     "wrangler": "4.158.0",
     "drizzle-kit": "0.31.11",
     "vitest": "5.0.5",
