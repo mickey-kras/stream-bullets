@@ -47,7 +47,7 @@ jobs:
           fi
       - name: Check third-party notices
         run: node scripts/third-party-notices.ts --check
-      - run: pnpm audit --audit-level high --ignore GHSA-fc5q-39xc-vjpf # unpatched picomatch ReDoS; dev-only path (vitest mocker); revisit when a patched release exists
+      - run: pnpm audit --audit-level high
 
   unit:
     name: Unit coverage
