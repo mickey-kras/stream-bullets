@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       revision:
-        description: Full commit SHA to deploy from this repository
-        required: true
+        description: Optional full commit SHA (defaults to the selected branch)
+        required: false
         type: string
 
 permissions:
@@ -26,13 +26,16 @@ jobs:
       - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
         with:
           egress-policy: audit
-      - name: Validate revision
+      - name: Resolve revision
+        id: revision
         env:
-          REVISION: ${{ inputs.revision }}
-        run: '[[ "$REVISION" =~ ^[a-f0-9]{40}$ ]]'
+          REVISION: ${{ inputs.revision || github.sha }}
+        run: |
+          [[ "$REVISION" =~ ^[a-f0-9]{40}$ ]]
+          echo "sha=$REVISION" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ inputs.revision }}
+          ref: ${{ steps.revision.outputs.sha }}
           persist-credentials: false
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
@@ -52,7 +55,7 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: 4c8f932bbf73d6901fbb40f559f6e1f4
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          REVISION: ${{ inputs.revision }}
+          REVISION: ${{ steps.revision.outputs.sha }}
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN" || { echo '::error::Set CLOUDFLARE_API_TOKEN in the test environment.'; exit 1; }
@@ -60,7 +63,7 @@ jobs:
           pnpm exec wrangler deploy --config build/server/wrangler.json --var "DEPLOYED_COMMIT:$REVISION" --message "test commit $REVISION"
       - name: Verify deployed revision
         env:
-          REVISION: ${{ inputs.revision }}
+          REVISION: ${{ steps.revision.outputs.sha }}
         run: |
           curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 5 --max-time 30 https://test.streambullets.com/__test --output /tmp/test-deployment.html
           grep -Fq "$REVISION" /tmp/test-deployment.html
