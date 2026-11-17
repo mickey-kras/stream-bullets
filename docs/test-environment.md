@@ -75,7 +75,7 @@ If the database ID changes, update the bindings and checks before use.
 
 The workflow runs type checks, lint, coverage, and a test build.
 It checks the compiled bindings before it applies test migrations.
-Deployment preserves Cloudflare secrets and records the selected commit.
+Deployment keeps the secrets in Cloudflare and records the selected commit.
 A response check verifies the deployed commit.
 Use `pnpm build:test` and `node scripts/check-test-deployment.ts` to check bindings locally.
 
