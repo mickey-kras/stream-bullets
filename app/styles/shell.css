@@ -334,6 +334,12 @@ header.site-header.header-stacked > nav { justify-content: center; width: 100%; 
 .onair-ticker-link .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--status-live-text); flex: none; }
 .onair-ticker-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .75rem; font-weight: 400; letter-spacing: 1.5px; color: var(--c-9cacab); }
 .onair-ticker-link:hover .onair-ticker-title { color: var(--gold); }
+/* The strip sits flush under the header content and spans the header padding at every breakpoint. */
+header.site-header:has(> .onair-ticker) { row-gap: 0; padding-bottom: 0; }
+@media (max-width: 1200px) { .onair-ticker { margin: 0 -12px; padding: 0 12px; } }
+@media (max-width: 1050px) { .onair-ticker { margin-top: 8px; } }
+@media (max-width: 560px) { .onair-ticker { margin: 8px -6px 0; padding: 0 6px; } }
+header.site-header.header-stacked > .onair-ticker { margin-top: 8px; }
 header .header-end > a.header-streamers { display: inline-flex !important; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; border: 1px solid var(--btn-border); border-radius: 8px; color: var(--cream); font: 600 .9375rem var(--body); text-decoration: none; white-space: nowrap; }
 header .header-end > a.header-streamers:hover { border-color: var(--gold); color: var(--gold); }
 @media (max-width: 78.125em) {

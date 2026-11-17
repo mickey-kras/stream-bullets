@@ -29,6 +29,10 @@ button.gold:hover { background:var(--gold-hover); }
 .topic-content > .votes { grid-column:1; grid-row:1 / span 50; flex-direction:column; gap:10px; align-self:start; border-right:1px dashed var(--c-415759); padding-right:20px; }
 .topic-content > .votes button { min-width:0; width:100%; flex-direction:column; gap:8px; min-height:0; padding:10px 6px; }
 .topic-content > .votes b { border-left:0; border-top:1px dashed var(--c-6f7f79); padding-left:0; padding-top:8px; }
+/* The 96px rail cannot fit the longer translated labels; keep them for assistive technology only. */
+@container(min-width:500.02px) {
+  .topic-content > .votes .vote-word { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+}
 .detail-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:17px; }
 .category { display:flex; align-items:center; gap:12px; border:1px solid var(--c-5b7071); border-radius:var(--radius-control); background:var(--c-18313677); padding:6px 14px; font:600 1.062rem/1.1 Oswald,sans-serif; letter-spacing:1px; text-transform:uppercase; }
 .category svg { width:23px; height:23px; }
