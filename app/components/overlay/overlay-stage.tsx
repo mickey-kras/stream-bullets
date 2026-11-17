@@ -237,14 +237,18 @@ function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source
   return null;
 }
 
-// 1920x1080 stage. Polls/battles fill it; other sources use presets. Hidden is transparent and empty.
+// 1920x1080 stage. Polls/battles fill it; other sources use presets. Hidden is transparent and empty. In a grid cell
+// (`fit`) the content is centred and the position setting does not apply.
 export function OverlayStage({
   scene,
   source,
   className = "",
-}: Readonly<{ scene: OverlayScene; source: OverlaySourceRef; className?: string }>): ReactNode {
+  fit = false,
+}: Readonly<{ scene: OverlayScene; source: OverlaySourceRef; className?: string; fit?: boolean }>): ReactNode {
   const full: boolean = source.type === "auto" || source.type === "poll";
-  const classes: string = `ov-stage pos-${full ? "full" : scene.overlay.position} size-${scene.overlay.size} ${className}`;
+  let position: string = full ? "full" : scene.overlay.position;
+  if (fit) position = "fit";
+  const classes: string = `ov-stage pos-${position} size-${scene.overlay.size} ${className}`;
   return (
     <div className={classes.trim()} data-overlay-type={source.type}>
       <SourceContent scene={scene} source={source} />

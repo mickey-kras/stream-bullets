@@ -10,7 +10,7 @@ import { accountDeletionSchema, displayPrefsSchema, localeSchema, profileSchema 
 import { get, write, type ApiRoute } from "./router";
 
 // Provider label for Your profile and Your data.
-async function signInProvider(env: AppEnv, userId: string): Promise<Provider | null> {
+export async function signInProvider(env: AppEnv, userId: string): Promise<Provider | null> {
   const row = await env.DB.prepare("SELECT provider_id FROM account WHERE user_id=? ORDER BY created_at LIMIT 1")
     .bind(userId)
     .first<{ provider_id: string }>();

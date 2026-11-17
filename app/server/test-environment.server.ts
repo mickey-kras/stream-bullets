@@ -42,7 +42,8 @@ const ACCESS_COOKIE = "__Host-sb-test-access";
 async function accessCookie(env: AppEnv): Promise<string> {
   const expires: string = String(Date.now() + 3_600_000);
   const signature: string = await makeSignature(expires, env.TEST_ACCESS_SECRET!);
-  return `${ACCESS_COOKIE}=${encodeURIComponent(`${expires}.${signature}`)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600`;
+  const value: string = encodeURIComponent(`${expires}.${signature}`);
+  return `${ACCESS_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600`;
 }
 
 export async function requireTestAccess(request: Request, env: AppEnv): Promise<void> {
@@ -60,7 +61,7 @@ export async function requireTestAccess(request: Request, env: AppEnv): Promise<
   } catch {
     throw new HttpError(403, "Use /__test to unlock test access.");
   }
-  const match = /^([0-9]{13})\.([A-Za-z0-9+/=]+)$/u.exec(value);
+  const match = /^(\d{13})\.([A-Za-z0-9+/=]+)$/u.exec(value);
   if (!match || Number(match[1]) <= Date.now() || Number(match[1]) > Date.now() + 3_600_000)
     throw new HttpError(403, "Use /__test to unlock test access.");
   await checkSecret(match[2], await makeSignature(match[1], env.TEST_ACCESS_SECRET!));
@@ -68,16 +69,10 @@ export async function requireTestAccess(request: Request, env: AppEnv): Promise<
 
 function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
   const statements: D1PreparedStatement[] = [];
-  for (const community of [1, 2, 3, 4]) {
+  const owners: TestAccount[] = ["owner", "other_owner", "frozen_owner", "suspended_owner"];
+  for (const [index, owner] of owners.entries()) {
+    const community: number = index + 1;
     const topic: string = fixtureId(community * 10);
-    const owner: TestAccount =
-      community === 1
-        ? "owner"
-        : community === 2
-          ? "other_owner"
-          : community === 3
-            ? "frozen_owner"
-            : "suspended_owner";
     statements.push(
       env.DB.prepare(
         "INSERT OR IGNORE INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at) VALUES(?,?,?,?,?,?,?,?,?)",
@@ -92,8 +87,6 @@ function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
         "[]",
         now,
       ),
-    );
-    statements.push(
       env.DB.prepare(
         "INSERT OR IGNORE INTO entries(id,streamer_id,author_id,kind,title,options,created_at) VALUES(?,?,?,?,?,?,?)",
       ).bind(
@@ -105,13 +98,9 @@ function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
         '["Games","Music","Tech"]',
         now,
       ),
-    );
-    statements.push(
       env.DB.prepare(
         "INSERT OR IGNORE INTO entry_comments(id,entry_id,author_id,text,created_at) VALUES(?,?,?,?,?)",
       ).bind(fixtureId(community * 10 + 2), topic, testAccountId("viewer"), "A viewer question.", now),
-    );
-    statements.push(
       env.DB.prepare(
         "INSERT OR IGNORE INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id) VALUES(?,?,?,?,?,?)",
       ).bind(
@@ -122,8 +111,6 @@ function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
         now + 1,
         fixtureId(community * 10 + 2),
       ),
-    );
-    statements.push(
       env.DB.prepare(
         "INSERT OR IGNORE INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id) VALUES(?,?,?,?,?,?)",
       ).bind(
@@ -134,15 +121,11 @@ function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
         now + 2,
         fixtureId(community * 10 + 3),
       ),
-    );
-    statements.push(
       env.DB.prepare("INSERT OR IGNORE INTO entry_votes(entry_id,user_id,choice) VALUES(?,?,?)").bind(
         fixtureId(community * 10 + 1),
         testAccountId("viewer"),
         0,
       ),
-    );
-    statements.push(
       env.DB.prepare("INSERT OR IGNORE INTO entry_reactions(entry_id,user_id,value) VALUES(?,?,?)").bind(
         topic,
         testAccountId("other_viewer"),
@@ -179,6 +162,12 @@ async function resetTestRooms(env: AppEnv, ids: string[]): Promise<void> {
   }
 }
 
+async function deleteTestImages(env: AppEnv, users: string[]): Promise<void> {
+  for (const user of users) {
+    for (const kind of ["avatar", "background", "logo"] as const) await deleteImageObjects(env, user, kind);
+  }
+}
+
 export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<void> {
   await requireTestDatabase(env);
   const now: number = Date.now();
@@ -211,25 +200,17 @@ export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<
       ]),
     ];
     await resetTestRooms(env, roomIds);
-    for (const user of users) {
-      for (const kind of ["avatar", "background", "logo"] as const) await deleteImageObjects(env, user, kind);
-    }
+    await deleteTestImages(env, users);
     statements.push(
       env.DB.prepare(`DELETE FROM moderation_actions WHERE actor_id IN (SELECT value FROM json_each(?))`).bind(
         JSON.stringify(users),
       ),
-    );
-    statements.push(
       env.DB.prepare(
         "DELETE FROM content_reports WHERE reporter_id IN (SELECT value FROM json_each(?)) OR target_author_id IN (SELECT value FROM json_each(?))",
       ).bind(JSON.stringify(users), JSON.stringify(users)),
-    );
-    statements.push(
       env.DB.prepare(
         "DELETE FROM app_rate_limits WHERE key IN (SELECT 'write:' || value FROM json_each(?)) OR key IN (SELECT 'content:' || value FROM json_each(?))",
       ).bind(JSON.stringify(users), JSON.stringify(users)),
-    );
-    statements.push(
       env.DB.prepare(`INSERT INTO test_fixture_revisions(streamer_id,revision,overlay_revision)
         SELECT s.id,s.revision+1,COALESCE(o.revision,0)+1 FROM streamers s
         LEFT JOIN overlay_state o ON o.streamer_id=s.id WHERE s.owner_id IN (SELECT value FROM json_each(?))
@@ -291,8 +272,8 @@ export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<
       ),
     );
   }
-  statements.push(...communityFixtures(env, now));
   statements.push(
+    ...communityFixtures(env, now),
     env.DB.prepare(
       "INSERT OR IGNORE INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,status) VALUES(?,?,?,?,?,?,?,?,?,?)",
     ).bind(
@@ -324,8 +305,9 @@ export async function testEnvironmentResponse(request: Request, env: AppEnv): Pr
   queryParams(request, []);
   if (request.method === "GET") {
     const commit: string = /^[a-f0-9]{40}$/u.test(env.DEPLOYED_COMMIT ?? "") ? env.DEPLOYED_COMMIT! : "undeployed";
+    const options: string = TEST_ACCOUNTS.map((account: TestAccount): string => `<option>${account}</option>`).join("");
     return new Response(
-      `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>StreamBullets test access</title><h1>Test environment</h1><p>Commit: ${commit}</p><p>Use the shared test access secret from approved secret storage.</p><form method="post"><label>Access secret <input type="password" name="secret" required autocomplete="off"></label><label>Account <select name="account"><option>signedout</option>${TEST_ACCOUNTS.map((account: TestAccount): string => `<option>${account}</option>`).join("")}</select></label><button name="action" value="login">Sign in</button><button name="action" value="seed">Seed missing fixtures</button><button name="action" value="reset">Reset synthetic data</button></form></html>`,
+      `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>StreamBullets test access</title><h1>Test environment</h1><p>Commit: ${commit}</p><p>Use the shared test access secret from approved secret storage.</p><form method="post"><label>Access secret <input type="password" name="secret" required autocomplete="off"></label><label>Account <select name="account"><option>signedout</option>${options}</select></label><button name="action" value="login">Sign in</button><button name="action" value="seed">Seed missing fixtures</button><button name="action" value="reset">Reset synthetic data</button></form></html>`,
       {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
@@ -365,7 +347,7 @@ export async function testEnvironmentResponse(request: Request, env: AppEnv): Pr
     );
     return new Response(null, { status: 303, headers });
   }
-  if (action !== "login" || !TEST_ACCOUNTS.some((allowed: TestAccount): boolean => allowed === account))
+  if (action !== "login" || !TEST_ACCOUNTS.includes(account as TestAccount))
     throw new HttpError(400, "Choose a test account.");
   if (env.BETTER_AUTH_SECRET.length < 32) throw new HttpError(503, "Authentication secret is not configured.");
   const userId: string = testAccountId(account as TestAccount);

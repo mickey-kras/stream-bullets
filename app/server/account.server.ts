@@ -1,3 +1,5 @@
+import { disconnectAllChannels } from "./channels.server";
+import { parseStoredLayers, type OverlayLayers } from "../lib/overlay-layers";
 import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";
@@ -56,6 +58,7 @@ interface OverlayRow {
   show_results: number;
   message: string;
   message_style: string;
+  layers: string;
   updated_at: number;
 }
 
@@ -267,6 +270,16 @@ export interface AccountExport {
     aaguid: string | null;
     createdAt: string | null;
   }[];
+  /** Channels connected to the page for its activity feed. Their tokens are credentials and stay out. */
+  channelConnections: {
+    platform: string;
+    channelId: string;
+    displayName: string;
+    scopes: string[];
+    status: string;
+    connectedAt: string;
+    lastEventAt: string | null;
+  }[];
   streamerPage: {
     handle: string;
     name: string;
@@ -318,6 +331,7 @@ export interface AccountExport {
       showResults: boolean;
       message: string;
       messageStyle: string;
+      layers: OverlayLayers;
       updatedAt: string;
     } | null;
   } | null;
@@ -454,7 +468,7 @@ async function readHistory(env: AppEnv, userId: string, now: number) {
   ).filter((row: SessionRow): boolean => row.expires_at > now);
   const entries = await readAll<EntryRow>(
     env,
-    `SELECT x.rowid AS row_cursor,x.id,s.handle,x.kind,x.title,x.body,x.category,x.options,x.created_at,x.ends_at,x.revealed
+    `SELECT x.rowid AS row_cursor,x.id,s.handle,x.kind,x.title,x.body,x.category,COALESCE(x.binary_labels,x.options) AS options,x.created_at,x.ends_at,x.revealed
       FROM entries x JOIN streamers s ON s.id=x.streamer_id WHERE x.author_id=?1 AND ${page}`,
     userId,
   );
@@ -473,7 +487,7 @@ async function readHistory(env: AppEnv, userId: string, now: number) {
   const votes = await readAll<VoteRow>(
     env,
     `SELECT x.rowid AS row_cursor,x.entry_id,e.title AS entry_title,s.handle,x.choice,
-        json_extract(e.options,'$['||x.choice||']') AS option
+        json_extract(COALESCE(e.binary_labels,e.options),'$['||x.choice||']') AS option
       FROM entry_votes x ${entryJoin} WHERE x.user_id=?1 AND ${page}`,
     userId,
   );
@@ -652,6 +666,7 @@ function pageExport(
           showResults: overlay.show_results === 1,
           message: overlay.message,
           messageStyle: overlay.message_style,
+          layers: parseStoredLayers(overlay.layers),
           updatedAt: iso(overlay.updated_at),
         }
       : null,
@@ -659,6 +674,54 @@ function pageExport(
 }
 
 // Export account data, excluding credentials and other users' data.
+/** The profile part of the export. */
+function accountProfile(account: UserRow): AccountExport["account"] {
+  return {
+    id: account.id,
+    name: account.name,
+    email: account.email,
+    emailVerified: account.email_verified === 1,
+    emailLinkVerified: account.email_link_verified === 1,
+    image: account.image,
+    avatarPreset: account.avatar_preset,
+    locale: account.locale,
+    displayPreferences: parseJson(account.display_prefs),
+    conversionMilestones: {
+      firstVote: account.first_vote_counted === 1,
+      firstTopic: account.first_topic_counted === 1,
+    },
+    createdAt: iso(account.created_at),
+    updatedAt: iso(account.updated_at),
+  };
+}
+
+/** Channels connected to the user's page. Their tokens are credentials and stay out of the export. */
+async function exportChannels(env: AppEnv, userId: string): Promise<AccountExport["channelConnections"]> {
+  const { results } = await env.DB.prepare(
+    `SELECT c.platform,c.external_id,c.display_name,c.scopes,c.status,c.created_at,c.last_event_at
+      FROM channel_connections c JOIN streamers s ON s.id=c.streamer_id WHERE s.owner_id=? ORDER BY c.created_at`,
+  )
+    .bind(userId)
+    .all<{
+      platform: string;
+      external_id: string;
+      display_name: string;
+      scopes: string;
+      status: string;
+      created_at: number;
+      last_event_at: number | null;
+    }>();
+  return results.map((row) => ({
+    platform: row.platform,
+    channelId: row.external_id,
+    displayName: row.display_name,
+    scopes: row.scopes.split(" ").filter(Boolean),
+    status: row.status,
+    connectedAt: iso(row.created_at),
+    lastEventAt: optionalIso(row.last_event_at),
+  }));
+}
+
 export async function exportAccount(env: AppEnv, userId: string): Promise<AccountExport> {
   const origin = getOrigin(env);
   const now = Date.now();
@@ -674,7 +737,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       "SELECT links,note,status,created_at,updated_at,reviewed_at FROM streamer_applications WHERE user_id=?",
     ).bind(userId),
     env.DB.prepare(
-      `SELECT o.air,o.preview,o.position,o.size,o.instant,o.show_results,o.message,o.message_style,o.updated_at
+      `SELECT o.air,o.preview,o.position,o.size,o.instant,o.show_results,o.message,o.message_style,o.layers,o.updated_at
         FROM overlay_state o JOIN streamers s ON s.id=o.streamer_id WHERE s.owner_id=?`,
     ).bind(userId),
   ]);
@@ -696,23 +759,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
     signupAcceptance,
     exportedAt: iso(now),
     notes: NOTES,
-    account: {
-      id: account.id,
-      name: account.name,
-      email: account.email,
-      emailVerified: account.email_verified === 1,
-      emailLinkVerified: account.email_link_verified === 1,
-      image: account.image,
-      avatarPreset: account.avatar_preset,
-      locale: account.locale,
-      displayPreferences: parseJson(account.display_prefs),
-      conversionMilestones: {
-        firstVote: account.first_vote_counted === 1,
-        firstTopic: account.first_topic_counted === 1,
-      },
-      createdAt: iso(account.created_at),
-      updatedAt: iso(account.updated_at),
-    },
+    account: accountProfile(account),
     signInMethods: history.providers.map((row: ProviderRow) => ({
       providerId: row.provider_id,
       accountId: row.account_id,
@@ -734,6 +781,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       aaguid: row.aaguid,
       createdAt: optionalIso(row.created_at),
     })),
+    channelConnections: await exportChannels(env, userId),
     streamerPage: streamer ? pageExport(streamer, overlay, history, origin) : null,
     streamerApplication: application
       ? {
@@ -844,6 +892,9 @@ const touchedStreamersMore = `
 // images and refresh rooms.
 export async function deleteAccount(env: AppEnv, userId: string): Promise<void> {
   if (userId === SYSTEM_USER_ID) throw new HttpError(403, "The system principal cannot be deleted.");
+  // Provider grants and subscriptions do not cascade: end them first, best effort and bounded in time.
+  const own = await env.DB.prepare("SELECT id FROM streamers WHERE owner_id=?").bind(userId).all<{ id: string }>();
+  for (const page of own.results) await disconnectAllChannels(env, page.id);
   const statement = (sql: string): D1PreparedStatement => env.DB.prepare(sql).bind(userId);
   const results = await env.DB.batch([
     statement("SELECT id FROM streamers WHERE owner_id=?1"),

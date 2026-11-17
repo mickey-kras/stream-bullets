@@ -6,13 +6,30 @@ Test data is synthetic. Never copy production data or secrets here.
 
 ## Initial setup
 
-Create the GitHub environment `test` with these secrets:
+Use the same setup as production: GitHub holds the deployment token.
+Cloudflare holds the application secrets.
+
+Create the GitHub environment `test` with `CLOUDFLARE_API_TOKEN`.
+A repository secret with that name also works.
+The token needs access to the test Worker, D1, R2, and custom domain.
+
+Set these secrets on the Cloudflare Worker `stream-bullets-test`:
 
 | Secret | Value |
 | --- | --- |
-| `CLOUDFLARE_API_TOKEN` | A token for the test Worker, D1, R2, and custom domain. |
 | `BETTER_AUTH_SECRET` | A new random value with at least 32 characters. |
 | `TEST_ACCESS_SECRET` | A different random value with at least 32 characters. |
+
+Use the Worker's **Settings > Variables and secrets**, or Wrangler:
+
+```sh
+pnpm exec wrangler secret put BETTER_AUTH_SECRET --env test
+pnpm exec wrangler secret put TEST_ACCESS_SECRET --env test
+```
+
+Wrangler can create the Worker before its first application deployment.
+Keep both values separate from production secrets.
+Deployments preserve the secrets already stored in Cloudflare.
 
 Restrict deployment access to the owner and approved maintainers.
 Store the access secret in approved secret storage.
@@ -58,7 +75,7 @@ If the database ID changes, update the bindings and checks before use.
 
 The workflow runs type checks, lint, coverage, and a test build.
 It checks the compiled bindings before it applies test migrations.
-Deployment uploads only the test secrets and records the selected commit.
+Deployment preserves Cloudflare secrets and records the selected commit.
 A response check verifies the deployed commit.
 Use `pnpm build:test` and `node scripts/check-test-deployment.ts` to check bindings locally.
 

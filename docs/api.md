@@ -76,9 +76,109 @@ Unknown paths return `404`. Unsupported methods on known paths return `405`.
 - `GET /api/streamers/:handle` accepts an Ideas `status` filter.
 - `Entry.reported` and `Comment.reported` show the viewer's open report. Show "Reported" without another Report button.
 
+## Channel connections
+
+| Endpoint | Body | Response |
+|---|---|---|
+| `GET /api/channels` | none | `{channels: [{platform, available, connection, capabilities}]}` for the owner's page. `connection` is null or `{displayName, status, code, connectedAt, lastEventAt, updatedAt}`. `updatedAt` is when the status or its code last changed. It never holds tokens or scopes. |
+| `POST /api/channels/:platform/connect` | `{}` | `{authorizeUrl}`. The browser then goes to the provider. |
+| `POST /api/channels/:platform/reconnect` | `{}` | `{authorizeUrl}`. The connection row stays. |
+| `DELETE /api/channels/:platform` | none, or `{}` | `{revoked}`: true when the provider confirmed the revoke. `404` when the page has no connection for the platform. `409` (`channel_conflict`) when the row changed during the disconnect. A reconnect replaced it, or another disconnect or the expiry job removed it. |
+| `GET /channels/callback/:platform` | provider query | A redirect to `/overlay-control?channel=<platform>&result=<code>`. |
+| `GET /api/activity/:handle` | WebSocket upgrade, optional `key`, optional `characters=1` | The activity feed. Only the current overlay key or the signed-in owner can connect. With `characters=1` the socket also gets the character playground frames. `400` for another `characters` value or another parameter. `426` without a WebSocket upgrade, `403` without a valid key or owner session, `404` for a missing or suspended page, `503` while the `CHANNELS_OFF` secret exists. |
+| `POST /hooks/twitch`, `POST /hooks/kick` | signed provider webhook | `204`, or `200` with the challenge for a Twitch subscription check. `410` for a signed Twitch notification of an unknown channel. Twitch counts it as a failed delivery. It revokes the subscription after repeated failures. `403` for a bad signature or an old timestamp. `413` for a large body. `429` when an address with too many forged webhooks reaches the per-address limit. `503` when the server cannot check the webhook. |
+
+- `:platform` is `twitch`, `youtube` or `kick`.
+- The writes need a session from the last 10 minutes. Otherwise they answer `403` with the code
+  `reauth_required`. They count against the content quota of 6 changes each minute.
+- A connect answers `423` for a frozen or suspended page. A disconnect works on a frozen page too.
+- A platform without credentials answers `503` with the code `platform_unavailable`.
+- The callback result is `connected`, `denied`, `state_invalid`, `session_mismatch`, `channel_taken`,
+  `disconnect_first`, `scope_missing` or `failed`.
+- See [Channel connections and activity](channel-connections.md) for the event contract and the limits.
+
+## Overlay layers
+
+| Endpoint | Body | Response |
+| --- | --- | --- |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?}, characters?: {enabled?, timeout?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
+| `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
+| `GET /@handle/overlay?key&layer` | Optional `layer`: `content`, `chat`, or `characters` | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that layer alone. An unknown value shows an empty page. |
+
+- `orientation` is `horizontal` (a grid of 16 × 9 cells) or `vertical` (9 × 16 cells). A cell is 120 pixels.
+- Each orientation in `cells` holds `{chat?, characters?, content?}`. Each value is a cell rectangle `{c, r, w, h}` of whole cells.
+  `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
+- `content` accepts `null`. Then the content uses the full frame and its position and size settings.
+- The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for `content`.
+- After the merge, no two layers can overlap in an orientation. A content layer without a cell does not count.
+- `write` is `{writer, seq}`. `writer` is a random ID of 8 to 64 letters, digits, `_` or `-`. `seq` is a positive integer.
+  The server keeps the largest applied `seq` of each of the last 8 writers. It ignores a change with a `seq` that is not larger than the kept `seq` of its `writer`.
+  The server then answers `200` with the current state and does not notify the overlay pages. A change without `write` always applies.
+- The body changes only the fields that it names. The API merges each field into the saved layers.
+  Thus send only the fields that you change. Unknown fields return `400`.
+- The change goes live at once. Overlay pages get the new `layers` through the live room.
+- `chatTest` with `on: true` sets `chatTestUntil` to the server time plus 60 seconds. With `on: false` it sets 0.
+  `on: true` returns `400` when the chat layer is off. `on: false` always applies.
+  A `layers` action that sets the chat layer to off also sets `chatTestUntil` to 0.
+  Overlay pages get the value through the live room. A time in the past means no test.
+- `characters.timeout` is the time in seconds without chat before a character walks out. It is a whole number from 10 to 600. The default is 60.
+- Each `layers` action and each `chatTest` action with `on: true` counts against the write quota of 60 changes each minute.
+- `POST /api/overlay/characters` controls the character playground of the page:
+  - `status` changes nothing. It only returns the state.
+  - `test` starts the characters test for 5 minutes, or starts it again. It also ends a pause.
+    It returns `400` when the saved characters layer is off.
+  - With the saved characters layer off, the playground keeps nothing. Then each operation returns `{paused: false, testEndsAt: null}`, and `remove` returns `404`.
+  - `stopTest` stops the test. `pause` and `resume` stop and start the playground. `reset` removes all characters.
+  - `remove` removes the character with the frame `id`. It returns `404` when no character has that `id`.
+  - `testEndsAt` is the server time at which the test ends, or `null` when no test runs.
+  - `test`, `reset`, and `remove` count against the write quota. The other operations do not.
+  - It returns `503` while the `CHANNELS_OFF` secret exists, when the deployment has no `CHANNEL_INGEST` binding, or when the playground cannot answer.
+- The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
+- Errors: `400` for an invalid body, a cell outside the grid, or overlapping layers, `401` without sign-in, and `403` for another origin.
+  Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
+- `OverlayState.layers` and `OverlayPublic.layers` are `{orientation, chat: {enabled, hideCommands}, characters: {enabled, timeout}, cells: {horizontal, vertical}}`.
+  Each orientation in `cells` is `{chat, characters, content}`. `content` is a cell or `null`.
+  Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value. Chat and characters are off by default, and `hideCommands` is on.
+- See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the chat test, and the chat limits.
+
 ## Later phases
 
 Overlay, Mash Battle, admin, step-up, and AI-interest handlers now exist in the registry.
 For complete route definitions, inspect their modules in `app/server/api/`.
 New modules export `ApiRoute[]` through `get()` and `write()` and join `apiRoutes` in `index.ts`.
 Streamer-page writes must call `assertStreamerWritable()`.
+
+## Discussion updates
+
+| Route | Input | Result |
+| --- | --- | --- |
+| `POST /api/streamers/:handle` | `{action: "comment", id, text, parentId?, mentions?}` | `{id}`. New comment or reply. |
+| `POST /api/comments` | `{action: "edit", id, text, mentions?}` | `{id}`. Only authors can edit their comments. Removed comments cannot change. |
+| `GET /api/comments/:id` | None | `{comment, rootId, thread, handle, entryId}`. Exact comment and its thread, subject to page access. |
+| `GET /api/entries/:id/mention-candidates` | `query`, at most 40 characters | `{users}`. At most 10 public profiles or participants in this community. Requires sign-in. |
+| `GET /api/notifications` | Optional opaque `cursor` | `NotificationSnapshot`: at most 50 notifications, unread count, preferences and next cursor. Requires sign-in. |
+| `POST /api/notifications` | `{action: "read", id, read}` | `{ok: true}`. Only the recipient can change read state. |
+| `POST /api/notifications` | `{action: "preferences", replies, mentions}` | `{ok: true}`. Saves in-app delivery preferences for new events. |
+
+Comments include `editedAt` and `mentions`. Each mention contains `{userId, start, end}`.
+Offsets use UTF-16 indices into the exact comment text. Do not trim the text before you send it.
+Each new selection must match `@name` for an available account.
+You can select up to five distinct accounts.
+
+An edit can keep an existing mention after the recipient changes their name.
+Plain `@name` text without a selection does not send a notification.
+
+New replies and selected mentions send in-app notifications. The sender receives no notification.
+If a reply also mentions its parent author, the recipient receives one notification.
+The service uses their delivery preferences to select the notification type.
+
+Edits do not send notifications. If you remove a mention, the service deletes its notification.
+The inbox and exact-comment lookup omit deleted comments and inaccessible pages.
+Notifications contain no comment excerpts. They link to the current comment.
+The service does not send email or push notifications.
+
+Each inbox keeps up to 200 notifications for up to 90 days.
+The next delivery deletes expired records.
+Each sender can send up to 100 notifications per hour, with at most 10 per recipient.
+Existing content quotas also apply.

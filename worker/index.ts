@@ -1,6 +1,6 @@
 import { sitemapResponse } from "../app/server/sitemap.server";
 import { createRequestHandler, RouterContextProvider } from "react-router";
-import { appContext, type AppEnv } from "../app/env";
+import { appContext, type AppContext, type AppEnv } from "../app/env";
 import { isStreamerListed } from "../app/server/access.server";
 import { getViewer } from "../app/server/auth.server";
 import { getStreamer } from "../app/server/data.server";
@@ -25,7 +25,13 @@ import {
   validateTestEnvironment,
 } from "../app/server/test-environment.server";
 
+import { WebhookRejected, kickWebhook, logRejectedWebhook, twitchWebhook } from "../app/server/channel-webhooks.server";
+import { channelsOff } from "../app/server/channel-tokens.server";
+import { expireYoutubeConnections } from "../app/server/channels.server";
+import { callIngest } from "../app/server/ingest-call.server";
+
 export { PollRoom } from "../app/server/poll-room";
+export { ChannelIngest } from "../app/server/channel-ingest";
 
 async function sha256(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -36,6 +42,9 @@ async function sha256(value: string): Promise<string> {
 async function clientKey(request: Request): Promise<string> {
   return sha256(visitorPrefix(request.headers.get("CF-Connecting-IP") ?? "local"));
 }
+
+const BINARY_LABELS_COMPATIBILITY_HEADER: string = "X-StreamBullets-Binary-Labels";
+const BINARY_LABELS_COMPATIBILITY_VERSION: string = "1";
 
 const handler = createRequestHandler(() => import("virtual:react-router/server-build"), import.meta.env.MODE);
 
@@ -84,6 +93,91 @@ async function liveResponse(
   return room.fetch(`https://poll-room.internal/subscribe?streamerId=${encodeURIComponent(streamer.id)}`, { headers });
 }
 
+/**
+ * The page's activity feed (docs/channel-connections.md): only an OBS source with the current overlay key, or the
+ * signed-in owner, may listen. The key grants this read-only feed and the live room, nothing else.
+ */
+async function activityResponse(
+  request: Request,
+  env: AppEnv,
+  handle: string,
+  nonce: string,
+  responseHeaders: Headers,
+): Promise<Response> {
+  requireSameOrigin(request, env);
+  const params: URLSearchParams = queryParams(request, ["key", "characters"]);
+  const overlayKey: string | null = params.get("key");
+  // `characters=1` also asks for the character playground frames.
+  const characters: string | null = params.get("characters");
+  if (characters !== null && characters !== "1") throw new HttpError(400, "Invalid query parameters.");
+  if (request.method !== "GET" || request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
+    throw new HttpError(426, "Use a WebSocket connection.");
+  const streamer = await getStreamer(env, handle);
+  if (!streamer || !isStreamerListed(streamer.status)) throw new HttpError(404, "Streamer not found.");
+  const headers = new Headers({ Upgrade: "websocket" });
+  if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
+  else if ((await getViewer(request, { env, nonce, responseHeaders }))?.id === streamer.ownerId)
+    headers.set("X-SB-Owner", "1");
+  else throw new HttpError(403, "Use the overlay URL with its key.");
+  return callIngest(env, streamer.id, "subscribe", { init: { headers }, characters: characters === "1" });
+}
+
+async function webhookResponse(request: Request, env: AppEnv, path: string, key: string): Promise<Response> {
+  const platform: "twitch" | "kick" = path === "/hooks/twitch" ? "twitch" : "kick";
+  try {
+    // A repeated Kick message id counts against the limit too (see kickWebhook).
+    const countRepeat = async (): Promise<void> => {
+      if (!(await env.REQUEST_LIMITER.limit({ key })).success)
+        throw new HttpError(429, "Too many requests. Please try again in a minute.");
+    };
+    return platform === "twitch"
+      ? await twitchWebhook(request, env)
+      : await kickWebhook(request, env, Date.now(), countRepeat);
+  } catch (error: unknown) {
+    logRejectedWebhook(platform, error);
+    if (error instanceof WebhookRejected && error.forged && !(await env.REQUEST_LIMITER.limit({ key })).success)
+      throw new HttpError(429, "Too many requests. Please try again in a minute.");
+    throw error;
+  }
+}
+
+async function routeResponse(
+  request: Request,
+  path: string,
+  key: string,
+  context: AppContext,
+  origin: string,
+): Promise<Response> {
+  const { env, nonce, responseHeaders } = context;
+  const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
+  const activity = /^\/api\/activity\/([a-z0-9_]{3,30})$/.exec(path);
+  const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
+  if (path === "/__test") {
+    return await testEnvironmentResponse(request, env);
+  } else if (path === "/hooks/kick" && channelsOff(env)) {
+    // Ingestion is off: acknowledge and drop, so Kick does not retry. Twitch still reports revocations.
+    return new Response(null, { status: 204 });
+  } else if (path === "/hooks/twitch" || path === "/hooks/kick") {
+    return await webhookResponse(request, env, path, key);
+  } else if (activity) {
+    if (channelsOff(env)) throw new HttpError(503, "The activity feed is off.");
+    return await activityResponse(request, env, activity[1], nonce, responseHeaders);
+  } else if (path === "/sitemap.xml") {
+    return await sitemapResponse(request, env);
+  } else if (calendar) {
+    return await calendarResponse(request, env, calendar[1], origin);
+  } else if (live) {
+    return await liveResponse(request, env, live[1], key, nonce, responseHeaders);
+  } else if (path.startsWith("/images/")) {
+    if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
+    return await serveImage(env, path.slice("/images/".length), request.method);
+  } else {
+    const routerContext = new RouterContextProvider();
+    routerContext.set(appContext, context);
+    return await handler(request, routerContext);
+  }
+}
+
 export default {
   // Run hourly jobs independently. Log each failure, then throw so cron failure alerts fire.
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
@@ -93,6 +187,8 @@ export default {
       cleanup: cleanExpiredData,
       // Keep weekly series 12 weeks ahead.
       schedule_top_up: topUpSeries,
+      // Stored YouTube API data must not outlive its refresh window.
+      youtube_expiry: expireYoutubeConnections,
     };
     const names: string[] = Object.keys(jobs);
     const results = await Promise.allSettled(names.map((name: string) => jobs[name](env, controller.scheduledTime)));
@@ -119,29 +215,19 @@ export default {
       validateTestEnvironment(env);
       origin = getOrigin(env);
       if (new URL(request.url).origin !== origin) throw new HttpError(421, "Use the configured application URL.");
-      const key = await clientKey(request);
-      if (!(await env.REQUEST_LIMITER.limit({ key })).success)
-        throw new HttpError(429, "Too many requests. Please try again in a minute.");
       const path = new URL(request.url).pathname;
+      const key = await clientKey(request);
+      // Provider webhooks come from a few shared provider addresses, so the per-address limit would drop real
+      // deliveries. Only a failed check that a forger causes (a bad signature, size, method or query) counts against
+      // the limit. A stale or unparsable signed Twitch delivery does not: only Twitch has our secret. For Kick, a
+      // stale or unparsable copy and a repeated message id do count: Kick signs every app's webhooks with one key.
+      // A forged request still costs a body read and a signature check. The ingest object's admission buckets
+      // bound signed deliveries.
+      const hook = path === "/hooks/twitch" || path === "/hooks/kick";
+      if (!hook && !(await env.REQUEST_LIMITER.limit({ key })).success)
+        throw new HttpError(429, "Too many requests. Please try again in a minute.");
       if (path !== "/__test") await requireTestAccess(request, env);
-      const live = /^\/api\/live\/([a-z0-9_]{3,30})$/.exec(path);
-      const calendar = /^\/@([a-z0-9_]{3,30})\/schedule\.ics$/.exec(path);
-      if (path === "/__test") {
-        response = await testEnvironmentResponse(request, env);
-      } else if (path === "/sitemap.xml") {
-        response = await sitemapResponse(request, env);
-      } else if (calendar) {
-        response = await calendarResponse(request, env, calendar[1], origin);
-      } else if (live) {
-        response = await liveResponse(request, env, live[1], key, nonce, responseHeaders);
-      } else if (path.startsWith("/images/")) {
-        if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
-        response = await serveImage(env, path.slice("/images/".length), request.method);
-      } else {
-        const context = new RouterContextProvider();
-        context.set(appContext, { env, nonce, responseHeaders, requestId });
-        response = await handler(request, context);
-      }
+      response = await routeResponse(request, path, key, { env, nonce, responseHeaders, requestId }, origin);
     } catch (error) {
       response = errorResponse(error, request, requestId);
       origin = "https://invalid.invalid";
@@ -149,6 +235,7 @@ export default {
     const secured = securityHeaders(response, request, nonce, origin, import.meta.env.DEV);
     if (env.APP_ENV === "test") secured.headers.set("X-Robots-Tag", "noindex, nofollow");
     secured.headers.set("X-Request-ID", requestId);
+    secured.headers.set(BINARY_LABELS_COMPATIBILITY_HEADER, BINARY_LABELS_COMPATIBILITY_VERSION);
     for (const value of responseHeaders.getSetCookie()) secured.headers.append("Set-Cookie", value);
     return secured;
   },

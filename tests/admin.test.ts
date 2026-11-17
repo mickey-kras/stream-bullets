@@ -99,6 +99,10 @@ beforeAll(async (): Promise<void> => {
   env = {
     DB: database.db,
     IMAGES: database.bucket,
+    CHANNEL_INGEST: {
+      idFromName: (name: string) => name,
+      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+    } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
       get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
@@ -768,6 +772,17 @@ describe("page moderation and the reports queue", (): void => {
     ).toBe(400);
     const search = await body<AdminPageList>(await asAdmin("GET", "admin/streamers?query=zed"));
     expect(search.pages.map((page) => page.handle)).toEqual(["zed_page"]);
+  });
+
+  it("keeps owner and system audit rows out of the admin page history", async (): Promise<void> => {
+    const freeze = await asAdmin("POST", `admin/streamers/${ids.page}`, { body: { action: "freeze", reason: "spam" } });
+    expect(freeze.status).toBe(200);
+    for (const action of ["channel_connected", "channel_expired", "overlay_key_regenerated"]) {
+      const entry = { targetKind: "streamer" as const, targetId: ids.page, streamerId: ids.page, action, actorId: null };
+      await auditStatement(env, entry).run();
+    }
+    const list = await body<AdminPageList>(await asAdmin("GET", "admin/streamers"));
+    expect(list.pages.find((page) => page.id === ids.page)?.history.map((event) => event.action)).toEqual(["freeze"]);
   });
 
   it("marks and clears the official page with an audit row, and pins it in the directory (R14)", async (): Promise<void> => {

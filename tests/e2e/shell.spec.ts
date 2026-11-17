@@ -153,7 +153,7 @@ test("headers keep every label on one line at 390px", async ({ browser }) => {
   await close(context);
 });
 
-test("the footer keeps touch controls on the frame at desktop and phone widths", async ({ page }) => {
+test("the compact footer keeps touch controls at desktop and phone widths", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/@test_host");
   const footer = page.getByRole("contentinfo");

@@ -1,0 +1,353 @@
+/* Composition editor on Overlay control. The preview reuses .ov-frame / .ov-scaler (the frame of the orientation,
+   scaled by --ov-scale). Boxes inside the scaler use design pixels; their outlines divide by --ov-scale. */
+
+.ov-comp {
+  max-width: 1300px;
+  margin: 32px auto 0;
+  display: grid;
+  gap: 12px;
+}
+.ov-comp-head h2 {
+  margin: 0;
+}
+.ov-comp-head p {
+  margin: 4px 0 0;
+}
+.ov-comp-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: 16px 24px;
+  align-items: start;
+}
+.ov-comp-stage {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.ov-comp-help {
+  margin: 0;
+}
+/* A note, not an error: the layout still saves. */
+.ov-comp-overlap {
+  padding: 6px 10px;
+  border-inline-start: 3px solid var(--gold);
+  font-size: 0.9375rem;
+}
+/* The note's live region stays mounted; empty, it takes no space. */
+.ov-comp-overlap:empty {
+  padding: 0;
+  border: 0;
+}
+
+/* ---------- Preview background ---------- */
+.ov-comp-frame {
+  border-color: var(--gold);
+}
+.ov-comp-frame[data-background="game"] {
+  background: #20140c;
+}
+/* A sample game scene in CSS only: dusk sky, sun, far ridges, near dunes, a road and a HUD. */
+.ov-comp-game {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 70% 46%, #ffd77a 0 70px, rgb(255 190 90 / 0.55) 71px 120px, transparent 260px),
+    linear-gradient(180deg, #2b1a3c 0%, #7a3b4a 32%, #d9764a 52%, #f2b25c 60%, #6b4a2e 61%, #3a2718 100%);
+}
+.ov-comp-game::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 420px;
+  height: 260px;
+  background: linear-gradient(180deg, #4b2f3b, #2c1d22);
+  clip-path: polygon(
+    0 70%,
+    8% 40%,
+    15% 55%,
+    24% 20%,
+    33% 50%,
+    42% 35%,
+    52% 60%,
+    61% 25%,
+    72% 52%,
+    80% 30%,
+    90% 58%,
+    100% 38%,
+    100% 100%,
+    0 100%
+  );
+}
+.ov-comp-game::after {
+  content: "";
+  position: absolute;
+  inset: 600px 0 0;
+  background:
+    repeating-linear-gradient(170deg, rgb(0 0 0 / 0.1) 0 30px, transparent 30px 110px),
+    linear-gradient(180deg, #8a5a32, #4a2f1a);
+  clip-path: polygon(0 18%, 30% 4%, 62% 12%, 100% 2%, 100% 100%, 0 100%);
+}
+
+/* ---------- Layout grid (layout-grid.tsx) ----------
+   The grid boxes sit in the scaler in design pixels: a cell is 120 px. Lines and labels divide by --ov-scale. */
+.ov-comp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.ov-comp-bar .field {
+  margin: 0;
+}
+/* The vertical frame fits the screen height between the site header and the page bottom: about 140 px on a wide
+   screen, and about 310 px with the phone Take dock (header 119 px, and a dock of up to 168 px at 390 × 844 when its
+   title wraps in German or Russian). It never gets narrower than 200 px. */
+.ov-comp-frame[data-orientation="vertical"] {
+  --ov-comp-chrome: 140px;
+  aspect-ratio: 9 / 16;
+  width: 100%;
+  max-width: min(100%, 420px, max(200px, calc((100dvh - var(--ov-comp-chrome)) * 9 / 16)));
+  justify-self: center;
+}
+@media (max-width: 56.25em) {
+  .ov-comp-frame[data-orientation="vertical"] {
+    --ov-comp-chrome: 310px;
+  }
+}
+.ov-grid-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.18) calc(1px / var(--ov-scale, 1)), transparent 0),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.18) calc(1px / var(--ov-scale, 1)), transparent 0);
+  background-size: 120px 120px;
+}
+.ov-grid-box {
+  position: absolute;
+  z-index: 5;
+  box-sizing: border-box;
+  display: grid;
+  align-content: space-between;
+  justify-items: start;
+  border: calc(2px / var(--ov-scale, 1)) solid var(--gold);
+  pointer-events: none;
+}
+.ov-grid-box[data-off] {
+  border-style: dashed;
+  opacity: 0.7;
+}
+.ov-grid-box[data-grid-box="characters"] {
+  background: repeating-linear-gradient(135deg, rgb(242 210 46 / 0.08) 0 24px, transparent 24px 48px);
+}
+.ov-grid-box[data-selected] {
+  outline: calc(3px / var(--ov-scale, 1)) solid var(--cream);
+  outline-offset: calc(-6px / var(--ov-scale, 1));
+}
+.ov-grid-box[data-lifted] {
+  opacity: 0.35;
+}
+.ov-grid-tag {
+  padding: calc(2px / var(--ov-scale, 1)) calc(6px / var(--ov-scale, 1));
+  background: var(--gold);
+  color: var(--on-gold);
+  font: 700 calc(12px / var(--ov-scale, 1)) / 1.3 var(--body);
+  /* A narrow box wraps the label instead of letting it spill past the box. */
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+.ov-grid-preview {
+  position: absolute;
+  z-index: 6;
+  box-sizing: border-box;
+  border: calc(3px / var(--ov-scale, 1)) dashed var(--gold);
+  background: rgb(212 176 42 / 0.2);
+  pointer-events: none;
+}
+.ov-grid-preview[data-invalid] {
+  border-color: var(--error);
+  background: rgb(226 87 76 / 0.25);
+}
+.ov-grid-app {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+}
+.ov-grid-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+.ov-grid-input:focus-visible {
+  outline: calc(3px / var(--ov-scale, 1)) solid var(--focus-ring, var(--gold));
+  outline-offset: calc(-3px / var(--ov-scale, 1));
+  box-shadow: none;
+}
+.ov-grid-cursor {
+  position: absolute;
+  box-sizing: border-box;
+  border: calc(3px / var(--ov-scale, 1)) solid var(--cream);
+  box-shadow: 0 0 0 calc(2px / var(--ov-scale, 1)) #000;
+}
+.ov-grid-status {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 0.9375rem;
+}
+.ov-grid-status[data-bad] {
+  color: var(--error);
+}
+.ov-comp-test {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+/* ---------- Layer controls ---------- */
+.ov-comp-layers {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.ov-comp-layer {
+  margin: 0;
+  padding: 12px 14px 14px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-width: 0;
+}
+.ov-comp-layer legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+.ov-comp-layer .choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.ov-comp-layer .choice:has(:disabled) {
+  color: var(--muted);
+}
+.ov-comp-note {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+/* ---------- Characters controls (characters-controls.tsx) ---------- */
+.ov-chars {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.ov-chars-timeout {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  margin: 0;
+}
+.ov-chars-timeout label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.ov-chars-timeout input {
+  width: 6em;
+  padding: 8px 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--field);
+}
+.ov-chars-timeout input[aria-invalid="true"] {
+  border-color: var(--error);
+}
+.ov-chars-invalid {
+  margin: 0;
+  color: var(--error);
+  font-size: 0.8125rem;
+}
+.ov-chars-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ov-chars-title {
+  margin: 4px 0 0;
+  font-size: 0.9375rem;
+}
+.ov-chars-list {
+  display: grid;
+  gap: 4px;
+  max-height: 16rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.ov-chars-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ov-chars-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ov-comp-status {
+  display: block;
+  margin: 0;
+  min-height: 1.25em;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.ov-comp-error {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  color: var(--error);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 60em) {
+  .ov-comp-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Per-layer overlay URLs (overlay-link.tsx) ---------- */
+.ov-url-layers {
+  display: grid;
+  gap: 8px;
+}
+.ov-url-layer {
+  display: grid;
+  gap: 4px;
+}
+.ov-url .ov-url-caption {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.ov-url .ov-url-size {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}

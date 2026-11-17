@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RouterContextProvider } from "react-router";
-import { appContext } from "../app/env";
+import { appContext, type AppEnv } from "../app/env";
+import { notifyActivityPage, notifyOverlayKey } from "../app/server/live.server";
 import { action } from "../app/routes/api";
 
 vi.mock("../app/server/auth.server", () => ({
@@ -23,6 +24,10 @@ async function mutate(fetchRoom: () => Promise<Response>): Promise<Response> {
       IMAGES: {} as R2Bucket,
       REQUEST_LIMITER: {} as RateLimit,
       BETTER_AUTH_SECRET: "test-secret",
+      CHANNEL_INGEST: {
+        idFromName: (name: string) => name,
+        get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+      } as unknown as DurableObjectNamespace,
       POLL_ROOMS: {
         idFromName: vi.fn(),
         idFromString: vi.fn(),
@@ -69,5 +74,42 @@ describe("live notification failure recovery", () => {
     const response = await mutate(() => Promise.reject(new Error("secret credential")));
     expect(response.status).toBe(200);
     expect(log.mock.calls).toEqual([["live_refresh_failed", { cause: "unexpected_error" }]]);
+  });
+});
+
+describe("overlay key revocation notices", () => {
+  function envWith(ingestFetch: () => Promise<Response>): AppEnv {
+    const namespace = { idFromName: (name: string) => name, get: () => ({ fetch: ingestFetch }) };
+    return {
+      POLL_ROOMS: { idFromName: (name: string) => name, get: () => ({ fetch: async () => new Response(null, { status: 204 }) }) },
+      CHANNEL_INGEST: namespace,
+    } as unknown as AppEnv;
+  }
+
+  async function settle(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  it("asks the activity feed to close the old key's sockets, and logs failures without details", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const calls: string[] = [];
+    notifyOverlayKey(
+      envWith(async () => {
+        calls.push("ingest");
+        return new Response(null, { status: 204 });
+      }),
+      "streamer",
+    );
+    await settle();
+    expect(calls).toEqual(["ingest"]);
+    notifyOverlayKey(envWith(async () => new Response(null, { status: 500 })), "streamer");
+    notifyOverlayKey(envWith(() => Promise.reject(new TypeError("secret"))), "streamer");
+    notifyActivityPage(envWith(() => Promise.reject(new Error("secret"))), "streamer");
+    await settle();
+    expect(log.mock.calls).toEqual([
+      ["activity_notify_failed", { path: "overlay-key", status: 500 }],
+      ["activity_notify_failed", { path: "overlay-key", cause: "transport_error" }],
+      ["activity_notify_failed", { path: "page-status", cause: "unexpected_error" }],
+    ]);
   });
 });

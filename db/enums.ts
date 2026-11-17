@@ -52,6 +52,11 @@ export const OVERLAY_POSITIONS = ["lower", "top", "corner", "center"] as const;
 export const OVERLAY_SIZES = ["s", "m", "l"] as const;
 export const OVERLAY_MESSAGE_STYLES = ["info", "hype"] as const;
 
+/** Streaming platforms a page can connect for its activity feed (docs/channel-connections.md). */
+export const CHANNEL_PLATFORMS = ["twitch", "youtube", "kick"] as const;
+/** `needs_reauth`: the provider revoked access or the refresh failed; the owner must reconnect. */
+export const CHANNEL_STATUSES = ["active", "needs_reauth", "error"] as const;
+
 export const MASH_PHASES = ["setup", "countdown", "live", "finished"] as const;
 
 // SQL `IN (...)` values must be constants, never user input.

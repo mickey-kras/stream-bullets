@@ -2,6 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { build } from "esbuild";
 import { Miniflare } from "miniflare";
 import { fileURLToPath } from "node:url";
+import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
 import type { LiveSnapshot } from "../app/types";
 import { LIVE_SCHEMA, liveRows } from "./helpers/room";
 
@@ -318,17 +319,17 @@ describe("public poll updates", (): void => {
   it("bounds snapshots to fifty polls and excludes topics and other streamers", async (): Promise<void> => {
     const inserts = Array.from({ length: 51 }, (_, index) =>
       database
-        .prepare("INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
+        .prepare("INSERT INTO entries (id, streamer_id, title, kind, options, ends_at, revealed, created_at) VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
         .bind(crypto.randomUUID(), streamerId, `Poll ${index}`, "choice", '["A","B"]', index),
     );
     inserts.push(
       database
-        .prepare("INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
+        .prepare("INSERT INTO entries (id, streamer_id, title, kind, options, ends_at, revealed, created_at) VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
         .bind(crypto.randomUUID(), streamerId, "Topic", "topic", "[]", 100),
     );
     inserts.push(
       database
-        .prepare("INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
+        .prepare("INSERT INTO entries (id, streamer_id, title, kind, options, ends_at, revealed, created_at) VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
         .bind(crypto.randomUUID(), crypto.randomUUID(), "Private scope", "choice", '["A","B"]', 100),
     );
     await database.batch(inserts);
@@ -346,7 +347,7 @@ describe("public poll updates", (): void => {
     await database.batch(
       Array.from({ length: 50 }, (_, index) =>
         database
-          .prepare("INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 1, ?)")
+          .prepare("INSERT INTO entries (id, streamer_id, title, kind, options, ends_at, revealed, created_at) VALUES (?, ?, ?, ?, ?, NULL, 1, ?)")
           .bind(
             index === 49 ? newest : crypto.randomUUID(),
             streamerId,
@@ -626,6 +627,8 @@ describe("overlay updates", (): void => {
       position: "top",
       size: "l",
       message: "BRB 5 min",
+      layers: DEFAULT_LAYERS,
+      chatTestUntil: 0,
       revision: 3,
     });
     expect((await update).overlay).not.toHaveProperty("preview");

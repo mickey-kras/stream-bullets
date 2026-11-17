@@ -27,12 +27,21 @@ const ranges = {
   oauth: [[150, 153]],
   landing: [[154, 155]],
   "board-navigation": [[160, 163]],
+  "discussion-notifications": [[164, 169]],
+  "mobile-discussion": [[170, 172]],
   a11y: [[175, 179]],
   i18n: [
     [180, 181],
     [232, 235],
   ],
   roles: [[200, 219]],
+  "overlay-composition": [
+    [240, 244],
+    [250, 250],
+  ],
+  "composition-editor": [[245, 249]],
+  characters: [[182, 189]],
+  "compact-layout": [[220, 231]],
 } as const satisfies Record<string, readonly (readonly [number, number])[]>;
 
 export type Spec = keyof typeof ranges;

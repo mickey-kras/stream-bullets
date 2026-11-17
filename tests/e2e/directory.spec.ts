@@ -130,6 +130,8 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
 });
 
 test("visitors can open real content from the featured community", async ({ page }) => {
+  // Software WebGL competes with the DOM assertions in CI.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("link", { name: "Browse streamers", exact: true }).click();
   const featured = page.getByRole("region", { name: /^StreamBullets/ });

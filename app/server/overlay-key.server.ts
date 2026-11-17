@@ -24,10 +24,14 @@ export function newOverlayKey(): string {
     .replaceAll("=", "");
 }
 
+// Bytes as lowercase hex.
+export function hex(bytes: ArrayBuffer | Uint8Array): string {
+  return Array.from(new Uint8Array(bytes), (byte: number): string => byte.toString(16).padStart(2, "0")).join("");
+}
+
 // The hex SHA-256 of a key, as stored.
 export async function hashOverlayKey(key: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
-  return Array.from(new Uint8Array(digest), (byte: number): string => byte.toString(16).padStart(2, "0")).join("");
+  return hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key)));
 }
 
 // Compares two strings in time that depends only on their lengths, never on where they first differ.

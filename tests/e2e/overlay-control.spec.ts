@@ -143,6 +143,133 @@ test("overlay control is for the page owner only", async ({ browser, page }) => 
   await Promise.all([close(viewer), close(owner)]);
 });
 
+test("source pickers preserve preview, hide poll results and recover from a failed save", async ({ browser }) => {
+  const streamer = "(SELECT id FROM streamers WHERE handle='feature_host')";
+  const topicId: string = randomUUID();
+  const pollId: string = randomUUID();
+  const now: number = Date.now();
+  await runSql("overlay-picker-seed", [
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${topicId}',${streamer},(SELECT id FROM user WHERE name='featureowner'),'topic','Overlay picker topic','Preview only','Tech & setups','[]',${now},0);`,
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${pollId}',${streamer},(SELECT id FROM user WHERE name='featureowner'),'choice','Overlay picker poll','','','["Tea","Coffee"]',${now},0);`,
+    `DELETE FROM app_rate_limits WHERE key='content:'||(SELECT id FROM user WHERE name='featureowner');`,
+  ]);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 90));
+  // This case owns 203.0.113.140 so asset requests do not share another case's quota.
+  await owner.setExtraHTTPHeaders({ "CF-Connecting-IP": "203.0.113.140", Origin: origin });
+  try {
+    const control = await newPage(owner);
+    await control.setViewportSize({ width: 1440, height: 1000 });
+    await control.goto("/overlay-control");
+    const preview = control.locator('[data-ov-monitor="prev"]');
+    const air = control.locator('[data-ov-monitor="air"]');
+    await control.getByRole("combobox", { name: "Topic", exact: true }).click();
+    await control.getByRole("option", { name: "Overlay picker topic", exact: true }).click();
+    await expect(preview).toContainText("Overlay picker topic");
+    await expect(air).not.toContainText("Overlay picker topic");
+    await preview.getByRole("button", { name: "Enlarge the preview" }).click();
+    await expect(control.locator(".ov-grid.enlarge-prev")).toBeVisible();
+    await preview.getByRole("button", { name: "Enlarge the preview" }).click();
+    await expect(control.locator(".ov-grid.enlarge-prev")).toHaveCount(0);
+    await air.getByRole("button", { name: "Enlarge the on-air monitor" }).click();
+    await expect(control.locator(".ov-grid.enlarge-air")).toBeVisible();
+    await air.getByRole("button", { name: "Enlarge the on-air monitor" }).click();
+
+    // Source radios are controlled by the saved API response, so wait for that state after selecting.
+    await control.getByRole("radio", { name: /A specific poll/ }).click();
+    await control.getByRole("combobox", { name: "Poll", exact: true }).click();
+    await expect(control.getByRole("option", { name: "Mash Battle: Which boss first?", exact: true })).toBeVisible();
+    await control.getByRole("option", { name: "Overlay picker poll", exact: true }).click();
+    await expect(control.getByRole("radio", { name: /A specific poll/ })).toBeChecked();
+    await expect(preview.getByRole("heading", { name: "Overlay picker poll" })).toBeVisible();
+    await control.getByRole("checkbox", { name: "Show results", exact: true }).click();
+    await expect(control.getByRole("checkbox", { name: "Show results", exact: true })).not.toBeChecked();
+    await expect(preview).toContainText("Results hidden");
+    await control.getByRole("button", { name: /Take/ }).click();
+    await expect(air).toContainText("Overlay picker poll");
+    await expect(air).toContainText("Results hidden");
+
+    await control.getByRole("radio", { name: /^Community card/ }).click();
+    await control.getByRole("combobox", { name: "Community card", exact: true }).click();
+    await control.getByRole("option", { name: "Join the Discord", exact: true }).click();
+    await expect(control.getByRole("radio", { name: /^Community card/ })).toBeChecked();
+    await expect(preview).toContainText("discord.gg/feature_host");
+    await expect(air).toContainText("Overlay picker poll");
+    await control.getByRole("button", { name: "Corner", exact: true }).click();
+    await expect(preview.locator(".ov-stage")).toHaveClass(/pos-corner/);
+    await control.route("**/api/overlay", async (route) => {
+      if (route.request().method() !== "POST") return route.continue();
+      await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
+    });
+    await control.getByRole("button", { name: "L", exact: true }).click();
+    await expect(control.locator(".sb-toast")).toHaveText("The request failed. Please try again.");
+    await expect(control.getByRole("button", { name: "L", exact: true })).toBeEnabled();
+    await expect(preview.locator(".ov-stage")).toHaveClass(/size-m/);
+    await control.unroute("**/api/overlay");
+    await control.getByRole("button", { name: "L", exact: true }).click();
+    await expect(preview.locator(".ov-stage")).toHaveClass(/size-l/);
+    await control.getByRole("button", { name: "Center", exact: true }).click();
+    await expect(preview.locator(".ov-stage")).toHaveClass(/pos-center/);
+    await control.getByRole("radio", { name: /^Support banner/ }).click();
+    await expect(control.getByRole("radio", { name: /^Support banner/ })).toBeChecked();
+    await expect(preview.locator('[data-overlay-source="support"]')).toContainText("ko-fi.com/feature_host");
+  } finally {
+    await close(owner);
+    await runSql("overlay-picker-cleanup", [`DELETE FROM entries WHERE id IN ('${topicId}','${pollId}');`]);
+  }
+});
+
+test("channel conflicts reload the list and expired authentication leaves a sign-in prompt", async ({ browser }) => {
+  const connectionId: string = randomUUID();
+  const now: number = Date.now();
+  await runSql("channel-conflict-seed", [
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','coverage-kick','Conflict Kick','','active',NULL,${now},${now},NULL);`,
+  ]);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 91));
+  // This case owns 203.0.113.141.
+  await owner.setExtraHTTPHeaders({ "CF-Connecting-IP": "203.0.113.141", Origin: origin });
+  try {
+    const control = await newPage(owner);
+    await control.goto("/overlay-control");
+    const kick = control.locator('[data-channel="kick"]');
+    await expect(kick).not.toContainText("Last activity:");
+    await control.route("**/api/channels/kick", async (route) => {
+      await route.fulfill({ status: 409, json: { error: "The connection changed. Try again." } });
+    });
+    await kick.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
+    await control
+      .getByRole("dialog", { name: "Disconnect Kick?" })
+      .getByRole("button", { name: "Disconnect Kick", exact: true })
+      .click();
+    await expect(control.getByRole("dialog", { name: "Disconnect Kick?" })).toBeHidden();
+    await expect(control.locator(".sb-toast").filter({ hasText: "The connection changed. Try again." })).toBeVisible();
+    await expect(kick.getByRole("button", { name: "Disconnect Kick", exact: true })).toBeEnabled();
+    await control.unroute("**/api/channels/kick");
+    // Another tab removed it before this tab confirmed its old view.
+    await runSql("channel-conflict-removed", [`DELETE FROM channel_connections WHERE id='${connectionId}';`]);
+    await control.route("**/api/channels/kick", async (route) => {
+      await route.fulfill({ status: 404, json: { error: "This channel is no longer connected." } });
+    });
+    await kick.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
+    await control
+      .getByRole("dialog", { name: "Disconnect Kick?" })
+      .getByRole("button", { name: "Disconnect Kick", exact: true })
+      .click();
+    await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeFocused();
+    await expect(kick).toContainText("Not connected");
+    await control.route("**/api/channels/kick/connect", async (route) => {
+      await route.fulfill({ status: 401, json: { error: "Sign in again.", code: "reauth_required" } });
+    });
+    await kick.getByRole("button", { name: "Connect Kick", exact: true }).click();
+    await expect(
+      control.getByRole("alert").filter({ hasText: "Sign in again to change channel connections." }),
+    ).toBeVisible();
+    await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeEnabled();
+  } finally {
+    await close(owner);
+    await runSql("channel-conflict-cleanup", [`DELETE FROM channel_connections WHERE id='${connectionId}';`]);
+  }
+});
+
 test("a monitor shows its stage only once it is scaled to the frame", async ({ browser }) => {
   const phone = { viewport: { width: 390, height: 844 } };
   // Without JavaScript, hide the unscaled stage to prevent overflow.
@@ -156,6 +283,56 @@ test("a monitor shows its stage only once it is scaled to the frame", async ({ b
   await page.goto("/overlay-control");
   await expect(page.locator('[data-ov-monitor="air"] .ov-scaler')).toBeVisible();
   await close(owner);
+});
+
+test("an unattended OBS error stays transparent, retries and reloads into recovered content", async ({ browser }) => {
+  // This case owns 203.0.113.142. A missing poll is a real loader failure, with no shared fixture damage.
+  const context = await browser.newContext({
+    baseURL: origin,
+    extraHTTPHeaders: { "CF-Connecting-IP": "203.0.113.142" },
+  });
+  try {
+    const page = await newPage(context);
+    const now: number = Date.now();
+    await page.clock.install({ time: now });
+    await page.clock.pauseAt(now + 60_000);
+    let failedLoads: number = 0;
+    let recoveredDocuments: number = 0;
+    await page.route("**/@feature_host/overlay*", async (route) => {
+      const request = route.request();
+      if (failedLoads < 7) {
+        failedLoads += 1;
+        await route.continue();
+        return;
+      }
+      // The service recovers after the initial failure and six failed data retries.
+      const url = new URL(request.url());
+      url.searchParams.delete("poll");
+      const response = await route.fetch({ url: url.href });
+      if (request.isNavigationRequest()) recoveredDocuments += 1;
+      await route.fulfill({ response });
+    });
+    expect((await page.goto(`/@feature_host/overlay?poll=${randomUUID()}`))?.status()).toBe(404);
+    const screen = page.locator("main.overlay-screen");
+    await expect(screen).toHaveAttribute("aria-busy", "true");
+    await expect(screen).toBeEmpty();
+    for (let attempt: number = 1; attempt <= 6; attempt += 1) {
+      const response = page.waitForResponse((result) => new URL(result.url()).pathname.endsWith("/overlay.data"));
+      await page.clock.runFor(60_001);
+      expect((await response).status()).toBe(404);
+      await expect.poll(() => failedLoads).toBe(attempt + 1);
+      await expect(screen).toBeEmpty();
+    }
+    const reload = page.waitForEvent("domcontentloaded");
+    await page.clock.runFor(60_001);
+    await reload;
+    await expect.poll(() => recoveredDocuments).toBe(1);
+    await expect(page.locator("[data-overlay-type]")).toBeVisible();
+    await expect(screen).not.toHaveAttribute("aria-busy", "true");
+    await expect(page.getByRole("button", { name: /retry|reload/i })).toHaveCount(0);
+  } finally {
+    await close(context);
+  }
 });
 
 test("the control page moves Up next on when the stream it shows starts", async ({ browser }) => {
@@ -182,6 +359,85 @@ test("the control page moves Up next on when the stream it shows starts", async 
       `DELETE FROM stream_events WHERE id='${id}';`,
       preview(`json_object('type','topic','ref',${topic})`),
     ]);
+    await close(owner);
+  }
+});
+
+test("the owner sees each channel's connection health and the result of a connection attempt", async ({ browser }) => {
+  const page = "(SELECT id FROM streamers WHERE handle='feature_host')";
+  const youtubeId = randomUUID();
+  const kickId = randomUUID();
+  const now = Date.now();
+  const row = (id: string, platform: string, external: string, name: string, status: string, code: string): string =>
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${id}',${page},'${platform}','${external}','${name}','','${status}','${code}',${now},${now},${now});`;
+  await runSql("channels-seed", [
+    row(youtubeId, "youtube", "UCe2e", "Feature Tube", "error", "quota_exhausted"),
+    row(kickId, "kick", "4242", "Feature Kick", "needs_reauth", "authorization_revoked"),
+    // Disconnect needs a sign-in from the last 10 minutes; a long browser run outlasts the seeded session time.
+    `UPDATE session SET created_at=${now} WHERE user_id=(SELECT id FROM user WHERE name='featureowner');`,
+    // The overlay link test uses the same account's content quota; start this test with a clear one.
+    `DELETE FROM app_rate_limits WHERE key='content:'||(SELECT id FROM user WHERE name='featureowner');`,
+  ]);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 93));
+  try {
+    const control = await newPage(owner);
+    await control.goto("/overlay-control?channel=kick&result=channel_taken");
+    const section = control.getByRole("region", { name: "Channels" });
+    const banner = section.locator(".ch-result");
+    // The result is read once: the banner is a status region with focus, and no toast repeats it.
+    await expect(banner).toHaveText("This Kick channel is already connected to another StreamBullets page.");
+    // An <output> element: a status region by its own role.
+    await expect(section.getByRole("status").and(banner)).toBeVisible();
+    await expect(banner).toBeFocused();
+    await expect(control.locator(".toast").filter({ hasText: "already connected" })).toHaveCount(0);
+    // It leaves the address, so a reload does not show it again.
+    await expect(control).toHaveURL(/\/overlay-control$/);
+    const youtube = section.locator('[data-channel="youtube"]');
+    // YouTube is not set up here, so its notes about the YouTube limits stay hidden.
+    await expect(youtube).not.toContainText("Chat starts when an overlay");
+    await expect(youtube).toContainText("Connected as Feature Tube");
+    // YouTube is not set up on this test server, so its card gives no reconnect advice.
+    await expect(youtube.getByRole("alert")).toHaveCount(0);
+    await expect(youtube).toContainText("Last activity:");
+    await expect(section.getByText("This platform is not set up on this site yet.")).toHaveCount(2);
+    // Kick is set up: its card shows what happened and how to fix it.
+    const kick = section.locator('[data-channel="kick"]');
+    await expect(kick.getByRole("alert")).toHaveText("Access ended. Reconnect to keep receiving chat.");
+    await expect(kick.getByRole("button", { name: "Reconnect Kick", exact: true })).toBeVisible();
+    // A failed provider handoff restores the controls and clears the callback banner.
+    await control.route("**/api/channels/kick/reconnect", async (route) => {
+      await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
+    });
+    await kick.getByRole("button", { name: "Reconnect Kick", exact: true }).click();
+    await expect(control.locator(".sb-toast")).toHaveText("The request failed. Please try again.");
+    await expect(kick.getByRole("button", { name: "Reconnect Kick", exact: true })).toBeEnabled();
+    await expect(banner).toHaveCount(0);
+    await control.unroute("**/api/channels/kick/reconnect");
+    await kick.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
+    await control
+      .getByRole("dialog", { name: "Disconnect Kick?" })
+      .getByRole("button", { name: "Cancel", exact: true })
+      .click();
+    await expect(kick.getByRole("button", { name: "Disconnect Kick", exact: true })).toBeFocused();
+    await expect(kick).toContainText("Connected as Feature Kick");
+    // Disconnect: after the confirmation, focus lands on the platform's Connect button.
+    await kick.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
+    const dialog = control.getByRole("dialog", { name: "Disconnect Kick?" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Disconnect Kick", exact: true }).click();
+    await expect(dialog).toBeHidden();
+    await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeFocused();
+    await expect(kick).toContainText("Not connected");
+    // Kick could not confirm the revoke (the stored tokens were seeded without any), so the advice stays.
+    await expect(kick).toContainText("Remove StreamBullets in your Kick settings.");
+    // A platform the site does not offer has no Connect button: focus goes to the section heading.
+    await youtube.getByRole("button", { name: "Disconnect YouTube", exact: true }).click();
+    const youtubeDialog = control.getByRole("dialog", { name: "Disconnect YouTube?" });
+    await youtubeDialog.getByRole("button", { name: "Disconnect YouTube", exact: true }).click();
+    await expect(youtube).toContainText("Not connected");
+    await expect(control.locator("#channels-title")).toBeFocused();
+  } finally {
+    await runSql("channels-seed", [`DELETE FROM channel_connections WHERE id IN ('${youtubeId}','${kickId}');`]);
     await close(owner);
   }
 });

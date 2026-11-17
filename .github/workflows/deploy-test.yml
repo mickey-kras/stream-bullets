@@ -52,22 +52,12 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: 4c8f932bbf73d6901fbb40f559f6e1f4
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          TEST_ACCESS_SECRET: ${{ secrets.TEST_ACCESS_SECRET }}
           REVISION: ${{ inputs.revision }}
         run: |
           set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN"
-          node --input-type=module <<'JS'
-          import { writeFileSync } from 'node:fs';
-          const { BETTER_AUTH_SECRET, TEST_ACCESS_SECRET, RUNNER_TEMP } = process.env;
-          if (!BETTER_AUTH_SECRET || BETTER_AUTH_SECRET.length < 32 || !TEST_ACCESS_SECRET || TEST_ACCESS_SECRET.length < 32 || BETTER_AUTH_SECRET === TEST_ACCESS_SECRET)
-            throw new Error('Configure two distinct test-only secrets of at least 32 characters.');
-          writeFileSync(`${RUNNER_TEMP}/test-secrets.json`, JSON.stringify({ BETTER_AUTH_SECRET, TEST_ACCESS_SECRET }), { mode: 0o600 });
-          JS
-          trap 'rm -f "$RUNNER_TEMP/test-secrets.json"' EXIT
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo '::error::Set CLOUDFLARE_API_TOKEN in the test environment.'; exit 1; }
           pnpm exec wrangler d1 migrations apply DB --env test --remote
-          pnpm exec wrangler deploy --config build/server/wrangler.json --secrets-file "$RUNNER_TEMP/test-secrets.json" --var "DEPLOYED_COMMIT:$REVISION" --message "test commit $REVISION"
+          pnpm exec wrangler deploy --config build/server/wrangler.json --var "DEPLOYED_COMMIT:$REVISION" --message "test commit $REVISION"
       - name: Verify deployed revision
         env:
           REVISION: ${{ inputs.revision }}

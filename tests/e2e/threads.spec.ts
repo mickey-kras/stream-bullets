@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { expect, test } from "./coverage";
 import { accounts, runSql, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
+import { z } from "zod";
 
 async function seedThreads(): Promise<string> {
   const users = await accounts();
@@ -74,4 +75,140 @@ test("replies collapse after two, removed comments keep their thread, one reply 
   const again = page.locator("article.comment").filter({ has: page.getByText("Reply number 2", { exact: true }) });
   await expect(again.locator(".reported-note")).toHaveCount(1);
   await close(context);
+});
+
+test("failed comment actions keep drafts and editors available for retry", async ({ browser }) => {
+  const entryId: string = await seedThreads();
+  const users = await accounts();
+  await runSql("threads-recovery-author", [
+    `DELETE FROM app_rate_limits WHERE key IN ('content:${users.frozenowner.id}','write:${users.frozenowner.id}');`,
+    `UPDATE entry_comments SET author_id='${users.frozenowner.id}' WHERE entry_id='${entryId}' AND author_id='${users.viewer.id}';`,
+  ]);
+  const context = await signedIn(browser, "frozenowner", clientIp("threads", 100));
+  // This recovery case owns 203.0.113.102 to isolate its request quota.
+  await context.setExtraHTTPHeaders({ Origin: "http://localhost:5173", "CF-Connecting-IP": "203.0.113.102" });
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const rootId: string | null = await page
+      .locator("article.comment")
+      .filter({
+        has: page.getByText("Root comment", { exact: true }),
+      })
+      .getAttribute("id");
+    if (!rootId) throw new Error("Missing root comment.");
+    const root = page.locator(`#${rootId}`);
+    let failedAction: string | null = "comment";
+    await page.route(/\/api\/(?:comments|streamers\/other_host)$/u, async (route) => {
+      if (route.request().method() === "POST") {
+        const { action } = z.object({ action: z.string() }).parse(route.request().postDataJSON());
+        if (action === failedAction) {
+          await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
+          return;
+        }
+      }
+      await route.continue();
+    });
+    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    await composer.fill("A recoverable comment draft.");
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    await expect(page.locator(".discussion > .form-error")).toHaveText("The request failed. Please try again.");
+    await expect(composer).toHaveValue("A recoverable comment draft.");
+    failedAction = null;
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    await expect(page.getByText("A recoverable comment draft.", { exact: true })).toBeVisible();
+    await expect(composer).toHaveValue("");
+
+    await root.getByRole("button", { name: "Edit", exact: true }).click();
+    const editor = root.getByRole("textbox", { name: "Edit comment", exact: true });
+    await expect(editor).toBeFocused();
+    await editor.fill("Cancelled edit");
+    await root.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(root.locator(".comment-text")).toHaveText("Root comment");
+    await expect(root.getByRole("button", { name: "Like comment by frozenowner", exact: true })).toBeFocused();
+    await root.getByRole("button", { name: "Edit", exact: true }).click();
+    await expect(editor).toHaveValue("Root comment");
+    await editor.fill("Root comment after retry");
+    failedAction = "edit";
+    await root.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(root.getByRole("alert")).toHaveText("The request failed. Please try again.");
+    await expect(editor).toHaveValue("Root comment after retry");
+    failedAction = null;
+    await root.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(root.locator(".comment-text")).toHaveText("Root comment after retry");
+
+    // A failed nested like is reconciled with the server rather than leaving its optimistic count.
+    const ownReply = page.locator("article.comment").filter({
+      has: page.getByText("Reply under a removed comment", { exact: true }),
+    });
+    const like = ownReply.getByRole("button", { name: "Like comment by frozenowner", exact: true });
+    failedAction = "like";
+    const rejectedLike = page.waitForResponse(
+      (response) => response.url().endsWith("/api/comments") && response.status() === 503,
+    );
+    await like.click();
+    await rejectedLike;
+    await expect(like).toHaveAttribute("aria-pressed", "false");
+    await expect(like).toHaveText("Like 0");
+    failedAction = null;
+    await like.click();
+    await expect(like).toHaveAttribute("aria-pressed", "true");
+    await expect(like).toHaveText("Like 1");
+
+    await ownReply.getByRole("button", { name: "Delete comment", exact: true }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(ownReply).toBeVisible();
+    await ownReply.getByRole("button", { name: "Delete comment", exact: true }).click();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await ownReply.getByRole("button", { name: "Delete comment", exact: true }).click();
+    failedAction = "delete";
+    await dialog.getByRole("button", { name: "Delete comment", exact: true }).click();
+    await expect(dialog.getByRole("alert")).toHaveText("The request failed. Please try again.");
+    await expect(ownReply).toBeVisible();
+    failedAction = null;
+    await dialog.getByRole("button", { name: "Delete comment", exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(ownReply).toHaveCount(0);
+  } finally {
+    await close(context);
+    await runSql("threads-recovery-cleanup", [`DELETE FROM entries WHERE id='${entryId}';`]);
+  }
+});
+
+test("signed-out readers can expand a removed-parent thread and return from sign in", async ({ browser }) => {
+  const entryId: string = await seedThreads();
+  // This read-only case owns 203.0.113.104 to isolate its request quota.
+  const context = await browser.newContext({
+    baseURL: "http://localhost:5173",
+    extraHTTPHeaders: { "CF-Connecting-IP": "203.0.113.104" },
+  });
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const removed = page.locator("li.thread").filter({
+      has: page.getByRole("article", { name: "Comment removed", exact: true }),
+    });
+    await removed.getByRole("button", { name: "Hide replies (1)", exact: true }).click();
+    await expect(removed.locator(".replies")).toBeHidden();
+    await removed.getByRole("button", { name: "Show 1 reply", exact: true }).click();
+    await expect(removed.getByText("Reply under a removed comment", { exact: true })).toBeVisible();
+    const root = page.locator("article.comment").filter({ has: page.getByText("Root comment", { exact: true }) });
+    await expect(root.getByRole("button", { name: "Like comment by viewer", exact: true })).toBeDisabled();
+    await expect(root.getByRole("button", { name: "Reply", exact: true })).toBeDisabled();
+    await expect(root.getByRole("button", { name: "Edit", exact: true })).toHaveCount(0);
+    const signIn = page.getByRole("button", { name: "Sign in to comment", exact: true });
+    await signIn.click();
+    const dialog = page.getByRole("dialog", { name: "Sign in or sign up", exact: true });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Close dialog", exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(signIn).toBeFocused();
+    await expect(root).toBeVisible();
+  } finally {
+    await close(context);
+    await runSql("threads-signed-out-cleanup", [`DELETE FROM entries WHERE id='${entryId}';`]);
+  }
 });

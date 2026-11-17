@@ -43,3 +43,12 @@ test("JSON-LD remains readable under the production CSP on page loads and naviga
     expect(await page.locator("html").getAttribute("data-csp-bypassed")).toBeNull();
   }
 });
+
+test("the overlay page allows emote images from the Twitch CDN and sends no referrer", async ({ page }) => {
+  const response = await page.goto("/@feature_host/overlay?layer=chat");
+  expect(response?.status()).toBe(200);
+  const policy: string = response?.headers()["content-security-policy"] ?? "";
+  const images: string = policy.split(";").find((part: string): boolean => part.trim().startsWith("img-src")) ?? "";
+  expect(images.trim().split(/\s+/)).toContain("https://static-cdn.jtvnw.net");
+  expect(response?.headers()["referrer-policy"]).toBe("no-referrer");
+});

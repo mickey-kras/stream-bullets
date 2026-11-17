@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { AppEnv } from "../env";
+import { EMOTE_HOSTS } from "../lib/activity";
 
 export class HttpError extends Error {
   // `code` is a stable, machine-readable reason (for example `step_up_required`) sent next to the message.
@@ -158,7 +159,10 @@ export function securityHeaders(
   const headers = new Headers(response.headers);
   headers.set("X-Content-Type-Options", "nosniff");
   // Overlay URLs carry secret keys; suppress Referer.
-  const overlayPage: boolean = /^\/@[^/]+\/overlay$/.test(new URL(request.url).pathname);
+  const pathname: string = new URL(request.url).pathname;
+  const overlayPage: boolean = /^\/@[^/]+\/overlay$/.test(pathname);
+  // The CSP applies per document, and in-app navigation reaches the composition preview without a new document.
+  const emoteHosts: string = EMOTE_HOSTS.map((host: string): string => ` https://${host}`).join("");
   headers.set("Referrer-Policy", overlayPage ? "no-referrer" : "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   headers.set("X-Frame-Options", "DENY");
@@ -168,7 +172,7 @@ export function securityHeaders(
       "default-src 'self'",
       `script-src 'self' 'nonce-${nonce}'${development ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' blob: data:",
+      `img-src 'self' blob: data:${emoteHosts}`,
       "font-src 'self'",
       `connect-src 'self' ${origin.replace(/^http/, "ws")}`,
       "object-src 'none'",

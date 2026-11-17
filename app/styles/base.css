@@ -1,7 +1,7 @@
-/* Element defaults, focus, page frame, noise and icons. */
+/* Element defaults, focus, noise and icons. */
 * { box-sizing:border-box; }
 html { height:100%; overflow:hidden; }
-body { height:100vh; height:100dvh; margin:0; padding:14px 16px 16px; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at 30% 0,var(--c-21424755),transparent 60%),var(--bg); color:var(--cream); font:400 var(--text-body)/var(--leading-body) var(--body); }
+body { height:100vh; height:100dvh; margin:0; padding:0; overflow:hidden; display:flex; flex-direction:column; background:radial-gradient(ellipse at 30% 0,var(--c-21424755),transparent 60%),var(--bg); color:var(--cream); font:400 var(--text-body)/var(--leading-body) var(--body); }
 button, input, textarea, select { font:inherit; font-size:var(--text-control); color:inherit; }
 button { cursor:pointer; border:1px solid var(--btn-border); border-radius:var(--radius-control); background:linear-gradient(110deg,var(--btn-hi),var(--btn-lo)); padding:var(--space-3) var(--space-4); }
 button:hover { border-color:var(--gold); background-color:var(--btn-hover); }
@@ -17,7 +17,6 @@ select option { background:var(--c-122b31); color:var(--cream); }
   main { padding-left:15px; }
 }
 @media(max-width:700px) {
-  body { padding:8px 10px 11px; }
   main { display:block; padding:17px 10px 0; min-height:0; }
   h2 { font-size:2.438rem; }
 }

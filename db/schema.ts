@@ -14,6 +14,8 @@ import { user } from "./auth-schema";
 import {
   CARD_ICONS,
   CARD_TABS,
+  CHANNEL_PLATFORMS,
+  CHANNEL_STATUSES,
   ENTRY_STATUSES,
   MASH_PHASES,
   MODERATION_TARGETS,
@@ -95,6 +97,7 @@ export const entries = sqliteTable(
     body: text("body").notNull().default(""),
     category: text("category").notNull().default(""),
     options: text("options", { mode: "json" }).$type<string[]>().notNull().default([]),
+    binaryLabels: text("binary_labels", { mode: "json" }).$type<string[]>(),
     createdAt: integer("created_at").notNull(),
     endsAt: integer("ends_at"),
     revealed: integer("revealed", { mode: "boolean" }).notNull().default(false),
@@ -121,7 +124,29 @@ export const entries = sqliteTable(
       "entries_options_check",
       sql`json_valid(${table.options}) AND json_type(${table.options}) = 'array' AND ((${table.kind} = 'topic' AND json_array_length(${table.options}) = 0) OR (${table.kind} = 'choice' AND json_array_length(${table.options}) BETWEEN 2 AND 6) OR (${table.kind} = 'binary' AND ${table.options} = '["Yes","No"]'))`,
     ),
+    check(
+      "entries_binary_labels_check",
+      sql`${table.binaryLabels} IS NULL OR (${table.kind} = 'binary' AND json_valid(${table.binaryLabels}) AND json_type(${table.binaryLabels}) = 'array' AND json_array_length(${table.binaryLabels}) = 2 AND json_type(${table.binaryLabels}, '$[0]') = 'text' AND json_type(${table.binaryLabels}, '$[1]') = 'text' AND length(trim(json_extract(${table.binaryLabels}, '$[0]'))) BETWEEN 1 AND 80 AND length(trim(json_extract(${table.binaryLabels}, '$[1]'))) BETWEEN 1 AND 80 AND json_extract(${table.binaryLabels}, '$[0]') <> json_extract(${table.binaryLabels}, '$[1]'))`,
+    ),
     check("entries_deadline_check", sql`${table.endsAt} IS NULL OR ${table.endsAt} > ${table.createdAt}`),
+  ],
+);
+
+export const entryActivityCounts = sqliteTable(
+  "entry_activity_counts",
+  {
+    entryId: text("entry_id")
+      .primaryKey()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    likes: integer("likes").notNull().default(0),
+    dislikes: integer("dislikes").notNull().default(0),
+    comments: integer("comments").notNull().default(0),
+  },
+  (table) => [
+    check(
+      "entry_activity_counts_check",
+      sql`${table.likes} >= 0 AND ${table.dislikes} >= 0 AND ${table.comments} >= 0`,
+    ),
   ],
 );
 
@@ -190,6 +215,7 @@ export const entryComments = sqliteTable(
     text: text("text").notNull(),
     createdAt: integer("created_at").notNull(),
     parentId: text("parent_id"),
+    editedAt: integer("edited_at"),
     // Deleted parents remain as "Comment removed" placeholders.
     removedAt: integer("removed_at"),
   },
@@ -205,6 +231,71 @@ export const entryComments = sqliteTable(
     }).onDelete("cascade"),
     check("entry_comments_text_check", sql`length(${table.text}) BETWEEN 1 AND 2000`),
     check("entry_comments_parent_check", sql`${table.parentId} IS NULL OR ${table.parentId} <> ${table.id}`),
+  ],
+);
+
+export const commentMentions = sqliteTable(
+  "comment_mentions",
+  {
+    commentId: text("comment_id")
+      .notNull()
+      .references(() => entryComments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    start: integer("start").notNull(),
+    end: integer("end").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.commentId, table.userId] }),
+    index("comment_mentions_user_idx").on(table.userId),
+    check(
+      "comment_mentions_range_check",
+      sql`${table.start} >= 0 AND ${table.end} > ${table.start} AND ${table.end} <= 2000`,
+    ),
+  ],
+);
+
+export const notificationPreferences = sqliteTable(
+  "notification_preferences",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    replies: integer("replies").notNull().default(1),
+    mentions: integer("mentions").notNull().default(1),
+  },
+  (table) => [
+    check("notification_preferences_replies_check", sql`${table.replies} IN (0,1)`),
+    check("notification_preferences_mentions_check", sql`${table.mentions} IN (0,1)`),
+  ],
+);
+
+export const notifications = sqliteTable(
+  "notifications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    actorId: text("actor_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    commentId: text("comment_id")
+      .notNull()
+      .references(() => entryComments.id, { onDelete: "cascade" }),
+    kind: text("kind", { enum: ["reply", "mention"] }).notNull(),
+    createdAt: integer("created_at").notNull(),
+    read: integer("read").notNull().default(0),
+  },
+  (table) => [
+    uniqueIndex("notifications_delivery_idx").on(table.userId, table.commentId),
+    index("notifications_inbox_idx").on(table.userId, table.createdAt, table.id),
+    index("notifications_actor_idx").on(table.actorId, table.createdAt),
+    index("notifications_comment_idx").on(table.commentId),
+    index("notifications_expiry_idx").on(table.createdAt),
+    check("notifications_kind_check", sql`${table.kind} IN ('reply','mention')`),
+    check("notifications_read_check", sql`${table.read} IN (0,1)`),
   ],
 );
 
@@ -541,6 +632,9 @@ export const streamerLinks = sqliteTable(
 const overlaySourceCheck = (column: unknown) =>
   sql`json_valid(${column}) AND json_type(${column}) = 'object' AND json_extract(${column}, '$.type') IN (${sql.raw(sqlList(OVERLAY_SOURCES))}) AND length(${column}) <= 200`;
 
+// Stored overlay layers. Missing keys take defaults; app/lib/overlay-layers.ts validates the content.
+type StoredLayers = Record<string, unknown>;
+
 // `air` and `preview` use `{type, ref}`; sources use `ref` for a poll, topic, or card. No row means `auto`.
 export const overlayState = sqliteTable(
   "overlay_state",
@@ -564,6 +658,13 @@ export const overlayState = sqliteTable(
     messageStyle: text("message_style", { enum: OVERLAY_MESSAGE_STYLES }).notNull().default("info"),
     revision: integer("revision").notNull().default(0),
     updatedAt: integer("updated_at").notNull(),
+    // Orientation and grid cells of the layers. `{}` reads as the defaults in app/lib/overlay-layers.ts.
+    layers: text("layers", { mode: "json" }).$type<StoredLayers>().notNull().default({}),
+    // Server time when the chat test ends; a past time means no test.
+    chatTestUntil: integer("chat_test_until").notNull().default(0),
+    // The last applied layer write of up to 8 editors: [random editor id, write number] pairs, the most recent
+    // editor first (app/server/overlay.server.ts).
+    layersWrites: text("layers_writes", { mode: "json" }).$type<[string, number][]>().notNull().default([]),
   },
   (table) => [
     check("overlay_state_air_check", overlaySourceCheck(table.air)),
@@ -573,6 +674,15 @@ export const overlayState = sqliteTable(
     check("overlay_state_flags_check", sql`${table.instant} IN (0, 1) AND ${table.showResults} IN (0, 1)`),
     check("overlay_state_message_check", sql`length(${table.message}) <= 120`),
     enumCheck("overlay_state_message_style_check", table.messageStyle, OVERLAY_MESSAGE_STYLES),
+    check(
+      "overlay_state_layers_check",
+      sql`json_valid(${table.layers}) AND json_type(${table.layers}) = 'object' AND length(${table.layers}) <= 1000`,
+    ),
+    check("overlay_state_chat_test_check", sql`${table.chatTestUntil} >= 0`),
+    check(
+      "overlay_state_layers_writes_check",
+      sql`json_valid(${table.layersWrites}) AND json_type(${table.layersWrites}) = 'array' AND json_array_length(${table.layersWrites}) <= 8 AND length(${table.layersWrites}) <= 800`,
+    ),
     check("overlay_state_revision_check", sql`${table.revision} >= 0`),
   ],
 );
@@ -710,3 +820,55 @@ export const conversionClicks = sqliteTable(
   },
   (table) => [index("conversion_clicks_created_idx").on(table.createdAt)],
 );
+
+/**
+ * A streaming channel connected to a page for its activity feed (docs/channel-connections.md). It is separate from
+ * the sign-in `account` table. One channel belongs to at most one page, so nobody can claim another streamer's
+ * channel. `status_code` is a short machine code for the controls, never provider text.
+ */
+export const channelConnections = sqliteTable(
+  "channel_connections",
+  {
+    id: text("id").primaryKey(),
+    streamerId: text("streamer_id")
+      .notNull()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    platform: text("platform", { enum: CHANNEL_PLATFORMS }).notNull(),
+    externalId: text("external_id").notNull(),
+    displayName: text("display_name").notNull(),
+    scopes: text("scopes").notNull(),
+    status: text("status", { enum: CHANNEL_STATUSES }).notNull().default("active"),
+    statusCode: text("status_code"),
+    createdAt: integer("created_at").notNull(),
+    /** When the status or its code last changed, or a disconnect marked the row. The 7-day removal uses it. */
+    updatedAt: integer("updated_at").notNull(),
+    /** When the channel data (the name) was last read from the platform: at each connect and title refresh. */
+    dataReadAt: integer("data_read_at").notNull().default(0),
+    /** When the last event arrived, written at most each 30 seconds. */
+    lastEventAt: integer("last_event_at"),
+  },
+  (table) => [
+    uniqueIndex("channel_connections_streamer_platform_idx").on(table.streamerId, table.platform),
+    uniqueIndex("channel_connections_platform_external_idx").on(table.platform, table.externalId),
+    enumCheck("channel_connections_platform_check", table.platform, CHANNEL_PLATFORMS),
+    enumCheck("channel_connections_status_check", table.status, CHANNEL_STATUSES),
+    check("channel_connections_external_check", sql`length(${table.externalId}) BETWEEN 1 AND 64`),
+    check("channel_connections_name_check", sql`length(${table.displayName}) BETWEEN 1 AND 100`),
+    check("channel_connections_code_check", sql`${table.statusCode} IS NULL OR length(${table.statusCode}) <= 40`),
+  ],
+);
+
+/**
+ * Provider tokens, encrypted with AES-256-GCM (app/server/channel-tokens.server.ts). Each value is
+ * `base64url(iv).base64url(ciphertext)`; `key_id` names the key in CHANNEL_TOKEN_KEYS. No other module reads it.
+ */
+export const channelTokens = sqliteTable("channel_tokens", {
+  connectionId: text("connection_id")
+    .primaryKey()
+    .references(() => channelConnections.id, { onDelete: "cascade" }),
+  keyId: text("key_id").notNull(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  expiresAt: integer("expires_at"),
+  updatedAt: integer("updated_at").notNull(),
+});
