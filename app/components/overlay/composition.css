@@ -192,6 +192,10 @@
   touch-action: none;
   user-select: none;
 }
+/* The input covers the whole frame. The global button hover fill would hide the grid and the layers below it. */
+.ov-grid-input:hover {
+  background: transparent;
+}
 .ov-grid-input:focus-visible {
   outline: calc(3px / var(--ov-scale, 1)) solid var(--focus-ring, var(--gold));
   outline-offset: calc(-3px / var(--ov-scale, 1));
