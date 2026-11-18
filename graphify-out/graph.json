@@ -36765,7 +36765,7 @@
       "relation": "calls",
       "source": "app_server_data_server_adminremoval",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L715",
+      "source_location": "L713",
       "target": "app_server_access_server_isadmin",
       "weight": 1.0
     },
@@ -36777,7 +36777,7 @@
       "relation": "calls",
       "source": "app_server_data_server_adminremoval",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L715",
+      "source_location": "L713",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -36789,7 +36789,7 @@
       "relation": "calls",
       "source": "app_server_data_server_adminremoval",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L719",
+      "source_location": "L717",
       "target": "app_server_audit_server_auditstatement",
       "weight": 1.0
     },
@@ -36801,7 +36801,7 @@
       "relation": "calls",
       "source": "app_server_data_server_applymutation",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L682",
+      "source_location": "L680",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -36849,7 +36849,7 @@
       "relation": "calls",
       "source": "app_server_data_server_createentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L820",
+      "source_location": "L818",
       "target": "app_server_data_server_newentrystatus",
       "weight": 1.0
     },
@@ -36861,7 +36861,7 @@
       "relation": "calls",
       "source": "app_server_data_server_createentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L821",
+      "source_location": "L819",
       "target": "app_server_data_server_applymutation",
       "weight": 1.0
     },
@@ -36897,7 +36897,7 @@
       "relation": "calls",
       "source": "app_server_data_server_deleteentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L779",
+      "source_location": "L777",
       "target": "app_server_data_server_entrypermission",
       "weight": 1.0
     },
@@ -36909,7 +36909,7 @@
       "relation": "calls",
       "source": "app_server_data_server_deleteentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L779",
+      "source_location": "L777",
       "target": "app_server_data_server_removeentry",
       "weight": 1.0
     },
@@ -36933,7 +36933,7 @@
       "relation": "calls",
       "source": "app_server_data_server_entrypermission",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L691",
+      "source_location": "L689",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -37149,7 +37149,7 @@
       "relation": "calls",
       "source": "app_server_data_server_groupedorder",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L569",
+      "source_location": "L567",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -37185,7 +37185,7 @@
       "relation": "calls",
       "source": "app_server_data_server_listentries",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L615",
+      "source_location": "L613",
       "target": "app_server_data_server_parsed",
       "weight": 1.0
     },
@@ -37197,7 +37197,7 @@
       "relation": "calls",
       "source": "app_server_data_server_listentries",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L618",
+      "source_location": "L616",
       "target": "app_server_data_server_decodecursor",
       "weight": 1.0
     },
@@ -37209,7 +37209,7 @@
       "relation": "calls",
       "source": "app_server_data_server_listentries",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L620",
+      "source_location": "L618",
       "target": "app_server_data_server_listorder_7bb352d2ebb7",
       "weight": 1.0
     },
@@ -37221,7 +37221,7 @@
       "relation": "calls",
       "source": "app_server_data_server_listentries",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L644",
+      "source_location": "L642",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -37233,7 +37233,7 @@
       "relation": "calls",
       "source": "app_server_data_server_listentries",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L655",
+      "source_location": "L653",
       "target": "app_server_data_server_encodecursor",
       "weight": 1.0
     },
@@ -37245,7 +37245,7 @@
       "relation": "calls",
       "source": "app_server_data_server_listorder_7bb352d2ebb7",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L585",
+      "source_location": "L583",
       "target": "app_server_data_server_groupedorder",
       "weight": 1.0
     },
@@ -37305,7 +37305,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L855",
+      "source_location": "L853",
       "target": "app_server_data_server_parsed",
       "weight": 1.0
     },
@@ -37317,7 +37317,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L856",
+      "source_location": "L854",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -37329,7 +37329,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L857",
+      "source_location": "L855",
       "target": "app_server_data_server_consumemutationquota",
       "weight": 1.0
     },
@@ -37341,7 +37341,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L859",
+      "source_location": "L857",
       "target": "app_server_data_server_createentry",
       "weight": 1.0
     },
@@ -37353,7 +37353,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L860",
+      "source_location": "L858",
       "target": "app_server_data_server_entrypermission",
       "weight": 1.0
     },
@@ -37365,7 +37365,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L863",
+      "source_location": "L861",
       "target": "app_server_data_server_applymutation",
       "weight": 1.0
     },
@@ -37377,7 +37377,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L896",
+      "source_location": "L894",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -37389,7 +37389,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L912",
+      "source_location": "L910",
       "target": "app_server_data_server_removeentry",
       "weight": 1.0
     },
@@ -37401,7 +37401,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L916",
+      "source_location": "L914",
       "target": "app_server_discussion_notifications_server_validatementions",
       "weight": 1.0
     },
@@ -37413,7 +37413,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L941",
+      "source_location": "L939",
       "target": "app_server_discussion_notifications_server_mentionstatements",
       "weight": 1.0
     },
@@ -37425,7 +37425,7 @@
       "relation": "calls",
       "source": "app_server_data_server_mutateentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L941",
+      "source_location": "L939",
       "target": "app_server_discussion_notifications_server_notificationstatements",
       "weight": 1.0
     },
@@ -37437,7 +37437,7 @@
       "relation": "calls",
       "source": "app_server_data_server_newentrystatus",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L797",
+      "source_location": "L795",
       "target": "app_server_data_server_newpollstatus",
       "weight": 1.0
     },
@@ -37449,7 +37449,7 @@
       "relation": "calls",
       "source": "app_server_data_server_newentrystatus",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L805",
+      "source_location": "L803",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -37461,7 +37461,7 @@
       "relation": "calls",
       "source": "app_server_data_server_newentrystatus",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L806",
+      "source_location": "L804",
       "target": "app_lib_ideas_isuntouchedtemplate",
       "weight": 1.0
     },
@@ -37485,7 +37485,7 @@
       "relation": "calls",
       "source": "app_server_data_server_removeentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L728",
+      "source_location": "L726",
       "target": "app_server_data_server_adminremoval",
       "weight": 1.0
     },
@@ -37497,7 +37497,7 @@
       "relation": "calls",
       "source": "app_server_data_server_removeentry",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L754",
+      "source_location": "L752",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -159622,7 +159622,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L565",
+      "source_location": "L563",
       "target": "app_server_data_server_groupedorder",
       "weight": 1.0
     },
@@ -159633,7 +159633,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L584",
+      "source_location": "L582",
       "target": "app_server_data_server_listorder_7bb352d2ebb7",
       "weight": 1.0
     },
@@ -159644,7 +159644,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L609",
+      "source_location": "L607",
       "target": "app_server_data_server_listentries",
       "weight": 1.0
     },
@@ -159677,7 +159677,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L668",
+      "source_location": "L666",
       "target": "app_server_data_server_applymutation",
       "weight": 1.0
     },
@@ -159688,7 +159688,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L685",
+      "source_location": "L683",
       "target": "app_server_data_server_entrypermission",
       "weight": 1.0
     },
@@ -159699,7 +159699,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L697",
+      "source_location": "L695",
       "target": "app_server_data_server_adminremovalgate",
       "weight": 1.0
     },
@@ -159710,7 +159710,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L700",
+      "source_location": "L698",
       "target": "app_server_data_server_stepupgate",
       "weight": 1.0
     },
@@ -159721,7 +159721,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L703",
+      "source_location": "L701",
       "target": "app_server_data_server_removalaudit",
       "weight": 1.0
     },
@@ -159732,7 +159732,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L707",
+      "source_location": "L705",
       "target": "app_server_data_server_adminremoval",
       "weight": 1.0
     },
@@ -159743,7 +159743,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L722",
+      "source_location": "L720",
       "target": "app_server_data_server_removeentry",
       "weight": 1.0
     },
@@ -159754,7 +159754,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L772",
+      "source_location": "L770",
       "target": "app_server_data_server_deleteentry",
       "weight": 1.0
     },
@@ -159765,7 +159765,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L784",
+      "source_location": "L782",
       "target": "app_server_data_server_newpollstatus",
       "weight": 1.0
     },
@@ -159776,7 +159776,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L791",
+      "source_location": "L789",
       "target": "app_server_data_server_newentrystatus",
       "weight": 1.0
     },
@@ -159787,7 +159787,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L811",
+      "source_location": "L809",
       "target": "app_server_data_server_createentry",
       "weight": 1.0
     },
@@ -159798,7 +159798,7 @@
       "relation": "contains",
       "source": "app_server_data_server",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L848",
+      "source_location": "L846",
       "target": "app_server_data_server_mutateentry",
       "weight": 1.0
     },
@@ -178900,7 +178900,7 @@
       "relation": "indirect_call",
       "source": "app_server_data_server_listentries",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L650",
+      "source_location": "L648",
       "target": "app_server_data_server_entryvalue",
       "weight": 1.0
     },
@@ -180676,7 +180676,7 @@
       "relation": "indirect_call",
       "source": "app_server_data_server_groupedorder",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L574",
+      "source_location": "L572",
       "target": "app_server_poll_sql_groupedpolls",
       "weight": 1.0
     },
@@ -181174,10 +181174,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "309dd9f588a76ae5a0df449164e1f5288a6b297010fbb7dfa3e1da5bb7c1e866",
+    "content_sha256": "f8b4b8b47d91038b3c04a1aaa09bb627eb2ae03952f814f5baef1a7f97388f4c",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "df02ae2e881267094c4c238f09dab60cf4de5d97748b87f960ba8edb5c8f1303",
+    "source_sha256": "8223815180d409d93dd461829d7d7bf8a4332e23edd332dbaf7ad4a9ccfce125",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -185171,7 +185171,7 @@
       "label": "AdminRemovalGate",
       "norm_label": "adminremovalgate",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L697"
+      "source_location": "L695"
     },
     {
       "_callable": true,
@@ -185243,7 +185243,7 @@
       "label": "RemovalAudit",
       "norm_label": "removalaudit",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L703"
+      "source_location": "L701"
     },
     {
       "_callable": true,
@@ -185255,7 +185255,7 @@
       "label": "StepUpGate",
       "norm_label": "stepupgate",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L700"
+      "source_location": "L698"
     },
     {
       "_callable": true,
@@ -204678,7 +204678,7 @@
       "label": "adminRemoval()",
       "norm_label": "adminremoval()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L707"
+      "source_location": "L705"
     },
     {
       "_callable": true,
@@ -204689,7 +204689,7 @@
       "label": "applyMutation()",
       "norm_label": "applymutation()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L668"
+      "source_location": "L666"
     },
     {
       "_callable": true,
@@ -204722,7 +204722,7 @@
       "label": "createEntry()",
       "norm_label": "createentry()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L811"
+      "source_location": "L809"
     },
     {
       "_callable": true,
@@ -204744,7 +204744,7 @@
       "label": "deleteEntry()",
       "norm_label": "deleteentry()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L772"
+      "source_location": "L770"
     },
     {
       "_callable": true,
@@ -204788,7 +204788,7 @@
       "label": "entryPermission()",
       "norm_label": "entrypermission()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L685"
+      "source_location": "L683"
     },
     {
       "_callable": true,
@@ -204876,7 +204876,7 @@
       "label": "groupedOrder()",
       "norm_label": "groupedorder()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L565"
+      "source_location": "L563"
     },
     {
       "_callable": true,
@@ -204909,7 +204909,7 @@
       "label": "listEntries()",
       "norm_label": "listentries()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L609"
+      "source_location": "L607"
     },
     {
       "_callable": true,
@@ -204920,7 +204920,7 @@
       "label": "listOrder()",
       "norm_label": "listorder()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L584"
+      "source_location": "L582"
     },
     {
       "_callable": true,
@@ -204942,7 +204942,7 @@
       "label": "mutateEntry()",
       "norm_label": "mutateentry()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L848"
+      "source_location": "L846"
     },
     {
       "_callable": true,
@@ -204953,7 +204953,7 @@
       "label": "newEntryStatus()",
       "norm_label": "newentrystatus()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L791"
+      "source_location": "L789"
     },
     {
       "_callable": true,
@@ -204964,7 +204964,7 @@
       "label": "newPollStatus()",
       "norm_label": "newpollstatus()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L784"
+      "source_location": "L782"
     },
     {
       "_callable": true,
@@ -205030,7 +205030,7 @@
       "label": "removeEntry()",
       "norm_label": "removeentry()",
       "source_file": "app/server/data.server.ts",
-      "source_location": "L722"
+      "source_location": "L720"
     },
     {
       "_callable": true,

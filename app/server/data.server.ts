@@ -547,16 +547,14 @@ export async function getOverlaySnapshot(
 
 type ListValue = string | number;
 
-// How one list page orders its rows and continues after a cursor.
+/** The order of one list page. `before` and `after` bind around the values of the rows SELECT that `from` wraps. */
 interface ListOrder {
-  // Wraps the SELECT that reads the rows.
   from: (rows: string) => string;
-  // Values to bind before and after the values of the rows SELECT.
   before: ListValue[];
   after: ListValue[];
   where: string;
   order: string;
-  // List time of a grouped polls list. The next cursor keeps it.
+  /** List time of a grouped polls list. The next cursor keeps it. */
   at: number | null;
 }
 
