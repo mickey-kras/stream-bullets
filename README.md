@@ -310,6 +310,12 @@ Get the tree with `git rev-parse HEAD^{tree}`. The owner can post:
 Approve CI policy: tree=<TREE_SHA> base=<CURRENT_PR_BASE_SHA> trusted=<GITHUB_WORKFLOW_SHA>
 ```
 
+The short form binds only the head commit. Use the full 40-character SHA:
+
+```text
+/approve-ci <HEAD_SHA>
+```
+
 Comment creation, editing, or deletion rechecks policy. Rejection removes approval.
 Changed files, base, or trusted revision need renewed approval. Metadata-only commit rewrites preserve tree approval.
 Legacy `head=<HEAD_SHA>` approval binds only that commit. Owner comments prove account identity, not human authorship.
