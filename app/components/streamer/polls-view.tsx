@@ -144,6 +144,8 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
   const phase: string = useBattlePhase(battle, now);
   useBattleFocus(battle !== null && (phase === "live" || phase === "countdown"));
   const offline: boolean = live.status === "offline";
+  // Each signed-in viewer can create a poll, like a topic. Guests sign in first.
+  const canCreate: boolean = Boolean(viewer) && writable;
   const card = (entry: Entry): ReactNode =>
     entry.kind === "mash" && !selected ? (
       <MashTeaser key={entry.id} entry={entry} now={now} />
@@ -173,12 +175,12 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
       />
     );
   else if (!selected && entries.length === 0)
-    body = owner ? (
+    body = (
       <EmptyState
-        title={t("polls.emptyTitle")}
+        title={t(owner ? "polls.emptyTitle" : "polls.viewerEmptyTitle")}
         icon="mic"
         action={
-          writable && (
+          canCreate && (
             <button className="gold" type="button" onClick={props.onCreate}>
               <Icon name="plus" size={18} />
               {t("polls.createFirst")}
@@ -186,11 +188,7 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
           )
         }
       >
-        {t("polls.emptyBody")}
-      </EmptyState>
-    ) : (
-      <EmptyState title={t("polls.viewerEmptyTitle")} icon="mic">
-        {t("polls.viewerEmptyBody", { name: name.split(" ")[0] ?? name })}
+        {t(owner ? "polls.emptyBody" : "polls.viewerEmptyBody")}
       </EmptyState>
     );
   return (
@@ -205,7 +203,7 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
           </h1>
           {!battle && <p>{t("polls.lead")}</p>}
         </div>
-        {owner && writable && !battle && (
+        {canCreate && !battle && (
           <button className="gold" type="button" onClick={props.onCreate}>
             <Icon name="plus" size={18} />
             {t("polls.create")}

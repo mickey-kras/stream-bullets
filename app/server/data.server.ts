@@ -29,7 +29,8 @@ import { IDEA_CATEGORIES, isUntouchedTemplate, NEW_IDEA_STATUS } from "../lib/id
 import { auditStatement, type AuditEntry } from "./audit.server";
 import { HttpError } from "./http.server";
 import { imageStorageKey } from "./images.server";
-import { MASH_COLUMN, mashValue, notFinishedBattle } from "./mash-sql";
+import { MASH_COLUMN, mashValue } from "./mash-sql";
+import { POLL_GROUP_AFTER, POLL_GROUP_ORDER, SQL_NOW, autoPoll, groupedPolls, notHeld, openPoll } from "./poll-sql";
 import {
   directoryQuerySchema,
   displayPrefsSchema,
@@ -53,6 +54,9 @@ const cursorSchema = z
     score: z.number().int(),
     time: z.number().int().nonnegative(),
     id: z.string().uuid(),
+    // Grouped polls list only: the group of the last row, and the list time that decides which polls are active.
+    group: z.number().int().min(0).max(2).optional(),
+    at: z.number().int().nonnegative().optional(),
   })
   .strict();
 type Cursor = z.infer<typeof cursorSchema>;
@@ -84,6 +88,8 @@ interface EntryRow {
   status_reason: string | null;
   reported: number;
   mash: string | null;
+  // Grouped polls list only.
+  poll_group?: number;
 }
 interface PermissionRow {
   id: string;
@@ -493,25 +499,26 @@ export async function getOverlaySnapshot(
   streamerId: string,
   pollId: string | null,
 ): Promise<LiveSnapshot> {
-  const now = "(CAST(strftime('%s','now') AS INTEGER)*1000+CAST(substr(strftime('%f','now'),4,3) AS INTEGER))";
+  // Automatic selection (`pollId` null) reads only polls of the page owner: the newest active one, then the newest.
+  // A viewer poll reaches the overlay only by its ID, when the owner picks it. Moderation-held polls never do.
   const selection =
     pollId === null
       ? `COALESCE(
-    (SELECT id FROM entries WHERE streamer_id=? AND kind!='topic' AND revealed=0
-      AND (ends_at IS NULL OR ends_at>${now}) AND ${notFinishedBattle(now)}
+    (SELECT id FROM entries WHERE streamer_id=? AND kind!='topic' AND ${openPoll(SQL_NOW)} AND ${autoPoll()}
       ORDER BY created_at DESC,id DESC LIMIT 1),
-    (SELECT id FROM entries WHERE streamer_id=? AND kind!='topic' ORDER BY created_at DESC,id DESC LIMIT 1)
+    (SELECT id FROM entries WHERE streamer_id=? AND kind!='topic' AND ${autoPoll()}
+      ORDER BY created_at DESC,id DESC LIMIT 1)
   )`
       : "?";
   const parameters: string[] =
     pollId === null ? ["", "", "", streamerId, streamerId, streamerId] : ["", "", "", pollId, streamerId];
   const results = await env.DB.batch([
-    env.DB.prepare("SELECT revision, status FROM streamers WHERE id=?").bind(streamerId),
-    env.DB.prepare(`${entrySelect} WHERE e.id=${selection} AND e.streamer_id=? AND e.kind!='topic'`).bind(
-      ...parameters,
-    ),
+    env.DB.prepare("SELECT revision, status, owner_id FROM streamers WHERE id=?").bind(streamerId),
+    env.DB.prepare(
+      `${entrySelect} WHERE e.id=${selection} AND e.streamer_id=? AND e.kind!='topic' AND ${notHeld("e")}`,
+    ).bind(...parameters),
   ]);
-  const page = results[0]?.results[0] as { revision: number; status: string } | undefined;
+  const page = results[0]?.results[0] as { revision: number; status: string; owner_id: string } | undefined;
   if (page === undefined) throw new HttpError(404, "Streamer not found.");
   const { revision } = page;
   // A suspended page shows nothing in the overlay.
@@ -532,8 +539,63 @@ export async function getOverlaySnapshot(
         counts: entry.counts,
         total: entry.total,
         mash: entry.mash,
+        byOwner: row.author_id === page.owner_id,
       };
     }),
+  };
+}
+
+type ListValue = string | number;
+
+/** The order of one list page. `before` and `after` bind around the values of the rows SELECT that `from` wraps. */
+interface ListOrder {
+  from: (rows: string) => string;
+  before: ListValue[];
+  after: ListValue[];
+  where: string;
+  order: string;
+  /** List time of a grouped polls list. The next cursor keeps it. */
+  at: number | null;
+}
+
+// Default polls order: active polls of the page owner, active polls of other people, then all other polls. Each group
+// lists newest first. The cursor continues after (group, time, id), so each page moves forward and the list ends.
+function groupedOrder(cursor: Cursor | null, ownerId: string): ListOrder {
+  let at: number = Date.now();
+  let after: ListValue[] = [];
+  if (cursor) {
+    if (cursor.group === undefined || cursor.at === undefined) throw new HttpError(400, "Invalid page cursor.");
+    at = cursor.at;
+    after = [cursor.group, cursor.group, cursor.time, cursor.id];
+  }
+  return {
+    from: groupedPolls,
+    before: [at, at, ownerId],
+    after,
+    where: cursor ? POLL_GROUP_AFTER : "",
+    order: POLL_GROUP_ORDER,
+    at,
+  };
+}
+
+// Topics and the Top polls order keep their plain order: score for Top, then newest first.
+function listOrder(query: z.infer<typeof entryQuerySchema>, cursor: Cursor | null, ownerId: string): ListOrder {
+  if (query.kind === "polls" && query.sort === "newest") return groupedOrder(cursor, ownerId);
+  const top: boolean = query.sort === "top";
+  const after: ListValue[] = [];
+  let where = "";
+  if (cursor) {
+    where = top ? "WHERE (score,created_at,id) < (?,?,?)" : "WHERE (created_at,id) < (?,?)";
+    if (top) after.push(cursor.score);
+    after.push(cursor.time, cursor.id);
+  }
+  return {
+    from: (rows: string): string => `(${rows})`,
+    before: [],
+    after,
+    where,
+    order: `${top ? "score DESC," : ""}created_at DESC,id DESC`,
+    at: null,
   };
 }
 
@@ -553,7 +615,9 @@ export async function listEntries(
   const scope = `${streamer.id}:${query.kind}${statusScope}`;
   const cursor = decodeCursor(query.cursor, scope, query.sort, query.query);
   const escapedQuery = query.query.replaceAll(/[\\%_]/gu, String.raw`\$&`);
-  const parameters: (string | number)[] = [
+  const order: ListOrder = listOrder(query, cursor, streamer.ownerId);
+  const parameters: ListValue[] = [
+    ...order.before,
     viewerId ?? "",
     viewerId ?? "",
     viewerId ?? "",
@@ -562,18 +626,14 @@ export async function listEntries(
     query.status ?? "",
     NEW_IDEA_STATUS,
     query.status ?? "",
+    ...order.after,
   ];
-  let where = "";
-  if (cursor) {
-    where = query.sort === "top" ? "WHERE (score,created_at,id) < (?,?,?)" : "WHERE (created_at,id) < (?,?)";
-    if (query.sort === "top") parameters.push(cursor.score);
-    parameters.push(cursor.time, cursor.id);
-  }
-  const entriesQuery = env.DB.prepare(String.raw`SELECT * FROM (${entrySelect}
+  const rowsSql: string = String.raw`${entrySelect}
     WHERE e.streamer_id=? AND e.kind ${query.kind === "topics" ? "= 'topic'" : "!= 'topic'"}
-      AND e.title LIKE ? ESCAPE '\' AND (?='' OR ${IDEA_STATUS_SQL}=?)) ${where}
-    ORDER BY ${query.sort === "top" ? "score DESC," : ""}created_at DESC,id DESC LIMIT ${PAGE_SIZE + 1}
-  `).bind(...parameters);
+      AND e.title LIKE ? ESCAPE '\' AND (?='' OR ${IDEA_STATUS_SQL}=?)`;
+  const entriesQuery = env.DB.prepare(
+    `SELECT * FROM ${order.from(rowsSql)} ${order.where} ORDER BY ${order.order} LIMIT ${PAGE_SIZE + 1}`,
+  ).bind(...parameters);
   const results = await env.DB.batch([
     env.DB.prepare("SELECT revision FROM streamers WHERE id=?").bind(streamer.id),
     entriesQuery,
@@ -597,6 +657,7 @@ export async function listEntries(
             score: last.score,
             time: last.created_at,
             id: last.id,
+            ...(order.at === null ? {} : { group: last.poll_group, at: order.at }),
           })
         : null,
   };
@@ -716,12 +777,22 @@ export async function deleteEntry(
   await removeEntry(env, viewerId, await entryPermission(env, id, streamerId), gate);
 }
 
+// The status of a new poll. A viewer poll follows the topic rule: the official page holds it under review. Other
+// pages do not review topics or polls. Polls of the page owner have no status.
+export async function newPollStatus(env: AppEnv, userId: string, streamerId: string): Promise<EntryStatus | null> {
+  const page = await env.DB.prepare("SELECT is_official, owner_id FROM streamers WHERE id=?")
+    .bind(streamerId)
+    .first<{ is_official: number; owner_id: string }>();
+  return page?.is_official === 1 && page.owner_id !== userId ? NEW_IDEA_STATUS : null;
+}
+
 async function newEntryStatus(
   env: AppEnv,
+  userId: string,
   streamerId: string,
   action: Extract<EntryAction, { action: "create" }>,
 ): Promise<EntryStatus | null> {
-  if (action.kind !== "topic") return null;
+  if (action.kind !== "topic") return newPollStatus(env, userId, streamerId);
   const page = await env.DB.prepare("SELECT is_official FROM streamers WHERE id=?")
     .bind(streamerId)
     .first<{ is_official: number }>();
@@ -744,13 +815,13 @@ async function createEntry(
   const id = crypto.randomUUID();
   const options = action.kind === "binary" ? ["Yes", "No"] : (action.options ?? []);
   const now = Date.now();
-  const status = await newEntryStatus(env, streamerId, action);
+  const status = await newEntryStatus(env, userId, streamerId, action);
   await applyMutation(
     env,
     streamerId,
     env.DB.prepare(`
     INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed,status)
-    SELECT ?,s.id,?,?,?,?,?,?,?,?,0,? FROM streamers s WHERE s.id=? AND (?='topic' OR s.owner_id=?)
+    SELECT ?,s.id,?,?,?,?,?,?,?,?,0,? FROM streamers s WHERE s.id=?
       AND (SELECT count(*) FROM entries e WHERE e.streamer_id=s.id) < ?
   `).bind(
       id,
@@ -764,12 +835,10 @@ async function createEntry(
       action.kind !== "topic" && action.duration > 0 ? now + action.duration * 1000 : null,
       status,
       streamerId,
-      action.kind,
-      userId,
       MAX_ENTRIES,
     ),
     403,
-    "Only the streamer can create polls. Each page can contain up to 1000 topics and polls.",
+    "Each page can contain up to 1000 topics and polls.",
   );
   return { id };
 }

@@ -241,19 +241,18 @@ function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revi
   return update ? { ...entry, ...update } : entry;
 }
 
-// Each tab has one primary action.
+// Each tab has one primary action. Each signed-in viewer can create a poll; the other actions are for the owner.
 function headerAction(view: View, owner: boolean, official: boolean): { dialog: Dialog; label: string } | null {
   if (official) return view === "topics" ? { dialog: "idea", label: t("ideas.suggest") } : null;
-  if (view === "topics") return null;
-  if (!owner) return null;
   if (view === "polls") return { dialog: "poll", label: t("streamer.newPoll") };
+  if (view === "topics" || !owner) return null;
   if (view === "schedule") return { dialog: "event", label: t("schedule.create") };
   if (view === "community") return { dialog: "card", label: t("community.addCard") };
   return null;
 }
 
 function floatingAction(view: View, owner: boolean, official: boolean): ReturnType<typeof headerAction> {
-  if ((official && view === "topics") || (owner && (view === "polls" || view === "schedule")))
+  if ((official && view === "topics") || (!official && view === "polls") || (owner && view === "schedule"))
     return headerAction(view, owner, official);
   return null;
 }
@@ -917,7 +916,7 @@ export default function StreamerPage(): ReactNode {
         action={
           action && (
             <button
-              className={owner && !official ? "header-secondary header-action" : "gold"}
+              className={official ? "gold" : "header-secondary header-action"}
               id="suggest"
               type="button"
               aria-label={action.label}

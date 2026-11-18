@@ -66,10 +66,16 @@ test("public access rejects forged identities and unsafe mutations", async ({ br
     data: { action: "create", kind: "choice", title: "Cross-site poll", options: ["A", "B"], duration: 0 },
   });
   expect(crossSite.status()).toBe(403);
+  // A viewer cannot end a poll of the page owner or reveal its results.
+  const ownerPoll = await owner.request.post("/api/streamers/test_host", {
+    headers: { Origin: origin },
+    data: { action: "create", kind: "binary", title: "Owner poll", duration: 0 },
+  });
+  expect(ownerPoll.status()).toBe(200);
   const viewer = await signedIn(browser, "viewer");
   const unauthorized = await viewer.request.post("/api/streamers/test_host", {
     headers: { Origin: origin },
-    data: { action: "create", kind: "binary", title: "Viewer poll", duration: 0 },
+    data: { action: "reveal", id: ((await ownerPoll.json()) as { id: string }).id },
   });
   expect(unauthorized.status()).toBe(403);
   const me = await owner.request.get("/api/me");
@@ -158,7 +164,9 @@ test("streamer controls a binary poll and the public OBS overlay updates live", 
   if (!pollId) throw new Error("Created poll link is missing.");
   const viewer = await newPage(viewerContext);
   await viewer.goto(`/@test_host?view=polls&entry=${pollId}`);
-  await expect(viewer.getByRole("button", { name: "Create poll", exact: true })).toHaveCount(0);
+  // A viewer can create a poll too, but has no control that ends this poll.
+  await expect(viewer.getByRole("button", { name: "Create poll", exact: true })).toBeVisible();
+  await expect(viewer.getByRole("button", { name: "End & reveal" })).toHaveCount(0);
   const overlayContext = await browser.newContext({ baseURL: origin });
   const overlay = await newPage(overlayContext);
   await overlay.goto(`/@test_host/overlay?poll=${pollId}`);
@@ -345,7 +353,13 @@ test("a viewer reports a topic and an admin removes it", async ({ browser, page,
   const { id } = (await created.json()) as { id: string };
   const second = await owner.request.post("/api/streamers/test_host", {
     headers: { Origin: origin },
-    data: { action: "create", kind: "topic", title: "Second topic to report", body: "Another topic on the same board.", category: "Just chatting" },
+    data: {
+      action: "create",
+      kind: "topic",
+      title: "Second topic to report",
+      body: "Another topic on the same board.",
+      category: "Just chatting",
+    },
   });
   expect(second.status()).toBe(200);
   const ownerPage = await newPage(owner);

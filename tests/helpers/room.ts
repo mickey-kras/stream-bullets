@@ -141,7 +141,9 @@ class RoomStorage {
   deleteAll(): Promise<void> {
     return new Promise((resolve): void => {
       this.values.clear();
-      const tables = this.sql.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
+      const tables = this.sql.db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+        .all();
       for (const { name } of tables as { name: string }[]) this.sql.db.exec(`DROP TABLE "${name}"`);
       resolve();
     });
@@ -198,6 +200,11 @@ export class RoomState {
     return this.accepted.find((entry) => entry.socket === socket)?.tags ?? [];
   }
 
+  // The runtime name of `tagsOf`: the room reads the tags of a socket with it.
+  getTags(socket: FakeSocket): string[] {
+    return this.tagsOf(socket);
+  }
+
   // Simulate a runtime pong without waking the room.
   ping(socket: FakeSocket, at: number = Date.now()): void {
     if (this.autoResponse?.request !== "ping") throw new Error("The room set no ping auto-response");
@@ -248,14 +255,14 @@ export class RoomNamespace<Room extends RoomLike> {
   }
 }
 
-// Minimal schema for room reads.
+// Minimal schema for room reads. A poll row without an author reads as a poll of the page owner.
 export const LIVE_SCHEMA = `
-  CREATE TABLE streamers (id TEXT PRIMARY KEY, revision INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'active');
+  CREATE TABLE streamers (id TEXT PRIMARY KEY, revision INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'active', owner_id TEXT NOT NULL DEFAULT 'owner');
   CREATE TABLE user (id TEXT PRIMARY KEY);
   CREATE TABLE entry_mash (entry_id TEXT PRIMARY KEY, duration_s INTEGER NOT NULL, phase TEXT NOT NULL DEFAULT 'setup', starts_at INTEGER, ends_at INTEGER, winner INTEGER);
   CREATE TABLE mash_taps (entry_id TEXT NOT NULL, user_id TEXT NOT NULL, side INTEGER NOT NULL, taps INTEGER NOT NULL DEFAULT 0, assisted_taps INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(entry_id, user_id));
   CREATE TABLE overlay_state (streamer_id TEXT PRIMARY KEY, air TEXT NOT NULL, preview TEXT NOT NULL, position TEXT NOT NULL, size TEXT NOT NULL, instant INTEGER NOT NULL, show_results INTEGER NOT NULL, message TEXT NOT NULL, message_style TEXT NOT NULL, revision INTEGER NOT NULL, layers TEXT NOT NULL DEFAULT '{}', chat_test_until INTEGER NOT NULL DEFAULT 0);
-  CREATE TABLE entries (id TEXT PRIMARY KEY, streamer_id TEXT NOT NULL, title TEXT NOT NULL, kind TEXT NOT NULL, options TEXT NOT NULL, binary_labels TEXT, ends_at INTEGER, revealed INTEGER NOT NULL, created_at INTEGER NOT NULL);
+  CREATE TABLE entries (id TEXT PRIMARY KEY, streamer_id TEXT NOT NULL, title TEXT NOT NULL, kind TEXT NOT NULL, options TEXT NOT NULL, binary_labels TEXT, ends_at INTEGER, revealed INTEGER NOT NULL, created_at INTEGER NOT NULL, author_id TEXT NOT NULL DEFAULT 'owner', status TEXT);
   CREATE TABLE entry_votes (entry_id TEXT NOT NULL, user_id TEXT NOT NULL, choice INTEGER NOT NULL, PRIMARY KEY(entry_id, user_id));
   CREATE TABLE entry_vote_counts (entry_id TEXT NOT NULL, choice INTEGER NOT NULL, votes INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(entry_id, choice));
   CREATE TRIGGER entry_votes_count_insert AFTER INSERT ON entry_votes BEGIN INSERT INTO entry_vote_counts SELECT NEW.entry_id, NEW.choice, 0 WHERE NOT EXISTS (SELECT 1 FROM entry_vote_counts WHERE entry_id = NEW.entry_id AND choice = NEW.choice); UPDATE entry_vote_counts SET votes = votes + 1 WHERE entry_id = NEW.entry_id AND choice = NEW.choice; END;

@@ -503,6 +503,41 @@ describe("live room snapshots", (): void => {
     }
   });
 
+  it("sends viewer polls to the page, but to the OBS overlay only the one that the owner put on air", async (): Promise<void> => {
+    const own = await rows.addPoll("choice", null, 1);
+    const viewerPoll = await rows.addPoll("choice", null, 2);
+    await database.db.prepare("UPDATE entries SET author_id='viewer' WHERE id=?").bind(viewerPoll).run();
+    const viewer = await join();
+    const obs = await join({ key: "b".repeat(64), overlay: true });
+    const ids = (socket: FakeSocket): string[] | undefined =>
+      lastOf<LiveSnapshot>(socket, "snapshot")?.polls.map((poll) => poll.id);
+    expect(viewer.messages<LiveSnapshot>()[0].polls).toMatchObject([
+      { id: viewerPoll, byOwner: false },
+      { id: own, byOwner: true },
+    ]);
+    expect(ids(obs)).toEqual([own]);
+    await rows.vote(viewerPoll, 0);
+    expect((await post("refresh")).status).toBe(204);
+    expect(ids(viewer)).toEqual([viewerPoll, own]);
+    expect(ids(obs)).toEqual([own]);
+
+    // The owner picks the viewer poll with "A specific poll" and takes it on air.
+    await database.db
+      .prepare(
+        `INSERT INTO overlay_state (streamer_id, air, preview, position, size, instant, show_results, message, message_style, revision)
+        VALUES (?, ?, ?, 'lower', 'm', 0, 1, '', 'info', 1)`,
+      )
+      .bind(streamerId, JSON.stringify({ type: "poll", ref: viewerPoll }), JSON.stringify({ type: "auto", ref: null }))
+      .run();
+    expect((await post("overlay")).status).toBe(204);
+    await rows.vote(viewerPoll, 1);
+    expect((await post("refresh")).status).toBe(204);
+    expect(lastOf<LiveSnapshot>(obs, "snapshot")?.polls).toMatchObject([
+      { id: viewerPoll, byOwner: false, total: 2 },
+      { id: own, byOwner: true },
+    ]);
+  });
+
   it("keeps an older open poll in the snapshot when the newest entry is a finished battle", async (): Promise<void> => {
     const open = await rows.addPoll("choice", null, 1);
     const newer: string[] = [];
@@ -624,7 +659,12 @@ describe("live room snapshots", (): void => {
     await database.db.prepare("UPDATE entries SET binary_labels=? WHERE id=?").bind('["No","Yes"]', id).run();
     await rows.vote(id, 0);
     const socket = await join();
-    expect(socket.messages<LiveSnapshot>()[0].polls[0]).toMatchObject({ kind: "binary", options: ["No", "Yes"], counts: null, total: 1 });
+    expect(socket.messages<LiveSnapshot>()[0].polls[0]).toMatchObject({
+      kind: "binary",
+      options: ["No", "Yes"],
+      counts: null,
+      total: 1,
+    });
     await database.db.prepare("UPDATE entries SET revealed = 1 WHERE id = ?").bind(id).run();
     await rows.vote(id, 1);
     await post("refresh");
@@ -789,7 +829,11 @@ describe("live room tap messages", (): void => {
     for (const message of bad) {
       const socket = await join({ key: "b".repeat(64) });
       await room().webSocketMessage(socket as unknown as WebSocket, message);
-      expect([(typeof message === "string" ? message : "binary message").slice(0, 40), socket.closeCode, socket.closeReason]).toEqual([
+      expect([
+        (typeof message === "string" ? message : "binary message").slice(0, 40),
+        socket.closeCode,
+        socket.closeReason,
+      ]).toEqual([
         (typeof message === "string" ? message : "binary message").slice(0, 40),
         1008,
         "Unsupported message",
