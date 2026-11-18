@@ -155,7 +155,8 @@ See [live capacity](live-room-capacity.md).
 3. **Place the layers**: the layout grid.
 4. **Add to OBS**: the overlay link.
 
-A signed-in page owner opens the page from **Overlay** in the header or from the account menu.
+A signed-in page owner opens the page from **Overlay** in the header of their own streamer page or from the account menu.
+The site header has no **Overlay** entry.
 
 Step 3 shows the grid of the selected orientation on a preview of the frame.
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.

@@ -261,12 +261,42 @@ test("the page is a flow of four numbered steps, with the channels first and col
 
     // No channel is connected: the first step is open, with the full panel.
     const channels = control.getByRole("region", { name: "1 Connect channels" });
-    const details = channels.locator("details");
-    const summary = channels.locator("summary");
+    const details = channels.locator("details.ch-details");
+    const summary = channels.locator("[data-channels-summary]");
     const kick = channels.locator('[data-channel="kick"]');
     await expect(details).toHaveAttribute("open", "");
     await expect(summary).toHaveText("No channel connected yet");
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeVisible();
+
+    // Each card has its name and status, one sentence, and its button. The longer notes are in closed details.
+    // This site offers only Kick: the other two cards say so and have no notes.
+    const cards = channels.locator("[data-channel]");
+    await expect(cards.locator(".ch-body")).toHaveText([
+      "This platform is not set up on this site yet.",
+      "This platform is not set up on this site yet.",
+      "Chat starts as soon as the channel is connected.",
+    ]);
+    const more = cards.locator("details");
+    await expect(more).toHaveCount(1);
+    await expect(more).not.toHaveAttribute("open");
+    await expect(more.locator("summary")).toHaveText("What is read and the limits");
+    await expect(more.getByRole("listitem").first()).toBeHidden();
+    expect((await more.locator("summary").boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    // The open notes are below the button: the button does not move.
+    const connectKick = kick.getByRole("button", { name: "Connect Kick", exact: true });
+    // Measured from the top of the card: a click can scroll the page.
+    const fromCard = async (): Promise<number> => (await connectKick.boundingBox())!.y - (await kick.boundingBox())!.y;
+    const before: number = await fromCard();
+    await more.locator("summary").click();
+    await expect(more.getByRole("listitem")).toHaveText([
+      "Read: chat messages, bans and timeouts.",
+      "Kick emotes show as their names, not as images.",
+      "Kick does not report message deletions, chat clears or unbans.",
+    ]);
+    expect(await fromCard()).toBe(before);
+    const button = (await connectKick.boundingBox())!;
+    expect((await more.boundingBox())!.y).toBeGreaterThanOrEqual(button.y + button.height);
+    await more.locator("summary").click();
 
     // With a connected channel the step is one status line. It opens by keyboard and by pointer.
     await runSql("channel-flow-seed", [
@@ -306,7 +336,10 @@ test("the page is a flow of four numbered steps, with the channels first and col
 test("channel conflicts reload the list and expired authentication leaves a sign-in prompt", async ({ browser }) => {
   const connectionId: string = randomUUID();
   const now: number = Date.now();
+  const accountId: string = randomUUID();
   await runSql("channel-conflict-seed", [
+    // The account signs in with Google: the prompt for a new sign-in offers that provider.
+    `INSERT INTO account(id,account_id,provider_id,user_id,created_at,updated_at) VALUES ('${accountId}','e2e-google-owner','google',(SELECT id FROM user WHERE name='featureowner'),${now},${now});`,
     `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',(SELECT id FROM streamers WHERE handle='feature_host'),'kick','coverage-kick','Conflict Kick','','active',NULL,${now},${now},NULL);`,
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 91));
@@ -347,13 +380,72 @@ test("channel conflicts reload the list and expired authentication leaves a sign
       await route.fulfill({ status: 401, json: { error: "Sign in again.", code: "reauth_required" } });
     });
     await kick.getByRole("button", { name: "Connect Kick", exact: true }).click();
-    await expect(
-      control.getByRole("alert").filter({ hasText: "Sign in again to change channel connections." }),
-    ).toBeVisible();
+    // The prompt is in the card of the platform. It names the platform, the reason and the sign-in provider.
+    const prompt = kick.locator(".ch-reauth");
+    await expect(prompt).toHaveAttribute("role", "alert");
+    await expect(prompt.locator("p").first()).toHaveText(
+      "To connect Kick, first confirm that it is you. Sign in to StreamBullets again with Google. The Kick connection then continues by itself.",
+    );
+    await expect(control.locator(".ch-reauth")).toHaveCount(1);
+    // The owner has an account: no display name, no eligibility checkbox, no hint and no legal line.
+    await expect(prompt.getByRole("button")).toHaveText(["Continue with Google"]);
+    await expect(prompt.getByRole("textbox")).toHaveCount(0);
+    await expect(prompt.getByRole("checkbox")).toHaveCount(0);
+    await expect(prompt.getByRole("link")).toHaveCount(0);
+    await expect(prompt).not.toContainText("Watching on YouTube?");
+    // A normal button, not one as wide as the prompt.
+    const button = (await prompt.getByRole("button").boundingBox())!;
+    expect(button.width).toBeLessThan((await prompt.boundingBox())!.width - 40);
+    expect(button.height).toBeGreaterThanOrEqual(44);
+    // The request has no eligibility consent and no display name. The tab keeps the intent for the return.
+    const signIn = control.waitForRequest("**/api/auth/sign-in/social");
+    await control.route("**/api/auth/sign-in/social", async (route) => {
+      await route.fulfill({ status: 500, json: {} });
+    });
+    await prompt.getByRole("button").click();
+    expect((await signIn).postDataJSON()).toEqual({
+      provider: "google",
+      callbackURL: "/overlay-control",
+      errorCallbackURL: "/sign-in?next=%2Foverlay-control",
+    });
+    await expect(prompt).toContainText("Sign-in failed. Please try again.");
+    const stored = JSON.parse((await control.evaluate(() => sessionStorage.getItem("sb-channel-intent"))) ?? "{}") as {
+      platform?: string;
+      action?: string;
+    };
+    expect(stored).toMatchObject({ platform: "kick", action: "connect" });
+    // Back from the sign-in: the connect goes on to the provider without a second click, and only once.
+    await control.unroute("**/api/channels/kick/connect");
+    let connects: number = 0;
+    await control.route("**/api/channels/kick/connect", async (route) => {
+      connects += 1;
+      await route.fulfill({ json: { authorizeUrl: "/overlay-control?channel=kick&result=denied" } });
+    });
+    await control.goto("/overlay-control");
+    await expect(control.locator(".ch-result")).toHaveText("The Kick authorization was cancelled.");
+    expect(connects).toBe(1);
+    expect(await control.evaluate(() => sessionStorage.getItem("sb-channel-intent"))).toBeNull();
+    await control.reload();
+    await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeVisible();
+    expect(connects).toBe(1);
+    // An intent that the tab did not store itself, or an old one, starts nothing.
+    await control.evaluate(() => {
+      sessionStorage.setItem(
+        "sb-channel-intent",
+        JSON.stringify({ platform: "kick", action: "connect", at: Date.now() - 11 * 60 * 1000 }),
+      );
+    });
+    await control.goto("/overlay-control?connect=kick");
+    await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeVisible();
+    await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeEnabled();
+    expect(connects).toBe(1);
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeEnabled();
   } finally {
     await close(owner);
-    await runSql("channel-conflict-cleanup", [`DELETE FROM channel_connections WHERE id='${connectionId}';`]);
+    await runSql("channel-conflict-cleanup", [
+      `DELETE FROM channel_connections WHERE id='${connectionId}';`,
+      `DELETE FROM account WHERE id='${accountId}';`,
+    ]);
   }
 });
 
@@ -471,8 +563,8 @@ test("the owner sees each channel's connection health and the result of a connec
     await control.goto("/overlay-control?channel=kick&result=channel_taken");
     const section = control.getByRole("region", { name: "1 Connect channels" });
     // A callback result and a connection to repair open the section.
-    await expect(section.locator("details")).toHaveAttribute("open", "");
-    await expect(section.locator("summary")).toHaveText("Connected: YouTube · Needs attention: Kick");
+    await expect(section.locator("details.ch-details")).toHaveAttribute("open", "");
+    await expect(section.locator("[data-channels-summary]")).toHaveText("Connected: YouTube · Needs attention: Kick");
     const banner = section.locator(".ch-result");
     // The result is read once: the banner is a status region with focus, and no toast repeats it.
     await expect(banner).toHaveText("This Kick channel is already connected to another StreamBullets page.");
