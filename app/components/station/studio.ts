@@ -161,10 +161,10 @@ function studioCrt(k: Kit, s: Pick<StudioScope, "onDesk" | "counterTop">): void 
               }`,
   });
   animators.push((t: number): void => {
-    crtMaterial.uniforms.uTime!.value = t;
+    crtMaterial.uniforms.uTime.value = t;
   });
   onLights.push((on: boolean): void => {
-    crtMaterial.uniforms.uOn!.value = on ? 1 : 0.08;
+    crtMaterial.uniforms.uOn.value = on ? 1 : 0.08;
   });
   const screenGeo = new THREE.SphereGeometry(1, 32, 24, Math.PI / 2 - 0.2, 0.4, Math.PI / 2 - 0.16, 0.32);
   screenGeo.translate(0, 0, -Math.cos(0.2) + 0.02);

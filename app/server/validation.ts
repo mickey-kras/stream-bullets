@@ -283,7 +283,7 @@ export function readDisplayPrefs(value: unknown): z.infer<typeof displayPrefsSch
     const parsed = shape[key as keyof typeof shape].safeParse(field);
     if (parsed.success && parsed.data !== undefined) result[key] = parsed.data;
   }
-  return result as z.infer<typeof displayPrefsSchema>;
+  return result;
 }
 
 // `PATCH /api/streamer`: edit your page. `logoMode: "profile"` drops the uploaded logo.

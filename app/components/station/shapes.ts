@@ -1,6 +1,10 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
+export function isMesh(object: THREE.Object3D): object is THREE.Mesh {
+  return object instanceof THREE.Mesh;
+}
+
 // Shared geometry helpers. Positions: [x,y,z]; sizes follow Three.js geometry tuple order.
 
 export type P = readonly [number, number, number];

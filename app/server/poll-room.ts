@@ -2,7 +2,6 @@ import { DurableObject } from "cloudflare:workers";
 import type { AppEnv } from "../env";
 import {
   MASH_FLUSH_MS,
-  MASH_MAX_BATCH,
   MASH_TICK_MS,
   mashPhaseAt,
   mashWinner,
@@ -16,6 +15,8 @@ import type { LiveSnapshot, MashPhase, MashTick, OverlayPublic } from "../types"
 import { LIVE_POLLS_SQL, livePolls, optionsFromJson, type PollRow } from "./live-polls";
 import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from "./overlay-state";
 import { validateTestEnvironment } from "./test-environment-config";
+import { detached } from "../lib/detached";
+import { ENTRY_ID, tapMessage, type TapMessage } from "./tap-message";
 
 const MAX_CONNECTIONS = 200;
 // Reserve half the room for signed-in viewers.
@@ -29,10 +30,8 @@ const CONNECTION_LEASE_MS = 60 * 60 * 1_000;
 const IDLE_TIMEOUT_MS = 60_000;
 const CLIENT_KEY = /^[0-9a-f]{64}$/;
 const USER_ID = /^[\w-]{1,100}$/;
-const ENTRY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RESYNC_INTERVAL_MS = 15_000;
 const STREAMER_ID = ENTRY_ID;
-const MAX_MESSAGE_LENGTH = 256;
 // Cache non-live battle lookups for this interval.
 const NOT_LIVE_CACHE_MS = 2_000;
 const ROOM_PATHS: Readonly<Record<string, "GET" | "POST">> = {
@@ -55,14 +54,6 @@ type SocketRole = "owner" | "member" | "anonymous";
 
 // Suspension closes all sockets and hides live data.
 class PageSuspended extends Error {}
-
-interface TapMessage {
-  t: "tap";
-  id: string;
-  n: number;
-  assisted: boolean;
-  seq: number;
-}
 
 // Keep active battles in memory. Persist each tap to `tap_journal` before acknowledgement; flush totals to D1
 // every second. Recover journals after eviction/deploy. Per-player cumulative totals make repeated writes
@@ -113,33 +104,6 @@ function response(message: string, status: number): Response {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-function tapMessage(raw: string | ArrayBuffer): TapMessage | null {
-  if (typeof raw !== "string" || raw.length > MAX_MESSAGE_LENGTH) return null;
-  let value: unknown;
-  try {
-    value = JSON.parse(raw);
-  } catch {
-    return null;
-  }
-  if (typeof value !== "object" || value === null) return null;
-  const { t, id, n, assisted, seq } = value as Record<string, unknown>;
-  if (
-    t !== "tap" ||
-    typeof id !== "string" ||
-    !ENTRY_ID.test(id) ||
-    typeof n !== "number" ||
-    !Number.isSafeInteger(n) ||
-    n < 1 ||
-    typeof assisted !== "boolean" ||
-    typeof seq !== "number" ||
-    !Number.isSafeInteger(seq) ||
-    seq < 0
-  )
-    return null;
-  // Cap reconnect backlogs per message; the token bucket decides accepted taps.
-  return { t, id, n: Math.min(n, MASH_MAX_BATCH), assisted, seq };
-}
-
 // The socket that opened first, or null for none.
 function oldest(sockets: readonly WebSocket[], openedAt: (socket: WebSocket) => number): WebSocket | null {
   let found: WebSocket | null = null;
@@ -169,12 +133,14 @@ export class PollRoom extends DurableObject<AppEnv> {
 
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
-    ctx.blockConcurrencyWhile(async (): Promise<void> => {
-      this.streamerId = await ctx.storage.get<string>("streamerId");
-      ctx.storage.sql.exec(`CREATE TABLE IF NOT EXISTS tap_journal (entry_id TEXT NOT NULL, starts_at INTEGER,
-        user_id TEXT NOT NULL, side INTEGER NOT NULL, taps INTEGER NOT NULL, assisted INTEGER NOT NULL,
-        PRIMARY KEY (entry_id, user_id))`);
-    });
+    detached(
+      ctx.blockConcurrencyWhile(async (): Promise<void> => {
+        this.streamerId = await ctx.storage.get<string>("streamerId");
+        ctx.storage.sql.exec(`CREATE TABLE IF NOT EXISTS tap_journal (entry_id TEXT NOT NULL, starts_at INTEGER,
+          user_id TEXT NOT NULL, side INTEGER NOT NULL, taps INTEGER NOT NULL, assisted INTEGER NOT NULL,
+          PRIMARY KEY (entry_id, user_id))`);
+      }),
+    );
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
 

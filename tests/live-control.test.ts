@@ -49,7 +49,7 @@ let ingestReply: () => Response;
 const { call, cookie, context } = apiCaller(() => env, origin, secret);
 
 async function body<T>(response: Response): Promise<T> {
-  return (await response.json()) as T;
+  return await response.json();
 }
 
 async function seed(): Promise<void> {
@@ -106,8 +106,8 @@ beforeAll(async (): Promise<void> => {
       get: () => ({
         fetch: async (url: string, init: RequestInit): Promise<Response> => {
           const target = new URL(url);
-          ingestCalls.push({ path: `${target.pathname}${target.search}`, body: String(init.body ?? "") });
-          return target.pathname === "/playground" ? ingestReply() : new Response(null, { status: 204 });
+          ingestCalls.push({ path: `${target.pathname}${target.search}`, body: await new Response(init.body).text() });
+          return Promise.resolve(target.pathname === "/playground" ? ingestReply() : new Response(null, { status: 204 }));
         },
       }),
     } as unknown as DurableObjectNamespace,
@@ -116,8 +116,8 @@ beforeAll(async (): Promise<void> => {
       get: () => ({
         fetch: async (url: string, init: RequestInit): Promise<Response> => {
           const target = new URL(url);
-          roomCalls.push({ path: `${target.pathname}${target.search}`, body: String(init.body ?? "") });
-          return new Response(null, { status: 204 });
+          roomCalls.push({ path: `${target.pathname}${target.search}`, body: await new Response(init.body).text() });
+          return Promise.resolve(new Response(null, { status: 204 }));
         },
       }),
     } as unknown as DurableObjectNamespace,
@@ -559,7 +559,7 @@ describe("Mash Battle owner controls", (): void => {
       ...env,
       DB: {
         prepare: (sql: string) => env.DB.prepare(sql),
-        batch: async () => [{ meta: { changes: 0 } }, { meta: { changes: 1 } }],
+        batch: () => Promise.resolve([{ meta: { changes: 0 } }, { meta: { changes: 1 } }]),
       } as unknown as D1Database,
     };
     await expect(runMashAction(raced, "owner", id, "start", { countdown: false })).rejects.toMatchObject({
@@ -1053,7 +1053,7 @@ describe("overlay control", (): void => {
       expect(await refused.json()).toMatchObject({ error: "Turn on the characters layer first." });
       // The other controls work with the layer off.
       expect((await characters({ op: "pause" })).status).toBe(200);
-      expect(ingestCalls.map((entry) => JSON.parse(entry.body))).toEqual([{ op: "pause" }]);
+      expect(ingestCalls.map((entry): unknown => JSON.parse(entry.body))).toEqual([{ op: "pause" }]);
     });
 
     it("uses the write quota to start a test, reset and remove, never to read, stop or pause", async (): Promise<void> => {

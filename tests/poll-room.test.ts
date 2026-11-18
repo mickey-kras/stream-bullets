@@ -346,7 +346,7 @@ describe("live room admission", (): void => {
 
   it("re-checks the cap after loading the snapshot, so overlapping subscriptions never pass it", async (): Promise<void> => {
     const responses = await Promise.all(Array.from({ length: 12 }, () => subscribe({ key: KEY })));
-    expect(responses.map((response) => response.status).sort()).toEqual([...Array(10).fill(101), 429, 429]);
+    expect(responses.map((response) => response.status).sort()).toEqual([...Array<number>(10).fill(101), 429, 429]);
   });
 
   it("lets signed-out sockets fill half the room, then only signed-in viewers", async (): Promise<void> => {
@@ -621,9 +621,10 @@ describe("live room snapshots", (): void => {
 
   it("hides the counts of a binary poll until it is revealed", async (): Promise<void> => {
     const id = await rows.addPoll("binary");
+    await database.db.prepare("UPDATE entries SET binary_labels=? WHERE id=?").bind('["No","Yes"]', id).run();
     await rows.vote(id, 0);
     const socket = await join();
-    expect(socket.messages<LiveSnapshot>()[0].polls[0]).toMatchObject({ kind: "binary", counts: null, total: 1 });
+    expect(socket.messages<LiveSnapshot>()[0].polls[0]).toMatchObject({ kind: "binary", options: ["No", "Yes"], counts: null, total: 1 });
     await database.db.prepare("UPDATE entries SET revealed = 1 WHERE id = ?").bind(id).run();
     await rows.vote(id, 1);
     await post("refresh");
@@ -788,8 +789,8 @@ describe("live room tap messages", (): void => {
     for (const message of bad) {
       const socket = await join({ key: "b".repeat(64) });
       await room().webSocketMessage(socket as unknown as WebSocket, message);
-      expect([String(message).slice(0, 40), socket.closeCode, socket.closeReason]).toEqual([
-        String(message).slice(0, 40),
+      expect([(typeof message === "string" ? message : "binary message").slice(0, 40), socket.closeCode, socket.closeReason]).toEqual([
+        (typeof message === "string" ? message : "binary message").slice(0, 40),
         1008,
         "Unsupported message",
       ]);

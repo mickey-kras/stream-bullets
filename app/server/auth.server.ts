@@ -145,9 +145,11 @@ function reliableProviderEmail(provider: string | undefined, profile: unknown): 
   return null;
 }
 
-async function addSignInContext(
-  additionalData: { acceptance?: unknown; displayName?: unknown } | null | undefined,
-): Promise<void> {
+async function addSignInContext(additionalData: unknown): Promise<void> {
+  const context = z
+    .object({ acceptance: z.unknown().optional(), displayName: z.unknown().optional() })
+    .safeParse(additionalData);
+  if (!context.success) return;
   const acceptance = z
     .object({
       accepted: z.literal(true),
@@ -155,9 +157,9 @@ async function addSignInContext(
       termsVersion: z.literal(signupPolicy.termsVersion),
       privacyVersion: z.literal(signupPolicy.privacyVersion),
     })
-    .safeParse(additionalData?.acceptance);
+    .safeParse(context.data.acceptance);
   if (acceptance.success) await addOAuthServerContext({ acceptedAt: Date.now(), ...signupPolicy });
-  const displayName: unknown = additionalData?.displayName;
+  const displayName: unknown = context.data.displayName;
   if (displayName !== undefined) {
     const parsed = displayNameSchema.safeParse(displayName);
     if (!parsed.success)
@@ -172,8 +174,13 @@ async function addSignInContext(
 function authRequestHooks(env: AppEnv, origin: string): NonNullable<BetterAuthOptions["hooks"]> {
   return {
     before: createAuthMiddleware(async (ctx) => {
+      if (!["/sign-in/social", "/sign-in/oauth2", "/link-social", "/unlink-account"].includes(ctx.path ?? "")) return;
+      const body: unknown = ctx.body;
+      const parsed = z.record(z.string(), z.unknown()).safeParse(body ?? {});
+      // A body that is not an object has no fields; the checks below reject it as they did before.
+      const fields: Record<string, unknown> = parsed.success ? parsed.data : {};
       if (ctx.path === "/sign-in/social" || ctx.path === "/sign-in/oauth2") {
-        await addSignInContext(ctx.body?.additionalData);
+        await addSignInContext(fields.additionalData);
       }
       if (ctx.path !== "/link-social" && ctx.path !== "/unlink-account") return;
       if (ctx.headers?.get("origin") !== origin)
@@ -187,7 +194,8 @@ function authRequestHooks(env: AppEnv, origin: string): NonNullable<BetterAuthOp
         });
       }
       if (ctx.path === "/link-social") {
-        if (!configuredProviders(env).includes(ctx.body?.provider) || ctx.body?.idToken) {
+        const providers: readonly string[] = configuredProviders(env);
+        if (typeof fields.provider !== "string" || !providers.includes(fields.provider) || fields.idToken) {
           throw new APIError("BAD_REQUEST", {
             message: "Use a configured provider authorization to link an account.",
           });
@@ -195,7 +203,7 @@ function authRequestHooks(env: AppEnv, origin: string): NonNullable<BetterAuthOp
         await addOAuthServerContext({ linkingSession: session.session.id });
         return;
       }
-      const accountId = z.string().min(1).max(128).safeParse(ctx.body?.accountId);
+      const accountId = z.string().min(1).max(128).safeParse(fields.accountId);
       if (!accountId.success) throw new APIError("BAD_REQUEST", { message: "Choose a linked account." });
       const removed = await env.DB.prepare(`DELETE FROM account WHERE id=? AND user_id=?
           AND EXISTS (SELECT 1 FROM account other WHERE other.user_id=? AND other.id<>?

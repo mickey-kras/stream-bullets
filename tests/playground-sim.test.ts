@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { RLO } from "./helpers/hostile-bidi";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../app/lib/activity";
 import {
   BUBBLE_LENGTH,
@@ -391,7 +392,7 @@ describe("commands and bubbles", () => {
   it("shows queued text once walking and keeps at most four bubbles", () => {
     const { sim, viewers } = crowd(8);
     for (const v of viewers) walking(sim, find(sim, v) as Participant);
-    for (const v of viewers) sim.receive(chat(v, `line ‮from ${v.userId}\n`));
+    for (const v of viewers) sim.receive(chat(v, `line ${RLO}from ${v.userId}\n`));
     sim.tick();
     const frame = sim.fullFrame();
     expect(frame.bubbles).toHaveLength(BUBBLE_MAX);
@@ -803,7 +804,8 @@ describe("frames", () => {
     // After a full frame, the next tick frame repeats every section.
     sim.fullFrame();
     sim.resendSections();
-    expect(sim.tickFrame()).toMatchObject({ roster: expect.any(Array), mode: { paused: false, test: false } });
+    const expectedRoster: unknown = expect.any(Array);
+    expect(sim.tickFrame()).toMatchObject({ roster: expectedRoster, mode: { paused: false, test: false } });
   });
 
   it("never puts a platform user id in a frame", () => {

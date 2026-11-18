@@ -116,7 +116,7 @@ export function ModerateSheet({
       return;
     }
     const note = data.get("note");
-    send({
+    void send({
       action,
       reason: reason as ModerationReason,
       note: typeof note === "string" ? note.trim() : "",

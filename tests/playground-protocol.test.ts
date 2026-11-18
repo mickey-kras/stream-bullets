@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ALM, LRM, RLO, RLM } from "./helpers/hostile-bidi";
 import type { ActivityChat } from "../app/lib/activity";
 import {
   BUBBLE_GRAPHEMES,
@@ -49,7 +50,7 @@ function hostile(name: string): ActivityChat {
     channelId: "c1",
     messageId: "m1",
     user: { id: "secret-user-id", displayName: name },
-    text: `<img src=x onerror=alert(1)>\u0000‮${"Ź̂̃".repeat(200)}`,
+    text: `<img src=x onerror=alert(1)>\u0000${RLO}${"Ź̂̃".repeat(200)}`,
     fragments: [],
     badges: [],
     sentAt: null,
@@ -96,7 +97,7 @@ describe("playground protocol", () => {
     expect(parseFrame(bad({ chars: [[1, 0.5, 0, 1, 0, 1, 0]] }))).toBeNull();
     expect(parseFrame(bad({ chars: [[1, 0, 0, 1, 0, 1, 8]] }))).toBeNull();
     expect(parseFrame(bad({ roster: [{ id: 1, platform: "instagram", name: "x" }] }))).toBeNull();
-    expect(parseFrame(bad({ roster: [{ id: 1, platform: "twitch", name: "a‮b" }] }))).toBeNull();
+    expect(parseFrame(bad({ roster: [{ id: 1, platform: "twitch", name: `a${RLO}b` }] }))).toBeNull();
     expect(parseFrame(bad({ bubbles: [{ id: 1, text: "line\nbreak" }] }))).toBeNull();
     expect(parseFrame(bad({ bubbles: [{ id: 1, text: "x".repeat(BUBBLE_MAX_UNITS + 1) }] }))).toBeNull();
     expect(parseFrame(bad({ terrain: { ...frame.terrain, ground: "gx" } }))).toBeNull();
@@ -128,7 +129,7 @@ describe("playground protocol", () => {
   });
 
   it("bounds hostile text by graphemes and code units, never splitting one", () => {
-    expect(boundText("  a\u0000b‮ c\n\nd  ", 80, 320)).toBe("a b c d");
+    expect(boundText(`  a\u0000b${RLO} c\n\nd  `, 80, 320)).toBe("a b c d");
     expect(boundText("👩‍🚀👩‍🚀👩‍🚀", 2, 100)).toBe("👩‍🚀👩‍🚀");
     expect(boundText("ab👩‍🚀", 10, 4)).toBe("ab");
     expect(boundText("x\uD800y", 10, 10)).toBe("x�y");
@@ -138,13 +139,13 @@ describe("playground protocol", () => {
     expect(boundText("ab 👩‍🚀👩‍🚀", 10, 9, "…")).toBe("ab 👩‍🚀…");
     expect(boundText("abcd", 4, 100, "…")).toBe("abcd");
     // The Arabic letter mark and the left-to-right and right-to-left marks become spaces too.
-    expect(boundText("a؜b‎c‏d", 80, 320)).toBe("a b c d");
+    expect(boundText(`a${ALM}b${LRM}c${RLM}d`, 80, 320)).toBe("a b c d");
   });
 
   it("carries hostile chat as bounded, safe text and never the platform user id", () => {
     const sim = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: () => 0.5 });
     sim.resumeAfter(0);
-    sim.receive(hostile(`‮${"N".repeat(500)}\u0007`));
+    sim.receive(hostile(`${RLO}${"N".repeat(500)}\u0007`));
     const p = sim.list()[0];
     p.state = "walk";
     p.free = false;

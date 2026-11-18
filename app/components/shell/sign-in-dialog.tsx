@@ -58,7 +58,7 @@ export function SignIn({
     try {
       // The social endpoint also handles generic OAuth Instagram.
       const result = await authClient.signIn.social({
-        provider: provider as "google",
+        provider,
         callbackURL: returnTo,
         errorCallbackURL: `/sign-in?${new URLSearchParams({ next: returnTo }).toString()}`,
         newUserCallbackURL: profileOver(returnTo),

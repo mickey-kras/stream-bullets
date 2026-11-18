@@ -58,7 +58,7 @@ test("mobile landing is one screen with Browse streamers and the scene under the
 
 test("desktop landing remains usable when WebGL is unavailable", async ({ page }) => {
   await page.addInitScript(() => {
-    const original = HTMLCanvasElement.prototype.getContext;
+    const original = Reflect.get<HTMLCanvasElement, "getContext">(HTMLCanvasElement.prototype, "getContext");
     Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
       value: function (this: HTMLCanvasElement, contextId: string, options?: unknown): RenderingContext | null {
         if (contextId.startsWith("webgl")) return null;
@@ -88,7 +88,7 @@ test("the tilt pill shows only on touch devices that ask for motion access", asy
   const desktop = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: "reduce" });
   const stubPermission = (): void => {
     Object.defineProperty(globalThis.DeviceOrientationEvent, "requestPermission", {
-      value: async (): Promise<string> => "granted",
+      value: (): Promise<string> => Promise.resolve("granted"),
       configurable: true,
     });
   };

@@ -362,7 +362,7 @@ describe("reviewing reports", (): void => {
           return typeof value === "function" ? value.bind(target) : value;
         },
       }),
-    } as AppEnv;
+    };
     await expect(resolveReport(failing, "admin", { id, action: "remove" })).rejects.toThrow("D1 unavailable");
     expect(await statuses(topic)).toEqual(["open"]);
   });
@@ -371,7 +371,7 @@ describe("reviewing reports", (): void => {
 describe("moderation rights", (): void => {
   // Simulate a fresh admin key check.
   const fresh = (): ReturnType<typeof vi.fn<() => Promise<{ stepUp: string }>>> =>
-    vi.fn(async (): Promise<{ stepUp: string }> => ({ stepUp: "fresh" }));
+    vi.fn((): Promise<{ stepUp: string }> => Promise.resolve(({ stepUp: "fresh" })));
 
   async function auditRows(): Promise<{ target_id: string; action: string; actor_id: string; metadata: string }[]> {
     const { results } = await env.DB.prepare(
@@ -429,8 +429,8 @@ describe("moderation rights", (): void => {
   it("refuses an admin removal when the gate refuses or no gate is given, and writes no row", async (): Promise<void> => {
     const topic = await seedEntry();
     const comment = await seedComment(topic);
-    const refused = vi.fn(async (): Promise<{ stepUp: string }> => {
-      throw new HttpError(403, "Confirm with your security key to continue.", "step_up_required");
+    const refused = vi.fn((): Promise<{ stepUp: string }> => {
+      return Promise.reject(new HttpError(403, "Confirm with your security key to continue.", "step_up_required"));
     });
     await expect(
       mutateEntry(env, "admin", streamer.id, { action: "delete", id: topic }, refused),

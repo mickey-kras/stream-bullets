@@ -166,7 +166,7 @@ it("measures local room admission, saturation, votes, mash and recovery", { skip
     }
   }
   await freshRoom();
-  const rows = liveRows(() => database as unknown as D1Database, (): string => room);
+  const rows = liveRows(() => database, (): string => room);
   const poll: string = await rows.addPoll();
   await burst("mixed-full", [...Array.from({ length: 100 }, (): Role => "anonymous"), ...Array.from({ length: 98 }, (): Role => "member"), "owner", "overlay"]);
   const owners: Client[] = clients.filter((client: Client): boolean => client.role === "owner" || client.role === "overlay");

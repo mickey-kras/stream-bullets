@@ -1,7 +1,11 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { allowedProviderPhoto, importProviderPhoto } from "../app/server/provider-avatar.server";
 import { createTestDatabase } from "./helpers/database";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 let database: Awaited<ReturnType<typeof createTestDatabase>>;
 let env: AppEnv;
@@ -63,9 +67,10 @@ describe("provider avatar import", () => {
       expect(await env.DB.prepare("SELECT version FROM image_versions WHERE owner_id='photo-user'").first()).toEqual(
         initial,
       );
+      const expectedSignal: unknown = expect.any(AbortSignal);
       expect(fetchMock).toHaveBeenCalledWith(
         "https://lh3.googleusercontent.com/photo",
-        expect.objectContaining({ redirect: "error", signal: expect.any(AbortSignal) }),
+        expect.objectContaining({ redirect: "error", signal: expectedSignal }),
       );
       expect(warn).toHaveBeenCalledTimes(3);
     } finally {

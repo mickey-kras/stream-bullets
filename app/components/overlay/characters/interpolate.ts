@@ -26,12 +26,7 @@ export function pushFrame(buffer: readonly TimedView[], view: PlaygroundView, at
 }
 
 function moves(from: CharacterView, to: CharacterView | undefined): to is CharacterView {
-  return (
-    to !== undefined &&
-    to.state === from.state &&
-    Math.abs(to.x - from.x) <= TELEPORT_PX &&
-    Math.abs(to.y - from.y) <= TELEPORT_PX
-  );
+  return to?.state === from.state && Math.abs(to.x - from.x) <= TELEPORT_PX && Math.abs(to.y - from.y) <= TELEPORT_PX;
 }
 
 /**
@@ -52,7 +47,8 @@ export function sampleView(buffer: readonly TimedView[], now: number, reduced: b
   const elapsed: number = Math.max(0, time - base.at);
   const paused: boolean = base.view.mode.paused;
   const share: number = next && !paused ? Math.min(1, elapsed / Math.max(1, next.at - base.at)) : 0;
-  const ahead: number = paused ? 0 : Math.min(elapsed, next ? next.at - base.at : MAX_AHEAD_MS) * TICKS_PER_MS;
+  const span: number = next ? next.at - base.at : MAX_AHEAD_MS;
+  const ahead: number = paused ? 0 : Math.min(elapsed, span) * TICKS_PER_MS;
   const later = new Map<number, CharacterView>(next?.view.characters.map((c: CharacterView) => [c.id, c]));
   const characters: CharacterView[] = base.view.characters.map((c: CharacterView): CharacterView => {
     const to: CharacterView | undefined = later.get(c.id);

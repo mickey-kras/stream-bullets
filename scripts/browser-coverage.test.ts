@@ -12,8 +12,8 @@ import {
 
 import { mergeBrowserCoverage } from "./merge-browser-coverage.ts";
 
-describe("browser coverage", (): void => {
-  it("normalizes source-map paths to the repository", (): void => {
+void describe("browser coverage", (): void => {
+  void it("normalizes source-map paths to the repository", (): void => {
     assert.equal(
       applicationSourcePath("../../app/routes/home.tsx"),
       "app/routes/home.tsx",
@@ -25,7 +25,7 @@ describe("browser coverage", (): void => {
     assert.equal(applicationSourcePath("app/root.tsx"), "app/root.tsx");
   });
 
-  it("rejects empty reports and mixed mapped and unmapped paths", (): void => {
+  void it("rejects empty reports and mixed mapped and unmapped paths", (): void => {
     assert.throws(
       () => validateBrowserCoverage(""),
       /only mapped application sources/,
@@ -42,7 +42,7 @@ describe("browser coverage", (): void => {
     );
   });
 
-  it("merges browser entries and maps executed code back to TypeScript", async (): Promise<void> => {
+  void it("merges browser entries and maps executed code back to TypeScript", async (): Promise<void> => {
     const directory: string = await mkdtemp(
       join(tmpdir(), "browser-coverage-"),
     );
@@ -92,7 +92,7 @@ describe("browser coverage", (): void => {
       await rm(directory, { recursive: true, force: true });
     }
   });
-  it("combines shards from both application origins and rejects missing or empty inputs", async (): Promise<void> => {
+  void it("combines shards from both application origins and rejects missing or empty inputs", async (): Promise<void> => {
     const directory: string = await mkdtemp(join(tmpdir(), "browser-shards-"));
     const shards: string[] = [join(directory, "one"), join(directory, "two")];
     try {

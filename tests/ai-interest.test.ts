@@ -44,9 +44,9 @@ beforeAll(async () => {
     AI_INTEREST_SALT: SALT,
     BETTER_AUTH_SECRET: "x".repeat(32),
     REQUEST_LIMITER: {
-      limit: async ({ key }: { key: string }): Promise<{ success: boolean }> => {
+      limit: ({ key }: { key: string }): Promise<{ success: boolean }> => {
         limiterKeys.push(key);
-        return { success: limiterOpen };
+        return Promise.resolve({ success: limiterOpen });
       },
     },
   } as AppEnv;
@@ -118,7 +118,7 @@ describe("AI interest counter", () => {
     });
     await expect(recordAiInterest(off, visitor("192.0.2.5"), "up", NOW)).rejects.toMatchObject({ status: 503 });
     await expect(
-      recordAiInterest({ ...env, AI_INTEREST_SALT: "short" } as AppEnv, visitor("192.0.2.5"), "up", NOW),
+      recordAiInterest({ ...env, AI_INTEREST_SALT: "short" }, visitor("192.0.2.5"), "up", NOW),
     ).rejects.toMatchObject({ status: 503 });
   });
 
@@ -247,7 +247,7 @@ describe("POST /api/ai-interest", () => {
       context: api.context(),
       url: new URL(request.url),
       pattern: "/api/*",
-    } as Parameters<typeof action>[0]);
+    });
   }
 
   it("takes a signed-out vote from this site", async () => {
@@ -261,7 +261,7 @@ describe("POST /api/ai-interest", () => {
   it("takes a vote from a client without an Origin header, such as an agent", async () => {
     const response: Response = await post({ "CF-Connecting-IP": "203.0.113.50" });
     expect(response.status).toBe(200);
-    expect(((await response.json()) as { counted: boolean }).counted).toBe(true);
+    expect((await response.json<{ counted: boolean }>()).counted).toBe(true);
   });
 
   it("refuses browsers on other sites and bad bodies", async () => {

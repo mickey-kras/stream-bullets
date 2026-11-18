@@ -64,6 +64,7 @@ import type {
   Viewer,
 } from "../types";
 import type { Route } from "./+types/streamer";
+import { detached } from "../lib/detached";
 
 type View = StreamerView;
 type Dialog = "topic" | "poll" | "idea" | "event" | "card" | null;
@@ -406,7 +407,7 @@ export default function StreamerPage(): ReactNode {
 
   /** Back to the list: the previous history entry when the list opened this detail, so filters, scroll and focus stay. */
   function backToList(next: View): void {
-    if (cameFromList(here.state)) go(-1);
+    if (cameFromList(here.state)) detached(go(-1));
     else navigate(next);
   }
 
@@ -503,7 +504,7 @@ export default function StreamerPage(): ReactNode {
   function closeDiscussion(): void {
     const state: unknown = here.state;
     if (typeof state === "object" && state !== null && "discussionReturn" in state && state.discussionReturn === true)
-      go(-1);
+      detached(go(-1));
     else setParam("discussion", null);
   }
 
@@ -518,14 +519,17 @@ export default function StreamerPage(): ReactNode {
         moderator={moderator}
         status={streamer.status}
         refreshKey={board.revision}
-        onChanged={refreshBoard}
+        onChanged={() => detached(refreshBoard())}
       />
     );
   }
 
   function copyPageLink(): void {
     const url = `${location.origin}/@${streamer.handle}`;
-    copyText(url).then((copied: boolean) => toast(copied ? t("entry.linkCopied") : url));
+    copyText(url).then(
+      (copied: boolean) => toast(copied ? t("entry.linkCopied") : url),
+      () => toast(url),
+    );
   }
 
   function renderEmptyTopics(): ReactNode {
@@ -647,7 +651,7 @@ export default function StreamerPage(): ReactNode {
                 owner={owner}
                 moderator={moderator}
                 writable={writable}
-                pending={pending.has(selected.id)}
+                pending={pending.has(selected.id) || topicSelection.provisional}
                 onBack={() => backToList("topics")}
                 onDiscuss={() => openDiscussion(selected)}
                 onReact={(value) => act({ action: "react", id: selected.id, value }, selected.id)}
@@ -666,7 +670,7 @@ export default function StreamerPage(): ReactNode {
         onSelect={(id: string) => openFromList("topics", id)}
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onSearch={(next: string) => changeBoard("query", next)}
-        onLoadMore={loadMore}
+        onLoadMore={() => void loadMore()}
         action={
           !official &&
           viewer && (
@@ -712,9 +716,9 @@ export default function StreamerPage(): ReactNode {
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onRefresh={() => {
           setRefreshes((value: number) => value + 1);
-          refreshBoard();
+          detached(refreshBoard());
         }}
-        onLoadMore={loadMore}
+        onLoadMore={() => void loadMore()}
         onAction={act}
         onDelete={async (id: string) => {
           if (loadedSelected?.id === id) return removeSelected();
@@ -898,6 +902,15 @@ export default function StreamerPage(): ReactNode {
               <span className="live-dot" aria-hidden="true" />
               {t("live.badge")}
               <span className="sr-only">: {liveEvent.title}</span>
+            </Link>
+          )
+        }
+        ticker={
+          liveEvent && (
+            <Link className="onair-ticker-link" to="?view=schedule">
+              <span className="live-dot" aria-hidden="true" />
+              <strong>{t("live.badge")}</strong>
+              <span className="onair-ticker-title">{liveEvent.title}</span>
             </Link>
           )
         }

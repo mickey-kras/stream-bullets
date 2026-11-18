@@ -44,7 +44,7 @@ describe("the preference cookies", (): void => {
   });
 
   it("writes through the Cookie Store API where the browser has it", async (): Promise<void> => {
-    const set = vi.fn(async (): Promise<void> => undefined);
+    const set = vi.fn((): Promise<void> => Promise.resolve(undefined));
     const fetcher = vi.fn();
     vi.stubGlobal("cookieStore", { set });
     vi.stubGlobal("fetch", fetcher);
@@ -56,7 +56,7 @@ describe("the preference cookies", (): void => {
   it("asks the server to set the cookie where the Cookie Store API is missing", async (): Promise<void> => {
     vi.stubGlobal("cookieStore", undefined);
     const fetcher = vi.fn(
-      async (_url: string, _init: RequestInit): Promise<Response> => new Response(null, { status: 204 }),
+      (_url: string, _init: RequestInit): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })),
     );
     vi.stubGlobal("fetch", fetcher);
     await saveLocaleCookie("pt-BR");

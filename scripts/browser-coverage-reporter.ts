@@ -1,4 +1,4 @@
-import { rm } from "node:fs/promises";
+import { rmSync } from "node:fs";
 import type { Reporter, FullResult } from "@playwright/test/reporter";
 import { mergeBrowserCoverage } from "./merge-browser-coverage.ts";
 
@@ -9,8 +9,8 @@ export default class BrowserCoverageReporter implements Reporter {
     this.executed++;
   }
 
-  async onBegin(): Promise<void> {
-    await rm("coverage/browser", { recursive: true, force: true });
+  onBegin(): void {
+    rmSync("coverage/browser", { recursive: true, force: true });
   }
 
   async onEnd(result: FullResult): Promise<void> {

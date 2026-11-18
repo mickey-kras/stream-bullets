@@ -31,6 +31,8 @@ import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./cha
 import { HttpError, getOrigin } from "./http.server";
 import { ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
+import { detached } from "../lib/detached";
+import { NEW_YOUTUBE_STATE, type Connection, type YoutubeState } from "./channel-ingest-state";
 import {
   SNAPSHOT_SIZE,
   SNAPSHOT_MAX_AGE_MS,
@@ -83,26 +85,6 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/playground-config": "POST",
 };
 
-interface Connection {
-  id: string;
-  externalId: string;
-  status: ChannelStatus;
-  /** The page is suspended: nothing is received or polled until an admin lifts it. */
-  suspended: boolean;
-}
-
-interface YoutubeState {
-  liveChatId: string | null;
-  pageToken: string | null;
-  backoffMs: number;
-  /** No poll runs before this time: the backoff, the polling interval and quota waits all set it. */
-  nextPollAt: number;
-  /** When the channel title was last read again from YouTube. */
-  nameAt: number;
-}
-
-const NEW_YOUTUBE_STATE: YoutubeState = { liveChatId: null, pageToken: null, backoffMs: 0, nextPollAt: 0, nameAt: 0 };
-
 type EventRow = { body: string };
 
 /** A disconnect or close started while a poll waited: the poll stops and writes nothing. */
@@ -143,11 +125,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
     this.playground = playgroundOf(ctx, env, () => this.streamerId, this.scheduleAlarm.bind(this));
-    ctx.blockConcurrencyWhile(async (): Promise<void> => {
-      this.streamerId = await ctx.storage.get<string>("streamerId");
-      this.createTables();
-      await this.playground.load();
-    });
+    detached(
+      ctx.blockConcurrencyWhile(async (): Promise<void> => {
+        this.streamerId = await ctx.storage.get<string>("streamerId");
+        this.createTables();
+        await this.playground.load();
+      }),
+    );
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
 
@@ -188,10 +172,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
     if (url.pathname.startsWith("/playground")) return this.playground.request(url.pathname, request);
+    return this.platformRequest(url.pathname, platform, request);
+  }
+  private async platformRequest(pathname: string, platform: string | null, request: Request): Promise<Response> {
     if (!isPlatform(platform)) return reply("Invalid platform", 400);
-    if (url.pathname === "/event") return this.receive(platform, request);
-    if (url.pathname === "/connect") return Response.json(await this.connectChannel(platform));
-    if (url.pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
+    if (pathname === "/event") return this.receive(platform, request);
+    if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
+    if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
     return this.statusChanged(platform, request);
   }
 
@@ -290,12 +277,12 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     return new Response(null, { status: 204 });
   }
 
-  async webSocketMessage(socket: WebSocket): Promise<void> {
+  webSocketMessage(socket: WebSocket): void {
     // Consumers only listen; anything but the ping (answered by the runtime) closes the socket.
     socket.close(1008, "Unsupported message");
   }
 
-  async webSocketClose(socket: WebSocket): Promise<void> {
+  webSocketClose(socket: WebSocket): void {
     socket.close();
   }
 

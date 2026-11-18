@@ -319,7 +319,7 @@ export async function kickWebhook(
   request: Request,
   env: AppEnv,
   now: number = Date.now(),
-  countRepeat: () => Promise<void> = async (): Promise<void> => undefined,
+  countRepeat: () => Promise<void> = (): Promise<void> => Promise.resolve(),
 ): Promise<Response> {
   requirePost(request);
   const id = request.headers.get("Kick-Event-Message-Id") ?? "";
