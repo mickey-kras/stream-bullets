@@ -16833,7 +16833,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L148",
+      "source_location": "L150",
       "target": "app_components_station_palette_enamel",
       "weight": 1.0
     },
@@ -16845,7 +16845,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L156",
+      "source_location": "L158",
       "target": "app_components_station_logo_letters",
       "weight": 1.0
     },
@@ -16857,7 +16857,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L157",
+      "source_location": "L159",
       "target": "app_components_station_logo_wrap",
       "weight": 1.0
     },
@@ -16869,7 +16869,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L159",
+      "source_location": "L161",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -16881,7 +16881,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L162",
+      "source_location": "L164",
       "target": "app_components_station_logo_walker",
       "weight": 1.0
     },
@@ -16893,7 +16893,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L167",
+      "source_location": "L169",
       "target": "app_components_station_plan_loop",
       "weight": 1.0
     },
@@ -16905,7 +16905,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L167",
+      "source_location": "L169",
       "target": "app_components_station_shapes_tube",
       "weight": 1.0
     },
@@ -16917,7 +16917,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L169",
+      "source_location": "L171",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -16929,7 +16929,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L169",
+      "source_location": "L171",
       "target": "app_components_station_shapes_ball",
       "weight": 1.0
     },
@@ -16941,7 +16941,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L173",
+      "source_location": "L175",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -16953,7 +16953,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_glyphshapes",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L86",
+      "source_location": "L88",
       "target": "app_components_station_logo_place",
       "weight": 1.0
     },
@@ -16965,7 +16965,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_letters",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L118",
+      "source_location": "L120",
       "target": "app_components_station_logo_glyphshapes",
       "weight": 1.0
     },
@@ -16989,7 +16989,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_wrap",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L138",
+      "source_location": "L140",
       "target": "app_components_station_logo_walker",
       "weight": 1.0
     },
@@ -17001,7 +17001,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_wrap",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L140",
+      "source_location": "L142",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -140641,7 +140641,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L117",
+      "source_location": "L119",
       "target": "app_components_station_logo_letters",
       "weight": 1.0
     },
@@ -140652,7 +140652,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L136",
+      "source_location": "L138",
       "target": "app_components_station_logo_wrap",
       "weight": 1.0
     },
@@ -140663,7 +140663,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L146",
+      "source_location": "L148",
       "target": "app_components_station_logo_buildlogo",
       "weight": 1.0
     },
@@ -140729,7 +140729,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L63",
+      "source_location": "L65",
       "target": "app_components_station_logo_skew",
       "weight": 1.0
     },
@@ -140740,7 +140740,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L64",
+      "source_location": "L66",
       "target": "app_components_station_logo_place",
       "weight": 1.0
     },
@@ -140751,7 +140751,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L68",
+      "source_location": "L70",
       "target": "app_components_station_logo_glyphshapes",
       "weight": 1.0
     },
@@ -175970,10 +175970,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "4189dd8d5685157be45666fa63e0d8b1d1ae7bdf7adbe8f874068ec6f90e675c",
+    "content_sha256": "b7c495cbf5da46b7ef9a8d742cb55b723e03e3adccdb4dcc107a52323d6726aa",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "28daf4f8a5ed1d1fbedd575b5749f7136d1b35c21c6abacc782dce3e2fa7af75",
+    "source_sha256": "af5512455cc0a0a3f85f2a9671bc7a2d8b8693a5ba200934164860385db11730",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -188808,7 +188808,7 @@
       "label": "buildLogo()",
       "norm_label": "buildlogo()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L146"
+      "source_location": "L148"
     },
     {
       "_callable": true,
@@ -188819,7 +188819,7 @@
       "label": "glyphShapes()",
       "norm_label": "glyphshapes()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L68"
+      "source_location": "L70"
     },
     {
       "_callable": true,
@@ -188830,7 +188830,7 @@
       "label": "letters()",
       "norm_label": "letters()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L117"
+      "source_location": "L119"
     },
     {
       "_callable": true,
@@ -188841,7 +188841,7 @@
       "label": "place()",
       "norm_label": "place()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L64"
+      "source_location": "L66"
     },
     {
       "_callable": true,
@@ -188863,7 +188863,7 @@
       "label": "wrap()",
       "norm_label": "wrap()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L136"
+      "source_location": "L138"
     },
     {
       "_callable": true,
@@ -211242,7 +211242,7 @@
       "label": "SKEW",
       "norm_label": "skew",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L63"
+      "source_location": "L65"
     },
     {
       "_origin": "ast",
