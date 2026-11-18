@@ -21,14 +21,15 @@ async function signedIn(browser: Browser, role: string): Promise<BrowserContext>
   return context;
 }
 
-test("the Streamers directory pins the official page, pages with Load more, and searches", async ({ page }) => {
+test("the Streamers directory shows the official page as the ideas strip, pages with Load more, and searches", async ({ page }) => {
   await page.goto("/streamers");
   await expect(page).toHaveTitle("Streamers · StreamBullets");
   await expect(page.getByRole("heading", { level: 1, name: "Streamers" })).toBeVisible();
   const cards = page.locator(".streamer-card");
-  // Official first; suspended omitted; frozen labeled.
-  await expect(cards.first()).toContainText("StreamBullets");
-  await expect(cards.first()).toContainText("Official");
+  // The official page is the ideas strip, not a card; suspended omitted; frozen labeled.
+  const ideas = page.getByRole("region", { name: "Ideas", exact: true });
+  await expect(ideas.getByRole("link", { name: "Ideas", exact: true })).toHaveAttribute("href", "/@streambullets");
+  await expect(page.locator('.streamer-card[href^="/@streambullets"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: /Suspended host/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /Frozen host/ })).toContainText("Frozen");
   // Picture fallback: logo, owner avatar, Space explorer.
@@ -37,14 +38,14 @@ test("the Streamers directory pins the official page, pages with Load more, and 
     "14",
   );
 
-  await expect(cards).toHaveCount(50);
+  await expect(cards).toHaveCount(49);
   const count = page.locator(".list-count");
   const announcement = page.locator("#sb-announce-polite");
-  await expect(count).toHaveText(/^Showing 50 of \d+ pages$/);
+  await expect(count).toHaveText(/^Showing 49 of \d+ pages$/);
   const total = Number(/of (\d+)/.exec((await count.textContent()) ?? "")?.[1]);
   await page.getByRole("button", { name: "Load more streamers" }).click();
   await expect(cards).toHaveCount(total);
-  await expect(cards.nth(50)).toBeFocused();
+  await expect(cards.nth(49)).toBeFocused();
   await expect(page.getByRole("button", { name: "Load more streamers" })).toHaveCount(0);
   await expect(count).toHaveText(`Showing ${total} pages`);
 
@@ -88,7 +89,7 @@ test("the Streamers directory pins the official page, pages with Load more, and 
   await page.getByRole("link", { name: "Clear search" }).click();
   await expect(page).toHaveURL(/\/streamers$/);
   await expect(search).toHaveValue("");
-  await expect(cards).toHaveCount(50);
+  await expect(cards).toHaveCount(49);
 });
 
 test("a landing sign's intent shows a prompt and sends each card to that action", async ({ browser, page }) => {
@@ -100,7 +101,7 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
     "/@test_host?view=topics&intent=suggest",
   );
   await page.goto("/streamers?then=vote");
-  await expect(page.locator(".streamer-card.official-card")).toHaveAttribute("href", "/@streambullets?view=topics");
+  await expect(page.getByRole("region", { name: "Ideas", exact: true }).getByRole("link", { name: "Ideas", exact: true })).toHaveAttribute("href", "/@streambullets?view=topics");
   await expect(page.getByRole("link", { name: /Test host/ })).toHaveAttribute("href", "/@test_host?view=polls");
   await page.goto("/streamers?then=discuss");
   await expect(page.getByRole("link", { name: /Test host/ })).toHaveAttribute(
@@ -129,13 +130,12 @@ test("a landing sign's intent shows a prompt and sends each card to that action"
   await close(context);
 });
 
-test("visitors can open real content from the featured community", async ({ page }) => {
+test("visitors can open an idea from the ideas strip", async ({ page }) => {
   // Software WebGL competes with the DOM assertions in CI.
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("link", { name: "Browse streamers", exact: true }).click();
-  const featured = page.getByRole("region", { name: /^StreamBullets/ });
-  await expect(featured.getByText("Start here")).toBeVisible();
+  const featured = page.getByRole("region", { name: "Ideas", exact: true });
   const entry = featured.locator("li a").first();
   const title: string = await entry.innerText();
   await expect(entry).toHaveAttribute("href", /view=topics&entry=/);
@@ -143,7 +143,7 @@ test("visitors can open real content from the featured community", async ({ page
   await expect(page).toHaveURL(/entry=/);
   await expect(page.getByRole("heading", { name: title, exact: true }).first()).toBeVisible();
   await page.goto("/streamers?query=nothing_here");
-  await expect(page.getByText("Start here", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Ideas", exact: true })).toHaveCount(0);
 });
 
 
