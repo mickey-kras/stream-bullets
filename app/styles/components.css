@@ -229,7 +229,6 @@ button.gold:hover { background:var(--gold-hover); }
 .ideas-strip h2 { margin: 0; font: inherit; font-weight: 700; }
 .ideas-strip .ideas-link { margin-left: 0; }
 .ideas-strip p { margin: 0; flex: 1 1 280px; }
-.ideas-strip ul { display: flex; flex-wrap: wrap; gap: 4px 20px; flex-basis: 100%; margin: 0; padding: 0; list-style: none; }
 .streamer-card h2 { font-size: 1.75rem; overflow-wrap: anywhere; }
 .streamer-card p { margin: 6px 0; }
 .streamer-bio { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; -webkit-line-clamp: 2; line-clamp: 2; }

@@ -10,7 +10,7 @@ import { t, tn } from "../i18n";
 import { directoryHref, readIntent, streamerTarget, type Intent } from "../lib/directory";
 import { useShell } from "../lib/shell";
 import { countStreamers, listStreamers } from "../server/data.server";
-import { getFeaturedStreamer, type FeaturedEntry, type FeaturedStreamer } from "../server/featured-streamer.server";
+import { getFeaturedStreamer, type FeaturedStreamer } from "../server/featured-streamer.server";
 import type { Streamer, StreamerDirectory } from "../types";
 import { errorMessage, requestJson } from "../components/api";
 import { dialogHref, type DialogState } from "../components/account/dialog-route";
@@ -90,20 +90,6 @@ function IdeasStrip({ official, intent }: Readonly<{ official: FeaturedStreamer;
         </Link>
       </h2>
       <p className="muted">{t("streamers.officialBio")}</p>
-      {official.entries.length > 0 && (
-        <ul>
-          {official.entries.map((entry: FeaturedEntry) => (
-            <li key={entry.id}>
-              <Link
-                className="text-link"
-                to={`/@${official.handle}?view=${entry.kind === "topic" ? "topics" : "polls"}&entry=${entry.id}`}
-              >
-                {entry.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
     </section>
   );
 }
