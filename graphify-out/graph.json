@@ -4461,7 +4461,7 @@
       "relation": "calls",
       "source": "app_components_api_apierrormessage",
       "source_file": "app/components/api.ts",
-      "source_location": "L128",
+      "source_location": "L133",
       "target": "app_components_api_handlecooldownmessage",
       "weight": 1.0
     },
@@ -4473,7 +4473,19 @@
       "relation": "calls",
       "source": "app_components_api_apierrormessage",
       "source_file": "app/components/api.ts",
-      "source_location": "L130",
+      "source_location": "L134",
+      "target": "app_components_api_keepsservertext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_api_apierrormessage",
+      "source_file": "app/components/api.ts",
+      "source_location": "L136",
       "target": "app_components_api_statusmessage",
       "weight": 1.0
     },
@@ -4485,7 +4497,7 @@
       "relation": "calls",
       "source": "app_components_api_apierrormessage",
       "source_file": "app/components/api.ts",
-      "source_location": "L130",
+      "source_location": "L136",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4497,7 +4509,7 @@
       "relation": "calls",
       "source": "app_components_api_errormessage",
       "source_file": "app/components/api.ts",
-      "source_location": "L134",
+      "source_location": "L140",
       "target": "app_components_api_apierrormessage",
       "weight": 1.0
     },
@@ -4509,7 +4521,7 @@
       "relation": "calls",
       "source": "app_components_api_errormessage",
       "source_file": "app/components/api.ts",
-      "source_location": "L135",
+      "source_location": "L141",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4535,6 +4547,18 @@
       "source_file": "app/components/api.ts",
       "source_location": "L113",
       "target": "app_i18n_index_intllocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_api_keepsservertext",
+      "source_file": "app/components/api.ts",
+      "source_location": "L129",
+      "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
     {
@@ -4593,7 +4617,7 @@
       "relation": "calls",
       "source": "app_components_api_statusmessage",
       "source_file": "app/components/api.ts",
-      "source_location": "L120",
+      "source_location": "L119",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4605,7 +4629,7 @@
       "relation": "calls",
       "source": "app_components_api_statusmessage",
       "source_file": "app/components/api.ts",
-      "source_location": "L123",
+      "source_location": "L121",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -135571,7 +135595,7 @@
       "relation": "contains",
       "source": "app_components_api",
       "source_file": "app/components/api.ts",
-      "source_location": "L119",
+      "source_location": "L118",
       "target": "app_components_api_statusmessage",
       "weight": 1.0
     },
@@ -135582,7 +135606,29 @@
       "relation": "contains",
       "source": "app_components_api",
       "source_file": "app/components/api.ts",
-      "source_location": "L127",
+      "source_location": "L126",
+      "target": "app_components_api_servertextcodes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_api",
+      "source_file": "app/components/api.ts",
+      "source_location": "L128",
+      "target": "app_components_api_keepsservertext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_api",
+      "source_file": "app/components/api.ts",
+      "source_location": "L132",
       "target": "app_components_api_apierrormessage",
       "weight": 1.0
     },
@@ -135593,7 +135639,7 @@
       "relation": "contains",
       "source": "app_components_api",
       "source_file": "app/components/api.ts",
-      "source_location": "L133",
+      "source_location": "L139",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -177381,10 +177427,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "9a91071ef542998d44ccf4a8578ddd4e8e1e448f0ef0e64ecf889e59c56cd509",
+    "content_sha256": "f28d547c18c05ee572dd63e76d0451e09edadd090a6911c781b8ea8ef03005fc",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "1ede2fe5d4a0ef79c963b47e03e7b93fed1a6ff33febf557fe5112ba80d5b587",
+    "source_sha256": "62e705af157c7ae28c79e643a47e9846021b7d3ee87145dcb49c6cc2b1881c02",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -184987,7 +185033,7 @@
       "label": "apiErrorMessage()",
       "norm_label": "apierrormessage()",
       "source_file": "app/components/api.ts",
-      "source_location": "L127"
+      "source_location": "L132"
     },
     {
       "_callable": true,
@@ -185009,7 +185055,7 @@
       "label": "errorMessage()",
       "norm_label": "errormessage()",
       "source_file": "app/components/api.ts",
-      "source_location": "L133"
+      "source_location": "L139"
     },
     {
       "_callable": true,
@@ -185021,6 +185067,17 @@
       "norm_label": "handlecooldownmessage()",
       "source_file": "app/components/api.ts",
       "source_location": "L109"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_api_keepsservertext",
+      "label": "keepsServerText()",
+      "norm_label": "keepsservertext()",
+      "source_file": "app/components/api.ts",
+      "source_location": "L128"
     },
     {
       "_callable": true,
@@ -185075,7 +185132,7 @@
       "label": "statusMessage()",
       "norm_label": "statusmessage()",
       "source_file": "app/components/api.ts",
-      "source_location": "L119"
+      "source_location": "L118"
     },
     {
       "_callable": true,
@@ -211273,6 +211330,16 @@
       "norm_label": "not_json",
       "source_file": "app/components/api.ts",
       "source_location": "L34"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_api_servertextcodes",
+      "label": "serverTextCodes",
+      "norm_label": "servertextcodes",
+      "source_file": "app/components/api.ts",
+      "source_location": "L126"
     },
     {
       "_origin": "ast",

@@ -95,9 +95,39 @@ describe("localized participation", (): void => {
     expect(errorMessage(new ApiError("Suspended", 423, "page_suspended"))).toBe(t("error.pageSuspended"));
     expect(errorMessage(new ApiError("Locked", 423, null))).toBe(t("error.pageLocked"));
     expect(errorMessage(new ApiError("English server detail", 429, "rate_limited"))).toBe(t("error.rateLimit"));
+    if (locale === "en") return;
     expect(errorMessage(new ApiError("Internal service detail", 503, "unknown_failure"))).toBe(t("common.failed"));
     expect(errorMessage(new ApiError("Not JSON", 200, null))).toBe(t("common.failed"));
   });
+
+  // On main, English showed the server text for every API error. These cases must not get worse.
+  it("keeps the English server text where the catalog text says less", (): void => {
+    const stepUp: string = "Confirm with a key you already registered, then add the new key.";
+    expect(errorMessage(new ApiError(stepUp, 403, "step_up_required"))).toBe(stepUp);
+    expect(ceremonyError(new ApiError(stepUp, 403, "step_up_required"))).toBe(stepUp);
+    const otherKey: string = "Confirm with a different key than the one you remove.";
+    expect(errorMessage(new ApiError(otherKey, 403, "other_key_required"))).toBe(otherKey);
+    expect(errorMessage(new ApiError("", 403, "step_up_required"))).toBe(t("keys.confirmTitle"));
+    for (const text of ["Kick is unavailable.", "Characters are off on this server.", "Vote unavailable"]) {
+      expect(errorMessage(new ApiError(text, 503, null))).toBe(text);
+    }
+    expect(errorMessage(new ApiError("This platform is not configured.", 503, "platform_unavailable"))).toBe(
+      "This platform is not configured.",
+    );
+    expect(errorMessage(new ApiError("The request failed. Please try again.", 500, null))).toBe(t("common.failed"));
+    expect(errorMessage(new ApiError("Admin request failed.", 200, null))).toBe("Admin request failed.");
+    expect(errorMessage(new ApiError("", 502, null))).toBe(t("common.failed"));
+  });
+
+  it.each(LOCALES.filter((locale: Locale): boolean => locale !== "en"))(
+    "%s still translates the security-key codes",
+    async (locale: Locale): Promise<void> => {
+      await loadCatalog(locale);
+      setLocaleSource((): Locale => locale);
+      expect(errorMessage(new ApiError("Confirm again.", 403, "step_up_required"))).toBe(t("keys.confirmTitle"));
+      expect(errorMessage(new ApiError("Use another key.", 403, "other_key_required"))).toBe(t("keys.confirmRemove"));
+    },
+  );
 
   it("keeps actionable unmapped client errors in English", (): void => {
     expect(errorMessage(new ApiError("Upload a logo first.", 400, "future_code"))).toBe("Upload a logo first.");

@@ -114,18 +114,24 @@ function handleCooldownMessage(error: ApiError): string {
   return t("error.handleCooldownDate", { date });
 }
 
-// No known code. English keeps the server text for 4xx, because it names the fix. Other languages use the
-// status text. Server faults never show their own text.
+// No known code. English keeps the server text, because it names the fix. Other languages use the status text.
 function statusMessage(error: ApiError): string {
   if (error.status === 423) return t("error.pageLocked");
   if (error.status === 429) return t("error.rateLimit");
-  if (error.status < 400 || error.status >= 500) return t("common.failed");
-  if (getLocale() !== "en") return t(statusMessages[error.status] ?? "common.failed");
-  return error.message || t("common.failed");
+  if (getLocale() === "en") return error.message || t("common.failed");
+  return t(statusMessages[error.status] ?? "common.failed");
+}
+
+// The catalog text for these codes is a dialog title or a button label. The English server text says what to do.
+const serverTextCodes: ReadonlySet<string> = new Set<string>(["step_up_required", "other_key_required"]);
+
+function keepsServerText(error: ApiError): boolean {
+  return getLocale() === "en" && error.code !== null && serverTextCodes.has(error.code) && error.message !== "";
 }
 
 function apiErrorMessage(error: ApiError): string {
   if (error.code === "handle_cooldown") return handleCooldownMessage(error);
+  if (keepsServerText(error)) return error.message;
   const id: MessageId | undefined = error.code ? codeMessages[error.code] : undefined;
   return id ? t(id) : statusMessage(error);
 }

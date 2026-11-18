@@ -112,7 +112,7 @@ describe("browser security-key errors", (): void => {
 
   it("preserves API errors and gives unknown errors a fallback", (): void => {
     const error = new ApiError("Denied", 403, "step_up_required");
-    expect(ceremonyError(error)).toBe(t("keys.confirmTitle"));
+    expect(ceremonyError(error)).toBe("Denied");
     expect(ceremonyError(null)).toBe(t("keys.failed"));
     expect(errorText(new Error("Failed"))).toBe("Failed");
     expect(errorText(null)).toBe(t("admin.requestFailed"));
