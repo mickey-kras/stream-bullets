@@ -1,6 +1,6 @@
 // Responsive cases own 198.51.100.1-88. Mobile dialog/search cases own 203.0.113.1-11 and .30-40.
 // Other specs use owned 192.0.2.x ranges via CF-Connecting-IP. clientIp rejects out-of-range addresses.
-// Allocate free ranges to isolate each spec's 120 requests/min quota.
+// Allocate free ranges to isolate each spec's write, authentication, and connection quotas (120/min each).
 const ranges = {
   platform: [[10, 15]],
   mutations: [[25, 27]],

@@ -6,6 +6,13 @@ Reads (`GET`/`HEAD`) allow signed-out access unless noted.
 Writes need sign-in, exact origin, and no query string. Failures return `401`, `403`, or `400`.
 Unknown paths return `404`. Unsupported methods on known paths return `405`.
 
+The Worker applies address quotas of 120 requests each minute. An address is one IPv4 address or one IPv6 `/64` network.
+Each of these kinds of requests has its own quota: `/api/auth/*`, WebSocket connections, writes, and private reads.
+Private reads are `/api/admin*` and `/api/account/export`. Other reads use no address quota.
+
+Requests above the quota get `429` with `Retry-After: 60`.
+A path with malformed percent-encoding returns `400`.
+
 ## Changed response shapes
 
 | Type or route | Contract |
