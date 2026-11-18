@@ -177,8 +177,8 @@ function authRequestHooks(env: AppEnv, origin: string): NonNullable<BetterAuthOp
       if (!["/sign-in/social", "/sign-in/oauth2", "/link-social", "/unlink-account"].includes(ctx.path ?? "")) return;
       const body: unknown = ctx.body;
       const parsed = z.record(z.string(), z.unknown()).safeParse(body ?? {});
-      if (!parsed.success) throw new APIError("BAD_REQUEST", { message: "Invalid request body." });
-      const fields = parsed.data;
+      // A body that is not an object has no fields; the checks below reject it as they did before.
+      const fields: Record<string, unknown> = parsed.success ? parsed.data : {};
       if (ctx.path === "/sign-in/social" || ctx.path === "/sign-in/oauth2") {
         await addSignInContext(fields.additionalData);
       }

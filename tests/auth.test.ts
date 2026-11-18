@@ -1268,6 +1268,24 @@ describe("explicit login methods", () => {
     });
   });
 
+  it.each(["link-social", "unlink-account"] as const)(
+    "rejects %s with a body that is not an object by origin first",
+    async (path) => {
+      const ownerId: string = `array-body-${path}-${oauthClient}`;
+      const token: string = await freshAccount(ownerId);
+      const request: Request = await signedRequest(token);
+      request.headers.set("origin", "https://stream.example.test/");
+      request.headers.set("content-type", "application/json");
+      request.headers.set("cf-connecting-ip", `192.0.2.${oauthClient++}`);
+      const response: Response = await createAuth(env).handler(
+        new Request(`${env.APP_ORIGIN}/api/auth/${path}`, { method: "POST", headers: request.headers, body: "[]" }),
+      );
+      expect(response.status).toBe(403);
+      expect(await response.json()).toEqual({ message: "Use this site's account settings." });
+      expect(response.headers.getSetCookie()).toEqual([]);
+    },
+  );
+
   it.each([
     ["an ID token", { provider: "twitch", idToken: { token: "attacker-id-token" } }],
     ["an unconfigured provider", { provider: "tiktok" }],
