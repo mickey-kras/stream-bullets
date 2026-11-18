@@ -27,6 +27,7 @@ The sign-in sends no age confirmation and no display name. The server reads them
 
 Before the browser goes to the sign-in provider, the page stores the platform and the action in the session storage of the tab.
 After the sign-in, the page reads this value once and removes it. A value older than 10 minutes does nothing.
+
 The value also holds the handle of the page. A value for a different page does nothing.
 A connect then continues to the platform without a second click. For a disconnect, its button gets focus.
 
