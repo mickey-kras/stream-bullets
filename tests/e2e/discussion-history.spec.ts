@@ -5,7 +5,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { expect, test, type BrowserContext } from "./coverage";
 import { z } from "zod";
-import { clientAddress } from "./client-ips";
+import { clientAddress, clientIp } from "./client-ips";
+import { accounts, runSql, signedIn } from "./fixtures";
 
 const origin = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -224,3 +225,62 @@ for (const change of ["sort", "refresh"] as const) {
     }
   });
 }
+
+test("comment loading and pagination recover without dropping the loaded history", async ({ browser }) => {
+  const users = await accounts();
+  const { entryId } = await seedHistory(users.viewer.id);
+  const foreignEntryId: string = randomUUID();
+  const foreignCommentId: string = randomUUID();
+  await runSql("discussion-foreign-target", [
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${foreignEntryId}',id,'${users.viewer.id}','topic','Another discussion','','Just chatting',${Date.now()} FROM streamers WHERE handle='test_host';`,
+    `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at) VALUES ('${foreignCommentId}','${foreignEntryId}','${users.viewer.id}','Comment in another discussion',${Date.now()});`,
+  ]);
+  const context = await signedIn(browser, "viewer", clientIp("discussion-history", 75));
+  // This loading case owns 203.0.113.103 to isolate its request quota.
+  await context.setExtraHTTPHeaders({ Origin: origin, "CF-Connecting-IP": "203.0.113.103" });
+  try {
+    const page = await newPage(context);
+    let failure: "initial" | "page" | null = "initial";
+    await page.route(`**/api/entries/${entryId}/comments?**`, async (route) => {
+      const paginating: boolean = new URL(route.request().url()).searchParams.has("cursor");
+      if (failure === "initial" || (failure === "page" && paginating)) {
+        await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
+        return;
+      }
+      await route.continue();
+    });
+    await page.goto(`/@test_host?entry=${entryId}`);
+    const alert = page.locator(".discussion > .form-error");
+    await expect(alert).toHaveText("The request failed. Please try again.");
+    await expect(page.getByText("Loading comments…", { exact: true })).toHaveCount(0);
+    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    await composer.fill("Keep this draft through history retries.");
+    failure = null;
+    await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
+    const roots = page.locator(".thread-list > li.thread");
+    await expect(roots).toHaveCount(100);
+    await expect(alert).toBeEmpty();
+    failure = "page";
+    const more = page.getByRole("button", { name: "Load more comments", exact: true });
+    await more.click();
+    await expect(alert).toHaveText("The request failed. Please try again.");
+    await expect(roots).toHaveCount(100);
+    await expect(more).toBeEnabled();
+    await expect(composer).toHaveValue("Keep this draft through history retries.");
+    failure = null;
+    await more.click();
+    await expect(roots).toHaveCount(110);
+    await expect(more).toHaveCount(0);
+    await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
+    await expect(alert).toBeEmpty();
+    await expect(roots).toHaveCount(110);
+    await page.goto(`/@test_host?entry=${entryId}&comment=${foreignCommentId}`);
+    await expect(alert).toHaveText("This comment is no longer available.");
+    await expect(page.locator(`#cm-${foreignCommentId}`)).toHaveCount(0);
+    await expect(roots).toHaveCount(100);
+    await expect(composer).toHaveValue("Keep this draft through history retries.");
+  } finally {
+    await close(context);
+    await runSql("discussion-loading-cleanup", [`DELETE FROM entries WHERE id IN ('${entryId}','${foreignEntryId}');`]);
+  }
+});

@@ -33,7 +33,7 @@ async function regenerate(user: string): Promise<Response> {
 async function newUrl(user: string = "owner"): Promise<{ url: string; key: string }> {
   const response = await regenerate(user);
   expect(response.status).toBe(200);
-  const { url } = (await response.json()) as { url: string };
+  const { url } = await response.json<{ url: string }>();
   return { url, key: new URL(url).searchParams.get("key") ?? "" };
 }
 
@@ -65,15 +65,15 @@ beforeAll(async (): Promise<void> => {
     IMAGES: database.bucket,
     CHANNEL_INGEST: {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })) }),
     } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
       get: () => ({
-        fetch: async (url: string): Promise<Response> => {
+        fetch: (url: string): Promise<Response> => {
           const target = new URL(url);
           roomCalls.push(`${target.pathname}${target.search}`);
-          return new Response(null, { status: 204 });
+          return Promise.resolve(new Response(null, { status: 204 }));
         },
       }),
     } as unknown as DurableObjectNamespace,
@@ -128,7 +128,7 @@ describe("overlay key values", (): void => {
 
   it("reads every character, also after the first difference", (): void => {
     const read: number[] = [];
-    const original = String.prototype.codePointAt;
+    const original = Object.getOwnPropertyDescriptor(String.prototype, "codePointAt")!.value as (this: string, index: number) => number | undefined;
     vi.spyOn(String.prototype, "codePointAt").mockImplementation(function (this: string, index: number) {
       read.push(index);
       return original.call(this, index);
@@ -147,7 +147,8 @@ describe("making and checking the overlay key", (): void => {
     expect(key).toMatch(KEY);
     expect(await hasOverlayKey(env, page)).toBe(true);
     const row = await env.DB.prepare("SELECT * FROM overlay_keys WHERE streamer_id=?").bind(page).first();
-    expect(row).toEqual({ streamer_id: page, key_hash: await hashOverlayKey(key), created_at: expect.any(Number) });
+    const expectedCreatedAt: unknown = expect.any(Number);
+    expect(row).toEqual({ streamer_id: page, key_hash: await hashOverlayKey(key), created_at: expectedCreatedAt });
     expect(JSON.stringify(row)).not.toContain(key);
     expect(await overlayKeyMatches(env, page, key)).toBe(true);
     const state = await call("GET", "overlay", { user: "owner" });

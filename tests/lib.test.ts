@@ -20,7 +20,7 @@ import { supportLabel } from "../app/lib/support";
 import { replyParent, visibleReplies } from "../app/lib/threads";
 import { usePrefs } from "../app/lib/use-prefs";
 import { formatDate, isValidZone, parseDate } from "../app/lib/zoned";
-import type { Comment, CommentThread, StreamEvent } from "../app/types";
+import type { Comment, StreamEvent } from "../app/types";
 
 const origin = "https://streambullets.test";
 const hour = 3_600_000;
@@ -306,7 +306,7 @@ describe("comment threads", (): void => {
 
   it("finds the parent a reply answers", (): void => {
     const reply = comment("r2", { parentId: "r1" });
-    const thread = { ...comment("t"), replies: [comment("r1", { parentId: "t" }), reply] } as CommentThread;
+    const thread = { ...comment("t"), replies: [comment("r1", { parentId: "t" }), reply] };
     expect(replyParent(thread, reply)?.id).toBe("r1");
     expect(replyParent(thread, thread.replies[0])).toBe(thread);
     expect(replyParent(thread, comment("x"))).toBeNull();

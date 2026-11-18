@@ -43,6 +43,9 @@ async function clientKey(request: Request): Promise<string> {
   return sha256(visitorPrefix(request.headers.get("CF-Connecting-IP") ?? "local"));
 }
 
+const BINARY_LABELS_COMPATIBILITY_HEADER: string = "X-StreamBullets-Binary-Labels";
+const BINARY_LABELS_COMPATIBILITY_VERSION: string = "1";
+
 const handler = createRequestHandler(() => import("virtual:react-router/server-build"), import.meta.env.MODE);
 
 async function calendarResponse(request: Request, env: AppEnv, handle: string, origin: string): Promise<Response> {
@@ -232,6 +235,7 @@ export default {
     const secured = securityHeaders(response, request, nonce, origin, import.meta.env.DEV);
     if (env.APP_ENV === "test") secured.headers.set("X-Robots-Tag", "noindex, nofollow");
     secured.headers.set("X-Request-ID", requestId);
+    secured.headers.set(BINARY_LABELS_COMPATIBILITY_HEADER, BINARY_LABELS_COMPATIBILITY_VERSION);
     for (const value of responseHeaders.getSetCookie()) secured.headers.append("Set-Cookie", value);
     return secured;
   },

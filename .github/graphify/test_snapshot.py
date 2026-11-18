@@ -1,5 +1,6 @@
 """Check input selection, extraction, and output safety."""
 import importlib.util
+from functools import partial
 from pathlib import Path
 import subprocess
 import tempfile
@@ -50,6 +51,22 @@ class SnapshotTests(unittest.TestCase):
             (root / "app/new.ts").write_text("export const untracked = 3;\n")
             with patch.object(snapshot, "ROOT", root):
                 self.assertEqual(snapshot.source_files(), {"app/a.ts": b"export const staged = 1;\n"})
+
+    def test_exporter_commit_provenance_does_not_change_snapshot(self) -> None:
+        from graphify.export import to_json
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "app").mkdir()
+            (root / "app/a.ts").write_text("export const value = 1;\n")
+            stage(root)
+            graphs: list[dict[str, object]] = []
+            for commit in ("1" * 40, "2" * 40):
+                with patch.object(snapshot, "ROOT", root), \
+                     patch("graphify.export.to_json", side_effect=partial(to_json, built_at_commit=commit)):
+                    graphs.append(snapshot.build())
+            self.assertNotIn("built_at_commit", graphs[0])
+            self.assertEqual(graphs[0], graphs[1])
 
     def test_check_rejects_a_stale_graph_and_accepts_a_current_one(self) -> None:
         graph = {"nodes": [{"id": "current"}], "edges": [], "graph": {}}

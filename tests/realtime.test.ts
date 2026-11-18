@@ -16,9 +16,14 @@ const sockets: LiveSocket[] = [];
 const origin = "https://streambullets.test";
 const clientKey = "a".repeat(64);
 const rows = liveRows(
-  () => database as unknown as D1Database,
+  () => database,
   () => streamerId,
 );
+
+function socketText(data: unknown): string {
+  if (typeof data !== "string") throw new TypeError("Expected a text WebSocket frame");
+  return data;
+}
 
 function nextSnapshot(socket: LiveSocket): Promise<LiveSnapshot> {
   return new Promise((resolve, reject): void => {
@@ -28,9 +33,9 @@ function nextSnapshot(socket: LiveSocket): Promise<LiveSnapshot> {
       (event): void => {
         clearTimeout(timeout);
         try {
-          resolve(JSON.parse(String(event.data)) as LiveSnapshot);
+          resolve(JSON.parse(socketText(event.data)) as LiveSnapshot);
         } catch (error: unknown) {
-          reject(error);
+          reject(error instanceof Error ? error : new Error(String(error)));
         }
       },
       { once: true },
@@ -85,7 +90,7 @@ function nextMessage<T extends { type: string }>(
 ): Promise<T> {
   return new Promise((resolve, reject): void => {
     const listener = (event: { data: unknown }): void => {
-      const message = JSON.parse(String(event.data)) as T;
+      const message = JSON.parse(socketText(event.data)) as T;
       if (!match(message)) return;
       clearTimeout(timeout);
       socket.removeEventListener("message", listener);
@@ -154,7 +159,7 @@ async function openCount(key: string = ""): Promise<number> {
 
 function nextRaw(socket: LiveSocket): Promise<string> {
   return new Promise((resolve): void => {
-    socket.addEventListener("message", (event): void => resolve(String(event.data)), { once: true });
+    socket.addEventListener("message", (event): void => resolve(socketText(event.data)), { once: true });
   });
 }
 
@@ -319,17 +324,17 @@ describe("public poll updates", (): void => {
   it("bounds snapshots to fifty polls and excludes topics and other streamers", async (): Promise<void> => {
     const inserts = Array.from({ length: 51 }, (_, index) =>
       database
-        .prepare("INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
+        .prepare("INSERT INTO entries (id, streamer_id, title, kind, options, ends_at, revealed, created_at) VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
         .bind(crypto.randomUUID(), streamerId, `Poll ${index}`, "choice", '["A","B"]', index),
     );
     inserts.push(
       database
-        .prepare("INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
+        .prepare("INSERT INTO entries (id, streamer_id, title, kind, options, ends_at, revealed, created_at) VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
         .bind(crypto.randomUUID(), streamerId, "Topic", "topic", "[]", 100),
     );
     inserts.push(
       database
-        .prepare("INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
+        .prepare("INSERT INTO entries (id, streamer_id, title, kind, options, ends_at, revealed, created_at) VALUES (?, ?, ?, ?, ?, NULL, 0, ?)")
         .bind(crypto.randomUUID(), crypto.randomUUID(), "Private scope", "choice", '["A","B"]', 100),
     );
     await database.batch(inserts);
@@ -347,7 +352,7 @@ describe("public poll updates", (): void => {
     await database.batch(
       Array.from({ length: 50 }, (_, index) =>
         database
-          .prepare("INSERT INTO entries VALUES (?, ?, ?, ?, ?, NULL, 1, ?)")
+          .prepare("INSERT INTO entries (id, streamer_id, title, kind, options, ends_at, revealed, created_at) VALUES (?, ?, ?, ?, ?, NULL, 1, ?)")
           .bind(
             index === 49 ? newest : crypto.randomUUID(),
             streamerId,
@@ -608,7 +613,7 @@ describe("overlay updates", (): void => {
     const other = await connect("c".repeat(64));
     let leaked = false;
     socket.addEventListener("message", (event): void => {
-      if (String(event.data).includes('"type":"overlay"')) leaked = true;
+      if (socketText(event.data).includes('"type":"overlay"')) leaked = true;
     });
     await database
       .prepare(

@@ -38,8 +38,8 @@ export function showsLabel(character: CharacterView): boolean {
 export function frameAt(sequence: Sequence, t: number): number {
   const step: number = Math.max(0, Math.floor(t / sequence.ticksPerFrame));
   const { frames, loopFrom } = sequence;
+  if (loopFrom === undefined) return frames[Math.min(step, frames.length - 1)];
   if (step < frames.length) return frames[step];
-  if (loopFrom === undefined) return frames[frames.length - 1];
   return frames[loopFrom + ((step - loopFrom) % (frames.length - loopFrom))];
 }
 
@@ -131,7 +131,7 @@ function middleRuns(tiles: readonly TileView[]): { kind: TileView["kind"]; from:
   const runs: { kind: TileView["kind"]; from: number; to: number }[] = [];
   tiles.forEach((tile: TileView, i: number): void => {
     const run = runs.at(-1);
-    if (run && run.kind === tile.kind) run.to = i + 1;
+    if (run?.kind === tile.kind) run.to = i + 1;
     else runs.push({ kind: tile.kind, from: i, to: i + 1 });
   });
   return runs.slice(1, -1);
@@ -155,7 +155,7 @@ function spawnEffects(view: PlaygroundView, theme: PlaygroundTheme, atlas: Atlas
   for (const c of view.characters) {
     const before = memory.seen.get(c.id);
     seen.set(c.id, { state: c.state, t: c.t });
-    if (!before || before.state !== c.state) continue;
+    if (before?.state !== c.state) continue;
     if (c.state === "dig" && Math.floor((before.t - 15) / 20) < Math.floor((c.t - 15) / 20)) {
       const ground: TileView | undefined = view.tiles[Math.floor((c.x + c.dir * 4) / tile)];
       if (ground?.kind === "dirt") {
@@ -220,6 +220,8 @@ function picture(
   ctx.restore();
 }
 
+type PlaceTerrain = (name: TerrainPicture, x: number, y: number, flip?: boolean) => void;
+
 function drawWorld(
   ctx: CanvasRenderingContext2D,
   view: PlaygroundView,
@@ -229,13 +231,20 @@ function drawWorld(
   reduced: boolean,
 ): void {
   const { rects, tile } = theme.terrain;
-  const terrain: HTMLImageElement = atlas.terrain;
-  const ground: number = view.world.ground;
-  const at = (name: TerrainPicture, x: number, y: number, flip: boolean = false): void =>
-    picture(ctx, terrain, rects[name], x, y, flip);
+  const at: PlaceTerrain = (name: TerrainPicture, x: number, y: number, flip: boolean = false): void =>
+    picture(ctx, atlas.terrain, rects[name], x, y, flip);
   const blink: boolean = !reduced && Math.floor(now / theme.blinkMs) % 2 === 0;
 
-  view.tiles.forEach((_: TileView, i: number): void => at(tilePicture(view.tiles, i), i * tile, ground));
+  view.tiles.forEach((_: TileView, i: number): void => at(tilePicture(view.tiles, i), i * tile, view.world.ground));
+  drawProps(view, theme, at);
+  drawLandmarks(ctx, view, theme, at, now, reduced, blink);
+  drawStairs(ctx, view, theme, atlas.terrain);
+}
+
+/** One prop in the middle of each run of equal tiles, unless a hole is there. */
+function drawProps(view: PlaygroundView, theme: PlaygroundTheme, at: PlaceTerrain): void {
+  const { rects, tile } = theme.terrain;
+  const ground: number = view.world.ground;
   let girderRun = 0;
   let dirtRun = 0;
   for (const run of middleRuns(view.tiles)) {
@@ -246,7 +255,19 @@ function drawWorld(
     const [, , w, h] = rects[name];
     if (view.tiles[Math.floor(centre / tile)]?.stage !== 3) at(name, Math.round(centre - w / 2), ground - h);
   }
+}
 
+/** The doors with their lamps, the flag, the signs, the antenna and the respawn pad. */
+function drawLandmarks(
+  ctx: CanvasRenderingContext2D,
+  view: PlaygroundView,
+  theme: PlaygroundTheme,
+  at: PlaceTerrain,
+  now: number,
+  reduced: boolean,
+  blink: boolean,
+): void {
+  const ground: number = view.world.ground;
   const { door } = theme;
   const inUse = (state: CharacterState): boolean => view.characters.some((c: CharacterView) => c.state === state);
   for (const [x, name, lamp, active] of [
@@ -270,8 +291,16 @@ function drawWorld(
   if (inUse("respawn") && (blink || reduced))
     at("padActive", view.pad + theme.pad.activeDx, ground + theme.pad.activeDy);
   else at("pad", view.pad + theme.pad.dx, ground + theme.pad.dy);
+}
 
-  const [sx, sy, sw] = rects.step;
+function drawStairs(
+  ctx: CanvasRenderingContext2D,
+  view: PlaygroundView,
+  theme: PlaygroundTheme,
+  terrain: HTMLImageElement,
+): void {
+  const ground: number = view.world.ground;
+  const [sx, sy, sw] = theme.terrain.rects.step;
   for (const stair of view.stairs) {
     const leg: number = Math.max(0, ground - stair.top - 3);
     ctx.save();
@@ -367,24 +396,29 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, width: number, maxLin
       line += ch;
       continue;
     }
-    const space: number = line.lastIndexOf(" ");
-    if (ch !== " " && space > 0) {
-      lines.push(line.slice(0, space));
-      line = line.slice(space + 1) + ch;
-    } else {
-      lines.push(line);
-      line = ch === " " ? "" : ch;
-    }
+    const [full, next] = breakLine(line, ch);
+    lines.push(full);
+    line = next;
   }
   if (line !== "" && lines.length < maxLines) lines.push(line);
   else if (line !== "") left = true;
-  if (left) {
-    let last: string = lines[lines.length - 1] ?? "";
-    while (last !== "" && ctx.measureText(`${last}${CUT_MARK}`).width > width)
-      last = graphemes(last).slice(0, -1).join("");
-    lines[lines.length - 1] = `${last.trimEnd()}${CUT_MARK}`;
-  }
+  if (left) lines[lines.length - 1] = withCutMark(ctx, lines.at(-1) ?? "", width);
   return lines;
+}
+
+/** A full line and the start of the next when `ch` does not fit: the break goes at the last space if there is one. */
+function breakLine(line: string, ch: string): [string, string] {
+  const space: number = line.lastIndexOf(" ");
+  if (ch !== " " && space > 0) return [line.slice(0, space), line.slice(space + 1) + ch];
+  return [line, ch === " " ? "" : ch];
+}
+
+/** The line shortened until it fits `width` with the cut mark, then the mark. */
+function withCutMark(ctx: CanvasRenderingContext2D, line: string, width: number): string {
+  let last: string = line;
+  while (last !== "" && ctx.measureText(`${last}${CUT_MARK}`).width > width)
+    last = graphemes(last).slice(0, -1).join("");
+  return `${last.trimEnd()}${CUT_MARK}`;
 }
 
 function labelCanvas(width: number, height: number): [HTMLCanvasElement, CanvasRenderingContext2D] {

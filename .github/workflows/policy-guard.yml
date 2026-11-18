@@ -13,13 +13,53 @@ permissions:
   checks: write
 
 jobs:
+  trust:
+    name: trust
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      (github.event.issue.pull_request && github.event.issue.state == 'open')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      trusted: ${{ steps.reviewers.outputs.trusted }}
+    steps:
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: .github
+      - name: Resolve trusted reviewers
+        id: reviewers
+        env:
+          COMMENTER_ID: ${{ github.event.comment.user.id }}
+          COMMENTER_LOGIN: ${{ github.event.comment.user.login }}
+          COMMENTER_TYPE: ${{ github.event.comment.user.type }}
+        run: |
+          set -euo pipefail
+          jq -e . .github/trusted-reviewers.json > /dev/null
+          echo "list=$(jq -c . .github/trusted-reviewers.json)" >> "$GITHUB_OUTPUT"
+          trusted=false
+          if [ "$COMMENTER_TYPE" = "User" ]; then
+            case "$COMMENTER_ID" in
+              ''|*[!0-9]*)
+                trusted=$(jq -r --arg login "$COMMENTER_LOGIN" \
+                  '[.reviewers[].login] | index($login) != null' .github/trusted-reviewers.json) ;;
+              *)
+                trusted=$(jq -r --argjson id "$COMMENTER_ID" \
+                  '[.reviewers[].id] | index($id) != null' .github/trusted-reviewers.json) ;;
+            esac
+          fi
+          echo "trusted=$trusted" >> "$GITHUB_OUTPUT"
   guard:
     name: guard
+    needs: trust
     if: >-
       github.event_name == 'pull_request_target' ||
       (github.event.issue.pull_request && github.event.issue.state == 'open' &&
-       github.event.comment.user.id == 24433677 &&
-       github.event.comment.user.login == 'mickey-kras' && github.event.comment.user.type == 'User')
+       needs.trust.outputs.trusted == 'true')
     concurrency:
       group: trusted-policy-${{ github.event.pull_request.number || github.event.issue.number }}
       cancel-in-progress: true
@@ -46,7 +86,9 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-          sparse-checkout: .github/trusted-ci
+          sparse-checkout: |
+            .github/trusted-ci
+            .github/trusted-reviewers.json
       - name: Install trusted policy dependencies
         run: npm ci --prefix .github/trusted-ci --ignore-scripts --no-audit --no-fund
       - name: Validate candidate policy with trusted code

@@ -137,6 +137,30 @@ test("owner comment admission binds exact head, base and trusted policy and supp
   );
 });
 
+test("short owner approval binds the exact head and the latest decisive comment wins", () => {
+  const comment = { id: 1, user: OWNER, body: `/approve-ci ${SHA}` };
+  assert.equal(validComment([comment], SHA, BASE, TRUSTED), true);
+  assert.equal(validComment([{ ...comment, body: `/approve-ci ${SHA}\n` }], SHA, BASE, TRUSTED), true);
+  assert.equal(validComment([comment], BASE, BASE, TRUSTED), false);
+  for (const body of [
+    `/approve-ci ${SHA.slice(0, 12)}`,
+    `/approve-ci ${SHA} and more`,
+    `/approve-ci`,
+    `approve-ci ${SHA}`,
+    `Please /approve-ci ${SHA}`,
+  ]) {
+    assert.equal(validComment([{ ...comment, body }], SHA, BASE, TRUSTED), false, body);
+  }
+  assert.equal(validComment([{ ...comment, user: { ...OWNER, id: 1 } }], SHA, BASE, TRUSTED), false);
+  assert.equal(validComment([{ ...comment, user: { ...OWNER, type: "Bot" } }], SHA, BASE, TRUSTED), false);
+  assert.equal(
+    validComment([comment, { id: 2, user: OWNER, body: "Reject CI policy: revoked" }], SHA, BASE, TRUSTED),
+    false,
+  );
+  // A newer short comment for another commit replaces an older valid approval.
+  assert.equal(validComment([comment, { id: 2, user: OWNER, body: `/approve-ci ${BASE}` }], SHA, BASE, TRUSTED), false);
+});
+
 function harness({
   fork = false,
   admitted = false,
@@ -364,8 +388,12 @@ test("trusted workflow covers comment revocation and base retarget without execu
   const checkout = steps.find((step) => step.uses?.startsWith("actions/checkout@"));
   assert.equal(checkout.with.ref, `\${{ github.workflow_sha }}`);
   assert.equal(checkout.with["persist-credentials"], false);
-  assert.match(workflow.jobs.guard.if, /comment.user.id == 24433677/);
-  assert.match(workflow.jobs.guard.if, /comment.user.login == 'mickey-kras'/);
+  assert.match(workflow.jobs.guard.if, /needs\.trust\.outputs\.trusted == 'true'/);
+  assert.equal(workflow.jobs.trust.outputs.trusted, "${{ steps.reviewers.outputs.trusted }}");
+  const trustCheckout = workflow.jobs.trust.steps.find((step) => step.uses?.startsWith("actions/checkout@"));
+  assert.equal(trustCheckout.with.ref, `\${{ github.workflow_sha }}`);
+  assert.equal(trustCheckout.with["persist-credentials"], false);
+  assert.match(trustCheckout.with["sparse-checkout"], /^\.github$/);
   assert.ok(!steps.some((step) => String(step.run || "").includes("candidate")));
 });
 

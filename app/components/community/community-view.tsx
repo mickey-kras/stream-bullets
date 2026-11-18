@@ -242,6 +242,12 @@ export function CommunityView({
         <CardDialog
           card={editing}
           onClose={() => {
+            // Radix can still deliver a fast Escape to this editor just after the confirmation opens.
+            // Dismiss the confirmation on top; keep the editor and its draft.
+            if (deleting) {
+              setDeleting(null);
+              return;
+            }
             setEditing(null);
             onAdding(false);
           }}

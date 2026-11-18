@@ -215,13 +215,14 @@ describe("cards, links and the Ideas board in storage", (): void => {
     const hidden = await saveSupport(env, "owner", { links, visible: false, card: true });
     expect(hidden).toMatchObject({ visible: false, card: false });
     expect(await getSupport(env, page)).toMatchObject({ visible: false, card: false });
+    const expectedMessage: unknown = expect.stringContaining("Patreon");
     await expect(
       saveSupport(env, "owner", {
         links: [{ kind: "patreon", label: null, url: "https://ko-fi.com/nova" }],
         visible: true,
         card: false,
       }),
-    ).rejects.toMatchObject({ status: 400, message: expect.stringContaining("Patreon") });
+    ).rejects.toMatchObject({ status: 400, message: expectedMessage });
     await expect(
       saveSupport(env, "owner", {
         links: [{ kind: "other", label: null, url: "https://merch.example/x" }],

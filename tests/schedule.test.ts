@@ -188,7 +188,7 @@ describe("time zones and weekly series", (): void => {
       durationMin,
     });
     const early = [at(1), at(4), at(7)];
-    const hours = gridHours(early as StreamEvent[], zone);
+    const hours = gridHours(early, zone);
     expect(hours).toEqual({ first: 1, last: 24 });
     const tops = early.map((event) => blockPosition(event, zone, hours).top);
     expect(tops).toEqual([0, 3 * 48, 6 * 48]);
@@ -1189,7 +1189,7 @@ describe("schedule storage", (): void => {
     const load = async (event: string) => {
       const url = `https://streambullets.com/@nova?view=schedule&event=${event}`;
       const context = new RouterContextProvider();
-      const pageEnv = { ...env, APP_ORIGIN: "https://streambullets.com", BETTER_AUTH_SECRET: "s".repeat(32) } as AppEnv;
+      const pageEnv = { ...env, APP_ORIGIN: "https://streambullets.com", BETTER_AUTH_SECRET: "s".repeat(32) };
       context.set(appContext, { env: pageEnv, nonce: "nonce", responseHeaders: new Headers() });
       return streamerLoader({
         request: new Request(url),

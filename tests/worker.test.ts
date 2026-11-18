@@ -1,3 +1,4 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppContext, AppEnv } from "../app/env";
 import { appContext } from "../app/env";
@@ -11,13 +12,20 @@ import { installFakeProviders } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import { installWorkersRuntime, RoomNamespace, serverSocketOf } from "./helpers/room";
 
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
+
 vi.mock("cloudflare:workers", () => import("./helpers/room"));
 
 // Stub the generated React Router build.
-const router = vi.hoisted(() => ({
+const router = vi.hoisted((): {
+  mode: string;
+  build: unknown;
+  calls: { request: Request; context: { get: (key: unknown) => unknown } }[];
+} => ({
   mode: "",
-  build: null as unknown,
-  calls: [] as { request: Request; context: { get: (key: unknown) => unknown } }[],
+  build: null,
+  calls: [],
 }));
 vi.mock("virtual:react-router/server-build", () => ({ build: "server-build" }));
 vi.mock("react-router", async (original) => ({
@@ -66,9 +74,9 @@ function live(handle: string, headers: Record<string, string> = {}, query = ""):
 // Record room requests and accept the socket.
 function capturingRooms(): RoomNamespace<{ fetch: (request: Request) => Promise<Response> }> {
   return new RoomNamespace(() => ({
-    fetch: async (request: Request): Promise<Response> => {
+    fetch: (request: Request): Promise<Response> => {
       forwarded.push(request);
-      return new Response(null, { status: 101, webSocket: new WebSocketPair()[0] } as ResponseInit);
+      return Promise.resolve(new Response(null, { status: 101, webSocket: new WebSocketPair()[0] }));
     },
   }));
 }
@@ -100,11 +108,11 @@ beforeAll(async (): Promise<void> => {
     POLL_ROOMS: capturingRooms() as unknown as DurableObjectNamespace,
     CHANNEL_INGEST: capturingRooms() as unknown as DurableObjectNamespace,
     REQUEST_LIMITER: {
-      limit: async ({ key }: { key: string }): Promise<{ success: boolean }> => {
+      limit: ({ key }: { key: string }): Promise<{ success: boolean }> => {
         limiter.keys.push(key);
-        return { success: limiter.allow };
+        return Promise.resolve({ success: limiter.allow });
       },
-    } as RateLimit,
+    },
     APP_ORIGIN: origin,
     BETTER_AUTH_SECRET: secret,
   };
@@ -144,6 +152,12 @@ beforeEach(async (): Promise<void> => {
 });
 
 describe("Worker request checks", (): void => {
+  it("advertises binary label reader compatibility after migration", async (): Promise<void> => {
+    const response = await fetchPath("/");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-StreamBullets-Binary-Labels")).toBe("1");
+  });
+
   it("answers 421 for another host name, with the error origin in the policy", async (): Promise<void> => {
     const response = await worker.fetch(new Request("https://other.example.test/"), env);
     expect(response.status).toBe(421);
@@ -516,11 +530,11 @@ describe("Worker activity feed and provider webhooks", (): void => {
     )
       .bind(pageId)
       .run();
-    const keys = (await crypto.subtle.generateKey(
+    const keys = await crypto.subtle.generateKey(
       { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
       true,
       ["sign", "verify"],
-    )) as CryptoKeyPair;
+    );
     const spki = btoa(String.fromCodePoint(...new Uint8Array(await crypto.subtle.exportKey("spki", keys.publicKey))));
     // The fake for Kick's public key endpoint, as in tests/channel-webhooks.test.ts.
     const fake = installFakeProviders();

@@ -1,7 +1,11 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { crc32 } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { imageSize } from "image-size";
 import { stripImageMetadata } from "../app/server/image-metadata";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 const ascii = (text: string): number[] => [...text].map((char: string): number => char.codePointAt(0) ?? 0);
 const contains = (bytes: Uint8Array, text: string): boolean => Buffer.from(bytes).includes(Buffer.from(text));

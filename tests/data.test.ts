@@ -1,3 +1,4 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { AppEnv } from "../app/env";
 import type { Streamer } from "../app/types";
@@ -16,6 +17,9 @@ import { listComments, mutateComment } from "../app/server/comments.server";
 import { createTestDatabase } from "./helpers/database";
 import type { TestDatabase } from "./helpers/database";
 import { startOfQuotaWindow } from "./helpers/quota";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 let database: TestDatabase;
 let env: AppEnv;

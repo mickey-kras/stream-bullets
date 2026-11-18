@@ -143,7 +143,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
     this.playground = playgroundOf(ctx, env, () => this.streamerId, this.scheduleAlarm.bind(this));
-    ctx.blockConcurrencyWhile(async (): Promise<void> => {
+    void ctx.blockConcurrencyWhile(async (): Promise<void> => {
       this.streamerId = await ctx.storage.get<string>("streamerId");
       this.createTables();
       await this.playground.load();
@@ -188,10 +188,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname === "/close") return this.closeAll();
     if (url.pathname === "/refresh") return Response.json(await this.refreshRequested());
     if (url.pathname.startsWith("/playground")) return this.playground.request(url.pathname, request);
+    return this.platformRequest(url.pathname, platform, request);
+  }
+  private async platformRequest(pathname: string, platform: string | null, request: Request): Promise<Response> {
     if (!isPlatform(platform)) return reply("Invalid platform", 400);
-    if (url.pathname === "/event") return this.receive(platform, request);
-    if (url.pathname === "/connect") return Response.json(await this.connectChannel(platform));
-    if (url.pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
+    if (pathname === "/event") return this.receive(platform, request);
+    if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
+    if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
     return this.statusChanged(platform, request);
   }
 
@@ -290,12 +293,12 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     return new Response(null, { status: 204 });
   }
 
-  async webSocketMessage(socket: WebSocket): Promise<void> {
+  webSocketMessage(socket: WebSocket): void {
     // Consumers only listen; anything but the ping (answered by the runtime) closes the socket.
     socket.close(1008, "Unsupported message");
   }
 
-  async webSocketClose(socket: WebSocket): Promise<void> {
+  webSocketClose(socket: WebSocket): void {
     socket.close();
   }
 

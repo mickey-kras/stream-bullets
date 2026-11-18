@@ -81,19 +81,21 @@ export function CharactersLayer({
     };
   }, [theme]);
 
+  // The wrapper hides the picture from assistive technology: a canvas counts as a focusable element.
   return (
-    <canvas
-      ref={canvasRef}
-      className="characters-layer"
-      width={columns * CELL_DESIGN_PX}
-      height={rows * CELL_DESIGN_PX}
-      aria-hidden="true"
-      style={{
-        display: "block",
-        width: "100%",
-        height: "100%",
-        imageRendering: "pixelated",
-      }}
-    />
+    <div aria-hidden="true" style={{ width: "100%", height: "100%" }}>
+      <canvas
+        ref={canvasRef}
+        className="characters-layer"
+        width={columns * CELL_DESIGN_PX}
+        height={rows * CELL_DESIGN_PX}
+        style={{
+          display: "block",
+          width: "100%",
+          height: "100%",
+          imageRendering: "pixelated",
+        }}
+      />
+    </div>
   );
 }

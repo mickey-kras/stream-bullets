@@ -30,10 +30,10 @@ const env = {
 /** Answers every request with the next response in the list (the last one repeats) and records the requests. */
 function answers(...responses: (() => Response)[]): Request[] {
   const requests: Request[] = [];
-  vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
+  vi.stubGlobal("fetch", (input: string, init?: RequestInit): Promise<Response> => {
     requests.push(new Request(input, init));
     const next = responses[Math.min(requests.length - 1, responses.length - 1)];
-    return next();
+    return Promise.resolve(next());
   });
   return requests;
 }
