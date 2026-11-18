@@ -101,7 +101,7 @@ describe("anonymous conversion totals", () => {
     const responses = await Promise.all([call("POST", "conversions", { body }), call("POST", "conversions", { body })]);
     expect(responses.map((response) => response.status)).toEqual([200, 200]);
     const results: { counted: boolean }[] = await Promise.all(
-      responses.map(async (response) => (await response.json()) as { counted: boolean }),
+      responses.map(async (response) => await response.json<{ counted: boolean }>()),
     );
     expect(results.filter((result) => result.counted)).toHaveLength(1);
     expect(await totals()).toMatchObject({ cta_browse: 1 });

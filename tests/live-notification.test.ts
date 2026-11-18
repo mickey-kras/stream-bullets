@@ -26,7 +26,7 @@ async function mutate(fetchRoom: () => Promise<Response>): Promise<Response> {
       BETTER_AUTH_SECRET: "test-secret",
       CHANNEL_INGEST: {
         idFromName: (name: string) => name,
-        get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+        get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })) }),
       } as unknown as DurableObjectNamespace,
       POLL_ROOMS: {
         idFromName: vi.fn(),
@@ -81,7 +81,7 @@ describe("overlay key revocation notices", () => {
   function envWith(ingestFetch: () => Promise<Response>): AppEnv {
     const namespace = { idFromName: (name: string) => name, get: () => ({ fetch: ingestFetch }) };
     return {
-      POLL_ROOMS: { idFromName: (name: string) => name, get: () => ({ fetch: async () => new Response(null, { status: 204 }) }) },
+      POLL_ROOMS: { idFromName: (name: string) => name, get: () => ({ fetch: () => Promise.resolve(new Response(null, { status: 204 })) }) },
       CHANNEL_INGEST: namespace,
     } as unknown as AppEnv;
   }
@@ -94,15 +94,15 @@ describe("overlay key revocation notices", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     const calls: string[] = [];
     notifyOverlayKey(
-      envWith(async () => {
+      envWith(() => {
         calls.push("ingest");
-        return new Response(null, { status: 204 });
+        return Promise.resolve(new Response(null, { status: 204 }));
       }),
       "streamer",
     );
     await settle();
     expect(calls).toEqual(["ingest"]);
-    notifyOverlayKey(envWith(async () => new Response(null, { status: 500 })), "streamer");
+    notifyOverlayKey(envWith(() => Promise.resolve(new Response(null, { status: 500 }))), "streamer");
     notifyOverlayKey(envWith(() => Promise.reject(new TypeError("secret"))), "streamer");
     notifyActivityPage(envWith(() => Promise.reject(new Error("secret"))), "streamer");
     await settle();

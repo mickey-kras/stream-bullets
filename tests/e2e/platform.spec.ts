@@ -1,8 +1,12 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { newPage, close } from "./coverage";
 import { readFile } from "node:fs/promises";
 import { test, expect, type Browser, type BrowserContext, type Page } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 const origin: string = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));

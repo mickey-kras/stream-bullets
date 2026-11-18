@@ -276,11 +276,11 @@ describe("characters sockets", (): void => {
     const first = await listen();
     const second = await listen();
     first.close();
-    await room().webSocketClose(first as unknown as WebSocket);
+    room().webSocketClose(first as unknown as WebSocket);
     advance(FRAME_MS);
     expect(vi.getTimerCount()).toBe(1);
     second.close();
-    await room().webSocketClose(second as unknown as WebSocket);
+    room().webSocketClose(second as unknown as WebSocket);
     advance(FRAME_MS);
     expect(vi.getTimerCount()).toBe(0);
     expect(state().storage.values.get(PLAYGROUND_KEY)).toMatchObject({ v: 1, enabled: true, test: null });
@@ -296,7 +296,7 @@ describe("characters sockets", (): void => {
     expect(vi.getTimerCount()).toBe(0);
     const next = await listen();
     expect(vi.getTimerCount()).toBe(1);
-    await room().webSocketMessage(next as unknown as WebSocket);
+    room().webSocketMessage(next as unknown as WebSocket);
     expect(next.closeCode).toBe(1008);
     advance(FRAME_MS);
     expect(vi.getTimerCount()).toBe(0);
@@ -316,7 +316,7 @@ describe("registry mode", (): void => {
     const socket = await listen();
     await deliver([chat("m1", "u1", "hello")]);
     socket.close();
-    await room().webSocketClose(socket as unknown as WebSocket);
+    room().webSocketClose(socket as unknown as WebSocket);
     advance(FRAME_MS);
     // Without a socket: a command, a new speaker and a ban.
     await deliver([chat("m2", "u1", "!jump"), chat("m3", "u2", "hi")]);
@@ -341,11 +341,12 @@ describe("registry mode", (): void => {
     const spoke: number = Date.now();
     advance(FRAME_MS);
     socket.close();
-    await room().webSocketClose(socket as unknown as WebSocket);
+    room().webSocketClose(socket as unknown as WebSocket);
     advance(FRAME_MS);
     await Promise.resolve();
     expect(vi.getTimerCount()).toBe(0);
-    expect(state().storage.values.get(PLAYGROUND_KEY)).toMatchObject({ sim: expect.stringContaining('"u1"') });
+    const expectedCheckpoint: unknown = expect.stringContaining('"u1"');
+    expect(state().storage.values.get(PLAYGROUND_KEY)).toMatchObject({ sim: expectedCheckpoint });
     // No more chat: the alarms alone forget the viewer on time; they also read the layers every minute.
     for (let i = 0; i < 40 && state().storage.values.has(PLAYGROUND_KEY); i += 1) {
       expect(state().storage.alarm).toBeLessThanOrEqual(spoke + 30 * 60_000 + 1_000);
@@ -361,7 +362,7 @@ describe("registry mode", (): void => {
   it("keeps a restriction until it ends, then nothing", async (): Promise<void> => {
     const socket = await listen();
     socket.close();
-    await room().webSocketClose(socket as unknown as WebSocket);
+    room().webSocketClose(socket as unknown as WebSocket);
     advance(FRAME_MS);
     await deliver([
       { kind: "ban", platform: "twitch", userId: "u9", until: Date.now() + 60_000, receivedAt: Date.now() },
@@ -393,7 +394,7 @@ describe("registry mode", (): void => {
     const socket = await listen();
     await deliver([chat("m1", "u1", "hello")]);
     socket.close();
-    await room().webSocketClose(socket as unknown as WebSocket);
+    room().webSocketClose(socket as unknown as WebSocket);
     advance(FRAME_MS);
     await Promise.resolve();
     expect(state().storage.values.has(PLAYGROUND_KEY)).toBe(true);
@@ -408,7 +409,7 @@ describe("registry mode", (): void => {
     const socket = await listen();
     await deliver([chat("m1", "u1", "hello")]);
     socket.close();
-    await room().webSocketClose(socket as unknown as WebSocket);
+    room().webSocketClose(socket as unknown as WebSocket);
     advance(FRAME_MS);
     await Promise.resolve();
     await fireAlarm();
@@ -428,7 +429,7 @@ describe("registry mode", (): void => {
     const socket = await listen();
     await deliver([chat("m1", "u1", "hello")]);
     socket.close();
-    await room().webSocketClose(socket as unknown as WebSocket);
+    room().webSocketClose(socket as unknown as WebSocket);
     advance(FRAME_MS);
     await Promise.resolve();
     const error = vi.spyOn(console, "error").mockImplementation((): void => undefined);
@@ -875,13 +876,13 @@ describe("PlaygroundHost", (): void => {
     const sockets: WebSocket[] = [];
     const playground = new PlaygroundHost({
       storage: {
-        get: async (key: string): Promise<unknown> => values.get(key),
-        put: options.put ?? (async (key: string, value: unknown): Promise<void> => void values.set(key, value)),
-        delete: options.remove ?? (async (key: string): Promise<boolean> => values.delete(key)),
+        get: (key: string): Promise<unknown> => Promise.resolve(values.get(key)),
+        put: options.put ?? ((key: string, value: unknown): Promise<void> => Promise.resolve(void values.set(key, value))),
+        delete: options.remove ?? ((key: string): Promise<boolean> => Promise.resolve(values.delete(key))),
       } as unknown as DurableObjectStorage,
       sockets: (): WebSocket[] => sockets,
-      readLayers: options.layers ?? (async (): Promise<OverlayLayers> => ON),
-      schedule: async (): Promise<void> => undefined,
+      readLayers: options.layers ?? ((): Promise<OverlayLayers> => Promise.resolve(ON)),
+      schedule: (): Promise<void> => Promise.resolve(undefined),
       clock,
       seed: (): number => 7,
     });

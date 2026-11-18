@@ -17,7 +17,7 @@ import { buildMast } from "./mast";
 import { batchStatic } from "./merge";
 import * as M from "./materials";
 import { motionReduced, watchMotion } from "./motion";
-import { DECK_Y, mesh, polar } from "./shapes";
+import { DECK_Y, isMesh, mesh, polar } from "./shapes";
 import { buildSigns } from "./signs";
 import { buildStudio } from "./studio";
 import * as T from "./textures";
@@ -223,9 +223,9 @@ function createEnvironment(renderer: THREE.WebGLRenderer): THREE.WebGLRenderTarg
   }
   const target = pmrem.fromScene(envScene, 0.02);
   envScene.traverse((o: THREE.Object3D): void => {
-    if (o instanceof THREE.Mesh) {
+    if (isMesh(o)) {
       o.geometry.dispose();
-      (o.material as THREE.Material).dispose();
+      for (const material of Array.isArray(o.material) ? o.material : [o.material]) material.dispose();
     }
   });
   pmrem.dispose();
@@ -402,10 +402,14 @@ function createControls(camera: THREE.PerspectiveCamera, element: HTMLElement): 
   return controls;
 }
 
+function isTexture(value: unknown): value is THREE.Texture {
+  return value instanceof THREE.Texture;
+}
+
 function collectMaterialTextures(m: THREE.Material, textures: Set<THREE.Texture>): void {
-  for (const v of Object.values(m)) if (v instanceof THREE.Texture) textures.add(v);
+  for (const v of Object.values(m)) if (isTexture(v)) textures.add(v);
   if (m instanceof THREE.ShaderMaterial)
-    for (const u of Object.values(m.uniforms)) if (u.value instanceof THREE.Texture) textures.add(u.value);
+    for (const u of Object.values(m.uniforms)) if (isTexture(u.value)) textures.add(u.value);
 }
 
 function disposeScene(scene: THREE.Scene, k: Kit): void {
@@ -427,7 +431,7 @@ function disposeScene(scene: THREE.Scene, k: Kit): void {
   for (const tile of Object.values(k.tiles)) for (const t of [tile.map, tile.normal, tile.rough]) textures.add(t);
   for (const g of geometries) g.dispose();
   for (const t of textures) t.dispose();
-  if (scene.background instanceof THREE.Texture) scene.background.dispose();
+  if (isTexture(scene.background)) scene.background.dispose();
 }
 
 // Build into wrap in steps; resolve at first-frame readiness before mounting the canvas.
@@ -539,7 +543,7 @@ export async function createStation(
     if (state.playing) {
       state.clock += dt;
       for (const a of k.animators) a(state.clock, dt);
-      finish.uniforms.uTime!.value = state.clock;
+      finish.uniforms.uTime.value = state.clock;
     }
     returnToHero(now);
     if (rig.moving && !state.dragging) step(dt);

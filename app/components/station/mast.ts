@@ -155,7 +155,7 @@ function buildSignal(k: Kit, mast: THREE.Group, mastTop: number): THREE.Group {
           prev = next;
         }
       }
-      arcGeometry.attributes.position!.needsUpdate = true;
+      arcGeometry.attributes.position.needsUpdate = true;
       arcs.visible = show;
     }
   });

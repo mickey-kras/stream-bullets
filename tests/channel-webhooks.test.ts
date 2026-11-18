@@ -127,11 +127,11 @@ async function status(response: Promise<Response>): Promise<number> {
 
 beforeAll(async (): Promise<void> => {
   database = await createTestDatabase();
-  kickKeys = (await crypto.subtle.generateKey(
+  kickKeys = await crypto.subtle.generateKey(
     { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
     true,
     ["sign", "verify"],
-  )) as CryptoKeyPair;
+  );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
@@ -185,7 +185,7 @@ describe("Twitch EventSub webhook", (): void => {
   it("answers 503 when the ingest object fails, so Twitch retries", async (): Promise<void> => {
     env.CHANNEL_INGEST = {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 500 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 500 })) }),
     } as unknown as DurableObjectNamespace;
     const body = twitchNotification("channel.chat.message", twitchChat);
     expect(await status(twitchWebhook(await twitchRequest(body), env))).toBe(503);
@@ -388,11 +388,11 @@ describe("Kick webhook", (): void => {
   it("fetches the key again after a rotation, at most once a minute", async (): Promise<void> => {
     const now = Date.now();
     await kickWebhook(await kickRequest(kickChat), env, now);
-    kickKeys = (await crypto.subtle.generateKey(
+    kickKeys = await crypto.subtle.generateKey(
       { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
       true,
       ["sign", "verify"],
-    )) as CryptoKeyPair;
+    );
     const spki = btoa(String.fromCodePoint(...new Uint8Array(await crypto.subtle.exportKey("spki", kickKeys.publicKey))));
     fake.kickPublicKey = `-----BEGIN PUBLIC KEY-----\n${spki}\n-----END PUBLIC KEY-----`;
     expect(await status(kickWebhook(await kickRequest(kickChat), env, now + 1000))).toBe(403);
@@ -404,8 +404,9 @@ describe("Kick webhook", (): void => {
     const socket = await listen();
     const request = (): Promise<Request> => kickRequest(kickChat, { id: "same-id" });
     let repeats = 0;
-    const count = async (): Promise<void> => {
+    const count = (): Promise<void> => {
       repeats += 1;
+      return Promise.resolve();
     };
     expect((await kickWebhook(await request(), env, Date.now(), count)).status).toBe(204);
     const calls = ingest.entry(page).state.storage.sql.exec("SELECT key FROM seen").toArray().length;
@@ -419,11 +420,12 @@ describe("Kick webhook", (): void => {
     const real = env.CHANNEL_INGEST;
     env.CHANNEL_INGEST = {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 500 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 500 })) }),
     } as unknown as DurableObjectNamespace;
     let repeats = 0;
-    const count = async (): Promise<void> => {
+    const count = (): Promise<void> => {
       repeats += 1;
+      return Promise.resolve();
     };
     await expect(kickWebhook(await kickRequest(kickChat, { id: "retry-id" }), env, Date.now(), count)).rejects.toMatchObject({ status: 503 });
     env.CHANNEL_INGEST = real;
@@ -436,8 +438,9 @@ describe("Kick webhook", (): void => {
   it("counts a parallel copy as a repeat while the first is forwarded", async (): Promise<void> => {
     const socket = await listen();
     let repeats = 0;
-    const count = async (): Promise<void> => {
+    const count = (): Promise<void> => {
       repeats += 1;
+      return Promise.resolve();
     };
     const copies = await Promise.all([kickRequest(kickChat, { id: "parallel" }), kickRequest(kickChat, { id: "parallel" })]);
     const answers = await Promise.all(copies.map((request) => kickWebhook(request, env, Date.now(), count)));
@@ -450,8 +453,9 @@ describe("Kick webhook", (): void => {
     expect((await kickWebhook(await kickRequest(kickChat, { id: "oldest" }), env)).status).toBe(204);
     for (let index = 0; index < MAX_RECENT_KICK; index++) rememberKickId(`filler-${index}`);
     let repeats = 0;
-    const count = async (): Promise<void> => {
+    const count = (): Promise<void> => {
       repeats += 1;
+      return Promise.resolve();
     };
     // "oldest" left the map: it is forwarded again (the ingest object then drops it as a known delivery).
     await kickWebhook(await kickRequest(kickChat, { id: "oldest" }), env, Date.now(), count);

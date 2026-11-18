@@ -49,7 +49,7 @@ describe("browser security-key encoding", (): void => {
       userVerification: "required",
       allowCredentials: [{ type: "public-key", id: new Uint8Array([1]).buffer, transports: ["usb"] }],
     } });
-    expect(JSON.parse(String(request.mock.calls[1][1]?.body))).toEqual({
+    expect((await new Response(request.mock.calls[1][1]?.body).json<unknown>())).toEqual({
       id: "key-id",
       response: { clientDataJSON: encoded, authenticatorData: encoded, signature: encoded, userHandle: encoded },
     });
@@ -62,7 +62,7 @@ describe("browser security-key encoding", (): void => {
     }) } });
     const request = mockFetch();
     await confirmWithKey();
-    expect(JSON.parse(String(request.mock.calls[1][1]?.body)).response.userHandle).toBeNull();
+    expect((await new Response(request.mock.calls[1][1]?.body).json<{ response: { userHandle: string | null } }>()).response.userHandle).toBeNull();
   });
 
   it.each([true, false])("registers a credential with transport support %s", async (hasTransports: boolean): Promise<void> => {
@@ -85,7 +85,7 @@ describe("browser security-key encoding", (): void => {
       authenticatorSelection: options.authenticatorSelection,
       excludeCredentials: [{ type: "public-key", id: new Uint8Array([2]).buffer, transports: ["nfc"] }],
     } });
-    expect(JSON.parse(String(request.mock.calls[1][1]?.body))).toEqual({ name: key.name, credential: {
+    expect((await new Response(request.mock.calls[1][1]?.body).json<unknown>())).toEqual({ name: key.name, credential: {
       id: key.id, response: {
         clientDataJSON: "_w", attestationObject: "-_8",
         transports: hasTransports ? ["usb", ...Array<string>(7).fill("nfc")] : [],

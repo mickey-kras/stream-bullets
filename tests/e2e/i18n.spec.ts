@@ -112,7 +112,7 @@ test("the For AI agents page counts one vote per visitor per day", async ({ page
   await page.goto("/ai");
   await expect(page.getByRole("heading", { level: 1, name: "For AI agents" })).toBeVisible();
   const interest = page.getByRole("region", { name: "Should AI agents take part?" });
-  const before = await (await request.get("/api/ai-interest")).json();
+  const before = (await (await request.get("/api/ai-interest")).json()) as { totals: { up: number } };
   await interest.getByRole("button", { name: "Agent vote: in favor" }).click();
   await expect(interest.getByRole("button", { name: "Agent vote: in favor" })).toBeDisabled();
   await expect(interest).toContainText(String(before.totals.up + 1));
@@ -126,11 +126,13 @@ test("the For AI agents page counts one vote per visitor per day", async ({ page
 test("streamer pages carry JSON-LD for search engines and agents", async ({ page }) => {
   await page.goto("/@test_host");
   const blocks: unknown[] = (await page.locator('script[type="application/ld+json"]').allTextContents()).map(
-    (text: string) => JSON.parse(text),
+    (text: string): unknown => JSON.parse(text),
   );
   expect(blocks).toContainEqual(expect.objectContaining({ "@type": "Person", alternateName: "@test_host" }));
   await page.goto("/");
-  const site = JSON.parse((await page.locator('script[type="application/ld+json"]').first().textContent()) ?? "{}");
+  const site = JSON.parse(
+    (await page.locator('script[type="application/ld+json"]').first().textContent()) ?? "{}",
+  ) as { "@graph": { "@type": string }[] };
   expect(site["@graph"].map((node: { "@type": string }) => node["@type"])).toEqual(["WebSite", "Organization"]);
 });
 

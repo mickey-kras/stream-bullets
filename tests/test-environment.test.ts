@@ -21,7 +21,7 @@ const secret = "test-access-secret-with-at-least-32-bytes";
 const identity = "e475eb5b-db31-43bd-8692-5926711e8faa";
 let database: TestDatabase;
 let env: AppEnv;
-const fetchRoom = vi.fn(async (): Promise<Response> => new Response(null, { status: 204 }));
+const fetchRoom = vi.fn((): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })));
 
 function request(fields: Record<string, string> = {}, init: RequestInit = {}): Request {
   return new Request(`${TEST_ORIGIN}/__test`, {

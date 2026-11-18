@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import type { Animator } from "./kit";
+import { isMesh } from "./shapes";
+
+function isInstancedMesh(object: THREE.Object3D): object is THREE.InstancedMesh {
+  return object instanceof THREE.InstancedMesh;
+}
 
 // Merge static meshes by material to reduce draw calls. Sample animators to exclude changing meshes; also
 // exclude caller-pinned roots.
@@ -77,7 +82,7 @@ function snapshot(root: THREE.Object3D): Restore {
 function movingMeshes(root: THREE.Object3D, animators: readonly Animator[]): Set<THREE.Mesh> {
   const meshes: THREE.Mesh[] = [];
   root.traverse((o: THREE.Object3D): void => {
-    if (o instanceof THREE.Mesh) meshes.push(o);
+    if (isMesh(o)) meshes.push(o);
   });
   root.updateMatrixWorld(true);
   const rest = new Map<THREE.Mesh, Pose>(
@@ -144,9 +149,9 @@ function batchKey(m: THREE.Mesh): string {
 function batchInstances(station: THREE.Object3D, moving: Set<THREE.Mesh>, pins: Set<THREE.Object3D>): void {
   const groups = new Map<string, THREE.InstancedMesh[]>();
   station.traverse((o: THREE.Object3D): void => {
-    if (!(o instanceof THREE.InstancedMesh) || moving.has(o) || Array.isArray(o.material) || !shown(o)) return;
+    if (!isInstancedMesh(o) || moving.has(o) || Array.isArray(o.material) || !shown(o)) return;
     for (let p: THREE.Object3D | null = o; p; p = p.parent) if (pins.has(p)) return;
-    const shape = JSON.stringify(o.geometry.parameters ?? o.geometry.uuid);
+    const shape = JSON.stringify(("parameters" in o.geometry ? o.geometry.parameters : undefined) ?? o.geometry.uuid);
     const key = [o.material.uuid, o.geometry.type, shape, o.castShadow, o.receiveShadow, o.renderOrder].join("|");
     const list = groups.get(key) ?? [];
     list.push(o);
@@ -193,7 +198,7 @@ export function batchStatic(
   const pins = new Set<THREE.Object3D>(pinned);
   const groups = new Map<string, THREE.Mesh[]>();
   station.traverse((o: THREE.Object3D): void => {
-    if (!(o instanceof THREE.Mesh) || !eligible(o, moving, pins)) return;
+    if (!isMesh(o) || !eligible(o, moving, pins)) return;
     const key = batchKey(o);
     const list = groups.get(key) ?? [];
     list.push(o);
@@ -230,7 +235,7 @@ export function batchStatic(
   batchInstances(station, moving, pins);
   // Dispose shared geometry only when no retained mesh uses it.
   station.traverse((o: THREE.Object3D): void => {
-    if (o instanceof THREE.Mesh) removed.delete(o.geometry);
+    if (isMesh(o)) removed.delete(o.geometry);
   });
   for (const g of removed) g.dispose();
   return moving;
