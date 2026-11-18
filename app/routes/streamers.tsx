@@ -136,8 +136,10 @@ export default function Streamers(): ReactNode {
   const more = extra?.key === key ? extra : null;
   const streamers: Streamer[] = [...data.streamers, ...(more?.streamers ?? [])];
   const nextCursor: string | null = more ? more.nextCursor : data.nextCursor;
-  // The ideas strip stands for the official page. A search has no strip, so it lists the page.
-  const listed: Streamer[] = featured ? streamers.filter((streamer: Streamer) => !streamer.isOfficial) : streamers;
+  // The ideas strip stands for one official page. A search has no strip, so it lists that page.
+  const listed: Streamer[] = featured
+    ? streamers.filter((streamer: Streamer) => streamer.handle !== featured.handle)
+    : streamers;
   const listedTotal: number = data.total - (streamers.length - listed.length);
   // Follow URL changes without overwriting active input.
   const [shownQuery, setShownQuery] = useState<string>(data.query);
