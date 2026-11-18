@@ -30,6 +30,8 @@ function pointer(type: string, pointerType: string, x: number, y: number, timeSt
   return e;
 }
 
+const DEG: number = Math.PI / 180;
+
 function camera(): THREE.PerspectiveCamera {
   const c = new THREE.PerspectiveCamera(30, 2, 0.1, 100);
   c.position.set(0, 0, 10);
@@ -123,6 +125,37 @@ describe("look-around", (): void => {
     expect(cam.position.length()).toBeCloseTo(10, 3);
     expect(Number.isFinite(cam.position.y)).toBe(true);
     look.restore(cam, target);
+  });
+
+  it.each([
+    ["upright", 60, 0],
+    ["on its side", 5, 88],
+    ["face down above the head", 170, 0],
+  ])("turns the view the same way when the phone is %s", (_posture: string, beta: number, gamma: number): void => {
+    const page = new EventTarget();
+    vi.stubGlobal("addEventListener", page.addEventListener.bind(page));
+    vi.stubGlobal("screen", { orientation: { angle: 0 } });
+    const look = createLook(host(), new AbortController().signal);
+    // Attitude after a 20 degree turn about the phone's long axis, in the angles a browser reports.
+    const rest = new THREE.Quaternion().setFromEuler(new THREE.Euler(beta * DEG, gamma * DEG, 0, "ZXY"));
+    const turned = new THREE.Euler().setFromQuaternion(
+      rest.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), 20 * DEG)),
+      "ZXY",
+    );
+    const tilt = (e: THREE.Euler): void => {
+      page.dispatchEvent(
+        Object.assign(new Event("deviceorientation"), { alpha: e.z / DEG, beta: e.x / DEG, gamma: e.y / DEG }),
+      );
+    };
+    tilt(new THREE.Euler(beta * DEG, gamma * DEG, 0, "ZXY"));
+    look.step(0.016, true);
+    tilt(turned);
+    for (let i = 0; i < 60; i++) look.step(0.016, true);
+    const cam = camera();
+    look.apply(cam, new THREE.Vector3());
+    expect(Math.atan2(cam.position.x, cam.position.z) / DEG).toBeCloseTo(-19, 0);
+    expect(Math.abs(cam.position.y)).toBeLessThan(0.2);
+    look.restore(cam, new THREE.Vector3());
   });
 
   it("leaves an overhead view where it is when there is no lean", (): void => {
