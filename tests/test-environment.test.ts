@@ -145,6 +145,9 @@ describe("test access", (): void => {
     expect(response.headers.has("Set-Cookie")).toBe(false);
     expect(html).not.toContain(secret);
     for (const account of TEST_ACCOUNTS) expect(html).toContain(`<option>${account}</option>`);
+    // The gate has its own styles: the application stylesheet needs test access.
+    expect(html).toContain("<style>");
+    expect(html).not.toMatch(/<link|<script|url\(/u);
   });
   it.each(TEST_ACCOUNTS)("creates a real isolated session for %s", async (account): Promise<void> => {
     const response = await testEnvironmentResponse(request({ account }), env);
