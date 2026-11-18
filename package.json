@@ -14,7 +14,7 @@
     "build:production": "CLOUDFLARE_ENV=production react-router build",
     "start": "wrangler dev --config build/server/wrangler.json --port 5173",
     "check": "react-router typegen && tsc --noEmit",
-    "lint": "eslint app db worker tests *.ts",
+    "lint": "eslint app db worker tests scripts *.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",

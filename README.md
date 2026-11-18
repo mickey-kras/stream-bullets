@@ -288,6 +288,10 @@ PRs need `Required quality gates` and `Trusted CI policy`. Production also needs
 | CodeQL | Analysis failure. Code scanning rules must block findings |
 | Policy | Unpinned action, ignored failure, missing gate, or mixed CI/application change |
 
+ESLint uses types to check application code, tests, and scripts written in TypeScript. Run `pnpm check` before `pnpm lint`.
+CI sends its ESLint JSON report to SonarQube from the same verified revision.
+The lint job still blocks findings before merge.
+
 Scanners use immutable `PINNED` tooling. Candidate configuration cannot select tools.
 Promote tools and pins in a separate CI PR. Keep changes to CI policy separate from application changes.
 Aislop compatibility settings keep Workers globals and virtual modules. `pnpm audit` owns dependency auditing.
@@ -304,6 +308,12 @@ Get the tree with `git rev-parse HEAD^{tree}`. The owner can post:
 
 ```text
 Approve CI policy: tree=<TREE_SHA> base=<CURRENT_PR_BASE_SHA> trusted=<GITHUB_WORKFLOW_SHA>
+```
+
+The short form binds only the head commit. Use the full 40-character SHA:
+
+```text
+/approve-ci <HEAD_SHA>
 ```
 
 Comment creation, editing, or deletion rechecks policy. Rejection removes approval.

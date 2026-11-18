@@ -111,6 +111,30 @@ test("owner comment admission binds exact head, base and trusted policy and supp
   );
 });
 
+test("short owner approval binds the exact head and the latest decisive comment wins", () => {
+  const comment = { id: 1, user: OWNER, body: `/approve-ci ${SHA}` };
+  assert.equal(validComment([comment], SHA, BASE, TRUSTED), true);
+  assert.equal(validComment([{ ...comment, body: `/approve-ci ${SHA}\n` }], SHA, BASE, TRUSTED), true);
+  assert.equal(validComment([comment], BASE, BASE, TRUSTED), false);
+  for (const body of [
+    `/approve-ci ${SHA.slice(0, 12)}`,
+    `/approve-ci ${SHA} and more`,
+    `/approve-ci`,
+    `approve-ci ${SHA}`,
+    `Please /approve-ci ${SHA}`,
+  ]) {
+    assert.equal(validComment([{ ...comment, body }], SHA, BASE, TRUSTED), false, body);
+  }
+  assert.equal(validComment([{ ...comment, user: { ...OWNER, id: 1 } }], SHA, BASE, TRUSTED), false);
+  assert.equal(validComment([{ ...comment, user: { ...OWNER, type: "Bot" } }], SHA, BASE, TRUSTED), false);
+  assert.equal(
+    validComment([comment, { id: 2, user: OWNER, body: "Reject CI policy: revoked" }], SHA, BASE, TRUSTED),
+    false,
+  );
+  // A newer short comment for another commit replaces an older valid approval.
+  assert.equal(validComment([comment, { id: 2, user: OWNER, body: `/approve-ci ${BASE}` }], SHA, BASE, TRUSTED), false);
+});
+
 function harness({
   fork = false,
   admitted = false,
