@@ -113,11 +113,36 @@ function directoryCount(shown: number, total: number): string {
   return shown < total ? t("streamers.showingOf", { shown, total }) : tn("streamers.showing", shown);
 }
 
+// A signed-in viewer without a page can ask to host one.
+function HostPrompt(): ReactNode {
+  const shell = useShell();
+  const location = useLocation();
+  if (!shell.viewer || shell.ownStreamer) return null;
+  return (
+    <p className="muted">
+      {t("streamers.hostPrompt")}{" "}
+      <Link
+        className="text-link"
+        to={dialogHref(location, "host")}
+        state={{ dialogFrom: location.pathname } satisfies DialogState}
+        preventScrollReset
+      >
+        {t("account.hostCommunity")}
+      </Link>
+    </p>
+  );
+}
+
+// The ideas strip stands for one official page. A search has no strip, so it lists that page.
+function withoutFeatured(streamers: Streamer[], featured: FeaturedStreamer | null): Streamer[] {
+  if (!featured) return streamers;
+  return streamers.filter((streamer: Streamer) => streamer.handle !== featured.handle);
+}
+
 // Official pages first, then handles; 20 per page. Landing intents add a dismissible prompt and direct each
 // card to the requested action.
 export default function Streamers(): ReactNode {
   const data = useLoaderData<typeof loader>();
-  const shell = useShell();
   const featured: FeaturedStreamer | null = data.featured;
   const location = useLocation();
   const navigate = useNavigate();
@@ -136,10 +161,7 @@ export default function Streamers(): ReactNode {
   const more = extra?.key === key ? extra : null;
   const streamers: Streamer[] = [...data.streamers, ...(more?.streamers ?? [])];
   const nextCursor: string | null = more ? more.nextCursor : data.nextCursor;
-  // The ideas strip stands for one official page. A search has no strip, so it lists that page.
-  const listed: Streamer[] = featured
-    ? streamers.filter((streamer: Streamer) => streamer.handle !== featured.handle)
-    : streamers;
+  const listed: Streamer[] = withoutFeatured(streamers, featured);
   const listedTotal: number = data.total - (streamers.length - listed.length);
   // Follow URL changes without overwriting active input.
   const [shownQuery, setShownQuery] = useState<string>(data.query);
@@ -209,21 +231,6 @@ export default function Streamers(): ReactNode {
     }
   }
 
-  const signedInViewer: boolean = Boolean(shell.viewer && !shell.ownStreamer);
-  const hostCta: ReactNode = signedInViewer ? (
-    <p className="muted">
-      {t("streamers.hostPrompt")}{" "}
-      <Link
-        className="text-link"
-        to={dialogHref(location, "host")}
-        state={{ dialogFrom: location.pathname } satisfies DialogState}
-        preventScrollReset
-      >
-        {t("account.hostCommunity")}
-      </Link>
-    </p>
-  ) : null;
-
   const count: string = directoryCount(listed.length, listedTotal);
   const resultMessage: string =
     count || (data.query ? t("streamers.noMatch", { query: data.query }) : t("streamers.emptyTitle"));
@@ -259,7 +266,7 @@ export default function Streamers(): ReactNode {
           </output>
         )}
         {featured && <IdeasStrip official={featured} intent={data.intent} />}
-        {hostCta}
+        <HostPrompt />
         {listedTotal === 0 && !data.query ? (
           <EmptyState
             title={t("streamers.emptyTitle")}
