@@ -13,6 +13,13 @@ Private reads are `/api/admin*` and `/api/account/export`. Other reads use no ad
 Requests above the quota get `429` with `Retry-After: 60`.
 A path with malformed percent-encoding returns `400`.
 
+Errors return `{error, code?, details?}` with the HTTP status. `error` is an English message.
+`code` is a stable reason. `details` is an optional `Record<string, string>` with values for that code.
+
+The client translates a known code. A `423` or `429` without a known code gets a status message.
+For other errors without a known code, English shows `error`. Other languages show a status message.
+English also shows `error` for `step_up_required` and `other_key_required`.
+
 ## Changed response shapes
 
 | Type or route | Contract |
@@ -21,7 +28,7 @@ A path with malformed percent-encoding returns `400`.
 | `Streamer` | `logo: string \| null`, `isOfficial: boolean`, `status: "active" \| "frozen" \| "suspended"`, `statusReason`, `handleChangedAt`. Only owners receive both last fields. Administrators also receive the reason. Others receive null. |
 | `Entry` | Ideas `status`: `review`, `planned`, `progress`, `shipped`, `declined`, or null. `statusReason`. Comment counts exclude removed placeholders. |
 | `Comment` | `removed: boolean`. Removed parents keep replies with empty `author`, `authorId`, and `text`, null `avatar`, and zero `likes`. Render "Comment removed" without like, report, or delete controls. |
-| Moderated-page writes | `423` for frozen or suspended pages. Suspended pages return `404` to users other than owners and administrators. |
+| Moderated-page writes | `423` with the code `page_frozen` or `page_suspended`. Suspended pages return `404` to users other than owners and administrators. |
 | `GET /api/streamers` | Official pages first. Suspended pages excluded. `query` matches name or handle, at most 60 characters. Send `nextCursor` back as `cursor`, including forms such as `1.handle`. |
 | `GET /@handle`, `/api/streamers/:handle`, `/api/entries/:id` | Suspended pages return `404` except to owners and administrators. |
 | `GET /@handle/overlay`, `/api/live/:handle` | Suspended pages return `404` to everyone. |
@@ -38,7 +45,8 @@ A path with malformed percent-encoding returns `400`.
 | `DELETE /api/images/logo` | None | `{logo: null}` |
 | `GET /api/entries/:id/comments?view=thread` | `sort`, `cursor` query parameters | `{comments: CommentThread[], nextCursor}`. Paged parents with all-depth `replies`, oldest first, keeping `parentId` |
 
-- Handle changes need 30 days. Early changes return `409` with the next allowed date.
+- Handle changes need 30 days. Early changes return `409` with the code `handle_cooldown`.
+  `details.retryAt` is the ISO timestamp of the next allowed change.
 - Old page and overlay links stop working without redirects. Warn before saving.
 - `logoMode: "profile"` and logo deletion remove uploads. `logoMode: "logo"` needs an upload or returns `400`.
 - Uploaded `avatar` takes precedence over a preset. Selecting a preset does not remove the upload. The profile dialog handles that choice.

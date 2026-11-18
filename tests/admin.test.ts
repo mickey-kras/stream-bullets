@@ -742,6 +742,7 @@ describe("page moderation and the reports queue", (): void => {
       body: { action: "create", kind: "topic", title: "New", body: "Details", category: "Gaming" },
     });
     expect(write.status).toBe(423);
+    expect(await body<{ code: string }>(write)).toMatchObject({ code: "page_frozen" });
 
     const again = await asAdmin("POST", `admin/streamers/${ids.page}`, { body: { action: "freeze", reason: "spam" } });
     expect(again.status).toBe(409);

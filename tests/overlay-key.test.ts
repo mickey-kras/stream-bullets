@@ -220,6 +220,7 @@ describe("making and checking the overlay key", (): void => {
   it("refuses a key for a suspended page, and lets a frozen page replace a leaked one", async (): Promise<void> => {
     const suspended = await regenerate("suspended");
     expect(suspended.status).toBe(423);
+    expect(await suspended.json()).toMatchObject({ code: "page_suspended" });
     expect(await hasOverlayKey(env, suspendedPage)).toBe(false);
     const { key } = await newUrl("frozen");
     expect(await overlayKeyMatches(env, frozenPage, key)).toBe(true);
