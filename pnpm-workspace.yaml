@@ -20,3 +20,7 @@ minimumReleaseAgeExclude:
 auditConfig:
   ignoreGhsas:
     - GHSA-fc5q-39xc-vjpf
+# Backport of the upstream fix for a race in the synchronous proxy channel (assertion "message?.id === id").
+# Remove at the next miniflare update: pnpm stops the install when the version does not match.
+patchedDependencies:
+  miniflare@4.20260730.0: .github/patches/miniflare@4.20260730.0.patch
