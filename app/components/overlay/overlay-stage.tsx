@@ -129,6 +129,16 @@ export function upNextStart(source: OverlaySourceRef, data: Pick<OverlayData, "n
   return source.type === "next" ? (data.next?.startsAt ?? null) : null;
 }
 
+// False when the stage stays empty: Hidden, or a topic, stream or card that is not there.
+export function showsContent(source: OverlaySourceRef, data: Pick<OverlayData, "topics" | "cards" | "next">): boolean {
+  if (source.type === "hidden") return false;
+  if (source.type === "topic") return data.topics.some((item) => item.id === source.ref);
+  if (source.type === "next") return data.next !== null;
+  if (source.type === "card")
+    return source.ref === null ? data.cards.length > 0 : data.cards.some((item) => item.id === source.ref);
+  return true;
+}
+
 function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
   const hydrated: boolean = useHydrated();
   const next = scene.data.next;

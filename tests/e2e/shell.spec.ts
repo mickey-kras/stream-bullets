@@ -141,6 +141,47 @@ test("logos go home, the streamer picture goes to its topics, and navigation mar
   await close(context);
 });
 
+test("the header offers Overlay to a page owner and not to a viewer without a page", async ({ browser }) => {
+  const owner = await signedIn(browser, "owner");
+  const page = await newPage(owner);
+  await page.goto("/streamers");
+  const nav = page.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
+  // Beside "Your page", in the order of the account menu.
+  await expect(nav.getByRole("link")).toHaveText(["Streamers", "Your page", "Overlay"]);
+  const overlay = nav.getByRole("link", { name: "Overlay", exact: true });
+  await expect(overlay).toHaveAttribute("href", "/overlay-control");
+  await expect(overlay).not.toHaveAttribute("aria-current", "page");
+  await expect(overlay.locator("svg")).toBeVisible();
+  await overlay.click();
+  await expect(page.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
+  await expect(overlay).toHaveAttribute("aria-current", "page");
+  await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+  // The account menu keeps its entry.
+  await page.getByRole("button", { name: /^Account menu/ }).click();
+  await expect(
+    page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Overlay control" }),
+  ).toHaveAttribute("href", "/overlay-control");
+  // On a phone the entry stays in the header, as a touch target, without sideways scroll. "Your page" gives it
+  // the room: that link stays in the account menu.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/streamers");
+  await expect(overlay).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Your page", exact: true })).toBeHidden();
+  const box = (await overlay.boundingBox())!;
+  expect(box.height).toBeGreaterThanOrEqual(44);
+  expect(box.x + box.width).toBeLessThanOrEqual(390);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await close(owner);
+
+  const viewer = await signedIn(browser, "viewer");
+  const viewerPage = await newPage(viewer);
+  await viewerPage.goto("/streamers");
+  const viewerNav = viewerPage.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
+  await expect(viewerNav.getByRole("link", { name: "Streamers" })).toBeVisible();
+  await expect(viewerNav.getByRole("link", { name: "Overlay", exact: true })).toHaveCount(0);
+  await close(viewer);
+});
+
 test("headers keep every label on one line at 390px", async ({ browser }) => {
   const context = await signedIn(browser, "admin", { width: 390 });
   const page = await newPage(context);
