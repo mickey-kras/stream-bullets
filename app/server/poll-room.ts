@@ -16,7 +16,6 @@ import type { LiveSnapshot, MashPhase, MashTick, OverlayPublic } from "../types"
 import { LIVE_POLLS_SQL, livePolls, optionsFromJson, type PollRow } from "./live-polls";
 import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from "./overlay-state";
 import { validateTestEnvironment } from "./test-environment-config";
-import { detached } from "../lib/detached";
 
 const MAX_CONNECTIONS = 200;
 // Reserve half the room for signed-in viewers.
@@ -170,12 +169,12 @@ export class PollRoom extends DurableObject<AppEnv> {
 
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
-    detached(ctx.blockConcurrencyWhile(async (): Promise<void> => {
+    void ctx.blockConcurrencyWhile(async (): Promise<void> => {
       this.streamerId = await ctx.storage.get<string>("streamerId");
       ctx.storage.sql.exec(`CREATE TABLE IF NOT EXISTS tap_journal (entry_id TEXT NOT NULL, starts_at INTEGER,
         user_id TEXT NOT NULL, side INTEGER NOT NULL, taps INTEGER NOT NULL, assisted INTEGER NOT NULL,
         PRIMARY KEY (entry_id, user_id))`);
-    }));
+    });
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
 
