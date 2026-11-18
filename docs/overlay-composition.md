@@ -146,9 +146,25 @@ See [live capacity](live-room-capacity.md).
 
 ## Editor
 
-The **Composition** section of **Overlay control** shows the grid of the selected orientation on a preview of the frame.
+**Overlay control** has four numbered steps:
+
+1. **Connect channels**: the channel connections. With a connected channel, the step shows one status line.
+   Select the line to open the full panel.
+2. **Choose what shows**: the monitors, **Take**, and the sources of the on-air content.
+   Below them are the switches of the chat and characters layers.
+3. **Place the layers**: the layout grid.
+4. **Add to OBS**: the overlay link.
+
+A signed-in page owner opens the page from **Overlay** in the header or from the account menu.
+
+Step 3 shows the grid of the selected orientation on a preview of the frame.
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.
 Each placed layer shows its name and its size in pixels.
+
+Each placed layer also shows content. A layer that is off shows a dimmed sample: sample chat messages or sample characters.
+A content cell with nothing on air shows a dimmed sample topic.
+The samples are only in this preview. OBS does not show them and the server does not store them.
+
 Under **Preview background**, select **Transparent** or **Sample game**.
 
 To change the layout, do these steps:

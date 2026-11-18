@@ -3,15 +3,56 @@
 
 .ov-comp {
   max-width: 1300px;
-  margin: 32px auto 0;
-  display: grid;
-  gap: 12px;
+  margin: 0 auto;
 }
-.ov-comp-head h2 {
-  margin: 0;
+
+/* ---------- Steps of Overlay control (step-heading.tsx) ---------- */
+.ov-step {
+  max-width: 1300px;
+  margin: 28px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
 }
-.ov-comp-head p {
-  margin: 4px 0 0;
+.ov-step-title {
+  margin: 0 0 12px;
+  font-size: 28px;
+}
+.ov-step-num {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5em;
+  height: 1.5em;
+  margin-inline-end: 6px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--on-gold);
+  font: 700 0.75em / 1 var(--body);
+  vertical-align: 0.15em;
+}
+.ov-step-intro {
+  margin: 0 0 12px;
+}
+.ov-step .ov-url {
+  margin-top: 0;
+}
+/* Step 2: the chat and characters switches, side by side under the live control. */
+.ov-step-layers {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  align-items: start;
+  margin-top: 20px;
+}
+/* Step 1: the status line opens the channel panel. */
+.ch-details > summary {
+  width: fit-content;
+  max-width: 100%;
+  /* 44 px high with one line of text. */
+  padding: 10px 0;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--gold);
+}
+.ch-details[open] > summary {
+  margin-bottom: 4px;
 }
 .ov-comp-body {
   display: grid;
@@ -137,6 +178,13 @@
 .ov-grid-box[data-off] {
   border-style: dashed;
   opacity: 0.7;
+}
+/* A sample of a layer that is off, or of content that is not on air: dimmed. Only the editor preview sets
+   data-sample-off; the OBS pages never do. */
+.ov-comp-frame[data-sample-off~="chat"] .ov-layer[data-layer="chat"],
+.ov-comp-frame[data-sample-off~="characters"] .ov-layer[data-layer="characters"],
+.ov-comp-frame[data-sample-off~="content"] .ov-layer[data-layer="content"] {
+  opacity: 0.45;
 }
 .ov-grid-box[data-grid-box="characters"] {
   background: repeating-linear-gradient(135deg, rgb(242 210 46 / 0.08) 0 24px, transparent 24px 48px);

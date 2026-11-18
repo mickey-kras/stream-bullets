@@ -1,5 +1,6 @@
 import {
   useId,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -25,8 +26,9 @@ import {
 } from "../../lib/overlay-layers";
 import type { OverlaySourceRef } from "../../types";
 import type { ActivityFeed } from "./activity-feed";
-import { OverlayComposition, frameStyle } from "./overlay-composition";
-import type { OverlayScene } from "./overlay-stage";
+import { SAMPLE_SOURCE, sampleCharactersFeed, sampleScene } from "./editor-samples";
+import { CHARACTERS_READY, OverlayComposition, frameStyle } from "./overlay-composition";
+import { showsContent, type OverlayScene } from "./overlay-stage";
 import { useDesignScale } from "./use-design-scale";
 
 export type PreviewBackground = "checker" | "game";
@@ -261,6 +263,29 @@ export function LayoutGrid({
     }
   };
 
+  // The preview shows every placed layer. A layer that is off shows a dimmed sample: chat plays the sample messages
+  // and the characters get a still sample frame, not the live socket. A content cell with nothing on air shows a
+  // sample card. `layers` stays as it is: nothing here is saved or sent to OBS.
+  const charactersCell: CellRect | null = cells.characters;
+  const cellsW: number = charactersCell?.w ?? 0;
+  const cellsH: number = charactersCell?.h ?? 0;
+  const sampleCharacters: ActivityFeed | null = useMemo(
+    (): ActivityFeed | null => (charactersFeed === null && cellsW > 0 ? sampleCharactersFeed(cellsW, cellsH) : null),
+    [charactersFeed, cellsW, cellsH],
+  );
+  const sampleContent: boolean = cells.content !== null && !showsContent(source, scene.data);
+  const dimmed: Readonly<Record<GridLayer, boolean>> = {
+    chat: cells.chat !== null && !layers.chat.enabled,
+    characters: charactersCell !== null && !layers.characters.enabled,
+    content: sampleContent,
+  };
+  const sampleOff: string = GRID_LAYERS.filter((layer: GridLayer): boolean => dimmed[layer]).join(" ");
+  const previewLayers: OverlayLayers = {
+    ...layers,
+    chat: { ...layers.chat, enabled: true },
+    characters: { ...layers.characters, enabled: CHARACTERS_READY },
+  };
+
   const shape: CellRect | null = drag ? dragShape(cells, orientation, drag) : null;
   const invalid: boolean =
     drag !== null && shape !== null && placeProblem(orientation, cells, drag.layer, shape) !== null;
@@ -272,18 +297,19 @@ export function LayoutGrid({
         className="ov-frame ov-comp-frame"
         data-orientation={orientation}
         data-background={background}
+        data-sample-off={sampleOff || undefined}
         ref={frame}
         aria-label={t("overlay.comp.preview")}
       >
         <div className="ov-scaler" style={frameStyle(orientation)}>
           {background === "game" && <div className="ov-comp-game" aria-hidden="true" />}
           <OverlayComposition
-            scene={scene}
-            source={source}
-            layers={layers}
+            scene={sampleContent ? sampleScene(scene) : scene}
+            source={sampleContent ? SAMPLE_SOURCE : source}
+            layers={previewLayers}
             only={null}
             feed={null}
-            charactersFeed={charactersFeed}
+            charactersFeed={charactersFeed ?? sampleCharacters}
             samples={SAMPLE_CHAT}
           />
           <div className="ov-grid-lines" aria-hidden="true" />
@@ -291,7 +317,6 @@ export function LayoutGrid({
             const rect: CellRect | null = cells[layer];
             if (!rect) return null;
             const px = cellPixels(rect);
-            const on: boolean = layer === "content" || layers[layer].enabled;
             return (
               <div
                 key={layer}
@@ -299,7 +324,7 @@ export function LayoutGrid({
                 data-grid-box={layer}
                 data-selected={layer === selected || undefined}
                 data-lifted={layer === lifted || undefined}
-                data-off={!on || undefined}
+                data-off={dimmed[layer] || undefined}
                 style={boxStyle(rect)}
                 aria-hidden="true"
               >
