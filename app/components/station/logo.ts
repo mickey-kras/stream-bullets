@@ -42,9 +42,11 @@ function walker(a: number, grow: number): (s: number) => number {
     const step = side ? -WALK_STEP : WALK_STEP;
     const run = runs[side];
     const want = Math.abs(s);
-    while (run[run.length - 1] < want) {
+    let reached: number = run.at(-1) ?? 0;
+    while (reached < want) {
       const p = plan(a + step * run.length, grow);
-      run.push(run[run.length - 1] + p.distanceTo(ends[side]));
+      reached += p.distanceTo(ends[side]);
+      run.push(reached);
       ends[side] = p;
     }
     // First step that reaches the distance.
