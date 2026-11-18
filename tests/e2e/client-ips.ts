@@ -40,6 +40,7 @@ const ranges = {
     [250, 250],
   ],
   "composition-editor": [[245, 249]],
+  "layout-widgets": [[251, 253]],
   characters: [[182, 189]],
   "compact-layout": [[220, 231]],
 } as const satisfies Record<string, readonly (readonly [number, number])[]>;

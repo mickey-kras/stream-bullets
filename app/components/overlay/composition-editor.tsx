@@ -5,7 +5,6 @@ import { withCell } from "../../lib/layer-geometry";
 import {
   GRID,
   GRID_LAYERS,
-  MIN_CELLS,
   ORIENTATIONS,
   frameSize,
   layerPixels,
@@ -20,7 +19,8 @@ import { motionReduced } from "../station/motion";
 import { useToast } from "../ui/toast";
 import { type ActivityFeed, useActivityFeed } from "./activity-feed";
 import { CharactersControls } from "./characters-controls";
-import { LAYER_NAMES, LayoutGrid, type PreviewBackground } from "./layout-grid";
+import { LayerPalette } from "./layer-palette";
+import { LayoutGrid, type LayoutGridHandle, type PreviewBackground } from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
 import { showsContent, type OverlayScene } from "./overlay-stage";
 import { StepHeading } from "./step-heading";
@@ -173,7 +173,9 @@ export function CompositionEditor({
   const commandsId: string = useId();
   const orientationNoteId: string = useId();
   const [background, setBackground] = useState<PreviewBackground>("checker");
+  // The selected layer of the grid. It is here, not in the grid, so that other controls can read and set it.
   const [selected, setSelected] = useState<GridLayer>("chat");
+  const grid = useRef<LayoutGridHandle | null>(null);
   const { shown, status, error, edit } = useLayerDraft(layers, onSaved);
   const orientation: Orientation = shown.orientation;
   // The preview shows the live playground while the characters layer is on: the owner's own characters socket.
@@ -183,6 +185,9 @@ export function CompositionEditor({
     owner: true,
   });
   const content: CellRect | null = shown.cells[orientation].content;
+  const free: GridLayer[] = GRID_LAYERS.filter(
+    (layer: GridLayer): boolean => shown.cells[orientation][layer] === null,
+  );
   const frame = useRef<HTMLDivElement | null>(null);
   const covers: boolean = useChatOverlap(
     frame,
@@ -316,26 +321,6 @@ export function CompositionEditor({
                 </p>
               </fieldset>
               <fieldset className="field ov-seg-field">
-                <legend className="field-label">{t("overlay.grid.layer")}</legend>
-                <div className="seg">
-                  {GRID_LAYERS.map((layer: GridLayer) => (
-                    <button
-                      key={layer}
-                      type="button"
-                      aria-pressed={selected === layer}
-                      onClick={() => setSelected(layer)}
-                      data-comp-pick={layer}
-                    >
-                      {t("overlay.grid.pick", {
-                        layer: t(LAYER_NAMES[layer]),
-                        w: MIN_CELLS[layer].w,
-                        h: MIN_CELLS[layer].h,
-                      })}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-              <fieldset className="field ov-seg-field">
                 <legend className="field-label">{t("overlay.comp.background")}</legend>
                 <div className="seg">
                   {BACKGROUNDS.map(([value, label]) => (
@@ -350,8 +335,10 @@ export function CompositionEditor({
                   ))}
                 </div>
               </fieldset>
+              <LayerPalette free={free} grid={grid} />
             </div>
             <LayoutGrid
+              ref={grid}
               layers={shown}
               scene={scene}
               source={source}

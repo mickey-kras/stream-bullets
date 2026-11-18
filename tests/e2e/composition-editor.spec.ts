@@ -4,7 +4,17 @@ import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import { DEFAULT_LAYERS, cellPixels, type OverlayLayers } from "../../app/lib/overlay-layers";
 import { SAMPLE_INTERVAL_MS } from "../../app/components/overlay/use-chat";
-import type { Locator } from "@playwright/test";
+import {
+  FEATURE_HOST,
+  PALETTE_HINT,
+  gridButton,
+  gridCells,
+  gridLines,
+  paletteChip,
+  resetLayers,
+  saved,
+  storedLayers,
+} from "./grid-helpers";
 
 const OWNER_IP = clientIp("composition-editor", 245);
 const MOTION_IP = clientIp("composition-editor", 246);
@@ -12,8 +22,6 @@ const OVERLAP_IP = clientIp("composition-editor", 247);
 const LEAVE_IP = clientIp("composition-editor", 248);
 const NAV_IP = clientIp("composition-editor", 249);
 
-const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
-const resetLayers = `UPDATE overlay_state SET layers='{}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
 const chatOn = `UPDATE overlay_state SET layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
 // The seeded on-air content: the Mash Battle poll. It fills the top half of the stage (about y 48 to 550).
 const seededAir = `UPDATE overlay_state SET air=json_object('type','poll','ref',(SELECT id FROM entries WHERE streamer_id=${FEATURE_HOST} AND title='Which boss first?')), revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
@@ -26,38 +34,6 @@ test.beforeEach(async () => {
 test.afterAll(async () => {
   await runSql("composition-editor-cleanup", [resetLayers]);
 });
-
-function saved(page: Page): Promise<unknown> {
-  return page.waitForResponse(
-    (response) =>
-      response.request().method() === "POST" && new URL(response.url()).pathname === "/api/overlay" && response.ok(),
-  );
-}
-
-/** The saved layers, read through the API with the page's session. */
-async function storedLayers(page: Page): Promise<OverlayLayers> {
-  const response = await page.request.get("/api/overlay");
-  return ((await response.json()) as { overlay: { layers: OverlayLayers } }).overlay.layers;
-}
-
-/** The grid button inside the application region that carries the grid name. */
-function gridButton(editor: Locator, name: string | RegExp): Locator {
-  return editor.getByRole("application", { name }).getByRole("button");
-}
-
-/** Pointer helpers for the grid: the centre of a cell in screen pixels. */
-async function gridCells(
-  grid: Locator,
-  cols: number,
-  rows: number,
-): Promise<(c: number, r: number) => { x: number; y: number }> {
-  const box = await grid.boundingBox();
-  if (!box) throw new Error("No grid.");
-  return (c: number, r: number) => ({
-    x: Math.round(box.x + ((c + 0.5) * box.width) / cols),
-    y: Math.round(box.y + ((r + 0.5) * box.height) / rows),
-  });
-}
 
 async function dragCells(page: Page, from: { x: number; y: number }, to: { x: number; y: number }): Promise<void> {
   await page.mouse.move(from.x, from.y);
@@ -161,25 +137,35 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
   expect((await storedLayers(page)).cells.horizontal.chat).toEqual({ c: 10, r: 0, w: 5, h: 7 });
 
-  // Drag on empty cells to draw the selected layer: the content gets a cell.
+  // No layer selector: the palette lists the layers that are not on the grid. Here that is the content.
   const content = editor.locator('[data-comp-layer="content"]');
+  const palette = editor.locator("[data-comp-palette]");
+  await expect(editor.getByRole("button", { name: /min\./ })).toHaveCount(0);
   await expect(content.locator("[data-comp-content-note]")).toContainText("The content has no cell.");
-  await editor.getByRole("button", { name: "On-air content (min. 4 × 2)" }).click();
-  // The click scrolls the layer buttons into view: centre the preview again and measure the grid.
-  await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
-  at = await gridCells(grid, 16, 9);
+  await expect(palette.getByRole("button")).toHaveCount(1);
+  const chip = paletteChip(editor, "On-air content");
+  await expect(chip).toHaveAccessibleDescription(PALETTE_HINT);
+  // The chat is selected at first: it shows the eight resize handles.
+  await expect(frame.locator('[data-grid-box="chat"]')).toHaveAttribute("data-selected", "true");
+  await expect(frame.locator('[data-grid-box="chat"] [data-grid-handle]')).toHaveCount(8);
+  await expect(frame.locator('[data-grid-box="characters"] [data-grid-handle]')).toHaveCount(0);
+  // A click on the chip adds the content at the first free place, at its minimum size, and selects it.
   save = saved(page);
-  await dragCells(page, at(0, 0), at(5, 2));
+  await chip.click();
   await save;
-  await expect(status).toHaveText("On-air content placed at column 1, row 1, 6 × 3 cells.");
-  await expect(frame.locator('[data-grid-box="content"]')).toContainText("On-air content · 720 × 360");
+  await expect(status).toHaveText("On-air content placed at column 1, row 1, 4 × 2 cells.");
+  await expect(frame.locator('[data-grid-box="content"]')).toContainText("On-air content · 480 × 240");
+  await expect(frame.locator('[data-grid-box="content"]')).toHaveAttribute("data-selected", "true");
+  await expect(frame.locator('[data-grid-box="content"] [data-grid-handle]')).toHaveCount(8);
+  await expect(frame.locator('[data-grid-box="chat"] [data-grid-handle]')).toHaveCount(0);
   await expect(content.locator("[data-comp-content-note]")).toContainText(
     "The position setting applies only when the content has no cell.",
   );
-  // A shape below the minimum size is not kept.
-  await dragCells(page, at(0, 4), at(1, 5));
-  await expect(status).toHaveText("Not placed. On-air content needs at least 4 × 2 cells.");
-  expect((await storedLayers(page)).cells.horizontal.content).toEqual({ c: 0, r: 0, w: 6, h: 3 });
+  // The chip left the palette, and the grid has the focus for the next keys.
+  await expect(palette.getByRole("button")).toHaveCount(0);
+  await expect(palette.locator("[data-comp-palette-empty]")).toHaveText("All layers are on the grid.");
+  await expect(grid).toBeFocused();
+  expect((await storedLayers(page)).cells.horizontal.content).toEqual({ c: 0, r: 0, w: 4, h: 2 });
 
   // Keyboard: the cursor starts at the first cell after a new page load.
   await page.reload();
@@ -194,15 +180,24 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   save = saved(page);
   await page.keyboard.press("Space");
   await save;
-  await expect(status).toHaveText("On-air content moved to column 1, row 2, 6 × 3 cells.");
+  await expect(status).toHaveText("On-air content moved to column 1, row 2, 4 × 2 cells.");
   // Escape cancels a pick.
   await page.keyboard.press("Enter");
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Escape");
   await expect(status).toHaveText("Cancelled.");
+  // A press on a placed layer selects it. An empty cell has nothing to pick up.
+  at = await gridCells(grid, 16, 9);
+  await page.mouse.click(at(8, 5).x, at(8, 5).y);
+  await expect(frame.locator('[data-grid-box="content"]')).toHaveAttribute("data-selected", "true");
+  await page.keyboard.press("Space");
+  await expect(status).toHaveText("Column 9, row 6: empty.");
+  await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
+  await page.mouse.click(at(12, 3).x, at(12, 3).y);
+  await expect(status).toHaveText("Chat selected.");
+  await expect(frame.locator('[data-grid-box="chat"]')).toHaveAttribute("data-selected", "true");
+  await expect(frame.locator('[data-grid-box="content"]')).not.toHaveAttribute("data-selected");
   // Shift + arrow moves the selected layer one cell; it saves after a short pause.
-  await editor.getByRole("button", { name: "Chat (min. 3 × 2)" }).click();
-  await grid.focus();
   save = saved(page);
   await page.keyboard.press("Shift+ArrowRight");
   await save;
@@ -211,7 +206,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await expect(status).toHaveText("Chat moved to column 12, row 1, 5 × 7 cells.");
   expect((await storedLayers(page)).cells.horizontal).toMatchObject({
     chat: { c: 11, r: 0, w: 5, h: 7 },
-    content: { c: 0, r: 1, w: 6, h: 3 },
+    content: { c: 0, r: 1, w: 4, h: 2 },
   });
 
   // Remove takes the content off the grid: it uses the full frame again.
@@ -221,6 +216,9 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await expect(content.locator("[data-comp-content-note]")).toContainText("The content has no cell.");
   await expect(content.getByRole("button", { name: "Remove from grid" })).toHaveAttribute("aria-disabled", "true");
   await expect(content.getByRole("button", { name: "Remove from grid" })).toBeFocused();
+  // The chip is back in the palette.
+  await expect(chip).toBeVisible();
+  await expect(palette.locator("[data-comp-palette-empty]")).toHaveCount(0);
 
   // The vertical orientation has its own layout and frame. The horizontal layout stays.
   save = saved(page);
@@ -282,50 +280,51 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
     if (request.method() === "POST" && new URL(request.url()).pathname === "/api/overlay")
       bodies.push(request.postDataJSON());
   });
-  await editor.getByRole("button", { name: "On-air content (min. 4 × 2)" }).click();
-  await gridButton(editor, "Layout grid, 16 columns by 9 rows").focus();
-  // The cursor goes to the last column, and a drawing starts there.
-  for (let step = 0; step < 15; step++) await page.keyboard.press("ArrowRight");
-  await expect(status).toHaveText("Column 16, row 1: empty.");
+  // The content goes to the first free place, beside the chat, and the grid takes the focus with the cursor there.
+  const added = saved(page);
+  await paletteChip(editor, "On-air content").click();
+  await added;
+  await expect(status).toHaveText("On-air content placed at column 6, row 1, 4 × 2 cells.");
+  await expect(gridButton(editor, "Layout grid, 16 columns by 9 rows")).toBeFocused();
+  // Space picks up the content, and the cursor carries it to the last column.
   await page.keyboard.press("Space");
-  await expect(status).toHaveText(
-    "Drawing On-air content from column 16, row 1. Move the cursor, then press Space or Enter.",
-  );
+  await expect(status).toHaveText("Moving On-air content. Move the cursor, then press Space or Enter.");
+  for (let step = 0; step < 10; step++) await page.keyboard.press("ArrowRight");
+  await expect(status).toHaveText("Column 16, row 1: empty.");
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(1);
-  // Leaving the grid ends the drawing.
+  // Leaving the grid ends the move.
   const save = saved(page);
   await editor.getByRole("button", { name: "Vertical 9 × 16" }).click();
   await save;
   await expect(status).toHaveText("Cancelled.");
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
-  // The cursor is in the last column of the 9 columns now: the first key, Space, draws from there.
+  // The cursor is in the last column of the 9 columns now: the first key, Space, finds an empty cell there.
   const tall = gridButton(editor, "Layout grid, 9 columns by 16 rows");
   await tall.focus();
   await page.keyboard.press("Space");
-  await expect(status).toHaveText(
-    "Drawing On-air content from column 9, row 1. Move the cursor, then press Space or Enter.",
-  );
-  // Every cell of the drawing stays inside the vertical grid.
-  for (const key of ["ArrowLeft", "ArrowLeft", "ArrowLeft", "ArrowDown"]) await page.keyboard.press(key);
+  await expect(status).toHaveText("Column 9, row 1: empty.");
+  await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
+  // The vertical layout has its own palette: the content is not on this grid.
   const placed = saved(page);
-  await page.keyboard.press("Space");
+  await paletteChip(editor, "On-air content").click();
   await placed;
-  await expect(status).toHaveText("On-air content placed at column 6, row 1, 4 × 2 cells.");
+  await expect(status).toHaveText("On-air content placed at column 1, row 1, 4 × 2 cells.");
   expect(withoutWrite(bodies)).toEqual([
+    { action: "layers", cells: { horizontal: { content: { c: 5, r: 0, w: 4, h: 2 } } } },
     { action: "layers", orientation: "vertical" },
-    { action: "layers", cells: { vertical: { content: { c: 5, r: 0, w: 4, h: 2 } } } },
+    { action: "layers", cells: { vertical: { content: { c: 0, r: 0, w: 4, h: 2 } } } },
   ]);
-  expect((await storedLayers(page)).cells.vertical.content).toEqual({ c: 5, r: 0, w: 4, h: 2 });
+  expect((await storedLayers(page)).cells.vertical.content).toEqual({ c: 0, r: 0, w: 4, h: 2 });
   // A click without a pointer (a screen reader's activation) acts as Space: it picks up the layer at the cursor.
+  await expect(tall).toBeFocused();
   await tall.dispatchEvent("click");
   await expect(status).toHaveText("Moving On-air content. Move the cursor, then press Space or Enter.");
   await page.keyboard.press("Escape");
   await expect(status).toHaveText("Cancelled.");
-  // An orientation change from elsewhere (another tab, here a request) ends an open drawing without a blur.
-  await page.keyboard.press("ArrowDown");
-  await page.keyboard.press("ArrowDown");
-  await expect(status).toHaveText("Column 6, row 4: empty.");
+  // An orientation change from elsewhere (another tab, here a request) ends an open move without a blur.
   await page.keyboard.press("Space");
+  await page.keyboard.press("ArrowDown");
+  await expect(status).toHaveText("Column 1, row 2: On-air content.");
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(1);
   const switched: number = await page.evaluate(async (): Promise<number> => {
     const response = await fetch("/api/overlay", {
@@ -340,9 +339,9 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
   const wide = gridButton(editor, "Layout grid, 16 columns by 9 rows");
   await expect(wide).toBeFocused();
   await expect(frame.locator("[data-grid-preview]")).toHaveCount(0);
-  // Space starts a new drawing, so no drawing from the old grid was still open.
+  // Space starts a new move at the cursor, so no move from the old grid was still open.
   await page.keyboard.press("Space");
-  await expect(status).toHaveText(/^Drawing On-air content from column 6, row 4\./);
+  await expect(status).toHaveText(/^Moving Chat\./);
   await page.keyboard.press("Escape");
   await close(owner);
 });
@@ -709,20 +708,27 @@ test("a note shows while the chat covers the on-air content and goes when the ch
   // The note does not speak on page load, only after a change.
   await expect(note).toHaveAttribute("aria-live", "off");
 
-  // Below the poll is free: draw the chat again in rows 6 and 7, beside its old place.
+  // Below the poll is free: the top handle of the chat brings it down to rows 6 and 7.
   await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
   const grid = gridButton(editor, /^Layout grid/);
-  let at = await gridCells(grid, 16, 9);
+  const line = await gridLines(grid, 16, 9);
+  const dragLine = async (from: { x: number; y: number }, to: { x: number; y: number }): Promise<void> => {
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    await page.mouse.move(to.x, to.y, { steps: 6 });
+    await page.mouse.up();
+  };
   let save = saved(page);
-  await dragCells(page, at(6, 5), at(11, 6));
+  await dragLine({ x: line(2, 0).x, y: line(2, 0).y }, { x: line(2, 5).x, y: line(2, 5).y });
   await save;
+  await expect(editor.locator("[data-grid-status]")).toHaveText("Chat resized to 5 × 2 cells at column 1, row 6.");
   // The note stays mounted as a live region; it is empty when nothing is covered.
   await expect(note).toHaveText("");
   await expect(note).toHaveAttribute("aria-live", "polite");
 
   // Back over the poll, the note shows again. A hidden chat covers nothing.
   save = saved(page);
-  await dragCells(page, at(8, 6), at(8, 1));
+  await dragLine({ x: line(2, 5).x, y: line(2, 5).y }, { x: line(2, 0).x, y: line(2, 0).y });
   await save;
   await expect(note).toHaveText(OVERLAP_NOTE);
   save = saved(page);
@@ -734,12 +740,8 @@ test("a note shows while the chat covers the on-air content and goes when the ch
   await editor.locator('[data-comp-layer="chat"]').getByRole("checkbox", { name: "Show on stream" }).check();
   await save;
   await expect(note).toHaveText(OVERLAP_NOTE);
-  await editor.getByRole("button", { name: "On-air content (min. 4 × 2)" }).click();
-  // The clicks above can scroll the page: measure the grid again.
-  await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
-  at = await gridCells(grid, 16, 9);
   save = saved(page);
-  await dragCells(page, at(0, 0), at(5, 4));
+  await paletteChip(editor, "On-air content").click();
   await save;
   await expect(note).toHaveText("");
   await close(owner);
