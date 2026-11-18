@@ -18,8 +18,6 @@ const DEG = Math.PI / 180;
 
 // Linear near zero; bounded by max.
 const soften = (v: number, max: number): number => max * Math.tanh(v / max);
-// Shortest signed degree difference across angle wrapping.
-const turn = (a: number, b: number): number => ((((a - b + 180) % 360) + 360) % 360) - 180;
 
 export interface Look {
   // Ease toward input; return whether moving. Reduced motion clears lean immediately.
@@ -37,8 +35,12 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
   const right = new THREE.Vector3();
   const up = new THREE.Vector3(0, 1, 0);
   let gyro = false;
-  let base: { beta: number; gamma: number } | null = null;
-  let reading = { beta: 0, gamma: 0 };
+  // Device attitude as a rotation. Beta and gamma alone flip when the phone is on its side or faces down.
+  const attitude = new THREE.Euler();
+  const reading = new THREE.Quaternion();
+  const delta = new THREE.Quaternion();
+  let base: THREE.Quaternion | null = null;
+  let screenAngle = 0;
 
   wrap.addEventListener(
     "pointermove",
@@ -65,12 +67,11 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
     (e: DeviceOrientationEvent): void => {
       if (e.beta === null || e.gamma === null) return;
       gyro = true;
-      // Swap axes in landscape to follow screen orientation.
-      const angle = globalThis.screen?.orientation?.angle ?? 0;
-      const turned = angle === 90 || angle === -90 || angle === 270;
-      const sign = angle === 90 ? 1 : -1;
-      reading = turned ? { beta: e.gamma * sign, gamma: e.beta * -sign } : { beta: e.beta, gamma: e.gamma };
-      base ??= { ...reading };
+      // W3C order: alpha about Z, then beta about X, then gamma about Y.
+      attitude.set(e.beta * DEG, e.gamma * DEG, (e.alpha ?? 0) * DEG, "ZXY");
+      reading.setFromEuler(attitude);
+      base ??= reading.clone();
+      screenAngle = globalThis.screen?.orientation?.angle ?? 0;
     },
     { signal },
   );
@@ -87,12 +88,19 @@ export function createLook(wrap: HTMLElement, signal: AbortSignal): Look {
       }
       if (gyro && base) {
         // Slowly adapt the neutral grip.
-        const drift = 1 - Math.exp(-dt / GRIP_SETTLE);
-        base.beta += turn(reading.beta, base.beta) * drift;
-        base.gamma += turn(reading.gamma, base.gamma) * drift;
-        goal.yaw = -soften(turn(reading.gamma, base.gamma) * DEG, GYRO_YAW);
+        base.slerp(reading, 1 - Math.exp(-dt / GRIP_SETTLE));
+        // Turn from the neutral grip, as a rotation vector on the phone's own axes. It is the same in each posture.
+        delta.copy(base).invert().multiply(reading);
+        const half = Math.acos(Math.min(1, Math.abs(delta.w)));
+        const scale = (half < 1e-6 ? 2 : (2 * half) / Math.sin(half)) * Math.sign(delta.w || 1);
+        const aboutX = delta.x * scale;
+        const aboutY = delta.y * scale;
+        // Swap axes in landscape to follow screen orientation.
+        const turned = screenAngle === 90 || screenAngle === -90 || screenAngle === 270;
+        const sign = screenAngle === 90 ? 1 : -1;
+        goal.yaw = -soften(turned ? aboutX * -sign : aboutY, GYRO_YAW);
         // Tilting the phone top away raises the view.
-        goal.pitch = -soften(turn(reading.beta, base.beta) * DEG, GYRO_PITCH);
+        goal.pitch = -soften(turned ? aboutY * sign : aboutX, GYRO_PITCH);
       }
       const k = 1 - Math.exp(-dt * (gyro ? GYRO_FOLLOW : MOUSE_FOLLOW));
       const dy = goal.yaw - now.yaw;
