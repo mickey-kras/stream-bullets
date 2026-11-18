@@ -194,11 +194,8 @@ function authRequestHooks(env: AppEnv, origin: string): NonNullable<BetterAuthOp
         });
       }
       if (ctx.path === "/link-social") {
-        if (
-          typeof fields.provider !== "string" ||
-          !configuredProviders(env).some((provider) => provider === fields.provider) ||
-          fields.idToken
-        ) {
+        const providers: readonly string[] = configuredProviders(env);
+        if (typeof fields.provider !== "string" || !providers.includes(fields.provider) || fields.idToken) {
           throw new APIError("BAD_REQUEST", {
             message: "Use a configured provider authorization to link an account.",
           });

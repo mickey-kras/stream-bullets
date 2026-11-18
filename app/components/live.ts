@@ -3,6 +3,7 @@ import { catch as fallback, z } from "zod";
 import { MASH_PHASES, OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES, OVERLAY_SOURCES } from "../../db/enums";
 import { storedLayersSchema } from "../lib/overlay-layers";
 import type { LiveSnapshot, MashTick, OverlayPublic } from "../types";
+import { detached } from "../lib/detached";
 
 const count = z.number().int().nonnegative();
 const time = z.number().int().nullable();
@@ -342,7 +343,7 @@ export function useLiveRevalidation(
       timer.current = null;
       const jitter: number = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
       next.current = Date.now() + REVALIDATE_INTERVAL_MS + jitter * REVALIDATE_JITTER_MS;
-      void latest.current();
+      detached(latest.current());
     }, delay);
   }, [status, revision, enabled]);
   const disconnected: boolean = enabled && status !== "live";

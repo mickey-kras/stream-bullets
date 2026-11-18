@@ -14,6 +14,7 @@ import { SignIn } from "../shell/sign-in-dialog";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { useToast } from "../ui/toast";
+import { detached } from "../../lib/detached";
 
 /** One platform as GET /api/channels and the overlay-control loader list it. */
 export interface ChannelView {
@@ -178,7 +179,7 @@ export function ChannelPanel({
     resultShown.current = true;
     document.getElementById("channels-title")?.scrollIntoView({ block: "start" });
     banner.current?.focus();
-    void navigate(location.pathname, { replace: true, preventScrollReset: true });
+    detached(navigate(location.pathname, { replace: true, preventScrollReset: true }));
   }, [initialResult, location.pathname, navigate]);
 
   // Coming back to the page from the back-forward cache (after the provider) must not leave buttons disabled.
@@ -251,7 +252,7 @@ export function ChannelPanel({
       });
       setFocusConnect(platform);
       setConfirming(null);
-      void revalidator.revalidate();
+      detached(revalidator.revalidate());
     } catch (error: unknown) {
       setConfirming(null);
       failed(error);
@@ -259,7 +260,7 @@ export function ChannelPanel({
       // connection, so focus moves to its Connect button as after a disconnect.
       if (error instanceof ApiError && (error.status === 404 || error.status === 409)) {
         if (error.status === 404) setFocusConnect(platform);
-        void revalidator.revalidate();
+        detached(revalidator.revalidate());
       }
     } finally {
       setBusy(null);
