@@ -4,10 +4,12 @@ import { EMOTE_HOSTS } from "../lib/activity";
 
 export class HttpError extends Error {
   // `code` is a stable, machine-readable reason (for example `step_up_required`) sent next to the message.
+  // `details` holds values for that code (for example `retryAt`), so the client can format them.
   constructor(
     public readonly status: number,
     message: string,
     public readonly code?: string,
+    public readonly details?: Readonly<Record<string, string>>,
   ) {
     super(message);
   }
@@ -135,7 +137,11 @@ export function logError(event: string, error: unknown, request?: Request, reque
 export function errorResponse(error: unknown, request?: Request, requestId?: string): Response {
   if (error instanceof HttpError) {
     const response = json(
-      error.code ? { error: error.message, code: error.code } : { error: error.message },
+      {
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.details ? { details: error.details } : {}),
+      },
       error.status,
     );
     if (error.status === 429) response.headers.set("Retry-After", "60");

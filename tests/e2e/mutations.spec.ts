@@ -70,7 +70,7 @@ test("selected poll data stays current and failed votes leave controls usable", 
   });
   const first = page.getByRole("button", { name: /^First/ });
   await first.click();
-  await expect(page.locator(".page-error")).toHaveText("Vote unavailable");
+  await expect(page.locator(".page-error")).toHaveText("The request failed. Please try again.");
   await expect(first).toBeEnabled();
   await page.unroute("**/api/streamers/test_host");
   await first.click();

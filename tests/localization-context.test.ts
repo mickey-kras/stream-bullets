@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, errorMessage } from "../app/components/api";
+import { ApiError, apiError, errorMessage } from "../app/components/api";
 import { ceremonyError, errorText } from "../app/components/admin/webauthn";
 import { environment, switchTemplate } from "../app/components/ideas/idea-dialog";
 import { LOCALES, intlLocale, loadCatalog, setLocaleSource, t, tn, type Locale } from "../app/i18n";
 import { BUG_TEMPLATES } from "../app/lib/bug-templates";
 import { isUntouchedTemplate } from "../app/lib/ideas";
+import { HttpError, errorResponse } from "../app/server/http.server";
 
 afterEach((): void => {
   vi.unstubAllGlobals();
@@ -54,12 +55,69 @@ describe("localized participation", (): void => {
     expect(error).toMatchObject({ status: 429, code: "rate_limited" });
     expect(errorMessage(new TypeError("Failed to fetch"))).toBe(t("common.failed"));
     expect(errorMessage(new ApiError("Unexpected server detail", 502, null))).toBe(t("common.failed"));
-    expect(errorMessage(new ApiError("Unknown reason", 400, "future_code"))).toBe(t("error.invalid"));
+    expect(errorMessage(new ApiError("Upload a logo first.", 400, "future_code"))).toBe(t("error.invalid"));
+    expect(errorMessage(new ApiError("Only the owner can do this.", 403, null))).toBe(t("error.forbidden"));
+    expect(errorMessage(new ApiError("Unknown client error.", 418, null))).toBe(t("common.failed"));
     const taken = new ApiError("This handle is already in use.", 409, "handle_taken");
     expect(errorMessage(taken)).toBe(t("error.handleTaken"));
     expect(errorText(taken)).toBe(t("error.handleTaken"));
     expect(ceremonyError(new ApiError("Add another key first.", 409, "last_key"))).toBe(t("keys.onlyKey"));
     expect(errorMessage(new ApiError("Fill in the template.", 400, "bug_template_empty"))).toBe(t("ideas.form.fillTemplate"));
     expect(errorMessage(new ApiError("Invalid date.", 400, "invalid_schedule_date"))).toBe(t("error.scheduleDate"));
+  });
+
+  it.each(LOCALES)("%s preserves actionable cooldown and moderation errors", async (locale: Locale): Promise<void> => {
+    await loadCatalog(locale);
+    setLocaleSource((): Locale => locale);
+    const response: Response = errorResponse(
+      new HttpError(409, "Wait before changing your handle.", "handle_cooldown", {
+        retryAt: "2026-12-13T08:30:00.000Z",
+      }),
+    );
+    const body: unknown = await response.json();
+    expect(body).toEqual({
+      error: "Wait before changing your handle.",
+      code: "handle_cooldown",
+      details: { retryAt: "2026-12-13T08:30:00.000Z" },
+    });
+    const error: ApiError = apiError(response.status, body, "Failed");
+    const date: string = new Intl.DateTimeFormat(intlLocale(), { dateStyle: "long", timeZone: "UTC" }).format(
+      new Date("2026-12-13"),
+    );
+    expect(errorMessage(error)).toBe(t("error.handleCooldownDate", { date }));
+    expect(errorMessage(error)).toContain(date);
+    expect(errorMessage(error)).not.toBe(t("error.conflict"));
+    expect(errorMessage(new ApiError("Cooldown", 409, "handle_cooldown", { retryAt: "invalid" }))).toBe(
+      t("error.handleCooldown"),
+    );
+    expect(errorMessage(new ApiError("Cooldown", 409, "handle_cooldown"))).toBe(t("error.handleCooldown"));
+    expect(errorMessage(new ApiError("Frozen", 423, "page_frozen"))).toBe(t("error.pageFrozen"));
+    expect(errorMessage(new ApiError("Suspended", 423, "page_suspended"))).toBe(t("error.pageSuspended"));
+    expect(errorMessage(new ApiError("Locked", 423, null))).toBe(t("error.pageLocked"));
+    expect(errorMessage(new ApiError("English server detail", 429, "rate_limited"))).toBe(t("error.rateLimit"));
+    expect(errorMessage(new ApiError("Internal service detail", 503, "unknown_failure"))).toBe(t("common.failed"));
+    expect(errorMessage(new ApiError("Not JSON", 200, null))).toBe(t("common.failed"));
+  });
+
+  it("keeps actionable unmapped client errors in English", (): void => {
+    expect(errorMessage(new ApiError("Upload a logo first.", 400, "future_code"))).toBe("Upload a logo first.");
+    expect(errorMessage(new ApiError("Only the owner can do this.", 403, null))).toBe("Only the owner can do this.");
+    expect(errorMessage(new ApiError("", 400, null))).toBe(t("common.failed"));
+  });
+
+  it("reads only string details from an error body and sends none without them", async (): Promise<void> => {
+    const error: ApiError = apiError(
+      409,
+      { error: "Wait.", code: "x", details: { retryAt: "soon", count: 3 } },
+      "Failed",
+    );
+    expect(error.details).toEqual({ retryAt: "soon" });
+    expect(apiError(409, { error: "Wait.", details: "text" }, "Failed").details).toEqual({});
+    expect(apiError(500, null, "Failed")).toMatchObject({ message: "Failed", code: null, details: {} });
+    expect(await errorResponse(new HttpError(423, "Frozen.", "page_frozen")).json()).toEqual({
+      error: "Frozen.",
+      code: "page_frozen",
+    });
+    expect(await errorResponse(new HttpError(404, "Not found.")).json()).toEqual({ error: "Not found." });
   });
 });

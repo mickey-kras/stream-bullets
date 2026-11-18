@@ -297,8 +297,13 @@ function handleConflict(error: unknown): never {
 function handleChange(current: typeof streamers.$inferSelect, handle: string | undefined, now: number): number | null {
   if (handle === undefined || handle === current.handle) return current.handleChangedAt;
   if (current.handleChangedAt !== null && now - current.handleChangedAt < HANDLE_CHANGE_INTERVAL) {
-    const next = new Date(current.handleChangedAt + HANDLE_CHANGE_INTERVAL).toISOString().slice(0, 10);
-    throw new HttpError(409, `You can change your handle once every 30 days. Try again on ${next}.`);
+    const retryAt = new Date(current.handleChangedAt + HANDLE_CHANGE_INTERVAL).toISOString();
+    throw new HttpError(
+      409,
+      `You can change your handle once every 30 days. Try again on ${retryAt.slice(0, 10)}.`,
+      "handle_cooldown",
+      { retryAt },
+    );
   }
   return now;
 }

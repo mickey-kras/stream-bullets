@@ -296,7 +296,10 @@ describe("edit your page", (): void => {
     expect((await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_tv" } })).status).toBe(200);
     const tooSoon = await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_again" } });
     expect(tooSoon.status).toBe(409);
-    expect((await tooSoon.json<{ error: string }>()).error).toMatch(/once every 30 days/u);
+    const refusal = await tooSoon.json<{ error: string; code: string; details: { retryAt: string } }>();
+    expect(refusal.error).toMatch(/once every 30 days/u);
+    expect(refusal.code).toBe("handle_cooldown");
+    expect(Date.parse(refusal.details.retryAt)).toBe((streamer.handleChangedAt ?? 0) + 30 * day);
     vi.spyOn(Date, "now").mockReturnValue((streamer.handleChangedAt ?? 0) + 31 * day);
     expect((await call("PATCH", "streamer", { user: "owner", body: { handle: "streambullets" } })).status).toBe(409);
     expect((await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_again" } })).status).toBe(200);
