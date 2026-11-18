@@ -21,6 +21,18 @@ They never read or change the `account` table of Better Auth or the linked login
 9. For YouTube, the `ChannelIngest` object reads the live chat with a poll while a consumer listens.
 10. Consumers connect to `/api/activity/:handle` with a WebSocket. They get a snapshot first. Live events come next.
 
+Connect, reconnect, and disconnect need a sign-in from the last 10 minutes.
+With an older session, the card of the platform shows a prompt. It names the platform and the sign-in provider of the account.
+The sign-in sends no age confirmation and no display name. The server reads them only when it creates an account.
+
+Before the browser goes to the sign-in provider, the page stores the platform and the action in the session storage of the tab.
+After the sign-in, the page reads this value once and removes it. A value older than 10 minutes does nothing.
+
+The value also holds the handle of the page. A value for a different page does nothing.
+A connect then continues to the platform without a second click. For a disconnect, its button gets focus.
+
+The address never carries this value. Thus a link from another site cannot start a connect.
+
 The code is in these files:
 
 | Part | File |
@@ -106,7 +118,8 @@ The playground runs only while at least one characters socket is open. See [Inte
 | Source time | Message timestamp header | `publishedAt` | `created_at` |
 
 The constant `PLATFORM_CAPABILITIES` in `app/lib/activity.ts` holds this matrix.
-The controls show the gaps for each platform.
+Each card in the controls shows one sentence: when chat starts for that platform.
+A closed details part of each card lists the data that the feed reads, the limits, and the gaps.
 
 Note 1: the YouTube documentation lists the `tombstone` type but does not describe it in detail.
 The feed treats a `tombstone` item as a deletion of the message with the same ID.

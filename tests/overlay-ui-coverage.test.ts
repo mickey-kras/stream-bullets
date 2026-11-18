@@ -1,6 +1,8 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
+import { ChannelPanel, type ChannelView } from "../app/components/channels/channel-panel";
 import { controlState, defaultRef, OverlayControl } from "../app/components/overlay/overlay-control";
 import { ChatLayer, shortName } from "../app/components/overlay/chat-layer";
 import { CharactersSlot, CONTENT_SELECTOR, layerSelector } from "../app/components/overlay/overlay-composition";
@@ -299,5 +301,79 @@ describe("chat overlap measurements", () => {
     expect(chatCoversContent(composition(rect(249, 0, 100, 100), content))).toBe(false);
     expect(chatCoversContent(composition(rect(248, 0, 100, 100), content))).toBe(true);
     expect(chatCoversContent(composition(rect(0, 249, 100, 100), content))).toBe(false);
+  });
+});
+
+describe("the channel cards", (): void => {
+  const offered: ChannelView[] = [
+    { platform: "twitch", available: true, connection: null },
+    { platform: "youtube", available: true, connection: null },
+    { platform: "kick", available: true, connection: null },
+  ];
+  function cards(channels: ChannelView[]): string[] {
+    const Stub = createRoutesStub([
+      {
+        path: "/overlay-control",
+        Component: () =>
+          createElement(ChannelPanel, { channels, providers: ["google"], signInProvider: "google", result: null }),
+      },
+    ]);
+    const markup: string = renderToStaticMarkup(createElement(Stub, { initialEntries: ["/overlay-control"] }));
+    return markup.split('<li class="ch-item"').slice(1);
+  }
+
+  it("show the name and status, one sentence, the button, and then closed notes", (): void => {
+    const [twitch, youtube, kick] = cards(offered);
+    for (const card of [twitch, youtube, kick]) {
+      // Four parts in one order, so the buttons of the cards are on one line.
+      expect(card.match(/class="ch-(head|body|actions|foot)"/g)).toEqual([
+        'class="ch-head"',
+        'class="ch-body"',
+        'class="ch-actions"',
+        'class="ch-foot"',
+      ]);
+      expect(card.match(/<details/g)).toHaveLength(1);
+      expect(card).toContain('<details class="ch-more"><summary>What is read and the limits</summary>');
+      expect(card).not.toContain("<details open");
+      expect(card).not.toContain("ch-reauth");
+    }
+    expect(twitch).toContain('<div class="ch-body"><p>Chat starts as soon as the channel is connected.</p></div>');
+    expect(youtube).toContain(
+      '<div class="ch-body"><p>Chat starts when an overlay with your overlay link is open.</p></div>',
+    );
+    expect(kick).toContain('<div class="ch-body"><p>Chat starts as soon as the channel is connected.</p></div>');
+    expect(twitch).toContain(
+      "<ul><li>Read: chat messages, message deletions, chat clears, bans and timeouts.</li>" +
+        "<li>Twitch emotes show as images.</li>" +
+        "<li>If Twitch stops sending events, reconnect the channel to resume.</li></ul>",
+    );
+    expect(youtube).toContain(
+      "<ul><li>Read: chat messages, message deletions, bans and timeouts.</li>" +
+        "<li>Each page can show about 100 minutes of YouTube chat a day. If the channel data cannot be refreshed " +
+        "for 30 days, the connection is removed.</li>" +
+        "<li>YouTube does not report chat clears or unbans.</li></ul>",
+    );
+    expect(kick).toContain(
+      "<ul><li>Read: chat messages, bans and timeouts.</li>" +
+        "<li>Kick emotes show as their names, not as images.</li>" +
+        "<li>Kick does not report message deletions, chat clears or unbans.</li></ul>",
+    );
+  });
+
+  it("keep the YouTube terms sentence in view beside the YouTube button only", (): void => {
+    const [twitch, youtube, kick] = cards(offered);
+    const terms: string = "By connecting YouTube, you agree to the YouTube Terms of Service.";
+    expect(youtube.indexOf(terms)).toBeGreaterThan(youtube.indexOf('class="ch-actions"'));
+    expect(youtube.indexOf(terms)).toBeLessThan(youtube.indexOf("Connect YouTube"));
+    expect(youtube.indexOf("Connect YouTube")).toBeLessThan(youtube.indexOf("<details"));
+    expect(twitch).not.toContain(terms);
+    expect(kick).not.toContain(terms);
+  });
+
+  it("give a platform that the site does not offer no button and no notes", (): void => {
+    const [twitch] = cards([{ platform: "twitch", available: false, connection: null }]);
+    expect(twitch).toContain("This platform is not set up on this site yet.");
+    expect(twitch).not.toContain("<button");
+    expect(twitch).not.toContain("<details");
   });
 });

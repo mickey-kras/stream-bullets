@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { problemRole, resultMessage, statusMessage, type ChannelView } from "../app/components/channels/channel-panel";
+import {
+  parseIntent,
+  problemRole,
+  resultMessage,
+  statusMessage,
+  type ChannelView,
+} from "../app/components/channels/channel-panel";
 import { channelsStartOpen, channelsSummary } from "../app/components/channels/channels-step";
 import { CHANNEL_STATUS_CODES, CONNECT_RESULTS, type ActivityPlatform } from "../app/lib/activity";
 
@@ -100,5 +106,45 @@ describe("statusMessage", (): void => {
     expect(statusMessage(connection("error", "something_new"), null, "kick")).toBe(
       "This channel has a problem. Reconnect to try again.",
     );
+  });
+});
+
+describe("parseIntent", (): void => {
+  const now: number = 1_800_000_000_000;
+  const stored = (value: unknown): string =>
+    JSON.stringify(typeof value === "object" && value !== null ? { owner: "owner_page", ...value } : value);
+
+  it("reads a recent intent for a known platform and action", (): void => {
+    expect(parseIntent(stored({ platform: "twitch", action: "connect", at: now - 1000 }), now, "owner_page")).toEqual({
+      platform: "twitch",
+      action: "connect",
+    });
+    expect(parseIntent(stored({ platform: "kick", action: "disconnect", at: now }), now, "owner_page")).toEqual({
+      platform: "kick",
+      action: "disconnect",
+    });
+  });
+
+  it("refuses an intent of another page owner, and each intent when no owner is signed in", (): void => {
+    const raw: string = stored({ platform: "twitch", action: "connect", at: now });
+    expect(parseIntent(raw, now, "other_page")).toBeNull();
+    expect(parseIntent(raw, now, null)).toBeNull();
+    expect(parseIntent(JSON.stringify({ platform: "twitch", action: "connect", at: now }), now, "owner_page")).toBeNull();
+  });
+
+  it("refuses an old intent, a future one, and one without a time", (): void => {
+    expect(parseIntent(stored({ platform: "twitch", action: "connect", at: now - 10 * 60 * 1000 - 1 }), now, "owner_page")).toBeNull();
+    expect(parseIntent(stored({ platform: "twitch", action: "connect", at: now + 1 }), now, "owner_page")).toBeNull();
+    expect(parseIntent(stored({ platform: "twitch", action: "connect" }), now, "owner_page")).toBeNull();
+  });
+
+  it("refuses unknown platforms and actions, and values that are not an intent", (): void => {
+    expect(parseIntent(stored({ platform: "tiktok", action: "connect", at: now }), now, "owner_page")).toBeNull();
+    expect(parseIntent(stored({ platform: "constructor", action: "connect", at: now }), now, "owner_page")).toBeNull();
+    expect(parseIntent(stored({ platform: "twitch", action: "reconnect", at: now }), now, "owner_page")).toBeNull();
+    expect(parseIntent(stored("twitch"), now, "owner_page")).toBeNull();
+    expect(parseIntent(stored(null), now, "owner_page")).toBeNull();
+    expect(parseIntent("{", now, "owner_page")).toBeNull();
+    expect(parseIntent(null, now, "owner_page")).toBeNull();
   });
 });
