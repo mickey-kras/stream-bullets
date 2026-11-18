@@ -14,6 +14,7 @@ import { providerName, Reauthenticate } from "../shell/sign-in-dialog";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { useToast } from "../ui/toast";
+import { useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
 
 /** One platform as GET /api/channels and the overlay-control loader list it. */
@@ -88,8 +89,8 @@ const INTENT_MS = 10 * 60 * 1000;
  * The intent that the session storage holds, or null for a missing, malformed or old value. The storage belongs
  * to this origin and this tab, so no link from another site can set an intent.
  */
-export function parseIntent(raw: string | null, now: number): ChannelIntent | null {
-  if (raw === null) return null;
+export function parseIntent(raw: string | null, now: number, owner: string | null): ChannelIntent | null {
+  if (raw === null || owner === null) return null;
   let value: unknown;
   try {
     value = JSON.parse(raw);
@@ -97,27 +98,30 @@ export function parseIntent(raw: string | null, now: number): ChannelIntent | nu
     return null;
   }
   if (typeof value !== "object" || value === null) return null;
-  const { platform, action, at } = value as Record<string, unknown>;
+  const { platform, action, at, owner: storedOwner } = value as Record<string, unknown>;
+  // Another account can sign in during the prompt. Its page must not get the channel of the first owner.
+  if (storedOwner !== owner) return null;
   if (typeof platform !== "string" || !isPlatform(platform)) return null;
   if (action !== "connect" && action !== "disconnect") return null;
   if (typeof at !== "number" || at > now || now - at > INTENT_MS) return null;
   return { platform, action };
 }
 
-function rememberIntent(intent: ChannelIntent): void {
+function rememberIntent(intent: ChannelIntent, owner: string | null): void {
+  if (owner === null) return;
   try {
-    sessionStorage.setItem(INTENT_KEY, JSON.stringify({ ...intent, at: Date.now() }));
+    sessionStorage.setItem(INTENT_KEY, JSON.stringify({ ...intent, owner, at: Date.now() }));
   } catch {
     // Without storage, the owner selects the button again after the sign-in.
   }
 }
 
 /** Reads the intent once: a reload does not take it up again. */
-function takeIntent(): ChannelIntent | null {
+function takeIntent(owner: string | null): ChannelIntent | null {
   try {
     const raw: string | null = sessionStorage.getItem(INTENT_KEY);
     sessionStorage.removeItem(INTENT_KEY);
-    return parseIntent(raw, Date.now());
+    return parseIntent(raw, Date.now(), owner);
   } catch {
     return null;
   }
@@ -212,6 +216,8 @@ export function ChannelPanel({
   result: string | null;
 }>): ReactNode {
   const toast = useToast();
+  // The page that gets the channel. A stored intent is valid only for this owner.
+  const owner: string | null = useShell().ownStreamer?.handle ?? null;
   const revalidator = useRevalidator();
   const navigate = useNavigate();
   const location = useLocation();
@@ -302,13 +308,18 @@ export function ChannelPanel({
   useEffect((): void => {
     if (resumed.current) return;
     resumed.current = true;
-    const intent: ChannelIntent | null = takeIntent();
+    const intent: ChannelIntent | null = takeIntent(owner);
     const channel = intent && channels.find((item: ChannelView): boolean => item.platform === intent.platform);
     if (!intent || !channel?.available || initialResult) return;
     const details: HTMLDetailsElement | null | undefined = panel.current?.closest("details");
     if (details) details.open = true;
-    if (intent.action === "connect") void connect(intent.platform, channel.connection !== null);
-    else panel.current?.querySelector<HTMLElement>(`[data-channel="${intent.platform}"] [data-disconnect]`)?.focus();
+    // After the effect: the connect sets the busy state.
+    if (intent.action === "connect") {
+      const reconnect: boolean = channel.connection !== null;
+      queueMicrotask((): void => detached(connect(intent.platform, reconnect)));
+    } else {
+      panel.current?.querySelector<HTMLElement>(`[data-channel="${intent.platform}"] [data-disconnect]`)?.focus();
+    }
   });
 
   async function disconnect(platform: ActivityPlatform): Promise<void> {
@@ -444,7 +455,7 @@ export function ChannelPanel({
                     <Reauthenticate
                       providers={signInProviders}
                       callbackURL="/overlay-control"
-                      onStart={() => rememberIntent(reauth)}
+                      onStart={() => rememberIntent(reauth, owner)}
                     />
                   </div>
                 )}

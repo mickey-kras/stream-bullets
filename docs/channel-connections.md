@@ -27,6 +27,7 @@ The sign-in sends no age confirmation and no display name. The server reads them
 
 Before the browser goes to the sign-in provider, the page stores the platform and the action in the session storage of the tab.
 After the sign-in, the page reads this value once and removes it. A value older than 10 minutes does nothing.
+The value also holds the handle of the page. A value for a different page does nothing.
 A connect then continues to the platform without a second click. For a disconnect, its button gets focus.
 
 The address never carries this value. Thus a link from another site cannot start a connect.
@@ -117,7 +118,7 @@ The playground runs only while at least one characters socket is open. See [Inte
 
 The constant `PLATFORM_CAPABILITIES` in `app/lib/activity.ts` holds this matrix.
 Each card in the controls shows one sentence: when chat starts for that platform.
-A closed **What is read and the limits** part of each card lists what the feed reads, the limits, and the gaps.
+A closed details part of each card lists the data that the feed reads, the limits, and the gaps.
 
 Note 1: the YouTube documentation lists the `tombstone` type but does not describe it in detail.
 The feed treats a `tombstone` item as a deletion of the message with the same ID.

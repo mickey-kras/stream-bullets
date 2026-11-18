@@ -4641,7 +4641,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L214",
+      "source_location": "L218",
       "target": "app_components_ui_toast_usetoast",
       "weight": 1.0
     },
@@ -4653,7 +4653,19 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L233",
+      "source_location": "L220",
+      "target": "app_lib_shell_useshell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_channels_channel_panel_channelpanel",
+      "source_file": "app/components/channels/channel-panel.tsx",
+      "source_location": "L239",
       "target": "app_components_channels_channel_panel_usehydrated",
       "weight": 1.0
     },
@@ -4665,7 +4677,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L243",
+      "source_location": "L249",
       "target": "app_lib_detached_detached",
       "weight": 1.0
     },
@@ -4677,7 +4689,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L281",
+      "source_location": "L287",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -4689,7 +4701,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L305",
+      "source_location": "L311",
       "target": "app_components_channels_channel_panel_takeintent",
       "weight": 1.0
     },
@@ -4701,7 +4713,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L310",
+      "source_location": "L319",
       "target": "app_components_channels_channel_panel_channelpanel_connect",
       "weight": 1.0
     },
@@ -4713,7 +4725,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L322",
+      "source_location": "L333",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4725,7 +4737,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L349",
+      "source_location": "L360",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -4737,7 +4749,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L370",
+      "source_location": "L381",
       "target": "app_components_channels_channel_panel_quotaresettext",
       "weight": 1.0
     },
@@ -4749,7 +4761,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L371",
+      "source_location": "L382",
       "target": "app_components_channels_channel_panel_statusmessage",
       "weight": 1.0
     },
@@ -4761,7 +4773,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L385",
+      "source_location": "L396",
       "target": "app_components_channels_channel_panel_lastactivity",
       "weight": 1.0
     },
@@ -4773,7 +4785,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L388",
+      "source_location": "L399",
       "target": "app_components_channels_channel_panel_problemrole",
       "weight": 1.0
     },
@@ -4785,7 +4797,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L389",
+      "source_location": "L400",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -4797,7 +4809,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L444",
+      "source_location": "L455",
       "target": "app_components_shell_sign_in_dialog_reauthenticate",
       "weight": 1.0
     },
@@ -4809,7 +4821,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L447",
+      "source_location": "L458",
       "target": "app_components_channels_channel_panel_rememberintent",
       "weight": 1.0
     },
@@ -4821,7 +4833,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L466",
+      "source_location": "L477",
       "target": "app_components_ui_dialog_dialog",
       "weight": 1.0
     },
@@ -4833,7 +4845,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L475",
+      "source_location": "L486",
       "target": "app_components_ui_dialog_dialogactions",
       "weight": 1.0
     },
@@ -4845,7 +4857,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L480",
+      "source_location": "L491",
       "target": "app_components_channels_channel_panel_channelpanel_disconnect",
       "weight": 1.0
     },
@@ -4857,7 +4869,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_connect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L295",
+      "source_location": "L301",
       "target": "app_components_channels_channel_panel_channelpanel_failed",
       "weight": 1.0
     },
@@ -4869,7 +4881,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_disconnect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L322",
+      "source_location": "L333",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4881,7 +4893,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_disconnect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L330",
+      "source_location": "L341",
       "target": "app_components_channels_channel_panel_channelpanel_focusconnectafterreload",
       "weight": 1.0
     },
@@ -4893,7 +4905,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_disconnect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L332",
+      "source_location": "L343",
       "target": "app_lib_detached_detached",
       "weight": 1.0
     },
@@ -4905,7 +4917,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_disconnect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L335",
+      "source_location": "L346",
       "target": "app_components_channels_channel_panel_channelpanel_failed",
       "weight": 1.0
     },
@@ -4917,7 +4929,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_failed",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L281",
+      "source_location": "L287",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -4929,7 +4941,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_lastactivity",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L191",
+      "source_location": "L195",
       "target": "app_components_channels_channel_panel_usehydrated",
       "weight": 1.0
     },
@@ -4941,7 +4953,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_lastactivity",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L192",
+      "source_location": "L196",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4953,7 +4965,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_lastactivity",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L194",
+      "source_location": "L198",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -4965,7 +4977,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_parseintent",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L101",
+      "source_location": "L104",
       "target": "app_components_channels_channel_panel_isplatform",
       "weight": 1.0
     },
@@ -4977,7 +4989,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_quotaresettext",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L183",
+      "source_location": "L187",
       "target": "app_lib_activity_quotaday",
       "weight": 1.0
     },
@@ -4989,7 +5001,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_quotaresettext",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L185",
+      "source_location": "L189",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -5001,7 +5013,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_resultmessage",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L132",
+      "source_location": "L136",
       "target": "app_components_channels_channel_panel_isplatform",
       "weight": 1.0
     },
@@ -5013,7 +5025,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_resultmessage",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L133",
+      "source_location": "L137",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -5025,7 +5037,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_statusmessage",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L149",
+      "source_location": "L153",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -5037,7 +5049,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_takeintent",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L120",
+      "source_location": "L124",
       "target": "app_components_channels_channel_panel_parseintent",
       "weight": 1.0
     },
@@ -52487,7 +52499,7 @@
       "relation": "references",
       "source": "app_components_channels_channel_panel_channelintent",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L79",
+      "source_location": "L80",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -52499,7 +52511,7 @@
       "relation": "references",
       "source": "app_components_channels_channel_panel_channelview",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -52511,7 +52523,7 @@
       "relation": "references",
       "source": "app_components_channels_channel_panel_channelview",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_lib_activity_channelstatus",
       "weight": 1.0
     },
@@ -57399,6 +57411,18 @@
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
       "source_location": "L17",
+      "target": "app_lib_shell_useshell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_channels_channel_panel",
+      "source_file": "app/components/channels/channel-panel.tsx",
+      "source_location": "L18",
       "target": "app_lib_detached_detached",
       "weight": 1.0
     },
@@ -105583,6 +105607,18 @@
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
       "source_location": "L17",
+      "target": "app_lib_shell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_channels_channel_panel",
+      "source_file": "app/components/channels/channel-panel.tsx",
+      "source_location": "L18",
       "target": "app_lib_detached",
       "weight": 1.0
     },
@@ -136072,7 +136108,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L107",
+      "source_location": "L110",
       "target": "app_components_channels_channel_panel_rememberintent",
       "weight": 1.0
     },
@@ -136083,7 +136119,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L116",
+      "source_location": "L120",
       "target": "app_components_channels_channel_panel_takeintent",
       "weight": 1.0
     },
@@ -136094,7 +136130,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L126",
+      "source_location": "L130",
       "target": "app_components_channels_channel_panel_isplatform",
       "weight": 1.0
     },
@@ -136105,7 +136141,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L131",
+      "source_location": "L135",
       "target": "app_components_channels_channel_panel_resultmessage",
       "weight": 1.0
     },
@@ -136116,7 +136152,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L141",
+      "source_location": "L145",
       "target": "app_components_channels_channel_panel_statusmessage",
       "weight": 1.0
     },
@@ -136127,7 +136163,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L160",
+      "source_location": "L164",
       "target": "app_components_channels_channel_panel_nosubscription",
       "weight": 1.0
     },
@@ -136138,7 +136174,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L165",
+      "source_location": "L169",
       "target": "app_components_channels_channel_panel_usehydrated",
       "weight": 1.0
     },
@@ -136149,7 +136185,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L174",
+      "source_location": "L178",
       "target": "app_components_channels_channel_panel_problemrole",
       "weight": 1.0
     },
@@ -136160,7 +136196,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L182",
+      "source_location": "L186",
       "target": "app_components_channels_channel_panel_quotaresettext",
       "weight": 1.0
     },
@@ -136171,7 +136207,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L190",
+      "source_location": "L194",
       "target": "app_components_channels_channel_panel_lastactivity",
       "weight": 1.0
     },
@@ -136182,18 +136218,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L20",
-      "target": "app_components_channels_channel_panel_channelview",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_channels_channel_panel",
-      "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L203",
+      "source_location": "L207",
       "target": "app_components_channels_channel_panel_channelpanel",
       "weight": 1.0
     },
@@ -136204,7 +136229,18 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L34",
+      "source_location": "L21",
+      "target": "app_components_channels_channel_panel_channelview",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_channels_channel_panel",
+      "source_file": "app/components/channels/channel-panel.tsx",
+      "source_location": "L35",
       "target": "app_components_channels_channel_panel_platform_names",
       "weight": 1.0
     },
@@ -136215,7 +136251,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "target": "app_components_channels_channel_panel_result_messages",
       "weight": 1.0
     },
@@ -136226,7 +136262,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "target": "app_components_channels_channel_panel_status_messages",
       "weight": 1.0
     },
@@ -136237,7 +136273,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L64",
+      "source_location": "L65",
       "target": "app_components_channels_channel_panel_starts",
       "weight": 1.0
     },
@@ -136248,7 +136284,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L71",
+      "source_location": "L72",
       "target": "app_components_channels_channel_panel_notes",
       "weight": 1.0
     },
@@ -136259,7 +136295,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "app_components_channels_channel_panel_channelintent",
       "weight": 1.0
     },
@@ -136270,7 +136306,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L91",
+      "source_location": "L92",
       "target": "app_components_channels_channel_panel_parseintent",
       "weight": 1.0
     },
@@ -136281,7 +136317,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L248",
+      "source_location": "L254",
       "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
@@ -136292,7 +136328,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L274",
+      "source_location": "L280",
       "target": "app_components_channels_channel_panel_channelpanel_focusconnectafterreload",
       "weight": 1.0
     },
@@ -136303,7 +136339,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L279",
+      "source_location": "L285",
       "target": "app_components_channels_channel_panel_channelpanel_failed",
       "weight": 1.0
     },
@@ -136314,7 +136350,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L284",
+      "source_location": "L290",
       "target": "app_components_channels_channel_panel_channelpanel_connect",
       "weight": 1.0
     },
@@ -136325,7 +136361,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L314",
+      "source_location": "L325",
       "target": "app_components_channels_channel_panel_channelpanel_disconnect",
       "weight": 1.0
     },
@@ -163374,7 +163410,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L104",
+      "source_location": "L105",
       "target": "docs_channel_connections_capability_matrix",
       "weight": 1.0
     },
@@ -163396,7 +163432,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L126",
+      "source_location": "L127",
       "target": "docs_channel_connections_permissions",
       "weight": 1.0
     },
@@ -163407,7 +163443,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L144",
+      "source_location": "L145",
       "target": "docs_channel_connections_limits_and_retention",
       "weight": 1.0
     },
@@ -163418,7 +163454,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L252",
+      "source_location": "L253",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -163429,7 +163465,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L304",
+      "source_location": "L305",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -163440,7 +163476,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L367",
+      "source_location": "L368",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -163451,7 +163487,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L389",
+      "source_location": "L390",
       "target": "docs_channel_connections_overlay_key",
       "weight": 1.0
     },
@@ -163462,7 +163498,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L396",
+      "source_location": "L397",
       "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
@@ -163473,7 +163509,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L424",
+      "source_location": "L425",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -163484,7 +163520,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L442",
+      "source_location": "L443",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -163495,7 +163531,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L47",
+      "source_location": "L48",
       "target": "docs_channel_connections_event_contract",
       "weight": 1.0
     },
@@ -163506,7 +163542,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L480",
+      "source_location": "L481",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -163517,7 +163553,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L491",
+      "source_location": "L492",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -163528,7 +163564,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L548",
+      "source_location": "L549",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -163539,7 +163575,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L585",
+      "source_location": "L586",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -163550,7 +163586,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L330",
+      "source_location": "L331",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -163561,7 +163597,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L343",
+      "source_location": "L344",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -163572,7 +163608,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L351",
+      "source_location": "L352",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -163583,7 +163619,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L80",
+      "source_location": "L81",
       "target": "docs_channel_connections_rules_for_consumers",
       "weight": 1.0
     },
@@ -163594,7 +163630,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L90",
+      "source_location": "L91",
       "target": "docs_channel_connections_overlay_chat",
       "weight": 1.0
     },
@@ -163605,7 +163641,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "docs_channel_connections_interactive_characters",
       "weight": 1.0
     },
@@ -163616,7 +163652,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_limits_and_retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L213",
+      "source_location": "L214",
       "target": "docs_channel_connections_youtube_quota",
       "weight": 1.0
     },
@@ -163627,7 +163663,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L493",
+      "source_location": "L494",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -163638,7 +163674,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L501",
+      "source_location": "L502",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -163649,7 +163685,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L509",
+      "source_location": "L510",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -163660,7 +163696,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L537",
+      "source_location": "L538",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -163671,7 +163707,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L293",
+      "source_location": "L294",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -175074,7 +175110,7 @@
       "relation": "references",
       "source": "docs_channel_connections",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L102",
+      "source_location": "L103",
       "target": "docs_characters",
       "weight": 1.0
     },
@@ -175085,7 +175121,7 @@
       "relation": "references",
       "source": "docs_channel_connections",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L94",
+      "source_location": "L95",
       "target": "docs_overlay_composition",
       "weight": 1.0
     },
@@ -175263,7 +175299,7 @@
       "relation": "indirect_call",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L251",
+      "source_location": "L257",
       "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
@@ -175275,7 +175311,7 @@
       "relation": "indirect_call",
       "source": "app_components_channels_channel_panel_usehydrated",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L167",
+      "source_location": "L171",
       "target": "app_components_channels_channel_panel_nosubscription",
       "weight": 1.0
     },
@@ -177615,7 +177651,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L309",
+      "source_location": "L310",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -177627,7 +177663,7 @@
       "relation": "references",
       "source": "docs_channel_connections_interactive_characters",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L99",
+      "source_location": "L100",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -177639,7 +177675,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L295",
+      "source_location": "L296",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -177651,7 +177687,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L482",
+      "source_location": "L483",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -177663,7 +177699,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L415",
+      "source_location": "L416",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -177675,7 +177711,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L521",
+      "source_location": "L522",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -177855,7 +177891,7 @@
       "relation": "references",
       "source": "docs_channel_connections_event_contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L49",
+      "source_location": "L50",
       "target": "app_lib_activity_parseactivitymessage",
       "weight": 1.0
     },
@@ -177873,10 +177909,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "830ff92d321d9f1cbfff45f94a38feda76b1d73cdcd9faa25ed60b2cfdb9cfd3",
+    "content_sha256": "7de36b351478eff79b14e38f61755ada073f3f001548579e5ee0d8915eb472f3",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "468570b3fde2ef917174cf5b5c34ef3f009cb0095c0bb150a85c601d96945842",
+    "source_sha256": "df89c06361a15a7076d4c5f06acb7312ef647dc91da1767701c43e68e98e9ac2",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -178462,7 +178498,7 @@
       "label": "ChannelIntent",
       "norm_label": "channelintent",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L78"
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -178474,7 +178510,7 @@
       "label": "ChannelView",
       "norm_label": "channelview",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_callable": true,
@@ -185601,7 +185637,7 @@
       "label": "ChannelPanel()",
       "norm_label": "channelpanel()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L203"
+      "source_location": "L207"
     },
     {
       "_callable": true,
@@ -185612,7 +185648,7 @@
       "label": "connect()",
       "norm_label": "connect()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L284"
+      "source_location": "L290"
     },
     {
       "_callable": true,
@@ -185623,7 +185659,7 @@
       "label": "disconnect()",
       "norm_label": "disconnect()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L314"
+      "source_location": "L325"
     },
     {
       "_callable": true,
@@ -185634,7 +185670,7 @@
       "label": "failed()",
       "norm_label": "failed()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L279"
+      "source_location": "L285"
     },
     {
       "_callable": true,
@@ -185645,7 +185681,7 @@
       "label": "focusConnectAfterReload()",
       "norm_label": "focusconnectafterreload()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L274"
+      "source_location": "L280"
     },
     {
       "_callable": true,
@@ -185656,7 +185692,7 @@
       "label": "shown()",
       "norm_label": "shown()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L248"
+      "source_location": "L254"
     },
     {
       "_callable": true,
@@ -185667,7 +185703,7 @@
       "label": "isPlatform()",
       "norm_label": "isplatform()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L126"
+      "source_location": "L130"
     },
     {
       "_callable": true,
@@ -185678,7 +185714,7 @@
       "label": "LastActivity()",
       "norm_label": "lastactivity()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L190"
+      "source_location": "L194"
     },
     {
       "_callable": true,
@@ -185689,7 +185725,7 @@
       "label": "noSubscription()",
       "norm_label": "nosubscription()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L160"
+      "source_location": "L164"
     },
     {
       "_callable": true,
@@ -185700,7 +185736,7 @@
       "label": "parseIntent()",
       "norm_label": "parseintent()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L91"
+      "source_location": "L92"
     },
     {
       "_callable": true,
@@ -185711,7 +185747,7 @@
       "label": "problemRole()",
       "norm_label": "problemrole()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L174"
+      "source_location": "L178"
     },
     {
       "_callable": true,
@@ -185722,7 +185758,7 @@
       "label": "quotaResetText()",
       "norm_label": "quotaresettext()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L182"
+      "source_location": "L186"
     },
     {
       "_callable": true,
@@ -185733,7 +185769,7 @@
       "label": "rememberIntent()",
       "norm_label": "rememberintent()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L107"
+      "source_location": "L110"
     },
     {
       "_callable": true,
@@ -185744,7 +185780,7 @@
       "label": "resultMessage()",
       "norm_label": "resultmessage()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L131"
+      "source_location": "L135"
     },
     {
       "_callable": true,
@@ -185755,7 +185791,7 @@
       "label": "statusMessage()",
       "norm_label": "statusmessage()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L141"
+      "source_location": "L145"
     },
     {
       "_callable": true,
@@ -185766,7 +185802,7 @@
       "label": "takeIntent()",
       "norm_label": "takeintent()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L116"
+      "source_location": "L120"
     },
     {
       "_callable": true,
@@ -185777,7 +185813,7 @@
       "label": "useHydrated()",
       "norm_label": "usehydrated()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L165"
+      "source_location": "L169"
     },
     {
       "_callable": true,
@@ -211922,7 +211958,7 @@
       "label": "NOTES",
       "norm_label": "notes",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L71"
+      "source_location": "L72"
     },
     {
       "_origin": "ast",
@@ -211932,7 +211968,7 @@
       "label": "PLATFORM_NAMES",
       "norm_label": "platform_names",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L34"
+      "source_location": "L35"
     },
     {
       "_origin": "ast",
@@ -211942,7 +211978,7 @@
       "label": "RESULT_MESSAGES",
       "norm_label": "result_messages",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L41"
+      "source_location": "L42"
     },
     {
       "_origin": "ast",
@@ -211952,7 +211988,7 @@
       "label": "STARTS",
       "norm_label": "starts",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L64"
+      "source_location": "L65"
     },
     {
       "_origin": "ast",
@@ -211962,7 +211998,7 @@
       "label": "STATUS_MESSAGES",
       "norm_label": "status_messages",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L53"
+      "source_location": "L54"
     },
     {
       "_origin": "ast",
@@ -224209,7 +224245,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L343"
+      "source_location": "L344"
     },
     {
       "_origin": "ast",
@@ -224220,7 +224256,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L501"
+      "source_location": "L502"
     },
     {
       "_origin": "ast",
@@ -224231,7 +224267,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L493"
+      "source_location": "L494"
     },
     {
       "_origin": "ast",
@@ -224242,7 +224278,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L351"
+      "source_location": "L352"
     },
     {
       "_origin": "ast",
@@ -224253,7 +224289,7 @@
       "node_kind": "heading",
       "norm_label": "capability matrix",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L104"
+      "source_location": "L105"
     },
     {
       "_origin": "ast",
@@ -224286,7 +224322,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L304"
+      "source_location": "L305"
     },
     {
       "_origin": "ast",
@@ -224297,7 +224333,7 @@
       "node_kind": "heading",
       "norm_label": "event contract",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L47"
+      "source_location": "L48"
     },
     {
       "_origin": "ast",
@@ -224308,7 +224344,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L585"
+      "source_location": "L586"
     },
     {
       "_origin": "ast",
@@ -224319,7 +224355,7 @@
       "node_kind": "heading",
       "norm_label": "interactive characters",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L96"
+      "source_location": "L97"
     },
     {
       "_origin": "ast",
@@ -224330,7 +224366,7 @@
       "node_kind": "heading",
       "norm_label": "limits and retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L144"
+      "source_location": "L145"
     },
     {
       "_origin": "ast",
@@ -224341,7 +224377,7 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L367"
+      "source_location": "L368"
     },
     {
       "_origin": "ast",
@@ -224352,7 +224388,7 @@
       "node_kind": "heading",
       "norm_label": "overlay chat",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L90"
+      "source_location": "L91"
     },
     {
       "_origin": "ast",
@@ -224363,7 +224399,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L389"
+      "source_location": "L390"
     },
     {
       "_origin": "ast",
@@ -224374,7 +224410,7 @@
       "node_kind": "heading",
       "norm_label": "permissions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L126"
+      "source_location": "L127"
     },
     {
       "_origin": "ast",
@@ -224385,7 +224421,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L330"
+      "source_location": "L331"
     },
     {
       "_origin": "ast",
@@ -224396,7 +224432,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L293"
+      "source_location": "L294"
     },
     {
       "_origin": "ast",
@@ -224407,7 +224443,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L537"
+      "source_location": "L538"
     },
     {
       "_origin": "ast",
@@ -224418,7 +224454,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L480"
+      "source_location": "L481"
     },
     {
       "_origin": "ast",
@@ -224429,7 +224465,7 @@
       "node_kind": "heading",
       "norm_label": "rules for consumers",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L80"
+      "source_location": "L81"
     },
     {
       "_origin": "ast",
@@ -224440,7 +224476,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L424"
+      "source_location": "L425"
     },
     {
       "_origin": "ast",
@@ -224451,7 +224487,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L396"
+      "source_location": "L397"
     },
     {
       "_origin": "ast",
@@ -224462,7 +224498,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L548"
+      "source_location": "L549"
     },
     {
       "_origin": "ast",
@@ -224473,7 +224509,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L491"
+      "source_location": "L492"
     },
     {
       "_origin": "ast",
@@ -224484,7 +224520,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L509"
+      "source_location": "L510"
     },
     {
       "_origin": "ast",
@@ -224495,7 +224531,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L252"
+      "source_location": "L253"
     },
     {
       "_origin": "ast",
@@ -224506,7 +224542,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L442"
+      "source_location": "L443"
     },
     {
       "_origin": "ast",
@@ -224517,7 +224553,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L213"
+      "source_location": "L214"
     },
     {
       "_origin": "ast",
