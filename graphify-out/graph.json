@@ -4533,7 +4533,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L172",
+      "source_location": "L173",
       "target": "app_components_channels_channel_panel_usehydrated",
       "weight": 1.0
     },
@@ -4545,7 +4545,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L182",
+      "source_location": "L183",
       "target": "app_lib_detached_detached",
       "weight": 1.0
     },
@@ -4557,7 +4557,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L220",
+      "source_location": "L221",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -4569,7 +4569,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L245",
+      "source_location": "L246",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4581,7 +4581,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L282",
+      "source_location": "L283",
       "target": "app_components_shell_sign_in_dialog_signin",
       "weight": 1.0
     },
@@ -4593,7 +4593,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L295",
+      "source_location": "L296",
       "target": "app_components_channels_channel_panel_quotaresettext",
       "weight": 1.0
     },
@@ -4605,7 +4605,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L296",
+      "source_location": "L297",
       "target": "app_components_channels_channel_panel_statusmessage",
       "weight": 1.0
     },
@@ -4617,7 +4617,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L308",
+      "source_location": "L309",
       "target": "app_components_channels_channel_panel_lastactivity",
       "weight": 1.0
     },
@@ -4629,7 +4629,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L311",
+      "source_location": "L312",
       "target": "app_components_channels_channel_panel_problemrole",
       "weight": 1.0
     },
@@ -4641,7 +4641,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L312",
+      "source_location": "L313",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -4653,7 +4653,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L339",
+      "source_location": "L340",
       "target": "app_components_channels_channel_panel_channelpanel_connect",
       "weight": 1.0
     },
@@ -4665,7 +4665,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L361",
+      "source_location": "L365",
       "target": "app_components_ui_dialog_dialog",
       "weight": 1.0
     },
@@ -4677,7 +4677,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L370",
+      "source_location": "L374",
       "target": "app_components_ui_dialog_dialogactions",
       "weight": 1.0
     },
@@ -4689,7 +4689,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L375",
+      "source_location": "L379",
       "target": "app_components_channels_channel_panel_channelpanel_disconnect",
       "weight": 1.0
     },
@@ -4701,7 +4701,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_connect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L233",
+      "source_location": "L234",
       "target": "app_components_channels_channel_panel_channelpanel_failed",
       "weight": 1.0
     },
@@ -4713,7 +4713,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_disconnect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L245",
+      "source_location": "L246",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4725,7 +4725,19 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_disconnect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L255",
+      "source_location": "L254",
+      "target": "app_components_channels_channel_panel_channelpanel_focusconnectafterreload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_channels_channel_panel_channelpanel_disconnect",
+      "source_file": "app/components/channels/channel-panel.tsx",
+      "source_location": "L256",
       "target": "app_lib_detached_detached",
       "weight": 1.0
     },
@@ -4737,7 +4749,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_disconnect",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L258",
+      "source_location": "L259",
       "target": "app_components_channels_channel_panel_channelpanel_failed",
       "weight": 1.0
     },
@@ -4749,7 +4761,7 @@
       "relation": "calls",
       "source": "app_components_channels_channel_panel_channelpanel_failed",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L220",
+      "source_location": "L221",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -134584,7 +134596,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L187",
+      "source_location": "L188",
       "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
@@ -134595,7 +134607,18 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L218",
+      "source_location": "L214",
+      "target": "app_components_channels_channel_panel_channelpanel_focusconnectafterreload",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_channels_channel_panel_channelpanel",
+      "source_file": "app/components/channels/channel-panel.tsx",
+      "source_location": "L219",
       "target": "app_components_channels_channel_panel_channelpanel_failed",
       "weight": 1.0
     },
@@ -134606,7 +134629,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L223",
+      "source_location": "L224",
       "target": "app_components_channels_channel_panel_channelpanel_connect",
       "weight": 1.0
     },
@@ -134617,7 +134640,7 @@
       "relation": "contains",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L238",
+      "source_location": "L239",
       "target": "app_components_channels_channel_panel_channelpanel_disconnect",
       "weight": 1.0
     },
@@ -173269,7 +173292,7 @@
       "relation": "indirect_call",
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L190",
+      "source_location": "L191",
       "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
@@ -175819,10 +175842,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "0b4b195a82a9543e2a44d8883047181e1b5f926fe7a90635d0d8f56f12e27802",
+    "content_sha256": "75dd010358f5437626fdb0fbd754fc2dcf229214cb0200c385cdce35c7462331",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "9d012a1cdf65b846761add0e7d35998dcf6f523b1c9c15fb89aa80c5369b3915",
+    "source_sha256": "e5b61da96fc8529fdd6cf2031e49c0cb2628d3c0108560e7df94c92e260d202d",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -183479,7 +183502,7 @@
       "label": "connect()",
       "norm_label": "connect()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L223"
+      "source_location": "L224"
     },
     {
       "_callable": true,
@@ -183490,7 +183513,7 @@
       "label": "disconnect()",
       "norm_label": "disconnect()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L238"
+      "source_location": "L239"
     },
     {
       "_callable": true,
@@ -183501,7 +183524,18 @@
       "label": "failed()",
       "norm_label": "failed()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L218"
+      "source_location": "L219"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_channels_channel_panel_channelpanel_focusconnectafterreload",
+      "label": "focusConnectAfterReload()",
+      "norm_label": "focusconnectafterreload()",
+      "source_file": "app/components/channels/channel-panel.tsx",
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -183512,7 +183546,7 @@
       "label": "shown()",
       "norm_label": "shown()",
       "source_file": "app/components/channels/channel-panel.tsx",
-      "source_location": "L187"
+      "source_location": "L188"
     },
     {
       "_callable": true,
