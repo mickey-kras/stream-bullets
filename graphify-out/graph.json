@@ -10365,7 +10365,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L192",
+      "source_location": "L190",
       "target": "app_components_overlay_use_chat_overlap_usechatoverlap",
       "weight": 1.0
     },
@@ -10377,7 +10377,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L194",
+      "source_location": "L192",
       "target": "app_lib_overlay_layers_layerpixels",
       "weight": 1.0
     },
@@ -10389,7 +10389,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L199",
+      "source_location": "L197",
       "target": "app_components_overlay_composition_editor_layeroff",
       "weight": 1.0
     },
@@ -10401,7 +10401,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L200",
+      "source_location": "L198",
       "target": "app_components_overlay_overlay_stage_showscontent",
       "weight": 1.0
     },
@@ -10413,7 +10413,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L201",
+      "source_location": "L199",
       "target": "app_i18n_index_taround",
       "weight": 1.0
     },
@@ -10425,7 +10425,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L216",
+      "source_location": "L214",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -10437,7 +10437,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L219",
+      "source_location": "L217",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -10449,7 +10449,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L225",
+      "source_location": "L223",
       "target": "app_components_overlay_step_heading_stepheading",
       "weight": 1.0
     },
@@ -10461,7 +10461,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L267",
+      "source_location": "L265",
       "target": "app_components_overlay_composition_editor_chattest",
       "weight": 1.0
     },
@@ -10473,7 +10473,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L285",
+      "source_location": "L283",
       "target": "app_components_overlay_characters_controls_characterscontrols",
       "weight": 1.0
     },
@@ -10485,7 +10485,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L338",
+      "source_location": "L336",
       "target": "app_components_overlay_layer_palette_layerpalette",
       "weight": 1.0
     },
@@ -10497,7 +10497,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L340",
+      "source_location": "L338",
       "target": "app_components_overlay_layout_grid_layoutgrid",
       "weight": 1.0
     },
@@ -10509,7 +10509,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L352",
+      "source_location": "L350",
       "target": "app_lib_overlay_layers_framesize",
       "weight": 1.0
     },
@@ -10521,7 +10521,7 @@
       "relation": "calls",
       "source": "app_components_overlay_composition_editor_compositioneditor",
       "source_file": "app/components/overlay/composition-editor.tsx",
-      "source_location": "L389",
+      "source_location": "L387",
       "target": "app_components_overlay_composition_editor_editoralert",
       "weight": 1.0
     },
@@ -10749,7 +10749,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L213",
+      "source_location": "L221",
       "target": "app_components_overlay_use_design_scale_usedesignscale",
       "weight": 1.0
     },
@@ -10761,7 +10761,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L215",
+      "source_location": "L223",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -10773,7 +10773,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L241",
+      "source_location": "L249",
       "target": "app_components_overlay_layout_grid_gridhit_3ac12e2e5bff",
       "weight": 1.0
     },
@@ -10785,7 +10785,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L246",
+      "source_location": "L254",
       "target": "app_lib_layer_geometry_handleat",
       "weight": 1.0
     },
@@ -10797,7 +10797,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L251",
+      "source_location": "L259",
       "target": "app_lib_layer_geometry_layerat",
       "weight": 1.0
     },
@@ -10809,7 +10809,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L262",
+      "source_location": "L270",
       "target": "app_lib_layer_geometry_handlelines",
       "weight": 1.0
     },
@@ -10821,7 +10821,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L284",
+      "source_location": "L292",
       "target": "app_components_overlay_layout_grid_dragshape",
       "weight": 1.0
     },
@@ -10833,7 +10833,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L290",
+      "source_location": "L298",
       "target": "app_components_overlay_layout_grid_samerect",
       "weight": 1.0
     },
@@ -10845,7 +10845,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L292",
+      "source_location": "L300",
       "target": "app_components_overlay_layout_grid_belowminimum",
       "weight": 1.0
     },
@@ -10857,7 +10857,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L293",
+      "source_location": "L301",
       "target": "app_components_overlay_layout_grid_name",
       "weight": 1.0
     },
@@ -10869,7 +10869,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L293",
+      "source_location": "L301",
       "target": "app_components_overlay_layout_grid_smalltext",
       "weight": 1.0
     },
@@ -10881,7 +10881,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L296",
+      "source_location": "L304",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -10893,7 +10893,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L298",
+      "source_location": "L306",
       "target": "app_components_overlay_layout_grid_problemtext",
       "weight": 1.0
     },
@@ -10905,7 +10905,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L302",
+      "source_location": "L310",
       "target": "app_components_overlay_layout_grid_placetext",
       "weight": 1.0
     },
@@ -10917,7 +10917,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L345",
+      "source_location": "L353",
       "target": "app_components_overlay_layout_grid_cursortext",
       "weight": 1.0
     },
@@ -10929,7 +10929,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L366",
+      "source_location": "L374",
       "target": "app_lib_layer_geometry_growcell",
       "weight": 1.0
     },
@@ -10941,7 +10941,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L369",
+      "source_location": "L377",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -10953,7 +10953,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L424",
+      "source_location": "L432",
       "target": "app_lib_layer_geometry_firstfreecell",
       "weight": 1.0
     },
@@ -10965,8 +10965,8 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L459",
-      "target": "app_components_overlay_editor_samples_samplecharactersfeed",
+      "source_location": "L466",
+      "target": "app_components_overlay_layout_grid_usesamplecharacters",
       "weight": 1.0
     },
     {
@@ -10977,7 +10977,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L462",
+      "source_location": "L467",
       "target": "app_components_overlay_overlay_stage_showscontent",
       "weight": 1.0
     },
@@ -10989,7 +10989,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L485",
+      "source_location": "L490",
       "target": "app_components_overlay_overlay_composition_framestyle",
       "weight": 1.0
     },
@@ -11001,7 +11001,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L487",
+      "source_location": "L492",
       "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
@@ -11013,7 +11013,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L488",
+      "source_location": "L493",
       "target": "app_components_overlay_editor_samples_samplescene",
       "weight": 1.0
     },
@@ -11025,7 +11025,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L500",
+      "source_location": "L505",
       "target": "app_lib_overlay_layers_cellpixels",
       "weight": 1.0
     },
@@ -11037,7 +11037,7 @@
       "relation": "calls",
       "source": "app_components_overlay_layout_grid_layoutgrid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L509",
+      "source_location": "L514",
       "target": "app_components_overlay_layout_grid_boxstyle",
       "weight": 1.0
     },
@@ -11111,6 +11111,18 @@
       "source_file": "app/components/overlay/layout-grid.tsx",
       "source_location": "L130",
       "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_layout_grid_usesamplecharacters",
+      "source_file": "app/components/overlay/layout-grid.tsx",
+      "source_location": "L172",
+      "target": "app_components_overlay_editor_samples_samplecharactersfeed",
       "weight": 1.0
     },
     {
@@ -140751,7 +140763,18 @@
       "relation": "contains",
       "source": "app_components_overlay_layout_grid",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L183",
+      "source_location": "L170",
+      "target": "app_components_overlay_layout_grid_usesamplecharacters",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_layout_grid",
+      "source_file": "app/components/overlay/layout-grid.tsx",
+      "source_location": "L191",
       "target": "app_components_overlay_layout_grid_layoutgrid",
       "weight": 1.0
     },
@@ -179517,10 +179540,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "a1553b7ee30dd181d6ec3725101d6a6a2df5834b7345cbca219184b32f3e0bab",
+    "content_sha256": "34f00c674a15115d34b8a878b04721ba2be792acf0d01591feecf18fbc691b67",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "effb987e4d78cb30af0b5e273262d210e54ebc9701b9aa935e9f517564c01e45",
+    "source_sha256": "7673060cfab6849ca3ace9fd0f46b8bf675cf516364c3b46664ed9ea028100bc",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -190376,7 +190399,7 @@
       "label": "LayoutGrid()",
       "norm_label": "layoutgrid()",
       "source_file": "app/components/overlay/layout-grid.tsx",
-      "source_location": "L183"
+      "source_location": "L191"
     },
     {
       "_callable": true,
@@ -190432,6 +190455,17 @@
       "norm_label": "smalltext()",
       "source_file": "app/components/overlay/layout-grid.tsx",
       "source_location": "L129"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_overlay_layout_grid_usesamplecharacters",
+      "label": "useSampleCharacters()",
+      "norm_label": "usesamplecharacters()",
+      "source_file": "app/components/overlay/layout-grid.tsx",
+      "source_location": "L170"
     },
     {
       "_callable": true,

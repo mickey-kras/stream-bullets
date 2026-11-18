@@ -185,9 +185,7 @@ export function CompositionEditor({
     owner: true,
   });
   const content: CellRect | null = shown.cells[orientation].content;
-  const free: GridLayer[] = GRID_LAYERS.filter(
-    (layer: GridLayer): boolean => shown.cells[orientation][layer] === null,
-  );
+  const free: GridLayer[] = GRID_LAYERS.filter((layer: GridLayer): boolean => shown.cells[orientation][layer] === null);
   const frame = useRef<HTMLDivElement | null>(null);
   const covers: boolean = useChatOverlap(
     frame,

@@ -166,6 +166,14 @@ function gridHit(box: DOMRect, x: number, y: number, cols: number, rows: number)
   };
 }
 
+/** A still sample frame for a characters layer that has no live feed. One frame for each size of the cell. */
+function useSampleCharacters(feed: ActivityFeed | null, cellsW: number, cellsH: number): ActivityFeed | null {
+  return useMemo(
+    (): ActivityFeed | null => (feed === null && cellsW > 0 ? sampleCharactersFeed(cellsW, cellsH) : null),
+    [feed, cellsW, cellsH],
+  );
+}
+
 /**
  * The layout grid of the selected orientation over a live preview of the composition. Pointer (mouse, touch or pen):
  * press a placed layer to select it and drag it to move it. The selected layer shows eight resize handles, on its
@@ -455,10 +463,7 @@ export function LayoutGrid({
   const charactersCell: CellRect | null = shown.characters;
   const cellsW: number = charactersCell?.w ?? 0;
   const cellsH: number = charactersCell?.h ?? 0;
-  const sampleCharacters: ActivityFeed | null = useMemo(
-    (): ActivityFeed | null => (charactersFeed === null && cellsW > 0 ? sampleCharactersFeed(cellsW, cellsH) : null),
-    [charactersFeed, cellsW, cellsH],
-  );
+  const sampleCharacters: ActivityFeed | null = useSampleCharacters(charactersFeed, cellsW, cellsH);
   const sampleContent: boolean = shown.content !== null && !showsContent(source, scene.data);
   const dimmed: Readonly<Record<GridLayer, boolean>> = {
     chat: shown.chat !== null && !layers.chat.enabled,
