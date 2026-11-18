@@ -100,8 +100,8 @@ importers:
         specifier: 4.20260730.0
         version: 4.20260730.0(patch_hash=64b7b7d84730fbe8f5551a4117dd9a3b85cf1eb19b5ae64ff72440ca3710d410)(@types/node@26.6.6)
       monocart-coverage-reports:
-        specifier: 3.2.0
-        version: 3.2.0
+        specifier: 3.2.1
+        version: 3.2.1
       react-server-dom-webpack:
         specifier: 19.3.1
         version: 19.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(webpack@5.112.2(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.35.5(@types/node@26.6.6)))
@@ -2374,8 +2374,8 @@ packages:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
-  commander@15.0.0:
-    resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
+  commander@15.1.0:
+    resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
     engines: {node: '>=22.12.0'}
 
   commander@2.20.3:
@@ -3015,8 +3015,8 @@ packages:
       uglify-js:
         optional: true
 
-  monocart-coverage-reports@3.2.0:
-    resolution: {integrity: sha512-hF8GxLozQGJ9P2FDjTrGfo/IAvHSlPdmYiBE3qkfbWUc9Zc+I+mrShta9+cJxmZfC5d6FiaEyrhjzCNrpAflog==}
+  monocart-coverage-reports@3.2.1:
+    resolution: {integrity: sha512-iOsx8vvP4bZkmzS1v/hW7CTZNSm7PNDRdZgLdTc+WMFD2nH3TiT1oNqJBp424v9ZUpTQwgidIN5O09Cf34QMpA==}
     engines: {node: '>=22.15.0'}
     hasBin: true
 
@@ -3599,6 +3599,18 @@ packages:
 
   ws@8.22.0:
     resolution: {integrity: sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.22.2:
+    resolution: {integrity: sha512-/rEZ2ejown2N5gxVTHUu9bVVC7ttu0/Tgzf5hbTOixR3Fs7mbbXgn2DbdbcKgJOmpQMtrIUWivtYuVMnp/W/yA==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -5719,7 +5731,7 @@ snapshots:
 
   chrome-trace-event@1.0.4: {}
 
-  commander@15.0.0: {}
+  commander@15.1.0: {}
 
   commander@2.20.3: {}
 
@@ -6226,13 +6238,13 @@ snapshots:
       postcss: 8.5.32
       sharp: 0.35.5(@types/node@26.6.6)
 
-  monocart-coverage-reports@3.2.0:
+  monocart-coverage-reports@3.2.1:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
       acorn: 8.19.0
       acorn-loose: 8.5.2
       acorn-walk: 8.3.5
-      commander: 15.0.0
+      commander: 15.1.0
       console-grid: 2.2.4
       convert-source-map: 2.0.0
       eight-colors: 1.3.3
@@ -6243,7 +6255,7 @@ snapshots:
       lz-utils: 2.1.1
       monocart-locator: 1.0.6
       node-stream-zip: 1.16.0
-      ws: 8.22.0
+      ws: 8.22.2
       yazl: 3.3.1
     transitivePeerDependencies:
       - bufferutil
@@ -6807,6 +6819,8 @@ snapshots:
   ws@8.21.0: {}
 
   ws@8.22.0: {}
+
+  ws@8.22.2: {}
 
   yallist@3.1.1: {}
 

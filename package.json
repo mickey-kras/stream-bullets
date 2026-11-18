@@ -59,6 +59,6 @@
     "esbuild": "0.28.2",
     "react-server-dom-webpack": "19.3.1",
     "@types/three": "0.187.0",
-    "monocart-coverage-reports": "3.2.0"
+    "monocart-coverage-reports": "3.2.1"
   }
 }
