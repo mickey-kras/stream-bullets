@@ -196,6 +196,52 @@
 .ov-grid-box[data-lifted] {
   opacity: 0.35;
 }
+/* The eight resize handles of the selected layer: 12 screen pixels, in the corners and the middles of the edges.
+   They stay inside the box, so the frame does not cut them off at its edge. They only show the place: the grid
+   input takes the pointer in a band of 28 screen pixels along each edge. */
+.ov-grid-handle {
+  --ov-handle: calc(12px / var(--ov-scale, 1));
+  position: absolute;
+  left: calc(var(--hx) * (100% - var(--ov-handle)));
+  top: calc(var(--hy) * (100% - var(--ov-handle)));
+  width: var(--ov-handle);
+  height: var(--ov-handle);
+  box-sizing: border-box;
+  border: calc(2px / var(--ov-scale, 1)) solid #000;
+  background: var(--cream);
+}
+.ov-grid-handle[data-grid-handle="nw"] {
+  --hx: 0;
+  --hy: 0;
+}
+.ov-grid-handle[data-grid-handle="n"] {
+  --hx: 0.5;
+  --hy: 0;
+}
+.ov-grid-handle[data-grid-handle="ne"] {
+  --hx: 1;
+  --hy: 0;
+}
+.ov-grid-handle[data-grid-handle="e"] {
+  --hx: 1;
+  --hy: 0.5;
+}
+.ov-grid-handle[data-grid-handle="se"] {
+  --hx: 1;
+  --hy: 1;
+}
+.ov-grid-handle[data-grid-handle="s"] {
+  --hx: 0.5;
+  --hy: 1;
+}
+.ov-grid-handle[data-grid-handle="sw"] {
+  --hx: 0;
+  --hy: 1;
+}
+.ov-grid-handle[data-grid-handle="w"] {
+  --hx: 0;
+  --hy: 0.5;
+}
 .ov-grid-tag {
   padding: calc(2px / var(--ov-scale, 1)) calc(6px / var(--ov-scale, 1));
   background: var(--gold);
@@ -236,13 +282,32 @@
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  cursor: crosshair;
+  cursor: default;
   touch-action: none;
   user-select: none;
 }
 /* The input covers the whole frame. The global button hover fill would hide the grid and the layers below it. */
 .ov-grid-input:hover {
   background: transparent;
+}
+.ov-grid-input[data-hover="move"] {
+  cursor: move;
+}
+.ov-grid-input[data-hover="n"],
+.ov-grid-input[data-hover="s"] {
+  cursor: ns-resize;
+}
+.ov-grid-input[data-hover="e"],
+.ov-grid-input[data-hover="w"] {
+  cursor: ew-resize;
+}
+.ov-grid-input[data-hover="nw"],
+.ov-grid-input[data-hover="se"] {
+  cursor: nwse-resize;
+}
+.ov-grid-input[data-hover="ne"],
+.ov-grid-input[data-hover="sw"] {
+  cursor: nesw-resize;
 }
 .ov-grid-input:focus-visible {
   outline: calc(3px / var(--ov-scale, 1)) solid var(--focus-ring, var(--gold));
@@ -262,6 +327,36 @@
 }
 .ov-grid-status[data-bad] {
   color: var(--error);
+}
+/* ---------- Layer palette (layer-palette.tsx) ---------- */
+.ov-palette-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ov-palette .ov-comp-note {
+  margin-top: 6px;
+  max-width: 28rem;
+}
+/* A chip is 44 px high for touch. It does not scroll the page under a finger: a drag carries it to the grid. */
+.ov-palette-chip {
+  min-height: 44px;
+  padding: 6px 14px;
+  border-style: dashed;
+  border-color: var(--gold);
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.ov-palette-chip[data-dragging] {
+  position: relative;
+  z-index: 20;
+  cursor: grabbing;
+  opacity: 0.85;
+  /* The grid under the chip stays in view, and the chip does not move back with a transition. */
+  transition: none;
 }
 .ov-comp-test {
   display: grid;
