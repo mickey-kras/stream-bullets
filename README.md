@@ -34,7 +34,7 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - **Sign in** also creates accounts. Registration needs acknowledgement of the minimum age, 16, and links to Terms and Privacy Policy.
 - `/privacy` and `/terms` contain legal disclosures. Footers link legal pages, contact, and reporting rules. Overlays have no footer.
 - Newest uses stable cursors. Top sorts by likes minus dislikes. Votes can move entries between pages. Refresh for current order.
-- The Polls list shows active polls of the page owner first, then active polls of other people, then all other polls.
+- The Polls list has three groups in this order: active polls of the page owner, active polls of other people, all other polls.
 - Each of these groups lists the newest poll first. Top keeps the plain score order without groups.
 - `/@handle/overlay` shows the latest active poll of the page owner. It never selects a viewer poll by itself.
 - The owner picks a viewer poll in **Overlay control**. `?poll=<id>` also selects a poll. Public overlays cannot vote.

@@ -115,6 +115,7 @@ Check both independent communities with separate owner and viewer sessions.
 Check the topics, replies, votes, polls, suggestions, and overlays.
 
 A viewer can create a poll on an owner's page.
+
 A viewer must not edit an owner's page, end an owner's poll, or reveal its results.
 One owner must not control the other owner's page or overlay.
 A non-admin must not review applications or do admin actions.
