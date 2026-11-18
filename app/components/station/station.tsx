@@ -1,15 +1,19 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode, type TransitionEvent } from "react";
 import { t } from "../../i18n";
 import { motionReduced, watchMotion } from "./motion";
 import { askForTilt, onFirstMotion, tiltPillWanted } from "./tilt";
 import type { StationController } from "./scene.client";
 
 const DISPLAY_FONT = "Oswald, 'Arial Narrow', sans-serif";
+// Phone poster pixels: width, height.
+const PHONE_POSTER = [487, 557] as const;
 
 export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void }> = {}): ReactNode {
   const host = useRef<HTMLDivElement>(null);
   const controller = useRef<StationController | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  // The poster stays below the canvas until the canvas fade ends.
+  const [stage, setStage] = useState<"poster" | "fade" | "live">("poster");
   // Hide Tilt after motion arrives or permission is answered.
   const [tiltDone, setTiltDone] = useState<boolean>(false);
   // Keep the one-time scene bound to the latest handler.
@@ -31,6 +35,15 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
       controller.current = null;
       if (!disposed) setStatus("unavailable");
     }
+    // Phone content above the stage covers its top. The poster and the camera use the same value.
+    function overlap(): number {
+      const actions = document.querySelector(".landing-actions")?.getBoundingClientRect();
+      const stageBox = host.current?.getBoundingClientRect();
+      const covered: number = actions && stageBox ? Math.max(0, actions.top - stageBox.top) : 0;
+      host.current?.parentElement?.style.setProperty("--station-overlap", `${covered}px`);
+      return covered;
+    }
+    overlap();
     async function start(): Promise<void> {
       try {
         const [scene] = await Promise.all([
@@ -43,11 +56,9 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
           shift: (width: number): number => (wide.matches && width > 900 ? 0.24 : 0),
           onSign: (index: number): void => signHandler.current?.(index),
           // Phone mast may overlap buttons above the stage.
-          overlap: (): number => {
-            const actions = document.querySelector(".landing-actions")?.getBoundingClientRect();
-            const stage = host.current?.getBoundingClientRect();
-            return actions && stage ? Math.max(0, actions.top - stage.top) : 0;
-          },
+          overlap,
+          // Reduced motion swaps at once. Otherwise the canvas fades in above the poster.
+          onFrame: (): void => setStage(motionReduced() ? "live" : "fade"),
         });
         // Discard completed builds after navigation.
         if (disposed) {
@@ -72,18 +83,38 @@ export function Station({ onSign }: Readonly<{ onSign?: (index: number) => void 
   }, []);
 
   return (
-    <section className="landing-station" aria-label={t("landing.station")} data-status={status}>
-      {status !== "ready" && (
-        <img
-          className="station-poster"
-          src="/assets/station-poster.webp"
-          alt=""
-          width="1024"
-          height="1024"
-          fetchPriority="high"
-        />
+    <section
+      className="landing-station"
+      aria-label={t("landing.station")}
+      data-status={status}
+      data-live={status === "ready" && stage !== "poster" ? "" : undefined}
+    >
+      {/* Rendered from the model at the first camera position: one frame for wide screens, one for phones. */}
+      {!(status === "ready" && stage === "live") && (
+        <picture>
+          <source
+            media="(max-width: 700px)"
+            srcSet="/assets/station-poster-phone.webp"
+            width={PHONE_POSTER[0]}
+            height={PHONE_POSTER[1]}
+          />
+          <img
+            className="station-poster"
+            src="/assets/station-poster.webp"
+            alt=""
+            width="1024"
+            height="1024"
+            fetchPriority="high"
+          />
+        </picture>
       )}
-      <div className="landing-canvas" ref={host} />
+      <div
+        className="landing-canvas"
+        ref={host}
+        onTransitionEnd={(event: TransitionEvent<HTMLDivElement>): void => {
+          if (event.target === event.currentTarget && event.propertyName === "opacity") setStage("live");
+        }}
+      />
       {/* Wait for browser readiness to preserve hydration equality. */}
       {status === "ready" && !tiltDone && tiltPillWanted() && (
         <button

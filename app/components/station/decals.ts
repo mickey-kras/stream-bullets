@@ -122,17 +122,18 @@ export function buildDecals(k: Kit, station: THREE.Group, parts: { hall: THREE.G
       m.renderOrder = 1;
     }
 
+    // Three patch textures serve ten rim patches.
+    const verdigris = [d("verdigris", 40), d("verdigris", 41), d("verdigris", 42)];
     for (let i = 0; i < 10; i++) {
       const a = rnd() * TAU;
       const m = mesh(
         new THREE.CylinderGeometry(5.235, 5.235, 0.3, 12, 1, true, a, 0.28),
-        d("verdigris", 40 + i),
+        verdigris[i % 3],
         [0, 0.19, 0],
         station,
         false,
       );
       m.renderOrder = 1;
-      (m.material as THREE.MeshStandardMaterial).side = THREE.FrontSide;
     }
   }
 }

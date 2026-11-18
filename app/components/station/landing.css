@@ -134,24 +134,27 @@ body:has(.landing-page)::after {
   position: absolute;
   inset: 0;
   z-index: 0;
+  /* The poster sizes itself from the stage, as the camera does. The stage clips it, as it clips the canvas. */
+  container-type: size;
+  overflow: clip;
 }
+/* The canvas fades in above the poster after its first frame. */
 .landing-canvas {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.8s ease-out;
+}
+.landing-station[data-live] .landing-canvas {
+  opacity: 1;
 }
 .landing-canvas canvas {
   display: block;
   cursor: grab;
-  animation: station-in 0.7s ease-out;
 }
 .landing-canvas canvas:active {
   cursor: grabbing;
-}
-@keyframes station-in {
-  from {
-    opacity: 0;
-  }
 }
 .landing-shade {
   position: absolute;
@@ -189,14 +192,19 @@ body:has(.landing-page)::after {
   border-color: var(--gold);
 }
 
-/* Poster fills the stage without layout shifts. */
+/* Poster takes the model frame of the canvas: a square of the camera view height, at the view center. */
 .station-poster {
   position: absolute;
-  inset: 0 0 0 auto;
-  width: 66%;
-  height: 100%;
-  object-fit: contain;
+  top: 50%;
+  left: 50%;
+  width: min(100cqh, 80cqw);
+  height: min(100cqh, 80cqw);
+  transform: translate(-50%, -50%);
   pointer-events: none;
+}
+/* The scene moves the view right to clear the copy. */
+@media (min-width: 901px) {
+  .station-poster { left: 74%; }
 }
 .station-fallback {
   position: absolute;
@@ -215,7 +223,14 @@ body:has(.landing-page)::after {
   font-size: 15px;
 }
 @media (max-width: 700px) {
-  .station-poster { width: 100%; }
+  /* Phone camera: the model fits the stage width or the height below the copy. --unit is one model unit. */
+  .station-poster {
+    --covered: var(--station-overlap, max(0px, 14vh - 81px));
+    --unit: min(100cqw / 11.72, (100cqh - var(--covered)) / 12.2);
+    top: calc((100cqh + var(--covered)) / 2);
+    width: calc(var(--unit) * 11.72);
+    height: calc(var(--unit) * 13.4);
+  }
   .station-fallback { left: 16px; right: 16px; bottom: 16px; width: auto; }
 }
 
@@ -618,7 +633,6 @@ body:has(.landing-page)::after {
   .landing-actions .button-link {
     transition: none;
   }
-  .landing-canvas canvas,
   .station-loader::before {
     animation: none;
   }
