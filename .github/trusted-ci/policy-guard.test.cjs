@@ -45,6 +45,32 @@ test("all gate inputs, including the real ESLint config, scripts and pins, are p
   assert.equal(isPolicyPath("app/main.tsx"), false);
 });
 
+test("coverage gate modules and resolution shadows require policy admission", () => {
+  const basenames = ["tests/e2e/coverage", "tests/e2e/coverage-navigation.spec", "tests/e2e-coverage.test"];
+  const suffixes = ["", ".js", ".ts", ".jsx", ".tsx", ".cjs", ".mjs", ".cts", ".mts", "/index.ts", "/package.json"];
+  for (const basename of basenames) {
+    for (const suffix of suffixes) {
+      const name = `${basename}${suffix}`;
+      assert.equal(isPolicyPath(name), true, name);
+      assert.equal(isApplicationPath(name), false, name);
+      assert.ok(
+        inspectChanges({}, { [name]: entry() }).some((message) => message.includes("exact-head")),
+        name,
+      );
+      assert.deepEqual(inspectChanges({}, { [name]: entry() }, true), [], name);
+    }
+  }
+  for (const name of [
+    "tests/e2e/coverage-extra.ts",
+    "tests/e2e/coverage-navigation.spec-extra.ts",
+    "tests/e2e-coverage.test-extra.ts",
+    "tests/e2e/topics.spec.ts",
+  ]) {
+    assert.equal(isPolicyPath(name), false, name);
+    assert.equal(isApplicationPath(name), true, name);
+  }
+});
+
 test("rejects scanner replacement, deletion, additions and symlinks; admits only policy-only updates", () => {
   const name = ".github/workflows/quality.yml";
   const base = { [name]: entry(BASE), "app/main.tsx": entry(BASE) };
