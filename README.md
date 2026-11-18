@@ -24,7 +24,9 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - Display names need 1 to 40 characters on one line. Invalid provider names need correction before sign-in.
 - D1 stores topics, comments, replies, reactions, and profile changes.
 - Each account gets one reaction per topic or poll, one like per comment, and one changeable vote per open poll.
-- Only owners create, end, and reveal their polls. Polls can end manually or at a deadline.
+- Each signed-in viewer can create polls and Mash Battles. The limits and rules of topics apply to them.
+- Only the page owner ends polls, reveals results, and runs Mash Battles. Polls can end manually or at a deadline.
+- The author and the page owner can delete a poll. Each poll shows its author.
 - Binary counts and percentages stay private until reveal. Multiple-choice results update live.
 - Authors and owners can remove content. Removing a parent comment preserves replies.
 - Signed-in users can **Report** topics and comments. Administrators review reports at `/admin`. Hourly cleanup deletes resolved reports after one year.
@@ -32,7 +34,10 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - **Sign in** also creates accounts. Registration needs acknowledgement of the minimum age, 16, and links to Terms and Privacy Policy.
 - `/privacy` and `/terms` contain legal disclosures. Footers link legal pages, contact, and reporting rules. Overlays have no footer.
 - Newest uses stable cursors. Top sorts by likes minus dislikes. Votes can move entries between pages. Refresh for current order.
-- `/@handle/overlay` shows the latest active poll. `?poll=<id>` selects a poll. Public overlays cannot vote.
+- The Polls list shows active polls of the page owner first, then active polls of other people, then all other polls.
+- Each of these groups lists the newest poll first. Top keeps the plain score order without groups.
+- `/@handle/overlay` shows the latest active poll of the page owner. It never selects a viewer poll by itself.
+- The owner picks a viewer poll in **Overlay control**. `?poll=<id>` also selects a poll. Public overlays cannot vote.
 - **Overlay control** creates a private OBS URL with a secret `key`. It grants owner-priority admission, including full rooms.
 - The full URL appears once. The server stores only its SHA-256 key hash. **Regenerate link** revokes the old key. Update OBS afterward.
 - See [overlay composition](docs/overlay-composition.md) for the layers, the per-layer URLs, and the merged chat.
@@ -238,7 +243,8 @@ Browser-only prototype topics and profiles never reached the server.
 - Rooms allow 200 connections, including 100 signed-out viewers and 10 per client network: IPv4 address or IPv6 /64.
 - Owners and valid private overlays get priority. Key hashes use constant-time comparison. Invalid keys receive normal anonymous admission.
 - Regeneration closes old-key connections. Frozen overlays remain read-only. Suspension refuses overlays and closes live connections.
-- At capacity, signed-in viewers displace the oldest signed-out connection. Snapshots include at most 50 polls and the newest active poll.
+- At capacity, signed-in viewers displace the oldest signed-out connection. Snapshots include at most 50 polls and the newest active poll of the page owner.
+- Private overlay connections receive only the polls of the page owner and the poll on air.
 - Leases last one hour. Clients ping every 20 seconds. 60 seconds without a ping closes the connection.
 - Mash taps enter durable storage before acknowledgement. Totals flush to D1 each second and recover after restart.
 - Rooms resync every 15 seconds. Reconnect loads current state. Disconnected views refresh HTTP every 30 seconds.

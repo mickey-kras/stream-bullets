@@ -219,6 +219,7 @@ describe("Mash Battle taps across a restart", (): void => {
         counts: [0, 0],
         total: 0,
         mash: { durationS: 10, phase, startsAt, endsAt: null, winner: null, totals: [0, 0], players: 0, assisted: 0 },
+        byOwner: true,
       },
     ],
   });

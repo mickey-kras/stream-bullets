@@ -12,7 +12,7 @@ import {
   type TokenBucket,
 } from "../lib/mash";
 import type { LiveSnapshot, MashPhase, MashTick, OverlayPublic } from "../types";
-import { LIVE_POLLS_SQL, livePolls, optionsFromJson, type PollRow } from "./live-polls";
+import { LIVE_POLLS_SQL, livePolls, optionsFromJson, overlaySnapshot, type PollRow } from "./live-polls";
 import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from "./overlay-state";
 import { validateTestEnvironment } from "./test-environment-config";
 import { detached } from "../lib/detached";
@@ -275,7 +275,8 @@ export class PollRoom extends DurableObject<AppEnv> {
     const now = Date.now();
     const lease: ConnectionLease = { expiresAt: now + CONNECTION_LEASE_MS, userId: userId ?? null, openedAt: now };
     server.serializeAttachment(lease);
-    this.send(server, JSON.stringify(this.withBattles(snapshot)));
+    const first: LiveSnapshot = this.withBattles(snapshot);
+    this.send(server, JSON.stringify(overlayKey ? overlaySnapshot(first) : first));
     this.startTicker();
     await this.scheduleResync();
     return new Response(null, { status: 101, webSocket: client });
@@ -837,9 +838,17 @@ export class PollRoom extends DurableObject<AppEnv> {
     };
   }
 
+  // OBS overlay sockets receive only the polls that the overlay may show (see `overlaySnapshot`).
   private broadcast(snapshot: LiveSnapshot): void {
-    const message = JSON.stringify(this.withBattles(snapshot));
-    for (const socket of this.activeSockets()) this.send(socket, message);
+    const full: LiveSnapshot = this.withBattles(snapshot);
+    const message = JSON.stringify(full);
+    let overlayMessage: string | undefined;
+    for (const socket of this.activeSockets()) {
+      if (this.ctx.getTags(socket).includes("overlay-key")) {
+        overlayMessage ??= JSON.stringify(overlaySnapshot(full));
+        this.send(socket, overlayMessage);
+      } else this.send(socket, message);
+    }
   }
 
   private send(socket: WebSocket, message: string): void {

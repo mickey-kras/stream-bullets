@@ -13,6 +13,7 @@ import type { CardIcon, OverlayData, OverlaySource, OverlaySourceRef, OverlaySta
 import { assertStreamerWritable } from "./access.server";
 import { HttpError } from "./http.server";
 import { notifyOverlay } from "./live.server";
+import { byOwner, notHeld } from "./poll-sql";
 import {
   OVERLAY_COLUMNS,
   OVERLAY_MESSAGE_LENGTH,
@@ -75,10 +76,12 @@ export async function getOverlayState(env: AppEnv, streamerId: string): Promise<
 // Checks that `ref` names something on this page, and drops refs the source does not use.
 async function checkedSource(env: AppEnv, streamerId: string, source: OverlaySourceRef): Promise<OverlaySourceRef> {
   if (source.type === "poll" || source.type === "topic") {
+    // "A specific poll" can start with no poll: the overlay waits until the owner picks one from the list.
+    if (source.ref === null && source.type === "poll") return source;
     if (source.ref === null) throw new HttpError(400, "Pick a poll or topic.");
-    const found = await env.DB.prepare(
-      `SELECT 1 FROM entries WHERE id=? AND streamer_id=? AND kind ${source.type === "topic" ? "=" : "!="} 'topic'`,
-    )
+    // The owner can pick each poll of the page, also a viewer poll, but not one that moderation holds.
+    const kind: string = source.type === "topic" ? "= 'topic'" : `!= 'topic' AND ${notHeld()}`;
+    const found = await env.DB.prepare(`SELECT 1 FROM entries WHERE id=? AND streamer_id=? AND kind ${kind}`)
       .bind(source.ref, streamerId)
       .first();
     if (!found) throw new HttpError(404, source.type === "topic" ? "Topic not found." : "Poll not found.");
@@ -278,6 +281,14 @@ interface TopicRow {
   likes: number;
 }
 
+interface PollChoiceRow {
+  id: string;
+  title: string;
+  mash: number;
+  by_owner: number;
+  author: string;
+}
+
 interface CardRow {
   id: string;
   icon: CardIcon | null;
@@ -301,10 +312,15 @@ export async function getOverlayData(
   topicIds: readonly string[],
 ): Promise<OverlayData> {
   const [polls, topics, cards, next, support] = await env.DB.batch([
-    env.DB.prepare(`SELECT e.id,e.title,EXISTS(SELECT 1 FROM entry_mash m WHERE m.entry_id=e.id) AS mash FROM entries e
-      WHERE e.streamer_id=? AND e.kind!='topic' ORDER BY e.created_at DESC,e.id DESC LIMIT ${LIST_LIMIT}`).bind(
-      streamerId,
-    ),
+    // The newest polls of the page owner, then the newest polls of other people. Viewer polls cannot push the
+    // owner's polls out of the list. Polls that moderation holds stay out.
+    env.DB.prepare(`WITH p AS (SELECT e.id,e.title,e.created_at,e.author_id,(${byOwner("e")}) AS by_owner,
+        EXISTS(SELECT 1 FROM entry_mash m WHERE m.entry_id=e.id) AS mash
+        FROM entries e WHERE e.streamer_id=? AND e.kind!='topic' AND ${notHeld("e")})
+      SELECT p.id,p.title,p.mash,p.by_owner,u.name AS author FROM p JOIN user u ON u.id=p.author_id
+      WHERE p.id IN (SELECT id FROM p WHERE by_owner=1 ORDER BY created_at DESC,id DESC LIMIT ${LIST_LIMIT})
+        OR p.id IN (SELECT id FROM p WHERE by_owner=0 ORDER BY created_at DESC,id DESC LIMIT ${LIST_LIMIT})
+      ORDER BY p.by_owner DESC,p.created_at DESC,p.id DESC`).bind(streamerId),
     env.DB.prepare(`SELECT e.id,e.title,e.category,e.author_id,u.name AS author,u.image,u.avatar_preset,
         (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=1) AS likes
       FROM entries e JOIN user u ON u.id=e.author_id
@@ -323,10 +339,12 @@ export async function getOverlayData(
   const event = next.results[0] as { title: string; starts_at: number } | undefined;
   const link = support.results[0] as { kind: SupportLinkKind; label: string | null; url: string } | undefined;
   return {
-    polls: (polls.results as { id: string; title: string; mash: number }[]).map((row) => ({
+    polls: (polls.results as PollChoiceRow[]).map((row: PollChoiceRow) => ({
       id: row.id,
       title: row.title,
       mash: row.mash === 1,
+      author: row.author,
+      byOwner: row.by_owner === 1,
     })),
     topics: (topics.results as TopicRow[]).map((row: TopicRow) => ({
       id: row.id,
