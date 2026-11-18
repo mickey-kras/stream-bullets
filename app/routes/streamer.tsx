@@ -651,7 +651,7 @@ export default function StreamerPage(): ReactNode {
                 owner={owner}
                 moderator={moderator}
                 writable={writable}
-                pending={pending.has(selected.id)}
+                pending={pending.has(selected.id) || topicSelection.provisional}
                 onBack={() => backToList("topics")}
                 onDiscuss={() => openDiscussion(selected)}
                 onReact={(value) => act({ action: "react", id: selected.id, value }, selected.id)}

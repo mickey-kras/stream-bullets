@@ -94,6 +94,9 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   const grid = gridButton(editor, "Layout grid, 16 columns by 9 rows");
   await expect(grid).toBeVisible();
   await expect(grid).toHaveAccessibleName("Column 1, row 1: Chat.");
+  // The button covers the frame. It stays transparent under the pointer, so the grid and the layers stay in view.
+  await grid.hover();
+  await expect(grid).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   // The default places: chat on the left, the characters slot along the bottom, the content without a cell.
   await expect(frame.locator('[data-grid-box="chat"]')).toContainText("Chat · 600 × 840");
   const charactersCell = cellPixels(DEFAULT_LAYERS.cells.horizontal.characters);
