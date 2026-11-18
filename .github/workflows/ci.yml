@@ -241,12 +241,29 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  deploy-test:
+    name: Deploy test
+    needs: [checks, sonar]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/deploy-test.yml
+    with:
+      revision: ${{ github.sha }}
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+  # Production starts only after the test deployment of the same commit succeeds.
+  # Required reviewers on the production environment add a manual approval here.
   deploy:
     name: Deploy production
-    needs: [checks, sonar]
+    needs: [checks, sonar, deploy-test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
     environment:
       name: production
       url: https://streambullets.com
