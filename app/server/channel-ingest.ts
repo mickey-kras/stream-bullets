@@ -57,6 +57,7 @@ import {
   ADMISSIONS,
   newBuckets,
 } from "./channel-ingest-limits";
+import { detached } from "../lib/detached";
 
 /**
  * One per page (`idFromName(streamerId)`): the single ingestion point for the page's connected channels, shared by
@@ -143,11 +144,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
     this.playground = playgroundOf(ctx, env, () => this.streamerId, this.scheduleAlarm.bind(this));
-    void ctx.blockConcurrencyWhile(async (): Promise<void> => {
-      this.streamerId = await ctx.storage.get<string>("streamerId");
-      this.createTables();
-      await this.playground.load();
-    });
+    detached(
+      ctx.blockConcurrencyWhile(async (): Promise<void> => {
+        this.streamerId = await ctx.storage.get<string>("streamerId");
+        this.createTables();
+        await this.playground.load();
+      }),
+    );
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
 

@@ -12,6 +12,7 @@ import { SignInDialog } from "../components/shell/sign-in-dialog";
 import { Icon, type IconName } from "../components/ui/icon";
 import { Station } from "../components/station/station";
 import "../components/station/landing.css";
+import { detached } from "../lib/detached";
 
 const signIcon: Record<Intent, IconName> = { suggest: "plus", vote: "polls", discuss: "comment" };
 const signLabel: Record<Intent, "landing.suggest" | "landing.vote" | "landing.discuss"> = {
@@ -41,7 +42,7 @@ export default function Home(): ReactNode {
       const intent: Intent | undefined = SIGN_INTENTS[index];
       if (intent) {
         trackCta(`cta_${intent}`);
-        void navigate(directoryHref(intent));
+        detached(navigate(directoryHref(intent)));
       }
     },
     [navigate],

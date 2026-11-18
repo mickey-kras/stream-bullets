@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate, type Location } from "react-router";
+import { detached } from "../../lib/detached";
 
 // Account, language and display dialogs use ?dialog=<name>.
 export const ACCOUNT_DIALOGS = ["profile", "host", "data", "page", "language", "a11y"] as const;
@@ -38,8 +39,8 @@ export function useAccountDialog(): { name: AccountDialogName | null; close: () 
   const closing = useRef<boolean>(false);
   const close = useCallback((): void => {
     closing.current = true;
-    if (fromApp) void navigate(-1);
-    else void navigate(dialogHref(location, null), { replace: true, preventScrollReset: true });
+    if (fromApp) detached(navigate(-1));
+    else detached(navigate(dialogHref(location, null), { replace: true, preventScrollReset: true }));
   }, [fromApp, location, navigate]);
   // Restore avatar focus after route rendering, not a timer: unmount can otherwise leave focus on body.
   useEffect((): void => {
