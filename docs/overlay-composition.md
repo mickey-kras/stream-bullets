@@ -182,6 +182,7 @@ The handles change the size of a placed layer, and the palette adds a layer. Thu
 
 A handle changes the size in full cells. The edges that the handle does not hold stay in their place.
 The layer, its label, and its content show the new size during the drag. The editor saves the change when you release the handle.
+
 A layer stops at its minimum size and at the edge of the grid.
 When a layer stops at its minimum size, a message under the grid gives the minimum.
 The area that takes a press on a handle is a band of 28 screen pixels along each edge. A corner is where two bands cross.
@@ -201,7 +202,7 @@ The chat layer and the characters layer always have a cell. Thus only the on-air
   The layer drops at its minimum size around the cell at the pointer, inside the grid.
 
 If no place is free, or the drop touches another layer, the editor adds nothing and gives the reason.
-After the editor adds a layer, the layer is selected and the grid has the focus.
+After the editor adds a layer, it selects the layer and the grid has the focus.
 
 **Remove from grid** removes the content cell. Then the content uses the full frame again, and its chip shows in the palette again.
 The chat layer and the characters layer cannot leave the grid. Use **Show on stream** to show or hide them.
