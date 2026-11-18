@@ -225,9 +225,11 @@ button.gold:hover { background:var(--gold-hover); }
 .streamer-card { display: flex; gap: 18px; margin-top: 20px; max-width: none; }
 .streamer-card:hover { border-color: var(--gold); }
 .streamer-card .user-avatar { width: 60px; height: 60px; }
-.featured-community { overflow-wrap: anywhere; }
-.featured-community ul { margin: 0; padding-left: 24px; }
-.featured-community li + li { margin-top: 12px; }
+.ideas-strip { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 16px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; overflow-wrap: anywhere; }
+.ideas-strip h2 { margin: 0; font: inherit; font-weight: 700; }
+.ideas-strip .ideas-link { margin-left: 0; }
+.ideas-strip p { margin: 0; flex: 1 1 280px; }
+.ideas-strip ul { display: flex; flex-wrap: wrap; gap: 4px 20px; flex-basis: 100%; margin: 0; padding: 0; list-style: none; }
 .streamer-card h2 { font-size: 1.75rem; overflow-wrap: anywhere; }
 .streamer-card p { margin: 6px 0; }
 .streamer-bio { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; -webkit-line-clamp: 2; line-clamp: 2; }
@@ -1156,7 +1158,6 @@ table.month-grid tr { display: table-row; }
 @media (max-width: 43.75em) {
   .ideas-logo { width: 64px; height: 64px; }
 }
-.official-card { border-color: var(--gold); }
 .official-badge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--gold); color: var(--on-gold); font: 700 0.75rem/1.2 var(--body); letter-spacing: .5px; text-transform: uppercase; vertical-align: middle; }
 .ideas-link { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; font-size: 0.9375rem; }
 .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
@@ -1462,7 +1463,6 @@ html[data-reduced="true"] .landing-station .station-tilt { display: none !import
 :root[data-contrast="high"] a.streamer-card, :root[data-underline="true"] a.streamer-card { text-decoration: none !important; }
 :root[data-contrast="high"] a.streamer-card h2, :root[data-underline="true"] a.streamer-card h2 { text-decoration: underline; text-underline-offset: 4px; }
 @media (max-width: 43.75em) {
-  .streamers-page .ideas-link { display: flex; width: fit-content; margin-top: 4px; }
 }
 .dialog-notice { display: block; margin: 8px 20px 0; padding: 8px 12px; border-radius: 8px; background: var(--cream); color: var(--bg); font: 600 .9375rem/1.3 var(--body); }
 .modal-content:not(.sheet) .dialog-notice { margin: 0 0 12px; }

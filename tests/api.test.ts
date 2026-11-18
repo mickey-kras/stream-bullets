@@ -424,18 +424,11 @@ describe("waitlist and reports through the handler table", (): void => {
 });
 
 describe("first visitor destination", () => {
-  it("features a public community with real content before an empty page", async (): Promise<void> => {
-    expect(await getFeaturedStreamer(env)).toEqual({
-      handle: "zed_page",
-      name: "Zed",
-      isOfficial: false,
-      entries: [{ id: ids.topic, title: "Topic", kind: "topic" }],
-    });
+  it("features the official page, also when another page has content", async (): Promise<void> => {
+    expect(await getFeaturedStreamer(env)).toEqual({ handle: "streambullets", name: "StreamBullets", isOfficial: true, entries: [] });
   });
 
-  it("excludes frozen and suspended communities and falls back to an active page", async (): Promise<void> => {
-    await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(ids.page).run();
-    expect(await getFeaturedStreamer(env)).toEqual({ handle: "streambullets", name: "StreamBullets", isOfficial: true, entries: [] });
+  it("features no page when the official page is not active", async (): Promise<void> => {
     await env.DB.prepare("UPDATE streamers SET status='suspended' WHERE id=?").bind(ids.official).run();
     expect(await getFeaturedStreamer(env)).toBeNull();
   });
@@ -444,7 +437,7 @@ describe("first visitor destination", () => {
     for (let index: number = 0; index < 4; index++) {
       await env.DB.prepare(`INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at)
         VALUES (?,?,'viewer','binary',?,'["Yes","No"]',?)`)
-        .bind(`poll-${index}`, ids.page, `Poll ${index}`, index + 2).run();
+        .bind(`poll-${index}`, ids.official, `Poll ${index}`, index + 2).run();
     }
     const featured = await getFeaturedStreamer(env);
     expect(featured?.entries.map((entry) => entry.title)).toEqual(["Poll 3", "Poll 2", "Poll 1"]);
