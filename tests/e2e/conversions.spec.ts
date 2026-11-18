@@ -79,7 +79,9 @@ for (const [label, width, height] of [
     if (height <= 600) {
       await expect(page.locator(".landing-main")).toHaveCSS("overflow-y", "auto");
     }
-    for (const link of await page.locator(".landing-copy a").all()) {
+    // Phones hide the three intent links; Browse streamers leads to the same place.
+    await expect(page.getByRole("list", { name: "Get started" })).toHaveCount(width <= 700 ? 0 : 1);
+    for (const link of await page.locator(".landing-copy a:visible").all()) {
       if (height <= 600) {
         await link.evaluate((element: HTMLAnchorElement) => element.scrollIntoView({ block: "center" }));
       }

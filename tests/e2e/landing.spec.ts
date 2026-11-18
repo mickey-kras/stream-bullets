@@ -17,6 +17,15 @@ test("mobile landing is one screen with Browse streamers and the scene under the
     timeout: 60_000,
   });
   await expect(station.locator(".station-loader")).toHaveCount(0);
+  if ((await station.locator(".landing-canvas canvas").count()) === 1) {
+    // The first frame shows the canvas; reduced motion removes the poster at once.
+    await expect(station).toHaveAttribute("data-live", "", { timeout: 60_000 });
+    await expect(station.locator(".station-poster")).toHaveCount(0);
+    await expect(station.locator(".landing-canvas")).toHaveCSS("opacity", "1");
+  }
+  // Phones hide the intent links so they do not cover the station.
+  await expect(page.getByRole("list", { name: "Get started" })).toHaveCount(0);
+  await expect(page.locator(".landing-start")).toBeHidden();
   const headingBox = (await heading.boundingBox())!;
   const stationBox = (await station.boundingBox())!;
   expect(stationBox.y).toBeGreaterThan(headingBox.y + headingBox.height);

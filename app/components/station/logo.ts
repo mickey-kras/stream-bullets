@@ -30,18 +30,33 @@ const LETTER_H = 0.66;
 const LETTER_GROW = 0.275;
 const LETTER_DEPTH = 0.055;
 
-// Walk s meters along the plan from a; positive moves toward +x.
-function walk(a: number, s: number, grow: number): number {
-  const step = 0.0005 * Math.sign(s);
-  let run = 0;
-  let prev = plan(a, grow);
-  while (Math.abs(run) < Math.abs(s)) {
-    a += step;
-    const p = plan(a, grow);
-    run += p.distanceTo(prev) * Math.sign(s);
-    prev = p;
-  }
-  return a;
+const WALK_STEP = 0.0005;
+
+// Walk s meters along the plan from a; positive moves toward +x. The walker keeps its path, so each
+// letter vertex costs one search and not a new walk.
+function walker(a: number, grow: number): (s: number) => number {
+  const runs: [number[], number[]] = [[0], [0]];
+  const ends: [THREE.Vector3, THREE.Vector3] = [plan(a, grow), plan(a, grow)];
+  return (s: number): number => {
+    const side = s < 0 ? 1 : 0;
+    const step = side ? -WALK_STEP : WALK_STEP;
+    const run = runs[side];
+    const want = Math.abs(s);
+    while (run[run.length - 1] < want) {
+      const p = plan(a + step * run.length, grow);
+      run.push(run[run.length - 1] + p.distanceTo(ends[side]));
+      ends[side] = p;
+    }
+    // First step that reaches the distance.
+    let low = 0;
+    let high = run.length - 1;
+    while (low < high) {
+      const mid = (low + high) >> 1;
+      if (run[mid] < want) low = mid + 1;
+      else high = mid;
+    }
+    return a + step * low;
+  };
 }
 
 // Brand transform: translate(78 0) skewX(-10).
@@ -120,8 +135,9 @@ function letters(scale: number): THREE.BufferGeometry {
 // Wrap x-along/y-up/z-out geometry around the wall at angle a and height y.
 function wrap(g: THREE.BufferGeometry, a: number, grow: number, y: number): void {
   const pos = g.attributes.position;
+  const walk = walker(a, grow);
   for (let i = 0; i < pos.count; i++) {
-    const p = plan(walk(a, pos.getX(i), grow), grow + pos.getZ(i), y + pos.getY(i));
+    const p = plan(walk(pos.getX(i)), grow + pos.getZ(i), y + pos.getY(i));
     pos.setXYZ(i, p.x, p.y, p.z);
   }
   g.computeVertexNormals();
@@ -143,10 +159,11 @@ export function buildLogo(k: Kit, hall: THREE.Group): void {
   const sign = mesh(g, face, [0, 0, 0], hall);
   sign.material = [face, gold];
   const halfW = ((SVG_RIGHT - SVG_LEFT) / 2) * scale;
+  const walk = walker(LOGO_AT, STRIPE_GROW);
   STRIPE_Y.forEach((y: number, i: number): void => {
     // Run stripes around the rear between letter-block edges.
-    const from = walk(LOGO_AT, halfW + RIGHT_GAP[i] * scale + 0.02, STRIPE_GROW);
-    const to = walk(LOGO_AT, -(halfW + LEFT_GAP[i] * scale + 0.02), STRIPE_GROW) + TAU;
+    const from = walk(halfW + RIGHT_GAP[i] * scale + 0.02);
+    const to = walk(-(halfW + LEFT_GAP[i] * scale + 0.02)) + TAU;
     tube(loop(from, to, STRIPE_GROW, y, 160), STRIPE_R, stripe, hall, false);
     for (const a of [from, to])
       ball(STRIPE_R, [...plan(a, STRIPE_GROW, y).toArray()] as [number, number, number], stripe, hall, 12);
