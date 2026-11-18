@@ -904,6 +904,15 @@ export default function StreamerPage(): ReactNode {
             </Link>
           )
         }
+        ticker={
+          liveEvent && (
+            <Link className="onair-ticker-link" to="?view=schedule">
+              <span className="live-dot" aria-hidden="true" />
+              <strong>{t("live.badge")}</strong>
+              <span className="onair-ticker-title">{liveEvent.title}</span>
+            </Link>
+          )
+        }
         action={
           action && (
             <button

@@ -24,9 +24,17 @@ button.gold:hover { background:var(--gold-hover); }
 .selected .topic-meta { color:var(--c-0c272c); }
 .empty { font:1rem Figtree,Onest,sans-serif; padding:24px 10px; color:var(--muted); display: flex; align-items: center; gap: 8px; }
 .detail { height:100%; min-height:0; min-width:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; scrollbar-gutter:stable both-edges; scrollbar-width:thin; scrollbar-color:var(--c-536868) transparent; border:1px solid var(--input-border); border-radius:12px; background:linear-gradient(115deg,var(--c-0c2429ee),var(--c-091d22ee)); box-shadow:inset 0 0 60px var(--c-0002); container-type:inline-size; }
-.topic-content { padding:26px 30px 20px; }
+.topic-content { padding:26px 30px 20px; display:grid; grid-template-columns:96px minmax(0,1fr); column-gap:24px; }
+.topic-content > * { grid-column:2; min-width:0; }
+.topic-content > .votes { grid-column:1; grid-row:1 / span 50; flex-direction:column; gap:10px; align-self:start; border-right:1px dashed var(--c-415759); padding-right:20px; }
+.topic-content > .votes button { min-width:0; width:100%; flex-direction:column; gap:8px; min-height:0; padding:10px 6px; }
+.topic-content > .votes b { border-left:0; border-top:1px dashed var(--c-6f7f79); padding-left:0; padding-top:8px; }
+/* The 96px rail cannot fit the longer translated labels; keep them for assistive technology only. */
+@container(min-width:500.02px) {
+  .topic-content > .votes .vote-word { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+}
 .detail-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:17px; }
-.category { display:flex; align-items:center; gap:12px; border:1px solid var(--c-5b7071); border-radius:6px; background:var(--c-18313677); padding:6px 14px; font:600 1.062rem/1.1 Oswald,sans-serif; letter-spacing:1px; text-transform:uppercase; }
+.category { display:flex; align-items:center; gap:12px; border:1px solid var(--c-5b7071); border-radius:var(--radius-control); background:var(--c-18313677); padding:6px 14px; font:600 1.062rem/1.1 Oswald,sans-serif; letter-spacing:1px; text-transform:uppercase; }
 .category svg { width:23px; height:23px; }
 .author { display:flex; align-items:center; gap:10px; font:400 1.25rem Figtree,Onest,sans-serif; color:var(--c-c0c9c2); margin-top:12px; }
 .author strong { color:var(--gold); font-weight:600; }
@@ -37,9 +45,9 @@ button.gold:hover { background:var(--gold-hover); }
 .votes button[aria-pressed=true] { background:linear-gradient(110deg,var(--gold-hi),var(--gold-lo)); color:var(--on-gold); border-color:var(--gold-lo); }
 .discussion { border-top:1px solid var(--line); padding:14px 30px 20px; }
 .discussion-head { display:flex; align-items:center; gap:16px; border-bottom:1px solid var(--c-405658); padding-bottom:9px; margin-bottom:0; }
-.discussion-head h3 { font:600 1.938rem/1.2 var(--heading); text-transform:uppercase; margin:0; letter-spacing:0; }
-.discussion-head select { width:106px; min-height:36px; font:400 1.125rem/1.2 Figtree,Onest,sans-serif; border-radius:6px; padding:5px 33px 5px 16px; }
-.comment { display:flex; align-items:flex-start; gap:13px; border-bottom:1px solid var(--c-415759); padding:16px 0 18px; }
+.discussion-head h3 { font:600 1.938rem/1.2 var(--heading); text-transform:uppercase; margin:0; letter-spacing:2px; }
+.discussion-head select { width:106px; min-height:36px; font:400 1.125rem/1.2 Figtree,Onest,sans-serif; border-radius:var(--radius-control); padding:5px 33px 5px 16px; }
+.comment { display:flex; align-items:flex-start; gap:13px; border-bottom:1px dashed var(--c-415759); padding:16px 0 18px; }
 .comment-body { flex:1; min-width:0; }
 .comment-meta { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .comment-meta strong { font:600 1.125rem Figtree,Onest,sans-serif; color:var(--gold); }
@@ -49,7 +57,7 @@ button.gold:hover { background:var(--gold-hover); }
 .comment-actions button { border:0; border-radius:0; padding:0; display:flex; align-items:center; gap:7px; font:400 1rem Figtree,Onest,sans-serif; color:var(--c-e4e5d7); background:none; min-height:24px; }
 .comment-actions button:hover, .comment-actions button[aria-pressed=true] { color:var(--gold); }
 .composer { display:flex; gap:14px; margin-top:14px; align-items: stretch; min-width:0; }
-.composer textarea { flex:1; min-width:0; max-height:150px; padding:12px 15px; border:1px solid var(--c-637677); border-radius:7px; background:var(--c-162e3255); color:var(--cream); font:400 1.062rem/1.25 Figtree,Onest,sans-serif; min-height: 48px; padding-top: 13px; padding-bottom: 13px; resize: none; overflow-y: auto; }
+.composer textarea { flex:1; min-width:0; max-height:150px; padding:12px 15px; border:1px solid var(--c-637677); border-radius:var(--radius-control); background:var(--c-162e3255); color:var(--cream); font:400 1.062rem/1.25 Figtree,Onest,sans-serif; min-height: 48px; padding-top: 13px; padding-bottom: 13px; resize: none; overflow-y: auto; }
 .composer > .gold { min-width:80px; font:600 1.312rem Oswald,sans-serif; padding:8px 17px; align-self: stretch; min-height: 48px; flex: 0 0 auto; padding-block: 0; line-height: 1; }
 .replying { font:0.875rem Figtree,Onest,sans-serif; color:var(--gold); margin-top:9px; }
 .replying:empty { display:none; }
@@ -135,6 +143,10 @@ button.gold:hover { background:var(--gold-hover); }
 }
 @container(max-width:500px) {
   .topic-content, .discussion { padding-left:18px; padding-right:18px; }
+  .topic-content { display:block; }
+  .topic-content > .votes { flex-direction:row; border-right:0; border-top:1px dashed var(--c-415759); padding-right:0; padding-top:14px; margin-top:14px; }
+  .topic-content > .votes button { flex-direction:row; width:auto; }
+  .topic-content > .votes b { border-top:0; border-left:1px dashed var(--c-6f7f79); padding-top:0; padding-left:14px; }
   .votes button { min-width:0; flex:1; }
   .votes { gap:10px; }
   .discussion-head { gap:8px; }
@@ -1027,12 +1039,12 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .thread-list, .replies { list-style: none; margin: 0; padding: 0; }
 .thread { position: relative; border-bottom: 1px solid var(--c-415759); padding-bottom: 6px; }
 .thread > .comment { border-bottom: 0; }
-.thread.has-replies::before { content: ""; position: absolute; left: 20px; top: 66px; bottom: 18px; width: 2px; border-radius: 2px; background: var(--line); }
+.thread.has-replies::before { content: ""; position: absolute; left: 20px; top: 66px; bottom: 18px; width: 0; border-left: 2px dashed var(--line); }
 .replies { position: relative; margin-left: 40px; }
 .replies[hidden] { display: none; }
 .replies .comment { border-bottom: 0; padding: 10px 0 12px; }
 .replies > li { position: relative; }
-.replies > li > .comment::before { content: ""; position: absolute; left: -20px; top: 30px; width: 14px; height: 2px; background: var(--line); }
+.replies > li > .comment::before { content: ""; position: absolute; left: -20px; top: 30px; width: 14px; height: 0; border-top: 2px dashed var(--line); }
 .thread-toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin: -6px 0 4px 55px; padding: 2px 4px; border: 0; background: none; color: var(--gold); font: 600 14px/1.2 var(--body); }
 .thread-toggle:hover { background: none; text-decoration: underline; text-underline-offset: 3px; }
 .thread-more { padding: 2px 0 8px; }
