@@ -4881,7 +4881,7 @@
       "relation": "calls",
       "source": "app_components_channels_channels_step_channelsstep",
       "source_file": "app/components/channels/channels-step.tsx",
-      "source_location": "L63",
+      "source_location": "L76",
       "target": "app_components_overlay_step_heading_stepheading",
       "weight": 1.0
     },
@@ -4893,7 +4893,7 @@
       "relation": "calls",
       "source": "app_components_channels_channels_step_channelsstep",
       "source_file": "app/components/channels/channels-step.tsx",
-      "source_location": "L63",
+      "source_location": "L76",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -4905,7 +4905,7 @@
       "relation": "calls",
       "source": "app_components_channels_channels_step_channelsstep",
       "source_file": "app/components/channels/channels-step.tsx",
-      "source_location": "L65",
+      "source_location": "L78",
       "target": "app_components_channels_channels_step_channelssummary",
       "weight": 1.0
     },
@@ -4917,7 +4917,7 @@
       "relation": "calls",
       "source": "app_components_channels_channels_step_channelsstep",
       "source_file": "app/components/channels/channels-step.tsx",
-      "source_location": "L66",
+      "source_location": "L79",
       "target": "app_components_channels_channel_panel_channelpanel",
       "weight": 1.0
     },
@@ -177066,10 +177066,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "d03fa842f58db95d31abed17003ac5bbe8139bb81c54ea4da68777899e563484",
+    "content_sha256": "fae85f3e4778209d6fb61d2e74f85f88076d37aec23f80823587343e3bf0e5cf",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "3492de4dcea52098977289c8728efc695cfb06e1fdcae8df5c04430a62b192d9",
+    "source_sha256": "2b5350a5f648d79d266da37ead449a07415741058c44e3ff01f7b0a48092c2a6",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],

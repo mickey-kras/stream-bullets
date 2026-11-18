@@ -287,6 +287,16 @@ test("the page is a flow of four numbered steps, with the channels first and col
     await show.getByRole("link", { name: "Connect channels" }).click();
     await expect(details).toHaveAttribute("open", "");
     await expect(kick).toBeVisible();
+    // The address has the fragment now. The same link opens a closed panel again, and so does a load.
+    await summary.click();
+    await expect(kick).toBeHidden();
+    await show.getByRole("link", { name: "Connect channels" }).click();
+    await expect(details).toHaveAttribute("open", "");
+    await summary.click();
+    await expect(kick).toBeHidden();
+    await control.reload();
+    await expect(control).toHaveURL(/#channels-title$/);
+    await expect(details).toHaveAttribute("open", "");
   } finally {
     await close(owner);
     await runSql("channel-flow-cleanup", [`DELETE FROM channel_connections WHERE id='${connectionId}';`]);

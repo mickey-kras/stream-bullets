@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { t } from "../../i18n";
 import type { Provider } from "../../types";
 import { StepHeading } from "../overlay/step-heading";
@@ -50,18 +50,31 @@ export function ChannelsStep({
 }>): ReactNode {
   // Set once: the callback result leaves the address after the first render, and the owner's choice must stay.
   const [open, setOpen] = useState<boolean>((): boolean => channelsStartOpen(channels, result));
-  // The "Connect channels" links of the page go to the heading: open the panel for them.
+  const details = useRef<HTMLDetailsElement | null>(null);
+  // The "Connect channels" links of the page go to the heading: open the panel for them. A click on a link whose
+  // fragment is already in the address makes no hashchange event, and neither does a load with the fragment.
   useEffect((): (() => void) => {
     const reveal = (): void => {
-      if (globalThis.location.hash === "#channels-title") setOpen(true);
+      if (details.current) details.current.open = true;
     };
-    globalThis.addEventListener("hashchange", reveal);
-    return (): void => globalThis.removeEventListener("hashchange", reveal);
+    const fragment = (): void => {
+      if (globalThis.location.hash === "#channels-title") reveal();
+    };
+    const link = (event: MouseEvent): void => {
+      if (event.target instanceof Element && event.target.closest('a[href="#channels-title"]')) reveal();
+    };
+    fragment();
+    globalThis.addEventListener("hashchange", fragment);
+    document.addEventListener("click", link);
+    return (): void => {
+      globalThis.removeEventListener("hashchange", fragment);
+      document.removeEventListener("click", link);
+    };
   }, []);
   return (
     <section className="ov-step" aria-labelledby="channels-title" data-step="channels">
       <StepHeading step={1} id="channels-title" title={t("overlay.step.channels")} focusable />
-      <details className="ch-details" open={open} onToggle={(event) => setOpen(event.currentTarget.open)}>
+      <details className="ch-details" ref={details} open={open} onToggle={(event) => setOpen(event.currentTarget.open)}>
         <summary data-channels-summary>{channelsSummary(channels)}</summary>
         <ChannelPanel channels={channels} providers={providers} signInProvider={signInProvider} result={result} />
       </details>
