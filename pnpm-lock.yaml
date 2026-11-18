@@ -10,6 +10,9 @@ overrides:
   '@esbuild-kit/core-utils>esbuild': 0.28.2
   minimatch@10.2.6: 11.0.1
 
+patchedDependencies:
+  miniflare@4.20260730.0: 64b7b7d84730fbe8f5551a4117dd9a3b85cf1eb19b5ae64ff72440ca3710d410
+
 importers:
 
   .:
@@ -95,7 +98,7 @@ importers:
         version: 10.14.0(jiti@2.7.0)(supports-color@10.2.2)
       miniflare:
         specifier: 4.20260730.0
-        version: 4.20260730.0(@types/node@26.6.6)
+        version: 4.20260730.0(patch_hash=64b7b7d84730fbe8f5551a4117dd9a3b85cf1eb19b5ae64ff72440ca3710d410)(@types/node@26.6.6)
       monocart-coverage-reports:
         specifier: 3.2.0
         version: 3.2.0
@@ -6166,7 +6169,7 @@ snapshots:
 
   mime-db@1.54.0: {}
 
-  miniflare@4.20260730.0(@types/node@26.6.6):
+  miniflare@4.20260730.0(patch_hash=64b7b7d84730fbe8f5551a4117dd9a3b85cf1eb19b5ae64ff72440ca3710d410)(@types/node@26.6.6):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       sharp: 0.35.5(@types/node@26.6.6)

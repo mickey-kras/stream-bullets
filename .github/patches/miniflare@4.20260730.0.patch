@@ -1,0 +1,48 @@
+diff --git a/dist/src/index.js b/dist/src/index.js
+index ae57410a970d7d47f9f1810567529df69e9d8df1..f903c3f37b33a26f0e350c4271369c44de2f8a84 100644
+--- a/dist/src/index.js
++++ b/dist/src/index.js
+@@ -92247,7 +92247,8 @@ port.addEventListener("message", async (event) => {
+       port.postMessage({ id, error: new Error(String(error)) });
+     }
+   } finally {
+-    Atomics.store(notifyHandle, /* index */ 0, /* value */ 1);
++    // Publish this request's generation (never 0), not a bare flag: see fetch()
++    Atomics.store(notifyHandle, /* index */ 0, /* generation */ (id + 1) | 0);
+     Atomics.notify(notifyHandle, /* index */ 0);
+   }
+ });
+@@ -92278,13 +92279,6 @@ var SynchronousFetcher = class {
+   }
+   fetch(url44, init2) {
+     this.#ensureWorker();
+-    Atomics.store(
+-      this.#notifyHandle,
+-      /* index */
+-      0,
+-      /* value */
+-      0
+-    );
+     const id = this.#nextId++;
+     this.#channel.port1.postMessage({
+       id,
+@@ -92293,13 +92287,12 @@ var SynchronousFetcher = class {
+       headers: init2.headers,
+       body: init2.body
+     });
+-    Atomics.wait(
+-      this.#notifyHandle,
+-      /* index */
+-      0,
+-      /* value */
+-      0
+-    );
++    // Wait for this request's own generation. A notify left over from the previous request (the worker stores,
++    // then notifies, and can be descheduled between the two) only sends the loop round again.
++    const generation = id + 1 | 0;
++    for (let seen = Atomics.load(this.#notifyHandle, 0); seen !== generation; seen = Atomics.load(this.#notifyHandle, 0)) {
++      Atomics.wait(this.#notifyHandle, 0, seen);
++    }
+     const message = (0, import_node_worker_threads.receiveMessageOnPort)(
+       this.#channel.port1
+     )?.message;
