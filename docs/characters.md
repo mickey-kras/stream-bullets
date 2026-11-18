@@ -152,7 +152,7 @@ See the [capability matrix](channel-connections.md#capability-matrix).
 
 ## Controls
 
-The **Characters** part of the **Composition** editor on **Overlay control** has these controls:
+The **Characters** part of step 2 (**Choose what shows**) on **Overlay control** has these controls:
 
 - **Show on stream** shows or hides the layer.
 - **Seconds without chat before a character walks out** sets the inactivity timeout, from 10 to 600 seconds.

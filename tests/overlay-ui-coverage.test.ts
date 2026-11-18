@@ -4,10 +4,17 @@ import { describe, expect, it } from "vitest";
 import { controlState, defaultRef, OverlayControl } from "../app/components/overlay/overlay-control";
 import { ChatLayer, shortName } from "../app/components/overlay/chat-layer";
 import { CharactersSlot, CONTENT_SELECTOR, layerSelector } from "../app/components/overlay/overlay-composition";
+import {
+  SAMPLE_SOURCE,
+  sampleCharactersFeed,
+  sampleCharactersFrame,
+  sampleScene,
+} from "../app/components/overlay/editor-samples";
 import { chatCoversContent } from "../app/components/overlay/use-chat-overlap";
 import {
   OverlayStage,
   overlayPoll,
+  showsContent,
   upNextStart,
   type OverlayPoll,
   type OverlayScene,
@@ -165,6 +172,43 @@ describe("overlay source fallbacks", () => {
     expect(
       stage({ type: "card", ref: "card" }, { data: { ...data, cards: [{ ...card, label: null }] } }),
     ).not.toContain('class="ov-cta"');
+  });
+
+  it("knows which sources leave the stage empty, and fills a sample topic for the editor", () => {
+    const card: OverlayData["cards"][number] = { id: "card", icon: null, title: "C", body: "", label: null, target: null };
+    expect(showsContent({ type: "hidden", ref: null }, data)).toBe(false);
+    expect(showsContent({ type: "topic", ref: "deleted" }, data)).toBe(false);
+    expect(showsContent({ type: "next", ref: null }, data)).toBe(false);
+    expect(showsContent({ type: "next", ref: null }, { ...data, next: { title: "Soon", startsAt: 2000 } })).toBe(true);
+    expect(showsContent({ type: "card", ref: null }, data)).toBe(false);
+    expect(showsContent({ type: "card", ref: null }, { ...data, cards: [card] })).toBe(true);
+    expect(showsContent({ type: "card", ref: "deleted" }, { ...data, cards: [card] })).toBe(false);
+    expect(showsContent({ type: "auto", ref: null }, data)).toBe(true);
+    expect(showsContent({ type: "message", ref: null }, data)).toBe(true);
+    const sample: OverlayScene = sampleScene(scene);
+    expect(showsContent(SAMPLE_SOURCE, sample.data)).toBe(true);
+    expect(stage(SAMPLE_SOURCE, sample)).toContain("Sample topic");
+    // The scene of the page keeps its own topics.
+    expect(scene.data.topics).toEqual([]);
+  });
+
+  it("gives the editor a still sample frame of characters without a socket", () => {
+    const frame = sampleCharactersFrame(16, 2);
+    expect(frame.full).toBe(true);
+    expect(frame.terrain.w).toBe(640);
+    expect(frame.roster.map((entry) => entry.name)).toEqual(["RustBucket", "Ngozi Okafor", "Zoë_Ünter", "scav_kid"]);
+    for (const [, x10, y10] of frame.chars) {
+      expect(x10 / 10).toBeGreaterThan(frame.terrain.xmin);
+      expect(x10 / 10).toBeLessThan(frame.terrain.xmax);
+      expect(y10 / 10).toBe(frame.terrain.gy);
+    }
+    const seen: unknown[] = [];
+    const feed = sampleCharactersFeed(6, 2);
+    feed?.subscribe((message) => seen.push(message))();
+    expect(seen).toEqual([sampleCharactersFrame(6, 2)]);
+    expect(feed?.status).toBe("off");
+    // A cell below the playground size limits gets no sample.
+    expect(sampleCharactersFeed(2, 1)).toBeNull();
   });
 
   it("shows support and message setup hints until content has been saved", () => {

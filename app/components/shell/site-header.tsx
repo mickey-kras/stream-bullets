@@ -37,6 +37,12 @@ export function SiteHeader(): ReactNode {
             {t("nav.yourPage")}
           </Link>
         )}
+        {shell.ownStreamer && (
+          <Link to={paths.overlayControl} aria-current={current(paths.overlayControl)}>
+            <Icon name="overlay" size={18} />
+            {t("nav.overlay")}
+          </Link>
+        )}
         {shell.admin && (
           <Link to={paths.admin} aria-current={pathname.startsWith(paths.admin) ? "page" : undefined}>
             <Icon name="admin" size={18} />

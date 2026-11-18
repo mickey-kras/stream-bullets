@@ -13,7 +13,8 @@ import { getOverlaySnapshot, getOwnStreamer } from "../server/data.server";
 import { hasOverlayKey } from "../server/overlay-key.server";
 import { getOverlayData, getOverlayState, sourceTopics } from "../server/overlay.server";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
-import { ChannelPanel, resultMessage } from "../components/channels/channel-panel";
+import { resultMessage } from "../components/channels/channel-panel";
+import { ChannelsStep } from "../components/channels/channels-step";
 import { OverlayControl } from "../components/overlay/overlay-control";
 import type { OverlayPoll } from "../components/overlay/overlay-stage";
 import { SiteHeader } from "../components/shell/site-header";
@@ -89,18 +90,15 @@ export default function OverlayControlPage(): ReactNode {
           connected={status === "live" || status === "connecting"}
           reconnect={status === "offline" ? reconnect : undefined}
           scene={{ name: loaded.name, handle: loaded.handle, host: loaded.host, polls, data: loaded.data, now }}
+          channels={
+            <ChannelsStep
+              channels={loaded.channels}
+              providers={loaded.providers}
+              signInProvider={loaded.signInProvider}
+              result={resultMessage(search.get("channel"), search.get("result"))}
+            />
+          }
         />
-        <section className="ch-section" aria-labelledby="channels-title">
-          <h2 id="channels-title" tabIndex={-1}>
-            {t("channels.title")}
-          </h2>
-          <ChannelPanel
-            channels={loaded.channels}
-            providers={loaded.providers}
-            signInProvider={loaded.signInProvider}
-            result={resultMessage(search.get("channel"), search.get("result"))}
-          />
-        </section>
       </main>
     </>
   );
