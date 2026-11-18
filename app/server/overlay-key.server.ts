@@ -66,7 +66,8 @@ export async function regenerateOverlayKey(
   actorId: string,
   streamer: { id: string; status: StreamerStatus },
 ): Promise<string> {
-  if (!isStreamerListed(streamer.status)) throw new HttpError(423, "This page is suspended. Nothing on it can change.");
+  if (!isStreamerListed(streamer.status))
+    throw new HttpError(423, "This page is suspended. Nothing on it can change.", "page_suspended");
   const key = newOverlayKey();
   const now = Date.now();
   await env.DB.batch([

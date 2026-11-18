@@ -300,6 +300,25 @@ async function checkSecret(value: string, expected: string): Promise<void> {
   if (!timingSafeEqual(given, actual)) throw new HttpError(403, "Test access denied.");
 }
 
+// The gate cannot load the application stylesheet: each other path needs test access. Colors follow app/styles/tokens.css.
+const GATE_STYLE: string = [
+  ":root{color-scheme:dark}",
+  "body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0a2025;color:#f7edcf;font:400 1rem/1.5 system-ui,sans-serif}",
+  "main{box-sizing:border-box;width:min(100%,30rem);padding:1.5rem}",
+  "h1{margin:0 0 1rem;font-size:1.75rem}",
+  "p{margin:0 0 .75rem;color:#bcc8c4}",
+  "code{overflow-wrap:anywhere}",
+  "form{display:grid;gap:1rem;margin-top:1.5rem}",
+  "label{display:grid;gap:.25rem}",
+  "input,select,button{font:inherit;color:inherit;min-height:2.75rem;padding:0 .75rem;border:1px solid #849291;border-radius:.5rem;background:#11282d}",
+  "div{display:flex;flex-wrap:wrap;gap:.5rem}",
+  "button{cursor:pointer}",
+  "button:hover{border-color:#edbd53;background:#2d4649}",
+  "button[value=login]{border-color:#edbd53;background:#edbd53;color:#061a1e;font-weight:600}",
+  "button[value=login]:hover{background:#f8ce72}",
+  ":focus-visible{outline:2px solid #edbd53;outline-offset:2px}",
+].join("");
+
 export async function testEnvironmentResponse(request: Request, env: AppEnv): Promise<Response> {
   await requireTestDatabase(env);
   queryParams(request, []);
@@ -307,7 +326,7 @@ export async function testEnvironmentResponse(request: Request, env: AppEnv): Pr
     const commit: string = /^[a-f0-9]{40}$/u.test(env.DEPLOYED_COMMIT ?? "") ? env.DEPLOYED_COMMIT! : "undeployed";
     const options: string = TEST_ACCOUNTS.map((account: TestAccount): string => `<option>${account}</option>`).join("");
     return new Response(
-      `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>StreamBullets test access</title><h1>Test environment</h1><p>Commit: ${commit}</p><p>Use the shared test access secret from approved secret storage.</p><form method="post"><label>Access secret <input type="password" name="secret" required autocomplete="off"></label><label>Account <select name="account"><option>signedout</option>${options}</select></label><button name="action" value="login">Sign in</button><button name="action" value="seed">Seed missing fixtures</button><button name="action" value="reset">Reset synthetic data</button></form></html>`,
+      `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>StreamBullets test access</title><style>${GATE_STYLE}</style><main><h1>Test environment</h1><p>Commit: <code>${commit}</code></p><p>Use the shared test access secret from approved secret storage.</p><form method="post"><label>Access secret <input type="password" name="secret" required autocomplete="off"></label><label>Account <select name="account"><option>signedout</option>${options}</select></label><div><button name="action" value="login">Sign in</button><button name="action" value="seed">Seed missing fixtures</button><button name="action" value="reset">Reset synthetic data</button></div></form></main></html>`,
       {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
