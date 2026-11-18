@@ -82,7 +82,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   await expect(editor).toBeVisible();
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
@@ -105,7 +105,20 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   const chatLayer = editor.locator('[data-comp-layer="chat"]');
   await expect(editor.locator('[data-comp-layer="characters"]').getByRole("checkbox")).not.toBeChecked();
   await expect(chatLayer.getByRole("checkbox", { name: "Show on stream" })).not.toBeChecked();
-  await expect(frame.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
+  // A layer that is off shows a dimmed sample in its area: sample chat rows and sample characters.
+  await expect(frame).toHaveAttribute("data-sample-off", "chat characters");
+  const sampleChat = frame.locator('.ov-layer[data-layer="chat"]');
+  await expect(sampleChat.locator("li.wl-item").first()).toBeVisible();
+  await expect(sampleChat).toHaveCSS("opacity", "0.45");
+  const sampleCharacters = frame.locator('.ov-layer[data-layer="characters"]');
+  await expect(sampleCharacters.locator("canvas.characters-layer")).toBeVisible();
+  await expect(sampleCharacters).toHaveCSS("opacity", "0.45");
+  await expect(frame.locator('[data-grid-box="chat"]')).toHaveAttribute("data-off", "true");
+  await expect(editor.locator("[data-comp-sample-off]")).toHaveText(
+    "A dimmed layer is off. Its sample shows only in this preview, not on stream.",
+  );
+  // The sample is only in the preview: the saved chat layer stays off.
+  expect((await storedLayers(page)).chat.enabled).toBe(false);
   // Beside the toggle: chat on puts the on-air content in the layout of the preview.
   await expect(chatLayer.locator("[data-comp-scale]")).toContainText("turning on chat changes the size of the on-air");
   await expect(editor.locator("[data-comp-frame-size]")).toHaveText(
@@ -117,6 +130,10 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await save;
   // The preview plays sample chat without an activity socket.
   await expect(frame.locator('.ov-layer[data-layer="chat"] .wl-chat')).toBeVisible();
+  // The chat is on: its preview is not dimmed. The characters layer is still off.
+  await expect(frame).toHaveAttribute("data-sample-off", "characters");
+  await expect(frame.locator('.ov-layer[data-layer="chat"]')).toHaveCSS("opacity", "1");
+  await expect(frame.locator('[data-grid-box="chat"]')).not.toHaveAttribute("data-off");
 
   // Keep the whole preview clear of the sticky header and footer.
   await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
@@ -248,7 +265,7 @@ test("a new orientation ends a drag and keeps the keyboard cursor inside its gri
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   const status = editor.locator("[data-grid-status]");
   await expect(editor.locator("[data-comp-orientation-note]")).toHaveText(
@@ -456,7 +473,7 @@ test("a rejected layer save rolls back and shows an error", async ({ browser }) 
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   const show = editor.locator('[data-comp-layer="chat"]').getByRole("checkbox", { name: "Show on stream" });
   await expect(show).not.toBeChecked();
   await page.route("**/api/overlay", (route) =>
@@ -472,7 +489,8 @@ test("a rejected layer save rolls back and shows an error", async ({ browser }) 
   await show.click();
   await expect(editor.getByRole("alert")).toContainText("Too many requests");
   await expect(show).not.toBeChecked();
-  await expect(editor.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
+  // The chat is off again: the preview shows its sample dimmed.
+  await expect(editor.locator(".ov-comp-frame")).toHaveAttribute("data-sample-off", /\bchat\b/);
   await close(owner);
 });
 
@@ -480,7 +498,7 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   const chatLayer = editor.locator('[data-comp-layer="chat"]');
   const show = chatLayer.getByRole("checkbox", { name: "Show on stream" });
   const hide = chatLayer.getByRole("checkbox", { name: "Hide chat commands (!jump)" });
@@ -540,7 +558,6 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.goto("/overlay-control");
-  await page.getByText("Setup", { exact: true }).click();
   await expect(page.locator("[data-ov-layer-urls]")).toHaveCount(0);
   await page.getByRole("button", { name: /^(Create overlay link|Regenerate link)$/ }).click();
   // An existing link asks for confirmation first.
@@ -560,7 +577,6 @@ test("a new overlay link lists one URL per layer", async ({ browser }) => {
     `Source size: ${characters.w} × ${characters.h}`,
   );
   await page.reload();
-  await page.getByText("Setup", { exact: true }).click();
   await expect(page.locator(".ov-url")).toContainText("&layer=chat");
   await expect(page.locator("[data-ov-layer-url]")).toHaveCount(0);
   await close(owner);
@@ -591,6 +607,14 @@ for (const reduced of [true, false]) {
     const page = await newPage(owner);
     await page.emulateMedia({ reducedMotion: reduced ? "reduce" : "no-preference" });
     await page.clock.install();
+    // The sample emote comes from the Twitch CDN. Serve it here: without network its text fallback shows at an
+    // unknown time and would change a row between the two reads.
+    await page.route("https://static-cdn.jtvnw.net/**", (route) =>
+      route.fulfill({
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>',
+      }),
+    );
     await page.goto("/overlay-control");
     const frame = page.getByRole("region", { name: "Composition preview" });
     const rows = frame.locator('.ov-layer[data-layer="chat"] li.wl-item');
@@ -614,13 +638,66 @@ for (const reduced of [true, false]) {
   });
 }
 
+test("a content cell with nothing on air shows a sample card in the preview only", async ({ browser }) => {
+  const air = (source: string): string =>
+    `UPDATE overlay_state SET air='${source}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
+  await runSql("composition-editor-sample-air", [air('{"type":"hidden","ref":null}')]);
+  const owner = await signedIn(browser, "featureowner", OWNER_IP);
+  try {
+    const cell = { c: 6, r: 0, w: 6, h: 3 };
+    const placed = await owner.request.post("/api/overlay", {
+      data: { action: "layers", cells: { horizontal: { content: cell } } },
+    });
+    expect(placed.ok()).toBe(true);
+    const page = await newPage(owner);
+    await page.goto("/overlay-control");
+    const editor = page.locator("[data-composition-editor]");
+    const frame = editor.getByRole("region", { name: "Composition preview" });
+    // Hidden is on air: the content area shows a dimmed sample topic, and its box has the "off" style.
+    const content = frame.locator('.ov-layer[data-layer="content"]');
+    await expect(content.locator('[data-overlay-source="topic"]')).toContainText("Sample topic");
+    await expect(content).toHaveCSS("opacity", "0.45");
+    await expect(frame).toHaveAttribute("data-sample-off", "chat characters content");
+    await expect(frame.locator('[data-grid-box="content"]')).toHaveAttribute("data-off", "true");
+    // The grid stays clear under the pointer.
+    const grid = editor.locator("[data-comp-grid]");
+    await grid.hover();
+    await expect(grid).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    // The monitors and OBS show what is on air: nothing. The sample is not saved.
+    await expect(page.locator('[data-ov-monitor="air"]')).not.toContainText("Sample topic");
+    const obs = await newPage(browser, { viewport: { width: 1920, height: 1080 } });
+    await obs.goto("/@feature_host/overlay");
+    await expect(obs.locator('.ov-layer[data-layer="content"] [data-overlay-type="hidden"]')).toBeEmpty();
+    await expect(obs.getByText("Sample topic")).toHaveCount(0);
+    await expect(obs.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
+    await expect(obs.locator('.ov-layer[data-layer="characters"]')).toHaveCount(0);
+    await close(obs);
+    const stored = await storedLayers(page);
+    expect(stored.chat.enabled).toBe(false);
+    expect(stored.characters.enabled).toBe(false);
+    expect(stored.cells.horizontal.content).toEqual(cell);
+    // With content on air the area shows the real content, not dimmed.
+    // The radio follows the saved preview, so it changes after the save.
+    await page.getByRole("radio", { name: /Message banner/ }).click();
+    await expect(page.getByRole("radio", { name: /Message banner/ })).toBeChecked();
+    await page.getByRole("button", { name: /Take/ }).click();
+    await expect(content.locator('[data-overlay-source="message"]')).toBeVisible();
+    await expect(content).toHaveCSS("opacity", "1");
+    await expect(frame).toHaveAttribute("data-sample-off", "chat characters");
+    await expect(frame.locator('[data-grid-box="content"]')).not.toHaveAttribute("data-off");
+  } finally {
+    await close(owner);
+    await runSql("composition-editor-sample-air-reset", [air('{"type":"auto","ref":null}')]);
+  }
+});
+
 test("a note shows while the chat covers the on-air content and goes when the chat moves away", async ({ browser }) => {
   await runSql("composition-editor-overlap", [seededAir, chatOn]);
   const owner = await signedIn(browser, "featureowner", OVERLAP_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame.locator(".ov-stage > *").first()).toBeVisible();
   // The default chat cell (columns 1 to 5, rows 1 to 7) covers the left part of the poll.
@@ -671,7 +748,7 @@ test("closing the editor sends an edit that waits for the idle save", async ({ b
   const page = await newPage(owner);
   await page.clock.install();
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
   // A key edit saves after a short idle time. Stop the clock, so only leaving the page can send it.
   await page.clock.pauseAt(Date.now() + 1000);
@@ -714,7 +791,7 @@ test("leaving the editor by an in-app link sends the edit that waits for the idl
   const page = await newPage(owner);
   await page.clock.install();
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
   // Stop the clock, so only closing the editor can send the key edit.
   await page.clock.pauseAt(Date.now() + 1000);
@@ -736,7 +813,7 @@ test("leaving the editor during a save sends the newer edit after it, so the new
   const page = await newPage(owner);
   await page.clock.install();
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
   await page.clock.pauseAt(Date.now() + 1000);
   const bodies: unknown[] = [];
@@ -780,7 +857,7 @@ for (const stale of [false, true]) {
     const page = await newPage(owner);
     await page.clock.install();
     await page.goto("/overlay-control");
-    const editor = page.getByRole("region", { name: "Composition", exact: true });
+    const editor = page.locator("[data-composition-editor]");
     await expect(editor.getByRole("region", { name: "Composition preview" })).toHaveAttribute("data-scaled", "true");
     await page.clock.pauseAt(Date.now() + 1000);
     await page.route("**/api/overlay", (route) =>
@@ -797,7 +874,7 @@ for (const stale of [false, true]) {
     // Back in the app (no page load), the editor shows the error with its own prefix, unless it is stale.
     await page.goBack();
     await expect(page.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
-    const back = page.getByRole("region", { name: "Composition", exact: true });
+    const back = page.locator("[data-composition-editor]");
     await expect(back.locator("[data-comp-grid]")).toBeVisible();
     if (stale) await expect(back.getByRole("alert")).toHaveCount(0);
     else {

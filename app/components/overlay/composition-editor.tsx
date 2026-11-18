@@ -22,7 +22,8 @@ import { type ActivityFeed, useActivityFeed } from "./activity-feed";
 import { CharactersControls } from "./characters-controls";
 import { LAYER_NAMES, LayoutGrid, type PreviewBackground } from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
-import type { OverlayScene } from "./overlay-stage";
+import { showsContent, type OverlayScene } from "./overlay-stage";
+import { StepHeading } from "./step-heading";
 import { useChatOverlap } from "./use-chat-overlap";
 import { useLayerDraft, type EditorError, type EditTiming } from "./use-layer-draft";
 
@@ -34,6 +35,11 @@ const ORIENTATION_NAMES: Readonly<Record<Orientation, MessageId>> = {
   horizontal: "overlay.grid.horizontal",
   vertical: "overlay.grid.vertical",
 };
+
+/** A placed chat or characters layer that is off: the preview shows its sample dimmed. */
+function layerOff(layers: OverlayLayers, layer: GridLayer): boolean {
+  return layer !== "content" && layers.cells[layers.orientation][layer] !== null && !layers[layer].enabled;
+}
 
 /** Debounce for the overlap note: it changes only once a move has settled. */
 const OVERLAP_NOTE_MS = 500;
@@ -138,9 +144,10 @@ function ChatTest({
 }
 
 /**
- * The Composition section of Overlay control: the layout grid of the selected orientation over a preview of what
- * OBS shows. It plays sample chat. While the characters layer is on, it opens the owner's characters socket and shows
- * the live playground. Layer edits go live at once.
+ * Steps 2 and 3 of Overlay control. Step 2 has the live control (`live`) and the switches of the chat and characters
+ * layers. Step 3 has the layout grid of the selected orientation over a preview of what OBS shows. The preview plays
+ * sample chat. While the characters layer is on, it opens the owner's characters socket and shows the live
+ * playground. Layer edits go live at once.
  */
 export function CompositionEditor({
   layers,
@@ -148,6 +155,7 @@ export function CompositionEditor({
   source,
   chatTestUntil,
   onSaved,
+  live,
 }: Readonly<{
   /** The newest saved or live layers. */
   layers: OverlayLayers;
@@ -157,8 +165,11 @@ export function CompositionEditor({
   /** Server time when the chat test ends. */
   chatTestUntil: number;
   onSaved: (overlay: OverlayState) => void;
+  /** The live control of the on-air content: monitors, Take and sources. */
+  live: ReactNode;
 }>): ReactNode {
-  const titleId: string = useId();
+  const showId: string = useId();
+  const placeId: string = useId();
   const commandsId: string = useId();
   const orientationNoteId: string = useId();
   const [background, setBackground] = useState<PreviewBackground>("checker");
@@ -178,6 +189,10 @@ export function CompositionEditor({
     { enabled: shown.chat.enabled && content === null, rect: layerPixels(shown, "chat") ?? { x: 0, y: 0, w: 0, h: 0 } },
     source,
   );
+  // The preview dims a sample: a placed layer that is off, or a content cell with nothing on air.
+  const dimmed: boolean =
+    GRID_LAYERS.some((layer: GridLayer): boolean => layerOff(shown, layer)) ||
+    (content !== null && !showsContent(source, scene.data));
   const [sourceBefore, sourceAfter] = tAround("overlay.comp.chatSource", "link");
   // The overlap note follows `covers` OVERLAP_NOTE_MS after the last change. It speaks only after the owner's first
   // edit, not on page load.
@@ -200,94 +215,11 @@ export function CompositionEditor({
   else if (status === "saved") statusText = t("overlay.comp.saved");
 
   return (
-    <section className="ov-comp" aria-labelledby={titleId} data-composition-editor>
-      <div className="ov-comp-head">
-        <h2 id={titleId}>{t("overlay.comp.title")}</h2>
-        <p className="muted">{t("overlay.comp.intro")}</p>
-      </div>
-      <div className="ov-comp-body">
-        <div className="ov-comp-stage" ref={frame}>
-          <div className="ov-comp-bar">
-            <fieldset className="field ov-seg-field">
-              <legend className="field-label">{t("overlay.grid.orientation")}</legend>
-              <div className="seg">
-                {ORIENTATIONS.map((value: Orientation) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={orientation === value}
-                    aria-describedby={orientationNoteId}
-                    onClick={() => change((current) => ({ ...current, orientation: value }))}
-                    data-comp-orientation={value}
-                  >
-                    {t(ORIENTATION_NAMES[value], { cols: GRID[value].cols, rows: GRID[value].rows })}
-                  </button>
-                ))}
-              </div>
-              <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
-                {t("overlay.grid.orientationNote")}
-              </p>
-            </fieldset>
-            <fieldset className="field ov-seg-field">
-              <legend className="field-label">{t("overlay.grid.layer")}</legend>
-              <div className="seg">
-                {GRID_LAYERS.map((layer: GridLayer) => (
-                  <button
-                    key={layer}
-                    type="button"
-                    aria-pressed={selected === layer}
-                    onClick={() => setSelected(layer)}
-                    data-comp-pick={layer}
-                  >
-                    {t("overlay.grid.pick", {
-                      layer: t(LAYER_NAMES[layer]),
-                      w: MIN_CELLS[layer].w,
-                      h: MIN_CELLS[layer].h,
-                    })}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-            <fieldset className="field ov-seg-field">
-              <legend className="field-label">{t("overlay.comp.background")}</legend>
-              <div className="seg">
-                {BACKGROUNDS.map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={background === value}
-                    onClick={() => setBackground(value)}
-                  >
-                    {t(label)}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-          <LayoutGrid
-            layers={shown}
-            scene={scene}
-            source={source}
-            background={background}
-            charactersFeed={charactersOn ? charactersFeed : null}
-            selected={selected}
-            onSelect={setSelected}
-            onPlace={place}
-          />
-          <p className="muted ov-comp-help" data-comp-frame-size>
-            {t("overlay.grid.obsSize", frameSize(orientation))}
-          </p>
-          {/* Always mounted, so a screen reader follows it. Silent until the owner first changes the layout. */}
-          <p className="ov-comp-help ov-comp-overlap" data-comp-overlap aria-live={armed ? "polite" : "off"}>
-            {note ? t("overlay.comp.overlap") : ""}
-          </p>
-          {shown.chat.enabled && (
-            <p className="muted ov-comp-help" data-comp-sample>
-              {t("overlay.comp.sampleChat")}
-            </p>
-          )}
-        </div>
-        <div className="ov-comp-layers">
+    <div className="ov-comp" data-composition-editor>
+      <section className="ov-step" aria-labelledby={showId} data-step="show">
+        <StepHeading step={2} id={showId} title={t("overlay.step.show")} />
+        {live}
+        <div className="ov-comp-layers ov-step-layers">
           <fieldset className="ov-comp-layer" data-comp-layer="chat">
             <legend>{t("overlay.comp.chat")}</legend>
             <p className="muted ov-comp-note" data-comp-chat-source>
@@ -355,28 +287,122 @@ export function CompositionEditor({
               now={scene.now}
             />
           </fieldset>
-          <fieldset className="ov-comp-layer" data-comp-layer="content">
-            <legend>{t("overlay.comp.content")}</legend>
-            {/* Polite: the text changes when the content gets a cell or the Remove button takes it away. */}
-            <p className="muted ov-comp-note" data-comp-content-note aria-live="polite">
-              {t(content ? "overlay.comp.contentCell" : "overlay.comp.contentFull")}
-            </p>
-            {/* aria-disabled, not disabled: the button keeps focus after it removes the cell. */}
-            <button
-              type="button"
-              aria-disabled={content === null}
-              onClick={() => {
-                if (content !== null) place("content", null, "now");
-              }}
-              data-comp-remove
-            >
-              {t("overlay.comp.contentRemove")}
-            </button>
-          </fieldset>
-          <output className="ov-comp-status">{statusText}</output>
-          {error && <EditorAlert error={error} />}
         </div>
-      </div>
-    </section>
+      </section>
+      <section className="ov-step" aria-labelledby={placeId} data-step="place">
+        <StepHeading step={3} id={placeId} title={t("overlay.step.place")} />
+        <p className="muted ov-step-intro">{t("overlay.comp.intro")}</p>
+        <div className="ov-comp-body">
+          <div className="ov-comp-stage" ref={frame}>
+            <div className="ov-comp-bar">
+              <fieldset className="field ov-seg-field">
+                <legend className="field-label">{t("overlay.grid.orientation")}</legend>
+                <div className="seg">
+                  {ORIENTATIONS.map((value: Orientation) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={orientation === value}
+                      aria-describedby={orientationNoteId}
+                      onClick={() => change((current) => ({ ...current, orientation: value }))}
+                      data-comp-orientation={value}
+                    >
+                      {t(ORIENTATION_NAMES[value], { cols: GRID[value].cols, rows: GRID[value].rows })}
+                    </button>
+                  ))}
+                </div>
+                <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
+                  {t("overlay.grid.orientationNote")}
+                </p>
+              </fieldset>
+              <fieldset className="field ov-seg-field">
+                <legend className="field-label">{t("overlay.grid.layer")}</legend>
+                <div className="seg">
+                  {GRID_LAYERS.map((layer: GridLayer) => (
+                    <button
+                      key={layer}
+                      type="button"
+                      aria-pressed={selected === layer}
+                      onClick={() => setSelected(layer)}
+                      data-comp-pick={layer}
+                    >
+                      {t("overlay.grid.pick", {
+                        layer: t(LAYER_NAMES[layer]),
+                        w: MIN_CELLS[layer].w,
+                        h: MIN_CELLS[layer].h,
+                      })}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset className="field ov-seg-field">
+                <legend className="field-label">{t("overlay.comp.background")}</legend>
+                <div className="seg">
+                  {BACKGROUNDS.map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={background === value}
+                      onClick={() => setBackground(value)}
+                    >
+                      {t(label)}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+            <LayoutGrid
+              layers={shown}
+              scene={scene}
+              source={source}
+              background={background}
+              charactersFeed={charactersOn ? charactersFeed : null}
+              selected={selected}
+              onSelect={setSelected}
+              onPlace={place}
+            />
+            <p className="muted ov-comp-help" data-comp-frame-size>
+              {t("overlay.grid.obsSize", frameSize(orientation))}
+            </p>
+            {/* Always mounted, so a screen reader follows it. Silent until the owner first changes the layout. */}
+            <p className="ov-comp-help ov-comp-overlap" data-comp-overlap aria-live={armed ? "polite" : "off"}>
+              {note ? t("overlay.comp.overlap") : ""}
+            </p>
+            {shown.cells[orientation].chat && (
+              <p className="muted ov-comp-help" data-comp-sample>
+                {t("overlay.comp.sampleChat")}
+              </p>
+            )}
+            {dimmed && (
+              <p className="muted ov-comp-help" data-comp-sample-off>
+                {t("overlay.comp.sampleOff")}
+              </p>
+            )}
+          </div>
+          <div className="ov-comp-layers">
+            <fieldset className="ov-comp-layer" data-comp-layer="content">
+              <legend>{t("overlay.comp.content")}</legend>
+              {/* Polite: the text changes when the content gets a cell or the Remove button takes it away. */}
+              <p className="muted ov-comp-note" data-comp-content-note aria-live="polite">
+                {t(content ? "overlay.comp.contentCell" : "overlay.comp.contentFull")}
+              </p>
+              {/* aria-disabled, not disabled: the button keeps focus after it removes the cell. */}
+              <button
+                type="button"
+                aria-disabled={content === null}
+                onClick={() => {
+                  if (content !== null) place("content", null, "now");
+                }}
+                data-comp-remove
+              >
+                {t("overlay.comp.contentRemove")}
+              </button>
+            </fieldset>
+            <output className="ov-comp-status">{statusText}</output>
+            {error && <EditorAlert error={error} />}
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

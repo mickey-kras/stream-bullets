@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { problemRole, resultMessage, statusMessage, type ChannelView } from "../app/components/channels/channel-panel";
-import { CHANNEL_STATUS_CODES, CONNECT_RESULTS } from "../app/lib/activity";
+import { channelsStartOpen, channelsSummary } from "../app/components/channels/channels-step";
+import { CHANNEL_STATUS_CODES, CONNECT_RESULTS, type ActivityPlatform } from "../app/lib/activity";
 
 /** The channel panel's messages: every callback result and status code, unknown values and the fallbacks. */
 
@@ -9,6 +10,36 @@ type Connection = NonNullable<ChannelView["connection"]>;
 function connection(status: Connection["status"], code: string | null): Connection {
   return { displayName: "Host", status, code, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
 }
+
+function channel(platform: ActivityPlatform, status: Connection["status"] | null, available: boolean = true): ChannelView {
+  return { platform, available, connection: status ? connection(status, null) : null };
+}
+
+describe("the channels step", (): void => {
+  it("starts open with no channel connected and names nothing", (): void => {
+    const none: ChannelView[] = [channel("twitch", null), channel("kick", null)];
+    expect(channelsSummary(none)).toBe("No channel connected yet");
+    expect(channelsStartOpen(none, null)).toBe(true);
+  });
+
+  it("starts closed with a healthy connection and names the connected platforms", (): void => {
+    const healthy: ChannelView[] = [channel("twitch", "active"), channel("youtube", null), channel("kick", "active")];
+    expect(channelsSummary(healthy)).toBe("Connected: Twitch, Kick");
+    expect(channelsStartOpen(healthy, null)).toBe(false);
+  });
+
+  it("starts open for a callback result or a connection that the owner can repair", (): void => {
+    const healthy: ChannelView[] = [channel("twitch", "active")];
+    expect(channelsStartOpen(healthy, "Twitch connected.")).toBe(true);
+    const broken: ChannelView[] = [channel("twitch", "active"), channel("kick", "needs_reauth")];
+    expect(channelsSummary(broken)).toBe("Connected: Twitch · Needs attention: Kick");
+    expect(channelsStartOpen(broken, null)).toBe(true);
+    // A platform that the site does not offer cannot be repaired here.
+    const unavailable: ChannelView[] = [channel("youtube", "error", false)];
+    expect(channelsSummary(unavailable)).toBe("Connected: YouTube");
+    expect(channelsStartOpen(unavailable, null)).toBe(false);
+  });
+});
 
 describe("resultMessage", (): void => {
   it("has a message for every callback result, with the platform name", (): void => {
