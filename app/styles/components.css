@@ -1318,9 +1318,9 @@ html[data-reduced="true"] .landing-station .station-tilt { display: none !import
 .key-lost p { margin: 6px 0 0; color: var(--muted); }
 .community-mode { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 16px; }
 .community-mode .muted { margin: 0; }
+/* Phones: the links cover the station. Browse streamers leads to the same place. */
 @media (max-width: 43.75em) {
-  .landing-start { position: relative; z-index: 3; gap: 6px; width: fit-content; max-width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--c-061a1ef0); box-shadow: 0 8px 24px var(--c-0009); }
-  .landing-start li { flex: 1 1 auto; }
+  .landing-start { display: none; }
 }
 .mash-winner .mash-burst { inset: -40px -60px; z-index: 0; -webkit-mask-image: linear-gradient(180deg, var(--c-000) 0 22%, transparent 34% 74%, var(--c-000) 86%); mask-image: linear-gradient(180deg, var(--c-000) 0 22%, transparent 34% 74%, var(--c-000) 86%); }
 .mash-winner > :not(.mash-burst) { position: relative; z-index: 1; background: none !important; padding: 0; }

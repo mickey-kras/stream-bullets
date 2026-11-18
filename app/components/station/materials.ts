@@ -527,7 +527,8 @@ export function wear(material: THREE.MeshStandardMaterial, o: WearOptions): THRE
       );
     shader.fragmentShader = frag;
   };
-  material.customProgramCacheKey = (): string => `sb-wear-${o.exposed}-${o.edges}-${o.grime}-${tiled}`;
+  // Wear strengths are uniforms. Only tiling changes the shader, so materials share programs.
+  material.customProgramCacheKey = (): string => `sb-wear-${tiled}`;
   return material;
 }
 

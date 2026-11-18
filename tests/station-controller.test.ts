@@ -141,11 +141,14 @@ it.each([true, false])(
       getBoundingClientRect: (): object => ({ left: 0, top: 0, width: 1200, height: 800 }),
     });
     const fail = vi.fn();
+    const onFrame = vi.fn();
     const controller = await createStation(
       host as unknown as HTMLDivElement,
       fail,
-      reduced ? {} : { shift: (): number => 0.2, family: "sans-serif" },
+      reduced ? { onFrame } : { shift: (): number => 0.2, family: "sans-serif", onFrame },
     );
+    // The canvas has its size before the first frame; the first frame alone starts the poster fade.
+    expect(onFrame).not.toHaveBeenCalled();
     expect(host.appendChild).toHaveBeenCalledOnce();
     expect(gpu.setSize).toHaveBeenCalledWith(1200, 800);
     const initialPosition = gpu.camera!.position.clone();
@@ -165,6 +168,7 @@ it.each([true, false])(
     host.dispatchEvent(pointer("mouse"));
     frame(100);
     expect(gpu.render).toHaveBeenCalled();
+    expect(onFrame).toHaveBeenCalledOnce();
     gpu.render.mockClear();
     visible([{ isIntersecting: false }]);
     frame(120);
@@ -210,6 +214,7 @@ it.each([true, false])(
     gpu.canvas.dispatchEvent(lost);
     expect(lost.defaultPrevented).toBe(true);
     expect(fail).toHaveBeenCalledOnce();
+    expect(onFrame).toHaveBeenCalledOnce();
     controller.dispose();
     expect(cancel).toHaveBeenCalled();
     expect(disconnect).toHaveBeenCalledTimes(2);

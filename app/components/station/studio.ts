@@ -35,8 +35,8 @@ function studioMicrophone(k: Kit, s: Pick<StudioScope, "onDesk">): void {
   // Pill-shaped superellipse capsule.
   const radiusAt = (y: number): number => 0.08 * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(y / 0.15), 4)), 0.25);
   const capsuleProfile: Array<[number, number]> = [];
-  for (let i = 0; i <= 32; i++) {
-    const y = -0.15 + (i / 32) * 0.3;
+  for (let i = 0; i <= 16; i++) {
+    const y = -0.15 + (i / 16) * 0.3;
     capsuleProfile.push([Math.max(0.001, radiusAt(y)), y]);
   }
   const body = add(new THREE.Group(), head);
@@ -109,16 +109,11 @@ function studioConsole(k: Kit, s: Pick<StudioScope, "onDesk">): void {
     top,
     0.012,
   );
+  const cap = new THREE.MeshStandardMaterial({ color: "#efe3c4", roughness: 0.35 });
   for (let c = 0; c < 6; c++) {
     const x = -0.24 + c * 0.095;
     box([0.01, 0.006, 0.16], [x, 0.02, 0.07], rubber, top, 0.002);
-    box(
-      [0.035, 0.03, 0.025],
-      [x, 0.04, 0.03 + (c % 3) * 0.035],
-      new THREE.MeshStandardMaterial({ color: "#efe3c4", roughness: 0.35 }),
-      top,
-      0.008,
-    );
+    box([0.035, 0.03, 0.025], [x, 0.04, 0.03 + (c % 3) * 0.035], cap, top, 0.008);
     cyl([0.016, 0.018, 0.03], [x, 0.035, -0.08], rubber, top, [14]);
   }
   for (const x of [-0.13, 0.13]) {
@@ -166,7 +161,7 @@ function studioCrt(k: Kit, s: Pick<StudioScope, "onDesk" | "counterTop">): void 
   onLights.push((on: boolean): void => {
     crtMaterial.uniforms.uOn.value = on ? 1 : 0.08;
   });
-  const screenGeo = new THREE.SphereGeometry(1, 32, 24, Math.PI / 2 - 0.2, 0.4, Math.PI / 2 - 0.16, 0.32);
+  const screenGeo = new THREE.SphereGeometry(1, 10, 8, Math.PI / 2 - 0.2, 0.4, Math.PI / 2 - 0.16, 0.32);
   screenGeo.translate(0, 0, -Math.cos(0.2) + 0.02);
   mesh(screenGeo, crtMaterial, [0, 0.28, 0.22], g, false);
   for (let i = 0; i < 2; i++)
