@@ -87,7 +87,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:coverage
-      - run: node --test scripts/browser-coverage.test.ts
+      - run: node --test scripts/browser-coverage.test.ts scripts/deploy-production.test.ts
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         id: coverage
         with:
@@ -291,14 +291,7 @@ jobs:
             echo '```'
             echo 'D1 restore steps: https://developers.cloudflare.com/d1/reference/time-travel/'
           } >> "$GITHUB_STEP_SUMMARY"
-          pnpm exec wrangler d1 migrations apply DB --env production --remote
-          pnpm exec wrangler deploy --config build/server/wrangler.json --message "commit $GITHUB_SHA"
-      - name: Check production response and assets
-        if: steps.revision.outputs.deploy == 'true'
-        run: |
-          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/ --output /tmp/streambullets.html
-          grep -Fq 'id="landing-title"' /tmp/streambullets.html
-          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 10 --max-time 30 https://streambullets.com/fonts.css --output /dev/null
+          bash scripts/deploy-production.sh
 
   graphify:
     name: Graphify snapshot
