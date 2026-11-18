@@ -43905,7 +43905,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L304",
+      "source_location": "L323",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
     },
@@ -43917,7 +43917,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L305",
+      "source_location": "L324",
       "target": "app_server_http_server_queryparams",
       "weight": 1.0
     },
@@ -43929,7 +43929,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L320",
+      "source_location": "L339",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -43941,7 +43941,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L321",
+      "source_location": "L340",
       "target": "app_server_http_server_requiresameorigin",
       "weight": 1.0
     },
@@ -43953,7 +43953,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L324",
+      "source_location": "L343",
       "target": "app_server_http_server_readbody",
       "weight": 1.0
     },
@@ -43965,7 +43965,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L331",
+      "source_location": "L350",
       "target": "app_server_test_environment_server_checksecret",
       "weight": 1.0
     },
@@ -43977,7 +43977,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L332",
+      "source_location": "L351",
       "target": "app_server_test_environment_server_accesscookie",
       "weight": 1.0
     },
@@ -43989,7 +43989,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L335",
+      "source_location": "L354",
       "target": "app_server_test_environment_server_seedtestenvironment",
       "weight": 1.0
     },
@@ -44001,7 +44001,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L353",
+      "source_location": "L372",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -160367,7 +160367,18 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L303",
+      "source_location": "L304",
+      "target": "app_server_test_environment_server_gate_style",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L322",
       "target": "app_server_test_environment_server_testenvironmentresponse",
       "weight": 1.0
     },
@@ -171301,7 +171312,7 @@
       "relation": "contains",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L341",
+      "source_location": "L344",
       "target": "tests_test_environment_test_get",
       "weight": 1.0
     },
@@ -177427,10 +177438,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f28d547c18c05ee572dd63e76d0451e09edadd090a6911c781b8ea8ef03005fc",
+    "content_sha256": "c73d81486f549d55eedf59f29f83369dbb5a31ad4f512ce2cc9decb31cebf118",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "62e705af157c7ae28c79e643a47e9846021b7d3ee87145dcb49c6cc2b1881c02",
+    "source_sha256": "188bf0622c420be8f3eda5630c51281a5d97f9ca743bdbc69d68980889e5be3e",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -204532,7 +204543,7 @@
       "label": "testEnvironmentResponse()",
       "norm_label": "testenvironmentresponse()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L303"
+      "source_location": "L322"
     },
     {
       "_callable": true,
@@ -210521,14 +210532,14 @@
             "callee": "delete",
             "file": "tests/test-environment.test.ts",
             "lang": "typescript",
-            "line": "L348",
+            "line": "L351",
             "receiver_type": "R2Bucket"
           }
         ]
       },
       "norm_label": "get()",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L341"
+      "source_location": "L344"
     },
     {
       "_callable": true,
@@ -218671,6 +218682,16 @@
       "norm_label": "test-environment.server.ts",
       "source_file": "app/server/test-environment.server.ts",
       "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_test_environment_server_gate_style",
+      "label": "GATE_STYLE",
+      "norm_label": "gate_style",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L304"
     },
     {
       "_origin": "ast",
