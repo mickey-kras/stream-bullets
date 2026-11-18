@@ -17253,19 +17253,7 @@
       "relation": "calls",
       "source": "app_components_station_look_createlook",
       "source_file": "app/components/station/look.ts",
-      "source_location": "L91",
-      "target": "app_components_station_look_turn",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_look_createlook",
-      "source_file": "app/components/station/look.ts",
-      "source_location": "L93",
+      "source_location": "L101",
       "target": "app_components_station_look_soften",
       "weight": 1.0
     },
@@ -50793,7 +50781,7 @@
       "relation": "calls",
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L161",
+      "source_location": "L194",
       "target": "tests_station_interaction_test_scene",
       "weight": 1.0
     },
@@ -50805,7 +50793,7 @@
       "relation": "calls",
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L306",
+      "source_location": "L339",
       "target": "app_components_station_scene_client_fitphone",
       "weight": 1.0
     },
@@ -50817,7 +50805,7 @@
       "relation": "calls",
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L336",
+      "source_location": "L369",
       "target": "tests_station_interaction_test_storage",
       "weight": 1.0
     },
@@ -50829,20 +50817,8 @@
       "relation": "calls",
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L43",
+      "source_location": "L45",
       "target": "tests_station_interaction_test_host",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_station_interaction_test",
-      "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L46",
-      "target": "tests_station_interaction_test_camera",
       "weight": 1.0
     },
     {
@@ -50854,6 +50830,18 @@
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
       "source_location": "L48",
+      "target": "tests_station_interaction_test_camera",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_station_interaction_test",
+      "source_file": "tests/station-interaction.test.ts",
+      "source_location": "L50",
       "target": "tests_station_interaction_test_pointer",
       "weight": 1.0
     },
@@ -50865,7 +50853,7 @@
       "relation": "calls",
       "source": "tests_station_interaction_test_scene",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L150",
+      "source_location": "L183",
       "target": "tests_station_interaction_test_host",
       "weight": 1.0
     },
@@ -50877,7 +50865,7 @@
       "relation": "calls",
       "source": "tests_station_interaction_test_scene",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L153",
+      "source_location": "L186",
       "target": "app_components_station_flips_createflips",
       "weight": 1.0
     },
@@ -50889,7 +50877,7 @@
       "relation": "calls",
       "source": "tests_station_interaction_test_scene",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L154",
+      "source_location": "L187",
       "target": "tests_station_interaction_test_camera",
       "weight": 1.0
     },
@@ -53929,7 +53917,7 @@
       "relation": "imports_from",
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L305",
+      "source_location": "L338",
       "target": "app_components_station_scene_client",
       "weight": 1.0
     },
@@ -141892,17 +141880,6 @@
       "source": "app_components_station_look",
       "source_file": "app/components/station/look.ts",
       "source_location": "L22",
-      "target": "app_components_station_look_turn",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_station_look",
-      "source_file": "app/components/station/look.ts",
-      "source_location": "L24",
       "target": "app_components_station_look_look",
       "weight": 1.0
     },
@@ -141913,7 +141890,7 @@
       "relation": "contains",
       "source": "app_components_station_look",
       "source_file": "app/components/station/look.ts",
-      "source_location": "L32",
+      "source_location": "L30",
       "target": "app_components_station_look_createlook",
       "weight": 1.0
     },
@@ -170898,7 +170875,7 @@
       "relation": "contains",
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L141",
+      "source_location": "L174",
       "target": "tests_station_interaction_test_scene",
       "weight": 1.0
     },
@@ -170920,8 +170897,8 @@
       "relation": "contains",
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L318",
-      "target": "tests_station_interaction_test_storage",
+      "source_location": "L35",
+      "target": "tests_station_interaction_test_camera",
       "weight": 1.0
     },
     {
@@ -170931,8 +170908,8 @@
       "relation": "contains",
       "source": "tests_station_interaction_test",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L33",
-      "target": "tests_station_interaction_test_camera",
+      "source_location": "L351",
+      "target": "tests_station_interaction_test_storage",
       "weight": 1.0
     },
     {
@@ -177112,10 +177089,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "18eac099989ca54e5abd5dae9cecf39dfe26648a51043aa7c5cf949f780acac3",
+    "content_sha256": "2e9d21de8710f6baf0cec7759145453370472fdba2aabb4648763910d781df64",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "b7b383831ab840136b012484a3f28f4163e08c7141788217822cd0ee0aded8d1",
+    "source_sha256": "6deba7fcb5ff9a51d14f2b64fbb4b6ded846cba85a415c2724353d1122992ec6",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -178649,7 +178626,7 @@
       "label": "Look",
       "norm_label": "look",
       "source_file": "app/components/station/look.ts",
-      "source_location": "L24"
+      "source_location": "L22"
     },
     {
       "_callable": true,
@@ -190141,21 +190118,21 @@
             "callee": "addEventListener",
             "file": "app/components/station/look.ts",
             "lang": "typescript",
-            "line": "L43",
+            "line": "L45",
             "receiver_type": "HTMLElement"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "app/components/station/look.ts",
             "lang": "typescript",
-            "line": "L47",
+            "line": "L49",
             "receiver_type": "HTMLElement"
           }
         ]
       },
       "norm_label": "createlook()",
       "source_file": "app/components/station/look.ts",
-      "source_location": "L32"
+      "source_location": "L30"
     },
     {
       "_callable": true,
@@ -190167,17 +190144,6 @@
       "norm_label": "soften()",
       "source_file": "app/components/station/look.ts",
       "source_location": "L20"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_components_station_look_turn",
-      "label": "turn()",
-      "norm_label": "turn()",
-      "source_file": "app/components/station/look.ts",
-      "source_location": "L22"
     },
     {
       "_callable": true,
@@ -210047,7 +210013,7 @@
       "label": "camera()",
       "norm_label": "camera()",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L33"
+      "source_location": "L35"
     },
     {
       "_callable": true,
@@ -210080,7 +210046,7 @@
       "label": "scene()",
       "norm_label": "scene()",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L141"
+      "source_location": "L174"
     },
     {
       "_callable": true,
@@ -210091,7 +210057,7 @@
       "label": "storage()",
       "norm_label": "storage()",
       "source_file": "tests/station-interaction.test.ts",
-      "source_location": "L318"
+      "source_location": "L351"
     },
     {
       "_callable": true,
@@ -222748,7 +222714,7 @@
             "callee": "dispatchEvent",
             "file": "tests/station-interaction.test.ts",
             "lang": "typescript",
-            "line": "L84",
+            "line": "L86",
             "receiver_type": "EventTarget"
           }
         ]
