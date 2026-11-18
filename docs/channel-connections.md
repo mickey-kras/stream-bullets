@@ -23,7 +23,7 @@ They never read or change the `account` table of Better Auth or the linked login
 
 Connect, reconnect, and disconnect need a sign-in from the last 10 minutes.
 With an older session, the card of the platform shows a prompt. It names the platform and the sign-in provider of the account.
-The sign-in request sends no age confirmation and no display name. The server reads them only when it creates an account.
+The sign-in sends no age confirmation and no display name. The server reads them only when it creates an account.
 
 Before the browser goes to the sign-in provider, the page stores the platform and the action in the session storage of the tab.
 After the sign-in, the page reads this value once and removes it. A value older than 10 minutes does nothing.
