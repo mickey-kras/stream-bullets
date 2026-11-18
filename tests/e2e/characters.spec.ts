@@ -265,7 +265,7 @@ test("the editor preview opens the owner's characters socket only while the char
     route.fulfill({ json: { paused: false, testEndsAt: null } }),
   );
   await page.goto("/overlay-control");
-  const editor = page.getByRole("region", { name: "Composition", exact: true });
+  const editor = page.locator("[data-composition-editor]");
   const frame = editor.getByRole("region", { name: "Composition preview" });
   await expect(frame).toHaveAttribute("data-scaled", "true");
   // The preview plays sample chat; with the characters layer off it opens no activity socket.

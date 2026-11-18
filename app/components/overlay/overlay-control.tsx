@@ -21,6 +21,7 @@ import { useToast } from "../ui/toast";
 import { CompositionEditor } from "./composition-editor";
 import { OverlayLink } from "./overlay-link";
 import { OverlayStage, type OverlayScene } from "./overlay-stage";
+import { StepHeading } from "./step-heading";
 import { useDesignScale } from "./use-design-scale";
 
 // Must match overlay_state_message_check.
@@ -319,6 +320,7 @@ export function OverlayControl({
   hasOverlayKey,
   connected = true,
   reconnect,
+  channels,
 }: Readonly<{
   initial: OverlayState;
   // Latest live overlay state includes changes from other tabs.
@@ -329,6 +331,8 @@ export function OverlayControl({
   // Offline changes save but reach OBS after reconnect.
   connected?: boolean;
   reconnect?: () => void;
+  // The channel connections section: the first step of the page.
+  channels?: ReactNode;
 }>): ReactNode {
   const toast = useToast();
   const [saved, setSaved] = useState<OverlayState>(initial);
@@ -341,6 +345,7 @@ export function OverlayControl({
     if (!connected) announce(t(offline ? "overlay.offline" : "overlay.disconnected"));
   }, [connected, offline]);
   const titleId: string = useId();
+  const obsId: string = useId();
   const same: boolean = sameSource(state.preview, state.air);
   const view: OverlayScene = { ...scene, overlay: state };
   // Save responses can arrive out of order; an older revision must not replace a newer one.
@@ -419,6 +424,92 @@ export function OverlayControl({
     </div>
   );
 
+  // The live control of the on-air content. It is part of step 2: the owner chooses a source, checks the preview
+  // and takes it on air.
+  const liveControl: ReactNode = (
+    <div
+      className={["ov-grid", state.instant && "is-instant", enlarged && `enlarge-${enlarged}`]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {!state.instant && (
+        <Monitor
+          kind="prev"
+          source={state.preview}
+          scene={view}
+          enlarged={enlarged === "prev"}
+          onEnlarge={() => enlarge("prev")}
+        />
+      )}
+      {take}
+      <Monitor
+        kind="air"
+        source={state.air}
+        scene={view}
+        enlarged={enlarged === "air"}
+        onEnlarge={() => enlarge("air")}
+      />
+      <section className="ov-sources" aria-labelledby={titleId}>
+        <h3 id={titleId}>{t("overlay.sources")}</h3>
+        <ul>
+          {SOURCES.map((source, index: number) => {
+            const selected: boolean = state.preview.type === source.type;
+            const onAir: boolean = state.air.type === source.type;
+            const classes: string = `ov-source${selected ? " is-selected" : ""}${onAir ? " is-air" : ""}`;
+            return (
+              <li key={source.type} className={classes}>
+                <label className="ov-source-main">
+                  <input
+                    type="radio"
+                    name="ov-source"
+                    value={source.type}
+                    checked={selected}
+                    disabled={busy}
+                    onChange={() => choose(source.type)}
+                  />
+                  <span className="ov-key" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  <Icon name={source.icon} size={20} />
+                  <span className="ov-source-text">
+                    <strong>{t(source.label)}</strong>
+                    <small>{t(source.hint)}</small>
+                  </span>
+                  {onAir && <span className="onair-badge">{t("overlay.onAir")}</span>}
+                </label>
+                {selected && <SourcePicker type={source.type} state={state} data={scene.data} busy={busy} run={run} />}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+      <div className="ov-extra">
+        <details className="ov-layout-wrap" ref={openOnWideScreens}>
+          <summary>
+            <Icon name="overlay" size={16} />
+            {t("overlay.positionAndSize")}
+          </summary>
+          <div className="ov-layout">
+            <Segmented
+              label={t("overlay.position")}
+              value={state.position}
+              options={POSITIONS.map(([position, id]) => [position, t(id)] as const)}
+              disabled={busy}
+              onChange={(position: OverlayPosition) => run({ action: "layout", position })}
+            />
+            <Segmented
+              label={t("overlay.size")}
+              value={state.size}
+              options={SIZES}
+              disabled={busy}
+              onChange={(size: OverlaySize) => run({ action: "layout", size })}
+            />
+          </div>
+        </details>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="ov-head">
@@ -445,103 +536,19 @@ export function OverlayControl({
           )}
         </p>
       )}
-      <div
-        className={["ov-grid", state.instant && "is-instant", enlarged && `enlarge-${enlarged}`]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        {!state.instant && (
-          <Monitor
-            kind="prev"
-            source={state.preview}
-            scene={view}
-            enlarged={enlarged === "prev"}
-            onEnlarge={() => enlarge("prev")}
-          />
-        )}
-        {take}
-        <Monitor
-          kind="air"
-          source={state.air}
-          scene={view}
-          enlarged={enlarged === "air"}
-          onEnlarge={() => enlarge("air")}
-        />
-        <section className="ov-sources" aria-labelledby={titleId}>
-          <h2 id={titleId}>{t("overlay.sources")}</h2>
-          <ul>
-            {SOURCES.map((source, index: number) => {
-              const selected: boolean = state.preview.type === source.type;
-              const onAir: boolean = state.air.type === source.type;
-              const classes: string = `ov-source${selected ? " is-selected" : ""}${onAir ? " is-air" : ""}`;
-              return (
-                <li key={source.type} className={classes}>
-                  <label className="ov-source-main">
-                    <input
-                      type="radio"
-                      name="ov-source"
-                      value={source.type}
-                      checked={selected}
-                      disabled={busy}
-                      onChange={() => choose(source.type)}
-                    />
-                    <span className="ov-key" aria-hidden="true">
-                      {index + 1}
-                    </span>
-                    <Icon name={source.icon} size={20} />
-                    <span className="ov-source-text">
-                      <strong>{t(source.label)}</strong>
-                      <small>{t(source.hint)}</small>
-                    </span>
-                    {onAir && <span className="onair-badge">{t("overlay.onAir")}</span>}
-                  </label>
-                  {selected && (
-                    <SourcePicker type={source.type} state={state} data={scene.data} busy={busy} run={run} />
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-        <div className="ov-extra">
-          <details className="ov-layout-wrap" ref={openOnWideScreens}>
-            <summary>
-              <Icon name="overlay" size={16} />
-              {t("overlay.positionAndSize")}
-            </summary>
-            <div className="ov-layout">
-              <Segmented
-                label={t("overlay.position")}
-                value={state.position}
-                options={POSITIONS.map(([position, id]) => [position, t(id)] as const)}
-                disabled={busy}
-                onChange={(position: OverlayPosition) => run({ action: "layout", position })}
-              />
-              <Segmented
-                label={t("overlay.size")}
-                value={state.size}
-                options={SIZES}
-                disabled={busy}
-                onChange={(size: OverlaySize) => run({ action: "layout", size })}
-              />
-            </div>
-          </details>
-          <details className="ov-setup">
-            <summary>
-              <Icon name="link" size={16} />
-              {t("overlay.setup")}
-            </summary>
-            <OverlayLink hasKey={hasOverlayKey} layers={state.layers} />
-          </details>
-        </div>
-      </div>
+      {channels}
       <CompositionEditor
         layers={state.layers}
         scene={view}
         source={state.air}
         chatTestUntil={state.chatTestUntil}
         onSaved={keepNewest}
+        live={liveControl}
       />
+      <section className="ov-step" aria-labelledby={obsId} data-step="obs">
+        <StepHeading step={4} id={obsId} title={t("overlay.step.obs")} />
+        <OverlayLink hasKey={hasOverlayKey} layers={state.layers} />
+      </section>
       <div className="ov-take-dock">{take}</div>
     </>
   );
