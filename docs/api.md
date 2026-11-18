@@ -6,12 +6,19 @@ Reads (`GET`/`HEAD`) allow signed-out access unless noted.
 Writes need sign-in, exact origin, and no query string. Failures return `401`, `403`, or `400`.
 Unknown paths return `404`. Unsupported methods on known paths return `405`.
 
+The Worker applies address quotas of 120 requests each minute. An address is one IPv4 address or one IPv6 `/64` network.
+Each of these kinds of requests has its own quota: `/api/auth/*`, WebSocket connections, writes, and private reads.
+Private reads are `/api/admin*` and `/api/account/export`. Other reads use no address quota.
+
+Requests above the quota get `429` with `Retry-After: 60`.
+A path with malformed percent-encoding returns `400`.
+
 Errors return `{error, code?, details?}` with the HTTP status. `error` is an English message.
 `code` is a stable reason. `details` is an optional `Record<string, string>` with values for that code.
 
-The client translates a known code. Without a known code, it translates the status.
-In English, a `4xx` error without a known code shows the `error` message.
-A `5xx` error always shows a general message.
+The client translates a known code. A `423` or `429` without a known code gets a status message.
+For other errors without a known code, English shows `error`. Other languages show a status message.
+English also shows `error` for `step_up_required` and `other_key_required`.
 
 ## Changed response shapes
 

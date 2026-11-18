@@ -46,6 +46,39 @@ async function clientKey(request: Request): Promise<string> {
 const BINARY_LABELS_COMPATIBILITY_HEADER: string = "X-StreamBullets-Binary-Labels";
 const BINARY_LABELS_COMPATIBILITY_VERSION: string = "1";
 
+type QuotaScope = "auth" | "connect" | "write" | "private-read";
+
+const READ_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD", "OPTIONS"]);
+const PRIVATE_READ_PATH: RegExp = /^\/api\/(admin(?:\/|$)|account\/export$)/;
+
+// The router decodes and ignores letter case, and its data URLs reach the same loader as the document path.
+// Apply the same rules, so that an encoded, upper-case, or `.data` URL cannot select a different quota.
+function admissionPath(path: string): string {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(path);
+  } catch {
+    throw new HttpError(400, "Invalid URL path.");
+  }
+  return decoded
+    .toLowerCase()
+    .replaceAll("%2f", "/")
+    .replace(/\/_\.data$/, "/")
+    .replace(/\.data$/, "");
+}
+
+// Reads of public pages, API data, and images use no per-address quota, so one busy shared address cannot lock its
+// users out of them. Each abuse-sensitive request kind has its own budget. Writes and exports also have account
+// quotas in their handlers.
+function quotaScope(request: Request, path: string): QuotaScope | null {
+  const normalized: string = admissionPath(path);
+  if (normalized.startsWith("/api/auth/")) return "auth";
+  if (request.headers.get("Upgrade")?.toLowerCase() === "websocket") return "connect";
+  if (!READ_METHODS.has(request.method)) return "write";
+  if (PRIVATE_READ_PATH.test(normalized)) return "private-read";
+  return null;
+}
+
 const handler = createRequestHandler(() => import("virtual:react-router/server-build"), import.meta.env.MODE);
 
 async function calendarResponse(request: Request, env: AppEnv, handle: string, origin: string): Promise<Response> {
@@ -224,7 +257,8 @@ export default {
       // A forged request still costs a body read and a signature check. The ingest object's admission buckets
       // bound signed deliveries.
       const hook = path === "/hooks/twitch" || path === "/hooks/kick";
-      if (!hook && !(await env.REQUEST_LIMITER.limit({ key })).success)
+      const scope: QuotaScope | null = hook ? null : quotaScope(request, path);
+      if (scope && !(await env.REQUEST_LIMITER.limit({ key: `${scope}:${key}` })).success)
         throw new HttpError(429, "Too many requests. Please try again in a minute.");
       if (path !== "/__test") await requireTestAccess(request, env);
       response = await routeResponse(request, path, key, { env, nonce, responseHeaders, requestId }, origin);
