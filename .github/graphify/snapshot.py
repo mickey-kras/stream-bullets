@@ -97,6 +97,9 @@ def build() -> dict[str, object]:
             raise ValueError("Graph export failed")
         graph = json.loads(merged_path.read_text())
         graph["edges"] = graph.pop("links")
+        # Hooks run before the commit exists; CI may use a synthetic merge commit.
+        # The indexed source digest, rather than HEAD, identifies this snapshot.
+        graph.pop("built_at_commit", None)
     for key in ("nodes", "edges", "hyperedges"):
         graph[key] = sorted(graph.get(key, []), key=lambda item: json.dumps(item, sort_keys=True))
     graph["graph"] = {
