@@ -19,6 +19,7 @@ import { useRememberContentRoute } from "../components/shell/back-link";
 import { SiteHeader } from "../components/shell/site-header";
 import { StreamerLogo } from "../components/ui/avatar";
 import { Icon, type IconName } from "../components/ui/icon";
+import { detached } from "../lib/detached";
 
 export function meta({ matches }: MetaArgs) {
   return [
@@ -202,7 +203,7 @@ export default function Streamers(): ReactNode {
     else params.delete("query");
     const qs: string = params.toString();
     const target: string = qs ? `/streamers?${qs}` : "/streamers";
-    void navigate(target, { replace, preventScrollReset: true });
+    detached(navigate(target, { replace, preventScrollReset: true }));
   }
 
   async function loadMore(): Promise<void> {

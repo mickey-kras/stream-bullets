@@ -64,6 +64,7 @@ import type {
   Viewer,
 } from "../types";
 import type { Route } from "./+types/streamer";
+import { detached } from "../lib/detached";
 
 type View = StreamerView;
 type Dialog = "topic" | "poll" | "idea" | "event" | "card" | null;
@@ -406,7 +407,7 @@ export default function StreamerPage(): ReactNode {
 
   /** Back to the list: the previous history entry when the list opened this detail, so filters, scroll and focus stay. */
   function backToList(next: View): void {
-    if (cameFromList(here.state)) void go(-1);
+    if (cameFromList(here.state)) detached(go(-1));
     else navigate(next);
   }
 
@@ -503,7 +504,7 @@ export default function StreamerPage(): ReactNode {
   function closeDiscussion(): void {
     const state: unknown = here.state;
     if (typeof state === "object" && state !== null && "discussionReturn" in state && state.discussionReturn === true)
-      void go(-1);
+      detached(go(-1));
     else setParam("discussion", null);
   }
 
@@ -518,7 +519,7 @@ export default function StreamerPage(): ReactNode {
         moderator={moderator}
         status={streamer.status}
         refreshKey={board.revision}
-        onChanged={() => void refreshBoard()}
+        onChanged={() => detached(refreshBoard())}
       />
     );
   }
@@ -715,7 +716,7 @@ export default function StreamerPage(): ReactNode {
         onSort={(next: SortOrder) => changeBoard("sort", next)}
         onRefresh={() => {
           setRefreshes((value: number) => value + 1);
-          void refreshBoard();
+          detached(refreshBoard());
         }}
         onLoadMore={() => void loadMore()}
         onAction={act}
