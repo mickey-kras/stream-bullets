@@ -5325,7 +5325,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L253",
+      "source_location": "L259",
       "target": "app_components_community_community_view_communityview_save",
       "weight": 1.0
     },
@@ -5337,7 +5337,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L259",
+      "source_location": "L265",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -5349,7 +5349,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L267",
+      "source_location": "L273",
       "target": "app_components_ui_dialog_dialogactions",
       "weight": 1.0
     },
@@ -5361,7 +5361,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L268",
+      "source_location": "L274",
       "target": "app_components_community_community_view_communityview_remove",
       "weight": 1.0
     },
@@ -44277,7 +44277,7 @@
       "relation": "calls",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1278",
+      "source_location": "L1296",
       "target": "tests_auth_test_accountrequest",
       "weight": 1.0
     },
@@ -44469,7 +44469,7 @@
       "relation": "calls",
       "source": "tests_auth_test_responseviewer",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1514",
+      "source_location": "L1532",
       "target": "app_server_auth_server_getviewer",
       "weight": 1.0
     },
@@ -44481,7 +44481,7 @@
       "relation": "calls",
       "source": "tests_auth_test_responseviewer",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1514",
+      "source_location": "L1532",
       "target": "tests_auth_test_context",
       "weight": 1.0
     },
@@ -161854,6 +161854,72 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L1",
+      "target": "docs_test_environment_test_environment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L107",
+      "target": "docs_test_environment_authorization_checks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L123",
+      "target": "docs_test_environment_isolation_and_limits",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L68",
+      "target": "docs_test_environment_deploy_a_revision",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L7",
+      "target": "docs_test_environment_initial_setup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_test_environment_test_environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L82",
+      "target": "docs_test_environment_sign_in_and_reset",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "readme",
       "source_file": "README.md",
       "source_location": "L1",
@@ -162593,7 +162659,7 @@
       "relation": "contains",
       "source": "tests_auth_test",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1509",
+      "source_location": "L1527",
       "target": "tests_auth_test_responseviewer",
       "weight": 1.0
     },
@@ -174918,6 +174984,18 @@
       "confidence_score": 0.95,
       "context": "PollRoom",
       "relation": "references",
+      "source": "docs_test_environment_initial_setup",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L46",
+      "target": "app_server_poll_room_pollroom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "PollRoom",
+      "relation": "references",
       "source": "readme_deploy_to_cloudflare",
       "source_file": "README.md",
       "source_location": "L219",
@@ -174974,10 +175052,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "94591cf602b28e2cbfd6a85c6ffde76ca79fc95d618c15fb6309b8c44cd4003f",
+    "content_sha256": "45d461a3429a25793e0c4d44d634d462cbbe53b2ce4fb9183532d27a2815279f",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "8cf2af01e6e692630af90a127f3e2b4fc5548c4fd63dd0c0b4f82e183347c1e9",
+    "source_sha256": "4ff79aca0a7d57288944bebb40b8dd3bf0e8da406f529cf0f36ff0cc4c3bbb06",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -202562,7 +202640,7 @@
       "label": "responseViewer()",
       "norm_label": "responseviewer()",
       "source_file": "tests/auth.test.ts",
-      "source_location": "L1509"
+      "source_location": "L1527"
     },
     {
       "_callable": true,
@@ -222033,6 +222111,83 @@
       "norm_label": "select the procedure",
       "source_file": "docs/recovery.md",
       "source_location": "L9"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment",
+      "label": "test-environment.md",
+      "node_kind": "page",
+      "norm_label": "test-environment.md",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_authorization_checks",
+      "label": "Authorization checks",
+      "node_kind": "heading",
+      "norm_label": "authorization checks",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L107"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_deploy_a_revision",
+      "label": "Deploy a revision",
+      "node_kind": "heading",
+      "norm_label": "deploy a revision",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L68"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_initial_setup",
+      "label": "Initial setup",
+      "node_kind": "heading",
+      "norm_label": "initial setup",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L7"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_isolation_and_limits",
+      "label": "Isolation and limits",
+      "node_kind": "heading",
+      "norm_label": "isolation and limits",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L123"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_sign_in_and_reset",
+      "label": "Sign in and reset",
+      "node_kind": "heading",
+      "norm_label": "sign in and reset",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L82"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_test_environment",
+      "label": "Test environment",
+      "node_kind": "heading",
+      "norm_label": "test environment",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",

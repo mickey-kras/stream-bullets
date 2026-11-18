@@ -40,6 +40,9 @@ jobs:
       - run: pnpm check
       - name: Type-aware lint report
         run: pnpm lint --format json --output-file reports/eslint.json
+      - name: Show lint findings
+        if: failure()
+        run: pnpm lint
       - name: Verify typed lint rules
         run: node --test scripts/typed-lint.test.ts
       - name: Bind analyzer report to this revision
@@ -111,6 +114,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:production
+      - run: pnpm exec wrangler deploy --config build/server/wrangler.json --dry-run
+      - run: pnpm build:test
+      - run: node scripts/check-test-deployment.ts
       - run: pnpm exec wrangler deploy --config build/server/wrangler.json --dry-run
 
   browser:

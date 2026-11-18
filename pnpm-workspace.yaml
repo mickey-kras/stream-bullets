@@ -15,3 +15,8 @@ overrides:
 minimumReleaseAgeExclude:
   - minimatch@11.0.1
   - '@isaacs/nonrecursive-glob-match@1.0.1'
+# Unpatched picomatch ReDoS (<= 4.0.7, no fixed release). Build and test tooling only.
+# Remove when a patched picomatch ships.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf
