@@ -48,7 +48,7 @@ const BINARY_LABELS_COMPATIBILITY_VERSION: string = "1";
 
 type QuotaScope = "auth" | "connect" | "write" | "private-read";
 
-const READ_METHODS: readonly string[] = ["GET", "HEAD", "OPTIONS"];
+const READ_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD", "OPTIONS"]);
 const PRIVATE_READ_PATH: RegExp = /^\/api\/(admin(?:\/|$)|account\/export$)/;
 
 // The router decodes and ignores letter case, and its data URLs reach the same loader as the document path.
@@ -74,7 +74,7 @@ function quotaScope(request: Request, path: string): QuotaScope | null {
   const normalized: string = admissionPath(path);
   if (normalized.startsWith("/api/auth/")) return "auth";
   if (request.headers.get("Upgrade")?.toLowerCase() === "websocket") return "connect";
-  if (!READ_METHODS.includes(request.method)) return "write";
+  if (!READ_METHODS.has(request.method)) return "write";
   if (PRIVATE_READ_PATH.test(normalized)) return "private-read";
   return null;
 }
