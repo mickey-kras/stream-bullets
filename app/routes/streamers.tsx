@@ -51,37 +51,19 @@ const intentPrompt: Record<Intent, "streamers.intent.suggest" | "streamers.inten
   };
 
 function StreamerCard({ streamer, intent }: Readonly<{ streamer: Streamer; intent: Intent | null }>): ReactNode {
-  if (streamer.isOfficial)
-    return (
-      <Link
-        className="info-card streamer-card official-card"
-        to={streamerTarget(streamer.handle, intent, streamer.isOfficial)}
-      >
-        {streamer.logo || streamer.avatar ? (
-          <StreamerLogo streamer={streamer} />
-        ) : (
-          <span className="ideas-logo" aria-hidden="true">
-            <img src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
-          </span>
-        )}
-        <div>
-          <h2>
-            {streamer.name}{" "}
-            <span className="official-badge">
-              <Icon name="shield-check" size={16} />
-              {t("streamers.official")}
-            </span>
-          </h2>
-          <p className="muted">@{streamer.handle}</p>
-          <p className="official-bio">{streamer.about || t("streamers.officialBio")}</p>
-        </div>
-      </Link>
-    );
   return (
     <Link className="info-card streamer-card" to={streamerTarget(streamer.handle, intent, streamer.isOfficial)}>
       <StreamerLogo streamer={streamer} />
       <div>
-        <h2>{streamer.name}</h2>
+        <h2>
+          {streamer.name}
+          {streamer.isOfficial && (
+            <span className="official-badge">
+              <Icon name="shield-check" size={16} />
+              {t("streamers.official")}
+            </span>
+          )}
+        </h2>
         <p className="muted">@{streamer.handle}</p>
         {streamer.status === "frozen" && (
           <p className="card-status">
@@ -97,27 +79,24 @@ function StreamerCard({ streamer, intent }: Readonly<{ streamer: Streamer; inten
   );
 }
 
-function FeaturedCommunity({
-  featured,
-  intent,
-}: Readonly<{ featured: FeaturedStreamer; intent: Intent | null }>): ReactNode {
+// The official page is the place for product ideas. It is not a streamer, so it is not a card in the list.
+function IdeasStrip({ official, intent }: Readonly<{ official: FeaturedStreamer; intent: Intent | null }>): ReactNode {
   return (
-    <section className="info-card featured-community" aria-labelledby="featured-title">
-      <span className="eyebrow">{t("streamers.startHere")}</span>
-      <h2 id="featured-title">
-        <Link className="text-link" to={streamerTarget(featured.handle, intent, featured.isOfficial)}>
-          {featured.name}
+    <section className="ideas-strip" aria-labelledby="ideas-strip-title">
+      <h2 id="ideas-strip-title">
+        <Link className="text-link ideas-link" to={streamerTarget(official.handle, intent, true)}>
+          <Icon name="idea" size={16} />
+          {t("streamers.ideas")}
         </Link>
-        {featured.isOfficial && <span className="official-badge">{t("streamers.official")}</span>}
       </h2>
-      <p>{t(featured.isOfficial ? "streamers.officialBio" : "streamers.featuredBody")}</p>
-      {featured.entries.length > 0 && (
+      <p className="muted">{t("streamers.officialBio")}</p>
+      {official.entries.length > 0 && (
         <ul>
-          {featured.entries.map((entry: FeaturedEntry) => (
+          {official.entries.map((entry: FeaturedEntry) => (
             <li key={entry.id}>
               <Link
                 className="text-link"
-                to={`/@${featured.handle}?view=${entry.kind === "topic" ? "topics" : "polls"}&entry=${entry.id}`}
+                to={`/@${official.handle}?view=${entry.kind === "topic" ? "topics" : "polls"}&entry=${entry.id}`}
               >
                 {entry.title}
               </Link>
@@ -134,11 +113,36 @@ function directoryCount(shown: number, total: number): string {
   return shown < total ? t("streamers.showingOf", { shown, total }) : tn("streamers.showing", shown);
 }
 
+// A signed-in viewer without a page can ask to host one.
+function HostPrompt(): ReactNode {
+  const shell = useShell();
+  const location = useLocation();
+  if (!shell.viewer || shell.ownStreamer) return null;
+  return (
+    <p className="muted">
+      {t("streamers.hostPrompt")}{" "}
+      <Link
+        className="text-link"
+        to={dialogHref(location, "host")}
+        state={{ dialogFrom: location.pathname } satisfies DialogState}
+        preventScrollReset
+      >
+        {t("account.hostCommunity")}
+      </Link>
+    </p>
+  );
+}
+
+// The ideas strip stands for one official page. A search has no strip, so it lists that page.
+function withoutFeatured(streamers: Streamer[], featured: FeaturedStreamer | null): Streamer[] {
+  if (!featured) return streamers;
+  return streamers.filter((streamer: Streamer) => streamer.handle !== featured.handle);
+}
+
 // Official pages first, then handles; 20 per page. Landing intents add a dismissible prompt and direct each
 // card to the requested action.
 export default function Streamers(): ReactNode {
   const data = useLoaderData<typeof loader>();
-  const shell = useShell();
   const featured: FeaturedStreamer | null = data.featured;
   const location = useLocation();
   const navigate = useNavigate();
@@ -157,6 +161,8 @@ export default function Streamers(): ReactNode {
   const more = extra?.key === key ? extra : null;
   const streamers: Streamer[] = [...data.streamers, ...(more?.streamers ?? [])];
   const nextCursor: string | null = more ? more.nextCursor : data.nextCursor;
+  const listed: Streamer[] = withoutFeatured(streamers, featured);
+  const listedTotal: number = data.total - (streamers.length - listed.length);
   // Follow URL changes without overwriting active input.
   const [shownQuery, setShownQuery] = useState<string>(data.query);
   if (shownQuery !== data.query) {
@@ -169,7 +175,7 @@ export default function Streamers(): ReactNode {
     if (index === null) return;
     focusCard.current = null;
     grid.current?.querySelectorAll<HTMLElement>(".streamer-card")[index]?.focus();
-  }, [streamers.length]);
+  }, [listed.length]);
 
   useEffect(() => {
     function keepSearchVisible(): void {
@@ -210,7 +216,7 @@ export default function Streamers(): ReactNode {
     if (!nextCursor || loading) return;
     setLoading(true);
     setError("");
-    const shown: number = streamers.length;
+    const shown: number = listed.length;
     try {
       const params = new URLSearchParams({ cursor: nextCursor });
       if (data.query) params.set("query", data.query);
@@ -225,23 +231,7 @@ export default function Streamers(): ReactNode {
     }
   }
 
-  const official: Streamer | undefined = streamers.find((streamer: Streamer) => streamer.isOfficial);
-  const signedInViewer: boolean = Boolean(shell.viewer && !shell.ownStreamer);
-  const hostCta: ReactNode = signedInViewer ? (
-    <p className="muted">
-      {t("streamers.hostPrompt")}{" "}
-      <Link
-        className="text-link"
-        to={dialogHref(location, "host")}
-        state={{ dialogFrom: location.pathname } satisfies DialogState}
-        preventScrollReset
-      >
-        {t("account.hostCommunity")}
-      </Link>
-    </p>
-  ) : null;
-
-  const count: string = directoryCount(streamers.length, data.total);
+  const count: string = directoryCount(listed.length, listedTotal);
   const resultMessage: string =
     count || (data.query ? t("streamers.noMatch", { query: data.query }) : t("streamers.emptyTitle"));
   useEffect(() => {
@@ -256,18 +246,7 @@ export default function Streamers(): ReactNode {
           <div>
             <span className="eyebrow">{t("streamers.eyebrow")}</span>
             <h1>{t("nav.streamers")}</h1>
-            <p>
-              {t("streamers.intro")}
-              {official && (
-                <>
-                  {" "}
-                  <Link className="text-link ideas-link" to={`/@${official.handle}`}>
-                    <Icon name="idea" size={16} />
-                    {t("streamers.ideas")}
-                  </Link>
-                </>
-              )}
-            </p>
+            <p>{t("streamers.intro")}</p>
           </div>
         </div>
         {data.intent && (
@@ -286,9 +265,9 @@ export default function Streamers(): ReactNode {
             </Link>
           </output>
         )}
-        {featured && <FeaturedCommunity featured={featured} intent={data.intent} />}
-        {hostCta}
-        {data.total === 0 && !data.query ? (
+        {featured && <IdeasStrip official={featured} intent={data.intent} />}
+        <HostPrompt />
+        {listedTotal === 0 && !data.query ? (
           <EmptyState
             title={t("streamers.emptyTitle")}
             icon="streamers"
@@ -340,7 +319,7 @@ export default function Streamers(): ReactNode {
             </search>
             <div className="list-toolbar">
               <span className="list-count">{count}</span>
-              {streamers.length === 0 && (
+              {listed.length === 0 && (
                 <Link
                   className="text-link"
                   to={directoryHref(data.intent)}
@@ -351,9 +330,9 @@ export default function Streamers(): ReactNode {
               )}
             </div>
             <div ref={grid}>
-              {streamers.length > 0 ? (
+              {listed.length > 0 ? (
                 <div className="streamer-grid">
-                  {streamers.map((streamer: Streamer) => (
+                  {listed.map((streamer: Streamer) => (
                     <StreamerCard key={streamer.id} streamer={streamer} intent={data.intent} />
                   ))}
                 </div>

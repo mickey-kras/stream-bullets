@@ -240,7 +240,7 @@
   touch-action: none;
   user-select: none;
 }
-/* The grid stays clear under the pointer: no button hover fill over the preview. */
+/* The input covers the whole frame. The global button hover fill would hide the grid and the layers below it. */
 .ov-grid-input:hover {
   background: transparent;
 }
