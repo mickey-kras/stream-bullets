@@ -428,22 +428,11 @@ describe("waitlist and reports through the handler table", (): void => {
 
 describe("first visitor destination", () => {
   it("features the official page, also when another page has content", async (): Promise<void> => {
-    expect(await getFeaturedStreamer(env)).toEqual({ handle: "streambullets", name: "StreamBullets", isOfficial: true, entries: [] });
+    expect(await getFeaturedStreamer(env)).toEqual({ handle: "streambullets", name: "StreamBullets", isOfficial: true });
   });
 
   it("features no page when the official page is not active", async (): Promise<void> => {
     await env.DB.prepare("UPDATE streamers SET status='suspended' WHERE id=?").bind(ids.official).run();
     expect(await getFeaturedStreamer(env)).toBeNull();
-  });
-
-  it("bounds links to the three latest entries, including polls", async (): Promise<void> => {
-    for (let index: number = 0; index < 4; index++) {
-      await env.DB.prepare(`INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at)
-        VALUES (?,?,'viewer','binary',?,'["Yes","No"]',?)`)
-        .bind(`poll-${index}`, ids.official, `Poll ${index}`, index + 2).run();
-    }
-    const featured = await getFeaturedStreamer(env);
-    expect(featured?.entries.map((entry) => entry.title)).toEqual(["Poll 3", "Poll 2", "Poll 1"]);
-    expect(featured?.entries.every((entry) => entry.kind === "binary")).toBe(true);
   });
 });
