@@ -153,7 +153,7 @@ describe("poll states", (): void => {
         pending: false,
         onAction: (): void => undefined,
         onDiscuss: (): void => undefined,
-        onDelete: async (): Promise<void> => undefined,
+        onDelete: (): Promise<void> => Promise.resolve(undefined),
       }),
     );
   }

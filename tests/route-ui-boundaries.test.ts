@@ -231,13 +231,13 @@ beforeEach((): void => {
   vi.mocked(data.getStreamer).mockResolvedValue(streamer);
   vi.mocked(data.getOwnStreamer).mockResolvedValue(null);
   vi.mocked(data.getEntry).mockResolvedValue(null);
-  vi.mocked(data.listEntries).mockImplementation(async (_env, page) => ({
+  vi.mocked(data.listEntries).mockImplementation((_env, page) => Promise.resolve(({
     streamer: page,
     entries: [],
     nextCursor: null,
     revision: 0,
     serverNow: now,
-  }));
+  })));
   vi.mocked(data.listStreamers).mockResolvedValue({ streamers: [streamer], nextCursor: null });
   vi.mocked(data.countStreamers).mockResolvedValue(1);
   vi.mocked(data.getOverlaySnapshot).mockResolvedValue(initial);
@@ -538,9 +538,10 @@ describe("overlay loader contracts", (): void => {
   });
 
   it("redirects signed-out control users and returns 404 to users without a page", async (): Promise<void> => {
+    const expectedHeaders: unknown = expect.any(Headers);
     await expect(controlRoute.loader(args("/overlay-control"))).rejects.toMatchObject({
       status: 302,
-      headers: expect.any(Headers),
+      headers: expectedHeaders,
     });
     expect(data.getOwnStreamer).not.toHaveBeenCalled();
     signedIn();
@@ -555,13 +556,13 @@ describe("overlay loader contracts", (): void => {
       air: { type: "poll", ref: "air" },
       preview: { type: "poll", ref: "preview" },
     });
-    vi.mocked(data.getOverlaySnapshot).mockImplementation(async (_env, _id, ref) => ({
+    vi.mocked(data.getOverlaySnapshot).mockImplementation((_env, _id, ref) => Promise.resolve(({
       ...initial,
       polls: [
         { ...entry, id: "recent", kind: "choice" },
         ...(ref ? [{ ...entry, id: ref, kind: "choice" as const }] : []),
       ],
-    }));
+    })));
     const result = await controlRoute.loader(args("/overlay-control"));
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["recent", "air", "preview"]);
     expect(vi.mocked(data.getOverlaySnapshot).mock.calls.map((call) => call[2])).toEqual([null, "air", "preview"]);
@@ -765,12 +766,13 @@ describe("public route metadata", (): void => {
       href: "https://stream.example.test/@zed?entry=topic",
     });
     expect(metadata).toContainEqual({ name: "description", content: "Public page biography" });
-    expect(metadata).toContainEqual({
-      "script:ld+json": expect.objectContaining({
+    const expectedDiscussion: unknown = expect.objectContaining({
         "@type": "DiscussionForumPosting",
         headline: entry.title,
         url: "https://stream.example.test/@zed?view=topics&entry=topic",
-      }),
+      });
+    expect(metadata).toContainEqual({
+      "script:ld+json": expectedDiscussion,
     });
   });
 
@@ -803,8 +805,10 @@ describe("public route metadata", (): void => {
     const loaded = await streamerRoute.loader(args("/@zed", { handle: "@zed" }));
     const input = await streamerMetaArgs(loaded, "");
     const metadata = streamerRoute.meta(input);
-    expect(metadata).toContainEqual({ name: "description", content: expect.stringContaining("Zed") });
-    expect(metadata).toContainEqual({ "script:ld+json": expect.objectContaining({ "@type": "Person", url: "/@zed" }) });
+    const expectedDescription: unknown = expect.stringContaining("Zed");
+    expect(metadata).toContainEqual({ name: "description", content: expectedDescription });
+    const expectedPerson: unknown = expect.objectContaining({ "@type": "Person", url: "/@zed" });
+    expect(metadata).toContainEqual({ "script:ld+json": expectedPerson });
     expect(metadata.some((item) => "rel" in item && item.rel === "canonical")).toBe(false);
   });
 
@@ -837,7 +841,8 @@ describe("public route metadata", (): void => {
     setLocaleSource(() => "de");
     for (const meta of [adminRoute.meta, signInRoute.meta, controlRoute.meta]) {
       expect(meta()).toContainEqual({ name: "robots", content: "noindex" });
-      expect(meta()).toContainEqual({ title: expect.stringContaining("StreamBullets") });
+      const expectedTitle: unknown = expect.stringContaining("StreamBullets");
+      expect(meta()).toContainEqual({ title: expectedTitle });
     }
     expect(signInRoute.meta()[0]).toEqual({ title: "Anmelden oder registrieren · StreamBullets" });
   });

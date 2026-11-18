@@ -178,7 +178,7 @@ export function ChannelPanel({
     resultShown.current = true;
     document.getElementById("channels-title")?.scrollIntoView({ block: "start" });
     banner.current?.focus();
-    navigate(location.pathname, { replace: true, preventScrollReset: true });
+    void navigate(location.pathname, { replace: true, preventScrollReset: true });
   }, [initialResult, location.pathname, navigate]);
 
   // Coming back to the page from the back-forward cache (after the provider) must not leave buttons disabled.
@@ -251,7 +251,7 @@ export function ChannelPanel({
       });
       setFocusConnect(platform);
       setConfirming(null);
-      revalidator.revalidate();
+      void revalidator.revalidate();
     } catch (error: unknown) {
       setConfirming(null);
       failed(error);
@@ -259,7 +259,7 @@ export function ChannelPanel({
       // connection, so focus moves to its Connect button as after a disconnect.
       if (error instanceof ApiError && (error.status === 404 || error.status === 409)) {
         if (error.status === 404) setFocusConnect(platform);
-        revalidator.revalidate();
+        void revalidator.revalidate();
       }
     } finally {
       setBusy(null);

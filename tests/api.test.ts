@@ -1,3 +1,4 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { getFeaturedStreamer } from "../app/server/featured-streamer.server";
 import type { AppEnv } from "../app/env";
@@ -10,6 +11,9 @@ import { serveImage } from "../app/server/images.server";
 import type { CommentThread, Streamer, StreamerDirectory, ThreadSnapshot, Viewer } from "../app/types";
 import { apiCaller } from "./helpers/api";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 const origin = "https://stream.example.test";
 const secret = "test-only-secret-1f0c3f1e9a2b4c5d8e7f6a5b4c3d2e1f";
@@ -69,11 +73,11 @@ beforeAll(async (): Promise<void> => {
     IMAGES: database.bucket,
     CHANNEL_INGEST: {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })) }),
     } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })) }),
     } as unknown as DurableObjectNamespace,
     REQUEST_LIMITER: {} as RateLimit,
     APP_ORIGIN: origin,
@@ -127,9 +131,9 @@ describe("profile, language and preferences", (): void => {
   it("saves the name and preset avatar and shows them on the viewer", async (): Promise<void> => {
     const saved = await call("PATCH", "profile", { user: "viewer", body: { name: "  New name ", avatarPreset: 17 } });
     expect(saved.status).toBe(200);
-    expect(((await saved.json()) as { viewer: Viewer }).viewer).toMatchObject({ name: "New name", avatarPreset: 17 });
+    expect((await saved.json<{ viewer: Viewer }>()).viewer).toMatchObject({ name: "New name", avatarPreset: 17 });
     const cleared = await call("PATCH", "profile", { user: "viewer", body: { avatarPreset: null } });
-    expect(((await cleared.json()) as { viewer: Viewer }).viewer).toMatchObject({
+    expect((await cleared.json<{ viewer: Viewer }>()).viewer).toMatchObject({
       name: "New name",
       avatarPreset: null,
     });
@@ -155,7 +159,7 @@ describe("profile, language and preferences", (): void => {
     expect((await call("PATCH", "me/preferences", { user: "viewer", body: { theme: "dark" } })).status).toBe(400);
     expect((await call("PATCH", "me/preferences", { user: "viewer", body: { text: "200" } })).status).toBe(400);
     await call("PATCH", "profile", { user: "viewer", body: { avatarPreset: 4 } });
-    const me = (await (await call("GET", "me", { user: "viewer" })).json()) as { viewer: Viewer };
+    const me = await (await call("GET", "me", { user: "viewer" })).json<{ viewer: Viewer }>();
     expect(me.viewer).toEqual({
       id: "viewer",
       name: "Name viewer",
@@ -165,7 +169,7 @@ describe("profile, language and preferences", (): void => {
       displayPrefs: preferences,
     });
     expect((await call("PATCH", "me/locale", { user: "viewer", body: { locale: null } })).status).toBe(200);
-    const after = (await (await call("GET", "me", { user: "viewer" })).json()) as { viewer: Viewer };
+    const after = await (await call("GET", "me", { user: "viewer" })).json<{ viewer: Viewer }>();
     expect(after.viewer.locale).toBeNull();
   });
 
@@ -228,7 +232,7 @@ describe("profile, language and preferences", (): void => {
 
 describe("directory", (): void => {
   it("pins official pages first, hides suspended pages, and searches names and handles", async (): Promise<void> => {
-    const page = (await (await call("GET", "streamers")).json()) as StreamerDirectory;
+    const page = await (await call("GET", "streamers")).json<StreamerDirectory>();
     expect(page.streamers.map((streamer: Streamer) => [streamer.handle, streamer.isOfficial, streamer.status])).toEqual(
       [
         ["streambullets", true, "active"],
@@ -236,9 +240,9 @@ describe("directory", (): void => {
       ],
     );
     expect(page.streamers[1]).toMatchObject({ logo: null, statusReason: null, handleChangedAt: null });
-    const search = (await (await call("GET", "streamers?query=ZED")).json()) as StreamerDirectory;
+    const search = await (await call("GET", "streamers?query=ZED")).json<StreamerDirectory>();
     expect(search.streamers.map((streamer: Streamer) => streamer.handle)).toEqual(["zed_page"]);
-    const literal = (await (await call("GET", "streamers?query=%25")).json()) as StreamerDirectory;
+    const literal = await (await call("GET", "streamers?query=%25")).json<StreamerDirectory>();
     expect(literal.streamers).toEqual([]);
     expect((await call("GET", "streamers?cursor=Bad")).status).toBe(400);
     expect((await call("GET", "streamers/hidden_page")).status).toBe(404);
@@ -262,7 +266,7 @@ describe("directory", (): void => {
     let cursor: string | null = null;
     do {
       const query: string = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
-      const result = (await (await call("GET", `streamers${query}`)).json()) as StreamerDirectory;
+      const result = await (await call("GET", `streamers${query}`)).json<StreamerDirectory>();
       handles.push(...result.streamers.map((streamer: Streamer) => streamer.handle));
       cursor = result.nextCursor;
     } while (cursor);
@@ -271,7 +275,7 @@ describe("directory", (): void => {
     expect(new Set(handles).size).toBe(53);
     expect(handles.at(-1)).toBe("zed_page");
     // Legacy cursors still start after the official-page group.
-    const legacy = (await (await call("GET", "streamers?cursor=page_p50")).json()) as StreamerDirectory;
+    const legacy = await (await call("GET", "streamers?cursor=page_p50")).json<StreamerDirectory>();
     expect(legacy.streamers.map((streamer: Streamer) => streamer.handle)).toEqual(["zed_page"]);
   });
 });
@@ -279,20 +283,20 @@ describe("directory", (): void => {
 describe("edit your page", (): void => {
   it("changes only the fields sent and limits handle changes to once every 30 days", async (): Promise<void> => {
     const edited = await call("PATCH", "streamer", { user: "owner", body: { name: "Zed TV", about: "New about" } });
-    expect(((await edited.json()) as { streamer: Streamer }).streamer).toMatchObject({
+    expect((await edited.json<{ streamer: Streamer }>()).streamer).toMatchObject({
       handle: "zed_page",
       name: "Zed TV",
       about: "New about",
       handleChangedAt: null,
     });
     const renamed = await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_tv" } });
-    const streamer = ((await renamed.json()) as { streamer: Streamer }).streamer;
+    const streamer = (await renamed.json<{ streamer: Streamer }>()).streamer;
     expect(streamer.handle).toBe("zed_tv");
     expect(streamer.handleChangedAt).toEqual(expect.any(Number));
     expect((await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_tv" } })).status).toBe(200);
     const tooSoon = await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_again" } });
     expect(tooSoon.status).toBe(409);
-    expect(((await tooSoon.json()) as { error: string }).error).toMatch(/once every 30 days/u);
+    expect((await tooSoon.json<{ error: string }>()).error).toMatch(/once every 30 days/u);
     vi.spyOn(Date, "now").mockReturnValue((streamer.handleChangedAt ?? 0) + 31 * day);
     expect((await call("PATCH", "streamer", { user: "owner", body: { handle: "streambullets" } })).status).toBe(409);
     expect((await call("PATCH", "streamer", { user: "owner", body: { handle: "zed_again" } })).status).toBe(200);
@@ -310,7 +314,7 @@ describe("edit your page", (): void => {
   it("uploads a page logo, serves it, and falls back to the profile picture", async (): Promise<void> => {
     const upload = await call("PUT", "images/logo", { user: "owner", raw: png, type: "image/png" });
     expect(await upload.json()).toEqual({ url: "/images/logo/owner" });
-    const me = (await (await call("GET", "me", { user: "owner" })).json()) as { streamer: Streamer };
+    const me = await (await call("GET", "me", { user: "owner" })).json<{ streamer: Streamer }>();
     expect(me.streamer.logo).toBe("/images/logo/owner");
     expect((await serveImage(env, "logo/owner", "GET")).headers.get("Content-Type")).toBe("image/png");
     expect((await call("PATCH", "streamer", { user: "owner", body: { logoMode: "logo" } })).status).toBe(200);
@@ -321,7 +325,7 @@ describe("edit your page", (): void => {
     await call("PUT", "images/logo", { user: "owner", raw: png, type: "image/png" });
     expect(await (await call("DELETE", "images/logo", { user: "owner" })).json()).toEqual({ logo: null });
     expect(await env.IMAGES.head("logo/owner")).toBeNull();
-    const after = (await (await call("GET", "me", { user: "owner" })).json()) as { streamer: Streamer };
+    const after = await (await call("GET", "me", { user: "owner" })).json<{ streamer: Streamer }>();
     expect(after.streamer.logo).toBeNull();
 
     expect((await call("PUT", "images/logo", { user: "viewer", raw: png, type: "image/png" })).status).toBe(403);
@@ -337,7 +341,7 @@ describe("threads", (): void => {
         user,
         body: { action: "comment", id: ids.topic, text, ...(parentId ? { parentId } : {}) },
       });
-      return ((await response.json()) as { id: string }).id;
+      return (await response.json<{ id: string }>()).id;
     };
     const first = await post("viewer", "First");
     const reply = await post("owner", "Reply", first);
@@ -347,7 +351,7 @@ describe("threads", (): void => {
       200,
     );
     const response = await call("GET", `entries/${ids.topic}/comments?view=thread`);
-    const { comments, nextCursor } = (await response.json()) as ThreadSnapshot;
+    const { comments, nextCursor } = await response.json<ThreadSnapshot>();
     expect(nextCursor).toBeNull();
     expect(
       comments.map((thread: CommentThread) => [thread.id, thread.removed, thread.replies.map((item) => item.id)]),
@@ -371,24 +375,24 @@ describe("waitlist and reports through the handler table", (): void => {
       user: "applicant",
       body: { links: ["https://twitch.tv/applicant"] },
     });
-    const { application } = (await applied.json()) as { application: { id: string; status: string } };
+    const { application } = await applied.json<{ application: { id: string; status: string } }>();
     expect(application.status).toBe("pending");
     expect((await call("GET", "admin/applications")).status).toBe(401);
     expect((await call("GET", "admin/applications", { user: "viewer" })).status).toBe(403);
-    const queue = (await (await call("GET", "admin/applications?status=pending", { user: "admin" })).json()) as {
+    const queue = await (await call("GET", "admin/applications?status=pending", { user: "admin" })).json<{
       applications: { id: string }[];
-    };
+    }>();
     expect(queue.applications.map((item) => item.id)).toEqual([application.id]);
     const reviewed = await call("POST", "admin/applications", {
       user: "admin",
       body: { id: application.id, decision: "approved" },
     });
-    expect(((await reviewed.json()) as { application: { status: string } }).application.status).toBe("approved");
+    expect((await reviewed.json<{ application: { status: string } }>()).application.status).toBe("approved");
     const created = await call("POST", "streamer", {
       user: "applicant",
       body: { handle: "applicant_page", name: "Applicant", about: "" },
     });
-    expect(((await created.json()) as { streamer: Streamer }).streamer).toMatchObject({
+    expect((await created.json<{ streamer: Streamer }>()).streamer).toMatchObject({
       handle: "applicant_page",
       logo: null,
       ownerAvatarPreset: null,
@@ -403,11 +407,11 @@ describe("waitlist and reports through the handler table", (): void => {
       user: "owner",
       body: { targetKind: "entry", targetId: ids.topic, reason: "spam" },
     });
-    const { report } = (await reported.json()) as { report: { id: string } };
+    const { report } = await reported.json<{ report: { id: string } }>();
     expect((await call("GET", "admin/reports")).status).toBe(401);
-    const reports = (await (await call("GET", "admin/reports", { user: "admin" })).json()) as {
+    const reports = await (await call("GET", "admin/reports", { user: "admin" })).json<{
       reports: { id: string }[];
-    };
+    }>();
     expect(reports.reports.map((item) => item.id)).toEqual([report.id]);
     const resolved = await call("POST", "admin/reports", { user: "admin", body: { id: report.id, action: "remove" } });
     expect(await resolved.json()).toEqual({ status: "actioned", resolved: 1 });

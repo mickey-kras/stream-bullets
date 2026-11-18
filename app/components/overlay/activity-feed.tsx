@@ -11,7 +11,7 @@ export type ActivityFeedStatus = ActivitySocketStatus | "off";
 
 export interface ActivityFeed {
   /** Every parsed message of the page's activity socket. Returns the unsubscribe function. */
-  subscribe(listener: (message: ActivityMessage) => void): () => void;
+  subscribe(this: void, listener: (message: ActivityMessage) => void): () => void;
   status: ActivityFeedStatus;
 }
 

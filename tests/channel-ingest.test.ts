@@ -238,12 +238,12 @@ describe("ChannelIngest requests", (): void => {
     expect(overlay.closeCode).toBe(1001);
     expect(overlay.ofType("unavailable")).toHaveLength(1);
     expect(owner.open).toBe(true);
-    await room().webSocketMessage(owner as unknown as WebSocket);
+    room().webSocketMessage(owner as unknown as WebSocket);
     expect(owner.closeCode).toBe(1008);
     const failing = await listen();
     room().webSocketError(failing as unknown as WebSocket);
     expect(failing.closeCode).toBe(1011);
-    await room().webSocketClose(failing as unknown as WebSocket);
+    room().webSocketClose(failing as unknown as WebSocket);
   });
 });
 

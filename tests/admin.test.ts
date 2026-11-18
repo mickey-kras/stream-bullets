@@ -44,7 +44,7 @@ let env: AppEnv;
 const { call } = apiCaller(() => env, origin, secret);
 
 async function body<T>(response: Response): Promise<T> {
-  return (await response.json()) as T;
+  return await response.json();
 }
 
 function asAdmin(method: string, path: string, options: CallOptions = {}): Promise<Response> {
@@ -101,11 +101,11 @@ beforeAll(async (): Promise<void> => {
     IMAGES: database.bucket,
     CHANNEL_INGEST: {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })) }),
     } as unknown as DurableObjectNamespace,
     POLL_ROOMS: {
       idFromName: (name: string) => name,
-      get: () => ({ fetch: async (): Promise<Response> => new Response(null, { status: 204 }) }),
+      get: () => ({ fetch: (): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })) }),
     } as unknown as DurableObjectNamespace,
     REQUEST_LIMITER: {} as RateLimit,
     APP_ORIGIN: origin,
@@ -264,7 +264,7 @@ describe("admin authorisation", (): void => {
       (await asAdmin("POST", `admin/streamers/${ids.page}`, { body: { action: "freeze", reason: "spam" } })).status,
     ).toBe(200);
     const rows = await missing();
-    expect(rows.map((row) => [row.actor_id, JSON.parse(row.metadata)])).toEqual([
+    expect(rows.map((row): unknown[] => [row.actor_id, JSON.parse(row.metadata)])).toEqual([
       ["admin", { route: "GET /api/admin/report-groups", need: "keys", sensitive: false }],
       ["admin", { route: `POST /api/admin/streamers/${ids.page}`, need: "keys", sensitive: true }],
     ]);
@@ -674,7 +674,7 @@ describe("step-up binding (test review gaps)", (): void => {
           return typeof value === "function" ? value.bind(target) : value;
         },
       }),
-    } as AppEnv;
+    };
     const results = await Promise.allSettled([
       verifyStepUp(raced, adminSession("s-admin"), assertion),
       verifyStepUp(raced, adminSession("s-admin2"), assertion),
@@ -982,7 +982,8 @@ describe("admin edge cases", (): void => {
       listReportGroups(env, "admin", { group: "streamer", status: "closed" as "open" }),
     ).rejects.toMatchObject({ status: 400 });
     const items = await listReportItems(env, "admin", { streamer: ids.page, status: "resolved" });
-    expect(items.items[0]).toMatchObject({ status: "actioned", resolvedAt: expect.any(Number) });
+    const expectedResolvedAt: unknown = expect.any(Number);
+    expect(items.items[0]).toMatchObject({ status: "actioned", resolvedAt: expectedResolvedAt });
     expect((await listReportItems(env, "admin", { streamer: gone, status: "all" })).streamer).toBeNull();
   });
 
@@ -1186,9 +1187,9 @@ describe("admin edge cases", (): void => {
 describe("owner notice email (R13)", (): void => {
   const sent: EmailMessageBuilder[] = [];
   const binding = {
-    send: async (message: EmailMessageBuilder): Promise<EmailSendResult> => {
+    send: (message: EmailMessageBuilder): Promise<EmailSendResult> => {
       sent.push(message);
-      return { messageId: "test" } as EmailSendResult;
+      return Promise.resolve<EmailSendResult>({ messageId: "test" });
     },
   } as unknown as SendEmail;
   const freeze = { body: { action: "freeze", reason: "spam", note: "Bot wave", notify: true } };
@@ -1262,7 +1263,7 @@ describe("owner notice email (R13)", (): void => {
     const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
     env.NOTIFY_EMAIL = {
       send: async (): Promise<never> => Promise.reject(new Error("mail relay down")),
-    } as unknown as SendEmail;
+    };
     const response = await asAdmin("POST", `admin/streamers/${ids.page}`, freeze);
     expect(response.status).toBe(200);
     expect(await body<{ page: { status: string }; emailed: boolean }>(response)).toMatchObject({

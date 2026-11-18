@@ -143,7 +143,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
     this.playground = playgroundOf(ctx, env, () => this.streamerId, this.scheduleAlarm.bind(this));
-    ctx.blockConcurrencyWhile(async (): Promise<void> => {
+    void ctx.blockConcurrencyWhile(async (): Promise<void> => {
       this.streamerId = await ctx.storage.get<string>("streamerId");
       this.createTables();
       await this.playground.load();
@@ -293,12 +293,12 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     return new Response(null, { status: 204 });
   }
 
-  async webSocketMessage(socket: WebSocket): Promise<void> {
+  webSocketMessage(socket: WebSocket): void {
     // Consumers only listen; anything but the ping (answered by the runtime) closes the socket.
     socket.close(1008, "Unsupported message");
   }
 
-  async webSocketClose(socket: WebSocket): Promise<void> {
+  webSocketClose(socket: WebSocket): void {
     socket.close();
   }
 

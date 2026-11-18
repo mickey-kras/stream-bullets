@@ -94,7 +94,7 @@ function PageActions({
   if (cropping) {
     return (
       <DialogActions cancel={false}>
-        <button className="gold" type="button" onClick={onCrop}>
+        <button className="gold" type="button" onClick={() => void onCrop()}>
           <Icon name="check" size={18} />
           {t("crop.use")}
         </button>

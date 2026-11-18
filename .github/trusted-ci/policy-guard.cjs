@@ -42,14 +42,17 @@ function isTrustedReviewer(user) {
 
 // A repository owner cannot approve their own PR. An explicit comment is an
 // admission bound to the candidate, current base and trusted policy.
+// The short form `/approve-ci <head>` binds the exact head commit only. Merging needs an
+// up-to-date branch, so a moved base gives a new head and needs a new approval.
 function commentAdmission(comments, head, base, trusted, tree) {
-  const prefix = /^(Approve|Reject) CI policy: /;
+  const prefix = /^(?:(?:Approve|Reject) CI policy: |\/approve-ci(?:\s|$))/;
   const decisive = comments.filter(
     (comment) => Number.isSafeInteger(comment.id) && isTrustedReviewer(comment.user) && prefix.test(comment.body || ""),
   );
   decisive.sort((a, b) => b.id - a.id);
   if (!decisive.length) return undefined;
   return (
+    decisive[0].body.trim() === `/approve-ci ${head}` ||
     decisive[0].body === `Approve CI policy: head=${head} base=${base} trusted=${trusted}` ||
     (SHA.test(tree || "") && decisive[0].body === `Approve CI policy: tree=${tree} base=${base} trusted=${trusted}`)
   );

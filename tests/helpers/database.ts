@@ -35,7 +35,7 @@ export async function createTestDatabase(options: { migrate?: boolean } = {}): P
     d1Databases: ["DB"],
     r2Buckets: ["IMAGES"],
   });
-  const db = (await runtime.getD1Database("DB")) as unknown as D1Database;
+  const db = await runtime.getD1Database("DB");
   try {
     if (options.migrate !== false) await applyMigrations(db, await migrationFiles());
   } catch (error: unknown) {

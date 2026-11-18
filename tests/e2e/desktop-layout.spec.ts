@@ -63,7 +63,7 @@ for (const locale of LOCALES) {
     await page.setViewportSize({ width: 1363, height: 936 });
     await context.addCookies([{ name: "sb_locale", value: locale, domain: "localhost", path: "/" }]);
     await page.addInitScript(() => {
-      const original = HTMLCanvasElement.prototype.getContext;
+      const original = Reflect.get<HTMLCanvasElement, "getContext">(HTMLCanvasElement.prototype, "getContext");
       Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
         value: function (this: HTMLCanvasElement, contextId: string, options?: unknown): RenderingContext | null {
           return contextId.startsWith("webgl") ? null : original.call(this, contextId, options);

@@ -1,3 +1,4 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { inflateSync } from "node:zlib";
@@ -5,6 +6,9 @@ import { imageSize } from "image-size";
 import { describe, expect, it } from "vitest";
 import { CHARACTER_ROWS } from "../app/components/overlay/characters/view";
 import { WASTELAND_PLAYGROUND as theme, type Rect } from "../app/components/overlay/wasteland/playground-theme";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 const file = (url: string): Buffer => readFileSync(new URL(`../public${url.split("?")[0]}`, import.meta.url));
 const courier: Buffer = file(theme.courier.url);

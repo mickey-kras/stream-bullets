@@ -68,3 +68,6 @@ __pycache__/
 /graphify-out/*
 !/graphify-out/graph.json
 /.graphify-venv/
+
+# Static analyzer output
+/reports/

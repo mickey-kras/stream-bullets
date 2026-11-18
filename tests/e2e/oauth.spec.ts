@@ -1,3 +1,4 @@
+import { Buffer as NodeBuffer } from "node:buffer";
 import { randomBytes } from "node:crypto";
 import { readdir } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -6,6 +7,9 @@ import type { BrowserContext, Page, Response } from "@playwright/test";
 import { test, expect, newPage, close } from "./coverage";
 import { applyMigrations, migrationFiles } from "../helpers/database";
 import { clientAddress } from "./client-ips";
+
+// Workers globals declare Buffer as any; use the Node constructor type for this Node test.
+const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
 
 const origin: string = "https://localhost:5174";
 const sessionName: string = "__Host-stream-bullets.session_token";
@@ -62,7 +66,7 @@ test.beforeAll(async () => {
     ratelimits: { REQUEST_LIMITER: { namespace_id: "587", simple: { limit: 120, period: 60 } } },
     outboundService: providerResponse,
   });
-  await applyMigrations((await runtime.getD1Database("DB")) as unknown as D1Database, await migrationFiles());
+  await applyMigrations(await runtime.getD1Database("DB"), await migrationFiles());
   await runtime.ready;
 });
 

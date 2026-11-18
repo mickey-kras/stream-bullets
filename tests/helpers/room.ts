@@ -124,35 +124,41 @@ class RoomStorage {
   readonly sql = new RoomSql();
   alarm: number | null = null;
 
-  async get<T>(key: string): Promise<T | undefined> {
-    return this.values.get(key) as T | undefined;
+  get<T>(key: string): Promise<T | undefined> {
+    return Promise.resolve(this.values.get(key) as T | undefined);
   }
 
-  async put(key: string, value: unknown): Promise<void> {
+  put(key: string, value: unknown): Promise<void> {
     this.values.set(key, value);
+    return Promise.resolve();
   }
 
-  async delete(key: string): Promise<boolean> {
-    return this.values.delete(key);
+  delete(key: string): Promise<boolean> {
+    return Promise.resolve(this.values.delete(key));
   }
 
   /** Deletes every key and every SQL table, as the runtime's deleteAll does. Like the runtime, it keeps the alarm. */
-  async deleteAll(): Promise<void> {
-    this.values.clear();
-    const tables = this.sql.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
-    for (const { name } of tables as { name: string }[]) this.sql.db.exec(`DROP TABLE "${name}"`);
+  deleteAll(): Promise<void> {
+    return new Promise((resolve): void => {
+      this.values.clear();
+      const tables = this.sql.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
+      for (const { name } of tables as { name: string }[]) this.sql.db.exec(`DROP TABLE "${name}"`);
+      resolve();
+    });
   }
 
-  async getAlarm(): Promise<number | null> {
-    return this.alarm;
+  getAlarm(): Promise<number | null> {
+    return Promise.resolve(this.alarm);
   }
 
-  async setAlarm(time: number | Date): Promise<void> {
+  setAlarm(time: number | Date): Promise<void> {
     this.alarm = typeof time === "number" ? time : time.getTime();
+    return Promise.resolve();
   }
 
-  async deleteAlarm(): Promise<void> {
+  deleteAlarm(): Promise<void> {
     this.alarm = null;
+    return Promise.resolve();
   }
 }
 
