@@ -166,9 +166,10 @@ export function ChannelPanel({
   const [reauth, setReauth] = useState<boolean>(false);
   /** Platforms whose last disconnect the provider did not confirm: the owner should remove the app there. */
   const [unrevoked, setUnrevoked] = useState<ReadonlySet<ActivityPlatform>>(new Set());
+  // The platform of the last disconnect. Until the next dialog opens, the closed dialog does not take focus back.
   const [focusConnect, setFocusConnect] = useState<ActivityPlatform | null>(null);
-  /** Whether the list reload after a disconnect has started, so its end can be told from the state before it. */
-  const reloading = useRef<boolean>(false);
+  /** The platform whose Connect button waits for focus. */
+  const awaitingConnect = useRef<ActivityPlatform | null>(null);
   const hydrated = useHydrated();
 
   // The result of a callback: show it in view and give it focus, so it is read once (the banner is a status
@@ -194,26 +195,26 @@ export function ChannelPanel({
   // After a disconnect, focus moves to the platform's Connect button once the reloaded list shows the card without
   // its connection. Without a Connect button (the platform is not offered), it goes to the section heading.
   useEffect((): void => {
-    if (!focusConnect) return;
+    const platform = awaitingConnect.current;
+    if (!platform) return;
     const title = document.getElementById("channels-title");
-    if (revalidator.state !== "idle") {
-      reloading.current = true;
+    // The list still shows the connection: the dialog and its opener go away, so focus waits on the section heading.
+    // Decide from the list on screen, not from the reload state. A busy browser can skip the loading state, and
+    // the router can show the new list before or after the reload ends.
+    if (channels.find((channel) => channel.platform === platform)?.connection) {
+      if (document.activeElement === document.body) title?.focus();
       return;
     }
-    // Right after the disconnect: the dialog and its opener go away, so focus waits on the section heading.
-    if (!reloading.current) {
-      title?.focus();
-      return;
-    }
-    // The reload ended (whatever its result): focus Connect when the card shows it, else stay on the heading.
-    reloading.current = false;
-    setFocusConnect(null);
-    const card = channels.find((channel) => channel.platform === focusConnect);
-    const button = card?.connection
-      ? null
-      : panel.current?.querySelector<HTMLButtonElement>(`[data-channel="${focusConnect}"] [data-connect]`);
+    // The list shows the card without its connection: focus Connect when the card offers it, else the heading.
+    awaitingConnect.current = null;
+    const button = panel.current?.querySelector<HTMLButtonElement>(`[data-channel="${platform}"] [data-connect]`);
     (button ?? title)?.focus();
-  }, [channels, focusConnect, revalidator.state]);
+  }, [channels, focusConnect]);
+
+  function focusConnectAfterReload(platform: ActivityPlatform): void {
+    awaitingConnect.current = platform;
+    setFocusConnect(platform);
+  }
 
   function failed(error: unknown): void {
     if (error instanceof ApiError && error.code === "reauth_required") setReauth(true);
@@ -250,7 +251,7 @@ export function ChannelPanel({
         else next.add(platform);
         return next;
       });
-      setFocusConnect(platform);
+      focusConnectAfterReload(platform);
       setConfirming(null);
       detached(revalidator.revalidate());
     } catch (error: unknown) {
@@ -259,7 +260,7 @@ export function ChannelPanel({
       // Gone already (404) or changed meanwhile (409): show the current list. After a 404 the card loses its
       // connection, so focus moves to its Connect button as after a disconnect.
       if (error instanceof ApiError && (error.status === 404 || error.status === 409)) {
-        if (error.status === 404) setFocusConnect(platform);
+        if (error.status === 404) focusConnectAfterReload(platform);
         detached(revalidator.revalidate());
       }
     } finally {
@@ -348,7 +349,10 @@ export function ChannelPanel({
                     type="button"
                     className="danger"
                     disabled={busy !== null}
-                    onClick={() => setConfirming(channel.platform)}
+                    onClick={() => {
+                      setFocusConnect(null);
+                      setConfirming(channel.platform);
+                    }}
                   >
                     {t("channels.disconnect", { platform: name })}
                   </button>
