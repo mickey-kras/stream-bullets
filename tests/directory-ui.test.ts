@@ -30,7 +30,7 @@ it("shows the official page as the ideas strip, not as a streamer, and sends vot
     background: null, ownerId: "owner", logo: null, ownerAvatarPreset: null, isOfficial: true,
     status: "active", statusReason: null, statusChangedAt: null, handleChangedAt: null,
   };
-  const featured: FeaturedStreamer = { handle: official.handle, name: official.name, isOfficial: true, entries: [] };
+  const featured: FeaturedStreamer = { handle: official.handle, name: official.name, isOfficial: true };
   const handler = createStaticHandler([{
     path: "/streamers", Component: Streamers,
     loader: () => ({ streamers: [official], total: 1, nextCursor: null, featured, query: "", intent: "vote" }),
@@ -57,7 +57,7 @@ it("keeps a second official page as a card when the ideas strip stands for the f
     status: "active", statusReason: null, statusChangedAt: null, handleChangedAt: null,
   };
   const second: Streamer = { ...base, id: "second", handle: "second_official", name: "Second official" };
-  const featured: FeaturedStreamer = { handle: base.handle, name: base.name, isOfficial: true, entries: [] };
+  const featured: FeaturedStreamer = { handle: base.handle, name: base.name, isOfficial: true };
   const handler = createStaticHandler([{
     path: "/streamers", Component: Streamers,
     loader: () => ({ streamers: [base, second], total: 2, nextCursor: null, featured, query: "", intent: null }),

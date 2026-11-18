@@ -136,12 +136,8 @@ test("visitors can open an idea from the ideas strip", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Browse streamers", exact: true }).click();
   const featured = page.getByRole("region", { name: "Ideas", exact: true });
-  const entry = featured.locator("li a").first();
-  const title: string = await entry.innerText();
-  await expect(entry).toHaveAttribute("href", /view=topics&entry=/);
-  await entry.click();
-  await expect(page).toHaveURL(/entry=/);
-  await expect(page.getByRole("heading", { name: title, exact: true }).first()).toBeVisible();
+  // The strip links to the official page only. It lists no entries.
+  await expect(featured.getByRole("link")).toHaveCount(1);
   await page.goto("/streamers?query=nothing_here");
   await expect(page.getByRole("region", { name: "Ideas", exact: true })).toHaveCount(0);
 });
