@@ -20,11 +20,11 @@ it("gives signed-out visitors a host request link when the directory is empty", 
   expect(markup).toContain("No streamer pages yet.");
   expect(markup).toContain('href="/streamers?dialog=host"');
   expect(markup).toContain("Viewers can ask their streamer to join.");
-  expect(markup).not.toContain('id="featured-title"');
+  expect(markup).not.toContain('id="ideas-strip-title"');
 });
 
 
-it("labels an empty official featured page as feedback and sends voting to ideas", async (): Promise<void> => {
+it("shows the official page as the ideas strip, not as a streamer, and sends voting to ideas", async (): Promise<void> => {
   const official: Streamer = {
     id: "official", handle: "streambullets", name: "StreamBullets", about: "", avatar: null,
     background: null, ownerId: "owner", logo: null, ownerAvatarPreset: null, isOfficial: true,
@@ -41,11 +41,13 @@ it("labels an empty official featured page as feedback and sends voting to ideas
     router: createStaticRouter(handler.dataRoutes, result), context: result,
   }));
   expect(markup).toContain("Public pages");
-  expect(markup).toContain("Showing 1 page");
+  expect(markup).toContain('id="ideas-strip-title"');
   expect(markup).toContain("Help shape StreamBullets.");
   expect(markup).toContain('href="/@streambullets?view=topics"');
   expect(markup).not.toContain('href="/@streambullets?view=polls"');
-  expect(markup).toContain('class="official-badge"');
+  // The official page is the only page, so the list of streamers is empty.
+  expect(markup).not.toContain("streamer-card");
+  expect(markup).toContain("No streamer pages yet.");
 });
 
 it("offers a native no-results recovery link that preserves the visitor intent", async (): Promise<void> => {
