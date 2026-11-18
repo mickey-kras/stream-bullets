@@ -1,7 +1,7 @@
 import { useRef, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t, type MessageId } from "../../i18n";
-import { paths } from "../../lib/shell";
+import { paths, useShell } from "../../lib/shell";
 import { StreamerLogo } from "../ui/avatar";
 import { Icon, type IconName } from "../ui/icon";
 import { AccountMenu } from "./account-menu";
@@ -26,7 +26,7 @@ const viewLabel: Record<StreamerView, MessageId> = {
   community: "streamer.nav.community",
 };
 
-// Narrow headers use icon tabs with accessible names.
+// Narrow headers use icon tabs with accessible names. The owner of the page also gets the Overlay entry.
 export function StreamerHeader({
   streamer,
   current,
@@ -61,6 +61,7 @@ export function StreamerHeader({
 }>): ReactNode {
   const header = useRef<HTMLElement | null>(null);
   useFitHeader(header);
+  const ownPage: boolean = useShell().ownStreamer?.handle === streamer.handle;
   return (
     <header className={`site-header streamer-header ${className}`.trim()} ref={header}>
       <div className="brand streamer-brand">
@@ -100,6 +101,12 @@ export function StreamerHeader({
             <span className="nav-label">{labels[view] ?? t(viewLabel[view])}</span>
           </Link>
         ))}
+        {ownPage && (
+          <Link className="nav-tab" to={paths.overlayControl} aria-label={t("nav.overlay")} title={t("nav.overlay")}>
+            <Icon name="overlay" size={20} />
+            <span className="nav-label">{t("nav.overlay")}</span>
+          </Link>
+        )}
       </nav>
       <div className="header-end">
         <Link className="header-streamers" to={paths.streamers} aria-label={t("nav.streamers")}>

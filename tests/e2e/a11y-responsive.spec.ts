@@ -54,6 +54,30 @@ async function expectHeaderFits(page: Page): Promise<void> {
   expect(overlaps).toBe(false);
 }
 
+// The consent checkbox: a 24 px target, a gap before its text, centred on the first line. Wrapped lines stay under the text.
+async function expectConsentAligned(consent: Locator): Promise<void> {
+  const place = await consent.evaluate((input: Element) => {
+    const span: Element = input.nextElementSibling!;
+    const range: Range = document.createRange();
+    range.selectNodeContents(span);
+    const lines: DOMRect[] = [...range.getClientRects()].filter((line: DOMRect): boolean => line.width > 0);
+    const box: DOMRect = input.getBoundingClientRect();
+    const text: DOMRect = span.getBoundingClientRect();
+    return {
+      display: getComputedStyle(input.parentElement!).display,
+      size: Math.min(box.width, box.height),
+      gap: text.left - box.right,
+      centre: box.top + box.height / 2 - (lines[0].top + lines[0].bottom) / 2,
+      outdent: Math.min(...lines.map((line: DOMRect): number => line.left)) - text.left,
+    };
+  });
+  expect(place.display).toBe("flex");
+  expect(place.size).toBeGreaterThanOrEqual(24);
+  expect(place.gap).toBeGreaterThanOrEqual(8);
+  expect(Math.abs(place.centre)).toBeLessThanOrEqual(2);
+  expect(place.outdent).toBeGreaterThanOrEqual(-0.5);
+}
+
 async function expectReachable(locator: Locator): Promise<void> {
   await locator.evaluate((element: Element): void => {
     element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" });
@@ -244,6 +268,19 @@ test.describe("configured-provider mobile dialogs", () => {
     await runtime?.dispose();
   });
 
+  test("the consent checkbox lines up with its label on a desktop, and its label checks it", async ({ page, context }) => {
+    await context.setExtraHTTPHeaders({ "CF-Connecting-IP": "203.0.113.90" });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${origin}/streamers`);
+    await page.locator("header .header-signin").click();
+    const signIn: Locator = page.getByRole("dialog");
+    const consent: Locator = signIn.getByRole("checkbox");
+    await expect(consent).toBeVisible();
+    await expectConsentAligned(consent);
+    await signIn.locator(".sign-in-accept > span").click({ position: { x: 4, y: 4 } });
+    await expect(consent).toBeChecked();
+  });
+
   for (const locale of LOCALES) {
     test(`${locale} signed-out dialogs remain reachable in portrait and landscape`, async ({ page, context }) => {
       await context.setExtraHTTPHeaders({ "CF-Connecting-IP": `203.0.113.${LOCALES.indexOf(locale) + 1}` });
@@ -280,6 +317,7 @@ test.describe("configured-provider mobile dialogs", () => {
             element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" });
           });
           await expect(consent).toBeInViewport({ ratio: 1 });
+          await expectConsentAligned(consent);
           await consent.check();
           for (const provider of await providers.all()) {
             await expectReachable(provider);
