@@ -68,9 +68,9 @@ If the database ID changes, update the bindings and checks before use.
 ## Deploy a revision
 
 1. Open **Actions > Deploy to test > Run workflow**.
-2. Enter the full 40-character commit SHA from this repository.
-3. Run the workflow from the approved workflow revision.
-   Select a commit that contains both the runtime and deployment changes.
+2. Select the branch to deploy. Leave the commit SHA blank to use that branch.
+3. To deploy a specific commit, enter its full 40-character SHA.
+   The selected revision must contain both the runtime and deployment changes.
 4. Check the deployment summary for the URL and commit.
 
 The workflow runs type checks, lint, coverage, and a test build.
