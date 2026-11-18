@@ -13,14 +13,16 @@ export const TAU = Math.PI * 2;
 // Deck height above platform origin.
 export const DECK_Y = 0.45;
 
+// Segment counts fit the fixed camera distance: about 100 screen pixels per model unit.
+
 // Reduce segments for thin rails.
 export function sides(r: number, most = 12): number {
-  return Math.min(most, Math.max(5, Math.round(5 + r * 90)));
+  return Math.min(most, Math.max(4, Math.round(4 + r * 90)));
 }
 
-// Visible round parts: 16 sides for 5cm caps; 48 for 1m tanks.
+// Visible round parts: 10 sides for 5cm caps; 52 for 1m tanks.
 function roundSides(r: number): number {
-  return Math.max(12, Math.round(12 + r * 40));
+  return Math.max(8, Math.round(8 + r * 44));
 }
 
 // Curve segments preserve bends without oversampling straight runs.
@@ -61,9 +63,12 @@ export function mesh(
 // size = [width, height, depth].
 export function box(size: P, at: P, mat: THREE.Material, parent: THREE.Object3D, radius = 0.03): THREE.Mesh {
   const [w, h, d] = size;
-  // Use one bevel step for small parts.
-  const steps = Math.max(w, h, d) < 0.35 ? 1 : 2;
-  return mesh(new RoundedBoxGeometry(w, h, d, steps, Math.min(radius, w / 2, h / 2, d / 2)), mat, at, parent);
+  const bevel = Math.min(radius, w / 2, h / 2, d / 2);
+  // A bevel below one screen pixel is not visible.
+  if (bevel <= 0.01) return mesh(new THREE.BoxGeometry(w, h, d), mat, at, parent);
+  // Use one bevel step for small parts and thin bevels.
+  const steps = Math.max(w, h, d) < 0.35 || bevel <= 0.04 ? 1 : 2;
+  return mesh(new RoundedBoxGeometry(w, h, d, steps, bevel), mat, at, parent);
 }
 
 // dims = [radiusTop, radiusBottom, height]; extra = [segments, openEnded, thetaStart, thetaLength].
@@ -85,7 +90,7 @@ export function cyl(
 }
 
 export function ball(r: number, at: P, mat: THREE.Material, parent: THREE.Object3D, seg = 24): THREE.Mesh {
-  const around = Math.min(seg, Math.max(8, Math.round(8 + r * 44)));
+  const around = Math.min(seg, Math.max(6, Math.round(6 + r * 44)));
   return mesh(new THREE.SphereGeometry(r, around, Math.max(6, Math.round(around * 0.66))), mat, at, parent);
 }
 
@@ -98,7 +103,7 @@ export function torus(
   flat = true,
 ): THREE.Mesh {
   const [r, tubeRadius] = ring;
-  const around = Math.min(72, Math.max(24, Math.round(r * 30)));
+  const around = Math.min(72, Math.max(14, Math.round(12 + r * 24)));
   const m = mesh(new THREE.TorusGeometry(r, tubeRadius, sides(tubeRadius, 10), around), mat, at, parent);
   if (flat) m.rotation.x = Math.PI / 2;
   return m;
@@ -237,7 +242,7 @@ export function extrude(
     bevelEnabled: bevel > 0,
     bevelSize: bevel,
     bevelThickness: bevel,
-    bevelSegments: 2,
+    bevelSegments: 1,
     curveSegments: 6,
   });
   return mesh(geometry, mat, at, parent);
@@ -280,8 +285,8 @@ export function slab(
     bevelEnabled: true,
     bevelSize: 0.025,
     bevelThickness: 0.025,
-    bevelSegments: 2,
-    curveSegments: 8,
+    bevelSegments: 1,
+    curveSegments: 6,
   });
   g.rotateX(-Math.PI / 2);
   g.translate(0, -h / 2, 0);
@@ -306,7 +311,7 @@ export function rivets(
   mat: THREE.Material,
   parent: THREE.Object3D,
 ): THREE.InstancedMesh {
-  const inst = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 5, 3), mat, points.length);
+  const inst = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 4, 2), mat, points.length);
   const m = new THREE.Matrix4();
   points.forEach((p: THREE.Vector3, i: number): void => {
     m.makeScale(r, r, r).setPosition(p);

@@ -54,6 +54,8 @@ export interface StationOptions {
   overlap?: () => number;
   // Completed sign flip: 0 suggest, 1 vote, 2 discuss.
   onSign?: (index: number) => void;
+  // The first frame is on the canvas.
+  onFrame?: () => void;
 }
 
 interface Shot {
@@ -453,6 +455,7 @@ export async function createStation(
     clock: 0,
     last: performance.now(),
     visible: true,
+    drawn: false,
     view: "hero" as StationView,
     // Last orbit completion; -1 before any drag.
     idleSince: -1,
@@ -472,8 +475,12 @@ export async function createStation(
   const { tilt, signs } = await buildModel(k, scene, station);
   const key = addLights(scene, compact.matches);
   const { composer, bloom, finish } = createPost(renderer, scene, camera);
-  // Compile shaders asynchronously where supported to avoid first-frame stalls.
-  await renderer.compileAsync?.(scene, camera);
+  // Compile shaders asynchronously where supported to avoid first-frame stalls. Compile for the composer
+  // target: screen programs have other tone mapping and are not used.
+  renderer.setRenderTarget?.(composer.readBuffer);
+  const compiled: Promise<unknown> | undefined = renderer.compileAsync?.(scene, camera);
+  renderer.setRenderTarget?.(null);
+  await compiled;
   wrap.appendChild(renderer.domElement);
 
   const controls = createControls(camera, renderer.domElement);
@@ -491,7 +498,7 @@ export async function createStation(
     state.dirty = true;
   });
 
-  const resize = new ResizeObserver((): void => {
+  const fit = (): void => {
     rig.width = Math.max(1, wrap.clientWidth);
     rig.height = Math.max(1, wrap.clientHeight);
     camera.aspect = rig.width / rig.height;
@@ -509,7 +516,10 @@ export async function createStation(
     }
     applyShift();
     state.dirty = true;
-  });
+  };
+  // Size the canvas before the first frame. The observer reports only after that frame.
+  fit();
+  const resize = new ResizeObserver(fit);
   resize.observe(wrap);
   const visibility = new IntersectionObserver((entries: IntersectionObserverEntry[]): void => {
     state.visible = entries[0].isIntersecting;
@@ -567,6 +577,10 @@ export async function createStation(
     }
     if (state.playing || state.dirty || rig.moving || state.dragging || leaning || turning) {
       composer.render(dt);
+      if (!state.drawn) {
+        state.drawn = true;
+        options.onFrame?.();
+      }
       state.dirty = false;
     }
     look.restore(camera, controls.target);

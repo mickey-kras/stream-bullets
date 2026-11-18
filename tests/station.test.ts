@@ -208,4 +208,7 @@ it("renders a static station before JavaScript or WebGL is available", (): void 
   expect(html).toContain('class="station-poster"');
   expect(html).toContain('src="/assets/station-poster.webp"');
   expect(html).toContain('width="1024" height="1024"');
+  // Phones get the frame of the phone camera.
+  expect(html).toMatch(/<source media="\(max-width: 700px\)" srcSet="\/assets\/station-poster-phone\.webp" width="\d+" height="\d+"\/>/);
+  expect(html).not.toContain("data-live");
 });

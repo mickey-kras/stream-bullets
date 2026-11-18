@@ -16833,7 +16833,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L132",
+      "source_location": "L148",
       "target": "app_components_station_palette_enamel",
       "weight": 1.0
     },
@@ -16845,7 +16845,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L140",
+      "source_location": "L156",
       "target": "app_components_station_logo_letters",
       "weight": 1.0
     },
@@ -16857,7 +16857,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L141",
+      "source_location": "L157",
       "target": "app_components_station_logo_wrap",
       "weight": 1.0
     },
@@ -16869,7 +16869,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L143",
+      "source_location": "L159",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -16881,8 +16881,8 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L148",
-      "target": "app_components_station_logo_walk",
+      "source_location": "L162",
+      "target": "app_components_station_logo_walker",
       "weight": 1.0
     },
     {
@@ -16893,7 +16893,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L150",
+      "source_location": "L167",
       "target": "app_components_station_plan_loop",
       "weight": 1.0
     },
@@ -16905,7 +16905,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L150",
+      "source_location": "L167",
       "target": "app_components_station_shapes_tube",
       "weight": 1.0
     },
@@ -16917,7 +16917,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L152",
+      "source_location": "L169",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -16929,7 +16929,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L152",
+      "source_location": "L169",
       "target": "app_components_station_shapes_ball",
       "weight": 1.0
     },
@@ -16941,7 +16941,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_buildlogo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L156",
+      "source_location": "L173",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -16953,7 +16953,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_glyphshapes",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L71",
+      "source_location": "L86",
       "target": "app_components_station_logo_place",
       "weight": 1.0
     },
@@ -16965,7 +16965,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_letters",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L103",
+      "source_location": "L118",
       "target": "app_components_station_logo_glyphshapes",
       "weight": 1.0
     },
@@ -16975,9 +16975,9 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_components_station_logo_walk",
+      "source": "app_components_station_logo_walker",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L37",
+      "source_location": "L39",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -16989,8 +16989,8 @@
       "relation": "calls",
       "source": "app_components_station_logo_wrap",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L124",
-      "target": "app_components_station_logo_walk",
+      "source_location": "L138",
+      "target": "app_components_station_logo_walker",
       "weight": 1.0
     },
     {
@@ -17001,7 +17001,7 @@
       "relation": "calls",
       "source": "app_components_station_logo_wrap",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L124",
+      "source_location": "L140",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -17301,7 +17301,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_decalmaterial",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L778",
+      "source_location": "L779",
       "target": "app_components_station_materials_decaltexture",
       "weight": 1.0
     },
@@ -17313,7 +17313,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_decaltexture",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L742",
+      "source_location": "L743",
       "target": "app_components_station_textures_random_a415ab5cc17c",
       "weight": 1.0
     },
@@ -17325,7 +17325,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_decaltexture",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L743",
+      "source_location": "L744",
       "target": "app_components_station_materials_valuenoise",
       "weight": 1.0
     },
@@ -17337,7 +17337,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_decaltexture",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L763",
+      "source_location": "L764",
       "target": "app_components_station_materials_paintchip",
       "weight": 1.0
     },
@@ -17349,7 +17349,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_decaltexture",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L764",
+      "source_location": "L765",
       "target": "app_components_station_materials_paintbolts",
       "weight": 1.0
     },
@@ -17361,7 +17361,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_decaltexture",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L765",
+      "source_location": "L766",
       "target": "app_components_station_materials_paintcorrosion",
       "weight": 1.0
     },
@@ -17373,7 +17373,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_decaltexture",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L766",
+      "source_location": "L767",
       "target": "app_components_station_materials_paintgrime",
       "weight": 1.0
     },
@@ -17385,7 +17385,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_decaltexture",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L767",
+      "source_location": "L768",
       "target": "app_components_station_materials_paintscratches",
       "weight": 1.0
     },
@@ -17541,7 +17541,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_paintbolthead",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L616",
+      "source_location": "L617",
       "target": "app_components_station_materials_rust",
       "weight": 1.0
     },
@@ -17553,20 +17553,8 @@
       "relation": "calls",
       "source": "app_components_station_materials_paintboltruns",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L606",
+      "source_location": "L607",
       "target": "app_components_station_materials_rust",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_materials_paintbolts",
-      "source_file": "app/components/station/materials.ts",
-      "source_location": "L636",
-      "target": "app_components_station_materials_paintboltruns",
       "weight": 1.0
     },
     {
@@ -17578,6 +17566,18 @@
       "source": "app_components_station_materials_paintbolts",
       "source_file": "app/components/station/materials.ts",
       "source_location": "L637",
+      "target": "app_components_station_materials_paintboltruns",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_materials_paintbolts",
+      "source_file": "app/components/station/materials.ts",
+      "source_location": "L638",
       "target": "app_components_station_materials_paintbolthead",
       "weight": 1.0
     },
@@ -17589,7 +17589,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_paintchip",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L590",
+      "source_location": "L591",
       "target": "app_components_station_materials_rust",
       "weight": 1.0
     },
@@ -17601,7 +17601,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_paintcorrosion",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L662",
+      "source_location": "L663",
       "target": "app_components_station_materials_paintcorrosionpixel",
       "weight": 1.0
     },
@@ -17613,7 +17613,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_paintcorrosionpixel",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L647",
+      "source_location": "L648",
       "target": "app_components_station_materials_rust",
       "weight": 1.0
     },
@@ -17625,7 +17625,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_paintscratch",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L715",
+      "source_location": "L716",
       "target": "app_components_station_materials_paintscratchwidth",
       "weight": 1.0
     },
@@ -17637,7 +17637,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_paintscratches",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L737",
+      "source_location": "L738",
       "target": "app_components_station_materials_paintscratch",
       "weight": 1.0
     },
@@ -17649,7 +17649,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_paintscratchwidth",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L697",
+      "source_location": "L698",
       "target": "app_components_station_materials_rust",
       "weight": 1.0
     },
@@ -17757,7 +17757,7 @@
       "relation": "calls",
       "source": "app_components_station_materials_valuenoise",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L549",
+      "source_location": "L550",
       "target": "app_components_station_textures_random_a415ab5cc17c",
       "weight": 1.0
     },
@@ -17925,7 +17925,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L230",
+      "source_location": "L231",
       "target": "app_components_station_palette_lamps",
       "weight": 1.0
     },
@@ -17937,7 +17937,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L238",
+      "source_location": "L239",
       "target": "app_components_station_palette_metals",
       "weight": 1.0
     },
@@ -17949,7 +17949,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L239",
+      "source_location": "L240",
       "target": "app_components_station_palette_paints",
       "weight": 1.0
     },
@@ -17961,7 +17961,7 @@
       "relation": "calls",
       "source": "app_components_station_palette_createpalette",
       "source_file": "app/components/station/palette.ts",
-      "source_location": "L241",
+      "source_location": "L242",
       "target": "app_components_station_palette_furnishings",
       "weight": 1.0
     },
@@ -18285,32 +18285,8 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_addlights",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L259",
+      "source_location": "L261",
       "target": "app_components_station_shapes_mesh",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_scene_client_buildmodel",
-      "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L314",
-      "target": "app_components_station_deck_builddeck",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_scene_client_buildmodel",
-      "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L315",
-      "target": "app_components_station_scene_client_pause",
       "weight": 1.0
     },
     {
@@ -18322,7 +18298,19 @@
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L316",
-      "target": "app_components_station_hall_buildhall",
+      "target": "app_components_station_deck_builddeck",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_scene_client_buildmodel",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L317",
+      "target": "app_components_station_scene_client_pause",
       "weight": 1.0
     },
     {
@@ -18334,7 +18322,7 @@
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L318",
-      "target": "app_components_station_studio_buildstudio",
+      "target": "app_components_station_hall_buildhall",
       "weight": 1.0
     },
     {
@@ -18346,6 +18334,18 @@
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
       "source_location": "L320",
+      "target": "app_components_station_studio_buildstudio",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_scene_client_buildmodel",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L322",
       "target": "app_components_station_wing_buildwing",
       "weight": 1.0
     },
@@ -18357,7 +18357,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L321",
+      "source_location": "L323",
       "target": "app_components_station_decals_builddecals",
       "weight": 1.0
     },
@@ -18369,7 +18369,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L323",
+      "source_location": "L325",
       "target": "app_components_station_works_buildworks",
       "weight": 1.0
     },
@@ -18381,7 +18381,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L325",
+      "source_location": "L327",
       "target": "app_components_station_mast_buildmast",
       "weight": 1.0
     },
@@ -18393,7 +18393,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L326",
+      "source_location": "L328",
       "target": "app_components_station_signs_buildsigns",
       "weight": 1.0
     },
@@ -18405,7 +18405,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L327",
+      "source_location": "L329",
       "target": "app_components_station_atom_buildatom",
       "weight": 1.0
     },
@@ -18417,7 +18417,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L330",
+      "source_location": "L332",
       "target": "app_components_station_merge_batchstatic",
       "weight": 1.0
     },
@@ -18429,7 +18429,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_buildmodel",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L334",
+      "source_location": "L336",
       "target": "app_components_station_atmosphere_buildatmosphere",
       "weight": 1.0
     },
@@ -18441,7 +18441,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_collectmaterialtextures",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L410",
+      "source_location": "L412",
       "target": "app_components_station_scene_client_istexture",
       "weight": 1.0
     },
@@ -18453,7 +18453,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createenvironment",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L226",
+      "source_location": "L228",
       "target": "app_components_station_shapes_ismesh",
       "weight": 1.0
     },
@@ -18465,7 +18465,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L446",
+      "source_location": "L448",
       "target": "app_components_station_kit_createkit",
       "weight": 1.0
     },
@@ -18477,7 +18477,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L447",
+      "source_location": "L449",
       "target": "app_components_station_scene_client_pause",
       "weight": 1.0
     },
@@ -18489,7 +18489,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L450",
+      "source_location": "L452",
       "target": "app_components_station_motion_motionreduced",
       "weight": 1.0
     },
@@ -18501,7 +18501,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L462",
+      "source_location": "L465",
       "target": "app_components_station_scene_client_createrenderer",
       "weight": 1.0
     },
@@ -18513,7 +18513,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L466",
+      "source_location": "L469",
       "target": "app_components_station_scene_client_createenvironment",
       "weight": 1.0
     },
@@ -18525,7 +18525,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L472",
+      "source_location": "L475",
       "target": "app_components_station_scene_client_buildmodel",
       "weight": 1.0
     },
@@ -18537,7 +18537,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L473",
+      "source_location": "L476",
       "target": "app_components_station_scene_client_addlights",
       "weight": 1.0
     },
@@ -18549,7 +18549,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L474",
+      "source_location": "L477",
       "target": "app_components_station_scene_client_createpost",
       "weight": 1.0
     },
@@ -18561,7 +18561,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L479",
+      "source_location": "L486",
       "target": "app_components_station_scene_client_createcontrols",
       "weight": 1.0
     },
@@ -18573,7 +18573,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L480",
+      "source_location": "L487",
       "target": "app_components_station_scene_client_createrig",
       "weight": 1.0
     },
@@ -18585,7 +18585,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L504",
+      "source_location": "L511",
       "target": "app_components_station_scene_client_fitphone",
       "weight": 1.0
     },
@@ -18597,7 +18597,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L518",
+      "source_location": "L528",
       "target": "app_components_station_look_createlook",
       "weight": 1.0
     },
@@ -18609,7 +18609,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L519",
+      "source_location": "L529",
       "target": "app_components_station_flips_createflips",
       "weight": 1.0
     },
@@ -18621,7 +18621,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L520",
+      "source_location": "L530",
       "target": "app_components_station_motion_watchmotion",
       "weight": 1.0
     },
@@ -18633,7 +18633,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L609",
+      "source_location": "L623",
       "target": "app_components_station_materials_field_paint",
       "weight": 1.0
     },
@@ -18645,7 +18645,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_createstation",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L618",
+      "source_location": "L632",
       "target": "app_components_station_scene_client_disposescene",
       "weight": 1.0
     },
@@ -18657,7 +18657,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_disposescene",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L428",
+      "source_location": "L430",
       "target": "app_components_station_scene_client_collectmaterialtextures",
       "weight": 1.0
     },
@@ -18669,7 +18669,7 @@
       "relation": "calls",
       "source": "app_components_station_scene_client_disposescene",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L434",
+      "source_location": "L436",
       "target": "app_components_station_scene_client_istexture",
       "weight": 1.0
     },
@@ -18681,7 +18681,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_ball",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L89",
+      "source_location": "L94",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18693,7 +18693,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_box",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L66",
+      "source_location": "L68",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18705,7 +18705,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_cyl",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L78",
+      "source_location": "L83",
       "target": "app_components_station_shapes_roundsides",
       "weight": 1.0
     },
@@ -18717,7 +18717,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_cyl",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L79",
+      "source_location": "L84",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18729,7 +18729,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_extrude",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L243",
+      "source_location": "L248",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18741,7 +18741,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_frame",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L265",
+      "source_location": "L270",
       "target": "app_components_station_shapes_rounded",
       "weight": 1.0
     },
@@ -18753,7 +18753,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_frame",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L267",
+      "source_location": "L272",
       "target": "app_components_station_shapes_extrude",
       "weight": 1.0
     },
@@ -18765,7 +18765,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_frond",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L359",
+      "source_location": "L364",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18777,7 +18777,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_lathe",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L300",
+      "source_location": "L305",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18789,7 +18789,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_lathe",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L300",
+      "source_location": "L305",
       "target": "app_components_station_shapes_roundsides",
       "weight": 1.0
     },
@@ -18801,7 +18801,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_pipe",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L168",
+      "source_location": "L173",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18813,7 +18813,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_pipe",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L169",
+      "source_location": "L174",
       "target": "app_components_station_shapes_runsegments",
       "weight": 1.0
     },
@@ -18825,7 +18825,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_pipe",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L169",
+      "source_location": "L174",
       "target": "app_components_station_shapes_sides",
       "weight": 1.0
     },
@@ -18837,7 +18837,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_plaque",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L254",
+      "source_location": "L259",
       "target": "app_components_station_shapes_extrude",
       "weight": 1.0
     },
@@ -18849,7 +18849,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_plaque",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L254",
+      "source_location": "L259",
       "target": "app_components_station_shapes_rounded",
       "weight": 1.0
     },
@@ -18861,7 +18861,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_rod",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L116",
+      "source_location": "L121",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18873,7 +18873,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_slab",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L278",
+      "source_location": "L283",
       "target": "app_components_station_shapes_rounded",
       "weight": 1.0
     },
@@ -18885,7 +18885,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_slab",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L288",
+      "source_location": "L293",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18897,7 +18897,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_torus",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L102",
+      "source_location": "L107",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18909,7 +18909,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_torus",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L102",
+      "source_location": "L107",
       "target": "app_components_station_shapes_sides",
       "weight": 1.0
     },
@@ -18921,7 +18921,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_tube",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L130",
+      "source_location": "L135",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -18933,7 +18933,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_tube",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L130",
+      "source_location": "L135",
       "target": "app_components_station_shapes_runsegments",
       "weight": 1.0
     },
@@ -18945,7 +18945,7 @@
       "relation": "calls",
       "source": "app_components_station_shapes_tube",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L130",
+      "source_location": "L135",
       "target": "app_components_station_shapes_sides",
       "weight": 1.0
     },
@@ -19053,67 +19053,7 @@
       "relation": "calls",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L22",
-      "target": "app_components_station_tilt_onfirstmotion",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_station_station",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L58",
-      "target": "app_components_station_motion_motionreduced",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_station_station",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L64",
-      "target": "app_components_station_station_station_start",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_station_station",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L65",
-      "target": "app_components_station_motion_watchmotion",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_station_station",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L75",
-      "target": "app_i18n_index_t",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_station_station_station",
-      "source_file": "app/components/station/station.tsx",
-      "source_location": "L88",
+      "source_location": "L119",
       "target": "app_components_station_tilt_tiltpillwanted",
       "weight": 1.0
     },
@@ -19125,7 +19065,7 @@
       "relation": "calls",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L93",
+      "source_location": "L124",
       "target": "app_components_station_tilt_askfortilt",
       "weight": 1.0
     },
@@ -19135,10 +19075,70 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_components_station_station_station_start",
+      "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L58",
+      "source_location": "L26",
+      "target": "app_components_station_tilt_onfirstmotion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L46",
+      "target": "app_components_station_station_station_overlap",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L61",
       "target": "app_components_station_motion_motionreduced",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L75",
+      "target": "app_components_station_station_station_start",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L76",
+      "target": "app_components_station_motion_watchmotion",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L88",
+      "target": "app_i18n_index_t",
       "weight": 1.0
     },
     {
@@ -19150,6 +19150,18 @@
       "source": "app_components_station_station_station_start",
       "source_file": "app/components/station/station.tsx",
       "source_location": "L61",
+      "target": "app_components_station_motion_motionreduced",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_station_station_station_start",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L72",
       "target": "app_components_station_station_station_fail",
       "weight": 1.0
     },
@@ -19161,7 +19173,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L435",
+      "source_location": "L430",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -19173,7 +19185,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L437",
+      "source_location": "L432",
       "target": "app_components_station_plan_planshape",
       "weight": 1.0
     },
@@ -19185,7 +19197,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L439",
+      "source_location": "L434",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -19197,7 +19209,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L451",
+      "source_location": "L446",
       "target": "app_components_station_plan_loop",
       "weight": 1.0
     },
@@ -19209,7 +19221,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L451",
+      "source_location": "L446",
       "target": "app_components_station_shapes_tube",
       "weight": 1.0
     },
@@ -19221,7 +19233,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L461",
+      "source_location": "L456",
       "target": "app_components_station_plan_band",
       "weight": 1.0
     },
@@ -19233,7 +19245,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L481",
+      "source_location": "L476",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -19245,7 +19257,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L482",
+      "source_location": "L477",
       "target": "app_components_station_shapes_rod",
       "weight": 1.0
     },
@@ -19257,7 +19269,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L488",
+      "source_location": "L483",
       "target": "app_components_station_plan_plansector",
       "weight": 1.0
     },
@@ -19269,7 +19281,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L498",
+      "source_location": "L493",
       "target": "app_components_station_plan_facingin",
       "weight": 1.0
     },
@@ -19281,7 +19293,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L499",
+      "source_location": "L494",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -19293,7 +19305,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L508",
+      "source_location": "L503",
       "target": "app_components_station_plan_facing",
       "weight": 1.0
     },
@@ -19305,7 +19317,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L512",
+      "source_location": "L507",
       "target": "app_components_station_studio_studiomicrophone",
       "weight": 1.0
     },
@@ -19317,7 +19329,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L514",
+      "source_location": "L509",
       "target": "app_components_station_studio_studioconsole",
       "weight": 1.0
     },
@@ -19329,7 +19341,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L516",
+      "source_location": "L511",
       "target": "app_components_station_studio_studiodeskplant",
       "weight": 1.0
     },
@@ -19341,7 +19353,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L527",
+      "source_location": "L522",
       "target": "app_components_station_studio_studiocrt",
       "weight": 1.0
     },
@@ -19353,7 +19365,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L528",
+      "source_location": "L523",
       "target": "app_components_station_studio_studiotapedeck",
       "weight": 1.0
     },
@@ -19365,7 +19377,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L530",
+      "source_location": "L525",
       "target": "app_components_station_studio_studiorack",
       "weight": 1.0
     },
@@ -19377,7 +19389,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L531",
+      "source_location": "L526",
       "target": "app_components_station_studio_studiolocker",
       "weight": 1.0
     },
@@ -19389,7 +19401,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L532",
+      "source_location": "L527",
       "target": "app_components_station_studio_studiodoor",
       "weight": 1.0
     },
@@ -19401,7 +19413,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L533",
+      "source_location": "L528",
       "target": "app_components_station_studio_studioclock",
       "weight": 1.0
     },
@@ -19413,7 +19425,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L534",
+      "source_location": "L529",
       "target": "app_components_station_studio_studioposter",
       "weight": 1.0
     },
@@ -19425,7 +19437,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L536",
+      "source_location": "L531",
       "target": "app_components_station_studio_studiopendants",
       "weight": 1.0
     },
@@ -19437,7 +19449,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L538",
+      "source_location": "L533",
       "target": "app_components_station_studio_studiochair",
       "weight": 1.0
     },
@@ -19449,7 +19461,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L540",
+      "source_location": "L535",
       "target": "app_components_station_studio_studiofloorplant",
       "weight": 1.0
     },
@@ -19461,7 +19473,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_buildstudio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L544",
+      "source_location": "L539",
       "target": "app_components_station_studio_studioplanters",
       "weight": 1.0
     },
@@ -19473,7 +19485,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiochair",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L372",
+      "source_location": "L367",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -19485,7 +19497,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiochair",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L373",
+      "source_location": "L368",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -19497,7 +19509,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiochair",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L374",
+      "source_location": "L369",
       "target": "app_components_station_plan_facing",
       "weight": 1.0
     },
@@ -19509,7 +19521,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiochair",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L377",
+      "source_location": "L372",
       "target": "app_components_station_shapes_rod",
       "weight": 1.0
     },
@@ -19521,7 +19533,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiochair",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L385",
+      "source_location": "L380",
       "target": "app_components_station_shapes_ball",
       "weight": 1.0
     },
@@ -19533,7 +19545,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiochair",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L387",
+      "source_location": "L382",
       "target": "app_components_station_shapes_cyl",
       "weight": 1.0
     },
@@ -19545,7 +19557,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiochair",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L388",
+      "source_location": "L383",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -19557,7 +19569,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiochair",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L392",
+      "source_location": "L387",
       "target": "app_components_station_shapes_tube",
       "weight": 1.0
     },
@@ -19569,7 +19581,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioclock",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L303",
+      "source_location": "L298",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -19581,7 +19593,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioclock",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L304",
+      "source_location": "L299",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -19593,7 +19605,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioclock",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L305",
+      "source_location": "L300",
       "target": "app_components_station_plan_facingin",
       "weight": 1.0
     },
@@ -19605,7 +19617,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioclock",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L306",
+      "source_location": "L301",
       "target": "app_components_station_shapes_cyl",
       "weight": 1.0
     },
@@ -19617,7 +19629,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioclock",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L307",
+      "source_location": "L302",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -19629,7 +19641,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioclock",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L314",
+      "source_location": "L309",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -19641,7 +19653,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioconsole",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L122",
+      "source_location": "L117",
       "target": "app_components_station_shapes_cyl",
       "weight": 1.0
     },
@@ -19677,7 +19689,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiocrt",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L143",
+      "source_location": "L138",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -19689,7 +19701,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiocrt",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L171",
+      "source_location": "L166",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -19701,7 +19713,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiocrt",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L173",
+      "source_location": "L168",
       "target": "app_components_station_shapes_cyl",
       "weight": 1.0
     },
@@ -19713,7 +19725,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodeskplant",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L133",
+      "source_location": "L128",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -19725,7 +19737,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodeskplant",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L134",
+      "source_location": "L129",
       "target": "app_components_station_shapes_lathe",
       "weight": 1.0
     },
@@ -19737,7 +19749,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodeskplant",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L134",
+      "source_location": "L129",
       "target": "app_components_station_shapes_profile",
       "weight": 1.0
     },
@@ -19749,7 +19761,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodoor",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L257",
+      "source_location": "L252",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -19761,7 +19773,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodoor",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L265",
+      "source_location": "L260",
       "target": "app_components_station_shapes_plaque",
       "weight": 1.0
     },
@@ -19773,7 +19785,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodoor",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L266",
+      "source_location": "L261",
       "target": "app_components_station_shapes_frame",
       "weight": 1.0
     },
@@ -19785,7 +19797,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodoor",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L269",
+      "source_location": "L264",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -19797,7 +19809,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodoor",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L270",
+      "source_location": "L265",
       "target": "app_components_station_shapes_tube",
       "weight": 1.0
     },
@@ -19809,7 +19821,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiodoor",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L279",
+      "source_location": "L274",
       "target": "app_components_station_shapes_rivets",
       "weight": 1.0
     },
@@ -19821,7 +19833,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiofloorplant",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L408",
+      "source_location": "L403",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -19833,7 +19845,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiofloorplant",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L409",
+      "source_location": "L404",
       "target": "app_components_station_shapes_lathe",
       "weight": 1.0
     },
@@ -19845,7 +19857,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiofloorplant",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L409",
+      "source_location": "L404",
       "target": "app_components_station_shapes_profile",
       "weight": 1.0
     },
@@ -19857,7 +19869,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiolocker",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L227",
+      "source_location": "L222",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -19869,7 +19881,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiolocker",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L228",
+      "source_location": "L223",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -19881,7 +19893,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiolocker",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L229",
+      "source_location": "L224",
       "target": "app_components_station_plan_facingin",
       "weight": 1.0
     },
@@ -19893,7 +19905,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiolocker",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L230",
+      "source_location": "L225",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -19905,7 +19917,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiolocker",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L235",
+      "source_location": "L230",
       "target": "app_components_station_shapes_cyl",
       "weight": 1.0
     },
@@ -19917,7 +19929,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiolocker",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L236",
+      "source_location": "L231",
       "target": "app_components_station_shapes_ball",
       "weight": 1.0
     },
@@ -19929,7 +19941,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiolocker",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L239",
+      "source_location": "L234",
       "target": "app_components_station_shapes_tube",
       "weight": 1.0
     },
@@ -19941,7 +19953,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiolocker",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L250",
+      "source_location": "L245",
       "target": "app_components_station_shapes_torus",
       "weight": 1.0
     },
@@ -20037,7 +20049,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiopendants",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L346",
+      "source_location": "L341",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -20049,7 +20061,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiopendants",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L347",
+      "source_location": "L342",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -20061,7 +20073,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiopendants",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L349",
+      "source_location": "L344",
       "target": "app_components_station_shapes_rod",
       "weight": 1.0
     },
@@ -20073,7 +20085,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiopendants",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L350",
+      "source_location": "L345",
       "target": "app_components_station_shapes_lathe",
       "weight": 1.0
     },
@@ -20085,7 +20097,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiopendants",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L351",
+      "source_location": "L346",
       "target": "app_components_station_shapes_profile",
       "weight": 1.0
     },
@@ -20097,7 +20109,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiopendants",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L363",
+      "source_location": "L358",
       "target": "app_components_station_shapes_ball",
       "weight": 1.0
     },
@@ -20109,7 +20121,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioplanters",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L421",
+      "source_location": "L416",
       "target": "app_components_station_plan_plansector",
       "weight": 1.0
     },
@@ -20121,7 +20133,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioplanters",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L423",
+      "source_location": "L418",
       "target": "app_components_station_plan_loop",
       "weight": 1.0
     },
@@ -20133,7 +20145,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioplanters",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L423",
+      "source_location": "L418",
       "target": "app_components_station_shapes_tube",
       "weight": 1.0
     },
@@ -20145,7 +20157,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioplanters",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L426",
+      "source_location": "L421",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -20157,7 +20169,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioposter",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L321",
+      "source_location": "L316",
       "target": "app_components_station_poster_postertexture",
       "weight": 1.0
     },
@@ -20169,7 +20181,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioposter",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L323",
+      "source_location": "L318",
       "target": "app_components_station_poster_poster",
       "weight": 1.0
     },
@@ -20181,7 +20193,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioposter",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L326",
+      "source_location": "L321",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -20193,7 +20205,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioposter",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L327",
+      "source_location": "L322",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -20205,7 +20217,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioposter",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L328",
+      "source_location": "L323",
       "target": "app_components_station_plan_facingin",
       "weight": 1.0
     },
@@ -20217,7 +20229,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioposter",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L329",
+      "source_location": "L324",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -20229,7 +20241,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studioposter",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L330",
+      "source_location": "L325",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -20241,7 +20253,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiorack",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L202",
+      "source_location": "L197",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -20253,7 +20265,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiorack",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L203",
+      "source_location": "L198",
       "target": "app_components_station_plan_plan",
       "weight": 1.0
     },
@@ -20265,7 +20277,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiorack",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L204",
+      "source_location": "L199",
       "target": "app_components_station_plan_facingin",
       "weight": 1.0
     },
@@ -20277,7 +20289,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiorack",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L205",
+      "source_location": "L200",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -20289,7 +20301,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiorack",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L206",
+      "source_location": "L201",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -20301,7 +20313,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiotapedeck",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L181",
+      "source_location": "L176",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -20313,7 +20325,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiotapedeck",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L190",
+      "source_location": "L185",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -20325,7 +20337,7 @@
       "relation": "calls",
       "source": "app_components_station_studio_studiotapedeck",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L192",
+      "source_location": "L187",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -51562,7 +51574,7 @@
       "relation": "re_exports",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L789",
+      "source_location": "L790",
       "target": "app_components_station_textures",
       "weight": 1.0
     },
@@ -52307,7 +52319,7 @@
       "relation": "references",
       "source": "app_components_station_materials_decalpaint",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L572",
+      "source_location": "L573",
       "target": "app_components_station_textures_random",
       "weight": 1.0
     },
@@ -53652,7 +53664,7 @@
       "relation": "imports_from",
       "source": "app_components_station_station_station_start",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L37",
+      "source_location": "L50",
       "target": "app_components_station_scene_client",
       "weight": 1.0
     },
@@ -131873,7 +131885,7 @@
       "relation": "re_exports",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L789",
+      "source_location": "L790",
       "target": "app_components_station_textures_random",
       "weight": 1.0
     },
@@ -140629,7 +140641,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L102",
+      "source_location": "L117",
       "target": "app_components_station_logo_letters",
       "weight": 1.0
     },
@@ -140640,7 +140652,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L121",
+      "source_location": "L136",
       "target": "app_components_station_logo_wrap",
       "weight": 1.0
     },
@@ -140651,7 +140663,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L130",
+      "source_location": "L146",
       "target": "app_components_station_logo_buildlogo",
       "weight": 1.0
     },
@@ -140706,8 +140718,8 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L34",
-      "target": "app_components_station_logo_walk",
+      "source_location": "L37",
+      "target": "app_components_station_logo_walker",
       "weight": 1.0
     },
     {
@@ -140717,7 +140729,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L48",
+      "source_location": "L63",
       "target": "app_components_station_logo_skew",
       "weight": 1.0
     },
@@ -140728,7 +140740,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L49",
+      "source_location": "L64",
       "target": "app_components_station_logo_place",
       "weight": 1.0
     },
@@ -140739,7 +140751,7 @@
       "relation": "contains",
       "source": "app_components_station_logo",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L53",
+      "source_location": "L68",
       "target": "app_components_station_logo_glyphshapes",
       "weight": 1.0
     },
@@ -141025,7 +141037,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L535",
+      "source_location": "L536",
       "target": "app_components_station_materials_decalkind",
       "weight": 1.0
     },
@@ -141036,7 +141048,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L548",
+      "source_location": "L549",
       "target": "app_components_station_materials_valuenoise",
       "weight": 1.0
     },
@@ -141047,7 +141059,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L569",
+      "source_location": "L570",
       "target": "app_components_station_materials_pixelpainter",
       "weight": 1.0
     },
@@ -141058,7 +141070,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L570",
+      "source_location": "L571",
       "target": "app_components_station_materials_decalpaint",
       "weight": 1.0
     },
@@ -141069,7 +141081,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L578",
+      "source_location": "L579",
       "target": "app_components_station_materials_rust",
       "weight": 1.0
     },
@@ -141080,7 +141092,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L580",
+      "source_location": "L581",
       "target": "app_components_station_materials_paintchip",
       "weight": 1.0
     },
@@ -141091,7 +141103,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L597",
+      "source_location": "L598",
       "target": "app_components_station_materials_paintboltruns",
       "weight": 1.0
     },
@@ -141102,7 +141114,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L611",
+      "source_location": "L612",
       "target": "app_components_station_materials_paintbolthead",
       "weight": 1.0
     },
@@ -141113,7 +141125,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L628",
+      "source_location": "L629",
       "target": "app_components_station_materials_paintbolts",
       "weight": 1.0
     },
@@ -141124,7 +141136,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L641",
+      "source_location": "L642",
       "target": "app_components_station_materials_paintcorrosionpixel",
       "weight": 1.0
     },
@@ -141135,7 +141147,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L658",
+      "source_location": "L659",
       "target": "app_components_station_materials_paintcorrosion",
       "weight": 1.0
     },
@@ -141146,7 +141158,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L666",
+      "source_location": "L667",
       "target": "app_components_station_materials_paintgrime",
       "weight": 1.0
     },
@@ -141157,7 +141169,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L682",
+      "source_location": "L683",
       "target": "app_components_station_materials_scratch",
       "weight": 1.0
     },
@@ -141168,7 +141180,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L690",
+      "source_location": "L691",
       "target": "app_components_station_materials_paintscratchwidth",
       "weight": 1.0
     },
@@ -141190,7 +141202,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L708",
+      "source_location": "L709",
       "target": "app_components_station_materials_paintscratch",
       "weight": 1.0
     },
@@ -141201,7 +141213,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L719",
+      "source_location": "L720",
       "target": "app_components_station_materials_paintscratches",
       "weight": 1.0
     },
@@ -141212,7 +141224,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L741",
+      "source_location": "L742",
       "target": "app_components_station_materials_decaltexture",
       "weight": 1.0
     },
@@ -141223,7 +141235,7 @@
       "relation": "contains",
       "source": "app_components_station_materials",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L775",
+      "source_location": "L776",
       "target": "app_components_station_materials_decalmaterial",
       "weight": 1.0
     },
@@ -141784,7 +141796,18 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L165",
+      "source_location": "L101",
+      "target": "app_components_station_scene_client_shots",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_station_scene_client",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L167",
       "target": "app_components_station_scene_client_createrenderer",
       "weight": 1.0
     },
@@ -141795,7 +141818,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L189",
+      "source_location": "L191",
       "target": "app_components_station_scene_client_createenvironment",
       "weight": 1.0
     },
@@ -141806,7 +141829,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L235",
+      "source_location": "L237",
       "target": "app_components_station_scene_client_addlights",
       "weight": 1.0
     },
@@ -141828,7 +141851,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L271",
+      "source_location": "L273",
       "target": "app_components_station_scene_client_createpost",
       "weight": 1.0
     },
@@ -141839,7 +141862,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L303",
+      "source_location": "L305",
       "target": "app_components_station_scene_client_pause",
       "weight": 1.0
     },
@@ -141850,7 +141873,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L309",
+      "source_location": "L311",
       "target": "app_components_station_scene_client_buildmodel",
       "weight": 1.0
     },
@@ -141861,7 +141884,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L339",
+      "source_location": "L341",
       "target": "app_components_station_scene_client_createrig",
       "weight": 1.0
     },
@@ -141872,7 +141895,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L392",
+      "source_location": "L394",
       "target": "app_components_station_scene_client_createcontrols",
       "weight": 1.0
     },
@@ -141883,19 +141906,8 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L405",
+      "source_location": "L407",
       "target": "app_components_station_scene_client_istexture",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_station_scene_client",
-      "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L409",
-      "target": "app_components_station_scene_client_collectmaterialtextures",
       "weight": 1.0
     },
     {
@@ -141916,7 +141928,18 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L415",
+      "source_location": "L411",
+      "target": "app_components_station_scene_client_collectmaterialtextures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_station_scene_client",
+      "source_file": "app/components/station/scene.client.ts",
+      "source_location": "L417",
       "target": "app_components_station_scene_client_disposescene",
       "weight": 1.0
     },
@@ -141927,7 +141950,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L438",
+      "source_location": "L440",
       "target": "app_components_station_scene_client_createstation",
       "weight": 1.0
     },
@@ -141949,7 +141972,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L59",
+      "source_location": "L61",
       "target": "app_components_station_scene_client_shot",
       "weight": 1.0
     },
@@ -141960,7 +141983,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L68",
+      "source_location": "L70",
       "target": "app_components_station_scene_client_phone_hero",
       "weight": 1.0
     },
@@ -141971,7 +141994,7 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L80",
+      "source_location": "L82",
       "target": "app_components_station_scene_client_fitphone",
       "weight": 1.0
     },
@@ -141982,19 +142005,8 @@
       "relation": "contains",
       "source": "app_components_station_scene_client",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L91",
+      "source_location": "L93",
       "target": "app_components_station_scene_client_turnaround",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_station_scene_client",
-      "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L99",
-      "target": "app_components_station_scene_client_shots",
       "weight": 1.0
     },
     {
@@ -142015,7 +142027,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L107",
+      "source_location": "L112",
       "target": "app_components_station_shapes_rod",
       "weight": 1.0
     },
@@ -142037,7 +142049,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L121",
+      "source_location": "L126",
       "target": "app_components_station_shapes_tube",
       "weight": 1.0
     },
@@ -142048,7 +142060,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L134",
+      "source_location": "L139",
       "target": "app_components_station_shapes_pipe",
       "weight": 1.0
     },
@@ -142070,7 +142082,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L17",
+      "source_location": "L19",
       "target": "app_components_station_shapes_sides",
       "weight": 1.0
     },
@@ -142081,7 +142093,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L188",
+      "source_location": "L193",
       "target": "app_components_station_shapes_arc",
       "weight": 1.0
     },
@@ -142092,7 +142104,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L197",
+      "source_location": "L202",
       "target": "app_components_station_shapes_polar",
       "weight": 1.0
     },
@@ -142103,7 +142115,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L201",
+      "source_location": "L206",
       "target": "app_components_station_shapes_rounded",
       "weight": 1.0
     },
@@ -142114,7 +142126,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L217",
+      "source_location": "L222",
       "target": "app_components_station_shapes_archshape",
       "weight": 1.0
     },
@@ -142125,18 +142137,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L22",
-      "target": "app_components_station_shapes_roundsides",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_station_shapes",
-      "source_file": "app/components/station/shapes.ts",
-      "source_location": "L227",
+      "source_location": "L232",
       "target": "app_components_station_shapes_extrude",
       "weight": 1.0
     },
@@ -142147,7 +142148,18 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L247",
+      "source_location": "L24",
+      "target": "app_components_station_shapes_roundsides",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_station_shapes",
+      "source_file": "app/components/station/shapes.ts",
+      "source_location": "L252",
       "target": "app_components_station_shapes_plaque",
       "weight": 1.0
     },
@@ -142158,7 +142170,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L258",
+      "source_location": "L263",
       "target": "app_components_station_shapes_frame",
       "weight": 1.0
     },
@@ -142169,18 +142181,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L27",
-      "target": "app_components_station_shapes_runsegments",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_station_shapes",
-      "source_file": "app/components/station/shapes.ts",
-      "source_location": "L271",
+      "source_location": "L276",
       "target": "app_components_station_shapes_slab",
       "weight": 1.0
     },
@@ -142191,7 +142192,18 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L291",
+      "source_location": "L29",
+      "target": "app_components_station_shapes_runsegments",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_station_shapes",
+      "source_file": "app/components/station/shapes.ts",
+      "source_location": "L296",
       "target": "app_components_station_shapes_lathe",
       "weight": 1.0
     },
@@ -142202,7 +142214,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L303",
+      "source_location": "L308",
       "target": "app_components_station_shapes_rivets",
       "weight": 1.0
     },
@@ -142213,7 +142225,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L321",
+      "source_location": "L326",
       "target": "app_components_station_shapes_ringpoints",
       "weight": 1.0
     },
@@ -142224,7 +142236,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L330",
+      "source_location": "L335",
       "target": "app_components_station_shapes_frond",
       "weight": 1.0
     },
@@ -142235,7 +142247,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L363",
+      "source_location": "L368",
       "target": "app_components_station_shapes_profile",
       "weight": 1.0
     },
@@ -142257,7 +142269,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L41",
+      "source_location": "L43",
       "target": "app_components_station_shapes_add",
       "weight": 1.0
     },
@@ -142268,7 +142280,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L46",
+      "source_location": "L48",
       "target": "app_components_station_shapes_mesh",
       "weight": 1.0
     },
@@ -142279,7 +142291,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L62",
+      "source_location": "L64",
       "target": "app_components_station_shapes_box",
       "weight": 1.0
     },
@@ -142290,7 +142302,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L70",
+      "source_location": "L75",
       "target": "app_components_station_shapes_cyl",
       "weight": 1.0
     },
@@ -142301,7 +142313,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L87",
+      "source_location": "L92",
       "target": "app_components_station_shapes_ball",
       "weight": 1.0
     },
@@ -142312,7 +142324,7 @@
       "relation": "contains",
       "source": "app_components_station_shapes",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L93",
+      "source_location": "L98",
       "target": "app_components_station_shapes_torus",
       "weight": 1.0
     },
@@ -142345,8 +142357,19 @@
       "relation": "contains",
       "source": "app_components_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L9",
+      "source_location": "L11",
       "target": "app_components_station_station_station",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L9",
+      "target": "app_components_station_station_phone_poster",
       "weight": 1.0
     },
     {
@@ -142356,7 +142379,7 @@
       "relation": "contains",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L29",
+      "source_location": "L33",
       "target": "app_components_station_station_station_fail",
       "weight": 1.0
     },
@@ -142367,7 +142390,18 @@
       "relation": "contains",
       "source": "app_components_station_station_station",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L34",
+      "source_location": "L39",
+      "target": "app_components_station_station_station_overlap",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_station_station_station",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L47",
       "target": "app_components_station_station_station_start",
       "weight": 1.0
     },
@@ -142378,7 +142412,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L130",
+      "source_location": "L125",
       "target": "app_components_station_studio_studiodeskplant",
       "weight": 1.0
     },
@@ -142389,7 +142423,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L138",
+      "source_location": "L133",
       "target": "app_components_station_studio_studiocrt",
       "weight": 1.0
     },
@@ -142400,7 +142434,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L176",
+      "source_location": "L171",
       "target": "app_components_station_studio_studiotapedeck",
       "weight": 1.0
     },
@@ -142422,7 +142456,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L199",
+      "source_location": "L194",
       "target": "app_components_station_studio_studiorack",
       "weight": 1.0
     },
@@ -142433,7 +142467,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L224",
+      "source_location": "L219",
       "target": "app_components_station_studio_studiolocker",
       "weight": 1.0
     },
@@ -142444,7 +142478,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L254",
+      "source_location": "L249",
       "target": "app_components_station_studio_studiodoor",
       "weight": 1.0
     },
@@ -142455,7 +142489,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L300",
+      "source_location": "L295",
       "target": "app_components_station_studio_studioclock",
       "weight": 1.0
     },
@@ -142466,7 +142500,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L318",
+      "source_location": "L313",
       "target": "app_components_station_studio_studioposter",
       "weight": 1.0
     },
@@ -142477,7 +142511,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L339",
+      "source_location": "L334",
       "target": "app_components_station_studio_studiopendants",
       "weight": 1.0
     },
@@ -142488,7 +142522,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L369",
+      "source_location": "L364",
       "target": "app_components_station_studio_studiochair",
       "weight": 1.0
     },
@@ -142499,7 +142533,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L405",
+      "source_location": "L400",
       "target": "app_components_station_studio_studiofloorplant",
       "weight": 1.0
     },
@@ -142510,7 +142544,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L413",
+      "source_location": "L408",
       "target": "app_components_station_studio_studioplanters",
       "weight": 1.0
     },
@@ -142521,7 +142555,7 @@
       "relation": "contains",
       "source": "app_components_station_studio",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L432",
+      "source_location": "L427",
       "target": "app_components_station_studio_buildstudio",
       "weight": 1.0
     },
@@ -173602,7 +173636,7 @@
       "relation": "indirect_call",
       "source": "app_components_station_station_station_start",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L41",
+      "source_location": "L54",
       "target": "app_components_station_station_station_fail",
       "weight": 1.0
     },
@@ -175412,6 +175446,18 @@
       "confidence_score": 0.85,
       "context": "collection",
       "relation": "indirect_call",
+      "source": "app_components_station_station_station_start",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L59",
+      "target": "app_components_station_station_station_overlap",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "collection",
+      "relation": "indirect_call",
       "source": "app_components_support_support_usesupportdraft",
       "source_file": "app/components/support/support.tsx",
       "source_location": "L152",
@@ -175924,10 +175970,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "2bd7cf3133d492654de9c16ddf2e7d2577603184d93d1dffcaa0a121c21763fc",
+    "content_sha256": "4189dd8d5685157be45666fa63e0d8b1d1ae7bdf7adbe8f874068ec6f90e675c",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "5b32b91ce93b508cfb8225930c85487dcbd67912d4e2f4669e388c8d4a6c98d1",
+    "source_sha256": "28daf4f8a5ed1d1fbedd575b5749f7136d1b35c21c6abacc782dce3e2fa7af75",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -177473,7 +177519,7 @@
       "label": "DecalKind",
       "norm_label": "decalkind",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L535"
+      "source_location": "L536"
     },
     {
       "_callable": true,
@@ -177485,7 +177531,7 @@
       "label": "DecalPaint",
       "norm_label": "decalpaint",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L570"
+      "source_location": "L571"
     },
     {
       "_callable": true,
@@ -177497,7 +177543,7 @@
       "label": "PixelPainter",
       "norm_label": "pixelpainter",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L569"
+      "source_location": "L570"
     },
     {
       "_callable": true,
@@ -177509,7 +177555,7 @@
       "label": "Scratch",
       "norm_label": "scratch",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L682"
+      "source_location": "L683"
     },
     {
       "_callable": true,
@@ -177605,7 +177651,7 @@
       "label": "Shot",
       "norm_label": "shot",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L59"
+      "source_location": "L61"
     },
     {
       "_callable": true,
@@ -188762,7 +188808,7 @@
       "label": "buildLogo()",
       "norm_label": "buildlogo()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L130"
+      "source_location": "L146"
     },
     {
       "_callable": true,
@@ -188773,7 +188819,7 @@
       "label": "glyphShapes()",
       "norm_label": "glyphshapes()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L53"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -188784,7 +188830,7 @@
       "label": "letters()",
       "norm_label": "letters()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L102"
+      "source_location": "L117"
     },
     {
       "_callable": true,
@@ -188795,18 +188841,18 @@
       "label": "place()",
       "norm_label": "place()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L49"
+      "source_location": "L64"
     },
     {
       "_callable": true,
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_components_station_logo_walk",
-      "label": "walk()",
-      "norm_label": "walk()",
+      "id": "app_components_station_logo_walker",
+      "label": "walker()",
+      "norm_label": "walker()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L34"
+      "source_location": "L37"
     },
     {
       "_callable": true,
@@ -188817,7 +188863,7 @@
       "label": "wrap()",
       "norm_label": "wrap()",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L121"
+      "source_location": "L136"
     },
     {
       "_callable": true,
@@ -188978,7 +189024,7 @@
       "label": "decalMaterial()",
       "norm_label": "decalmaterial()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L775"
+      "source_location": "L776"
     },
     {
       "_callable": true,
@@ -188993,14 +189039,14 @@
             "callee": "getContext",
             "file": "app/components/station/materials.ts",
             "lang": "typescript",
-            "line": "L750",
+            "line": "L751",
             "receiver_type": "HTMLCanvasElement"
           }
         ]
       },
       "norm_label": "decaltexture()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L741"
+      "source_location": "L742"
     },
     {
       "_callable": true,
@@ -189154,7 +189200,7 @@
       "label": "paintBoltHead()",
       "norm_label": "paintbolthead()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L611"
+      "source_location": "L612"
     },
     {
       "_callable": true,
@@ -189165,7 +189211,7 @@
       "label": "paintBoltRuns()",
       "norm_label": "paintboltruns()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L597"
+      "source_location": "L598"
     },
     {
       "_callable": true,
@@ -189176,7 +189222,7 @@
       "label": "paintBolts()",
       "norm_label": "paintbolts()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L628"
+      "source_location": "L629"
     },
     {
       "_callable": true,
@@ -189187,7 +189233,7 @@
       "label": "paintChip()",
       "norm_label": "paintchip()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L580"
+      "source_location": "L581"
     },
     {
       "_callable": true,
@@ -189198,7 +189244,7 @@
       "label": "paintCorrosion()",
       "norm_label": "paintcorrosion()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L658"
+      "source_location": "L659"
     },
     {
       "_callable": true,
@@ -189209,7 +189255,7 @@
       "label": "paintCorrosionPixel()",
       "norm_label": "paintcorrosionpixel()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L641"
+      "source_location": "L642"
     },
     {
       "_callable": true,
@@ -189220,7 +189266,7 @@
       "label": "paintGrime()",
       "norm_label": "paintgrime()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L666"
+      "source_location": "L667"
     },
     {
       "_callable": true,
@@ -189231,7 +189277,7 @@
       "label": "paintScratch()",
       "norm_label": "paintscratch()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L708"
+      "source_location": "L709"
     },
     {
       "_callable": true,
@@ -189242,7 +189288,7 @@
       "label": "paintScratches()",
       "norm_label": "paintscratches()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L719"
+      "source_location": "L720"
     },
     {
       "_callable": true,
@@ -189253,7 +189299,7 @@
       "label": "paintScratchWidth()",
       "norm_label": "paintscratchwidth()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L690"
+      "source_location": "L691"
     },
     {
       "_callable": true,
@@ -189286,7 +189332,7 @@
       "label": "rust()",
       "norm_label": "rust()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L578"
+      "source_location": "L579"
     },
     {
       "_callable": true,
@@ -189319,7 +189365,7 @@
       "label": "valueNoise()",
       "norm_label": "valuenoise()",
       "source_file": "app/components/station/materials.ts",
-      "source_location": "L548"
+      "source_location": "L549"
     },
     {
       "_callable": true,
@@ -189777,7 +189823,7 @@
       "label": "addLights()",
       "norm_label": "addlights()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L235"
+      "source_location": "L237"
     },
     {
       "_callable": true,
@@ -189788,7 +189834,7 @@
       "label": "buildModel()",
       "norm_label": "buildmodel()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L309"
+      "source_location": "L311"
     },
     {
       "_callable": true,
@@ -189799,7 +189845,7 @@
       "label": "collectMaterialTextures()",
       "norm_label": "collectmaterialtextures()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L409"
+      "source_location": "L411"
     },
     {
       "_callable": true,
@@ -189810,7 +189856,7 @@
       "label": "createControls()",
       "norm_label": "createcontrols()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L392"
+      "source_location": "L394"
     },
     {
       "_callable": true,
@@ -189821,7 +189867,7 @@
       "label": "createEnvironment()",
       "norm_label": "createenvironment()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L189"
+      "source_location": "L191"
     },
     {
       "_callable": true,
@@ -189836,14 +189882,14 @@
             "callee": "addPass",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L279",
+            "line": "L281",
             "receiver_type": "EffectComposer"
           }
         ]
       },
       "norm_label": "createpost()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L271"
+      "source_location": "L273"
     },
     {
       "_callable": true,
@@ -189854,7 +189900,7 @@
       "label": "createRenderer()",
       "norm_label": "createrenderer()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L165"
+      "source_location": "L167"
     },
     {
       "_callable": true,
@@ -189865,7 +189911,7 @@
       "label": "createRig()",
       "norm_label": "createrig()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L339"
+      "source_location": "L341"
     },
     {
       "_callable": true,
@@ -189880,84 +189926,84 @@
             "callee": "appendChild",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L477",
+            "line": "L484",
             "receiver_type": "HTMLDivElement"
           },
           {
             "callee": "addEventListener",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L481",
+            "line": "L488",
             "receiver_type": "OrbitControls"
           },
           {
             "callee": "setSize",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L502",
+            "line": "L509",
             "receiver_type": "EffectComposer"
           },
           {
             "callee": "observe",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L513",
+            "line": "L523",
             "receiver_type": "ResizeObserver"
           },
           {
             "callee": "observe",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L517",
+            "line": "L527",
             "receiver_type": "IntersectionObserver"
           },
           {
             "callee": "update",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L550",
+            "line": "L560",
             "receiver_type": "OrbitControls"
           },
           {
             "callee": "render",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L569",
+            "line": "L579",
             "receiver_type": "EffectComposer"
           },
           {
             "callee": "disconnect",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L615",
+            "line": "L629",
             "receiver_type": "ResizeObserver"
           },
           {
             "callee": "disconnect",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L616",
+            "line": "L630",
             "receiver_type": "IntersectionObserver"
           },
           {
             "callee": "dispose",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L617",
+            "line": "L631",
             "receiver_type": "OrbitControls"
           },
           {
             "callee": "dispose",
             "file": "app/components/station/scene.client.ts",
             "lang": "typescript",
-            "line": "L621",
+            "line": "L635",
             "receiver_type": "EffectComposer"
           }
         ]
       },
       "norm_label": "createstation()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L438"
+      "source_location": "L440"
     },
     {
       "_callable": true,
@@ -189968,7 +190014,7 @@
       "label": "disposeScene()",
       "norm_label": "disposescene()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L415"
+      "source_location": "L417"
     },
     {
       "_callable": true,
@@ -189979,7 +190025,7 @@
       "label": "fitPhone()",
       "norm_label": "fitphone()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L80"
+      "source_location": "L82"
     },
     {
       "_callable": true,
@@ -189990,7 +190036,7 @@
       "label": "isTexture()",
       "norm_label": "istexture()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L405"
+      "source_location": "L407"
     },
     {
       "_callable": true,
@@ -190001,7 +190047,7 @@
       "label": "pause()",
       "norm_label": "pause()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L303"
+      "source_location": "L305"
     },
     {
       "_callable": true,
@@ -190012,7 +190058,7 @@
       "label": "turnaround()",
       "norm_label": "turnaround()",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L91"
+      "source_location": "L93"
     },
     {
       "_callable": true,
@@ -190023,7 +190069,7 @@
       "label": "add()",
       "norm_label": "add()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L41"
+      "source_location": "L43"
     },
     {
       "_callable": true,
@@ -190034,7 +190080,7 @@
       "label": "arc()",
       "norm_label": "arc()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L188"
+      "source_location": "L193"
     },
     {
       "_callable": true,
@@ -190045,7 +190091,7 @@
       "label": "archShape()",
       "norm_label": "archshape()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L217"
+      "source_location": "L222"
     },
     {
       "_callable": true,
@@ -190056,7 +190102,7 @@
       "label": "ball()",
       "norm_label": "ball()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L87"
+      "source_location": "L92"
     },
     {
       "_callable": true,
@@ -190067,7 +190113,7 @@
       "label": "box()",
       "norm_label": "box()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L62"
+      "source_location": "L64"
     },
     {
       "_callable": true,
@@ -190078,7 +190124,7 @@
       "label": "cyl()",
       "norm_label": "cyl()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L70"
+      "source_location": "L75"
     },
     {
       "_callable": true,
@@ -190089,7 +190135,7 @@
       "label": "extrude()",
       "norm_label": "extrude()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L227"
+      "source_location": "L232"
     },
     {
       "_callable": true,
@@ -190100,7 +190146,7 @@
       "label": "frame()",
       "norm_label": "frame()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L258"
+      "source_location": "L263"
     },
     {
       "_callable": true,
@@ -190111,7 +190157,7 @@
       "label": "frond()",
       "norm_label": "frond()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L330"
+      "source_location": "L335"
     },
     {
       "_callable": true,
@@ -190133,7 +190179,7 @@
       "label": "lathe()",
       "norm_label": "lathe()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L291"
+      "source_location": "L296"
     },
     {
       "_callable": true,
@@ -190144,7 +190190,7 @@
       "label": "mesh()",
       "norm_label": "mesh()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L46"
+      "source_location": "L48"
     },
     {
       "_callable": true,
@@ -190155,7 +190201,7 @@
       "label": "pipe()",
       "norm_label": "pipe()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L134"
+      "source_location": "L139"
     },
     {
       "_callable": true,
@@ -190166,7 +190212,7 @@
       "label": "plaque()",
       "norm_label": "plaque()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L247"
+      "source_location": "L252"
     },
     {
       "_callable": true,
@@ -190177,7 +190223,7 @@
       "label": "polar()",
       "norm_label": "polar()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L197"
+      "source_location": "L202"
     },
     {
       "_callable": true,
@@ -190188,7 +190234,7 @@
       "label": "profile()",
       "norm_label": "profile()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L363"
+      "source_location": "L368"
     },
     {
       "_callable": true,
@@ -190199,7 +190245,7 @@
       "label": "ringPoints()",
       "norm_label": "ringpoints()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L321"
+      "source_location": "L326"
     },
     {
       "_callable": true,
@@ -190210,7 +190256,7 @@
       "label": "rivets()",
       "norm_label": "rivets()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L303"
+      "source_location": "L308"
     },
     {
       "_callable": true,
@@ -190221,7 +190267,7 @@
       "label": "rod()",
       "norm_label": "rod()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L107"
+      "source_location": "L112"
     },
     {
       "_callable": true,
@@ -190232,7 +190278,7 @@
       "label": "rounded()",
       "norm_label": "rounded()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L201"
+      "source_location": "L206"
     },
     {
       "_callable": true,
@@ -190243,7 +190289,7 @@
       "label": "roundSides()",
       "norm_label": "roundsides()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L22"
+      "source_location": "L24"
     },
     {
       "_callable": true,
@@ -190254,7 +190300,7 @@
       "label": "runSegments()",
       "norm_label": "runsegments()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L27"
+      "source_location": "L29"
     },
     {
       "_callable": true,
@@ -190265,7 +190311,7 @@
       "label": "sides()",
       "norm_label": "sides()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L17"
+      "source_location": "L19"
     },
     {
       "_callable": true,
@@ -190276,7 +190322,7 @@
       "label": "slab()",
       "norm_label": "slab()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L271"
+      "source_location": "L276"
     },
     {
       "_callable": true,
@@ -190287,7 +190333,7 @@
       "label": "torus()",
       "norm_label": "torus()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L93"
+      "source_location": "L98"
     },
     {
       "_callable": true,
@@ -190298,7 +190344,7 @@
       "label": "tube()",
       "norm_label": "tube()",
       "source_file": "app/components/station/shapes.ts",
-      "source_location": "L121"
+      "source_location": "L126"
     },
     {
       "_callable": true,
@@ -190384,7 +190430,7 @@
       "label": "Station()",
       "norm_label": "station()",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L9"
+      "source_location": "L11"
     },
     {
       "_callable": true,
@@ -190395,7 +190441,18 @@
       "label": "fail()",
       "norm_label": "fail()",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L29"
+      "source_location": "L33"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_station_station_station_overlap",
+      "label": "overlap()",
+      "norm_label": "overlap()",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L39"
     },
     {
       "_callable": true,
@@ -190406,7 +190463,7 @@
       "label": "start()",
       "norm_label": "start()",
       "source_file": "app/components/station/station.tsx",
-      "source_location": "L34"
+      "source_location": "L47"
     },
     {
       "_callable": true,
@@ -190417,7 +190474,7 @@
       "label": "buildStudio()",
       "norm_label": "buildstudio()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L432"
+      "source_location": "L427"
     },
     {
       "_callable": true,
@@ -190428,7 +190485,7 @@
       "label": "studioChair()",
       "norm_label": "studiochair()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L369"
+      "source_location": "L364"
     },
     {
       "_callable": true,
@@ -190439,7 +190496,7 @@
       "label": "studioClock()",
       "norm_label": "studioclock()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L300"
+      "source_location": "L295"
     },
     {
       "_callable": true,
@@ -190461,7 +190518,7 @@
       "label": "studioCrt()",
       "norm_label": "studiocrt()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L138"
+      "source_location": "L133"
     },
     {
       "_callable": true,
@@ -190472,7 +190529,7 @@
       "label": "studioDeskPlant()",
       "norm_label": "studiodeskplant()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L130"
+      "source_location": "L125"
     },
     {
       "_callable": true,
@@ -190483,7 +190540,7 @@
       "label": "studioDoor()",
       "norm_label": "studiodoor()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L254"
+      "source_location": "L249"
     },
     {
       "_callable": true,
@@ -190494,7 +190551,7 @@
       "label": "studioFloorPlant()",
       "norm_label": "studiofloorplant()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L405"
+      "source_location": "L400"
     },
     {
       "_callable": true,
@@ -190505,7 +190562,7 @@
       "label": "studioLocker()",
       "norm_label": "studiolocker()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L224"
+      "source_location": "L219"
     },
     {
       "_callable": true,
@@ -190527,7 +190584,7 @@
       "label": "studioPendants()",
       "norm_label": "studiopendants()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L339"
+      "source_location": "L334"
     },
     {
       "_callable": true,
@@ -190538,7 +190595,7 @@
       "label": "studioPlanters()",
       "norm_label": "studioplanters()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L413"
+      "source_location": "L408"
     },
     {
       "_callable": true,
@@ -190549,7 +190606,7 @@
       "label": "studioPoster()",
       "norm_label": "studioposter()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L318"
+      "source_location": "L313"
     },
     {
       "_callable": true,
@@ -190560,7 +190617,7 @@
       "label": "studioRack()",
       "norm_label": "studiorack()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L199"
+      "source_location": "L194"
     },
     {
       "_callable": true,
@@ -190571,7 +190628,7 @@
       "label": "studioTapeDeck()",
       "norm_label": "studiotapedeck()",
       "source_file": "app/components/station/studio.ts",
-      "source_location": "L176"
+      "source_location": "L171"
     },
     {
       "_callable": true,
@@ -211185,7 +211242,7 @@
       "label": "SKEW",
       "norm_label": "skew",
       "source_file": "app/components/station/logo.ts",
-      "source_location": "L48"
+      "source_location": "L63"
     },
     {
       "_origin": "ast",
@@ -211395,7 +211452,7 @@
       "label": "PHONE_HERO",
       "norm_label": "phone_hero",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L68"
+      "source_location": "L70"
     },
     {
       "_origin": "ast",
@@ -211405,7 +211462,7 @@
       "label": "SHOTS",
       "norm_label": "shots",
       "source_file": "app/components/station/scene.client.ts",
-      "source_location": "L99"
+      "source_location": "L101"
     },
     {
       "_origin": "ast",
@@ -211456,6 +211513,16 @@
       "norm_label": "station.tsx",
       "source_file": "app/components/station/station.tsx",
       "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_station_station_phone_poster",
+      "label": "PHONE_POSTER",
+      "norm_label": "phone_poster",
+      "source_file": "app/components/station/station.tsx",
+      "source_location": "L9"
     },
     {
       "_origin": "ast",
@@ -219104,7 +219171,7 @@
             "callee": "scrollIntoView",
             "file": "tests/e2e/conversions.spec.ts",
             "lang": "typescript",
-            "line": "L84",
+            "line": "L86",
             "receiver_type": "HTMLAnchorElement"
           }
         ]
