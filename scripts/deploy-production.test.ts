@@ -66,8 +66,8 @@ fi
   }
 }
 
-describe("production deployment recovery", (): void => {
-  it("verifies the active reader before migrating and keeps a successful deployment", async (): Promise<void> => {
+void describe("production deployment recovery", (): void => {
+  void it("verifies the active reader before migrating and keeps a successful deployment", async (): Promise<void> => {
     const result = await deploy("success");
     assert.equal(result.status, 0);
     const calls: string[] = result.calls.trim().split("\n");
@@ -80,7 +80,7 @@ describe("production deployment recovery", (): void => {
     assert.ok(!result.calls.includes("wrangler rollback"));
   });
 
-  it("refuses a missing or unsupported reader marker before migrations or traffic changes", async (): Promise<void> => {
+  void it("refuses a missing or unsupported reader marker before migrations or traffic changes", async (): Promise<void> => {
     for (const scenario of ["missing-marker", "unsupported-marker"]) {
       const result = await deploy(scenario);
       assert.notEqual(result.status, 0);
@@ -91,7 +91,7 @@ describe("production deployment recovery", (): void => {
     }
   });
 
-  it("rejects a changed active version before migrations or deployment", async (): Promise<void> => {
+  void it("rejects a changed active version before migrations or deployment", async (): Promise<void> => {
     const result = await deploy("version-changed");
     assert.notEqual(result.status, 0);
     assert.ok(!result.calls.includes("migrations apply"));
@@ -100,7 +100,7 @@ describe("production deployment recovery", (): void => {
     assert.ok(result.output.includes("active Worker changed"));
   });
 
-  it("stops on migration failure without changing the active Worker", async (): Promise<void> => {
+  void it("stops on migration failure without changing the active Worker", async (): Promise<void> => {
     const result = await deploy("migration-fails");
     assert.notEqual(result.status, 0);
     assert.ok(result.calls.includes("migrations apply"));
@@ -108,7 +108,7 @@ describe("production deployment recovery", (): void => {
     assert.ok(!result.calls.includes("wrangler rollback"));
   });
 
-  it("restores the captured version and checks it after a failed smoke", async (): Promise<void> => {
+  void it("restores the captured version and checks it after a failed smoke", async (): Promise<void> => {
     const result = await deploy("smoke-fails");
     assert.notEqual(result.status, 0);
     assert.ok(result.calls.includes(`wrangler rollback ${previousVersion}`));
@@ -116,7 +116,7 @@ describe("production deployment recovery", (): void => {
     assert.ok(result.output.includes("Previous Worker restored"));
   });
 
-  it("stops before migrations or deployment without a rollback target", async (): Promise<void> => {
+  void it("stops before migrations or deployment without a rollback target", async (): Promise<void> => {
     const result = await deploy("no-active-version");
     assert.notEqual(result.status, 0);
     assert.ok(!result.calls.includes("migrations apply"));
@@ -124,14 +124,14 @@ describe("production deployment recovery", (): void => {
     assert.ok(!result.calls.includes("wrangler rollback"));
   });
 
-  it("reports a failed smoke check on the restored version", async (): Promise<void> => {
+  void it("reports a failed smoke check on the restored version", async (): Promise<void> => {
     const result = await deploy("restored-smoke-fails");
     assert.notEqual(result.status, 0);
     assert.ok(result.output.includes("Rollback smoke check failed"));
     assert.ok(!result.output.includes("Previous Worker restored"));
   });
 
-  it("recovers when deploy fails and reports rollback failure", async (): Promise<void> => {
+  void it("recovers when deploy fails and reports rollback failure", async (): Promise<void> => {
     const failedDeploy = await deploy("deploy-fails");
     assert.notEqual(failedDeploy.status, 0);
     assert.ok(failedDeploy.calls.includes(`wrangler rollback ${previousVersion}`));
