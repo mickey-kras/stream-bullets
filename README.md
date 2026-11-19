@@ -27,6 +27,7 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - Each signed-in viewer can create polls and Mash Battles. The limits and rules of topics apply to them.
 - Only the page owner ends polls, reveals results, and runs Mash Battles. Polls can end manually or at a deadline.
 - The author and the page owner can delete a poll. Each poll shows its author.
+- The author of a Yes/No poll can set two custom labels of at most 80 characters each. The labels must differ. Empty fields keep Yes and No.
 - Binary counts and percentages stay private until reveal. Multiple-choice results update live.
 - Authors and owners can remove content. Removing a parent comment preserves replies.
 - Signed-in users can **Report** topics and comments. Administrators review reports at `/admin`. Hourly cleanup deletes resolved reports after one year.
