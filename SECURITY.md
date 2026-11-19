@@ -11,7 +11,8 @@ With `ADMIN_STEP_UP=enforce`, every admin endpoint and page loader also checks a
 Admin content removal uses the same check and records a `moderation_actions` row.
 Authors and page owners need no key to remove their content.
 
-The default mode, `report`, permits access without a key check.
+The default mode is `enforce`. A deployment with no `ADMIN_STEP_UP` value enforces the check.
+The mode `report` permits access without a key check.
 Unchecked calls to admin endpoints record `step_up_missing`, the administrator, and the route.
 
 - Challenges use 32 random bytes, expire after 2 minutes, and bind to a session and purpose. First use consumes them.

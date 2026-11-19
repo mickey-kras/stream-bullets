@@ -45633,7 +45633,7 @@
       "relation": "calls",
       "source": "tests_api_test",
       "source_file": "tests/api.test.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "tests_api_test_seed",
       "weight": 1.0
     },
@@ -168067,7 +168067,7 @@
       "relation": "contains",
       "source": "security_admin_security_keys",
       "source_file": "SECURITY.md",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "security_recovery_when_the_administrator_loses_every_key",
       "weight": 1.0
     },
@@ -168078,7 +168078,7 @@
       "relation": "contains",
       "source": "security_security_policy",
       "source_file": "SECURITY.md",
-      "source_location": "L38",
+      "source_location": "L39",
       "target": "security_channel_connections",
       "weight": 1.0
     },
@@ -168089,7 +168089,7 @@
       "relation": "contains",
       "source": "security_security_policy",
       "source_file": "SECURITY.md",
-      "source_location": "L42",
+      "source_location": "L43",
       "target": "security_dependency_licenses",
       "weight": 1.0
     },
@@ -178876,7 +178876,7 @@
       "relation": "references",
       "source": "security",
       "source_file": "SECURITY.md",
-      "source_location": "L40",
+      "source_location": "L41",
       "target": "docs_channel_connections",
       "weight": 1.0
     },
@@ -181534,10 +181534,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "6429687332a62e4531216d8c51f87e7978d4712fa9041521ce117b02d2c3bc39",
+    "content_sha256": "58e9870705abeb365b386afcc39ae8c0ba1a8681ca4418b31e40812ba2f85ece",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "dca8339d97507e8dbe54beb2cb1348b7dc935b2bbc6ad3cc074c259fd2fb362d",
+    "source_sha256": "63a86b1c08d45748b195570f217a4494ba3893c0f8b2ca57e0b47c4bc7bfbdef",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -230417,7 +230417,7 @@
       "node_kind": "heading",
       "norm_label": "channel connections",
       "source_file": "SECURITY.md",
-      "source_location": "L38"
+      "source_location": "L39"
     },
     {
       "_origin": "ast",
@@ -230428,7 +230428,7 @@
       "node_kind": "heading",
       "norm_label": "dependency licenses",
       "source_file": "SECURITY.md",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "_origin": "ast",
@@ -230439,7 +230439,7 @@
       "node_kind": "heading",
       "norm_label": "recovery when the administrator loses every key",
       "source_file": "SECURITY.md",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "_origin": "ast",
