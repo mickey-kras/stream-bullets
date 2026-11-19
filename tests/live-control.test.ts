@@ -788,21 +788,21 @@ describe("overlay control", (): void => {
       expect(first).toMatchObject({ revision: 1, position: "lower", air: { type: "auto" } });
       expect(first.layers).toEqual({
         ...DEFAULT_LAYERS,
-        chat: { enabled: true, hideCommands: true },
+        chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
         cells: horizontal({ chat: chatCell }),
       });
       const second = await overlay(
         await send({
           action: "layers",
           orientation: "vertical",
-          chat: { hideCommands: false },
+          chat: { hideCommands: false, backgroundOpacity: 45 },
           characters: { enabled: true },
           cells: { horizontal: { content: { c: 0, r: 0, w: 6, h: 4 } } },
         }),
       );
       expect(second.layers).toEqual({
         orientation: "vertical",
-        chat: { enabled: true, hideCommands: false },
+        chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
         characters: { enabled: true, timeout: 60 },
         cells: horizontal({ chat: chatCell, content: { c: 0, r: 0, w: 6, h: 4 } }),
       });
@@ -884,6 +884,8 @@ describe("overlay control", (): void => {
         { content: { enabled: false } },
         { orientation: "square" },
         { chat: { enabled: "yes" } },
+        { chat: { backgroundOpacity: 3 } },
+        { chat: { backgroundOpacity: "50" } },
         { layers: { chat: { enabled: true } } },
         { write: { writer: "short", seq: 1 } },
         { write: { writer: "editor-1234", seq: 0 } },
@@ -931,7 +933,7 @@ describe("overlay control", (): void => {
       expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60 } });
       expect((await getOverlayState(env, page)).layers).toEqual({
         ...DEFAULT_LAYERS,
-        chat: { enabled: true, hideCommands: true },
+        chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
         cells: horizontal({ chat: chatCell }),
       });
       await expect(

@@ -40,7 +40,7 @@ describe("grid and defaults", (): void => {
   it("keeps chat and characters off, content without a cell, and valid default cells that do not overlap", (): void => {
     expect(DEFAULT_LAYERS).toEqual({
       orientation: "horizontal",
-      chat: { enabled: false, hideCommands: true },
+      chat: { enabled: false, hideCommands: true, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 60 },
       cells: {
         horizontal: { chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 }, content: null },
@@ -116,7 +116,7 @@ describe("stored layers", (): void => {
   it("keeps valid cells of both orientations and the selected orientation", (): void => {
     const stored = {
       orientation: "vertical",
-      chat: { enabled: true, hideCommands: false },
+      chat: { enabled: true, hideCommands: false, backgroundOpacity: 35 },
       characters: { enabled: true, timeout: 60 },
       cells: {
         horizontal: { chat: chatCell, characters: { c: 0, r: 7, w: 16, h: 2 }, content: { c: 0, r: 0, w: 6, h: 4 } },
@@ -172,11 +172,22 @@ describe("stored layers", (): void => {
     expect(
       storedLayersSchema.parse({
         orientation: "diagonal",
-        chat: { enabled: "yes", hideCommands: 0 },
+        chat: { enabled: "yes", hideCommands: 0, backgroundOpacity: "50" },
         characters: { enabled: null },
         cells: { horizontal: [], vertical: 3 },
       }),
     ).toEqual(DEFAULT_LAYERS);
+  });
+
+  it("reads a missing or incorrect message background as the default and keeps the other chat fields", (): void => {
+    const read = (chat: Record<string, unknown>): unknown => storedLayersSchema.parse({ chat }).chat;
+    const old = { enabled: true, hideCommands: false };
+    expect(read(old)).toEqual({ ...old, backgroundOpacity: 100 });
+    for (const backgroundOpacity of [3, -5, 105, 2.5, "50", null, Number.NaN])
+      expect(read({ ...old, backgroundOpacity })).toEqual({ ...old, backgroundOpacity: 100 });
+    for (const backgroundOpacity of [0, 5, 50, 100])
+      expect(read({ ...old, backgroundOpacity })).toEqual({ ...old, backgroundOpacity });
+    expect(parseStoredLayers('{"chat":{"enabled":true,"backgroundOpacity":0}}').chat.backgroundOpacity).toBe(0);
   });
 
   it.each([
@@ -201,7 +212,7 @@ describe("stored layers", (): void => {
     const full: OverlayLayers = {
       ...DEFAULT_LAYERS,
       orientation: "horizontal",
-      chat: { enabled: false, hideCommands: false },
+      chat: { enabled: false, hideCommands: false, backgroundOpacity: 100 },
       characters: { enabled: false, timeout: 600 },
       cells: {
         horizontal: { ...DEFAULT_LAYERS.cells.horizontal, content: { c: 10, r: 0, w: 6, h: 7 } },
@@ -242,8 +253,29 @@ describe("layer patches", (): void => {
       { cells: { horizontal: { chat: { c: 0, r: 0, w: 4, h: 4 }, content: { c: 3, r: 3, w: 4, h: 2 } } } },
     ],
     ["a null value", { chat: { enabled: null } }],
+    ["a message background that is not a step of 5", { chat: { backgroundOpacity: 3 } }],
+    ["a negative message background", { chat: { backgroundOpacity: -5 } }],
+    ["a message background above 100", { chat: { backgroundOpacity: 105 } }],
+    ["a message background as text", { chat: { backgroundOpacity: "50" } }],
+    ["a fractional message background", { chat: { backgroundOpacity: 2.5 } }],
+    ["a null message background", { chat: { backgroundOpacity: null } }],
   ])("refuses %s", (_name: string, patch: Record<string, unknown>): void => {
     expect(layersPatchSchema.safeParse(patch).success).toBe(false);
+  });
+
+  it.each([0, 5, 100])("accepts a message background of %i percent", (backgroundOpacity: number): void => {
+    expect(layersPatchSchema.parse({ chat: { backgroundOpacity } })).toEqual({ chat: { backgroundOpacity } });
+  });
+
+  it("merges the message background alone and keeps it when a patch does not name it", (): void => {
+    const faint: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { chat: { backgroundOpacity: 0 } });
+    expect(faint.chat).toEqual({ enabled: false, hideCommands: true, backgroundOpacity: 0 });
+    // A patch from an older editor has no such field.
+    expect(mergeLayers(faint, { chat: { enabled: true } }).chat).toEqual({
+      enabled: true,
+      hideCommands: true,
+      backgroundOpacity: 0,
+    });
   });
 
   it("changes only the given fields, copies each cell whole and removes a content cell with null", (): void => {
@@ -255,7 +287,7 @@ describe("layer patches", (): void => {
     expect(next).toEqual({
       ...DEFAULT_LAYERS,
       orientation: "vertical",
-      chat: { enabled: true, hideCommands: true },
+      chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
       cells: {
         horizontal: { ...DEFAULT_LAYERS.cells.horizontal, chat: chatCell, content: { c: 0, r: 0, w: 4, h: 2 } },
         vertical: DEFAULT_LAYERS.cells.vertical,

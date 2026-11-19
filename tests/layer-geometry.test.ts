@@ -35,7 +35,7 @@ const write = { writer: "editor-1234", seq: 1 };
 const cell: CellRect = { c: 10, r: 0, w: 6, h: 4 };
 
 function layers(): OverlayLayers {
-  return structuredClone({ ...DEFAULT_LAYERS, chat: { enabled: true, hideCommands: true } });
+  return structuredClone({ ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, enabled: true } });
 }
 
 describe("grid edits", () => {
@@ -108,7 +108,7 @@ describe("field-level patches", () => {
     expect(diffLayers(before, layers())).toEqual({});
     const after: OverlayLayers = {
       orientation: "vertical",
-      chat: { enabled: false, hideCommands: false },
+      chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90 },
       cells: {
         horizontal: { ...before.cells.horizontal, chat: cell, content: { c: 5, r: 0, w: 4, h: 2 } },
@@ -117,7 +117,7 @@ describe("field-level patches", () => {
     };
     expect(diffLayers(before, after)).toEqual({
       orientation: "vertical",
-      chat: { enabled: false, hideCommands: false },
+      chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90 },
       cells: { horizontal: { chat: cell, content: { c: 5, r: 0, w: 4, h: 2 } } },
     });
@@ -132,6 +132,9 @@ describe("field-level patches", () => {
     expect(diffLayers(before, { ...before, chat: { ...before.chat, hideCommands: false } })).toEqual({
       chat: { hideCommands: false },
     });
+    expect(diffLayers(before, { ...before, chat: { ...before.chat, backgroundOpacity: 0 } })).toEqual({
+      chat: { backgroundOpacity: 0 },
+    });
   });
 
   it("merges patches with the newer field winning, and checks emptiness", () => {
@@ -145,6 +148,10 @@ describe("field-level patches", () => {
       cells: { horizontal: { chat: cell, content: cell } },
     });
     expect(mergePatches({ orientation: "vertical" }, {})).toEqual({ orientation: "vertical" });
+    // Each step of the message background slider replaces the step before it.
+    expect(mergePatches({ chat: { enabled: true, backgroundOpacity: 60 } }, { chat: { backgroundOpacity: 55 } })).toEqual({
+      chat: { enabled: true, backgroundOpacity: 55 },
+    });
     expect(mergePatches({}, { characters: { enabled: true } })).toEqual({ characters: { enabled: true } });
     expect(mergePatches({}, {})).toEqual({});
     expect(isEmptyPatch({})).toBe(true);
@@ -175,6 +182,9 @@ describe("field-level patches", () => {
       cells: { horizontal: { chat: { ...cell, c: 9 } }, vertical: { content: cell } },
     });
     expect(withoutSent({ chat: { hideCommands: true } }, {})).toEqual({ chat: { hideCommands: true } });
+    const faint: LayersPatch = { chat: { backgroundOpacity: 20 } };
+    expect(withoutSent(faint, faint)).toEqual({});
+    expect(withoutSent({ chat: { backgroundOpacity: 15 } }, faint)).toEqual({ chat: { backgroundOpacity: 15 } });
     expect(withoutSent({}, sent)).toEqual({});
     // The draft itself does not change.
     expect(later.cells?.horizontal?.content).toBeNull();

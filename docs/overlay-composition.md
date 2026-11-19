@@ -326,6 +326,7 @@ The chat uses the approved compact cards of issue #663.
 | Badge labels | Small gray text, `#c4c2a8`, before the user name |
 | Removed message | Gray italic text. In Japanese, Chinese, and Hindi, gray upright text. |
 | Top edge | The column fades out in the top 18% |
+| Text outline | Dark teal, `#041517e6`. It shows only when the message background is below 50%. |
 
 A new card moves up from below its place and fades in. The other cards move up at the same time.
 The movement takes 520 milliseconds. When a card goes, the column closes with the same movement.
@@ -339,6 +340,24 @@ When a snapshot removes a card, the card goes at once. Then the column closes wi
 
 When the activity feed is not available, the chat starts again with no cards. All cards go at once, without a fade.
 A removed card fades out in 300 milliseconds from the time that it leaves the chat, also when the page is slow.
+
+### Message background
+
+**Message background** in the chat settings of the editor sets how much of the card shows behind each message.
+The value is a percentage from 0 to 100 in steps of 5 (`CHAT_BACKGROUND`). The default is 100, which is the full card.
+At 0, the chat shows no card: only the platform icon, the user name, and the message show.
+
+The setting scales the card fill, the borders, the shadows, the bar of the newest card, and the vault mark together.
+The platform icon, the badge labels, the user name, the message, and the emotes always stay fully opaque.
+Below 50%, the text and the platform icon get a dark outline. Thus you can read the chat on a bright game.
+
+Use the slider with a mouse, a finger, or the arrow keys. The preview shows each step at once.
+The editor saves the value after 400 milliseconds without a change. Then OBS shows it without a reload.
+To see the result on a game, select **Sample game** under **Preview background**.
+
+The chat root has the `--wl-bg` CSS property, from 0 to 1. Only the card background and the vault mark read it.
+The layers store the value as `chat.backgroundOpacity`. A missing or incorrect stored value reads as 100.
+Thus a layout from before this setting does not change.
 
 ### Moderation
 

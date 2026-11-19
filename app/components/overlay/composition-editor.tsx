@@ -3,6 +3,7 @@ import { t, tAround, type MessageId } from "../../i18n";
 import { CHAT_TEST_MS, chatTestLeft } from "../../lib/chat-test";
 import { withCell } from "../../lib/layer-geometry";
 import {
+  CHAT_BACKGROUND,
   GRID,
   GRID_LAYERS,
   ORIENTATIONS,
@@ -171,6 +172,8 @@ export function CompositionEditor({
   const showId: string = useId();
   const placeId: string = useId();
   const commandsId: string = useId();
+  const backgroundId: string = useId();
+  const backgroundHintId: string = useId();
   const orientationNoteId: string = useId();
   const [background, setBackground] = useState<PreviewBackground>("checker");
   // The selected layer of the grid. It is here, not in the grid, so that other controls can read and set it.
@@ -213,6 +216,7 @@ export function CompositionEditor({
   const place = (layer: GridLayer, rect: CellRect | null, when: EditTiming): void =>
     change((current: OverlayLayers) => withCell(current, current.orientation, layer, rect), when);
 
+  const backgroundText: string = t("overlay.comp.chatBackgroundValue", { percent: shown.chat.backgroundOpacity });
   let statusText: string = "";
   if (status === "saving") statusText = t("overlay.comp.saving");
   else if (status === "saved") statusText = t("overlay.comp.saved");
@@ -261,6 +265,31 @@ export function CompositionEditor({
             <p className="muted ov-comp-note" id={commandsId}>
               {t("overlay.comp.hideCommandsHint")}
             </p>
+            <div className="ov-comp-range" data-comp-chat-background>
+              <label htmlFor={backgroundId}>{t("overlay.comp.chatBackground")}</label>
+              <input
+                id={backgroundId}
+                type="range"
+                min={CHAT_BACKGROUND.min}
+                max={CHAT_BACKGROUND.max}
+                step={CHAT_BACKGROUND.step}
+                value={shown.chat.backgroundOpacity}
+                aria-valuetext={backgroundText}
+                aria-describedby={backgroundHintId}
+                onChange={(event) => {
+                  const backgroundOpacity: number = event.currentTarget.valueAsNumber;
+                  // The preview follows each step. The save waits for a pause, like a keyboard move on the grid.
+                  change((current) => ({ ...current, chat: { ...current.chat, backgroundOpacity } }), "idle");
+                }}
+              />
+              {/* The slider already names the value (aria-valuetext), so a screen reader skips this copy. */}
+              <span className="ov-comp-range-value" aria-hidden="true" data-comp-chat-background-value>
+                {backgroundText}
+              </span>
+              <p className="muted ov-comp-note" id={backgroundHintId}>
+                {t("overlay.comp.chatBackgroundHint")}
+              </p>
+            </div>
             {/* The server checks the saved layers, so an unsaved draft does not make the test available. */}
             <ChatTest until={chatTestUntil} now={scene.now} enabled={layers.chat.enabled} onSaved={onSaved} />
           </fieldset>

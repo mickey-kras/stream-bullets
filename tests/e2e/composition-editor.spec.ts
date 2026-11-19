@@ -556,6 +556,64 @@ test("a save sends only the changed fields, and a failure rolls back only its ow
   await close(owner);
 });
 
+/** The background and the text of the first chat card in the preview: the opacity of each and the text outline. */
+function cardLook(page: Page): Promise<{ background: number; text: number; outline: string }> {
+  return page
+    .locator(".ov-comp-frame [data-overlay-chat] .wl-card")
+    .first()
+    .evaluate((card: Element) => {
+      const line: Element = card.querySelector(".wl-line") ?? card;
+      return {
+        background: Number(getComputedStyle(card, "::after").opacity),
+        text: Number(getComputedStyle(line).opacity) * Number(getComputedStyle(card).opacity),
+        outline: getComputedStyle(line).textShadow,
+      };
+    });
+}
+
+test("the message background slider changes the chat cards in the preview and the value persists", async ({
+  browser,
+}) => {
+  await runSql("composition-editor-background", [chatOn]);
+  const owner = await signedIn(browser, "featureowner", OWNER_IP);
+  const page = await newPage(owner);
+  await page.goto("/overlay-control");
+  const editor = page.locator("[data-composition-editor]");
+  const range = editor.locator("[data-comp-chat-background]");
+  const slider = range.getByRole("slider", { name: "Message background" });
+  await expect(slider).toHaveValue("100");
+  await expect(range.locator("[data-comp-chat-background-value]")).toHaveText("100%");
+  await expect.poll(() => cardLook(page)).toEqual({ background: 1, text: 1, outline: "none" });
+  // Each key press is one step of 5. The preview follows at once and the save waits for a pause.
+  const bodies: unknown[] = [];
+  page.on("request", (sent) => {
+    if (sent.method() === "POST" && new URL(sent.url()).pathname === "/api/overlay") bodies.push(sent.postDataJSON());
+  });
+  const first = saved(page);
+  await slider.focus();
+  for (let step = 0; step < 8; step += 1) await page.keyboard.press("ArrowLeft");
+  await expect(slider).toHaveValue("60");
+  await expect(slider).toHaveAttribute("aria-valuetext", "60%");
+  await expect(range.locator("[data-comp-chat-background-value]")).toHaveText("60%");
+  await expect.poll(() => cardLook(page)).toEqual({ background: 0.6, text: 1, outline: "none" });
+  await first;
+  expect(withoutWrite(bodies)).toEqual([{ action: "layers", chat: { backgroundOpacity: 60 } }]);
+  // At 0 the card background is gone. The text stays opaque and gets an outline.
+  const second = saved(page);
+  await page.keyboard.press("Home");
+  await expect(range.locator("[data-comp-chat-background-value]")).toHaveText("0%");
+  await expect.poll(async () => (await cardLook(page)).background).toBe(0);
+  const bare = await cardLook(page);
+  expect(bare.text).toBe(1);
+  expect(bare.outline).not.toBe("none");
+  await second;
+  await expect.poll(async () => (await storedLayers(page)).chat.backgroundOpacity).toBe(0);
+  await page.reload();
+  await expect(slider).toHaveValue("0");
+  await expect.poll(async () => (await cardLook(page)).background).toBe(0);
+  await close(owner);
+});
+
 test("a new overlay link lists one URL per layer", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);

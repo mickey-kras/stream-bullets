@@ -396,6 +396,36 @@
   margin: 0;
   font-size: 0.8125rem;
 }
+/* A labelled range with its value as text: the message background of the chat. */
+.ov-comp-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  min-width: 0;
+}
+.ov-comp-range label,
+.ov-comp-range .ov-comp-note {
+  flex: 0 0 100%;
+}
+.ov-comp-range label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.ov-comp-range input {
+  flex: 0 1 20rem;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  accent-color: var(--gold);
+}
+.ov-comp-range-value {
+  min-width: 4ch;
+  font-variant-numeric: tabular-nums;
+}
 /* ---------- Characters controls (characters-controls.tsx) ---------- */
 .ov-chars {
   display: grid;
