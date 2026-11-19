@@ -182,6 +182,16 @@ describe("Twitch EventSub webhook", (): void => {
     expect(socket.ofType<{ event: { id: string } }>("event").map((message) => message.event.id)).toEqual(["twitch:m1"]);
   });
 
+  it("delivers a message whose id has base64 characters, because Twitch ids are opaque", async (): Promise<void> => {
+    const socket = await listen();
+    const body = twitchNotification("channel.chat.message", twitchChat);
+    const request = await twitchRequest(body, { id: "hId+zZ0vqcCcCQXWcDDnmgk3Z0ZNOqDArx2X7ZvVdDg=" });
+    expect((await twitchWebhook(request, env)).status).toBe(204);
+    expect(socket.ofType<{ event: { id: string } }>("event").map((message) => message.event.id)).toEqual(["twitch:m1"]);
+    const long = await twitchRequest(body, { id: "a".repeat(129) });
+    expect(await status(twitchWebhook(long, env))).toBe(403);
+  });
+
   it("answers 503 when the ingest object fails, so Twitch retries", async (): Promise<void> => {
     env.CHANNEL_INGEST = {
       idFromName: (name: string) => name,
