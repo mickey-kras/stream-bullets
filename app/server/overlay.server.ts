@@ -73,28 +73,37 @@ export async function getOverlayState(env: AppEnv, streamerId: string): Promise<
   return overlayValue(row);
 }
 
+/** A poll or topic of this page. A poll that moderation holds is not selectable. */
+async function checkedEntry(env: AppEnv, streamerId: string, type: "poll" | "topic", ref: string): Promise<void> {
+  const topic: boolean = type === "topic";
+  const kind: string = topic ? "= 'topic'" : `!= 'topic' AND ${notHeld()}`;
+  const found = await env.DB.prepare(`SELECT 1 FROM entries WHERE id=? AND streamer_id=? AND kind ${kind}`)
+    .bind(ref, streamerId)
+    .first();
+  if (!found) throw new HttpError(404, topic ? "Topic not found." : "Poll not found.");
+}
+
+async function checkedCard(env: AppEnv, streamerId: string, ref: string): Promise<void> {
+  const found = await env.DB.prepare("SELECT 1 FROM community_cards WHERE id=? AND streamer_id=?")
+    .bind(ref, streamerId)
+    .first();
+  if (!found) throw new HttpError(404, "Community card not found.");
+}
+
 // Checks that `ref` names something on this page, and drops refs the source does not use.
 async function checkedSource(env: AppEnv, streamerId: string, source: OverlaySourceRef): Promise<OverlaySourceRef> {
-  if (source.type === "poll" || source.type === "topic") {
+  const { type, ref } = source;
+  if (type === "poll" || type === "topic") {
     // "A specific poll" can start with no poll: the overlay waits until the owner picks one from the list.
-    if (source.ref === null && source.type === "poll") return source;
-    if (source.ref === null) throw new HttpError(400, "Pick a poll or topic.");
-    // The owner can pick each poll of the page, also a viewer poll, but not one that moderation holds.
-    const kind: string = source.type === "topic" ? "= 'topic'" : `!= 'topic' AND ${notHeld()}`;
-    const found = await env.DB.prepare(`SELECT 1 FROM entries WHERE id=? AND streamer_id=? AND kind ${kind}`)
-      .bind(source.ref, streamerId)
-      .first();
-    if (!found) throw new HttpError(404, source.type === "topic" ? "Topic not found." : "Poll not found.");
+    if (ref === null && type === "topic") throw new HttpError(400, "Pick a poll or topic.");
+    if (ref !== null) await checkedEntry(env, streamerId, type, ref);
     return source;
   }
-  if (source.type === "card" && source.ref !== null) {
-    const found = await env.DB.prepare("SELECT 1 FROM community_cards WHERE id=? AND streamer_id=?")
-      .bind(source.ref, streamerId)
-      .first();
-    if (!found) throw new HttpError(404, "Community card not found.");
+  if (type === "card" && ref !== null) {
+    await checkedCard(env, streamerId, ref);
     return source;
   }
-  return { type: source.type, ref: null };
+  return { type, ref: null };
 }
 
 // Merged layers must not overlap in either orientation: a patch can move a cell onto a saved cell.
