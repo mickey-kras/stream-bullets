@@ -23311,81 +23311,9 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
+      "source": "app_components_streamer_polls_view_pollsempty",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L142",
-      "target": "app_components_streamer_polls_view_usereturnfocus",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L144",
-      "target": "app_components_streamer_polls_view_usebattlephase",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L145",
-      "target": "app_components_streamer_polls_view_usebattlefocus",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L151",
-      "target": "app_components_poll_mashteaser",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L153",
-      "target": "app_components_poll_pollcard",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L168",
-      "target": "app_components_mash_mash_card_mashcard",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L179",
+      "source_location": "L141",
       "target": "app_components_common_emptystate",
       "weight": 1.0
     },
@@ -23395,9 +23323,9 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
+      "source": "app_components_streamer_polls_view_pollsempty",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L180",
+      "source_location": "L142",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -23407,9 +23335,9 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
+      "source": "app_components_streamer_polls_view_pollsempty",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L185",
+      "source_location": "L147",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -23421,7 +23349,91 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L196",
+      "source_location": "L161",
+      "target": "app_components_streamer_polls_view_usereturnfocus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L163",
+      "target": "app_components_streamer_polls_view_usebattlephase",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L164",
+      "target": "app_components_streamer_polls_view_usebattlefocus",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L171",
+      "target": "app_components_poll_mashteaser",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L173",
+      "target": "app_components_poll_pollcard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L188",
+      "target": "app_components_mash_mash_card_mashcard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L198",
+      "target": "app_components_streamer_polls_view_pollsempty",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L201",
       "target": "app_components_streamer_topic_board_livestrip",
       "weight": 1.0
     },
@@ -23433,7 +23445,31 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L226",
+      "source_location": "L204",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L213",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L231",
       "target": "app_components_ui_icon_button_iconbutton",
       "weight": 1.0
     },
@@ -23445,7 +23481,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L237",
+      "source_location": "L242",
       "target": "app_components_streamer_polls_view_polltoolbarstart",
       "weight": 1.0
     },
@@ -23457,7 +23493,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L265",
+      "source_location": "L270",
       "target": "app_components_streamer_entry_detail_entryactions",
       "weight": 1.0
     },
@@ -23505,7 +23541,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_usebattlephase",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L286",
+      "source_location": "L291",
       "target": "app_components_mash_use_mash_usemashview",
       "weight": 1.0
     },
@@ -23517,7 +23553,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_usepollsmainclass",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L294",
+      "source_location": "L299",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -39331,9 +39367,33 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_server_overlay_server_checkedsource",
+      "source": "app_server_overlay_server_checkedcard",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L81",
+      "source_location": "L90",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_server_checkedentry",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L79",
+      "target": "app_server_poll_sql_notheld",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_server_checkedentry",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L83",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -39345,8 +39405,32 @@
       "relation": "calls",
       "source": "app_server_overlay_server_checkedsource",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L83",
-      "target": "app_server_poll_sql_notheld",
+      "source_location": "L103",
+      "target": "app_server_overlay_server_checkedcard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_server_checkedsource",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L98",
+      "target": "app_server_http_server_httperror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_overlay_server_checkedsource",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L99",
+      "target": "app_server_overlay_server_checkedentry",
       "weight": 1.0
     },
     {
@@ -39357,7 +39441,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_getoverlaydata",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L317",
+      "source_location": "L326",
       "target": "app_server_poll_sql_byowner",
       "weight": 1.0
     },
@@ -39369,7 +39453,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_getoverlaydata",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L319",
+      "source_location": "L328",
       "target": "app_server_poll_sql_notheld",
       "weight": 1.0
     },
@@ -39393,7 +39477,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_mergedlayers",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L102",
+      "source_location": "L111",
       "target": "app_lib_overlay_layers_mergelayers",
       "weight": 1.0
     },
@@ -39405,7 +39489,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_mergedlayers",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L104",
+      "source_location": "L113",
       "target": "app_lib_overlay_layers_overlappingpair",
       "weight": 1.0
     },
@@ -39417,7 +39501,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_mergedlayers",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L104",
+      "source_location": "L113",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -39429,7 +39513,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_nextoverlaystate",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L117",
+      "source_location": "L126",
       "target": "app_server_overlay_server_checkedsource",
       "weight": 1.0
     },
@@ -39441,7 +39525,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_nextoverlaystate",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L129",
+      "source_location": "L138",
       "target": "app_server_overlay_server_mergedlayers",
       "weight": 1.0
     },
@@ -39453,7 +39537,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_nextoverlaystate",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L134",
+      "source_location": "L143",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -39465,7 +39549,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_refreshoverlayfor",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L149",
+      "source_location": "L158",
       "target": "app_server_overlay_server_refreshwhere",
       "weight": 1.0
     },
@@ -39477,7 +39561,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_refreshpageoverlay",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L158",
+      "source_location": "L167",
       "target": "app_server_overlay_server_refreshwhere",
       "weight": 1.0
     },
@@ -39489,7 +39573,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_refreshwhere",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L174",
+      "source_location": "L183",
       "target": "app_server_live_server_notifyoverlay",
       "weight": 1.0
     },
@@ -39501,7 +39585,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_updateoverlay",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L230",
+      "source_location": "L239",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -39513,7 +39597,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_updateoverlay",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L231",
+      "source_location": "L240",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -39525,7 +39609,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_updateoverlay",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L237",
+      "source_location": "L246",
       "target": "app_server_overlay_state_overlayvalue",
       "weight": 1.0
     },
@@ -39537,7 +39621,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_updateoverlay",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L238",
+      "source_location": "L247",
       "target": "app_server_overlay_server_storedwrites",
       "weight": 1.0
     },
@@ -39549,7 +39633,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_updateoverlay",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L239",
+      "source_location": "L248",
       "target": "app_server_overlay_server_passedwrite",
       "weight": 1.0
     },
@@ -39561,7 +39645,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_updateoverlay",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L240",
+      "source_location": "L249",
       "target": "app_server_overlay_server_nextoverlaystate",
       "weight": 1.0
     },
@@ -39573,7 +39657,7 @@
       "relation": "calls",
       "source": "app_server_overlay_server_updateoverlay",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L241",
+      "source_location": "L250",
       "target": "app_server_overlay_server_recordwrite",
       "weight": 1.0
     },
@@ -54419,7 +54503,7 @@
       "relation": "references",
       "source": "app_server_overlay_server_cardrow",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L294",
+      "source_location": "L303",
       "target": "app_types_cardicon",
       "weight": 1.0
     },
@@ -54431,7 +54515,7 @@
       "relation": "references",
       "source": "app_server_overlay_server_overlayupdate",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L216",
+      "source_location": "L225",
       "target": "app_types_overlaystate",
       "weight": 1.0
     },
@@ -147731,7 +147815,18 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L140",
+      "source_location": "L139",
+      "target": "app_components_streamer_polls_view_pollsempty",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_streamer_polls_view",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L159",
       "target": "app_components_streamer_polls_view_pollsview",
       "weight": 1.0
     },
@@ -147775,7 +147870,7 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L285",
+      "source_location": "L290",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -147786,7 +147881,7 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L292",
+      "source_location": "L297",
       "target": "app_components_streamer_polls_view_usepollsmainclass",
       "weight": 1.0
     },
@@ -161316,7 +161411,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L101",
+      "source_location": "L110",
       "target": "app_server_overlay_server_mergedlayers",
       "weight": 1.0
     },
@@ -161327,7 +161422,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L109",
+      "source_location": "L118",
       "target": "app_server_overlay_server_nextoverlaystate",
       "weight": 1.0
     },
@@ -161338,7 +161433,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L144",
+      "source_location": "L153",
       "target": "app_server_overlay_server_refreshoverlayfor",
       "weight": 1.0
     },
@@ -161349,7 +161444,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L153",
+      "source_location": "L162",
       "target": "app_server_overlay_server_refreshpageoverlay",
       "weight": 1.0
     },
@@ -161360,7 +161455,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L161",
+      "source_location": "L170",
       "target": "app_server_overlay_server_refreshwhere",
       "weight": 1.0
     },
@@ -161371,7 +161466,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L184",
+      "source_location": "L193",
       "target": "app_server_overlay_server_layerswritesschema",
       "weight": 1.0
     },
@@ -161382,7 +161477,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L185",
+      "source_location": "L194",
       "target": "app_server_overlay_server_layerswrites",
       "weight": 1.0
     },
@@ -161393,7 +161488,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L189",
+      "source_location": "L198",
       "target": "app_server_overlay_server_storedwrites",
       "weight": 1.0
     },
@@ -161404,7 +161499,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L203",
+      "source_location": "L212",
       "target": "app_server_overlay_server_recordwrite",
       "weight": 1.0
     },
@@ -161415,7 +161510,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L210",
+      "source_location": "L219",
       "target": "app_server_overlay_server_passedwrite",
       "weight": 1.0
     },
@@ -161426,7 +161521,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L215",
+      "source_location": "L224",
       "target": "app_server_overlay_server_overlayupdate",
       "weight": 1.0
     },
@@ -161437,19 +161532,8 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L224",
+      "source_location": "L233",
       "target": "app_server_overlay_server_updateoverlay",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_overlay_server",
-      "source_file": "app/server/overlay.server.ts",
-      "source_location": "L273",
-      "target": "app_server_overlay_server_topicrow",
       "weight": 1.0
     },
     {
@@ -161470,7 +161554,18 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L284",
+      "source_location": "L282",
+      "target": "app_server_overlay_server_topicrow",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_server",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L293",
       "target": "app_server_overlay_server_pollchoicerow",
       "weight": 1.0
     },
@@ -161481,7 +161576,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L292",
+      "source_location": "L301",
       "target": "app_server_overlay_server_cardrow",
       "weight": 1.0
     },
@@ -161492,7 +161587,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L302",
+      "source_location": "L311",
       "target": "app_server_overlay_server_sourcetopics",
       "weight": 1.0
     },
@@ -161503,7 +161598,7 @@
       "relation": "contains",
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L309",
+      "source_location": "L318",
       "target": "app_server_overlay_server_getoverlaydata",
       "weight": 1.0
     },
@@ -161559,6 +161654,28 @@
       "source": "app_server_overlay_server",
       "source_file": "app/server/overlay.server.ts",
       "source_location": "L77",
+      "target": "app_server_overlay_server_checkedentry",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_server",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L86",
+      "target": "app_server_overlay_server_checkedcard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_overlay_server",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L94",
       "target": "app_server_overlay_server_checkedsource",
       "weight": 1.0
     },
@@ -181174,10 +181291,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f8b4b8b47d91038b3c04a1aaa09bb627eb2ae03952f814f5baef1a7f97388f4c",
+    "content_sha256": "f941f028ef75bab20ec21fa2692afa6020d614dd651e78766a12ac76a379b822",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "8223815180d409d93dd461829d7d7bf8a4332e23edd332dbaf7ad4a9ccfce125",
+    "source_sha256": "5d1e5f67517fa7ff9ebed110df0e9174f2c6b1a2626bcdaefaa1d9a167dfbcbb",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -185507,7 +185624,7 @@
       "label": "CardRow",
       "norm_label": "cardrow",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L292"
+      "source_location": "L301"
     },
     {
       "_callable": true,
@@ -185531,7 +185648,7 @@
       "label": "LayersWrites",
       "norm_label": "layerswrites",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L185"
+      "source_location": "L194"
     },
     {
       "_callable": true,
@@ -185555,7 +185672,7 @@
       "label": "OverlayUpdate",
       "norm_label": "overlayupdate",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L215"
+      "source_location": "L224"
     },
     {
       "_callable": true,
@@ -185567,7 +185684,7 @@
       "label": "PollChoiceRow",
       "norm_label": "pollchoicerow",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L284"
+      "source_location": "L293"
     },
     {
       "_callable": true,
@@ -185579,7 +185696,7 @@
       "label": "TopicRow",
       "norm_label": "topicrow",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L273"
+      "source_location": "L282"
     },
     {
       "_callable": true,
@@ -197268,11 +197385,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_streamer_polls_view_pollsempty",
+      "label": "PollsEmpty()",
+      "norm_label": "pollsempty()",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L139"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_streamer_polls_view_pollsview",
       "label": "PollsView()",
       "norm_label": "pollsview()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L140"
+      "source_location": "L159"
     },
     {
       "_callable": true,
@@ -197305,7 +197433,7 @@
       "label": "useBattlePhase()",
       "norm_label": "usebattlephase()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L285"
+      "source_location": "L290"
     },
     {
       "_callable": true,
@@ -197316,7 +197444,7 @@
       "label": "usePollsMainClass()",
       "norm_label": "usepollsmainclass()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L292"
+      "source_location": "L297"
     },
     {
       "_callable": true,
@@ -206306,11 +206434,33 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_overlay_server_checkedcard",
+      "label": "checkedCard()",
+      "norm_label": "checkedcard()",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L86"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_overlay_server_checkedentry",
+      "label": "checkedEntry()",
+      "norm_label": "checkedentry()",
+      "source_file": "app/server/overlay.server.ts",
+      "source_location": "L77"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_overlay_server_checkedsource",
       "label": "checkedSource()",
       "norm_label": "checkedsource()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L77"
+      "source_location": "L94"
     },
     {
       "_callable": true,
@@ -206321,7 +206471,7 @@
       "label": "getOverlayData()",
       "norm_label": "getoverlaydata()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L309"
+      "source_location": "L318"
     },
     {
       "_callable": true,
@@ -206343,7 +206493,7 @@
       "label": "mergedLayers()",
       "norm_label": "mergedlayers()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L101"
+      "source_location": "L110"
     },
     {
       "_callable": true,
@@ -206354,7 +206504,7 @@
       "label": "nextOverlayState()",
       "norm_label": "nextoverlaystate()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L109"
+      "source_location": "L118"
     },
     {
       "_callable": true,
@@ -206365,7 +206515,7 @@
       "label": "passedWrite()",
       "norm_label": "passedwrite()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L210"
+      "source_location": "L219"
     },
     {
       "_callable": true,
@@ -206376,7 +206526,7 @@
       "label": "recordWrite()",
       "norm_label": "recordwrite()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L203"
+      "source_location": "L212"
     },
     {
       "_callable": true,
@@ -206387,7 +206537,7 @@
       "label": "refreshOverlayFor()",
       "norm_label": "refreshoverlayfor()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L144"
+      "source_location": "L153"
     },
     {
       "_callable": true,
@@ -206398,7 +206548,7 @@
       "label": "refreshPageOverlay()",
       "norm_label": "refreshpageoverlay()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L153"
+      "source_location": "L162"
     },
     {
       "_callable": true,
@@ -206409,7 +206559,7 @@
       "label": "refreshWhere()",
       "norm_label": "refreshwhere()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L161"
+      "source_location": "L170"
     },
     {
       "_callable": true,
@@ -206420,7 +206570,7 @@
       "label": "sourceTopics()",
       "norm_label": "sourcetopics()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L302"
+      "source_location": "L311"
     },
     {
       "_callable": true,
@@ -206431,7 +206581,7 @@
       "label": "storedWrites()",
       "norm_label": "storedwrites()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L189"
+      "source_location": "L198"
     },
     {
       "_callable": true,
@@ -206442,7 +206592,7 @@
       "label": "updateOverlay()",
       "norm_label": "updateoverlay()",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L224"
+      "source_location": "L233"
     },
     {
       "_callable": true,
@@ -222725,7 +222875,7 @@
       "label": "layersWritesSchema",
       "norm_label": "layerswritesschema",
       "source_file": "app/server/overlay.server.ts",
-      "source_location": "L184"
+      "source_location": "L193"
     },
     {
       "_origin": "ast",

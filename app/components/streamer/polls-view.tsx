@@ -136,6 +136,25 @@ function useReturnFocus(selectedId: string | null): void {
   }, [selectedId]);
 }
 
+function PollsEmpty({ owner, onCreate }: Readonly<{ owner: boolean; onCreate: (() => void) | null }>): ReactNode {
+  return (
+    <EmptyState
+      title={t(owner ? "polls.emptyTitle" : "polls.viewerEmptyTitle")}
+      icon="mic"
+      action={
+        onCreate && (
+          <button className="gold" type="button" onClick={onCreate}>
+            <Icon name="plus" size={18} />
+            {t("polls.createFirst")}
+          </button>
+        )
+      }
+    >
+      {t(owner ? "polls.emptyBody" : "polls.viewerEmptyBody")}
+    </EmptyState>
+  );
+}
+
 // Polls shows the list, a discussion, or a Mash Battle.
 export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
   const { name, viewer, owner, writable, entries, selected, now, live } = props;
@@ -146,6 +165,7 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
   const offline: boolean = live.status === "offline";
   // Each signed-in viewer can create a poll, like a topic. Guests sign in first.
   const canCreate: boolean = Boolean(viewer) && writable;
+  const canOwn: boolean = owner && writable;
   const card = (entry: Entry): ReactNode =>
     entry.kind === "mash" && !selected ? (
       <MashTeaser key={entry.id} entry={entry} now={now} />
@@ -154,8 +174,8 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
         key={entry.id}
         entry={entry}
         now={now}
-        signedIn={Boolean(viewer) && writable}
-        owner={owner && writable}
+        signedIn={canCreate}
+        owner={canOwn}
         pending={props.pending.has(entry.id)}
         onAction={(body: unknown) => props.onAction(body, entry.id)}
         onDiscuss={() => props.onOpen(entry.id)}
@@ -168,29 +188,14 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
       <MashCard
         entry={battle}
         now={now}
-        signedIn={Boolean(viewer) && writable}
-        owner={owner && writable}
+        signedIn={canCreate}
+        owner={canOwn}
         pending={props.pending.has(battle.id)}
         onAction={(body: unknown) => props.onAction(body, battle.id)}
       />
     );
   else if (!selected && entries.length === 0)
-    body = (
-      <EmptyState
-        title={t(owner ? "polls.emptyTitle" : "polls.viewerEmptyTitle")}
-        icon="mic"
-        action={
-          canCreate && (
-            <button className="gold" type="button" onClick={props.onCreate}>
-              <Icon name="plus" size={18} />
-              {t("polls.createFirst")}
-            </button>
-          )
-        }
-      >
-        {t(owner ? "polls.emptyBody" : "polls.viewerEmptyBody")}
-      </EmptyState>
-    );
+    body = <PollsEmpty owner={owner} onCreate={canCreate ? props.onCreate : null} />;
   return (
     <>
       <LiveStrip event={props.liveEvent} />
