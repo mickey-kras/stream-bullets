@@ -15,6 +15,18 @@ export class HttpError extends Error {
   }
 }
 
+/** Read the stable API code that a schema attached to a custom issue. */
+function issueCode(issue: z.core.$ZodIssue | undefined): string | undefined {
+  const code: unknown = issue?.code === "custom" ? issue.params?.apiCode : undefined;
+  return typeof code === "string" ? code : undefined;
+}
+
+/** Turn a failed schema check into a 400 error that keeps the API code of the first issue. */
+export function validationError(error: z.ZodError, fallback: string): HttpError {
+  const issue: z.core.$ZodIssue | undefined = error.issues[0];
+  return new HttpError(400, issue?.message ?? fallback, issueCode(issue));
+}
+
 export function getOrigin(env: AppEnv): string {
   let url: URL;
   try {
@@ -94,7 +106,7 @@ export async function readJson<T>(request: Request, schema: z.ZodType<T>): Promi
     throw new HttpError(400, "Send valid JSON.");
   }
   const result = schema.safeParse(value);
-  if (!result.success) throw new HttpError(400, result.error.issues[0]?.message ?? "Invalid request.");
+  if (!result.success) throw validationError(result.error, "Invalid request.");
   return result.data;
 }
 
