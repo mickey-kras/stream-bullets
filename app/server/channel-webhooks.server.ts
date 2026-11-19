@@ -20,6 +20,8 @@ export const MAX_WEBHOOK_BYTES = 64 * 1024;
 export const MAX_WEBHOOK_AGE_MS = 10 * 60_000;
 
 const MESSAGE_ID = /^[\w.:-]{1,128}$/;
+/** Twitch documents its message id as opaque, so any printable ASCII text is valid. */
+const TWITCH_MESSAGE_ID = /^[\x21-\x7e]{1,128}$/;
 
 /** For tests: forget the cached routes and the sampled log times. */
 export function resetRoutes(): void {
@@ -185,7 +187,7 @@ export async function twitchWebhook(request: Request, env: AppEnv, now: number =
   const timestamp = request.headers.get("Twitch-Eventsub-Message-Timestamp") ?? "";
   const signature = request.headers.get("Twitch-Eventsub-Message-Signature") ?? "";
   const type = request.headers.get("Twitch-Eventsub-Message-Type") ?? "";
-  if (!MESSAGE_ID.test(id) || timestamp.length > 64)
+  if (!TWITCH_MESSAGE_ID.test(id) || timestamp.length > 64)
     throw new WebhookRejected(403, "Invalid signature.", "signature", true);
   const body = await webhookBody(request);
   const key = await crypto.subtle.importKey(
