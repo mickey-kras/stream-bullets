@@ -358,7 +358,10 @@ Shell, support, and schedule stay loaded. New reads and navigation cancel older 
 
 Workers cache image bodies for one hour per data center.
 Every read checks the D1 reference and upload version before cache lookup. Cache hits skip R2.
-Browsers receive `Cache-Control: no-store` to force access checks. Deleted references fail before cache lookup.
+Public images use `Cache-Control: public, max-age=60, must-revalidate`. Browsers can reuse them for one minute.
+
+Test environment images use `Cache-Control: private, no-cache`. Error responses use `Cache-Control: no-store`.
+Deleted references fail when requests reach the Worker.
 
 Migration `0021_image_versions.sql` adds versions. Old images bypass cache until re-uploaded.
 Replacement stores an immutable R2 object, then publishes its reference and version atomically.
