@@ -434,7 +434,11 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   /** An accepted delivery proves that the channel works: it records the time and ends an `error` status. */
   private async accepted(platform: ActivityPlatform, connection: Connection, now: number): Promise<void> {
     await this.touch(platform, connection, now);
-    if (connection.status === "error") await this.setStatus(platform, connection, "active", null);
+    if (connection.status !== "error") return;
+    // A revocation can arrive during the write above: the status it set stands.
+    const current = await this.connection(platform);
+    if (current?.id === connection.id && current.status === "error")
+      await this.setStatus(platform, current, "active", null);
   }
 
   /**

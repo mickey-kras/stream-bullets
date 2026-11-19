@@ -2013,6 +2013,48 @@ describe("ChannelIngest subscription repair", (): void => {
     expect(await connectionRow("twitch")).toMatchObject({ status: "needs_reauth", status_code: "authorization_revoked" });
   });
 
+  it("keeps a revoked authorization that arrives while an accepted delivery writes its time", async (): Promise<void> => {
+    await addConnection("twitch", { status: "error" });
+    await env.DB.prepare("UPDATE channel_connections SET status_code='delivery_failed'").run();
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    await listen();
+    let release = (): void => undefined;
+    const held = new Promise<void>((resolve): void => {
+      release = resolve;
+    });
+    let reached = (): void => undefined;
+    const waiting = new Promise<void>((resolve): void => {
+      reached = resolve;
+    });
+    const db = env.DB;
+    let hold = true;
+    const prepare = (query: string): D1PreparedStatement => {
+      const statement = db.prepare(query);
+      if (!hold || !query.includes("SET last_event_at")) return statement;
+      hold = false;
+      return {
+        bind: (...values: unknown[]) => {
+          const bound = statement.bind(...values);
+          return {
+            run: async (): Promise<D1Result> => {
+              reached();
+              await held;
+              return bound.run();
+            },
+          };
+        },
+      } as unknown as D1PreparedStatement;
+    };
+    env.DB = { prepare, batch: (statements: D1PreparedStatement[]) => db.batch(statements) } as unknown as D1Database;
+    const delivery = deliver("d1", [chat("m1")]);
+    await waiting;
+    await post("status", "twitch", { code: "authorization_revoked" });
+    release();
+    expect((await delivery).status).toBe(204);
+    env.DB = db;
+    expect(await connectionRow("twitch")).toMatchObject({ status: "needs_reauth", status_code: "authorization_revoked" });
+  });
+
   it("ignores forged deliveries for a channel that accepts deliveries", async (): Promise<void> => {
     await addConnection("twitch");
     provider();

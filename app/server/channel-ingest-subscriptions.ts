@@ -277,9 +277,12 @@ export class ChannelSubscriptions {
     state.alertedAt = now;
     // Only the platform: never a header, a body, a signature or an id.
     console.warn("channel_webhooks_all_rejected", { platform });
-    if (connection.code === "webhooks_rejected") return connection;
-    await this.host.setStatus(platform, connection, "error", "webhooks_rejected");
-    return { ...connection, status: "error", code: "webhooks_rejected" };
+    // A revocation can arrive during the read above: the status it set stands.
+    const current = await this.host.connection(platform);
+    if (!this.checkable(platform, current)) return current ?? connection;
+    if (current.code === "webhooks_rejected") return current;
+    await this.host.setStatus(platform, current, "error", "webhooks_rejected");
+    return { ...current, status: "error", code: "webhooks_rejected" };
   }
 
   /** One due subscription check of a platform. Returns the wait before its next one, or null for none. */
@@ -297,6 +300,7 @@ export class ChannelSubscriptions {
       return null;
     }
     const current = listening ? await this.watch(platform, connection, state, now) : connection;
+    if (!this.checkable(platform, current)) return null;
     const result = await this.reconcile(platform, current);
     return this.scheduled(platform, state, result, listening, now);
   }
