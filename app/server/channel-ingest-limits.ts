@@ -53,8 +53,8 @@ export const YOUTUBE_NAME_RETRY_MS = 60 * 60_000;
 export const YOUTUBE_JOB_RETRY_MS = 50 * 60_000;
 /** Units of the shared daily YouTube Data API quota (10,000 by default) the feed may spend, across all pages. */
 export const YOUTUBE_DAILY_BUDGET = 9_000;
-/** Units one page may spend each day, so one busy page cannot use up the shared budget: 100 minutes of live chat. */
-export const YOUTUBE_PAGE_DAILY_BUDGET = 3_000;
+/** Units one page may spend each day: 5 hours of live chat. Lower it when more pages share the daily budget. */
+export const YOUTUBE_PAGE_DAILY_BUDGET = 9_000;
 /** Refresh an access token this long before it expires. */
 export const REFRESH_MARGIN_MS = 60_000;
 

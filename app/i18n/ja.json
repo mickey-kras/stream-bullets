@@ -197,7 +197,7 @@
   "channels.gaps.youtube": "YouTube はチャットのクリアと BAN 解除を通知しません。",
   "channels.intro": "チャンネルは一度連携するだけです。チャットとモデレーションのイベントがオーバーレイに届きます。StreamBullets は読み取るだけで、投稿やモデレーションは行いません。",
   "channels.lastActivity": "最新のアクティビティ: {time}",
-  "channels.limits.youtube": "各ページで1日に約100分の YouTube チャットを表示できます。チャンネルのデータを30日間更新できない場合、連携は削除されます。",
+  "channels.limits.youtube": "各ページで1日に約5時間の YouTube チャットを表示できます。チャンネルのデータを30日間更新できない場合、連携は削除されます。",
   "channels.more": "読み取る内容と制限",
   "channels.noActivity": "まだアクティビティはありません。",
   "channels.notConnected": "未連携",

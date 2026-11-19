@@ -205,7 +205,7 @@
   "channels.gaps.youtube": "O YouTube não informa limpezas do chat nem desbanimentos.",
   "channels.intro": "Conecte seus canais uma vez. O chat e os eventos de moderação deles chegam ao seu overlay. O StreamBullets só os lê: nunca publica nem modera.",
   "channels.lastActivity": "Última atividade: {time}",
-  "channels.limits.youtube": "Cada página pode mostrar cerca de 100 minutos de chat do YouTube por dia. Se os dados do canal não puderem ser atualizados por 30 dias, a conexão é removida.",
+  "channels.limits.youtube": "Cada página pode mostrar cerca de 5 horas de chat do YouTube por dia. Se os dados do canal não puderem ser atualizados por 30 dias, a conexão é removida.",
   "channels.more": "O que é lido e os limites",
   "channels.noActivity": "Nenhuma atividade ainda.",
   "channels.notConnected": "Não conectado",

@@ -403,7 +403,7 @@ describe("the channel cards", (): void => {
     );
     expect(youtube).toContain(
       "<ul><li>Read: chat messages, message deletions, bans and timeouts.</li>" +
-        "<li>Each page can show about 100 minutes of YouTube chat a day. If the channel data cannot be refreshed " +
+        "<li>Each page can show about 5 hours of YouTube chat a day. If the channel data cannot be refreshed " +
         "for 30 days, the connection is removed.</li>" +
         "<li>YouTube does not report chat clears or unbans.</li></ul>",
     );
