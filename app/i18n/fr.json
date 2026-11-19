@@ -205,7 +205,7 @@
   "channels.gaps.youtube": "YouTube ne signale ni les chats vidés ni les levées de bannissement.",
   "channels.intro": "Connectez vos chaînes une seule fois. Leur chat et leurs événements de modération alimentent votre overlay. StreamBullets les lit seulement : il ne publie et ne modère jamais.",
   "channels.lastActivity": "Dernière activité : {time}",
-  "channels.limits.youtube": "Chaque page peut afficher environ 100 minutes de chat YouTube par jour. Si les données de la chaîne ne peuvent pas être actualisées pendant 30 jours, la connexion est supprimée.",
+  "channels.limits.youtube": "Chaque page peut afficher environ 5 heures de chat YouTube par jour. Si les données de la chaîne ne peuvent pas être actualisées pendant 30 jours, la connexion est supprimée.",
   "channels.more": "Ce qui est lu et les limites",
   "channels.noActivity": "Aucune activité pour l’instant.",
   "channels.notConnected": "Non connecté",

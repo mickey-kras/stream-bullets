@@ -168,7 +168,7 @@ The callback refuses an authorization that gives fewer scopes than the list abov
 | YouTube poll interval | The larger of `pollingIntervalMillis` and 10 seconds |
 | YouTube check for a live broadcast | Every 10 minutes while the channel is not live |
 | YouTube backoff | 1 second up to 5 minutes, with jitter |
-| YouTube quota | 9,000 units each quota day for all pages together, and 3,000 units for each page |
+| YouTube quota | 9,000 units each quota day for all pages together, and 9,000 units for each page |
 | `last_event_at` writes | One each 30 seconds for each channel |
 | Subscription check while a consumer listens | At most one each 10 minutes for each channel |
 | Subscription checks of the hourly job | 25 channels in one run |
@@ -236,7 +236,7 @@ follows this reset, also across summer time.
 | --- | --- |
 | One live page at the 10-second floor | 1,800 each hour (6 polls each minute × 5 units × 60) |
 | One open overlay, channel not live | 6 each hour (one check each 10 minutes) |
-| Budget for one page | 3,000 each day: about 100 minutes of live chat at the floor |
+| Budget for one page | 9,000 each day: about 5 hours of live chat at the floor |
 | Budget for all pages | 9,000 each day: about 5 hours of live chat at the floor |
 
 YouTube can ask for a longer interval with `pollingIntervalMillis`. Then a page uses fewer units.

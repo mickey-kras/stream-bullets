@@ -221,7 +221,7 @@
   "channels.gaps.youtube": "YouTube nie zgłasza czyszczenia czatu ani zdjęcia bana.",
   "channels.intro": "Połącz swoje kanały raz. Ich czat i zdarzenia moderacji trafiają do Twojego overlayu. StreamBullets tylko je odczytuje: nigdy nie publikuje ani nie moderuje.",
   "channels.lastActivity": "Ostatnia aktywność: {time}",
-  "channels.limits.youtube": "Każda strona może pokazać około 100 minut czatu YouTube dziennie. Jeśli danych kanału nie da się odświeżyć przez 30 dni, połączenie zostanie usunięte.",
+  "channels.limits.youtube": "Każda strona może pokazać około 5 godzin czatu YouTube dziennie. Jeśli danych kanału nie da się odświeżyć przez 30 dni, połączenie zostanie usunięte.",
   "channels.more": "Co jest odczytywane i jakie są limity",
   "channels.noActivity": "Brak aktywności.",
   "channels.notConnected": "Nie połączono",

@@ -197,7 +197,7 @@
   "channels.gaps.youtube": "YouTube 不会报告聊天清空或解除封禁。",
   "channels.intro": "只需连接一次频道。频道的聊天和管理事件会进入你的叠加层。StreamBullets 只读取这些内容，从不发言或执行管理操作。",
   "channels.lastActivity": "最近动态：{time}",
-  "channels.limits.youtube": "每个页面每天可显示约 100 分钟的 YouTube 聊天。如果频道数据 30 天内无法刷新，连接将被移除。",
+  "channels.limits.youtube": "每个页面每天可显示约 5 小时的 YouTube 聊天。如果频道数据 30 天内无法刷新，连接将被移除。",
   "channels.more": "读取的内容和限制",
   "channels.noActivity": "暂无动态。",
   "channels.notConnected": "未连接",
