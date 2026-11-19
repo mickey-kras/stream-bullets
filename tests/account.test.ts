@@ -764,7 +764,59 @@ describe("tables added by migrations 0006–0012", (): void => {
   });
 });
 
+type VerificationSeed = readonly [id: string, identifier: string, value: string];
+
 describe("account deletion", (): void => {
+  it("removes each verification row of the account by exact match and keeps look-alike rows", async (): Promise<void> => {
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES
+          ('leaver-2','Twin','not-leaver@example.test',1,?1,?1),
+          ('xleaver','Twin','leaver@example.test.invalid',1,?1,?1)`,
+      ).bind(now),
+      env.DB.prepare(
+        `INSERT INTO session (id,token,user_id,expires_at,created_at,updated_at) VALUES
+          ('s10','twin-session-token','leaver-2',?1,?2,?2),('xs1','twin-session-token-2','xleaver',?1,?2,?2)`,
+      ).bind(now + day, now),
+    ]);
+    const owned: readonly VerificationSeed[] = [
+      ["own-id", "leaver", "code"],
+      ["own-stepup", "admin-webauthn:stepup:s1", "challenge"],
+      ["own-register", "admin-webauthn:register:s2", "challenge"],
+      ["own-reset", "reset-password:token-a", "leaver"],
+      ["own-delete", "delete-account-token-b", "leaver"],
+      ["own-channel", "channel-connect:aa", '{"userId":"leaver","streamerId":"p","platform":"twitch"}'],
+      ["own-escaped", "channel-connect:ab", String.raw`{"userId":"leaver"}`],
+      ["own-spaced", "auth-state:aa", '{ "link": { "userId": "leaver", "email": "leaver@example.test" } }'],
+    ];
+    const kept: readonly VerificationSeed[] = [
+      ["twin-email", "not-leaver@example.test", "code"],
+      ["twin-email-2", "leaver@example.test.invalid", "code"],
+      ["twin-id", "leaver-2", "code"],
+      ["twin-stepup", "admin-webauthn:stepup:s10", "challenge"],
+      ["twin-register", "admin-webauthn:register:xs1", "challenge"],
+      ["twin-reset", "reset-password:token-c", "leaver-2"],
+      ["twin-delete", "delete-account-token-d", "xleaver"],
+      ["twin-channel", "channel-connect:bb", '{"userId":"leaver-2","streamerId":"p","platform":"twitch"}'],
+      ["twin-link", "auth-state:bb", '{"link":{"userId":"xleaver","email":"leaver@example.test.invalid"}}'],
+      ["twin-text", "auth-state:cc", String.raw`{"callbackURL":"\"userId\":\"leaver\"","link":{"userId":"other"}}`],
+      ["twin-challenge", "admin-webauthn:stepup:s3", "leaver"],
+      ["twin-broken", "auth-state:dd", '{"userId":"leaver"'],
+    ];
+    await env.DB.batch(
+      [...owned, ...kept].map(
+        ([id, identifier, value]: VerificationSeed): D1PreparedStatement =>
+          env.DB.prepare(
+            "INSERT INTO verification (id,identifier,value,expires_at,created_at,updated_at) VALUES (?,?,?,?,?,?)",
+          ).bind(id, identifier, value, now + day, now, now),
+      ),
+    );
+    await deleteAccount(env, "leaver");
+    const remaining = await env.DB.prepare("SELECT id FROM verification ORDER BY id").all<{ id: string }>();
+    const expected: string[] = [...kept.map(([id]: VerificationSeed): string => id), "v3"].sort();
+    expect(remaining.results.map((row: { id: string }): string => row.id)).toEqual(expected);
+  });
+
   it("removes every row linked to the account and keeps other people's data", async (): Promise<void> => {
     const otherBefore = await linkedRows("other");
     await deleteAccount(env, "leaver");
