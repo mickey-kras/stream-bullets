@@ -7,18 +7,29 @@ on:
         description: Optional full commit SHA (defaults to the selected branch)
         required: false
         type: string
+  # The main pipeline calls this workflow before the production deployment.
+  workflow_call:
+    inputs:
+      revision:
+        description: Full commit SHA to deploy
+        required: true
+        type: string
+    secrets:
+      # A secret of the test environment replaces this value.
+      CLOUDFLARE_API_TOKEN:
+        required: false
 
 permissions:
   contents: read
-
-concurrency:
-  group: deploy-test
-  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # A job group applies to manual runs and to calls from the main pipeline.
+    concurrency:
+      group: deploy-test
+      cancel-in-progress: false
     environment:
       name: test
       url: https://test.streambullets.com
