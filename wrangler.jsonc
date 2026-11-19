@@ -4,7 +4,7 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-25",
   "compatibility_flags": ["nodejs_compat"],
-  "vars": { "APP_ORIGIN": "http://localhost:5173" },
+  "vars": { "APP_ORIGIN": "http://localhost:5173", "ADMIN_STEP_UP": "report" },
   "d1_databases": [{ "binding": "DB", "database_name": "stream-bullets", "database_id": "REPLACE_WITH_D1_DATABASE_ID", "migrations_dir": "drizzle" }],
   "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "stream-bullets-images" }],
   "durable_objects": {

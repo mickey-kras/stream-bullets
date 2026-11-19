@@ -331,8 +331,9 @@ export async function getOverlayData(
         OR p.id IN (SELECT id FROM p WHERE by_owner=0 ORDER BY created_at DESC,id DESC LIMIT ${LIST_LIMIT})
       ORDER BY p.by_owner DESC,p.created_at DESC,p.id DESC`).bind(streamerId),
     env.DB.prepare(`SELECT e.id,e.title,e.category,e.author_id,u.name AS author,u.image,u.avatar_preset,
-        (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=1) AS likes
+        COALESCE(activity.likes,0) AS likes
       FROM entries e JOIN user u ON u.id=e.author_id
+      LEFT JOIN entry_activity_counts activity ON activity.entry_id=e.id
       WHERE e.streamer_id=? AND e.kind='topic' AND (e.id IN (SELECT id FROM entries WHERE streamer_id=? AND kind='topic'
         ORDER BY created_at DESC LIMIT ${LIST_LIMIT}) OR e.id IN (SELECT value FROM json_each(?)))
       ORDER BY e.created_at DESC`).bind(streamerId, streamerId, JSON.stringify(topicIds)),

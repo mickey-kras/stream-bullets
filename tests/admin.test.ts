@@ -119,7 +119,7 @@ afterAll(async (): Promise<void> => database.dispose());
 beforeEach(async (): Promise<void> => {
   vi.restoreAllMocks();
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
-  env.ADMIN_STEP_UP = undefined;
+  env.ADMIN_STEP_UP = "report";
   await env.DB.batch([
     env.DB.prepare("DELETE FROM user"),
     env.DB.prepare("DELETE FROM app_rate_limits"),
@@ -224,10 +224,12 @@ describe("admin authorisation", (): void => {
     },
   );
 
-  it("reads the step-up mode and fails closed on unknown values", (): void => {
+  it("reads the step-up mode and fails closed on unset and unknown values", (): void => {
     const mode = (value: string | undefined): string => stepUpMode({ ...env, ADMIN_STEP_UP: value });
-    expect(mode(undefined)).toBe("report");
-    expect(mode("")).toBe("report");
+    expect(mode(undefined)).toBe("enforce");
+    expect(mode("")).toBe("enforce");
+    expect(stepUpMode({ ...env, APP_ENV: "test", ADMIN_STEP_UP: undefined })).toBe("report");
+    expect(stepUpMode({ ...env, APP_ENV: "test", ADMIN_STEP_UP: "enforce" })).toBe("enforce");
     expect(mode(" Report ")).toBe("report");
     expect(mode("off")).toBe("off");
     expect(mode("enforce")).toBe("enforce");
@@ -235,7 +237,7 @@ describe("admin authorisation", (): void => {
     expect(mode("yes")).toBe("enforce");
   });
 
-  it("lets the owner in before any key exists in the default mode, and logs the missing step-up", async (): Promise<void> => {
+  it("lets the owner in before any key exists in the report mode, and logs the missing step-up", async (): Promise<void> => {
     const status = await body<StepUpStatus>(await asAdmin("GET", "admin/stepup"));
     expect(status).toMatchObject({ mode: "report", keys: 0, need: "none", canRegister: true, verifiedAt: null });
     expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
@@ -282,7 +284,7 @@ describe("admin authorisation", (): void => {
     env.ADMIN_STEP_UP = "off";
     await age(16 * minute);
     expect((await asAdmin("GET", "admin/streamers")).status).toBe(200);
-    env.ADMIN_STEP_UP = undefined;
+    env.ADMIN_STEP_UP = "report";
     expect((await call("GET", "admin/streamers", { user: "viewer" })).status).toBe(403);
     expect(await missing()).toHaveLength(before);
   });

@@ -73,7 +73,7 @@ The YouTube scope `youtube.readonly` is sensitive. Google must check the app bef
 5. With a separate viewer, submit and vote on an idea.
 6. Change its status in Admin and confirm the public result.
 7. Register two keys at `/admin?view=keys` using the README procedure.
-8. Test both before setting `ADMIN_STEP_UP=enforce`.
+8. Test both keys. Delete the secret `ADMIN_STEP_UP` after the test.
 
 Administrators need no waitlist approval. Other accounts start as viewers. Streamer applications need approval.
 

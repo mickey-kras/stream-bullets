@@ -174,6 +174,14 @@ async function webhookResponse(request: Request, env: AppEnv, path: string, key:
   }
 }
 
+async function imageResponse(request: Request, env: AppEnv, path: string): Promise<Response> {
+  if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
+  const image: Response = await serveImage(env, path.slice("/images/".length), request.method);
+  // The test environment serves images only behind its access cookie.
+  if (env.APP_ENV === "test") image.headers.set("Cache-Control", "private, no-cache");
+  return image;
+}
+
 async function routeResponse(
   request: Request,
   path: string,
@@ -202,8 +210,7 @@ async function routeResponse(
   } else if (live) {
     return await liveResponse(request, env, live[1], key, nonce, responseHeaders);
   } else if (path.startsWith("/images/")) {
-    if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
-    return await serveImage(env, path.slice("/images/".length), request.method);
+    return await imageResponse(request, env, path);
   } else {
     const routerContext = new RouterContextProvider();
     routerContext.set(appContext, context);
