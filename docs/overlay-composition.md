@@ -54,7 +54,9 @@ The overlay shows only the selected orientation.
 | `characters` | `c` 0, `r` 7, 16 × 2 | `c` 0, `r` 13, 9 × 3 | 6 × 2 |
 | `content` | No cell | No cell | 4 × 2 |
 
-The chat layer and the characters layer always have a cell.
+The chat layer and the characters layer always have a stored cell, also while they are off.
+A layer that is off is not on the grid of the editor. The server still keeps its cell free of the other cells.
+
 The characters cell sets the size of the playground world: each cell is 40 × 40 world pixels.
 A wide cell gives a long ground. A tall cell gives more sky above the ground.
 In a small cell, such as the minimum of 6 × 2 cells, up to 40 characters stand close together on a short ground.
@@ -163,7 +165,9 @@ The preview uses the same code as the OBS page. Thus the layer positions in the 
 Each placed layer shows its name and its size in pixels.
 The grid and the palette are separate components. The editor holds the selected layer and gives it to the grid.
 
-Each placed layer also shows content. A layer that is off shows a dimmed sample: sample chat messages or sample characters.
+The grid shows only the layers that are on it. A chat or characters layer that is off has no box and no content there.
+
+Each placed layer also shows content. The chat layer shows sample messages.
 A content cell with nothing on air shows a dimmed sample topic.
 The samples are only in this preview. OBS does not show them and the server does not store them.
 
@@ -194,7 +198,10 @@ Then the editor does not keep the change. A message under the grid gives the rea
 ### Add and remove a layer
 
 **Add a layer** shows one chip for each layer that is not on the grid of the selected orientation.
-The chat layer and the characters layer always have a cell. Thus only the on-air content can be in the palette.
+The chat layer and the characters layer are on the grid while they are on. The on-air content is on the grid while it has a cell.
+With the default layers, the palette shows all three chips.
+
+To add a layer, use its chip:
 
 - Select the chip, or press Enter or Space on it. The layer goes to the first free place at its minimum size.
   The editor looks for the place row by row, from the top-left corner.
@@ -203,9 +210,32 @@ The chat layer and the characters layer always have a cell. Thus only the on-air
 
 If no place is free, or the drop touches another layer, the editor adds nothing and gives the reason.
 After the editor adds a layer, it selects the layer and the grid has the focus.
+A chat or characters layer that you add comes on. **Show on stream** for that layer shows a check mark.
 
-**Remove from grid** removes the content cell. Then the content uses the full frame again, and its chip shows in the palette again.
-The chat layer and the characters layer cannot leave the grid. Use **Show on stream** to show or hide them.
+To remove a layer, use one of these procedures:
+
+- Drag the layer from the grid onto **Add a layer**. During the drag, the palette shows **Drop here to remove**.
+  The palette changes color while the pointer is on it. Release the layer there.
+- Select the layer on the grid and press Delete or Backspace.
+- For the chat layer or the characters layer, clear **Show on stream**.
+- For the on-air content, select **Remove from grid**.
+
+The editor removes each layer in the way that its data permits:
+
+| Layer | Result of a removal |
+| --- | --- |
+| `chat`, `characters` | The layer goes off in the two orientations. OBS does not show it. The server keeps its cells. |
+| `content` | The content loses its cell in the selected orientation. It uses the full frame again. OBS continues to show it. |
+
+The chip of a removed layer shows in the palette again. A message under the grid tells the removal.
+**Show on stream** and the grid show the same state. When you set **Show on stream**, the layer comes back at its stored cell.
+
+A layer that is off does not block the cells on the grid. You can put a different layer on its stored cell.
+Then the editor moves the stored cell to a free place and saves the two cells together.
+
+The stored cell keeps its size if that size has a free place. If not, it takes the minimum size.
+If the grid has no free place for the stored cell, the editor does not keep the change.
+It names the layer that has no room.
 
 ### Keyboard
 
@@ -217,6 +247,7 @@ You can use the keyboard on the grid:
 | Space or Enter | Starts to move the layer at the cursor, and selects it. The next press keeps the change. |
 | Shift and arrow key | Moves the selected layer one cell. |
 | Alt and arrow key | Moves the bottom-right corner of the selected layer one cell. Right and Down make the layer larger. Left and Up make it smaller. |
+| Delete or Backspace | Removes the selected layer from the grid. During a move, it removes the layer that moves. |
 | Escape | Cancels a move. |
 
 On a Mac, Alt is the Option key. The top-left corner stays in its place during a keyboard change of size.

@@ -188,8 +188,40 @@ export function moveCell(orientation: Orientation, rect: CellRect, grab: Cell, a
   };
 }
 
+/** The cells the layout grid draws. A layer that is not on the grid has null. */
+export type GridCells = Readonly<Record<GridLayer, CellRect | null>>;
+
+/** The layers that leave the grid by their `enabled` setting. Their cells stay stored. */
+const SWITCHED_LAYERS = ["chat", "characters"] as const;
+
+/** True when the grid draws `layer`: a chat or characters layer that is on, or content with a cell. */
+export function onGrid(layers: OverlayLayers, orientation: Orientation, layer: GridLayer): boolean {
+  return layer === "content" ? layers.cells[orientation].content !== null : layers[layer].enabled;
+}
+
+/** The cells of the layers on the grid in `orientation`. A chat or characters layer that is off has null. */
+export function gridCells(layers: OverlayLayers, orientation: Orientation): GridCells {
+  const cells: LayerCells = layers.cells[orientation];
+  return {
+    chat: layers.chat.enabled ? cells.chat : null,
+    characters: layers.characters.enabled ? cells.characters : null,
+    content: cells.content,
+  };
+}
+
+function withEnabled(layers: OverlayLayers, layer: GridLayer, enabled: boolean): OverlayLayers {
+  if (layer === "chat") return { ...layers, chat: { ...layers.chat, enabled } };
+  if (layer === "characters") return { ...layers, characters: { ...layers.characters, enabled } };
+  return layers;
+}
+
+/** `layers` with `layer` off the grid. Content loses its cell. Chat and characters go off and keep their cells. */
+export function withRemoved(layers: OverlayLayers, orientation: Orientation, layer: GridLayer): OverlayLayers {
+  return layer === "content" ? withCell(layers, orientation, "content", null) : withEnabled(layers, layer, false);
+}
+
 /** The placed layer at a cell, or null for an empty cell. */
-export function layerAt(cells: LayerCells, cell: Cell): GridLayer | null {
+export function layerAt(cells: GridCells, cell: Cell): GridLayer | null {
   for (const layer of GRID_LAYERS) {
     const rect: CellRect | null = cells[layer];
     if (rect && cell.c >= rect.c && cell.c < rect.c + rect.w && cell.r >= rect.r && cell.r < rect.r + rect.h)
@@ -198,7 +230,11 @@ export function layerAt(cells: LayerCells, cell: Cell): GridLayer | null {
   return null;
 }
 
-export type PlaceProblem = { kind: "outside" } | { kind: "overlap"; other: GridLayer } | { kind: "small" };
+export type PlaceProblem =
+  | { kind: "outside" }
+  | { kind: "overlap"; other: GridLayer }
+  | { kind: "small" }
+  | { kind: "noRoom"; other: GridLayer };
 
 /**
  * Why `rect` cannot be the cell of `layer` in `orientation` (it leaves the grid, touches another layer or is below
@@ -206,7 +242,7 @@ export type PlaceProblem = { kind: "outside" } | { kind: "overlap"; other: GridL
  */
 export function placeProblem(
   orientation: Orientation,
-  cells: LayerCells,
+  cells: GridCells,
   layer: GridLayer,
   rect: CellRect,
 ): PlaceProblem | null {
@@ -329,16 +365,72 @@ export function dropCell(orientation: Orientation, layer: GridLayer, at: Cell): 
 }
 
 /**
- * The first free place for `layer` at its minimum size, row by row from the top-left corner, or null when no place
- * is free.
+ * The first free place for `layer` at `size` (default: its minimum size), row by row from the top-left corner, or
+ * null when no place is free.
  */
-export function firstFreeCell(orientation: Orientation, cells: LayerCells, layer: GridLayer): CellRect | null {
+export function firstFreeCell(
+  orientation: Orientation,
+  cells: GridCells,
+  layer: GridLayer,
+  size: Readonly<{ w: number; h: number }> = MIN_CELLS[layer],
+): CellRect | null {
   const { cols, rows } = GRID[orientation];
-  const { w, h } = MIN_CELLS[layer];
+  const { w, h } = size;
   for (let r = 0; r + h <= rows; r += 1)
     for (let c = 0; c + w <= cols; c += 1) {
       const rect: CellRect = { c, r, w, h };
       if (placeProblem(orientation, cells, layer, rect) === null) return rect;
     }
   return null;
+}
+
+/** The stored cells after a placement, or the layer off the grid that has no free place for its stored cell. */
+type Parked = { cells: LayerCells; stuck: null } | { cells: null; stuck: GridLayer };
+
+// Stored cells never overlap, also the cell of a layer that is off. So such a cell moves away from a new cell.
+function parkedCells(orientation: Orientation, layers: OverlayLayers, layer: GridLayer, rect: CellRect): Parked {
+  const cells: LayerCells = { ...layers.cells[orientation] };
+  if (layer === "content") cells.content = rect;
+  else cells[layer] = rect;
+  for (const other of SWITCHED_LAYERS) {
+    const kept: CellRect = cells[other];
+    if (other === layer || layers[other].enabled || !cellsOverlap(kept, rect)) continue;
+    const free: CellRect | null =
+      firstFreeCell(orientation, cells, other, kept) ?? firstFreeCell(orientation, cells, other);
+    if (!free) return { cells: null, stuck: other };
+    cells[other] = free;
+  }
+  return { cells, stuck: null };
+}
+
+/**
+ * Why `rect` cannot be the cell of `layer` on the grid of `layers`, or null. Only the layers on the grid are in the
+ * way. `noRoom` names a layer off the grid whose stored cell is under `rect` and has no other free place.
+ */
+export function layoutProblem(
+  layers: OverlayLayers,
+  orientation: Orientation,
+  layer: GridLayer,
+  rect: CellRect,
+): PlaceProblem | null {
+  const problem: PlaceProblem | null = placeProblem(orientation, gridCells(layers, orientation), layer, rect);
+  if (problem) return problem;
+  const { stuck } = parkedCells(orientation, layers, layer, rect);
+  return stuck ? { kind: "noRoom", other: stuck } : null;
+}
+
+/**
+ * `layers` with `layer` on the grid at `rect`: a chat or characters layer goes on. The stored cell of a layer that
+ * is off the grid moves to a free place when `rect` covers it. Null when layoutProblem refuses `rect`.
+ */
+export function withPlaced(
+  layers: OverlayLayers,
+  orientation: Orientation,
+  layer: GridLayer,
+  rect: CellRect,
+): OverlayLayers | null {
+  if (placeProblem(orientation, gridCells(layers, orientation), layer, rect) !== null) return null;
+  const { cells } = parkedCells(orientation, layers, layer, rect);
+  if (!cells) return null;
+  return { ...withEnabled(layers, layer, true), cells: { ...layers.cells, [orientation]: cells } };
 }

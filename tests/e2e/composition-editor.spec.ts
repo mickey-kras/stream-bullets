@@ -6,6 +6,7 @@ import { DEFAULT_LAYERS, cellPixels, type OverlayLayers } from "../../app/lib/ov
 import { SAMPLE_INTERVAL_MS } from "../../app/components/overlay/use-chat";
 import {
   FEATURE_HOST,
+  PALETTE_EMPTY,
   PALETTE_HINT,
   gridButton,
   gridCells,
@@ -69,34 +70,25 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   await expect(app.getByRole("button")).toHaveCount(1);
   const grid = gridButton(editor, "Layout grid, 16 columns by 9 rows");
   await expect(grid).toBeVisible();
-  await expect(grid).toHaveAccessibleName("Column 1, row 1: Chat.");
+  await expect(grid).toHaveAccessibleName("Column 1, row 1: empty.");
   // The button covers the frame. It stays transparent under the pointer, so the grid and the layers stay in view.
   await grid.hover();
   await expect(grid).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  // The default places: chat on the left, the characters slot along the bottom, the content without a cell.
-  await expect(frame.locator('[data-grid-box="chat"]')).toContainText("Chat · 600 × 840");
-  const charactersCell = cellPixels(DEFAULT_LAYERS.cells.horizontal.characters);
-  await expect(frame.locator('[data-grid-box="characters"]')).toHaveText(
-    `Characters · ${charactersCell.w} × ${charactersCell.h}`,
-  );
-  await expect(frame.locator('[data-grid-box="content"]')).toHaveCount(0);
-  // Chat and characters are off by default.
+  // Chat and characters are off by default, and the content has no cell: no layer is on the grid.
   const chatLayer = editor.locator('[data-comp-layer="chat"]');
-  await expect(editor.locator('[data-comp-layer="characters"]').getByRole("checkbox")).not.toBeChecked();
+  const charactersLayer = editor.locator('[data-comp-layer="characters"]');
+  await expect(charactersLayer.getByRole("checkbox", { name: "Show on stream" })).not.toBeChecked();
   await expect(chatLayer.getByRole("checkbox", { name: "Show on stream" })).not.toBeChecked();
-  // A layer that is off shows a dimmed sample in its area: sample chat rows and sample characters.
-  await expect(frame).toHaveAttribute("data-sample-off", "chat characters");
-  const sampleChat = frame.locator('.ov-layer[data-layer="chat"]');
-  await expect(sampleChat.locator("li.wl-item").first()).toBeVisible();
-  await expect(sampleChat).toHaveCSS("opacity", "0.45");
-  const sampleCharacters = frame.locator('.ov-layer[data-layer="characters"]');
-  await expect(sampleCharacters.locator("canvas.characters-layer")).toBeVisible();
-  await expect(sampleCharacters).toHaveCSS("opacity", "0.45");
-  await expect(frame.locator('[data-grid-box="chat"]')).toHaveAttribute("data-off", "true");
-  await expect(editor.locator("[data-comp-sample-off]")).toHaveText(
-    "A dimmed layer is off. Its sample shows only in this preview, not on stream.",
-  );
-  // The sample is only in the preview: the saved chat layer stays off.
+  await expect(frame.locator("[data-grid-box]")).toHaveCount(0);
+  await expect(frame.locator(".ov-layer")).toHaveCount(0);
+  await expect(frame).not.toHaveAttribute("data-sample-off");
+  await expect(editor.locator("[data-comp-sample-off]")).toHaveCount(0);
+  // Each layer that is off the grid has a chip.
+  await expect(editor.locator("[data-comp-palette]").getByRole("button")).toHaveText([
+    "+ Chat",
+    "+ Characters",
+    "+ On-air content",
+  ]);
   expect((await storedLayers(page)).chat.enabled).toBe(false);
   // Beside the toggle: chat on puts the on-air content in the layout of the preview.
   await expect(chatLayer.locator("[data-comp-scale]")).toContainText("turning on chat changes the size of the on-air");
@@ -107,12 +99,24 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   let save = saved(page);
   await chatLayer.getByRole("checkbox", { name: "Show on stream" }).check();
   await save;
+  // "Show on stream" puts the chat on the grid at its stored cell: the default place on the left.
+  await expect(frame.locator('[data-grid-box="chat"]')).toContainText("Chat · 600 × 840");
+  await expect(grid).toHaveAccessibleName("Column 1, row 1: Chat.");
   // The preview plays sample chat without an activity socket.
   await expect(frame.locator('.ov-layer[data-layer="chat"] .wl-chat')).toBeVisible();
-  // The chat is on: its preview is not dimmed. The characters layer is still off.
-  await expect(frame).toHaveAttribute("data-sample-off", "characters");
   await expect(frame.locator('.ov-layer[data-layer="chat"]')).toHaveCSS("opacity", "1");
   await expect(frame.locator('[data-grid-box="chat"]')).not.toHaveAttribute("data-off");
+  // The characters layer is still off the grid. Its switch puts it along the bottom.
+  await expect(frame.locator('[data-grid-box="characters"]')).toHaveCount(0);
+  save = saved(page);
+  await charactersLayer.getByRole("checkbox", { name: "Show on stream" }).check();
+  await save;
+  const charactersCell = cellPixels(DEFAULT_LAYERS.cells.horizontal.characters);
+  await expect(frame.locator('[data-grid-box="characters"]')).toHaveText(
+    `Characters · ${charactersCell.w} × ${charactersCell.h}`,
+  );
+  await expect(frame.locator('.ov-layer[data-layer="characters"] canvas.characters-layer')).toBeVisible();
+  await expect(frame.locator('[data-grid-box="content"]')).toHaveCount(0);
 
   // Keep the whole preview clear of the sticky header and footer.
   await frame.evaluate((element: Element) => element.scrollIntoView({ block: "center" }));
@@ -163,7 +167,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   );
   // The chip left the palette, and the grid has the focus for the next keys.
   await expect(palette.getByRole("button")).toHaveCount(0);
-  await expect(palette.locator("[data-comp-palette-empty]")).toHaveText("All layers are on the grid.");
+  await expect(palette.locator("[data-comp-palette-empty]")).toHaveText(PALETTE_EMPTY);
   await expect(grid).toBeFocused();
   expect((await storedLayers(page)).cells.horizontal.content).toEqual({ c: 0, r: 0, w: 4, h: 2 });
 
@@ -262,6 +266,7 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
 });
 
 test("a new orientation ends a drag and keeps the keyboard cursor inside its grid", async ({ browser }) => {
+  await runSql("composition-editor-orientation", [chatOn]);
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const page = await newPage(owner);
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -491,8 +496,9 @@ test("a rejected layer save rolls back and shows an error", async ({ browser }) 
   await show.click();
   await expect(editor.getByRole("alert")).toContainText("Too many requests");
   await expect(show).not.toBeChecked();
-  // The chat is off again: the preview shows its sample dimmed.
-  await expect(editor.locator(".ov-comp-frame")).toHaveAttribute("data-sample-off", /\bchat\b/);
+  // The chat is off again: it is not on the grid, and its chip is in the palette.
+  await expect(editor.locator('[data-grid-box="chat"]')).toHaveCount(0);
+  await expect(paletteChip(editor, "Chat")).toBeVisible();
   await close(owner);
 });
 
@@ -717,7 +723,10 @@ test("a content cell with nothing on air shows a sample card in the preview only
     const content = frame.locator('.ov-layer[data-layer="content"]');
     await expect(content.locator('[data-overlay-source="topic"]')).toContainText("Sample topic");
     await expect(content).toHaveCSS("opacity", "0.45");
-    await expect(frame).toHaveAttribute("data-sample-off", "chat characters content");
+    await expect(frame).toHaveAttribute("data-sample-off", "content");
+    await expect(editor.locator("[data-comp-sample-off]")).toHaveText(
+      "Nothing is on air. The dimmed sample shows only in this preview, not on stream.",
+    );
     await expect(frame.locator('[data-grid-box="content"]')).toHaveAttribute("data-off", "true");
     // The grid stays clear under the pointer.
     const grid = editor.locator("[data-comp-grid]");
@@ -743,7 +752,8 @@ test("a content cell with nothing on air shows a sample card in the preview only
     await page.getByRole("button", { name: /Take/ }).click();
     await expect(content.locator('[data-overlay-source="message"]')).toBeVisible();
     await expect(content).toHaveCSS("opacity", "1");
-    await expect(frame).toHaveAttribute("data-sample-off", "chat characters");
+    await expect(frame).not.toHaveAttribute("data-sample-off");
+    await expect(editor.locator("[data-comp-sample-off]")).toHaveCount(0);
     await expect(frame.locator('[data-grid-box="content"]')).not.toHaveAttribute("data-off");
   } finally {
     await close(owner);

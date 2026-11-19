@@ -1,7 +1,16 @@
-import { useId, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode, type RefObject } from "react";
+import {
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+  type ReactNode,
+  type Ref,
+  type RefObject,
+} from "react";
 import { t } from "../../i18n";
 import type { GridLayer } from "../../lib/overlay-layers";
-import { LAYER_NAMES, type LayoutGridHandle } from "./layout-grid";
+import { LAYER_NAMES, type LayoutGridHandle, type RemoveDrop } from "./layout-grid";
 
 /** A press that moves this many pixels is a drag, not a click. */
 const DRAG_START_PX = 6;
@@ -86,35 +95,51 @@ function PaletteChip({
  * The layers that are not on the grid, as chips. A chip adds its layer to the grid `grid` (see PaletteChip). When
  * all layers are on the grid, a note shows in place of the chips. The parent gives the layers and puts the palette
  * where it fits: the palette does not know the page around it.
+ *
+ * The palette is also where a layer leaves the grid. While a pointer carries a placed layer (`drop`), a drop place
+ * covers the chips and names the action. The grid reads the box of the palette through `ref` and takes the drop.
  */
 export function LayerPalette({
   free,
   grid,
+  drop,
+  ref,
 }: Readonly<{
-  /** The layers without a cell in the selected orientation. */
+  /** The layers that are not on the grid in the selected orientation. */
   free: readonly GridLayer[];
   grid: RefObject<LayoutGridHandle | null>;
+  /** A pointer carries a placed layer ("ready"), or holds it over the palette ("over"). Null: no such drag. */
+  drop: RemoveDrop | null;
+  ref?: Ref<HTMLFieldSetElement>;
 }>): ReactNode {
   const hintId: string = useId();
   return (
-    <fieldset className="field ov-seg-field ov-palette" data-comp-palette>
+    <fieldset className="field ov-seg-field ov-palette" data-comp-palette data-drop={drop ?? undefined} ref={ref}>
       <legend className="field-label">{t("overlay.grid.palette")}</legend>
-      {free.length > 0 ? (
-        <>
-          <div className="ov-palette-chips">
-            {free.map((layer: GridLayer) => (
-              <PaletteChip key={layer} layer={layer} grid={grid} hintId={hintId} />
-            ))}
-          </div>
-          <p className="muted ov-comp-note" id={hintId}>
-            {t("overlay.grid.paletteHint")}
+      <div className="ov-palette-body">
+        {free.length > 0 ? (
+          <>
+            <div className="ov-palette-chips">
+              {free.map((layer: GridLayer) => (
+                <PaletteChip key={layer} layer={layer} grid={grid} hintId={hintId} />
+              ))}
+            </div>
+            <p className="muted ov-comp-note" id={hintId}>
+              {t("overlay.grid.paletteHint")}
+            </p>
+          </>
+        ) : (
+          <p className="muted ov-comp-note" data-comp-palette-empty>
+            {t("overlay.grid.paletteEmpty")}
           </p>
-        </>
-      ) : (
-        <p className="muted ov-comp-note" data-comp-palette-empty>
-          {t("overlay.grid.paletteEmpty")}
-        </p>
-      )}
+        )}
+        {/* Hidden from screen readers: a pointer drag shows it, and the keyboard has Delete on the grid. */}
+        {drop && (
+          <p className="ov-palette-drop" data-comp-palette-drop aria-hidden="true">
+            {t("overlay.grid.dropRemove")}
+          </p>
+        )}
+      </div>
     </fieldset>
   );
 }

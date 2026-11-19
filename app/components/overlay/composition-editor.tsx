@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { t, tAround, type MessageId } from "../../i18n";
 import { CHAT_TEST_MS, chatTestLeft } from "../../lib/chat-test";
-import { withCell } from "../../lib/layer-geometry";
+import { onGrid, withPlaced, withRemoved } from "../../lib/layer-geometry";
 import {
   CHAT_BACKGROUND,
   GRID,
@@ -21,7 +21,7 @@ import { useToast } from "../ui/toast";
 import { type ActivityFeed, useActivityFeed } from "./activity-feed";
 import { CharactersControls } from "./characters-controls";
 import { LayerPalette } from "./layer-palette";
-import { LayoutGrid, type LayoutGridHandle, type PreviewBackground } from "./layout-grid";
+import { LayoutGrid, type LayoutGridHandle, type PreviewBackground, type RemoveDrop } from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
 import { showsContent, type OverlayScene } from "./overlay-stage";
 import { StepHeading } from "./step-heading";
@@ -36,11 +36,6 @@ const ORIENTATION_NAMES: Readonly<Record<Orientation, MessageId>> = {
   horizontal: "overlay.grid.horizontal",
   vertical: "overlay.grid.vertical",
 };
-
-/** A placed chat or characters layer that is off: the preview shows its sample dimmed. */
-function layerOff(layers: OverlayLayers, layer: GridLayer): boolean {
-  return layer !== "content" && layers.cells[layers.orientation][layer] !== null && !layers[layer].enabled;
-}
 
 /** Debounce for the overlap note: it changes only once a move has settled. */
 const OVERLAP_NOTE_MS = 500;
@@ -179,6 +174,9 @@ export function CompositionEditor({
   // The selected layer of the grid. It is here, not in the grid, so that other controls can read and set it.
   const [selected, setSelected] = useState<GridLayer>("chat");
   const grid = useRef<LayoutGridHandle | null>(null);
+  // The palette takes a layer that a pointer drags off the grid: the grid reads its box and sets what it shows.
+  const palette = useRef<HTMLFieldSetElement | null>(null);
+  const [removeDrop, setRemoveDrop] = useState<RemoveDrop | null>(null);
   const { shown, status, error, edit } = useLayerDraft(layers, onSaved);
   const orientation: Orientation = shown.orientation;
   // The preview shows the live playground while the characters layer is on: the owner's own characters socket.
@@ -188,17 +186,15 @@ export function CompositionEditor({
     owner: true,
   });
   const content: CellRect | null = shown.cells[orientation].content;
-  const free: GridLayer[] = GRID_LAYERS.filter((layer: GridLayer): boolean => shown.cells[orientation][layer] === null);
+  const free: GridLayer[] = GRID_LAYERS.filter((layer: GridLayer): boolean => !onGrid(shown, orientation, layer));
   const frame = useRef<HTMLDivElement | null>(null);
   const covers: boolean = useChatOverlap(
     frame,
     { enabled: shown.chat.enabled && content === null, rect: layerPixels(shown, "chat") ?? { x: 0, y: 0, w: 0, h: 0 } },
     source,
   );
-  // The preview dims a sample: a placed layer that is off, or a content cell with nothing on air.
-  const dimmed: boolean =
-    GRID_LAYERS.some((layer: GridLayer): boolean => layerOff(shown, layer)) ||
-    (content !== null && !showsContent(source, scene.data));
+  // The preview dims a sample: a content cell with nothing on air.
+  const dimmed: boolean = content !== null && !showsContent(source, scene.data);
   const [sourceBefore, sourceAfter] = tAround("overlay.comp.chatSource", "link");
   // The overlap note follows `covers` OVERLAP_NOTE_MS after the last change. It speaks only after the owner's first
   // edit, not on page load.
@@ -213,8 +209,11 @@ export function CompositionEditor({
     setArmed(true);
     edit(update, when);
   };
-  const place = (layer: GridLayer, rect: CellRect | null, when: EditTiming): void =>
-    change((current: OverlayLayers) => withCell(current, current.orientation, layer, rect), when);
+  // The grid checks a cell before it calls `place`, so a cell that no longer fits changes nothing.
+  const place = (layer: GridLayer, rect: CellRect, when: EditTiming): void =>
+    change((current: OverlayLayers) => withPlaced(current, current.orientation, layer, rect) ?? current, when);
+  const remove = (layer: GridLayer): void =>
+    change((current: OverlayLayers) => withRemoved(current, current.orientation, layer));
 
   const backgroundText: string = t("overlay.comp.chatBackgroundValue", { percent: shown.chat.backgroundOpacity });
   let statusText: string = "";
@@ -362,7 +361,7 @@ export function CompositionEditor({
                   ))}
                 </div>
               </fieldset>
-              <LayerPalette free={free} grid={grid} />
+              <LayerPalette free={free} grid={grid} drop={removeDrop} ref={palette} />
             </div>
             <LayoutGrid
               ref={grid}
@@ -374,6 +373,9 @@ export function CompositionEditor({
               selected={selected}
               onSelect={setSelected}
               onPlace={place}
+              onRemove={remove}
+              removeZone={palette}
+              onRemoveDrop={setRemoveDrop}
             />
             <p className="muted ov-comp-help" data-comp-frame-size>
               {t("overlay.grid.obsSize", frameSize(orientation))}
@@ -382,7 +384,7 @@ export function CompositionEditor({
             <p className="ov-comp-help ov-comp-overlap" data-comp-overlap aria-live={armed ? "polite" : "off"}>
               {note ? t("overlay.comp.overlap") : ""}
             </p>
-            {shown.cells[orientation].chat && (
+            {shown.chat.enabled && (
               <p className="muted ov-comp-help" data-comp-sample>
                 {t("overlay.comp.sampleChat")}
               </p>
@@ -405,7 +407,7 @@ export function CompositionEditor({
                 type="button"
                 aria-disabled={content === null}
                 onClick={() => {
-                  if (content !== null) place("content", null, "now");
+                  if (content !== null) remove("content");
                 }}
                 data-comp-remove
               >
