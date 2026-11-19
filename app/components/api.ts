@@ -95,6 +95,7 @@ const codeMessages: Readonly<Record<string, MessageId>> = {
   other_key_required: "keys.confirmRemove",
   last_key: "keys.onlyKey",
   bug_template_empty: "ideas.form.fillTemplate",
+  binary_options_invalid: "error.binaryOptions",
   invalid_image: "upload.invalid",
   handle_taken: "error.handleTaken",
   invalid_schedule_date: "error.scheduleDate",

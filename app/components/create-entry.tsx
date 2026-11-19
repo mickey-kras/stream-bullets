@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { t, type MessageId } from "../i18n";
+import { getLocale, t, type MessageId } from "../i18n";
 import { Modal } from "./common";
 import { errorMessage } from "./api";
 import { MASH_NAME } from "../lib/mash";
@@ -8,6 +8,7 @@ import { topicCategoryLabel } from "./topic-icon";
 import { DialogActions } from "./ui/dialog";
 import { Select, type SelectOption } from "./ui/select";
 import { Req, RequiredNote } from "./ui/required";
+import { BINARY_LABEL_MAX_LENGTH, binaryLabelInput, binaryOptions } from "../lib/polls";
 
 type PollKind = "choice" | "binary" | "mash";
 
@@ -33,6 +34,31 @@ const durations: readonly [string, MessageId][] = [
   ["300", "create.minutes5"],
   ["600", "create.minutes10"],
 ];
+
+const BINARY_LABEL_FIELDS: readonly string[] = ["binary-first", "binary-second"];
+
+/** Two optional inputs for the labels of a Yes/No poll. Each placeholder shows the default label. */
+function BinaryLabelFields(): ReactNode {
+  const defaults: readonly [string, string] = binaryOptions(getLocale());
+  return (
+    <>
+      {BINARY_LABEL_FIELDS.map((name: string, index: number) => (
+        <label key={name}>
+          <span>{t("create.binaryOption", { number: index + 1 })}</span>
+          <input name={name} placeholder={defaults[index]} maxLength={BINARY_LABEL_MAX_LENGTH} />
+        </label>
+      ))}
+    </>
+  );
+}
+
+/** The options of a choice poll, one per line. */
+function choiceOptions(text: string): string[] {
+  return text
+    .split("\n")
+    .map((option: string): string => option.trim())
+    .filter(Boolean);
+}
 
 export function CreateEntry({
   mode,
@@ -86,11 +112,8 @@ export function CreateEntry({
           title: textField("title"),
           options:
             kind === "binary"
-              ? ["Yes", "No"]
-              : textField("options")
-                  .split("\n")
-                  .map((option: string) => option.trim())
-                  .filter(Boolean),
+              ? binaryLabelInput(textField("binary-first"), textField("binary-second"))
+              : choiceOptions(textField("options")),
           duration: Number(textField("duration")),
         };
       }
@@ -179,7 +202,12 @@ export function CreateEntry({
                 <small id="options-help">{t("create.optionsHelp")}</small>
               </label>
             )}
-            {kind === "binary" && <p className="muted">{t("create.binaryHelp")}</p>}
+            {kind === "binary" && (
+              <>
+                <p className="muted">{t("create.binaryHelp")}</p>
+                <BinaryLabelFields />
+              </>
+            )}
             <div className="field" hidden={kind === "mash"}>
               <span className="field-label" id="poll-duration-label">
                 {t("create.votingTime")}

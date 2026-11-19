@@ -11,6 +11,7 @@ import {
   SUPPORT_LINK_KINDS,
 } from "../../db/enums";
 import { IDEA_CATEGORIES, TOPIC_CATEGORIES } from "../lib/ideas";
+import { BINARY_LABEL_MAX_LENGTH, isBinaryLabelPair } from "../lib/polls";
 import { isPlainUrlText } from "../lib/url-text";
 import { isValidZone, parseDate } from "../lib/zoned";
 
@@ -64,6 +65,12 @@ export const commentMentionsSchema = z
   .max(5)
   .default([]);
 
+/** True for at least two options that differ. The comparison ignores letter case. */
+function isChoiceOptionList(options: readonly string[]): boolean {
+  const distinct: Set<string> = new Set(options.map((option: string): string => option.toLowerCase()));
+  return options.length >= 2 && distinct.size === options.length;
+}
+
 export const entryActionSchema = z
   .discriminatedUnion("action", [
     z
@@ -73,7 +80,7 @@ export const entryActionSchema = z
         title: line(160),
         body: text(2000).optional(),
         category: z.enum([...TOPIC_CATEGORIES, ...IDEA_CATEGORIES]).optional(),
-        options: z.array(line(80)).min(2).max(6).optional(),
+        options: z.array(line(BINARY_LABEL_MAX_LENGTH)).min(1).max(6).optional(),
         duration: z.union([z.literal(0), z.number().int().min(15).max(3600)]).default(0),
       })
       .strict(),
@@ -99,12 +106,15 @@ export const entryActionSchema = z
         message: "Topics need a title up to 100 characters, details, and a category.",
       });
     }
-    if (
-      value.kind === "choice" &&
-      (!value.options?.length ||
-        new Set(value.options.map((option: string) => option.toLowerCase())).size !== value.options.length)
-    ) {
+    if (value.kind === "choice" && !isChoiceOptionList(value.options ?? [])) {
       context.addIssue({ code: z.ZodIssueCode.custom, message: "Add 2 to 6 different poll options." });
+    }
+    if (value.kind === "binary" && value.options !== undefined && !isBinaryLabelPair(value.options)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Enter two different labels, or leave both empty.",
+        params: { apiCode: "binary_options_invalid" },
+      });
     }
   });
 
