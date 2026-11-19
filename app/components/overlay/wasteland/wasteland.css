@@ -146,41 +146,61 @@
   mask-image: linear-gradient(to bottom, transparent, #000 18%, #000);
 }
 .wl-item {
+  position: relative;
   flex: 0 0 auto;
   min-width: 0;
   margin: 0;
   padding: 0;
 }
+/* The drop shadow of the card. It is here because the card clips its own paint. --wl-bg scales it with the card. */
+.wl-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0.32em;
+  box-shadow: 0 2px 4px var(--wl-shadow);
+  opacity: var(--wl-bg, 1);
+  pointer-events: none;
+}
 .wl-card {
   position: relative;
-  padding: 0.3em 2em 0.32em 0.48em;
+  /* Each side has 1px more for the border, which the background (::after) draws. */
+  padding: calc(0.3em + 1px) calc(2em + 1px) calc(0.32em + 1px) calc(0.48em + 1px);
+  border-radius: 0.32em;
+  /* A card never changes the layout or the paint outside its box. */
+  contain: layout paint;
+}
+/* The card background: fill, border and inset ring. --wl-bg (0 to 1, chat-layer.tsx) scales it, never the text. */
+.wl-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background-color: var(--wl-card);
   background-image:
     radial-gradient(ellipse at 7% 0%, var(--wl-glow), transparent 55%),
     repeating-linear-gradient(0deg, transparent 0 3px, var(--wl-scan) 3px 4px);
   border: 1px solid var(--wl-border);
   border-radius: 0.32em;
-  box-shadow:
-    inset 0 0 0 2px var(--wl-inset),
-    0 2px 4px var(--wl-shadow);
-  /* A card never changes the layout or the paint outside its box (its own shadow still shows). */
-  contain: layout paint;
+  box-shadow: inset 0 0 0 2px var(--wl-inset);
+  opacity: var(--wl-bg, 1);
+  pointer-events: none;
 }
 .wl-card::before {
   content: "";
   position: absolute;
-  inset: 2px;
+  inset: 3px;
   border: 1px solid var(--wl-inner);
   border-radius: 0.22em;
+  opacity: var(--wl-bg, 1);
   pointer-events: none;
 }
 /* The newest active card (data-newest, never a removed, leaving or fading card): an accent border and a left bar. */
-.wl-item[data-newest] .wl-card {
+.wl-item[data-newest] .wl-card::after {
   border-color: var(--wl-accent);
   box-shadow:
     inset 3px 0 var(--wl-accent),
-    inset 0 0 0 2px var(--wl-inset),
-    0 2px 4px var(--wl-shadow);
+    inset 0 0 0 2px var(--wl-inset);
 }
 .wl-line {
   display: block;
@@ -219,7 +239,7 @@
 }
 .wl-vault {
   position: absolute;
-  right: 0.45em;
+  right: calc(0.45em + 1px);
   top: 50%;
   width: 1.1em;
   height: 0.8em;
@@ -227,7 +247,17 @@
   fill: none;
   stroke: var(--wl-accent);
   stroke-width: 1.7;
-  opacity: 0.55;
+  opacity: calc(0.55 * var(--wl-bg, 1));
+}
+/* A faint card background (data-outline, chat-layer.tsx): a dark outline keeps the text readable over a bright game. */
+.wl-chat[data-outline] .wl-line {
+  text-shadow:
+    0 0 0.1em var(--wl-outline),
+    0 0 0.1em var(--wl-outline),
+    0 0.05em 0.22em var(--wl-outline);
+}
+.wl-chat[data-outline] .wl-icon {
+  filter: drop-shadow(0 0 0.06em var(--wl-outline)) drop-shadow(0 0.05em 0.1em var(--wl-outline));
 }
 
 /* ---------- Row phases ---------- */
@@ -241,7 +271,9 @@
 }
 /* A leaving row, and a removed row after its hold, fade out. Then the column closes up (use-row-motion.ts). */
 .wl-item[data-phase="leaving"] .wl-card,
-.wl-item[data-gone] .wl-card {
+.wl-item[data-phase="leaving"]::before,
+.wl-item[data-gone] .wl-card,
+.wl-item[data-gone]::before {
   animation: wl-fade-out var(--wl-leave) ease-in both;
 }
 @keyframes wl-fade-out {

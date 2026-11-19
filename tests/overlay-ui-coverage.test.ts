@@ -4,7 +4,7 @@ import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import { ChannelPanel, type ChannelView } from "../app/components/channels/channel-panel";
 import { controlState, defaultRef, OverlayControl } from "../app/components/overlay/overlay-control";
-import { ChatLayer, shortName } from "../app/components/overlay/chat-layer";
+import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
 import { CharactersSlot, CONTENT_SELECTOR, layerSelector } from "../app/components/overlay/overlay-composition";
 import {
   SAMPLE_SOURCE,
@@ -264,6 +264,21 @@ describe("overlay source fallbacks", () => {
     expect(html).toContain(`${family.repeat(19)}…`);
     expect(html).toContain("Unsafe emote");
     expect(html).not.toContain("<img");
+    // Without a message background setting the card is as before: full opacity and no text outline.
+    expect(html).toContain("--wl-bg:1");
+    expect(html).not.toContain("data-outline");
+  });
+
+  it("puts the message background on the chat root and outlines the text only below 50 percent", () => {
+    const chat = { rows: [], epoch: 0, at: 1000 };
+    const render = (backgroundOpacity: number): string =>
+      renderToStaticMarkup(createElement(ChatLayer, { chat, backgroundOpacity }));
+    expect(chatStyle(60)).toMatchObject({ "--wl-bg": "0.6", "--wl-card": "rgba(8, 43, 46, 0.9)" });
+    expect(render(100)).toMatch(/^<ol class="wl-chat" style="[^"]*--wl-bg:1"/);
+    expect(render(60)).toContain("--wl-bg:0.6");
+    expect(render(50)).not.toContain("data-outline");
+    expect(render(45)).toMatch(/--wl-bg:0\.45"[^>]* data-outline="true"/);
+    expect(render(0)).toMatch(/--wl-bg:0"[^>]* data-outline="true"/);
   });
 });
 

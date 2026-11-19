@@ -84,6 +84,8 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
   if (before.chat.enabled !== after.chat.enabled) patch.chat = { enabled: after.chat.enabled };
   if (before.chat.hideCommands !== after.chat.hideCommands)
     patch.chat = { ...patch.chat, hideCommands: after.chat.hideCommands };
+  if (before.chat.backgroundOpacity !== after.chat.backgroundOpacity)
+    patch.chat = { ...patch.chat, backgroundOpacity: after.chat.backgroundOpacity };
   if (before.characters.enabled !== after.characters.enabled) patch.characters = { enabled: after.characters.enabled };
   if (before.characters.timeout !== after.characters.timeout)
     patch.characters = { ...patch.characters, timeout: after.characters.timeout };
@@ -128,6 +130,8 @@ export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch 
     if (result.chat.enabled !== undefined && result.chat.enabled === sent.chat?.enabled) delete result.chat.enabled;
     if (result.chat.hideCommands !== undefined && result.chat.hideCommands === sent.chat?.hideCommands)
       delete result.chat.hideCommands;
+    if (result.chat.backgroundOpacity !== undefined && result.chat.backgroundOpacity === sent.chat?.backgroundOpacity)
+      delete result.chat.backgroundOpacity;
   }
   if (result.characters?.enabled !== undefined && result.characters.enabled === sent.characters?.enabled)
     delete result.characters.enabled;
