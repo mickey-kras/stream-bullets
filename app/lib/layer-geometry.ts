@@ -119,22 +119,24 @@ function removeSentCells(layout: CellsPatch, sent: CellsPatch): void {
       delete layout[layer];
 }
 
+function removeSentFields<T extends object>(
+  target: T | undefined,
+  sent: T | undefined,
+  keys: readonly (keyof T)[],
+): void {
+  if (!target || !sent) return;
+  for (const key of keys) if (target[key] !== undefined && target[key] === sent[key]) delete target[key];
+}
+
 /**
  * `draft` without the fields that still hold the value `sent` saved (or failed to save). A field edited again
  * since then has another value and stays.
  */
 export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch {
   const result: LayersPatch = compact(draft);
-  if (result.orientation !== undefined && result.orientation === sent.orientation) delete result.orientation;
-  if (result.chat) {
-    if (result.chat.enabled !== undefined && result.chat.enabled === sent.chat?.enabled) delete result.chat.enabled;
-    if (result.chat.hideCommands !== undefined && result.chat.hideCommands === sent.chat?.hideCommands)
-      delete result.chat.hideCommands;
-    if (result.chat.backgroundOpacity !== undefined && result.chat.backgroundOpacity === sent.chat?.backgroundOpacity)
-      delete result.chat.backgroundOpacity;
-  }
-  if (result.characters?.enabled !== undefined && result.characters.enabled === sent.characters?.enabled)
-    delete result.characters.enabled;
+  removeSentFields(result, sent, ["orientation"]);
+  removeSentFields(result.chat, sent.chat, ["enabled", "hideCommands", "backgroundOpacity"]);
+  removeSentFields(result.characters, sent.characters, ["enabled"]);
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch | undefined = result.cells?.[orientation];
     const done: CellsPatch | undefined = sent.cells?.[orientation];
