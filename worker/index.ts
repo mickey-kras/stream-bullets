@@ -203,7 +203,10 @@ async function routeResponse(
     return await liveResponse(request, env, live[1], key, nonce, responseHeaders);
   } else if (path.startsWith("/images/")) {
     if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
-    return await serveImage(env, path.slice("/images/".length), request.method);
+    const image: Response = await serveImage(env, path.slice("/images/".length), request.method);
+    // The test environment serves images only behind its access cookie.
+    if (env.APP_ENV === "test") image.headers.set("Cache-Control", "private, no-cache");
+    return image;
   } else {
     const routerContext = new RouterContextProvider();
     routerContext.set(appContext, context);

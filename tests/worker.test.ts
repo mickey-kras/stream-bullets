@@ -338,6 +338,7 @@ describe("Worker test environment", (): void => {
     for (const path of ["/", "/images/logo/owner", "/api/live/zed_page"]) {
       const response = await worker.fetch(new Request(`${testOrigin}${path}`), testEnv);
       expect(response.status).toBe(403);
+      expect(response.headers.get("Cache-Control")).toBe("no-store");
       expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
     }
     expect(router.calls).toHaveLength(0);
@@ -359,6 +360,17 @@ describe("Worker test environment", (): void => {
     expect(page.status).toBe(200);
     expect(page.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
     expect(await page.text()).toBe("page");
+    const image: Response = await worker.fetch(
+      new Request(`${testOrigin}/images/logo/owner`, { headers: { Cookie: cookie } }),
+      testEnv,
+    );
+    expect([image.status, image.headers.get("Cache-Control")]).toEqual([200, "private, no-cache"]);
+    await image.arrayBuffer();
+    const missing: Response = await worker.fetch(
+      new Request(`${testOrigin}/images/logo/nobody`, { headers: { Cookie: cookie } }),
+      testEnv,
+    );
+    expect([missing.status, missing.headers.get("Cache-Control")]).toEqual([404, "no-store"]);
     const controller: ScheduledController = {
       scheduledTime: Date.now(),
       cron: "0 * * * *",
@@ -413,11 +425,15 @@ describe("Worker pages", (): void => {
   it("serves referenced images for GET and HEAD and refuses other methods", async (): Promise<void> => {
     const image = await fetchPath("/images/logo/owner");
     expect(image.status).toBe(200);
+    expect(image.headers.get("Cache-Control")).toBe("public, max-age=60, must-revalidate");
     expect(new Uint8Array(await image.arrayBuffer())).toEqual(png);
     const head = await fetchPath("/images/logo/owner", { method: "HEAD" });
     expect([head.status, await head.text()]).toEqual([200, ""]);
-    expect((await fetchPath("/images/logo/owner", { method: "POST", headers: { Origin: origin } })).status).toBe(405);
-    expect((await fetchPath("/images/logo/nobody")).status).toBe(404);
+    expect(head.headers.get("Cache-Control")).toBe("public, max-age=60, must-revalidate");
+    const refused: Response = await fetchPath("/images/logo/owner", { method: "POST", headers: { Origin: origin } });
+    expect([refused.status, refused.headers.get("Cache-Control")]).toEqual([405, "no-store"]);
+    const missing: Response = await fetchPath("/images/logo/nobody");
+    expect([missing.status, missing.headers.get("Cache-Control")]).toEqual([404, "no-store"]);
     expect(router.calls).toHaveLength(0);
   });
 });
