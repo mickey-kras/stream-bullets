@@ -8,6 +8,7 @@ import {
   exchangeCode,
   listSubscriptions,
   refreshTokens,
+  requiredSubscriptions,
   revokeToken,
   subscribe,
   unsubscribe,
@@ -163,7 +164,7 @@ describe("channel provider clients", (): void => {
           pagination: {},
         }),
     );
-    expect(await listSubscriptions(env, "twitch", "111", null, origin)).toEqual([{ id: "mine", type: "channel.chat.message" }]);
+    expect(await listSubscriptions(env, "twitch", "111", null, origin)).toEqual([{ id: "mine", type: "channel.chat.message", health: "enabled" }]);
     expect(new URL(requests[1].url).searchParams.get("user_id")).toBe("111");
     expect(new URL(requests[2].url).searchParams.get("after")).toBe("next");
     answers(() =>
@@ -174,7 +175,7 @@ describe("channel provider clients", (): void => {
         ],
       }),
     );
-    expect(await listSubscriptions(env, "kick", "333", "t", origin)).toEqual([{ id: "k1", type: "chat.message.sent" }]);
+    expect(await listSubscriptions(env, "kick", "333", "t", origin)).toEqual([{ id: "k1", type: "chat.message.sent", health: "enabled" }]);
     expect(await listSubscriptions(env, "kick", "333", null, origin)).toBeNull();
     answers(() => new Response(null, { status: 500 }));
     expect(await listSubscriptions(env, "kick", "333", "t", origin)).toBeNull();
@@ -186,6 +187,71 @@ describe("channel provider clients", (): void => {
     answers(() => Response.json({ bad: true }));
     expect(await listSubscriptions(env, "kick", "333", "t", origin)).toBeNull();
     expect(await listSubscriptions(env, "youtube", "UC", null, origin)).toEqual([]);
+  });
+
+  it("reads the health of each Twitch subscription and creates only the named types", async (): Promise<void> => {
+    const origin = "https://app.test";
+    const item = (id: string, status?: string): unknown => ({
+      id,
+      type: "channel.chat.message",
+      ...(status ? { status } : {}),
+      condition: { broadcaster_user_id: "111", user_id: "111" },
+      transport: { method: "webhook", callback: `${origin}/hooks/twitch` },
+    });
+    answers(
+      () => Response.json({ access_token: "app" }),
+      () =>
+        Response.json({
+          data: [
+            item("on", "enabled"),
+            item("pending", "webhook_callback_verification_pending"),
+            item("failed", "webhook_callback_verification_failed"),
+            item("revoked", "notification_failures_exceeded"),
+            item("new-status", "something_new"),
+            item("no-status"),
+          ],
+        }),
+    );
+    expect((await listSubscriptions(env, "twitch", "111", null, origin))?.map((entry) => [entry.id, entry.health])).toEqual([
+      ["on", "enabled"],
+      ["pending", "pending"],
+      ["failed", "unhealthy"],
+      ["revoked", "unhealthy"],
+      ["new-status", "unhealthy"],
+      // A list without the documented status proves no failure.
+      ["no-status", "enabled"],
+    ]);
+    expect(requiredSubscriptions("twitch")).toEqual([
+      "channel.chat.message",
+      "channel.chat.message_delete",
+      "channel.chat.clear",
+      "channel.chat.clear_user_messages",
+      "channel.moderate",
+    ]);
+    expect(requiredSubscriptions("kick")).toEqual(["chat.message.sent", "moderation.banned"]);
+    expect(requiredSubscriptions("youtube")).toEqual([]);
+    let requests = answers(
+      () => Response.json({ access_token: "app" }),
+      () => Response.json({ data: [{ id: "made" }] }, { status: 202 }),
+    );
+    const created: string[] = [];
+    // Twitch needs no user token: the app token creates the webhook subscription.
+    await subscribe(env, "twitch", "111", null, origin, created, ["channel.moderate"]);
+    expect(created).toEqual(["made"]);
+    expect(requests).toHaveLength(2);
+    expect(await requests[1].json()).toMatchObject({ type: "channel.moderate", version: "2" });
+    expect(requests[1].headers.get("Authorization")).toBe("Bearer app");
+    requests = answers(() => Response.json({ data: [{ subscription_id: "k2" }] }));
+    await subscribe(env, "kick", "333", "t", origin, [], ["moderation.banned"]);
+    expect(await requests[0].json()).toMatchObject({ events: [{ name: "moderation.banned", version: 1 }] });
+    // Kick subscribes only with the broadcaster's token.
+    await expect(subscribe(env, "kick", "333", null, origin, [])).rejects.toBeInstanceOf(ReauthRequired);
+    // A refused app token is not the owner's to repair: no reconnect is asked for.
+    answers(
+      () => Response.json({ access_token: "app" }),
+      () => new Response(null, { status: 401 }),
+    );
+    await expect(subscribe(env, "twitch", "111", null, origin, [])).rejects.toBeInstanceOf(ProviderError);
   });
 
   it("skips malformed live chat items and fills the documented defaults", async (): Promise<void> => {

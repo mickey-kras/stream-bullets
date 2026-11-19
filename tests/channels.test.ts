@@ -5,11 +5,14 @@ import { ChannelIngest } from "../app/server/channel-ingest";
 import { loadTokens, tokenStatement } from "../app/server/channel-tokens.server";
 import { deleteAccount } from "../app/server/account.server";
 import {
+  REPAIR_BATCH,
   STATE_TTL_MS,
   disconnectAllChannels,
   expireYoutubeConnections,
+  repairChannelSubscriptions,
   routeFor,
 } from "../app/server/channels.server";
+import { RECONCILE_INTERVAL_MS } from "../app/server/channel-ingest-limits";
 import { loader as callbackLoader } from "../app/routes/channels-callback";
 import { apiCaller } from "./helpers/api";
 import { installFakeProviders, TWITCH_SCOPES, type FakeProviders } from "./helpers/channels";
@@ -1064,5 +1067,88 @@ describe("YouTube data retention", (): void => {
     } as unknown as DurableObjectNamespace;
     await expireYoutubeConnections(env, Date.now());
     expect(await env.DB.prepare("SELECT count(*) AS n FROM channel_connections").first("n")).toBe(0);
+  });
+});
+
+describe("subscription repair job", (): void => {
+  const hour = 3_600_000;
+
+  /** Adds pages with one Twitch connection each. */
+  async function addChannels(count: number): Promise<void> {
+    const ids = JSON.stringify(Array.from({ length: count }, (_: unknown, index: number): string => String(index).padStart(2, "0")));
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO user (id,name,email,email_verified,created_at,updated_at)
+          SELECT 'r'||value, 'R', 'r'||value||'@example.test', 1, 1, 1 FROM json_each(?)`,
+      ).bind(ids),
+      env.DB.prepare(
+        `INSERT INTO streamers (id,owner_id,handle,name,about,is_official,status)
+          SELECT '41000000-0000-4000-8000-0000000000'||value, 'r'||value, 'repair_'||value, 'R', '', 0, 'active' FROM json_each(?)`,
+      ).bind(ids),
+      env.DB.prepare(
+        `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,status,created_at,updated_at)
+          SELECT 'rc'||value, '41000000-0000-4000-8000-0000000000'||value, 'twitch', '9'||value, 'R', '', 'active', 1, 1 FROM json_each(?)`,
+      ).bind(ids),
+    ]);
+  }
+
+  it("checks at most REPAIR_BATCH channels a run, the others the next hour, and goes on after a failing one", async (): Promise<void> => {
+    await addChannels(REPAIR_BATCH + 5);
+    // Never checked: YouTube, a channel that waits for its owner, a running disconnect and a suspended page.
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at)
+          VALUES ('x1',?1,'youtube','UCx','Y','','active',NULL,1,1), ('x2',?1,'kick','71','K','','needs_reauth','authorization_revoked',1,1),
+            ('x3',?2,'twitch','72','T','','needs_reauth','disconnecting',1,1), ('x4',?3,'twitch','73','T','','error','delivery_failed',1,1)`,
+      ).bind(page, rivalPage, frozenPage),
+      env.DB.prepare("UPDATE streamers SET status='suspended' WHERE id=?").bind(frozenPage),
+    ]);
+    const calls: URL[] = [];
+    env.CHANNEL_INGEST = {
+      idFromName: (name: string): string => name,
+      get: () => ({
+        fetch: (input: string): Promise<Response> => {
+          calls.push(new URL(input));
+          if (calls.length === 2) return Promise.reject(new TypeError("down"));
+          return Promise.resolve(Response.json({ result: calls.length === 3 ? "repaired" : "ok" }));
+        },
+      }),
+    } as unknown as DurableObjectNamespace;
+    const error = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    await repairChannelSubscriptions(env, 6 * hour);
+    expect(calls).toHaveLength(REPAIR_BATCH);
+    expect(new Set(calls.map((url) => `${url.pathname}?${url.searchParams.get("platform")}`))).toEqual(new Set(["/reconcile?twitch"]));
+    expect(error.mock.calls.map((call: unknown[]) => call[0])).toEqual(["channel_repair_failed"]);
+    // Only counts are logged.
+    expect(warn.mock.calls).toEqual([["channel_repair_run", { ok: REPAIR_BATCH - 2, failed: 1, repaired: 1 }]]);
+    await repairChannelSubscriptions(env, 7 * hour);
+    expect(calls).toHaveLength(REPAIR_BATCH + 5);
+    const pages = new Set(calls.map((url) => url.searchParams.get("streamerId")));
+    expect(pages.size).toBe(REPAIR_BATCH + 5);
+    expect([...pages].every((id) => id?.startsWith("41000000-"))).toBe(true);
+    env.CHANNELS_OFF = "1";
+    await repairChannelSubscriptions(env, 8 * hour);
+    expect(calls).toHaveLength(REPAIR_BATCH + 5);
+  });
+
+  it("creates a revoked subscription again through the page's ingest object", async (): Promise<void> => {
+    expect(await connectChannel("twitch")).toBe("connected");
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    const revoked = fake.subscriptions[0];
+    revoked.status = "notification_failures_exceeded";
+    await env.DB.prepare("UPDATE channel_connections SET status='error', status_code='delivery_failed'").run();
+    // The connect made every subscription: inside the interval the job leaves the channel alone.
+    await repairChannelSubscriptions(env, Date.now());
+    expect(fake.subscriptions).toContain(revoked);
+    const later = Date.now() + RECONCILE_INTERVAL_MS;
+    vi.spyOn(Date, "now").mockReturnValue(later);
+    await repairChannelSubscriptions(env, later);
+    expect(fake.subscriptions).not.toContain(revoked);
+    expect(fake.subscriptions.filter((item) => item.type === revoked.type && item.status === undefined)).toHaveLength(1);
+    expect(await env.DB.prepare("SELECT status, status_code FROM channel_connections").first()).toEqual({
+      status: "active",
+      status_code: null,
+    });
   });
 });

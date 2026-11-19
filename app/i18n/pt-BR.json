@@ -235,6 +235,7 @@
   "channels.status.revokedYoutube": "O acesso terminou. Reconecte para continuar recebendo o chat. Sem uma nova conexão, esta conexão é removida após 7 dias.",
   "channels.status.subscribeFailed": "Não foi possível configurar os eventos do chat. Reconecte para tentar de novo.",
   "channels.status.subscriptionRemoved": "A plataforma encerrou a assinatura de eventos. Reconecte para continuar.",
+  "channels.status.webhooksRejected": "O feed não consegue aceitar eventos da plataforma no momento. Ele verifica de novo sozinho: você não precisa reconectar.",
   "channels.summary.attention": "Precisa de atenção: {platforms}",
   "channels.summary.connected": "Conectado: {platforms}",
   "channels.summary.none": "Nenhum canal conectado ainda",
