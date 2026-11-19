@@ -23323,6 +23323,90 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_components_streamer_polls_view_connectionstatus",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L167",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_connectionstatus",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L168",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_connectionstatus",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L177",
+      "target": "app_components_ui_icon_button_iconbutton",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsbody",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L201",
+      "target": "app_components_mash_mash_card_mashcard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsbody",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L211",
+      "target": "app_components_streamer_polls_view_pollsempty",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsbody",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L214",
+      "target": "app_components_poll_mashteaser",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsbody",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L216",
+      "target": "app_components_poll_pollcard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsempty",
       "source_file": "app/components/streamer/polls-view.tsx",
       "source_location": "L141",
@@ -23361,7 +23445,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L161",
+      "source_location": "L234",
       "target": "app_components_streamer_polls_view_usereturnfocus",
       "weight": 1.0
     },
@@ -23373,7 +23457,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L163",
+      "source_location": "L236",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -23385,7 +23469,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L164",
+      "source_location": "L237",
       "target": "app_components_streamer_polls_view_usebattlefocus",
       "weight": 1.0
     },
@@ -23397,55 +23481,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L171",
-      "target": "app_components_poll_mashteaser",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L173",
-      "target": "app_components_poll_pollcard",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L188",
-      "target": "app_components_mash_mash_card_mashcard",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L198",
-      "target": "app_components_streamer_polls_view_pollsempty",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_streamer_polls_view_pollsview",
-      "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L201",
+      "source_location": "L243",
       "target": "app_components_streamer_topic_board_livestrip",
       "weight": 1.0
     },
@@ -23457,7 +23493,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L204",
+      "source_location": "L246",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -23469,7 +23505,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L213",
+      "source_location": "L255",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -23481,8 +23517,8 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L231",
-      "target": "app_components_ui_icon_button_iconbutton",
+      "source_location": "L260",
+      "target": "app_components_streamer_polls_view_connectionstatus",
       "weight": 1.0
     },
     {
@@ -23493,7 +23529,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L242",
+      "source_location": "L262",
       "target": "app_components_streamer_polls_view_polltoolbarstart",
       "weight": 1.0
     },
@@ -23505,7 +23541,19 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_pollsview",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L270",
+      "source_location": "L278",
+      "target": "app_components_streamer_polls_view_pollsbody",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_streamer_polls_view_pollsview",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L290",
       "target": "app_components_streamer_entry_detail_entryactions",
       "weight": 1.0
     },
@@ -23553,7 +23601,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_usebattlephase",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L291",
+      "source_location": "L311",
       "target": "app_components_mash_use_mash_usemashview",
       "weight": 1.0
     },
@@ -23565,7 +23613,7 @@
       "relation": "calls",
       "source": "app_components_streamer_polls_view_usepollsmainclass",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L299",
+      "source_location": "L319",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -25737,7 +25785,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_dropcell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L326",
+      "source_location": "L328",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -25749,7 +25797,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_firstfreecell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L339",
+      "source_location": "L341",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -25761,7 +25809,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_growcell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L286",
+      "source_location": "L288",
       "target": "app_lib_layer_geometry_resizecell",
       "weight": 1.0
     },
@@ -25773,7 +25821,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_handleat",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L313",
+      "source_location": "L315",
       "target": "app_lib_layer_geometry_sideat",
       "weight": 1.0
     },
@@ -25785,7 +25833,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_isemptypatch",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L148",
+      "source_location": "L150",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -25797,7 +25845,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_layersaction_a1e1e0548f1e",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L153",
+      "source_location": "L155",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -25821,7 +25869,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L215",
+      "source_location": "L217",
       "target": "app_lib_overlay_layers_cellsoverlap",
       "weight": 1.0
     },
@@ -25833,7 +25881,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L217",
+      "source_location": "L219",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -25845,7 +25893,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L215",
+      "source_location": "L217",
       "target": "app_lib_overlay_layers_cellsoverlap",
       "weight": 1.0
     },
@@ -25857,7 +25905,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L217",
+      "source_location": "L219",
       "target": "app_lib_overlay_layers_cellfits",
       "weight": 1.0
     },
@@ -25881,7 +25929,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_resizecell",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L279",
+      "source_location": "L281",
       "target": "app_lib_layer_geometry_resizespan",
       "weight": 1.0
     },
@@ -25905,7 +25953,7 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withoutsent",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L127",
+      "source_location": "L136",
       "target": "app_lib_layer_geometry_compact",
       "weight": 1.0
     },
@@ -25917,7 +25965,19 @@
       "relation": "calls",
       "source": "app_lib_layer_geometry_withoutsent",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L142",
+      "source_location": "L137",
+      "target": "app_lib_layer_geometry_removesentfields",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_layer_geometry_withoutsent",
+      "source_file": "app/lib/layer-geometry.ts",
+      "source_location": "L144",
       "target": "app_lib_layer_geometry_removesentcells",
       "weight": 1.0
     },
@@ -53817,6 +53877,18 @@
       "confidence_score": 1.0,
       "context": "field",
       "relation": "references",
+      "source": "app_components_streamer_polls_view_pollsbodyprops",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L191",
+      "target": "app_types_entry",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
       "source": "app_components_streamer_polls_view_pollsviewprops",
       "source_file": "app/components/streamer/polls-view.tsx",
       "source_location": "L28",
@@ -54071,7 +54143,7 @@
       "relation": "references",
       "source": "app_lib_layer_geometry_resize",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L240",
+      "source_location": "L242",
       "target": "app_lib_overlay_layers_cellrect",
       "weight": 1.0
     },
@@ -147909,8 +147981,8 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L159",
-      "target": "app_components_streamer_polls_view_pollsview",
+      "source_location": "L158",
+      "target": "app_components_streamer_polls_view_connectionstatus",
       "weight": 1.0
     },
     {
@@ -147922,6 +147994,39 @@
       "source_file": "app/components/streamer/polls-view.tsx",
       "source_location": "L16",
       "target": "app_components_streamer_polls_view_livelabels",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_streamer_polls_view",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L189",
+      "target": "app_components_streamer_polls_view_pollsbodyprops",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_streamer_polls_view",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L197",
+      "target": "app_components_streamer_polls_view_pollsbody",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_streamer_polls_view",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L232",
+      "target": "app_components_streamer_polls_view_pollsview",
       "weight": 1.0
     },
     {
@@ -147953,7 +148058,7 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L290",
+      "source_location": "L310",
       "target": "app_components_streamer_polls_view_usebattlephase",
       "weight": 1.0
     },
@@ -147964,7 +148069,7 @@
       "relation": "contains",
       "source": "app_components_streamer_polls_view",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L297",
+      "source_location": "L317",
       "target": "app_components_streamer_polls_view_usepollsmainclass",
       "weight": 1.0
     },
@@ -150769,7 +150874,18 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L126",
+      "source_location": "L122",
+      "target": "app_lib_layer_geometry_removesentfields",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_layer_geometry",
+      "source_file": "app/lib/layer-geometry.ts",
+      "source_location": "L135",
       "target": "app_lib_layer_geometry_withoutsent",
       "weight": 1.0
     },
@@ -150780,7 +150896,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L147",
+      "source_location": "L149",
       "target": "app_lib_layer_geometry_isemptypatch",
       "weight": 1.0
     },
@@ -150791,7 +150907,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L152",
+      "source_location": "L154",
       "target": "app_lib_layer_geometry_layersaction_a1e1e0548f1e",
       "weight": 1.0
     },
@@ -150802,7 +150918,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L157",
+      "source_location": "L159",
       "target": "app_lib_layer_geometry_withcell",
       "weight": 1.0
     },
@@ -150813,7 +150929,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L170",
+      "source_location": "L172",
       "target": "app_lib_layer_geometry_spancells",
       "weight": 1.0
     },
@@ -150824,7 +150940,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L180",
+      "source_location": "L182",
       "target": "app_lib_layer_geometry_movecell",
       "weight": 1.0
     },
@@ -150835,7 +150951,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L190",
+      "source_location": "L192",
       "target": "app_lib_layer_geometry_layerat",
       "weight": 1.0
     },
@@ -150846,7 +150962,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L199",
+      "source_location": "L201",
       "target": "app_lib_layer_geometry_placeproblem",
       "weight": 1.0
     },
@@ -150857,7 +150973,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L205",
+      "source_location": "L207",
       "target": "app_lib_layer_geometry_placeproblem_58c492526df9",
       "weight": 1.0
     },
@@ -150868,7 +150984,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L221",
+      "source_location": "L223",
       "target": "app_lib_layer_geometry_resize_handles",
       "weight": 1.0
     },
@@ -150879,7 +150995,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L222",
+      "source_location": "L224",
       "target": "app_lib_layer_geometry_resizehandle",
       "weight": 1.0
     },
@@ -150890,7 +151006,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L224",
+      "source_location": "L226",
       "target": "app_lib_layer_geometry_side",
       "weight": 1.0
     },
@@ -150901,7 +151017,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L227",
+      "source_location": "L229",
       "target": "app_lib_layer_geometry_handle_sides",
       "weight": 1.0
     },
@@ -150912,7 +151028,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L239",
+      "source_location": "L241",
       "target": "app_lib_layer_geometry_resize",
       "weight": 1.0
     },
@@ -150923,7 +151039,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L244",
+      "source_location": "L246",
       "target": "app_lib_layer_geometry_span",
       "weight": 1.0
     },
@@ -150945,7 +151061,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L251",
+      "source_location": "L253",
       "target": "app_lib_layer_geometry_resizespan",
       "weight": 1.0
     },
@@ -150956,7 +151072,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L269",
+      "source_location": "L271",
       "target": "app_lib_layer_geometry_resizecell",
       "weight": 1.0
     },
@@ -150967,7 +151083,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L285",
+      "source_location": "L287",
       "target": "app_lib_layer_geometry_growcell",
       "weight": 1.0
     },
@@ -150978,7 +151094,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L290",
+      "source_location": "L292",
       "target": "app_lib_layer_geometry_handlelines",
       "weight": 1.0
     },
@@ -150989,7 +151105,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L300",
+      "source_location": "L302",
       "target": "app_lib_layer_geometry_sideat",
       "weight": 1.0
     },
@@ -151011,7 +151127,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L312",
+      "source_location": "L314",
       "target": "app_lib_layer_geometry_handleat",
       "weight": 1.0
     },
@@ -151022,7 +151138,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L324",
+      "source_location": "L326",
       "target": "app_lib_layer_geometry_dropcell",
       "weight": 1.0
     },
@@ -151033,7 +151149,7 @@
       "relation": "contains",
       "source": "app_lib_layer_geometry",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L333",
+      "source_location": "L335",
       "target": "app_lib_layer_geometry_firstfreecell",
       "weight": 1.0
     },
@@ -181418,10 +181534,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "5e08859570fa7f58045f8850f7a791e2d4b6bf351ff66b021da6d99136f21b17",
+    "content_sha256": "6429687332a62e4531216d8c51f87e7978d4712fa9041521ce117b02d2c3bc39",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "bb884086d39c8385f45632f982ad1e7851abead15173641d19b2a6051995c100",
+    "source_sha256": "dca8339d97507e8dbe54beb2cb1348b7dc935b2bbc6ad3cc074c259fd2fb362d",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -183287,6 +183403,18 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_streamer_polls_view_pollsbodyprops",
+      "label": "PollsBodyProps",
+      "norm_label": "pollsbodyprops",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L189"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_streamer_polls_view_pollsviewprops",
       "label": "PollsViewProps",
       "norm_label": "pollsviewprops",
@@ -183999,7 +184127,7 @@
       "label": "PlaceProblem",
       "norm_label": "placeproblem",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L199"
+      "source_location": "L201"
     },
     {
       "_callable": true,
@@ -184011,7 +184139,7 @@
       "label": "Resize",
       "norm_label": "resize",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L239"
+      "source_location": "L241"
     },
     {
       "_callable": true,
@@ -184023,7 +184151,7 @@
       "label": "ResizeHandle",
       "norm_label": "resizehandle",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L222"
+      "source_location": "L224"
     },
     {
       "_callable": true,
@@ -184035,7 +184163,7 @@
       "label": "Side",
       "norm_label": "side",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L224"
+      "source_location": "L226"
     },
     {
       "_callable": true,
@@ -184047,7 +184175,7 @@
       "label": "Span",
       "norm_label": "span",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L244"
+      "source_location": "L246"
     },
     {
       "_callable": true,
@@ -197512,11 +197640,33 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_streamer_polls_view_connectionstatus",
+      "label": "ConnectionStatus()",
+      "norm_label": "connectionstatus()",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L158"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_streamer_polls_view_isopenpoll",
       "label": "isOpenPoll()",
       "norm_label": "isopenpoll()",
       "source_file": "app/components/streamer/polls-view.tsx",
       "source_location": "L57"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_streamer_polls_view_pollsbody",
+      "label": "PollsBody()",
+      "norm_label": "pollsbody()",
+      "source_file": "app/components/streamer/polls-view.tsx",
+      "source_location": "L197"
     },
     {
       "_callable": true,
@@ -197538,7 +197688,7 @@
       "label": "PollsView()",
       "norm_label": "pollsview()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L159"
+      "source_location": "L232"
     },
     {
       "_callable": true,
@@ -197571,7 +197721,7 @@
       "label": "useBattlePhase()",
       "norm_label": "usebattlephase()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L290"
+      "source_location": "L310"
     },
     {
       "_callable": true,
@@ -197582,7 +197732,7 @@
       "label": "usePollsMainClass()",
       "norm_label": "usepollsmainclass()",
       "source_file": "app/components/streamer/polls-view.tsx",
-      "source_location": "L297"
+      "source_location": "L317"
     },
     {
       "_callable": true,
@@ -199305,7 +199455,7 @@
       "label": "dropCell()",
       "norm_label": "dropcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L324"
+      "source_location": "L326"
     },
     {
       "_callable": true,
@@ -199316,7 +199466,7 @@
       "label": "firstFreeCell()",
       "norm_label": "firstfreecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L333"
+      "source_location": "L335"
     },
     {
       "_callable": true,
@@ -199327,7 +199477,7 @@
       "label": "growCell()",
       "norm_label": "growcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L285"
+      "source_location": "L287"
     },
     {
       "_callable": true,
@@ -199338,7 +199488,7 @@
       "label": "handleAt()",
       "norm_label": "handleat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L312"
+      "source_location": "L314"
     },
     {
       "_callable": true,
@@ -199349,7 +199499,7 @@
       "label": "handleLines()",
       "norm_label": "handlelines()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L290"
+      "source_location": "L292"
     },
     {
       "_callable": true,
@@ -199360,7 +199510,7 @@
       "label": "isEmptyPatch()",
       "norm_label": "isemptypatch()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L147"
+      "source_location": "L149"
     },
     {
       "_callable": true,
@@ -199371,7 +199521,7 @@
       "label": "layerAt()",
       "norm_label": "layerat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L190"
+      "source_location": "L192"
     },
     {
       "_callable": true,
@@ -199382,7 +199532,7 @@
       "label": "layersAction()",
       "norm_label": "layersaction()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L152"
+      "source_location": "L154"
     },
     {
       "_callable": true,
@@ -199404,7 +199554,7 @@
       "label": "moveCell()",
       "norm_label": "movecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L180"
+      "source_location": "L182"
     },
     {
       "_callable": true,
@@ -199415,7 +199565,7 @@
       "label": "placeProblem()",
       "norm_label": "placeproblem()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L205"
+      "source_location": "L207"
     },
     {
       "_callable": true,
@@ -199433,11 +199583,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_layer_geometry_removesentfields",
+      "label": "removeSentFields()",
+      "norm_label": "removesentfields()",
+      "source_file": "app/lib/layer-geometry.ts",
+      "source_location": "L122"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_layer_geometry_resizecell",
       "label": "resizeCell()",
       "norm_label": "resizecell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L269"
+      "source_location": "L271"
     },
     {
       "_callable": true,
@@ -199448,7 +199609,7 @@
       "label": "resizeSpan()",
       "norm_label": "resizespan()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L251"
+      "source_location": "L253"
     },
     {
       "_callable": true,
@@ -199481,7 +199642,7 @@
       "label": "sideAt()",
       "norm_label": "sideat()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L300"
+      "source_location": "L302"
     },
     {
       "_callable": true,
@@ -199492,7 +199653,7 @@
       "label": "spanCells()",
       "norm_label": "spancells()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L170"
+      "source_location": "L172"
     },
     {
       "_callable": true,
@@ -199503,7 +199664,7 @@
       "label": "withCell()",
       "norm_label": "withcell()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L157"
+      "source_location": "L159"
     },
     {
       "_callable": true,
@@ -199514,7 +199675,7 @@
       "label": "withoutSent()",
       "norm_label": "withoutsent()",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L126"
+      "source_location": "L135"
     },
     {
       "_callable": true,
@@ -219215,7 +219376,7 @@
       "label": "HANDLE_SIDES",
       "norm_label": "handle_sides",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L227"
+      "source_location": "L229"
     },
     {
       "_origin": "ast",
@@ -219225,7 +219386,7 @@
       "label": "RESIZE_HANDLES",
       "norm_label": "resize_handles",
       "source_file": "app/lib/layer-geometry.ts",
-      "source_location": "L221"
+      "source_location": "L223"
     },
     {
       "_origin": "ast",
