@@ -183551,7 +183551,7 @@
     "content_sha256": "52526a90193f407090c7f2b3c6f155547a6d73895e593a0544c106f0e196db5f",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "cefc2425e1c730ac68e72cd3fa6c0dc36d58e62ebe1e040e76ff52127cd4f909",
+    "source_sha256": "3bbcbdc3cd676232b13390d677620edf8e597268514c5872ab05083d4455a373",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
