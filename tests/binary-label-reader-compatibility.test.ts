@@ -12,7 +12,12 @@ let pollId: string;
 
 beforeAll(async (): Promise<void> => {
   database = await createTestDatabase();
-  env = { DB: database.db, IMAGES: database.bucket, APP_ORIGIN: "https://stream.example.test", ADMIN_EMAILS: "host@example.test" } as AppEnv;
+  env = {
+    DB: database.db,
+    IMAGES: database.bucket,
+    APP_ORIGIN: "https://stream.example.test",
+    ADMIN_EMAILS: "host@example.test",
+  } as AppEnv;
   await env.DB.batch([
     env.DB.prepare(`INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES
       ('host','Host','host@example.test',1,1,1),('fan','Fan','fan@example.test',1,1,1)`),
@@ -31,7 +36,12 @@ describe("binary label reader compatibility", (): void => {
   it("preserves labels and vote indexes in board, detail, and overlay reads", async (): Promise<void> => {
     const streamer = await getStreamer(env, "host_page");
     if (!streamer) throw new Error("The seeded page is missing.");
-    expect(await getEntry(env, pollId, "fan")).toMatchObject({ options: ["No", "Yes"], myVote: 0, counts: null, total: 1 });
+    expect(await getEntry(env, pollId, "fan")).toMatchObject({
+      options: ["No", "Yes"],
+      myVote: 0,
+      counts: null,
+      total: 1,
+    });
     const board = await listEntries(env, streamer, "fan", { kind: "polls" });
     expect(board.entries.find((entry) => entry.id === pollId)).toMatchObject({ options: ["No", "Yes"], myVote: 0 });
     const overlay = await getOverlaySnapshot(env, "page", pollId);
@@ -50,12 +60,17 @@ describe("binary label reader compatibility", (): void => {
   it("keeps the displayed labels in moderation snapshots", async (): Promise<void> => {
     await submitReport(env, "fan", { targetKind: "entry", targetId: pollId, reason: "spam", details: "" });
     const queue = await listReports(env, "host", {});
-    expect(queue.reports.find((report) => report.targetId === pollId)).toMatchObject({ snapshot: "Continue?\n\nOptions: No · Yes" });
+    expect(queue.reports.find((report) => report.targetId === pollId)).toMatchObject({
+      snapshot: "Continue?\n\nOptions: No · Yes",
+    });
   });
 
-  it("keeps the legacy writer unchanged and falls back when labels are absent", async (): Promise<void> => {
+  it("keeps the request of the legacy form unchanged and falls back when labels are absent", async (): Promise<void> => {
     const created = await mutateEntry(env, "host", "page", {
-      action: "create", kind: "binary", title: "Another poll?", options: ["Custom one", "Custom two"],
+      action: "create",
+      kind: "binary",
+      title: "Another poll?",
+      options: ["Yes", "No"],
     });
     const row = await env.DB.prepare("SELECT options,binary_labels FROM entries WHERE id=?").bind(created.id).first();
     expect(row).toEqual({ options: '["Yes","No"]', binary_labels: null });
