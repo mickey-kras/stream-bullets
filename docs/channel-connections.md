@@ -374,7 +374,7 @@ A check never runs for a connection with `needs_reauth`, for a suspended page, o
 It also never runs for a platform without provider credentials.
 A connect makes every subscription. Thus the first check after a connect waits 10 minutes.
 
-The check sets the status that its result proves. If every required type is enabled or pending, the connection
+The check sets the status that its result proves. If the provider reports each required type as `enabled` or pending, the connection
 becomes `active`. If the provider refuses a missing type, the connection gets `error` with `subscribe_failed`.
 An `error` that already has a code keeps that code. A list that the object cannot read changes no status.
 
@@ -416,7 +416,7 @@ The object then writes one `channel_webhooks_all_rejected` warning. The warning 
 object sets `error` with `webhooks_rejected`. The usual check follows. While the provider list is healthy, later
 checks keep this code and change no subscription. An accepted delivery ends the code.
 
-A sender without the provider key cannot name a channel in these counts. Forged deliveries cannot change a
+A sender that does not have the key of the provider cannot name a channel in these counts. Forged deliveries cannot change a
 channel that accepts deliveries. They cannot change any channel while the platform accepts deliveries for other
 channels. They never cause a delete or a create at the provider. See the residual risks for the case that stays.
 
