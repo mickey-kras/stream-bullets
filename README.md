@@ -94,7 +94,7 @@ Each complete pair enables its sign-in button. Do not commit secrets or database
 | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Instagram Login credentials. Requires Meta review and a creator or business account. No provider email. |
 | `ADMIN_EMAILS` | Case-insensitive administrator emails, separated by commas or spaces. |
 | `AI_INTEREST_SALT` | Worker secret, at least 16 random characters. Keys the daily IP hash. The counter never stores raw IPs. Absence disables the counter and buttons. |
-| `ADMIN_STEP_UP` | `off`, `report` (default), or `enforce`. Unknown values enforce. See [Admin security keys](#admin-security-keys). |
+| `ADMIN_STEP_UP` | `off`, `report`, or `enforce` (default). No value and unknown values enforce. The test environment reports when it has no value. See [Admin security keys](#admin-security-keys). |
 | `LEGAL_DETAILS` | Worker secret: JSON with `operatorName`, `operatorCountry`, and `policyEffectiveDate` (`YYYY-MM-DD`). Values appear publicly. Missing values show a draft. Invalid values return 503. |
 | `CRON_HEARTBEAT_URL` | Optional uptime-service URL. Successful hourly jobs send POST. Configure alerts for missed calls. |
 | `CHANNEL_TOKEN_KEYS`, `TWITCH_EVENTSUB_SECRET`, `KICK_CLIENT_ID`, `KICK_CLIENT_SECRET` | Worker secrets for channel connections. See [setup](docs/channel-connections.md#setup). |
@@ -125,11 +125,11 @@ Freezing, suspension, and key changes need a check within 2 minutes.
 
 Configure enforcement:
 
-1. Deploy with `report` or no value.
+1. Set the Worker secret `ADMIN_STEP_UP` to `report`.
 2. Sign out. Then sign in as administrator.
 3. Within 5 minutes, open `/admin?view=keys` and register the first key. Register the backup key.
 4. In a second session, confirm both keys pass the prompt.
-5. Set `ADMIN_STEP_UP=enforce` in `env.production.vars` or a Worker secret. Then deploy.
+5. Delete the secret `ADMIN_STEP_UP`, or set it to `enforce`.
 
 Keys bind to the `APP_ORIGIN` host. Localhost keys cannot authenticate in production.
 See [key recovery](SECURITY.md#recovery-when-the-administrator-loses-every-key).

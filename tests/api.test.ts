@@ -83,6 +83,7 @@ beforeAll(async (): Promise<void> => {
     APP_ORIGIN: origin,
     BETTER_AUTH_SECRET: secret,
     ADMIN_EMAILS: "admin@example.test",
+    ADMIN_STEP_UP: "report",
   };
 });
 

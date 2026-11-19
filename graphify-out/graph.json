@@ -45597,7 +45597,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L1146",
+      "source_location": "L1148",
       "target": "tests_admin_test_insertkey",
       "weight": 1.0
     },
@@ -45621,7 +45621,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L239",
+      "source_location": "L241",
       "target": "tests_admin_test_asadmin",
       "weight": 1.0
     },
@@ -45633,7 +45633,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L274",
+      "source_location": "L276",
       "target": "tests_admin_test_twokeys",
       "weight": 1.0
     },
@@ -45645,7 +45645,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L275",
+      "source_location": "L277",
       "target": "tests_admin_test_age",
       "weight": 1.0
     },
@@ -45657,7 +45657,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L279",
+      "source_location": "L281",
       "target": "tests_admin_test_stepup",
       "weight": 1.0
     },
@@ -45669,7 +45669,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L452",
+      "source_location": "L454",
       "target": "tests_admin_test_addkey",
       "weight": 1.0
     },
@@ -45681,7 +45681,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L601",
+      "source_location": "L603",
       "target": "tests_admin_test_stamp",
       "weight": 1.0
     },
@@ -45693,7 +45693,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L822",
+      "source_location": "L824",
       "target": "tests_admin_test_seedreport",
       "weight": 1.0
     },
@@ -45789,7 +45789,7 @@
       "relation": "calls",
       "source": "tests_api_test",
       "source_file": "tests/api.test.ts",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "tests_api_test_seed",
       "weight": 1.0
     },
@@ -168932,7 +168932,7 @@
       "relation": "contains",
       "source": "security_admin_security_keys",
       "source_file": "SECURITY.md",
-      "source_location": "L25",
+      "source_location": "L27",
       "target": "security_recovery_when_the_administrator_loses_every_key",
       "weight": 1.0
     },
@@ -168943,7 +168943,7 @@
       "relation": "contains",
       "source": "security_security_policy",
       "source_file": "SECURITY.md",
-      "source_location": "L38",
+      "source_location": "L40",
       "target": "security_channel_connections",
       "weight": 1.0
     },
@@ -168954,7 +168954,7 @@
       "relation": "contains",
       "source": "security_security_policy",
       "source_file": "SECURITY.md",
-      "source_location": "L42",
+      "source_location": "L44",
       "target": "security_dependency_licenses",
       "weight": 1.0
     },
@@ -169350,7 +169350,7 @@
       "relation": "contains",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L592",
+      "source_location": "L594",
       "target": "tests_admin_test_stamp",
       "weight": 1.0
     },
@@ -169361,7 +169361,7 @@
       "relation": "contains",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L663",
+      "source_location": "L665",
       "target": "tests_admin_test_get",
       "weight": 1.0
     },
@@ -169372,7 +169372,7 @@
       "relation": "contains",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L900",
+      "source_location": "L902",
       "target": "tests_admin_test_insertkey",
       "weight": 1.0
     },
@@ -172485,7 +172485,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L104",
+      "source_location": "L108",
       "target": "tests_e2e_server_streamid",
       "weight": 1.0
     },
@@ -172496,7 +172496,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L111",
+      "source_location": "L115",
       "target": "tests_e2e_server_paginationstreamid",
       "weight": 1.0
     },
@@ -172507,7 +172507,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L121",
+      "source_location": "L125",
       "target": "tests_e2e_server_leavercommentid",
       "weight": 1.0
     },
@@ -172518,7 +172518,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L133",
+      "source_location": "L137",
       "target": "tests_e2e_server_frozenstreamid",
       "weight": 1.0
     },
@@ -172529,7 +172529,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L134",
+      "source_location": "L138",
       "target": "tests_e2e_server_suspendedstreamid",
       "weight": 1.0
     },
@@ -172562,7 +172562,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L160",
+      "source_location": "L164",
       "target": "tests_e2e_server_featurestreamid",
       "weight": 1.0
     },
@@ -172573,7 +172573,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L161",
+      "source_location": "L165",
       "target": "tests_e2e_server_featuretopicid",
       "weight": 1.0
     },
@@ -172584,7 +172584,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L162",
+      "source_location": "L166",
       "target": "tests_e2e_server_mashpollid",
       "weight": 1.0
     },
@@ -172595,7 +172595,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L163",
+      "source_location": "L167",
       "target": "tests_e2e_server_seriesid",
       "weight": 1.0
     },
@@ -172628,7 +172628,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L181",
+      "source_location": "L185",
       "target": "tests_e2e_server_seedpath",
       "weight": 1.0
     },
@@ -172639,7 +172639,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L185",
+      "source_location": "L189",
       "target": "tests_e2e_server_child",
       "weight": 1.0
     },
@@ -172683,7 +172683,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L38",
+      "source_location": "L42",
       "target": "tests_e2e_server_configpath",
       "weight": 1.0
     },
@@ -172694,7 +172694,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L39",
+      "source_location": "L43",
       "target": "tests_e2e_server_statepath",
       "weight": 1.0
     },
@@ -172705,7 +172705,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L50",
+      "source_location": "L54",
       "target": "tests_e2e_server_wrangler",
       "weight": 1.0
     },
@@ -172716,7 +172716,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L51",
+      "source_location": "L55",
       "target": "tests_e2e_server_common",
       "weight": 1.0
     },
@@ -172727,7 +172727,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L52",
+      "source_location": "L56",
       "target": "tests_e2e_server_execute",
       "weight": 1.0
     },
@@ -172738,7 +172738,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L61",
+      "source_location": "L65",
       "target": "tests_e2e_server_now",
       "weight": 1.0
     },
@@ -172749,7 +172749,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L62",
+      "source_location": "L66",
       "target": "tests_e2e_server_users",
       "weight": 1.0
     },
@@ -172760,7 +172760,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L63",
+      "source_location": "L67",
       "target": "tests_e2e_server_statements",
       "weight": 1.0
     },
@@ -179774,7 +179774,7 @@
       "relation": "references",
       "source": "security",
       "source_file": "SECURITY.md",
-      "source_location": "L40",
+      "source_location": "L42",
       "target": "docs_channel_connections",
       "weight": 1.0
     },
@@ -182432,10 +182432,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "0e88d5c0614190077415c76f233989fecea2a03453ee3650fade10fa49679c66",
+    "content_sha256": "8fe24f1deaff7deca1b371437257404eaaa686700ec6f2e0dfebb2231b4d4d3a",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "e62d2884f8d96f3abffe33e1b76bb8a305975d16736badb415df3b4cd1dc4fda",
+    "source_sha256": "8df036fb6053aea8ce5b09534a7074fe97eb904ad0decbcbe2ef8fc051c22204",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -210734,14 +210734,14 @@
             "callee": "batch",
             "file": "tests/admin.test.ts",
             "lang": "typescript",
-            "line": "L671",
+            "line": "L673",
             "receiver_type": "D1Database"
           }
         ]
       },
       "norm_label": "get()",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L663"
+      "source_location": "L665"
     },
     {
       "_callable": true,
@@ -210752,7 +210752,7 @@
       "label": "insertKey()",
       "norm_label": "insertkey()",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L900"
+      "source_location": "L902"
     },
     {
       "_callable": true,
@@ -210785,7 +210785,7 @@
       "label": "stamp()",
       "norm_label": "stamp()",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L592"
+      "source_location": "L594"
     },
     {
       "_callable": true,
@@ -213322,7 +213322,7 @@
       "label": "execute()",
       "norm_label": "execute()",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L52"
+      "source_location": "L56"
     },
     {
       "_callable": true,
@@ -226101,7 +226101,7 @@
             "callee": "set",
             "file": "tests/admin.test.ts",
             "lang": "typescript",
-            "line": "L529",
+            "line": "L531",
             "receiver_type": "Uint8Array"
           }
         ]
@@ -228031,7 +228031,7 @@
       "label": "child",
       "norm_label": "child",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L185"
+      "source_location": "L189"
     },
     {
       "_origin": "ast",
@@ -228041,7 +228041,7 @@
       "label": "common",
       "norm_label": "common",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L51"
+      "source_location": "L55"
     },
     {
       "_origin": "ast",
@@ -228061,7 +228061,7 @@
       "label": "configPath",
       "norm_label": "configpath",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L38"
+      "source_location": "L42"
     },
     {
       "_origin": "ast",
@@ -228091,7 +228091,7 @@
       "label": "featureStreamId",
       "norm_label": "featurestreamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L160"
+      "source_location": "L164"
     },
     {
       "_origin": "ast",
@@ -228101,7 +228101,7 @@
       "label": "featureTopicId",
       "norm_label": "featuretopicid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L161"
+      "source_location": "L165"
     },
     {
       "_origin": "ast",
@@ -228111,7 +228111,7 @@
       "label": "frozenStreamId",
       "norm_label": "frozenstreamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L133"
+      "source_location": "L137"
     },
     {
       "_origin": "ast",
@@ -228121,7 +228121,7 @@
       "label": "leaverCommentId",
       "norm_label": "leavercommentid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L121"
+      "source_location": "L125"
     },
     {
       "_origin": "ast",
@@ -228131,7 +228131,7 @@
       "label": "mashPollId",
       "norm_label": "mashpollid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L162"
+      "source_location": "L166"
     },
     {
       "_origin": "ast",
@@ -228141,7 +228141,7 @@
       "label": "now",
       "norm_label": "now",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L61"
+      "source_location": "L65"
     },
     {
       "_origin": "ast",
@@ -228151,7 +228151,7 @@
       "label": "paginationStreamId",
       "norm_label": "paginationstreamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L111"
+      "source_location": "L115"
     },
     {
       "_origin": "ast",
@@ -228181,7 +228181,7 @@
       "label": "seedPath",
       "norm_label": "seedpath",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L181"
+      "source_location": "L185"
     },
     {
       "_origin": "ast",
@@ -228191,7 +228191,7 @@
       "label": "seriesId",
       "norm_label": "seriesid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L163"
+      "source_location": "L167"
     },
     {
       "_origin": "ast",
@@ -228201,7 +228201,7 @@
       "label": "statements",
       "norm_label": "statements",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L63"
+      "source_location": "L67"
     },
     {
       "_origin": "ast",
@@ -228211,7 +228211,7 @@
       "label": "statePath",
       "norm_label": "statepath",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L39"
+      "source_location": "L43"
     },
     {
       "_origin": "ast",
@@ -228221,7 +228221,7 @@
       "label": "streamId",
       "norm_label": "streamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L104"
+      "source_location": "L108"
     },
     {
       "_origin": "ast",
@@ -228231,7 +228231,7 @@
       "label": "suspendedStreamId",
       "norm_label": "suspendedstreamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L134"
+      "source_location": "L138"
     },
     {
       "_origin": "ast",
@@ -228241,7 +228241,7 @@
       "label": "users",
       "norm_label": "users",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L62"
+      "source_location": "L66"
     },
     {
       "_origin": "ast",
@@ -228251,7 +228251,7 @@
       "label": "wrangler",
       "norm_label": "wrangler",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L50"
+      "source_location": "L54"
     },
     {
       "_origin": "ast",
@@ -231508,7 +231508,7 @@
       "node_kind": "heading",
       "norm_label": "channel connections",
       "source_file": "SECURITY.md",
-      "source_location": "L38"
+      "source_location": "L40"
     },
     {
       "_origin": "ast",
@@ -231519,7 +231519,7 @@
       "node_kind": "heading",
       "norm_label": "dependency licenses",
       "source_file": "SECURITY.md",
-      "source_location": "L42"
+      "source_location": "L44"
     },
     {
       "_origin": "ast",
@@ -231530,7 +231530,7 @@
       "node_kind": "heading",
       "norm_label": "recovery when the administrator loses every key",
       "source_file": "SECURITY.md",
-      "source_location": "L25"
+      "source_location": "L27"
     },
     {
       "_origin": "ast",
