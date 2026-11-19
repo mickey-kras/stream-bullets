@@ -36,7 +36,15 @@ export interface FakeProviders {
   /** Fails the next matching request with a network error. */
   failNetwork: RegExp | null;
   /** The webhook subscriptions the providers hold: created, listed and deleted like the real APIs. */
-  subscriptions: { platform: "twitch" | "kick"; id: string; broadcaster: string; callback: string; type?: string }[];
+  subscriptions: {
+    platform: "twitch" | "kick";
+    id: string;
+    broadcaster: string;
+    callback: string;
+    type?: string;
+    /** The Twitch status of the subscription; `enabled` when not set. */
+    status?: string;
+  }[];
   /** Status for listing subscriptions, when set. */
   listStatus: number | null;
   /** The next this many list requests fail with 500. */
@@ -171,6 +179,7 @@ export function installFakeProviders(): FakeProviders {
           data: mine.map((item) => ({
             id: item.id,
             type: item.type ?? "channel.chat.message",
+            status: item.status ?? "enabled",
             condition: { broadcaster_user_id: item.broadcaster, user_id: item.broadcaster },
             transport: { method: "webhook", callback: item.callback },
           })),
@@ -184,8 +193,9 @@ export function installFakeProviders(): FakeProviders {
           condition: { broadcaster_user_id: string };
           transport: { callback: string };
         };
-        // Twitch refuses a second subscription of a type for the same condition, whatever its callback.
-        if (fake.subscriptions.some((item) => item.platform === "twitch" && item.type === sub.type && item.broadcaster === sub.condition.broadcaster_user_id))
+        // Twitch refuses a second subscription of a type for the same condition while the first is enabled or pending.
+        const live = ["enabled", "webhook_callback_verification_pending"];
+        if (fake.subscriptions.some((item) => item.platform === "twitch" && item.type === sub.type && item.broadcaster === sub.condition.broadcaster_user_id && live.includes(item.status ?? "enabled")))
           return json({ error: "Conflict" }, 409);
         subscription += 1;
         const id = `twitch-sub-${subscription}`;

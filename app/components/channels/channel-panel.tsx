@@ -58,6 +58,7 @@ const STATUS_MESSAGES: Readonly<Record<ChannelStatusCode, MessageId>> = {
   subscribe_failed: "channels.status.subscribeFailed",
   delivery_failed: "channels.status.deliveryFailed",
   subscription_removed: "channels.status.subscriptionRemoved",
+  webhooks_rejected: "channels.status.webhooksRejected",
   disconnecting: "channels.status.error",
 };
 

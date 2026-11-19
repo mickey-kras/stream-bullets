@@ -25,9 +25,15 @@ import {
   validateTestEnvironment,
 } from "../app/server/test-environment.server";
 
-import { WebhookRejected, kickWebhook, logRejectedWebhook, twitchWebhook } from "../app/server/channel-webhooks.server";
+import {
+  WebhookRejected,
+  kickWebhook,
+  logRejectedWebhook,
+  recordRejectedWebhook,
+  twitchWebhook,
+} from "../app/server/channel-webhooks.server";
 import { channelsOff } from "../app/server/channel-tokens.server";
-import { expireYoutubeConnections } from "../app/server/channels.server";
+import { expireYoutubeConnections, repairChannelSubscriptions } from "../app/server/channels.server";
 import { callIngest } from "../app/server/ingest-call.server";
 
 export { PollRoom } from "../app/server/poll-room";
@@ -168,6 +174,7 @@ async function webhookResponse(request: Request, env: AppEnv, path: string, key:
       : await kickWebhook(request, env, Date.now(), countRepeat);
   } catch (error: unknown) {
     logRejectedWebhook(platform, error);
+    await recordRejectedWebhook(env, platform, error);
     if (error instanceof WebhookRejected && error.forged && !(await env.REQUEST_LIMITER.limit({ key })).success)
       throw new HttpError(429, "Too many requests. Please try again in a minute.");
     throw error;
@@ -229,6 +236,8 @@ export default {
       schedule_top_up: topUpSeries,
       // Stored YouTube API data must not outlive its refresh window.
       youtube_expiry: expireYoutubeConnections,
+      // Twitch and Kick subscriptions that the provider ended are created again.
+      channel_repair: repairChannelSubscriptions,
     };
     const names: string[] = Object.keys(jobs);
     const results = await Promise.allSettled(names.map((name: string) => jobs[name](env, controller.scheduledTime)));

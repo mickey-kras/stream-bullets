@@ -77,6 +77,7 @@ export const CHANNEL_STATUS_CODES = [
   "subscribe_failed",
   "delivery_failed",
   "subscription_removed",
+  "webhooks_rejected",
   "disconnecting",
 ] as const;
 export type ChannelStatusCode = (typeof CHANNEL_STATUS_CODES)[number];

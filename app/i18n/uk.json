@@ -251,6 +251,7 @@
   "channels.status.revokedYoutube": "Доступ припинено. Перепідключіть канал, щоб і далі отримувати чат. Без перепідключення це підключення буде видалено через 7 днів.",
   "channels.status.subscribeFailed": "Не вдалося налаштувати події чату. Перепідключіть канал, щоб спробувати знову.",
   "channels.status.subscriptionRemoved": "Платформа завершила підписку на події. Перепідключіть канал, щоб продовжити.",
+  "channels.status.webhooksRejected": "Стрічка зараз не може прийняти події платформи. Вона перевірить знову сама: перепідключати канал не потрібно.",
   "channels.summary.attention": "Потребує уваги: {platforms}",
   "channels.summary.connected": "Підключено: {platforms}",
   "channels.summary.none": "Ще не підключено жодного каналу",
