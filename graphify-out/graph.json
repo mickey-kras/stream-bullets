@@ -171587,7 +171587,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L104",
+      "source_location": "L108",
       "target": "tests_e2e_server_streamid",
       "weight": 1.0
     },
@@ -171598,7 +171598,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L111",
+      "source_location": "L115",
       "target": "tests_e2e_server_paginationstreamid",
       "weight": 1.0
     },
@@ -171609,7 +171609,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L121",
+      "source_location": "L125",
       "target": "tests_e2e_server_leavercommentid",
       "weight": 1.0
     },
@@ -171620,7 +171620,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L133",
+      "source_location": "L137",
       "target": "tests_e2e_server_frozenstreamid",
       "weight": 1.0
     },
@@ -171631,7 +171631,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L134",
+      "source_location": "L138",
       "target": "tests_e2e_server_suspendedstreamid",
       "weight": 1.0
     },
@@ -171664,7 +171664,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L160",
+      "source_location": "L164",
       "target": "tests_e2e_server_featurestreamid",
       "weight": 1.0
     },
@@ -171675,7 +171675,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L161",
+      "source_location": "L165",
       "target": "tests_e2e_server_featuretopicid",
       "weight": 1.0
     },
@@ -171686,7 +171686,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L162",
+      "source_location": "L166",
       "target": "tests_e2e_server_mashpollid",
       "weight": 1.0
     },
@@ -171697,7 +171697,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L163",
+      "source_location": "L167",
       "target": "tests_e2e_server_seriesid",
       "weight": 1.0
     },
@@ -171730,7 +171730,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L181",
+      "source_location": "L185",
       "target": "tests_e2e_server_seedpath",
       "weight": 1.0
     },
@@ -171741,7 +171741,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L185",
+      "source_location": "L189",
       "target": "tests_e2e_server_child",
       "weight": 1.0
     },
@@ -171785,7 +171785,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L38",
+      "source_location": "L42",
       "target": "tests_e2e_server_configpath",
       "weight": 1.0
     },
@@ -171796,7 +171796,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L39",
+      "source_location": "L43",
       "target": "tests_e2e_server_statepath",
       "weight": 1.0
     },
@@ -171807,7 +171807,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L50",
+      "source_location": "L54",
       "target": "tests_e2e_server_wrangler",
       "weight": 1.0
     },
@@ -171818,7 +171818,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L51",
+      "source_location": "L55",
       "target": "tests_e2e_server_common",
       "weight": 1.0
     },
@@ -171829,7 +171829,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L52",
+      "source_location": "L56",
       "target": "tests_e2e_server_execute",
       "weight": 1.0
     },
@@ -171840,7 +171840,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L61",
+      "source_location": "L65",
       "target": "tests_e2e_server_now",
       "weight": 1.0
     },
@@ -171851,7 +171851,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L62",
+      "source_location": "L66",
       "target": "tests_e2e_server_users",
       "weight": 1.0
     },
@@ -171862,7 +171862,7 @@
       "relation": "contains",
       "source": "tests_e2e_server",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L63",
+      "source_location": "L67",
       "target": "tests_e2e_server_statements",
       "weight": 1.0
     },
@@ -181534,10 +181534,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "3b5b2fc01d711400a433035272d57098917cf8bca6652cafc7a9ae5acf515176",
+    "content_sha256": "fcd0b3a91858523cebc4917097baf32f1a645ad3c7e43d657d433cdef4c152ac",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "2422b06e99bee17dd2c492a6bea46396af26bf4997cc08250c607a42f80ccc1c",
+    "source_sha256": "94f7fb6f425eba32d0db77e5fa074f1b4db671eb6b943f42c01eeb310d45fb52",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -212291,7 +212291,7 @@
       "label": "execute()",
       "norm_label": "execute()",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L52"
+      "source_location": "L56"
     },
     {
       "_callable": true,
@@ -226940,7 +226940,7 @@
       "label": "child",
       "norm_label": "child",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L185"
+      "source_location": "L189"
     },
     {
       "_origin": "ast",
@@ -226950,7 +226950,7 @@
       "label": "common",
       "norm_label": "common",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L51"
+      "source_location": "L55"
     },
     {
       "_origin": "ast",
@@ -226970,7 +226970,7 @@
       "label": "configPath",
       "norm_label": "configpath",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L38"
+      "source_location": "L42"
     },
     {
       "_origin": "ast",
@@ -227000,7 +227000,7 @@
       "label": "featureStreamId",
       "norm_label": "featurestreamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L160"
+      "source_location": "L164"
     },
     {
       "_origin": "ast",
@@ -227010,7 +227010,7 @@
       "label": "featureTopicId",
       "norm_label": "featuretopicid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L161"
+      "source_location": "L165"
     },
     {
       "_origin": "ast",
@@ -227020,7 +227020,7 @@
       "label": "frozenStreamId",
       "norm_label": "frozenstreamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L133"
+      "source_location": "L137"
     },
     {
       "_origin": "ast",
@@ -227030,7 +227030,7 @@
       "label": "leaverCommentId",
       "norm_label": "leavercommentid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L121"
+      "source_location": "L125"
     },
     {
       "_origin": "ast",
@@ -227040,7 +227040,7 @@
       "label": "mashPollId",
       "norm_label": "mashpollid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L162"
+      "source_location": "L166"
     },
     {
       "_origin": "ast",
@@ -227050,7 +227050,7 @@
       "label": "now",
       "norm_label": "now",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L61"
+      "source_location": "L65"
     },
     {
       "_origin": "ast",
@@ -227060,7 +227060,7 @@
       "label": "paginationStreamId",
       "norm_label": "paginationstreamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L111"
+      "source_location": "L115"
     },
     {
       "_origin": "ast",
@@ -227090,7 +227090,7 @@
       "label": "seedPath",
       "norm_label": "seedpath",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L181"
+      "source_location": "L185"
     },
     {
       "_origin": "ast",
@@ -227100,7 +227100,7 @@
       "label": "seriesId",
       "norm_label": "seriesid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L163"
+      "source_location": "L167"
     },
     {
       "_origin": "ast",
@@ -227110,7 +227110,7 @@
       "label": "statements",
       "norm_label": "statements",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L63"
+      "source_location": "L67"
     },
     {
       "_origin": "ast",
@@ -227120,7 +227120,7 @@
       "label": "statePath",
       "norm_label": "statepath",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L39"
+      "source_location": "L43"
     },
     {
       "_origin": "ast",
@@ -227130,7 +227130,7 @@
       "label": "streamId",
       "norm_label": "streamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L104"
+      "source_location": "L108"
     },
     {
       "_origin": "ast",
@@ -227140,7 +227140,7 @@
       "label": "suspendedStreamId",
       "norm_label": "suspendedstreamid",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L134"
+      "source_location": "L138"
     },
     {
       "_origin": "ast",
@@ -227150,7 +227150,7 @@
       "label": "users",
       "norm_label": "users",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L62"
+      "source_location": "L66"
     },
     {
       "_origin": "ast",
@@ -227160,7 +227160,7 @@
       "label": "wrangler",
       "norm_label": "wrangler",
       "source_file": "tests/e2e-server.ts",
-      "source_location": "L50"
+      "source_location": "L54"
     },
     {
       "_origin": "ast",
