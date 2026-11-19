@@ -136,15 +136,80 @@ function useReturnFocus(selectedId: string | null): void {
   }, [selectedId]);
 }
 
-// Polls shows the list, a discussion, or a Mash Battle.
-export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
-  const { name, viewer, owner, writable, entries, selected, now, live } = props;
-  useReturnFocus(selected?.id ?? null);
-  const battle: Entry | null = selected?.kind === "mash" ? selected : null;
-  const phase: string = useBattlePhase(battle, now);
-  useBattleFocus(battle !== null && (phase === "live" || phase === "countdown"));
+function PollsEmpty({ owner, onCreate }: Readonly<{ owner: boolean; onCreate: (() => void) | null }>): ReactNode {
+  return (
+    <EmptyState
+      title={t(owner ? "polls.emptyTitle" : "polls.viewerEmptyTitle")}
+      icon="mic"
+      action={
+        onCreate && (
+          <button className="gold" type="button" onClick={onCreate}>
+            <Icon name="plus" size={18} />
+            {t("polls.createFirst")}
+          </button>
+        )
+      }
+    >
+      {t(owner ? "polls.emptyBody" : "polls.viewerEmptyBody")}
+    </EmptyState>
+  );
+}
+
+function ConnectionStatus({
+  props,
+  showRefresh,
+}: Readonly<{ props: Readonly<PollsViewProps>; showRefresh: boolean }>): ReactNode {
+  const { live } = props;
   const offline: boolean = live.status === "offline";
-  const card = (entry: Entry): ReactNode =>
+  return (
+    <div className="connection-status">
+      <output className={offline ? "conn-off" : undefined}>
+        <Icon name={live.status === "live" ? "wifi" : "wifi-off"} size={16} />
+        {t(liveLabels[live.status])}
+      </output>
+      {offline && (
+        <button type="button" onClick={live.reconnect}>
+          <Icon name="refresh" size={16} />
+          {t("live.reconnect")}
+        </button>
+      )}
+      {showRefresh && (
+        <IconButton
+          label={t("polls.refresh")}
+          icon="refresh"
+          spin={props.refreshes}
+          disabled={props.refreshing}
+          onClick={props.onRefresh}
+        />
+      )}
+    </div>
+  );
+}
+
+interface PollsBodyProps {
+  props: Readonly<PollsViewProps>;
+  battle: Entry | null;
+  canCreate: boolean;
+  canOwn: boolean;
+}
+
+/** The Mash Battle, the empty state, or the poll cards. */
+function PollsBody({ props, battle, canCreate, canOwn }: Readonly<PollsBodyProps>): ReactNode {
+  const { entries, selected, now } = props;
+  if (battle)
+    return (
+      <MashCard
+        entry={battle}
+        now={now}
+        signedIn={canCreate}
+        owner={canOwn}
+        pending={props.pending.has(battle.id)}
+        onAction={(body: unknown) => props.onAction(body, battle.id)}
+      />
+    );
+  if (!selected && entries.length === 0)
+    return <PollsEmpty owner={props.owner} onCreate={canCreate ? props.onCreate : null} />;
+  return (selected ? [selected] : entries).map((entry: Entry) =>
     entry.kind === "mash" && !selected ? (
       <MashTeaser key={entry.id} entry={entry} now={now} />
     ) : (
@@ -152,47 +217,27 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
         key={entry.id}
         entry={entry}
         now={now}
-        signedIn={Boolean(viewer) && writable}
-        owner={owner && writable}
+        signedIn={canCreate}
+        owner={canOwn}
         pending={props.pending.has(entry.id)}
         onAction={(body: unknown) => props.onAction(body, entry.id)}
         onDiscuss={() => props.onOpen(entry.id)}
         onDelete={() => props.onDelete(entry.id)}
       />
-    );
-  let body: ReactNode = (selected ? [selected] : entries).map(card);
-  if (battle)
-    body = (
-      <MashCard
-        entry={battle}
-        now={now}
-        signedIn={Boolean(viewer) && writable}
-        owner={owner && writable}
-        pending={props.pending.has(battle.id)}
-        onAction={(body: unknown) => props.onAction(body, battle.id)}
-      />
-    );
-  else if (!selected && entries.length === 0)
-    body = owner ? (
-      <EmptyState
-        title={t("polls.emptyTitle")}
-        icon="mic"
-        action={
-          writable && (
-            <button className="gold" type="button" onClick={props.onCreate}>
-              <Icon name="plus" size={18} />
-              {t("polls.createFirst")}
-            </button>
-          )
-        }
-      >
-        {t("polls.emptyBody")}
-      </EmptyState>
-    ) : (
-      <EmptyState title={t("polls.viewerEmptyTitle")} icon="mic">
-        {t("polls.viewerEmptyBody", { name: name.split(" ")[0] ?? name })}
-      </EmptyState>
-    );
+    ),
+  );
+}
+
+// Polls shows the list, a discussion, or a Mash Battle.
+export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
+  const { name, viewer, owner, writable, entries, selected, now, live } = props;
+  useReturnFocus(selected?.id ?? null);
+  const battle: Entry | null = selected?.kind === "mash" ? selected : null;
+  const phase: string = useBattlePhase(battle, now);
+  useBattleFocus(battle !== null && (phase === "live" || phase === "countdown"));
+  // Each signed-in viewer can create a poll, like a topic. Guests sign in first.
+  const canCreate: boolean = Boolean(viewer) && writable;
+  const canOwn: boolean = owner && writable;
   return (
     <>
       <LiveStrip event={props.liveEvent} />
@@ -205,36 +250,14 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
           </h1>
           {!battle && <p>{t("polls.lead")}</p>}
         </div>
-        {owner && writable && !battle && (
+        {canCreate && !battle && (
           <button className="gold" type="button" onClick={props.onCreate}>
             <Icon name="plus" size={18} />
             {t("polls.create")}
           </button>
         )}
       </div>
-      {(!battle || live.status !== "live") && (
-        <div className="connection-status">
-          <output className={offline ? "conn-off" : undefined}>
-            <Icon name={live.status === "live" ? "wifi" : "wifi-off"} size={16} />
-            {t(liveLabels[live.status])}
-          </output>
-          {offline && (
-            <button type="button" onClick={live.reconnect}>
-              <Icon name="refresh" size={16} />
-              {t("live.reconnect")}
-            </button>
-          )}
-          {!battle && (
-            <IconButton
-              label={t("polls.refresh")}
-              icon="refresh"
-              spin={props.refreshes}
-              disabled={props.refreshing}
-              onClick={props.onRefresh}
-            />
-          )}
-        </div>
-      )}
+      {(!battle || live.status !== "live") && <ConnectionStatus props={props} showRefresh={!battle} />}
       <div className={`poll-toolbar${selected ? " is-single" : ""}${battle && owner ? " owner-tools" : ""}`}>
         <PollToolbarStart props={props} battle={battle} phase={phase} />
         {owner && (
@@ -252,7 +275,7 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
           </button>
         </output>
       )}
-      {body}
+      <PollsBody props={props} battle={battle} canCreate={canCreate} canOwn={canOwn} />
       {props.more && !selected && (
         <button type="button" className="load-more" disabled={props.loadingMore} onClick={props.onLoadMore}>
           {props.loadingMore ? t("entry.loading") : t("polls.loadMore")}

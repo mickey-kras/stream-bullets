@@ -10,10 +10,11 @@ import {
 } from "../../lib/activity";
 import type { Provider } from "../../types";
 import { ApiError, errorMessage, postJson, sendJson } from "../api";
-import { SignIn } from "../shell/sign-in-dialog";
+import { providerName, Reauthenticate } from "../shell/sign-in-dialog";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { useToast } from "../ui/toast";
+import { useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
 
 /** One platform as GET /api/channels and the overlay-control loader list it. */
@@ -60,10 +61,71 @@ const STATUS_MESSAGES: Readonly<Record<ChannelStatusCode, MessageId>> = {
   disconnecting: "channels.status.error",
 };
 
-const NOTES: Readonly<Partial<Record<ActivityPlatform, readonly MessageId[]>>> = {
-  youtube: ["channels.youtubeNote", "channels.gaps.youtube"],
-  kick: ["channels.gaps.kick"],
+/** The one sentence of each card: when chat starts (docs/channel-connections.md). */
+const STARTS: Readonly<Record<ActivityPlatform, MessageId>> = {
+  twitch: "channels.starts.connected",
+  youtube: "channels.starts.overlay",
+  kick: "channels.starts.connected",
 };
+
+/** The closed details of each card: what the feed reads, then the limits and the gaps. */
+const NOTES: Readonly<Record<ActivityPlatform, readonly MessageId[]>> = {
+  twitch: ["channels.reads.twitch", "channels.emotes.twitch", "channels.twitchReconnect"],
+  youtube: ["channels.reads.youtube", "channels.limits.youtube", "channels.gaps.youtube"],
+  kick: ["channels.reads.kick", "channels.emotes.kick", "channels.gaps.kick"],
+};
+
+/** A change that needs a recent sign-in. The owner signs in again, then the page takes the change up again. */
+export interface ChannelIntent {
+  platform: ActivityPlatform;
+  action: "connect" | "disconnect";
+}
+
+const INTENT_KEY = "sb-channel-intent";
+/** As long as an authorization state lives: an older intent is not the owner's wish any more. */
+const INTENT_MS = 10 * 60 * 1000;
+
+/**
+ * The intent that the session storage holds, or null for a missing, malformed or old value. The storage belongs
+ * to this origin and this tab, so no link from another site can set an intent.
+ */
+export function parseIntent(raw: string | null, now: number, owner: string | null): ChannelIntent | null {
+  if (raw === null || owner === null) return null;
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (typeof value !== "object" || value === null) return null;
+  const { platform, action, at, owner: storedOwner } = value as Record<string, unknown>;
+  // Another account can sign in during the prompt. Its page must not get the channel of the first owner.
+  if (storedOwner !== owner) return null;
+  if (typeof platform !== "string" || !isPlatform(platform)) return null;
+  if (action !== "connect" && action !== "disconnect") return null;
+  if (typeof at !== "number" || at > now || now - at > INTENT_MS) return null;
+  return { platform, action };
+}
+
+function rememberIntent(intent: ChannelIntent, owner: string | null): void {
+  if (owner === null) return;
+  try {
+    sessionStorage.setItem(INTENT_KEY, JSON.stringify({ ...intent, owner, at: Date.now() }));
+  } catch {
+    // Without storage, the owner selects the button again after the sign-in.
+  }
+}
+
+/** Reads the intent once: a reload does not take it up again. */
+function takeIntent(owner: string | null): ChannelIntent | null {
+  try {
+    const raw: string | null = sessionStorage.getItem(INTENT_KEY);
+    sessionStorage.removeItem(INTENT_KEY);
+    return parseIntent(raw, Date.now(), owner);
+  } catch {
+    return null;
+  }
+}
 
 function isPlatform(value: string | null): value is ActivityPlatform {
   return value !== null && Object.hasOwn(PLATFORM_NAMES, value);
@@ -154,6 +216,8 @@ export function ChannelPanel({
   result: string | null;
 }>): ReactNode {
   const toast = useToast();
+  // The page that gets the channel. A stored intent is valid only for this owner.
+  const owner: string | null = useShell().ownStreamer?.handle ?? null;
   const revalidator = useRevalidator();
   const navigate = useNavigate();
   const location = useLocation();
@@ -163,7 +227,9 @@ export function ChannelPanel({
   const [result, setResult] = useState<string | null>(initialResult);
   const [busy, setBusy] = useState<ActivityPlatform | null>(null);
   const [confirming, setConfirming] = useState<ActivityPlatform | null>(null);
-  const [reauth, setReauth] = useState<boolean>(false);
+  /** The change that the server refused because the sign-in is too old. Its card shows the sign-in prompt. */
+  const [reauth, setReauth] = useState<ChannelIntent | null>(null);
+  const resumed = useRef<boolean>(false);
   /** Platforms whose last disconnect the provider did not confirm: the owner should remove the app there. */
   const [unrevoked, setUnrevoked] = useState<ReadonlySet<ActivityPlatform>>(new Set());
   // The platform of the last disconnect. Until the next dialog opens, the closed dialog does not take focus back.
@@ -216,13 +282,14 @@ export function ChannelPanel({
     setFocusConnect(platform);
   }
 
-  function failed(error: unknown): void {
-    if (error instanceof ApiError && error.code === "reauth_required") setReauth(true);
+  function failed(error: unknown, intent: ChannelIntent): void {
+    if (error instanceof ApiError && error.code === "reauth_required") setReauth(intent);
     else toast(errorMessage(error), { tone: "error" });
   }
 
   async function connect(platform: ActivityPlatform, reconnect: boolean): Promise<void> {
     setResult(null);
+    setReauth(null);
     setBusy(platform);
     try {
       const { authorizeUrl } = await postJson<{ authorizeUrl: string }>(
@@ -231,13 +298,33 @@ export function ChannelPanel({
       );
       globalThis.location.assign(authorizeUrl);
     } catch (error: unknown) {
-      failed(error);
+      failed(error, { platform, action: "connect" });
       setBusy(null);
     }
   }
 
+  // Back from the sign-in that a change needed: take the change up again. A connect goes on to the provider
+  // without a second click. A disconnect is not repeated by itself: its button gets focus.
+  useEffect((): void => {
+    if (resumed.current) return;
+    resumed.current = true;
+    const intent: ChannelIntent | null = takeIntent(owner);
+    const channel = intent && channels.find((item: ChannelView): boolean => item.platform === intent.platform);
+    if (!intent || !channel?.available || initialResult) return;
+    const details: HTMLDetailsElement | null | undefined = panel.current?.closest("details");
+    if (details) details.open = true;
+    // After the effect: the connect sets the busy state.
+    if (intent.action === "connect") {
+      const reconnect: boolean = channel.connection !== null;
+      queueMicrotask((): void => detached(connect(intent.platform, reconnect)));
+    } else {
+      panel.current?.querySelector<HTMLElement>(`[data-channel="${intent.platform}"] [data-disconnect]`)?.focus();
+    }
+  });
+
   async function disconnect(platform: ActivityPlatform): Promise<void> {
     setResult(null);
+    setReauth(null);
     setBusy(platform);
     try {
       const { revoked } = await sendJson<{ revoked: boolean }>("DELETE", `/api/channels/${platform}`);
@@ -256,7 +343,7 @@ export function ChannelPanel({
       detached(revalidator.revalidate());
     } catch (error: unknown) {
       setConfirming(null);
-      failed(error);
+      failed(error, { platform, action: "disconnect" });
       // Gone already (404) or changed meanwhile (409): show the current list. After a 404 the card loses its
       // connection, so focus moves to its Connect button as after a disconnect.
       if (error instanceof ApiError && (error.status === 404 || error.status === 409)) {
@@ -269,6 +356,10 @@ export function ChannelPanel({
   }
 
   const confirmingName = confirming ? PLATFORM_NAMES[confirming] : "";
+  const signInProviders: Provider[] = signInProvider ? [signInProvider] : providers;
+  const signInNames: string = new Intl.ListFormat(intlLocale(), { type: "disjunction" }).format(
+    signInProviders.map((provider: Provider): string => providerName[provider]),
+  );
   return (
     <div className="ch-panel" ref={panel}>
       <p className="muted">{t("channels.intro")}</p>
@@ -276,12 +367,6 @@ export function ChannelPanel({
         <output className="ch-result" tabIndex={-1} ref={banner}>
           {result}
         </output>
-      )}
-      {reauth && (
-        <div className="ch-reauth" role="alert">
-          <p>{t("channels.reauth")}</p>
-          <SignIn providers={signInProvider ? [signInProvider] : providers} callbackURL="/overlay-control" />
-        </div>
       )}
       <ul className="ch-list">
         {channels.map((channel: ChannelView) => {
@@ -306,27 +391,24 @@ export function ChannelPanel({
                     : t("channels.notConnected")}
                 </strong>
               </p>
-              {connection && <LastActivity at={connection.lastEventAt} />}
-              {problem && (
-                // A used-up quota is a known state, not news: it is a status, so it is not read out as an alert.
-                <p className="ch-problem" role={problemRole(connection?.code ?? null)}>
-                  <Icon name="warning" size={16} />
-                  <span>{problem}</span>
-                </p>
-              )}
-              {!connection && unrevoked.has(channel.platform) && (
-                <p className="ch-problem">
-                  <Icon name="warning" size={16} />
-                  <span>{t("channels.removeApp", { platform: name })}</span>
-                </p>
-              )}
-              {!channel.available && <p className="muted">{t("channels.unavailable")}</p>}
-              {(channel.available ? (NOTES[channel.platform] ?? []) : []).map((id: MessageId) => (
-                <p key={id} className="muted">
-                  {t(id)}
-                </p>
-              ))}
-              <p className="ch-actions">
+              <div className="ch-body">
+                {channel.available ? <p>{t(STARTS[channel.platform])}</p> : <p>{t("channels.unavailable")}</p>}
+                {connection && <LastActivity at={connection.lastEventAt} />}
+                {problem && (
+                  // A used-up quota is a known state, not news: it is a status, so it is not read out as an alert.
+                  <p className="ch-problem" role={problemRole(connection?.code ?? null)}>
+                    <Icon name="warning" size={16} />
+                    <span>{problem}</span>
+                  </p>
+                )}
+                {!connection && unrevoked.has(channel.platform) && (
+                  <p className="ch-problem">
+                    <Icon name="warning" size={16} />
+                    <span>{t("channels.removeApp", { platform: name })}</span>
+                  </p>
+                )}
+              </div>
+              <div className="ch-actions">
                 {channel.available && channel.platform === "youtube" && !connection && (
                   <a className="text-link ch-terms" href="https://www.youtube.com/t/terms">
                     {t("channels.youtubeTerms")}
@@ -348,6 +430,7 @@ export function ChannelPanel({
                   <button
                     type="button"
                     className="danger"
+                    data-disconnect
                     disabled={busy !== null}
                     onClick={() => {
                       setFocusConnect(null);
@@ -357,7 +440,36 @@ export function ChannelPanel({
                     {t("channels.disconnect", { platform: name })}
                   </button>
                 )}
-              </p>
+              </div>
+              <div className="ch-foot">
+                {reauth?.platform === channel.platform && (
+                  <div className="ch-reauth" role="alert">
+                    {signInProviders.length > 0 && (
+                      <p>
+                        {t(reauth.action === "connect" ? "channels.reauth.connect" : "channels.reauth.disconnect", {
+                          platform: name,
+                          provider: signInNames,
+                        })}
+                      </p>
+                    )}
+                    <Reauthenticate
+                      providers={signInProviders}
+                      callbackURL="/overlay-control"
+                      onStart={() => rememberIntent(reauth, owner)}
+                    />
+                  </div>
+                )}
+                {channel.available && (
+                  <details className="ch-more">
+                    <summary>{t("channels.more")}</summary>
+                    <ul>
+                      {NOTES[channel.platform].map((id: MessageId) => (
+                        <li key={id}>{t(id)}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
             </li>
           );
         })}

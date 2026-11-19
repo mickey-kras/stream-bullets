@@ -1,8 +1,10 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
+import { ChannelPanel, type ChannelView } from "../app/components/channels/channel-panel";
 import { controlState, defaultRef, OverlayControl } from "../app/components/overlay/overlay-control";
-import { ChatLayer, shortName } from "../app/components/overlay/chat-layer";
+import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
 import { CharactersSlot, CONTENT_SELECTOR, layerSelector } from "../app/components/overlay/overlay-composition";
 import {
   SAMPLE_SOURCE,
@@ -62,6 +64,7 @@ function poll(id: string, override: Partial<OverlayPoll> = {}): OverlayPoll {
     counts: [0, 0],
     total: 0,
     mash: null,
+    byOwner: true,
     ...override,
   };
 }
@@ -70,7 +73,10 @@ describe("overlay source fallbacks", () => {
   it("defaults each picker to its first saved item and leaves an empty picker without a reference", () => {
     const populated: OverlayData = {
       ...data,
-      polls: [{ id: "poll", title: "Poll", mash: false }],
+      polls: [
+        { id: "viewer-poll", title: "Viewer poll", mash: false, author: "Viewer", byOwner: false },
+        { id: "poll", title: "Poll", mash: false, author: "Host", byOwner: true },
+      ],
       topics: [
         { id: "topic", title: "Topic", category: "", author: "Viewer", avatar: null, avatarPreset: null, likes: 0 },
       ],
@@ -81,6 +87,8 @@ describe("overlay source fallbacks", () => {
       expect(defaultRef(type, data)).toBeNull();
     }
     expect(defaultRef("support", populated)).toBeNull();
+    // A viewer poll is never the default poll: the owner picks it in the list.
+    expect(defaultRef("poll", { ...data, polls: populated.polls.slice(0, 1) })).toBeNull();
   });
 
   it("keeps draft fields when newer public state arrives and ignores stale updates", () => {
@@ -175,7 +183,14 @@ describe("overlay source fallbacks", () => {
   });
 
   it("knows which sources leave the stage empty, and fills a sample topic for the editor", () => {
-    const card: OverlayData["cards"][number] = { id: "card", icon: null, title: "C", body: "", label: null, target: null };
+    const card: OverlayData["cards"][number] = {
+      id: "card",
+      icon: null,
+      title: "C",
+      body: "",
+      label: null,
+      target: null,
+    };
     expect(showsContent({ type: "hidden", ref: null }, data)).toBe(false);
     expect(showsContent({ type: "topic", ref: "deleted" }, data)).toBe(false);
     expect(showsContent({ type: "next", ref: null }, data)).toBe(false);
@@ -224,12 +239,14 @@ describe("overlay source fallbacks", () => {
       ...data,
       cards: [{ id: "card", icon: null, title: "Card", body: "", label: null, target: null }],
     };
-    const html: string = renderToStaticMarkup(createElement(OverlayControl, {
-      initial: { ...state, preview: { type: "card", ref: null } },
-      scene: { ...scene, data: populated },
-      hasOverlayKey: false,
-      connected: false,
-    }));
+    const html: string = renderToStaticMarkup(
+      createElement(OverlayControl, {
+        initial: { ...state, preview: { type: "card", ref: null } },
+        scene: { ...scene, data: populated },
+        hasOverlayKey: false,
+        connected: false,
+      }),
+    );
     expect(html).toContain('role="combobox"');
     expect(html).toContain('data-overlay-source="card"');
     expect(html).toContain("Overlay disconnected, retrying");
@@ -237,10 +254,12 @@ describe("overlay source fallbacks", () => {
   });
 
   it("renders a transparent characters canvas at the cell's design dimensions before a feed is available", () => {
-    const html: string = renderToStaticMarkup(createElement(CharactersSlot, {
-      feed: null,
-      rect: { x: 0, y: 0, w: 720, h: 240 },
-    }));
+    const html: string = renderToStaticMarkup(
+      createElement(CharactersSlot, {
+        feed: null,
+        rect: { x: 0, y: 0, w: 720, h: 240 },
+      }),
+    );
     expect(html).toMatch(/^<div aria-hidden="true"[^>]*><canvas class="characters-layer" width="720" height="240"/);
     expect(html).not.toContain("<img");
     expect(html).not.toContain("<button");
@@ -250,32 +269,69 @@ describe("overlay source fallbacks", () => {
     const family: string = "👨‍👩‍👧‍👦";
     expect(shortName(family.repeat(21))).toBe(`${family.repeat(19)}…`);
     const row: ChatRow = {
-      id: "chat-1", seq: 1, platform: "twitch", userId: "viewer", name: family.repeat(21), badges: [],
-      fragments: [{ type: "emote", id: "unsafe", name: "Unsafe emote", url: "https://untrusted.example.test/emote.png" }],
-      truncated: false, receivedAt: 1000, shownAt: 1000, phase: "shown", phaseAt: 1000, animate: false, command: false,
+      id: "chat-1",
+      seq: 1,
+      platform: "twitch",
+      userId: "viewer",
+      name: family.repeat(21),
+      badges: [],
+      fragments: [
+        { type: "emote", id: "unsafe", name: "Unsafe emote", url: "https://untrusted.example.test/emote.png" },
+      ],
+      truncated: false,
+      receivedAt: 1000,
+      shownAt: 1000,
+      phase: "shown",
+      phaseAt: 1000,
+      animate: false,
+      command: false,
     };
-    const html: string = renderToStaticMarkup(createElement(ChatLayer, {
-      chat: { rows: [row], epoch: 0, at: 1000 },
-      className: "editor-chat",
-    }));
+    const html: string = renderToStaticMarkup(
+      createElement(ChatLayer, {
+        chat: { rows: [row], epoch: 0, at: 1000 },
+        className: "editor-chat",
+      }),
+    );
     expect(html).toContain('class="wl-chat editor-chat"');
     expect(html).toContain(`${family.repeat(19)}…`);
     expect(html).toContain("Unsafe emote");
     expect(html).not.toContain("<img");
+    // Without a message background setting the card is as before: full opacity and no text outline.
+    expect(html).toContain("--wl-bg:1");
+    expect(html).not.toContain("data-outline");
+  });
+
+  it("puts the message background on the chat root and outlines the text only below 50 percent", () => {
+    const chat = { rows: [], epoch: 0, at: 1000 };
+    const render = (backgroundOpacity: number): string =>
+      renderToStaticMarkup(createElement(ChatLayer, { chat, backgroundOpacity }));
+    expect(chatStyle(60)).toMatchObject({ "--wl-bg": "0.6", "--wl-card": "rgba(8, 43, 46, 0.9)" });
+    expect(render(100)).toMatch(/^<ol class="wl-chat" style="[^"]*--wl-bg:1"/);
+    expect(render(60)).toContain("--wl-bg:0.6");
+    expect(render(50)).not.toContain("data-outline");
+    expect(render(45)).toMatch(/--wl-bg:0\.45"[^>]* data-outline="true"/);
+    expect(render(0)).toMatch(/--wl-bg:0"[^>]* data-outline="true"/);
   });
 });
 
 describe("chat overlap measurements", () => {
   function rect(left: number, top: number, width: number, height: number): DOMRect {
     return {
-      x: left, y: top, left, top, width, height, right: left + width, bottom: top + height,
+      x: left,
+      y: top,
+      left,
+      top,
+      width,
+      height,
+      right: left + width,
+      bottom: top + height,
       toJSON: (): object => ({ left, top, width, height }),
     };
   }
 
   function composition(chat: DOMRect | null, content: readonly DOMRect[] | null): HTMLElement {
     const element = (bounds: DOMRect): Element => ({ getBoundingClientRect: (): DOMRect => bounds }) as Element;
-    const stage = content === null ? null : { children: content.map(element) } as unknown as Element;
+    const stage = content === null ? null : ({ children: content.map(element) } as unknown as Element);
     return {
       querySelector: (selector: string): Element | null => {
         if (selector === CONTENT_SELECTOR) return stage;
@@ -299,5 +355,79 @@ describe("chat overlap measurements", () => {
     expect(chatCoversContent(composition(rect(249, 0, 100, 100), content))).toBe(false);
     expect(chatCoversContent(composition(rect(248, 0, 100, 100), content))).toBe(true);
     expect(chatCoversContent(composition(rect(0, 249, 100, 100), content))).toBe(false);
+  });
+});
+
+describe("the channel cards", (): void => {
+  const offered: ChannelView[] = [
+    { platform: "twitch", available: true, connection: null },
+    { platform: "youtube", available: true, connection: null },
+    { platform: "kick", available: true, connection: null },
+  ];
+  function cards(channels: ChannelView[]): string[] {
+    const Stub = createRoutesStub([
+      {
+        path: "/overlay-control",
+        Component: () =>
+          createElement(ChannelPanel, { channels, providers: ["google"], signInProvider: "google", result: null }),
+      },
+    ]);
+    const markup: string = renderToStaticMarkup(createElement(Stub, { initialEntries: ["/overlay-control"] }));
+    return markup.split('<li class="ch-item"').slice(1);
+  }
+
+  it("show the name and status, one sentence, the button, and then closed notes", (): void => {
+    const [twitch, youtube, kick] = cards(offered);
+    for (const card of [twitch, youtube, kick]) {
+      // Four parts in one order, so the buttons of the cards are on one line.
+      expect(card.match(/class="ch-(head|body|actions|foot)"/g)).toEqual([
+        'class="ch-head"',
+        'class="ch-body"',
+        'class="ch-actions"',
+        'class="ch-foot"',
+      ]);
+      expect(card.match(/<details/g)).toHaveLength(1);
+      expect(card).toContain('<details class="ch-more"><summary>What is read and the limits</summary>');
+      expect(card).not.toContain("<details open");
+      expect(card).not.toContain("ch-reauth");
+    }
+    expect(twitch).toContain('<div class="ch-body"><p>Chat starts as soon as the channel is connected.</p></div>');
+    expect(youtube).toContain(
+      '<div class="ch-body"><p>Chat starts when an overlay with your overlay link is open.</p></div>',
+    );
+    expect(kick).toContain('<div class="ch-body"><p>Chat starts as soon as the channel is connected.</p></div>');
+    expect(twitch).toContain(
+      "<ul><li>Read: chat messages, message deletions, chat clears, bans and timeouts.</li>" +
+        "<li>Twitch emotes show as images.</li>" +
+        "<li>If Twitch stops sending events, reconnect the channel to resume.</li></ul>",
+    );
+    expect(youtube).toContain(
+      "<ul><li>Read: chat messages, message deletions, bans and timeouts.</li>" +
+        "<li>Each page can show about 100 minutes of YouTube chat a day. If the channel data cannot be refreshed " +
+        "for 30 days, the connection is removed.</li>" +
+        "<li>YouTube does not report chat clears or unbans.</li></ul>",
+    );
+    expect(kick).toContain(
+      "<ul><li>Read: chat messages, bans and timeouts.</li>" +
+        "<li>Kick emotes show as their names, not as images.</li>" +
+        "<li>Kick does not report message deletions, chat clears or unbans.</li></ul>",
+    );
+  });
+
+  it("keep the YouTube terms sentence in view beside the YouTube button only", (): void => {
+    const [twitch, youtube, kick] = cards(offered);
+    const terms: string = "By connecting YouTube, you agree to the YouTube Terms of Service.";
+    expect(youtube.indexOf(terms)).toBeGreaterThan(youtube.indexOf('class="ch-actions"'));
+    expect(youtube.indexOf(terms)).toBeLessThan(youtube.indexOf("Connect YouTube"));
+    expect(youtube.indexOf("Connect YouTube")).toBeLessThan(youtube.indexOf("<details"));
+    expect(twitch).not.toContain(terms);
+    expect(kick).not.toContain(terms);
+  });
+
+  it("give a platform that the site does not offer no button and no notes", (): void => {
+    const [twitch] = cards([{ platform: "twitch", available: false, connection: null }]);
+    expect(twitch).toContain("This platform is not set up on this site yet.");
+    expect(twitch).not.toContain("<button");
+    expect(twitch).not.toContain("<details");
   });
 });

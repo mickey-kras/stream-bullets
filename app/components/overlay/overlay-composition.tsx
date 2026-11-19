@@ -257,6 +257,7 @@ function useChatTestOn(until: number, serverOffset: number): boolean {
 const ChatSlot = memo(function ChatSlot({
   feed,
   hideCommands,
+  backgroundOpacity,
   samples,
   serverOffset,
   testUntil,
@@ -264,6 +265,8 @@ const ChatSlot = memo(function ChatSlot({
   feed: ActivityFeed | null;
   /** A boolean, not the layer object: a new layers snapshot (a poll update) keeps the memo when the flag is the same. */
   hideCommands: boolean;
+  /** Percent of the card background that shows behind each message. */
+  backgroundOpacity: number;
   samples?: readonly ActivityChat[];
   serverOffset: number;
   testUntil: number;
@@ -273,7 +276,7 @@ const ChatSlot = memo(function ChatSlot({
   // A new list when a test starts or ends: the cards of the other chat go at once and nothing on screen slides in.
   return (
     <>
-      <ChatLayer key={test ? "test" : "chat"} chat={chat} />
+      <ChatLayer key={test ? "test" : "chat"} chat={chat} backgroundOpacity={backgroundOpacity} />
       {test && (
         <span className="wl-test" data-chat-test>
           {t("overlay.chat.test")}
@@ -336,6 +339,7 @@ export function OverlayComposition({
           <ChatSlot
             feed={feed}
             hideCommands={layers.chat.hideCommands}
+            backgroundOpacity={layers.chat.backgroundOpacity}
             samples={samples}
             serverOffset={serverOffset}
             testUntil={testUntil}

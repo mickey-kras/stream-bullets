@@ -30,6 +30,8 @@ export const WASTELAND_COLORS = {
   scan: "#0000000c",
   /** The drop shadow under each card. */
   shadow: "#00000030",
+  /** The dark outline of the text while the card background is faint: it keeps the text readable over a game. */
+  outline: "#041517e6",
 } as const;
 
 /** Platform names are brand names; they are not translated. */
@@ -51,6 +53,7 @@ export const WASTELAND_STYLE: CSSProperties = {
   "--wl-inset": WASTELAND_COLORS.inset,
   "--wl-scan": WASTELAND_COLORS.scan,
   "--wl-shadow": WASTELAND_COLORS.shadow,
+  "--wl-outline": WASTELAND_COLORS.outline,
   // The fade of a leaving or removed card. It is the reducer's leave time, so the fade and the reducer agree.
   "--wl-leave": `${CHAT_LIMITS.leaveMs}ms`,
 } as CSSProperties;

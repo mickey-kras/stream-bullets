@@ -1,5 +1,8 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { RouterContextProvider } from "react-router";
 import { describe, expect, it } from "vitest";
+import { Reauthenticate } from "../app/components/shell/sign-in-dialog";
 import { appContext, type AppEnv } from "../app/env";
 import { loader } from "../app/routes/sign-in";
 
@@ -29,5 +32,21 @@ describe("sign-in recovery", () => {
     expect(next("/@alice?intent=suggest")).toBe("/@alice?intent=suggest");
     expect(next("//evil.example")).toBe("/settings");
     expect(next("https://evil.example/")).toBe("/settings");
+  });
+});
+
+describe("the reauthentication prompt", () => {
+  it("shows only the provider buttons: no display name, no eligibility checkbox, no hint and no legal line", () => {
+    const html: string = renderToStaticMarkup(
+      createElement(Reauthenticate, { providers: ["google", "twitch"], callbackURL: "/overlay-control" }),
+    );
+    expect(html.match(/<button/g)).toHaveLength(2);
+    expect(html).toContain("Continue with Google");
+    expect(html).toContain("Continue with Twitch");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<label");
+    expect(html).not.toContain("<a ");
+    expect(html).not.toContain("Watching on YouTube?");
+    expect(html).not.toContain("or older");
   });
 });

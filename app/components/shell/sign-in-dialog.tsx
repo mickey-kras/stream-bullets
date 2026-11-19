@@ -85,7 +85,7 @@ export function SignIn({
               onChange={(event) => setDisplayName(event.currentTarget.value)}
             />
           </label>
-          <label>
+          <label className="sign-in-accept">
             <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.currentTarget.checked)} />
             <span>
               {t("signup.accept", { age: legal.minimumAge })} <Link to={paths.terms}>{t("legal.terms")}</Link>{" "}
@@ -145,6 +145,65 @@ export function SignIn({
             <Link to={paths.privacy}>{t("legal.privacyPolicy")}</Link>.
           </>
         )}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The provider buttons for a signed-in account that must sign in again. The request sends no eligibility consent
+ * and no display name: the server reads them only when it creates an account. Thus a provider account without a
+ * StreamBullets account cannot sign up here, and the error page then shows the full form.
+ * `onStart` runs before the browser leaves for the provider.
+ */
+export function Reauthenticate({
+  providers,
+  callbackURL,
+  onStart,
+}: Readonly<{
+  providers: Provider[];
+  callbackURL: string;
+  onStart?: () => void;
+}>): ReactNode {
+  const [pending, setPending] = useState<Provider | null>(null);
+  const [error, setError] = useState<string>("");
+  async function signIn(provider: Provider): Promise<void> {
+    setError("");
+    setPending(provider);
+    onStart?.();
+    try {
+      const result = await authClient.signIn.social({
+        provider,
+        callbackURL,
+        errorCallbackURL: `/sign-in?${new URLSearchParams({ next: callbackURL }).toString()}`,
+      });
+      if (result.error) throw new Error(t("signIn.failed"));
+    } catch (error_: unknown) {
+      setError(errorMessage(error_));
+    } finally {
+      setPending(null);
+    }
+  }
+  return (
+    <div className="reauth-options">
+      {providers.map((provider: Provider) => (
+        <button
+          type="button"
+          key={provider}
+          disabled={pending !== null}
+          onClick={() => {
+            void signIn(provider);
+          }}
+        >
+          <Icon name={providerIcon[provider]} size={18} />
+          {pending === provider
+            ? t("signIn.connecting")
+            : t("signIn.continueWith", { provider: providerName[provider] })}
+        </button>
+      ))}
+      {providers.length === 0 && <output>{t("signIn.off")}</output>}
+      <p className="form-error" role="alert">
+        {error}
       </p>
     </div>
   );

@@ -17,7 +17,7 @@ The code is in these files:
 | Activity socket client | `app/lib/activity-socket.ts`, `app/components/overlay/activity-feed.tsx` |
 | Chat rows and the composition | `app/components/overlay/chat-layer.tsx`, `app/components/overlay/overlay-composition.tsx` |
 | Chat appearance and motion | `app/components/overlay/wasteland/`, `app/components/overlay/use-row-motion.ts` |
-| Editor | `app/components/overlay/composition-editor.tsx`, `layout-grid.tsx`, `use-layer-draft.ts` |
+| Editor | `app/components/overlay/composition-editor.tsx`, `layout-grid.tsx`, `layer-palette.tsx`, `use-layer-draft.ts` |
 | Overlay page | `app/routes/overlay.tsx` |
 | Layer action | `app/server/overlay.server.ts`, `app/server/api/live.ts` |
 
@@ -155,11 +155,13 @@ See [live capacity](live-room-capacity.md).
 3. **Place the layers**: the layout grid.
 4. **Add to OBS**: the overlay link.
 
-A signed-in page owner opens the page from **Overlay** in the header or from the account menu.
+A signed-in page owner opens the page from **Overlay** in the header of their own streamer page or from the account menu.
+The site header has no **Overlay** entry.
 
 Step 3 shows the grid of the selected orientation on a preview of the frame.
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.
 Each placed layer shows its name and its size in pixels.
+The grid and the palette are separate components. The editor holds the selected layer and gives it to the grid.
 
 Each placed layer also shows content. A layer that is off shows a dimmed sample: sample chat messages or sample characters.
 A content cell with nothing on air shows a dimmed sample topic.
@@ -171,31 +173,73 @@ To change the layout, do these steps:
 
 1. Under **Screen orientation**, select **Horizontal 16 × 9** or **Vertical 9 × 16**.
    OBS changes to the new orientation at once. Each orientation keeps its own layout.
-2. Under **Layer**, select the layer to draw.
-3. To draw the selected layer, drag across empty cells. The layer moves to the new cells.
-4. To move a placed layer, drag it. This also selects the layer.
+2. To select a placed layer, press it on the grid. The selected layer shows eight handles: four on its corners and four on its edges.
+3. To move a placed layer, drag it.
+4. To change the size of the selected layer, drag one of its handles.
 
-During a drag, a dashed rectangle shows the new cells.
-If the new cells touch another layer or are smaller than the minimum size, the rectangle is red.
+There is no layer selector, and you cannot draw a layer on empty cells.
+The handles change the size of a placed layer, and the palette adds a layer. Thus a drag on empty cells does nothing.
+
+A handle changes the size in full cells. The edges that the handle does not hold stay in their place.
+The layer, its label, and its content show the new size during the drag. The editor saves the change when you release the handle.
+
+A layer stops at its minimum size and at the edge of the grid.
+When a layer stops at its minimum size, a message under the grid gives the minimum.
+The area that takes a press on a handle is a band of 28 screen pixels along each edge. A corner is where two bands cross.
+
+During a move or a drop from the palette, a dashed rectangle shows the new cells. During a change of size, it shows around the layer.
+If the new cells touch another layer, the rectangle is red.
 Then the editor does not keep the change. A message under the grid gives the reason.
+
+### Add and remove a layer
+
+**Add a layer** shows one chip for each layer that is not on the grid of the selected orientation.
+The chat layer and the characters layer always have a cell. Thus only the on-air content can be in the palette.
+
+- Select the chip, or press Enter or Space on it. The layer goes to the first free place at its minimum size.
+  The editor looks for the place row by row, from the top-left corner.
+- Or drag the chip onto the grid, with a mouse, a finger, or a pen.
+  The layer drops at its minimum size around the cell at the pointer, inside the grid.
+
+If no place is free, or the drop touches another layer, the editor adds nothing and gives the reason.
+After the editor adds a layer, it selects the layer and the grid has the focus.
+
+**Remove from grid** removes the content cell. Then the content uses the full frame again, and its chip shows in the palette again.
+The chat layer and the characters layer cannot leave the grid. Use **Show on stream** to show or hide them.
+
+### Keyboard
 
 You can use the keyboard on the grid:
 
 | Key | Result |
 | --- | --- |
 | Arrow key | Moves the cursor one cell. |
-| Space or Enter | Starts to move the layer at the cursor, or starts to draw the selected layer on an empty cell. The next press keeps the change. |
+| Space or Enter | Starts to move the layer at the cursor, and selects it. The next press keeps the change. |
 | Shift and arrow key | Moves the selected layer one cell. |
-| Escape | Cancels a move or a drawing. |
+| Alt and arrow key | Moves the bottom-right corner of the selected layer one cell. Right and Down make the layer larger. Left and Up make it smaller. |
+| Escape | Cancels a move. |
+
+On a Mac, Alt is the Option key. The top-left corner stays in its place during a keyboard change of size.
+To change the size from the top or the left, first change the size, then move the layer.
 
 A screen reader reads each result from a polite live region under the grid.
 The grid is in a region with the `application` role. Thus a screen reader sends the keys to the grid, also in browse mode.
-If the orientation changes or the grid loses focus during a move or a drawing, the editor cancels it.
+If the orientation changes or the grid loses focus during a move or a change of size, the editor cancels it.
 
-**Remove from grid** removes the content cell. Then the content uses the full frame again.
-The chat layer and the characters layer cannot leave the grid. Use **Show on stream** to show or hide them.
+### How the content follows the size
 
-A drag or a key that puts down a layer saves at once. Shift and an arrow key save after 400 milliseconds without a change.
+A change of size does not scale a layer. Each layer uses the new space in its own way:
+
+| Layer | Wider cell | Taller cell |
+| --- | --- | --- |
+| `chat` | The font stays at 26 pixels. A message wraps later, so its card has fewer lines. | More cards show. The layer clips the oldest cards at the top. |
+| `characters` | The sprites keep their size: 1 world pixel is 3 design pixels. The ground is longer. | More sky shows above the ground. The sprites keep their size. |
+| `content` | The content keeps its **Size** setting. If it is larger than the cell, it becomes smaller until it fits. | The same. The content stays in the middle of the cell. |
+
+### Saves
+
+A drag, a chip, or a key that puts down a layer saves at once.
+Shift or Alt with an arrow key saves after 400 milliseconds without a change.
 If you close the page or go to a different page before then, the editor sends the change at once.
 
 The editor does not wait for the result of a change that it sends while you leave.
@@ -282,6 +326,7 @@ The chat uses the approved compact cards of issue #663.
 | Badge labels | Small gray text, `#c4c2a8`, before the user name |
 | Removed message | Gray italic text. In Japanese, Chinese, and Hindi, gray upright text. |
 | Top edge | The column fades out in the top 18% |
+| Text outline | Dark teal, `#041517e6`. It shows only when the message background is below 50%. |
 
 A new card moves up from below its place and fades in. The other cards move up at the same time.
 The movement takes 520 milliseconds. When a card goes, the column closes with the same movement.
@@ -295,6 +340,24 @@ When a snapshot removes a card, the card goes at once. Then the column closes wi
 
 When the activity feed is not available, the chat starts again with no cards. All cards go at once, without a fade.
 A removed card fades out in 300 milliseconds from the time that it leaves the chat, also when the page is slow.
+
+### Message background
+
+**Message background** in the chat settings of the editor sets how much of the card shows behind each message.
+The value is a percentage from 0 to 100 in steps of 5 (`CHAT_BACKGROUND`). The default is 100, which is the full card.
+At 0, the chat shows no card: only the platform icon, the user name, and the message show.
+
+The setting scales the card fill, the borders, the shadows, the bar of the newest card, and the vault mark together.
+The platform icon, the badge labels, the user name, the message, and the emotes always stay fully opaque.
+Below 50%, the text and the platform icon get a dark outline. Thus you can read the chat on a bright game.
+
+Use the slider with a mouse, a finger, or the arrow keys. The preview shows each step at once.
+The editor saves the value after 400 milliseconds without a change. Then OBS shows it without a reload.
+To see the result on a game, select **Sample game** under **Preview background**.
+
+The chat root has the `--wl-bg` CSS property, from 0 to 1. Only the card background and the vault mark read it.
+The layers store the value as `chat.backgroundOpacity`. A missing or incorrect stored value reads as 100.
+Thus a layout from before this setting does not change.
 
 ### Moderation
 

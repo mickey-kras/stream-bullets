@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { t, tAround } from "../../i18n";
 import type { ActivityFragment } from "../../lib/activity";
 import { CHAT_LIMITS, graphemes, safeEmoteUrl, type ChatRow } from "../../lib/chat-feed";
@@ -12,6 +12,7 @@ import {
   type GoneRow,
   type ShownRow,
 } from "../../lib/fading-rows";
+import { CHAT_BACKGROUND } from "../../lib/overlay-layers";
 import { motionReduced } from "../station/motion";
 import { useRowMotion } from "./use-row-motion";
 import { PlatformIcon, VaultMark } from "./wasteland/glyphs";
@@ -25,6 +26,14 @@ const FADE_LIMITS: FadeLimits = {
   maxLeaving: CHAT_LIMITS.maxLeaving,
   removedHoldMs: CHAT_LIMITS.removedHoldMs,
 };
+
+/** Below this background opacity (percent) the text gets a dark outline (`data-outline`, wasteland.css). */
+const OUTLINE_BELOW = 50;
+
+/** The theme with `--wl-bg`, the card background opacity from 0 to 1. wasteland.css scales only the card with it. */
+export function chatStyle(backgroundOpacity: number): CSSProperties {
+  return { ...WASTELAND_STYLE, "--wl-bg": String(backgroundOpacity / 100) } as CSSProperties;
+}
 
 /** Cuts a name to `max` user-perceived characters, never inside an emoji sequence or a combining mark. */
 export function shortName(name: string, max: number = MAX_NAME_CHARS): string {
@@ -170,19 +179,27 @@ const ChatRowItem = memo(function ChatRowItem({
 export const ChatLayer = memo(function ChatLayer({
   chat,
   className,
-}: Readonly<{ chat: ChatView; className?: string }>): ReactNode {
+  backgroundOpacity = CHAT_BACKGROUND.default,
+}: Readonly<{
+  chat: ChatView;
+  className?: string;
+  /** Percent of the card background that shows (CHAT_BACKGROUND). The text stays opaque. */
+  backgroundOpacity?: number;
+}>): ReactNode {
   const removedText: string = t("overlay.chat.removed");
   const { before, after }: NameFrame = nameFrame();
   const shown: ShownRow[] = useFadingRows(chat);
   const list = useRef<HTMLOListElement>(null);
   useRowMotion(list, shown);
+  const style: CSSProperties = useMemo((): CSSProperties => chatStyle(backgroundOpacity), [backgroundOpacity]);
   return (
     <ol
       ref={list}
       className={className ? `wl-chat ${className}` : "wl-chat"}
-      style={WASTELAND_STYLE}
+      style={style}
       aria-label={t("overlay.chat.label")}
       data-overlay-chat=""
+      data-outline={backgroundOpacity < OUTLINE_BELOW || undefined}
     >
       {shown.map(({ row, gone, newest }: ShownRow) => (
         <ChatRowItem

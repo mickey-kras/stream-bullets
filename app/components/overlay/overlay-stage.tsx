@@ -35,8 +35,9 @@ function useHydrated(): boolean {
   );
 }
 
-// Auto chooses newest open poll, then newest poll. Mash openness follows phase at now; entries never receive
-// end/reveal values.
+// Auto chooses the newest open poll of the page owner, then the owner's newest poll. It never chooses a viewer poll:
+// the owner picks one with "A specific poll". Mash openness follows phase at now; entries never receive end/reveal
+// values.
 export function overlayPoll(
   source: OverlaySourceRef,
   polls: readonly OverlayPoll[],
@@ -48,7 +49,8 @@ export function overlayPoll(
     !poll.revealed &&
     (poll.endsAt === null || poll.endsAt > now) &&
     (poll.mash === null || mashPhaseAt(poll.mash, now) !== "finished");
-  return polls.find(open) ?? polls[0];
+  const own: readonly OverlayPoll[] = polls.filter((poll: OverlayPoll): boolean => poll.byOwner);
+  return own.find(open) ?? own[0];
 }
 
 function MashOverlay({ scene, poll }: Readonly<{ scene: OverlayScene; poll: OverlayPoll }>): ReactNode {

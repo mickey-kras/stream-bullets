@@ -107,7 +107,9 @@ beforeAll(async (): Promise<void> => {
         fetch: async (url: string, init: RequestInit): Promise<Response> => {
           const target = new URL(url);
           ingestCalls.push({ path: `${target.pathname}${target.search}`, body: await new Response(init.body).text() });
-          return Promise.resolve(target.pathname === "/playground" ? ingestReply() : new Response(null, { status: 204 }));
+          return Promise.resolve(
+            target.pathname === "/playground" ? ingestReply() : new Response(null, { status: 204 }),
+          );
         },
       }),
     } as unknown as DurableObjectNamespace,
@@ -279,6 +281,7 @@ describe("Auto on the overlay", (): void => {
       counts: [0, 0],
       total: 0,
       mash: null,
+      byOwner: true,
     };
     const stats = { durationS: 30, winner: null, totals: [], players: 0, assisted: 0 };
     const battle = (phase: "countdown" | "live" | "finished", startsAt: number): OverlayPoll => ({
@@ -293,6 +296,30 @@ describe("Auto on the overlay", (): void => {
     expect(auto(battle("live", now - 60_000))).toBe("open");
     expect(auto(battle("live", now - 5_000))).toBe("battle-live");
     expect(auto(battle("countdown", now + 3_000))).toBe("battle-countdown");
+  });
+
+  it("never shows a viewer poll, also when it is the only open poll or the only poll", (): void => {
+    const poll = (id: string, byOwner: boolean, revealed: boolean): OverlayPoll => ({
+      id,
+      title: id,
+      kind: "choice",
+      options: ["A", "B"],
+      endsAt: null,
+      revealed,
+      counts: [0, 0],
+      total: 0,
+      mash: null,
+      byOwner,
+    });
+    const auto = (polls: OverlayPoll[]): string | undefined =>
+      overlayPoll({ type: "auto", ref: null }, polls, 1_000)?.id;
+    const viewerOpen: OverlayPoll = poll("viewer-open", false, false);
+    expect(auto([viewerOpen, poll("owner-open", true, false)])).toBe("owner-open");
+    // A closed poll of the owner wins over an open viewer poll.
+    expect(auto([viewerOpen, poll("owner-closed", true, true)])).toBe("owner-closed");
+    expect(auto([viewerOpen, poll("viewer-closed", false, true)])).toBeUndefined();
+    // The owner still shows a viewer poll with "A specific poll".
+    expect(overlayPoll({ type: "poll", ref: "viewer-open" }, [viewerOpen], 1_000)).toBe(viewerOpen);
   });
 });
 
@@ -362,6 +389,7 @@ describe("overlay poll card", (): void => {
                 counts: [total, 0],
                 total,
                 mash: null,
+                byOwner: true,
               },
             ],
             data: { polls: [], topics: [], cards: [], next: null, support: null },
@@ -403,6 +431,7 @@ describe("overlay poll card", (): void => {
                   players: 9,
                   assisted: 0,
                 },
+                byOwner: true,
               },
             ],
             data: { polls: [], topics: [], cards: [], next: null, support: null },
@@ -497,8 +526,20 @@ describe("Mash Battle owner controls", (): void => {
     expect(roomCalls.map((value) => value.path)).toEqual([`/refresh?streamerId=${page}`]);
   });
 
-  it("lets only the page owner create a battle, with distinct sides and a known length", async (): Promise<void> => {
-    expect((await create("viewer")).status).toBe(403);
+  it("lets a viewer create a battle that only the page owner runs", async (): Promise<void> => {
+    const created = await create("viewer");
+    expect(created.status).toBe(200);
+    const { id } = await body<{ id: string }>(created);
+    expect(await env.DB.prepare("SELECT author_id,status FROM entries WHERE id=?").bind(id).first()).toEqual({
+      author_id: "viewer",
+      status: null,
+    });
+    for (const action of ["start", "end", "restart"]) expect((await act(id, action, {}, "viewer")).status).toBe(403);
+    expect(await phase(id)).toEqual({ phase: "setup", starts_at: null, ends_at: null });
+    expect((await act(id, "start", { countdown: false })).status).toBe(200);
+  });
+
+  it("creates a battle only with distinct sides and a known length", async (): Promise<void> => {
     const bad = { action: "create", kind: "mash", title: "Same", options: ["A", "a"], durationS: 30 };
     expect((await call("POST", "streamers/live_page", { user: "owner", body: bad })).status).toBe(400);
     expect(
@@ -588,7 +629,9 @@ describe("overlay control", (): void => {
     );
     expect(result.overlay).toEqual(DEFAULT_OVERLAY);
     expect(result.handle).toBe("live_page");
-    expect(result.data.polls).toEqual([{ id: poll, title: "Pick one", mash: false }]);
+    expect(result.data.polls).toEqual([
+      { id: poll, title: "Pick one", mash: false, author: "Name owner", byOwner: true },
+    ]);
     expect(result.data.topics.map((value) => value.id)).toEqual([topic]);
     expect(result.data.cards).toEqual([
       { id: card, icon: "heart", title: "Card", body: "Body", label: null, target: null },
@@ -622,7 +665,12 @@ describe("overlay control", (): void => {
       const response = await send({ action: "preview", source });
       return { status: response.status, error: (await body<{ error: string }>(response)).error };
     };
-    expect(await refused({ type: "poll", ref: null })).toEqual({ status: 400, error: "Pick a poll or topic." });
+    expect(await refused({ type: "topic", ref: null })).toEqual({ status: 400, error: "Pick a poll or topic." });
+    // "A specific poll" can start with no poll: the overlay waits until the owner picks one.
+    expect((await overlay(await send({ action: "preview", source: { type: "poll", ref: null } }))).preview).toEqual({
+      type: "poll",
+      ref: null,
+    });
     expect(await refused({ type: "poll", ref: topic })).toEqual({ status: 404, error: "Poll not found." });
     expect(await refused({ type: "topic", ref: poll })).toEqual({ status: 404, error: "Topic not found." });
     expect(await refused({ type: "topic", ref: foreignTopic })).toEqual({ status: 404, error: "Topic not found." });
@@ -740,21 +788,21 @@ describe("overlay control", (): void => {
       expect(first).toMatchObject({ revision: 1, position: "lower", air: { type: "auto" } });
       expect(first.layers).toEqual({
         ...DEFAULT_LAYERS,
-        chat: { enabled: true, hideCommands: true },
+        chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
         cells: horizontal({ chat: chatCell }),
       });
       const second = await overlay(
         await send({
           action: "layers",
           orientation: "vertical",
-          chat: { hideCommands: false },
+          chat: { hideCommands: false, backgroundOpacity: 45 },
           characters: { enabled: true },
           cells: { horizontal: { content: { c: 0, r: 0, w: 6, h: 4 } } },
         }),
       );
       expect(second.layers).toEqual({
         orientation: "vertical",
-        chat: { enabled: true, hideCommands: false },
+        chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
         characters: { enabled: true, timeout: 60 },
         cells: horizontal({ chat: chatCell, content: { c: 0, r: 0, w: 6, h: 4 } }),
       });
@@ -836,6 +884,8 @@ describe("overlay control", (): void => {
         { content: { enabled: false } },
         { orientation: "square" },
         { chat: { enabled: "yes" } },
+        { chat: { backgroundOpacity: 3 } },
+        { chat: { backgroundOpacity: "50" } },
         { layers: { chat: { enabled: true } } },
         { write: { writer: "short", seq: 1 } },
         { write: { writer: "editor-1234", seq: 0 } },
@@ -883,7 +933,7 @@ describe("overlay control", (): void => {
       expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60 } });
       expect((await getOverlayState(env, page)).layers).toEqual({
         ...DEFAULT_LAYERS,
-        chat: { enabled: true, hideCommands: true },
+        chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
         cells: horizontal({ chat: chatCell }),
       });
       await expect(
@@ -1223,7 +1273,7 @@ describe("overlay control", (): void => {
       ).bind(crypto.randomUUID(), page),
     ]);
     const data = await getOverlayData(env, page, []);
-    expect(data.polls).toEqual([{ id: poll, title: "Pick one", mash: true }]);
+    expect(data.polls).toEqual([{ id: poll, title: "Pick one", mash: true, author: "Name owner", byOwner: true }]);
     expect(data.topics).toEqual([
       {
         id: topic,

@@ -10,7 +10,7 @@ import {
 } from "../lib/mash";
 import type { MashPhase } from "../types";
 import { assertStreamerWritable } from "./access.server";
-import { consumeMutationQuota } from "./data.server";
+import { consumeMutationQuota, newPollStatus } from "./data.server";
 import { HttpError } from "./http.server";
 import { line } from "./validation";
 
@@ -55,7 +55,8 @@ interface BattleRow {
   owner_id: string;
 }
 
-// Creates a Mash Battle: an entry of kind `choice` plus its `entry_mash` row, in one batch.
+// Creates a Mash Battle: an entry of kind `choice` plus its `entry_mash` row, in one batch. Each signed-in viewer can
+// create one, with the rules of other polls. Only the page owner can run it (see `ownedBattle`).
 export async function createMash(
   env: AppEnv,
   userId: string,
@@ -66,17 +67,18 @@ export async function createMash(
   await consumeMutationQuota(env, userId);
   await consumeMutationQuota(env, userId, true);
   const id = crypto.randomUUID();
+  const status = await newPollStatus(env, userId, streamerId);
   const [created] = await env.DB.batch([
-    env.DB.prepare(`INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed)
-      SELECT ?,s.id,?,'choice',?,'','',?,?,NULL,0 FROM streamers s WHERE s.id=? AND s.owner_id=?
+    env.DB.prepare(`INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed,status)
+      SELECT ?,s.id,?,'choice',?,'','',?,?,NULL,0,? FROM streamers s WHERE s.id=?
         AND (SELECT count(*) FROM entries e WHERE e.streamer_id=s.id) < ?`).bind(
       id,
       userId,
       input.title,
       JSON.stringify(input.options),
       Date.now(),
+      status,
       streamerId,
-      userId,
       MAX_ENTRIES,
     ),
     env.DB.prepare("INSERT INTO entry_mash (entry_id,duration_s) SELECT id,? FROM entries WHERE id=?").bind(
@@ -85,8 +87,7 @@ export async function createMash(
     ),
     env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(streamerId),
   ]);
-  if (created.meta.changes === 0)
-    throw new HttpError(403, "Only the streamer can create polls. Each page can contain up to 1000 topics and polls.");
+  if (created.meta.changes === 0) throw new HttpError(403, "Each page can contain up to 1000 topics and polls.");
   return { id };
 }
 

@@ -3,6 +3,7 @@
 // Allocate free ranges to isolate each spec's write, authentication, and connection quotas (120/min each).
 const ranges = {
   platform: [[10, 15]],
+  "viewer-polls": [[16, 19]],
   mutations: [[25, 27]],
   account: [[40, 40]],
   pagination: [[50, 51]],
@@ -40,6 +41,7 @@ const ranges = {
     [250, 250],
   ],
   "composition-editor": [[245, 249]],
+  "layout-widgets": [[251, 253]],
   characters: [[182, 189]],
   "compact-layout": [[220, 231]],
 } as const satisfies Record<string, readonly (readonly [number, number])[]>;

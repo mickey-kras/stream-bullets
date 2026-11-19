@@ -229,7 +229,6 @@ button.gold:hover { background:var(--gold-hover); }
 .ideas-strip h2 { margin: 0; font: inherit; font-weight: 700; }
 .ideas-strip .ideas-link { margin-left: 0; }
 .ideas-strip p { margin: 0; flex: 1 1 280px; }
-.ideas-strip ul { display: flex; flex-wrap: wrap; gap: 4px 20px; flex-basis: 100%; margin: 0; padding: 0; list-style: none; }
 .streamer-card h2 { font-size: 1.75rem; overflow-wrap: anywhere; }
 .streamer-card p { margin: 6px 0; }
 .streamer-bio { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; -webkit-line-clamp: 2; line-clamp: 2; }
@@ -248,6 +247,8 @@ button.gold:hover { background:var(--gold-hover); }
 .modal-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 12px; }
 .sign-in-options { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
 .sign-in-options > button { width: 100%; }
+.sign-in-options label.sign-in-accept { display: flex; align-items: flex-start; gap: 10px; }
+.sign-in-accept > span { flex: 1 1 0; min-width: 0; min-height: 24px; line-height: 24px; }
 .form-error { color: var(--error); font-size: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .form-error:empty { display: none; }
 .page-error { position: relative; z-index: 3; margin: 8px 26px; flex-shrink: 0; }
@@ -1757,16 +1758,21 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 
 /* Channel connections in the overlay controls (docs/channel-connections.md). */
 .ch-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 12px; margin: 12px 0 0; padding: 0; list-style: none; }
-.ch-item { min-width: 0; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--modal); }
+.ch-item { display: grid; grid-template-rows: subgrid; grid-row: span 4; row-gap: 4px; min-width: 0; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--modal); }
 .ch-item p { margin: 6px 0; overflow-wrap: anywhere; }
+.ch-item > * { min-width: 0; }
 .ch-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .ch-badge { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; font-weight: 600; }
 .ch-problem { display: flex; align-items: flex-start; gap: 6px; }
 .ch-problem .icon { flex: none; margin-top: 2px; color: var(--live); }
-.ch-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ch-actions { display: flex; flex-wrap: wrap; align-items: center; align-self: end; gap: 8px; }
+.ch-more > summary { width: fit-content; max-width: 100%; padding: 10px 0; cursor: pointer; color: var(--muted); font-weight: 600; }
+.ch-more > ul { display: grid; gap: 6px; margin: 0 0 6px; padding-left: 1.25em; color: var(--muted); overflow-wrap: anywhere; }
 .ch-result { display: block; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
-.ch-reauth { margin-top: 12px; }
-.ch-terms { display: block; margin: 6px 0; font-size: 0.875rem; }
+.ch-reauth { margin-top: 8px; padding: 4px 12px 10px; border: 1px solid var(--gold); border-radius: 8px; }
+.reauth-options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.reauth-options > .form-error { flex-basis: 100%; margin: 0; }
+.ch-terms { flex-basis: 100%; font-size: 0.875rem; }
 
 .discussion-focus-bar { display: none; }
 .open-discussion { display: none; }

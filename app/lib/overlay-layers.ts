@@ -45,7 +45,12 @@ export interface LayerCells {
 export interface ChatLayer {
   enabled: boolean;
   hideCommands: boolean;
+  /** Percent of the card background that shows behind each message (CHAT_BACKGROUND). */
+  backgroundOpacity: number;
 }
+
+/** The message background opacity in percent: the one source for the layers, the editor and the chat. */
+export const CHAT_BACKGROUND = { min: 0, max: 100, step: 5, default: 100 } as const;
 
 export interface CharactersLayer {
   enabled: boolean;
@@ -81,7 +86,7 @@ export const MIN_CELLS: Readonly<Record<GridLayer, Readonly<{ w: number; h: numb
 // Chat and characters stay off by default, so existing OBS scenes do not change. Content has no cell by default.
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
-  chat: { enabled: false, hideCommands: true },
+  chat: { enabled: false, hideCommands: true, backgroundOpacity: CHAT_BACKGROUND.default },
   characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default },
   cells: {
     horizontal: { chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 }, content: null },
@@ -160,13 +165,26 @@ function cellsPatchSchema(orientation: Orientation): z.ZodType<CellsPatch> {
 }
 
 const characterTimeout = z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max);
+const chatBackground = z
+  .number()
+  .int()
+  .min(CHAT_BACKGROUND.min)
+  .max(CHAT_BACKGROUND.max)
+  .multipleOf(CHAT_BACKGROUND.step);
 
 // Writes are strict: unknown keys, cells outside the grid, below the minimum size or over each other return 400.
 // The server also checks the merged layout, so a cell never covers a saved cell of another layer.
 export const layersPatchSchema = z
   .object({
     orientation: z.enum(ORIENTATIONS).optional(),
-    chat: z.object({ enabled: z.boolean().optional(), hideCommands: z.boolean().optional() }).strict().optional(),
+    chat: z
+      .object({
+        enabled: z.boolean().optional(),
+        hideCommands: z.boolean().optional(),
+        backgroundOpacity: chatBackground.optional(),
+      })
+      .strict()
+      .optional(),
     characters: z.object({ enabled: z.boolean().optional(), timeout: characterTimeout.optional() }).strict().optional(),
     cells: z
       .object({
@@ -219,6 +237,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
       z.object({
         enabled: fallback(z.boolean(), DEFAULT_LAYERS.chat.enabled),
         hideCommands: fallback(z.boolean(), DEFAULT_LAYERS.chat.hideCommands),
+        backgroundOpacity: fallback(chatBackground, DEFAULT_LAYERS.chat.backgroundOpacity),
       }),
       (): ChatLayer => ({ ...DEFAULT_LAYERS.chat }),
     ),
@@ -273,6 +292,7 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
     chat: {
       enabled: patch.chat?.enabled ?? current.chat.enabled,
       hideCommands: patch.chat?.hideCommands ?? current.chat.hideCommands,
+      backgroundOpacity: patch.chat?.backgroundOpacity ?? current.chat.backgroundOpacity,
     },
     characters: {
       enabled: patch.characters?.enabled ?? current.characters.enabled,

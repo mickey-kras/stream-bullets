@@ -141,45 +141,71 @@ test("logos go home, the streamer picture goes to its topics, and navigation mar
   await close(context);
 });
 
-test("the header offers Overlay to a page owner and not to a viewer without a page", async ({ browser }) => {
+test("the streamer header offers Overlay to the owner of the page only, and the site header has no Overlay entry", async ({
+  browser,
+}) => {
   const owner = await signedIn(browser, "owner");
   const page = await newPage(owner);
-  await page.goto("/streamers");
+  await page.goto("/@test_host");
   const nav = page.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
-  // Beside "Your page", in the order of the account menu.
-  await expect(nav.getByRole("link")).toHaveText(["Streamers", "Your page", "Overlay"]);
+  // After the page views, with the icon and the label of the other tabs.
+  await expect(nav.getByRole("link")).toHaveText(["Topics", "Polls", "Schedule", "About", "Community", "Overlay"]);
   const overlay = nav.getByRole("link", { name: "Overlay", exact: true });
   await expect(overlay).toHaveAttribute("href", "/overlay-control");
+  await expect(overlay).toHaveClass(/nav-tab/);
   await expect(overlay).not.toHaveAttribute("aria-current", "page");
   await expect(overlay.locator("svg")).toBeVisible();
-  await overlay.click();
-  await expect(page.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
-  await expect(overlay).toHaveAttribute("aria-current", "page");
-  await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
   // The account menu keeps its entry.
   await page.getByRole("button", { name: /^Account menu/ }).click();
   await expect(
     page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Overlay control" }),
   ).toHaveAttribute("href", "/overlay-control");
-  // On a phone the entry stays in the header, as a touch target, without sideways scroll. "Your page" gives it
-  // the room: that link stays in the account menu.
+  await page.keyboard.press("Escape");
+  // On a phone the six tabs are icons in one row. Each is a touch target, without sideways scroll.
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/streamers");
+  await page.goto("/@test_host");
   await expect(overlay).toBeVisible();
-  await expect(nav.getByRole("link", { name: "Your page", exact: true })).toBeHidden();
-  const box = (await overlay.boundingBox())!;
-  expect(box.height).toBeGreaterThanOrEqual(44);
-  expect(box.x + box.width).toBeLessThanOrEqual(390);
+  const boxes = await nav.getByRole("link").evaluateAll((links: Element[]) =>
+    links.map((link: Element) => {
+      const { x, y, width, height } = link.getBoundingClientRect();
+      return { x, y, width, height };
+    }),
+  );
+  expect(boxes).toHaveLength(6);
+  for (const box of boxes) {
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.y).toBe(boxes[0].y);
+    expect(box.x + box.width).toBeLessThanOrEqual(390);
+  }
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await overlay.click();
+  await expect(page.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
+  // The site header has no Overlay entry, also on Overlay control. "Your page" stays, also on a phone.
+  const site = page.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
+  await expect(site.getByRole("link")).toHaveText(["Streamers", "Your page"]);
+  await page.goto("/streamers");
+  await expect(site.getByRole("link")).toHaveText(["Streamers", "Your page"]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(site.getByRole("link", { name: "Your page", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  // The page of another streamer has no Overlay entry for this owner.
+  await page.goto("/@feature_host");
+  await expect(nav.getByRole("link", { name: "Topics", exact: true })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Overlay", exact: true })).toHaveCount(0);
   await close(owner);
 
+  // A signed-in viewer without a page and a guest get no Overlay entry.
   const viewer = await signedIn(browser, "viewer");
-  const viewerPage = await newPage(viewer);
-  await viewerPage.goto("/streamers");
-  const viewerNav = viewerPage.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
-  await expect(viewerNav.getByRole("link", { name: "Streamers" })).toBeVisible();
-  await expect(viewerNav.getByRole("link", { name: "Overlay", exact: true })).toHaveCount(0);
-  await close(viewer);
+  const guest = await browser.newContext({ baseURL: origin });
+  for (const context of [viewer, guest]) {
+    const other = await newPage(context);
+    await other.goto("/@test_host");
+    const tabs = other.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
+    await expect(tabs.getByRole("link")).toHaveText(["Topics", "Polls", "Schedule", "About", "Community"]);
+    await close(context);
+  }
 });
 
 test("headers keep every label on one line at 390px", async ({ browser }) => {
