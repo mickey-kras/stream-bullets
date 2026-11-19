@@ -885,6 +885,15 @@ const touchedStreamers = `
 // D1 permits five compound SELECT terms; split further sources.
 const touchedStreamersMore = `
   SELECT e.streamer_id FROM mash_taps m JOIN entries e ON e.id=m.entry_id WHERE m.user_id=?1`;
+// Verification rows of the account, by exact identifier, exact token value, or exact JSON user field.
+const ownedVerificationRows = `
+  identifier IN (?1,(SELECT email FROM user WHERE id=?1))
+  OR identifier IN (SELECT 'admin-webauthn:stepup:'||id FROM session WHERE user_id=?1)
+  OR identifier IN (SELECT 'admin-webauthn:register:'||id FROM session WHERE user_id=?1)
+  OR (value=?1 AND (identifier LIKE 'reset-password:%' OR identifier LIKE 'delete-account-%'))
+  OR CASE WHEN json_valid(value)
+    THEN json_extract(value,'$.userId')=?1 OR json_extract(value,'$.link.userId')=?1
+    ELSE 0 END`;
 
 // Delete the account and owned data in one D1 batch. Cascades remove sessions, links, keys, page data,
 // content, votes, reactions, taps, and applications. Other authors' replies become top-level; empty
@@ -911,10 +920,7 @@ export async function deleteAccount(env: AppEnv, userId: string): Promise<void> 
     ),
     statement("UPDATE streamers SET status_changed_by=NULL WHERE status_changed_by=?1"),
     statement("DELETE FROM app_rate_limits WHERE key IN ('write:'||?1,'content:'||?1)"),
-    statement(
-      `DELETE FROM verification WHERE identifier IN (?1,(SELECT email FROM user WHERE id=?1))
-        OR instr(value,'"userId":"'||?1||'"')>0`,
-    ),
+    statement(`DELETE FROM verification WHERE ${ownedVerificationRows}`),
     // Delete authored reports. Retain reports about deleted content but erase copied text.
     statement("DELETE FROM content_reports WHERE reporter_id=?1"),
     statement(

@@ -32205,7 +32205,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L894",
+      "source_location": "L903",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -32217,7 +32217,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L897",
+      "source_location": "L906",
       "target": "app_server_channels_server_disconnectallchannels",
       "weight": 1.0
     },
@@ -32229,7 +32229,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L931",
+      "source_location": "L937",
       "target": "app_server_images_server_deleteimageobjects",
       "weight": 1.0
     },
@@ -32241,7 +32241,7 @@
       "relation": "calls",
       "source": "app_server_account_server_deleteaccount",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L939",
+      "source_location": "L945",
       "target": "app_server_live_server_notifyroom",
       "weight": 1.0
     },
@@ -45465,7 +45465,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L919",
+      "source_location": "L971",
       "target": "tests_account_test_calldelete",
       "weight": 1.0
     },
@@ -45477,7 +45477,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L942",
+      "source_location": "L994",
       "target": "tests_account_test_cookie",
       "weight": 1.0
     },
@@ -45489,7 +45489,7 @@
       "relation": "calls",
       "source": "tests_account_test",
       "source_file": "tests/account.test.ts",
-      "source_location": "L944",
+      "source_location": "L996",
       "target": "tests_account_test_routecontext",
       "weight": 1.0
     },
@@ -157437,7 +157437,7 @@
       "relation": "contains",
       "source": "app_server_account_server",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L893",
+      "source_location": "L902",
       "target": "app_server_account_server_deleteaccount",
       "weight": 1.0
     },
@@ -169143,6 +169143,17 @@
       "source_file": "tests/account.test.ts",
       "source_location": "L338",
       "target": "tests_account_test_calldelete",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_account_test",
+      "source_file": "tests/account.test.ts",
+      "source_location": "L767",
+      "target": "tests_account_test_verificationseed",
       "weight": 1.0
     },
     {
@@ -182432,10 +182443,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "8fe24f1deaff7deca1b371437257404eaaa686700ec6f2e0dfebb2231b4d4d3a",
+    "content_sha256": "30fb5df59ed82cffae637cd73cda324456e05c588600376d3a741cfa1a381ac2",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "8df036fb6053aea8ce5b09534a7074fe97eb904ad0decbcbe2ef8fc051c22204",
+    "source_sha256": "6cf3ff18e92c6ad18b3e69b4c76e2fffb0d4c9e87480e6a734f135cc55b7330b",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -188458,6 +188469,18 @@
       "norm_label": "storedlayers",
       "source_file": "db/schema.ts",
       "source_location": "L636"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_account_test_verificationseed",
+      "label": "VerificationSeed",
+      "norm_label": "verificationseed",
+      "source_file": "tests/account.test.ts",
+      "source_location": "L767"
     },
     {
       "_callable": true,
@@ -203709,7 +203732,7 @@
       "label": "deleteAccount()",
       "norm_label": "deleteaccount()",
       "source_file": "app/server/account.server.ts",
-      "source_location": "L893"
+      "source_location": "L902"
     },
     {
       "_callable": true,
