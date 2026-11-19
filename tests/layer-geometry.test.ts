@@ -4,18 +4,23 @@ import {
   diffLayers,
   dropCell,
   firstFreeCell,
+  gridCells,
   growCell,
   handleAt,
   handleLines,
   isEmptyPatch,
   layerAt,
   layersAction,
+  layoutProblem,
   mergePatches,
   moveCell,
+  onGrid,
   placeProblem,
   resizeCell,
   spanCells,
   withCell,
+  withPlaced,
+  withRemoved,
   withoutSent,
   type Cell,
   type ResizeHandle,
@@ -24,6 +29,7 @@ import {
   DEFAULT_LAYERS,
   GRID_LAYERS,
   MIN_CELLS,
+  overlappingPair,
   type CellRect,
   type GridLayer,
   type LayerCells,
@@ -149,7 +155,9 @@ describe("field-level patches", () => {
     });
     expect(mergePatches({ orientation: "vertical" }, {})).toEqual({ orientation: "vertical" });
     // Each step of the message background slider replaces the step before it.
-    expect(mergePatches({ chat: { enabled: true, backgroundOpacity: 60 } }, { chat: { backgroundOpacity: 55 } })).toEqual({
+    expect(
+      mergePatches({ chat: { enabled: true, backgroundOpacity: 60 } }, { chat: { backgroundOpacity: 55 } }),
+    ).toEqual({
       chat: { enabled: true, backgroundOpacity: 55 },
     });
     expect(mergePatches({}, { characters: { enabled: true } })).toEqual({ characters: { enabled: true } });
@@ -430,5 +438,93 @@ describe("layer palette", () => {
     ];
     for (const [layer, at, rect] of drops) expect(dropCell("horizontal", layer, at), layer).toEqual(rect);
     expect(dropCell("vertical", "content", { c: 8, r: 15 })).toEqual({ c: 5, r: 14, w: 4, h: 2 });
+  });
+
+  it("finds a free place of a given size", () => {
+    const cells: LayerCells = DEFAULT_LAYERS.cells.horizontal;
+    expect(firstFreeCell("horizontal", cells, "content", { w: 11, h: 7 })).toEqual({ c: 5, r: 0, w: 11, h: 7 });
+    expect(firstFreeCell("horizontal", cells, "content", { w: 12, h: 7 })).toBeNull();
+  });
+});
+
+describe("layers off the grid", () => {
+  const off = (): OverlayLayers => structuredClone(DEFAULT_LAYERS);
+  const allOn = (): OverlayLayers => ({
+    ...off(),
+    chat: { ...DEFAULT_LAYERS.chat, enabled: true },
+    characters: { ...DEFAULT_LAYERS.characters, enabled: true },
+  });
+
+  it("draws a chat or characters layer only while it is on, and content only with a cell", () => {
+    expect(gridCells(off(), "horizontal")).toEqual({ chat: null, characters: null, content: null });
+    expect(GRID_LAYERS.filter((layer: GridLayer): boolean => onGrid(off(), "horizontal", layer))).toEqual([]);
+    const on: OverlayLayers = withCell(allOn(), "horizontal", "content", cell);
+    expect(gridCells(on, "horizontal")).toEqual({ ...DEFAULT_LAYERS.cells.horizontal, content: cell });
+    expect(GRID_LAYERS.every((layer: GridLayer): boolean => onGrid(on, "horizontal", layer))).toBe(true);
+    // The content has a cell only in the horizontal layout. The switches apply to both orientations.
+    expect(gridCells(on, "vertical")).toEqual({ ...DEFAULT_LAYERS.cells.vertical, content: null });
+    expect(onGrid(on, "vertical", "content")).toBe(false);
+  });
+
+  it("removes chat and characters by their switch and keeps their cells, and removes the content cell", () => {
+    const start: OverlayLayers = withCell(allOn(), "horizontal", "content", cell);
+    const noCharacters: OverlayLayers = withRemoved(start, "horizontal", "characters");
+    expect(noCharacters.characters).toEqual({ ...DEFAULT_LAYERS.characters, enabled: false });
+    expect(noCharacters.cells).toEqual(start.cells);
+    expect(noCharacters.chat.enabled).toBe(true);
+    expect(diffLayers(start, noCharacters)).toEqual({ characters: { enabled: false } });
+    expect(diffLayers(start, withRemoved(start, "horizontal", "chat"))).toEqual({ chat: { enabled: false } });
+    const noContent: OverlayLayers = withRemoved(start, "horizontal", "content");
+    expect(noContent.cells.horizontal.content).toBeNull();
+    expect(diffLayers(start, noContent)).toEqual({ cells: { horizontal: { content: null } } });
+    expect(start.characters.enabled).toBe(true);
+  });
+
+  it("puts a layer back on the grid at a cell and turns it on", () => {
+    const rect: CellRect = { c: 8, r: 0, w: 3, h: 2 };
+    const placed: OverlayLayers | null = withPlaced(off(), "horizontal", "chat", rect);
+    expect(placed?.chat.enabled).toBe(true);
+    expect(placed?.characters.enabled).toBe(false);
+    expect(placed?.cells.horizontal.chat).toEqual(rect);
+    expect(placed?.cells.vertical).toEqual(DEFAULT_LAYERS.cells.vertical);
+    expect(diffLayers(off(), placed ?? off())).toEqual({
+      chat: { enabled: true },
+      cells: { horizontal: { chat: rect } },
+    });
+    const content: OverlayLayers | null = withPlaced(off(), "horizontal", "content", cell);
+    expect(content?.cells.horizontal.content).toEqual(cell);
+    expect(content?.chat.enabled).toBe(false);
+  });
+
+  it("lets a layer take the stored cell of a layer that is off, and moves that cell to a free place", () => {
+    // The stored characters cell is the bottom two rows. The characters are off, so the grid shows that area free.
+    const rect: CellRect = { c: 0, r: 7, w: 4, h: 2 };
+    expect(layoutProblem(off(), "horizontal", "content", rect)).toBeNull();
+    const placed: OverlayLayers | null = withPlaced(off(), "horizontal", "content", rect);
+    expect(placed?.cells.horizontal.content).toEqual(rect);
+    // No room for 16 x 2 cells now: the stored cell takes the first free place at the minimum size.
+    expect(placed?.cells.horizontal.characters).toEqual({ c: 5, r: 0, w: 6, h: 2 });
+    expect(placed?.characters.enabled).toBe(false);
+    expect(placed ? overlappingPair(placed.cells.horizontal) : "none").toBeNull();
+    // A stored cell keeps its size when that size has a free place.
+    const low: OverlayLayers = withCell(off(), "horizontal", "chat", { c: 0, r: 0, w: 5, h: 3 });
+    const moved: OverlayLayers | null = withPlaced(low, "horizontal", "content", { c: 0, r: 0, w: 4, h: 2 });
+    expect(moved?.cells.horizontal.chat).toEqual({ c: 4, r: 0, w: 5, h: 3 });
+    // A layer on the grid stays in the way.
+    expect(layoutProblem(allOn(), "horizontal", "content", rect)).toEqual({ kind: "overlap", other: "characters" });
+    expect(withPlaced(allOn(), "horizontal", "content", rect)).toBeNull();
+    expect(withPlaced(off(), "horizontal", "content", { c: 14, r: 0, w: 4, h: 2 })).toBeNull();
+  });
+
+  it("refuses a cell that leaves no free place for the stored cell of a layer that is off", () => {
+    // Chat fills the top seven rows. The characters are off, with their stored cell in the bottom two rows.
+    const tall: OverlayLayers = withCell(allOn(), "horizontal", "chat", { c: 0, r: 0, w: 16, h: 7 });
+    const start: OverlayLayers = withRemoved(tall, "horizontal", "characters");
+    const rect: CellRect = { c: 0, r: 7, w: 16, h: 2 };
+    expect(layoutProblem(start, "horizontal", "content", rect)).toEqual({ kind: "noRoom", other: "characters" });
+    expect(withPlaced(start, "horizontal", "content", rect)).toBeNull();
+    // Ten columns leave the minimum characters cell (6 x 2) free beside the content.
+    const narrow: OverlayLayers | null = withPlaced(start, "horizontal", "content", { ...rect, w: 10 });
+    expect(narrow?.cells.horizontal.characters).toEqual({ c: 10, r: 7, w: 6, h: 2 });
   });
 });

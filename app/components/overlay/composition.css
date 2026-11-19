@@ -179,10 +179,8 @@
   border-style: dashed;
   opacity: 0.7;
 }
-/* A sample of a layer that is off, or of content that is not on air: dimmed. Only the editor preview sets
+/* A sample of content that is not on air: dimmed. Only the editor preview sets
    data-sample-off; the OBS pages never do. */
-.ov-comp-frame[data-sample-off~="chat"] .ov-layer[data-layer="chat"],
-.ov-comp-frame[data-sample-off~="characters"] .ov-layer[data-layer="characters"],
 .ov-comp-frame[data-sample-off~="content"] .ov-layer[data-layer="content"] {
   opacity: 0.45;
 }
@@ -329,6 +327,34 @@
   color: var(--error);
 }
 /* ---------- Layer palette (layer-palette.tsx) ---------- */
+/* The palette keeps one height with chips, with its note and as a drop place: the grid below does not jump. */
+.ov-palette-body {
+  position: relative;
+  min-height: 5.5rem;
+}
+/* Where a pointer drops a placed layer to take it off the grid. It covers the chips, so the bar keeps its size and
+   the grid under the pointer does not move. */
+.ov-palette-drop {
+  position: absolute;
+  inset: 0;
+  z-index: 21;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 4px 10px;
+  border: 2px dashed var(--gold);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--cream);
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+}
+.ov-palette[data-drop="over"] .ov-palette-drop {
+  border-style: solid;
+  background: var(--gold);
+  color: var(--ink);
+}
 .ov-palette-chips {
   display: flex;
   flex-wrap: wrap;

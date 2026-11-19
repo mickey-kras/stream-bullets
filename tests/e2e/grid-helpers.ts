@@ -55,9 +55,11 @@ export async function gridLines(
   });
 }
 
-/** The chip of a layer that is not on the grid. */
+/** The chip of a layer that is not on the grid: a chat or characters layer that is off, or content without a cell. */
 export function paletteChip(editor: Locator, name: string): Locator {
   return editor.locator("[data-comp-palette]").getByRole("button", { name });
 }
 
-export const PALETTE_HINT = "Select a layer to add it at the first free place. Or drag it onto the grid.";
+export const PALETTE_HINT =
+  "Select a layer to add it at the first free place. Or drag it onto the grid. To remove a layer, drag it from the grid back here.";
+export const PALETTE_EMPTY = "All layers are on the grid. Drag a layer here to remove it.";
