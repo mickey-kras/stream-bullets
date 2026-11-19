@@ -63,9 +63,10 @@ function sameSource(a: OverlaySourceRef, b: OverlaySourceRef): boolean {
   return a.type === b.type && a.ref === b.ref;
 }
 
-// Default source ref: newest poll, topic or card.
+// Default source ref: newest poll of the page owner, newest topic or first card. A viewer poll is never the default: the
+// owner picks it in the list.
 export function defaultRef(type: OverlaySource, data: OverlayData): string | null {
-  if (type === "poll") return data.polls[0]?.id ?? null;
+  if (type === "poll") return data.polls.find((poll): boolean => poll.byOwner)?.id ?? null;
   if (type === "topic") return data.topics[0]?.id ?? null;
   if (type === "card") return data.cards[0]?.id ?? null;
   return null;
@@ -223,6 +224,12 @@ function MessageEditor({
   );
 }
 
+// The picker names the author of each viewer poll.
+function pollLabel(poll: OverlayData["polls"][number]): string {
+  const title: string = poll.mash ? `${MASH_NAME}: ${poll.title}` : poll.title;
+  return poll.byOwner ? title : t("overlay.pollBy", { title, author: poll.author });
+}
+
 function SourcePicker({
   type,
   state,
@@ -249,9 +256,10 @@ function SourcePicker({
             labelledBy={labelId}
             options={data.polls.map((poll) => ({
               value: poll.id,
-              label: poll.mash ? `${MASH_NAME}: ${poll.title}` : poll.title,
+              label: pollLabel(poll),
               icon: poll.mash ? "zap" : "polls",
             }))}
+            placeholder={t("overlay.pickPoll")}
             value={state.preview.ref ?? undefined}
             onValueChange={pick}
             disabled={busy}

@@ -231,13 +231,15 @@ beforeEach((): void => {
   vi.mocked(data.getStreamer).mockResolvedValue(streamer);
   vi.mocked(data.getOwnStreamer).mockResolvedValue(null);
   vi.mocked(data.getEntry).mockResolvedValue(null);
-  vi.mocked(data.listEntries).mockImplementation((_env, page) => Promise.resolve(({
-    streamer: page,
-    entries: [],
-    nextCursor: null,
-    revision: 0,
-    serverNow: now,
-  })));
+  vi.mocked(data.listEntries).mockImplementation((_env, page) =>
+    Promise.resolve({
+      streamer: page,
+      entries: [],
+      nextCursor: null,
+      revision: 0,
+      serverNow: now,
+    }),
+  );
   vi.mocked(data.listStreamers).mockResolvedValue({ streamers: [streamer], nextCursor: null });
   vi.mocked(data.countStreamers).mockResolvedValue(1);
   vi.mocked(data.getOverlaySnapshot).mockResolvedValue(initial);
@@ -529,7 +531,7 @@ describe("overlay loader contracts", (): void => {
     });
     vi.mocked(data.getOverlaySnapshot).mockResolvedValue({
       ...initial,
-      polls: [{ ...entry, id: "override", kind: "choice" }],
+      polls: [{ ...entry, id: "override", kind: "choice", byOwner: true }],
     });
     const result = await overlayRoute.loader(args("/@zed/overlay?poll=override", { handle: "@zed" }));
     expect(result.override).toBe("override");
@@ -556,13 +558,15 @@ describe("overlay loader contracts", (): void => {
       air: { type: "poll", ref: "air" },
       preview: { type: "poll", ref: "preview" },
     });
-    vi.mocked(data.getOverlaySnapshot).mockImplementation((_env, _id, ref) => Promise.resolve(({
-      ...initial,
-      polls: [
-        { ...entry, id: "recent", kind: "choice" },
-        ...(ref ? [{ ...entry, id: ref, kind: "choice" as const }] : []),
-      ],
-    })));
+    vi.mocked(data.getOverlaySnapshot).mockImplementation((_env, _id, ref) =>
+      Promise.resolve({
+        ...initial,
+        polls: [
+          { ...entry, id: "recent", kind: "choice", byOwner: true },
+          ...(ref ? [{ ...entry, id: ref, kind: "choice" as const, byOwner: true }] : []),
+        ],
+      }),
+    );
     const result = await controlRoute.loader(args("/overlay-control"));
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["recent", "air", "preview"]);
     expect(vi.mocked(data.getOverlaySnapshot).mock.calls.map((call) => call[2])).toEqual([null, "air", "preview"]);
@@ -767,10 +771,10 @@ describe("public route metadata", (): void => {
     });
     expect(metadata).toContainEqual({ name: "description", content: "Public page biography" });
     const expectedDiscussion: unknown = expect.objectContaining({
-        "@type": "DiscussionForumPosting",
-        headline: entry.title,
-        url: "https://stream.example.test/@zed?view=topics&entry=topic",
-      });
+      "@type": "DiscussionForumPosting",
+      headline: entry.title,
+      url: "https://stream.example.test/@zed?view=topics&entry=topic",
+    });
     expect(metadata).toContainEqual({
       "script:ld+json": expectedDiscussion,
     });

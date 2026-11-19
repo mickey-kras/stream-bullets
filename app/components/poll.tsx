@@ -4,13 +4,14 @@ import { t, tn } from "../i18n";
 import { MASH_DRAW, MASH_NAME, mashWinner } from "../lib/mash";
 import { largestRemainder } from "../lib/percent";
 import type { Entry, LiveSnapshot } from "../types";
+import { Avatar } from "./common";
 import { DeleteButton } from "./discussion";
 import { formatPercent } from "./mash/mash-parts";
 import { useMashView } from "./mash/use-mash";
 import { VoteButtons } from "./streamer/vote-buttons";
 import { Icon } from "./ui/icon";
 
-type PublicPoll = LiveSnapshot["polls"][number];
+type PublicPoll = Omit<LiveSnapshot["polls"][number], "byOwner">;
 
 export function PollResults({
   poll,
@@ -202,6 +203,9 @@ export function MashTeaser({ entry, now }: Readonly<{ entry: Entry; now: number 
         <span className="muted">
           {entry.options.join(" vs ")} · {t("mash.battleLength", { n: entry.mash?.durationS ?? 0 })}
         </span>
+        <span className="muted" data-poll-author>
+          {t("entry.postedBy")} {entry.author}
+        </span>
       </span>
       <Icon name="chevron-right" size={20} />
     </Link>
@@ -233,6 +237,12 @@ export function PollCard({
       {owner && <PollMenu entry={entry} closed={closed} pending={pending} onAction={onAction} onDelete={onDelete} />}
       <PollStatus poll={entry} now={now} />
       <h2>{entry.title}</h2>
+      <div className="author" data-poll-author>
+        <Avatar name={entry.author} url={entry.avatar} preset={entry.avatarPreset} />
+        <span className="byline">
+          {t("entry.postedBy")} <strong>{entry.author}</strong>
+        </span>
+      </div>
       <PollResults
         poll={entry}
         now={now}

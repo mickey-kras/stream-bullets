@@ -258,13 +258,15 @@ describe("synthetic fixtures", (): void => {
     const own = (await getStreamer(env, "test_host"))!;
     const other = (await getStreamer(env, "other_host"))!;
     expect(own.ownerId).not.toBe(other.ownerId);
+    // A viewer creates a poll on another page, but only the page owner reveals its results.
+    const viewerPoll = await mutateEntry(env, own.ownerId, other.id, {
+      action: "create",
+      kind: "choice",
+      title: "Viewer poll",
+      options: ["One", "Two"],
+    });
     await expect(
-      mutateEntry(env, own.ownerId, other.id, {
-        action: "create",
-        kind: "choice",
-        title: "Unauthorized poll",
-        options: ["One", "Two"],
-      }),
+      mutateEntry(env, own.ownerId, other.id, { action: "reveal", id: viewerPoll.id }),
     ).rejects.toMatchObject({ status: 403 });
     const frozen = (await getStreamer(env, "frozen_host"))!;
     const suspended = (await getStreamer(env, "suspended_host"))!;

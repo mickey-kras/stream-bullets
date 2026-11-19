@@ -233,7 +233,10 @@ export interface LiveSnapshot {
   type: "snapshot";
   revision: number;
   serverNow: number;
-  polls: Pick<Entry, "id" | "title" | "kind" | "options" | "endsAt" | "revealed" | "counts" | "total" | "mash">[];
+  // `byOwner`: the page owner wrote the poll. Automatic overlay selection uses only these polls.
+  polls: (Pick<Entry, "id" | "title" | "kind" | "options" | "endsAt" | "revealed" | "counts" | "total" | "mash"> & {
+    byOwner: boolean;
+  })[];
   // Always sent by the live room; optional in loaders.
   overlay?: OverlayPublic | null;
 }
@@ -400,8 +403,8 @@ export interface SupportSettings {
 
 // Public content for non-poll overlay sources.
 export interface OverlayData {
-  // Newest polls and Mash Battles for the picker.
-  polls: { id: string; title: string; mash: boolean }[];
+  // Polls and Mash Battles for the picker: the page owner's first, then newest first. `author` is the display name.
+  polls: { id: string; title: string; mash: boolean; author: string; byOwner: boolean }[];
   topics: {
     id: string;
     title: string;

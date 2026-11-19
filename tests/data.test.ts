@@ -154,6 +154,7 @@ describe("topics and polls", (): void => {
     expect(initial.polls).toMatchObject([{ id: activeId, counts: null, total: 1 }]);
     expect(initial.polls).toHaveLength(1);
     expect(Object.keys(initial.polls[0]).sort()).toEqual([
+      "byOwner",
       "counts",
       "endsAt",
       "id",
@@ -222,7 +223,7 @@ describe("topics and polls", (): void => {
     ]);
   });
 
-  it("persists viewer topics but permits only the owner to create polls", async (): Promise<void> => {
+  it("persists viewer topics and polls, and polls of the owner", async (): Promise<void> => {
     const topic = await mutateEntry(env, "viewer", streamer.id, {
       action: "create",
       kind: "topic",
@@ -236,14 +237,13 @@ describe("topics and polls", (): void => {
       body: "What do you use?",
       options: [],
     });
-    await expect(
-      mutateEntry(env, "viewer", streamer.id, {
-        action: "create",
-        kind: "choice",
-        title: "Which one?",
-        options: ["A", "B"],
-      }),
-    ).rejects.toMatchObject({ status: 403 });
+    const viewerPoll = await mutateEntry(env, "viewer", streamer.id, {
+      action: "create",
+      kind: "choice",
+      title: "Which one?",
+      options: ["A", "B"],
+    });
+    expect(await getEntry(env, viewerPoll.id, null)).toMatchObject({ kind: "choice", author: "viewer", status: null });
     const poll = await mutateEntry(env, "owner", streamer.id, {
       action: "create",
       kind: "binary",
@@ -445,7 +445,9 @@ describe("discussion", (): void => {
       { id, author: "viewer", avatar: null, avatarPreset: 17 },
     ]);
     const threads = await listComments(env, topic.id, null, { sort: "newest", cursor: null, view: "thread" });
-    expect(threads.comments).toMatchObject([{ id, avatarPreset: 17, replies: [{ author: "other", avatarPreset: null }] }]);
+    expect(threads.comments).toMatchObject([
+      { id, avatarPreset: 17, replies: [{ author: "other", avatarPreset: null }] },
+    ]);
     await mutateComment(env, "viewer", { action: "delete", id });
     expect((await listComments(env, topic.id, null, { sort: "newest", cursor: null })).comments).toContainEqual(
       expect.objectContaining({ id, removed: true, avatarPreset: null }),

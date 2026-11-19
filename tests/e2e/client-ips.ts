@@ -3,6 +3,7 @@
 // Allocate free ranges to isolate each spec's write, authentication, and connection quotas (120/min each).
 const ranges = {
   platform: [[10, 15]],
+  "viewer-polls": [[16, 19]],
   mutations: [[25, 27]],
   account: [[40, 40]],
   pagination: [[50, 51]],

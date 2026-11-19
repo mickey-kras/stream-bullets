@@ -3,9 +3,9 @@ import { MASH_PHASES } from "../../db/enums";
 import type { MashState } from "../types";
 
 // Exclude finished Mash Battles from Auto: entries retain NULL `ends_at` and `revealed=0`, so inspect
-// `entry_mash`. Setup/countdown/live count as open; `now` is SQL milliseconds.
-export function notFinishedBattle(now: string): string {
-  return `NOT EXISTS (SELECT 1 FROM entry_mash m WHERE m.entry_id=entries.id
+// `entry_mash`. Setup/countdown/live count as open; `now` is SQL milliseconds. `entry` is the entries alias.
+export function notFinishedBattle(now: string, entry = "entries"): string {
+  return `NOT EXISTS (SELECT 1 FROM entry_mash m WHERE m.entry_id=${entry}.id
     AND (m.phase='finished' OR (m.ends_at IS NOT NULL AND m.ends_at <= ${now})))`;
 }
 

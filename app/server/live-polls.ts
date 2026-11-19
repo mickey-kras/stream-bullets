@@ -1,5 +1,6 @@
 import type { LiveSnapshot } from "../types";
-import { MASH_COLUMN, mashValue, notFinishedBattle } from "./mash-sql";
+import { MASH_COLUMN, mashValue } from "./mash-sql";
+import { autoPoll, byOwner, notHeld, openPoll } from "./poll-sql";
 
 export type PollRow = {
   id: string;
@@ -16,25 +17,30 @@ export type PollRow = {
   count_4: number;
   count_5: number;
   mash: string | null;
+  by_owner: number;
 };
 
-// Read the 50 newest choice/binary polls plus any older open poll, with counts. Bind streamer ID twice.
+const POLL_COLUMNS = `id, title, kind, COALESCE(binary_labels, options) AS options, ends_at, revealed, created_at,
+      (${byOwner()}) AS by_owner`;
+
+// Read the 50 newest choice/binary polls plus any older open poll of the page owner, with counts. Leave out polls that
+// moderation holds. Only a poll of the page owner can be the open poll: automatic selection never shows a viewer poll.
+// Bind streamer ID twice.
 export const LIVE_POLLS_SQL = `
   WITH recent AS (
-    SELECT id, title, kind, COALESCE(binary_labels, options) AS options, ends_at, revealed, created_at
-    FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary')
+    SELECT ${POLL_COLUMNS}
+    FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary') AND ${notHeld()}
     ORDER BY created_at DESC, id DESC LIMIT 50
   ), active AS (
-    SELECT id, title, kind, COALESCE(binary_labels, options) AS options, ends_at, revealed, created_at
+    SELECT ${POLL_COLUMNS}
     FROM entries WHERE streamer_id = ? AND kind IN ('choice', 'binary')
-      AND revealed = 0 AND (ends_at IS NULL OR ends_at > unixepoch('subsec') * 1000)
-      AND ${notFinishedBattle("unixepoch('subsec') * 1000")}
+      AND ${openPoll("unixepoch('subsec') * 1000")} AND ${autoPoll()}
     ORDER BY created_at DESC, id DESC LIMIT 1
   ), selected AS (
     SELECT * FROM (SELECT * FROM recent UNION SELECT * FROM active)
     ORDER BY (id = (SELECT id FROM active)) DESC, created_at DESC, id DESC LIMIT 50
   )
-  SELECT e.id, e.title, e.kind, e.options, e.ends_at, e.revealed,
+  SELECT e.id, e.title, e.kind, e.options, e.ends_at, e.revealed, e.by_owner,
     COALESCE(SUM(c.votes), 0) AS total,
     COALESCE(SUM(CASE WHEN c.choice = 0 THEN c.votes END), 0) AS count_0,
     COALESCE(SUM(CASE WHEN c.choice = 1 THEN c.votes END), 0) AS count_1,
@@ -82,6 +88,20 @@ export function livePolls(rows: readonly PollRow[]): LiveSnapshot["polls"] {
             ),
       total: poll.total,
       mash,
+      byOwner: poll.by_owner === 1,
     };
   });
+}
+
+/**
+ * The snapshot for a socket of the OBS overlay: polls of the page owner, plus the poll that the owner put on air.
+ * An overlay page that runs older code then cannot show a viewer poll through automatic selection.
+ */
+export function overlaySnapshot(snapshot: LiveSnapshot): LiveSnapshot {
+  const air = snapshot.overlay?.air;
+  const picked: string | null = air?.type === "poll" ? air.ref : null;
+  return {
+    ...snapshot,
+    polls: snapshot.polls.filter((poll: LiveSnapshot["polls"][number]): boolean => poll.byOwner || poll.id === picked),
+  };
 }

@@ -157,7 +157,10 @@ test("role matrix: the streamer page header action and content tools", async ({ 
     await expect(page.getByRole("button", { name: "Report topic" }), role).toHaveCount(want.signedIn ? 1 : 0);
     await expect(page.getByRole("button", { name: "Delete topic" }), role).toHaveCount(want.remove ? 1 : 0);
     await page.goto("/@pagination_host?view=polls");
-    await expect(page.getByRole("button", { name: "New poll" }), role).toHaveCount(0);
+    // Each signed-in account can create a poll, like a topic. A guest signs in first.
+    const newPoll = page.getByRole("button", { name: "New poll" });
+    if (want.signedIn) await expect(newPoll.first(), role).toBeVisible();
+    else await expect(newPoll, role).toHaveCount(0);
 
     // A signed-in report of a missing item passes authentication; signed out fails.
     const report = await context.request.post("/api/reports", {

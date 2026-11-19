@@ -46,6 +46,8 @@ const snapshotSchema = z.object({
         counts: z.array(count).max(6).nullable(),
         total: count,
         mash: mashSchema.nullable().default(null),
+        // A missing value (an older server) reads as a viewer poll: automatic overlay selection then skips it.
+        byOwner: z.boolean().default(false),
       }),
     )
     .max(100),
