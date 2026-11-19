@@ -28,7 +28,11 @@ const config: BuildConfig = {
   ...(build.assets
     ? { assets: { ...build.assets, directory: resolve(dirname(buildPath), build.assets.directory) } }
     : {}),
-  vars: { APP_ORIGIN: "http://localhost:5173", ADMIN_EMAILS: "admin@example.test keyadmin@example.test" },
+  vars: {
+    APP_ORIGIN: "http://localhost:5173",
+    ADMIN_EMAILS: "admin@example.test keyadmin@example.test",
+    ADMIN_STEP_UP: "report",
+  },
   d1_databases: build.d1_databases.map((database) => ({
     ...database,
     database_id: databaseId,
