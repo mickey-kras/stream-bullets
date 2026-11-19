@@ -786,7 +786,7 @@ describe("account deletion", (): void => {
       ["own-reset", "reset-password:token-a", "leaver"],
       ["own-delete", "delete-account-token-b", "leaver"],
       ["own-channel", "channel-connect:aa", '{"userId":"leaver","streamerId":"p","platform":"twitch"}'],
-      ["own-escaped", "channel-connect:ab", String.raw`{"userId":"leaver"}`],
+      ["own-escaped", "channel-connect:ab", String.raw`{"userId":"\u006ceaver"}`],
       ["own-spaced", "auth-state:aa", '{ "link": { "userId": "leaver", "email": "leaver@example.test" } }'],
     ];
     const kept: readonly VerificationSeed[] = [
