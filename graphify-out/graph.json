@@ -45441,7 +45441,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L1146",
+      "source_location": "L1148",
       "target": "tests_admin_test_insertkey",
       "weight": 1.0
     },
@@ -45465,7 +45465,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L239",
+      "source_location": "L241",
       "target": "tests_admin_test_asadmin",
       "weight": 1.0
     },
@@ -45477,7 +45477,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L274",
+      "source_location": "L276",
       "target": "tests_admin_test_twokeys",
       "weight": 1.0
     },
@@ -45489,7 +45489,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L275",
+      "source_location": "L277",
       "target": "tests_admin_test_age",
       "weight": 1.0
     },
@@ -45501,7 +45501,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L279",
+      "source_location": "L281",
       "target": "tests_admin_test_stepup",
       "weight": 1.0
     },
@@ -45513,7 +45513,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L452",
+      "source_location": "L454",
       "target": "tests_admin_test_addkey",
       "weight": 1.0
     },
@@ -45525,7 +45525,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L601",
+      "source_location": "L603",
       "target": "tests_admin_test_stamp",
       "weight": 1.0
     },
@@ -45537,7 +45537,7 @@
       "relation": "calls",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L822",
+      "source_location": "L824",
       "target": "tests_admin_test_seedreport",
       "weight": 1.0
     },
@@ -168067,7 +168067,7 @@
       "relation": "contains",
       "source": "security_admin_security_keys",
       "source_file": "SECURITY.md",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "security_recovery_when_the_administrator_loses_every_key",
       "weight": 1.0
     },
@@ -168078,7 +168078,7 @@
       "relation": "contains",
       "source": "security_security_policy",
       "source_file": "SECURITY.md",
-      "source_location": "L39",
+      "source_location": "L40",
       "target": "security_channel_connections",
       "weight": 1.0
     },
@@ -168089,7 +168089,7 @@
       "relation": "contains",
       "source": "security_security_policy",
       "source_file": "SECURITY.md",
-      "source_location": "L43",
+      "source_location": "L44",
       "target": "security_dependency_licenses",
       "weight": 1.0
     },
@@ -168485,7 +168485,7 @@
       "relation": "contains",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L592",
+      "source_location": "L594",
       "target": "tests_admin_test_stamp",
       "weight": 1.0
     },
@@ -168496,7 +168496,7 @@
       "relation": "contains",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L663",
+      "source_location": "L665",
       "target": "tests_admin_test_get",
       "weight": 1.0
     },
@@ -168507,7 +168507,7 @@
       "relation": "contains",
       "source": "tests_admin_test",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L900",
+      "source_location": "L902",
       "target": "tests_admin_test_insertkey",
       "weight": 1.0
     },
@@ -178876,7 +178876,7 @@
       "relation": "references",
       "source": "security",
       "source_file": "SECURITY.md",
-      "source_location": "L41",
+      "source_location": "L42",
       "target": "docs_channel_connections",
       "weight": 1.0
     },
@@ -181534,10 +181534,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "58e9870705abeb365b386afcc39ae8c0ba1a8681ca4418b31e40812ba2f85ece",
+    "content_sha256": "3b5b2fc01d711400a433035272d57098917cf8bca6652cafc7a9ae5acf515176",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "63a86b1c08d45748b195570f217a4494ba3893c0f8b2ca57e0b47c4bc7bfbdef",
+    "source_sha256": "2422b06e99bee17dd2c492a6bea46396af26bf4997cc08250c607a42f80ccc1c",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -209725,14 +209725,14 @@
             "callee": "batch",
             "file": "tests/admin.test.ts",
             "lang": "typescript",
-            "line": "L671",
+            "line": "L673",
             "receiver_type": "D1Database"
           }
         ]
       },
       "norm_label": "get()",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L663"
+      "source_location": "L665"
     },
     {
       "_callable": true,
@@ -209743,7 +209743,7 @@
       "label": "insertKey()",
       "norm_label": "insertkey()",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L900"
+      "source_location": "L902"
     },
     {
       "_callable": true,
@@ -209776,7 +209776,7 @@
       "label": "stamp()",
       "norm_label": "stamp()",
       "source_file": "tests/admin.test.ts",
-      "source_location": "L592"
+      "source_location": "L594"
     },
     {
       "_callable": true,
@@ -225020,7 +225020,7 @@
             "callee": "set",
             "file": "tests/admin.test.ts",
             "lang": "typescript",
-            "line": "L529",
+            "line": "L531",
             "receiver_type": "Uint8Array"
           }
         ]
@@ -230417,7 +230417,7 @@
       "node_kind": "heading",
       "norm_label": "channel connections",
       "source_file": "SECURITY.md",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "_origin": "ast",
@@ -230428,7 +230428,7 @@
       "node_kind": "heading",
       "norm_label": "dependency licenses",
       "source_file": "SECURITY.md",
-      "source_location": "L43"
+      "source_location": "L44"
     },
     {
       "_origin": "ast",
@@ -230439,7 +230439,7 @@
       "node_kind": "heading",
       "norm_label": "recovery when the administrator loses every key",
       "source_file": "SECURITY.md",
-      "source_location": "L26"
+      "source_location": "L27"
     },
     {
       "_origin": "ast",

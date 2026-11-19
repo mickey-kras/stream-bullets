@@ -16,7 +16,7 @@ import {
 
 // Verify FIDO2 keys on the current session; passkey sign-in would create another session. Stamp
 // `session.admin_verified_at`: 15 minutes for ordinary actions, 2 for sensitive actions. `enforce`
-// requires two keys plus fresh step-up. Unset and unknown modes fail closed to `enforce`.
+// requires two keys plus fresh step-up. Unset and unknown modes enforce; the unset test environment reports.
 
 export const STEP_UP_WINDOW_MS = 15 * 60_000;
 export const SENSITIVE_WINDOW_MS = 2 * 60_000;
@@ -60,7 +60,7 @@ export interface CreationOptions {
 
 export function stepUpMode(env: AppEnv): StepUpMode {
   const value = (env.ADMIN_STEP_UP ?? "").trim().toLowerCase();
-  if (value === "report") return "report";
+  if (value === "report" || (value === "" && env.APP_ENV === "test")) return "report";
   if (value === "off") return "off";
   return "enforce";
 }

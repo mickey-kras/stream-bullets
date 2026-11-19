@@ -33,7 +33,6 @@
       "vars": {
         "APP_ORIGIN": "https://test.streambullets.com",
         "APP_ENV": "test",
-        "ADMIN_STEP_UP": "report",
         "ADMIN_EMAILS": "admin@example.test",
         "TEST_DATABASE_ID": "e475eb5b-db31-43bd-8692-5926711e8faa"
       },

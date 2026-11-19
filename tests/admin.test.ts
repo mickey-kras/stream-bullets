@@ -228,6 +228,8 @@ describe("admin authorisation", (): void => {
     const mode = (value: string | undefined): string => stepUpMode({ ...env, ADMIN_STEP_UP: value });
     expect(mode(undefined)).toBe("enforce");
     expect(mode("")).toBe("enforce");
+    expect(stepUpMode({ ...env, APP_ENV: "test", ADMIN_STEP_UP: undefined })).toBe("report");
+    expect(stepUpMode({ ...env, APP_ENV: "test", ADMIN_STEP_UP: "enforce" })).toBe("enforce");
     expect(mode(" Report ")).toBe("report");
     expect(mode("off")).toBe("off");
     expect(mode("enforce")).toBe("enforce");

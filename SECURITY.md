@@ -12,6 +12,7 @@ Admin content removal uses the same check and records a `moderation_actions` row
 Authors and page owners need no key to remove their content.
 
 The default mode is `enforce`. A deployment with no `ADMIN_STEP_UP` value enforces the check.
+The test environment is the exception: with no value, it reports.
 The mode `report` permits access without a key check.
 Unchecked calls to admin endpoints record `step_up_missing`, the administrator, and the route.
 

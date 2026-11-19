@@ -93,7 +93,7 @@ Each complete pair enables its sign-in button. Do not commit secrets or database
 | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Instagram Login credentials. Requires Meta review and a creator or business account. No provider email. |
 | `ADMIN_EMAILS` | Case-insensitive administrator emails, separated by commas or spaces. |
 | `AI_INTEREST_SALT` | Worker secret, at least 16 random characters. Keys the daily IP hash. The counter never stores raw IPs. Absence disables the counter and buttons. |
-| `ADMIN_STEP_UP` | `off`, `report`, or `enforce` (default). No value and unknown values enforce. See [Admin security keys](#admin-security-keys). |
+| `ADMIN_STEP_UP` | `off`, `report`, or `enforce` (default). No value and unknown values enforce. The test environment reports when it has no value. See [Admin security keys](#admin-security-keys). |
 | `LEGAL_DETAILS` | Worker secret: JSON with `operatorName`, `operatorCountry`, and `policyEffectiveDate` (`YYYY-MM-DD`). Values appear publicly. Missing values show a draft. Invalid values return 503. |
 | `CRON_HEARTBEAT_URL` | Optional uptime-service URL. Successful hourly jobs send POST. Configure alerts for missed calls. |
 | `CHANNEL_TOKEN_KEYS`, `TWITCH_EVENTSUB_SECRET`, `KICK_CLIENT_ID`, `KICK_CLIENT_SECRET` | Worker secrets for channel connections. See [setup](docs/channel-connections.md#setup). |
