@@ -21,14 +21,13 @@ import {
   ReauthRequired,
   refreshTokens,
   revokeToken,
-  listSubscriptions,
-  subscribe,
   unsubscribe,
   youtubeChatPage,
   youtubeLiveChat,
 } from "./channel-providers.server";
+import { ChannelSubscriptions } from "./channel-ingest-subscriptions";
 import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./channel-tokens.server";
-import { HttpError, getOrigin } from "./http.server";
+import { HttpError } from "./http.server";
 import { ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
@@ -81,6 +80,7 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/page-status": "POST",
   "/close": "POST",
   "/refresh": "POST",
+  "/reconcile": "POST",
   "/playground": "POST",
   "/playground-config": "POST",
 };
@@ -106,8 +106,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   private readonly healthAt = new Map<ActivityPlatform, number>();
   /** The refresh in flight for each connection: a second caller waits for it instead of refreshing again. */
   private readonly refreshes = new Map<string, Promise<StoredTokens>>();
-  /** Provider subscription replacements run one at a time for each platform. */
-  private readonly subscriptions = new Map<ActivityPlatform, Promise<void>>();
+  /** The provider subscriptions: made on connect, and checked and repaired without the owner. */
+  private readonly subscriptions: ChannelSubscriptions;
   /** Rows in `seen` and `deleted`, so the count limit runs only when a table is over it. */
   private readonly counts = new Map<IdTable, number>();
   /** Connections read from D1, with when they were read. The handlers that change a connection clear it. */
@@ -125,6 +125,18 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   constructor(ctx: DurableObjectState, env: AppEnv) {
     super(ctx, env);
     this.playground = playgroundOf(ctx, env, () => this.streamerId, this.scheduleAlarm.bind(this));
+    this.subscriptions = new ChannelSubscriptions({
+      env,
+      storage: ctx.storage,
+      streamerId: () => this.streamerId,
+      listening: () => ctx.getWebSockets("activity").length > 0,
+      connection: this.connection.bind(this),
+      setStatus: this.setStatus.bind(this),
+      freshTokens: this.freshTokens.bind(this),
+      generation: (platform: ActivityPlatform) => this.generations.get(platform),
+      schedule: this.scheduleAlarm.bind(this),
+      acceptedAt: (platform: ActivityPlatform) => this.healthAt.get(platform) ?? 0,
+    });
     detached(
       ctx.blockConcurrencyWhile(async (): Promise<void> => {
         this.streamerId = await ctx.storage.get<string>("streamerId");
@@ -162,7 +174,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       await this.ctx.storage.put("streamerId", streamerId);
     }
     // These requests change a connection or the page: read them from D1 again afterwards.
-    if (["/connect", "/disconnect", "/status", "/page-status", "/close", "/refresh"].includes(url.pathname))
+    if (
+      ["/connect", "/disconnect", "/status", "/page-status", "/close", "/refresh", "/reconcile"].includes(url.pathname)
+    )
       this.forgetConnections();
     // Ingestion is off: consumers get `unavailable` and reconnect once it is on again.
     if (channelsOff(this.env)) this.closeSockets("Channels off");
@@ -179,6 +193,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (pathname === "/event") return this.receive(platform, request);
     if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
     if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
+    if (pathname === "/reconcile") return Response.json(await this.subscriptions.requested(platform, Date.now()));
     return this.statusChanged(platform, request);
   }
 
@@ -206,6 +221,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     // A key change that arrived while this check waited revoked the key this request carries.
     if (overlay && this.overlayKeys !== keysBefore) return reply("Forbidden", 403);
     if (this.ctx.getWebSockets("activity").length >= MAX_SOCKETS) return reply("Too many connections", 429);
+    const first = this.ctx.getWebSockets("activity").length === 0;
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
     const tags = overlay ? ["activity", "overlay-key"] : ["activity", "owner"];
@@ -213,13 +229,21 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.ctx.acceptWebSocket(server, characters ? [...tags, "characters"] : tags);
     this.send(server, snapshotMessage(this.snapshot(Date.now())));
     if (characters) await this.playground.open(server);
+    await this.listeningStarted(first, Date.now());
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  /** A consumer listens: YouTube polling and the subscription checks start, each no earlier than its own wait. */
+  private async listeningStarted(first: boolean, now: number): Promise<void> {
+    // The watchdog measures silence from here, so a page without a consumer is never reported.
+    if (first) await this.ctx.storage.put("listeningSince", now);
     const youtube = await this.connection("youtube");
     if (youtube && youtube.status !== "needs_reauth" && !youtube.suspended) {
       // A new consumer never moves a poll forward past a backoff, an interval or a quota wait.
       const state = (await this.ctx.storage.get<YoutubeState>("youtube")) ?? NEW_YOUTUBE_STATE;
-      await this.scheduleAlarm(Math.max(Date.now(), state.nextPollAt));
+      await this.scheduleAlarm(Math.max(now, state.nextPollAt));
     }
-    return new Response(null, { status: 101, webSocket: client });
+    await this.subscriptions.listeningStarted(now);
   }
 
   private async pageSuspended(): Promise<boolean> {
@@ -403,8 +427,14 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.ingest(admitted, now);
     // The alarm expires stored messages and ids on time, also when no further delivery comes.
     await this.scheduleAlarm(Math.min(now + SNAPSHOT_MAX_AGE_MS + 1, this.playground.wakeAt() ?? Infinity));
-    await this.touch(platform, connection, now);
+    await this.accepted(platform, connection, now);
     return new Response(null, { status: 204 });
+  }
+
+  /** An accepted delivery proves that the channel works: it records the time and ends an `error` status. */
+  private async accepted(platform: ActivityPlatform, connection: Connection, now: number): Promise<void> {
+    await this.touch(platform, connection, now);
+    if (connection.status === "error") await this.setStatus(platform, connection, "active", null);
   }
 
   /**
@@ -459,6 +489,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   // Connections ---------------------------------------------------------------------------------------------------
 
   private forgetConnections(): void {
+    this.subscriptions.forget();
     this.connections.clear();
     this.connectionEpoch += 1;
   }
@@ -483,14 +514,27 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   private async readConnection(platform: ActivityPlatform): Promise<Connection | null> {
     const row = await this.env.DB.prepare(
-      `SELECT c.id, c.external_id, c.status, s.status AS page_status FROM channel_connections c
-        JOIN streamers s ON s.id = c.streamer_id WHERE c.streamer_id=? AND c.platform=?`,
+      `SELECT c.id, c.external_id, c.status, c.status_code, c.last_event_at, s.status AS page_status
+        FROM channel_connections c JOIN streamers s ON s.id = c.streamer_id WHERE c.streamer_id=? AND c.platform=?`,
     )
       .bind(this.streamerId, platform)
-      .first<{ id: string; external_id: string; status: ChannelStatus; page_status: string }>();
-    return row
-      ? { id: row.id, externalId: row.external_id, status: row.status, suspended: row.page_status === "suspended" }
-      : null;
+      .first<{
+        id: string;
+        external_id: string;
+        status: ChannelStatus;
+        status_code: string | null;
+        last_event_at: number | null;
+        page_status: string;
+      }>();
+    if (!row) return null;
+    return {
+      id: row.id,
+      externalId: row.external_id,
+      status: row.status,
+      code: row.status_code,
+      lastEventAt: row.last_event_at,
+      suspended: row.page_status === "suspended",
+    };
   }
 
   private async setStatus(
@@ -516,7 +560,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     this.connectionEpoch += 1;
     const cached = this.connections.get(platform);
     if (overtaken) this.connections.delete(platform);
-    else if (cached?.value?.id === connection.id) cached.value = { ...cached.value, status };
+    else if (cached?.value?.id === connection.id) cached.value = { ...cached.value, status, code };
     // Only the platform and fixed codes: never an id, a name or provider text.
     if (status !== connection.status || status !== "active")
       console.warn("channel_status_changed", { platform, status, code });
@@ -593,16 +637,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const overtaken = (): boolean => this.generations.get(platform) !== generation;
     try {
       const tokens = await this.freshTokens(platform, connection);
-      await this.resubscribe(platform, connection, tokens.accessToken, overtaken);
+      await this.subscriptions.resubscribe(platform, connection, tokens.accessToken, overtaken);
       if (overtaken()) return { status: "error", code: "subscribe_failed" };
-      if (platform === "youtube") {
-        // A reconnect starts a new chat session but keeps a pending wait, so reconnecting cannot skip a quota wait.
-        const previous = (await this.ctx.storage.get<YoutubeState>("youtube")) ?? NEW_YOUTUBE_STATE;
-        // The callback read the title just now.
-        const state: YoutubeState = { ...NEW_YOUTUBE_STATE, nextPollAt: previous.nextPollAt, nameAt: Date.now() };
-        await this.ctx.storage.put("youtube", state);
-        await this.scheduleAlarm(Math.max(Date.now(), state.nextPollAt));
-      }
+      await this.connectionStarted(platform, Date.now());
       await this.setStatus(platform, connection, "active", null);
       return { status: "active", code: null };
     } catch (error: unknown) {
@@ -618,73 +655,15 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     }
   }
 
-  /** The subscriptions this object knows of and the ones the provider lists for the channel and this callback. */
-  private async knownSubscriptions(
-    platform: ActivityPlatform,
-    connection: Connection,
-    accessToken: string | null,
-  ): Promise<{ ids: string[]; listed: boolean }> {
-    const stored = (await this.ctx.storage.get<string[]>(`subs:${platform}`)) ?? [];
-    const listed = await listSubscriptions(this.env, platform, connection.externalId, accessToken, getOrigin(this.env));
-    return { ids: [...new Set([...stored, ...(listed ?? []).map((item) => item.id)])], listed: listed !== null };
-  }
-
-  /**
-   * Deletes the old provider subscriptions of the channel and makes new ones. Undeleted and new ids stay stored
-   * for a later disconnect. A Twitch 409 adopts the listed subscriptions of that type. A type left without a
-   * subscription for this callback fails the connect.
-   */
-  private async resubscribe(
-    platform: ActivityPlatform,
-    connection: Connection,
-    accessToken: string,
-    overtaken: () => boolean,
-  ): Promise<void> {
-    await this.serialSubscriptions(platform, async (): Promise<void> => {
-      if (!overtaken()) await this.replaceSubscriptions(platform, connection, accessToken, overtaken);
-    });
-  }
-
-  private async serialSubscriptions<T>(platform: ActivityPlatform, work: () => Promise<T>): Promise<T> {
-    const previous = this.subscriptions.get(platform) ?? Promise.resolve();
-    const pending = previous.then(work);
-    // The queue advances after either outcome; the caller still receives the original failure.
-    const settled = pending.then(
-      (): void => undefined,
-      (): void => undefined,
-    );
-    this.subscriptions.set(platform, settled);
-    try {
-      return await pending;
-    } finally {
-      if (this.subscriptions.get(platform) === settled) this.subscriptions.delete(platform);
-    }
-  }
-
-  private async replaceSubscriptions(
-    platform: ActivityPlatform,
-    connection: Connection,
-    accessToken: string,
-    overtaken: () => boolean,
-  ): Promise<void> {
-    const key = `subs:${platform}`;
-    const origin = getOrigin(this.env);
-    const known = await this.knownSubscriptions(platform, connection, accessToken);
-    if (overtaken()) return;
-    let kept = await unsubscribe(this.env, platform, known.ids, accessToken);
-    if (overtaken()) return;
-    const created: string[] = [];
-    try {
-      const { conflicts } = await subscribe(this.env, platform, connection.externalId, accessToken, origin, created);
-      if (conflicts.length > 0) {
-        const listed = await listSubscriptions(this.env, platform, connection.externalId, accessToken, origin);
-        const adopted = (listed ?? []).filter((item) => conflicts.includes(item.type));
-        kept = [...kept, ...adopted.map((item) => item.id)];
-        if (conflicts.some((type) => !adopted.some((item) => item.type === type))) throw new ProviderError(409);
-      }
-    } finally {
-      if (!overtaken()) await this.ctx.storage.put(key, [...new Set([...kept, ...created])]);
-    }
+  /** A connect succeeded: YouTube polling starts, and the next subscription check waits one interval. */
+  private async connectionStarted(platform: ActivityPlatform, now: number): Promise<void> {
+    if (platform !== "youtube") return this.subscriptions.connected(platform, now);
+    // A reconnect starts a new chat session but keeps a pending wait, so reconnecting cannot skip a quota wait.
+    const previous = (await this.ctx.storage.get<YoutubeState>("youtube")) ?? NEW_YOUTUBE_STATE;
+    // The callback read the title just now.
+    const state: YoutubeState = { ...NEW_YOUTUBE_STATE, nextPollAt: previous.nextPollAt, nameAt: now };
+    await this.ctx.storage.put("youtube", state);
+    await this.scheduleAlarm(Math.max(now, state.nextPollAt));
   }
 
   /**
@@ -694,7 +673,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   private async disconnectChannel(platform: ActivityPlatform): Promise<{ revoked: boolean; unsubscribed: boolean }> {
     this.bump(platform);
     const generation = this.generations.get(platform);
-    return this.serialSubscriptions(platform, () => this.cleanupChannel(platform, generation));
+    return this.subscriptions.serial(platform, () => this.cleanupChannel(platform, generation));
   }
 
   private async cleanupChannel(
@@ -715,7 +694,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
         // An expired token that cannot refresh may still revoke the refresh token.
         tokens = await loadTokens(this.env, connection.id, platform).catch((): null => null);
       }
-      const known = await this.knownSubscriptions(platform, connection, tokens?.accessToken ?? null);
+      const known = await this.subscriptions.known(platform, connection, tokens?.accessToken ?? null);
       left = await unsubscribe(this.env, platform, known.ids, tokens?.accessToken ?? null);
       // Reported as done only when the provider's own list was read and every delete succeeded.
       unsubscribed = known.listed && left.length === 0;
@@ -727,12 +706,13 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (left.length > 0) await this.ctx.storage.put(key, left);
     else await this.ctx.storage.delete(key);
     if (platform === "youtube") await this.ctx.storage.delete("youtube");
+    await this.ctx.storage.delete(`repair:${platform}`);
     this.ctx.storage.sql.exec("DELETE FROM events WHERE platform=?", platform);
     this.broadcast({ kind: "status", platform, status: "disconnected" });
     return { revoked, unsubscribed };
   }
 
-  /** The Worker saw a provider revocation (Twitch `revocation` message): stop until the owner reconnects. */
+  /** The Worker saw a Twitch `revocation`. A revoked authorization waits for the owner; any other gets a repair. */
   private async statusChanged(platform: ActivityPlatform, request: Request): Promise<Response> {
     const parsed = z
       .object({ code: z.enum(CHANNEL_STATUS_CODES) })
@@ -740,8 +720,10 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (!parsed.success) return reply("Invalid status", 400);
     const { code } = parsed.data;
     const connection = await this.connection(platform);
-    if (connection)
-      await this.setStatus(platform, connection, code === "authorization_revoked" ? "needs_reauth" : "error", code);
+    if (!connection) return new Response(null, { status: 204 });
+    const reauth = code === "authorization_revoked";
+    await this.setStatus(platform, connection, reauth ? "needs_reauth" : "error", code);
+    if (!reauth) await this.subscriptions.owe(platform, Date.now());
     return new Response(null, { status: 204 });
   }
 
@@ -798,6 +780,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       });
       wait = CLEANUP_INTERVAL_MS;
     }
+    const repair = await this.subscriptions.due(now);
+    if (repair !== null) wait = Math.min(wait ?? Infinity, repair);
     if (wait !== null) await this.ctx.storage.setAlarm(cleanup === null ? now + wait : Math.min(cleanup, now + wait));
     // The playground restarts after an eviction and sets its watchdog, or saves a pending checkpoint.
     await this.playground.alarm();

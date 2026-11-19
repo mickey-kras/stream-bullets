@@ -235,6 +235,7 @@
   "channels.status.revokedYoutube": "L’accès a pris fin. Reconnectez la chaîne pour continuer à recevoir le chat. Sans reconnexion, cette connexion est supprimée après 7 jours.",
   "channels.status.subscribeFailed": "Les événements du chat n’ont pas pu être configurés. Reconnectez la chaîne pour réessayer.",
   "channels.status.subscriptionRemoved": "La plateforme a mis fin à l’abonnement aux événements. Reconnectez la chaîne pour reprendre.",
+  "channels.status.webhooksRejected": "Le flux ne peut pas accepter les événements de la plateforme pour le moment. Il vérifie de nouveau tout seul : inutile de reconnecter la chaîne.",
   "channels.summary.attention": "À vérifier : {platforms}",
   "channels.summary.connected": "Connecté : {platforms}",
   "channels.summary.none": "Aucune chaîne connectée pour l’instant",

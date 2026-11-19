@@ -227,6 +227,7 @@
   "channels.status.revokedYoutube": "访问已结束。请重新连接以继续接收聊天。如不重新连接，此连接将在 7 天后移除。",
   "channels.status.subscribeFailed": "无法设置聊天事件。请重新连接后再试。",
   "channels.status.subscriptionRemoved": "平台已终止事件订阅。请重新连接以恢复。",
+  "channels.status.webhooksRejected": "信息流目前无法接收平台的事件。它会自动重新检查：无需重新连接。",
   "channels.summary.attention": "需要处理：{platforms}",
   "channels.summary.connected": "已连接：{platforms}",
   "channels.summary.none": "尚未连接任何频道",

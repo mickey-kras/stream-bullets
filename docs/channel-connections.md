@@ -44,6 +44,7 @@ The code is in these files:
 | Webhook checks | `app/server/channel-webhooks.server.ts` |
 | Payload normalization | `app/server/channel-normalize.ts` |
 | Ingestion, snapshot, YouTube poll | `app/server/channel-ingest.ts` |
+| Provider subscriptions and their repair | `app/server/channel-ingest-subscriptions.ts`, `app/server/channel-repair.server.ts` |
 | Streamer controls | `app/components/channels/channel-panel.tsx` |
 
 ## Event contract
@@ -169,6 +170,11 @@ The callback refuses an authorization that gives fewer scopes than the list abov
 | YouTube backoff | 1 second up to 5 minutes, with jitter |
 | YouTube quota | 9,000 units each quota day for all pages together, and 3,000 units for each page |
 | `last_event_at` writes | One each 30 seconds for each channel |
+| Subscription check while a consumer listens | At most one each 10 minutes for each channel |
+| Subscription checks of the hourly job | 25 channels in one run |
+| Repair backoff | 1 second up to 5 minutes, with jitter |
+| Webhook health writes | One each minute for each key and Worker isolate |
+| Watchdog report | At most one each hour for each channel |
 
 The object keeps the snapshot and the IDs in its own SQLite storage. A snapshot never holds a message older than
 10 minutes. An alarm also deletes expired messages and IDs from storage. To limit wakeups, the alarm runs at most
@@ -342,6 +348,78 @@ If Twitch answers that a subscription exists (409), the object adopts the IDs of
 If a type stays without a subscription for this callback, the connect fails with `subscribe_failed`. This occurs
 when another deployment holds the subscription, or when the object cannot read the list.
 
+### Subscription repair
+
+The object repairs Twitch and Kick subscriptions without the owner. A check reads the list of the provider for
+the channel. It deletes each subscription that the provider reports as ended. It creates each required type that
+has no enabled or pending subscription. It never changes an enabled or pending subscription. Thus a check of a
+healthy channel changes nothing.
+
+Twitch reports a status for each subscription. `enabled` is healthy. `webhook_callback_verification_pending`
+waits for the callback check. Every other status means that the subscription ended. The Twitch check uses only
+the app token.
+
+Kick reports no status. Kick removes a subscription when its webhook fails for more than a day. Thus a missing
+event in the list is the only sign. The Kick check needs the token of the broadcaster. The object refreshes that
+token first. The check creates only the missing events.
+
+A check runs at these times:
+
+- When a consumer starts to listen, and at most once each 10 minutes while one listens.
+- Each hour from the `channel_repair` job, for at most 25 channels in one run. Each run starts at another
+  channel. A failed channel does not stop the job.
+- After a Twitch revocation that the app can repair.
+
+A check never runs for a connection with `needs_reauth`, for a suspended page, or while `CHANNELS_OFF` exists.
+It also never runs for a platform without provider credentials.
+A connect makes every subscription. Thus the first check after a connect waits 10 minutes.
+
+The check sets the status that its result proves. If every required type is enabled or pending, the connection
+becomes `active`. If the provider refuses a missing type, the connection gets `error` with `subscribe_failed`.
+An `error` that already has a code keeps that code. A list that the object cannot read changes no status.
+
+A refused Kick refresh sets `needs_reauth`. A Twitch 403 for a new subscription also sets `needs_reauth`.
+
+A failed check runs again with backoff, from 1 second up to 5 minutes, with jitter. Without a consumer, the
+object stops at the longest backoff. The hourly job then tries the channel again.
+
+A Twitch revocation with `notification_failures_exceeded` or `version_removed` sets `error`. The object also
+schedules a check with the same backoff. A revocation with an unknown status gets the same repair. A revocation
+with `authorization_revoked` or `user_removed` sets `needs_reauth`. Only the owner can give that access back.
+
+The feed subscribes to current versions. Thus a new subscription can replace one with a removed version.
+
+The Worker checks no header format before the signature of a Twitch message. A signed revocation needs no
+message ID. Thus an unusual ID can never refuse a revocation. Only a notification needs a valid ID, because the
+ID is the delivery ID.
+
+An accepted, signed Twitch or Kick delivery proves that the channel works. It changes `error` back to `active`
+and sends the new status to the consumers. It never changes `needs_reauth`.
+
+### Refused webhooks
+
+The Worker counts each webhook that it refuses for a bad signature or a bad payload. It writes the count to D1
+at most once a minute for each key and isolate. A refusal before the signature check counts for the platform
+only, because the sender is unknown. A signed Twitch delivery with a bad body or a bad message ID counts for its
+channel. The Worker also records when a platform last accepted a delivery.
+
+The object reads these counts during a check for a listening consumer. It reports a channel only when all of
+these conditions are true:
+
+- A consumer listened for 10 minutes, and the channel accepted no delivery in that time.
+- At least 3 sampled refusals arrived, each less than 10 minutes after the one before.
+- The refusals are for this channel. Or the platform accepted no delivery for any channel in the last
+  10 minutes.
+- The object did not report this channel in the last hour.
+
+The object then writes one `channel_webhooks_all_rejected` warning. The warning holds only the platform. The
+object sets `error` with `webhooks_rejected`. The usual check follows. While the provider list is healthy, later
+checks keep this code and change no subscription. An accepted delivery ends the code.
+
+A sender without the provider key cannot name a channel in these counts. Forged deliveries cannot change a
+channel that accepts deliveries. They cannot change any channel while the platform accepts deliveries for other
+channels. They never cause a delete or a create at the provider. See the residual risks for the case that stays.
+
 ### Account deletion
 
 Before the database deletes an account, the server runs the disconnect steps for each connected channel.
@@ -381,7 +459,13 @@ The logs hold only fixed codes, platforms, and counts. They never hold an ID, a 
 | `channel_youtube_overdue` | After a run, D1 still holds YouTube data older than 30 days (`count`) | Alert when it repeats for 2 hours. The job cannot keep up, and the 32-day backstop removes those rows. |
 | `channel_name_refresh_failed` | A YouTube title read failed. This read is the daily read for an open overlay, or a read for the hourly job. | Alert when it repeats for a day |
 | `channel_webhook_unknown_channel` | A signed Twitch notification named no connected channel (sampled) | Alert when it continues, mainly after a D1 restore |
-| `channel_status_changed` with `code: delivery_failed` | Twitch stopped a subscription after failed deliveries | Page when it occurs. The owner must reconnect. |
+| `channel_status_changed` with `code: delivery_failed` | Twitch stopped a subscription after failed deliveries. The object makes the subscription again. | Page when no `channel_subscriptions_repaired` follows in 10 minutes. |
+| `channel_webhooks_all_rejected` | A channel with an open overlay accepted nothing for 10 minutes while the Worker refused webhooks (`platform`). The object writes it at most once an hour for each channel. | Page when it occurs. Look at `channel_webhook_rejected` for the reason. |
+| `channel_subscriptions_repaired` | A check deleted or created a provider subscription (`platform`) | Information only. Alert when it repeats each 10 minutes: the callback fails its verification. |
+| `channel_reconcile_failed` | A provider call of a subscription check failed (`platform`). The object tries again with backoff. | Alert when it repeats for 15 minutes |
+| `channel_repair_run` | The hourly job counts its results (`ok`, `repaired`, `failed`, `reauth`, `recent`, `skipped`). It writes the log only when a count other than `ok`, `recent`, and `skipped` is not zero. | Alert on `failed` that repeats |
+| `channel_repair_failed` | The hourly job cannot reach an object, or a check in the object failed before the provider call. The log holds the error class. | Alert when it repeats |
+| `channel_webhook_health_failed` | The Worker cannot write a webhook health count to D1. The log holds the error class. | Alert when it repeats |
 | `channel_status_changed` | A connection is not active, with its code | Look at the `authorization_revoked` counts each day |
 | `channel_connect_failed` | The object cannot make the subscriptions | Alert when it repeats |
 | `channel_ingest_dropped` | The object dropped chat over the admission limit | Information only |
@@ -427,13 +511,20 @@ Twitch accepts only HTTPS on port 443, so local development cannot receive Twitc
 
 - `channel_status_changed` with `delivery_failed`: Twitch revoked a subscription after failed deliveries.
   Look for outages of `/hooks/twitch` in that time. Look for Worker errors, and for `channel_webhook_rejected`
-  with `reason: ingest` (failures of the ingest object or D1). Ask the owner to reconnect the channel.
+  with `reason: ingest` (failures of the ingest object or D1). The object makes the subscription again. The
+  owner does not need to reconnect.
+- `channel_webhooks_all_rejected`: the Worker refuses the webhooks of a platform. Read the `reason` of
+  `channel_webhook_rejected`. For `signature`, compare `TWITCH_EVENTSUB_SECRET` with the secret of the
+  subscriptions. For `payload`, look for a change in the provider payload. After a fix, the status clears with
+  the next accepted delivery.
+- A connection stays in `error` with `subscribe_failed`: the provider refuses the list or a new subscription.
+  Look at `channel_reconcile_failed` and at the provider status. The hourly job tries again.
 - D1 restore: before the restore, set `CHANNELS_OFF`. The hourly `youtube_expiry` job skips while this secret
   exists. Otherwise the job can remove YouTube connections whose restored data looks old.
 - After the restore, expect a wave of `needs_reauth`. Restored rows can hold tokens that the providers already
   replaced. Next, `channel_webhook_unknown_channel` can show: the restore can bring back a state without some
   connections. Twitch gets 410 for those channels. It revokes their subscriptions after repeated failures. Ask
-  the owners of those channels to reconnect.
+  the owners of those channels to reconnect. No check repairs a channel that has no connection.
 - `channel_youtube_expired`: the hourly job removed connections. The `reason` is `reauth`, `stale`,
   `stale_backstop`, or `stuck`. Each removal has an audit row (`channel_expired`).
 - A `stale` wave means that the title refreshes failed. Look at the quota and the Google API status.
@@ -530,7 +621,8 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 | Sign-in token with channel scopes | Google sign-in does not ask for incremental authorization (`include_granted_scopes`). The YouTube connection does not ask for it too. Thus a sign-in token never carries the YouTube scope. |
 | XSS by chat | The contract keeps text as text. The server removes control characters and limits lengths. Emote URLs come from emote IDs on allowed hosts only. Consumers must show text without HTML. |
 | Token leakage | D1 holds the tokens only in encrypted form. They are never in a response, a URL, browser storage, or a log. Logs hold only error classes and status codes. |
-| Revoked access | A refused token or a Twitch revocation changes the status to `needs_reauth`. Ingestion for that channel stops. |
+| Revoked access | A refused token, or a Twitch revocation of the authorization, changes the status to `needs_reauth`. Ingestion for that channel stops. No check repairs it. |
+| Forged webhooks against the repair | A refusal names a channel only after a valid signature. An accepted delivery in the last 10 minutes stops the watchdog for its channel. Accepted deliveries for other channels stop it for the platform. A check deletes only what the provider reports as ended. Each channel gets at most one check in 10 minutes and one report in an hour. |
 | Quota exhaustion | A shared daily budget and a budget for each page. Polls run only while a consumer listens. A stored next poll time, and backoff on errors. |
 | Replay of old commands | The live window: a message that the platform sent more than 30 seconds before it arrived is not live. Snapshot messages are never live. |
 | Suspended page | The object drops deliveries, stops polling, and closes the activity sockets. |
@@ -540,6 +632,9 @@ The D1 migrations `0027` and `0028` only add tables and a column. An older Worke
 
 - The overlay key is a bearer secret in the OBS URL. A person who has the URL can read the feed until the owner makes a new key.
 - A forged webhook costs a body read and a signature check before the per-address limit applies. The Worker logs refused webhooks at most once a minute for each platform (`channel_webhook_rejected`).
+- A forged webhook also costs one D1 write a minute for each platform and isolate.
+- Forged webhooks can set `webhooks_rejected` on a quiet channel with an open overlay. This needs 10 minutes in which the platform accepts no delivery for any channel. It changes no subscription. The next accepted delivery clears the status.
+- The `Twitch-Eventsub-Message-Type` header is not part of the Twitch signature. Thus the Worker trusts it only together with a signed body.
 - All pages share the YouTube quota. The budget for each page limits one page. But three busy pages can still use up the shared budget.
 - Account deletion waits at most 5 seconds for each provider. If a provider is down, its subscription or grant can stay. The Worker drops the later webhooks because no connection matches them.
 - We did not check that a revoked Twitch user token also ends the EventSub access of the app. The disconnect also deletes the subscriptions.
@@ -595,5 +690,12 @@ The provider documentation does not give these details, or we did not test them 
 - The guide from Google for web server apps does not list PKCE. Google accepts it in the current sign-in flow.
 - If revoking a Twitch user token also ends the EventSub authorizations for the app token.
 - If a Twitch webhook retry keeps the original `Twitch-Eventsub-Message-Timestamp`.
-- If a Kick `POST /events/subscriptions` for an existing event makes a second subscription.
+- If a Kick `POST /events/subscriptions` for an existing event makes a second subscription. A repair creates
+  only the missing events.
+- How many failed deliveries Twitch counts before it revokes a subscription, and how long its list shows a
+  revoked one.
+- If Kick accepts an app access token for its event subscription endpoints. The endpoint reference names only
+  the user token, so the feed uses that token.
+- If Kick sends any message when it removes a subscription. The documentation names none.
+- The repair with live Twitch and Kick traffic. Only tests with stand-in providers cover it.
 - The URL pattern for Twitch emote images: `https://static-cdn.jtvnw.net/emoticons/v2/<id>/default/dark/1.0`.

@@ -235,6 +235,7 @@
   "channels.status.revokedYoutube": "Der Zugriff ist beendet. Verbinde neu, um weiter Chat zu empfangen. Ohne neue Verbindung wird diese Verbindung nach 7 Tagen entfernt.",
   "channels.status.subscribeFailed": "Chat-Ereignisse konnten nicht eingerichtet werden. Verbinde neu, um es erneut zu versuchen.",
   "channels.status.subscriptionRemoved": "Die Plattform hat das Ereignis-Abo beendet. Verbinde neu, um fortzufahren.",
+  "channels.status.webhooksRejected": "Der Feed kann gerade keine Ereignisse der Plattform annehmen. Er prüft es selbst erneut: Du musst nicht neu verbinden.",
   "channels.summary.attention": "Braucht Aufmerksamkeit: {platforms}",
   "channels.summary.connected": "Verbunden: {platforms}",
   "channels.summary.none": "Noch kein Kanal verbunden",

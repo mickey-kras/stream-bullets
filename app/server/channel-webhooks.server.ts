@@ -3,6 +3,7 @@ import type { AppEnv } from "../env";
 import type { ActivityEvent, ActivityPlatform, ChannelStatusCode } from "../lib/activity";
 import { channelsOff } from "./channel-tokens.server";
 import { kickEvents, twitchEvents } from "./channel-normalize";
+import { markWebhookAccepted, markWebhookRejected, resetWebhookHealth } from "./channel-repair.server";
 import { connectionForChannel, forgetRoutes, routeFor } from "./channels.server";
 import { HttpError, readBody } from "./http.server";
 import { callIngest } from "./ingest-call.server";
@@ -28,6 +29,7 @@ export function resetRoutes(): void {
   forgetRoutes();
   loggedAt.clear();
   recentKick.clear();
+  resetWebhookHealth();
 }
 
 /**
@@ -47,6 +49,8 @@ export class WebhookRejected extends HttpError {
     message: string,
     readonly reason: RejectReason,
     readonly forged: boolean,
+    /** The channel a valid signature named, for the refusal count. Null when the sender is not proven. */
+    readonly channelId: string | null = null,
   ) {
     super(status, message);
   }
@@ -73,6 +77,18 @@ export function logRejectedWebhook(platform: ActivityPlatform, error: unknown, n
   if (error instanceof WebhookRejected) sampled("channel_webhook_rejected", platform, { reason: error.reason }, now);
   else if (error instanceof HttpError && error.status >= 500)
     sampled("channel_webhook_rejected", platform, { reason: "unavailable" }, now);
+}
+
+/** Counts a `signature` or `payload` refusal for the watchdog of the ingest object. Other reasons do not count. */
+export async function recordRejectedWebhook(
+  env: AppEnv,
+  platform: ActivityPlatform,
+  error: unknown,
+  now: number = Date.now(),
+): Promise<void> {
+  if (!(error instanceof WebhookRejected)) return;
+  if (error.reason === "signature" || error.reason === "payload")
+    await markWebhookRejected(env, platform, error.channelId, now);
 }
 
 /** The raw body, at most MAX_WEBHOOK_BYTES. */
@@ -125,16 +141,18 @@ async function forward(
 ): Promise<boolean> {
   const streamerId = await routeFor(env, platform, externalId, now);
   if (!streamerId) return false;
-  if (events.length === 0) return true;
   // The channel id lets the ingest object refuse a delivery that a stale route sent to the wrong page.
   // The provider retries a failed delivery: a 503 asks it to.
-  await deliverToIngest(
-    env,
-    streamerId,
-    "event",
-    platform,
-    JSON.stringify({ deliveryId, channelId: externalId, events }),
-  );
+  if (events.length > 0)
+    await deliverToIngest(
+      env,
+      streamerId,
+      "event",
+      platform,
+      JSON.stringify({ deliveryId, channelId: externalId, events }),
+    );
+  // The watchdog reads this: a platform that accepts deliveries is not one that refuses them all.
+  await markWebhookAccepted(env, platform, now);
   return true;
 }
 
@@ -178,17 +196,23 @@ async function confirmTwitchSubscription(
   return new Response(challenge, { headers: { "Content-Type": "text/plain" } });
 }
 
-/** Twitch EventSub: HMAC-SHA256 over message id + timestamp + raw body with TWITCH_EVENTSUB_SECRET. */
-export async function twitchWebhook(request: Request, env: AppEnv, now: number = Date.now()): Promise<Response> {
-  requirePost(request);
-  const secret = env.TWITCH_EVENTSUB_SECRET;
-  if (!secret || secret.length < 32) throw new HttpError(503, "Twitch is not configured.");
+/** The channel of a signed Twitch body that failed the full schema, for the refusal count. */
+const twitchChannelSchema = z.object({
+  subscription: z.object({ condition: z.object({ broadcaster_user_id: z.string().regex(/^\d{1,32}$/) }) }),
+});
+
+interface TwitchMessage {
+  id: string;
+  type: string;
+  timestamp: string;
+  body: Uint8Array<ArrayBuffer>;
+}
+
+/** Reads a Twitch message and checks its signature. Size and signature are the only reasons to refuse it here. */
+async function signedTwitchMessage(request: Request, secret: string): Promise<TwitchMessage> {
   const id = request.headers.get("Twitch-Eventsub-Message-Id") ?? "";
   const timestamp = request.headers.get("Twitch-Eventsub-Message-Timestamp") ?? "";
   const signature = request.headers.get("Twitch-Eventsub-Message-Signature") ?? "";
-  const type = request.headers.get("Twitch-Eventsub-Message-Type") ?? "";
-  if (!TWITCH_MESSAGE_ID.test(id) || timestamp.length > 64)
-    throw new WebhookRejected(403, "Invalid signature.", "signature", true);
   const body = await webhookBody(request);
   const key = await crypto.subtle.importKey(
     "raw",
@@ -200,38 +224,68 @@ export async function twitchWebhook(request: Request, env: AppEnv, now: number =
   const signed = new Uint8Array([...new TextEncoder().encode(id + timestamp), ...body]);
   const expected = `sha256=${hex(await crypto.subtle.sign("HMAC", key, signed))}`;
   if (!constantTimeEqual(expected, signature)) throw new WebhookRejected(403, "Invalid signature.", "signature", true);
-  const sentAt = Date.parse(timestamp);
-  if (!fresh(sentAt, now)) throw new WebhookRejected(403, "Stale message.", "stale", false);
-  let parsed: z.infer<typeof twitchBodySchema>;
+  return { id, type: request.headers.get("Twitch-Eventsub-Message-Type") ?? "", timestamp, body };
+}
+
+/** The parsed body of a signed message. A refusal names the channel when the body still shows it. */
+function twitchBody(body: Uint8Array<ArrayBuffer>): z.infer<typeof twitchBodySchema> {
+  let value: unknown = null;
   try {
-    parsed = twitchBodySchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(body)));
+    value = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(body));
   } catch {
-    throw new WebhookRejected(400, "Invalid payload.", "payload", false);
+    // Not JSON: the schema below refuses the null.
   }
+  const parsed = twitchBodySchema.safeParse(value);
+  if (parsed.success) return parsed.data;
+  const channel = twitchChannelSchema.safeParse(value);
+  const channelId = channel.success ? channel.data.subscription.condition.broadcaster_user_id : null;
+  throw new WebhookRejected(400, "Invalid payload.", "payload", false, channelId);
+}
+
+/** A signed challenge or notification. Only a notification needs the message id: it is the delivery id. */
+async function twitchDelivery(
+  env: AppEnv,
+  message: TwitchMessage,
+  parsed: z.infer<typeof twitchBodySchema>,
+  now: number,
+): Promise<Response> {
   const broadcaster = parsed.subscription.condition.broadcaster_user_id;
-  if (type === "revocation") {
-    // Revocations count also while ingestion is off: the controls must show that access ended.
-    const status = parsed.subscription.status ?? "";
-    await postStatus(
-      env,
-      "twitch",
-      broadcaster,
-      Object.hasOwn(TWITCH_REVOCATIONS, status) ? TWITCH_REVOCATIONS[status] : "subscription_removed",
-    );
-  } else if (channelsOff(env)) {
-    // Ingestion is off: confirm no new subscription and drop events.
-    if (type === "webhook_callback_verification") throw new HttpError(404, "Unknown channel.");
-  } else if (type === "webhook_callback_verification") {
-    return await confirmTwitchSubscription(env, broadcaster, parsed.challenge);
-  } else if (type === "notification") {
-    const events = twitchEvents(parsed.subscription.type, parsed.event, now, sentAt);
-    // A signed notification for an unknown channel gets a non-2xx answer (410). Twitch counts it as a failed
-    // delivery and revokes the subscription after repeated failures (notification_failures_exceeded).
-    if (!(await forward(env, "twitch", broadcaster, id, events, now))) {
-      sampled("channel_webhook_unknown_channel", "twitch", {}, now);
-      return new Response(null, { status: 410 });
-    }
+  const challenge = message.type === "webhook_callback_verification";
+  // Ingestion is off: confirm no new subscription and drop events.
+  if (channelsOff(env) && challenge) throw new HttpError(404, "Unknown channel.");
+  if (channelsOff(env) || message.type !== "notification")
+    return challenge
+      ? await confirmTwitchSubscription(env, broadcaster, parsed.challenge)
+      : new Response(null, { status: 204 });
+  if (!TWITCH_MESSAGE_ID.test(message.id))
+    throw new WebhookRejected(403, "Invalid message id.", "payload", false, broadcaster);
+  const events = twitchEvents(parsed.subscription.type, parsed.event, now, Date.parse(message.timestamp));
+  // A signed notification for an unknown channel gets a 410: Twitch counts failures and revokes the subscription.
+  if (!(await forward(env, "twitch", broadcaster, message.id, events, now))) {
+    sampled("channel_webhook_unknown_channel", "twitch", {}, now);
+    return new Response(null, { status: 410 });
   }
+  return new Response(null, { status: 204 });
+}
+
+/** Twitch EventSub: HMAC-SHA256 over message id + timestamp + raw body with TWITCH_EVENTSUB_SECRET. */
+export async function twitchWebhook(request: Request, env: AppEnv, now: number = Date.now()): Promise<Response> {
+  requirePost(request);
+  const secret = env.TWITCH_EVENTSUB_SECRET;
+  if (!secret || secret.length < 32) throw new HttpError(503, "Twitch is not configured.");
+  // No header format is checked before the signature: Twitch documents its message id as opaque.
+  const message = await signedTwitchMessage(request, secret);
+  if (!fresh(Date.parse(message.timestamp), now)) throw new WebhookRejected(403, "Stale message.", "stale", false);
+  const parsed = twitchBody(message.body);
+  if (message.type !== "revocation") return twitchDelivery(env, message, parsed, now);
+  // Revocations count also while ingestion is off: the controls must show that access ended.
+  const status = parsed.subscription.status ?? "";
+  await postStatus(
+    env,
+    "twitch",
+    parsed.subscription.condition.broadcaster_user_id,
+    Object.hasOwn(TWITCH_REVOCATIONS, status) ? TWITCH_REVOCATIONS[status] : "subscription_removed",
+  );
   return new Response(null, { status: 204 });
 }
 

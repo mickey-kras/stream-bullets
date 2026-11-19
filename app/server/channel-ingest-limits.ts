@@ -69,3 +69,12 @@ export const ADMISSIONS: Readonly<Record<Admission, { rate: number; burst: numbe
 export function newBuckets(): Record<Admission, Bucket> {
   return { chat: { tokens: ADMISSION_BURST, at: 0 }, moderation: { tokens: MODERATION_BURST, at: 0 } };
 }
+
+/** Provider subscriptions are checked at most this often while a consumer listens. */
+export const RECONCILE_INTERVAL_MS = 10 * 60_000;
+/** The watchdog acts only when no delivery was accepted for this long while a consumer listened. */
+export const WATCHDOG_QUIET_MS = 10 * 60_000;
+/** The watchdog reports one channel at most this often. */
+export const WATCHDOG_COOLDOWN_MS = 60 * 60_000;
+/** Sampled refusals inside WATCHDOG_QUIET_MS before the watchdog counts them: one a minute for each isolate. */
+export const WATCHDOG_MIN_REFUSALS = 3;

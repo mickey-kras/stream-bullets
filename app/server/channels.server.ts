@@ -624,6 +624,51 @@ async function expiredYoutubeRows(
   return marked.results;
 }
 
+/** The hourly repair job checks at most this many channels each run. */
+export const REPAIR_BATCH = 25;
+/** The job waits this long for one channel; the check itself goes on in the ingest object. */
+export const REPAIR_CALL_MS = 10_000;
+
+const REPAIRABLE = `c.platform IN ('twitch','kick') AND c.status IN ('active','error')
+  AND c.status_code IS NOT 'disconnecting' AND s.status <> 'suspended'`;
+
+/** Asks the page's ingest object to check one channel. A failed call is logged and counted as `failed`. */
+async function repairChannel(env: AppEnv, streamerId: string, platform: ActivityPlatform): Promise<string> {
+  let result = "failed";
+  try {
+    const response = await within(callIngest(env, streamerId, "reconcile", { platform }), REPAIR_CALL_MS, null);
+    const body: unknown = await response?.json().catch((): null => null);
+    result = z
+      .object({ result: z.string().max(32) })
+      .catch({ result })
+      .parse(body).result;
+  } catch (error: unknown) {
+    logError("channel_repair_failed", error);
+  }
+  return result;
+}
+
+/** Hourly: checks the provider subscriptions of up to REPAIR_BATCH Twitch and Kick channels and repairs them. */
+export async function repairChannelSubscriptions(env: AppEnv, now: number): Promise<void> {
+  if (channelsOff(env)) return;
+  const from = "FROM channel_connections c JOIN streamers s ON s.id = c.streamer_id";
+  const total = await env.DB.prepare(`SELECT count(*) AS count ${from} WHERE ${REPAIRABLE}`).first<number>("count");
+  // With more channels than one run takes, each hour starts at another channel, so every channel gets its turn.
+  const offset = (total ?? 0) > REPAIR_BATCH ? (Math.floor(now / 3_600_000) * REPAIR_BATCH) % (total ?? 1) : 0;
+  const { results } = await env.DB.prepare(
+    `SELECT c.streamer_id, c.platform ${from} WHERE ${REPAIRABLE} ORDER BY c.id LIMIT ? OFFSET ?`,
+  )
+    .bind(REPAIR_BATCH, offset)
+    .all<{ streamer_id: string; platform: ActivityPlatform }>();
+  const counts: Record<string, number> = {};
+  for (const row of results) {
+    const result = await repairChannel(env, row.streamer_id, row.platform);
+    counts[result] = (counts[result] ?? 0) + 1;
+  }
+  // Only counts: never a channel, a page or provider text.
+  if (counts.repaired || counts.failed || counts.reauth) console.warn("channel_repair_run", counts);
+}
+
 /** How long a channel's page is remembered, so a burst of deliveries reads D1 once per isolate. */
 export const ROUTE_CACHE_MS = 30_000;
 /** The most routes one isolate keeps; past it, the cache starts again. */

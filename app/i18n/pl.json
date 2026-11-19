@@ -251,6 +251,7 @@
   "channels.status.revokedYoutube": "Dostęp wygasł. Połącz ponownie, aby dalej odbierać czat. Bez ponownego połączenia to połączenie zostanie usunięte po 7 dniach.",
   "channels.status.subscribeFailed": "Nie udało się skonfigurować zdarzeń czatu. Połącz ponownie, aby spróbować jeszcze raz.",
   "channels.status.subscriptionRemoved": "Platforma zakończyła subskrypcję zdarzeń. Połącz ponownie, aby wznowić.",
+  "channels.status.webhooksRejected": "Kanał nie może teraz przyjąć zdarzeń z platformy. Sprawdzi to ponownie sam: nie musisz łączyć ponownie.",
   "channels.summary.attention": "Wymaga uwagi: {platforms}",
   "channels.summary.connected": "Połączono: {platforms}",
   "channels.summary.none": "Nie połączono jeszcze żadnego kanału",
