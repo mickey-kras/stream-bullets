@@ -34797,7 +34797,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_checked",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L304",
+      "source_location": "L307",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_platformdue",
       "weight": 1.0
     },
@@ -34809,7 +34809,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_due",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L313",
+      "source_location": "L316",
       "target": "app_server_channel_tokens_server_channelsoff",
       "weight": 1.0
     },
@@ -34821,7 +34821,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_due",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L317",
+      "source_location": "L320",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_checked",
       "weight": 1.0
     },
@@ -34905,7 +34905,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_platformdue",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L285",
+      "source_location": "L288",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_state",
       "weight": 1.0
     },
@@ -34917,7 +34917,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_platformdue",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L290",
+      "source_location": "L293",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_checkable",
       "weight": 1.0
     },
@@ -34929,7 +34929,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_platformdue",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L296",
+      "source_location": "L299",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_watch",
       "weight": 1.0
     },
@@ -34941,7 +34941,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_platformdue",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L297",
+      "source_location": "L300",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcile",
       "weight": 1.0
     },
@@ -34953,7 +34953,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_platformdue",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L298",
+      "source_location": "L301",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_scheduled",
       "weight": 1.0
     },
@@ -34989,7 +34989,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconciled",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L220",
+      "source_location": "L223",
       "target": "app_server_channel_repair_server_reconcilesubscriptions",
       "weight": 1.0
     },
@@ -35013,7 +35013,19 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcilenow",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L204",
+      "source_location": "L206",
+      "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_checkable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcilenow",
+      "source_file": "app/server/channel-ingest-subscriptions.ts",
+      "source_location": "L207",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcilefailed",
       "weight": 1.0
     },
@@ -35097,7 +35109,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_requested",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L325",
+      "source_location": "L328",
       "target": "app_server_channel_tokens_server_channelsoff",
       "weight": 1.0
     },
@@ -35109,7 +35121,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_requested",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L326",
+      "source_location": "L329",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_state",
       "weight": 1.0
     },
@@ -35121,7 +35133,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_requested",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L329",
+      "source_location": "L332",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_checkable",
       "weight": 1.0
     },
@@ -35133,7 +35145,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_requested",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L330",
+      "source_location": "L333",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcile",
       "weight": 1.0
     },
@@ -35145,7 +35157,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_requested",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L331",
+      "source_location": "L334",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_scheduled",
       "weight": 1.0
     },
@@ -35181,7 +35193,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_scheduled",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L256",
+      "source_location": "L259",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_nextbackoff",
       "weight": 1.0
     },
@@ -35193,7 +35205,7 @@
       "relation": "calls",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_watch",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L273",
+      "source_location": "L276",
       "target": "app_server_channel_repair_server_webhooksonlyrefused",
       "weight": 1.0
     },
@@ -47217,7 +47229,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1994",
+      "source_location": "L2024",
       "target": "tests_channel_ingest_test_forgedminutes",
       "weight": 1.0
     },
@@ -47229,7 +47241,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1999",
+      "source_location": "L2029",
       "target": "tests_channel_ingest_test_rejectedlogs",
       "weight": 1.0
     },
@@ -56699,7 +56711,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconciled",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L213",
+      "source_location": "L216",
       "target": "app_server_channel_repair_server_reconciled",
       "weight": 1.0
     },
@@ -56711,7 +56723,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcilefailed",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L223",
+      "source_location": "L226",
       "target": "app_server_channel_ingest_state_reconcileresult",
       "weight": 1.0
     },
@@ -56735,7 +56747,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_requested",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L324",
+      "source_location": "L327",
       "target": "app_server_channel_ingest_state_reconcileresult",
       "weight": 1.0
     },
@@ -139124,7 +139136,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_checked",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L302",
+      "source_location": "L305",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -139184,7 +139196,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_platformdue",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L283",
+      "source_location": "L286",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -139220,7 +139232,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconciled",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L213",
+      "source_location": "L216",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -139232,7 +139244,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconciled",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L213",
+      "source_location": "L216",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -139244,7 +139256,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcilefailed",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L223",
+      "source_location": "L226",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -139256,7 +139268,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcilefailed",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L223",
+      "source_location": "L226",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -139268,7 +139280,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcilefailed",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L223",
+      "source_location": "L226",
       "target": "app_server_channel_repair_server_reconciled",
       "weight": 1.0
     },
@@ -139328,7 +139340,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_requested",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L324",
+      "source_location": "L327",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -139364,7 +139376,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_scheduled",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L240",
+      "source_location": "L243",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -139376,7 +139388,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_scheduled",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L240",
+      "source_location": "L243",
       "target": "app_server_channel_ingest_state_reconcileresult",
       "weight": 1.0
     },
@@ -139388,7 +139400,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_scheduled",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L240",
+      "source_location": "L243",
       "target": "app_server_channel_ingest_state_repairstate",
       "weight": 1.0
     },
@@ -139424,7 +139436,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_watch",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L263",
+      "source_location": "L266",
       "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
@@ -139436,7 +139448,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_watch",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L263",
+      "source_location": "L266",
       "target": "app_server_channel_ingest_state_connection",
       "weight": 1.0
     },
@@ -139448,7 +139460,7 @@
       "relation": "references",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions_watch",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L263",
+      "source_location": "L266",
       "target": "app_server_channel_ingest_state_repairstate",
       "weight": 1.0
     },
@@ -181939,7 +181951,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L213",
+      "source_location": "L216",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconciled",
       "weight": 1.0
     },
@@ -181950,7 +181962,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L223",
+      "source_location": "L226",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_reconcilefailed",
       "weight": 1.0
     },
@@ -181961,7 +181973,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L240",
+      "source_location": "L243",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_scheduled",
       "weight": 1.0
     },
@@ -181972,7 +181984,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L263",
+      "source_location": "L266",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_watch",
       "weight": 1.0
     },
@@ -181983,7 +181995,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L283",
+      "source_location": "L286",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_platformdue",
       "weight": 1.0
     },
@@ -181994,7 +182006,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L302",
+      "source_location": "L305",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_checked",
       "weight": 1.0
     },
@@ -182005,7 +182017,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L312",
+      "source_location": "L315",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_due",
       "weight": 1.0
     },
@@ -182016,7 +182028,7 @@
       "relation": "method",
       "source": "app_server_channel_ingest_subscriptions_channelsubscriptions",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L324",
+      "source_location": "L327",
       "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_requested",
       "weight": 1.0
     },
@@ -186690,10 +186702,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "e4fb8171c603b337bb6c2343864899c148943f64494a39455416313b4815e6db",
+    "content_sha256": "01c9afc36855cf398df388ed3f46a4c79a858d82cfd38f386b6881808361fd66",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "e14a3a557aa3329fc92355cf2561b718c9c547b1bcd7ff88d4ceb159285b620b",
+    "source_sha256": "3f4fe36b423b32294c99f069526d358e4240b56ab68c9e2fe4ffa815182baa95",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -209539,7 +209551,7 @@
       "label": ".checked()",
       "norm_label": ".checked()",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L302"
+      "source_location": "L305"
     },
     {
       "_callable": true,
@@ -209572,7 +209584,7 @@
       "label": ".due()",
       "norm_label": ".due()",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L312"
+      "source_location": "L315"
     },
     {
       "_callable": true,
@@ -209638,7 +209650,7 @@
       "label": ".platformDue()",
       "norm_label": ".platformdue()",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L283"
+      "source_location": "L286"
     },
     {
       "_callable": true,
@@ -209660,7 +209672,7 @@
       "label": ".reconciled()",
       "norm_label": ".reconciled()",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L213"
+      "source_location": "L216"
     },
     {
       "_callable": true,
@@ -209671,7 +209683,7 @@
       "label": ".reconcileFailed()",
       "norm_label": ".reconcilefailed()",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L223"
+      "source_location": "L226"
     },
     {
       "_callable": true,
@@ -209704,7 +209716,7 @@
       "label": ".requested()",
       "norm_label": ".requested()",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L324"
+      "source_location": "L327"
     },
     {
       "_callable": true,
@@ -209726,7 +209738,7 @@
       "label": ".scheduled()",
       "norm_label": ".scheduled()",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L240"
+      "source_location": "L243"
     },
     {
       "_callable": true,
@@ -209759,7 +209771,7 @@
       "label": ".watch()",
       "norm_label": ".watch()",
       "source_file": "app/server/channel-ingest-subscriptions.ts",
-      "source_location": "L263"
+      "source_location": "L266"
     },
     {
       "_callable": true,

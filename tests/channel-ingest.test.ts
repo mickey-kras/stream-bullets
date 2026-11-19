@@ -1919,6 +1919,36 @@ describe("ChannelIngest subscription repair", (): void => {
     expect(state().storage.alarm).toBeNull();
   });
 
+  it("keeps a revoked authorization that arrives while a check waits for the provider", async (): Promise<void> => {
+    await addConnection("twitch");
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    provider({ "channel.chat.message": "notification_failures_exceeded" });
+    await post("status", "twitch", { code: "delivery_failed" });
+    let release = (): void => undefined;
+    const held = new Promise<void>((resolve): void => {
+      release = resolve;
+    });
+    let reached = (): void => undefined;
+    const waiting = new Promise<void>((resolve): void => {
+      reached = resolve;
+    });
+    const real = globalThis.fetch;
+    let hold = true;
+    vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
+      if (!hold || !new URL(input).pathname.endsWith("/eventsub/subscriptions")) return real(input, init);
+      hold = false;
+      reached();
+      await held;
+      return real(input, init);
+    });
+    const pending = alarm();
+    await waiting;
+    await post("status", "twitch", { code: "authorization_revoked" });
+    release();
+    await pending;
+    expect(await connectionRow("twitch")).toMatchObject({ status: "needs_reauth", status_code: "authorization_revoked" });
+  });
+
   it("waits for the owner after a revoked authorization", async (): Promise<void> => {
     await addConnection("twitch");
     vi.spyOn(console, "warn").mockImplementation((): void => undefined);

@@ -201,11 +201,14 @@ export class ChannelSubscriptions {
     // A connect, a disconnect or a close ran during the check: its outcome stands, so this one writes nothing.
     if (overtaken()) return "skipped";
     if (outcome.ids !== null) await this.host.storage.put(`subs:${platform}`, outcome.ids);
-    if (outcome.failure !== null) return this.reconcileFailed(platform, connection, outcome);
+    // A revocation can arrive during the check: the status it set stands, so the stale one writes no status.
+    const current = await this.host.connection(platform);
+    if (!this.checkable(platform, current)) return "skipped";
+    if (outcome.failure !== null) return this.reconcileFailed(platform, current, outcome);
     if (outcome.changed) console.warn("channel_subscriptions_repaired", { platform });
     // A healthy list does not disprove refused webhooks: only a repair or an accepted delivery ends that code.
-    const refused = connection.code === "webhooks_rejected" && !outcome.changed;
-    if (connection.status !== "active" && !refused) await this.host.setStatus(platform, connection, "active", null);
+    const refused = current.code === "webhooks_rejected" && !outcome.changed;
+    if (current.status !== "active" && !refused) await this.host.setStatus(platform, current, "active", null);
     return outcome.changed ? "repaired" : "ok";
   }
 
