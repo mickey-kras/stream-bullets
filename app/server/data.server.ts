@@ -26,8 +26,9 @@ import {
   streamerRole,
 } from "./access.server";
 import { IDEA_CATEGORIES, isUntouchedTemplate, NEW_IDEA_STATUS } from "../lib/ideas";
+import { BINARY_OPTIONS } from "../lib/polls";
 import { auditStatement, type AuditEntry } from "./audit.server";
-import { HttpError } from "./http.server";
+import { HttpError, validationError } from "./http.server";
 import { imageStorageKey } from "./images.server";
 import { MASH_COLUMN, mashValue } from "./mash-sql";
 import { POLL_GROUP_AFTER, POLL_GROUP_ORDER, SQL_NOW, autoPoll, groupedPolls, notHeld, openPoll } from "./poll-sql";
@@ -102,7 +103,7 @@ interface PermissionRow {
 
 export function parsed<T>(schema: z.ZodType<T>, value: unknown): T {
   const result = schema.safeParse(value);
-  if (!result.success) throw new HttpError(400, result.error.issues[0]?.message ?? "Invalid input.");
+  if (!result.success) throw validationError(result.error, "Invalid input.");
   return result.data;
 }
 
@@ -806,6 +807,15 @@ async function newEntryStatus(
   return official ? NEW_IDEA_STATUS : null;
 }
 
+/** The JSON for `binary_labels`. Only a Yes/No poll with labels that differ from the stored options has it. */
+function customBinaryLabels(action: Extract<EntryAction, { action: "create" }>): string | null {
+  if (action.kind !== "binary" || action.options === undefined) return null;
+  const custom: boolean = action.options.some(
+    (label: string, index: number): boolean => label !== BINARY_OPTIONS[index],
+  );
+  return custom ? JSON.stringify(action.options) : null;
+}
+
 async function createEntry(
   env: AppEnv,
   userId: string,
@@ -813,15 +823,15 @@ async function createEntry(
   action: Extract<EntryAction, { action: "create" }>,
 ): Promise<{ id: string }> {
   const id = crypto.randomUUID();
-  const options = action.kind === "binary" ? ["Yes", "No"] : (action.options ?? []);
+  const options = action.kind === "binary" ? BINARY_OPTIONS : (action.options ?? []);
   const now = Date.now();
   const status = await newEntryStatus(env, userId, streamerId, action);
   await applyMutation(
     env,
     streamerId,
     env.DB.prepare(`
-    INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed,status)
-    SELECT ?,s.id,?,?,?,?,?,?,?,?,0,? FROM streamers s WHERE s.id=?
+    INSERT INTO entries (id,streamer_id,author_id,kind,title,body,category,options,binary_labels,created_at,ends_at,revealed,status)
+    SELECT ?,s.id,?,?,?,?,?,?,?,?,?,0,? FROM streamers s WHERE s.id=?
       AND (SELECT count(*) FROM entries e WHERE e.streamer_id=s.id) < ?
   `).bind(
       id,
@@ -831,6 +841,7 @@ async function createEntry(
       action.kind === "topic" ? (action.body ?? "") : "",
       action.kind === "topic" ? (action.category ?? "") : "",
       JSON.stringify(action.kind === "topic" ? [] : options),
+      customBinaryLabels(action),
       now,
       action.kind !== "topic" && action.duration > 0 ? now + action.duration * 1000 : null,
       status,
