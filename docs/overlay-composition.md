@@ -56,6 +56,7 @@ The overlay shows only the selected orientation.
 
 The chat layer and the characters layer always have a stored cell, also while they are off.
 A layer that is off is not on the grid of the editor. The server still keeps its cell free of the other cells.
+
 The characters cell sets the size of the playground world: each cell is 40 × 40 world pixels.
 A wide cell gives a long ground. A tall cell gives more sky above the ground.
 In a small cell, such as the minimum of 6 × 2 cells, up to 40 characters stand close together on a short ground.
@@ -165,6 +166,7 @@ Each placed layer shows its name and its size in pixels.
 The grid and the palette are separate components. The editor holds the selected layer and gives it to the grid.
 
 The grid shows only the layers that are on it. A chat or characters layer that is off has no box and no content there.
+
 Each placed layer also shows content. The chat layer shows sample messages.
 A content cell with nothing on air shows a dimmed sample topic.
 The samples are only in this preview. OBS does not show them and the server does not store them.
@@ -230,8 +232,10 @@ The chip of a removed layer shows in the palette again. A message under the grid
 
 A layer that is off does not block the cells on the grid. You can put a different layer on its stored cell.
 Then the editor moves the stored cell to a free place and saves the two cells together.
+
 The stored cell keeps its size if that size has a free place. If not, it takes the minimum size.
-If the grid has no free place for the stored cell, the editor does not keep the change and names the layer that has no room.
+If the grid has no free place for the stored cell, the editor does not keep the change.
+It names the layer that has no room.
 
 ### Keyboard
 
