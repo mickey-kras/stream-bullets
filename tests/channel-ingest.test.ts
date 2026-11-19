@@ -5,7 +5,11 @@ import { MAX_ACTIVITY_MESSAGE_LENGTH, parseActivityMessage, quotaDay, type Activ
 import { ChannelIngest, snapshotMessage } from "../app/server/channel-ingest";
 import {
   ADMISSION_BURST,
+  BACKOFF_MAX_MS,
+  BACKOFF_MIN_MS,
   CONNECTION_CACHE_MS,
+  RECONCILE_INTERVAL_MS,
+  WATCHDOG_COOLDOWN_MS,
   MODERATION_BURST,
   SEEN_MAX,
   SEEN_TTL_MS,
@@ -19,9 +23,11 @@ import {
   YOUTUBE_NAME_RETRY_MS,
   YOUTUBE_PAGE_DAILY_BUDGET,
 } from "../app/server/channel-ingest-limits";
+import { markWebhookAccepted } from "../app/server/channel-repair.server";
 import { loadTokens, tokenStatement } from "../app/server/channel-tokens.server";
+import { recordRejectedWebhook, resetRoutes, WebhookRejected } from "../app/server/channel-webhooks.server";
 
-import { installFakeProviders, youtubeText, type FakeProviders } from "./helpers/channels";
+import { installFakeProviders, youtubeText, type FakeProviders, type ProviderCall } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 import { installWorkersRuntime, RoomNamespace, serverSocketOf, type FakeSocket, type RoomState } from "./helpers/room";
 
@@ -1657,5 +1663,491 @@ describe("ChannelIngest YouTube polling", (): void => {
       nameAt: clock,
     });
     expect(state().storage.alarm).toBe(clock + 50_000);
+  });
+});
+
+describe("ChannelIngest subscription repair", (): void => {
+  const callback = `${origin}/hooks/twitch`;
+  const TYPES = [
+    "channel.chat.message",
+    "channel.chat.message_delete",
+    "channel.chat.clear",
+    "channel.chat.clear_user_messages",
+    "channel.moderate",
+  ];
+  let clock: number;
+
+  beforeEach((): void => {
+    clock = Date.now();
+    vi.spyOn(Date, "now").mockImplementation((): number => clock);
+    resetRoutes();
+  });
+
+  /** Gives the provider one Twitch subscription for each type: `null` leaves a type out, a text sets its status. */
+  function provider(statuses: Record<string, string | null> = {}): void {
+    for (const [index, type] of TYPES.entries()) {
+      const status = statuses[type];
+      if (status === null) continue;
+      fake.subscriptions.push({ platform: "twitch", id: `sub-${index}`, broadcaster: "111", callback, type, ...(status ? { status } : {}) });
+    }
+  }
+
+  function subscriptionCalls(method: string): ProviderCall[] {
+    return fake.calls.filter((item) => item.method === method && item.url.pathname.endsWith("/subscriptions"));
+  }
+
+  /** What the hourly job gets from the object. */
+  async function reconcile(platform = "twitch"): Promise<string> {
+    return (await (await post("reconcile", platform)).json<{ result: string }>()).result;
+  }
+
+  /** Runs the alarm at its time and consumes it, as the runtime does. */
+  async function alarm(): Promise<void> {
+    await state().ready;
+    clock = Math.max(clock, state().storage.alarm ?? clock);
+    await state().storage.deleteAlarm();
+    await room().alarm();
+  }
+
+  function repairState(platform = "twitch"): Promise<{ nextAt: number; backoffMs: number } | undefined> {
+    return state().storage.get<{ nextAt: number; backoffMs: number }>(`repair:${platform}`);
+  }
+
+  /** Forged deliveries, one a minute: the Worker counts each refusal for the platform, never for a channel. */
+  async function forgedMinutes(minutes: number): Promise<void> {
+    for (let minute = 0; minute < minutes; minute++) {
+      clock += 60_000;
+      await recordRejectedWebhook(env, "twitch", new WebhookRejected(403, "Invalid signature.", "signature", true), clock);
+    }
+  }
+
+  function rejectedLogs(warn: { mock: { calls: unknown[][] } }): unknown[][] {
+    return warn.mock.calls.filter((call: unknown[]) => call[0] === "channel_webhooks_all_rejected");
+  }
+
+  it("creates a missing and a revoked subscription again and leaves the healthy ones", async (): Promise<void> => {
+    await addConnection("twitch");
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    provider({
+      "channel.chat.clear": "webhook_callback_verification_pending",
+      "channel.chat.clear_user_messages": "notification_failures_exceeded",
+      "channel.moderate": null,
+    });
+    // Another deployment's revoked subscription is not this callback's to repair.
+    fake.subscriptions.push({
+      platform: "twitch",
+      id: "staging",
+      broadcaster: "111",
+      callback: "https://staging.example.test/hooks/twitch",
+      type: "channel.moderate",
+      status: "notification_failures_exceeded",
+    });
+    expect(await reconcile()).toBe("repaired");
+    expect(subscriptionCalls("DELETE").map((item) => item.url.searchParams.get("id"))).toEqual(["sub-3"]);
+    expect(subscriptionCalls("POST").map((item) => (JSON.parse(item.body) as { type: string }).type)).toEqual([
+      "channel.chat.clear_user_messages",
+      "channel.moderate",
+    ]);
+    const mine = fake.subscriptions.filter((item) => item.callback === callback);
+    expect(mine.map((item) => item.type).sort()).toEqual([...TYPES].sort());
+    expect(mine.map((item) => item.id)).toEqual(expect.arrayContaining(["sub-0", "sub-1", "sub-2"]));
+    expect(fake.subscriptions.map((item) => item.id)).toContain("staging");
+    expect(await state().storage.get("subs:twitch")).toEqual(mine.map((item) => item.id));
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    // Twitch is repaired with the app token alone: the broadcaster's tokens are never read or refreshed.
+    expect(fake.calls.filter((item) => item.url.pathname.endsWith("/subscriptions")).map((item) => item.headers.get("Authorization"))).toEqual(
+      Array.from({ length: 4 }, (): string => "Bearer twitch-app-token"),
+    );
+    expect(fake.refreshes).toBe(0);
+    expect(warn).toHaveBeenCalledWith("channel_subscriptions_repaired", { platform: "twitch" });
+    // A check inside the interval stands: the job adds no second one.
+    expect(await reconcile()).toBe("recent");
+    expect(subscriptionCalls("GET")).toHaveLength(1);
+  });
+
+  it("changes nothing for enabled and pending subscriptions", async (): Promise<void> => {
+    await addConnection("twitch");
+    provider({ "channel.moderate": "webhook_callback_verification_pending" });
+    expect(await reconcile()).toBe("ok");
+    expect(subscriptionCalls("DELETE")).toEqual([]);
+    expect(subscriptionCalls("POST")).toEqual([]);
+    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "sub-4"]);
+    expect(await reconcile("youtube")).toBe("skipped");
+    await env.DB.prepare("UPDATE channel_connections SET status='needs_reauth', status_code='authorization_revoked'").run();
+    clock += RECONCILE_INTERVAL_MS;
+    expect(await reconcile()).toBe("skipped");
+    expect(subscriptionCalls("GET")).toHaveLength(1);
+  });
+
+  it("adopts the subscription a 409 points to, and fails when the list does not show it", async (): Promise<void> => {
+    await addConnection("twitch");
+    vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    provider({ "channel.moderate": null });
+    // Another request creates the missing type between the list and the create.
+    const real = globalThis.fetch;
+    let raced = false;
+    vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
+      if (init?.method === "POST" && input.includes("/eventsub/") && !raced) {
+        raced = true;
+        fake.subscriptions.push({
+          platform: "twitch",
+          id: "raced",
+          broadcaster: "111",
+          callback,
+          type: "channel.moderate",
+          status: "webhook_callback_verification_pending",
+        });
+      }
+      return real(input, init);
+    });
+    expect(await reconcile()).toBe("ok");
+    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "raced"]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    // The conflicting subscription now belongs to another callback: nothing can be adopted.
+    for (const item of fake.subscriptions) if (item.id === "raced") item.callback = "https://staging.example.test/hooks/twitch";
+    clock += RECONCILE_INTERVAL_MS;
+    expect(await reconcile()).toBe("failed");
+    expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "subscribe_failed" });
+    expect(fake.subscriptions.map((item) => item.id)).toEqual(["sub-0", "sub-1", "sub-2", "sub-3", "raced"]);
+  });
+
+  it("marks a failed provider call, retries it with backoff, and leaves it to the hourly job at the longest one", async (): Promise<void> => {
+    await addConnection("twitch");
+    const error = vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    fake.listStatus = 500;
+    expect(await reconcile()).toBe("failed");
+    expect(error.mock.calls).toEqual([["channel_reconcile_failed", { platform: "twitch" }]]);
+    // A list that cannot be read proves nothing about the channel: its status stays.
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    expect(await state().storage.get("subs:twitch")).toBeUndefined();
+    const waits: number[] = [];
+    const backoffs: number[] = [];
+    for (let attempt = 0; attempt < 20 && state().storage.alarm !== null; attempt++) {
+      waits.push((state().storage.alarm ?? 0) - clock);
+      backoffs.push((await repairState())?.backoffMs ?? 0);
+      await alarm();
+    }
+    // No consumer listens: the retries double from the shortest backoff to the longest and then stop.
+    expect(backoffs).toEqual([1000, 2000, 4000, 8000, 16_000, 32_000, 64_000, 128_000, 256_000, BACKOFF_MAX_MS]);
+    for (const [index, wait] of waits.entries()) {
+      expect(wait).toBeGreaterThanOrEqual(backoffs[index] / 2);
+      expect(wait).toBeLessThanOrEqual(backoffs[index]);
+    }
+    expect(BACKOFF_MIN_MS).toBe(backoffs[0]);
+    expect(state().storage.alarm).toBeNull();
+    // The provider lists again but refuses a new subscription: now a required type is known to be missing.
+    fake.listStatus = null;
+    fake.subscribeStatus = 500;
+    clock += RECONCILE_INTERVAL_MS;
+    expect(await reconcile()).toBe("failed");
+    expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "subscribe_failed" });
+    // The provider answers again: the owed repair creates everything and ends the error.
+    fake.subscribeStatus = 202;
+    await alarm();
+    expect(fake.subscriptions.map((item) => item.type).sort()).toEqual([...TYPES].sort());
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    expect(state().storage.alarm).toBeNull();
+    // Without provider credentials, nothing can be checked.
+    env.TWITCH_CLIENT_SECRET = undefined;
+    clock += RECONCILE_INTERVAL_MS;
+    expect(await reconcile()).toBe("skipped");
+  });
+
+  it("keeps the ids created before a failing create, and the reason an error already names", async (): Promise<void> => {
+    await addConnection("twitch", { status: "error" });
+    await env.DB.prepare("UPDATE channel_connections SET status_code='delivery_failed'").run();
+    vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    provider({ "channel.chat.clear_user_messages": null, "channel.moderate": null });
+    const real = globalThis.fetch;
+    let creates = 0;
+    vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
+      if (init?.method === "POST" && input.includes("/eventsub/") && ++creates === 2) return new Response(null, { status: 500 });
+      return real(input, init);
+    });
+    expect(await reconcile()).toBe("failed");
+    const created = fake.subscriptions.at(-1)?.id;
+    expect(await state().storage.get("subs:twitch")).toEqual(["sub-0", "sub-1", "sub-2", created]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "delivery_failed" });
+  });
+
+  it("repairs Kick with the broadcaster's refreshed token, and asks for a reconnect when the refresh is refused", async (): Promise<void> => {
+    await addConnection("kick", { expiresAt: Date.now() - 1 });
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    // Kick has no status field: a subscription that Kick ended is missing from its list.
+    fake.subscriptions.push({ platform: "kick", id: "k-chat", broadcaster: "111", callback: "", type: "chat.message.sent" });
+    expect(await reconcile("kick")).toBe("repaired");
+    expect(fake.refreshes).toBe(1);
+    const [create] = subscriptionCalls("POST");
+    expect(JSON.parse(create.body)).toMatchObject({ events: [{ name: "moderation.banned", version: 1 }] });
+    expect(create.headers.get("Authorization")).toBe("Bearer kick-access-1");
+    expect(subscriptionCalls("DELETE")).toEqual([]);
+    expect(await state().storage.get<string[]>("subs:kick")).toEqual(fake.subscriptions.map((item) => item.id));
+    await env.DB.prepare("UPDATE channel_tokens SET expires_at=1").run();
+    fake.refreshStatus = 400;
+    clock += RECONCILE_INTERVAL_MS;
+    expect(await reconcile("kick")).toBe("reauth");
+    expect(await connectionRow("kick")).toMatchObject({ status: "needs_reauth", status_code: "authorization_revoked" });
+    expect(state().storage.alarm).toBeNull();
+  });
+
+  it("repairs after a revocation with backoff, also without a consumer", async (): Promise<void> => {
+    await addConnection("twitch");
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    vi.spyOn(console, "error").mockImplementation((): void => undefined);
+    provider({ "channel.chat.message": "notification_failures_exceeded" });
+    expect((await post("status", "twitch", { code: "delivery_failed" })).status).toBe(204);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "delivery_failed" });
+    expect(await repairState()).toMatchObject({ backoffMs: BACKOFF_MIN_MS, nextAt: clock + BACKOFF_MIN_MS });
+    expect(state().storage.alarm).toBe(clock + BACKOFF_MIN_MS);
+    // Twitch revokes each subscription with its own message: the owed repair keeps its time.
+    const due = clock + BACKOFF_MIN_MS;
+    clock += 100;
+    await post("status", "twitch", { code: "subscription_removed" });
+    expect(await repairState()).toMatchObject({ backoffMs: BACKOFF_MIN_MS, nextAt: due });
+    // The provider fails once: the backoff doubles and the error keeps its reason.
+    fake.subscribeStatus = 500;
+    await alarm();
+    expect(await repairState()).toMatchObject({ backoffMs: 2 * BACKOFF_MIN_MS });
+    expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "subscription_removed" });
+    fake.subscribeStatus = 202;
+    await alarm();
+    expect(fake.subscriptions.map((item) => item.id)).not.toContain("sub-0");
+    expect(fake.subscriptions.map((item) => item.type).sort()).toEqual([...TYPES].sort());
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    expect(await repairState()).toMatchObject({ backoffMs: 0 });
+    expect(state().storage.alarm).toBeNull();
+  });
+
+  it("keeps a revoked authorization that arrives while a check waits for the provider", async (): Promise<void> => {
+    await addConnection("twitch");
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    provider({ "channel.chat.message": "notification_failures_exceeded" });
+    await post("status", "twitch", { code: "delivery_failed" });
+    let release = (): void => undefined;
+    const held = new Promise<void>((resolve): void => {
+      release = resolve;
+    });
+    let reached = (): void => undefined;
+    const waiting = new Promise<void>((resolve): void => {
+      reached = resolve;
+    });
+    const real = globalThis.fetch;
+    let hold = true;
+    vi.stubGlobal("fetch", async (input: string, init?: RequestInit): Promise<Response> => {
+      if (!hold || !new URL(input).pathname.endsWith("/eventsub/subscriptions")) return real(input, init);
+      hold = false;
+      reached();
+      await held;
+      return real(input, init);
+    });
+    const pending = alarm();
+    await waiting;
+    await post("status", "twitch", { code: "authorization_revoked" });
+    release();
+    await pending;
+    expect(await connectionRow("twitch")).toMatchObject({ status: "needs_reauth", status_code: "authorization_revoked" });
+  });
+
+  it("waits for the owner after a revoked authorization", async (): Promise<void> => {
+    await addConnection("twitch");
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    await post("status", "twitch", { code: "authorization_revoked" });
+    expect(await connectionRow("twitch")).toMatchObject({ status: "needs_reauth", status_code: "authorization_revoked" });
+    expect(await repairState()).toBeUndefined();
+    expect(state().storage.alarm).toBeNull();
+    await listen();
+    expect(state().storage.alarm).toBeNull();
+    expect(fake.calls).toEqual([]);
+  });
+
+  it("checks when a consumer starts to listen and at most once in 10 minutes while one listens", async (): Promise<void> => {
+    await addConnection("twitch");
+    provider();
+    await listen();
+    expect(state().storage.alarm).toBe(clock);
+    await alarm();
+    expect(subscriptionCalls("GET")).toHaveLength(1);
+    expect(state().storage.alarm).toBe(clock + RECONCILE_INTERVAL_MS);
+    // A second consumer and an early alarm move nothing forward.
+    await listen();
+    expect(state().storage.alarm).toBe(clock + RECONCILE_INTERVAL_MS);
+    const due = clock + RECONCILE_INTERVAL_MS;
+    clock += RECONCILE_INTERVAL_MS / 2;
+    await room().alarm();
+    expect(subscriptionCalls("GET")).toHaveLength(1);
+    expect(state().storage.alarm).toBe(due);
+    await alarm();
+    expect(subscriptionCalls("GET")).toHaveLength(2);
+    expect(subscriptionCalls("POST")).toEqual([]);
+    // A fresh connect made every subscription: its first check waits one interval.
+    await post("connect", "twitch");
+    expect(await repairState()).toMatchObject({ nextAt: clock + RECONCILE_INTERVAL_MS, backoffMs: 0 });
+  });
+
+  it("stops checking when no consumer listens and nothing is owed", async (): Promise<void> => {
+    await addConnection("twitch");
+    provider();
+    const socket = await listen();
+    await alarm();
+    socket.close();
+    state().accepted.splice(0);
+    await alarm();
+    expect(subscriptionCalls("GET")).toHaveLength(1);
+    expect(state().storage.alarm).toBeNull();
+  });
+
+  it("ends an error on an accepted delivery, but never a missing authorization", async (): Promise<void> => {
+    await addConnection("twitch", { status: "error" });
+    await env.DB.prepare("UPDATE channel_connections SET status_code='delivery_failed'").run();
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    const socket = await listen();
+    await deliver("d1", [chat("m1")]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    expect(socket.ofType<{ event: { kind: string } }>("event").map((message) => message.event)).toMatchObject([
+      { kind: "chat" },
+      { kind: "status", platform: "twitch", status: "active" },
+    ]);
+    await post("status", "twitch", { code: "authorization_revoked" });
+    await deliver("d2", [chat("m2")]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "needs_reauth", status_code: "authorization_revoked" });
+  });
+
+  it("keeps a revoked authorization that arrives while an accepted delivery writes its time", async (): Promise<void> => {
+    await addConnection("twitch", { status: "error" });
+    await env.DB.prepare("UPDATE channel_connections SET status_code='delivery_failed'").run();
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    await listen();
+    let release = (): void => undefined;
+    const held = new Promise<void>((resolve): void => {
+      release = resolve;
+    });
+    let reached = (): void => undefined;
+    const waiting = new Promise<void>((resolve): void => {
+      reached = resolve;
+    });
+    const db = env.DB;
+    let hold = true;
+    const prepare = (query: string): D1PreparedStatement => {
+      const statement = db.prepare(query);
+      if (!hold || !query.includes("SET last_event_at")) return statement;
+      hold = false;
+      return {
+        bind: (...values: unknown[]) => {
+          const bound = statement.bind(...values);
+          return {
+            run: async (): Promise<D1Result> => {
+              reached();
+              await held;
+              return bound.run();
+            },
+          };
+        },
+      } as unknown as D1PreparedStatement;
+    };
+    env.DB = { prepare, batch: (statements: D1PreparedStatement[]) => db.batch(statements) } as unknown as D1Database;
+    const delivery = deliver("d1", [chat("m1")]);
+    await waiting;
+    await post("status", "twitch", { code: "authorization_revoked" });
+    release();
+    expect((await delivery).status).toBe(204);
+    env.DB = db;
+    expect(await connectionRow("twitch")).toMatchObject({ status: "needs_reauth", status_code: "authorization_revoked" });
+  });
+
+  it("ignores forged deliveries for a channel that accepts deliveries", async (): Promise<void> => {
+    await addConnection("twitch");
+    provider();
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    await listen();
+    await alarm();
+    // Forged deliveries arrive every minute for 20 minutes while real chat goes on.
+    for (let round = 0; round < 2; round++) {
+      await forgedMinutes(5);
+      await deliver(`d${round}`, [chat(`m${round}`)]);
+      await forgedMinutes(4);
+      await alarm();
+    }
+    expect(rejectedLogs(warn)).toEqual([]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    expect(subscriptionCalls("DELETE")).toEqual([]);
+    expect(subscriptionCalls("POST")).toEqual([]);
+    // Forged deliveries name no channel: the count is the platform's.
+    expect((await env.DB.prepare("SELECT key FROM app_rate_limits WHERE key LIKE 'webhook-rejected:%'").all()).results).toEqual([
+      { key: "webhook-rejected:twitch" },
+    ]);
+  });
+
+  it("ignores forged deliveries for a quiet channel while the platform accepts deliveries or no consumer listens", async (): Promise<void> => {
+    await addConnection("twitch");
+    provider();
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    // Without a consumer, no check runs at all.
+    expect(await reconcile("youtube")).toBe("skipped");
+    await forgedMinutes(12);
+    await room().alarm();
+    expect(fake.calls).toEqual([]);
+    await listen();
+    await alarm();
+    // The channel is quiet, but the webhook accepts deliveries for other channels.
+    await forgedMinutes(9);
+    await markWebhookAccepted(env, "twitch", clock);
+    await alarm();
+    expect(rejectedLogs(warn)).toEqual([]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    expect(subscriptionCalls("DELETE")).toEqual([]);
+    expect(subscriptionCalls("POST")).toEqual([]);
+  });
+
+  it("reports refused webhooks once when nothing is accepted, without subscription churn, until a delivery is accepted", async (): Promise<void> => {
+    await addConnection("twitch");
+    provider();
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    const socket = await listen();
+    await alarm();
+    // Two refusals are not enough.
+    await forgedMinutes(2);
+    clock += 8 * 60_000;
+    await alarm();
+    expect(rejectedLogs(warn)).toEqual([]);
+    await forgedMinutes(9);
+    await alarm();
+    // Only the platform is logged: no id, header, body or signature.
+    expect(rejectedLogs(warn)).toEqual([["channel_webhooks_all_rejected", { platform: "twitch" }]]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "webhooks_rejected" });
+    expect(socket.ofType<{ event: unknown }>("event").map((message) => message.event)).toEqual([
+      { kind: "status", platform: "twitch", status: "error", code: "webhooks_rejected" },
+    ]);
+    // The provider still reports healthy subscriptions: the check deletes and creates nothing, and keeps the code.
+    await forgedMinutes(9);
+    await alarm();
+    expect(rejectedLogs(warn)).toHaveLength(1);
+    expect(subscriptionCalls("DELETE")).toEqual([]);
+    expect(subscriptionCalls("POST")).toEqual([]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "webhooks_rejected" });
+    await deliver("d1", [chat("m1")]);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "active", status_code: null });
+    // After the cooldown, the same silence is reported again.
+    clock += WATCHDOG_COOLDOWN_MS;
+    await forgedMinutes(3);
+    await alarm();
+    expect(rejectedLogs(warn)).toHaveLength(2);
+  });
+
+  it("reports signed deliveries that the webhook refused for this channel, whatever other channels do", async (): Promise<void> => {
+    await addConnection("twitch");
+    provider();
+    const warn = vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    await listen();
+    await alarm();
+    for (let minute = 0; minute < 9; minute++) {
+      clock += 60_000;
+      // Only a valid signature names a channel.
+      await recordRejectedWebhook(env, "twitch", new WebhookRejected(400, "Invalid payload.", "payload", false, "111"), clock);
+      await markWebhookAccepted(env, "twitch", clock);
+    }
+    await alarm();
+    expect(rejectedLogs(warn)).toHaveLength(1);
+    expect(await connectionRow("twitch")).toMatchObject({ status: "error", status_code: "webhooks_rejected" });
   });
 });

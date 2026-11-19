@@ -6,6 +6,7 @@ import {
   kickWebhook,
   logRejectedWebhook,
   MAX_RECENT_KICK,
+  recordRejectedWebhook,
   rememberKickId,
   resetKickKey,
   WebhookRejected,
@@ -500,5 +501,105 @@ describe("Kick webhook", (): void => {
     resetKickKey();
     fake.kickPublicKey = "-----BEGIN PUBLIC KEY-----\nnot a key\n-----END PUBLIC KEY-----";
     expect(await status(kickWebhook(await kickRequest(kickChat), env))).toBe(503);
+  });
+});
+
+describe("webhook repair signals", (): void => {
+  const revocation = JSON.stringify({
+    subscription: { type: "channel.chat.message", status: "notification_failures_exceeded", condition: { broadcaster_user_id: "111" } },
+  });
+
+  async function twitchRow(): Promise<unknown> {
+    return env.DB.prepare("SELECT status, status_code FROM channel_connections WHERE id='c-twitch'").first();
+  }
+
+  it("accepts a signed revocation whatever its message id looks like, and still needs the signature", async (): Promise<void> => {
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    // An odd id with a forged signature is refused by the signature check, never earlier.
+    expect(await status(twitchWebhook(await twitchRequest(revocation, { type: "revocation", id: "bad id!", signature: "sha256=00" }), env))).toBe(403);
+    expect(await status(twitchWebhook(await twitchRequest(revocation, { type: "revocation", secret: "another-secret-0123456789abcdef01" }), env))).toBe(403);
+    expect(await twitchRow()).toEqual({ status: "active", status_code: null });
+    for (const id of ["bad id!", "x".repeat(300), ""])
+      expect((await twitchWebhook(await twitchRequest(revocation, { type: "revocation", id }), env)).status).toBe(204);
+    expect(await twitchRow()).toEqual({ status: "error", status_code: "delivery_failed" });
+    // A challenge needs no message id either; a notification does, because the id is its delivery id.
+    const challenge = JSON.stringify({
+      challenge: "kappa",
+      subscription: { type: "channel.chat.message", condition: { broadcaster_user_id: "111" } },
+    });
+    expect((await twitchWebhook(await twitchRequest(challenge, { type: "webhook_callback_verification", id: "bad id!" }), env)).status).toBe(200);
+    expect(await status(twitchWebhook(await twitchRequest(twitchNotification("channel.chat.message", twitchChat), { id: "bad id!" }), env))).toBe(403);
+  });
+
+  it("creates the subscriptions again after a revocation for failed deliveries, without the owner", async (): Promise<void> => {
+    vi.spyOn(console, "warn").mockImplementation((): void => undefined);
+    env.TWITCH_CLIENT_ID = "twitch-client";
+    env.TWITCH_CLIENT_SECRET = "twitch-secret";
+    fake.subscriptions.push({
+      platform: "twitch",
+      id: "revoked",
+      broadcaster: "111",
+      callback: `${origin}/hooks/twitch`,
+      type: "channel.chat.message",
+      status: "notification_failures_exceeded",
+    });
+    expect((await twitchWebhook(await twitchRequest(revocation, { type: "revocation" }), env)).status).toBe(204);
+    const { state, room } = ingest.entry(page);
+    expect(await state.storage.get("repair:twitch")).toMatchObject({ backoffMs: 1000 });
+    const due = state.storage.alarm ?? 0;
+    expect(due).toBeGreaterThan(Date.now());
+    vi.spyOn(Date, "now").mockReturnValue(due);
+    await room.alarm();
+    expect(await twitchRow()).toEqual({ status: "active", status_code: null });
+    expect(fake.subscriptions.map((item) => item.id)).not.toContain("revoked");
+    expect(fake.subscriptions.filter((item) => item.broadcaster === "111" && item.callback === `${origin}/hooks/twitch`)).toHaveLength(5);
+    // A revoked authorization is not repaired: the owner must reconnect.
+    const revoked = revocation.replace("notification_failures_exceeded", "user_removed");
+    await twitchWebhook(await twitchRequest(revoked, { type: "revocation" }), env);
+    expect(await twitchRow()).toEqual({ status: "needs_reauth", status_code: "authorization_revoked" });
+  });
+
+  it("counts signature refusals for the platform and signed payload refusals for their channel", async (): Promise<void> => {
+    await env.DB.prepare("DELETE FROM app_rate_limits").run();
+    const rows = async (): Promise<unknown[]> =>
+      (await env.DB.prepare("SELECT key, count FROM app_rate_limits WHERE key LIKE 'webhook-%' ORDER BY key").all()).results;
+    /** The webhook as the Worker runs it: a refusal is counted. */
+    const hook = async (request: Request, now: number = Date.now()): Promise<void> => {
+      try {
+        await twitchWebhook(request, env, now);
+      } catch (error: unknown) {
+        await recordRejectedWebhook(env, "twitch", error, now);
+      }
+    };
+    const body = twitchNotification("channel.chat.message", twitchChat);
+    // Not counted: a stale signed delivery and a body that is too large.
+    await hook(await twitchRequest(body, { timestamp: new Date(Date.now() - MAX_WEBHOOK_AGE_MS - 1000).toISOString() }));
+    await hook(await twitchRequest(JSON.stringify({ padding: "x".repeat(70_000) })));
+    expect(await rows()).toEqual([]);
+    // A forged delivery that names channel 111 counts for the platform only, once a minute.
+    await hook(await twitchRequest(body, { signature: "sha256=00" }));
+    await hook(await twitchRequest(body, { signature: "sha256=00" }));
+    expect(await rows()).toEqual([{ key: "webhook-rejected:twitch", count: 1 }]);
+    // Twitch signed these, so the channel in the body is trusted for the count.
+    const unknownShape = JSON.stringify({ subscription: { condition: { broadcaster_user_id: "111" } } });
+    await hook(await twitchRequest(unknownShape));
+    await hook(await twitchRequest(body, { id: "bad id!" }));
+    expect(await rows()).toEqual([
+      { key: "webhook-rejected:twitch", count: 1 },
+      { key: "webhook-rejected:twitch:111", count: 1 },
+    ]);
+    // An accepted delivery is recorded for the platform; later refusals in the same run add to the count.
+    await hook(await twitchRequest(body));
+    const later = Date.now() + 61_000;
+    await recordRejectedWebhook(env, "twitch", new WebhookRejected(403, "x", "signature", true), later);
+    await recordRejectedWebhook(env, "kick", new HttpError(503, "Kick is unavailable."), later);
+    expect(await rows()).toEqual([
+      { key: "webhook-accepted:twitch", count: 1 },
+      { key: "webhook-rejected:twitch", count: 2 },
+      { key: "webhook-rejected:twitch:111", count: 1 },
+    ]);
+    // After a gap longer than the watchdog window, the count starts again.
+    await recordRejectedWebhook(env, "twitch", new WebhookRejected(403, "x", "signature", true), later + 11 * 60_000);
+    expect(await rows()).toContainEqual({ key: "webhook-rejected:twitch", count: 1 });
   });
 });

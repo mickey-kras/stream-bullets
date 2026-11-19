@@ -235,6 +235,7 @@
   "channels.status.revokedYoutube": "पहुँच ख़त्म हो गई। चैट पाते रहने के लिए फिर से कनेक्ट करें। फिर से कनेक्ट न करने पर यह कनेक्शन 7 दिन बाद हटा दिया जाएगा।",
   "channels.status.subscribeFailed": "चैट इवेंट सेट नहीं हो सके। फिर से कोशिश करने के लिए दोबारा कनेक्ट करें।",
   "channels.status.subscriptionRemoved": "प्लेटफ़ॉर्म ने इवेंट सब्सक्रिप्शन ख़त्म कर दिया। जारी रखने के लिए फिर से कनेक्ट करें।",
+  "channels.status.webhooksRejected": "फ़ीड अभी प्लेटफ़ॉर्म के इवेंट स्वीकार नहीं कर पा रहा है। यह अपने आप दोबारा जाँच करता है: फिर से कनेक्ट करने की ज़रूरत नहीं है।",
   "channels.summary.attention": "ध्यान देने की ज़रूरत: {platforms}",
   "channels.summary.connected": "कनेक्टेड: {platforms}",
   "channels.summary.none": "अभी कोई चैनल कनेक्ट नहीं है",

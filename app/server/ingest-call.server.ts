@@ -12,6 +12,7 @@ export type IngestPath =
   | "page-status"
   | "close"
   | "refresh"
+  | "reconcile"
   | "playground"
   | "playground-config";
 

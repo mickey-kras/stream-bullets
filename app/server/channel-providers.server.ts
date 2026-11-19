@@ -298,6 +298,12 @@ function twitchSubscriptions(
 
 export const KICK_EVENTS: readonly string[] = ["chat.message.sent", "moderation.banned"];
 
+/** The subscription types a healthy channel has at its provider. YouTube has none: its chat is polled. */
+export function requiredSubscriptions(platform: ActivityPlatform): readonly string[] {
+  if (platform === "youtube") return [];
+  return platform === "kick" ? KICK_EVENTS : twitchSubscriptions("").map((subscription) => subscription.type);
+}
+
 const TWITCH_SUBSCRIPTIONS_URL = "https://api.twitch.tv/helix/eventsub/subscriptions";
 const KICK_SUBSCRIPTIONS_URL = "https://api.kick.com/public/v1/events/subscriptions";
 
@@ -307,6 +313,7 @@ const twitchListSchema = z.object({
       z.object({
         id: z.string().min(1).max(64),
         type: z.string().max(100),
+        status: z.string().max(64).optional(),
         condition: z.record(z.string(), z.unknown()),
         transport: z.object({ method: z.string(), callback: z.string().optional() }),
       }),
@@ -328,10 +335,21 @@ const kickListSchema = z.object({
     .max(1000),
 });
 
-/** A provider subscription: its id and its event type. */
+/** Whether a listed subscription delivers events, waits for its callback check, or is ended. */
+export type SubscriptionHealth = "enabled" | "pending" | "unhealthy";
+
+/** A provider subscription: its id, its event type and its health. */
 export interface ProviderSubscription {
   id: string;
   type: string;
+  health: SubscriptionHealth;
+}
+
+/** Twitch names the state of each subscription. Kick has no such field: it lists only live subscriptions. */
+function twitchHealth(status: string | undefined): SubscriptionHealth {
+  // A list without the documented status proves no failure: nothing is deleted on it.
+  if (status === undefined || status === "enabled") return "enabled";
+  return status === "webhook_callback_verification_pending" ? "pending" : "unhealthy";
 }
 
 async function listTwitchSubscriptions(
@@ -359,7 +377,7 @@ async function listTwitchSubscriptions(
         item.transport.callback === `${callbackOrigin}/hooks/twitch` &&
         item.condition.broadcaster_user_id === externalId
       )
-        subscriptions.push({ id: item.id, type: item.type });
+        subscriptions.push({ id: item.id, type: item.type, health: twitchHealth(item.status) });
     cursor = body.pagination?.cursor;
     if (!cursor) return subscriptions;
   }
@@ -389,7 +407,7 @@ export async function listSubscriptions(
       return kickListSchema
         .parse(await response.json())
         .data.filter((item) => item.method === "webhook" && String(item.broadcaster_user_id) === externalId)
-        .map((item) => ({ id: item.id, type: item.event }));
+        .map((item): ProviderSubscription => ({ id: item.id, type: item.event, health: "enabled" }));
     }
     return await listTwitchSubscriptions(env, externalId, callbackOrigin);
   } catch {
@@ -402,10 +420,13 @@ async function subscribeTwitch(
   externalId: string,
   callbackOrigin: string,
   created: string[],
+  only: readonly string[] | null,
 ): Promise<{ conflicts: string[] }> {
   const token = await twitchAppToken(env);
   const conflicts: string[] = [];
-  for (const subscription of twitchSubscriptions(externalId)) {
+  // A repair names the missing types in `only`; a connect creates all of them.
+  const wanted = twitchSubscriptions(externalId).filter((item) => only?.includes(item.type) ?? true);
+  for (const subscription of wanted) {
     const response = await fetch(TWITCH_SUBSCRIPTIONS_URL, {
       method: "POST",
       headers: {
@@ -426,7 +447,8 @@ async function subscribeTwitch(
       conflicts.push(subscription.type);
       continue;
     }
-    if (response.status === 401 || response.status === 403) throw new ReauthRequired();
+    // 403: the broadcaster's authorization is missing. A 401 refuses the app token: no owner can repair that.
+    if (response.status === 403) throw new ReauthRequired();
     if (!response.ok) throw new ProviderError(response.status);
     const body = z
       .object({ data: z.array(z.object({ id: z.string().min(1).max(64) })).min(1) })
@@ -446,18 +468,21 @@ export async function subscribe(
   env: AppEnv,
   platform: ActivityPlatform,
   externalId: string,
-  accessToken: string,
+  accessToken: string | null,
   callbackOrigin: string,
   created: string[],
+  only: readonly string[] | null = null,
 ): Promise<{ conflicts: string[] }> {
   if (platform === "youtube") return { conflicts: [] };
-  if (platform === "twitch") return subscribeTwitch(env, externalId, callbackOrigin, created);
+  if (platform === "twitch") return subscribeTwitch(env, externalId, callbackOrigin, created, only);
+  if (!accessToken) throw new ReauthRequired();
+  const events = KICK_EVENTS.filter((name: string) => only?.includes(name) ?? true);
   const response = await fetch(KICK_SUBSCRIPTIONS_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       broadcaster_user_id: Number(externalId),
-      events: KICK_EVENTS.map((name: string) => ({ name, version: 1 })),
+      events: events.map((name: string) => ({ name, version: 1 })),
       method: "webhook",
     }),
   });
