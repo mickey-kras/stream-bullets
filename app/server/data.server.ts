@@ -421,20 +421,21 @@ export async function setDisplayPrefs(env: AppEnv, userId: string, input: unknow
   return preferences;
 }
 
+// Triggers (0031) keep entry_activity_counts current; an entry with no counts row reads zeros.
 const entrySelect = `
   SELECT e.*, u.name AS author, u.image AS avatar, u.avatar_preset,
-    (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=1) AS likes,
-    (SELECT count(*) FROM entry_reactions r WHERE r.entry_id=e.id AND r.value=-1) AS dislikes,
-    (SELECT count(*) FROM entry_comments c WHERE c.entry_id=e.id AND c.removed_at IS NULL) AS comments,
+    COALESCE(activity.likes,0) AS likes, COALESCE(activity.dislikes,0) AS dislikes,
+    COALESCE(activity.comments,0) AS comments,
     (SELECT json_group_array(json_object('choice',choice,'count',votes)) FROM entry_vote_counts vc
       WHERE vc.entry_id=e.id AND vc.votes>0) AS vote_counts,
     COALESCE((SELECT value FROM entry_reactions r WHERE r.entry_id=e.id AND r.user_id=?),0) AS reaction,
     (SELECT choice FROM entry_votes v WHERE v.entry_id=e.id AND v.user_id=?) AS my_vote,
-    COALESCE((SELECT sum(value) FROM entry_reactions r WHERE r.entry_id=e.id),0) AS score,
+    COALESCE(activity.likes-activity.dislikes,0) AS score,
     EXISTS(SELECT 1 FROM content_reports cr WHERE cr.target_kind='entry' AND cr.target_id=e.id
       AND cr.reporter_id=? AND cr.status='open') AS reported,
     ${MASH_COLUMN}
   FROM entries e JOIN user u ON u.id=e.author_id
+  LEFT JOIN entry_activity_counts activity ON activity.entry_id=e.id
 `;
 
 function entryValue(row: EntryRow): Entry {
