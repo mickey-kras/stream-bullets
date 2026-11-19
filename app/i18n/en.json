@@ -205,7 +205,7 @@
   "channels.gaps.youtube": "YouTube does not report chat clears or unbans.",
   "channels.intro": "Connect your channels once. Their chat and moderation events feed your overlay. StreamBullets only reads them: it never posts or moderates.",
   "channels.lastActivity": "Last activity: {time}",
-  "channels.limits.youtube": "Each page can show about 100 minutes of YouTube chat a day. If the channel data cannot be refreshed for 30 days, the connection is removed.",
+  "channels.limits.youtube": "Each page can show about 5 hours of YouTube chat a day. If the channel data cannot be refreshed for 30 days, the connection is removed.",
   "channels.more": "What is read and the limits",
   "channels.noActivity": "No activity yet.",
   "channels.notConnected": "Not connected",

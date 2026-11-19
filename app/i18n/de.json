@@ -205,7 +205,7 @@
   "channels.gaps.youtube": "YouTube meldet keine geleerten Chats und keine Entsperrungen.",
   "channels.intro": "Verbinde deine Kanäle einmal. Ihr Chat und ihre Moderationsereignisse fließen in dein Overlay. StreamBullets liest sie nur: Es postet und moderiert nie.",
   "channels.lastActivity": "Letzte Aktivität: {time}",
-  "channels.limits.youtube": "Jede Seite kann etwa 100 Minuten YouTube-Chat pro Tag zeigen. Wenn die Kanaldaten 30 Tage lang nicht aktualisiert werden können, wird die Verbindung entfernt.",
+  "channels.limits.youtube": "Jede Seite kann etwa 5 Stunden YouTube-Chat pro Tag zeigen. Wenn die Kanaldaten 30 Tage lang nicht aktualisiert werden können, wird die Verbindung entfernt.",
   "channels.more": "Was gelesen wird und die Grenzen",
   "channels.noActivity": "Noch keine Aktivität.",
   "channels.notConnected": "Nicht verbunden",
