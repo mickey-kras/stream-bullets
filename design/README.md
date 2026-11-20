@@ -9,9 +9,9 @@ Use it when you design or build an interface for the product.
 | `tokens.json` | Each design token with its value in each theme and a usage note |
 
 The values in `app/styles/tokens.css` are the source for the application.
-When a value changes there, change `tokens.json` in the same pull request.
+When a value changes there, change `tokens.json` in the same change.
 
-A copy with live component previews is in Claude:
+A copy with live previews of the interface parts is in Claude:
 <https://claude.ai/artifact/KGz1HGxTYswMinnycdVgVt>.
 The link opens only for accounts that have access to it.
 
@@ -31,8 +31,8 @@ The look is a dark broadcast station: deep teal, cream text, one gold accent, an
 ## Text
 
 - Write short sentences in the active voice. Address the reader as "you".
-- Use sentence case for labels, buttons, and headings. The style sheet sets headings in uppercase.
-- Give a control the name of its action: "Disconnect YouTube".
+- Use sentence case for labels, buttons, and headings. The CSS changes headings to uppercase.
+- Give a control the name of its action. An example is the button that disconnects YouTube.
 - An error tells what occurred and what to do next.
 - Do not use emoji or exclamation marks in the interface.
 - The interface has 11 languages. Let text wrap. Do not cut a label to make it fit.
@@ -59,7 +59,7 @@ The look is a dark broadcast station: deep teal, cream text, one gold accent, an
 ## Type
 
 - Headings, header tabs, and primary buttons use the `heading` family (Oswald) at weight 600.
-- Text and controls use the `body` family (Figtree). Onest supplies Cyrillic letters.
+- Text and controls use the `body` family (Figtree). For Cyrillic text, the family uses Onest.
 - Body text is 1.125rem with a line height of 1.5. Controls are 1rem. Metadata is 0.875rem.
 - An eyebrow is 0.75rem, weight 600, uppercase, and gold. Put it above a heading.
 - The readable-font mode sets each heading in the body family. A layout must work in the two modes.
@@ -70,7 +70,7 @@ The look is a dark broadcast station: deep teal, cream text, one gold accent, an
 - Use the spacing steps: 4, 8, 12, 16, 24, 32, 48, and 64px.
 - Each control is a minimum of 44px high and 44px wide.
 - Corners are 4px on controls and panels. Use `radius-control` and `radius-panel`.
-- Only status pills and avatars are fully round.
+- Only status pills and avatars have a full circle shape.
 - Page content is a maximum of 1250px wide.
 - Panels are flat. Only dialogs, menus, and toasts have a shadow.
 
