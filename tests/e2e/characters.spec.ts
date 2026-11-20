@@ -1,7 +1,16 @@
 import type { Locator, Request, Route, WebSocketRoute } from "@playwright/test";
 import { close, expect, newPage, test, type Browser, type Page } from "./coverage";
 import { runSql } from "./fixtures";
-import { CHARACTERS_CELL, CHAT_CELL, chip, defaultLayers, layersSql, settings } from "./grid-helpers";
+import {
+  CHARACTERS_CELL,
+  CHAT_CELL,
+  chip,
+  defaultLayers,
+  layersSql,
+  saved,
+  settings,
+  storedLayers,
+} from "./grid-helpers";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import type { ActivityChat } from "../../app/lib/activity";
@@ -456,6 +465,37 @@ test("the characters controls send their requests, keep focus and name every con
   });
   expect(problems).toEqual([]);
   await expect(layer.locator("[data-characters-list]")).toHaveAccessibleName("Characters on the playground");
+  await close(owner);
+});
+
+test("the maximum characters field saves through the layers and stays after a reload", async ({ browser }) => {
+  await setLayers("characters-max", CHARACTERS_OFF);
+  const owner = await signedIn(browser, "featureowner", CONTROLS_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/overlay-control");
+  const editor = page.locator("[data-composition-editor]");
+  await chip(editor, "characters").click();
+  const layer = settings(editor);
+  const max = layer.getByRole("textbox", { name: "Maximum characters on screen" });
+  await expect(max).toHaveValue("40");
+  await expect(max).toHaveAccessibleDescription(/A whole number from 5 to 40\./);
+  // A value outside the limits shows an error and saves nothing.
+  await max.fill("41");
+  await max.press("Enter");
+  await expect(max).toHaveAttribute("aria-invalid", "true");
+  await expect(layer.getByRole("alert")).toHaveText("Type a whole number from 5 to 40.");
+  expect((await storedLayers(page)).characters.max).toBe(40);
+  // A valid value saves when the field loses focus.
+  const done: Promise<unknown> = saved(page);
+  await max.fill("12");
+  await max.blur();
+  await done;
+  await expect(max).not.toHaveAttribute("aria-invalid", "true");
+  expect((await storedLayers(page)).characters.max).toBe(12);
+  await page.reload();
+  await chip(editor, "characters").click();
+  await expect(max).toHaveValue("12");
   await close(owner);
 });
 

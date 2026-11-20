@@ -358,6 +358,13 @@ describe("settings of the selected layer", () => {
     const off: string = settings("characters");
     expect(off).toContain("Each viewer who chats gets a character.");
     expect(off).toContain("data-characters-timeout");
+    expect(off).toMatch(/>Maximum characters on screen<\/label><input id="[^"]+" type="text" inputMode="numeric"/);
+    expect(off).toMatch(/aria-describedby="[^"]+" data-characters-max="true" value="40"\/>/);
+    expect(off).toContain("A whole number from 5 to 40. Saved when you leave the field or press Enter.");
+    const lowered: string = settings("characters", {
+      layers: { ...placed, characters: { ...placed.characters, max: 12 } },
+    });
+    expect(lowered).toMatch(/data-characters-max="true" value="12"\/>/);
     expect(off).toMatch(
       /<button type="button" aria-disabled="true" aria-describedby="[^"]+" data-characters-pause="true">Pause</,
     );

@@ -37,13 +37,14 @@ export const BOUNCE_INSET = 60;
 /** A character this far below the bottom of the world is gone. */
 export const FALL_OUT = 40;
 
-/** Visible characters, entrance, exit and respawn included. */
+/** The most visible characters that a frame holds, entrance, exit and respawn included. */
 export const VISIBLE_MAX = FRAME_CHARS_MAX;
-/** Slots that go to the highest decayed scores. */
-export const RANKED_SLOTS = 30;
-/** Slots that rotate through the other active participants. */
-export const ROTATING_SLOTS = VISIBLE_MAX - RANKED_SLOTS;
-/** The rotating slots advance by ROTATING_SLOTS participants at this interval (15 s). */
+/**
+ * The share of the visible slots that goes to the highest decayed scores. The other slots rotate through the other
+ * active participants. The owner sets the number of visible slots (CHARACTERS_MAX): 40 slots give 30 and 10.
+ */
+export const RANKED_SHARE = 0.75;
+/** The rotating slots advance by their own number of participants at this interval (15 s). */
 export const ROTATION_TICKS = 450;
 /** A character stays at least this long (10 s) before capacity or inactivity sends it out. */
 export const MIN_STAY_TICKS = 300;

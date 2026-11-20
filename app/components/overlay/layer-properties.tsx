@@ -381,6 +381,10 @@ export function LayerProperties({
           onTimeout={(timeout: number) =>
             change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, timeout } }))
           }
+          max={layers.characters.max}
+          onMax={(max: number) =>
+            change((current: OverlayLayers) => ({ ...current, characters: { ...current.characters, max } }))
+          }
         />
       )}
       {layer !== "chat" && layer !== "characters" && <ContentSettings layer={layer} {...props} />}

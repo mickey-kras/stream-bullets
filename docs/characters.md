@@ -35,10 +35,10 @@ To change a value, change `app/lib/playground/constants.ts` and this table.
 
 | Rule | Value |
 | --- | --- |
-| Visible characters, entrance, exit, and respawn included | 40 |
-| Ranked slots | 30 |
-| Rotating slots | 10 |
-| Rotation interval | 15 seconds (450 ticks). The rotating slots then advance by 10 participants. |
+| Visible characters, entrance, exit, and respawn included | 40. The owner can set 5 to 40. |
+| Ranked slots | 75 percent of the visible characters, rounded: 30 of 40 |
+| Rotating slots | The other visible characters: 10 of 40 |
+| Rotation interval | 15 seconds (450 ticks). The rotating slots then advance by their own number of participants. |
 | Minimum time on screen | 10 seconds (300 ticks) |
 | Score of a message | +1, at most one time in 3 seconds (90 ticks) |
 | Score decay | `exp(-elapsed / 1800 ticks)`, a time constant of 60 seconds |
@@ -77,11 +77,17 @@ If the timeout or a replacement comes during an action, the action ends first. T
 The playground chooses the visible participants again after each change:
 
 - An active participant has a score above 0 and a message in the timeout period. A removed participant is not active.
-- The 30 active participants with the highest decayed scores get the ranked slots.
-- The other active participants get the 10 rotating slots in turn, in the order of registration.
-- When fewer than 10 participants wait, all of them get a slot. Thus no slot stays empty while a participant waits.
+- The owner sets the maximum number of visible characters, from 5 to 40. The default is 40.
+- The ranked slots are 75 percent of the slots, as a rounded whole number. The other slots rotate.
+  Thus 40 slots give 30 and 10, and 5 slots give 4 and 1.
+- The active participants with the highest decayed scores get the ranked slots.
+- The other active participants get the rotating slots in turn, in the order of registration.
+- When fewer participants wait than rotating slots exist, all of them get a slot.
+  Thus no slot stays empty while a participant waits.
 - A participant has at most one slot.
-- The 40 slots include characters that enter, leave, or wait for a respawn. Thus a respawn cannot go above 40.
+- The slots include characters that enter, leave, or wait for a respawn. Thus a respawn cannot go above the maximum.
+- When the owner sets a maximum below the number of visible characters, the extra characters lose their slot.
+  They walk to the exit door and leave, as a replaced character does. No new character enters until a slot is free.
 
 Many messages do not move a participant forward. The score increases at most one time in 3 seconds.
 The rotation order does not change with new messages. Thus a viewer cannot jump the queue.
@@ -158,6 +164,8 @@ To put it on the grid, select its chip in the palette. Its settings show when yo
 - **Show on stream** shows or hides the layer. The layer stays on the grid.
 - **Seconds without chat before a character walks out** sets the inactivity timeout, from 10 to 600 seconds.
   The editor saves the value in the layers (`characters.timeout`) when you leave the field or press Enter.
+- **Maximum characters on screen** sets the number of visible characters, from 5 to 40.
+  The editor saves the value in the layers (`characters.max`) in the same way.
 - **Pause** stops the playground. The characters stand still and commands do nothing. **Resume** starts it again.
 - **Reset playground** asks for a confirmation. Then all characters go at once and the ground becomes complete again.
   Removed viewers can come back. Chat bans and timeouts stay.
@@ -262,7 +270,7 @@ Other overlay changes do not ask. The server asks only when the deployment has t
 The object reads the layers only while a characters socket is open or the playground keeps a state.
 A change that comes during a read causes one more read after it.
 
-A new cell makes a new world. A new timeout applies at once.
+A new cell makes a new world. A new timeout and a new maximum apply at once.
 A layer that is off stops the playground and deletes its state and its checkpoint.
 
 ## Kill switch and environments
@@ -281,7 +289,9 @@ The owner decides about that binding in a separate change.
 A rollback to a version without the playground leaves the checkpoint in the object storage.
 The old version does not read it. The alarm of a later version deletes it when it holds no participant.
 After a rollback, refresh each OBS browser source with the characters layer.
+
 An old version that saves the layers drops the characters timeout. The timeout then goes back to 60 seconds.
+A version without the maximum drops `characters.max` in the same way. The maximum then goes back to 40.
 
 ## Cost
 

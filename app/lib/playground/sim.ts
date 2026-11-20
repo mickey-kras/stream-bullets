@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CHANNEL_PLATFORMS } from "../../../db/enums";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../activity";
 import { isChatCommand } from "../chat-feed";
-import { CHARACTERS_TIMEOUT } from "../overlay-layers";
+import { CHARACTERS_MAX, CHARACTERS_TIMEOUT } from "../overlay-layers";
 import {
   BUBBLE_LENGTH,
   BUBBLE_MAX,
@@ -28,7 +28,6 @@ import {
   REGISTRY_MAX,
   RESPAWN_TICKS,
   RESTRICTED_MAX,
-  ROTATING_SLOTS,
   ROTATION_TICKS,
   STAIR_SPEED,
   STAIRS_MAX,
@@ -41,7 +40,7 @@ import {
   WALK_SPEED,
   WALK_SPEED_SPREAD,
 } from "./constants";
-import { addScore, COMMANDS, type Command, chooseCrowd, newParticipant, type Participant } from "./crowd";
+import { addScore, COMMANDS, type Command, chooseCrowd, crowdSlots, newParticipant, type Participant } from "./crowd";
 import {
   BUBBLE_MAX_UNITS,
   type BubbleView,
@@ -99,6 +98,8 @@ interface SimOptions {
   /** Random source in [0, 1). Use mulberry32 for a seeded run. */
   rng: () => number;
   timeoutSeconds?: number;
+  /** The most characters on screen (CHARACTERS_MAX). */
+  visibleMax?: number;
   /** Speed spread over characters (WALK_SPEED_SPREAD). A test sets 0 to give every character WALK_SPEED. */
   walkSpread?: number;
 }
@@ -151,6 +152,7 @@ export class PlaygroundSim {
   private active = false;
   private nextId = 1;
   private timeoutSeconds: number = CHARACTERS_TIMEOUT.default;
+  private maxVisible: number = CHARACTERS_MAX.default;
   private readonly rng: () => number;
   private readonly walkSpread: number;
   private readonly sent = { roster: "", bubbles: "", terrain: "", mode: "" };
@@ -161,6 +163,7 @@ export class PlaygroundSim {
     this.rng = options.rng;
     this.walkSpread = options.walkSpread ?? WALK_SPEED_SPREAD;
     if (options.timeoutSeconds !== undefined) this.setTimeoutSeconds(options.timeoutSeconds);
+    if (options.visibleMax !== undefined) this.setVisibleMax(options.visibleMax);
   }
 
   /** True while commands run and `tick()` may be called. */
@@ -176,6 +179,19 @@ export class PlaygroundSim {
   setTimeoutSeconds(seconds: number): void {
     if (!Number.isFinite(seconds)) throw new RangeError(`playground timeout must be a number: ${seconds}`);
     this.timeoutSeconds = Math.min(CHARACTERS_TIMEOUT.max, Math.max(CHARACTERS_TIMEOUT.min, Math.round(seconds)));
+  }
+
+  get visibleMax(): number {
+    return this.maxVisible;
+  }
+
+  /**
+   * Sets the most characters on screen, rounded and clamped to the CHARACTERS_MAX limits. Throws on NaN or infinity.
+   * With more characters on screen, the next choice leaves the extra ones without a slot: they walk to the exit.
+   */
+  setVisibleMax(count: number): void {
+    if (!Number.isFinite(count)) throw new RangeError(`playground maximum must be a number: ${count}`);
+    this.maxVisible = Math.min(CHARACTERS_MAX.max, Math.max(CHARACTERS_MAX.min, Math.round(count)));
   }
 
   /** The participants in registration order. */
@@ -367,7 +383,8 @@ export class PlaygroundSim {
       throw new RangeError(`playground gap must be a non-negative integer: ${gap}`);
     const from: number = this.clock;
     this.clock += gap;
-    this.rotation += ROTATING_SLOTS * (Math.floor(this.clock / ROTATION_TICKS) - Math.floor(from / ROTATION_TICKS));
+    const rotations: number = Math.floor(this.clock / ROTATION_TICKS) - Math.floor(from / ROTATION_TICKS);
+    this.rotation += crowdSlots(this.maxVisible).rotating * rotations;
     expire(this.terrain, this.clock);
     this.sweep();
     for (const p of this.participants.values()) this.settle(p);
@@ -383,7 +400,7 @@ export class PlaygroundSim {
   tick(): void {
     if (!this.running) throw new Error("playground tick while not running");
     this.clock += 1;
-    if (this.clock % ROTATION_TICKS === 0) this.rotation += ROTATING_SLOTS;
+    if (this.clock % ROTATION_TICKS === 0) this.rotation += crowdSlots(this.maxVisible).rotating;
     if (this.clock % SWEEP_TICKS === 0) this.sweep();
     this.select();
     expire(this.terrain, this.clock);
@@ -408,10 +425,16 @@ export class PlaygroundSim {
 
   /** Chooses the crowd and admits chosen participants while slots are free. */
   select(): void {
-    const chosen: Participant[] = chooseCrowd(this.list(), this.clock, this.timeoutTicks, this.rotation);
+    const chosen: Participant[] = chooseCrowd(
+      this.list(),
+      this.clock,
+      this.timeoutTicks,
+      this.rotation,
+      this.maxVisible,
+    );
     let occupied: number = this.list().filter((p: Participant): boolean => p.admitted).length;
     for (const [index, p] of chosen.entries()) {
-      if (p.admitted || occupied >= VISIBLE_MAX) continue;
+      if (p.admitted || occupied >= this.maxVisible) continue;
       p.admitted = true;
       p.admittedAt = this.clock;
       occupied += 1;
@@ -748,6 +771,7 @@ export class PlaygroundSim {
       paused: this.paused,
       testEndsAt: this.testEndsAt,
       timeoutSeconds: this.timeoutSeconds,
+      visibleMax: this.maxVisible,
       cellsW: this.world.cellsW,
       cellsH: this.world.cellsH,
       ground: groundString(this.terrain),
@@ -762,7 +786,10 @@ export class PlaygroundSim {
    * A playground from a checkpoint, in registry mode: the caller calls `resumeAfter(gap)` to run it. Visible
    * characters come back walking. Throws when the checkpoint is malformed.
    */
-  static restore(raw: string, options: Omit<SimOptions, "cellsW" | "cellsH" | "timeoutSeconds">): PlaygroundSim {
+  static restore(
+    raw: string,
+    options: Omit<SimOptions, "cellsW" | "cellsH" | "timeoutSeconds" | "visibleMax">,
+  ): PlaygroundSim {
     let value: unknown;
     try {
       value = JSON.parse(raw);
@@ -777,6 +804,7 @@ export class PlaygroundSim {
       cellsW: data.cellsW,
       cellsH: data.cellsH,
       timeoutSeconds: data.timeoutSeconds,
+      visibleMax: data.visibleMax,
     });
     restoreTerrain(sim.terrain, data);
     Object.assign(sim, {
@@ -839,6 +867,7 @@ interface Checkpoint {
   paused: boolean;
   testEndsAt: number | null;
   timeoutSeconds: number;
+  visibleMax: number;
   cellsW: number;
   cellsH: number;
   ground: string;
@@ -920,6 +949,8 @@ const checkpointSchema: z.ZodType<Checkpoint> = z
     paused: z.boolean(),
     testEndsAt: tick.nullable(),
     timeoutSeconds: z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max),
+    // A checkpoint from before this setting has no value: it takes the default.
+    visibleMax: z.number().int().min(CHARACTERS_MAX.min).max(CHARACTERS_MAX.max).default(CHARACTERS_MAX.default),
     cellsW: z.number().int(),
     cellsH: z.number().int(),
     ground: z.string().regex(/^[g0-3]*$/),

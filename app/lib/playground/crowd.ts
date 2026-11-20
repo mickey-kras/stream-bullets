@@ -1,17 +1,11 @@
 import type { ActivityPlatform } from "../activity";
-import {
-  COMMAND_COOLDOWN_TICKS,
-  RANKED_SLOTS,
-  ROTATING_SLOTS,
-  SCORE_COOLDOWN_TICKS,
-  SCORE_DECAY_TICKS,
-} from "./constants";
+import { COMMAND_COOLDOWN_TICKS, RANKED_SHARE, SCORE_COOLDOWN_TICKS, SCORE_DECAY_TICKS } from "./constants";
 import type { CharState } from "./protocol";
 
 /**
  * The participant registry and the choice of who is visible. A participant is `platform:userId`; display names are
- * never identities. The choice gives RANKED_SLOTS to the highest decayed scores and ROTATING_SLOTS to the other
- * active participants in turn, in registration order. A participant has at most one slot. Repeated messages do not move a participant forward: the score rises at most once per
+ * never identities. The choice gives the ranked slots to the highest decayed scores and the rotating slots to the
+ * other active participants in turn, in registration order (see crowdSlots). A participant has at most one slot. Repeated messages do not move a participant forward: the score rises at most once per
  * SCORE_COOLDOWN_TICKS and the rotation order is fixed.
  */
 
@@ -149,8 +143,14 @@ export function addScore(participant: Participant, clock: number): void {
   participant.lastScored = clock;
 }
 
+/** The split of `max` visible slots: RANKED_SHARE of them are ranked, rounded, and the others rotate. */
+export function crowdSlots(max: number): { ranked: number; rotating: number } {
+  const ranked: number = Math.round(max * RANKED_SHARE);
+  return { ranked, rotating: max - ranked };
+}
+
 /**
- * Chooses the participants for the visible slots and sets `eligible` and `slot` on every participant. Returns the
+ * Chooses the participants for `max` visible slots and sets `eligible` and `slot` on every participant. Returns the
  * chosen ones in admission order: ranked, then rotating. `participants` is in registration order.
  */
 export function chooseCrowd(
@@ -158,7 +158,9 @@ export function chooseCrowd(
   clock: number,
   timeoutTicks: number,
   rotation: number,
+  max: number,
 ): Participant[] {
+  const slots = crowdSlots(max);
   const active: Participant[] = participants.filter(
     (p: Participant): boolean => !p.removed && clock - p.lastChat < timeoutTicks && p.score > 0,
   );
@@ -167,11 +169,11 @@ export function chooseCrowd(
     .map((p: Participant): [Participant, number] => [p, decayedScore(p, clock)])
     .sort((a: [Participant, number], b: [Participant, number]): number => b[1] - a[1])
     .map((entry: [Participant, number]): Participant => entry[0]);
-  const top = new Set<Participant>(ranked.slice(0, RANKED_SLOTS));
+  const top = new Set<Participant>(ranked.slice(0, slots.ranked));
   const remaining: Participant[] = active.filter((p: Participant): boolean => !top.has(p));
-  // When fewer than ROTATING_SLOTS remain, all of them are chosen: no slot stays empty while someone waits.
+  // When fewer than the rotating slots remain, all of them are chosen: no slot stays empty while someone waits.
   const selected: Participant[] = [...top];
-  for (let i = 0; i < Math.min(ROTATING_SLOTS, remaining.length); i++) {
+  for (let i = 0; i < Math.min(slots.rotating, remaining.length); i++) {
     selected.push(remaining[(rotation + i) % remaining.length]);
   }
   const chosen = new Set<Participant>(selected);

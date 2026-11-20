@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
 import { t, tAround, type MessageId, type MessageVars } from "../../i18n";
-import { CHARACTERS_TIMEOUT } from "../../lib/overlay-layers";
+import { CHARACTERS_MAX, CHARACTERS_TIMEOUT } from "../../lib/overlay-layers";
 import {
   type ModeView,
   type PlaygroundControl,
@@ -50,18 +50,48 @@ function readStatus(
   };
 }
 
-/** The timeout as typed: a whole number of seconds in range, or null. */
-function parseTimeout(text: string): number | null {
-  if (!/^\d{1,4}$/.test(text.trim())) return null;
-  const seconds: number = Number(text.trim());
-  return seconds >= CHARACTERS_TIMEOUT.min && seconds <= CHARACTERS_TIMEOUT.max ? seconds : null;
+/** What a number field of the characters settings shows and saves. */
+interface NumberSetting {
+  limits: Readonly<{ min: number; max: number }>;
+  label: MessageId;
+  hint: MessageId;
+  invalid: MessageId;
+  /** The data attributes that mark the input and its error. */
+  input: Readonly<Record<string, boolean>>;
+  error: Readonly<Record<string, boolean>>;
 }
 
-/** The inactivity timeout. It saves when the field loses focus or on Enter, and only a valid value. */
-function TimeoutField({
-  timeout,
-  onTimeout,
-}: Readonly<{ timeout: number; onTimeout: (seconds: number) => void }>): ReactNode {
+const TIMEOUT_SETTING: NumberSetting = {
+  limits: CHARACTERS_TIMEOUT,
+  label: "overlay.characters.timeout",
+  hint: "overlay.characters.timeoutHint",
+  invalid: "overlay.characters.timeoutInvalid",
+  input: { "data-characters-timeout": true },
+  error: { "data-characters-timeout-error": true },
+};
+
+const MAX_SETTING: NumberSetting = {
+  limits: CHARACTERS_MAX,
+  label: "overlay.characters.max",
+  hint: "overlay.characters.maxHint",
+  invalid: "overlay.characters.maxInvalid",
+  input: { "data-characters-max": true },
+  error: { "data-characters-max-error": true },
+};
+
+/** The number as typed: a whole number in the limits, or null. */
+function parseNumber(text: string, limits: NumberSetting["limits"]): number | null {
+  if (!/^\d{1,4}$/.test(text.trim())) return null;
+  const value: number = Number(text.trim());
+  return value >= limits.min && value <= limits.max ? value : null;
+}
+
+/** A number setting. It saves when the field loses focus or on Enter, and only a valid value. */
+function NumberField({
+  setting,
+  value,
+  onValue,
+}: Readonly<{ setting: NumberSetting; value: number; onValue: (value: number) => void }>): ReactNode {
   const inputId: string = useId();
   const hintId: string = useId();
   const errorId: string = useId();
@@ -69,44 +99,44 @@ function TimeoutField({
   const [text, setText] = useState<string | null>(null);
   // The error shows after a save attempt (leaving the field or Enter), not while the owner types.
   const [tried, setTried] = useState<boolean>(false);
-  const invalid: boolean = tried && text !== null && parseTimeout(text) === null;
-  const limits = { min: CHARACTERS_TIMEOUT.min, max: CHARACTERS_TIMEOUT.max };
+  const invalid: boolean = tried && text !== null && parseNumber(text, setting.limits) === null;
+  const limits = { min: setting.limits.min, max: setting.limits.max };
   const commit = (): void => {
     if (text === null) return;
-    const seconds: number | null = parseTimeout(text);
-    setTried(seconds === null);
-    if (seconds === null) return;
-    if (seconds !== timeout) onTimeout(seconds);
+    const typed: number | null = parseNumber(text, setting.limits);
+    setTried(typed === null);
+    if (typed === null) return;
+    if (typed !== value) onValue(typed);
     setText(null);
   };
   return (
     <form
-      className="ov-chars-timeout"
+      className="ov-chars-number"
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         commit();
       }}
     >
-      <label htmlFor={inputId}>{t("overlay.characters.timeout")}</label>
+      <label htmlFor={inputId}>{t(setting.label)}</label>
       <input
         id={inputId}
         type="text"
         inputMode="numeric"
         autoComplete="off"
         size={4}
-        value={text ?? String(timeout)}
+        value={text ?? String(value)}
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? `${errorId} ${hintId}` : hintId}
         onChange={(event) => setText(event.currentTarget.value)}
         onBlur={commit}
-        data-characters-timeout
+        {...setting.input}
       />
       <p className="muted ov-comp-note" id={hintId}>
-        {t("overlay.characters.timeoutHint", limits)}
+        {t(setting.hint, limits)}
       </p>
       {invalid && (
-        <p className="ov-chars-invalid" id={errorId} role="alert" data-characters-timeout-error>
-          {t("overlay.characters.timeoutInvalid", limits)}
+        <p className="ov-chars-invalid" id={errorId} role="alert" {...setting.error}>
+          {t(setting.invalid, limits)}
         </p>
       )}
     </form>
@@ -258,7 +288,7 @@ export function useCharactersControl(feed: ActivityFeed | null, enabled: boolean
 }
 
 /**
- * The characters settings in the editor: timeout, pause, reset and the participants with a Remove button. Buttons
+ * The characters settings in the editor: timeout, maximum, pause, reset and the participants with a Remove button. Buttons
  * never take the `disabled` attribute: they keep focus while their request runs and ignore presses while busy or
  * unavailable. A polite region says what changed.
  */
@@ -266,10 +296,14 @@ export function CharactersControls({
   control: playground,
   timeout,
   onTimeout,
+  max,
+  onMax,
 }: Readonly<{
   control: CharactersControl;
   timeout: number;
   onTimeout: (seconds: number) => void;
+  max: number;
+  onMax: (count: number) => void;
 }>): ReactNode {
   const { feed, enabled, roster, off, statusError, busy, paused, news, setNews, send } = playground;
   const needsId: string = useId();
@@ -315,7 +349,8 @@ export function CharactersControls({
 
   return (
     <div className="ov-chars" data-characters-controls>
-      <TimeoutField timeout={timeout} onTimeout={onTimeout} />
+      <NumberField setting={TIMEOUT_SETTING} value={timeout} onValue={onTimeout} />
+      <NumberField setting={MAX_SETTING} value={max} onValue={onMax} />
       {off && (
         <p className="muted ov-comp-note" data-characters-off>
           {t("overlay.characters.off")}

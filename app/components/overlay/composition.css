@@ -552,24 +552,24 @@
   gap: 10px;
   min-width: 0;
 }
-.ov-chars-timeout {
+.ov-chars-number {
   display: grid;
   gap: 4px;
   justify-items: start;
   margin: 0;
 }
-.ov-chars-timeout label {
+.ov-chars-number label {
   font-size: 0.875rem;
   font-weight: 600;
 }
-.ov-chars-timeout input {
+.ov-chars-number input {
   width: 6em;
   padding: 8px 10px;
   border: 1px solid var(--input-border);
   border-radius: var(--radius-control);
   background: var(--field);
 }
-.ov-chars-timeout input[aria-invalid="true"] {
+.ov-chars-number input[aria-invalid="true"] {
   border-color: var(--error);
 }
 .ov-chars-invalid {
