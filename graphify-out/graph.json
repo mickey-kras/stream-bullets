@@ -29877,7 +29877,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L557",
+      "source_location": "L558",
       "target": "app_components_common_legaldocument",
       "weight": 1.0
     },
@@ -29889,7 +29889,7 @@
       "relation": "calls",
       "source": "app_routes_privacy_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L566",
+      "source_location": "L567",
       "target": "app_routes_privacy_sections",
       "weight": 1.0
     },
@@ -159286,7 +159286,7 @@
       "relation": "contains",
       "source": "app_routes_privacy",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L554",
+      "source_location": "L555",
       "target": "app_routes_privacy_privacy",
       "weight": 1.0
     },
@@ -186726,10 +186726,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "cdf8f4502f5044baa3ca4c4161e4f2a446e836ebfc687255df7e2c2a5167d041",
+    "content_sha256": "d631c7f6dd28d6cb31ea978a14f4e0f66675270f2bbe3a566144b4d8fef97583",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "b253a461f84ef0e0bac869af8be55d86c8142bce237375c0252e60b00c20d299",
+    "source_sha256": "ae2e99f4d7ed4aa245cd9fc96b1d662ad7716908686a7a3db0a16edb91acf481",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -207405,7 +207405,7 @@
       "label": "Privacy()",
       "norm_label": "privacy()",
       "source_file": "app/routes/privacy.tsx",
-      "source_location": "L554"
+      "source_location": "L555"
     },
     {
       "_callable": true,

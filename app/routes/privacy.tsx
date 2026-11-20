@@ -306,9 +306,9 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
         <li>
           <strong>Channel connections</strong> and their tokens stay until the streamer disconnects the channel or
           deletes the account. Disconnecting or deleting the account deletes the tokens, removes the event
-          subscriptions, and asks the platform to revoke access. A YouTube connection is also removed 7 days after its
-          access ended, or when its channel data was not read again from YouTube for 30 days; while an overlay is open,
-          we read it again each day. Chat passing through for overlays stays for at most 11 minutes, and IDs of
+          subscriptions, and asks the platform to revoke access. A YouTube connection is also removed 7 days after we
+          find that its access ended, or when its channel data was not read again from YouTube for 30 days. While an
+          overlay is open, we read it again each day; without an open overlay, we find an ended access within 30 days. Chat passing through for overlays stays for at most 11 minutes, and IDs of
           deliveries already received stay for at most 16 minutes. The viewer list of the character playground keeps
           each viewer for at most 30 minutes after their last message, and a ban or timeout until it ends.
         </li>
@@ -383,7 +383,8 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           For anything you cannot do yourself in your account, email {mail} from the address on your account. If your
           account has no email address (TikTok or Instagram sign-in), tell us your display name and we will check it
           another way. We answer within one month. For complex requests we can extend this by two more months, and we
-          will tell you why. We may ask you to confirm your identity.
+          will tell you why. We may ask you to confirm your identity. A request to delete data that we read from a
+          connected YouTube channel is different: we delete that data within 7 days.
         </p>
         <p>We do not make decisions about you based solely on automated processing, and we do not profile you.</p>
       </>

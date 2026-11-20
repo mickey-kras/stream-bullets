@@ -41,7 +41,7 @@ test("mobile landing is one screen with Browse streamers and the scene under the
   const join = page.getByRole("link", { name: "Join as a streamer", exact: true });
   await expect(join).toBeInViewport();
   await expect(join).toHaveAttribute("href", "/?dialog=host");
-  await expect(page.getByText("Collect topics from your viewers and run audience polls.")).toBeVisible();
+  await expect(page.getByText("Collect topics from your viewers, run audience polls, and show your Twitch, YouTube and Kick chat in one OBS overlay.")).toBeVisible();
   await join.click();
   await expect(page).toHaveURL(/\/\?dialog=host$/);
   await expect(page.getByRole("dialog", { name: "Sign in or sign up" })).toBeVisible();
