@@ -131,9 +131,6 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  /* A card is only as wide as its text, so a short message does not cover the game. A long message wraps at the
-     full layer width. */
-  align-items: flex-start;
   gap: 0.22em;
   overflow: hidden;
   /* System fonts only: the overlay loads no web font for the chat. */
@@ -152,7 +149,6 @@
   position: relative;
   flex: 0 0 auto;
   min-width: 0;
-  max-width: 100%;
   margin: 0;
   padding: 0;
 }
