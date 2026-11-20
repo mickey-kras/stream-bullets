@@ -1,9 +1,11 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { makeSignature } from "better-auth/crypto";
 import type { AppEnv } from "../app/env";
+import type { NotificationItem } from "../app/types";
 import { getViewer } from "../app/server/auth.server";
 import { canCreateStreamer, isAdmin, assertStreamerWritable, canViewStreamer } from "../app/server/access.server";
 import { getStreamer, mutateEntry } from "../app/server/data.server";
+import { listNotifications, markNotification, validateMentions } from "../app/server/discussion-notifications.server";
 import { getOverlayState } from "../app/server/overlay.server";
 import { DEFAULT_OVERLAY } from "../app/server/overlay-state";
 import {
@@ -12,6 +14,7 @@ import {
   testAccountId,
   requireTestAccess,
   TEST_ACCOUNTS,
+  type TestAccount,
   TEST_ORIGIN,
   validateTestEnvironment,
 } from "../app/server/test-environment.server";
@@ -276,7 +279,110 @@ describe("synthetic fixtures", (): void => {
     const nested = await env.DB.prepare(
       "SELECT count(*) AS count FROM entry_comments WHERE parent_id IS NOT NULL",
     ).first<{ count: number }>();
-    expect(nested?.count).toBe(8);
+    expect(nested?.count).toBe(9);
+  });
+  it("seeds mention and reply notifications in each state across both communities", async (): Promise<void> => {
+    const inbox = async (account: TestAccount): Promise<string[]> =>
+      (await listNotifications(env, testAccountId(account))).notifications.map(
+        (item: NotificationItem): string =>
+          `${item.handle} ${item.kind} ${item.actor} ${item.read ? "read" : "unread"}`,
+      );
+    expect(await inbox("viewer")).toEqual([
+      "other_host reply other owner unread",
+      "test_host reply owner read",
+      "test_host mention other viewer unread",
+    ]);
+    expect(await inbox("other_viewer")).toEqual(["other_host reply owner unread", "other_host mention viewer read"]);
+    expect(await inbox("owner")).toEqual(["test_host reply other viewer unread"]);
+    expect(await inbox("other_owner")).toEqual([
+      "other_host mention owner unread",
+      "other_host reply other viewer read",
+    ]);
+    for (const account of ["admin", "pending", "frozen_owner", "suspended_owner"] as const)
+      expect(await inbox(account)).toEqual([]);
+    expect((await listNotifications(env, testAccountId("viewer"))).unreadCount).toBe(2);
+    const { notifications } = await listNotifications(env, testAccountId("other_owner"));
+    expect(notifications[0].id).toMatch(/^[a-f0-9]{32}$/u);
+    expect(notifications[0].href).toBe(
+      "/@other_host?view=topics&entry=67500000-0000-4000-8001-000000000020&comment=67500000-0000-4000-8001-000000000027",
+    );
+    // Each mention range selects the label that the application accepts for the mentioned account.
+    const { results: mentions } = await env.DB.prepare(
+      `SELECT substr(c.text,m.start+1,m.end-m.start) AS label,u.name,c.entry_id,c.text FROM comment_mentions m
+        JOIN entry_comments c ON c.id=m.comment_id JOIN user u ON u.id=m.user_id ORDER BY c.id`,
+    ).all<{ label: string; name: string; entry_id: string; text: string }>();
+    expect(mentions.map((row): string => row.label)).toEqual(["@viewer", "@other viewer", "@other owner"]);
+    for (const row of mentions) expect(row.label).toBe(`@${row.name}`);
+    const other = (await getStreamer(env, "other_host"))!;
+    await expect(
+      validateMentions(env, other.id, mentions[2].text, [
+        { userId: testAccountId("other_owner"), start: 0, end: "@other owner".length },
+      ]),
+    ).resolves.toBeUndefined();
+  });
+  it("seeds again without duplicates and keeps changed notification state", async (): Promise<void> => {
+    const tables = ["entry_comments", "comment_mentions", "notifications"] as const;
+    const counts = async (): Promise<number[]> =>
+      Promise.all(
+        tables.map(
+          async (table: (typeof tables)[number]): Promise<number> =>
+            (await env.DB.prepare(`SELECT count(*) AS count FROM ${table}`).first<{ count: number }>())!.count,
+        ),
+      );
+    expect(await counts()).toEqual([15, 3, 8]);
+    const [first] = (await listNotifications(env, testAccountId("owner"))).notifications;
+    await markNotification(env, testAccountId("owner"), first.id, true);
+    await seedTestEnvironment(env, false);
+    expect(await counts()).toEqual([15, 3, 8]);
+    expect((await listNotifications(env, testAccountId("owner"))).notifications[0].read).toBe(true);
+  });
+  it("does not restore notifications for edited or removed fixture comments", async (): Promise<void> => {
+    const mention = "67500000-0000-4000-8001-000000000016";
+    const reply = "67500000-0000-4000-8001-000000000024";
+    await env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(mention).run();
+    await env.DB.prepare("DELETE FROM notifications WHERE comment_id IN (?,?)").bind(mention, reply).run();
+    await env.DB.prepare("UPDATE entry_comments SET text='Edited.' WHERE id=?").bind(mention).run();
+    await env.DB.prepare("UPDATE entry_comments SET removed_at=1 WHERE id=?").bind(reply).run();
+    await seedTestEnvironment(env, false);
+    expect(await env.DB.prepare("SELECT 1 FROM comment_mentions WHERE comment_id=?").bind(mention).first()).toBeNull();
+    expect(
+      await env.DB.prepare("SELECT 1 FROM notifications WHERE comment_id IN (?,?)").bind(mention, reply).first(),
+    ).toBeNull();
+    expect(
+      (await env.DB.prepare("SELECT count(*) AS count FROM notifications").first<{ count: number }>())?.count,
+    ).toBe(6);
+  });
+  it("reset removes tester notifications and limits and restores the seeded state", async (): Promise<void> => {
+    const own = (await getStreamer(env, "test_host"))!;
+    const viewer: string = testAccountId("viewer");
+    const created = await mutateEntry(env, viewer, own.id, {
+      action: "comment",
+      id: "67500000-0000-4000-8001-000000000010",
+      text: "@owner a tester comment.",
+      mentions: [{ userId: own.ownerId, start: 0, end: 6 }],
+      parentId: "67500000-0000-4000-8001-000000000014",
+    });
+    for (const item of (await listNotifications(env, viewer)).notifications)
+      await markNotification(env, viewer, item.id, true);
+    expect((await listNotifications(env, own.ownerId)).notifications).toHaveLength(2);
+    expect((await listNotifications(env, testAccountId("other_viewer"))).notifications).toHaveLength(3);
+    const limits = async (): Promise<number> =>
+      (await env.DB.prepare("SELECT count(*) AS count FROM app_rate_limits WHERE key LIKE 'notify-%'").first<{
+        count: number;
+      }>())!.count;
+    expect(await limits()).toBe(3);
+    await env.DB.prepare(
+      "INSERT INTO app_rate_limits(key,count,window_start) VALUES('notify-actor:unrelated',1,1)",
+    ).run();
+    await seedTestEnvironment(env, true);
+    expect(await limits()).toBe(1);
+    await env.DB.prepare("DELETE FROM app_rate_limits WHERE key='notify-actor:unrelated'").run();
+    expect(await env.DB.prepare("SELECT 1 FROM entry_comments WHERE id=?").bind(created.id).first()).toBeNull();
+    expect(
+      (await env.DB.prepare("SELECT count(*) AS count FROM notifications").first<{ count: number }>())?.count,
+    ).toBe(8);
+    expect((await listNotifications(env, viewer)).unreadCount).toBe(2);
+    expect((await listNotifications(env, own.ownerId)).notifications).toHaveLength(1);
   });
   it("resets sessions, content, images and rooms while preserving configuration and unrelated identities", async (): Promise<void> => {
     await testEnvironmentResponse(request(), env);

@@ -94,6 +94,29 @@ Choose a fixture account to create a normal application session.
 | `pending`, `approved`, `rejected` | Streamer applications in each supported state. |
 | `frozen_owner`, `suspended_owner` | Owners of restricted pages. |
 
+### Discussion fixtures
+
+Each fixture community has one topic, one poll, and a thread of three comments.
+The seed adds mention comments and notifications to `test_host` and `other_host`.
+The author of the comment causes the notification.
+
+| Account | Community | Notification | From | State |
+| --- | --- | --- | --- | --- |
+| `viewer` | `test_host` | Mention | `other_viewer` | Unread |
+| `viewer` | `test_host` | Reply | `owner` | Read |
+| `viewer` | `other_host` | Reply | `other_owner` | Unread |
+| `other_viewer` | `other_host` | Mention | `viewer` | Read |
+| `other_viewer` | `other_host` | Reply | `owner` | Unread |
+| `owner` | `test_host` | Reply | `other_viewer` | Unread |
+| `other_owner` | `other_host` | Reply | `other_viewer` | Read |
+| `other_owner` | `other_host` | Mention | `owner` | Unread |
+
+One comment from `owner` in `other_host` replies to `other_viewer` and mentions `other_owner`.
+The other accounts start with an empty inbox.
+A second seed keeps the read state that a tester changed.
+It does not restore the notifications of a comment that a tester edited or removed.
+Reset restores each fixture and clears the notification rate limits of the fixture accounts.
+
 The secret does not change an account's permissions.
 Use separate browser contexts to test separate accounts.
 Choose `signedout` to clear the application session and keep test access.
@@ -131,7 +154,6 @@ Production rejects test secrets and test login requests.
 OAuth credentials, email bindings, and heartbeat URLs must stay outside test.
 Test deployments disable cron. Tests use synthetic channels, viewers, and email recipients.
 Provider account linking, provider photos, and delivery need separate live-provider checks.
-Mentions and notifications from #674 need fixtures when those features ship.
 
 The test build does not inherit production D1, R2, or Durable Object state.
 Never change test bindings to production resource IDs.
