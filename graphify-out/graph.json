@@ -49737,7 +49737,7 @@
       "relation": "calls",
       "source": "tests_e2e_shell_spec",
       "source_file": "tests/e2e/shell.spec.ts",
-      "source_location": "L217",
+      "source_location": "L220",
       "target": "tests_e2e_shell_spec_headerlabelsdonotwrap",
       "weight": 1.0
     },
@@ -187022,10 +187022,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "a86943bc6507fde07e47e687a05e4aff9ac8703b6029db18d5cd5558dc401c77",
+    "content_sha256": "7c543872e992485c9391a8f01b2a144b6e82d7ccca83645d698b04b5c7b322a7",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "e2ccb6a569c8fc4ad508a064a453e7946c8338c07e56dbc045f50b912f802e99",
+    "source_sha256": "47325b773ba693d14a21cfaaaa8be22d3baa78a3a7f8b44f02bcf51f814c8a96",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -233965,7 +233965,7 @@
             "callee": "newContext",
             "file": "tests/e2e/shell.spec.ts",
             "lang": "typescript",
-            "line": "L201",
+            "line": "L204",
             "receiver_type": "Browser"
           }
         ]
