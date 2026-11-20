@@ -6,6 +6,7 @@ import { StreamerLogo } from "../ui/avatar";
 import { Icon, type IconName } from "../ui/icon";
 import { AccountMenu } from "./account-menu";
 import { useFitHeader } from "./fit-header";
+import { HeaderLanguage } from "./header-language";
 
 export type StreamerView = "topics" | "polls" | "schedule" | "about" | "community";
 
@@ -127,6 +128,7 @@ export function StreamerHeader({
           </span>
         </Link>
         {action}
+        <HeaderLanguage />
         <AccountMenu streamerHeader />
       </div>
       {ticker && <div className="onair-ticker">{ticker}</div>}

@@ -813,7 +813,7 @@
       "relation": "calls",
       "source": "app_components_account_dialog_route_useaccountdialog",
       "source_file": "app/components/account/dialog-route.ts",
-      "source_location": "L37",
+      "source_location": "L40",
       "target": "app_components_account_dialog_route_isaccountdialog",
       "weight": 1.0
     },
@@ -825,7 +825,7 @@
       "relation": "calls",
       "source": "app_components_account_dialog_route_useaccountdialog",
       "source_file": "app/components/account/dialog-route.ts",
-      "source_location": "L42",
+      "source_location": "L45",
       "target": "app_lib_detached_detached",
       "weight": 1.0
     },
@@ -837,7 +837,7 @@
       "relation": "calls",
       "source": "app_components_account_dialog_route_useaccountdialog",
       "source_file": "app/components/account/dialog-route.ts",
-      "source_location": "L43",
+      "source_location": "L46",
       "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
@@ -16845,7 +16845,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_morerow",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L13",
+      "source_location": "L19",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -16857,7 +16857,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L109",
+      "source_location": "L114",
       "target": "app_components_shell_contact_dialog_contactdialog",
       "weight": 1.0
     },
@@ -16869,7 +16869,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L110",
+      "source_location": "L115",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -16881,7 +16881,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L120",
+      "source_location": "L125",
       "target": "app_components_shell_footer_morerow",
       "weight": 1.0
     },
@@ -16893,7 +16893,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L23",
+      "source_location": "L29",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -16905,7 +16905,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L24",
+      "source_location": "L30",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -16917,7 +16917,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L66",
+      "source_location": "L71",
       "target": "app_components_shell_dialog_link_dialoglink",
       "weight": 1.0
     },
@@ -16929,7 +16929,67 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L68",
+      "source_location": "L73",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_header_language_headerlanguage",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L13",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_header_language_headerlanguage",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L14",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_header_language_headerlanguage",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L23",
+      "target": "app_lib_detached_detached",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_header_language_headerlanguage",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L24",
+      "target": "app_components_account_dialog_route_dialoghref",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_header_language_headerlanguage",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L31",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -16941,7 +17001,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_chooselocale",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L21",
+      "source_location": "L25",
       "target": "app_components_api_sendjson",
       "weight": 1.0
     },
@@ -16953,7 +17013,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_chooselocale",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L22",
+      "source_location": "L26",
       "target": "app_lib_prefs_savelocalecookie",
       "weight": 1.0
     },
@@ -16965,7 +17025,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L37",
+      "source_location": "L41",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -16977,7 +17037,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L40",
+      "source_location": "L44",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -16989,7 +17049,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L53",
+      "source_location": "L57",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -17001,7 +17061,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L58",
+      "source_location": "L62",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -17013,7 +17073,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L62",
+      "source_location": "L66",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -17025,7 +17085,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L81",
+      "source_location": "L85",
       "target": "app_components_shell_language_dialog_languagedialog_pick",
       "weight": 1.0
     },
@@ -17037,7 +17097,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L83",
+      "source_location": "L87",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -17049,7 +17109,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog_pick",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L51",
+      "source_location": "L55",
       "target": "app_components_shell_language_dialog_chooselocale",
       "weight": 1.0
     },
@@ -17061,7 +17121,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog_pick",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L53",
+      "source_location": "L57",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -17337,7 +17397,7 @@
       "relation": "calls",
       "source": "app_components_shell_site_header_siteheader",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -17349,20 +17409,8 @@
       "relation": "calls",
       "source": "app_components_shell_site_header_siteheader",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L24",
+      "source_location": "L25",
       "target": "app_components_shell_fit_header_usefitheader",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_shell_site_header_siteheader",
-      "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L28",
-      "target": "app_components_shell_site_header_sitelogo",
       "weight": 1.0
     },
     {
@@ -17374,6 +17422,18 @@
       "source": "app_components_shell_site_header_siteheader",
       "source_file": "app/components/shell/site-header.tsx",
       "source_location": "L29",
+      "target": "app_components_shell_site_header_sitelogo",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_site_header_siteheader",
+      "source_file": "app/components/shell/site-header.tsx",
+      "source_location": "L30",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -17385,7 +17445,7 @@
       "relation": "calls",
       "source": "app_components_shell_site_header_siteheader",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -17397,7 +17457,19 @@
       "relation": "calls",
       "source": "app_components_shell_site_header_siteheader",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L48",
+      "source_location": "L49",
+      "target": "app_components_shell_header_language_headerlanguage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_site_header_siteheader",
+      "source_file": "app/components/shell/site-header.tsx",
+      "source_location": "L50",
       "target": "app_components_shell_account_menu_accountmenu",
       "weight": 1.0
     },
@@ -17409,7 +17481,7 @@
       "relation": "calls",
       "source": "app_components_shell_site_header_sitelogo",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -17421,7 +17493,7 @@
       "relation": "calls",
       "source": "app_components_shell_streamer_header_streamerheader",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L105",
+      "source_location": "L106",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -17433,7 +17505,19 @@
       "relation": "calls",
       "source": "app_components_shell_streamer_header_streamerheader",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L130",
+      "source_location": "L131",
+      "target": "app_components_shell_header_language_headerlanguage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_shell_streamer_header_streamerheader",
+      "source_file": "app/components/shell/streamer-header.tsx",
+      "source_location": "L132",
       "target": "app_components_shell_account_menu_accountmenu",
       "weight": 1.0
     },
@@ -17445,7 +17529,7 @@
       "relation": "calls",
       "source": "app_components_shell_streamer_header_streamerheader",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L68",
+      "source_location": "L69",
       "target": "app_components_shell_fit_header_usefitheader",
       "weight": 1.0
     },
@@ -17457,7 +17541,7 @@
       "relation": "calls",
       "source": "app_components_shell_streamer_header_streamerheader",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -17469,7 +17553,7 @@
       "relation": "calls",
       "source": "app_components_shell_streamer_header_streamerheader",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -17481,7 +17565,7 @@
       "relation": "calls",
       "source": "app_components_shell_streamer_header_streamerheader",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "app_components_ui_avatar_streamerlogo",
       "weight": 1.0
     },
@@ -17493,7 +17577,7 @@
       "relation": "calls",
       "source": "app_components_shell_streamer_header_streamerheaderappearance",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L145",
+      "source_location": "L147",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -29243,6 +29327,18 @@
       "source_file": "app/root.tsx",
       "source_location": "L135",
       "target": "app_components_shell_footer_sitefooter",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_root_errorboundary",
+      "source_file": "app/root.tsx",
+      "source_location": "L136",
+      "target": "app_components_account_account_dialogs_accountdialogs",
       "weight": 1.0
     },
     {
@@ -50409,7 +50505,19 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L284",
+      "source_location": "L119",
+      "target": "tests_e2e_i18n_spec_inlanguage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_e2e_i18n_spec",
+      "source_file": "tests/e2e/i18n.spec.ts",
+      "source_location": "L337",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -50421,20 +50529,8 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L285",
+      "source_location": "L338",
       "target": "tests_e2e_i18n_spec_shot",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "tests_e2e_i18n_spec",
-      "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L66",
-      "target": "tests_e2e_i18n_spec_inlanguage",
       "weight": 1.0
     },
     {
@@ -50529,7 +50625,7 @@
       "relation": "calls",
       "source": "tests_e2e_mobile_discussion_spec",
       "source_file": "tests/e2e/mobile-discussion.spec.ts",
-      "source_location": "L111",
+      "source_location": "L134",
       "target": "tests_e2e_mobile_discussion_spec_touchscroll",
       "weight": 1.0
     },
@@ -50541,7 +50637,7 @@
       "relation": "calls",
       "source": "tests_e2e_mobile_discussion_spec",
       "source_file": "tests/e2e/mobile-discussion.spec.ts",
-      "source_location": "L47",
+      "source_location": "L49",
       "target": "tests_e2e_mobile_discussion_spec_discussion",
       "weight": 1.0
     },
@@ -70981,10 +71077,118 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L3",
+      "target": "app_i18n_index_getlocale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L3",
+      "target": "app_i18n_index_locale",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L3",
+      "target": "app_i18n_index_locale_names",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L3",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L4",
+      "target": "app_lib_detached_detached",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L5",
+      "target": "app_components_account_dialog_route_dialoghref",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L5",
+      "target": "app_components_account_dialog_route_dialogstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L6",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "app_components_shell_language_dialog",
       "source_file": "app/components/shell/language-dialog.tsx",
       "source_location": "L3",
       "target": "app_components_account_dialog_route_dialogstate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_language_dialog",
+      "source_file": "app/components/shell/language-dialog.tsx",
+      "source_location": "L3",
+      "target": "app_components_account_dialog_route_languageopener",
       "weight": 1.0
     },
     {
@@ -71365,6 +71569,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "app_components_shell_site_header",
+      "source_file": "app/components/shell/site-header.tsx",
+      "source_location": "L8",
+      "target": "app_components_shell_header_language_headerlanguage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
       "source_location": "L3",
@@ -71465,6 +71681,18 @@
       "source_file": "app/components/shell/streamer-header.tsx",
       "source_location": "L8",
       "target": "app_components_shell_fit_header_usefitheader",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_shell_streamer_header",
+      "source_file": "app/components/shell/streamer-header.tsx",
+      "source_location": "L9",
+      "target": "app_components_shell_header_language_headerlanguage",
       "weight": 1.0
     },
     {
@@ -120798,6 +121026,79 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L1",
+      "target": "ref_react",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L2",
+      "target": "ref_react_router",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L3",
+      "target": "app_i18n_index",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L4",
+      "target": "app_lib_detached",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L5",
+      "target": "app_components_account_dialog_route",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L6",
+      "target": "app_components_ui_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_components_shell_language_dialog",
       "source_file": "app/components/shell/language-dialog.tsx",
       "source_location": "L1",
@@ -121123,6 +121424,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_components_shell_site_header",
+      "source_file": "app/components/shell/site-header.tsx",
+      "source_location": "L8",
+      "target": "app_components_shell_header_language",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
       "source_location": "L1",
@@ -121211,6 +121524,18 @@
       "source_file": "app/components/shell/streamer-header.tsx",
       "source_location": "L8",
       "target": "app_components_shell_fit_header",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_shell_streamer_header",
+      "source_file": "app/components/shell/streamer-header.tsx",
+      "source_location": "L9",
+      "target": "app_components_shell_header_language",
       "weight": 1.0
     },
     {
@@ -146250,6 +146575,17 @@
       "source": "app_components_account_dialog_route",
       "source_file": "app/components/account/dialog-route.ts",
       "source_location": "L27",
+      "target": "app_components_account_dialog_route_languageopener",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_account_dialog_route",
+      "source_file": "app/components/account/dialog-route.ts",
+      "source_location": "L30",
       "target": "app_components_account_dialog_route_dialogstate",
       "weight": 1.0
     },
@@ -146260,7 +146596,7 @@
       "relation": "contains",
       "source": "app_components_account_dialog_route",
       "source_file": "app/components/account/dialog-route.ts",
-      "source_location": "L33",
+      "source_location": "L36",
       "target": "app_components_account_dialog_route_useaccountdialog",
       "weight": 1.0
     },
@@ -153961,6 +154297,17 @@
       "source": "app_components_shell_footer",
       "source_file": "app/components/shell/footer.tsx",
       "source_location": "L10",
+      "target": "app_components_shell_footer_language_openers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_shell_footer",
+      "source_file": "app/components/shell/footer.tsx",
+      "source_location": "L16",
       "target": "app_components_shell_footer_morerow",
       "weight": 1.0
     },
@@ -153971,8 +154318,19 @@
       "relation": "contains",
       "source": "app_components_shell_footer",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L19",
+      "source_location": "L25",
       "target": "app_components_shell_footer_sitefooter",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_shell_header_language",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L10",
+      "target": "app_components_shell_header_language_headerlanguage",
       "weight": 1.0
     },
     {
@@ -154004,7 +154362,7 @@
       "relation": "contains",
       "source": "app_components_shell_language_dialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L36",
+      "source_location": "L40",
       "target": "app_components_shell_language_dialog_languagedialog",
       "weight": 1.0
     },
@@ -154015,7 +154373,7 @@
       "relation": "contains",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L43",
+      "source_location": "L47",
       "target": "app_components_shell_language_dialog_languagedialog_pick",
       "weight": 1.0
     },
@@ -154136,7 +154494,7 @@
       "relation": "contains",
       "source": "app_components_shell_site_header",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L10",
+      "source_location": "L11",
       "target": "app_components_shell_site_header_sitelogo",
       "weight": 1.0
     },
@@ -154147,7 +154505,7 @@
       "relation": "contains",
       "source": "app_components_shell_site_header",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "app_components_shell_site_header_siteheader",
       "weight": 1.0
     },
@@ -154158,7 +154516,7 @@
       "relation": "contains",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L10",
+      "source_location": "L11",
       "target": "app_components_shell_streamer_header_streamerview",
       "weight": 1.0
     },
@@ -154169,7 +154527,7 @@
       "relation": "contains",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_components_shell_streamer_header_streamerviews",
       "weight": 1.0
     },
@@ -154180,7 +154538,7 @@
       "relation": "contains",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L138",
+      "source_location": "L140",
       "target": "app_components_shell_streamer_header_streamerheaderappearance",
       "weight": 1.0
     },
@@ -154191,7 +154549,7 @@
       "relation": "contains",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "app_components_shell_streamer_header_officialviews",
       "weight": 1.0
     },
@@ -154202,7 +154560,7 @@
       "relation": "contains",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "app_components_shell_streamer_header_viewicon",
       "weight": 1.0
     },
@@ -154213,7 +154571,7 @@
       "relation": "contains",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_components_shell_streamer_header_viewlabel",
       "weight": 1.0
     },
@@ -154224,7 +154582,7 @@
       "relation": "contains",
       "source": "app_components_shell_streamer_header",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "target": "app_components_shell_streamer_header_streamerheader",
       "weight": 1.0
     },
@@ -177897,6 +178255,17 @@
       "source": "docs_localization_localization",
       "source_file": "docs/localization.md",
       "source_location": "L58",
+      "target": "docs_localization_language_selection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "docs_localization_localization",
+      "source_file": "docs/localization.md",
+      "source_location": "L72",
       "target": "docs_localization_legal_translation_gaps",
       "weight": 1.0
     },
@@ -177907,7 +178276,7 @@
       "relation": "contains",
       "source": "docs_localization_localization",
       "source_file": "docs/localization.md",
-      "source_location": "L64",
+      "source_location": "L78",
       "target": "docs_localization_verification_and_native_review",
       "weight": 1.0
     },
@@ -181570,7 +181939,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L140",
+      "source_location": "L193",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -181581,7 +181950,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L175",
+      "source_location": "L228",
       "target": "tests_e2e_i18n_spec_phonescreen",
       "weight": 1.0
     },
@@ -181592,7 +181961,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L182",
+      "source_location": "L235",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -181603,7 +181972,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L185",
+      "source_location": "L238",
       "target": "tests_e2e_i18n_spec_phonescreens",
       "weight": 1.0
     },
@@ -193234,7 +193603,7 @@
       "relation": "indirect_call",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L241",
+      "source_location": "L294",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -193804,10 +194173,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f00d3551b3306a96f38b05b019b49f52dd12cda2f297a2ac14a9b59319f7f9c0",
+    "content_sha256": "129c4a46925704f8889594479654a2a74bd4ec85c0d2003d32a915a44bfd4681",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "8a0686fa25a515509b3885058ae95e201083df13eda896cf9d87cd06b8427d50",
+    "source_sha256": "f77ef487e78040bf960ce21c02c1a03937180cea355f4c1c8e51b2aebacf6811",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -194217,6 +194586,18 @@
       "id": "app_components_account_dialog_route_dialogstate",
       "label": "DialogState",
       "norm_label": "dialogstate",
+      "source_file": "app/components/account/dialog-route.ts",
+      "source_location": "L30"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_account_dialog_route_languageopener",
+      "label": "LanguageOpener",
+      "norm_label": "languageopener",
       "source_file": "app/components/account/dialog-route.ts",
       "source_location": "L27"
     },
@@ -195382,7 +195763,7 @@
       "label": "StreamerView",
       "norm_label": "streamerview",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "_callable": true,
@@ -200242,7 +200623,7 @@
       "label": "PhoneScreen",
       "norm_label": "phonescreen",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L175"
+      "source_location": "L228"
     },
     {
       "_callable": true,
@@ -200998,7 +201379,7 @@
       "label": "useAccountDialog()",
       "norm_label": "useaccountdialog()",
       "source_file": "app/components/account/dialog-route.ts",
-      "source_location": "L33"
+      "source_location": "L36"
     },
     {
       "_callable": true,
@@ -207281,7 +207662,7 @@
       "label": "MoreRow()",
       "norm_label": "morerow()",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L10"
+      "source_location": "L16"
     },
     {
       "_callable": true,
@@ -207296,14 +207677,25 @@
             "callee": "getClientRects",
             "file": "app/components/shell/footer.tsx",
             "lang": "typescript",
-            "line": "L45",
+            "line": "L49",
             "receiver_type": "HTMLElement"
           }
         ]
       },
       "norm_label": "sitefooter()",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L19"
+      "source_location": "L25"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_shell_header_language_headerlanguage",
+      "label": "HeaderLanguage()",
+      "norm_label": "headerlanguage()",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L10"
     },
     {
       "_callable": true,
@@ -207325,7 +207717,7 @@
       "label": "LanguageDialog()",
       "norm_label": "languagedialog()",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L36"
+      "source_location": "L40"
     },
     {
       "_callable": true,
@@ -207336,7 +207728,7 @@
       "label": "pick()",
       "norm_label": "pick()",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L43"
+      "source_location": "L47"
     },
     {
       "_callable": true,
@@ -207435,7 +207827,7 @@
       "label": "SiteHeader()",
       "norm_label": "siteheader()",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L20"
+      "source_location": "L21"
     },
     {
       "_callable": true,
@@ -207446,7 +207838,7 @@
       "label": "SiteLogo()",
       "norm_label": "sitelogo()",
       "source_file": "app/components/shell/site-header.tsx",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "_callable": true,
@@ -207457,7 +207849,7 @@
       "label": "StreamerHeader()",
       "norm_label": "streamerheader()",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L32"
+      "source_location": "L33"
     },
     {
       "_callable": true,
@@ -207468,7 +207860,7 @@
       "label": "streamerHeaderAppearance()",
       "norm_label": "streamerheaderappearance()",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L138"
+      "source_location": "L140"
     },
     {
       "_callable": true,
@@ -225595,7 +225987,7 @@
       "label": "headerAction()",
       "norm_label": "headeraction()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L182"
+      "source_location": "L235"
     },
     {
       "_callable": true,
@@ -225632,21 +226024,21 @@
             "callee": "checkVisibility",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L157",
+            "line": "L210",
             "receiver_type": "Element"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L158",
+            "line": "L211",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "phoneproblems()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L140"
+      "source_location": "L193"
     },
     {
       "_callable": true,
@@ -232103,6 +232495,26 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_shell_footer_language_openers",
+      "label": "LANGUAGE_OPENERS",
+      "norm_label": "language_openers",
+      "source_file": "app/components/shell/footer.tsx",
+      "source_location": "L10"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_shell_header_language",
+      "label": "header-language.tsx",
+      "norm_label": "header-language.tsx",
+      "source_file": "app/components/shell/header-language.tsx",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_shell_language_dialog",
       "label": "language-dialog.tsx",
       "norm_label": "language-dialog.tsx",
@@ -232177,7 +232589,7 @@
       "label": "officialViews",
       "norm_label": "officialviews",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L14"
+      "source_location": "L15"
     },
     {
       "_origin": "ast",
@@ -232187,7 +232599,7 @@
       "label": "streamerViews",
       "norm_label": "streamerviews",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "_origin": "ast",
@@ -232197,7 +232609,7 @@
       "label": "viewIcon",
       "norm_label": "viewicon",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L16"
+      "source_location": "L17"
     },
     {
       "_origin": "ast",
@@ -232207,7 +232619,7 @@
       "label": "viewLabel",
       "norm_label": "viewlabel",
       "source_file": "app/components/shell/streamer-header.tsx",
-      "source_location": "L23"
+      "source_location": "L24"
     },
     {
       "_origin": "ast",
@@ -241092,7 +241504,7 @@
       "label": "phoneScreens",
       "norm_label": "phonescreens",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L185"
+      "source_location": "L238"
     },
     {
       "_origin": "ast",
@@ -244905,12 +245317,23 @@
       "_origin": "ast",
       "community": null,
       "file_type": "document",
+      "id": "docs_localization_language_selection",
+      "label": "Language selection",
+      "node_kind": "heading",
+      "norm_label": "language selection",
+      "source_file": "docs/localization.md",
+      "source_location": "L58"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
       "id": "docs_localization_legal_translation_gaps",
       "label": "Legal translation gaps",
       "node_kind": "heading",
       "norm_label": "legal translation gaps",
       "source_file": "docs/localization.md",
-      "source_location": "L58"
+      "source_location": "L72"
     },
     {
       "_origin": "ast",
@@ -244965,7 +245388,7 @@
       "node_kind": "heading",
       "norm_label": "verification and native review",
       "source_file": "docs/localization.md",
-      "source_location": "L64"
+      "source_location": "L78"
     },
     {
       "_origin": "ast",
