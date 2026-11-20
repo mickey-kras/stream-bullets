@@ -131,6 +131,7 @@ A viewer scans the QR code with a phone. The phone then opens the public page of
 - Each link starts with the origin of the app (`APP_ORIGIN`), the same value that gives the host in the **Tap at** hint.
 - The code is in the card of the layer, at the right edge. On a poll card it is at the bottom, beside the **Tap at** hint.
 - The side of the code is 22 percent of the card height, and at least 96 design pixels.
+  It is at most 30 percent of the card width, unless that is below the minimum.
   The card with the code becomes smaller with its cell, as each card does.
 - The code has dark modules (`#0b2228`) on a light plate (`#f7edcf`) with a quiet zone of 2 modules.
   The plate stays opaque at each `backgroundOpacity`. Thus a phone can read the code on each background.

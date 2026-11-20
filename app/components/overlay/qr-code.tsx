@@ -10,10 +10,19 @@ const QR_BORDER = 2;
 /** The side of the code: this share of the card height, and at least this many design pixels. */
 const QR_SHARE = 0.22;
 export const QR_MIN = 96;
+/** The code takes at most this share of the card width, so a high narrow card keeps room for its text. */
+const QR_WIDTH_SHARE = 0.3;
+
+/** The side of the code for a card of this size, in design pixels. */
+export function qrSide(cardWidth: number, cardHeight: number): number {
+  const widest: number = Math.max(QR_MIN, Math.round(cardWidth * QR_WIDTH_SHARE));
+  return Math.min(widest, Math.max(QR_MIN, Math.round(cardHeight * QR_SHARE)));
+}
 
 /**
- * The side of the code in design pixels, from the height of its card. A new side can change the card height, so the
- * hook measures again until the side stays the same. Each write waits for the next frame.
+ * The side of the code in design pixels, from the size of its card. A new side can change the card height, so the
+ * hook measures again until the side stays the same. The width limit stops this growth. Each write waits for the
+ * next frame.
  */
 function useCardSide(plate: { readonly current: HTMLImageElement | null }): number {
   const [side, setSide] = useState<number>(QR_MIN);
@@ -23,8 +32,8 @@ function useCardSide(plate: { readonly current: HTMLImageElement | null }): numb
     let frame = 0;
     const sizes = new ResizeObserver((): void => {
       cancelAnimationFrame(frame);
-      // offsetHeight is in design pixels: the scale of the layer does not change it.
-      frame = requestAnimationFrame((): void => setSide(Math.max(QR_MIN, Math.round(card.offsetHeight * QR_SHARE))));
+      // The offset sizes are in design pixels: the scale of the layer does not change them.
+      frame = requestAnimationFrame((): void => setSide(qrSide(card.offsetWidth, card.offsetHeight)));
     });
     sizes.observe(card);
     return (): void => {

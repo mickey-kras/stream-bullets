@@ -17,7 +17,7 @@ import {
   type OverlayPoll,
   type OverlayScene,
 } from "../app/components/overlay/overlay-stage";
-import { QR_MIN, QrCode } from "../app/components/overlay/qr-code";
+import { QR_MIN, QrCode, qrSide } from "../app/components/overlay/qr-code";
 import { StudioTest } from "../app/components/overlay/studio-test";
 import { t } from "../app/i18n";
 import type { ChatRow } from "../app/lib/chat-feed";
@@ -587,6 +587,15 @@ describe("overlay source fallbacks", () => {
       expect(qrTarget(full, { type: "message", ref: null })).toBeNull();
     });
 
+    it("sizes the code from the card height, inside the limits", () => {
+      // 22% of the height, at least the minimum, at most 30% of the width.
+      expect(qrSide(1200, 517)).toBe(114);
+      expect(qrSide(1200, 200)).toBe(QR_MIN);
+      expect(qrSide(480, 2000)).toBe(144);
+      // A very narrow card keeps the minimum, so a phone can still read the code.
+      expect(qrSide(200, 2000)).toBe(QR_MIN);
+    });
+
     it("draws the code as an SVG picture with a name, the same for the same link", () => {
       const html: string = renderToStaticMarkup(createElement(QrCode, { url: `${page}?view=schedule` }));
       expect(html).toMatch(
@@ -618,9 +627,7 @@ describe("overlay source fallbacks", () => {
         const link: string = (qrTarget(full, source) ?? "").replaceAll("&", "&amp;");
         // The text keeps the left side. The code is the last part of the card.
         expect(on, source.type).toMatch(/<article [^>]*><div class="ov-qr-row"><div class="ov-qr-text">/);
-        expect(on, source.type).toMatch(
-          new RegExp(`data-overlay-qr="${link.replace(/[?]/g, "\\?")}"/></div></article></div>$`),
-        );
+        expect(on.endsWith(`data-overlay-qr="${link}"/></div></article></div>`), source.type).toBe(true);
         expect(on.match(/class="ov-qr"/g), source.type).toHaveLength(1);
         const off: string = stage(source, full);
         expect(off, source.type).toContain("<article");
