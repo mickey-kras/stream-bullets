@@ -35,6 +35,7 @@ The theme is separate from the layout and the behavior. The overlay has one them
 The model also has six source layers: `poll`, `topic`, `next`, `message`, `card`, and `support`.
 Each source layer shows one content source in its own cell, at the same level as the `content` layer.
 A source layer has no cell by default. Thus an existing OBS scene does not change.
+
 The editor does not place the source layers. Only the API sets them. See [Source layers](#source-layers).
 
 ## Grid and orientation
@@ -96,7 +97,7 @@ With all six source layers on the grid in the two orientations, some changes to 
 
 The page scales the design pixels to the size of the browser source.
 
-When the chat layer is on, the content has a cell, or a source layer is on stream, the composition puts all of its layers in one canvas.
+The composition puts all of its layers in one canvas in three cases. The chat layer is on, the content has a cell, or a source layer is on stream.
 The canvas has the frame size of the selected orientation. It is the same as the canvas of the editor preview.
 Thus the layout is the same at all source sizes with the same aspect ratio, and the same as in the preview.
 If the source does not have the frame size, the on-air content changes size when the chat layer comes on.

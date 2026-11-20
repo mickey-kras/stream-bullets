@@ -129,7 +129,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 - Each value in `items` holds the settings of one source layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
   - `ref` is the ID of a poll, a topic, or a Community card of the page. An unknown ID returns `404`.
     A `poll` layer with `ref: null` shows the latest active poll. A `card` layer with `ref: null` shows the first card.
-    For `next`, `message`, and `support`, `ref` must be `null`.
+    `next`, `message`, and `support` accept only `ref: null`.
   - `backgroundOpacity` has the same values as `chat.backgroundOpacity`. It applies to the card background of the layer.
   - The API only stores `qr`. The overlay does not show a QR code.
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
@@ -168,7 +168,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   Each orientation in `cells` is `{chat, characters, content, poll, topic, next, message, card, support}`. `content` and each source layer value are a cell or `null`.
   `items` holds `{enabled, ref, backgroundOpacity, qr}` for each source layer.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value. Chat and characters are off by default, `hideCommands` is on, and `backgroundOpacity` is 100.
-  A source layer has no cell by default. Its defaults are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `qr` is `true` for `poll` and `false` for the other source layers.
+  A source layer has no cell by default. Its defaults are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `poll` has `qr: true`. The other source layers have `qr: false`.
 - See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the chat test, and the chat limits.
 
 ## Later phases

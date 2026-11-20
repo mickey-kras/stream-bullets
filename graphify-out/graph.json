@@ -173482,7 +173482,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L375",
+      "source_location": "L376",
       "target": "docs_overlay_composition_chat_appearance",
       "weight": 1.0
     },
@@ -173493,7 +173493,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L404",
+      "source_location": "L405",
       "target": "docs_overlay_composition_message_background",
       "weight": 1.0
     },
@@ -173504,7 +173504,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L422",
+      "source_location": "L423",
       "target": "docs_overlay_composition_moderation",
       "weight": 1.0
     },
@@ -173515,7 +173515,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L433",
+      "source_location": "L434",
       "target": "docs_overlay_composition_commands",
       "weight": 1.0
     },
@@ -173526,7 +173526,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L442",
+      "source_location": "L443",
       "target": "docs_overlay_composition_reconnection",
       "weight": 1.0
     },
@@ -173537,7 +173537,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L227",
+      "source_location": "L228",
       "target": "docs_overlay_composition_add_and_remove_a_layer",
       "weight": 1.0
     },
@@ -173548,7 +173548,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L269",
+      "source_location": "L270",
       "target": "docs_overlay_composition_keyboard",
       "weight": 1.0
     },
@@ -173559,7 +173559,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L289",
+      "source_location": "L290",
       "target": "docs_overlay_composition_how_the_content_follows_the_size",
       "weight": 1.0
     },
@@ -173570,7 +173570,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L299",
+      "source_location": "L300",
       "target": "docs_overlay_composition_saves",
       "weight": 1.0
     },
@@ -173581,7 +173581,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_grid_and_orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "docs_overlay_composition_source_layers",
       "weight": 1.0
     },
@@ -173592,7 +173592,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_obs_browser_source",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L170",
+      "source_location": "L171",
       "target": "docs_overlay_composition_live_room_seats",
       "weight": 1.0
     },
@@ -173603,7 +173603,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L122",
+      "source_location": "L123",
       "target": "docs_overlay_composition_urls",
       "weight": 1.0
     },
@@ -173614,7 +173614,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L151",
+      "source_location": "L152",
       "target": "docs_overlay_composition_obs_browser_source",
       "weight": 1.0
     },
@@ -173625,7 +173625,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L178",
+      "source_location": "L179",
       "target": "docs_overlay_composition_editor",
       "weight": 1.0
     },
@@ -173647,7 +173647,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L326",
+      "source_location": "L327",
       "target": "docs_overlay_composition_chat_test",
       "weight": 1.0
     },
@@ -173658,7 +173658,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L351",
+      "source_location": "L352",
       "target": "docs_overlay_composition_chat_behavior",
       "weight": 1.0
     },
@@ -173669,7 +173669,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L40",
+      "source_location": "L41",
       "target": "docs_overlay_composition_grid_and_orientation",
       "weight": 1.0
     },
@@ -173680,7 +173680,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L458",
+      "source_location": "L459",
       "target": "docs_overlay_composition_youtube_quota_and_sockets",
       "weight": 1.0
     },
@@ -173691,7 +173691,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L474",
+      "source_location": "L475",
       "target": "docs_overlay_composition_security",
       "weight": 1.0
     },
@@ -173702,7 +173702,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L488",
+      "source_location": "L489",
       "target": "docs_overlay_composition_limits_and_known_gaps",
       "weight": 1.0
     },
@@ -185314,7 +185314,7 @@
       "relation": "references",
       "source": "docs_overlay_composition",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L120",
+      "source_location": "L121",
       "target": "docs_api",
       "weight": 1.0
     },
@@ -185325,7 +185325,7 @@
       "relation": "references",
       "source": "docs_overlay_composition",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L176",
+      "source_location": "L177",
       "target": "docs_live_room_capacity",
       "weight": 1.0
     },
@@ -188369,10 +188369,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "c2c04ae15cecd81003f51de6afbc38972b77a4901c8107a763bc16a867a459a9",
+    "content_sha256": "151eed8d3ba0a3397c5fc10916a7b01b12dd41382c5cdf4f1010589b280cfc96",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "f21c2057fba8d9bf4b1b9048bd790cef3c49bea63a10cffe77168a18d2bde38e",
+    "source_sha256": "5cbaeca5a6396bc96561ebc476ae097e7751116af4d9c8c9325f16cdb3c8398f",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -238311,7 +238311,7 @@
       "node_kind": "heading",
       "norm_label": "add and remove a layer",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L227"
+      "source_location": "L228"
     },
     {
       "_origin": "ast",
@@ -238322,7 +238322,7 @@
       "node_kind": "heading",
       "norm_label": "chat appearance",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L375"
+      "source_location": "L376"
     },
     {
       "_origin": "ast",
@@ -238333,7 +238333,7 @@
       "node_kind": "heading",
       "norm_label": "chat behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L351"
+      "source_location": "L352"
     },
     {
       "_origin": "ast",
@@ -238344,7 +238344,7 @@
       "node_kind": "heading",
       "norm_label": "chat test",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L326"
+      "source_location": "L327"
     },
     {
       "_origin": "ast",
@@ -238355,7 +238355,7 @@
       "node_kind": "heading",
       "norm_label": "commands",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L433"
+      "source_location": "L434"
     },
     {
       "_origin": "ast",
@@ -238366,7 +238366,7 @@
       "node_kind": "heading",
       "norm_label": "editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L178"
+      "source_location": "L179"
     },
     {
       "_origin": "ast",
@@ -238377,7 +238377,7 @@
       "node_kind": "heading",
       "norm_label": "grid and orientation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L40"
+      "source_location": "L41"
     },
     {
       "_origin": "ast",
@@ -238388,7 +238388,7 @@
       "node_kind": "heading",
       "norm_label": "how the content follows the size",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L289"
+      "source_location": "L290"
     },
     {
       "_origin": "ast",
@@ -238399,7 +238399,7 @@
       "node_kind": "heading",
       "norm_label": "keyboard",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L269"
+      "source_location": "L270"
     },
     {
       "_origin": "ast",
@@ -238421,7 +238421,7 @@
       "node_kind": "heading",
       "norm_label": "limits and known gaps",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L488"
+      "source_location": "L489"
     },
     {
       "_origin": "ast",
@@ -238432,7 +238432,7 @@
       "node_kind": "heading",
       "norm_label": "live-room seats",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L170"
+      "source_location": "L171"
     },
     {
       "_origin": "ast",
@@ -238443,7 +238443,7 @@
       "node_kind": "heading",
       "norm_label": "message background",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L404"
+      "source_location": "L405"
     },
     {
       "_origin": "ast",
@@ -238454,7 +238454,7 @@
       "node_kind": "heading",
       "norm_label": "moderation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L422"
+      "source_location": "L423"
     },
     {
       "_origin": "ast",
@@ -238465,7 +238465,7 @@
       "node_kind": "heading",
       "norm_label": "obs browser source",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L151"
+      "source_location": "L152"
     },
     {
       "_origin": "ast",
@@ -238487,7 +238487,7 @@
       "node_kind": "heading",
       "norm_label": "reconnection",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L442"
+      "source_location": "L443"
     },
     {
       "_origin": "ast",
@@ -238498,7 +238498,7 @@
       "node_kind": "heading",
       "norm_label": "saves",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L299"
+      "source_location": "L300"
     },
     {
       "_origin": "ast",
@@ -238509,7 +238509,7 @@
       "node_kind": "heading",
       "norm_label": "security",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L474"
+      "source_location": "L475"
     },
     {
       "_origin": "ast",
@@ -238520,7 +238520,7 @@
       "node_kind": "heading",
       "norm_label": "source layers",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L77"
+      "source_location": "L78"
     },
     {
       "_origin": "ast",
@@ -238531,7 +238531,7 @@
       "node_kind": "heading",
       "norm_label": "urls",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L122"
+      "source_location": "L123"
     },
     {
       "_origin": "ast",
@@ -238542,7 +238542,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota and sockets",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L458"
+      "source_location": "L459"
     },
     {
       "_origin": "ast",
