@@ -32,6 +32,12 @@ The composition has three layers. This list starts at the bottom layer:
 The chat layer and the characters layer are off by default. Thus an existing OBS scene does not change.
 The theme is separate from the layout and the behavior. The overlay has one theme, the wasteland theme.
 
+The model also has six source layers: `poll`, `topic`, `next`, `message`, `card`, and `support`.
+Each source layer shows one content source in its own cell, at the same level as the `content` layer.
+A source layer has no cell by default. Thus an existing OBS scene does not change.
+
+The editor does not place the source layers. Only the API sets them. See [Source layers](#source-layers).
+
 ## Grid and orientation
 
 The streamer selects the orientation of the frame. Each orientation has a grid of square cells of 120 pixels:
@@ -53,6 +59,7 @@ The overlay shows only the selected orientation.
 | `chat` | `c` 0, `r` 0, 5 × 7 | `c` 0, `r` 8, 9 × 5 | 3 × 2 |
 | `characters` | `c` 0, `r` 7, 16 × 2 | `c` 0, `r` 13, 9 × 3 | 6 × 2 |
 | `content` | No cell | No cell | 4 × 2 |
+| Each source layer | No cell | No cell | 4 × 2 |
 
 The chat layer and the characters layer always have a stored cell, also while they are off.
 A layer that is off is not on the grid of the editor. The server still keeps its cell free of the other cells.
@@ -68,9 +75,29 @@ A content layer without a cell does not count for the overlap rule.
 When the content has a cell, it shows in the middle of the cell. The **Position** setting does not apply then.
 The **Size** setting still applies. If the content is larger than the cell, it becomes smaller until it fits.
 
+### Source layers
+
+A source layer is on stream when it has a cell in the selected orientation and its `enabled` setting is on.
+The composition then shows the source of the layer in the middle of the cell, as for content with a cell.
+A layer source URL with the `layer` parameter does not show the source layers.
+
+Each source layer has these settings:
+
+- `enabled`: the layer shows on stream. The default is on.
+- `ref`: the poll, the topic, or the Community card that the layer shows.
+  Without a `ref`, the `poll` layer shows the latest active poll and the `card` layer shows the first card.
+  The `next`, `message`, and `support` layers have no `ref`.
+- `backgroundOpacity`: the opacity of the card background in percent. The text stays opaque. The border and the shadow of the card stay.
+- `qr`: the API stores this setting. The overlay does not show a QR code.
+
+The `content` layer still shows the on-air source. To show only the source layers, put the **Hidden** source on air.
+
+The stored layers have a limit of 1000 characters. The server refuses a change that goes above the limit.
+With all six source layers on the grid in the two orientations, some changes to the settings can go above the limit.
+
 The page scales the design pixels to the size of the browser source.
 
-When the chat layer is on, or the content has a cell, the composition puts all of its layers in one canvas.
+The composition puts all layers in one canvas when chat is on, the content has a cell, or a source layer is on stream.
 The canvas has the frame size of the selected orientation. It is the same as the canvas of the editor preview.
 Thus the layout is the same at all source sizes with the same aspect ratio, and the same as in the preview.
 If the source does not have the frame size, the on-air content changes size when the chat layer comes on.
@@ -86,6 +113,9 @@ The overlay reads stored and broadcast layers leniently. Thus a value from an ol
 - A chat or characters cell outside the grid or below the minimum size takes the default cell of its layer.
 - If the chat cell and the characters cell overlap, both take their default cells.
 - An incorrect content cell, or a content cell that overlaps another layer, reads as no cell.
+- An incorrect source layer cell reads as no cell. The same applies to a source layer cell that overlaps an earlier layer.
+  The sequence is `chat`, `characters`, `content`, `poll`, `topic`, `next`, `message`, `card`, `support`.
+- An incorrect source layer setting takes its default value.
 - A layer with an incorrect value takes the defaults of that layer.
 
 The API is strict for changes. See [Overlay layers](api.md#overlay-layers).

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES, OVERLAY_SOURCES } from "../../db/enums";
-import { DEFAULT_LAYERS, parseStoredLayers } from "../lib/overlay-layers";
+import { DEFAULT_LAYERS, contentSources, parseStoredLayers, type ContentSource } from "../lib/overlay-layers";
 import type { OverlayPublic, OverlaySourceRef, OverlayState } from "../types";
 
 export interface OverlayRow {
@@ -37,6 +37,14 @@ export const DEFAULT_OVERLAY: OverlayState = {
   chatTestUntil: 0,
   revision: 0,
 };
+
+// SQL for a row of `overlay_state`: true when the content layer `layer` (an SQL value) has a cell in the selected
+// orientation. It does not read `enabled`: one more reload of the overlay does no harm.
+export function placedLayerSql(layer: string): string {
+  return `json_type(layers, '$.cells.'
+    || CASE WHEN json_extract(layers,'$.orientation')='vertical' THEN 'vertical' ELSE 'horizontal' END
+    || '.' || ${layer})='object'`;
+}
 
 export const overlaySourceSchema = z
   .object({ type: z.enum(OVERLAY_SOURCES), ref: z.string().min(1).max(64).nullable() })
@@ -76,14 +84,15 @@ export function overlayValue(row: OverlayRow | null | undefined): OverlayState {
   };
 }
 
-// Public overlay: exclude preview and unaired message drafts.
+// Public overlay: exclude preview and unaired message drafts. The message layer on stream also shows the message.
 export function overlayPublic(state: OverlayState): OverlayPublic {
+  const layer: boolean = contentSources(state.layers).some((item: ContentSource): boolean => item.type === "message");
   return {
     air: state.air,
     position: state.position,
     size: state.size,
     showResults: state.showResults,
-    message: state.air.type === "message" ? state.message : "",
+    message: state.air.type === "message" || layer ? state.message : "",
     messageStyle: state.messageStyle,
     layers: state.layers,
     chatTestUntil: state.chatTestUntil,

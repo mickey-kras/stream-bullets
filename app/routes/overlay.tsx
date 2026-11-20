@@ -19,7 +19,7 @@ import {
 import { upNextStart, type OverlayPoll, type OverlayScene } from "../components/overlay/overlay-stage";
 import { useRevalidateAt } from "../components/use-clock";
 import { ServerOffset } from "../lib/clock";
-import { parseLayerParam, type OverlayLayer } from "../lib/overlay-layers";
+import { contentSources, parseLayerParam, type ContentSource, type OverlayLayer } from "../lib/overlay-layers";
 import type { LiveSnapshot, OverlayPublic, OverlaySourceRef } from "../types";
 import "../components/overlay/wasteland/wasteland.css";
 
@@ -33,18 +33,30 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   const override: string | null = new URL(request.url).searchParams.get("poll") || null;
   const overlay: OverlayPublic = overlayPublic(await getOverlayState(app.env, streamer.id));
   const pollId: string | null = override ?? (overlay.air.type === "poll" ? overlay.air.ref : null);
-  const [initial, data] = await Promise.all([
-    getOverlaySnapshot(app.env, streamer.id, pollId),
-    getOverlayData(app.env, streamer.id, sourceTopics(overlay.air)),
+  // The content layers on stream load their polls and topics in the same way. A null ref is the automatic poll.
+  const placed: ContentSource[] = contentSources(overlay.layers);
+  const refs = new Set<string | null>([pollId]);
+  for (const source of placed) if (source.type === "poll" || source.type === "auto") refs.add(source.ref);
+  const [data, initial, ...more] = await Promise.all([
+    getOverlayData(app.env, streamer.id, sourceTopics(overlay.air, ...placed)),
+    ...[...refs].map((ref: string | null) => getOverlaySnapshot(app.env, streamer.id, ref)),
   ]);
   if (override && initial.polls.length === 0) throw new Response("Poll not found.", { status: 404 });
+  // The polls of the automatic selection go first: the overlay picks the automatic poll by its place in the list.
+  const loaded: LiveSnapshot[] = [initial, ...more];
+  const automatic: number = [...refs].indexOf(null);
+  if (automatic > 0) loaded.unshift(...loaded.splice(automatic, 1));
+  const polls: OverlayPoll[] = loaded.reduce(
+    (merged: OverlayPoll[], snapshot: LiveSnapshot): OverlayPoll[] => mergeOverlayPolls(merged, snapshot.polls),
+    [],
+  );
   return {
     handle: streamer.handle,
     name: streamer.name,
     host: new URL(app.env.APP_ORIGIN).host,
     override,
     overlay,
-    initial,
+    initial: { ...initial, polls } satisfies LiveSnapshot,
     data,
   };
 });
@@ -86,8 +98,13 @@ export default function Overlay(): ReactNode {
   const now: number = useServerTime(current.serverNow);
   const polls: OverlayPoll[] = mergeOverlayPolls(current.polls, loaded.initial.polls);
   const source: OverlaySourceRef = loaded.override ? { type: "poll", ref: loaded.override } : overlay.air;
-  // Refresh Up next when the displayed stream starts.
-  useRevalidateAt(loaded.initial.serverNow, upNextStart(source, loaded.data), revalidator.revalidate);
+  // Refresh Up next when the displayed stream starts: on air, or in the Up next layer of the composition.
+  const sources: OverlaySourceRef[] = only === null ? [source, ...contentSources(overlay.layers)] : [source];
+  const nextStart: number | null =
+    sources
+      .map((item: OverlaySourceRef): number | null => upNextStart(item, loaded.data))
+      .find((start: number | null): boolean => start !== null) ?? null;
+  useRevalidateAt(loaded.initial.serverNow, nextStart, revalidator.revalidate);
   const scene: OverlayScene = {
     name: loaded.name,
     handle: loaded.handle,

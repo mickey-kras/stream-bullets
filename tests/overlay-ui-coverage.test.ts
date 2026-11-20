@@ -5,7 +5,13 @@ import { describe, expect, it } from "vitest";
 import { ChannelPanel, type ChannelView } from "../app/components/channels/channel-panel";
 import { controlState, defaultRef, OverlayControl } from "../app/components/overlay/overlay-control";
 import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
-import { CharactersSlot, CONTENT_SELECTOR, layerSelector } from "../app/components/overlay/overlay-composition";
+import {
+  CharactersSlot,
+  CONTENT_SELECTOR,
+  layerSelector,
+  OverlayComposition,
+  usesDesignCanvas,
+} from "../app/components/overlay/overlay-composition";
 import {
   SAMPLE_SOURCE,
   sampleCharactersFeed,
@@ -21,7 +27,7 @@ import {
   type OverlayPoll,
   type OverlayScene,
 } from "../app/components/overlay/overlay-stage";
-import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
+import { DEFAULT_LAYERS, type OverlayLayer, type OverlayLayers } from "../app/lib/overlay-layers";
 import type { ChatRow } from "../app/lib/chat-feed";
 import type { OverlayData, OverlaySourceRef, OverlayState } from "../app/types";
 
@@ -311,6 +317,99 @@ describe("overlay source fallbacks", () => {
     expect(render(50)).not.toContain("data-outline");
     expect(render(45)).toMatch(/--wl-bg:0\.45"[^>]* data-outline="true"/);
     expect(render(0)).toMatch(/--wl-bg:0"[^>]* data-outline="true"/);
+  });
+});
+
+describe("content layers in the composition", () => {
+  const layers: OverlayLayers = {
+    ...DEFAULT_LAYERS,
+    items: {
+      ...DEFAULT_LAYERS.items,
+      topic: { ...DEFAULT_LAYERS.items.topic, ref: "topic", backgroundOpacity: 40 },
+      message: { ...DEFAULT_LAYERS.items.message, backgroundOpacity: 0 },
+      support: { ...DEFAULT_LAYERS.items.support, enabled: false },
+    },
+    cells: {
+      ...DEFAULT_LAYERS.cells,
+      horizontal: {
+        ...DEFAULT_LAYERS.cells.horizontal,
+        poll: { c: 8, r: 0, w: 8, h: 3 },
+        topic: { c: 5, r: 0, w: 3, h: 3 },
+        message: { c: 5, r: 3, w: 4, h: 2 },
+        support: { c: 9, r: 3, w: 4, h: 2 },
+      },
+    },
+  };
+  const topic: OverlayData["topics"][number] = {
+    id: "topic",
+    title: "Speedrun night",
+    category: "games",
+    author: "Viewer",
+    avatar: null,
+    avatarPreset: null,
+    likes: 3,
+  };
+  const shown: OverlayScene = { ...scene, polls: [poll("Open poll")], data: { ...data, topics: [topic] } };
+
+  function composition(value: OverlayLayers, only: OverlayLayer | null = null): string {
+    return renderToStaticMarkup(
+      createElement(OverlayComposition, {
+        scene: shown,
+        source: { type: "hidden", ref: null },
+        layers: value,
+        only,
+        feed: null,
+      }),
+    );
+  }
+
+  it("shows each content layer on stream in its cell, with its source and its card background", () => {
+    const html: string = composition(layers);
+    const boxes: string[] = [...html.matchAll(/<div class="ov-layer" data-layer="([a-z]+)" style="([^"]*)"/g)].map(
+      (match: RegExpMatchArray): string => `${match[1]} ${match[2]}`,
+    );
+    expect(boxes).toEqual([
+      "poll left:50%;top:0%;width:50%;height:33.33333333333333%;--ov-bg:1",
+      "topic left:31.25%;top:0%;width:18.75%;height:33.33333333333333%;--ov-bg:0.4",
+      "message left:31.25%;top:33.33333333333333%;width:25%;height:22.22222222222222%;--ov-bg:0",
+    ]);
+    // A poll layer without a ref shows the latest active poll. Each cell centres its content.
+    expect(html).toContain('<div class="ov-fit"><div class="ov-stage pos-fit size-m" data-overlay-type="auto">');
+    expect(html).toContain('data-overlay-poll="Open poll"');
+    expect(html).toContain('data-overlay-type="topic"');
+    expect(html).toContain("Speedrun night");
+    expect(html).toContain("Draft message");
+    // The layer that is off stays out. The old content keeps its stage.
+    expect(html).not.toContain('data-layer="support"');
+    expect(html).toContain('<div class="ov-stage pos-lower size-m" data-overlay-type="hidden">');
+    expect(layerSelector("poll")).toBe('.ov-composition > .ov-layer[data-layer="poll"]');
+  });
+
+  it("shows the content layers only in the whole composition and only in the selected orientation", () => {
+    for (const only of ["content", "chat", "characters"] as const)
+      expect(composition(layers, only)).not.toMatch(/data-layer="(poll|topic|message)"/);
+    expect(composition({ ...layers, orientation: "vertical" })).not.toContain("ov-layer");
+    expect(composition(DEFAULT_LAYERS)).not.toContain("ov-layer");
+    // The other layer boxes get no card background value.
+    const chat: string = composition({ ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, enabled: true } });
+    expect(chat).toContain('data-layer="chat"');
+    expect(chat).not.toContain("--ov-bg");
+  });
+
+  it("uses the design canvas when a content layer is on stream", () => {
+    expect(usesDesignCanvas(DEFAULT_LAYERS, null)).toBe(false);
+    expect(usesDesignCanvas(layers, null)).toBe(true);
+    expect(usesDesignCanvas(layers, "content")).toBe(false);
+    expect(usesDesignCanvas({ ...layers, orientation: "vertical" }, null)).toBe(false);
+    const off: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      items: { ...DEFAULT_LAYERS.items, next: { ...DEFAULT_LAYERS.items.next, enabled: false } },
+      cells: {
+        ...DEFAULT_LAYERS.cells,
+        horizontal: { ...DEFAULT_LAYERS.cells.horizontal, next: { c: 8, r: 0, w: 4, h: 2 } },
+      },
+    };
+    expect(usesDesignCanvas(off, null)).toBe(false);
   });
 });
 

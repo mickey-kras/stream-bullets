@@ -7,7 +7,14 @@ import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../ap
 import { atMark } from "../app/lib/clock";
 import { MASH_COUNTDOWN_MS } from "../app/lib/mash";
 import { CHAT_TEST_MS } from "../app/lib/chat-test";
-import { DEFAULT_LAYERS, type CellRect, type OverlayLayers } from "../app/lib/overlay-layers";
+import {
+  DEFAULT_LAYERS,
+  STORED_LAYERS_LENGTH,
+  storedLayersSchema,
+  storedLayersText,
+  type CellRect,
+  type OverlayLayers,
+} from "../app/lib/overlay-layers";
 import { mashValue } from "../app/server/mash-sql";
 import { runMashAction } from "../app/server/mash.server";
 import { DEFAULT_OVERLAY, overlayPublic, overlayValue, type OverlayRow } from "../app/server/overlay-state";
@@ -214,6 +221,25 @@ describe("stored overlay and battle values", (): void => {
     });
     expect(overlayPublic({ ...state, air: { type: "auto", ref: null } }).message).toBe("");
     expect(overlayPublic(state)).not.toHaveProperty("preview");
+  });
+
+  it("shows the message while the message layer is on stream", (): void => {
+    const state: OverlayState = { ...overlayValue(row), air: { type: "auto", ref: null } };
+    const placed: OverlayLayers = {
+      ...layers,
+      cells: {
+        ...layers.cells,
+        horizontal: { ...layers.cells.horizontal, message: { c: 6, r: 0, w: 4, h: 2 } },
+      },
+    };
+    expect(overlayPublic({ ...state, layers: placed }).message).toBe("Back soon");
+    // Not in the other orientation, and not while the layer is off.
+    expect(overlayPublic({ ...state, layers: { ...placed, orientation: "vertical" } }).message).toBe("");
+    const off: OverlayLayers = {
+      ...placed,
+      items: { ...placed.items, message: { ...placed.items.message, enabled: false } },
+    };
+    expect(overlayPublic({ ...state, layers: off }).message).toBe("");
   });
 
   it("parses the mash column and fills sides with no taps", (): void => {
@@ -804,10 +830,11 @@ describe("overlay control", (): void => {
         orientation: "vertical",
         chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
         characters: { enabled: true, timeout: 60 },
+        items: DEFAULT_LAYERS.items,
         cells: horizontal({ chat: chatCell, content: { c: 0, r: 0, w: 6, h: 4 } }),
       });
       expect(second.revision).toBe(2);
-      expect(await storedLayers(page)).toEqual(second.layers);
+      expect(storedLayersSchema.parse(await storedLayers(page))).toEqual(second.layers);
       const read = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
       expect(read.overlay).toEqual(second);
       // Other actions keep the layers.
@@ -859,7 +886,7 @@ describe("overlay control", (): void => {
       expect(overlayPublic(state).layers).toEqual(DEFAULT_LAYERS);
       const next = await overlay(await send({ action: "layers", characters: { enabled: true } }));
       expect(next.layers.characters.enabled).toBe(true);
-      expect(await storedLayers(page)).toEqual(next.layers);
+      expect(storedLayersSchema.parse(await storedLayers(page))).toEqual(next.layers);
     });
 
     it("refuses cells outside the grid, below the minimum or over each other, and unknown fields", async (): Promise<void> => {
@@ -878,6 +905,14 @@ describe("overlay control", (): void => {
         { cells: { horizontal: { content: { c: 4, r: 0, w: 4, h: 2 } } } },
         // Over each other in the same patch.
         { cells: { horizontal: { chat: chatCell, content: { c: 10, r: 4, w: 4, h: 2 } } } },
+        // A content layer over the saved chat cell, below the minimum, and over another content layer.
+        { cells: { horizontal: { poll: { c: 4, r: 0, w: 4, h: 2 } } } },
+        { cells: { horizontal: { card: { c: 6, r: 0, w: 3, h: 2 } } } },
+        { cells: { horizontal: { poll: { c: 6, r: 0, w: 4, h: 2 }, topic: { c: 9, r: 1, w: 4, h: 2 } } } },
+        { items: { next: { ref: "n1" } } },
+        { items: { poll: { ref: "" } } },
+        { items: { poll: { backgroundOpacity: 3 } } },
+        { items: { auto: { enabled: true } } },
         { chat: { rect: { x: 0, y: 0, w: 280, h: 160 } } },
         { chat: { enabled: true, color: "#f00" } },
         { characters: { hideCommands: false } },
@@ -894,6 +929,136 @@ describe("overlay control", (): void => {
       for (const patch of refused) expect((await send({ action: "layers", ...patch })).status).toBe(400);
       expect(await storedLayers(page)).toBeNull();
       expect(roomCalls).toEqual([]);
+    });
+
+    it("saves the settings and the cells of the content layers and stores only what differs", async (): Promise<void> => {
+      const pollCell: CellRect = { c: 6, r: 0, w: 4, h: 3 };
+      const topicCell: CellRect = { c: 10, r: 0, w: 6, h: 2 };
+      const saved = await overlay(
+        await send({
+          action: "layers",
+          items: {
+            poll: { ref: poll, qr: false },
+            topic: { ref: topic, backgroundOpacity: 40 },
+            card: { ref: card, enabled: false },
+            message: { backgroundOpacity: 0 },
+          },
+          cells: { horizontal: { poll: pollCell, topic: topicCell }, vertical: { card: { c: 0, r: 0, w: 9, h: 2 } } },
+        }),
+      );
+      const items: OverlayLayers["items"] = {
+        ...DEFAULT_LAYERS.items,
+        poll: { enabled: true, ref: poll, backgroundOpacity: 100, qr: false },
+        topic: { enabled: true, ref: topic, backgroundOpacity: 40, qr: false },
+        card: { enabled: false, ref: card, backgroundOpacity: 100, qr: false },
+        message: { enabled: true, ref: null, backgroundOpacity: 0, qr: false },
+      };
+      expect(saved.layers).toEqual({
+        ...DEFAULT_LAYERS,
+        items,
+        cells: {
+          horizontal: { ...DEFAULT_LAYERS.cells.horizontal, poll: pollCell, topic: topicCell },
+          vertical: { ...DEFAULT_LAYERS.cells.vertical, card: { c: 0, r: 0, w: 9, h: 2 } },
+        },
+      });
+      expect(await storedLayers(page)).toMatchObject({
+        items: {
+          poll: { ref: poll, qr: false },
+          topic: { ref: topic, backgroundOpacity: 40 },
+          card: { ref: card, enabled: false },
+          message: { backgroundOpacity: 0 },
+        },
+        cells: { horizontal: { poll: pollCell, topic: topicCell } },
+      });
+      expect(await storedLayers(page)).not.toHaveProperty("cells.horizontal.card");
+      const read = await body<{ overlay: OverlayState; data: OverlayData }>(
+        await call("GET", "overlay", { user: "owner" }),
+      );
+      expect(read.overlay).toEqual(saved);
+      // A patch keeps the other content layers. Null takes a ref and a cell away.
+      const next = await overlay(
+        await send({ action: "layers", items: { poll: { ref: null } }, cells: { horizontal: { topic: null } } }),
+      );
+      expect(next.layers.items).toEqual({ ...items, poll: { ...items.poll, ref: null } });
+      expect(next.layers.cells.horizontal).toEqual({ ...DEFAULT_LAYERS.cells.horizontal, poll: pollCell });
+      // A cell must stay clear of the saved cell of another content layer.
+      expect((await send({ action: "layers", cells: { horizontal: { support: pollCell } } })).status).toBe(400);
+      expect((await getOverlayState(env, page)).layers).toEqual(next.layers);
+    });
+
+    it("loads the topic of a topic layer on stream, also outside the newest list", async (): Promise<void> => {
+      const newer: string[] = Array.from({ length: 50 }, (): string => crypto.randomUUID());
+      await env.DB.batch(
+        newer.map((id: string, index: number) =>
+          env.DB.prepare(
+            "INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at) VALUES (?,?,'viewer','topic',?,'[]',?)",
+          ).bind(id, page, `Newer ${index}`, 10 + index),
+        ),
+      );
+      const topics = async (): Promise<string[]> =>
+        (await body<{ data: OverlayData }>(await call("GET", "overlay", { user: "owner" }))).data.topics.map(
+          (value) => value.id,
+        );
+      expect(await topics()).not.toContain(topic);
+      // A topic layer without a cell is not on stream.
+      await send({ action: "layers", items: { topic: { ref: topic } } });
+      expect(await topics()).not.toContain(topic);
+      await send({ action: "layers", cells: { horizontal: { topic: { c: 6, r: 0, w: 4, h: 2 } } } });
+      expect(await topics()).toContain(topic);
+      await send({ action: "layers", items: { topic: { enabled: false } } });
+      expect(await topics()).not.toContain(topic);
+    });
+
+    it("checks that the ref of a content layer is on this page", async (): Promise<void> => {
+      const refused = async (items: Record<string, unknown>): Promise<{ status: number; error: string }> => {
+        const response = await send({ action: "layers", items });
+        return { status: response.status, error: (await body<{ error: string }>(response)).error };
+      };
+      expect(await refused({ poll: { ref: topic } })).toEqual({ status: 404, error: "Poll not found." });
+      expect(await refused({ topic: { ref: poll } })).toEqual({ status: 404, error: "Topic not found." });
+      expect(await refused({ topic: { ref: foreignTopic } })).toEqual({ status: 404, error: "Topic not found." });
+      expect(await refused({ card: { ref: "missing" } })).toEqual({
+        status: 404,
+        error: "Community card not found.",
+      });
+      // One bad ref refuses the whole patch.
+      expect((await refused({ poll: { ref: poll }, card: { ref: "missing" } })).status).toBe(404);
+      expect(await storedLayers(page)).toBeNull();
+      expect(roomCalls).toEqual([]);
+      // A null ref needs no check: a topic layer can wait for its topic.
+      const saved = await overlay(
+        await send({ action: "layers", items: { topic: { ref: null }, poll: { ref: poll }, card: { ref: card } } }),
+      );
+      expect(saved.layers.items).toMatchObject({ topic: { ref: null }, poll: { ref: poll }, card: { ref: card } });
+    });
+
+    it("refuses layers that do not fit the stored column", async (): Promise<void> => {
+      const cell = (c: number, r: number): CellRect => ({ c, r, w: 4, h: 2 });
+      const cells = {
+        poll: cell(0, 0),
+        topic: cell(0, 2),
+        next: cell(0, 4),
+        message: cell(0, 6),
+        card: cell(4, 0),
+        support: cell(4, 2),
+      };
+      const items = { poll: { ref: poll }, topic: { ref: topic }, card: { ref: card } };
+      const placed = await overlay(await send({ action: "layers", items, cells: { vertical: cells } }));
+      expect(storedLayersText(placed.layers).length).toBeLessThanOrEqual(STORED_LAYERS_LENGTH);
+      // The same layers with each setting changed need more than the column holds.
+      const other = { backgroundOpacity: 55, enabled: false, qr: true };
+      const changed = {
+        poll: { ...other, qr: false },
+        topic: other,
+        card: other,
+        next: other,
+        message: other,
+        support: other,
+      };
+      const response = await send({ action: "layers", items: changed });
+      expect(response.status).toBe(400);
+      expect(await body(response)).toEqual({ error: "The layers are too large to save. Take a layer off the grid." });
+      expect((await getOverlayState(env, page)).layers).toEqual(placed.layers);
     });
 
     it("counts layer edits against the write quota and answers 429 when it runs out", async (): Promise<void> => {
@@ -1350,6 +1515,53 @@ describe("schedule and Community routes", (): void => {
     await save("https://ko-fi.com/second");
     expect(await revision()).toBe(before + 1);
     expect(reloads()).toBe(1);
+  });
+
+  it("reloads an overlay with the Support layer in the selected orientation after the links are saved", async (): Promise<void> => {
+    const revision = async (): Promise<number> => (await getOverlayState(env, page)).revision;
+    const save = async (url: string): Promise<void> => {
+      const support = { links: [{ kind: "kofi", label: null, url }], visible: true, card: true };
+      expect((await call("PUT", "support-links", { user: "owner", body: support })).status).toBe(200);
+    };
+    const cell: CellRect = { c: 0, r: 0, w: 4, h: 2 };
+    await updateOverlay(env, "owner", page, { action: "layers", cells: { vertical: { support: cell, next: null } } });
+    let before = await revision();
+    await save("https://ko-fi.com/first");
+    expect(await revision()).toBe(before);
+    await updateOverlay(env, "owner", page, { action: "layers", orientation: "vertical" });
+    before = await revision();
+    await save("https://ko-fi.com/second");
+    expect(await revision()).toBe(before + 1);
+    // Another content layer on the grid does not reload for the links.
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      orientation: "horizontal",
+      cells: { horizontal: { next: { c: 6, r: 0, w: 4, h: 2 } } },
+    });
+    before = await revision();
+    await save("https://ko-fi.com/third");
+    expect(await revision()).toBe(before);
+    expect((await call("POST", "events", { user: "owner", body: event() })).status).toBe(200);
+    expect(await revision()).toBe(before + 1);
+  });
+
+  it("reloads an overlay with the card layer on the grid after the cards are saved", async (): Promise<void> => {
+    const revision = async (): Promise<number> => (await getOverlayState(env, page)).revision;
+    const save = async (): Promise<void> => {
+      const cards = [{ icon: "star", title: "New", body: "Text", buttonLabel: null, buttonTarget: null }];
+      expect((await call("PUT", "community-cards", { user: "owner", body: { cards } })).status).toBe(200);
+    };
+    await updateOverlay(env, "owner", page, { action: "layers", chat: { enabled: true } });
+    let before = await revision();
+    await save();
+    expect(await revision()).toBe(before);
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      cells: { horizontal: { card: { c: 6, r: 0, w: 4, h: 2 } } },
+    });
+    before = await revision();
+    await save();
+    expect(await revision()).toBe(before + 1);
   });
 
   it("reloads an overlay showing Up next after each schedule change, and only then", async (): Promise<void> => {

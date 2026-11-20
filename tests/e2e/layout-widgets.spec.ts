@@ -479,8 +479,9 @@ test("on a phone a finger resizes a layer and drags a chip, and the page does no
   await expect(status).toHaveText("On-air content placed at column 11, row 1, 4 × 2 cells.");
   expect(await page.evaluate((): number => window.scrollY)).toBe(scrolled);
   expect((await storedLayers(page)).cells.horizontal).toEqual({
+    // The source layers stay off the grid.
+    ...DEFAULT_LAYERS.cells.horizontal,
     chat: { c: 1, r: 0, w: 7, h: 7 },
-    characters: DEFAULT_LAYERS.cells.horizontal.characters,
     content: { c: 10, r: 0, w: 4, h: 2 },
   });
   await close(owner);

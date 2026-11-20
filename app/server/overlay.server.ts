@@ -3,10 +3,13 @@ import { OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES } from "../../
 import type { AppEnv } from "../env";
 import { CHAT_TEST_MS } from "../lib/chat-test";
 import {
+  CONTENT_LAYERS,
   ORIENTATIONS,
+  STORED_LAYERS_LENGTH,
   layersPatchSchema,
   mergeLayers,
   overlappingPair,
+  storedLayersText,
   type OverlayLayers,
 } from "../lib/overlay-layers";
 import type { CardIcon, OverlayData, OverlaySource, OverlaySourceRef, OverlayState, SupportLinkKind } from "../types";
@@ -19,6 +22,7 @@ import {
   OVERLAY_MESSAGE_LENGTH,
   overlaySourceSchema,
   overlayValue,
+  placedLayerSql,
   type OverlayRow,
 } from "./overlay-state";
 
@@ -106,11 +110,30 @@ async function checkedSource(env: AppEnv, streamerId: string, source: OverlaySou
   return { type, ref: null };
 }
 
-// Merged layers must not overlap in either orientation: a patch can move a cell onto a saved cell.
-function mergedLayers(current: OverlayLayers, patch: Extract<OverlayAction, { action: "layers" }>): OverlayLayers {
+type LayersAction = Extract<OverlayAction, { action: "layers" }>;
+
+// A new ref of a content layer must name a poll, topic or card of this page, like the ref of a previewed source.
+async function checkItemRefs(env: AppEnv, streamerId: string, items: LayersAction["items"]): Promise<void> {
+  for (const layer of CONTENT_LAYERS) {
+    const ref: string | null | undefined = items?.[layer]?.ref;
+    if (typeof ref === "string") await checkedSource(env, streamerId, { type: layer, ref });
+  }
+}
+
+// Merged layers must not overlap in either orientation: a patch can move a cell onto a saved cell. They must also
+// fit the `layers` column.
+async function mergedLayers(
+  env: AppEnv,
+  streamerId: string,
+  current: OverlayLayers,
+  patch: LayersAction,
+): Promise<OverlayLayers> {
   const next: OverlayLayers = mergeLayers(current, patch);
   for (const orientation of ORIENTATIONS)
     if (overlappingPair(next.cells[orientation]) !== null) throw new HttpError(400, "Layers must not overlap.");
+  if (storedLayersText(next).length > STORED_LAYERS_LENGTH)
+    throw new HttpError(400, "The layers are too large to save. Take a layer off the grid.");
+  await checkItemRefs(env, streamerId, patch.items);
   return next;
 }
 
@@ -135,7 +158,7 @@ export async function nextOverlayState(
     next.message = action.text;
     next.messageStyle = action.style;
   }
-  if (action.action === "layers") next.layers = mergedLayers(current.layers, action);
+  if (action.action === "layers") next.layers = await mergedLayers(env, streamerId, current.layers, action);
   // The test plays in the chat layer, so turning the layer off also ends a running test.
   if (!next.layers.chat.enabled) next.chatTestUntil = 0;
   if (action.action === "chatTest") {
@@ -149,7 +172,7 @@ export async function nextOverlayState(
 }
 
 // When source data changes, bump overlays using that source on air/in preview and notify the room. Leave other
-// sources unchanged.
+// sources unchanged. A content layer of that source with a cell in the selected orientation also counts.
 export async function refreshOverlayFor(
   env: AppEnv,
   ownerId: string,
@@ -176,7 +199,8 @@ async function refreshWhere(
   const row = await env.DB.prepare(`UPDATE overlay_state SET revision=revision+1, updated_at=?1
     WHERE streamer_id=${page}
       AND (json_extract(air,'$.type') IN (SELECT value FROM json_each(?3))
-        OR json_extract(preview,'$.type') IN (SELECT value FROM json_each(?3)))
+        OR json_extract(preview,'$.type') IN (SELECT value FROM json_each(?3))
+        OR EXISTS (SELECT 1 FROM json_each(?3) source WHERE ${placedLayerSql("source.value")}))
     RETURNING streamer_id`)
     .bind(Date.now(), key, JSON.stringify(sources))
     .first<{ streamer_id: string }>();
@@ -266,7 +290,7 @@ export async function updateOverlay(
         next.showResults ? 1 : 0,
         next.message,
         next.messageStyle,
-        JSON.stringify(next.layers),
+        storedLayersText(next.layers),
         next.chatTestUntil,
         JSON.stringify(applied),
         next.revision,

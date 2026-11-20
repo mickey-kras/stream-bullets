@@ -15,8 +15,16 @@ export const GRID: Readonly<Record<Orientation, Readonly<{ cols: number; rows: n
 export const OVERLAY_LAYERS = ["content", "chat", "characters"] as const;
 export type OverlayLayer = (typeof OVERLAY_LAYERS)[number];
 
+/** The layers that show one content source each. The streamer places each layer on the grid at most once. */
+export const CONTENT_LAYERS = ["poll", "topic", "next", "message", "card", "support"] as const;
+export type ContentLayer = (typeof CONTENT_LAYERS)[number];
+
+/** The layers that the composition editor places. It does not place the content layers. */
+export const EDITOR_LAYERS = ["chat", "characters", "content"] as const;
+export type EditorLayer = (typeof EDITOR_LAYERS)[number];
+
 /** The layers on the grid, in the order the lenient read resolves them. */
-export const GRID_LAYERS = ["chat", "characters", "content"] as const;
+export const GRID_LAYERS = [...EDITOR_LAYERS, ...CONTENT_LAYERS] as const;
 export type GridLayer = (typeof GRID_LAYERS)[number];
 
 /** A place in whole cells: column, row, width and height. `c + w <= cols` and `r + h <= rows`. */
@@ -35,8 +43,11 @@ export interface LayerRect {
   h: number;
 }
 
-/** The cells of one orientation. Content null: it fills the whole frame and keeps its position and size settings. */
-export interface LayerCells {
+/**
+ * The cells of one orientation. Content null: it fills the whole frame and keeps its position and size settings.
+ * A content layer with null is not on the grid.
+ */
+export interface LayerCells extends Record<ContentLayer, CellRect | null> {
   chat: CellRect;
   characters: CellRect;
   content: CellRect | null;
@@ -49,8 +60,10 @@ export interface ChatLayer {
   backgroundOpacity: number;
 }
 
-/** The message background opacity in percent: the one source for the layers, the editor and the chat. */
-export const CHAT_BACKGROUND = { min: 0, max: 100, step: 5, default: 100 } as const;
+/** The card background opacity of a layer in percent: the one source for the layers, the editor and the overlay. */
+export const LAYER_BACKGROUND = { min: 0, max: 100, step: 5, default: 100 } as const;
+/** The message background opacity of the chat. */
+export const CHAT_BACKGROUND = LAYER_BACKGROUND;
 
 export interface CharactersLayer {
   enabled: boolean;
@@ -61,10 +74,25 @@ export interface CharactersLayer {
 /** The characters inactivity timeout in seconds: the one source for the layers, the editor and the playground. */
 export const CHARACTERS_TIMEOUT = { min: 10, max: 600, default: 60 } as const;
 
+/** The settings of one content layer. */
+export interface ContentItem {
+  enabled: boolean;
+  /** The poll, topic or card to show. Null: the latest active poll, or the first card. Other layers have null. */
+  ref: string | null;
+  /** Percent of the card background that shows (LAYER_BACKGROUND). */
+  backgroundOpacity: number;
+  /** Stored only: the overlay does not draw a QR code. */
+  qr: boolean;
+}
+
+/** The content layers that use `ref`. */
+const REF_LAYERS: readonly ContentLayer[] = ["poll", "topic", "card"];
+
 export interface OverlayLayers {
   orientation: Orientation;
   chat: ChatLayer;
   characters: CharactersLayer;
+  items: Record<ContentLayer, ContentItem>;
   cells: Record<Orientation, LayerCells>;
 }
 
@@ -74,23 +102,64 @@ export interface LayersPatch {
   orientation?: Orientation;
   chat?: Partial<ChatLayer>;
   characters?: Partial<CharactersLayer>;
+  items?: Partial<Record<ContentLayer, Partial<ContentItem>>>;
   cells?: Partial<Record<Orientation, CellsPatch>>;
 }
+
+const CONTENT_MIN = { w: 4, h: 2 } as const;
 
 export const MIN_CELLS: Readonly<Record<GridLayer, Readonly<{ w: number; h: number }>>> = {
   chat: { w: 3, h: 2 },
   characters: { w: 6, h: 2 },
-  content: { w: 4, h: 2 },
+  content: CONTENT_MIN,
+  poll: CONTENT_MIN,
+  topic: CONTENT_MIN,
+  next: CONTENT_MIN,
+  message: CONTENT_MIN,
+  card: CONTENT_MIN,
+  support: CONTENT_MIN,
 };
 
-// Chat and characters stay off by default, so existing OBS scenes do not change. Content has no cell by default.
+/** One value for each content layer. */
+function contentRecord<T>(value: (layer: ContentLayer) => T): Record<ContentLayer, T> {
+  return {
+    poll: value("poll"),
+    topic: value("topic"),
+    next: value("next"),
+    message: value("message"),
+    card: value("card"),
+    support: value("support"),
+  };
+}
+
+function noCell(): null {
+  return null;
+}
+
+function defaultItem(layer: ContentLayer): ContentItem {
+  return { enabled: true, ref: null, backgroundOpacity: LAYER_BACKGROUND.default, qr: layer === "poll" };
+}
+
+// Chat and characters stay off by default, so existing OBS scenes do not change. Content and the content layers have
+// no cell by default.
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
   chat: { enabled: false, hideCommands: true, backgroundOpacity: CHAT_BACKGROUND.default },
   characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default },
+  items: contentRecord(defaultItem),
   cells: {
-    horizontal: { chat: { c: 0, r: 0, w: 5, h: 7 }, characters: { c: 0, r: 7, w: 16, h: 2 }, content: null },
-    vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, characters: { c: 0, r: 13, w: 9, h: 3 }, content: null },
+    horizontal: {
+      chat: { c: 0, r: 0, w: 5, h: 7 },
+      characters: { c: 0, r: 7, w: 16, h: 2 },
+      content: null,
+      ...contentRecord(noCell),
+    },
+    vertical: {
+      chat: { c: 0, r: 8, w: 9, h: 5 },
+      characters: { c: 0, r: 13, w: 9, h: 3 },
+      content: null,
+      ...contentRecord(noCell),
+    },
   },
 };
 
@@ -130,10 +199,41 @@ export function overlappingPair(cells: Partial<LayerCells>): [GridLayer, GridLay
   return null;
 }
 
-/** The design-pixel place of a layer in the selected orientation. Null for content without a cell. */
+/** The design-pixel place of a layer in the selected orientation. Null for a layer without a cell. */
 export function layerPixels(layers: OverlayLayers, layer: GridLayer): LayerRect | null {
   const rect: CellRect | null = layers.cells[layers.orientation][layer];
   return rect ? cellPixels(rect) : null;
+}
+
+/** What a content layer shows. A poll layer without a ref shows the latest active poll: the "auto" source. */
+export interface ContentSource {
+  type: ContentLayer | "auto";
+  ref: string | null;
+}
+
+/** A content layer on stream: it has a cell in the selected orientation and it is enabled. */
+export interface PlacedContent {
+  layer: ContentLayer;
+  rect: CellRect;
+  item: ContentItem;
+  source: ContentSource;
+}
+
+/** The content layers on stream, in the order of CONTENT_LAYERS. */
+export function placedContent(layers: OverlayLayers): PlacedContent[] {
+  const cells: LayerCells = layers.cells[layers.orientation];
+  return CONTENT_LAYERS.flatMap((layer: ContentLayer): PlacedContent[] => {
+    const rect: CellRect | null = cells[layer];
+    const item: ContentItem = layers.items[layer];
+    if (!rect || !item.enabled) return [];
+    const auto: boolean = layer === "poll" && item.ref === null;
+    return [{ layer, rect, item, source: { type: auto ? "auto" : layer, ref: item.ref } }];
+  });
+}
+
+/** The sources of the content layers on stream. */
+export function contentSources(layers: OverlayLayers): ContentSource[] {
+  return placedContent(layers).map((placed: PlacedContent): ContentSource => placed.source);
 }
 
 const cellShape = {
@@ -159,20 +259,39 @@ function cellsPatchSchema(orientation: Orientation): z.ZodType<CellsPatch> {
       chat: cellSchema(orientation, "chat").optional(),
       characters: cellSchema(orientation, "characters").optional(),
       content: cellSchema(orientation, "content").nullable().optional(),
+      ...contentRecord((layer: ContentLayer) => cellSchema(orientation, layer).nullable().optional()),
     })
     .strict()
     .refine((cells: CellsPatch): boolean => overlappingPair(cells) === null, { message: "Layers must not overlap." });
 }
 
 const characterTimeout = z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max);
-const chatBackground = z
+const layerBackground = z
   .number()
   .int()
-  .min(CHAT_BACKGROUND.min)
-  .max(CHAT_BACKGROUND.max)
-  .multipleOf(CHAT_BACKGROUND.step);
+  .min(LAYER_BACKGROUND.min)
+  .max(LAYER_BACKGROUND.max)
+  .multipleOf(LAYER_BACKGROUND.step);
+
+/** The `ref` of a content layer. The length limit matches `overlaySourceSchema`. Layers without a ref take null only. */
+function refSchema(layer: ContentLayer): z.ZodType<string | null> {
+  return REF_LAYERS.includes(layer) ? z.string().min(1).max(64).nullable() : z.null();
+}
+
+function itemPatchSchema(layer: ContentLayer): z.ZodType<Partial<ContentItem> | undefined> {
+  return z
+    .object({
+      enabled: z.boolean().optional(),
+      ref: refSchema(layer).optional(),
+      backgroundOpacity: layerBackground.optional(),
+      qr: z.boolean().optional(),
+    })
+    .strict()
+    .optional();
+}
 
 // Writes are strict: unknown keys, cells outside the grid, below the minimum size or over each other return 400.
+// A ref on a content layer that has none also returns 400.
 // The server also checks the merged layout, so a cell never covers a saved cell of another layer.
 export const layersPatchSchema = z
   .object({
@@ -181,11 +300,12 @@ export const layersPatchSchema = z
       .object({
         enabled: z.boolean().optional(),
         hideCommands: z.boolean().optional(),
-        backgroundOpacity: chatBackground.optional(),
+        backgroundOpacity: layerBackground.optional(),
       })
       .strict()
       .optional(),
     characters: z.object({ enabled: z.boolean().optional(), timeout: characterTimeout.optional() }).strict().optional(),
+    items: z.object(contentRecord(itemPatchSchema)).strict().optional(),
     cells: z
       .object({
         horizontal: cellsPatchSchema("horizontal").optional(),
@@ -206,12 +326,18 @@ function readCell(orientation: Orientation, layer: GridLayer, value: unknown): C
 
 function defaultCells(orientation: Orientation): LayerCells {
   const cells: LayerCells = DEFAULT_LAYERS.cells[orientation];
-  return { chat: copyCell(cells.chat), characters: copyCell(cells.characters), content: null };
+  return {
+    chat: copyCell(cells.chat),
+    characters: copyCell(cells.characters),
+    content: null,
+    ...contentRecord(noCell),
+  };
 }
 
 /**
  * A stored layout. An invalid chat or characters cell takes its default. When the chat and characters cells overlap,
- * both take their defaults. A content cell that is invalid or overlaps another layer reads as no cell.
+ * both take their defaults. A cell of content or of a content layer that is invalid reads as no cell. The same
+ * applies when it overlaps a layer earlier in GRID_LAYERS.
  */
 function readCells(orientation: Orientation, value: unknown): LayerCells {
   const raw: Record<string, unknown> = typeof value === "object" && value !== null ? { ...value } : {};
@@ -222,9 +348,32 @@ function readCells(orientation: Orientation, value: unknown): LayerCells {
     chat = fallback.chat;
     characters = fallback.characters;
   }
-  const content: CellRect | null = readCell(orientation, "content", raw.content);
-  const free: boolean = content !== null && !cellsOverlap(content, chat) && !cellsOverlap(content, characters);
-  return { chat, characters, content: free ? content : null };
+  const kept: CellRect[] = [chat, characters];
+  const free = (layer: "content" | ContentLayer): CellRect | null => {
+    const rect: CellRect | null = readCell(orientation, layer, raw[layer]);
+    if (rect === null || kept.some((other: CellRect): boolean => cellsOverlap(rect, other))) return null;
+    kept.push(rect);
+    return rect;
+  };
+  return { chat, characters, content: free("content"), ...contentRecord(free) };
+}
+
+function defaultItems(): Record<ContentLayer, ContentItem> {
+  return contentRecord((layer: ContentLayer): ContentItem => ({ ...DEFAULT_LAYERS.items[layer] }));
+}
+
+/** A stored content layer. An invalid field reads as its default. */
+function storedItemSchema(layer: ContentLayer): z.ZodType<ContentItem, unknown> {
+  const item: ContentItem = DEFAULT_LAYERS.items[layer];
+  return fallback(
+    z.object({
+      enabled: fallback(z.boolean(), item.enabled),
+      ref: fallback(refSchema(layer), item.ref),
+      backgroundOpacity: fallback(layerBackground, item.backgroundOpacity),
+      qr: fallback(z.boolean(), item.qr),
+    }),
+    (): ContentItem => ({ ...item }),
+  );
 }
 
 // Stored and broadcast layers. This schema never throws: older and newer versions must not break the overlay.
@@ -237,7 +386,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
       z.object({
         enabled: fallback(z.boolean(), DEFAULT_LAYERS.chat.enabled),
         hideCommands: fallback(z.boolean(), DEFAULT_LAYERS.chat.hideCommands),
-        backgroundOpacity: fallback(chatBackground, DEFAULT_LAYERS.chat.backgroundOpacity),
+        backgroundOpacity: fallback(layerBackground, DEFAULT_LAYERS.chat.backgroundOpacity),
       }),
       (): ChatLayer => ({ ...DEFAULT_LAYERS.chat }),
     ),
@@ -248,6 +397,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
       }),
       (): CharactersLayer => ({ ...DEFAULT_LAYERS.characters }),
     ),
+    items: fallback(z.object(contentRecord(storedItemSchema)), defaultItems),
     cells: fallback(z.object({ horizontal: z.unknown().optional(), vertical: z.unknown().optional() }), {
       horizontal: undefined,
       vertical: undefined,
@@ -262,6 +412,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     orientation: DEFAULT_LAYERS.orientation,
     chat: { ...DEFAULT_LAYERS.chat },
     characters: { ...DEFAULT_LAYERS.characters },
+    items: defaultItems(),
     cells: { horizontal: defaultCells("horizontal"), vertical: defaultCells("vertical") },
   }),
 );
@@ -277,12 +428,68 @@ export function parseStoredLayers(raw: string): OverlayLayers {
   return storedLayersSchema.parse(value);
 }
 
+// Match `overlay_state_layers_check`.
+export const STORED_LAYERS_LENGTH = 1000;
+
+function storedCells(cells: LayerCells): CellsPatch {
+  const stored: CellsPatch = { chat: cells.chat, characters: cells.characters, content: cells.content };
+  for (const layer of CONTENT_LAYERS) {
+    const rect: CellRect | null = cells[layer];
+    if (rect) stored[layer] = rect;
+  }
+  return stored;
+}
+
+function storedItem(layer: ContentLayer, item: ContentItem): Partial<ContentItem> {
+  const usual: ContentItem = DEFAULT_LAYERS.items[layer];
+  const stored: Partial<ContentItem> = {};
+  if (item.enabled !== usual.enabled) stored.enabled = item.enabled;
+  if (item.ref !== usual.ref) stored.ref = item.ref;
+  if (item.backgroundOpacity !== usual.backgroundOpacity) stored.backgroundOpacity = item.backgroundOpacity;
+  if (item.qr !== usual.qr) stored.qr = item.qr;
+  return stored;
+}
+
+/**
+ * The `layers` JSON text to store. It leaves out what the lenient read fills in: a content layer without a cell and
+ * each content layer setting at its default. Thus layers that use no content layer keep the text of older versions,
+ * and the text stays short. The caller checks it against STORED_LAYERS_LENGTH.
+ */
+export function storedLayersText(layers: OverlayLayers): string {
+  const items: LayersPatch["items"] = {};
+  for (const layer of CONTENT_LAYERS) {
+    const stored: Partial<ContentItem> = storedItem(layer, layers.items[layer]);
+    if (Object.keys(stored).length > 0) items[layer] = stored;
+  }
+  return JSON.stringify({
+    orientation: layers.orientation,
+    chat: layers.chat,
+    characters: layers.characters,
+    items: Object.keys(items).length > 0 ? items : undefined,
+    cells: { horizontal: storedCells(layers.cells.horizontal), vertical: storedCells(layers.cells.vertical) },
+  });
+}
+
 function mergeCells(current: LayerCells, patch: CellsPatch | undefined): LayerCells {
-  const content: CellRect | null = patch?.content === undefined ? current.content : patch.content;
+  const merged = (layer: "content" | ContentLayer): CellRect | null => {
+    const next: CellRect | null | undefined = patch?.[layer];
+    const rect: CellRect | null = next === undefined ? current[layer] : next;
+    return rect ? copyCell(rect) : null;
+  };
   return {
     chat: copyCell(patch?.chat ?? current.chat),
     characters: copyCell(patch?.characters ?? current.characters),
-    content: content ? copyCell(content) : null,
+    content: merged("content"),
+    ...contentRecord(merged),
+  };
+}
+
+function mergeItem(current: ContentItem, patch: Partial<ContentItem> | undefined): ContentItem {
+  return {
+    enabled: patch?.enabled ?? current.enabled,
+    ref: patch?.ref === undefined ? current.ref : patch.ref,
+    backgroundOpacity: patch?.backgroundOpacity ?? current.backgroundOpacity,
+    qr: patch?.qr ?? current.qr,
   };
 }
 
@@ -298,6 +505,7 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
       enabled: patch.characters?.enabled ?? current.characters.enabled,
       timeout: patch.characters?.timeout ?? current.characters.timeout,
     },
+    items: contentRecord((layer: ContentLayer): ContentItem => mergeItem(current.items[layer], patch.items?.[layer])),
     cells: {
       horizontal: mergeCells(current.cells.horizontal, patch.cells?.horizontal),
       vertical: mergeCells(current.cells.vertical, patch.cells?.vertical),
