@@ -9,6 +9,7 @@ import {
   saveStreamer,
 } from "../app/server/data.server";
 import { LIVE_POLLS_SQL, livePolls, overlaySnapshot, type PollRow } from "../app/server/live-polls";
+import { DEFAULT_LAYERS, mergeLayers } from "../app/lib/overlay-layers";
 import { createMash, runMashAction } from "../app/server/mash.server";
 import { DEFAULT_OVERLAY, overlayPublic } from "../app/server/overlay-state";
 import { getOverlayData, updateOverlay } from "../app/server/overlay.server";
@@ -346,6 +347,20 @@ describe("viewer polls", (): void => {
       overlay: overlayPublic({ ...DEFAULT_OVERLAY, air: { type: "topic", ref: newer[49] } }),
     };
     expect(overlaySnapshot(topicOnAir).polls.map((poll) => poll.id)).toEqual([ownerOpen]);
+    // A poll layer on stream picks a viewer poll. A poll layer that is off, or not on the grid, picks none.
+    const layerOn = (enabled: boolean, placed: boolean): LiveSnapshot => ({
+      ...snapshot,
+      overlay: overlayPublic({
+        ...DEFAULT_OVERLAY,
+        layers: mergeLayers(DEFAULT_LAYERS, {
+          items: { poll: { ref: newer[49], enabled } },
+          cells: { horizontal: { poll: placed ? { c: 6, r: 0, w: 4, h: 2 } : null } },
+        }),
+      }),
+    });
+    expect(overlaySnapshot(layerOn(true, true)).polls.map((poll) => poll.id)).toEqual([newer[49], ownerOpen]);
+    expect(overlaySnapshot(layerOn(false, true)).polls.map((poll) => poll.id)).toEqual([ownerOpen]);
+    expect(overlaySnapshot(layerOn(true, false)).polls.map((poll) => poll.id)).toEqual([ownerOpen]);
   });
 
   it("lists the owner's polls first in the overlay picker, and names the author of each viewer poll", async (): Promise<void> => {
