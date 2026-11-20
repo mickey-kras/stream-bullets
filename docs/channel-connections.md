@@ -243,7 +243,7 @@ follows this reset, also across summer time.
 YouTube can ask for a longer interval with `pollingIntervalMillis`. Then a page uses fewer units.
 
 The floor is 20 seconds after a page without items. It is 10 seconds again after a page with items.
-The floor is also 20 seconds when 80% of the page budget or of the shared budget is spent.
+The floor is also 20 seconds after the feed spends 80% of the page budget or of the shared budget.
 The 20-second floor is below the 30-second live window. Thus a message that waits one interval is still live.
 
 The counters are in `app_rate_limits`, with the keys `youtube-quota:<day>` and `youtube-quota:<day>:<page>`.
