@@ -1,3 +1,4 @@
+import type { Request, Route } from "@playwright/test";
 import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
 import { test, expect, type Page } from "./coverage";
@@ -517,6 +518,18 @@ test("channel conflicts reload the list and expired authentication leaves a sign
   await owner.setExtraHTTPHeaders({ "CF-Connecting-IP": "203.0.113.141", Origin: origin });
   try {
     const control = await newPage(owner);
+    // The reloads of the page data that are in flight. The live connection starts one soon after the load.
+    let reloads: number = 0;
+    const held: Route[] = [];
+    const reload = (request: Request): boolean => new URL(request.url()).pathname === "/overlay-control.data";
+    control.on("request", (request) => {
+      if (reload(request)) reloads += 1;
+    });
+    const ended = (request: Request): void => {
+      if (reload(request)) reloads -= 1;
+    };
+    control.on("requestfinished", ended);
+    control.on("requestfailed", ended);
     await control.goto("/overlay-control");
     const kick = control.locator('[data-channel="kick"]');
     // A healthy connection: the section starts as one status line. Open it for the full panel.
@@ -537,7 +550,13 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     await expect(control.locator(".sb-toast").filter({ hasText: "The connection changed. Try again." })).toBeVisible();
     await expect(kick.getByRole("button", { name: "Disconnect Kick", exact: true })).toBeEnabled();
     await control.unroute("**/api/channels/kick");
-    // Another tab removed it before this tab confirmed its old view.
+    // Another tab removed it before this tab confirmed its old view. A reload of the page data must not show the
+    // removal to this tab first: hold new reloads, and let the ones in flight end, before the removal.
+    await control.route("**/overlay-control.data*", (route) => {
+      reloads -= 1;
+      held.push(route);
+    });
+    await expect.poll((): number => reloads).toBe(0);
     await runSql("channel-conflict-removed", [`DELETE FROM channel_connections WHERE id='${connectionId}';`]);
     await control.route("**/api/channels/kick", async (route) => {
       await route.fulfill({ status: 404, json: { error: "This channel is no longer connected." } });
@@ -547,6 +566,8 @@ test("channel conflicts reload the list and expired authentication leaves a sign
       .getByRole("dialog", { name: "Disconnect Kick?" })
       .getByRole("button", { name: "Disconnect Kick", exact: true })
       .click();
+    await control.unroute("**/overlay-control.data*");
+    for (const route of held) await route.continue();
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeFocused();
     await expect(kick).toContainText("Not connected");
     await control.unroute("**/api/channels");

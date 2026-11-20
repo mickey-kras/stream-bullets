@@ -50877,7 +50877,7 @@
       "relation": "calls",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L139",
+      "source_location": "L140",
       "target": "tests_e2e_overlay_control_spec_livesockets",
       "weight": 1.0
     },
@@ -101931,7 +101931,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "target": "tests_e2e_coverage_close",
       "weight": 1.0
     },
@@ -101943,7 +101943,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "target": "tests_e2e_coverage_newpage",
       "weight": 1.0
     },
@@ -101955,7 +101955,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_expect",
       "weight": 1.0
     },
@@ -101967,7 +101967,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_page",
       "weight": 1.0
     },
@@ -101979,7 +101979,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
       "weight": 1.0
     },
@@ -101991,7 +101991,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
@@ -102003,7 +102003,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "target": "tests_e2e_fixtures_signedin",
       "weight": 1.0
     },
@@ -102015,7 +102015,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_chat_cell",
       "weight": 1.0
     },
@@ -102027,7 +102027,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_chip",
       "weight": 1.0
     },
@@ -102039,7 +102039,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_defaultlayers",
       "weight": 1.0
     },
@@ -102051,7 +102051,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_layerssql",
       "weight": 1.0
     },
@@ -102063,7 +102063,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_placelayer",
       "weight": 1.0
     },
@@ -102075,7 +102075,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_poll_cell",
       "weight": 1.0
     },
@@ -102087,7 +102087,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_saved",
       "weight": 1.0
     },
@@ -102099,7 +102099,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers_settings",
       "weight": 1.0
     },
@@ -102111,7 +102111,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "tests_e2e_live_helpers_origin",
       "weight": 1.0
     },
@@ -102123,7 +102123,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "tests_e2e_live_helpers_shots",
       "weight": 1.0
     },
@@ -102135,7 +102135,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "tests_e2e_live_helpers_signedin",
       "weight": 1.0
     },
@@ -102147,7 +102147,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "tests_e2e_client_ips_clientaddress",
       "weight": 1.0
     },
@@ -102159,7 +102159,7 @@
       "relation": "imports",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "tests_e2e_client_ips_clientip",
       "weight": 1.0
     },
@@ -137565,7 +137565,8 @@
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
       "source_location": "L1",
-      "target": "tests_e2e_coverage",
+      "target": "ref_playwright_test",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -137577,6 +137578,18 @@
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
       "source_location": "L2",
+      "target": "tests_e2e_coverage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_overlay_control_spec",
+      "source_file": "tests/e2e/overlay-control.spec.ts",
+      "source_location": "L3",
       "target": "ref_node_crypto",
       "weight": 1.0
     },
@@ -137588,7 +137601,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "target": "tests_e2e_fixtures",
       "weight": 1.0
     },
@@ -137600,7 +137613,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "tests_e2e_grid_helpers",
       "weight": 1.0
     },
@@ -137612,7 +137625,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "tests_e2e_live_helpers",
       "weight": 1.0
     },
@@ -137624,7 +137637,7 @@
       "relation": "imports_from",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "tests_e2e_client_ips",
       "weight": 1.0
     },
@@ -182206,7 +182219,7 @@
       "relation": "contains",
       "source": "tests_e2e_overlay_control_spec",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L96",
+      "source_location": "L97",
       "target": "tests_e2e_overlay_control_spec_livesockets",
       "weight": 1.0
     },
@@ -193791,10 +193804,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "0e9f47f8fcb2b70cce9fb103cd9c14f664daeb47c25d5b1079eaf06035814bf9",
+    "content_sha256": "f00d3551b3306a96f38b05b019b49f52dd12cda2f297a2ac14a9b59319f7f9c0",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "b539598e5ace58091f1ff9fe73af81855385cda4fbeb2bfd089a1416fda252c7",
+    "source_sha256": "8a0686fa25a515509b3885058ae95e201083df13eda896cf9d87cd06b8427d50",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -226025,7 +226038,7 @@
       "label": "liveSockets()",
       "norm_label": "livesockets()",
       "source_file": "tests/e2e/overlay-control.spec.ts",
-      "source_location": "L96"
+      "source_location": "L97"
     },
     {
       "_callable": true,
