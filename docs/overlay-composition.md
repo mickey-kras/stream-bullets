@@ -2,6 +2,7 @@
 
 The overlay page shows a composition of layers in one transparent browser source.
 The owner builds the composition in **Overlay control**. Each layer has a place on a grid. Changes go live at once.
+
 The overlay shows only the layers that are on the grid.
 The chat layer shows the merged chat of the connected Twitch, YouTube, and Kick channels.
 The chat reads the activity feed of [Channel connections and activity](channel-connections.md).
@@ -123,6 +124,7 @@ An older Worker can use the new table.
 The page scales the design pixels to the size of the browser source.
 The composition puts all of its layers in one canvas. The canvas has the frame size of the selected orientation.
 It is the same as the canvas of the editor preview.
+
 Thus the layout is the same at all source sizes with the same aspect ratio, and the same as in the preview.
 With a source of a different aspect ratio, the full canvas stays in the source.
 The free space is at the right or at the bottom.
@@ -144,11 +146,12 @@ The API is strict for changes. See [Overlay layers](api.md#overlay-layers).
 
 Before the overlay studio, the overlay showed one source on air, with a position and a size.
 The owner changed the source with **Preview** and **Take**.
-The chat layer and the characters layer always had a cell, and a `content` layer could give the source a cell.
+The chat layer and the characters layer always had a cell, and an optional `content` layer gave the source a cell.
 Now the overlay shows only layers on the grid.
 
 The stored layers have a version (`v`). The current version is 2. Stored layers without this version are old.
 The server converts old layers each time it reads them. The result is always the same.
+
 The first time the overlay page or **Overlay control** reads the state, the server stores the result.
 Each save also stores the current version. Thus the conversion happens one time.
 The owner does nothing. The revision of the overlay does not change.
@@ -182,7 +185,7 @@ Each cell in this table is `c`, `r`, `w` × `h`:
 | Old position | Horizontal S | Horizontal M | Horizontal L | Vertical S | Vertical M | Vertical L |
 | --- | --- | --- | --- | --- | --- | --- |
 | Poll (full frame) | 5, 0, 9 × 5 | 5, 0, 11 × 7 | 0, 0, 16 × 9 | 0, 0, 7 × 6 | 0, 0, 9 × 8 | 0, 0, 9 × 10 |
-| Lower third | 0, 7, 8 × 2 | 0, 6, 10 × 3 | 0, 5, 12 × 4 | 0, 14, 7 × 2 | 0, 13, 9 × 3 | 0, 12, 9 × 4 |
+| The lower third | 0, 7, 8 × 2 | 0, 6, 10 × 3 | 0, 5, 12 × 4 | 0, 14, 7 × 2 | 0, 13, 9 × 3 | 0, 12, 9 × 4 |
 | Top bar | 0, 0, 12 × 2 | 0, 0, 16 × 2 | 0, 0, 16 × 3 | 0, 0, 7 × 2 | 0, 0, 9 × 2 | 0, 0, 9 × 3 |
 | Corner | 11, 7, 5 × 2 | 10, 6, 6 × 3 | 8, 5, 8 × 4 | 5, 14, 4 × 2 | 4, 13, 5 × 3 | 3, 12, 6 × 4 |
 | Center | 5, 3, 6 × 3 | 4, 3, 8 × 3 | 3, 2, 10 × 5 | 2, 7, 5 × 2 | 1, 6, 7 × 3 | 0, 6, 9 × 4 |
@@ -282,11 +285,12 @@ The studio has these parts:
 - The grid of the selected orientation on a preview of the frame.
 - The settings of the selected layer.
 
-On a wide screen, the palette, the grid, and the settings are side by side.
+On a wide screen, the page shows the palette, the grid, and the settings side by side.
 On a narrow screen, such as a phone, they are one below the other in that sequence.
 
 The preview uses the same code as the OBS page. Thus the layer positions in the preview and in OBS agree.
 Each layer on the grid shows its name, its size in pixels, and its real content.
+
 The chat layer shows sample messages. The characters layer shows the live playground.
 A layer with **Show on stream** off keeps a dashed box on the grid. The preview does not show its content.
 
@@ -372,7 +376,7 @@ When you select a layer with its chip, a screen reader reads the selection. The 
 
 ### Keyboard
 
-Tab goes through the toolbar, the chips, the grid, and the settings, in that sequence.
+Tab moves to the toolbar, the chips, the grid, and the settings, in that sequence.
 Enter or Space on a chip adds its layer, or selects the layer if it is on the grid.
 
 You can use the keyboard on the grid:

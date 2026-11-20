@@ -37,7 +37,7 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - Newest uses stable cursors. Top sorts by likes minus dislikes. Votes can move entries between pages. Refresh for current order.
 - The Polls list has three groups in this order: active polls of the page owner, active polls of other people, all other polls.
 - Each of these groups lists the newest poll first. Top keeps the plain score order without groups.
-- `/@handle/overlay` shows the layers that the owner put on the grid in **Overlay control**.
+- `/@handle/overlay` shows the layers on the grid of **Overlay control**.
 - By default, the poll layer shows the latest active poll of the page owner. It never selects a viewer poll by itself.
 - The owner picks a viewer poll for the poll layer in **Overlay control**. `?poll=<id>` also selects a poll. Public overlays cannot vote.
 - **Overlay control** creates a private OBS URL with a secret `key`. It grants owner-priority admission, including full rooms.

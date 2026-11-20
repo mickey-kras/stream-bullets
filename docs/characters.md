@@ -170,6 +170,7 @@ To put it on the grid, select its chip in the palette. Its settings show when yo
 
 **Start test** in the toolbar of the studio plays a synthetic crowd for 5 minutes. **Stop test** ends it.
 The same button starts the chat test. See [Test](overlay-composition.md#test).
+
 The characters test needs the saved characters layer on stream.
 A start of the test also resumes a paused playground, so the test shows at once.
 During a pause, the text beside the button and the start message tell you this.
@@ -177,6 +178,7 @@ During a pause, the text beside the button and the start message tell you this.
 The layer is on stream when it has a cell in the selected orientation and **Show on stream** is on.
 The preview opens the owner's own characters socket while the characters layer is on stream.
 The editor reads the pause and the test only while the saved characters layer is on stream.
+
 The chat preview still shows sample messages.
 When the server has no playground (`503`), the editor shows "Characters are off on this server" instead of an error.
 The controls use `POST /api/overlay/characters`. See [API](api.md#overlay-layers).

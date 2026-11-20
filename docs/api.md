@@ -134,7 +134,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 - Each value in `items` holds the settings of one content layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
   - `ref` is the ID of a poll, a topic, or a Community card of the page. An unknown ID returns `404`.
     A `poll` layer with `ref: null` shows the latest active poll. A `card` layer with `ref: null` shows the first card.
-    For `next`, `message`, and `support`, `ref` must be `null`.
+    `next`, `message`, and `support` accept only `ref: null`.
   - `backgroundOpacity` has the same values as `chat.backgroundOpacity`. It applies to the card background of the layer.
   - The API only stores `qr`. The overlay does not show a QR code.
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
@@ -179,7 +179,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   `items` holds `{enabled, ref, backgroundOpacity, qr}` for each content layer.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value.
   No layer has a cell by default. Chat and characters are off by default, `hideCommands` is on, and `backgroundOpacity` is 100.
-  The defaults of a content layer are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `qr` is `true` for `poll` and `false` for the other content layers.
+  The defaults of a content layer are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `poll` has `qr: true`. The other content layers have `qr: false`.
 - With the `poll` parameter, the overlay page shows that poll in the poll layer, and no other content layer.
   A poll ID that the page does not have returns `404`.
 - The API has no `preview`, `take`, or `layout` action now. Each of them returns `400`.
