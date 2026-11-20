@@ -279,7 +279,9 @@ header nav a.nav-tab[aria-current="page"] { background: linear-gradient(110deg, 
 @media (max-width: 43.75em) {
   .ideas-header .streamer-name.streamer-name { max-width: 16ch; }
 }
-:root .sb-toast.has-action { pointer-events: auto; display: inline-flex; align-items: center; gap: 12px; }
+/* Each toast has the height of a toast with an action button. */
+:root .sb-toast { display: inline-flex; align-items: center; box-sizing: border-box; min-height: 52px; }
+:root .sb-toast.has-action { pointer-events: auto; gap: 12px; }
 :root .sb-toast .toast-action { min-height: 32px; padding: 4px 12px; border: 1px solid var(--bg); border-radius: var(--radius-panel); background: transparent; color: var(--bg); font: 700 .9375rem var(--body); cursor: pointer; }
 .site-header .account-menu { width: min(300px, calc(100% - 24px)); max-width: calc(100cqw - 24px); }
 .site-header .account-menu :is(a, button):not(.icon-button) { font: 500 1rem/1.3 var(--body) !important; text-transform: none !important; letter-spacing: 0 !important; white-space: normal; overflow-wrap: anywhere; gap: 10px; min-height: 44px; }
