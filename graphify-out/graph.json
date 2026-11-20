@@ -5445,8 +5445,20 @@
       "relation": "calls",
       "source": "app_components_channels_use_live_channels_uselivechannels",
       "source_file": "app/components/channels/use-live-channels.ts",
-      "source_location": "L93",
+      "source_location": "L95",
       "target": "app_components_channels_use_live_channels_startchannelrefresh",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_channels_use_live_channels_uselivechannels",
+      "source_file": "app/components/channels/use-live-channels.ts",
+      "source_location": "L98",
+      "target": "app_components_channels_use_live_channels_readchannels",
       "weight": 1.0
     },
     {
@@ -52509,7 +52521,7 @@
       "relation": "calls",
       "source": "tests_live_channels_test",
       "source_file": "tests/live-channels.test.ts",
-      "source_location": "L131",
+      "source_location": "L127",
       "target": "tests_live_channels_test_response",
       "weight": 1.0
     },
@@ -190687,18 +190699,6 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
-      "source": "app_components_channels_use_live_channels_uselivechannels",
-      "source_file": "app/components/channels/use-live-channels.ts",
-      "source_location": "L93",
-      "target": "app_components_channels_use_live_channels_readchannels",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "relation": "indirect_call",
       "source": "app_components_community_community_view_communityview_save",
       "source_file": "app/components/community/community-view.tsx",
       "source_location": "L137",
@@ -193791,10 +193791,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "89077d57f8542f7c7d18cbc1a8a08cc0029afe5cdf529dcd3da0aad20d16d8c4",
+    "content_sha256": "0e9f47f8fcb2b70cce9fb103cd9c14f664daeb47c25d5b1079eaf06035814bf9",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "586c99f1b358392141a6bb4027693ef3fc91b8450c666e85d0addd02385d6423",
+    "source_sha256": "b539598e5ace58091f1ff9fe73af81855385cda4fbeb2bfd089a1416fda252c7",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],

@@ -119,6 +119,23 @@ it("shows a newer loader list in place of an older read", async (): Promise<void
   expect(render(reloaded).channels).toEqual(broken);
 });
 
+it("drops a read that started before a newer loader list", async (): Promise<void> => {
+  let finish: (body: unknown) => void = (): void => {};
+  fetched.mockImplementation(
+    (): Promise<Response> =>
+      Promise.resolve(
+        response((): Promise<unknown> => new Promise<unknown>((resolve): void => void (finish = resolve)), 200),
+      ),
+  );
+  render(loaded);
+  await tick();
+  const reloaded: ChannelView[] = [channel("active")];
+  render(reloaded);
+  finish({ channels: broken });
+  for (let step: number = 0; step < 5; step += 1) await vi.advanceTimersByTimeAsync(0);
+  expect(render(reloaded).channels).toBe(reloaded);
+});
+
 it("keeps the last list while reads fail, and is stale from the third failure to the next success", async (): Promise<void> => {
   render(loaded);
   await tick();

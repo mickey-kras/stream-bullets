@@ -88,14 +88,21 @@ export function useLiveChannels(loaded: ChannelView[]): { channels: ChannelView[
   useEffect((): void => {
     source.current = loaded;
   }, [loaded]);
-  useEffect(
-    (): (() => void) =>
-      startChannelRefresh(readChannels, (channels: ChannelView[] | null, failed: number): void => {
+  useEffect((): (() => void) => {
+    // Reads never overlap, so one variable holds the loader list of the read in flight. A read that started
+    // before a newer loader list keeps the old list as its source, and the newer loader list wins.
+    let started: ChannelView[] = source.current;
+    return startChannelRefresh(
+      (): Promise<ChannelView[]> => {
+        started = source.current;
+        return readChannels();
+      },
+      (channels: ChannelView[] | null, failed: number): void => {
         setFailures(failed);
-        if (channels) setRead({ source: source.current, channels });
-      }),
-    [],
-  );
+        if (channels) setRead({ source: started, channels });
+      },
+    );
+  }, []);
   return {
     channels: read.source === loaded ? read.channels : loaded,
     stale: failures >= REFRESH_FAILURES_SHOWN,
