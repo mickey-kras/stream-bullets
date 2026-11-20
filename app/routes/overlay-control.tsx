@@ -17,7 +17,7 @@ import { resultMessage } from "../components/channels/channel-panel";
 import { ChannelsStep } from "../components/channels/channels-step";
 import { OverlayControl } from "../components/overlay/overlay-control";
 import type { OverlayPoll } from "../components/overlay/overlay-stage";
-import { SiteHeader } from "../components/shell/site-header";
+import { StreamerHeader, streamerHeaderAppearance, type StreamerView } from "../components/shell/streamer-header";
 import { useRevalidateAt } from "../components/use-clock";
 import type { LiveSnapshot } from "../types";
 import "../components/overlay/wasteland/wasteland.css";
@@ -48,6 +48,14 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
   return {
     handle: streamer.handle,
     name: streamer.name,
+    streamer: {
+      handle: streamer.handle,
+      name: streamer.name,
+      avatar: streamer.avatar,
+      logo: streamer.logo,
+      ownerAvatarPreset: streamer.ownerAvatarPreset,
+      isOfficial: streamer.isOfficial,
+    },
     host: new URL(origin).host,
     hasOverlayKey: await hasOverlayKey(app.env, streamer.id),
     channels: await listConnections(app.env, streamer.id),
@@ -81,7 +89,13 @@ export default function OverlayControlPage(): ReactNode {
   for (const poll of loaded.initial.polls) if (!polls.some((item) => item.id === poll.id)) polls.push(poll);
   return (
     <>
-      <SiteHeader />
+      <StreamerHeader
+        streamer={loaded.streamer}
+        current={null}
+        overlayCurrent
+        tabHref={(view: StreamerView): string => `${paths.streamer(loaded.handle)}?view=${view}`}
+        {...streamerHeaderAppearance(loaded.streamer)}
+      />
       <main className="page-panel ov-control" id="main-content">
         <OverlayControl
           initial={loaded.state}
