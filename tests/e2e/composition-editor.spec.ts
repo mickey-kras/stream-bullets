@@ -257,8 +257,9 @@ test("the owner places layers on the grid by mouse and keyboard, and the layout 
   const layers: OverlayLayers = await storedLayers(page);
   expect(layers.orientation).toBe("horizontal");
   expect(layers.cells.horizontal).toEqual({
+    // The source layers stay off the grid.
+    ...DEFAULT_LAYERS.cells.horizontal,
     chat: { c: 11, r: 0, w: 5, h: 7 },
-    characters: DEFAULT_LAYERS.cells.horizontal.characters,
     content: null,
   });
   expect(layers.cells.vertical.chat).toEqual({ c: 0, r: 0, w: 9, h: 5 });

@@ -49245,7 +49245,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L317",
+      "source_location": "L318",
       "target": "tests_e2e_composition_editor_spec_withoutwrite",
       "weight": 1.0
     },
@@ -49257,7 +49257,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L556",
+      "source_location": "L557",
       "target": "tests_e2e_composition_editor_spec_writes",
       "weight": 1.0
     },
@@ -49269,7 +49269,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L592",
+      "source_location": "L593",
       "target": "tests_e2e_composition_editor_spec_cardlook",
       "weight": 1.0
     },
@@ -49281,7 +49281,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L694",
+      "source_location": "L695",
       "target": "tests_e2e_composition_editor_spec_realtask",
       "weight": 1.0
     },
@@ -49293,7 +49293,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L828",
+      "source_location": "L829",
       "target": "tests_e2e_composition_editor_spec_nudgeright",
       "weight": 1.0
     },
@@ -49305,7 +49305,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L831",
+      "source_location": "L832",
       "target": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "weight": 1.0
     },
@@ -49317,7 +49317,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L875",
+      "source_location": "L876",
       "target": "tests_e2e_composition_editor_spec_leaveinapp",
       "weight": 1.0
     },
@@ -49329,7 +49329,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L905",
+      "source_location": "L906",
       "target": "tests_e2e_composition_editor_spec_carryright",
       "weight": 1.0
     },
@@ -49341,7 +49341,7 @@
       "relation": "calls",
       "source": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L858",
+      "source_location": "L859",
       "target": "tests_e2e_grid_helpers_storedlayers",
       "weight": 1.0
     },
@@ -176557,7 +176557,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L566",
+      "source_location": "L567",
       "target": "tests_e2e_composition_editor_spec_cardlook",
       "weight": 1.0
     },
@@ -176568,7 +176568,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L656",
+      "source_location": "L657",
       "target": "tests_e2e_composition_editor_spec_realtask",
       "weight": 1.0
     },
@@ -176579,7 +176579,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L836",
+      "source_location": "L837",
       "target": "tests_e2e_composition_editor_spec_leaveinapp",
       "weight": 1.0
     },
@@ -176590,7 +176590,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L844",
+      "source_location": "L845",
       "target": "tests_e2e_composition_editor_spec_nudgeright",
       "weight": 1.0
     },
@@ -176601,7 +176601,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L850",
+      "source_location": "L851",
       "target": "tests_e2e_composition_editor_spec_carryright",
       "weight": 1.0
     },
@@ -176612,7 +176612,7 @@
       "relation": "contains",
       "source": "tests_e2e_composition_editor_spec",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L857",
+      "source_location": "L858",
       "target": "tests_e2e_composition_editor_spec_storedchatcolumn",
       "weight": 1.0
     },
@@ -188441,10 +188441,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "ad25b549e9d725d7c66dd51abaeba477d94380124045230bc6c8a1ebaee9799b",
+    "content_sha256": "42674164140d45d4654014c9dd1025c923e29287f95c5719c4cdbaa58a596130",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "dc822e2dd8cdce875bfb7c4d9c74507bd11d3c523890464864741cd5aebdf764",
+    "source_sha256": "15859ccf66998114ba4e8a7e4f9f57058fa502d185e497b9fe31b9ae678bd4e6",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -219367,14 +219367,14 @@
             "callee": "querySelector",
             "file": "tests/e2e/composition-editor.spec.ts",
             "lang": "typescript",
-            "line": "L571",
+            "line": "L572",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "cardlook()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L566"
+      "source_location": "L567"
     },
     {
       "_callable": true,
@@ -219385,7 +219385,7 @@
       "label": "carryRight()",
       "norm_label": "carryright()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L850"
+      "source_location": "L851"
     },
     {
       "_callable": true,
@@ -219407,7 +219407,7 @@
       "label": "leaveInApp()",
       "norm_label": "leaveinapp()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L836"
+      "source_location": "L837"
     },
     {
       "_callable": true,
@@ -219418,7 +219418,7 @@
       "label": "nudgeRight()",
       "norm_label": "nudgeright()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L844"
+      "source_location": "L845"
     },
     {
       "_callable": true,
@@ -219429,7 +219429,7 @@
       "label": "realTask()",
       "norm_label": "realtask()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L656"
+      "source_location": "L657"
     },
     {
       "_callable": true,
@@ -219440,7 +219440,7 @@
       "label": "storedChatColumn()",
       "norm_label": "storedchatcolumn()",
       "source_file": "tests/e2e/composition-editor.spec.ts",
-      "source_location": "L857"
+      "source_location": "L858"
     },
     {
       "_callable": true,
