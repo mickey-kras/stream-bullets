@@ -154,6 +154,113 @@ function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
   return statements;
 }
 
+const accountName = (account: TestAccount): string => account.replaceAll("_", " ");
+// The inbox cursor accepts only notification ids of 32 hexadecimal characters.
+const notificationId = (index: number): string => fixtureId(100 + index).replaceAll("-", "");
+
+interface MentionFixture {
+  community: number;
+  comment: number;
+  author: TestAccount;
+  mentioned: TestAccount;
+  text: string;
+  parent: number | null;
+}
+
+// Each text starts with the mention label, so each mention range starts at zero.
+const MENTION_FIXTURES: readonly MentionFixture[] = [
+  {
+    community: 1,
+    comment: 6,
+    author: "other_viewer",
+    mentioned: "viewer",
+    text: "can you share the clip?",
+    parent: null,
+  },
+  {
+    community: 2,
+    comment: 6,
+    author: "viewer",
+    mentioned: "other_viewer",
+    text: "please check this topic.",
+    parent: null,
+  },
+  {
+    community: 2,
+    comment: 7,
+    author: "owner",
+    mentioned: "other_owner",
+    text: "we can plan a shared stream.",
+    parent: 4,
+  },
+];
+
+interface NotificationFixture {
+  community: number;
+  comment: number;
+  recipient: TestAccount;
+  kind: "reply" | "mention";
+  read: boolean;
+}
+
+// The comment author is the actor. The list covers each kind in the read and unread states in both communities.
+const NOTIFICATION_FIXTURES: readonly NotificationFixture[] = [
+  { community: 1, comment: 6, recipient: "viewer", kind: "mention", read: false },
+  { community: 1, comment: 3, recipient: "viewer", kind: "reply", read: true },
+  { community: 1, comment: 4, recipient: "owner", kind: "reply", read: false },
+  { community: 2, comment: 6, recipient: "other_viewer", kind: "mention", read: true },
+  { community: 2, comment: 3, recipient: "viewer", kind: "reply", read: false },
+  { community: 2, comment: 4, recipient: "other_owner", kind: "reply", read: true },
+  { community: 2, comment: 7, recipient: "other_viewer", kind: "reply", read: false },
+  { community: 2, comment: 7, recipient: "other_owner", kind: "mention", read: false },
+];
+
+function notificationFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
+  const statements: D1PreparedStatement[] = [];
+  for (const [index, fixture] of MENTION_FIXTURES.entries()) {
+    const id: string = fixtureId(fixture.community * 10 + fixture.comment);
+    const label: string = `@${accountName(fixture.mentioned)}`;
+    const text: string = `${label} ${fixture.text}`;
+    statements.push(
+      env.DB.prepare(
+        "INSERT OR IGNORE INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id) VALUES(?,?,?,?,?,?)",
+      ).bind(
+        id,
+        fixtureId(fixture.community * 10),
+        testAccountId(fixture.author),
+        text,
+        now + 3 + index,
+        fixture.parent === null ? null : fixtureId(fixture.community * 10 + fixture.parent),
+      ),
+      // An edited or removed comment keeps its current mentions.
+      env.DB.prepare(
+        "INSERT OR IGNORE INTO comment_mentions(comment_id,user_id,start,end) SELECT id,?,0,? FROM entry_comments WHERE id=? AND text=? AND removed_at IS NULL",
+      ).bind(testAccountId(fixture.mentioned), label.length, id, text),
+    );
+  }
+  for (const [index, fixture] of NOTIFICATION_FIXTURES.entries()) {
+    const recipient: string = testAccountId(fixture.recipient);
+    statements.push(
+      // The inbox hides a mention notification without its mention row, so the seed does not create one.
+      env.DB.prepare(
+        `INSERT OR IGNORE INTO notifications(id,user_id,actor_id,comment_id,kind,created_at,read)
+        SELECT ?,?,c.author_id,c.id,?,?,? FROM entry_comments c WHERE c.id=? AND c.removed_at IS NULL
+          AND (?='reply' OR EXISTS(SELECT 1 FROM comment_mentions m WHERE m.comment_id=c.id AND m.user_id=?))`,
+      ).bind(
+        notificationId(index + 1),
+        recipient,
+        fixture.kind,
+        now + 1 + index,
+        fixture.read ? 1 : 0,
+        fixtureId(fixture.community * 10 + fixture.comment),
+        fixture.kind,
+        recipient,
+      ),
+    );
+  }
+  return statements;
+}
+
 async function resetTestRooms(env: AppEnv, ids: string[]): Promise<void> {
   for (const id of ids) {
     const room = env.POLL_ROOMS.get(env.POLL_ROOMS.idFromName(id));
@@ -211,6 +318,11 @@ export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<
       env.DB.prepare(
         "DELETE FROM app_rate_limits WHERE key IN (SELECT 'write:' || value FROM json_each(?)) OR key IN (SELECT 'content:' || value FROM json_each(?))",
       ).bind(JSON.stringify(users), JSON.stringify(users)),
+      env.DB.prepare(
+        `DELETE FROM app_rate_limits WHERE key IN (SELECT 'notify-actor:' || value FROM json_each(?))
+          OR key IN (SELECT 'notify-recipient:' || json_array(actor.value,recipient.value)
+            FROM json_each(?) actor, json_each(?) recipient)`,
+      ).bind(JSON.stringify(users), JSON.stringify(users), JSON.stringify(users)),
       env.DB.prepare(`INSERT INTO test_fixture_revisions(streamer_id,revision,overlay_revision)
         SELECT s.id,s.revision+1,COALESCE(o.revision,0)+1 FROM streamers s
         LEFT JOIN overlay_state o ON o.streamer_id=s.id WHERE s.owner_id IN (SELECT value FROM json_each(?))
@@ -226,7 +338,7 @@ export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<
     statements.push(
       env.DB.prepare(
         "INSERT OR IGNORE INTO user(id,name,email,email_verified,created_at,updated_at) VALUES(?,?,?,?,?,?)",
-      ).bind(testAccountId(account), account.replaceAll("_", " "), `${account}@example.test`, 1, now, now),
+      ).bind(testAccountId(account), accountName(account), `${account}@example.test`, 1, now, now),
     );
   }
   for (const [index, account, handle, status] of [
@@ -274,6 +386,7 @@ export async function seedTestEnvironment(env: AppEnv, reset: boolean): Promise<
   }
   statements.push(
     ...communityFixtures(env, now),
+    ...notificationFixtures(env, now),
     env.DB.prepare(
       "INSERT OR IGNORE INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,status) VALUES(?,?,?,?,?,?,?,?,?,?)",
     ).bind(

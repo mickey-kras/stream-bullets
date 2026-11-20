@@ -46821,7 +46821,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_checksecret",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L300",
+      "source_location": "L413",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -46857,8 +46857,68 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_deletetestimages",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L167",
+      "source_location": "L274",
       "target": "app_server_images_server_deleteimageobjects",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_notificationfixtures",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L221",
+      "target": "app_server_test_environment_server_fixtureid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_notificationfixtures",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L222",
+      "target": "app_server_test_environment_server_accountname",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_notificationfixtures",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L230",
+      "target": "app_server_test_environment_server_testaccountid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_notificationfixtures",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L250",
+      "target": "app_server_test_environment_server_notificationid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_notificationid",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L159",
+      "target": "app_server_test_environment_server_fixtureid",
       "weight": 1.0
     },
     {
@@ -46941,7 +47001,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_resettestrooms",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L161",
+      "source_location": "L268",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -46953,7 +47013,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L172",
+      "source_location": "L279",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
     },
@@ -46965,7 +47025,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L179",
+      "source_location": "L286",
       "target": "app_server_test_environment_server_fixtureid",
       "weight": 1.0
     },
@@ -46977,7 +47037,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L202",
+      "source_location": "L309",
       "target": "app_server_test_environment_server_resettestrooms",
       "weight": 1.0
     },
@@ -46989,7 +47049,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L203",
+      "source_location": "L310",
       "target": "app_server_test_environment_server_deletetestimages",
       "weight": 1.0
     },
@@ -47001,7 +47061,19 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L229",
+      "source_location": "L341",
+      "target": "app_server_test_environment_server_accountname",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_seedtestenvironment",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L341",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -47013,8 +47085,20 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L276",
+      "source_location": "L388",
       "target": "app_server_test_environment_server_communityfixtures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_test_environment_server_seedtestenvironment",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L389",
+      "target": "app_server_test_environment_server_notificationfixtures",
       "weight": 1.0
     },
     {
@@ -47025,7 +47109,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L323",
+      "source_location": "L436",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
     },
@@ -47037,7 +47121,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L324",
+      "source_location": "L437",
       "target": "app_server_http_server_queryparams",
       "weight": 1.0
     },
@@ -47049,7 +47133,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L339",
+      "source_location": "L452",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -47061,7 +47145,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L340",
+      "source_location": "L453",
       "target": "app_server_http_server_requiresameorigin",
       "weight": 1.0
     },
@@ -47073,7 +47157,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L343",
+      "source_location": "L456",
       "target": "app_server_http_server_readbody",
       "weight": 1.0
     },
@@ -47085,7 +47169,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L350",
+      "source_location": "L463",
       "target": "app_server_test_environment_server_checksecret",
       "weight": 1.0
     },
@@ -47097,7 +47181,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L351",
+      "source_location": "L464",
       "target": "app_server_test_environment_server_accesscookie",
       "weight": 1.0
     },
@@ -47109,7 +47193,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L354",
+      "source_location": "L467",
       "target": "app_server_test_environment_server_seedtestenvironment",
       "weight": 1.0
     },
@@ -47121,7 +47205,7 @@
       "relation": "calls",
       "source": "app_server_test_environment_server_testenvironmentresponse",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L372",
+      "source_location": "L485",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -55089,7 +55173,7 @@
       "relation": "calls",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L65",
+      "source_location": "L68",
       "target": "tests_test_environment_test_request",
       "weight": 1.0
     },
@@ -111591,7 +111675,115 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L18",
+      "source_location": "L10",
+      "target": "app_server_overlay_state_default_overlay",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_config_test_origin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_config_validatetestenvironment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_server_requiretestaccess",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_server_seedtestenvironment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_server_test_accounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_server_testaccount",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_server_testaccountid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_server_testenvironmentresponse",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L21",
       "target": "tests_helpers_database_createtestdatabase",
       "weight": 1.0
     },
@@ -111603,7 +111795,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L18",
+      "source_location": "L21",
       "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
@@ -111628,6 +111820,18 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L4",
+      "target": "app_types_notificationitem",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L5",
       "target": "app_server_auth_server_getviewer",
       "weight": 1.0
     },
@@ -111639,7 +111843,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_server_access_server_assertstreamerwritable",
       "weight": 1.0
     },
@@ -111651,7 +111855,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_server_access_server_cancreatestreamer",
       "weight": 1.0
     },
@@ -111663,7 +111867,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_server_access_server_canviewstreamer",
       "weight": 1.0
     },
@@ -111675,7 +111879,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_server_access_server_isadmin",
       "weight": 1.0
     },
@@ -111687,7 +111891,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_server_data_server_getstreamer",
       "weight": 1.0
     },
@@ -111699,7 +111903,7 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_server_data_server_mutateentry",
       "weight": 1.0
     },
@@ -111711,8 +111915,8 @@
       "relation": "imports",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L7",
-      "target": "app_server_overlay_server_getoverlaystate",
+      "source_location": "L8",
+      "target": "app_server_discussion_notifications_server_listnotifications",
       "weight": 1.0
     },
     {
@@ -111724,7 +111928,19 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L8",
-      "target": "app_server_overlay_state_default_overlay",
+      "target": "app_server_discussion_notifications_server_marknotification",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L8",
+      "target": "app_server_discussion_notifications_server_validatementions",
       "weight": 1.0
     },
     {
@@ -111736,79 +111952,7 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L9",
-      "target": "app_server_test_environment_config_test_origin",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_test_environment_test",
-      "source_file": "tests/test-environment.test.ts",
-      "source_location": "L9",
-      "target": "app_server_test_environment_config_validatetestenvironment",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_test_environment_test",
-      "source_file": "tests/test-environment.test.ts",
-      "source_location": "L9",
-      "target": "app_server_test_environment_server_requiretestaccess",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_test_environment_test",
-      "source_file": "tests/test-environment.test.ts",
-      "source_location": "L9",
-      "target": "app_server_test_environment_server_seedtestenvironment",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_test_environment_test",
-      "source_file": "tests/test-environment.test.ts",
-      "source_location": "L9",
-      "target": "app_server_test_environment_server_test_accounts",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_test_environment_test",
-      "source_file": "tests/test-environment.test.ts",
-      "source_location": "L9",
-      "target": "app_server_test_environment_server_testaccountid",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_test_environment_test",
-      "source_file": "tests/test-environment.test.ts",
-      "source_location": "L9",
-      "target": "app_server_test_environment_server_testenvironmentresponse",
+      "target": "app_server_overlay_server_getoverlaystate",
       "weight": 1.0
     },
     {
@@ -142820,8 +142964,20 @@
       "relation": "imports_from",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L18",
-      "target": "tests_helpers_database",
+      "source_location": "L10",
+      "target": "app_server_overlay_state",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L11",
+      "target": "app_server_test_environment_server",
       "weight": 1.0
     },
     {
@@ -142834,6 +142990,18 @@
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L2",
       "target": "ref_better_auth",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_test_environment_test",
+      "source_file": "tests/test-environment.test.ts",
+      "source_location": "L21",
+      "target": "tests_helpers_database",
       "weight": 1.0
     },
     {
@@ -142858,7 +143026,8 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L4",
-      "target": "app_server_auth_server",
+      "target": "app_types",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -142870,7 +143039,7 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L5",
-      "target": "app_server_access_server",
+      "target": "app_server_auth_server",
       "weight": 1.0
     },
     {
@@ -142882,7 +143051,7 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L6",
-      "target": "app_server_data_server",
+      "target": "app_server_access_server",
       "weight": 1.0
     },
     {
@@ -142894,7 +143063,7 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L7",
-      "target": "app_server_overlay_server",
+      "target": "app_server_data_server",
       "weight": 1.0
     },
     {
@@ -142906,7 +143075,7 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L8",
-      "target": "app_server_overlay_state",
+      "target": "app_server_discussion_notifications_server",
       "weight": 1.0
     },
     {
@@ -142918,7 +143087,7 @@
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L9",
-      "target": "app_server_test_environment_server",
+      "target": "app_server_overlay_server",
       "weight": 1.0
     },
     {
@@ -174344,7 +174513,7 @@
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
       "source_location": "L157",
-      "target": "app_server_test_environment_server_resettestrooms",
+      "target": "app_server_test_environment_server_accountname",
       "weight": 1.0
     },
     {
@@ -174354,8 +174523,19 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L165",
-      "target": "app_server_test_environment_server_deletetestimages",
+      "source_location": "L159",
+      "target": "app_server_test_environment_server_notificationid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L161",
+      "target": "app_server_test_environment_server_mentionfixture",
       "weight": 1.0
     },
     {
@@ -174366,7 +174546,40 @@
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
       "source_location": "L171",
-      "target": "app_server_test_environment_server_seedtestenvironment",
+      "target": "app_server_test_environment_server_mention_fixtures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L198",
+      "target": "app_server_test_environment_server_notificationfixture",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L207",
+      "target": "app_server_test_environment_server_notification_fixtures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L218",
+      "target": "app_server_test_environment_server_notificationfixtures",
       "weight": 1.0
     },
     {
@@ -174398,6 +174611,17 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L264",
+      "target": "app_server_test_environment_server_resettestrooms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
       "source_location": "L27",
       "target": "app_server_test_environment_server_requiretestdatabase",
       "weight": 1.0
@@ -174409,8 +174633,8 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L296",
-      "target": "app_server_test_environment_server_checksecret",
+      "source_location": "L272",
+      "target": "app_server_test_environment_server_deletetestimages",
       "weight": 1.0
     },
     {
@@ -174420,19 +174644,8 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L304",
-      "target": "app_server_test_environment_server_gate_style",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_test_environment_server",
-      "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L322",
-      "target": "app_server_test_environment_server_testenvironmentresponse",
+      "source_location": "L278",
+      "target": "app_server_test_environment_server_seedtestenvironment",
       "weight": 1.0
     },
     {
@@ -174453,8 +174666,41 @@
       "relation": "contains",
       "source": "app_server_test_environment_server",
       "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L409",
+      "target": "app_server_test_environment_server_checksecret",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L417",
+      "target": "app_server_test_environment_server_gate_style",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
       "source_location": "L42",
       "target": "app_server_test_environment_server_accesscookie",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_test_environment_server",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L435",
+      "target": "app_server_test_environment_server_testenvironmentresponse",
       "weight": 1.0
     },
     {
@@ -178378,9 +178624,20 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "docs_test_environment_sign_in_and_reset",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L97",
+      "target": "docs_test_environment_discussion_fixtures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "docs_test_environment_test_environment",
       "source_file": "docs/test-environment.md",
-      "source_location": "L107",
+      "source_location": "L130",
       "target": "docs_test_environment_authorization_checks",
       "weight": 1.0
     },
@@ -178391,7 +178648,7 @@
       "relation": "contains",
       "source": "docs_test_environment_test_environment",
       "source_file": "docs/test-environment.md",
-      "source_location": "L125",
+      "source_location": "L148",
       "target": "docs_test_environment_isolation_and_limits",
       "weight": 1.0
     },
@@ -186641,7 +186898,7 @@
       "relation": "contains",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L24",
+      "source_location": "L27",
       "target": "tests_test_environment_test_fetchroom",
       "weight": 1.0
     },
@@ -186652,7 +186909,7 @@
       "relation": "contains",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L26",
+      "source_location": "L29",
       "target": "tests_test_environment_test_request",
       "weight": 1.0
     },
@@ -186663,7 +186920,7 @@
       "relation": "contains",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L346",
+      "source_location": "L452",
       "target": "tests_test_environment_test_get",
       "weight": 1.0
     },
@@ -191110,7 +191367,7 @@
       "relation": "indirect_call",
       "source": "app_server_test_environment_server_seedtestenvironment",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L187",
+      "source_location": "L294",
       "target": "app_server_test_environment_server_testaccountid",
       "weight": 1.0
     },
@@ -193804,10 +194061,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f00d3551b3306a96f38b05b019b49f52dd12cda2f297a2ac14a9b59319f7f9c0",
+    "content_sha256": "d5af8f893083a900476673c57a53caceb2e2fd6d7a06bde9bf7a186cf7d67671",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "8a0686fa25a515509b3885058ae95e201083df13eda896cf9d87cd06b8427d50",
+    "source_sha256": "44bc1c73b8056ed363690a7c49cccba7bdf4c68a3b6a776a50a7cd85875df457",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -198947,6 +199204,30 @@
       "norm_label": "tapmessage",
       "source_file": "app/server/tap-message.ts",
       "source_location": "L6"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_test_environment_server_mentionfixture",
+      "label": "MentionFixture",
+      "norm_label": "mentionfixture",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L161"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_test_environment_server_notificationfixture",
+      "label": "NotificationFixture",
+      "norm_label": "notificationfixture",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L198"
     },
     {
       "_callable": true,
@@ -222811,11 +223092,22 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_server_test_environment_server_accountname",
+      "label": "accountName()",
+      "norm_label": "accountname()",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L157"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_server_test_environment_server_checksecret",
       "label": "checkSecret()",
       "norm_label": "checksecret()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L296"
+      "source_location": "L409"
     },
     {
       "_callable": true,
@@ -222837,7 +223129,7 @@
       "label": "deleteTestImages()",
       "norm_label": "deletetestimages()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L165"
+      "source_location": "L272"
     },
     {
       "_callable": true,
@@ -222849,6 +223141,28 @@
       "norm_label": "fixtureid()",
       "source_file": "app/server/test-environment.server.ts",
       "source_location": "L39"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_test_environment_server_notificationfixtures",
+      "label": "notificationFixtures()",
+      "norm_label": "notificationfixtures()",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L218"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_test_environment_server_notificationid",
+      "label": "notificationId()",
+      "norm_label": "notificationid()",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L159"
     },
     {
       "_callable": true,
@@ -222881,7 +223195,7 @@
       "label": "resetTestRooms()",
       "norm_label": "resettestrooms()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L157"
+      "source_location": "L264"
     },
     {
       "_callable": true,
@@ -222892,7 +223206,7 @@
       "label": "seedTestEnvironment()",
       "norm_label": "seedtestenvironment()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L171"
+      "source_location": "L278"
     },
     {
       "_callable": true,
@@ -222914,7 +223228,7 @@
       "label": "testEnvironmentResponse()",
       "norm_label": "testenvironmentresponse()",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L322"
+      "source_location": "L435"
     },
     {
       "_callable": true,
@@ -229636,14 +229950,14 @@
             "callee": "delete",
             "file": "tests/test-environment.test.ts",
             "lang": "typescript",
-            "line": "L353",
+            "line": "L459",
             "receiver_type": "R2Bucket"
           }
         ]
       },
       "norm_label": "get()",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L346"
+      "source_location": "L452"
     },
     {
       "_callable": true,
@@ -229654,7 +229968,7 @@
       "label": "request()",
       "norm_label": "request()",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L26"
+      "source_location": "L29"
     },
     {
       "_callable": true,
@@ -238498,7 +238812,27 @@
       "label": "GATE_STYLE",
       "norm_label": "gate_style",
       "source_file": "app/server/test-environment.server.ts",
-      "source_location": "L304"
+      "source_location": "L417"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_test_environment_server_mention_fixtures",
+      "label": "MENTION_FIXTURES",
+      "norm_label": "mention_fixtures",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L171"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_test_environment_server_notification_fixtures",
+      "label": "NOTIFICATION_FIXTURES",
+      "norm_label": "notification_fixtures",
+      "source_file": "app/server/test-environment.server.ts",
+      "source_location": "L207"
     },
     {
       "_origin": "ast",
@@ -243585,7 +243919,7 @@
       "label": "fetchRoom",
       "norm_label": "fetchroom",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L24"
+      "source_location": "L27"
     },
     {
       "_origin": "ast",
@@ -245460,7 +245794,7 @@
       "node_kind": "heading",
       "norm_label": "authorization checks",
       "source_file": "docs/test-environment.md",
-      "source_location": "L107"
+      "source_location": "L130"
     },
     {
       "_origin": "ast",
@@ -245472,6 +245806,17 @@
       "norm_label": "deploy a revision",
       "source_file": "docs/test-environment.md",
       "source_location": "L68"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "document",
+      "id": "docs_test_environment_discussion_fixtures",
+      "label": "Discussion fixtures",
+      "node_kind": "heading",
+      "norm_label": "discussion fixtures",
+      "source_file": "docs/test-environment.md",
+      "source_location": "L97"
     },
     {
       "_origin": "ast",
@@ -245493,7 +245838,7 @@
       "node_kind": "heading",
       "norm_label": "isolation and limits",
       "source_file": "docs/test-environment.md",
-      "source_location": "L125"
+      "source_location": "L148"
     },
     {
       "_origin": "ast",
