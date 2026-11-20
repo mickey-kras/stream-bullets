@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import { ChannelPanel, type ChannelView } from "../app/components/channels/channel-panel";
+import { ChatDeliveryContext } from "../app/components/channels/use-live-channels";
 import type { CharactersControl } from "../app/components/overlay/characters-controls";
 import { ChatLayer, chatStyle, shortName } from "../app/components/overlay/chat-layer";
 import { LayerPalette } from "../app/components/overlay/layer-palette";
@@ -242,6 +243,37 @@ describe("settings of the selected layer", () => {
     // The characters have no background. The chat, the characters and the message banner have no QR code.
     expect(html.includes("data-props-background")).toBe(layer !== "characters");
     expect(html.includes("data-props-qr")).toBe(layer !== "chat" && layer !== "characters" && layer !== "message");
+  });
+
+  it("warns in the chat settings when the chat is on stream and no channel delivers chat", () => {
+    const chatSettings = (enabled: boolean, delivers: boolean): string =>
+      renderToStaticMarkup(
+        createElement(
+          ChatDeliveryContext.Provider,
+          { value: delivers },
+          createElement(LayerProperties, {
+            layer: "chat",
+            layers: { ...placed, chat: { ...placed.chat, enabled } },
+            state,
+            data: populated,
+            busy: false,
+            run: nothing,
+            change: nothing,
+            characters: playground(),
+            onRemove: nothing,
+          }),
+        ),
+      );
+    const warning: string = chatSettings(true, false);
+    expect(warning).toMatch(
+      /<p class="ch-problem ov-comp-note" data-comp-chat-down="true"><svg[^>]*icon-warning[^>]*>.*?<\/svg><span>No channel delivers chat right now\. See <a class="text-link" href="#channels-title">step 1<\/a>\.<\/span><\/p>/,
+    );
+    // Off stream, with a healthy channel, or without live channel data, the line does not show.
+    expect(chatSettings(false, false)).not.toContain("data-comp-chat-down");
+    expect(chatSettings(true, true)).not.toContain("data-comp-chat-down");
+    expect(settings("chat", { layers: { ...placed, chat: { ...placed.chat, enabled: true } } })).not.toContain(
+      "data-comp-chat-down",
+    );
   });
 
   it("reads Show on stream from the layer", () => {
@@ -930,5 +962,60 @@ describe("the channel cards", (): void => {
     expect(twitch).toContain("This platform is not set up on this site yet.");
     expect(twitch).not.toContain("<button");
     expect(twitch).not.toContain("<details");
+  });
+
+  it("mark the health of each card with an icon and words", (): void => {
+    const connection = { displayName: "Host", code: null, connectedAt: 1, lastEventAt: null, updatedAt: 1 };
+    const [twitch, youtube, kick] = cards([
+      { platform: "twitch", available: true, connection: { ...connection, status: "active" } },
+      { platform: "youtube", available: true, connection: { ...connection, status: "needs_reauth" } },
+      { platform: "kick", available: true, connection: null },
+    ]);
+    const mark = (card: string): string | undefined =>
+      /<span class="ch-mark" data-health="([a-z]+)"><svg[^>]*class="[^"]*(icon-[a-z-]+)"[^>]*>.*?<\/svg>([^<]+)<\/span>/
+        .exec(card)
+        ?.slice(1)
+        .join(" ");
+    expect(mark(twitch)).toBe("healthy icon-success Healthy");
+    expect(mark(youtube)).toBe("attention icon-warning Needs attention");
+    expect(mark(kick)).toBe("none icon-minus Not connected");
+    // The mark is beside the name of the connection, in the head of the card.
+    expect(twitch).toMatch(/<strong>Connected as Host<\/strong><span class="ch-mark"/);
+    expect(twitch.indexOf("ch-mark")).toBeLessThan(twitch.indexOf('class="ch-body"'));
+    // "Not connected" shows once: the mark says it.
+    expect(kick.match(/Not connected/g)).toHaveLength(1);
+    expect(kick).not.toContain("<strong>");
+    // A connection without a chat event says so on the server already. An age waits for the viewer's clock.
+    expect(twitch).toContain('<p class="muted">No chat event yet</p>');
+    const [aged] = cards([
+      { platform: "kick", available: true, connection: { ...connection, status: "active", lastEventAt: 5 } },
+    ]);
+    expect(aged).not.toContain("Last chat event");
+    // A platform that the site does not offer has no health mark.
+    const [gone] = cards([{ platform: "twitch", available: false, connection: { ...connection, status: "error" } }]);
+    expect(gone).not.toContain("ch-mark");
+  });
+
+  it("say that the status is old only while the reads fail", (): void => {
+    const panel = (stale: boolean): string => {
+      const Stub = createRoutesStub([
+        {
+          path: "/overlay-control",
+          Component: () =>
+            createElement(ChannelPanel, {
+              channels: offered,
+              stale,
+              providers: [],
+              signInProvider: null,
+              result: null,
+            }),
+        },
+      ]);
+      return renderToStaticMarkup(createElement(Stub, { initialEntries: ["/overlay-control"] }));
+    };
+    expect(panel(true)).toContain(
+      '<p class="muted" data-channels-stale="true">Status could not be refreshed. Next try in a moment.</p>',
+    );
+    expect(panel(false)).not.toContain("data-channels-stale");
   });
 });

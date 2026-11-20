@@ -1,4 +1,4 @@
-import { useId, useState, type FormEvent, type ReactNode } from "react";
+import { useContext, useId, useState, type FormEvent, type ReactNode } from "react";
 import { t, tAround, type MessageId } from "../../i18n";
 import { withEnabled, withItem } from "../../lib/layer-geometry";
 import { MASH_NAME } from "../../lib/mash";
@@ -10,6 +10,7 @@ import {
   type OverlayLayers,
 } from "../../lib/overlay-layers";
 import type { OverlayData, OverlayMessageStyle, OverlayState } from "../../types";
+import { ChatDeliveryContext } from "../channels/use-live-channels";
 import { Icon } from "../ui/icon";
 import { Select, type SelectOption } from "../ui/select";
 import { CharactersControls, type CharactersControl } from "./characters-controls";
@@ -190,8 +191,23 @@ function MessageEditor({ state, busy, run }: Readonly<Pick<SettingsProps, "state
 function ChatSettings({ layers, change }: Readonly<Pick<SettingsProps, "layers" | "change">>): ReactNode {
   const commandsId: string = useId();
   const [sourceBefore, sourceAfter] = tAround("overlay.comp.chatSource", "link");
+  const [downBefore, downAfter] = tAround("overlay.comp.chatDown", "link");
+  // The chat is on stream, and no connected platform delivers chat at the moment.
+  const down: boolean = !useContext(ChatDeliveryContext) && layerEnabled(layers, "chat");
   return (
     <>
+      {down && (
+        <p className="ch-problem ov-comp-note" data-comp-chat-down>
+          <Icon name="warning" size={16} />
+          <span>
+            {downBefore}
+            <a className="text-link" href="#channels-title">
+              {t("overlay.comp.chatDownLink")}
+            </a>
+            {downAfter}
+          </span>
+        </p>
+      )}
       <p className="muted ov-comp-note" data-comp-chat-source>
         {sourceBefore}
         <a className="text-link" href="#channels-title">
