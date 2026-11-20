@@ -1641,6 +1641,8 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ch-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .ch-logo { flex: none; width: 28px; height: 28px; }
 .ch-badge { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; font-weight: 600; }
+.ch-mark { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 0.875rem; font-weight: 600; }
+.ch-mark[data-health="attention"] .icon { color: var(--live); }
 .ch-problem { display: flex; align-items: flex-start; gap: 6px; }
 .ch-problem .icon { flex: none; margin-top: 2px; color: var(--live); }
 .ch-actions { display: flex; flex-wrap: wrap; align-items: center; align-self: end; gap: 8px; }

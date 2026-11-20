@@ -15,6 +15,8 @@ import { getOverlayData, getOverlayState } from "../server/overlay.server";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { resultMessage } from "../components/channels/channel-panel";
 import { ChannelsStep } from "../components/channels/channels-step";
+import { ChatDeliveryContext, useLiveChannels } from "../components/channels/use-live-channels";
+import { deliversChat } from "../lib/channel-health";
 import { OverlayControl } from "../components/overlay/overlay-control";
 import type { OverlayPoll } from "../components/overlay/overlay-stage";
 import { StreamerHeader, streamerHeaderAppearance, type StreamerView } from "../components/shell/streamer-header";
@@ -73,6 +75,8 @@ export default function OverlayControlPage(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
   const { snapshot, status, reconnect } = useLivePolls(loaded.handle);
   const revalidator = useRevalidator();
+  // Step 1 and the chat layer settings of step 2 read the same live channel list.
+  const { channels, stale } = useLiveChannels(loaded.channels);
   const [search] = useSearchParams();
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
   // Reload changes from other tabs; live messages omit the message draft.
@@ -99,30 +103,33 @@ export default function OverlayControlPage(): ReactNode {
         {...streamerHeaderAppearance(loaded.streamer)}
       />
       <main className="page-panel ov-control" id="main-content">
-        <OverlayControl
-          initial={loaded.state}
-          live={liveOverlay}
-          hasOverlayKey={loaded.hasOverlayKey}
-          connected={status === "live" || status === "connecting"}
-          reconnect={status === "offline" ? reconnect : undefined}
-          scene={{
-            name: loaded.name,
-            handle: loaded.handle,
-            host: loaded.host,
-            origin: loaded.origin,
-            polls,
-            data: loaded.data,
-            now,
-          }}
-          channels={
-            <ChannelsStep
-              channels={loaded.channels}
-              providers={loaded.providers}
-              signInProvider={loaded.signInProvider}
-              result={resultMessage(search.get("channel"), search.get("result"))}
-            />
-          }
-        />
+        <ChatDeliveryContext.Provider value={deliversChat(channels)}>
+          <OverlayControl
+            initial={loaded.state}
+            live={liveOverlay}
+            hasOverlayKey={loaded.hasOverlayKey}
+            connected={status === "live" || status === "connecting"}
+            reconnect={status === "offline" ? reconnect : undefined}
+            scene={{
+              name: loaded.name,
+              handle: loaded.handle,
+              host: loaded.host,
+              origin: loaded.origin,
+              polls,
+              data: loaded.data,
+              now,
+            }}
+            channels={
+              <ChannelsStep
+                channels={channels}
+                stale={stale}
+                providers={loaded.providers}
+                signInProvider={loaded.signInProvider}
+                result={resultMessage(search.get("channel"), search.get("result"))}
+              />
+            }
+          />
+        </ChatDeliveryContext.Provider>
       </main>
     </>
   );

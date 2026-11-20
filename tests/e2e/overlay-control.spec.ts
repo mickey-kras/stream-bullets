@@ -2,7 +2,7 @@ import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
 import { test, expect, type Page } from "./coverage";
 import { runSql, signedIn as fixtureSignedIn } from "./fixtures";
-import { POLL_CELL, chip, defaultLayers, layersSql, placeLayer, saved, settings } from "./grid-helpers";
+import { CHAT_CELL, POLL_CELL, chip, defaultLayers, layersSql, placeLayer, saved, settings } from "./grid-helpers";
 import { origin, shots, signedIn } from "./live-helpers";
 import { clientAddress, clientIp } from "./client-ips";
 
@@ -394,6 +394,115 @@ test("the page is a flow of three numbered steps, with the channels first and co
   }
 });
 
+test("the channel panel follows a platform that stops and works again while the page is open", async ({ browser }) => {
+  const connectionId: string = randomUUID();
+  const now: number = Date.now();
+  const status = (value: string, code: string | null): string =>
+    `UPDATE channel_connections SET status='${value}', status_code=${code ? `'${code}'` : "NULL"}, updated_at=${Date.now()} WHERE id='${connectionId}';`;
+  await runSql("channel-live-seed", [
+    // The chat layer is on stream, and the last chat event is 100 seconds old.
+    layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL, poll: POLL_CELL } } }),
+    `INSERT INTO channel_connections(id,streamer_id,platform,external_id,display_name,scopes,status,status_code,created_at,updated_at,last_event_at) VALUES ('${connectionId}',${FEATURE_HOST},'kick','live-kick','Live Kick','','active',NULL,${now},${now},${now - 100_000});`,
+  ]);
+  const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 94));
+  try {
+    const control = await newPage(owner);
+    // The page reads the channels every 20 seconds. The test moves the page clock in place of a wait.
+    await control.clock.install({ time: now });
+    let documents: number = 0;
+    control.on("request", (request) => {
+      if (request.isNavigationRequest()) documents += 1;
+    });
+    await control.goto("/overlay-control");
+    const section = control.getByRole("region", { name: "1 Connect channels" });
+    const details = section.locator("details.ch-details");
+    const summary = section.locator("[data-channels-summary]");
+    const kick = section.locator('[data-channel="kick"]');
+    const toast = control.locator(".sb-toast");
+    // A healthy channel: one status line, a closed panel, no toast and no warning in the chat settings.
+    await expect(summary).toHaveText("Connected: Kick");
+    await expect(details).not.toHaveAttribute("open");
+    await expect(toast).toHaveCount(0);
+    const build = control.locator("[data-composition-editor]");
+    await chip(build, "chat").click();
+    const chat = settings(build);
+    await expect(chat).toHaveAttribute("data-comp-props", "chat");
+    await expect(chat.locator("[data-comp-chat-down]")).toHaveCount(0);
+
+    // Kick ends the access during the stream. The next read shows it: the panel opens and a toast names it.
+    await runSql("channel-live-stop", [status("needs_reauth", "authorization_revoked")]);
+    const stopped = control.waitForResponse((response) => new URL(response.url()).pathname === "/api/channels");
+    await control.clock.runFor(20_001);
+    expect((await stopped).status()).toBe(200);
+    await expect(summary).toHaveText("Needs attention: Kick");
+    await expect(details).toHaveAttribute("open", "");
+    await expect(kick.locator(".ch-mark")).toHaveText("Needs attention");
+    await expect(kick.locator(".ch-mark")).toHaveAttribute("data-health", "attention");
+    await expect(kick.getByRole("alert")).toHaveText("Access ended. Reconnect to keep receiving chat.");
+    await expect(toast).toHaveText("Kick: Access ended. Reconnect to keep receiving chat.");
+    await expect(control.locator("#sb-announce-assertive")).toHaveText(
+      "Kick: Access ended. Reconnect to keep receiving chat.",
+    );
+    // The age of the last chat event is a time element with the absolute time as its title.
+    const age = kick.locator("time");
+    await expect(age).toHaveText("Last chat event 2 minutes ago");
+    await expect(age).toHaveAttribute("datetime", new Date(now - 100_000).toISOString());
+    await expect(age).toHaveAttribute("title", /\d/);
+    // The chat is on stream and no channel delivers chat: its settings say so, with a link to step 1.
+    await expect(chat.locator("[data-comp-chat-down]")).toHaveText("No channel delivers chat right now. See step 1.");
+    await expect(chat.locator("[data-comp-chat-down]").getByRole("link", { name: "step 1" })).toHaveAttribute(
+      "href",
+      "#channels-title",
+    );
+    // The same state at the next read is no news: the toast goes away by itself and does not come back.
+    const same = control.waitForResponse((response) => new URL(response.url()).pathname === "/api/channels");
+    await control.clock.runFor(15_000);
+    await expect(toast).toHaveCount(0);
+    await control.clock.runFor(5001);
+    await same;
+    await expect(kick.locator(".ch-mark")).toHaveText("Needs attention");
+    await expect(toast).toHaveCount(0);
+
+    // The channel works again: the card, the status line and a toast say so. The panel stays open.
+    await runSql("channel-live-back", [status("active", null)]);
+    const back = control.waitForResponse((response) => new URL(response.url()).pathname === "/api/channels");
+    await control.clock.runFor(20_001);
+    await back;
+    await expect(summary).toHaveText("Connected: Kick");
+    await expect(kick.locator(".ch-mark")).toHaveText("Healthy");
+    await expect(kick.getByRole("alert")).toHaveCount(0);
+    await expect(toast).toHaveText("Kick chat is back.");
+    await expect(control.locator("#sb-announce-polite")).toHaveText("Kick chat is back.");
+    await expect(details).toHaveAttribute("open", "");
+    await expect(chat.locator("[data-comp-chat-down]")).toHaveCount(0);
+
+    // Reads that fail keep the last list. After the third failure in a row, the panel says so, until a read works.
+    await control.route("**/api/channels", (route) => route.abort());
+    for (let attempt: number = 1; attempt <= 3; attempt += 1) {
+      await expect(section.locator("[data-channels-stale]")).toHaveCount(0);
+      const failed = control.waitForEvent("requestfailed", (request) => request.url().endsWith("/api/channels"));
+      await control.clock.runFor(20_001);
+      await failed;
+    }
+    await expect(section.locator("[data-channels-stale]")).toHaveText(
+      "Status could not be refreshed. Next try in a moment.",
+    );
+    await expect(kick.locator(".ch-mark")).toHaveText("Healthy");
+    // A failed read makes no toast.
+    await expect(toast).toHaveCount(0);
+    await control.unroute("**/api/channels");
+    const works = control.waitForResponse((response) => new URL(response.url()).pathname === "/api/channels");
+    await control.clock.runFor(20_001);
+    await works;
+    await expect(section.locator("[data-channels-stale]")).toHaveCount(0);
+    // All of it without a reload of the page.
+    expect(documents).toBe(1);
+  } finally {
+    await runSql("channel-live-cleanup", [`DELETE FROM channel_connections WHERE id='${connectionId}';`]);
+    await close(owner);
+  }
+});
+
 test("channel conflicts reload the list and expired authentication leaves a sign-in prompt", async ({ browser }) => {
   const connectionId: string = randomUUID();
   const now: number = Date.now();
@@ -412,7 +521,10 @@ test("channel conflicts reload the list and expired authentication leaves a sign
     const kick = control.locator('[data-channel="kick"]');
     // A healthy connection: the section starts as one status line. Open it for the full panel.
     await control.getByText("Connected: Kick", { exact: true }).click();
-    await expect(kick).not.toContainText("Last activity:");
+    await expect(kick).toContainText("No chat event yet");
+    await expect(kick.locator(".ch-mark")).toHaveText("Healthy");
+    // This tab keeps its old view for this case: hold the reads that keep the panel live.
+    await control.route("**/api/channels", (route) => route.abort());
     await control.route("**/api/channels/kick", async (route) => {
       await route.fulfill({ status: 409, json: { error: "The connection changed. Try again." } });
     });
@@ -437,6 +549,7 @@ test("channel conflicts reload the list and expired authentication leaves a sign
       .click();
     await expect(kick.getByRole("button", { name: "Connect Kick", exact: true })).toBeFocused();
     await expect(kick).toContainText("Not connected");
+    await control.unroute("**/api/channels");
     await control.route("**/api/channels/kick/connect", async (route) => {
       await route.fulfill({ status: 401, json: { error: "Sign in again.", code: "reauth_required" } });
     });
@@ -637,7 +750,11 @@ test("the owner sees each channel's connection health and the result of a connec
     await expect(youtube).toContainText("Connected as Feature Tube");
     // YouTube is not set up on this test server, so its card gives no reconnect advice.
     await expect(youtube.getByRole("alert")).toHaveCount(0);
-    await expect(youtube).toContainText("Last activity:");
+    await expect(youtube.locator("time")).toHaveText(/^Last chat event (just now|\d+ seconds? ago)$/);
+    // The site does not offer YouTube, so the card makes no health claim. Kick needs the owner.
+    await expect(youtube.locator(".ch-mark")).toHaveCount(0);
+    await expect(section.locator('[data-channel="kick"] .ch-mark')).toHaveText("Needs attention");
+    await expect(section.locator('[data-channel="twitch"] .ch-mark')).toHaveText("Not connected");
     await expect(section.getByText("This platform is not set up on this site yet.")).toHaveCount(2);
     // Kick is set up: its card shows what happened and how to fix it.
     const kick = section.locator('[data-channel="kick"]');
