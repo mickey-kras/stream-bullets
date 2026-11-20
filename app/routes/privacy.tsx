@@ -308,9 +308,10 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           deletes the account. Disconnecting or deleting the account deletes the tokens, removes the event
           subscriptions, and asks the platform to revoke access. A YouTube connection is also removed 7 days after we
           find that its access ended, or when its channel data was not read again from YouTube for 30 days. While an
-          overlay is open, we read it again each day; without an open overlay, we find an ended access within 30 days. Chat passing through for overlays stays for at most 11 minutes, and IDs of
-          deliveries already received stay for at most 16 minutes. The viewer list of the character playground keeps
-          each viewer for at most 30 minutes after their last message, and a ban or timeout until it ends.
+          overlay is open, we read it again each day; without an open overlay, we find an ended access within 30 days.
+          Chat passing through for overlays stays for at most 11 minutes, and IDs of deliveries already received stay
+          for at most 16 minutes. The viewer list of the character playground keeps each viewer for at most 30 minutes
+          after their last message, and a ban or timeout until it ends.
         </li>
         <li>
           <strong>AI interest votes</strong> are deleted after 30 days by the hourly task.
