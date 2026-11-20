@@ -29961,7 +29961,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_loader",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L46",
+      "source_location": "L50",
       "target": "app_routes_overlay_mergeoverlaypolls",
       "weight": 1.0
     },
@@ -29973,7 +29973,19 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L101",
+      "source_location": "L102",
+      "target": "app_lib_overlay_layers_contentsources",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_routes_overlay_overlay",
+      "source_file": "app/routes/overlay.tsx",
+      "source_location": "L105",
       "target": "app_components_overlay_overlay_stage_upnextstart",
       "weight": 1.0
     },
@@ -29985,7 +29997,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L103",
+      "source_location": "L107",
       "target": "app_components_use_clock_userevalidateat",
       "weight": 1.0
     },
@@ -29997,7 +30009,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L113",
+      "source_location": "L117",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -30009,7 +30021,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L116",
+      "source_location": "L120",
       "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
@@ -30021,7 +30033,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L129",
+      "source_location": "L133",
       "target": "app_components_overlay_overlay_composition_usesdesigncanvas",
       "weight": 1.0
     },
@@ -30033,7 +30045,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L139",
+      "source_location": "L143",
       "target": "app_components_overlay_overlay_composition_designcanvas",
       "weight": 1.0
     },
@@ -30045,7 +30057,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L71",
+      "source_location": "L75",
       "target": "app_lib_overlay_layers_parselayerparam",
       "weight": 1.0
     },
@@ -30057,7 +30069,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L79",
+      "source_location": "L83",
       "target": "app_components_live_uselivepolls",
       "weight": 1.0
     },
@@ -30069,7 +30081,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L84",
+      "source_location": "L88",
       "target": "app_components_live_useliverevalidation",
       "weight": 1.0
     },
@@ -30081,7 +30093,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L89",
+      "source_location": "L93",
       "target": "app_components_overlay_overlay_composition_usesactivityfeed",
       "weight": 1.0
     },
@@ -30093,7 +30105,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L90",
+      "source_location": "L94",
       "target": "app_components_overlay_activity_feed_useactivityfeed",
       "weight": 1.0
     },
@@ -30105,7 +30117,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L90",
+      "source_location": "L94",
       "target": "app_components_overlay_overlay_composition_usescharacters",
       "weight": 1.0
     },
@@ -30117,7 +30129,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L92",
+      "source_location": "L96",
       "target": "app_lib_clock_serveroffset",
       "weight": 1.0
     },
@@ -30129,7 +30141,7 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L94",
+      "source_location": "L98",
       "target": "app_components_live_useservertime",
       "weight": 1.0
     },
@@ -30141,20 +30153,8 @@
       "relation": "calls",
       "source": "app_routes_overlay_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L95",
+      "source_location": "L99",
       "target": "app_routes_overlay_mergeoverlaypolls",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_routes_overlay_overlay",
-      "source_file": "app/routes/overlay.tsx",
-      "source_location": "L98",
-      "target": "app_lib_overlay_layers_contentsources",
       "weight": 1.0
     },
     {
@@ -53433,7 +53433,7 @@
       "relation": "calls",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L785",
+      "source_location": "L786",
       "target": "tests_route_ui_boundaries_test_navigation",
       "weight": 1.0
     },
@@ -53445,7 +53445,7 @@
       "relation": "calls",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L821",
+      "source_location": "L822",
       "target": "tests_route_ui_boundaries_test_streamermetaargs",
       "weight": 1.0
     },
@@ -53457,7 +53457,7 @@
       "relation": "calls",
       "source": "tests_route_ui_boundaries_test_streamermetaargs",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L807",
+      "source_location": "L808",
       "target": "tests_route_ui_boundaries_test_args",
       "weight": 1.0
     },
@@ -160651,7 +160651,7 @@
       "relation": "contains",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L159",
+      "source_location": "L163",
       "target": "app_routes_overlay_errorboundary",
       "weight": 1.0
     },
@@ -160673,7 +160673,7 @@
       "relation": "contains",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L60",
+      "source_location": "L64",
       "target": "app_routes_overlay_mergeoverlaypolls",
       "weight": 1.0
     },
@@ -160684,7 +160684,7 @@
       "relation": "contains",
       "source": "app_routes_overlay",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L66",
+      "source_location": "L70",
       "target": "app_routes_overlay_overlay",
       "weight": 1.0
     },
@@ -160728,7 +160728,7 @@
       "relation": "contains",
       "source": "app_routes_overlay_errorboundary",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L173",
+      "source_location": "L177",
       "target": "app_routes_overlay_errorboundary_finishattempt",
       "weight": 1.0
     },
@@ -181232,7 +181232,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L767",
+      "source_location": "L768",
       "target": "tests_route_ui_boundaries_test_navigation",
       "weight": 1.0
     },
@@ -181243,7 +181243,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L803",
+      "source_location": "L804",
       "target": "tests_route_ui_boundaries_test_streamermetaargs",
       "weight": 1.0
     },
@@ -185927,7 +185927,7 @@
       "relation": "indirect_call",
       "source": "app_routes_overlay_errorboundary",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L178",
+      "source_location": "L182",
       "target": "app_routes_overlay_errorboundary_finishattempt",
       "weight": 1.0
     },
@@ -188441,10 +188441,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "4efd2905e19816f5c7e2724cf539b65253bfc02d58d8aaad4c5fd40c53f80ddb",
+    "content_sha256": "ad25b549e9d725d7c66dd51abaeba477d94380124045230bc6c8a1ebaee9799b",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "0d60fddfbe211ececa1eca592c848cafca05872764cf28f46ddc3ccaa92adb5b",
+    "source_sha256": "dc822e2dd8cdce875bfb7c4d9c74507bd11d3c523890464864741cd5aebdf764",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -209302,7 +209302,7 @@
       "label": "ErrorBoundary()",
       "norm_label": "errorboundary()",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L159"
+      "source_location": "L163"
     },
     {
       "_callable": true,
@@ -209313,7 +209313,7 @@
       "label": "finishAttempt()",
       "norm_label": "finishattempt()",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L173"
+      "source_location": "L177"
     },
     {
       "_callable": true,
@@ -209324,7 +209324,7 @@
       "label": "mergeOverlayPolls()",
       "norm_label": "mergeoverlaypolls()",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L60"
+      "source_location": "L64"
     },
     {
       "_callable": true,
@@ -209335,7 +209335,7 @@
       "label": "Overlay()",
       "norm_label": "overlay()",
       "source_file": "app/routes/overlay.tsx",
-      "source_location": "L66"
+      "source_location": "L70"
     },
     {
       "_callable": true,
@@ -223202,7 +223202,7 @@
       "label": "navigation()",
       "norm_label": "navigation()",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L767"
+      "source_location": "L768"
     },
     {
       "_callable": true,
@@ -223224,7 +223224,7 @@
       "label": "streamerMetaArgs()",
       "norm_label": "streamermetaargs()",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L803"
+      "source_location": "L804"
     },
     {
       "_callable": true,

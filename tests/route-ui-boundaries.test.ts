@@ -572,11 +572,12 @@ describe("overlay loader contracts", (): void => {
     expect(refs()).toEqual([null]);
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["auto"]);
     expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["air-topic", "layer-topic"]);
-    // The on-air poll stays first. A poll override loads the automatic poll for the layer too.
+    // A poll override loads the automatic poll for the layer too. The automatic poll goes first in the list, so
+    // the override does not change which poll the automatic selection shows.
     vi.mocked(data.getOverlaySnapshot).mockClear();
     result = await overlayRoute.loader(args("/@zed/overlay?poll=override", { handle: "@zed" }));
     expect(refs()).toEqual(["override", null]);
-    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["override", "auto"]);
+    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["auto", "override"]);
     vi.mocked(data.getOverlaySnapshot).mockClear();
     vi.mocked(overlay.getOverlayState).mockResolvedValue({
       ...DEFAULT_OVERLAY,

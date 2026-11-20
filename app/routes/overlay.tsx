@@ -42,9 +42,13 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
     ...[...refs].map((ref: string | null) => getOverlaySnapshot(app.env, streamer.id, ref)),
   ]);
   if (override && initial.polls.length === 0) throw new Response("Poll not found.", { status: 404 });
-  const polls: OverlayPoll[] = more.reduce(
+  // The polls of the automatic selection go first: the overlay picks the automatic poll by its place in the list.
+  const loaded: LiveSnapshot[] = [initial, ...more];
+  const automatic: number = [...refs].indexOf(null);
+  if (automatic > 0) loaded.unshift(...loaded.splice(automatic, 1));
+  const polls: OverlayPoll[] = loaded.reduce(
     (merged: OverlayPoll[], snapshot: LiveSnapshot): OverlayPoll[] => mergeOverlayPolls(merged, snapshot.polls),
-    initial.polls,
+    [],
   );
   return {
     handle: streamer.handle,
