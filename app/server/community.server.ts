@@ -34,13 +34,6 @@ export async function listCards(env: AppEnv, streamerId: string): Promise<Commun
   return results.length === 0 ? null : results.map(cardValue);
 }
 
-// An overlay source that names a card no longer on the page goes to Hidden, never to another card.
-function clearedCard(column: "air" | "preview"): string {
-  return `CASE WHEN json_extract(${column},'$.type')='card' AND json_extract(${column},'$.ref') IS NOT NULL
-    AND json_extract(${column},'$.ref') NOT IN (SELECT id FROM community_cards WHERE streamer_id=?1)
-    THEN '{"type":"hidden","ref":null}' ELSE ${column} END`;
-}
-
 // Replace up to eight cards atomically. Empty restores defaults; existing IDs preserve overlay references.
 // Rewrite positions (unique, 0-7), bump overlay revision, and reload. An overlay with the card layer on the grid
 // also reloads. A card layer that names a removed card shows nothing.
@@ -66,10 +59,9 @@ export async function saveCards(env: AppEnv, viewerId: string, value: unknown): 
         "INSERT INTO community_cards (id,streamer_id,position,icon,title,body,button_label,button_target) VALUES (?,?,?,?,?,?,?,?)",
       ).bind(ids[position], page.id, position, card.icon, card.title, card.body, card.buttonLabel, card.buttonTarget),
     ),
-    env.DB.prepare(`UPDATE overlay_state SET air=${clearedCard("air")}, preview=${clearedCard("preview")},
-      revision=revision+1, updated_at=?2
-      WHERE streamer_id=?1 AND (json_extract(air,'$.type')='card' OR json_extract(preview,'$.type')='card'
-        OR ${placedLayerSql("'card'")})`).bind(page.id, Date.now()),
+    env.DB.prepare(
+      `UPDATE overlay_state SET revision=revision+1, updated_at=?2 WHERE streamer_id=?1 AND ${placedLayerSql("'card'")}`,
+    ).bind(page.id, Date.now()),
   ]);
   return listCards(env, page.id);
 }

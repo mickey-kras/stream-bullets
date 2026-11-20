@@ -530,8 +530,8 @@ describe("schedule storage", (): void => {
     await env.DB.batch([
       env.DB.prepare("DELETE FROM overlay_state"),
       env.DB.prepare(
-        `INSERT INTO overlay_state (streamer_id, air, preview, position, size, instant, show_results, message, message_style, revision, updated_at)
-        VALUES (?, '{"type":"next","ref":null}', '{"type":"message","ref":null}', 'top', 'l', 0, 1, '', 'info', 0, ?)`,
+        `INSERT INTO overlay_state (streamer_id, layers, revision, updated_at)
+        VALUES (?, '{"v":2,"cells":{"horizontal":{"next":{"c":0,"r":0,"w":4,"h":2}}}}', 0, ?)`,
       ).bind(streamerId, Date.now()),
     ]);
     const revision = async (): Promise<number> =>

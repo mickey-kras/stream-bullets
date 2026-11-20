@@ -1,11 +1,36 @@
 import type { Locator } from "@playwright/test";
 import type { Page } from "./coverage";
-import type { OverlayLayers } from "../../app/lib/overlay-layers";
+import type { CellRect, GridLayer, LayersPatch, OverlayLayers } from "../../app/lib/overlay-layers";
 
-/** Helpers for the specs of the layout grid in Overlay control. */
+/** Helpers for the specs of the overlay studio in Overlay control. */
 
 export const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
-export const resetLayers = `UPDATE overlay_state SET layers='{}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
+
+/**
+ * SQL that saves layers for the feature host, as the current version stores them. Each layer that `layers` does not
+ * name is off the grid and has its default settings. The new revision makes the live room read the row again.
+ */
+export function layersSql(layers: LayersPatch = {}): string {
+  const text: string = JSON.stringify({ v: 2, ...layers }).replaceAll("'", "''");
+  return `UPDATE overlay_state SET layers='${text}', chat_test_until=0, revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`;
+}
+
+/** No layer on the grid, and the chat and the characters off. */
+export const resetLayers: string = layersSql();
+
+/** The old default cells of the chat and the characters: the chat at the top left, the characters along the bottom. */
+export const CHAT_CELL: CellRect = { c: 0, r: 0, w: 5, h: 7 };
+export const CHARACTERS_CELL: CellRect = { c: 0, r: 7, w: 16, h: 2 };
+/** The space beside CHAT_CELL and above CHARACTERS_CELL. */
+export const POLL_CELL: CellRect = { c: 5, r: 0, w: 11, h: 7 };
+
+/**
+ * The overlay of a page that the owner did not change: the poll layer shows the latest active poll. A spec that
+ * changes the layers of the feature host restores this when it ends, for the specs after it.
+ */
+export const defaultLayers: string = layersSql({
+  cells: { horizontal: { poll: POLL_CELL }, vertical: { poll: { c: 0, r: 0, w: 9, h: 8 } } },
+});
 
 export function saved(page: Page): Promise<unknown> {
   return page.waitForResponse(
@@ -55,11 +80,25 @@ export async function gridLines(
   });
 }
 
-/** The chip of a layer that is not on the grid: a chat or characters layer that is off, or content without a cell. */
-export function paletteChip(editor: Locator, name: string): Locator {
-  return editor.locator("[data-comp-palette]").getByRole("button", { name });
+/** The chip of a layer in the palette. A chip of a layer on the grid has `data-placed`. */
+export function chip(editor: Locator, layer: GridLayer): Locator {
+  return editor.locator(`[data-comp-palette] [data-comp-layer="${layer}"]`);
+}
+
+/** The settings of the selected layer. `data-comp-props` names the layer, and is empty without a selection. */
+export function settings(editor: Locator): Locator {
+  return editor.locator("[data-comp-props]");
+}
+
+/**
+ * Puts a layer that is off the grid on it through its chip: at the first free place, at its minimum size. The
+ * layer is then selected and its settings show.
+ */
+export async function placeLayer(page: Page, editor: Locator, layer: GridLayer): Promise<void> {
+  const done: Promise<unknown> = saved(page);
+  await chip(editor, layer).click();
+  await done;
 }
 
 export const PALETTE_HINT =
-  "Select a layer to add it at the first free place. Or drag it onto the grid. To remove a layer, drag it from the grid back here.";
-export const PALETTE_EMPTY = "All layers are on the grid. Drag a layer here to remove it.";
+  "Select a layer to add it at the first free place. Or drag it onto the grid. To remove a layer, drag it from the grid back here. Select a placed layer to change it.";

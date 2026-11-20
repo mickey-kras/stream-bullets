@@ -2,67 +2,93 @@ import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
 import { test, expect, type Page } from "./coverage";
 import { runSql, signedIn as fixtureSignedIn } from "./fixtures";
+import { POLL_CELL, chip, defaultLayers, layersSql, placeLayer, saved, settings } from "./grid-helpers";
 import { origin, shots, signedIn } from "./live-helpers";
 import { clientAddress, clientIp } from "./client-ips";
 
+const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
+
 test.beforeEach(async () => {
-  // Reset display state before each test and retry.
+  // Reset the overlay before each test and retry: the poll layer shows the latest active poll, and nothing else.
   await runSql("overlay-control-reset", [
-    `UPDATE overlay_state SET air='{"type":"auto","ref":null}', preview=json_object('type','topic','ref',(SELECT id FROM entries WHERE title='Mic shootout' AND kind='topic')), instant=0, position='lower', size='m', show_results=1, message='', message_style='info', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`,
+    layersSql({ cells: { horizontal: { poll: POLL_CELL } } }),
+    `UPDATE overlay_state SET show_results=1, message='', message_style='info' WHERE streamer_id=${FEATURE_HOST};`,
   ]);
 });
 
-test("the owner previews, takes and switches what the one OBS URL shows", async ({ browser }) => {
+test.afterAll(async () => {
+  await runSql("overlay-control-cleanup", [defaultLayers]);
+});
+
+test("the owner builds the overlay from layers and the one OBS URL follows at once", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 90));
   const control = await newPage(owner);
   await control.setViewportSize({ width: 1440, height: 1000 });
   const obs = await newPage(browser, { viewport: { width: 1920, height: 1080 } });
   await obs.goto("/@feature_host/overlay");
-  await expect(obs.locator("[data-overlay-mash]")).toBeVisible();
+  // The poll layer shows the latest active poll: the seeded battle.
+  await expect(obs.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
 
   await control.goto("/overlay-control");
   await expect(control.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
-  await expect(control.locator('[data-ov-monitor="prev"] [data-overlay-source="topic"]')).toContainText("Mic shootout");
+  const editor = control.locator("[data-composition-editor]");
+  await expect(editor.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
+  await expect(editor.locator("[data-comp-live-note]")).toHaveText("Changes go live right away");
+  // The controls from before the studio are gone: no monitors, no Take and no shortcuts.
+  await expect(control.locator("[data-ov-monitor]")).toHaveCount(0);
+  await expect(control.getByRole("button", { name: /Take/ })).toHaveCount(0);
+  await expect(control.locator("kbd")).toHaveCount(0);
   if (shots) await control.screenshot({ path: `${shots}/overlay-control.png`, fullPage: true });
 
-  await control.getByRole("button", { name: /Take/ }).click();
-  await expect(obs.locator('[data-overlay-source="topic"]')).toContainText("Mic shootout");
-  await expect(control.getByRole("button", { name: /Take/ })).toBeDisabled();
+  // A topic layer comes on the grid with the newest topic, and OBS shows it at once.
+  await placeLayer(control, editor, "topic");
+  await expect(settings(editor)).toHaveAttribute("data-comp-props", "topic");
+  await expect(obs.locator('.ov-layer[data-layer="topic"] [data-overlay-source="topic"]')).toContainText(
+    "Mic shootout",
+  );
+  await expect(obs.locator('.ov-layer[data-layer="poll"]')).toBeVisible();
 
-  // Shortcuts stay disabled until Take completes.
-  await expect(control.getByRole("radio", { name: /Message banner/ })).toBeEnabled();
-  // Shortcut 5 selects the banner; typing must not switch sources.
-  await control.locator("body").press("5");
+  // The message banner: the text saves with its button, the style at once. A digit in the field is only text.
+  await placeLayer(control, editor, "message");
   const message = control.locator("[data-ov-message]");
   await expect(message).toHaveAttribute("maxlength", "120");
+  await expect(obs.locator('[data-overlay-source="message"]')).toContainText("Your message");
   await message.fill("Back in 5 minutes 4");
-  await expect(control.getByRole("radio", { name: /Message banner/ })).toBeChecked();
   await control.getByRole("button", { name: "Save message" }).click();
   await expect(control.getByRole("button", { name: "Save message" })).toBeDisabled();
+  await expect(obs.locator('[data-overlay-source="message"]')).toContainText("Back in 5 minutes 4");
   await control.getByRole("button", { name: "Hype" }).click();
   await expect(control.getByRole("button", { name: "Hype" })).toHaveAttribute("aria-pressed", "true");
-  await expect(control.getByRole("button", { name: /Take/ })).toBeEnabled();
-  await control.locator("body").press("t");
-  await expect(obs.locator('[data-overlay-source="message"]')).toContainText("Back in 5 minutes 4");
   await expect(obs.locator(".ov-message.style-hype")).toBeVisible();
-
-  await control.getByRole("button", { name: "Top bar" }).click();
-  await expect(obs.locator(".ov-stage.pos-top")).toBeVisible();
-  await control.getByRole("checkbox", { name: "Instant switch (skip preview)" }).click();
-  await expect(control.getByRole("checkbox", { name: "Instant switch (skip preview)" })).toBeChecked();
-  await expect(control.locator('[data-ov-monitor="prev"]')).toHaveCount(0);
-  await expect(control.getByRole("radio", { name: /^Hidden/ })).toBeEnabled();
+  // The old shortcuts do nothing: 8 was Hidden and T was Take.
   await control.locator("body").press("8");
-  await expect(obs.locator('[data-overlay-type="hidden"]')).toBeEmpty();
-  if (shots) await obs.screenshot({ path: `${shots}/overlay-hidden.png` });
+  await control.locator("body").press("t");
+  await expect(obs.locator('[data-overlay-source="message"]')).toBeVisible();
 
-  // OBS updates can precede save completion and shortcut reactivation.
-  await expect(control.getByRole("radio", { name: /^Auto/ })).toBeEnabled();
-  // Restore Auto to the newest open poll.
-  await control.locator("body").press("1");
-  await expect(obs.locator('[data-overlay-type="auto"]')).toBeVisible();
-  await control.getByRole("checkbox", { name: "Instant switch (skip preview)" }).click();
-  await expect(control.getByRole("checkbox", { name: "Instant switch (skip preview)" })).not.toBeChecked();
+  // "Show on stream" hides the layer on OBS and keeps it on the grid. The message is then private again.
+  const show = settings(editor).getByRole("checkbox", { name: "Show on stream" });
+  let done = saved(control);
+  await show.uncheck();
+  await done;
+  await expect(obs.locator('.ov-layer[data-layer="message"]')).toHaveCount(0);
+  await expect(editor.locator('[data-grid-box="message"]')).toHaveAttribute("data-off", "true");
+  await expect(chip(editor, "message")).toHaveAttribute("data-placed", "true");
+  const live = (await (await obs.request.get("/api/live/feature_host")).json()) as { overlay?: { message?: string } };
+  expect(live.overlay?.message ?? "").toBe("");
+  done = saved(control);
+  await show.check();
+  await done;
+  await expect(obs.locator('[data-overlay-source="message"]')).toContainText("Back in 5 minutes 4");
+
+  // "Remove from grid" takes the layer off OBS. The focus goes to its chip, which offers the layer again.
+  done = saved(control);
+  await settings(editor).getByRole("button", { name: "Remove from grid" }).click();
+  await done;
+  await expect(obs.locator('.ov-layer[data-layer="message"]')).toHaveCount(0);
+  await expect(chip(editor, "message")).toBeFocused();
+  await expect(chip(editor, "message")).not.toHaveAttribute("data-placed");
+  await expect(settings(editor)).toContainText("No layer selected");
+  if (shots) await obs.screenshot({ path: `${shots}/overlay-layers.png` });
   await Promise.all([close(owner), close(obs)]);
 });
 
@@ -92,8 +118,8 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   await owner.grantPermissions(["clipboard-read", "clipboard-write"], { origin });
   const control = await newPage(owner);
   await control.goto("/overlay-control");
-  // Step 4 shows the link controls without a click.
-  await expect(control.getByRole("region", { name: "4 Add to OBS" })).toBeVisible();
+  // Step 3 shows the link controls without a click.
+  await expect(control.getByRole("region", { name: "3 Add to OBS" })).toBeVisible();
   await control.getByRole("button", { name: "Create overlay link" }).click();
   const field = control.locator("[data-ov-url]");
   await expect(field).toHaveValue(/^http:\/\/localhost:5173\/@feature_host\/overlay\?key=[\w-]{43}$/);
@@ -136,23 +162,33 @@ test("overlay control is for the page owner only", async ({ browser, page }) => 
   const viewer = await signedIn(browser, "viewer", clientIp("overlay-control", 91));
   const viewerPage = await newPage(viewer);
   expect((await viewerPage.goto("/overlay-control"))?.status()).toBe(404);
-  expect((await viewer.request.post("/api/overlay", { data: { action: "take" } })).status()).toBe(404);
+  const hide = { action: "showResults", on: false };
+  expect((await viewer.request.post("/api/overlay", { data: hide })).status()).toBe(404);
   const long = "x".repeat(121);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 92));
   const tooLong = await owner.request.post("/api/overlay", { data: { action: "message", text: long, style: "info" } });
   expect(tooLong.status()).toBe(400);
+  // The actions from before the overlay studio are gone.
+  for (const action of [{ action: "take" }, { action: "preview", source: { type: "hidden", ref: null } }])
+    expect((await owner.request.post("/api/overlay", { data: action })).status()).toBe(400);
+  expect((await owner.request.post("/api/overlay", { data: { action: "layout", position: "top" } })).status()).toBe(
+    400,
+  );
   await Promise.all([close(viewer), close(owner)]);
 });
 
-test("source pickers preserve preview, hide poll results and recover from a failed save", async ({ browser }) => {
-  const streamer = "(SELECT id FROM streamers WHERE handle='feature_host')";
+test("the pickers of a layer change what it shows, hide poll results and recover from a failed save", async ({
+  browser,
+}) => {
   const topicId: string = randomUUID();
   const pollId: string = randomUUID();
   const now: number = Date.now();
   await runSql("overlay-picker-seed", [
-    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${topicId}',${streamer},(SELECT id FROM user WHERE name='featureowner'),'topic','Overlay picker topic','Preview only','Tech & setups','[]',${now},0);`,
-    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${pollId}',${streamer},(SELECT id FROM user WHERE name='featureowner'),'choice','Overlay picker poll','','','["Tea","Coffee"]',${now},0);`,
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${topicId}',${FEATURE_HOST},(SELECT id FROM user WHERE name='featureowner'),'topic','Overlay picker topic','Preview only','Tech & setups','[]',${now},0);`,
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,revealed) VALUES ('${pollId}',${FEATURE_HOST},(SELECT id FROM user WHERE name='featureowner'),'choice','Overlay picker poll','','','["Tea","Coffee"]',${now},0);`,
     `DELETE FROM app_rate_limits WHERE key='content:'||(SELECT id FROM user WHERE name='featureowner');`,
+    // A smaller poll cell leaves room for the other layers of this test.
+    layersSql({ cells: { horizontal: { poll: { c: 8, r: 0, w: 8, h: 5 } } } }),
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 90));
   // This case owns 203.0.113.140 so asset requests do not share another case's quota.
@@ -161,65 +197,86 @@ test("source pickers preserve preview, hide poll results and recover from a fail
     const control = await newPage(owner);
     await control.setViewportSize({ width: 1440, height: 1000 });
     await control.goto("/overlay-control");
-    const preview = control.locator('[data-ov-monitor="prev"]');
-    const air = control.locator('[data-ov-monitor="air"]');
-    await control.getByRole("combobox", { name: "Topic", exact: true }).click();
-    await control.getByRole("option", { name: "Overlay picker topic", exact: true }).click();
-    await expect(preview).toContainText("Overlay picker topic");
-    await expect(air).not.toContainText("Overlay picker topic");
-    await preview.getByRole("button", { name: "Enlarge the preview" }).click();
-    await expect(control.locator(".ov-grid.enlarge-prev")).toBeVisible();
-    await preview.getByRole("button", { name: "Enlarge the preview" }).click();
-    await expect(control.locator(".ov-grid.enlarge-prev")).toHaveCount(0);
-    await air.getByRole("button", { name: "Enlarge the on-air monitor" }).click();
-    await expect(control.locator(".ov-grid.enlarge-air")).toBeVisible();
-    await air.getByRole("button", { name: "Enlarge the on-air monitor" }).click();
+    const editor = control.locator("[data-composition-editor]");
+    const preview = editor.getByRole("region", { name: "Composition preview" });
+    const panel = settings(editor);
 
-    // Source radios are controlled by the saved API response, so wait for that state after selecting.
-    await control.getByRole("radio", { name: /A specific poll/ }).click();
-    await control.getByRole("combobox", { name: "Poll", exact: true }).click();
-    await expect(control.getByRole("option", { name: "Mash Battle: Which boss first?", exact: true })).toBeVisible();
-    await control.getByRole("option", { name: "Overlay picker poll", exact: true }).click();
-    await expect(control.getByRole("radio", { name: /A specific poll/ })).toBeChecked();
+    // The poll layer: the latest active poll by default, then a poll of the page.
+    await chip(editor, "poll").click();
+    await expect(panel).toHaveAttribute("data-comp-props", "poll");
+    const pollPicker = panel.getByRole("combobox", { name: "Poll", exact: true });
+    await expect(pollPicker).toHaveText("Latest active poll");
     await expect(preview.getByRole("heading", { name: "Overlay picker poll" })).toBeVisible();
-    await control.getByRole("checkbox", { name: "Show results", exact: true }).click();
-    await expect(control.getByRole("checkbox", { name: "Show results", exact: true })).not.toBeChecked();
+    await pollPicker.click();
+    await expect(control.getByRole("option", { name: "Latest active poll", exact: true })).toBeVisible();
+    let done = saved(control);
+    await control.getByRole("option", { name: "Mash Battle: Which boss first?", exact: true }).click();
+    await done;
+    await expect(pollPicker).toHaveText("Mash Battle: Which boss first?");
+    await expect(preview.locator('.ov-layer[data-layer="poll"] [data-overlay-mash]')).toBeVisible();
+    await pollPicker.click();
+    done = saved(control);
+    await control.getByRole("option", { name: "Overlay picker poll", exact: true }).click();
+    await done;
+    await expect(preview.getByRole("heading", { name: "Overlay picker poll" })).toBeVisible();
+    const results = panel.getByRole("checkbox", { name: "Show results", exact: true });
+    await results.click();
+    await expect(results).not.toBeChecked();
     await expect(preview).toContainText("Results hidden");
-    await control.getByRole("button", { name: /Take/ }).click();
-    await expect(air).toContainText("Overlay picker poll");
-    await expect(air).toContainText("Results hidden");
 
-    await control.getByRole("radio", { name: /^Community card/ }).click();
-    await control.getByRole("combobox", { name: "Community card", exact: true }).click();
+    // The topic layer takes the newest topic when it comes on the grid. The picker changes it.
+    await placeLayer(control, editor, "topic");
+    const topicPicker = panel.getByRole("combobox", { name: "Topic", exact: true });
+    await expect(topicPicker).toHaveText("Overlay picker topic");
+    await topicPicker.click();
+    done = saved(control);
+    await control.getByRole("option", { name: "Mic shootout", exact: true }).click();
+    await done;
+    await expect(preview.locator('[data-overlay-source="topic"]')).toContainText("Mic shootout");
+    await expect(preview).toContainText("Overlay picker poll");
+
+    // The card layer shows the first card until the owner picks one.
+    await placeLayer(control, editor, "card");
+    const cardPicker = panel.getByRole("combobox", { name: "Community card", exact: true });
+    await expect(preview.locator('[data-overlay-source="card"]')).toBeVisible();
+    await cardPicker.click();
+    done = saved(control);
     await control.getByRole("option", { name: "Join the Discord", exact: true }).click();
-    await expect(control.getByRole("radio", { name: /^Community card/ })).toBeChecked();
+    await done;
+    await expect(cardPicker).toHaveText("Join the Discord");
     await expect(preview).toContainText("discord.gg/feature_host");
-    await expect(air).toContainText("Overlay picker poll");
-    await control.getByRole("button", { name: "Corner", exact: true }).click();
-    await expect(preview.locator(".ov-stage")).toHaveClass(/pos-corner/);
+
+    // A failed save of the results switch shows the reason and keeps the saved value.
+    await chip(editor, "poll").click();
     await control.route("**/api/overlay", async (route) => {
       if (route.request().method() !== "POST") return route.continue();
       await route.fulfill({ status: 503, json: { error: "The request failed. Please try again." } });
     });
-    await control.getByRole("button", { name: "L", exact: true }).click();
+    await results.click();
     await expect(control.locator(".sb-toast")).toHaveText("The request failed. Please try again.");
-    await expect(control.getByRole("button", { name: "L", exact: true })).toBeEnabled();
-    await expect(preview.locator(".ov-stage")).toHaveClass(/size-m/);
+    await expect(results).toBeEnabled();
+    await expect(results).not.toBeChecked();
+    // A failed save of a layer setting shows under the settings, and the setting goes back.
+    await panel.getByRole("checkbox", { name: "Show on stream" }).uncheck();
+    await expect(editor.locator("[data-comp-error]")).toContainText("Layout not saved");
+    await expect(panel.getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
     await control.unroute("**/api/overlay");
-    await control.getByRole("button", { name: "L", exact: true }).click();
-    await expect(preview.locator(".ov-stage")).toHaveClass(/size-l/);
-    await control.getByRole("button", { name: "Center", exact: true }).click();
-    await expect(preview.locator(".ov-stage")).toHaveClass(/pos-center/);
-    await control.getByRole("radio", { name: /^Support banner/ }).click();
-    await expect(control.getByRole("radio", { name: /^Support banner/ })).toBeChecked();
+    await results.click();
+    await expect(results).toBeChecked();
+    await expect(preview).not.toContainText("Results hidden");
+
+    await placeLayer(control, editor, "support");
     await expect(preview.locator('[data-overlay-source="support"]')).toContainText("ko-fi.com/feature_host");
+    // Up next and the support banner have no picker.
+    await expect(panel).toHaveAttribute("data-comp-props", "support");
+    await expect(panel.getByRole("combobox")).toHaveCount(0);
   } finally {
     await close(owner);
     await runSql("overlay-picker-cleanup", [`DELETE FROM entries WHERE id IN ('${topicId}','${pollId}');`]);
   }
 });
 
-test("the page is a flow of four numbered steps, with the channels first and collapsed when one is connected", async ({
+test("the page is a flow of three numbered steps, with the channels first and collapsed when one is connected", async ({
   browser,
 }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 91));
@@ -229,33 +286,35 @@ test("the page is a flow of four numbered steps, with the channels first and col
     const control = await newPage(owner);
     await control.goto("/overlay-control");
     // The steps come in order, each a region named by its numbered level 2 heading.
-    await expect(control.locator("[data-step]")).toHaveCount(4);
+    await expect(control.locator("[data-step]")).toHaveCount(3);
     expect(
       await control.locator("[data-step]").evaluateAll((steps) => steps.map((step) => step.getAttribute("data-step"))),
-    ).toEqual(["channels", "show", "place", "obs"]);
+    ).toEqual(["channels", "build", "obs"]);
     await expect(control.getByRole("heading", { level: 2 })).toHaveText([
       "1 Connect channels",
-      "2 Choose what shows",
-      "3 Place the layers",
-      "4 Add to OBS",
+      "2 Build your overlay",
+      "3 Add to OBS",
     ]);
-    // Step 2 keeps the live control and has the layer switches. Step 3 has the grid. Step 4 has the link.
-    const show = control.getByRole("region", { name: "2 Choose what shows" });
-    await expect(show.locator('[data-ov-monitor="air"]')).toBeVisible();
-    await expect(show.getByRole("button", { name: /Take/ })).toBeVisible();
-    await expect(show.getByRole("heading", { level: 3, name: "Sources" })).toBeVisible();
-    await expect(
-      show.getByRole("group", { name: "Chat" }).getByRole("checkbox", { name: "Show on stream" }),
-    ).toBeVisible();
-    await expect(
-      show.getByRole("group", { name: "Characters" }).getByRole("checkbox", { name: "Show on stream" }),
-    ).toBeVisible();
-    const place = control.getByRole("region", { name: "3 Place the layers" });
-    await expect(place.getByRole("region", { name: "Composition preview" })).toBeVisible();
-    await expect(place.getByRole("button", { name: "Remove from grid" })).toBeVisible();
+    // Step 2 is the studio: the toolbar, the layers, the grid and the settings of a layer. Step 3 has the link.
+    const build = control.getByRole("region", { name: "2 Build your overlay" });
+    await expect(build.getByRole("group", { name: "Screen orientation" })).toBeVisible();
+    await expect(build.getByRole("group", { name: "Preview background" })).toBeVisible();
+    await expect(build.getByRole("button", { name: "Start test" })).toBeVisible();
+    await expect(build.getByRole("group", { name: "Layers · one of each" }).getByRole("button")).toHaveText([
+      "+ Chat",
+      "+ Characters",
+      "PollPlaced",
+      "+ Topic",
+      "+ Up next",
+      "+ Message banner",
+      "+ Community card",
+      "+ Support banner",
+    ]);
+    await expect(build.getByRole("region", { name: "Composition preview" })).toBeVisible();
+    await expect(build.getByRole("region", { name: "No layer selected" })).toBeVisible();
     await expect(
       control
-        .getByRole("region", { name: "4 Add to OBS" })
+        .getByRole("region", { name: "3 Add to OBS" })
         .getByRole("button", { name: /overlay link|Regenerate link/ }),
     ).toBeVisible();
 
@@ -313,14 +372,16 @@ test("the page is a flow of four numbered steps, with the channels first and col
     await expect(kick).toContainText("Connected as Flow Kick");
     await summary.click();
     await expect(kick).toBeHidden();
-    // The "Connect channels" link of the chat layer opens the panel again.
-    await show.getByRole("link", { name: "Connect channels" }).click();
+    // The "Connect channels" link in the settings of the chat layer opens the panel again.
+    await placeLayer(control, build, "chat");
+    const link = build.getByRole("region", { name: "Chat" }).getByRole("link", { name: "Connect channels" });
+    await link.click();
     await expect(details).toHaveAttribute("open", "");
     await expect(kick).toBeVisible();
     // The address has the fragment now. The same link opens a closed panel again, and so does a load.
     await summary.click();
     await expect(kick).toBeHidden();
-    await show.getByRole("link", { name: "Connect channels" }).click();
+    await link.click();
     await expect(details).toHaveAttribute("open", "");
     await summary.click();
     await expect(kick).toBeHidden();
@@ -449,18 +510,18 @@ test("channel conflicts reload the list and expired authentication leaves a sign
   }
 });
 
-test("a monitor shows its stage only once it is scaled to the frame", async ({ browser }) => {
+test("the grid preview shows its composition only once it is scaled to the frame", async ({ browser }) => {
   const phone = { viewport: { width: 390, height: 844 } };
-  // Without JavaScript, hide the unscaled stage to prevent overflow.
+  // Without JavaScript, hide the unscaled composition to prevent overflow.
   const still = await fixtureSignedIn(browser, "featureowner", 92, { ...phone, javaScriptEnabled: false });
   const before = await newPage(still);
   await before.goto("/overlay-control");
-  await expect(before.locator('[data-ov-monitor="air"] .ov-scaler')).toBeHidden();
+  await expect(before.locator(".ov-comp-frame .ov-scaler")).toBeHidden();
   await close(still);
   const owner = await fixtureSignedIn(browser, "featureowner", 92, phone);
   const page = await newPage(owner);
   await page.goto("/overlay-control");
-  await expect(page.locator('[data-ov-monitor="air"] .ov-scaler')).toBeVisible();
+  await expect(page.locator(".ov-comp-frame .ov-scaler")).toBeVisible();
   await close(owner);
 });
 
@@ -515,29 +576,25 @@ test("an unattended OBS error stays transparent, retries and reloads into recove
 });
 
 test("the control page moves Up next on when the stream it shows starts", async ({ browser }) => {
-  const page = "(SELECT id FROM streamers WHERE handle='feature_host')";
-  const topic = "(SELECT id FROM entries WHERE title='Mic shootout' AND kind='topic')";
-  const preview = (source: string): string => `UPDATE overlay_state SET preview=${source} WHERE streamer_id=${page};`;
-  // Start a stream in 20 s, before the seeded Mic shootout.
+  // Start a stream in 20 s, before the seeded Mic shootout. The Up next layer is on the grid.
   const id = randomUUID();
   const now = Date.now();
   await runSql("upnext-soon", [
-    preview(`'{"type":"next","ref":null}'`),
-    `INSERT INTO stream_events(id,streamer_id,series_id,title,notes,starts_at,duration_min,platform,url,status,repeat_days,repeat_until,tz,created_at,updated_at) VALUES ('${id}',${page},NULL,'Soon stream','',${now + 20_000},30,'twitch','https://twitch.tv/feature_host','scheduled',0,NULL,'UTC',${now},${now});`,
+    layersSql({ cells: { horizontal: { next: { c: 0, r: 0, w: 8, h: 3 } } } }),
+    `INSERT INTO stream_events(id,streamer_id,series_id,title,notes,starts_at,duration_min,platform,url,status,repeat_days,repeat_until,tz,created_at,updated_at) VALUES ('${id}',${FEATURE_HOST},NULL,'Soon stream','',${now + 20_000},30,'twitch','https://twitch.tv/feature_host','scheduled',0,NULL,'UTC',${now},${now});`,
   ]);
   const owner = await signedIn(browser, "featureowner", clientIp("overlay-control", 94));
   try {
     const control = await newPage(owner);
     await control.goto("/overlay-control");
-    const monitor = control.locator('[data-ov-monitor="prev"] [data-overlay-source="next"]');
-    await expect(monitor).toContainText("Soon stream");
+    const layer = control.locator(
+      '[data-composition-editor] .ov-layer[data-layer="next"] [data-overlay-source="next"]',
+    );
+    await expect(layer).toContainText("Soon stream");
     // After start, load the next stream as OBS does.
-    await expect(monitor).toContainText("Mic shootout", { timeout: 40_000 });
+    await expect(layer).toContainText("Mic shootout", { timeout: 40_000 });
   } finally {
-    await runSql("upnext-soon", [
-      `DELETE FROM stream_events WHERE id='${id}';`,
-      preview(`json_object('type','topic','ref',${topic})`),
-    ]);
+    await runSql("upnext-soon", [`DELETE FROM stream_events WHERE id='${id}';`]);
     await close(owner);
   }
 });

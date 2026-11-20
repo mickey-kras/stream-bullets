@@ -1,7 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { t, type MessageId } from "../../i18n";
 import { copyText } from "../../lib/clipboard";
-import { layerPixels, layerUrl, type LayerRect, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
+import { frameSize, layerPixels, layerUrl, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
 import { errorMessage, postJson } from "../api";
 import { Dialog, DialogActions } from "../ui/dialog";
 import { IconButton } from "../ui/icon-button";
@@ -107,8 +107,9 @@ export function OverlayLink({
           <p className="muted">{t("overlay.layerUrlsHelp")}</p>
           {LAYER_LINKS.map(([layer, label]) => {
             if (layer === "characters" && !CHARACTERS_READY) return null;
-            // The size in the selected orientation. Content without a cell has no own size.
-            const size: LayerRect | null = layerPixels(layers, layer);
+            // The size in the selected orientation: the frame for the content layers, else the cell of the layer.
+            const size: { w: number; h: number } | null =
+              layer === "content" ? frameSize(layers.orientation) : layerPixels(layers, layer);
             const sizeLine: string | undefined = size ? `${sizeId}-${layer}` : undefined;
             return (
               <div key={layer} className="ov-url-layer" data-ov-layer-row={layer}>

@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { build } from "esbuild";
 import { Miniflare } from "miniflare";
 import { fileURLToPath } from "node:url";
-import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
+import { DEFAULT_LAYERS, emptyCells } from "../app/lib/overlay-layers";
 import type { LiveSnapshot } from "../app/types";
 import { LIVE_SCHEMA, liveRows } from "./helpers/room";
 
@@ -636,16 +636,21 @@ describe("overlay updates", (): void => {
       (message) => message.type === "overlay",
     );
     expect((await request("overlay")).status).toBe(204);
-    expect((await update).overlay).toMatchObject({
-      air: { type: "message", ref: null },
-      position: "top",
-      size: "l",
+    // The row is from before the overlay studio: the message on air shows as the message layer, in the top bar.
+    expect((await update).overlay).toEqual({
+      showResults: true,
       message: "BRB 5 min",
-      layers: DEFAULT_LAYERS,
+      messageStyle: "info",
+      layers: {
+        ...DEFAULT_LAYERS,
+        cells: {
+          horizontal: { ...emptyCells(), message: { c: 0, r: 0, w: 16, h: 3 } },
+          vertical: { ...emptyCells(), message: { c: 0, r: 0, w: 9, h: 3 } },
+        },
+      },
       chatTestUntil: 0,
       revision: 3,
     });
-    expect((await update).overlay).not.toHaveProperty("preview");
     // Ordered delivery puts leaked updates before the refresh snapshot.
     streamerId = otherId;
     const refreshed = nextMessage<{ type: string }>(socket, (message) => message.type === "snapshot");

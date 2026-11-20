@@ -1,7 +1,8 @@
 import { useSyncExternalStore, type ReactNode } from "react";
 import { intlLocale, t, tn } from "../../i18n";
 import { MASH_NAME, mashPhaseAt, mashWinner } from "../../lib/mash";
-import type { LiveSnapshot, OverlayData, OverlayPublic, OverlaySourceRef } from "../../types";
+import type { ContentSource } from "../../lib/overlay-layers";
+import type { LiveSnapshot, OverlayData, OverlayPublic } from "../../types";
 import { MashBars, MashRing, MashSides, MashWinner } from "../mash/mash-parts";
 import { useMashView } from "../mash/use-mash";
 import { PollResults, PollStatus } from "../poll";
@@ -10,13 +11,13 @@ import { Icon } from "../ui/icon";
 
 export type OverlayPoll = LiveSnapshot["polls"][number];
 
-// Shared graphic data for OBS and control monitors.
+// Shared graphic data for OBS and the editor preview.
 export interface OverlayScene {
   name: string;
   handle: string;
   // Host shown in Tap at.
   host: string;
-  overlay: Pick<OverlayPublic, "position" | "size" | "showResults" | "message" | "messageStyle">;
+  overlay: Pick<OverlayPublic, "showResults" | "message" | "messageStyle">;
   polls: readonly OverlayPoll[];
   data: OverlayData;
   now: number;
@@ -35,11 +36,11 @@ function useHydrated(): boolean {
   );
 }
 
-// Auto chooses the newest open poll of the page owner, then the owner's newest poll. It never chooses a viewer poll:
-// the owner picks one with "A specific poll". Mash openness follows phase at now; entries never receive end/reveal
-// values.
+// Auto (a poll layer without a ref) chooses the newest open poll of the page owner, then the owner's newest poll. It
+// never chooses a viewer poll: the owner picks one in the poll layer. Mash openness follows phase at now; entries
+// never receive end/reveal values.
 export function overlayPoll(
-  source: OverlaySourceRef,
+  source: ContentSource,
   polls: readonly OverlayPoll[],
   now: number,
 ): OverlayPoll | undefined {
@@ -126,21 +127,6 @@ function startsIn(startsAt: number, now: number): string {
   return t("overlay.inDays", { n: Math.floor(hours / 24) });
 }
 
-// Refresh Up next at its stream's start; null for other sources.
-export function upNextStart(source: OverlaySourceRef, data: Pick<OverlayData, "next">): number | null {
-  return source.type === "next" ? (data.next?.startsAt ?? null) : null;
-}
-
-// False when the stage stays empty: Hidden, or a topic, stream or card that is not there.
-export function showsContent(source: OverlaySourceRef, data: Pick<OverlayData, "topics" | "cards" | "next">): boolean {
-  if (source.type === "hidden") return false;
-  if (source.type === "topic") return data.topics.some((item) => item.id === source.ref);
-  if (source.type === "next") return data.next !== null;
-  if (source.type === "card")
-    return source.ref === null ? data.cards.length > 0 : data.cards.some((item) => item.id === source.ref);
-  return true;
-}
-
 function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
   const hydrated: boolean = useHydrated();
   const next = scene.data.next;
@@ -166,7 +152,7 @@ function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
   );
 }
 
-function CommunityOverlay({ scene, source }: Readonly<{ scene: OverlayScene; source: OverlaySourceRef }>): ReactNode {
+function CommunityOverlay({ scene, source }: Readonly<{ scene: OverlayScene; source: ContentSource }>): ReactNode {
   // Missing ref selects first card; deleted refs show nothing.
   const card = source.ref === null ? scene.data.cards[0] : scene.data.cards.find((item) => item.id === source.ref);
   if (!card) return null;
@@ -191,7 +177,7 @@ function CommunityOverlay({ scene, source }: Readonly<{ scene: OverlayScene; sou
   );
 }
 
-function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source: OverlaySourceRef }>): ReactNode {
+function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source: ContentSource }>): ReactNode {
   const { data, overlay } = scene;
   if (source.type === "auto" || source.type === "poll") {
     const poll = overlayPoll(source, scene.polls, scene.now);
@@ -235,34 +221,21 @@ function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source
       </article>
     );
   if (source.type === "card") return <CommunityOverlay scene={scene} source={source} />;
-  if (source.type === "support") {
-    const link = data.support;
-    return (
-      <article className="ov-card ov-support" data-overlay-source="support">
-        <h1>
-          <Icon name="heart" size={40} />
-          {t("overlay.supportStream")} <span>{link ? link.url.replace(/^https:\/\//, "") : t("overlay.addLink")}</span>
-        </h1>
-      </article>
-    );
-  }
-  return null;
+  const link = data.support;
+  return (
+    <article className="ov-card ov-support" data-overlay-source="support">
+      <h1>
+        <Icon name="heart" size={40} />
+        {t("overlay.supportStream")} <span>{link ? link.url.replace(/^https:\/\//, "") : t("overlay.addLink")}</span>
+      </h1>
+    </article>
+  );
 }
 
-// 1920x1080 stage. Polls/battles fill it; other sources use presets. Hidden is transparent and empty. In a grid cell
-// (`fit`) the content is centred and the position setting does not apply.
-export function OverlayStage({
-  scene,
-  source,
-  className = "",
-  fit = false,
-}: Readonly<{ scene: OverlayScene; source: OverlaySourceRef; className?: string; fit?: boolean }>): ReactNode {
-  const full: boolean = source.type === "auto" || source.type === "poll";
-  let position: string = full ? "full" : scene.overlay.position;
-  if (fit) position = "fit";
-  const classes: string = `ov-stage pos-${position} size-${scene.overlay.size} ${className}`;
+// The content of one layer in its grid cell: centred, at the full cell width.
+export function OverlayStage({ scene, source }: Readonly<{ scene: OverlayScene; source: ContentSource }>): ReactNode {
   return (
-    <div className={classes.trim()} data-overlay-type={source.type}>
+    <div className="ov-stage" data-overlay-type={source.type}>
       <SourceContent scene={scene} source={source} />
     </div>
   );

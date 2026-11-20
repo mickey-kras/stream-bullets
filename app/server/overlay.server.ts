@@ -1,18 +1,21 @@
 import { z } from "zod";
-import { OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES } from "../../db/enums";
+import { OVERLAY_MESSAGE_STYLES } from "../../db/enums";
 import type { AppEnv } from "../env";
 import { CHAT_TEST_MS } from "../lib/chat-test";
+import { legacyLayersText } from "../lib/overlay-legacy";
 import {
-  CONTENT_LAYERS,
   ORIENTATIONS,
   STORED_LAYERS_LENGTH,
   layersPatchSchema,
   mergeLayers,
+  onStream,
   overlappingPair,
   storedLayersText,
+  type ContentLayer,
+  type ContentSource,
   type OverlayLayers,
 } from "../lib/overlay-layers";
-import type { CardIcon, OverlayData, OverlaySource, OverlaySourceRef, OverlayState, SupportLinkKind } from "../types";
+import type { CardIcon, OverlayData, OverlayState, SupportLinkKind } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { HttpError } from "./http.server";
 import { notifyOverlay } from "./live.server";
@@ -20,7 +23,6 @@ import { byOwner, notHeld } from "./poll-sql";
 import {
   OVERLAY_COLUMNS,
   OVERLAY_MESSAGE_LENGTH,
-  overlaySourceSchema,
   overlayValue,
   placedLayerSql,
   type OverlayRow,
@@ -39,17 +41,8 @@ type LayersWrite = z.infer<typeof layersWriteSchema>;
 
 // `POST /api/overlay`. Every action returns the whole new state.
 export const overlayActionSchema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("preview"), source: overlaySourceSchema }).strict(),
-  z.object({ action: z.literal("take") }).strict(),
-  z
-    .object({
-      action: z.literal("layout"),
-      position: z.enum(OVERLAY_POSITIONS).optional(),
-      size: z.enum(OVERLAY_SIZES).optional(),
-      instant: z.boolean().optional(),
-      showResults: z.boolean().optional(),
-    })
-    .strict(),
+  // Shows (`on`) or hides the results of the poll on the overlay.
+  z.object({ action: z.literal("showResults"), on: z.boolean() }).strict(),
   z
     .object({
       action: z.literal("message"),
@@ -61,7 +54,7 @@ export const overlayActionSchema = z.discriminatedUnion("action", [
       style: z.enum(OVERLAY_MESSAGE_STYLES),
     })
     .strict(),
-  // Layer edits go live at once, like `layout`. `write` orders the writes of one editor (see updateOverlay).
+  // Layer edits go live at once. `write` orders the writes of one editor (see updateOverlay).
   layersPatchSchema.extend({ action: z.literal("layers"), write: layersWriteSchema.optional() }),
   // Starts (`on`) or stops the chat test. The overlay pages play sample chat until the stored end time.
   z.object({ action: z.literal("chatTest"), on: z.boolean() }).strict(),
@@ -70,11 +63,19 @@ export type OverlayAction = z.infer<typeof overlayActionSchema>;
 
 const LIST_LIMIT = 50;
 
+// An old `layers` text reads as its converted layers (overlayValue). The first read here stores them, so the
+// conversion happens once. The state does not change, so the revision stays. A save at the same time wins: it also
+// stores the current version.
 export async function getOverlayState(env: AppEnv, streamerId: string): Promise<OverlayState> {
   const row = await env.DB.prepare(`SELECT ${OVERLAY_COLUMNS} FROM overlay_state WHERE streamer_id=?`)
     .bind(streamerId)
     .first<OverlayRow>();
-  return overlayValue(row);
+  const state: OverlayState = overlayValue(row);
+  if (row && legacyLayersText(row.layers))
+    await env.DB.prepare("UPDATE overlay_state SET layers=?1 WHERE streamer_id=?2 AND revision=?3 AND layers=?4")
+      .bind(storedLayersText(state.layers), streamerId, row.revision, row.layers)
+      .run();
+  return state;
 }
 
 /** A poll or topic of this page. A poll that moderation holds is not selectable. */
@@ -94,30 +95,16 @@ async function checkedCard(env: AppEnv, streamerId: string, ref: string): Promis
   if (!found) throw new HttpError(404, "Community card not found.");
 }
 
-// Checks that `ref` names something on this page, and drops refs the source does not use.
-async function checkedSource(env: AppEnv, streamerId: string, source: OverlaySourceRef): Promise<OverlaySourceRef> {
-  const { type, ref } = source;
-  if (type === "poll" || type === "topic") {
-    // "A specific poll" can start with no poll: the overlay waits until the owner picks one from the list.
-    if (ref === null && type === "topic") throw new HttpError(400, "Pick a poll or topic.");
-    if (ref !== null) await checkedEntry(env, streamerId, type, ref);
-    return source;
-  }
-  if (type === "card" && ref !== null) {
-    await checkedCard(env, streamerId, ref);
-    return source;
-  }
-  return { type, ref: null };
-}
-
 type LayersAction = Extract<OverlayAction, { action: "layers" }>;
 
-// A new ref of a content layer must name a poll, topic or card of this page, like the ref of a previewed source.
+// A new ref of a content layer must name a poll, topic or card of this page.
 async function checkItemRefs(env: AppEnv, streamerId: string, items: LayersAction["items"]): Promise<void> {
-  for (const layer of CONTENT_LAYERS) {
+  for (const layer of ["poll", "topic"] as const) {
     const ref: string | null | undefined = items?.[layer]?.ref;
-    if (typeof ref === "string") await checkedSource(env, streamerId, { type: layer, ref });
+    if (typeof ref === "string") await checkedEntry(env, streamerId, layer, ref);
   }
+  const card: string | null | undefined = items?.card?.ref;
+  if (typeof card === "string") await checkedCard(env, streamerId, card);
 }
 
 // Merged layers must not overlap in either orientation: a patch can move a cell onto a saved cell. They must also
@@ -137,7 +124,7 @@ async function mergedLayers(
   return next;
 }
 
-// The state after an action at server time `now`. Pure apart from the source check, so the rules read in one place.
+// The state after an action at server time `now`. Pure apart from the ref check, so the rules read in one place.
 export async function nextOverlayState(
   env: AppEnv,
   streamerId: string,
@@ -146,38 +133,25 @@ export async function nextOverlayState(
   now: number = Date.now(),
 ): Promise<OverlayState> {
   const next: OverlayState = { ...current, revision: current.revision + 1 };
-  if (action.action === "preview") next.preview = await checkedSource(env, streamerId, action.source);
-  if (action.action === "take") next.air = current.preview;
-  if (action.action === "layout") {
-    next.position = action.position ?? current.position;
-    next.size = action.size ?? current.size;
-    next.instant = action.instant ?? current.instant;
-    next.showResults = action.showResults ?? current.showResults;
-  }
+  if (action.action === "showResults") next.showResults = action.on;
   if (action.action === "message") {
     next.message = action.text;
     next.messageStyle = action.style;
   }
   if (action.action === "layers") next.layers = await mergedLayers(env, streamerId, current.layers, action);
-  // The test plays in the chat layer, so turning the layer off also ends a running test.
-  if (!next.layers.chat.enabled) next.chatTestUntil = 0;
+  // The test plays in the chat layer, so taking the layer off stream also ends a running test.
+  if (!onStream(next.layers, "chat")) next.chatTestUntil = 0;
   if (action.action === "chatTest") {
-    // The test cannot start while the chat layer is off. Stop always works.
-    if (action.on && !current.layers.chat.enabled) throw new HttpError(400, "Turn on the chat layer first.");
+    // The test cannot start while the chat layer is off stream. Stop always works.
+    if (action.on && !onStream(current.layers, "chat")) throw new HttpError(400, "Put the chat layer on stream first.");
     next.chatTestUntil = action.on ? now + CHAT_TEST_MS : 0;
   }
-  // Instant switch skips the preview: whatever is previewed is on air.
-  if (next.instant) next.air = next.preview;
   return next;
 }
 
-// When source data changes, bump overlays using that source on air/in preview and notify the room. Leave other
-// sources unchanged. A content layer of that source with a cell in the selected orientation also counts.
-export async function refreshOverlayFor(
-  env: AppEnv,
-  ownerId: string,
-  sources: readonly OverlaySource[],
-): Promise<void> {
+// When source data changes, bump overlays that have a content layer of that source on the grid in the selected
+// orientation, and notify the room. Leave other overlays unchanged.
+export async function refreshOverlayFor(env: AppEnv, ownerId: string, sources: readonly ContentLayer[]): Promise<void> {
   await refreshWhere(env, "(SELECT id FROM streamers WHERE owner_id=?2)", ownerId, sources);
 }
 
@@ -185,7 +159,7 @@ export async function refreshOverlayFor(
 export async function refreshPageOverlay(
   env: AppEnv,
   streamerId: string,
-  sources: readonly OverlaySource[],
+  sources: readonly ContentLayer[],
 ): Promise<void> {
   await refreshWhere(env, "?2", streamerId, sources);
 }
@@ -194,13 +168,11 @@ async function refreshWhere(
   env: AppEnv,
   page: "?2" | "(SELECT id FROM streamers WHERE owner_id=?2)",
   key: string,
-  sources: readonly OverlaySource[],
+  sources: readonly ContentLayer[],
 ): Promise<void> {
   const row = await env.DB.prepare(`UPDATE overlay_state SET revision=revision+1, updated_at=?1
     WHERE streamer_id=${page}
-      AND (json_extract(air,'$.type') IN (SELECT value FROM json_each(?3))
-        OR json_extract(preview,'$.type') IN (SELECT value FROM json_each(?3))
-        OR EXISTS (SELECT 1 FROM json_each(?3) source WHERE ${placedLayerSql("source.value")}))
+      AND EXISTS (SELECT 1 FROM json_each(?3) source WHERE ${placedLayerSql("source.value")})
     RETURNING streamer_id`)
     .bind(Date.now(), key, JSON.stringify(sources))
     .first<{ streamer_id: string }>();
@@ -272,21 +244,16 @@ export async function updateOverlay(
     if (write && passedWrite(writes, write)) return { overlay: current, changed: false };
     const next = await nextOverlayState(env, streamerId, current, action);
     const applied: LayersWrites = write ? recordWrite(writes, write) : writes;
-    const result = await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,
-        show_results,message,message_style,layers,chat_test_until,layers_writes,revision,updated_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-      ON CONFLICT(streamer_id) DO UPDATE SET air=excluded.air,preview=excluded.preview,position=excluded.position,
-        size=excluded.size,instant=excluded.instant,show_results=excluded.show_results,message=excluded.message,
+    // The columns from before the overlay studio keep their values: `air`, `preview`, `position`, `size`, `instant`.
+    const result = await env.DB.prepare(`INSERT INTO overlay_state (streamer_id,show_results,message,message_style,
+        layers,chat_test_until,layers_writes,revision,updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?)
+      ON CONFLICT(streamer_id) DO UPDATE SET show_results=excluded.show_results,message=excluded.message,
         message_style=excluded.message_style,layers=excluded.layers,chat_test_until=excluded.chat_test_until,
         layers_writes=excluded.layers_writes,revision=excluded.revision,updated_at=excluded.updated_at
       WHERE overlay_state.revision=?`)
       .bind(
         streamerId,
-        JSON.stringify(next.air),
-        JSON.stringify(next.preview),
-        next.position,
-        next.size,
-        next.instant ? 1 : 0,
         next.showResults ? 1 : 0,
         next.message,
         next.messageStyle,
@@ -332,8 +299,8 @@ interface CardRow {
 }
 
 // Include referenced topics older than the newest 50.
-export function sourceTopics(...sources: OverlaySourceRef[]): string[] {
-  return sources.flatMap((source: OverlaySourceRef): string[] =>
+export function sourceTopics(sources: readonly ContentSource[]): string[] {
+  return sources.flatMap((source: ContentSource): string[] =>
     source.type === "topic" && source.ref !== null ? [source.ref] : [],
   );
 }

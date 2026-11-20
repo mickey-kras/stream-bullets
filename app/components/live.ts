@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { catch as fallback, z } from "zod";
-import { MASH_PHASES, OVERLAY_MESSAGE_STYLES, OVERLAY_POSITIONS, OVERLAY_SIZES, OVERLAY_SOURCES } from "../../db/enums";
+import { MASH_PHASES, OVERLAY_MESSAGE_STYLES } from "../../db/enums";
 import { storedLayersSchema } from "../lib/overlay-layers";
 import type { LiveSnapshot, MashTick, OverlayPublic } from "../types";
 import { detached } from "../lib/detached";
@@ -18,9 +18,6 @@ const mashSchema = z.object({
   assisted: count,
 });
 const overlaySchema = z.object({
-  air: z.object({ type: z.enum(OVERLAY_SOURCES), ref: z.string().max(64).nullable() }),
-  position: z.enum(OVERLAY_POSITIONS),
-  size: z.enum(OVERLAY_SIZES),
   showResults: z.boolean(),
   message: z.string().max(120),
   messageStyle: z.enum(OVERLAY_MESSAGE_STYLES),

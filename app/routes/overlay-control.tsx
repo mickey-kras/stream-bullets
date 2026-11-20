@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { redirect, useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
 import { t } from "../i18n";
-import { contentSources } from "../lib/overlay-layers";
 import { paths } from "../lib/shell";
 import { requestViewer } from "../lib/shell.server";
 import { signInProvider } from "../server/api/account";
@@ -12,7 +11,7 @@ import { configuredProviders } from "../server/auth.server";
 import { listConnections } from "../server/channels.server";
 import { getOverlaySnapshot, getOwnStreamer } from "../server/data.server";
 import { hasOverlayKey } from "../server/overlay-key.server";
-import { getOverlayData, getOverlayState, sourceTopics } from "../server/overlay.server";
+import { getOverlayData, getOverlayState } from "../server/overlay.server";
 import { useLivePolls, useLiveRevalidation, useServerTime } from "../components/live";
 import { resultMessage } from "../components/channels/channel-panel";
 import { ChannelsStep } from "../components/channels/channels-step";
@@ -20,7 +19,7 @@ import { OverlayControl } from "../components/overlay/overlay-control";
 import type { OverlayPoll } from "../components/overlay/overlay-stage";
 import { StreamerHeader, streamerHeaderAppearance, type StreamerView } from "../components/shell/streamer-header";
 import { useRevalidateAt } from "../components/use-clock";
-import type { LiveSnapshot, OverlaySourceRef } from "../types";
+import type { LiveSnapshot } from "../types";
 import "../components/overlay/wasteland/wasteland.css";
 import "../components/overlay/composition.css";
 
@@ -35,12 +34,12 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
   const streamer = await getOwnStreamer(app.env, viewer.id);
   if (!streamer) throw new Response("Page not found.", { status: 404 });
   const state = await getOverlayState(app.env, streamer.id);
-  // Load on-air, preview and content layer entries even outside the newest 50.
-  const sources: OverlaySourceRef[] = [state.air, state.preview, ...contentSources(state.layers)];
-  const refs = new Set<string | null>([null]);
-  for (const source of sources) if (source.type === "poll") refs.add(source.ref);
+  // Load the poll and the topic of their layers even outside the newest 50, also while a layer is off stream. A
+  // null poll is the automatic poll.
+  const { poll, topic } = state.layers.items;
+  const refs = new Set<string | null>([null, poll.ref]);
   const [data, ...snapshots] = await Promise.all([
-    getOverlayData(app.env, streamer.id, sourceTopics(...sources)),
+    getOverlayData(app.env, streamer.id, topic.ref === null ? [] : [topic.ref]),
     ...[...refs].map((ref: string | null) => getOverlaySnapshot(app.env, streamer.id, ref)),
   ]);
   const polls: OverlayPoll[] = [];
@@ -75,7 +74,7 @@ export default function OverlayControlPage(): ReactNode {
   const revalidator = useRevalidator();
   const [search] = useSearchParams();
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate);
-  // Reload changes from other tabs; live messages omit preview state.
+  // Reload changes from other tabs; live messages omit the message draft.
   const liveOverlay = snapshot?.overlay ?? null;
   useLiveRevalidation(
     status,
@@ -85,7 +84,7 @@ export default function OverlayControlPage(): ReactNode {
   );
   const current: LiveSnapshot = snapshot && snapshot.revision >= loaded.initial.revision ? snapshot : loaded.initial;
   const now: number = useServerTime(current.serverNow);
-  // Refresh Up next at the loaded stream's start, even when neither monitor currently shows it.
+  // Refresh Up next at the loaded stream's start, even when its layer is off the grid.
   useRevalidateAt(loaded.initial.serverNow, loaded.data.next?.startsAt ?? null, revalidator.revalidate);
   const polls: OverlayPoll[] = [...current.polls];
   for (const poll of loaded.initial.polls) if (!polls.some((item) => item.id === poll.id)) polls.push(poll);

@@ -1,9 +1,11 @@
 import type { Locator, Request, Route, WebSocketRoute } from "@playwright/test";
 import { close, expect, newPage, test, type Browser, type Page } from "./coverage";
 import { runSql } from "./fixtures";
+import { CHARACTERS_CELL, CHAT_CELL, chip, defaultLayers, layersSql, settings } from "./grid-helpers";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import type { ActivityChat } from "../../app/lib/activity";
+import type { LayersPatch } from "../../app/lib/overlay-layers";
 import { CHAR_STATES, encodeFrame, type RosterEntry } from "../../app/lib/playground/protocol";
 import { mulberry32, PlaygroundSim } from "../../app/lib/playground/sim";
 
@@ -17,16 +19,20 @@ const CROWD_IP = clientIp("characters", 188);
 const OTHER_TAB_IP = clientIp("characters", 189);
 const shotDir: string | undefined = process.env.OBS_SHOT_DIR;
 
-const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
-
-function setLayers(name: string, layers: object): Promise<void> {
-  return runSql(name, [
-    `UPDATE overlay_state SET layers='${JSON.stringify(layers)}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
-  ]);
+function setLayers(name: string, layers: LayersPatch): Promise<void> {
+  return runSql(name, [layersSql(layers)]);
 }
 
+/** The characters on stream along the bottom, and no other layer on the grid. */
+const CHARACTERS_ON: LayersPatch = {
+  characters: { enabled: true },
+  cells: { horizontal: { characters: CHARACTERS_CELL } },
+};
+/** The characters on the grid and off stream. */
+const CHARACTERS_OFF: LayersPatch = { cells: { horizontal: { characters: CHARACTERS_CELL } } };
+
 test.afterAll(async () => {
-  await setLayers("characters-cleanup", {});
+  await runSql("characters-cleanup", [defaultLayers]);
 });
 
 function chat(user: number, text: string = user % 2 === 0 ? "!wave" : "hello wasteland"): ActivityChat {
@@ -194,7 +200,11 @@ for (const [name, path, viewport] of [
   test(`${name} draws the playground from one activity socket with characters, on a transparent page`, async ({
     browser,
   }) => {
-    await setLayers("characters-obs", { chat: { enabled: true }, characters: { enabled: true } });
+    await setLayers("characters-obs", {
+      chat: { enabled: true },
+      characters: { enabled: true },
+      cells: { horizontal: { chat: CHAT_CELL, characters: CHARACTERS_CELL } },
+    });
     const frames: Frames = playground(1, 12);
     const page = await obsPage(browser, OBS_IP, viewport);
     const sockets = await mockFeed(page, () => [CHAT_SNAPSHOT, frames.full, ...frames.ticks]);
@@ -229,7 +239,7 @@ for (const [name, path, viewport] of [
 test("a refresh draws the playground again from the new socket's full frame, never from tick frames alone", async ({
   browser,
 }) => {
-  await setLayers("characters-refresh", { characters: { enabled: true } });
+  await setLayers("characters-refresh", CHARACTERS_ON);
   const before: Frames = playground(2, 6);
   const after: Frames = playground(3, 9);
   const page = await obsPage(browser, REFRESH_IP, { width: 1920, height: 240 });
@@ -255,7 +265,11 @@ test("a refresh draws the playground again from the new socket's full frame, nev
 test("the editor preview opens the owner's characters socket only while the characters layer is on", async ({
   browser,
 }) => {
-  await setLayers("characters-editor", { chat: { enabled: true } });
+  // The chat is on stream. The characters are on the grid and off stream.
+  await setLayers("characters-editor", {
+    chat: { enabled: true },
+    cells: { horizontal: { chat: CHAT_CELL, characters: CHARACTERS_CELL } },
+  });
   const frames: Frames = playground(4, 8);
   const owner = await signedIn(browser, "featureowner", EDITOR_IP);
   const page = await newPage(owner);
@@ -270,7 +284,10 @@ test("the editor preview opens the owner's characters socket only while the char
   await expect(frame).toHaveAttribute("data-scaled", "true");
   // The preview plays sample chat; with the characters layer off it opens no activity socket.
   await expect(frame.locator('.ov-layer[data-layer="chat"] li.wl-item').first()).toBeVisible();
-  const layer = editor.locator('[data-comp-layer="characters"]');
+  // The characters settings show for the selected layer.
+  await chip(editor, "characters").click();
+  const layer = settings(editor);
+  await expect(layer).toHaveAttribute("data-comp-props", "characters");
   await expect(layer.locator("[data-characters-empty]")).toHaveText(
     "Turn on “Show on stream” to see the characters here.",
   );
@@ -310,7 +327,7 @@ test("the editor preview opens the owner's characters socket only while the char
 });
 
 test("the characters controls send their requests, keep focus and name every control", async ({ browser }) => {
-  await setLayers("characters-controls", { characters: { enabled: true } });
+  await setLayers("characters-controls", CHARACTERS_ON);
   const frames: Frames = playground(5, 4);
   const owner = await signedIn(browser, "featureowner", CONTROLS_IP);
   const page = await newPage(owner);
@@ -328,10 +345,15 @@ test("the characters controls send their requests, keep focus and name every con
     await route.fulfill({ json: reply });
   });
   await page.goto("/overlay-control");
-  const layer = page.locator('[data-comp-layer="characters"]');
+  const editor = page.locator("[data-composition-editor]");
   await expect.poll(() => sockets.length).toBe(1);
   // The page asks for the state once: pause and the test end are not in the layers.
   await expect.poll(() => bodies).toEqual([{ op: "status" }]);
+  // The characters settings show for the selected layer. They have no test button of their own.
+  await chip(editor, "characters").click();
+  const layer = settings(editor);
+  await expect(layer).toHaveAttribute("data-comp-props", "characters");
+  await expect(layer.getByRole("button", { name: /test/i })).toHaveCount(0);
 
   // Timeout: an invalid value shows an error and saves nothing; a valid one saves through the layers.
   const timeout = layer.getByRole("textbox", { name: "Seconds without chat before a character walks out" });
@@ -362,32 +384,29 @@ test("the characters controls send their requests, keep focus and name every con
   await expect(layer.getByRole("button", { name: "Pause" })).toBeFocused();
   await expect(layer.locator("[data-characters-news]")).toHaveText("Playground resumed.");
 
-  // The test: focus stays on its button while it starts and stops.
-  const toggle = layer.locator("[data-characters-test-toggle]");
+  // The test: the one test button of the toolbar. Only the characters are on stream, so it starts only their test.
+  // Focus stays on the button while the test starts and stops.
+  const toggle = editor.locator("[data-test-toggle]");
+  const testNews = editor.locator("[data-test-news]");
+  await expect(toggle).toHaveText("Start test");
   await toggle.click();
-  await expect(toggle).toHaveText("Stop characters test");
+  await expect(toggle).toHaveText("Stop test");
   await expect(toggle).toBeFocused();
-  await expect(layer.locator("[data-characters-test-status]")).toContainText(
-    /Sample viewers play in OBS\. \d+ s left\./,
-  );
-  await expect(layer.locator("[data-characters-news]")).toHaveText(
-    "Characters test started. Sample viewers play in OBS.",
-  );
+  await expect(editor.locator("[data-test-status]")).toHaveText(/^The test runs in OBS\. \d+ s left\.$/);
+  await expect(testNews).toHaveText("Test started. OBS shows sample data.");
   await toggle.press("Enter");
-  await expect(toggle).toHaveText("Start characters test");
+  await expect(toggle).toHaveText("Start test");
   await expect(toggle).toBeFocused();
-  await expect(layer.locator("[data-characters-news]")).toHaveText("Characters test stopped.");
+  await expect(testNews).toHaveText("Test stopped.");
 
   // A test started during a pause ends the pause, and says so before and after.
   await layer.getByRole("button", { name: "Pause" }).click();
   await expect(toggle).toHaveAccessibleDescription(/Starting the test resumes the playground\.$/);
   await toggle.click();
-  await expect(layer.locator("[data-characters-news]")).toHaveText(
-    "Characters test started and the playground resumed. Sample viewers play in OBS.",
-  );
+  await expect(testNews).toHaveText("Test started and the playground resumed. OBS shows sample data.");
   await expect(layer.getByRole("button", { name: "Pause" })).toBeVisible();
   await toggle.click();
-  await expect(toggle).toHaveText("Start characters test");
+  await expect(toggle).toHaveText("Start test");
 
   // Remove takes the roster id of the frames. When the character leaves, focus goes to the next Remove button.
   const first: RosterEntry = frames.roster[0];
@@ -443,7 +462,7 @@ test("the characters controls send their requests, keep focus and name every con
 test("a test started in another tab shows here: frames with the test make the editor read the status again", async ({
   browser,
 }) => {
-  await setLayers("characters-other-tab", { characters: { enabled: true } });
+  await setLayers("characters-other-tab", CHARACTERS_ON);
   const frames: Frames = playground(6, 3);
   const testing = new PlaygroundSim({ cellsW: 16, cellsH: 2, rng: mulberry32(6) });
   testing.resumeAfter(0);
@@ -464,26 +483,27 @@ test("a test started in another tab shows here: frames with the test make the ed
     await route.fulfill({ json: { paused: false, testEndsAt: Date.now() + 300_000 } });
   });
   await page.goto("/overlay-control");
-  const layer = page.locator('[data-comp-layer="characters"]');
-  const toggle = layer.locator("[data-characters-test-toggle]");
+  const editor = page.locator("[data-composition-editor]");
+  const toggle = editor.locator("[data-test-toggle]");
+  const status = editor.locator("[data-test-status]");
   await expect.poll(() => sockets.length).toBe(1);
-  await expect(toggle).toHaveText("Start characters test");
+  await expect(toggle).toHaveText("Start test");
   // Another tab starts the test: this tab only sees it in the frames.
   sockets[0].send(encodeFrame(testing.fullFrame()));
   await expect.poll(() => bodies).toEqual([{ op: "status" }, { op: "status" }]);
   // While the status is read, the test runs here too, without a countdown.
-  await expect(toggle).toHaveText("Stop characters test");
-  await expect(layer.locator("[data-characters-test-status]")).not.toContainText(/s left/);
+  await expect(toggle).toHaveText("Stop test");
+  await expect(status).toHaveText("The test runs in OBS.");
   release();
-  await expect(layer.locator("[data-characters-test-status]")).toContainText(/\d+ s left\./);
-  await expect(toggle).toHaveText("Stop characters test");
+  await expect(status).toHaveText(/^The test runs in OBS\. \d+ s left\.$/);
+  await expect(toggle).toHaveText("Stop test");
   await close(owner);
 });
 
-test("the characters test, pause and reset are unavailable while the saved characters layer is off", async ({
+test("the test, pause and reset are unavailable while the saved characters layer is off stream", async ({
   browser,
 }) => {
-  await setLayers("characters-test-off", {});
+  await setLayers("characters-test-off", CHARACTERS_OFF);
   const owner = await signedIn(browser, "featureowner", CONTROLS_IP);
   const page = await newPage(owner);
   const bodies: unknown[] = [];
@@ -492,11 +512,13 @@ test("the characters test, pause and reset are unavailable while the saved chara
     await route.fulfill({ json: { paused: false, testEndsAt: null } });
   });
   await page.goto("/overlay-control");
-  const layer = page.locator('[data-comp-layer="characters"]');
-  const toggle = layer.locator("[data-characters-test-toggle]");
+  const editor = page.locator("[data-composition-editor]");
+  await chip(editor, "characters").click();
+  const layer = settings(editor);
+  const toggle = editor.locator("[data-test-toggle]");
   await expect(toggle).toHaveAttribute("aria-disabled", "true");
+  await expect(toggle).toHaveAccessibleDescription("Put Chat or Characters on stream to start the test.");
   const hint = "Turn on “Show on stream” to pause, reset, or test the characters.";
-  await expect(toggle).toHaveAccessibleDescription(hint);
   // A press does nothing; force skips Playwright's own check of aria-disabled.
   await toggle.click({ force: true });
   await expect(toggle).toBeFocused();
@@ -516,7 +538,7 @@ test("the characters test, pause and reset are unavailable while the saved chara
 });
 
 test("the controls show a calm note when the server has no playground", async ({ browser }) => {
-  await setLayers("characters-server-off", { characters: { enabled: true } });
+  await setLayers("characters-server-off", CHARACTERS_ON);
   const owner = await signedIn(browser, "featureowner", CONTROLS_IP);
   const page = await newPage(owner);
   await mockFeed(page, () => [SNAPSHOT]);
@@ -524,7 +546,9 @@ test("the controls show a calm note when the server has no playground", async ({
     route.fulfill({ status: 503, json: { error: "Characters are off on this server." } }),
   );
   await page.goto("/overlay-control");
-  const layer = page.locator('[data-comp-layer="characters"]');
+  const editor = page.locator("[data-composition-editor]");
+  await chip(editor, "characters").click();
+  const layer = settings(editor);
   await expect(layer.locator("[data-characters-off]")).toHaveText("Characters are off on this server.");
   await expect(layer.locator("[data-characters-status-error]")).toHaveCount(0);
   // A control gets the same note, not an error toast.
@@ -534,7 +558,7 @@ test("the controls show a calm note when the server has no playground", async ({
 });
 
 test("a closed feed empties the layer: no names, bubbles or badges stay on stream", async ({ browser }) => {
-  await setLayers("characters-unavailable", { characters: { enabled: true } });
+  await setLayers("characters-unavailable", CHARACTERS_ON);
   const frames: Frames = playground(6, 8);
   const page = await obsPage(browser, FEED_IP, { width: 1920, height: 240 });
   const sockets = await mockFeed(page, (index: number) =>
@@ -550,7 +574,7 @@ test("a closed feed empties the layer: no names, bubbles or badges stay on strea
 });
 
 test("pictures that fail to load leave the layer empty and log a fixed event", async ({ browser }) => {
-  await setLayers("characters-failed", { characters: { enabled: true } });
+  await setLayers("characters-failed", CHARACTERS_ON);
   const frames: Frames = playground(7, 6);
   const page = await obsPage(browser, FEED_IP, { width: 1920, height: 240 });
   const logged: string[] = [];

@@ -116,17 +116,22 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 
 | Endpoint | Body | Response |
 | --- | --- | --- |
+| `GET /api/overlay` | - | `{overlay, data, handle}`. The `OverlayState` of the page of the signed-in owner, and the polls, topics, and cards for the pickers |
 | `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?}, items?: {poll?, topic?, next?, message?, card?, support?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
+| `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
 | `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
-| `GET /@handle/overlay?key&layer` | Optional `layer`: `content`, `chat`, or `characters` | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that layer alone. An unknown value shows an empty page. |
+| `GET /@handle/overlay?key&layer&poll` | Optional `layer`: `content`, `chat`, or `characters`. Optional `poll`: a poll ID | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that part alone. An unknown value shows an empty page. |
 
+- The overlay shows only the layers on the grid: `chat`, `characters`, and the content layers.
+  The content layers are `poll`, `topic`, `next`, `message`, `card`, and `support`. Each content layer shows one content source.
+  A layer is on stream when it has a cell in the selected orientation and its `enabled` value is `true`.
 - `orientation` is `horizontal` (a grid of 16 × 9 cells) or `vertical` (9 × 16 cells). A cell is 120 pixels.
-- Each orientation in `cells` holds `{chat?, characters?, content?, poll?, topic?, next?, message?, card?, support?}`. Each value is a cell rectangle `{c, r, w, h}` of whole cells.
+- Each orientation in `cells` holds `{chat?, characters?, poll?, topic?, next?, message?, card?, support?}`.
+  Each value is a cell rectangle `{c, r, w, h}` of whole cells, or `null`. With `null`, the layer is not on the grid.
   `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
-- `poll`, `topic`, `next`, `message`, `card`, and `support` are the source layers. Each source layer shows one content source.
-  A source layer cell accepts `null`. Then the layer is not on the grid.
-- Each value in `items` holds the settings of one source layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
+- Each value in `items` holds the settings of one content layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
   - `ref` is the ID of a poll, a topic, or a Community card of the page. An unknown ID returns `404`.
     A `poll` layer with `ref: null` shows the latest active poll. A `card` layer with `ref: null` shows the first card.
     `next`, `message`, and `support` accept only `ref: null`.
@@ -134,28 +139,31 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   - The API only stores `qr`. The overlay does not show a QR code.
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
   Other values return `400`. See [Message background](overlay-composition.md#message-background).
-- `content` accepts `null`. Then the content uses the full frame and its position and size settings.
-- The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for `content` and for each source layer.
-- After the merge, no two layers can overlap in an orientation. A content layer or a source layer without a cell does not count.
-- The stored layers have a limit of 1000 characters. The server stores only the source layer cells and the source layer settings that are not the defaults.
-  A change that goes above the limit returns `400`.
+- The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for each content layer.
+- After the merge, no two layers can overlap in an orientation. A layer without a cell does not count.
+  A layer with a cell counts also while its `enabled` value is `false`.
+- The stored layers have a limit of 4000 characters. The server stores only the cells and the settings that are not the defaults.
+  A change that goes above the limit returns `400`. The values that the API accepts stay below the limit.
 - `write` is `{writer, seq}`. `writer` is a random ID of 8 to 64 letters, digits, `_` or `-`. `seq` is a positive integer.
   The server keeps the largest applied `seq` of each of the last 8 writers. It ignores a change with a `seq` that is not larger than the kept `seq` of its `writer`.
   The server then answers `200` with the current state and does not notify the overlay pages. A change without `write` always applies.
 - The body changes only the fields that it names. The API merges each field into the saved layers.
   Thus send only the fields that you change. Unknown fields return `400`.
 - The change goes live at once. Overlay pages get the new `layers` through the live room.
+- `showResults` shows (`on: true`) or hides the results of the poll in the poll layer.
+- `message` saves the text and the style of the message banner. The text has at most 120 characters on one line.
+  The public overlay state has the text only while the `message` layer is on stream.
 - `chatTest` with `on: true` sets `chatTestUntil` to the server time plus 60 seconds. With `on: false` it sets 0.
-  `on: true` returns `400` when the chat layer is off. `on: false` always applies.
-  A `layers` action that sets the chat layer to off also sets `chatTestUntil` to 0.
+  `on: true` returns `400` when the chat layer is off stream. `on: false` always applies.
+  A `layers` action that takes the chat layer off stream also sets `chatTestUntil` to 0.
   Overlay pages get the value through the live room. A time in the past means no test.
 - `characters.timeout` is the time in seconds without chat before a character walks out. It is a whole number from 10 to 600. The default is 60.
 - Each `layers` action and each `chatTest` action with `on: true` counts against the write quota of 60 changes each minute.
 - `POST /api/overlay/characters` controls the character playground of the page:
   - `status` changes nothing. It only returns the state.
   - `test` starts the characters test for 5 minutes, or starts it again. It also ends a pause.
-    It returns `400` when the saved characters layer is off.
-  - With the saved characters layer off, the playground keeps nothing. Then each operation returns `{paused: false, testEndsAt: null}`, and `remove` returns `404`.
+    It returns `400` when the saved characters layer is off stream.
+  - With the saved characters layer off stream, the playground keeps nothing. Then each operation returns `{paused: false, testEndsAt: null}`, and `remove` returns `404`.
   - `stopTest` stops the test. `pause` and `resume` stop and start the playground. `reset` removes all characters.
   - `remove` removes the character with the frame `id`. It returns `404` when no character has that `id`.
   - `testEndsAt` is the server time at which the test ends, or `null` when no test runs.
@@ -164,12 +172,22 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 - The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
 - Errors: `400` for an invalid body, a cell outside the grid, or overlapping layers, `401` without sign-in, and `403` for another origin.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
-- `OverlayState.layers` and `OverlayPublic.layers` are `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout}, items, cells: {horizontal, vertical}}`.
-  Each orientation in `cells` is `{chat, characters, content, poll, topic, next, message, card, support}`. `content` and each source layer value are a cell or `null`.
-  `items` holds `{enabled, ref, backgroundOpacity, qr}` for each source layer.
-  Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value. Chat and characters are off by default, `hideCommands` is on, and `backgroundOpacity` is 100.
-  A source layer has no cell by default. Its defaults are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `poll` has `qr: true`. The other source layers have `qr: false`.
-- See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the chat test, and the chat limits.
+- `OverlayState` and `OverlayPublic` are `{showResults, message, messageStyle, layers, chatTestUntil, revision}`.
+  `OverlayPublic` is what the overlay page and the live room get. Its `message` is empty unless the `message` layer is on stream.
+- `layers` is `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout}, items, cells: {horizontal, vertical}}`.
+  Each orientation in `cells` is `{chat, characters, poll, topic, next, message, card, support}`. Each value is a cell or `null`.
+  `items` holds `{enabled, ref, backgroundOpacity, qr}` for each content layer.
+  Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value.
+  No layer has a cell by default. Chat and characters are off by default, `hideCommands` is on, and `backgroundOpacity` is 100.
+  The defaults of a content layer are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `poll` has `qr: true`. The other content layers have `qr: false`.
+- With the `poll` parameter, the overlay page shows that poll in the poll layer, and no other content layer.
+  A poll ID that the page does not have returns `404`.
+- The API has no `preview`, `take`, or `layout` action now. Each of them returns `400`.
+  The state has no `air`, `preview`, `position`, `size`, or `instant` value now.
+  To show a source, put its layer on the grid with a `layers` action. To hide it, set `enabled` to `false` or its cell to `null`.
+  The server converts saved state from before this change by itself.
+  See [State from before the overlay studio](overlay-composition.md#state-from-before-the-overlay-studio).
+- See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the test, and the chat limits.
 
 ## Later phases
 

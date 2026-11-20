@@ -1,4 +1,3 @@
-import { contentSources } from "../lib/overlay-layers";
 import type { LiveSnapshot } from "../types";
 import { MASH_COLUMN, mashValue } from "./mash-sql";
 import { autoPoll, byOwner, notHeld, openPoll } from "./poll-sql";
@@ -95,18 +94,13 @@ export function livePolls(rows: readonly PollRow[]): LiveSnapshot["polls"] {
 }
 
 /**
- * The snapshot for a socket of the OBS overlay: polls of the page owner, plus the polls that the owner picked. A
- * picked poll is the poll on air or the poll of a poll layer on stream.
- * An overlay page that runs older code then cannot show a viewer poll through automatic selection.
+ * The snapshot for a socket of the OBS overlay: polls of the page owner, plus the poll that the owner picked for the
+ * poll layer. An overlay page that runs older code then cannot show a viewer poll through automatic selection.
  */
 export function overlaySnapshot(snapshot: LiveSnapshot): LiveSnapshot {
-  const overlay = snapshot.overlay;
-  const picked = new Set<string | null>();
-  if (overlay?.air.type === "poll") picked.add(overlay.air.ref);
-  for (const source of overlay ? contentSources(overlay.layers) : [])
-    if (source.type === "poll") picked.add(source.ref);
+  const picked: string | null = snapshot.overlay?.layers.items.poll.ref ?? null;
   return {
     ...snapshot,
-    polls: snapshot.polls.filter((poll: LiveSnapshot["polls"][number]): boolean => poll.byOwner || picked.has(poll.id)),
+    polls: snapshot.polls.filter((poll: LiveSnapshot["polls"][number]): boolean => poll.byOwner || poll.id === picked),
   };
 }

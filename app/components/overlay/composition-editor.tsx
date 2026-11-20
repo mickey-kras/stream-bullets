@@ -1,31 +1,30 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { t, tAround, type MessageId } from "../../i18n";
-import { CHAT_TEST_MS, chatTestLeft } from "../../lib/chat-test";
-import { onGrid, withPlaced, withRemoved } from "../../lib/layer-geometry";
+import { t, type MessageId } from "../../i18n";
+import { withItem, withPlaced, withRemoved } from "../../lib/layer-geometry";
 import {
-  CHAT_BACKGROUND,
-  EDITOR_LAYERS,
   GRID,
+  GRID_LAYERS,
   ORIENTATIONS,
   frameSize,
-  layerPixels,
+  onStream,
   type CellRect,
-  type EditorLayer,
+  type GridLayer,
+  type LayerCells,
   type OverlayLayers,
   type Orientation,
 } from "../../lib/overlay-layers";
-import type { OverlaySourceRef, OverlayState } from "../../types";
-import { errorMessage, postJson } from "../api";
+import type { OverlayState } from "../../types";
+import { announce } from "../a11y/announcer";
 import { motionReduced } from "../station/motion";
-import { useToast } from "../ui/toast";
 import { type ActivityFeed, useActivityFeed } from "./activity-feed";
-import { CharactersControls } from "./characters-controls";
+import { type CharactersControl, useCharactersControl } from "./characters-controls";
 import { LayerPalette } from "./layer-palette";
-import { LayoutGrid, type LayoutGridHandle, type PreviewBackground, type RemoveDrop } from "./layout-grid";
+import { LayerProperties, type ChangeLayers, type OverlayAction } from "./layer-properties";
+import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle, type PreviewBackground, type RemoveDrop } from "./layout-grid";
 import { CHARACTERS_READY } from "./overlay-composition";
-import { showsContent, type OverlayScene } from "./overlay-stage";
+import type { OverlayScene } from "./overlay-stage";
 import { StepHeading } from "./step-heading";
-import { useChatOverlap } from "./use-chat-overlap";
+import { StudioTest } from "./studio-test";
 import { useLayerDraft, type EditorError, type EditTiming } from "./use-layer-draft";
 
 const BACKGROUNDS: readonly (readonly [PreviewBackground, MessageId])[] = [
@@ -36,9 +35,6 @@ const ORIENTATION_NAMES: Readonly<Record<Orientation, MessageId>> = {
   horizontal: "overlay.grid.horizontal",
   vertical: "overlay.grid.vertical",
 };
-
-/** Debounce for the overlap note: it changes only once a move has settled. */
-const OVERLAP_NOTE_MS = 500;
 
 /**
  * The save error under the editor. The error of a change sent while leaving can show when the editor opens, below
@@ -62,363 +58,193 @@ function EditorAlert({ error }: Readonly<{ error: EditorError }>): ReactNode {
 }
 
 /**
- * Start and Stop for the chat test, with the time left. The test needs the chat layer on. The button never takes the
- * `disabled` attribute: it keeps focus during its own request and when the test ends, and ignores presses while it
- * is unavailable. A polite region says when the test starts, stops or ends; the time left is not read each second.
+ * `layers` with `layer` on the grid at `rect`. A topic layer that comes on the grid without a topic takes
+ * `topic`, the newest topic of the page. The grid checks a cell before it places a layer, so a cell that no longer
+ * fits changes nothing.
  */
-function ChatTest({
-  until,
-  now,
-  enabled,
-  onSaved,
-}: Readonly<{
-  until: number;
-  /** Server time. */
-  now: number;
-  /** The saved chat layer is on. */
-  enabled: boolean;
-  onSaved: (overlay: OverlayState) => void;
-}>): ReactNode {
-  const toast = useToast();
-  const hintId: string = useId();
-  const [busy, setBusy] = useState<boolean>(false);
-  const left: number = chatTestLeft(until, now);
-  const running: boolean = left > 0;
-  const unavailable: boolean = busy || (!running && !enabled);
-  // Empty on page load; set when `running` changes, so the region speaks only for a start or a stop.
-  const [news, setNews] = useState<string>("");
-  const wasRunning = useRef<boolean>(running);
-  // True from this editor's Stop press until its request fails: the end is then "stopped", not "ended" by the timer,
-  // the chat layer or another tab. The live room can bring the stop before the response.
-  const stoppedHere = useRef<boolean>(false);
-  useEffect(() => {
-    if (wasRunning.current === running) return;
-    wasRunning.current = running;
-    let text: MessageId = "overlay.test.ended";
-    if (running) text = "overlay.test.started";
-    else if (stoppedHere.current) text = "overlay.test.stopped";
-    setNews(t(text));
-  }, [running]);
-  async function send(on: boolean): Promise<void> {
-    setBusy(true);
-    stoppedHere.current = !on;
-    try {
-      const result = await postJson<{ overlay: OverlayState }>("/api/overlay", { action: "chatTest", on });
-      onSaved(result.overlay);
-    } catch (error_: unknown) {
-      stoppedHere.current = false;
-      toast(t("overlay.test.failed", { error: errorMessage(error_) }), { tone: "error" });
-    } finally {
-      setBusy(false);
-    }
-  }
-  const idleStatus: string = t(enabled ? "overlay.test.hint" : "overlay.test.needsChat", {
-    seconds: CHAT_TEST_MS / 1000,
-  });
-  const statusText: string = running ? t("overlay.test.left", { seconds: Math.ceil(left / 1000) }) : idleStatus;
-  return (
-    <div className="ov-comp-test" data-chat-test-control>
-      <button
-        type="button"
-        aria-disabled={unavailable}
-        aria-describedby={hintId}
-        onClick={() => {
-          if (!unavailable) void send(!running);
-        }}
-        data-chat-test-toggle
-      >
-        {t(running ? "overlay.test.stop" : "overlay.test.start")}
-      </button>
-      <p className="muted ov-comp-note" id={hintId} data-chat-test-status>
-        {statusText}
-      </p>
-      <p className="sr-only" aria-live="polite" data-chat-test-news>
-        {news}
-      </p>
-    </div>
-  );
+function placedLayers(layers: OverlayLayers, layer: GridLayer, rect: CellRect, topic: string | null): OverlayLayers {
+  const orientation: Orientation = layers.orientation;
+  const placed: OverlayLayers | null = withPlaced(layers, orientation, layer, rect);
+  if (!placed) return layers;
+  const added: boolean = layers.cells[orientation][layer] === null;
+  const pick: boolean = layer === "topic" && added && placed.items.topic.ref === null && topic !== null;
+  return pick ? withItem(placed, "topic", { ref: topic }) : placed;
 }
 
 /**
- * Steps 2 and 3 of Overlay control. Step 2 has the live control (`live`) and the switches of the chat and characters
- * layers. Step 3 has the layout grid of the selected orientation over a preview of what OBS shows. The preview plays
- * sample chat. While the characters layer is on, it opens the owner's characters socket and shows the live
- * playground. Layer edits go live at once.
+ * Step 2 of Overlay control: the overlay studio. A toolbar sets the orientation and the preview background and
+ * starts the test. Below it are the layer palette, the layout grid of the selected orientation over a preview of
+ * what OBS shows, and the settings of the selected layer. The preview plays sample chat. While the characters layer
+ * is on stream, it opens the owner's characters socket and shows the live playground. Layer edits go live at once.
  */
 export function CompositionEditor({
-  layers,
   scene,
-  source,
-  chatTestUntil,
+  state,
+  busy,
+  run,
   onSaved,
-  live,
 }: Readonly<{
-  /** The newest saved or live layers. */
-  layers: OverlayLayers;
   scene: OverlayScene;
-  /** What is on air. */
-  source: OverlaySourceRef;
-  /** Server time when the chat test ends. */
-  chatTestUntil: number;
+  /** The newest saved or live state, with the layers. */
+  state: OverlayState;
+  /** A request of `run` is in flight. */
+  busy: boolean;
+  /** Saves a setting that is not in the layers: the poll results switch or the message. */
+  run: (action: OverlayAction) => void;
   onSaved: (overlay: OverlayState) => void;
-  /** The live control of the on-air content: monitors, Take and sources. */
-  live: ReactNode;
 }>): ReactNode {
-  const showId: string = useId();
-  const placeId: string = useId();
-  const commandsId: string = useId();
-  const backgroundId: string = useId();
-  const backgroundHintId: string = useId();
+  const { layers } = state;
+  const buildId: string = useId();
   const orientationNoteId: string = useId();
   const [background, setBackground] = useState<PreviewBackground>("checker");
   // The selected layer of the grid. It is here, not in the grid, so that other controls can read and set it.
-  const [selected, setSelected] = useState<EditorLayer>("chat");
+  const [selected, setSelected] = useState<GridLayer | null>(null);
   const grid = useRef<LayoutGridHandle | null>(null);
   // The palette takes a layer that a pointer drags off the grid: the grid reads its box and sets what it shows.
   const palette = useRef<HTMLFieldSetElement | null>(null);
   const [removeDrop, setRemoveDrop] = useState<RemoveDrop | null>(null);
   const { shown, status, error, edit } = useLayerDraft(layers, onSaved);
   const orientation: Orientation = shown.orientation;
-  // The preview shows the live playground while the characters layer is on: the owner's own characters socket.
-  const charactersOn: boolean = CHARACTERS_READY && shown.characters.enabled;
+  const cells: LayerCells = shown.cells[orientation];
+  // The preview shows the live playground while the characters layer is on stream: the owner's characters socket.
+  const charactersOn: boolean = CHARACTERS_READY && onStream(shown, "characters");
   const charactersFeed: ActivityFeed = useActivityFeed(scene.handle, null, charactersOn, {
     characters: true,
     owner: true,
   });
-  const content: CellRect | null = shown.cells[orientation].content;
-  const free: EditorLayer[] = EDITOR_LAYERS.filter((layer: EditorLayer): boolean => !onGrid(shown, orientation, layer));
-  const frame = useRef<HTMLDivElement | null>(null);
-  const covers: boolean = useChatOverlap(
-    frame,
-    { enabled: shown.chat.enabled && content === null, rect: layerPixels(shown, "chat") ?? { x: 0, y: 0, w: 0, h: 0 } },
-    source,
+  // The server checks the saved layers, so an unsaved draft does not make the test or the controls available.
+  const characters: CharactersControl = useCharactersControl(
+    charactersOn ? charactersFeed : null,
+    CHARACTERS_READY && onStream(layers, "characters"),
+    scene.now,
   );
-  // The preview dims a sample: a content cell with nothing on air.
-  const dimmed: boolean = content !== null && !showsContent(source, scene.data);
-  const [sourceBefore, sourceAfter] = tAround("overlay.comp.chatSource", "link");
-  // The overlap note follows `covers` OVERLAP_NOTE_MS after the last change. It speaks only after the owner's first
-  // edit, not on page load.
-  const [note, setNote] = useState<boolean>(false);
-  const [armed, setArmed] = useState<boolean>(false);
-  useEffect(() => {
-    const wait = setTimeout(() => setNote(covers), OVERLAP_NOTE_MS);
-    return (): void => clearTimeout(wait);
-  }, [covers]);
+  const placed: GridLayer[] = GRID_LAYERS.filter((layer: GridLayer): boolean => cells[layer] !== null);
+  // The settings show for the selected layer while it is on the grid of this orientation.
+  const active: GridLayer | null = selected && cells[selected] ? selected : null;
 
-  const change = (update: (current: OverlayLayers) => OverlayLayers, when: EditTiming = "now"): void => {
-    setArmed(true);
+  const change: ChangeLayers = (update: (current: OverlayLayers) => OverlayLayers, when: EditTiming = "now"): void =>
     edit(update, when);
-  };
-  // The grid checks a cell before it calls `place`, so a cell that no longer fits changes nothing.
-  const place = (layer: EditorLayer, rect: CellRect, when: EditTiming): void =>
-    change((current: OverlayLayers) => withPlaced(current, current.orientation, layer, rect) ?? current, when);
-  const remove = (layer: EditorLayer): void =>
+  const newestTopic: string | null = scene.data.topics[0]?.id ?? null;
+  const place = (layer: GridLayer, rect: CellRect, when: EditTiming): void =>
+    change((current: OverlayLayers) => placedLayers(current, layer, rect, newestTopic), when);
+  const remove = (layer: GridLayer): void =>
     change((current: OverlayLayers) => withRemoved(current, current.orientation, layer));
+  // The grid tells its own selections. A selection from the palette is told here.
+  const selectChip = (layer: GridLayer): void => {
+    setSelected(layer);
+    announce(t("overlay.grid.selected", { layer: t(LAYER_NAMES[layer]) }));
+  };
+  // The Remove button goes away with its layer: the focus moves to the chip of that layer in the palette.
+  const removeSelected = (layer: GridLayer): void => {
+    remove(layer);
+    announce(t("overlay.grid.removed", { layer: t(LAYER_NAMES[layer]) }));
+    palette.current?.querySelector<HTMLButtonElement>(`[data-comp-layer="${layer}"]`)?.focus();
+  };
 
-  const backgroundText: string = t("overlay.comp.chatBackgroundValue", { percent: shown.chat.backgroundOpacity });
   let statusText: string = "";
   if (status === "saving") statusText = t("overlay.comp.saving");
   else if (status === "saved") statusText = t("overlay.comp.saved");
 
   return (
-    <div className="ov-comp" data-composition-editor>
-      <section className="ov-step" aria-labelledby={showId} data-step="show">
-        <StepHeading step={2} id={showId} title={t("overlay.step.show")} />
-        {live}
-        <div className="ov-comp-layers ov-step-layers">
-          <fieldset className="ov-comp-layer" data-comp-layer="chat">
-            <legend>{t("overlay.comp.chat")}</legend>
-            <p className="muted ov-comp-note" data-comp-chat-source>
-              {sourceBefore}
-              <a className="text-link" href="#channels-title">
-                {t("overlay.comp.chatSourceLink")}
-              </a>
-              {sourceAfter}
-            </p>
-            <label className="choice">
-              <input
-                type="checkbox"
-                checked={shown.chat.enabled}
-                onChange={(event) => {
-                  const enabled: boolean = event.currentTarget.checked;
-                  change((current) => ({ ...current, chat: { ...current.chat, enabled } }));
-                }}
-              />
-              <span>{t("overlay.comp.show")}</span>
-            </label>
-            <p className="muted ov-comp-note" data-comp-scale>
-              {t("overlay.comp.scaleNote")}
-            </p>
-            <label className="choice">
-              <input
-                type="checkbox"
-                checked={shown.chat.hideCommands}
-                aria-describedby={commandsId}
-                onChange={(event) => {
-                  const hideCommands: boolean = event.currentTarget.checked;
-                  change((current) => ({ ...current, chat: { ...current.chat, hideCommands } }));
-                }}
-              />
-              <span>{t("overlay.comp.hideCommands")}</span>
-            </label>
-            <p className="muted ov-comp-note" id={commandsId}>
-              {t("overlay.comp.hideCommandsHint")}
-            </p>
-            <div className="ov-comp-range" data-comp-chat-background>
-              <label htmlFor={backgroundId}>{t("overlay.comp.chatBackground")}</label>
-              <input
-                id={backgroundId}
-                type="range"
-                min={CHAT_BACKGROUND.min}
-                max={CHAT_BACKGROUND.max}
-                step={CHAT_BACKGROUND.step}
-                value={shown.chat.backgroundOpacity}
-                aria-valuetext={backgroundText}
-                aria-describedby={backgroundHintId}
-                onChange={(event) => {
-                  const backgroundOpacity: number = event.currentTarget.valueAsNumber;
-                  // The preview follows each step. The save waits for a pause, like a keyboard move on the grid.
-                  change((current) => ({ ...current, chat: { ...current.chat, backgroundOpacity } }), "idle");
-                }}
-              />
-              {/* The slider already names the value (aria-valuetext), so a screen reader skips this copy. */}
-              <span className="ov-comp-range-value" aria-hidden="true" data-comp-chat-background-value>
-                {backgroundText}
-              </span>
-              <p className="muted ov-comp-note" id={backgroundHintId}>
-                {t("overlay.comp.chatBackgroundHint")}
-              </p>
-            </div>
-            {/* The server checks the saved layers, so an unsaved draft does not make the test available. */}
-            <ChatTest until={chatTestUntil} now={scene.now} enabled={layers.chat.enabled} onSaved={onSaved} />
-          </fieldset>
-          <fieldset className="ov-comp-layer" data-comp-layer="characters">
-            <legend>{t("overlay.comp.characters")}</legend>
-            <p className="muted ov-comp-note">{t("overlay.characters.intro")}</p>
-            <label className="choice">
-              <input
-                type="checkbox"
-                checked={shown.characters.enabled}
-                disabled={!CHARACTERS_READY}
-                onChange={(event) => {
-                  const enabled: boolean = event.currentTarget.checked;
-                  change((current) => ({ ...current, characters: { ...current.characters, enabled } }));
-                }}
-              />
-              <span>{t("overlay.comp.show")}</span>
-            </label>
-            {/* The server checks the saved layers, so an unsaved draft does not make the test available. */}
-            <CharactersControls
-              feed={charactersOn ? charactersFeed : null}
-              enabled={layers.characters.enabled}
-              timeout={shown.characters.timeout}
-              onTimeout={(timeout: number) =>
-                change((current) => ({ ...current, characters: { ...current.characters, timeout } }))
-              }
-              now={scene.now}
-            />
-          </fieldset>
-        </div>
-      </section>
-      <section className="ov-step" aria-labelledby={placeId} data-step="place">
-        <StepHeading step={3} id={placeId} title={t("overlay.step.place")} />
-        <p className="muted ov-step-intro">{t("overlay.comp.intro")}</p>
-        <div className="ov-comp-body">
-          <div className="ov-comp-stage" ref={frame}>
-            <div className="ov-comp-bar">
-              <fieldset className="field ov-seg-field">
-                <legend className="field-label">{t("overlay.grid.orientation")}</legend>
-                <div className="seg">
-                  {ORIENTATIONS.map((value: Orientation) => (
-                    <button
-                      key={value}
-                      type="button"
-                      aria-pressed={orientation === value}
-                      aria-describedby={orientationNoteId}
-                      onClick={() => change((current) => ({ ...current, orientation: value }))}
-                      data-comp-orientation={value}
-                    >
-                      {t(ORIENTATION_NAMES[value], { cols: GRID[value].cols, rows: GRID[value].rows })}
-                    </button>
-                  ))}
-                </div>
-                <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
-                  {t("overlay.grid.orientationNote")}
-                </p>
-              </fieldset>
-              <fieldset className="field ov-seg-field">
-                <legend className="field-label">{t("overlay.comp.background")}</legend>
-                <div className="seg">
-                  {BACKGROUNDS.map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      aria-pressed={background === value}
-                      onClick={() => setBackground(value)}
-                    >
-                      {t(label)}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-              <LayerPalette free={free} grid={grid} drop={removeDrop} ref={palette} />
-            </div>
-            <LayoutGrid
-              ref={grid}
-              layers={shown}
-              scene={scene}
-              source={source}
-              background={background}
-              charactersFeed={charactersOn ? charactersFeed : null}
-              selected={selected}
-              onSelect={setSelected}
-              onPlace={place}
-              onRemove={remove}
-              removeZone={palette}
-              onRemoveDrop={setRemoveDrop}
-            />
-            <p className="muted ov-comp-help" data-comp-frame-size>
-              {t("overlay.grid.obsSize", frameSize(orientation))}
-            </p>
-            {/* Always mounted, so a screen reader follows it. Silent until the owner first changes the layout. */}
-            <p className="ov-comp-help ov-comp-overlap" data-comp-overlap aria-live={armed ? "polite" : "off"}>
-              {note ? t("overlay.comp.overlap") : ""}
-            </p>
-            {shown.chat.enabled && (
-              <p className="muted ov-comp-help" data-comp-sample>
-                {t("overlay.comp.sampleChat")}
-              </p>
-            )}
-            {dimmed && (
-              <p className="muted ov-comp-help" data-comp-sample-off>
-                {t("overlay.comp.sampleOff")}
-              </p>
-            )}
-          </div>
-          <div className="ov-comp-layers">
-            <fieldset className="ov-comp-layer" data-comp-layer="content">
-              <legend>{t("overlay.comp.content")}</legend>
-              {/* Polite: the text changes when the content gets a cell or the Remove button takes it away. */}
-              <p className="muted ov-comp-note" data-comp-content-note aria-live="polite">
-                {t(content ? "overlay.comp.contentCell" : "overlay.comp.contentFull")}
-              </p>
-              {/* aria-disabled, not disabled: the button keeps focus after it removes the cell. */}
+    <section className="ov-step ov-comp" aria-labelledby={buildId} data-step="build" data-composition-editor>
+      <StepHeading step={2} id={buildId} title={t("overlay.step.build")} />
+      <div className="ov-comp-bar">
+        <fieldset className="ov-seg-field">
+          <legend className="sr-only">{t("overlay.grid.orientation")}</legend>
+          <div className="seg">
+            {ORIENTATIONS.map((value: Orientation) => (
               <button
+                key={value}
                 type="button"
-                aria-disabled={content === null}
-                onClick={() => {
-                  if (content !== null) remove("content");
-                }}
-                data-comp-remove
+                aria-pressed={orientation === value}
+                aria-describedby={orientationNoteId}
+                onClick={() => change((current: OverlayLayers) => ({ ...current, orientation: value }))}
+                data-comp-orientation={value}
               >
-                {t("overlay.comp.contentRemove")}
+                {t(ORIENTATION_NAMES[value], { cols: GRID[value].cols, rows: GRID[value].rows })}
               </button>
-            </fieldset>
-            <output className="ov-comp-status">{statusText}</output>
-            {error && <EditorAlert error={error} />}
+            ))}
           </div>
+        </fieldset>
+        <fieldset className="ov-seg-field">
+          <legend className="sr-only">{t("overlay.comp.background")}</legend>
+          <div className="seg">
+            {BACKGROUNDS.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={background === value}
+                onClick={() => setBackground(value)}
+                data-comp-background={value}
+              >
+                {t(label)}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <StudioTest
+          chatUntil={state.chatTestUntil}
+          now={scene.now}
+          chatOn={onStream(layers, "chat")}
+          characters={characters}
+          onSaved={onSaved}
+        />
+        <p className="ov-live-note" data-comp-live-note>
+          <span className="ov-live-dot" aria-hidden="true" />
+          {t("overlay.comp.liveNote")}
+        </p>
+      </div>
+      <p className="muted ov-comp-note" id={orientationNoteId} data-comp-orientation-note>
+        {t("overlay.grid.orientationNote")}
+      </p>
+      <div className="ov-studio">
+        <LayerPalette
+          placed={placed}
+          selected={active}
+          grid={grid}
+          onSelect={selectChip}
+          drop={removeDrop}
+          ref={palette}
+        />
+        <div className="ov-comp-stage">
+          <LayoutGrid
+            ref={grid}
+            layers={shown}
+            scene={scene}
+            background={background}
+            charactersFeed={charactersOn ? charactersFeed : null}
+            selected={active}
+            onSelect={setSelected}
+            onPlace={place}
+            onRemove={remove}
+            removeZone={palette}
+            onRemoveDrop={setRemoveDrop}
+          />
+          <p className="muted ov-comp-help" data-comp-frame-size>
+            {t("overlay.grid.obsSize", frameSize(orientation))}
+          </p>
+          {onStream(shown, "chat") && (
+            <p className="muted ov-comp-help" data-comp-sample>
+              {t("overlay.comp.sampleChat")}
+            </p>
+          )}
         </div>
-      </section>
-    </div>
+        <div className="ov-studio-side">
+          <LayerProperties
+            layer={active}
+            layers={shown}
+            state={state}
+            data={scene.data}
+            busy={busy}
+            run={run}
+            change={change}
+            characters={characters}
+            onRemove={removeSelected}
+          />
+          <output className="ov-comp-status">{statusText}</output>
+          {error && <EditorAlert error={error} />}
+        </div>
+      </div>
+    </section>
   );
 }

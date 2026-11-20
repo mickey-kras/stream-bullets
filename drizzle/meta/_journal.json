@@ -225,6 +225,13 @@
       "when": 1794706489480,
       "tag": "0031_entry_activity_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1795160422350,
+      "tag": "0032_overlay_layers_limit",
+      "breakpoints": true
     }
   ]
 }

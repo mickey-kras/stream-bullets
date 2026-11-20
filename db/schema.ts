@@ -676,7 +676,7 @@ export const overlayState = sqliteTable(
     enumCheck("overlay_state_message_style_check", table.messageStyle, OVERLAY_MESSAGE_STYLES),
     check(
       "overlay_state_layers_check",
-      sql`json_valid(${table.layers}) AND json_type(${table.layers}) = 'object' AND length(${table.layers}) <= 1000`,
+      sql`json_valid(${table.layers}) AND json_type(${table.layers}) = 'object' AND length(${table.layers}) <= 4000`,
     ),
     check("overlay_state_chat_test_check", sql`${table.chatTestUntil} >= 0`),
     check(

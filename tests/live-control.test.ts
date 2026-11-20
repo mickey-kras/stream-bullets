@@ -1,15 +1,17 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { OverlayStage, overlayPoll, upNextStart, type OverlayPoll } from "../app/components/overlay/overlay-stage";
+import { OverlayStage, overlayPoll, type OverlayPoll } from "../app/components/overlay/overlay-stage";
 import type { AppEnv } from "../app/env";
 import { DEFAULT_LOCALE, loadCatalog, setLocaleSource, type Locale } from "../app/i18n";
 import { atMark } from "../app/lib/clock";
 import { MASH_COUNTDOWN_MS } from "../app/lib/mash";
 import { CHAT_TEST_MS } from "../app/lib/chat-test";
+import { legacyLayersText, parseStoredLayers } from "../app/lib/overlay-legacy";
 import {
   DEFAULT_LAYERS,
   STORED_LAYERS_LENGTH,
+  emptyCells,
   storedLayersSchema,
   storedLayersText,
   type CellRect,
@@ -147,31 +149,57 @@ beforeEach(async (): Promise<void> => {
   await seed();
 });
 
+/** Saves an overlay of this version with no layer on the grid, at revision 0. */
+async function emptyOverlay(streamerId: string = page): Promise<void> {
+  await env.DB.prepare("INSERT INTO overlay_state (streamer_id,layers,revision,updated_at) VALUES (?,'{\"v\":2}',0,1)")
+    .bind(streamerId)
+    .run();
+}
+
 describe("stored overlay and battle values", (): void => {
+  const chatCell: CellRect = { c: 0, r: 0, w: 5, h: 7 };
+  /** Stored by this version: the chat on stream, and no other layer on the grid. */
+  const layers: OverlayLayers = {
+    ...DEFAULT_LAYERS,
+    chat: { ...DEFAULT_LAYERS.chat, enabled: true },
+    cells: { horizontal: { ...emptyCells(), chat: chatCell }, vertical: emptyCells() },
+  };
   const row: OverlayRow = {
     air: '{"type":"message","ref":null}',
-    preview: '{"type":"poll","ref":"p1"}',
     position: "top",
     size: "l",
-    instant: 1,
     show_results: 0,
     message: "Back soon",
     message_style: "hype",
-    layers: '{"chat":{"enabled":true}}',
+    layers: storedLayersText(layers),
     chat_test_until: 1_000,
     revision: 4,
   };
-  const layers: OverlayLayers = { ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, enabled: true } };
+  const messageCell: CellRect = { c: 6, r: 0, w: 4, h: 2 };
+  const withMessage: OverlayLayers = {
+    ...layers,
+    cells: { ...layers.cells, horizontal: { ...layers.cells.horizontal, message: messageCell } },
+  };
 
-  it("shows Auto for a page with no row and parses a stored row", (): void => {
+  it("shows the latest active poll for a page with no row and parses a stored row", (): void => {
     expect(overlayValue(null)).toBe(DEFAULT_OVERLAY);
     expect(overlayValue(undefined)).toBe(DEFAULT_OVERLAY);
+    expect(DEFAULT_OVERLAY).toEqual({
+      showResults: true,
+      message: "",
+      messageStyle: "info",
+      layers: {
+        ...DEFAULT_LAYERS,
+        cells: {
+          horizontal: { ...emptyCells(), poll: { c: 5, r: 0, w: 11, h: 7 } },
+          vertical: { ...emptyCells(), poll: { c: 0, r: 0, w: 9, h: 8 } },
+        },
+      },
+      chatTestUntil: 0,
+      revision: 0,
+    });
+    // The row has the current layers version: the old source in `air` does not show.
     expect(overlayValue(row)).toEqual({
-      air: { type: "message", ref: null },
-      preview: { type: "poll", ref: "p1" },
-      position: "top",
-      size: "l",
-      instant: true,
       showResults: false,
       message: "Back soon",
       messageStyle: "hype",
@@ -179,65 +207,69 @@ describe("stored overlay and battle values", (): void => {
       chatTestUntil: 1_000,
       revision: 4,
     });
-    expect(overlayValue({ ...row, layers: "{}" }).layers).toEqual(DEFAULT_LAYERS);
+    expect(overlayValue({ ...row, layers: '{"v":2}' }).layers).toEqual(DEFAULT_LAYERS);
+  });
+
+  it("converts a row from before the overlay studio: the old source on air becomes a layer", (): void => {
+    const old: OverlayRow = { ...row, layers: '{"chat":{"enabled":true}}' };
+    expect(legacyLayersText(old.layers)).toBe(true);
+    const converted: OverlayLayers = overlayValue(old).layers;
+    expect(converted).toEqual(
+      parseStoredLayers(old.layers, { air: { type: "message", ref: null }, position: "top", size: "l" }),
+    );
+    // The top bar at size L touches the old default chat cell: the layer goes to the free space beside it.
+    expect(converted.cells.horizontal).toEqual({
+      ...emptyCells(),
+      chat: chatCell,
+      message: { c: 5, r: 0, w: 11, h: 3 },
+    });
+    expect(overlayValue({ ...old, layers: "{}" }).layers.cells.horizontal).toEqual({
+      ...emptyCells(),
+      message: { c: 0, r: 0, w: 16, h: 3 },
+    });
+    expect(overlayValue({ ...old, layers: "{}", air: '{"type":"hidden","ref":null}' }).layers).toEqual(DEFAULT_LAYERS);
   });
 
   it("throws on a malformed row so it never reaches a client", (): void => {
     expect(() => overlayValue({ ...row, position: "left" })).toThrow();
+    expect(() => overlayValue({ ...row, size: "xl" })).toThrow();
     expect(() => overlayValue({ ...row, air: '{"type":"poll"}' })).toThrow();
-    expect(() => overlayValue({ ...row, preview: "not json" })).toThrow();
+    expect(() => overlayValue({ ...row, air: "not json" })).toThrow();
     expect(() => overlayValue({ ...row, chat_test_until: -1 })).toThrow();
   });
 
-  it("reads a bad layers value as the default layers and keeps the rest of the overlay", (): void => {
+  it("reads a bad layers value as its defaults and keeps the rest of the overlay", (): void => {
+    const hidden: OverlayRow = { ...row, air: '{"type":"hidden","ref":null}' };
     const rest = { ...overlayValue(row), layers: DEFAULT_LAYERS };
     for (const layers of [
       "not json",
       "null",
       '"chat"',
       '{"chat":"on","characters":[]}',
-      '{"chat":{"enabled":"yes","hideCommands":1},"cells":{"horizontal":{"chat":{"c":0,"r":0,"w":1,"h":1}}}}',
+      '{"v":2,"chat":{"enabled":"yes","hideCommands":1},"cells":{"horizontal":{"chat":{"c":0,"r":0,"w":1,"h":1}}}}',
     ])
-      expect(overlayValue({ ...row, layers })).toEqual(rest);
+      expect(overlayValue({ ...hidden, layers })).toEqual(rest);
     // Only the bad field takes its default.
-    expect(
-      overlayValue({ ...row, layers: '{"chat":{"enabled":true,"rect":{"x":0,"y":0,"w":10,"h":10},"theme":"neon"}}' })
-        .layers,
-    ).toEqual(layers);
+    const stored: string = JSON.stringify({ ...JSON.parse(row.layers), chat: { enabled: true, theme: "neon" } });
+    expect(overlayValue({ ...row, layers: stored }).layers).toEqual(layers);
   });
 
-  it("hides the preview, and the message unless the message is on air", (): void => {
+  it("keeps the message private unless the message layer is on stream", (): void => {
     const state = overlayValue(row);
-    expect(overlayPublic(state)).toEqual({
-      air: { type: "message", ref: null },
-      position: "top",
-      size: "l",
-      showResults: false,
-      message: "Back soon",
-      messageStyle: "hype",
-      layers,
-      chatTestUntil: 1_000,
-      revision: 4,
-    });
-    expect(overlayPublic({ ...state, air: { type: "auto", ref: null } }).message).toBe("");
-    expect(overlayPublic(state)).not.toHaveProperty("preview");
+    expect(overlayPublic(state)).toEqual({ ...state, message: "" });
+    expect(overlayPublic({ ...state, layers: withMessage })).toEqual({ ...state, layers: withMessage });
+    for (const key of ["air", "preview", "position", "size", "instant"])
+      expect(overlayPublic(state)).not.toHaveProperty(key);
   });
 
   it("shows the message while the message layer is on stream", (): void => {
-    const state: OverlayState = { ...overlayValue(row), air: { type: "auto", ref: null } };
-    const placed: OverlayLayers = {
-      ...layers,
-      cells: {
-        ...layers.cells,
-        horizontal: { ...layers.cells.horizontal, message: { c: 6, r: 0, w: 4, h: 2 } },
-      },
-    };
-    expect(overlayPublic({ ...state, layers: placed }).message).toBe("Back soon");
+    const state: OverlayState = overlayValue(row);
+    expect(overlayPublic({ ...state, layers: withMessage }).message).toBe("Back soon");
     // Not in the other orientation, and not while the layer is off.
-    expect(overlayPublic({ ...state, layers: { ...placed, orientation: "vertical" } }).message).toBe("");
+    expect(overlayPublic({ ...state, layers: { ...withMessage, orientation: "vertical" } }).message).toBe("");
     const off: OverlayLayers = {
-      ...placed,
-      items: { ...placed.items, message: { ...placed.items.message, enabled: false } },
+      ...withMessage,
+      items: { ...withMessage.items, message: { ...withMessage.items.message, enabled: false } },
     };
     expect(overlayPublic({ ...state, layers: off }).message).toBe("");
   });
@@ -262,35 +294,35 @@ describe("stored overlay and battle values", (): void => {
 });
 
 describe("overlay control state", (): void => {
-  const saved: OverlayState = { ...DEFAULT_OVERLAY, preview: { type: "topic", ref: "t" }, instant: true, revision: 4 };
+  const saved: OverlayState = { ...DEFAULT_OVERLAY, message: "Mine", revision: 4 };
+  const messageOn: OverlayLayers = {
+    ...DEFAULT_LAYERS,
+    cells: { horizontal: { ...emptyCells(), message: { c: 0, r: 0, w: 4, h: 2 } }, vertical: emptyCells() },
+  };
 
   it("shows the newer of the saved and the loaded state", (): void => {
-    const loaded: OverlayState = { ...DEFAULT_OVERLAY, size: "l", revision: 5 };
+    const loaded: OverlayState = { ...DEFAULT_OVERLAY, showResults: false, revision: 5 };
     expect(controlState(saved, loaded, null)).toBe(loaded);
     expect(controlState(saved, { ...loaded, revision: 3 }, undefined)).toBe(saved);
-    expect(controlState(saved, saved, overlayPublic({ ...saved, size: "s" }))).toBe(saved);
+    expect(controlState(saved, saved, overlayPublic({ ...saved, showResults: false }))).toBe(saved);
   });
 
-  it("takes a newer live overlay from another tab and keeps the private fields", (): void => {
+  it("takes a newer live overlay from another tab and keeps the message draft", (): void => {
     const other: OverlayState = {
       ...saved,
-      air: { type: "message", ref: null },
-      position: "top",
-      size: "l",
       showResults: false,
       message: "Back soon",
       messageStyle: "hype",
-      preview: { type: "auto", ref: null },
+      layers: messageOn,
+      chatTestUntil: 9,
       revision: 6,
     };
-    expect(controlState(saved, saved, overlayPublic(other))).toEqual({ ...other, preview: saved.preview });
-    const air: OverlayState = { ...other, air: { type: "auto", ref: null }, message: "Draft", revision: 7 };
-    expect(controlState({ ...saved, message: "Mine" }, saved, overlayPublic(air))).toMatchObject({
-      air: { type: "auto" },
-      message: "Mine",
-      instant: true,
-      revision: 7,
-    });
+    // The message layer is on stream: the live message is the saved message, also an empty one.
+    expect(controlState(saved, saved, overlayPublic(other))).toEqual(other);
+    expect(controlState(saved, saved, overlayPublic({ ...other, message: "" })).message).toBe("");
+    // Off stream the live state has no message: the draft stays.
+    const draft: OverlayState = { ...other, layers: DEFAULT_LAYERS, message: "Draft", revision: 7 };
+    expect(controlState(saved, saved, overlayPublic(draft))).toEqual({ ...draft, message: "Mine" });
   });
 });
 
@@ -359,11 +391,8 @@ describe("Up next on the overlay", (): void => {
     // The local clock is 3 s ahead; reload must use server time.
     vi.setSystemTime(1_000_000 + 3_000);
     const serverNow = 1_000_000;
-    const data: Pick<OverlayData, "next"> = { next: { title: "Boss rush", startsAt: serverNow + 600_000 } };
-    const at = upNextStart({ type: "next", ref: null }, data);
-    expect(at).toBe(serverNow + 600_000);
     const reload = vi.fn();
-    atMark(serverNow, at!, reload);
+    atMark(serverNow, serverNow + 600_000, reload);
     vi.advanceTimersByTime(599_999);
     expect(reload).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1);
@@ -373,11 +402,8 @@ describe("Up next on the overlay", (): void => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("waits for nothing when Up next is off air, has no stream, already started or is stopped", (): void => {
+  it("waits for nothing when the stream already started or the wait is stopped", (): void => {
     vi.useFakeTimers();
-    const data: Pick<OverlayData, "next"> = { next: { title: "Boss rush", startsAt: Date.now() + 60_000 } };
-    expect(upNextStart({ type: "topic", ref: "t" }, data)).toBeNull();
-    expect(upNextStart({ type: "next", ref: null }, { next: null })).toBeNull();
     const reload = vi.fn();
     const stop = atMark(Date.now(), Date.now() + 60_000, reload);
     stop();
@@ -403,7 +429,7 @@ describe("overlay poll card", (): void => {
             name: "Nova",
             handle: "nova",
             host: "streambullets.com",
-            overlay: { position: "lower", size: "m", showResults: true, message: "", messageStyle: "info" },
+            overlay: { showResults: true, message: "", messageStyle: "info" },
             polls: [
               {
                 id: poll,
@@ -436,7 +462,7 @@ describe("overlay poll card", (): void => {
             name: "Nova",
             handle: "nova",
             host: "streambullets.com",
-            overlay: { position: "lower", size: "m", showResults, message: "", messageStyle: "info" },
+            overlay: { showResults, message: "", messageStyle: "info" },
             polls: [
               {
                 id: poll,
@@ -491,7 +517,7 @@ describe("overlay poll card", (): void => {
             name: "Nova",
             handle: "nova",
             host: "streambullets.com",
-            overlay: { position: "lower", size: "m", showResults: true, message: "", messageStyle: "info" },
+            overlay: { showResults: true, message: "", messageStyle: "info" },
             polls: [],
             data: {
               polls: [],
@@ -647,6 +673,14 @@ describe("overlay control", (): void => {
     return (await body<{ overlay: OverlayState }>(response)).overlay;
   }
 
+  async function storedRow(): Promise<Record<string, unknown> | null> {
+    return env.DB.prepare(
+      "SELECT air,preview,position,size,instant,layers,revision FROM overlay_state WHERE streamer_id=?",
+    )
+      .bind(page)
+      .first<Record<string, unknown>>();
+  }
+
   it("reads the default state and the sources for the owner only", async (): Promise<void> => {
     expect((await call("GET", "overlay")).status).toBe(401);
     expect((await call("GET", "overlay", { user: "viewer" })).status).toBe(404);
@@ -663,69 +697,140 @@ describe("overlay control", (): void => {
       { id: card, icon: "heart", title: "Card", body: "Body", label: null, target: null },
     ]);
     expect(result.data).toMatchObject({ next: null, support: null });
+    // A page without a row gets no row from a read.
+    expect(await storedRow()).toBeNull();
   });
 
-  it("previews, takes and lays out, and tells the live room each time", async (): Promise<void> => {
-    const previewed = await overlay(await send({ action: "preview", source: { type: "poll", ref: poll } }));
-    expect(previewed).toMatchObject({ preview: { type: "poll", ref: poll }, air: { type: "auto" }, revision: 1 });
-    const taken = await overlay(await send({ action: "take" }));
-    expect(taken).toMatchObject({ air: { type: "poll", ref: poll }, revision: 2 });
-    const layout = await overlay(await send({ action: "layout", position: "corner", showResults: false }));
-    expect(layout).toMatchObject({ position: "corner", size: "m", instant: false, showResults: false, revision: 3 });
+  it("shows and hides the results, saves the message, and tells the live room each time", async (): Promise<void> => {
+    const hidden = await overlay(await send({ action: "showResults", on: false }));
+    expect(hidden).toEqual({ ...DEFAULT_OVERLAY, showResults: false, revision: 1 });
     const message = await overlay(await send({ action: "message", text: "  Be right back ", style: "hype" }));
-    expect(message).toMatchObject({ message: "Be right back", messageStyle: "hype", air: { type: "poll" } });
-    expect(roomCalls).toEqual(Array.from({ length: 4 }, () => ({ path: `/overlay?streamerId=${page}`, body: "" })));
+    expect(message).toMatchObject({ message: "Be right back", messageStyle: "hype", showResults: false, revision: 2 });
+    expect((await overlay(await send({ action: "showResults", on: true }))).showResults).toBe(true);
+    expect(roomCalls).toEqual(Array.from({ length: 3 }, () => ({ path: `/overlay?streamerId=${page}`, body: "" })));
+    // The first save of a page stores its layers at the current version. The old columns keep their defaults.
+    const row = await storedRow();
+    expect(row).toMatchObject({
+      air: '{"type":"auto","ref":null}',
+      preview: '{"type":"auto","ref":null}',
+      position: "lower",
+      size: "m",
+      instant: 0,
+      revision: 3,
+    });
+    expect(row?.layers).toBe(storedLayersText(DEFAULT_OVERLAY.layers));
   });
 
-  it("puts the preview on air at once in instant mode", async (): Promise<void> => {
-    await send({ action: "layout", instant: true, size: "s" });
-    const state = await overlay(await send({ action: "preview", source: { type: "topic", ref: topic } }));
-    expect(state).toMatchObject({ air: { type: "topic", ref: topic }, preview: { type: "topic", ref: topic } });
-    // GET must return the on-air topic outside the newest list.
-    const read = await body<{ data: OverlayData }>(await call("GET", "overlay", { user: "owner" }));
-    expect(read.data.topics.map((value) => value.id)).toContain(topic);
-  });
-
-  it("checks that the source is on this page and drops refs a source does not use", async (): Promise<void> => {
-    const refused = async (source: Record<string, unknown>): Promise<{ status: number; error: string }> => {
-      const response = await send({ action: "preview", source });
-      return { status: response.status, error: (await body<{ error: string }>(response)).error };
-    };
-    expect(await refused({ type: "topic", ref: null })).toEqual({ status: 400, error: "Pick a poll or topic." });
-    // "A specific poll" can start with no poll: the overlay waits until the owner picks one.
-    expect((await overlay(await send({ action: "preview", source: { type: "poll", ref: null } }))).preview).toEqual({
-      type: "poll",
-      ref: null,
-    });
-    expect(await refused({ type: "poll", ref: topic })).toEqual({ status: 404, error: "Poll not found." });
-    expect(await refused({ type: "topic", ref: poll })).toEqual({ status: 404, error: "Topic not found." });
-    expect(await refused({ type: "topic", ref: foreignTopic })).toEqual({ status: 404, error: "Topic not found." });
-    expect(await refused({ type: "card", ref: "missing" })).toEqual({
-      status: 404,
-      error: "Community card not found.",
-    });
-    expect((await overlay(await send({ action: "preview", source: { type: "card", ref: card } }))).preview).toEqual({
-      type: "card",
-      ref: card,
-    });
-    expect((await overlay(await send({ action: "preview", source: { type: "card", ref: null } }))).preview).toEqual({
-      type: "card",
-      ref: null,
-    });
-    expect(
-      (await overlay(await send({ action: "preview", source: { type: "support", ref: "anything" } }))).preview,
-    ).toEqual({ type: "support", ref: null });
+  it("refuses the actions from before the overlay studio", async (): Promise<void> => {
+    for (const action of [
+      { action: "preview", source: { type: "poll", ref: poll } },
+      { action: "take" },
+      { action: "layout", position: "top" },
+      { action: "layout", showResults: false },
+      { action: "showResults" },
+      { action: "showResults", on: "yes" },
+      { action: "showResults", on: true, instant: true },
+    ])
+      expect((await send(action)).status, JSON.stringify(action)).toBe(400);
+    expect(await storedRow()).toBeNull();
+    expect(roomCalls).toEqual([]);
   });
 
   it("refuses bad actions, pages the user does not own, and frozen pages", async (): Promise<void> => {
-    expect((await send({ action: "take", extra: 1 })).status).toBe(400);
     expect((await send({ action: "message", text: "two\nlines", style: "info" })).status).toBe(400);
     expect((await send({ action: "message", text: "x".repeat(121), style: "info" })).status).toBe(400);
-    expect((await send({ action: "take" }, "viewer")).status).toBe(404);
-    await expect(updateOverlay(env, "viewer", page, { action: "take" })).rejects.toMatchObject({ status: 403 });
+    expect((await send({ action: "showResults", on: false }, "viewer")).status).toBe(404);
+    await expect(updateOverlay(env, "viewer", page, { action: "showResults", on: false })).rejects.toMatchObject({
+      status: 403,
+    });
     await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(page).run();
-    expect((await send({ action: "take" })).status).toBe(423);
+    expect((await send({ action: "showResults", on: false })).status).toBe(423);
     expect(roomCalls).toEqual([]);
+  });
+
+  describe("state from before the overlay studio", (): void => {
+    /** A row as the old version saved it: a source on air, and layers without a version. */
+    async function oldRow(air: Record<string, unknown>, layers: Record<string, unknown> = {}): Promise<void> {
+      await env.DB.prepare(
+        `INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,message,layers,revision,updated_at)
+          VALUES (?,?,'{"type":"card","ref":null}','corner','s',1,'Back soon',?,5,1)`,
+      )
+        .bind(page, JSON.stringify(air), JSON.stringify(layers))
+        .run();
+    }
+
+    it("converts the source on air to a layer on the first read and stores the result once", async (): Promise<void> => {
+      await oldRow({ type: "topic", ref: topic });
+      const state = await getOverlayState(env, page);
+      expect(state.revision).toBe(5);
+      expect(state.layers.items.topic).toEqual({ ...DEFAULT_LAYERS.items.topic, ref: topic });
+      // The corner at size S, in both orientations.
+      expect(state.layers.cells).toEqual({
+        horizontal: { ...emptyCells(), topic: { c: 11, r: 7, w: 5, h: 2 } },
+        vertical: { ...emptyCells(), topic: { c: 5, r: 14, w: 4, h: 2 } },
+      });
+      // The read stored the layers at the current version. The revision and the old columns stay.
+      const row = await storedRow();
+      expect(row).toMatchObject({
+        air: JSON.stringify({ type: "topic", ref: topic }),
+        preview: '{"type":"card","ref":null}',
+        position: "corner",
+        size: "s",
+        instant: 1,
+        revision: 5,
+      });
+      expect(row?.layers).toBe(storedLayersText(state.layers));
+      expect(legacyLayersText(String(row?.layers))).toBe(false);
+      expect(await getOverlayState(env, page)).toEqual(state);
+      expect(roomCalls).toEqual([]);
+    });
+
+    it("does not bring the old source back after the owner takes its layer off the grid", async (): Promise<void> => {
+      await oldRow({ type: "message", ref: null });
+      const read = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
+      expect(read.overlay.layers.cells.horizontal.message).toEqual({ c: 11, r: 7, w: 5, h: 2 });
+      // The message layer is on stream, so the message is public.
+      expect(overlayPublic(read.overlay).message).toBe("Back soon");
+      const cells = { horizontal: { message: null }, vertical: { message: null } };
+      const removed = await overlay(await send({ action: "layers", cells }));
+      expect(removed.layers.cells).toEqual({ horizontal: emptyCells(), vertical: emptyCells() });
+      expect((await getOverlayState(env, page)).layers).toEqual(removed.layers);
+      expect(overlayPublic(removed).message).toBe("");
+      expect((await storedRow())?.air).toBe('{"type":"message","ref":null}');
+    });
+
+    it("converts the same way without a read first, when an action saves", async (): Promise<void> => {
+      await oldRow({ type: "support", ref: null }, { chat: { enabled: true } });
+      const saved = await overlay(await send({ action: "showResults", on: false }));
+      // The old default chat cell (5 x 7 at the top left) stays. The corner is free.
+      expect(saved.layers.cells.horizontal).toEqual({
+        ...emptyCells(),
+        chat: { c: 0, r: 0, w: 5, h: 7 },
+        support: { c: 11, r: 7, w: 5, h: 2 },
+      });
+      expect((await storedRow())?.layers).toBe(storedLayersText(saved.layers));
+      expect((await getOverlayState(env, page)).layers).toEqual(saved.layers);
+    });
+
+    it("leaves Hidden without a layer, and takes a chat layer that was off away from the grid", async (): Promise<void> => {
+      const chat = { c: 0, r: 0, w: 5, h: 7 };
+      await oldRow({ type: "hidden", ref: null }, { chat: { enabled: false }, cells: { horizontal: { chat } } });
+      const state = await getOverlayState(env, page);
+      expect(state.layers).toEqual(DEFAULT_LAYERS);
+      expect((await storedRow())?.layers).toBe(storedLayersText(DEFAULT_LAYERS));
+    });
+
+    it("does not store the conversion when a save came first", async (): Promise<void> => {
+      await oldRow({ type: "next", ref: null });
+      // Another tab saves between the read of the row and the write of the conversion.
+      const raced = racingEnv(() => updateOverlay(env, "owner", page, { action: "showResults", on: false }), 1);
+      const state = await getOverlayState(raced, page);
+      expect(state.revision).toBe(5);
+      const row = await storedRow();
+      expect(row?.revision).toBe(6);
+      // The save stored the same layers.
+      expect(row?.layers).toBe(storedLayersText(state.layers));
+    });
   });
 
   // Run `race` after the first `times` overlay reads to simulate a second tab.
@@ -753,43 +858,40 @@ describe("overlay control", (): void => {
 
   it("re-applies an action when another tab saved in between, so neither change is lost", async (): Promise<void> => {
     await updateOverlay(env, "owner", page, { action: "message", text: "Hi", style: "info" });
-    const other = (): Promise<OverlayUpdate> =>
-      updateOverlay(env, "owner", page, { action: "layout", position: "top" });
+    const other = (): Promise<OverlayUpdate> => updateOverlay(env, "owner", page, { action: "showResults", on: false });
     const raced = racingEnv(other, 1);
     const { overlay: state } = await updateOverlay(raced, "owner", page, {
       action: "message",
       text: "Be right back",
       style: "hype",
     });
-    expect(state).toMatchObject({ position: "top", message: "Be right back", messageStyle: "hype", revision: 3 });
+    expect(state).toMatchObject({ showResults: false, message: "Be right back", messageStyle: "hype", revision: 3 });
     const stored = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
     expect(stored.overlay).toEqual(state);
   });
 
   it("answers 409 when other tabs keep saving first", async (): Promise<void> => {
-    let size = 0;
-    const sizes = ["s", "m", "l"] as const;
+    let saves = 0;
     const other = (): Promise<OverlayUpdate> =>
-      updateOverlay(env, "owner", page, { action: "layout", size: sizes[size++ % 3] });
+      updateOverlay(env, "owner", page, { action: "message", text: `Save ${++saves}`, style: "info" });
     await expect(
-      updateOverlay(racingEnv(other, 3), "owner", page, { action: "layout", position: "center" }),
+      updateOverlay(racingEnv(other, 3), "owner", page, { action: "showResults", on: false }),
     ).rejects.toMatchObject({ status: 409 });
     const stored = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
-    expect(stored.overlay).toMatchObject({ position: "lower", size: "l", revision: 3 });
+    expect(stored.overlay).toMatchObject({ showResults: true, message: "Save 3", revision: 3 });
   });
 
-  it("keeps each layout value the action leaves out", async (): Promise<void> => {
-    const current: OverlayState = {
-      ...DEFAULT_OVERLAY,
-      position: "top",
-      size: "l",
-      instant: false,
-      showResults: false,
-    };
-    expect(await nextOverlayState(env, page, current, { action: "layout" })).toEqual({ ...current, revision: 1 });
-    expect(
-      await nextOverlayState(env, page, current, { action: "layout", size: "s", instant: false, showResults: true }),
-    ).toEqual({ ...current, size: "s", showResults: true, revision: 1 });
+  it("changes only the results switch", async (): Promise<void> => {
+    const current: OverlayState = { ...DEFAULT_OVERLAY, message: "Hi", showResults: false, chatTestUntil: 0 };
+    expect(await nextOverlayState(env, page, current, { action: "showResults", on: false })).toEqual({
+      ...current,
+      revision: 1,
+    });
+    expect(await nextOverlayState(env, page, current, { action: "showResults", on: true })).toEqual({
+      ...current,
+      showResults: true,
+      revision: 1,
+    });
   });
 
   describe("layers", (): void => {
@@ -799,6 +901,9 @@ describe("overlay control", (): void => {
       horizontal: { ...DEFAULT_LAYERS.cells.horizontal, ...patch },
     });
 
+    // Each test starts with no layer on the grid.
+    beforeEach(async (): Promise<void> => emptyOverlay());
+
     async function storedLayers(streamerId: string): Promise<unknown> {
       const row = await env.DB.prepare("SELECT layers FROM overlay_state WHERE streamer_id=?")
         .bind(streamerId)
@@ -807,11 +912,10 @@ describe("overlay control", (): void => {
     }
 
     it("saves each layer change, sends it to the live room and reads it back", async (): Promise<void> => {
-      expect(DEFAULT_OVERLAY.layers).toEqual(DEFAULT_LAYERS);
       const first = await overlay(
         await send({ action: "layers", chat: { enabled: true }, cells: { horizontal: { chat: chatCell } } }),
       );
-      expect(first).toMatchObject({ revision: 1, position: "lower", air: { type: "auto" } });
+      expect(first).toMatchObject({ revision: 1, showResults: true, message: "" });
       expect(first.layers).toEqual({
         ...DEFAULT_LAYERS,
         chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },
@@ -823,7 +927,7 @@ describe("overlay control", (): void => {
           orientation: "vertical",
           chat: { hideCommands: false, backgroundOpacity: 45 },
           characters: { enabled: true },
-          cells: { horizontal: { content: { c: 0, r: 0, w: 6, h: 4 } } },
+          cells: { horizontal: { poll: { c: 0, r: 0, w: 6, h: 4 } } },
         }),
       );
       expect(second.layers).toEqual({
@@ -831,17 +935,18 @@ describe("overlay control", (): void => {
         chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
         characters: { enabled: true, timeout: 60 },
         items: DEFAULT_LAYERS.items,
-        cells: horizontal({ chat: chatCell, content: { c: 0, r: 0, w: 6, h: 4 } }),
+        cells: horizontal({ chat: chatCell, poll: { c: 0, r: 0, w: 6, h: 4 } }),
       });
       expect(second.revision).toBe(2);
       expect(storedLayersSchema.parse(await storedLayers(page))).toEqual(second.layers);
       const read = await body<{ overlay: OverlayState }>(await call("GET", "overlay", { user: "owner" }));
       expect(read.overlay).toEqual(second);
       // Other actions keep the layers.
-      expect((await overlay(await send({ action: "layout", size: "l" }))).layers).toEqual(second.layers);
-      // Null removes the content cell.
-      const third = await overlay(await send({ action: "layers", cells: { horizontal: { content: null } } }));
-      expect(third.layers.cells.horizontal.content).toBeNull();
+      expect((await overlay(await send({ action: "showResults", on: false }))).layers).toEqual(second.layers);
+      // Null takes a layer off the grid, also the chat.
+      const third = await overlay(await send({ action: "layers", cells: { horizontal: { poll: null, chat: null } } }));
+      expect(third.layers.cells).toEqual(DEFAULT_LAYERS.cells);
+      expect(third.layers.chat.enabled).toBe(true);
       expect(roomCalls).toEqual(Array.from({ length: 4 }, () => ({ path: `/overlay?streamerId=${page}`, body: "" })));
       // The character playground reads the saved layers again after each layers change, not after other actions.
       expect(ingestCalls).toEqual(
@@ -876,19 +981,6 @@ describe("overlay control", (): void => {
       expect(ingestCalls).toHaveLength(1);
     });
 
-    it("reads a row saved before layers existed as the default layers", async (): Promise<void> => {
-      await env.DB.prepare("INSERT INTO overlay_state (streamer_id,position,revision,updated_at) VALUES (?,'top',5,1)")
-        .bind(page)
-        .run();
-      expect(await storedLayers(page)).toEqual({});
-      const state = await getOverlayState(env, page);
-      expect(state).toMatchObject({ position: "top", revision: 5, layers: DEFAULT_LAYERS, chatTestUntil: 0 });
-      expect(overlayPublic(state).layers).toEqual(DEFAULT_LAYERS);
-      const next = await overlay(await send({ action: "layers", characters: { enabled: true } }));
-      expect(next.layers.characters.enabled).toBe(true);
-      expect(storedLayersSchema.parse(await storedLayers(page))).toEqual(next.layers);
-    });
-
     it("refuses cells outside the grid, below the minimum or over each other, and unknown fields", async (): Promise<void> => {
       const refused: Record<string, unknown>[] = [
         { cells: { horizontal: { chat: { c: 14, r: 0, w: 3, h: 2 } } } },
@@ -896,17 +988,15 @@ describe("overlay control", (): void => {
         { cells: { horizontal: { chat: { c: -1, r: 0, w: 3, h: 2 } } } },
         { cells: { horizontal: { chat: { c: 0, r: 0, w: 2, h: 2 } } } },
         { cells: { horizontal: { characters: { c: 0, r: 0, w: 5, h: 2 } } } },
-        { cells: { horizontal: { content: { c: 6, r: 0, w: 3, h: 2 } } } },
+        { cells: { horizontal: { content: { c: 6, r: 0, w: 4, h: 2 } } } },
+        { cells: { horizontal: { content: null } } },
         { cells: { horizontal: { chat: { c: 0.5, r: 0, w: 3, h: 2 } } } },
         { cells: { horizontal: { chat: { c: 0, r: 0, w: 3 } } } },
         { cells: { horizontal: { chat: { ...chatCell, z: 1 } } } },
-        { cells: { horizontal: { chat: null } } },
-        // Over a saved cell: the chat default covers columns 0 to 4, rows 0 to 6.
-        { cells: { horizontal: { content: { c: 4, r: 0, w: 4, h: 2 } } } },
         // Over each other in the same patch.
-        { cells: { horizontal: { chat: chatCell, content: { c: 10, r: 4, w: 4, h: 2 } } } },
-        // A content layer over the saved chat cell, below the minimum, and over another content layer.
-        { cells: { horizontal: { poll: { c: 4, r: 0, w: 4, h: 2 } } } },
+        { cells: { horizontal: { chat: chatCell, characters: { c: 10, r: 4, w: 6, h: 2 } } } },
+        // A content layer over the chat cell, below the minimum, and over another content layer.
+        { cells: { horizontal: { chat: chatCell, poll: { c: 9, r: 0, w: 4, h: 2 } } } },
         { cells: { horizontal: { card: { c: 6, r: 0, w: 3, h: 2 } } } },
         { cells: { horizontal: { poll: { c: 6, r: 0, w: 4, h: 2 }, topic: { c: 9, r: 1, w: 4, h: 2 } } } },
         { items: { next: { ref: "n1" } } },
@@ -927,8 +1017,24 @@ describe("overlay control", (): void => {
         { write: { writer: "editor-1234", seq: 1, extra: true } },
       ];
       for (const patch of refused) expect((await send({ action: "layers", ...patch })).status).toBe(400);
-      expect(await storedLayers(page)).toBeNull();
+      expect(await storedLayers(page)).toEqual({ v: 2 });
       expect(roomCalls).toEqual([]);
+    });
+
+    it("refuses a cell over the saved cell of another layer, also of a layer that is off stream", async (): Promise<void> => {
+      // The chat is on the grid and off stream.
+      await send({ action: "layers", cells: { horizontal: { chat: chatCell } } });
+      const before = await storedLayers(page);
+      for (const cells of [{ poll: { c: 9, r: 0, w: 4, h: 2 } }, { characters: { c: 10, r: 4, w: 6, h: 2 } }]) {
+        const response = await send({ action: "layers", cells: { horizontal: cells } });
+        expect(response.status).toBe(400);
+        expect(await body(response)).toEqual({ error: "Layers must not overlap." });
+      }
+      expect(await storedLayers(page)).toEqual(before);
+      // The other orientation has its own cells.
+      expect((await send({ action: "layers", cells: { vertical: { poll: { c: 0, r: 0, w: 4, h: 2 } } } })).status).toBe(
+        200,
+      );
     });
 
     it("saves the settings and the cells of the content layers and stores only what differs", async (): Promise<void> => {
@@ -962,6 +1068,7 @@ describe("overlay control", (): void => {
         },
       });
       expect(await storedLayers(page)).toMatchObject({
+        v: 2,
         items: {
           poll: { ref: poll, qr: false },
           topic: { ref: topic, backgroundOpacity: 40 },
@@ -1007,6 +1114,12 @@ describe("overlay control", (): void => {
       expect(await topics()).toContain(topic);
       await send({ action: "layers", items: { topic: { enabled: false } } });
       expect(await topics()).not.toContain(topic);
+      // The control page loads the topic of the layer also while the layer is off stream, for its picker.
+      const url = `${origin}/overlay-control`;
+      const request = new Request(url, { headers: { cookie: await cookie("owner") } });
+      const loaded = await controlLoader({ request, params: {}, context: context(), url: new URL(url), pattern: "" });
+      expect(loaded.state.layers.items.topic).toMatchObject({ enabled: false, ref: topic });
+      expect(loaded.data.topics.map((value) => value.id)).toContain(topic);
     });
 
     it("checks that the ref of a content layer is on this page", async (): Promise<void> => {
@@ -1023,7 +1136,7 @@ describe("overlay control", (): void => {
       });
       // One bad ref refuses the whole patch.
       expect((await refused({ poll: { ref: poll }, card: { ref: "missing" } })).status).toBe(404);
-      expect(await storedLayers(page)).toBeNull();
+      expect(await storedLayers(page)).toEqual({ v: 2 });
       expect(roomCalls).toEqual([]);
       // A null ref needs no check: a topic layer can wait for its topic.
       const saved = await overlay(
@@ -1032,33 +1145,55 @@ describe("overlay control", (): void => {
       expect(saved.layers.items).toMatchObject({ topic: { ref: null }, poll: { ref: poll }, card: { ref: card } });
     });
 
-    it("refuses layers that do not fit the stored column", async (): Promise<void> => {
-      const cell = (c: number, r: number): CellRect => ({ c, r, w: 4, h: 2 });
-      const cells = {
-        poll: cell(0, 0),
-        topic: cell(0, 2),
-        next: cell(0, 4),
-        message: cell(0, 6),
-        card: cell(4, 0),
-        support: cell(4, 2),
-      };
-      const items = { poll: { ref: poll }, topic: { ref: topic }, card: { ref: card } };
-      const placed = await overlay(await send({ action: "layers", items, cells: { vertical: cells } }));
-      expect(storedLayersText(placed.layers).length).toBeLessThanOrEqual(STORED_LAYERS_LENGTH);
-      // The same layers with each setting changed need more than the column holds.
+    it("keeps the largest layers below the limit of the stored column", async (): Promise<void> => {
+      // Each layer on the grid of both orientations, each ref set and each setting changed.
       const other = { backgroundOpacity: 55, enabled: false, qr: true };
-      const changed = {
-        poll: { ...other, qr: false },
-        topic: other,
-        card: other,
+      const items = {
+        poll: { ...other, ref: poll, qr: false },
+        topic: { ...other, ref: topic },
+        card: { ...other, ref: card },
         next: other,
         message: other,
         support: other,
       };
-      const response = await send({ action: "layers", items: changed });
-      expect(response.status).toBe(400);
-      expect(await body(response)).toEqual({ error: "The layers are too large to save. Take a layer off the grid." });
-      expect((await getOverlayState(env, page)).layers).toEqual(placed.layers);
+      const cells = (rows: number): Record<string, CellRect> => {
+        const names = ["chat", "characters", "poll", "topic", "next", "message", "card", "support"];
+        return Object.fromEntries(
+          names.map((name: string, index: number): [string, CellRect] => [name, { c: 0, r: index * rows, w: 9, h: 2 }]),
+        );
+      };
+      const horizontal = Object.fromEntries(
+        Object.keys(cells(1)).map((name: string, index: number): [string, CellRect] => [
+          name,
+          { c: (index % 2) * 8, r: Math.floor(index / 2) * 2, w: 8, h: 2 },
+        ]),
+      );
+      const placed = await overlay(
+        await send({
+          action: "layers",
+          chat: { enabled: true, hideCommands: false, backgroundOpacity: 0 },
+          characters: { enabled: true, timeout: 600 },
+          items,
+          cells: { horizontal, vertical: cells(2) },
+        }),
+      );
+      const text: string = storedLayersText(placed.layers);
+      expect(text.length).toBeLessThan(STORED_LAYERS_LENGTH / 2);
+      expect((await storedRow())?.layers).toBe(text);
+      // Layers above the limit get a clear refusal. The API cannot make such layers: only a stored ref can be long.
+      const long: OverlayLayers = {
+        ...placed.layers,
+        items: { ...placed.layers.items, poll: { ...placed.layers.items.poll, ref: "x".repeat(STORED_LAYERS_LENGTH) } },
+      };
+      await expect(
+        nextOverlayState(env, page, { ...placed, layers: long }, { action: "layers", orientation: "vertical" }),
+      ).rejects.toMatchObject({ status: 400, message: "The layers are too large to save. Take a layer off the grid." });
+      // The column refuses a longer text, so the server checks the length first.
+      await expect(
+        env.DB.prepare("UPDATE overlay_state SET layers=? WHERE streamer_id=?")
+          .bind(JSON.stringify({ v: 2, note: "x".repeat(STORED_LAYERS_LENGTH) }), page)
+          .run(),
+      ).rejects.toThrow(/constraint failed/);
     });
 
     it("counts layer edits against the write quota and answers 429 when it runs out", async (): Promise<void> => {
@@ -1076,7 +1211,7 @@ describe("overlay control", (): void => {
       expect((await send({ action: "chatTest", on: true })).status).toBe(429);
       // Stopping a chat test and other overlay actions do not use the quota.
       expect((await send({ action: "chatTest", on: false })).status).toBe(200);
-      expect((await send({ action: "take" })).status).toBe(200);
+      expect((await send({ action: "showResults", on: false })).status).toBe(200);
     });
 
     it("lets only the owner of an active or hidden page change layers", async (): Promise<void> => {
@@ -1088,11 +1223,12 @@ describe("overlay control", (): void => {
       await env.DB.prepare("UPDATE streamers SET status='frozen' WHERE id=?").bind(page).run();
       expect((await send({ action: "layers", chat: { enabled: true } })).status).toBe(423);
       expect((await send({ action: "chatTest", on: true })).status).toBe(423);
-      expect(await storedLayers(page)).toBeNull();
+      expect(await storedLayers(page)).toEqual({ v: 2 });
       expect(roomCalls).toEqual([]);
     });
 
     it("changes only the page of the signed-in owner", async (): Promise<void> => {
+      await emptyOverlay(otherPage);
       await send({ action: "layers", chat: { enabled: true }, cells: { horizontal: { chat: chatCell } } });
       const other = await overlay(await send({ action: "layers", characters: { enabled: true } }, "other"));
       expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60 } });
@@ -1111,7 +1247,13 @@ describe("overlay control", (): void => {
     });
 
     it("merges a layer patch without touching the other overlay values", async (): Promise<void> => {
-      const current: OverlayState = { ...DEFAULT_OVERLAY, position: "top", message: "Hi", revision: 7 };
+      const current: OverlayState = {
+        ...DEFAULT_OVERLAY,
+        layers: DEFAULT_LAYERS,
+        showResults: false,
+        message: "Hi",
+        revision: 7,
+      };
       expect(await nextOverlayState(env, page, current, { action: "layers" })).toEqual({ ...current, revision: 8 });
       const layers: OverlayLayers = { ...DEFAULT_LAYERS, cells: horizontal({ chat: chatCell }) };
       expect(
@@ -1127,7 +1269,8 @@ describe("overlay control", (): void => {
           write: { writer: by, seq },
           cells: { horizontal: { chat: { c, r: 0, w: 3, h: 2 } } },
         });
-      const chatColumn = async (): Promise<number> => (await getOverlayState(env, page)).layers.cells.horizontal.chat.c;
+      const chatColumn = async (): Promise<number | undefined> =>
+        (await getOverlayState(env, page)).layers.cells.horizontal.chat?.c;
       const storedWrites = async (): Promise<unknown> =>
         JSON.parse(
           (
@@ -1183,8 +1326,8 @@ describe("overlay control", (): void => {
         await updateOverlay(env, "owner", page, { action: "layers", cells: { horizontal: { chat: chatCell } } });
         expect(await chatColumn()).toBe(10);
         // Other actions keep the last writes.
-        await updateOverlay(env, "owner", page, { action: "layout", size: "s" });
-        expect((await moveChat(8, 1, "editor-2222-3333")).overlay.layers.cells.horizontal.chat.c).toBe(10);
+        await updateOverlay(env, "owner", page, { action: "showResults", on: false });
+        expect((await moveChat(8, 1, "editor-2222-3333")).overlay.layers.cells.horizontal.chat?.c).toBe(10);
         expect(await storedWrites()).toEqual([
           ["editor-2222-3333", 1],
           [writer, 2],
@@ -1199,7 +1342,7 @@ describe("overlay control", (): void => {
           write: { writer, seq: 1 },
           cells: { horizontal: { chat: { c: 5, r: 0, w: 3, h: 2 } } },
         });
-        expect(state.layers.cells.horizontal.chat.c).toBe(9);
+        expect(state.layers.cells.horizontal.chat?.c).toBe(9);
         expect(await chatColumn()).toBe(9);
       });
 
@@ -1214,7 +1357,7 @@ describe("overlay control", (): void => {
         await env.DB.prepare("UPDATE overlay_state SET layers_writes=? WHERE streamer_id=?")
           .bind('[["editor-0000-1111",0]]', page)
           .run();
-        expect((await send({ action: "take" })).status).toBe(200);
+        expect((await send({ action: "showResults", on: false })).status).toBe(200);
         expect((await moveChat(5, 1)).changed).toBe(true);
         expect(await storedWrites()).toEqual([[writer, 1]]);
         warn.mockRestore();
@@ -1235,8 +1378,14 @@ describe("overlay control", (): void => {
       return call("POST", "overlay/characters", { user, body: control });
     }
 
+    const charactersCell: CellRect = { c: 0, r: 7, w: 16, h: 2 };
+
+    // Each test starts with no layer on the grid.
+    beforeEach(async (): Promise<void> => emptyOverlay());
+
     async function charactersOn(): Promise<void> {
-      expect((await send({ action: "layers", characters: { enabled: true } })).status).toBe(200);
+      const cells = { horizontal: { characters: charactersCell } };
+      expect((await send({ action: "layers", characters: { enabled: true }, cells })).status).toBe(200);
       ingestCalls = [];
     }
 
@@ -1262,10 +1411,19 @@ describe("overlay control", (): void => {
       expect(JSON.parse(ingestCalls[6].body)).toEqual({ op: "remove", id: 7 });
     });
 
-    it("starts a test only with the characters layer saved on", async (): Promise<void> => {
+    it("starts a test only with the characters layer saved on stream", async (): Promise<void> => {
       const refused = await characters({ op: "test" });
       expect(refused.status).toBe(400);
-      expect(await refused.json()).toMatchObject({ error: "Turn on the characters layer first." });
+      expect(await refused.json()).toMatchObject({ error: "Put the characters layer on stream first." });
+      // On and off the grid, or on the grid and off, the layer is not on stream.
+      await send({ action: "layers", characters: { enabled: true } });
+      expect((await characters({ op: "test" })).status).toBe(400);
+      const cells = { horizontal: { characters: charactersCell } };
+      await send({ action: "layers", characters: { enabled: false }, cells });
+      expect((await characters({ op: "test" })).status).toBe(400);
+      await send({ action: "layers", characters: { enabled: true }, orientation: "vertical" });
+      expect((await characters({ op: "test" })).status).toBe(400);
+      ingestCalls = [];
       // The other controls work with the layer off.
       expect((await characters({ op: "pause" })).status).toBe(200);
       expect(ingestCalls.map((entry): unknown => JSON.parse(entry.body))).toEqual([{ op: "pause" }]);
@@ -1334,8 +1492,23 @@ describe("overlay control", (): void => {
   });
 
   describe("chat test", (): void => {
+    const chatCell: CellRect = { c: 0, r: 0, w: 5, h: 7 };
+    /** The chat on stream. */
+    const layers: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      chat: { ...DEFAULT_LAYERS.chat, enabled: true },
+      cells: { ...DEFAULT_LAYERS.cells, horizontal: { ...emptyCells(), chat: chatCell } },
+    };
+
+    // Each test starts with no layer on the grid.
+    beforeEach(async (): Promise<void> => emptyOverlay());
+
     it("stores the end time, broadcasts it and stops at once", async (): Promise<void> => {
-      await updateOverlay(env, "owner", page, { action: "layers", chat: { enabled: true } });
+      await updateOverlay(env, "owner", page, {
+        action: "layers",
+        chat: { enabled: true },
+        cells: { horizontal: { chat: chatCell } },
+      });
       const before: number = Date.now();
       const started = await overlay(await send({ action: "chatTest", on: true }));
       expect(started.chatTestUntil).toBeGreaterThanOrEqual(before + CHAT_TEST_MS);
@@ -1349,7 +1522,6 @@ describe("overlay control", (): void => {
     });
 
     it("uses the server time of the action and keeps the other values", async (): Promise<void> => {
-      const layers: OverlayLayers = { ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, enabled: true } };
       const current: OverlayState = { ...DEFAULT_OVERLAY, message: "Hi", layers, revision: 3 };
       expect(await nextOverlayState(env, page, current, { action: "chatTest", on: true }, 5_000)).toEqual({
         ...current,
@@ -1361,21 +1533,28 @@ describe("overlay control", (): void => {
       ).toEqual({ ...current, revision: 4 });
     });
 
-    it("ends a running test when the chat layer turns off", async (): Promise<void> => {
-      const layers: OverlayLayers = { ...DEFAULT_LAYERS, chat: { ...DEFAULT_LAYERS.chat, enabled: true } };
+    it("ends a running test when the chat layer goes off stream", async (): Promise<void> => {
       const running: OverlayState = { ...DEFAULT_OVERLAY, layers, chatTestUntil: 9_000, revision: 3 };
       const off = await nextOverlayState(env, page, running, { action: "layers", chat: { enabled: false } });
       expect(off).toMatchObject({ chatTestUntil: 0, revision: 4 });
       expect(off.layers.chat.enabled).toBe(false);
+      // Off the grid, and in an orientation where the chat has no cell.
+      for (const patch of [{ cells: { horizontal: { chat: null } } }, { orientation: "vertical" as const }])
+        expect((await nextOverlayState(env, page, running, { action: "layers", ...patch })).chatTestUntil).toBe(0);
       // Other layer edits keep the test running.
       const moved = await nextOverlayState(env, page, running, { action: "layers", chat: { hideCommands: false } });
       expect(moved.chatTestUntil).toBe(9_000);
     });
 
-    it("refuses to start while the chat layer is off, but stops", async (): Promise<void> => {
+    it("refuses to start while the chat layer is off stream, but stops", async (): Promise<void> => {
       const refused = await send({ action: "chatTest", on: true });
       expect(refused.status).toBe(400);
-      expect(await body<{ error: string }>(refused)).toEqual({ error: "Turn on the chat layer first." });
+      expect(await body<{ error: string }>(refused)).toEqual({ error: "Put the chat layer on stream first." });
+      // On without a cell is not on stream.
+      const onOnly: OverlayState = { ...DEFAULT_OVERLAY, layers: { ...layers, cells: DEFAULT_LAYERS.cells } };
+      await expect(nextOverlayState(env, page, onOnly, { action: "chatTest", on: true })).rejects.toMatchObject({
+        status: 400,
+      });
       expect((await getOverlayState(env, page)).chatTestUntil).toBe(0);
       expect((await overlay(await send({ action: "chatTest", on: false }))).chatTestUntil).toBe(0);
       expect(roomCalls).toHaveLength(1);
@@ -1391,36 +1570,6 @@ describe("overlay control", (): void => {
       expect((await send({ action: "chatTest", on: true }, "viewer")).status).toBe(404);
       expect(roomCalls).toEqual([]);
     });
-  });
-
-  it("keeps an old topic on air and in preview in the monitors' data", async (): Promise<void> => {
-    // 55 newer topics displace the seed from the newest 50.
-    const newer: string[] = Array.from({ length: 55 }, (): string => crypto.randomUUID());
-    await env.DB.batch(
-      newer.map((id: string, index: number) =>
-        env.DB.prepare(
-          "INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at) VALUES (?,?,'viewer','topic',?,'[]',?)",
-        ).bind(id, page, `Newer ${index}`, 10 + index),
-      ),
-    );
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "topic", ref: topic } });
-    await updateOverlay(env, "owner", page, { action: "take" });
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "card", ref: card } });
-    const url = `${origin}/overlay-control`;
-    const request = new Request(url, { headers: { cookie: await cookie("owner") } });
-    const loaded = await controlLoader({ request, params: {}, context: context(), url: new URL(url), pattern: "" });
-    expect(loaded.state.air).toEqual({ type: "topic", ref: topic });
-    expect(loaded.data.topics.map((value) => value.id)).toContain(topic);
-    // Overlay reload retains the topic on air or in preview.
-    const api = async (): Promise<string[]> =>
-      (await body<{ data: OverlayData }>(await call("GET", "overlay", { user: "owner" }))).data.topics.map(
-        (value) => value.id,
-      );
-    expect(await api()).toContain(topic);
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "topic", ref: topic } });
-    await updateOverlay(env, "owner", page, { action: "take" });
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "topic", ref: newer[0] } });
-    expect(await api()).toEqual(expect.arrayContaining([topic, newer[0]]));
   });
 
   it("lists battles, topic authors, the next stream and the first support link", async (): Promise<void> => {
@@ -1495,6 +1644,9 @@ describe("schedule and Community routes", (): void => {
     expect(await env.DB.prepare("SELECT count(*) AS n FROM stream_events").first()).toEqual({ n: 0 });
   });
 
+  // Each test starts with no layer on the grid.
+  beforeEach(async (): Promise<void> => emptyOverlay());
+
   it("reloads an overlay showing Support after the links are saved, and only then", async (): Promise<void> => {
     const revision = async (): Promise<number> => (await getOverlayState(env, page)).revision;
     const reloads = (): number => roomCalls.filter((value) => value.path === `/overlay?streamerId=${page}`).length;
@@ -1503,18 +1655,44 @@ describe("schedule and Community routes", (): void => {
       const response = await call("PUT", "support-links", { user: "owner", body: support });
       expect(response.status).toBe(200);
     };
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "topic", ref: topic } });
-    await updateOverlay(env, "owner", page, { action: "take" });
+    const cell: CellRect = { c: 0, r: 0, w: 4, h: 2 };
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      items: { topic: { ref: topic } },
+      cells: { horizontal: { topic: cell } },
+    });
     let before = await revision();
     await save("https://ko-fi.com/first");
     expect(await revision()).toBe(before);
     expect(reloads()).toBe(0);
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "support", ref: null } });
-    await updateOverlay(env, "owner", page, { action: "take" });
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      cells: { horizontal: { support: { ...cell, c: 4 } } },
+    });
     before = await revision();
     await save("https://ko-fi.com/second");
     expect(await revision()).toBe(before + 1);
     expect(reloads()).toBe(1);
+  });
+
+  it("does not reload an overlay from before the overlay studio that nobody opened since", async (): Promise<void> => {
+    // The old source on air is Support, and the layers have no version: no page read and converted the row.
+    await env.DB.prepare(
+      `UPDATE overlay_state SET air='{"type":"support","ref":null}', layers='{}' WHERE streamer_id=?`,
+    )
+      .bind(page)
+      .run();
+    const support = {
+      links: [{ kind: "kofi", label: null, url: "https://ko-fi.com/first" }],
+      visible: true,
+      card: true,
+    };
+    expect((await call("PUT", "support-links", { user: "owner", body: support })).status).toBe(200);
+    expect(roomCalls).toEqual([]);
+    // The first read converts the row. Then a change of the links reloads the overlay.
+    expect((await getOverlayState(env, page)).layers.cells.horizontal.support).not.toBeNull();
+    expect((await call("PUT", "support-links", { user: "owner", body: support })).status).toBe(200);
+    expect(roomCalls).toEqual([{ path: `/overlay?streamerId=${page}`, body: "" }]);
   });
 
   it("reloads an overlay with the Support layer in the selected orientation after the links are saved", async (): Promise<void> => {
@@ -1551,7 +1729,12 @@ describe("schedule and Community routes", (): void => {
       const cards = [{ icon: "star", title: "New", body: "Text", buttonLabel: null, buttonTarget: null }];
       expect((await call("PUT", "community-cards", { user: "owner", body: { cards } })).status).toBe(200);
     };
-    await updateOverlay(env, "owner", page, { action: "layers", chat: { enabled: true } });
+    const chat: CellRect = { c: 0, r: 0, w: 5, h: 7 };
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      chat: { enabled: true },
+      cells: { horizontal: { chat } },
+    });
     let before = await revision();
     await save();
     expect(await revision()).toBe(before);
@@ -1567,17 +1750,20 @@ describe("schedule and Community routes", (): void => {
   it("reloads an overlay showing Up next after each schedule change, and only then", async (): Promise<void> => {
     const revision = async (): Promise<number> => (await getOverlayState(env, page)).revision;
     const reloads = (): number => roomCalls.filter((value) => value.path === `/overlay?streamerId=${page}`).length;
-    // Schedule edits must preserve other on-air sources.
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "topic", ref: topic } });
-    await updateOverlay(env, "owner", page, { action: "take" });
+    // A schedule edit does not reload an overlay that shows another layer.
+    const cell: CellRect = { c: 0, r: 0, w: 4, h: 2 };
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      items: { topic: { ref: topic } },
+      cells: { horizontal: { topic: cell } },
+    });
     let before = await revision();
     const first = await call("POST", "events", { user: "owner", body: event() });
     const { event: stream } = await body<{ event: StreamEvent }>(first);
     expect(await revision()).toBe(before);
     expect(reloads()).toBe(0);
     // Up next must reload on event creation, edits, cancellation, and deletion.
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "next", ref: null } });
-    await updateOverlay(env, "owner", page, { action: "take" });
+    await updateOverlay(env, "owner", page, { action: "layers", cells: { horizontal: { next: { ...cell, c: 4 } } } });
     const steps: [string, string, Record<string, unknown> | undefined][] = [
       ["POST", "events", event({ title: "Second" })],
       ["PATCH", `events/${stream.id}`, { action: "edit", scope: "one", ...event({ time: "20:00" }) }],

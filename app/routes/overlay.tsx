@@ -16,11 +16,19 @@ import {
   usesCharacters,
   usesDesignCanvas,
 } from "../components/overlay/overlay-composition";
-import { upNextStart, type OverlayPoll, type OverlayScene } from "../components/overlay/overlay-stage";
+import type { OverlayPoll, OverlayScene } from "../components/overlay/overlay-stage";
 import { useRevalidateAt } from "../components/use-clock";
 import { ServerOffset } from "../lib/clock";
-import { contentSources, parseLayerParam, type ContentSource, type OverlayLayer } from "../lib/overlay-layers";
-import type { LiveSnapshot, OverlayPublic, OverlaySourceRef } from "../types";
+import { withPollOverride } from "../lib/overlay-legacy";
+import {
+  contentSources,
+  onStream,
+  parseLayerParam,
+  type ContentSource,
+  type OverlayLayer,
+  type OverlayLayers,
+} from "../lib/overlay-layers";
+import type { LiveSnapshot, OverlayPublic } from "../types";
 import "../components/overlay/wasteland/wasteland.css";
 
 export const loader = withRouteErrors(async ({ request, context, params }: LoaderFunctionArgs) => {
@@ -29,26 +37,22 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   const streamer = await getStreamer(app.env, params.handle.slice(1));
   // Suspended pages have no overlay.
   if (!streamer || streamer.status === "suspended") throw new Response("Streamer not found.", { status: 404 });
-  // `?poll=` overrides overlay control state.
+  // `?poll=` shows that poll in place of the content layers (shownLayers).
   const override: string | null = new URL(request.url).searchParams.get("poll") || null;
   const overlay: OverlayPublic = overlayPublic(await getOverlayState(app.env, streamer.id));
-  const pollId: string | null = override ?? (overlay.air.type === "poll" ? overlay.air.ref : null);
-  // The content layers on stream load their polls and topics in the same way. A null ref is the automatic poll.
-  const placed: ContentSource[] = contentSources(overlay.layers);
-  const refs = new Set<string | null>([pollId]);
+  // The content layers on stream load their polls and topics. A null ref is the automatic poll. The first snapshot
+  // is the poll of `?poll=`, or the automatic poll.
+  const placed: ContentSource[] = contentSources(shownLayers(overlay.layers, override));
+  const refs = new Set<string | null>([override]);
   for (const source of placed) if (source.type === "poll" || source.type === "auto") refs.add(source.ref);
   const [data, initial, ...more] = await Promise.all([
-    getOverlayData(app.env, streamer.id, sourceTopics(overlay.air, ...placed)),
+    getOverlayData(app.env, streamer.id, sourceTopics(placed)),
     ...[...refs].map((ref: string | null) => getOverlaySnapshot(app.env, streamer.id, ref)),
   ]);
   if (override && initial.polls.length === 0) throw new Response("Poll not found.", { status: 404 });
-  // The polls of the automatic selection go first: the overlay picks the automatic poll by its place in the list.
-  const loaded: LiveSnapshot[] = [initial, ...more];
-  const automatic: number = [...refs].indexOf(null);
-  if (automatic > 0) loaded.unshift(...loaded.splice(automatic, 1));
-  const polls: OverlayPoll[] = loaded.reduce(
+  const polls: OverlayPoll[] = more.reduce(
     (merged: OverlayPoll[], snapshot: LiveSnapshot): OverlayPoll[] => mergeOverlayPolls(merged, snapshot.polls),
-    [],
+    initial.polls,
   );
   return {
     handle: streamer.handle,
@@ -60,6 +64,11 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
     data,
   };
 });
+
+/** The layers that the page shows: with `?poll=` the poll layer shows that poll and no other content layer shows. */
+function shownLayers(layers: OverlayLayers, override: string | null): OverlayLayers {
+  return override === null ? layers : withPollOverride(layers, override);
+}
 
 function mergeOverlayPolls(current: readonly OverlayPoll[], initial: readonly OverlayPoll[]): OverlayPoll[] {
   const polls: OverlayPoll[] = [...current];
@@ -76,7 +85,7 @@ export default function Overlay(): ReactNode {
   const known: boolean = layer !== "unknown";
   const only: OverlayLayer | null = layer === "unknown" ? null : layer;
   // Every layer reads the live room: it carries the overlay state, so layer changes (show, hide, move, hide
-  // commands) apply at once on a per-layer source too. Only the content layer reloads data for what is on air.
+  // commands) apply at once on a per-layer source too. Only a page with the content layers reloads their data.
   // A characters-only source opens no socket while that layer cannot render (#664): it would only hold a seat.
   const content: boolean = known && (only === null || only === "content");
   const liveOn: boolean = known && (CHARACTERS_READY || only !== "characters");
@@ -86,24 +95,20 @@ export default function Overlay(): ReactNode {
   const live: OverlayPublic | null | undefined = snapshot?.overlay;
   const overlay: OverlayPublic = live && live.revision >= loaded.overlay.revision ? live : loaded.overlay;
   useLiveRevalidation(status, snapshot?.revision, revalidator.revalidate, content);
-  // Fetch missing content when the on-air source changes.
+  // Fetch missing content when a content layer changes.
   useLiveRevalidation(status, overlay.revision, revalidator.revalidate, content);
   // The activity socket is open only while a rendered layer needs it, so hiding the chat closes it. One socket carries
   // chat and, while the characters layer shows, the playground frames: the playground runs only while one listens.
-  const feedOn: boolean = known && usesActivityFeed(overlay.layers, only);
-  const feed = useActivityFeed(loaded.handle, key, feedOn, { characters: usesCharacters(overlay.layers, only) });
+  const layers: OverlayLayers = shownLayers(overlay.layers, loaded.override);
+  const feedOn: boolean = known && usesActivityFeed(layers, only);
+  const feed = useActivityFeed(loaded.handle, key, feedOn, { characters: usesCharacters(layers, only) });
   // Server time minus local time, measured once per loader response: chat lifetimes use server receive times.
   const [offsets] = useState<ServerOffset>(() => new ServerOffset());
   const serverOffset: number = offsets.for(loaded.initial.serverNow);
   const now: number = useServerTime(current.serverNow);
   const polls: OverlayPoll[] = mergeOverlayPolls(current.polls, loaded.initial.polls);
-  const source: OverlaySourceRef = loaded.override ? { type: "poll", ref: loaded.override } : overlay.air;
-  // Refresh Up next when the displayed stream starts: on air, or in the Up next layer of the composition.
-  const sources: OverlaySourceRef[] = only === null ? [source, ...contentSources(overlay.layers)] : [source];
-  const nextStart: number | null =
-    sources
-      .map((item: OverlaySourceRef): number | null => upNextStart(item, loaded.data))
-      .find((start: number | null): boolean => start !== null) ?? null;
+  // Refresh Up next when the displayed stream starts.
+  const nextStart: number | null = content && onStream(layers, "next") ? (loaded.data.next?.startsAt ?? null) : null;
   useRevalidateAt(loaded.initial.serverNow, nextStart, revalidator.revalidate);
   const scene: OverlayScene = {
     name: loaded.name,
@@ -119,18 +124,16 @@ export default function Overlay(): ReactNode {
   const composition: ReactNode = (
     <OverlayComposition
       scene={scene}
-      source={source}
-      layers={overlay.layers}
+      layers={layers}
       only={only}
       feed={feedOn ? feed : null}
       serverOffset={serverOffset}
       testUntil={overlay.chatTestUntil}
     />
   );
-  // With a feed layer on or a content cell, the composition uses the editor preview's canvas of the selected
-  // orientation, so OBS shows the same layout at every source size of that aspect ratio. The design screen also drops
-  // the small-screen content styles of .ov-screen.
-  const designed: boolean = usesDesignCanvas(overlay.layers, only);
+  // The composition and the content layers use the editor preview's canvas of the selected orientation, so OBS shows
+  // the same layout at every source size of that aspect ratio. A chat or characters layer alone fills the page.
+  const designed: boolean = usesDesignCanvas(only);
   return (
     // data-feed-status exposes the activity feed state for checks and support; nothing shows on stream.
     <main
@@ -139,8 +142,7 @@ export default function Overlay(): ReactNode {
       aria-label={label}
       data-feed-status={feed.status}
     >
-      {/* The same elements with and without the canvas, so a chat toggle never remounts the on-air content. */}
-      <DesignCanvas on={designed} orientation={overlay.layers.orientation}>
+      <DesignCanvas on={designed} orientation={layers.orientation}>
         {composition}
       </DesignCanvas>
       {/* The overlay never goes offline (it keeps retrying), so it never puts a button on stream. */}

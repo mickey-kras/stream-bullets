@@ -12,6 +12,7 @@ export const GRID: Readonly<Record<Orientation, Readonly<{ cols: number; rows: n
   vertical: { cols: 9, rows: 16 },
 };
 
+/** The values of `?layer=` on the OBS URL. `content` is all the content layers together. */
 export const OVERLAY_LAYERS = ["content", "chat", "characters"] as const;
 export type OverlayLayer = (typeof OVERLAY_LAYERS)[number];
 
@@ -19,12 +20,8 @@ export type OverlayLayer = (typeof OVERLAY_LAYERS)[number];
 export const CONTENT_LAYERS = ["poll", "topic", "next", "message", "card", "support"] as const;
 export type ContentLayer = (typeof CONTENT_LAYERS)[number];
 
-/** The layers that the composition editor places. It does not place the content layers. */
-export const EDITOR_LAYERS = ["chat", "characters", "content"] as const;
-export type EditorLayer = (typeof EDITOR_LAYERS)[number];
-
 /** The layers on the grid, in the order the lenient read resolves them. */
-export const GRID_LAYERS = [...EDITOR_LAYERS, ...CONTENT_LAYERS] as const;
+export const GRID_LAYERS = ["chat", "characters", ...CONTENT_LAYERS] as const;
 export type GridLayer = (typeof GRID_LAYERS)[number];
 
 /** A place in whole cells: column, row, width and height. `c + w <= cols` and `r + h <= rows`. */
@@ -43,15 +40,8 @@ export interface LayerRect {
   h: number;
 }
 
-/**
- * The cells of one orientation. Content null: it fills the whole frame and keeps its position and size settings.
- * A content layer with null is not on the grid.
- */
-export interface LayerCells extends Record<ContentLayer, CellRect | null> {
-  chat: CellRect;
-  characters: CellRect;
-  content: CellRect | null;
-}
+/** The cells of one orientation. A layer with null is not on the grid. */
+export type LayerCells = Record<GridLayer, CellRect | null>;
 
 export interface ChatLayer {
   enabled: boolean;
@@ -86,7 +76,7 @@ export interface ContentItem {
 }
 
 /** The content layers that use `ref`. */
-const REF_LAYERS: ReadonlySet<ContentLayer> = new Set<ContentLayer>(["poll", "topic", "card"]);
+export const REF_LAYERS: ReadonlySet<ContentLayer> = new Set<ContentLayer>(["poll", "topic", "card"]);
 
 export interface OverlayLayers {
   orientation: Orientation;
@@ -111,7 +101,6 @@ const CONTENT_MIN = { w: 4, h: 2 } as const;
 export const MIN_CELLS: Readonly<Record<GridLayer, Readonly<{ w: number; h: number }>>> = {
   chat: { w: 3, h: 2 },
   characters: { w: 6, h: 2 },
-  content: CONTENT_MIN,
   poll: CONTENT_MIN,
   topic: CONTENT_MIN,
   next: CONTENT_MIN,
@@ -132,34 +121,25 @@ function contentRecord<T>(value: (layer: ContentLayer) => T): Record<ContentLaye
   };
 }
 
-function noCell(): null {
-  return null;
+/** The cells of an orientation with no layer on the grid. */
+export function emptyCells(): LayerCells {
+  return { chat: null, characters: null, ...contentRecord((): null => null) };
 }
 
 function defaultItem(layer: ContentLayer): ContentItem {
   return { enabled: true, ref: null, backgroundOpacity: LAYER_BACKGROUND.default, qr: layer === "poll" };
 }
 
-// Chat and characters stay off by default, so existing OBS scenes do not change. Content and the content layers have
-// no cell by default.
+// No layer has a cell by default. A layer shows on stream when it is enabled and has a cell in the selected
+// orientation. Chat and characters are off until the streamer puts them on the grid.
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
   chat: { enabled: false, hideCommands: true, backgroundOpacity: CHAT_BACKGROUND.default },
   characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default },
   items: contentRecord(defaultItem),
   cells: {
-    horizontal: {
-      chat: { c: 0, r: 0, w: 5, h: 7 },
-      characters: { c: 0, r: 7, w: 16, h: 2 },
-      content: null,
-      ...contentRecord(noCell),
-    },
-    vertical: {
-      chat: { c: 0, r: 8, w: 9, h: 5 },
-      characters: { c: 0, r: 13, w: 9, h: 3 },
-      content: null,
-      ...contentRecord(noCell),
-    },
+    horizontal: emptyCells(),
+    vertical: emptyCells(),
   },
 };
 
@@ -219,6 +199,16 @@ export interface PlacedContent {
   source: ContentSource;
 }
 
+/** The "Show on stream" setting of a layer. */
+export function layerEnabled(layers: OverlayLayers, layer: GridLayer): boolean {
+  return layer === "chat" || layer === "characters" ? layers[layer].enabled : layers.items[layer].enabled;
+}
+
+/** True when `layer` shows on stream: it is enabled and has a cell in the selected orientation. */
+export function onStream(layers: OverlayLayers, layer: GridLayer): boolean {
+  return layerEnabled(layers, layer) && layers.cells[layers.orientation][layer] !== null;
+}
+
 /** The content layers on stream, in the order of CONTENT_LAYERS. */
 export function placedContent(layers: OverlayLayers): PlacedContent[] {
   const cells: LayerCells = layers.cells[layers.orientation];
@@ -256,9 +246,8 @@ function cellSchema(orientation: Orientation, layer: GridLayer): z.ZodType<CellR
 function cellsPatchSchema(orientation: Orientation): z.ZodType<CellsPatch> {
   return z
     .object({
-      chat: cellSchema(orientation, "chat").optional(),
-      characters: cellSchema(orientation, "characters").optional(),
-      content: cellSchema(orientation, "content").nullable().optional(),
+      chat: cellSchema(orientation, "chat").nullable().optional(),
+      characters: cellSchema(orientation, "characters").nullable().optional(),
       ...contentRecord((layer: ContentLayer) => cellSchema(orientation, layer).nullable().optional()),
     })
     .strict()
@@ -278,16 +267,16 @@ function refSchema(layer: ContentLayer): z.ZodType<string | null> {
   return REF_LAYERS.has(layer) ? z.string().min(1).max(64).nullable() : z.null();
 }
 
-function itemPatchSchema(layer: ContentLayer): z.ZodType<Partial<ContentItem> | undefined> {
-  return z
+function itemPatchSchema(layer: ContentLayer): z.ZodOptional<z.ZodType<Partial<ContentItem>>> {
+  const item: z.ZodType<Partial<ContentItem>> = z
     .object({
       enabled: z.boolean().optional(),
       ref: refSchema(layer).optional(),
       backgroundOpacity: layerBackground.optional(),
       qr: z.boolean().optional(),
     })
-    .strict()
-    .optional();
+    .strict();
+  return item.optional();
 }
 
 // Writes are strict: unknown keys, cells outside the grid, below the minimum size or over each other return 400.
@@ -319,43 +308,28 @@ export const layersPatchSchema = z
 const storedCell = z.object(cellShape);
 
 /** A stored cell of `layer`, or null when it is not a valid cell of this grid. */
-function readCell(orientation: Orientation, layer: GridLayer, value: unknown): CellRect | null {
+export function readCell(orientation: Orientation, layer: GridLayer, value: unknown): CellRect | null {
   const parsed = storedCell.safeParse(value);
   return parsed.success && cellFits(orientation, layer, parsed.data) ? copyCell(parsed.data) : null;
 }
 
-function defaultCells(orientation: Orientation): LayerCells {
-  const cells: LayerCells = DEFAULT_LAYERS.cells[orientation];
-  return {
-    chat: copyCell(cells.chat),
-    characters: copyCell(cells.characters),
-    content: null,
-    ...contentRecord(noCell),
-  };
-}
-
 /**
- * A stored layout. An invalid chat or characters cell takes its default. When the chat and characters cells overlap,
- * both take their defaults. A cell of content or of a content layer that is invalid reads as no cell. The same
- * applies when it overlaps a layer earlier in GRID_LAYERS.
+ * A stored layout. A cell that is invalid reads as no cell. The same applies when it overlaps a layer earlier in
+ * GRID_LAYERS.
  */
 function readCells(orientation: Orientation, value: unknown): LayerCells {
   const raw: Record<string, unknown> = typeof value === "object" && value !== null ? { ...value } : {};
-  const fallback: LayerCells = defaultCells(orientation);
-  let chat: CellRect = readCell(orientation, "chat", raw.chat) ?? fallback.chat;
-  let characters: CellRect = readCell(orientation, "characters", raw.characters) ?? fallback.characters;
-  if (cellsOverlap(chat, characters)) {
-    chat = fallback.chat;
-    characters = fallback.characters;
-  }
-  const kept: CellRect[] = [chat, characters];
-  const free = (layer: "content" | ContentLayer): CellRect | null => {
+  const kept: CellRect[] = [];
+  const free = (layer: GridLayer): CellRect | null => {
     const rect: CellRect | null = readCell(orientation, layer, raw[layer]);
     if (rect === null || kept.some((other: CellRect): boolean => cellsOverlap(rect, other))) return null;
     kept.push(rect);
     return rect;
   };
-  return { chat, characters, content: free("content"), ...contentRecord(free) };
+  // In the order of GRID_LAYERS.
+  const chat: CellRect | null = free("chat");
+  const characters: CellRect | null = free("characters");
+  return { chat, characters, ...contentRecord(free) };
 }
 
 function defaultItems(): Record<ContentLayer, ContentItem> {
@@ -378,7 +352,8 @@ function storedItemSchema(layer: ContentLayer): z.ZodType<ContentItem, unknown> 
 
 // Stored and broadcast layers. This schema never throws: older and newer versions must not break the overlay.
 // Missing keys take defaults, so `{}` reads as DEFAULT_LAYERS. Unknown keys are dropped. An invalid field reads as
-// its default (see readCells for the cells). Writes use the strict layersPatchSchema.
+// its default (see readCells for the cells). Unknown keys include `v`: this schema reads the current version, and
+// app/lib/overlay-legacy.ts converts an older text first. Writes use the strict layersPatchSchema.
 export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
   z.object({
     orientation: fallback(z.enum(ORIENTATIONS), DEFAULT_LAYERS.orientation),
@@ -413,27 +388,22 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
     chat: { ...DEFAULT_LAYERS.chat },
     characters: { ...DEFAULT_LAYERS.characters },
     items: defaultItems(),
-    cells: { horizontal: defaultCells("horizontal"), vertical: defaultCells("vertical") },
+    cells: { horizontal: emptyCells(), vertical: emptyCells() },
   }),
 );
 
-// Reads a stored `layers` JSON text. Invalid JSON reads as the defaults, the same as an invalid value.
-export function parseStoredLayers(raw: string): OverlayLayers {
-  let value: unknown;
-  try {
-    value = JSON.parse(raw);
-  } catch {
-    value = null;
-  }
-  return storedLayersSchema.parse(value);
-}
+/**
+ * The version of the stored `layers` JSON text that storedLayersText writes (`v`). A text without this version is
+ * from before the overlay studio: see app/lib/overlay-legacy.ts.
+ */
+export const LAYERS_VERSION = 2;
 
 // Match `overlay_state_layers_check`.
-export const STORED_LAYERS_LENGTH = 1000;
+export const STORED_LAYERS_LENGTH = 4000;
 
 function storedCells(cells: LayerCells): CellsPatch {
-  const stored: CellsPatch = { chat: cells.chat, characters: cells.characters, content: cells.content };
-  for (const layer of CONTENT_LAYERS) {
+  const stored: CellsPatch = {};
+  for (const layer of GRID_LAYERS) {
     const rect: CellRect | null = cells[layer];
     if (rect) stored[layer] = rect;
   }
@@ -451,9 +421,9 @@ function storedItem(layer: ContentLayer, item: ContentItem): Partial<ContentItem
 }
 
 /**
- * The `layers` JSON text to store. It leaves out what the lenient read fills in: a content layer without a cell and
- * each content layer setting at its default. Thus layers that use no content layer keep the text of older versions,
- * and the text stays short. The caller checks it against STORED_LAYERS_LENGTH.
+ * The `layers` JSON text to store. It leaves out what the lenient read fills in: a layer without a cell and each
+ * content layer setting at its default. Thus the text stays short. The caller checks it against
+ * STORED_LAYERS_LENGTH.
  */
 export function storedLayersText(layers: OverlayLayers): string {
   const items: LayersPatch["items"] = {};
@@ -462,6 +432,7 @@ export function storedLayersText(layers: OverlayLayers): string {
     if (Object.keys(stored).length > 0) items[layer] = stored;
   }
   return JSON.stringify({
+    v: LAYERS_VERSION,
     orientation: layers.orientation,
     chat: layers.chat,
     characters: layers.characters,
@@ -471,17 +442,12 @@ export function storedLayersText(layers: OverlayLayers): string {
 }
 
 function mergeCells(current: LayerCells, patch: CellsPatch | undefined): LayerCells {
-  const merged = (layer: "content" | ContentLayer): CellRect | null => {
+  const merged = (layer: GridLayer): CellRect | null => {
     const next: CellRect | null | undefined = patch?.[layer];
     const rect: CellRect | null = next === undefined ? current[layer] : next;
     return rect ? copyCell(rect) : null;
   };
-  return {
-    chat: copyCell(patch?.chat ?? current.chat),
-    characters: copyCell(patch?.characters ?? current.characters),
-    content: merged("content"),
-    ...contentRecord(merged),
-  };
+  return { chat: merged("chat"), characters: merged("characters"), ...contentRecord(merged) };
 }
 
 function mergeItem(current: ContentItem, patch: Partial<ContentItem> | undefined): ContentItem {

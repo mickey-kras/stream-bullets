@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { type ActivityChat, type ActivityEvent, parseActivityMessage } from "../app/lib/activity";
-import { DEFAULT_LAYERS, type OverlayLayers } from "../app/lib/overlay-layers";
+import { DEFAULT_LAYERS, emptyCells, storedLayersText, type OverlayLayers } from "../app/lib/overlay-layers";
 import { CHARACTERS_TEST_MS } from "../app/lib/playground/constants";
 import {
   CHAR_STATES,
@@ -137,11 +137,19 @@ async function setLayers(layers: OverlayLayers, streamerId: string = page): Prom
     `INSERT INTO overlay_state (streamer_id,position,revision,updated_at,layers) VALUES (?,'lower',1,1,?)
       ON CONFLICT(streamer_id) DO UPDATE SET layers=excluded.layers`,
   )
-    .bind(streamerId, JSON.stringify(layers))
+    .bind(streamerId, storedLayersText(layers))
     .run();
 }
 
-const ON: OverlayLayers = { ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60 } };
+/** The characters on stream in both orientations. */
+const ON: OverlayLayers = {
+  ...DEFAULT_LAYERS,
+  characters: { enabled: true, timeout: 60 },
+  cells: {
+    horizontal: { ...emptyCells(), characters: { c: 0, r: 7, w: 16, h: 2 } },
+    vertical: { ...emptyCells(), characters: { c: 0, r: 13, w: 9, h: 3 } },
+  },
+};
 
 async function control(body: unknown, streamerId: string = page): Promise<{ status: number; body: unknown }> {
   const response = await post("playground", body, streamerId);
@@ -795,6 +803,13 @@ describe("configuration", (): void => {
     await post("playground-config");
     expect(vi.getTimerCount()).toBe(0);
     await setLayers(ON);
+    await post("playground-config");
+    expect(vi.getTimerCount()).toBe(1);
+    // Off the grid of the selected orientation, the layer is off stream: the playground stops.
+    await setLayers({ ...ON, cells: { ...ON.cells, horizontal: emptyCells() } });
+    await post("playground-config");
+    expect(vi.getTimerCount()).toBe(0);
+    await setLayers({ ...ON, cells: { ...ON.cells, horizontal: emptyCells() }, orientation: "vertical" });
     await post("playground-config");
     expect(vi.getTimerCount()).toBe(1);
   });

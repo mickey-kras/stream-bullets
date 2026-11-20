@@ -1,5 +1,6 @@
 import { disconnectAllChannels } from "./channels.server";
-import { parseStoredLayers, type OverlayLayers } from "../lib/overlay-layers";
+import { parseStoredLayers } from "../lib/overlay-legacy";
+import type { OverlayLayers } from "../lib/overlay-layers";
 import { SYSTEM_USER_ID } from "../lib/system";
 import type { AppEnv } from "../env";
 import { getOrigin, HttpError } from "./http.server";

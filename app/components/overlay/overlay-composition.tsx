@@ -17,7 +17,9 @@ import {
   cellPixels,
   frameSize,
   layerPixels,
+  onStream,
   placedContent,
+  type ContentSource,
   type GridLayer,
   type LayerRect,
   type OverlayLayer,
@@ -25,7 +27,6 @@ import {
   type Orientation,
   type PlacedContent,
 } from "../../lib/overlay-layers";
-import type { OverlaySourceRef } from "../../types";
 import type { ActivityFeed } from "./activity-feed";
 import { CharactersLayer } from "./characters/characters-layer";
 import { usePlaygroundSource } from "./characters/use-playground";
@@ -71,34 +72,22 @@ export function CharactersSlot({ feed, rect }: Readonly<OverlayLayerSlotProps>):
 
 /** Whether a page that renders `only` (null: the composition) shows the characters layer, so its feed needs frames. */
 export function usesCharacters(layers: OverlayLayers, only: OverlayLayer | null): boolean {
-  return CHARACTERS_READY && (only === null || only === "characters") && layers.characters.enabled;
+  return CHARACTERS_READY && (only === null || only === "characters") && onStream(layers, "characters");
 }
 
 /** Whether a page that renders `only` (null: the composition) needs the activity feed for an enabled layer. */
 export function usesActivityFeed(layers: OverlayLayers, only: OverlayLayer | null): boolean {
-  const chat: boolean = (only === null || only === "chat") && layers.chat.enabled;
+  const chat: boolean = (only === null || only === "chat") && onStream(layers, "chat");
   return chat || usesCharacters(layers, only);
 }
 
 /**
- * Whether a composition (all layers, `only` null) lays out in the design canvas of the selected orientation, like
- * the editor preview. It does when it shows a feed layer or a content layer, or the content has a cell: those layers
- * sit at cells, so the content must use the same space. Otherwise the content keeps its responsive layout, so
- * existing OBS scenes do not change.
+ * Whether a page that renders `only` lays out in the design canvas of the selected orientation, like the editor
+ * preview. The composition (`only` null) and the content layers alone (`content`) do: their layers sit at cells. A
+ * chat or characters layer alone fills the viewport.
  */
-export function usesDesignCanvas(layers: OverlayLayers, only: OverlayLayer | null): boolean {
-  const content: boolean = layers.cells[layers.orientation].content !== null || placedContent(layers).length > 0;
-  return only === null && (layers.chat.enabled || (CHARACTERS_READY && layers.characters.enabled) || content);
-}
-
-/** The class of the layer boxes; their `data-layer` attribute names the layer. */
-export const LAYER_CLASS = "ov-layer";
-/** The on-air content stage in a composition, when the content has no cell. */
-export const CONTENT_SELECTOR = ".ov-composition > .ov-stage";
-
-/** The box of one layer in a composition. */
-export function layerSelector(layer: GridLayer): string {
-  return `.ov-composition > .${LAYER_CLASS}[data-layer="${layer}"]`;
+export function usesDesignCanvas(only: OverlayLayer | null): boolean {
+  return only === null || only === "content";
 }
 
 /** The style of a scaler for a frame: its design size and the size of 1vw in it. */
@@ -113,9 +102,7 @@ export function frameStyle(orientation: Orientation): CSSProperties {
  * width, as in the preview. At another aspect ratio the whole canvas stays in view and the free space is at the
  * right or bottom.
  *
- * With `on` false the two boxes have no class, so the content keeps its responsive layout. The boxes stay in the
- * page either way: turning the canvas on or off changes classes only, so the content below never remounts (no
- * flash, no replayed animations).
+ * With `on` false the two boxes have no class: a chat or characters layer alone fills the viewport.
  */
 export function DesignCanvas({
   on,
@@ -124,7 +111,7 @@ export function DesignCanvas({
 }: Readonly<{ on: boolean; orientation: Orientation; children: ReactNode }>): ReactNode {
   const frame = useRef<HTMLDivElement | null>(null);
   const { w, h } = frameSize(orientation);
-  // Off, the frame is not measured: it may have no height, and the content keeps its own layout.
+  // Off, the frame is not measured: it may have no height.
   useDesignScale(frame, w, h, on);
   return (
     <div className={on ? "ov-design" : undefined} ref={frame}>
@@ -180,7 +167,7 @@ function LayerBox({
       ? place
       : ({ ...place, "--ov-bg": String(backgroundOpacity / 100) } as CSSProperties);
   return (
-    <div className={LAYER_CLASS} data-layer={layer} data-alone={alone || undefined} style={style} ref={box}>
+    <div className="ov-layer" data-layer={layer} data-alone={alone || undefined} style={style} ref={box}>
       <div className="ov-layer-canvas" style={{ width: rect.w, height: rect.h }}>
         {children}
       </div>
@@ -225,13 +212,13 @@ function useFitScale(box: RefObject<HTMLDivElement | null>): void {
   }, [box]);
 }
 
-/** The on-air content inside its cell: centred, and scaled down to fit when it is larger than the cell. */
-function ContentCell({ scene, source }: Readonly<{ scene: OverlayScene; source: OverlaySourceRef }>): ReactNode {
+/** The content of a layer inside its cell: centred, and scaled down to fit when it is larger than the cell. */
+function ContentCell({ scene, source }: Readonly<{ scene: OverlayScene; source: ContentSource }>): ReactNode {
   const box = useRef<HTMLDivElement | null>(null);
   useFitScale(box);
   return (
     <div className="ov-fit" ref={box}>
-      <OverlayStage scene={scene} source={source} fit />
+      <OverlayStage scene={scene} source={source} />
     </div>
   );
 }
@@ -321,15 +308,15 @@ const ChatSlot = memo(function ChatSlot({
 });
 
 /**
- * The overlay: characters at the bottom, then the on-air content and the content layers, then chat on top. OBS and
- * the editor preview render this same component. `only` renders one layer alone for a per-layer source; null renders
- * them all. The content layers show only in the whole composition.
+ * The overlay: characters at the bottom, then the content layers, then chat on top. OBS and the editor preview render
+ * this same component. Each layer shows at its cell when it is on stream. `only` renders one part alone for a
+ * per-layer source: the chat or the characters fill the viewport, and `content` is the content layers at their
+ * cells. Null renders them all.
  * `testUntil` is the server time when the chat test ends. `charactersFeed` replaces `feed` for the characters: the
  * editor preview plays sample chat but shows the live playground.
  */
 export function OverlayComposition({
   scene,
-  source,
   layers,
   only,
   feed,
@@ -339,7 +326,6 @@ export function OverlayComposition({
   testUntil = 0,
 }: Readonly<{
   scene: OverlayScene;
-  source: OverlaySourceRef;
   layers: OverlayLayers;
   only: OverlayLayer | null;
   feed: ActivityFeed | null;
@@ -349,28 +335,19 @@ export function OverlayComposition({
   testUntil?: number;
 }>): ReactNode {
   const shows = (layer: OverlayLayer): boolean => only === null || only === layer;
-  const alone: boolean = only !== null;
+  const alone: boolean = only === "chat" || only === "characters";
   const frame = frameSize(layers.orientation);
-  const chat: LayerRect | null = layerPixels(layers, "chat");
-  const characters: LayerRect | null = layerPixels(layers, "characters");
-  const content: LayerRect | null = layerPixels(layers, "content");
+  const chat: LayerRect | null = onStream(layers, "chat") ? layerPixels(layers, "chat") : null;
+  const characters: LayerRect | null = onStream(layers, "characters") ? layerPixels(layers, "characters") : null;
   return (
     <div className="ov-composition" data-overlay-only={only ?? undefined}>
-      {shows("characters") && layers.characters.enabled && characters && (
+      {shows("characters") && characters && (
         <LayerBox layer="characters" rect={characters} frame={frame} alone={alone}>
           <CharactersSlot feed={charactersFeed} rect={characters} />
         </LayerBox>
       )}
-      {shows("content") &&
-        (content ? (
-          <LayerBox layer="content" rect={content} frame={frame} alone={alone}>
-            <ContentCell scene={scene} source={source} />
-          </LayerBox>
-        ) : (
-          <OverlayStage scene={scene} source={source} />
-        ))}
-      {only === null && <ContentLayers scene={scene} layers={layers} frame={frame} />}
-      {shows("chat") && layers.chat.enabled && chat && (
+      {shows("content") && <ContentLayers scene={scene} layers={layers} frame={frame} />}
+      {shows("chat") && chat && (
         <LayerBox layer="chat" rect={chat} frame={frame} alone={alone}>
           <ChatSlot
             feed={feed}

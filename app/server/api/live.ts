@@ -5,9 +5,8 @@ import { HttpError, getOrigin, json, readJson } from "../http.server";
 import { notifyMash, notifyOverlay, notifyOverlayKey, notifyPlayground } from "../live.server";
 import { mashStartSchema, runMashAction, type MashAction } from "../mash.server";
 import { callIngest } from "../ingest-call.server";
-import { contentSources } from "../../lib/overlay-layers";
+import { contentSources, onStream } from "../../lib/overlay-layers";
 import { playgroundControlSchema, playgroundStatusSchema } from "../../lib/playground/protocol";
-import type { OverlaySourceRef } from "../../types";
 import { overlayKeySchema, regenerateOverlayKey } from "../overlay-key.server";
 import { getOverlayData, getOverlayState, overlayActionSchema, sourceTopics, updateOverlay } from "../overlay.server";
 import { get, requireViewer, write, type ApiRoute } from "./router";
@@ -28,8 +27,7 @@ export const liveRoutes: ApiRoute[] = [
     const streamer = await getOwnStreamer(env, owner.id);
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
     const overlay = await getOverlayState(env, streamer.id);
-    const sources: OverlaySourceRef[] = [overlay.air, overlay.preview, ...contentSources(overlay.layers)];
-    const data = await getOverlayData(env, streamer.id, sourceTopics(...sources));
+    const data = await getOverlayData(env, streamer.id, sourceTopics(contentSources(overlay.layers)));
     return json({ overlay, data, handle: streamer.handle });
   }),
   // POST /api/overlay/key {} → {url}: a new overlay key, shown this once. The old key stops working.
@@ -51,8 +49,8 @@ export const liveRoutes: ApiRoute[] = [
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
     await assertStreamerWritable(env, streamer.id, viewer.id);
     if (!activityAvailable(env)) throw new HttpError(503, "Characters are off on this server.");
-    if (control.op === "test" && !(await getOverlayState(env, streamer.id)).layers.characters.enabled)
-      throw new HttpError(400, "Turn on the characters layer first.");
+    if (control.op === "test" && !onStream((await getOverlayState(env, streamer.id)).layers, "characters"))
+      throw new HttpError(400, "Put the characters layer on stream first.");
     if (control.op === "test" || control.op === "reset" || control.op === "remove")
       await consumeMutationQuota(env, viewer.id);
     const response = await callIngest(env, streamer.id, "playground", {
@@ -64,7 +62,7 @@ export const liveRoutes: ApiRoute[] = [
     if (!status.success) throw new Error("playground status invalid");
     return json(status.data);
   }),
-  // POST /api/overlay {action: preview|take|layout|message|layers|chatTest, ...} → {overlay}
+  // POST /api/overlay {action: showResults|message|layers|chatTest, ...} → {overlay}
   write("POST", /overlay/, async ({ request, env, viewer }) => {
     const action = await readJson(request, overlayActionSchema);
     const streamer = await getOwnStreamer(env, viewer.id);
