@@ -340,10 +340,14 @@ header .header-end > a.header-streamers:hover { border-color: var(--gold); color
 /* Language button: the compact icon size of the Streamers link at every width. */
 .header-end > button.header-language { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; min-height: 44px; padding: 0; background: none; color: var(--cream); }
 .header-end > button.header-language:hover { color: var(--gold); }
-/* Up to 1800px the Streamers label, the sign-in icon and part of the gap yield their room to the language button. */
+/* Up to 1800px, beside the sign-in button, the Streamers label, the sign-in icon and part of the gap yield their room to the language button. */
 @media (max-width: 112.5em) {
   .streamer-header .header-end { gap: 8px; }
   .streamer-header .header-signin > svg { display: none; }
+  .streamer-header .header-end:has(.header-signin) > a.header-streamers { width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; }
+  .streamer-header .header-end:has(.header-signin) > a.header-streamers .hs-label { display: none; }
+}
+@media (max-width: 78.125em) {
   header .header-end > a.header-streamers { width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; }
   header .header-end > a.header-streamers .hs-label { display: none; }
 }
