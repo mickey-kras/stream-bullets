@@ -1,36 +1,22 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useLocation, useNavigate, useRevalidator } from "react-router";
 import { intlLocale, t, type MessageId } from "../../i18n";
-import {
-  quotaDay,
-  type ActivityPlatform,
-  type ChannelStatus,
-  type ChannelStatusCode,
-  type ConnectResult,
-} from "../../lib/activity";
+import { quotaDay, type ActivityPlatform, type ChannelStatusCode, type ConnectResult } from "../../lib/activity";
+import { channelHealth, relativeAge, type ChannelHealth, type ChannelView } from "../../lib/channel-health";
 import type { Provider } from "../../types";
 import { ApiError, errorMessage, postJson, sendJson } from "../api";
 import { providerName, Reauthenticate } from "../shell/sign-in-dialog";
 import { Dialog, DialogActions } from "../ui/dialog";
-import { Icon } from "../ui/icon";
+import { Icon, type IconName } from "../ui/icon";
 import { useToast } from "../ui/toast";
 import { useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
 import { PlatformLogo } from "./platform-logo";
 
-/** One platform as GET /api/channels and the overlay-control loader list it. */
-export interface ChannelView {
-  platform: ActivityPlatform;
-  available: boolean;
-  connection: {
-    displayName: string;
-    status: ChannelStatus;
-    code: string | null;
-    connectedAt: number;
-    lastEventAt: number | null;
-    updatedAt: number;
-  } | null;
-}
+export type { ChannelView } from "../../lib/channel-health";
+
+/** How often the age of the last chat event changes on screen. */
+const AGE_TICK_MS = 15_000;
 
 /** Brand names stay as they are in every language. */
 export const PLATFORM_NAMES: Readonly<Record<ActivityPlatform, string>> = {
@@ -193,12 +179,58 @@ function quotaResetText(statusAt: number): string | null {
   );
 }
 
-function LastActivity({ at }: Readonly<{ at: number | null }>): ReactNode {
+/**
+ * The problem of a connection in words, or null for a healthy one. A platform that this site does not offer
+ * cannot be reconnected, so its status advice would mislead.
+ */
+export function channelProblem(channel: ChannelView): string | null {
+  const connection = channel.connection;
+  if (!connection || !channel.available) return null;
+  const quotaReset: string | null = connection.code === "quota_exhausted" ? quotaResetText(connection.updatedAt) : null;
+  return statusMessage(connection, quotaReset, channel.platform);
+}
+
+/** The sentence about the last chat event of a connection at the time `now`. */
+export function lastEventText(at: number | null, now: number): string {
+  if (at === null) return t("channels.noEvent");
+  const age: string | null = relativeAge(at, now, intlLocale());
+  return age === null ? t("channels.lastEventNow") : t("channels.lastEvent", { age });
+}
+
+/** The age of the last chat event. The server does not know the viewer's clock, so the age shows after hydration. */
+function LastEvent({ at, now }: Readonly<{ at: number | null; now: number }>): ReactNode {
   const hydrated = useHydrated();
-  if (at === null) return <p className="muted">{t("channels.noActivity")}</p>;
+  if (at === null) return <p className="muted">{lastEventText(null, now)}</p>;
   if (!hydrated) return null;
-  const time = new Intl.DateTimeFormat(intlLocale(), { dateStyle: "medium", timeStyle: "short" }).format(new Date(at));
-  return <p className="muted">{t("channels.lastActivity", { time })}</p>;
+  const absolute: string = new Intl.DateTimeFormat(intlLocale(), { dateStyle: "medium", timeStyle: "short" }).format(
+    new Date(at),
+  );
+  return (
+    <p className="muted">
+      <time dateTime={new Date(at).toISOString()} title={absolute}>
+        {lastEventText(at, now)}
+      </time>
+    </p>
+  );
+}
+
+/** The mark of each health state: an icon and words, never colour alone. */
+const HEALTH_MARKS: Readonly<Record<Exclude<ChannelHealth, "unavailable">, readonly [IconName, MessageId]>> = {
+  healthy: ["success", "channels.health.healthy"],
+  attention: ["warning", "channels.health.attention"],
+  none: ["minus", "channels.notConnected"],
+};
+
+/** The health of a card at a glance. A platform that this site does not offer has no mark: its card says so. */
+function HealthMark({ health }: Readonly<{ health: ChannelHealth }>): ReactNode {
+  if (health === "unavailable") return null;
+  const [icon, label] = HEALTH_MARKS[health];
+  return (
+    <span className="ch-mark" data-health={health}>
+      <Icon name={icon} size={16} />
+      {t(label)}
+    </span>
+  );
 }
 
 /**
@@ -208,11 +240,14 @@ function LastActivity({ at }: Readonly<{ at: number | null }>): ReactNode {
  */
 export function ChannelPanel({
   channels,
+  stale = false,
   providers,
   signInProvider,
   result: initialResult,
 }: Readonly<{
   channels: ChannelView[];
+  /** The last reads of the channels failed, so the status on screen can be old. */
+  stale?: boolean;
   providers: Provider[];
   signInProvider: Provider | null;
   result: string | null;
@@ -239,6 +274,13 @@ export function ChannelPanel({
   /** The platform whose Connect button waits for focus. */
   const awaitingConnect = useRef<ActivityPlatform | null>(null);
   const hydrated = useHydrated();
+  const [now, setNow] = useState<number>((): number => Date.now());
+
+  // One timer moves the age of every card.
+  useEffect((): (() => void) => {
+    const timer = setInterval((): void => setNow(Date.now()), AGE_TICK_MS);
+    return (): void => clearInterval(timer);
+  }, []);
 
   // The result of a callback: show it in view and give it focus, so it is read once (the banner is a status
   // region; no toast repeats it). Then take it out of the address, so a reload or a shared link does not show it
@@ -365,6 +407,11 @@ export function ChannelPanel({
   return (
     <div className="ch-panel" ref={panel}>
       <p className="muted">{t("channels.intro")}</p>
+      {stale && (
+        <p className="muted" data-channels-stale>
+          {t("channels.refreshFailed")}
+        </p>
+      )}
       {result && (
         <output className="ch-result" tabIndex={-1} ref={banner}>
           {result}
@@ -374,29 +421,20 @@ export function ChannelPanel({
         {channels.map((channel: ChannelView) => {
           const name = PLATFORM_NAMES[channel.platform];
           const connection = channel.connection;
-          // A platform this site no longer offers cannot be reconnected, so its status advice would mislead.
           // The quota message names the reset time in the viewer's time zone, so it shows after hydration.
           const waitsForTime = connection?.code === "quota_exhausted" && !hydrated;
-          let problem: string | null = null;
-          if (connection && channel.available && !waitsForTime) {
-            const quotaReset: string | null =
-              connection.code === "quota_exhausted" ? quotaResetText(connection.updatedAt) : null;
-            problem = statusMessage(connection, quotaReset, channel.platform);
-          }
+          const problem: string | null = waitsForTime ? null : channelProblem(channel);
           return (
             <li key={channel.platform} className="ch-item" data-channel={channel.platform}>
               <p className="ch-head">
                 <PlatformLogo platform={channel.platform} />
                 <span className="ch-badge">{name}</span>
-                <strong>
-                  {connection
-                    ? t("channels.connectedAs", { name: connection.displayName })
-                    : t("channels.notConnected")}
-                </strong>
+                {connection && <strong>{t("channels.connectedAs", { name: connection.displayName })}</strong>}
+                <HealthMark health={channelHealth(channel)} />
               </p>
               <div className="ch-body">
                 {channel.available ? <p>{t(STARTS[channel.platform])}</p> : <p>{t("channels.unavailable")}</p>}
-                {connection && <LastActivity at={connection.lastEventAt} />}
+                {connection && <LastEvent at={connection.lastEventAt} now={now} />}
                 {problem && (
                   // A used-up quota is a known state, not news: it is a status, so it is not read out as an alert.
                   <p className="ch-problem" role={problemRole(connection?.code ?? null)}>

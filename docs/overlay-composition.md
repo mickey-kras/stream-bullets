@@ -298,6 +298,7 @@ See [live capacity](live-room-capacity.md).
 
 1. **Connect channels**: the channel connections. With a connected channel, the step shows one status line.
    Select the line to open the full panel.
+   The line and the cards follow the channel health while the page is open.
 2. **Build your overlay**: the overlay studio.
 3. **Add to OBS**: the overlay link.
 
@@ -397,6 +398,11 @@ The settings show the name of the selected layer and these controls:
 
 Up next and the support banner have no picker. The characters layer has no background.
 Without a selected layer, the settings show a hint.
+
+The chat settings show a warning when the chat layer is on stream and no connected platform is healthy.
+The warning text is "No channel delivers chat right now. See step 1." It links to step 1.
+The warning uses the live channel list of step 1.
+See [Channel health in Overlay control](channel-connections.md#channel-health-in-overlay-control).
 
 The settings are a region with the name of the layer, after the grid in the tab sequence.
 When you select a layer with its chip, a screen reader reads the selection. The grid reads its own selections.

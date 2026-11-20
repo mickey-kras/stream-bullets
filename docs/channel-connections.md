@@ -45,7 +45,8 @@ The code is in these files:
 | Payload normalization | `app/server/channel-normalize.ts` |
 | Ingestion, snapshot, YouTube poll | `app/server/channel-ingest.ts` |
 | Provider subscriptions and their repair | `app/server/channel-ingest-subscriptions.ts`, `app/server/channel-repair.server.ts` |
-| Streamer controls | `app/components/channels/channel-panel.tsx` |
+| Streamer controls | `app/components/channels/channel-panel.tsx`, `app/components/channels/channels-step.tsx` |
+| Channel health and its refresh | `app/lib/channel-health.ts`, `app/components/channels/use-live-channels.ts` |
 
 ## Event contract
 
@@ -103,6 +104,43 @@ The `ChannelIngest` object tags these sockets `characters`. Each one counts as a
 Thus an open characters source keeps the YouTube poll alive, and each poll costs YouTube quota.
 
 The playground runs only while at least one characters socket is open. See [Interactive characters](characters.md).
+
+## Channel health in Overlay control
+
+Step 1 of **Overlay control** shows the health of each platform while the page is open.
+The page gets the first list from its loader. It then reads `GET /api/channels` every 20 seconds.
+It reads only while the tab is visible.
+It reads at once when the tab shows again or when the browser is online again.
+
+The read uses no account quota and no address limit. A failed read keeps the last list.
+After 3 failed reads in a row, the panel shows a short line. The next successful read removes the line.
+A failed read causes no toast.
+
+Each card has a status mark with an icon and text:
+
+| Mark | Condition |
+| --- | --- |
+| **Healthy** | The connection has the status `active`. |
+| **Needs attention** | The connection has a different status. The card shows the problem and the fix. |
+| **Not connected** | The platform has no connection. |
+
+A connection of a platform that the site does not offer gets no mark.
+The card also shows the age of the last chat event, for example "Last chat event 2 minutes ago".
+The age changes at most one time in 15 seconds. The `title` attribute of the text holds the absolute time.
+The status line of the step uses the same list.
+
+When the list shows a change, the page tells the owner one time:
+
+- A healthy platform gets a problem: the panel opens. A toast and the live region name the platform and the problem.
+- A platform works again: a toast and the live region say that its chat is back. The panel stays open.
+
+The first list causes no message. An unchanged state causes no message.
+The `quota_exhausted` status causes one message, at its start. The card shows this status until the next quota day.
+
+The overlay page never shows the channel health, because viewers see that page.
+
+The chat layer settings use the same list for their warning.
+See [Settings of the selected layer](overlay-composition.md#settings-of-the-selected-layer).
 
 ## Capability matrix
 
