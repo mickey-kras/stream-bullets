@@ -152,24 +152,31 @@ See the [capability matrix](channel-connections.md#capability-matrix).
 
 ## Controls
 
-The **Characters** part of step 2 (**Choose what shows**) on **Overlay control** has these controls:
+The characters layer is one of the layers in step 2 (**Build your overlay**) on **Overlay control**.
+To put it on the grid, select its chip in the palette. Its settings show when you select the layer:
 
-- **Show on stream** shows or hides the layer.
+- **Show on stream** shows or hides the layer. The layer stays on the grid.
 - **Seconds without chat before a character walks out** sets the inactivity timeout, from 10 to 600 seconds.
   The editor saves the value in the layers (`characters.timeout`) when you leave the field or press Enter.
 - **Pause** stops the playground. The characters stand still and commands do nothing. **Resume** starts it again.
 - **Reset playground** asks for a confirmation. Then all characters go at once and the ground becomes complete again.
   Removed viewers can come back. Chat bans and timeouts stay.
-- **Start characters test** plays a synthetic crowd for 5 minutes. **Stop characters test** ends it.
-  The test needs the saved characters layer on. Starting a test also resumes a paused playground, so the test shows at once.
-  During a pause, the test hint and the start message tell you this.
-- Pause, reset, and the test need the saved characters layer on. When it is off, the buttons are unavailable and a hint tells you to show the layer.
+- Pause and reset need the saved characters layer on stream.
+  When it is off stream, the buttons are unavailable and a hint tells you to show the layer.
 - Viewers see a **PAUSED** badge during a pause, and a **TEST** badge during a test.
 - **Characters on the playground** lists the visible characters with their platforms. **Remove** takes one character off.
   A removed participant stays off until a reset, or until the registry forgets the participant.
+- **Remove from grid** takes the layer off the grid of the selected orientation.
 
-The preview opens the owner's own characters socket while the characters layer is on.
-The editor reads the pause and the test only while the saved characters layer is on.
+**Start test** in the toolbar of the studio plays a synthetic crowd for 5 minutes. **Stop test** ends it.
+The same button starts the chat test. See [Test](overlay-composition.md#test).
+The characters test needs the saved characters layer on stream.
+A start of the test also resumes a paused playground, so the test shows at once.
+During a pause, the text beside the button and the start message tell you this.
+
+The layer is on stream when it has a cell in the selected orientation and **Show on stream** is on.
+The preview opens the owner's own characters socket while the characters layer is on stream.
+The editor reads the pause and the test only while the saved characters layer is on stream.
 The chat preview still shows sample messages.
 When the server has no playground (`503`), the editor shows "Characters are off on this server" instead of an error.
 The controls use `POST /api/overlay/characters`. See [API](api.md#overlay-layers).
@@ -209,7 +216,7 @@ The playground of a page runs in the `ChannelIngest` Durable Object of that page
 The playground runs only when all these conditions are true:
 
 - At least one socket that asked for characters is open.
-- The saved characters layer is on.
+- The saved characters layer is on stream.
 - The owner did not pause the playground.
 
 Each 100 ms, the host runs the rules ticks that are due, at most 10. Then it sends one frame.
@@ -307,7 +314,7 @@ It never holds message text. The privacy policy (`app/routes/privacy.tsx`) descr
 - Restrictions end at their end time. A ban without an end lasts 30 minutes. The playground keeps at most 500 restrictions.
 - An alarm forgets each participant and restriction on time, also when no more chat comes.
   When the playground keeps no participant and no restriction, has no pause, and runs no test, the alarm deletes the checkpoint.
-- With the characters layer off, the playground keeps nothing. Turning the layer off deletes the checkpoint at once.
+- With the characters layer off stream, the playground keeps nothing. Taking the layer off stream deletes the checkpoint at once.
   If the change notice to the object does not arrive, the next alarm deletes it. The alarm comes within one minute (`LAYER_CHECK_MS`).
 - Deleting the page deletes the checkpoint.
 
@@ -335,7 +342,8 @@ The art ships under the project license.
 
 ## OBS setup
 
-1. On **Overlay control**, select **Show on stream** in the **Characters** part.
+1. On **Overlay control**, select the **Characters** chip in the palette. The layer goes on the grid and on stream.
+   Drag the layer to its place and drag a handle to give it its size.
 2. Use the composition URL, or add a browser source with the characters layer URL:
 
    ```text
@@ -343,9 +351,9 @@ The art ships under the project license.
    ```
 
 3. Give the source the size of the characters cell. **Overlay control** shows it under **Layer URLs**.
-   The default cell is 1920 × 240.
+   A cell across the bottom of the horizontal frame is 1920 × 240.
 4. Keep the background of the source transparent.
-5. Select **Start characters test** to see the playground in OBS before you go live.
+5. Select **Start test** to see the playground in OBS before you go live.
 6. After an update of Stream Bullets, refresh the browser source once.
 
 Each open characters source keeps the playground running and uses one activity socket.

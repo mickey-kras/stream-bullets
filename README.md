@@ -37,8 +37,9 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - Newest uses stable cursors. Top sorts by likes minus dislikes. Votes can move entries between pages. Refresh for current order.
 - The Polls list has three groups in this order: active polls of the page owner, active polls of other people, all other polls.
 - Each of these groups lists the newest poll first. Top keeps the plain score order without groups.
-- `/@handle/overlay` shows the latest active poll of the page owner. It never selects a viewer poll by itself.
-- The owner picks a viewer poll in **Overlay control**. `?poll=<id>` also selects a poll. Public overlays cannot vote.
+- `/@handle/overlay` shows the layers that the owner put on the grid in **Overlay control**.
+- By default, the poll layer shows the latest active poll of the page owner. It never selects a viewer poll by itself.
+- The owner picks a viewer poll for the poll layer in **Overlay control**. `?poll=<id>` also selects a poll. Public overlays cannot vote.
 - **Overlay control** creates a private OBS URL with a secret `key`. It grants owner-priority admission, including full rooms.
 - The full URL appears once. The server stores only its SHA-256 key hash. **Regenerate link** revokes the old key. Update OBS afterward.
 - See [overlay composition](docs/overlay-composition.md) for the layers, the per-layer URLs, and the merged chat.
@@ -245,7 +246,7 @@ Browser-only prototype topics and profiles never reached the server.
 - Owners and valid private overlays get priority. Key hashes use constant-time comparison. Invalid keys receive normal anonymous admission.
 - Regeneration closes old-key connections. Frozen overlays remain read-only. Suspension refuses overlays and closes live connections.
 - At capacity, signed-in viewers displace the oldest signed-out connection. Snapshots include at most 50 polls and the newest active poll of the page owner.
-- Private overlay connections receive only the polls of the page owner and the poll on air.
+- Private overlay connections receive only the polls of the page owner and the poll of the poll layer.
 - Leases last one hour. Clients ping every 20 seconds. 60 seconds without a ping closes the connection.
 - Mash taps enter durable storage before acknowledgement. Totals flush to D1 each second and recover after restart.
 - Rooms resync every 15 seconds. Reconnect loads current state. Disconnected views refresh HTTP every 30 seconds.
