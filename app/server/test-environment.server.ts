@@ -310,7 +310,7 @@ const GATE_STYLE: string = [
   "code{overflow-wrap:anywhere}",
   "form{display:grid;gap:1rem;margin-top:1.5rem}",
   "label{display:grid;gap:.25rem}",
-  "input,select,button{font:inherit;color:inherit;min-height:2.75rem;padding:0 .75rem;border:1px solid #849291;border-radius:.5rem;background:#11282d}",
+  "input,select,button{font:inherit;color:inherit;min-height:2.75rem;padding:0 .75rem;border:1px solid #849291;border-radius:.25rem;background:#11282d}",
   "div{display:flex;flex-wrap:wrap;gap:.5rem}",
   "button{cursor:pointer}",
   "button:hover{border-color:#edbd53;background:#2d4649}",
