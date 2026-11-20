@@ -131,6 +131,9 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  /* A card is only as wide as its text, so a short message does not cover the game. A long message wraps at the
+     full layer width. */
+  align-items: flex-start;
   gap: 0.22em;
   overflow: hidden;
   /* System fonts only: the overlay loads no web font for the chat. */
@@ -149,6 +152,7 @@
   position: relative;
   flex: 0 0 auto;
   min-width: 0;
+  max-width: 100%;
   margin: 0;
   padding: 0;
 }
@@ -218,6 +222,8 @@
 .wl-badge {
   margin-right: 0.25em;
   font-size: 0.72em;
+  /* Lifts the small text so that its middle is level with the platform icon and the name. */
+  vertical-align: 0.14em;
   color: var(--wl-muted);
 }
 .wl-user {
