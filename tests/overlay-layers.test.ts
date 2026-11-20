@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   CELL_PX,
+  CHARACTERS_MAX,
   CHARACTERS_TIMEOUT,
   CHAT_BACKGROUND,
   CONTENT_LAYERS,
@@ -36,6 +37,7 @@ import {
   type LayerCells,
   type OverlayLayers,
 } from "../app/lib/overlay-layers";
+import { FRAME_CHARS_MAX } from "../app/lib/playground/protocol";
 
 // Pure rules for overlay layers: the grid, stored values, patches and layer URLs.
 
@@ -106,7 +108,7 @@ describe("grid and defaults", (): void => {
     expect(DEFAULT_LAYERS).toEqual({
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: true, backgroundOpacity: 100 },
-      characters: { enabled: false, timeout: 60 },
+      characters: { enabled: false, timeout: 60, max: 40 },
       items: defaultItems,
       cells: { horizontal: { ...none, support: null }, vertical: { ...none, support: null } },
     });
@@ -248,7 +250,7 @@ describe("stored layers", (): void => {
     const layers = {
       orientation: "vertical",
       chat: { enabled: true, hideCommands: false, backgroundOpacity: 35 },
-      characters: { enabled: true, timeout: 60 },
+      characters: { enabled: true, timeout: 60, max: 40 },
       items: {
         ...defaultItems,
         poll: { enabled: false, ref: "p1", backgroundOpacity: 0, qr: false },
@@ -411,7 +413,7 @@ describe("stored layers", (): void => {
     const full: OverlayLayers = {
       orientation: "horizontal",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 100 },
-      characters: { enabled: false, timeout: 600 },
+      characters: { enabled: false, timeout: 600, max: 5 },
       items: {
         poll: { ...changed, ref, qr: false },
         topic: { ...changed, ref },
@@ -570,7 +572,11 @@ describe("layer patches", (): void => {
     const removed: OverlayLayers = mergeLayers(next, { cells: { horizontal: { chat: null } } });
     expect(removed.cells.horizontal).toEqual({ ...LAID.cells.horizontal, chat: null });
     expect(removed.cells.vertical).toEqual(LAID.cells.vertical);
-    expect(mergeLayers(next, { characters: { enabled: true } }).characters).toEqual({ enabled: true, timeout: 60 });
+    expect(mergeLayers(next, { characters: { enabled: true } }).characters).toEqual({
+      enabled: true,
+      timeout: 60,
+      max: 40,
+    });
     expect(mergeLayers(next, {})).toEqual(next);
     expect(DEFAULT_LAYERS.chat.enabled).toBe(false);
     for (const orientation of ORIENTATIONS) expect(GRID[orientation].cols * GRID[orientation].rows).toBe(144);
@@ -625,6 +631,7 @@ describe("characters timeout", (): void => {
     expect(storedLayersSchema.parse({ characters: { enabled: true, timeout: 5 } }).characters).toEqual({
       enabled: true,
       timeout: 60,
+      max: 40,
     });
   });
 
@@ -634,14 +641,64 @@ describe("characters timeout", (): void => {
     for (const timeout of [9, 601, 30.5, "60", null, Number.NaN])
       expect(layersPatchSchema.safeParse({ characters: { timeout } }).success).toBe(false);
     const enabled: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { characters: { enabled: true } });
-    expect(mergeLayers(enabled, { characters: { timeout: 300 } }).characters).toEqual({ enabled: true, timeout: 300 });
+    expect(mergeLayers(enabled, { characters: { timeout: 300 } }).characters).toEqual({
+      enabled: true,
+      timeout: 300,
+      max: 40,
+    });
     expect(
-      mergeLayers({ ...enabled, characters: { enabled: true, timeout: 300 } }, { characters: { enabled: false } })
-        .characters,
+      mergeLayers(
+        { ...enabled, characters: { enabled: true, timeout: 300, max: 40 } },
+        { characters: { enabled: false } },
+      ).characters,
     ).toEqual({
       enabled: false,
       timeout: 300,
+      max: 40,
     });
+  });
+});
+
+describe("characters maximum", (): void => {
+  it("allows 5 to 40 characters and defaults to the frame limit", (): void => {
+    expect(CHARACTERS_MAX).toEqual({ min: 5, max: 40, default: 40 });
+    expect(CHARACTERS_MAX.max).toBe(FRAME_CHARS_MAX);
+    expect(DEFAULT_LAYERS.characters.max).toBe(40);
+  });
+
+  it("reads a stored maximum leniently: a missing or invalid one is the default", (): void => {
+    const read = (max: unknown): number => storedLayersSchema.parse({ characters: { max } }).characters.max;
+    expect(read(5)).toBe(5);
+    expect(read(12)).toBe(12);
+    expect(read(40)).toBe(40);
+    for (const value of [undefined, 4, 41, 12.5, "12", null]) expect(read(value)).toBe(40);
+    // A text from before this setting keeps its timeout.
+    expect(storedLayersSchema.parse({ characters: { enabled: true, timeout: 90 } }).characters).toEqual({
+      enabled: true,
+      timeout: 90,
+      max: 40,
+    });
+  });
+
+  it("accepts only whole numbers from 5 to 40 in a patch, and merges them", (): void => {
+    for (const max of [5, 20, 40])
+      expect(layersPatchSchema.parse({ characters: { max } })).toEqual({ characters: { max } });
+    for (const max of [4, 41, 12.5, "12", null, Number.NaN])
+      expect(layersPatchSchema.safeParse({ characters: { max } }).success).toBe(false);
+    const lowered: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { characters: { max: 12 } });
+    expect(lowered.characters).toEqual({ enabled: false, timeout: 60, max: 12 });
+    expect(mergeLayers(lowered, { characters: { timeout: 30 } }).characters).toEqual({
+      enabled: false,
+      timeout: 30,
+      max: 12,
+    });
+  });
+
+  it("stores the maximum and reads it again", (): void => {
+    const lowered: OverlayLayers = mergeLayers(DEFAULT_LAYERS, { characters: { max: 12 } });
+    const text: string = storedLayersText(lowered);
+    expect(JSON.parse(text)).toMatchObject({ characters: { enabled: false, timeout: 60, max: 12 } });
+    expect(storedLayersSchema.parse(JSON.parse(text))).toEqual(lowered);
   });
 });
 

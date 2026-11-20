@@ -933,7 +933,7 @@ describe("overlay control", (): void => {
       expect(second.layers).toEqual({
         orientation: "vertical",
         chat: { enabled: true, hideCommands: false, backgroundOpacity: 45 },
-        characters: { enabled: true, timeout: 60 },
+        characters: { enabled: true, timeout: 60, max: 40 },
         items: DEFAULT_LAYERS.items,
         cells: horizontal({ chat: chatCell, poll: { c: 0, r: 0, w: 6, h: 4 } }),
       });
@@ -956,7 +956,7 @@ describe("overlay control", (): void => {
 
     it("saves the characters timeout, and does not tell the playground while channels are off", async (): Promise<void> => {
       const saved = await overlay(await send({ action: "layers", characters: { enabled: true, timeout: 120 } }));
-      expect(saved.layers.characters).toEqual({ enabled: true, timeout: 120 });
+      expect(saved.layers.characters).toEqual({ enabled: true, timeout: 120, max: 40 });
       expect(ingestCalls).toEqual([{ path: `/playground-config?streamerId=${page}`, body: "" }]);
       for (const timeout of [9, 601, 30.5, "60"])
         expect((await send({ action: "layers", characters: { timeout } })).status).toBe(400);
@@ -979,6 +979,20 @@ describe("overlay control", (): void => {
         env.CHANNEL_INGEST = binding;
       }
       expect(ingestCalls).toHaveLength(1);
+    });
+
+    it("saves the characters maximum, tells the playground and refuses a value outside 5 to 40", async (): Promise<void> => {
+      const saved = await overlay(await send({ action: "layers", characters: { enabled: true, max: 12 } }));
+      expect(saved.layers.characters).toEqual({ enabled: true, timeout: 60, max: 12 });
+      expect(storedLayersSchema.parse(await storedLayers(page)).characters.max).toBe(12);
+      expect(ingestCalls).toEqual([{ path: `/playground-config?streamerId=${page}`, body: "" }]);
+      for (const max of [4, 41, 12.5, "12", null])
+        expect((await send({ action: "layers", characters: { max } })).status).toBe(400);
+      expect(ingestCalls).toHaveLength(1);
+      // A patch without the maximum keeps it.
+      const kept = await overlay(await send({ action: "layers", characters: { timeout: 30 } }));
+      expect(kept.layers.characters).toEqual({ enabled: true, timeout: 30, max: 12 });
+      expect(ingestCalls).toHaveLength(2);
     });
 
     it("refuses cells outside the grid, below the minimum or over each other, and unknown fields", async (): Promise<void> => {
@@ -1231,7 +1245,7 @@ describe("overlay control", (): void => {
       await emptyOverlay(otherPage);
       await send({ action: "layers", chat: { enabled: true }, cells: { horizontal: { chat: chatCell } } });
       const other = await overlay(await send({ action: "layers", characters: { enabled: true } }, "other"));
-      expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60 } });
+      expect(other.layers).toEqual({ ...DEFAULT_LAYERS, characters: { enabled: true, timeout: 60, max: 40 } });
       expect((await getOverlayState(env, page)).layers).toEqual({
         ...DEFAULT_LAYERS,
         chat: { enabled: true, hideCommands: true, backgroundOpacity: 100 },

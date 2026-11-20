@@ -14,7 +14,7 @@ import {
   TEST_USER_PREFIX,
   VISIBLE_MAX,
 } from "../app/lib/playground/constants";
-import { COMMANDS, type Command, chooseCrowd, type Participant } from "../app/lib/playground/crowd";
+import { COMMANDS, type Command, chooseCrowd, crowdSlots, type Participant } from "../app/lib/playground/crowd";
 import { BUBBLE_MAX_UNITS, CUT_MARK, encodeFrame, FLAG_NEW, FLAG_UNAVAILABLE } from "../app/lib/playground/protocol";
 import { mulberry32, PlaygroundSim, parseCommand, setState } from "../app/lib/playground/sim";
 import { createWorld, solidAt, tileAt } from "../app/lib/playground/terrain";
@@ -101,6 +101,79 @@ describe("prototype scenarios (640 x 120 world)", () => {
       tick();
       expect(admitted(sim).length).toBeLessThanOrEqual(40);
     }
+  });
+
+  it("splits the configured maximum into ranked and rotating slots", () => {
+    expect(crowdSlots(40)).toEqual({ ranked: 30, rotating: 10 });
+    expect(crowdSlots(5)).toEqual({ ranked: 4, rotating: 1 });
+    expect(crowdSlots(6)).toEqual({ ranked: 5, rotating: 1 });
+    expect(crowdSlots(20)).toEqual({ ranked: 15, rotating: 5 });
+  });
+
+  it("caps at the configured maximum, with the same split", () => {
+    const sim = new PlaygroundSim({ cellsW: 16, cellsH: 3, rng: () => 0.9, walkSpread: 0, visibleMax: 5 });
+    sim.resumeAfter(0);
+    const viewers: Viewer[] = Array.from({ length: 20 }, (_, i: number) => viewer(i));
+    for (const v of viewers) sim.receive(chat(v, "hi"));
+    expect(sim.visibleMax).toBe(5);
+    expect(admitted(sim)).toHaveLength(5);
+    expect(sim.list().filter((c) => c.eligible && c.slot === "ranked")).toHaveLength(4);
+    expect(sim.list().filter((c) => c.eligible && c.slot === "rotating")).toHaveLength(1);
+    for (let i = 0; i < 2000; i++) {
+      if (i % 60 === 0) for (const v of viewers) sim.receive(chat(v, "hi"));
+      sim.tick();
+      expect(admitted(sim).length).toBeLessThanOrEqual(5);
+      expect(sim.fullFrame().chars.length).toBeLessThanOrEqual(5);
+    }
+    // The one rotating slot advances by one participant each 450 ticks.
+    expect(sim.rotation).toBe(4);
+  });
+
+  it("sends the extra characters to the exit when the maximum goes below the crowd", () => {
+    const { sim, chars, message, tick } = proto();
+    sim.select();
+    for (const c of chars) message(c, "hi");
+    expect(admitted(sim)).toHaveLength(40);
+    sim.clock = 300;
+    sim.setVisibleMax(10);
+    tick();
+    // Nobody pops out: the 30 extra characters walk to the exit door and leave there.
+    expect(admitted(sim)).toHaveLength(40);
+    const leaving: Participant[] = chars.filter((c) => c.admitted && !c.eligible);
+    expect(leaving).toHaveLength(30);
+    expect(leaving.every((c) => c.state === "goto" && c.exitReason === "capacity")).toBe(true);
+    expect(chars.filter((c) => c.eligible)).toHaveLength(10);
+    const exited = new Set<Participant>();
+    for (let i = 0; i < 900; i++) {
+      if (i % 60 === 0) for (const c of chars) message(c, "hi");
+      tick();
+      for (const c of leaving) if (c.state === "exit") exited.add(c);
+      expect(admitted(sim).length).toBeLessThanOrEqual(40);
+    }
+    expect(exited.size).toBe(30);
+    expect(admitted(sim)).toHaveLength(10);
+  });
+
+  it("clamps the maximum setting and keeps it in the checkpoint", () => {
+    const { sim } = proto();
+    expect(sim.visibleMax).toBe(40);
+    sim.setVisibleMax(12.4);
+    expect(sim.visibleMax).toBe(12);
+    sim.setVisibleMax(0);
+    expect(sim.visibleMax).toBe(5);
+    sim.setVisibleMax(9999);
+    expect(sim.visibleMax).toBe(40);
+    expect(() => sim.setVisibleMax(Number.NaN)).toThrow(RangeError);
+    sim.setVisibleMax(8);
+    const raw: string = sim.checkpoint();
+    expect(PlaygroundSim.restore(raw, { rng: () => 0.9 }).visibleMax).toBe(8);
+    // A checkpoint from before this setting takes the default.
+    const old = JSON.parse(raw) as Record<string, unknown>;
+    delete old.visibleMax;
+    expect(PlaygroundSim.restore(JSON.stringify(old), { rng: () => 0.9 }).visibleMax).toBe(40);
+    expect(() => PlaygroundSim.restore(JSON.stringify({ ...old, visibleMax: 4 }), { rng: () => 0.9 })).toThrow(
+      "playground checkpoint invalid",
+    );
   });
 
   it("applies the 90-tick score and command cooldowns", () => {
@@ -866,8 +939,8 @@ describe("checkpoint", () => {
     const back = PlaygroundSim.restore(sim.checkpoint(), { rng: mulberry32(3) });
     expect(back.list().map((p) => p.id)).toEqual(sim.list().map((p) => p.id));
     const ids = (chosen: Participant[]): number[] => chosen.map((p) => p.id);
-    expect(ids(chooseCrowd(back.list(), back.clock, back.timeoutTicks, 7))).toEqual(
-      ids(chooseCrowd(sim.list(), sim.clock, sim.timeoutTicks, 7)),
+    expect(ids(chooseCrowd(back.list(), back.clock, back.timeoutTicks, 7, back.visibleMax))).toEqual(
+      ids(chooseCrowd(sim.list(), sim.clock, sim.timeoutTicks, 7, sim.visibleMax)),
     );
   });
 

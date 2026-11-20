@@ -59,10 +59,17 @@ export interface CharactersLayer {
   enabled: boolean;
   /** Seconds without chat before a character walks out (CHARACTERS_TIMEOUT). */
   timeout: number;
+  /** The most characters on screen at one time (CHARACTERS_MAX). */
+  max: number;
 }
 
 /** The characters inactivity timeout in seconds: the one source for the layers, the editor and the playground. */
 export const CHARACTERS_TIMEOUT = { min: 10, max: 600, default: 60 } as const;
+/**
+ * The most characters on screen: the one source for the layers, the editor and the playground. The upper limit
+ * equals FRAME_CHARS_MAX in app/lib/playground/protocol.ts.
+ */
+export const CHARACTERS_MAX = { min: 5, max: 40, default: 40 } as const;
 
 /** The settings of one content layer. */
 export interface ContentItem {
@@ -135,7 +142,7 @@ function defaultItem(layer: ContentLayer): ContentItem {
 export const DEFAULT_LAYERS: OverlayLayers = {
   orientation: "horizontal",
   chat: { enabled: false, hideCommands: true, backgroundOpacity: CHAT_BACKGROUND.default },
-  characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default },
+  characters: { enabled: false, timeout: CHARACTERS_TIMEOUT.default, max: CHARACTERS_MAX.default },
   items: contentRecord(defaultItem),
   cells: {
     horizontal: emptyCells(),
@@ -255,6 +262,7 @@ function cellsPatchSchema(orientation: Orientation): z.ZodType<CellsPatch> {
 }
 
 const characterTimeout = z.number().int().min(CHARACTERS_TIMEOUT.min).max(CHARACTERS_TIMEOUT.max);
+const characterMax = z.number().int().min(CHARACTERS_MAX.min).max(CHARACTERS_MAX.max);
 const layerBackground = z
   .number()
   .int()
@@ -293,7 +301,14 @@ export const layersPatchSchema = z
       })
       .strict()
       .optional(),
-    characters: z.object({ enabled: z.boolean().optional(), timeout: characterTimeout.optional() }).strict().optional(),
+    characters: z
+      .object({
+        enabled: z.boolean().optional(),
+        timeout: characterTimeout.optional(),
+        max: characterMax.optional(),
+      })
+      .strict()
+      .optional(),
     items: z.object(contentRecord(itemPatchSchema)).strict().optional(),
     cells: z
       .object({
@@ -369,6 +384,7 @@ export const storedLayersSchema: z.ZodType<OverlayLayers, unknown> = fallback(
       z.object({
         enabled: fallback(z.boolean(), DEFAULT_LAYERS.characters.enabled),
         timeout: fallback(characterTimeout, DEFAULT_LAYERS.characters.timeout),
+        max: fallback(characterMax, DEFAULT_LAYERS.characters.max),
       }),
       (): CharactersLayer => ({ ...DEFAULT_LAYERS.characters }),
     ),
@@ -470,6 +486,7 @@ export function mergeLayers(current: OverlayLayers, patch: LayersPatch): Overlay
     characters: {
       enabled: patch.characters?.enabled ?? current.characters.enabled,
       timeout: patch.characters?.timeout ?? current.characters.timeout,
+      max: patch.characters?.max ?? current.characters.max,
     },
     items: contentRecord((layer: ContentLayer): ContentItem => mergeItem(current.items[layer], patch.items?.[layer])),
     cells: {

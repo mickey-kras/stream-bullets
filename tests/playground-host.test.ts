@@ -144,7 +144,7 @@ async function setLayers(layers: OverlayLayers, streamerId: string = page): Prom
 /** The characters on stream in both orientations. */
 const ON: OverlayLayers = {
   ...DEFAULT_LAYERS,
-  characters: { enabled: true, timeout: 60 },
+  characters: { enabled: true, timeout: 60, max: 40 },
   cells: {
     horizontal: { ...emptyCells(), characters: { c: 0, r: 7, w: 16, h: 2 } },
     vertical: { ...emptyCells(), characters: { c: 0, r: 13, w: 9, h: 3 } },
@@ -785,7 +785,7 @@ describe("configuration", (): void => {
     const queries = watchQueries();
     const narrow: OverlayLayers = {
       ...ON,
-      characters: { enabled: true, timeout: 120 },
+      characters: { enabled: true, timeout: 120, max: 40 },
       cells: { ...ON.cells, horizontal: { ...ON.cells.horizontal, characters: { c: 0, r: 7, w: 8, h: 2 } } },
     };
     await setLayers(narrow);
@@ -835,6 +835,31 @@ describe("configuration", (): void => {
     expect(queries.filter((sql: string) => sql.startsWith("SELECT layers"))).toHaveLength(2);
     const socket = await listen();
     expect(frames(socket)[0].terrain).toMatchObject({ w: 320 });
+  });
+
+  it("applies the saved maximum: a new playground admits no more, a lower one sends the extra out", async (): Promise<void> => {
+    await setLayers({ ...ON, characters: { ...ON.characters, max: 5 } });
+    const socket = await listen();
+    advance(FRAME_MS);
+    await deliver(Array.from({ length: 8 }, (_, i: number) => chat(`m${i}`, `u${i}`, "hello")));
+    advance(FRAME_MS * 5);
+    expect(roster(socket)).toHaveLength(5);
+    await setLayers({ ...ON, characters: { ...ON.characters, max: 40 } });
+    await post("playground-config");
+    advance(FRAME_MS);
+    expect(roster(socket)).toHaveLength(8);
+    // Lower again while 8 stand: 3 walk to the exit door after the minimum time on screen.
+    await setLayers({ ...ON, characters: { ...ON.characters, max: 5 } });
+    await post("playground-config");
+    advance(FRAME_MS);
+    expect(roster(socket)).toHaveLength(8);
+    for (let second = 0; second < 40; second++) {
+      await deliver(Array.from({ length: 8 }, (_, i: number) => chat(`n${second}-${i}`, `u${i}`, "hello")));
+      advance(1000);
+    }
+    // The one rotating slot can stand empty while its next character walks in.
+    expect(roster(socket).length).toBeGreaterThanOrEqual(4);
+    expect(roster(socket).length).toBeLessThanOrEqual(5);
   });
 
   it("keeps running on a failed layers read and logs a fixed event", async (): Promise<void> => {
