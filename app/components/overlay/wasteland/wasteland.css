@@ -42,15 +42,12 @@
   }
 }
 
-/* ---------- Composition: characters below content, chat on top ---------- */
+/* ---------- Composition: characters below the content layers, chat on top ---------- */
 .ov-composition {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-}
-.ov-composition > .ov-stage {
-  z-index: 2;
 }
 .ov-layer {
   position: absolute;
@@ -60,19 +57,16 @@
 .ov-layer[data-layer="characters"] {
   z-index: 1;
 }
-/* The content layer and the layers of one content source each. */
+/* The content layers. --ov-bg (0 to 1, overlay-composition.tsx) scales the card background fill, never the text. The
+   border and the shadow of the card stay. */
 .ov-layer:not([data-layer="characters"], [data-layer="chat"]) {
   z-index: 2;
-}
-/* A layer of one content source: --ov-bg (0 to 1, overlay-composition.tsx) scales the card background fill, never
-   the text. The border and the shadow of the card stay. */
-.ov-layer:not([data-layer="content"]) {
   --ov-card: color-mix(in srgb, var(--c-0a2025ed) calc(var(--ov-bg, 1) * 100%), transparent);
 }
-.ov-layer:not([data-layer="content"]) :is(.ov-card, .overlay-card) {
+.ov-layer:not([data-layer="characters"], [data-layer="chat"]) :is(.ov-card, .overlay-card) {
   background: var(--ov-card);
 }
-.ov-layer:not([data-layer="content"]) .ov-message.style-hype {
+.ov-layer:not([data-layer="characters"], [data-layer="chat"]) .ov-message.style-hype {
   background: linear-gradient(
     110deg,
     var(--ov-card),
@@ -90,15 +84,6 @@
 .ov-fit > .ov-stage {
   transform: scale(var(--ov-fit, 1));
   transform-origin: 50% 50%;
-}
-.ov-stage.pos-fit {
-  padding: 0;
-  align-items: center;
-  justify-content: center;
-}
-.ov-stage.pos-fit > * {
-  flex: none;
-  width: 100%;
 }
 /* The chat test tag in the top-right corner of the chat layer. */
 .wl-test {

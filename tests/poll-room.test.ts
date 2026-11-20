@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AppEnv } from "../app/env";
 import { MASH_FLUSH_MS, MASH_TICK_MS } from "../app/lib/mash";
-import { DEFAULT_LAYERS } from "../app/lib/overlay-layers";
+import { DEFAULT_LAYERS, emptyCells } from "../app/lib/overlay-layers";
 import { PollRoom } from "../app/server/poll-room";
 import type { LiveSnapshot } from "../app/types";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -791,15 +791,22 @@ describe("live room snapshots", (): void => {
       .run();
     expect((await post("overlay")).status).toBe(204);
     const update = lastOf<{ overlay: Record<string, unknown> }>(other, "overlay");
-    expect(update?.overlay).toMatchObject({ air: { type: "message" }, position: "top", message: "BRB 5 min" });
-    // OBS shows and hides layers from this message, without a reload.
+    // The row is from before the overlay studio: the message on air is now the message layer, so it is public.
+    expect(update?.overlay).toMatchObject({ showResults: true, message: "BRB 5 min", revision: 3 });
+    // OBS shows and hides layers from this message, without a reload. The chat keeps its old default cells. The top
+    // bar at size L goes to the free space beside the chat.
     expect(update?.overlay.layers).toEqual({
       ...DEFAULT_LAYERS,
       chat: { ...DEFAULT_LAYERS.chat, enabled: true, hideCommands: false },
+      cells: {
+        horizontal: { ...emptyCells(), chat: { c: 0, r: 0, w: 5, h: 7 }, message: { c: 5, r: 0, w: 11, h: 3 } },
+        vertical: { ...emptyCells(), chat: { c: 0, r: 8, w: 9, h: 5 }, message: { c: 0, r: 0, w: 9, h: 3 } },
+      },
     });
     // The chat test end time reaches OBS the same way: 0 is no test.
     expect(update?.overlay.chatTestUntil).toBe(0);
-    expect(update?.overlay).not.toHaveProperty("preview");
+    for (const key of ["air", "preview", "position", "size", "instant"])
+      expect(update?.overlay).not.toHaveProperty(key);
     streamerId = page;
     expect(socket.ofType("overlay")).toEqual([]);
   });

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ActivityEvent } from "../lib/activity";
-import { type CellRect, DEFAULT_LAYERS, type OverlayLayers, parseStoredLayers } from "../lib/overlay-layers";
+import { parseStoredLayers } from "../lib/overlay-legacy";
+import { type CellRect, DEFAULT_LAYERS, type OverlayLayers } from "../lib/overlay-layers";
 import { TICK_HZ } from "../lib/playground/constants";
 import {
   encodeFrame,
@@ -405,11 +406,12 @@ export class PlaygroundHost {
   }
 
   private async apply(layers: OverlayLayers): Promise<void> {
-    if (!layers.characters.enabled) {
+    // Off stream: the layer is off, or it has no cell in the selected orientation.
+    const cell: CellRect | null = layers.cells[layers.orientation].characters;
+    if (!layers.characters.enabled || !cell) {
       if (this.sim || this.leftover) await this.forget();
       return;
     }
-    const cell: CellRect = layers.cells[layers.orientation].characters;
     const now = this.clock.now();
     if (this.sim) {
       const sim = this.sim;

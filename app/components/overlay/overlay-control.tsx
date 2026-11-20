@@ -1,79 +1,19 @@
-import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { t, type MessageId } from "../../i18n";
-import { MASH_NAME } from "../../lib/mash";
-import { frameSize } from "../../lib/overlay-layers";
-import type {
-  OverlayData,
-  OverlayMessageStyle,
-  OverlayPosition,
-  OverlayPublic,
-  OverlaySize,
-  OverlaySource,
-  OverlaySourceRef,
-  OverlayState,
-} from "../../types";
+import { useEffect, useId, useState, type ReactNode } from "react";
+import { t } from "../../i18n";
+import { onStream } from "../../lib/overlay-layers";
+import type { OverlayPublic, OverlayState } from "../../types";
 import { announce } from "../a11y/announcer";
 import { errorMessage, postJson } from "../api";
-import { IconButton } from "../ui/icon-button";
-import { Icon, type IconName } from "../ui/icon";
-import { Select } from "../ui/select";
+import { Icon } from "../ui/icon";
 import { useToast } from "../ui/toast";
 import { CompositionEditor } from "./composition-editor";
+import type { OverlayAction } from "./layer-properties";
 import { OverlayLink } from "./overlay-link";
-import { OverlayStage, type OverlayScene } from "./overlay-stage";
+import type { OverlayScene } from "./overlay-stage";
 import { StepHeading } from "./step-heading";
-import { useDesignScale } from "./use-design-scale";
 
-// Must match overlay_state_message_check.
-export const OVERLAY_MESSAGE_MAX = 120;
-
-const SOURCES: readonly { type: OverlaySource; label: MessageId; hint: MessageId; icon: IconName }[] = [
-  { type: "auto", label: "overlay.src.auto", hint: "overlay.src.autoHint", icon: "polls" },
-  { type: "poll", label: "overlay.src.poll", hint: "overlay.src.pollHint", icon: "poll-choice" },
-  { type: "topic", label: "overlay.src.topic", hint: "overlay.src.topicHint", icon: "topics" },
-  { type: "next", label: "overlay.src.next", hint: "overlay.src.nextHint", icon: "schedule" },
-  { type: "message", label: "overlay.src.message", hint: "overlay.src.messageHint", icon: "megaphone" },
-  { type: "card", label: "overlay.src.card", hint: "overlay.src.cardHint", icon: "community" },
-  { type: "support", label: "overlay.src.support", hint: "overlay.src.supportHint", icon: "heart" },
-  { type: "hidden", label: "overlay.src.hidden", hint: "overlay.src.hiddenHint", icon: "eye-off" },
-];
-const POSITIONS: readonly [OverlayPosition, MessageId][] = [
-  ["lower", "overlay.pos.lower"],
-  ["top", "overlay.pos.top"],
-  ["corner", "overlay.pos.corner"],
-  ["center", "overlay.pos.center"],
-];
-const SIZES: readonly [OverlaySize, string][] = [
-  ["s", "S"],
-  ["m", "M"],
-  ["l", "L"],
-];
-const STYLES: readonly [OverlayMessageStyle, MessageId][] = [
-  ["info", "overlay.style.info"],
-  ["hype", "overlay.style.hype"],
-];
-
-export type OverlayAction =
-  | { action: "preview"; source: OverlaySourceRef }
-  | { action: "take" }
-  | { action: "layout"; position?: OverlayPosition; size?: OverlaySize; instant?: boolean; showResults?: boolean }
-  | { action: "message"; text: string; style: OverlayMessageStyle };
-
-function sameSource(a: OverlaySourceRef, b: OverlaySourceRef): boolean {
-  return a.type === b.type && a.ref === b.ref;
-}
-
-// Default source ref: newest poll of the page owner, newest topic or first card. A viewer poll is never the default: the
-// owner picks it in the list.
-export function defaultRef(type: OverlaySource, data: OverlayData): string | null {
-  if (type === "poll") return data.polls.find((poll): boolean => poll.byOwner)?.id ?? null;
-  if (type === "topic") return data.topics[0]?.id ?? null;
-  if (type === "card") return data.cards[0]?.id ?? null;
-  return null;
-}
-
-// Use the newest saved, loaded or live overlay state. Live messages omit preview/draft fields; retain those
-// until reload catches up.
+// Use the newest saved, loaded or live overlay state. A live message has the message only while the message layer
+// is on stream. Otherwise keep the draft until a reload catches up.
 export function controlState(
   saved: OverlayState,
   loaded: OverlayState,
@@ -81,243 +21,7 @@ export function controlState(
 ): OverlayState {
   const base: OverlayState = loaded.revision > saved.revision ? loaded : saved;
   if (!live || live.revision <= base.revision) return base;
-  return {
-    ...base,
-    air: live.air,
-    position: live.position,
-    size: live.size,
-    showResults: live.showResults,
-    message: live.air.type === "message" ? live.message : base.message,
-    messageStyle: live.messageStyle,
-    layers: live.layers,
-    chatTestUntil: live.chatTestUntil,
-    revision: live.revision,
-  };
-}
-
-type MonitorKind = "prev" | "air";
-
-// Initialize details open on wide screens only; preserve subsequent user toggles.
-function openOnWideScreens(element: HTMLDetailsElement | null): void {
-  if (element && globalThis.matchMedia?.("(min-width: 43.75em)").matches) element.open = true;
-}
-
-// The monitors show the content alone in the 1920x1080 frame.
-const MONITOR_W: number = frameSize("horizontal").w;
-
-// Scale a 1920x1080 stage through CSS. Hide until measured to prevent overflow. Enlarge uses full width on
-// narrow screens.
-function Monitor({
-  kind,
-  source,
-  scene,
-  enlarged,
-  onEnlarge,
-}: Readonly<{
-  kind: MonitorKind;
-  source: OverlaySourceRef;
-  scene: OverlayScene;
-  enlarged: boolean;
-  onEnlarge: () => void;
-}>): ReactNode {
-  const frame = useRef<HTMLDivElement | null>(null);
-  useDesignScale(frame, MONITOR_W);
-  const label: string = t(SOURCES.find((item) => item.type === source.type)?.label ?? "overlay.src.auto");
-  return (
-    <figure className={`ov-monitor ${kind}`} data-ov-monitor={kind}>
-      <figcaption>
-        {kind === "air" ? (
-          <span className="onair-badge">{t("overlay.onAir")}</span>
-        ) : (
-          <span className="preview-badge">{t("overlay.preview")}</span>
-        )}
-        {t(kind === "air" ? "overlay.onAirIs" : "overlay.previewIs", { source: label })}
-      </figcaption>
-      <div className="ov-frame" ref={frame}>
-        <div className="ov-scaler">
-          <OverlayStage scene={scene} source={source} />
-        </div>
-        <IconButton
-          className="ov-enlarge-btn"
-          label={t(kind === "air" ? "overlay.enlargeAir" : "overlay.enlargePreview")}
-          icon={enlarged ? "zoom-out" : "zoom-in"}
-          iconSize={16}
-          aria-pressed={enlarged}
-          onClick={onEnlarge}
-          data-ov-enlarge={kind}
-        />
-      </div>
-    </figure>
-  );
-}
-
-function Segmented<T extends string>({
-  label,
-  value,
-  options,
-  disabled,
-  onChange,
-}: Readonly<{
-  label: string;
-  value: T;
-  options: readonly (readonly [T, string])[];
-  disabled: boolean;
-  onChange: (value: T) => void;
-}>): ReactNode {
-  return (
-    <fieldset className="field ov-seg-field">
-      <legend className="field-label">{label}</legend>
-      <div className="seg">
-        {options.map(([option, text]) => (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={value === option}
-            disabled={disabled}
-            onClick={() => onChange(option)}
-          >
-            {text}
-          </button>
-        ))}
-      </div>
-    </fieldset>
-  );
-}
-
-function MessageEditor({
-  state,
-  busy,
-  run,
-}: Readonly<{ state: OverlayState; busy: boolean; run: (action: OverlayAction) => void }>): ReactNode {
-  const [text, setText] = useState<string>(state.message);
-  const inputId: string = useId();
-  function save(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-    run({ action: "message", text, style: state.messageStyle });
-  }
-  return (
-    <form className="ov-sub" onSubmit={save}>
-      <label htmlFor={inputId}>
-        <span>{t("overlay.messageLabel", { n: OVERLAY_MESSAGE_MAX })}</span>
-      </label>
-      <input
-        id={inputId}
-        maxLength={OVERLAY_MESSAGE_MAX}
-        value={text}
-        onChange={(event) => setText(event.currentTarget.value)}
-        data-ov-message
-      />
-      <div className="ov-message-row">
-        <Segmented
-          label={t("overlay.messageStyle")}
-          value={state.messageStyle}
-          options={STYLES.map(([style, id]) => [style, t(id)] as const)}
-          disabled={busy}
-          onChange={(style: OverlayMessageStyle) => run({ action: "message", text, style })}
-        />
-        <button type="submit" className="small-button" disabled={busy || text === state.message}>
-          <Icon name="save" size={16} />
-          {t("overlay.saveMessage")}
-        </button>
-      </div>
-    </form>
-  );
-}
-
-// The picker names the author of each viewer poll.
-function pollLabel(poll: OverlayData["polls"][number]): string {
-  const title: string = poll.mash ? `${MASH_NAME}: ${poll.title}` : poll.title;
-  return poll.byOwner ? title : t("overlay.pollBy", { title, author: poll.author });
-}
-
-function SourcePicker({
-  type,
-  state,
-  data,
-  busy,
-  run,
-}: Readonly<{
-  type: OverlaySource;
-  state: OverlayState;
-  data: OverlayData;
-  busy: boolean;
-  run: (action: OverlayAction) => void;
-}>): ReactNode {
-  const labelId: string = useId();
-  const pick = (ref: string): void => run({ action: "preview", source: { type, ref } });
-  if (type === "poll")
-    return (
-      <div className="ov-sub">
-        <span className="sr-only" id={labelId}>
-          {t("overlay.pickPoll")}
-        </span>
-        {data.polls.length > 0 ? (
-          <Select
-            labelledBy={labelId}
-            options={data.polls.map((poll) => ({
-              value: poll.id,
-              label: pollLabel(poll),
-              icon: poll.mash ? "zap" : "polls",
-            }))}
-            placeholder={t("overlay.pickPoll")}
-            value={state.preview.ref ?? undefined}
-            onValueChange={pick}
-            disabled={busy}
-          />
-        ) : (
-          <p className="muted">{t("overlay.noPolls")}</p>
-        )}
-        <label className="choice ov-toggle">
-          <input
-            type="checkbox"
-            checked={state.showResults}
-            disabled={busy}
-            onChange={(event) => run({ action: "layout", showResults: event.currentTarget.checked })}
-          />
-          <span>{t("overlay.showResults")}</span>
-        </label>
-      </div>
-    );
-  if (type === "topic")
-    return (
-      <div className="ov-sub">
-        <span className="sr-only" id={labelId}>
-          {t("overlay.pickTopic")}
-        </span>
-        {data.topics.length > 0 ? (
-          <Select
-            labelledBy={labelId}
-            options={data.topics.map((topic) => ({ value: topic.id, label: topic.title, icon: "topics" }))}
-            value={state.preview.ref ?? undefined}
-            onValueChange={pick}
-            disabled={busy}
-          />
-        ) : (
-          <p className="muted">{t("overlay.noTopics")}</p>
-        )}
-      </div>
-    );
-  if (type === "card")
-    return (
-      <div className="ov-sub">
-        <span className="sr-only" id={labelId}>
-          {t("overlay.pickCard")}
-        </span>
-        {data.cards.length > 0 ? (
-          <Select
-            labelledBy={labelId}
-            options={data.cards.map((card) => ({ value: card.id, label: card.title }))}
-            value={state.preview.ref ?? undefined}
-            onValueChange={pick}
-            disabled={busy}
-          />
-        ) : (
-          <p className="muted">{t("overlay.noCards")}</p>
-        )}
-      </div>
-    );
-  if (type === "message") return <MessageEditor key={state.message} state={state} busy={busy} run={run} />;
-  return null;
+  return { ...live, message: onStream(live.layers, "message") ? live.message : base.message };
 }
 
 // POST /api/overlay saves control changes; live room updates OBS immediately.
@@ -346,15 +50,11 @@ export function OverlayControl({
   const [saved, setSaved] = useState<OverlayState>(initial);
   const state: OverlayState = controlState(saved, initial, live);
   const [busy, setBusy] = useState<boolean>(false);
-  const [enlarged, setEnlarged] = useState<MonitorKind | null>(null);
-  const enlarge = (kind: MonitorKind): void => setEnlarged((value) => (value === kind ? null : kind));
   const offline: boolean = reconnect !== undefined;
   useEffect(() => {
     if (!connected) announce(t(offline ? "overlay.offline" : "overlay.disconnected"));
   }, [connected, offline]);
-  const titleId: string = useId();
   const obsId: string = useId();
-  const same: boolean = sameSource(state.preview, state.air);
   const view: OverlayScene = { ...scene, overlay: state };
   // Save responses can arrive out of order; an older revision must not replace a newer one.
   const keepNewest = (next: OverlayState): void =>
@@ -374,150 +74,6 @@ export function OverlayControl({
   const run = (action: OverlayAction): void => {
     void send(action);
   };
-  const choose = (type: OverlaySource): void => {
-    if (state.preview.type === type) return;
-    run({ action: "preview", source: { type, ref: defaultRef(type, scene.data) } });
-  };
-
-  // 1..8 selects sources; T takes preview live. Ignore typing in fields.
-  useEffect(() => {
-    const listener = (event: KeyboardEvent): void => {
-      if (busy || event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
-      const target = event.target as HTMLElement | null;
-      if (target?.closest("input, textarea, select, [contenteditable], [role=dialog], [role=listbox]")) return;
-      const index: number = Number(event.key) - 1;
-      if (Number.isInteger(index) && index >= 0 && index < SOURCES.length) {
-        event.preventDefault();
-        choose(SOURCES[index].type);
-      } else if ((event.key === "t" || event.key === "T") && !same && !state.instant) {
-        event.preventDefault();
-        run({ action: "take" });
-      }
-    };
-    document.addEventListener("keydown", listener);
-    return (): void => document.removeEventListener("keydown", listener);
-  });
-
-  const sourceLabel = (source: OverlaySourceRef): string =>
-    t(SOURCES.find((item) => item.type === source.type)?.label ?? "overlay.src.auto");
-  const take: ReactNode = (
-    <div className="ov-take">
-      <p className="ov-take-label">
-        <span className="preview-badge">{t("overlay.preview")}</span>
-        <strong>{sourceLabel(state.preview)}</strong>
-      </p>
-      <p className="ov-take-onair">
-        <span className="onair-dot" aria-hidden="true" />
-        <span>{t("overlay.onAirIs", { source: sourceLabel(state.air) })}</span>
-      </p>
-      <button
-        type="button"
-        className="gold ov-take-btn"
-        disabled={busy || same || state.instant}
-        onClick={() => run({ action: "take" })}
-        data-ov-take
-      >
-        <Icon name="live" size={20} />
-        {t("overlay.take")} <kbd aria-hidden="true">T</kbd>
-      </button>
-      <label className="choice">
-        <input
-          type="checkbox"
-          checked={state.instant}
-          disabled={busy}
-          onChange={(event) => run({ action: "layout", instant: event.currentTarget.checked })}
-        />
-        <span>{t("overlay.instant")}</span>
-      </label>
-    </div>
-  );
-
-  // The live control of the on-air content. It is part of step 2: the owner chooses a source, checks the preview
-  // and takes it on air.
-  const liveControl: ReactNode = (
-    <div
-      className={["ov-grid", state.instant && "is-instant", enlarged && `enlarge-${enlarged}`]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {!state.instant && (
-        <Monitor
-          kind="prev"
-          source={state.preview}
-          scene={view}
-          enlarged={enlarged === "prev"}
-          onEnlarge={() => enlarge("prev")}
-        />
-      )}
-      {take}
-      <Monitor
-        kind="air"
-        source={state.air}
-        scene={view}
-        enlarged={enlarged === "air"}
-        onEnlarge={() => enlarge("air")}
-      />
-      <section className="ov-sources" aria-labelledby={titleId}>
-        <h3 id={titleId}>{t("overlay.sources")}</h3>
-        <ul>
-          {SOURCES.map((source, index: number) => {
-            const selected: boolean = state.preview.type === source.type;
-            const onAir: boolean = state.air.type === source.type;
-            const classes: string = `ov-source${selected ? " is-selected" : ""}${onAir ? " is-air" : ""}`;
-            return (
-              <li key={source.type} className={classes}>
-                <label className="ov-source-main">
-                  <input
-                    type="radio"
-                    name="ov-source"
-                    value={source.type}
-                    checked={selected}
-                    disabled={busy}
-                    onChange={() => choose(source.type)}
-                  />
-                  <span className="ov-key" aria-hidden="true">
-                    {index + 1}
-                  </span>
-                  <Icon name={source.icon} size={20} />
-                  <span className="ov-source-text">
-                    <strong>{t(source.label)}</strong>
-                    <small>{t(source.hint)}</small>
-                  </span>
-                  {onAir && <span className="onair-badge">{t("overlay.onAir")}</span>}
-                </label>
-                {selected && <SourcePicker type={source.type} state={state} data={scene.data} busy={busy} run={run} />}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-      <div className="ov-extra">
-        <details className="ov-layout-wrap" ref={openOnWideScreens}>
-          <summary>
-            <Icon name="overlay" size={16} />
-            {t("overlay.positionAndSize")}
-          </summary>
-          <div className="ov-layout">
-            <Segmented
-              label={t("overlay.position")}
-              value={state.position}
-              options={POSITIONS.map(([position, id]) => [position, t(id)] as const)}
-              disabled={busy}
-              onChange={(position: OverlayPosition) => run({ action: "layout", position })}
-            />
-            <Segmented
-              label={t("overlay.size")}
-              value={state.size}
-              options={SIZES}
-              disabled={busy}
-              onChange={(size: OverlaySize) => run({ action: "layout", size })}
-            />
-          </div>
-        </details>
-      </div>
-    </div>
-  );
-
   return (
     <>
       <div className="ov-head">
@@ -525,11 +81,6 @@ export function OverlayControl({
           <span className="eyebrow">{t("overlay.eyebrow")}</span>
           <h1>{t("overlay.controlTitle")}</h1>
         </div>
-        <p className="muted ov-keys">
-          <Icon name="about" size={16} />
-          {t("overlay.shortcutsLead")} <kbd>1</kbd>–<kbd>8</kbd> {t("overlay.shortcutsPick")} <kbd>T</kbd>{" "}
-          {t("overlay.shortcutsTake")}
-        </p>
       </div>
       {!connected && (
         <p className="ov-conn">
@@ -545,19 +96,11 @@ export function OverlayControl({
         </p>
       )}
       {channels}
-      <CompositionEditor
-        layers={state.layers}
-        scene={view}
-        source={state.air}
-        chatTestUntil={state.chatTestUntil}
-        onSaved={keepNewest}
-        live={liveControl}
-      />
+      <CompositionEditor scene={view} state={state} busy={busy} run={run} onSaved={keepNewest} />
       <section className="ov-step" aria-labelledby={obsId} data-step="obs">
-        <StepHeading step={4} id={obsId} title={t("overlay.step.obs")} />
+        <StepHeading step={3} id={obsId} title={t("overlay.step.obs")} />
         <OverlayLink hasKey={hasOverlayKey} layers={state.layers} />
       </section>
-      <div className="ov-take-dock">{take}</div>
     </>
   );
 }

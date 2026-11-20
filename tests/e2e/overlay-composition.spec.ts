@@ -1,11 +1,12 @@
 import type { Locator, WebSocketRoute } from "@playwright/test";
 import { newPage, close, test, expect, type Browser, type Page } from "./coverage";
 import { runSql } from "./fixtures";
+import { CHAT_CELL as DEFAULT_CHAT_CELL, FEATURE_HOST, POLL_CELL, defaultLayers, layersSql } from "./grid-helpers";
 import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import type { ActivityChat, ActivityEvent, ActivityPlatform } from "../../app/lib/activity";
 import { CHAT_TEST_MS } from "../../app/lib/chat-test";
-import { DEFAULT_LAYERS, cellPixels, type CellRect, type LayerRect } from "../../app/lib/overlay-layers";
+import { cellPixels, type CellRect, type LayerRect, type LayersPatch } from "../../app/lib/overlay-layers";
 
 const OWNER_IP = clientIp("overlay-composition", 240);
 const OBS_IP = clientIp("overlay-composition", 241);
@@ -15,12 +16,12 @@ const DESIGN_IP = clientIp("overlay-composition", 250);
 // Set OBS_SHOT_DIR to a folder to save the OBS composition screenshots of the design-space test.
 const shotDir: string | undefined = process.env.OBS_SHOT_DIR;
 
-const resetLayers = `UPDATE overlay_state SET layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`;
+/** The chat on stream at the top left, and no other layer on the grid. */
+const CHAT_ON: LayersPatch = { chat: { enabled: true }, cells: { horizontal: { chat: DEFAULT_CHAT_CELL } } };
+const resetLayers: string = layersSql(CHAT_ON);
 
 test.afterAll(async () => {
-  await runSql("overlay-composition-cleanup", [
-    `UPDATE overlay_state SET layers='{}', revision=revision+1 WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host');`,
-  ]);
+  await runSql("overlay-composition-cleanup", [defaultLayers]);
 });
 
 function chat(index: number, receivedAt: number): ActivityChat {
@@ -54,7 +55,7 @@ test("a per-layer chat source shows and hides the chat live when the owner chang
   await obs.goto("/@feature_host/overlay?key=e2e-key&layer=chat");
   const chatLayer = obs.locator("[data-overlay-chat]");
   await expect(chatLayer.getByText("Hello from the bunker 1")).toBeVisible();
-  // A chat source renders the chat alone: no on-air content.
+  // A chat source renders the chat alone: no content layer.
   await expect(obs.locator(".ov-stage")).toHaveCount(0);
   // The icon is hidden from assistive technology; screen readers read the platform name as text.
   await expect(chatLayer.locator("svg.wl-icon")).toHaveAttribute("aria-hidden", "true");
@@ -85,17 +86,14 @@ test("an unknown layer renders an empty transparent page", async ({ page }) => {
   expect(await page.locator("main.overlay-screen").evaluate((element) => element.childElementCount)).toBe(0);
 });
 
-const FEATURE_HOST = "(SELECT id FROM streamers WHERE handle='feature_host')";
-// A chat cell at the right edge, clear of the default characters cells (rows 7 and 8).
+// A chat cell at the right edge.
 const CHAT_CELL: CellRect = { c: 12, r: 2, w: 4, h: 5 };
 const CHAT_RECT: LayerRect = cellPixels(CHAT_CELL);
-const chatAt = (cell: CellRect) => ({ chat: { enabled: true }, cells: { horizontal: { chat: cell } } });
-const DEFAULT_CHAT: LayerRect = cellPixels(DEFAULT_LAYERS.cells.horizontal.chat);
+const chatAt = (cell: CellRect): LayersPatch => ({ chat: { enabled: true }, cells: { horizontal: { chat: cell } } });
+const DEFAULT_CHAT: LayerRect = cellPixels(DEFAULT_CHAT_CELL);
 
-function setLayers(name: string, layers: object): Promise<void> {
-  return runSql(name, [
-    `UPDATE overlay_state SET layers='${JSON.stringify(layers)}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
-  ]);
+function setLayers(name: string, layers: LayersPatch): Promise<void> {
+  return runSql(name, [layersSql(layers)]);
 }
 
 interface Message {
@@ -221,7 +219,7 @@ async function rowTexts(rows: Locator): Promise<string[]> {
 
 test.describe("merged chat on the overlay", () => {
   test.beforeEach(async () => {
-    await setLayers("overlay-chat-reset", { chat: { enabled: true } });
+    await setLayers("overlay-chat-reset", CHAT_ON);
   });
 
   test("rows from all three platforms keep arrival order and name their platform", async ({ browser }) => {
@@ -481,9 +479,7 @@ test.describe("merged chat on the overlay", () => {
     await expect(source.rows.locator(".wl-msg")).toHaveText("after the command");
     await close(source.page);
 
-    await setLayers("overlay-chat-commands", {
-      chat: { enabled: true, hideCommands: false },
-    });
+    await setLayers("overlay-chat-commands", { ...CHAT_ON, chat: { enabled: true, hideCommands: false } });
     source = await chatSource(browser);
     source.send(event(message({ platform: "kick", id: "c3", user: "Jumper", text: "!jump" })));
     source.send(
@@ -709,7 +705,7 @@ for (const viewport of [
 }
 
 test("turning on hide commands removes a command row from an open chat source", async ({ browser }) => {
-  await setLayers("overlay-commands-reset", { chat: { enabled: true, hideCommands: false } });
+  await setLayers("overlay-commands-reset", { ...CHAT_ON, chat: { enabled: true, hideCommands: false } });
   const owner = await signedIn(browser, "featureowner", COMMANDS_IP);
   const source = await chatSource(browser, () =>
     snapshot([
@@ -761,10 +757,11 @@ function expectSameRects(actual: DesignRects, expected: DesignRects): void {
 }
 
 test("with chat on, the OBS composition matches the editor preview at 1280x720 and 1920x1080", async ({ browser }) => {
-  // The seeded on-air poll and the default chat cell, which covers the left part of the poll.
-  await runSql("overlay-design-air", [
-    `UPDATE overlay_state SET air=json_object('type','poll','ref',(SELECT id FROM entries WHERE streamer_id=${FEATURE_HOST} AND title='Which boss first?')), layers='{"chat":{"enabled":true}}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
-  ]);
+  // The chat at the top left and the poll layer beside it, with the latest active poll: the seeded battle.
+  await setLayers("overlay-design-air", {
+    chat: { enabled: true },
+    cells: { horizontal: { chat: DEFAULT_CHAT_CELL, poll: POLL_CELL } },
+  });
   try {
     const owner = await signedIn(browser, "featureowner", DESIGN_IP);
     const editor = await newPage(owner);
@@ -783,8 +780,13 @@ test("with chat on, the OBS composition matches the editor preview at 1280x720 a
       scaler,
       previewScale,
     );
-    // The default chat cell, in the preview.
+    // The chat cell, in the preview. The poll card is inside the poll cell.
     expectSameRects(preview, { poll: preview.poll, chat: DEFAULT_CHAT });
+    const pollCell: LayerRect = cellPixels(POLL_CELL);
+    expect(preview.poll.x).toBeGreaterThanOrEqual(pollCell.x - 2);
+    expect(preview.poll.y).toBeGreaterThanOrEqual(pollCell.y - 2);
+    expect(preview.poll.x + preview.poll.w).toBeLessThanOrEqual(pollCell.x + pollCell.w + 2);
+    expect(preview.poll.y + preview.poll.h).toBeLessThanOrEqual(pollCell.y + pollCell.h + 2);
     await close(owner);
 
     for (const viewport of [
@@ -814,35 +816,35 @@ test("with chat on, the OBS composition matches the editor preview at 1280x720 a
       await close(page);
     }
   } finally {
-    await runSql("overlay-design-restore", [
-      `UPDATE overlay_state SET air='{"type":"auto","ref":null}', layers='{}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
-    ]);
+    await setLayers("overlay-design-restore", {});
   }
 });
 
-test("without a feed layer, the OBS composition keeps the responsive content layout", async ({ browser }) => {
-  await setLayers("overlay-design-off", {});
+test("turning the chat on live keeps the content layers in place, without a remount", async ({ browser }) => {
+  await setLayers("overlay-design-off", { cells: { horizontal: { poll: POLL_CELL } } });
   const page = await newPage(browser, {
     viewport: { width: 1280, height: 720 },
     extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DESIGN_IP}` },
   });
   await page.goto("/@feature_host/overlay?key=e2e-key");
-  await expect(page.locator("main.overlay-screen.ov-screen")).toBeAttached();
-  await expect(page.locator(".ov-design")).toHaveCount(0);
-  const stage = page.locator(".ov-composition > .ov-stage");
+  // The composition always uses the design canvas, also without a chat or characters layer.
+  await expect(page.locator("main.overlay-screen.ov-design-screen")).toBeAttached();
+  await expect(page.locator(".ov-design")).toHaveAttribute("data-scaled", "true");
+  await expect(page.locator(".ov-composition > .ov-stage")).toHaveCount(0);
+  const stage = page.locator('.ov-layer[data-layer="poll"] .ov-stage');
   await expect(stage).toBeAttached();
-  // Mark the on-air stage element: a remount would replace it, flash it and replay its animations.
+  // Mark the stage element of the poll layer: a remount would replace it, flash it and replay its animations.
   await stage.evaluate((element: Element) => Object.assign(element, { e2eKept: true }));
+  const before = await page.locator('.ov-layer[data-layer="poll"]').boundingBox();
 
-  // The owner turns the chat on live: the page changes to the design canvas without a remount.
+  // The owner puts the chat on stream live.
   const owner = await signedIn(browser, "featureowner", DESIGN_IP);
   try {
-    const on = await owner.request.post("/api/overlay", { data: { action: "layers", chat: { enabled: true } } });
+    const on = await owner.request.post("/api/overlay", { data: { action: "layers", ...CHAT_ON } });
     expect(on.status()).toBe(200);
-    await expect(page.locator("main.overlay-screen.ov-design-screen")).toBeAttached();
-    await expect(page.locator(".ov-design")).toHaveAttribute("data-scaled", "true");
     await expect(page.locator('.ov-layer[data-layer="chat"]')).toBeAttached();
     expect(await stage.evaluate((element: Element) => "e2eKept" in element)).toBe(true);
+    expect(await page.locator('.ov-layer[data-layer="poll"]').boundingBox()).toEqual(before);
   } finally {
     await setLayers("overlay-design-off-restore", {});
     await close(owner);
@@ -850,17 +852,13 @@ test("without a feed layer, the OBS composition keeps the responsive content lay
   }
 });
 
-const seededPoll = `(SELECT id FROM entries WHERE streamer_id=${FEATURE_HOST} AND title='Which boss first?')`;
-
-test("a vertical layout fills a 1080x1920 source and shows the content inside its cell", async ({ browser }) => {
-  const layers = {
+test("a vertical layout fills a 1080x1920 source and shows each layer inside its cell", async ({ browser }) => {
+  // The poll layer shows the latest active poll: the seeded battle.
+  await setLayers("overlay-vertical", {
     orientation: "vertical",
     chat: { enabled: true },
-    cells: { vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, content: { c: 1, r: 1, w: 7, h: 4 } } },
-  };
-  await runSql("overlay-vertical", [
-    `UPDATE overlay_state SET air=json_object('type','poll','ref',${seededPoll}), layers='${JSON.stringify(layers)}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
-  ]);
+    cells: { vertical: { chat: { c: 0, r: 8, w: 9, h: 5 }, poll: { c: 1, r: 1, w: 7, h: 4 } } },
+  });
   try {
     // Half of 1080x1920: every design pixel is half a screen pixel.
     const source = await chatSource(
@@ -875,45 +873,50 @@ test("a vertical layout fills a 1080x1920 source and shows the content inside it
     const near = (actual: number, expected: number): void => expect(Math.abs(actual - expected)).toBeLessThanOrEqual(2);
     const scaler = await page.locator(".ov-scaler").boundingBox();
     const chatBox = await page.locator('.ov-layer[data-layer="chat"]').boundingBox();
-    const contentBox = await page.locator('.ov-layer[data-layer="content"]').boundingBox();
-    if (!scaler || !chatBox || !contentBox) throw new Error("No vertical geometry.");
+    const pollBox = await page.locator('.ov-layer[data-layer="poll"]').boundingBox();
+    if (!scaler || !chatBox || !pollBox) throw new Error("No vertical geometry.");
     near(scaler.width, 540);
     near(scaler.height, 960);
+    const pollRect = { x: 120, y: 120, w: 840, h: 480 };
     for (const [box, rect] of [
       [chatBox, { x: 0, y: 960, w: 1080, h: 600 }],
-      [contentBox, { x: 120, y: 120, w: 840, h: 480 }],
+      [pollBox, pollRect],
     ] as const) {
       near(box.x, rect.x / 2);
       near(box.y, rect.y / 2);
       near(box.width, rect.w / 2);
       near(box.height, rect.h / 2);
     }
-    // The content sits in its cell: no full-frame stage, and the poll card fits inside the cell.
+    // The poll sits in its cell: no full-frame stage, and the poll card fits inside the cell.
     await expect(page.locator(".ov-composition > .ov-stage")).toHaveCount(0);
-    const card = page.locator('.ov-layer[data-layer="content"] .ov-stage > *').first();
+    const card = page.locator('.ov-layer[data-layer="poll"] .ov-stage > *').first();
     await expect(card).toBeVisible();
     await expect
       .poll(async () => {
         const box = await card.boundingBox();
-        return box !== null && box.y >= contentBox.y - 1 && box.y + box.height <= contentBox.y + contentBox.height + 1;
+        return box !== null && box.y >= pollBox.y - 1 && box.y + box.height <= pollBox.y + pollBox.height + 1;
       })
       .toBe(true);
     await close(page);
 
-    // A content source shows the content cell alone.
+    // A content source shows the content layers alone, at their cells in the frame.
     const alone = await newPage(browser, {
-      viewport: { width: 840, height: 480 },
+      viewport: { width: 540, height: 960 },
       extraHTTPHeaders: { "CF-Connecting-IP": `192.0.2.${DESIGN_IP}` },
     });
     await alone.goto("/@feature_host/overlay?key=e2e-key&layer=content");
-    await expect(alone.locator('.ov-layer[data-layer="content"][data-alone]')).toHaveAttribute("data-scaled", "true");
-    await expect(alone.locator('.ov-layer[data-layer="content"] .ov-stage > *').first()).toBeVisible();
+    await expect(alone.locator(".ov-design")).toHaveAttribute("data-scaled", "true");
+    await expect(alone.locator('.ov-layer[data-layer="poll"] .ov-stage > *').first()).toBeVisible();
+    const aloneBox = await alone.locator('.ov-layer[data-layer="poll"]').boundingBox();
+    if (!aloneBox) throw new Error("No content source geometry.");
+    near(aloneBox.x, pollRect.x / 2);
+    near(aloneBox.y, pollRect.y / 2);
+    near(aloneBox.width, pollRect.w / 2);
+    near(aloneBox.height, pollRect.h / 2);
     await expect(alone.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
     await close(alone);
   } finally {
-    await runSql("overlay-vertical-restore", [
-      `UPDATE overlay_state SET air='{"type":"auto","ref":null}', layers='{}', revision=revision+1 WHERE streamer_id=${FEATURE_HOST};`,
-    ]);
+    await setLayers("overlay-vertical-restore", {});
   }
 });
 
@@ -925,7 +928,7 @@ const setTestEnd = (until: number): Promise<void> =>
 test("a chat test plays sample chat with a TEST tag in OBS, then the real chat comes back without entering again", async ({
   browser,
 }) => {
-  await setLayers("overlay-test-reset", { chat: { enabled: true } });
+  await setLayers("overlay-test-reset", CHAT_ON);
   const owner = await signedIn(browser, "featureowner", OWNER_IP);
   const real: ActivityChat = message({ platform: "twitch", id: "t1", user: "Real", text: "real chat stays" });
   const source = await chatSource(browser, () => snapshot([real]));
@@ -969,7 +972,7 @@ test("a chat test plays sample chat with a TEST tag in OBS, then the real chat c
 });
 
 test("a chat test ends by itself at its end time, and a past end time shows no test", async ({ browser }) => {
-  await setLayers("overlay-test-expiry", { chat: { enabled: true } });
+  await setLayers("overlay-test-expiry", CHAT_ON);
   try {
     await setTestEnd(Date.now() - 1_000);
     const stale = await chatSource(browser);

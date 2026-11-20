@@ -502,28 +502,50 @@ describe("overlay loader contracts", (): void => {
     },
   );
 
-  it("uses the on-air poll and returns only the public overlay projection", async (): Promise<void> => {
-    vi.mocked(overlay.getOverlayState).mockResolvedValue({
-      ...DEFAULT_OVERLAY,
-      air: { type: "poll", ref: "air-poll" },
-    });
+  const cell = (r: number): { c: number; r: number; w: number; h: number } => ({ c: 6, r, w: 4, h: 2 });
+  /** The poll, the topic and the card layer on stream in the horizontal orientation. */
+  const layers: OverlayLayers = {
+    ...DEFAULT_LAYERS,
+    items: {
+      ...DEFAULT_LAYERS.items,
+      topic: { ...DEFAULT_LAYERS.items.topic, ref: "layer-topic" },
+      card: { ...DEFAULT_LAYERS.items.card, ref: "layer-card" },
+    },
+    cells: {
+      ...DEFAULT_LAYERS.cells,
+      horizontal: { ...DEFAULT_LAYERS.cells.horizontal, poll: cell(0), topic: cell(2), card: cell(4) },
+    },
+  };
+  const picked: OverlayLayers = {
+    ...layers,
+    items: { ...layers.items, poll: { ...layers.items.poll, ref: "layer-poll" } },
+  };
+  const refs = (): (string | null)[] => vi.mocked(data.getOverlaySnapshot).mock.calls.map((call) => call[2]);
+
+  it("loads the automatic poll for a page without saved state and returns the public overlay", async (): Promise<void> => {
     const result = await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
     expect(result).toMatchObject({ handle: "zed", name: "Zed", host: "stream.example.test", override: null });
-    expect(result.overlay).not.toHaveProperty("preview");
-    expect(result.overlay).not.toHaveProperty("instant");
-    expect(data.getOverlaySnapshot).toHaveBeenCalledWith(expect.anything(), "page", "air-poll");
+    expect(result.overlay).toEqual({ ...DEFAULT_OVERLAY, message: "" });
+    expect(refs()).toEqual([null]);
+    expect(overlay.getOverlayData).toHaveBeenCalledWith(expect.anything(), "page", []);
   });
 
-  it("loads a topic source reference and treats empty poll overrides as absent", async (): Promise<void> => {
-    vi.mocked(overlay.getOverlayState).mockResolvedValue({
-      ...DEFAULT_OVERLAY,
-      air: { type: "topic", ref: "old-topic" },
-    });
+  it("keeps the message private unless the message layer is on stream", async (): Promise<void> => {
+    const state = { ...DEFAULT_OVERLAY, message: "Draft", layers };
+    vi.mocked(overlay.getOverlayState).mockResolvedValue(state);
+    expect((await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }))).overlay.message).toBe("");
+    const cells = { ...layers.cells, horizontal: { ...layers.cells.horizontal, message: cell(6) } };
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({ ...state, layers: { ...layers, cells } });
+    expect((await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }))).overlay.message).toBe("Draft");
+  });
+
+  it("treats an empty poll override as absent", async (): Promise<void> => {
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({ ...DEFAULT_OVERLAY, layers });
     expect(await overlayRoute.loader(args("/@zed/overlay?poll=", { handle: "@zed" }))).toMatchObject({
       override: null,
     });
-    expect(data.getOverlaySnapshot).toHaveBeenCalledWith(expect.anything(), "page", null);
-    expect(overlay.getOverlayData).toHaveBeenCalledWith(expect.anything(), "page", ["old-topic"]);
+    expect(refs()).toEqual([null]);
+    expect(overlay.getOverlayData).toHaveBeenCalledWith(expect.anything(), "page", ["layer-topic"]);
   });
 
   it("rejects missing poll overrides and accepts an existing override", async (): Promise<void> => {
@@ -541,63 +563,27 @@ describe("overlay loader contracts", (): void => {
   });
 
   it("loads the polls and the topic of the content layers on stream", async (): Promise<void> => {
-    const cell = (r: number): { c: number; r: number; w: number; h: number } => ({ c: 6, r, w: 4, h: 2 });
-    const layers: OverlayLayers = {
-      ...DEFAULT_LAYERS,
-      items: {
-        ...DEFAULT_LAYERS.items,
-        topic: { ...DEFAULT_LAYERS.items.topic, ref: "layer-topic" },
-        card: { ...DEFAULT_LAYERS.items.card, ref: "layer-card" },
-      },
-      cells: {
-        ...DEFAULT_LAYERS.cells,
-        horizontal: { ...DEFAULT_LAYERS.cells.horizontal, poll: cell(0), topic: cell(2), card: cell(4) },
-      },
-    };
-    const picked: OverlayLayers = {
-      ...layers,
-      items: { ...layers.items, poll: { ...layers.items.poll, ref: "layer-poll" } },
-    };
     vi.mocked(data.getOverlaySnapshot).mockImplementation((_env, _id, ref) =>
       Promise.resolve({ ...initial, polls: [{ ...entry, id: ref ?? "auto", kind: "choice", byOwner: true }] }),
     );
-    const refs = (): (string | null)[] => vi.mocked(data.getOverlaySnapshot).mock.calls.map((call) => call[2]);
-    // A poll layer without a ref uses the automatic poll: the overlay page already loads it.
-    vi.mocked(overlay.getOverlayState).mockResolvedValue({
-      ...DEFAULT_OVERLAY,
-      air: { type: "topic", ref: "air-topic" },
-      layers,
-    });
+    // A poll layer without a ref uses the automatic poll.
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({ ...DEFAULT_OVERLAY, layers });
     let result = await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
     expect(refs()).toEqual([null]);
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["auto"]);
-    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["air-topic", "layer-topic"]);
-    // The on-air poll stays first. A poll override loads the automatic poll for the layer too.
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["layer-topic"]);
+    // A poll override shows in the poll layer in place of the content layers: only that poll loads, and no topic.
     vi.mocked(data.getOverlaySnapshot).mockClear();
     result = await overlayRoute.loader(args("/@zed/overlay?poll=override", { handle: "@zed" }));
-    expect(refs()).toEqual(["override", null]);
-    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["override", "auto"]);
+    expect(refs()).toEqual(["override"]);
+    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["override"]);
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", []);
+    // A picked poll loads after the first snapshot.
     vi.mocked(data.getOverlaySnapshot).mockClear();
-    vi.mocked(overlay.getOverlayState).mockResolvedValue({
-      ...DEFAULT_OVERLAY,
-      air: { type: "poll", ref: "air" },
-      preview: { type: "topic", ref: "preview-topic" },
-      layers: picked,
-    });
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({ ...DEFAULT_OVERLAY, layers: picked });
     result = await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
-    expect(refs()).toEqual(["air", "layer-poll"]);
-    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["air", "layer-poll"]);
-    // The control page loads the same entries, with the preview.
-    signedIn();
-    vi.mocked(data.getOwnStreamer).mockResolvedValue(streamer);
-    vi.mocked(data.getOverlaySnapshot).mockClear();
-    const control = await controlRoute.loader(args("/overlay-control"));
-    expect(refs()).toEqual([null, "air", "layer-poll"]);
-    expect(control.initial.polls.map((poll) => poll.id)).toEqual(["auto", "air", "layer-poll"]);
-    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", [
-      "preview-topic",
-      "layer-topic",
-    ]);
+    expect(refs()).toEqual([null, "layer-poll"]);
+    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["auto", "layer-poll"]);
     // A content layer in the other orientation loads nothing.
     vi.mocked(data.getOverlaySnapshot).mockClear();
     vi.mocked(overlay.getOverlayState).mockResolvedValue({
@@ -620,13 +606,13 @@ describe("overlay loader contracts", (): void => {
     await expect(controlRoute.loader(args("/overlay-control"))).rejects.toMatchObject({ status: 404 });
   });
 
-  it("loads off-list air and preview polls once and merges duplicate snapshots", async (): Promise<void> => {
+  it("loads the picked poll and topic for the control page, also while their layers are off stream", async (): Promise<void> => {
     signedIn();
     vi.mocked(data.getOwnStreamer).mockResolvedValue(streamer);
+    // The vertical orientation has no content layer on the grid. The pickers still need their entries.
     vi.mocked(overlay.getOverlayState).mockResolvedValue({
       ...DEFAULT_OVERLAY,
-      air: { type: "poll", ref: "air" },
-      preview: { type: "poll", ref: "preview" },
+      layers: { ...picked, orientation: "vertical" },
     });
     vi.mocked(data.getOverlaySnapshot).mockImplementation((_env, _id, ref) =>
       Promise.resolve({
@@ -638,28 +624,19 @@ describe("overlay loader contracts", (): void => {
       }),
     );
     const result = await controlRoute.loader(args("/overlay-control"));
-    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["recent", "air", "preview"]);
-    expect(vi.mocked(data.getOverlaySnapshot).mock.calls.map((call) => call[2])).toEqual([null, "air", "preview"]);
+    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["recent", "layer-poll"]);
+    expect(refs()).toEqual([null, "layer-poll"]);
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["layer-topic"]);
     expect(result).toMatchObject({ handle: "zed", host: "stream.example.test", hasOverlayKey: false, channels: [] });
+    expect(result.state.layers).toEqual({ ...picked, orientation: "vertical" });
   });
 
-  it("deduplicates the same on-air/preview poll and includes topic references", async (): Promise<void> => {
+  it("loads only the automatic poll and no topic for a control page without picked entries", async (): Promise<void> => {
     signedIn();
     vi.mocked(data.getOwnStreamer).mockResolvedValue(streamer);
-    vi.mocked(overlay.getOverlayState).mockResolvedValue({
-      ...DEFAULT_OVERLAY,
-      air: { type: "poll", ref: "same" },
-      preview: { type: "poll", ref: "same" },
-    });
     await controlRoute.loader(args("/overlay-control"));
-    expect(data.getOverlaySnapshot).toHaveBeenCalledTimes(2);
-    vi.mocked(overlay.getOverlayState).mockResolvedValue({
-      ...DEFAULT_OVERLAY,
-      air: { type: "topic", ref: "air-topic" },
-      preview: { type: "topic", ref: "preview-topic" },
-    });
-    await controlRoute.loader(args("/overlay-control"));
-    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["air-topic", "preview-topic"]);
+    expect(refs()).toEqual([null]);
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", []);
   });
 });
 

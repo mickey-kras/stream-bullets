@@ -1,6 +1,7 @@
 import {
-  EDITOR_LAYERS,
+  CONTENT_LAYERS,
   GRID,
+  GRID_LAYERS,
   MIN_CELLS,
   ORIENTATIONS,
   cellFits,
@@ -8,7 +9,9 @@ import {
   copyCell,
   type CellRect,
   type CellsPatch,
-  type EditorLayer,
+  type ContentItem,
+  type ContentLayer,
+  type GridLayer,
   type LayerCells,
   type LayersPatch,
   type Orientation,
@@ -49,18 +52,27 @@ function sameCell(a: CellRect | null | undefined, b: CellRect | null | undefined
   return a.c === b.c && a.r === b.r && a.w === b.w && a.h === b.h;
 }
 
-function setCell(cells: CellsPatch, layer: EditorLayer, rect: CellRect | null): void {
-  if (layer === "content") cells.content = rect ? copyCell(rect) : null;
-  else if (rect) cells[layer] = copyCell(rect);
-}
-
 function copyCells(cells: CellsPatch): CellsPatch {
   const copy: CellsPatch = {};
-  for (const layer of EDITOR_LAYERS) {
+  for (const layer of GRID_LAYERS) {
     const rect: CellRect | null | undefined = cells[layer];
-    if (rect !== undefined) setCell(copy, layer, rect);
+    if (rect !== undefined) copy[layer] = rect ? copyCell(rect) : null;
   }
   return copy;
+}
+
+type ItemsPatch = NonNullable<LayersPatch["items"]>;
+
+/** The fields of a content layer that a patch can name. */
+const ITEM_FIELDS = ["enabled", "ref", "backgroundOpacity", "qr"] as const;
+
+function compactItems(items: ItemsPatch | undefined): ItemsPatch {
+  const result: ItemsPatch = {};
+  for (const layer of CONTENT_LAYERS) {
+    const item: Partial<ContentItem> | undefined = items?.[layer];
+    if (item && Object.keys(item).length > 0) result[layer] = { ...item };
+  }
+  return result;
 }
 
 function compact(patch: LayersPatch): LayersPatch {
@@ -68,6 +80,8 @@ function compact(patch: LayersPatch): LayersPatch {
   if (patch.orientation !== undefined) result.orientation = patch.orientation;
   if (patch.chat && Object.keys(patch.chat).length > 0) result.chat = { ...patch.chat };
   if (patch.characters && Object.keys(patch.characters).length > 0) result.characters = { ...patch.characters };
+  const items: ItemsPatch = compactItems(patch.items);
+  if (Object.keys(items).length > 0) result.items = items;
   const cells: Partial<Record<Orientation, CellsPatch>> = {};
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch | undefined = patch.cells?.[orientation];
@@ -77,9 +91,25 @@ function compact(patch: LayersPatch): LayersPatch {
   return result;
 }
 
+/** The fields of a content layer that differ from `before` to `after`, with their `after` values. */
+function diffItem(before: ContentItem, after: ContentItem): Partial<ContentItem> {
+  const patch: Partial<ContentItem> = {};
+  if (before.enabled !== after.enabled) patch.enabled = after.enabled;
+  if (before.ref !== after.ref) patch.ref = after.ref;
+  if (before.backgroundOpacity !== after.backgroundOpacity) patch.backgroundOpacity = after.backgroundOpacity;
+  if (before.qr !== after.qr) patch.qr = after.qr;
+  return patch;
+}
+
+function diffItems(before: OverlayLayers, after: OverlayLayers): ItemsPatch {
+  const items: ItemsPatch = {};
+  for (const layer of CONTENT_LAYERS) items[layer] = diffItem(before.items[layer], after.items[layer]);
+  return items;
+}
+
 /** The fields that differ from `before` to `after`, with their `after` values. */
 export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersPatch {
-  const patch: LayersPatch = { chat: {}, characters: {}, cells: {} };
+  const patch: LayersPatch = { chat: {}, characters: {}, items: diffItems(before, after), cells: {} };
   if (before.orientation !== after.orientation) patch.orientation = after.orientation;
   if (before.chat.enabled !== after.chat.enabled) patch.chat = { enabled: after.chat.enabled };
   if (before.chat.hideCommands !== after.chat.hideCommands)
@@ -91,13 +121,19 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
     patch.characters = { ...patch.characters, timeout: after.characters.timeout };
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch = {};
-    for (const layer of EDITOR_LAYERS) {
+    for (const layer of GRID_LAYERS) {
       const rect: CellRect | null = after.cells[orientation][layer];
-      if (!sameCell(before.cells[orientation][layer], rect)) setCell(layout, layer, rect);
+      if (!sameCell(before.cells[orientation][layer], rect)) layout[layer] = rect;
     }
     patch.cells = { ...patch.cells, [orientation]: layout };
   }
   return compact(patch);
+}
+
+function mergeItems(base: ItemsPatch | undefined, next: ItemsPatch | undefined): ItemsPatch {
+  const items: ItemsPatch = {};
+  for (const layer of CONTENT_LAYERS) items[layer] = { ...base?.[layer], ...next?.[layer] };
+  return items;
 }
 
 /** Both patches in one. A field in `next` wins. */
@@ -106,6 +142,7 @@ export function mergePatches(base: LayersPatch, next: LayersPatch): LayersPatch 
     orientation: next.orientation ?? base.orientation,
     chat: { ...base.chat, ...next.chat },
     characters: { ...base.characters, ...next.characters },
+    items: mergeItems(base.items, next.items),
     cells: {
       horizontal: { ...base.cells?.horizontal, ...next.cells?.horizontal },
       vertical: { ...base.cells?.vertical, ...next.cells?.vertical },
@@ -114,7 +151,7 @@ export function mergePatches(base: LayersPatch, next: LayersPatch): LayersPatch 
 }
 
 function removeSentCells(layout: CellsPatch, sent: CellsPatch): void {
-  for (const layer of EDITOR_LAYERS)
+  for (const layer of GRID_LAYERS)
     if (layout[layer] !== undefined && sent[layer] !== undefined && sameCell(layout[layer], sent[layer]))
       delete layout[layer];
 }
@@ -137,6 +174,7 @@ export function withoutSent(draft: LayersPatch, sent: LayersPatch): LayersPatch 
   removeSentFields(result, sent, ["orientation"]);
   removeSentFields(result.chat, sent.chat, ["enabled", "hideCommands", "backgroundOpacity"]);
   removeSentFields(result.characters, sent.characters, ["enabled"]);
+  for (const layer of CONTENT_LAYERS) removeSentFields(result.items?.[layer], sent.items?.[layer], ITEM_FIELDS);
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch | undefined = result.cells?.[orientation];
     const done: CellsPatch | undefined = sent.cells?.[orientation];
@@ -155,16 +193,14 @@ export function layersAction(patch: LayersPatch, write: LayersWrite): LayersActi
   return { action: "layers", write: { ...write }, ...compact(patch) };
 }
 
-/** `layers` with one layer's cell in one orientation replaced. Null removes the content cell. */
+/** `layers` with one layer's cell in one orientation replaced. Null takes the layer off the grid. */
 export function withCell(
   layers: OverlayLayers,
   orientation: Orientation,
-  layer: EditorLayer,
+  layer: GridLayer,
   rect: CellRect | null,
 ): OverlayLayers {
-  const cells: LayerCells = { ...layers.cells[orientation] };
-  if (layer === "content") cells.content = rect;
-  else if (rect) cells[layer] = rect;
+  const cells: LayerCells = { ...layers.cells[orientation], [layer]: rect };
   return { ...layers, cells: { ...layers.cells, [orientation]: cells } };
 }
 
@@ -188,41 +224,26 @@ export function moveCell(orientation: Orientation, rect: CellRect, grab: Cell, a
   };
 }
 
-/** The cells the layout grid draws. A layer that is not on the grid has null. */
-export type GridCells = Readonly<Record<EditorLayer, CellRect | null>>;
-
-/** The layers that leave the grid by their `enabled` setting. Their cells stay stored. */
-const SWITCHED_LAYERS = ["chat", "characters"] as const;
-
-/** True when the grid draws `layer`: a chat or characters layer that is on, or content with a cell. */
-export function onGrid(layers: OverlayLayers, orientation: Orientation, layer: EditorLayer): boolean {
-  return layer === "content" ? layers.cells[orientation].content !== null : layers[layer].enabled;
-}
-
-/** The cells of the layers on the grid in `orientation`. A chat or characters layer that is off has null. */
-export function gridCells(layers: OverlayLayers, orientation: Orientation): GridCells {
-  const cells: LayerCells = layers.cells[orientation];
-  return {
-    chat: layers.chat.enabled ? cells.chat : null,
-    characters: layers.characters.enabled ? cells.characters : null,
-    content: cells.content,
-  };
-}
-
-function withEnabled(layers: OverlayLayers, layer: EditorLayer, enabled: boolean): OverlayLayers {
+/** `layers` with the "Show on stream" setting of `layer` set. */
+export function withEnabled(layers: OverlayLayers, layer: GridLayer, enabled: boolean): OverlayLayers {
   if (layer === "chat") return { ...layers, chat: { ...layers.chat, enabled } };
   if (layer === "characters") return { ...layers, characters: { ...layers.characters, enabled } };
-  return layers;
+  return withItem(layers, layer, { enabled });
 }
 
-/** `layers` with `layer` off the grid. Content loses its cell. Chat and characters go off and keep their cells. */
-export function withRemoved(layers: OverlayLayers, orientation: Orientation, layer: EditorLayer): OverlayLayers {
-  return layer === "content" ? withCell(layers, orientation, "content", null) : withEnabled(layers, layer, false);
+/** `layers` with some settings of the content layer `layer` replaced. */
+export function withItem(layers: OverlayLayers, layer: ContentLayer, item: Partial<ContentItem>): OverlayLayers {
+  return { ...layers, items: { ...layers.items, [layer]: { ...layers.items[layer], ...item } } };
+}
+
+/** `layers` with `layer` off the grid in `orientation`. Its settings stay. */
+export function withRemoved(layers: OverlayLayers, orientation: Orientation, layer: GridLayer): OverlayLayers {
+  return withCell(layers, orientation, layer, null);
 }
 
 /** The placed layer at a cell, or null for an empty cell. */
-export function layerAt(cells: GridCells, cell: Cell): EditorLayer | null {
-  for (const layer of EDITOR_LAYERS) {
+export function layerAt(cells: LayerCells, cell: Cell): GridLayer | null {
+  for (const layer of GRID_LAYERS) {
     const rect: CellRect | null = cells[layer];
     if (rect && cell.c >= rect.c && cell.c < rect.c + rect.w && cell.r >= rect.r && cell.r < rect.r + rect.h)
       return layer;
@@ -230,11 +251,7 @@ export function layerAt(cells: GridCells, cell: Cell): EditorLayer | null {
   return null;
 }
 
-export type PlaceProblem =
-  | { kind: "outside" }
-  | { kind: "overlap"; other: EditorLayer }
-  | { kind: "small" }
-  | { kind: "noRoom"; other: EditorLayer };
+export type PlaceProblem = { kind: "outside" } | { kind: "overlap"; other: GridLayer } | { kind: "small" };
 
 /**
  * Why `rect` cannot be the cell of `layer` in `orientation` (it leaves the grid, touches another layer or is below
@@ -242,13 +259,13 @@ export type PlaceProblem =
  */
 export function placeProblem(
   orientation: Orientation,
-  cells: GridCells,
-  layer: EditorLayer,
+  cells: LayerCells,
+  layer: GridLayer,
   rect: CellRect,
 ): PlaceProblem | null {
   const { cols, rows } = GRID[orientation];
   if (rect.c < 0 || rect.r < 0 || rect.c + rect.w > cols || rect.r + rect.h > rows) return { kind: "outside" };
-  for (const other of EDITOR_LAYERS) {
+  for (const other of GRID_LAYERS) {
     const place: CellRect | null = cells[other];
     if (other !== layer && place && cellsOverlap(rect, place)) return { kind: "overlap", other };
   }
@@ -306,7 +323,7 @@ function resizeSpan(start: number, size: number, side: Side, to: number, least: 
  */
 export function resizeCell(
   orientation: Orientation,
-  layer: EditorLayer,
+  layer: GridLayer,
   rect: CellRect,
   handle: ResizeHandle,
   to: Cell,
@@ -320,7 +337,7 @@ export function resizeCell(
 }
 
 /** `rect` with its bottom-right corner moved by `step` cells: the keyboard resize. */
-export function growCell(orientation: Orientation, layer: EditorLayer, rect: CellRect, step: Cell): Resize {
+export function growCell(orientation: Orientation, layer: GridLayer, rect: CellRect, step: Cell): Resize {
   return resizeCell(orientation, layer, rect, "se", { c: rect.c + rect.w + step.c, r: rect.r + rect.h + step.r });
 }
 
@@ -359,7 +376,7 @@ export function handleAt(rect: CellRect, point: GridPoint, reach: GridPoint): Re
 }
 
 /** The minimum-size cell of `layer` with its middle at the cell `at`, moved inside the grid: a drop from the palette. */
-export function dropCell(orientation: Orientation, layer: EditorLayer, at: Cell): CellRect {
+export function dropCell(orientation: Orientation, layer: GridLayer, at: Cell): CellRect {
   const { w, h } = MIN_CELLS[layer];
   return moveCell(orientation, { c: 0, r: 0, w, h }, { c: Math.floor(w / 2), r: Math.floor(h / 2) }, at);
 }
@@ -370,8 +387,8 @@ export function dropCell(orientation: Orientation, layer: EditorLayer, at: Cell)
  */
 export function firstFreeCell(
   orientation: Orientation,
-  cells: GridCells,
-  layer: EditorLayer,
+  cells: LayerCells,
+  layer: GridLayer,
   size: Readonly<{ w: number; h: number }> = MIN_CELLS[layer],
 ): CellRect | null {
   const { cols, rows } = GRID[orientation];
@@ -384,53 +401,18 @@ export function firstFreeCell(
   return null;
 }
 
-/** The stored cells after a placement, or the layer off the grid that has no free place for its stored cell. */
-type Parked = { cells: LayerCells; stuck: null } | { cells: null; stuck: EditorLayer };
-
-// Stored cells never overlap, also the cell of a layer that is off. So such a cell moves away from a new cell.
-function parkedCells(orientation: Orientation, layers: OverlayLayers, layer: EditorLayer, rect: CellRect): Parked {
-  const cells: LayerCells = { ...layers.cells[orientation] };
-  if (layer === "content") cells.content = rect;
-  else cells[layer] = rect;
-  for (const other of SWITCHED_LAYERS) {
-    const kept: CellRect = cells[other];
-    if (other === layer || layers[other].enabled || !cellsOverlap(kept, rect)) continue;
-    const free: CellRect | null =
-      firstFreeCell(orientation, cells, other, kept) ?? firstFreeCell(orientation, cells, other);
-    if (!free) return { cells: null, stuck: other };
-    cells[other] = free;
-  }
-  return { cells, stuck: null };
-}
-
 /**
- * Why `rect` cannot be the cell of `layer` on the grid of `layers`, or null. Only the layers on the grid are in the
- * way. `noRoom` names a layer off the grid whose stored cell is under `rect` and has no other free place.
- */
-export function layoutProblem(
-  layers: OverlayLayers,
-  orientation: Orientation,
-  layer: EditorLayer,
-  rect: CellRect,
-): PlaceProblem | null {
-  const problem: PlaceProblem | null = placeProblem(orientation, gridCells(layers, orientation), layer, rect);
-  if (problem) return problem;
-  const { stuck } = parkedCells(orientation, layers, layer, rect);
-  return stuck ? { kind: "noRoom", other: stuck } : null;
-}
-
-/**
- * `layers` with `layer` on the grid at `rect`: a chat or characters layer goes on. The stored cell of a layer that
- * is off the grid moves to a free place when `rect` covers it. Null when layoutProblem refuses `rect`.
+ * `layers` with `layer` on the grid at `rect`. A layer that was off the grid in `orientation` also gets "Show on
+ * stream". Null when placeProblem refuses `rect`.
  */
 export function withPlaced(
   layers: OverlayLayers,
   orientation: Orientation,
-  layer: EditorLayer,
+  layer: GridLayer,
   rect: CellRect,
 ): OverlayLayers | null {
-  if (placeProblem(orientation, gridCells(layers, orientation), layer, rect) !== null) return null;
-  const { cells } = parkedCells(orientation, layers, layer, rect);
-  if (!cells) return null;
-  return { ...withEnabled(layers, layer, true), cells: { ...layers.cells, [orientation]: cells } };
+  const cells: LayerCells = layers.cells[orientation];
+  if (placeProblem(orientation, cells, layer, rect) !== null) return null;
+  const placed: OverlayLayers = withCell(layers, orientation, layer, rect);
+  return cells[layer] === null ? withEnabled(placed, layer, true) : placed;
 }

@@ -17,45 +17,48 @@ import {
   RESIZE_HANDLES,
   dropCell,
   firstFreeCell,
-  gridCells,
   growCell,
   handleAt,
   handleLines,
   layerAt,
-  layoutProblem,
   moveCell,
+  placeProblem,
   resizeCell,
   withCell,
   type Cell,
-  type GridCells,
   type GridPoint,
   type PlaceProblem,
   type ResizeHandle,
 } from "../../lib/layer-geometry";
 import {
   CELL_PX,
-  EDITOR_LAYERS,
   GRID,
+  GRID_LAYERS,
   MIN_CELLS,
   cellPixels,
+  layerEnabled,
   type CellRect,
-  type EditorLayer,
+  type GridLayer,
+  type LayerCells,
   type Orientation,
   type OverlayLayers,
 } from "../../lib/overlay-layers";
-import type { OverlaySourceRef } from "../../types";
 import type { ActivityFeed } from "./activity-feed";
-import { SAMPLE_SOURCE, sampleScene } from "./editor-samples";
 import { OverlayComposition, frameStyle } from "./overlay-composition";
-import { showsContent, type OverlayScene } from "./overlay-stage";
+import type { OverlayScene } from "./overlay-stage";
 import { useDesignScale } from "./use-design-scale";
 
 export type PreviewBackground = "checker" | "game";
 
-export const LAYER_NAMES: Readonly<Record<EditorLayer, MessageId>> = {
+export const LAYER_NAMES: Readonly<Record<GridLayer, MessageId>> = {
   chat: "overlay.comp.chat",
   characters: "overlay.comp.characters",
-  content: "overlay.comp.content",
+  poll: "overlay.name.poll",
+  topic: "overlay.name.topic",
+  next: "overlay.name.next",
+  message: "overlay.name.message",
+  card: "overlay.name.card",
+  support: "overlay.name.support",
 };
 
 /**
@@ -67,11 +70,11 @@ export type RemoveDrop = "ready" | "over";
 
 export interface LayoutGridHandle {
   /** Puts a layer that is off the grid at the first free place, at its minimum size. */
-  add: (layer: EditorLayer) => void;
+  add: (layer: GridLayer) => void;
   /** A layer from the palette is dragged at this point: the grid shows where it would drop. */
-  dragOver: (layer: EditorLayer, x: number, y: number) => void;
+  dragOver: (layer: GridLayer, x: number, y: number) => void;
   /** The dragged layer is let go at this point. */
-  drop: (layer: EditorLayer, x: number, y: number) => void;
+  drop: (layer: GridLayer, x: number, y: number) => void;
   /** The drag from the palette ended without a drop. */
   cancelDrop: () => void;
 }
@@ -95,9 +98,9 @@ const REMOVE_KEYS: ReadonlySet<string> = new Set<string>(["Delete", "Backspace"]
  * over the cell `at` (null: outside the grid).
  */
 type Drag =
-  | { mode: "move"; layer: EditorLayer; grab: Cell; at: Cell; away: boolean }
-  | { mode: "resize"; layer: EditorLayer; handle: ResizeHandle; grab: GridPoint; to: Cell }
-  | { mode: "add"; layer: EditorLayer; at: Cell | null };
+  | { mode: "move"; layer: GridLayer; grab: Cell; at: Cell; away: boolean }
+  | { mode: "resize"; layer: GridLayer; handle: ResizeHandle; grab: GridPoint; to: Cell }
+  | { mode: "add"; layer: GridLayer; at: Cell | null };
 
 const NOT_KEPT: Readonly<Record<Drag["mode"], MessageId>> = {
   move: "overlay.grid.notMoved",
@@ -111,7 +114,7 @@ const KEPT: Readonly<Record<Drag["mode"], MessageId>> = {
 };
 
 /** The cell a drag would give its layer. Null for a drag that places nothing. */
-function dragShape(cells: GridCells, orientation: Orientation, drag: Drag): CellRect | null {
+function dragShape(cells: LayerCells, orientation: Orientation, drag: Drag): CellRect | null {
   if (drag.mode === "add") return drag.at ? dropCell(orientation, drag.layer, drag.at) : null;
   const rect: CellRect | null = cells[drag.layer];
   if (!rect) return null;
@@ -120,7 +123,7 @@ function dragShape(cells: GridCells, orientation: Orientation, drag: Drag): Cell
 }
 
 /** A resize that asks for less than the minimum size of its layer. */
-function belowMinimum(cells: GridCells, orientation: Orientation, drag: Drag | null): boolean {
+function belowMinimum(cells: LayerCells, orientation: Orientation, drag: Drag | null): boolean {
   const rect: CellRect | null = drag ? cells[drag.layer] : null;
   if (drag?.mode !== "resize" || !rect) return false;
   return resizeCell(orientation, drag.layer, rect, drag.handle, drag.to).min;
@@ -130,29 +133,28 @@ function sameRect(a: CellRect, b: CellRect): boolean {
   return a.c === b.c && a.r === b.r && a.w === b.w && a.h === b.h;
 }
 
-function name(layer: EditorLayer): string {
+function name(layer: GridLayer): string {
   return t(LAYER_NAMES[layer]);
 }
 
-function smallText(layer: EditorLayer): string {
+function smallText(layer: GridLayer): string {
   return t("overlay.grid.small", { layer: name(layer), w: MIN_CELLS[layer].w, h: MIN_CELLS[layer].h });
 }
 
-function problemText(layer: EditorLayer, problem: PlaceProblem): string {
+function problemText(layer: GridLayer, problem: PlaceProblem): string {
   if (problem.kind === "outside") return t("overlay.grid.outside");
   if (problem.kind === "overlap") return t("overlay.grid.touches", { layer: name(problem.other) });
-  if (problem.kind === "noRoom") return t("overlay.grid.noRoom", { layer: name(problem.other) });
   return smallText(layer);
 }
 
 // "Not moved. It touches Chat." for a cell the grid does not keep.
-function notKept(mode: Drag["mode"], layer: EditorLayer, problem: PlaceProblem): string {
+function notKept(mode: Drag["mode"], layer: GridLayer, problem: PlaceProblem): string {
   return `${t(NOT_KEPT[mode])} ${problemText(layer, problem)}`;
 }
 
 // "Column 3, row 2: Chat." for the cell under the keyboard cursor.
-function cursorText(cells: GridCells, cell: Cell): string {
-  const here: EditorLayer | null = layerAt(cells, cell);
+function cursorText(cells: LayerCells, cell: Cell): string {
+  const here: GridLayer | null = layerAt(cells, cell);
   return t("overlay.grid.cursor", { c: cell.c + 1, r: cell.r + 1, what: here ? name(here) : t("overlay.grid.empty") });
 }
 
@@ -202,7 +204,8 @@ function removeDrop(drag: Drag | null): RemoveDrop | null {
  * size of the layer and at the grid edge. A polite live region tells the result.
  *
  * A layer leaves the grid when a pointer drops it on `removeZone`, or by Delete or Backspace for the selected layer.
- * The grid draws only the layers on it: a chat or characters layer that is off has no box (see gridCells).
+ * The grid draws a box for each layer with a cell. A layer with "Show on stream" off keeps its box, dimmed, and the
+ * preview does not show its content.
  *
  * The grid has no layer selector and no palette of its own. The parent owns the selection (`selected`, `onSelect`),
  * and a palette adds a layer through the handle in `ref` (see LayoutGridHandle).
@@ -210,7 +213,6 @@ function removeDrop(drag: Drag | null): RemoveDrop | null {
 export function LayoutGrid({
   layers,
   scene,
-  source,
   background,
   charactersFeed,
   selected,
@@ -224,17 +226,16 @@ export function LayoutGrid({
   /** The layers as shown: saved plus local edits. */
   layers: OverlayLayers;
   scene: OverlayScene;
-  source: OverlaySourceRef;
   background: PreviewBackground;
   /** The owner's live characters feed, or null while the characters layer is off. */
   charactersFeed: ActivityFeed | null;
-  /** The selected layer: it shows the resize handles and takes Shift + arrow and Alt + arrow. */
-  selected: EditorLayer;
-  onSelect: (layer: EditorLayer) => void;
+  /** The selected layer: it shows the resize handles and takes Shift + arrow and Alt + arrow. Null: none. */
+  selected: GridLayer | null;
+  onSelect: (layer: GridLayer | null) => void;
   /** Keeps a valid cell for a layer. `when` is "idle" for Shift + arrow and Alt + arrow steps. */
-  onPlace: (layer: EditorLayer, rect: CellRect, when: "now" | "idle") => void;
+  onPlace: (layer: GridLayer, rect: CellRect, when: "now" | "idle") => void;
   /** Takes a layer off the grid. */
-  onRemove: (layer: EditorLayer) => void;
+  onRemove: (layer: GridLayer) => void;
   /** The element that takes a layer off the grid when a pointer drops the layer on it: the palette. */
   removeZone: RefObject<HTMLElement | null>;
   /** What `removeZone` shows now. Null: no pointer carries a layer. */
@@ -243,7 +244,9 @@ export function LayoutGrid({
 }>): ReactNode {
   const orientation: Orientation = layers.orientation;
   const { cols, rows } = GRID[orientation];
-  const cells: GridCells = gridCells(layers, orientation);
+  const cells: LayerCells = layers.cells[orientation];
+  // The selected layer when it is on this grid.
+  const chosen: GridLayer | null = selected && cells[selected] ? selected : null;
   const frame = useRef<HTMLElement | null>(null);
   const input = useRef<HTMLButtonElement | null>(null);
   useDesignScale(frame, cols * CELL_PX);
@@ -278,13 +281,13 @@ export function LayoutGrid({
   };
   /** The resize handle of the selected layer under a pointer, or null. */
   const handleUnder = (hit: GridHit): ResizeHandle | null => {
-    const rect: CellRect | null = cells[selected];
+    const rect: CellRect | null = chosen ? cells[chosen] : null;
     return rect ? handleAt(rect, hit.point, hit.reach) : null;
   };
 
   /** Picks up the layer at a cell to move it, and selects it. Null for an empty cell. */
   const lift = (cell: Cell): Drag | null => {
-    const hit: EditorLayer | null = layerAt(cells, cell);
+    const hit: GridLayer | null = layerAt(cells, cell);
     const rect: CellRect | null = hit ? cells[hit] : null;
     if (!hit || !rect) return null;
     onSelect(hit);
@@ -292,13 +295,13 @@ export function LayoutGrid({
   };
   /** A press on the grid: a resize by a handle of the selected layer, else a move of the layer at the pointer. */
   const press = (hit: GridHit): Drag | null => {
-    const rect: CellRect | null = cells[selected];
+    const rect: CellRect | null = chosen ? cells[chosen] : null;
     const handle: ResizeHandle | null = handleUnder(hit);
-    if (!rect || !handle) return hit.inside ? lift(cellOf(hit.point)) : null;
+    if (!chosen || !rect || !handle) return hit.inside ? lift(cellOf(hit.point)) : null;
     const lines: Cell = handleLines(rect, handle);
     return {
       mode: "resize",
-      layer: selected,
+      layer: chosen,
       handle,
       grab: { x: hit.point.x - lines.c, y: hit.point.y - lines.r },
       to: lines,
@@ -318,7 +321,7 @@ export function LayoutGrid({
   const overRemoveZone = (x: number, y: number): boolean => inBox(removeZone.current?.getBoundingClientRect(), x, y);
 
   /** Takes a layer off the grid and ends a drag. */
-  const remove = (layer: EditorLayer): void => {
+  const remove = (layer: GridLayer): void => {
     setDrag(null);
     onRemove(layer);
     say(t("overlay.grid.removed", { layer: name(layer) }));
@@ -343,7 +346,7 @@ export function LayoutGrid({
       say(small ? smallText(active.layer) : t("overlay.grid.selected", { layer: name(active.layer) }));
       return false;
     }
-    const problem: PlaceProblem | null = layoutProblem(layers, orientation, active.layer, rect);
+    const problem: PlaceProblem | null = placeProblem(orientation, cells, active.layer, rect);
     if (problem) {
       say(notKept(active.mode, active.layer, problem), true);
       return false;
@@ -361,7 +364,10 @@ export function LayoutGrid({
     const hit: GridHit | null = hitAt(event.clientX, event.clientY);
     if (!hit) return;
     setCursor(cellOf(hit.point));
-    setDrag(press(hit));
+    const next: Drag | null = press(hit);
+    // A press on an empty cell clears the selection.
+    if (!next && hit.inside) onSelect(null);
+    setDrag(next);
   };
   const pointerMove = (event: PointerEvent<HTMLButtonElement>): void => {
     const hit: GridHit | null = hitAt(event.clientX, event.clientY);
@@ -411,29 +417,29 @@ export function LayoutGrid({
 
   /** Shift + arrow moves the selected layer one cell. Alt + arrow moves its bottom-right corner one cell. */
   const step = (mode: "move" | "resize", arrow: readonly [number, number]): void => {
-    const rect: CellRect | null = cells[selected];
-    if (!rect) {
-      say(t("overlay.grid.noCell", { layer: name(selected) }), true);
+    const rect: CellRect | null = chosen ? cells[chosen] : null;
+    if (!chosen || !rect) {
+      say(t("overlay.grid.noSelection"), true);
       return;
     }
     const by: Cell = { c: arrow[0], r: arrow[1] };
-    const grown = growCell(orientation, selected, rect, by);
+    const grown = growCell(orientation, chosen, rect, by);
     const next: CellRect =
       mode === "move"
         ? moveCell(orientation, rect, { c: 0, r: 0 }, { c: rect.c + by.c, r: rect.r + by.r })
         : grown.rect;
     if (mode === "resize" && sameRect(rect, next)) {
       // The corner did not move: the layer is at its minimum size or at the edge of the grid.
-      say(`${t("overlay.grid.notResized")} ${grown.min ? smallText(selected) : t("overlay.grid.outside")}`, true);
+      say(`${t("overlay.grid.notResized")} ${grown.min ? smallText(chosen) : t("overlay.grid.outside")}`, true);
       return;
     }
-    const problem: PlaceProblem | null = layoutProblem(layers, orientation, selected, next);
+    const problem: PlaceProblem | null = placeProblem(orientation, cells, chosen, next);
     if (problem) {
-      say(notKept(mode, selected, problem), true);
+      say(notKept(mode, chosen, problem), true);
       return;
     }
-    onPlace(selected, next, "idle");
-    say(t(KEPT[mode], { layer: name(selected), ...placeText(next) }));
+    onPlace(chosen, next, "idle");
+    say(t(KEPT[mode], { layer: name(chosen), ...placeText(next) }));
   };
   const moveCursor = (arrow: readonly [number, number]): void => {
     const cell: Cell = clampCell({ c: cursor.c + arrow[0], r: cursor.r + arrow[1] });
@@ -448,9 +454,9 @@ export function LayoutGrid({
   };
   // Delete or Backspace: the layer that a move carries, else the selected layer, leaves the grid.
   const removeKey = (): void => {
-    const layer: EditorLayer = drag?.mode === "move" ? drag.layer : selected;
-    if (cells[layer]) remove(layer);
-    else say(t("overlay.grid.noCell", { layer: name(layer) }), true);
+    const layer: GridLayer | null = drag?.mode === "move" ? drag.layer : chosen;
+    if (layer) remove(layer);
+    else say(t("overlay.grid.noSelection"), true);
   };
   const cancelKey = (): void => {
     onRemoveDrop(null);
@@ -477,31 +483,30 @@ export function LayoutGrid({
   };
 
   /** A layer that a palette put on the grid: it is selected, and the grid takes the focus for the next keys. */
-  const added = (layer: EditorLayer, rect: CellRect): void => {
+  const added = (layer: GridLayer, rect: CellRect): void => {
     onSelect(layer);
     setCursor({ c: rect.c, r: rect.r });
     input.current?.focus({ preventScroll: true });
   };
-  const paletteDrag = (layer: EditorLayer, x: number, y: number): Drag => {
+  const paletteDrag = (layer: GridLayer, x: number, y: number): Drag => {
     const hit: GridHit | null = hitAt(x, y);
     return { mode: "add", layer, at: hit?.inside ? cellOf(hit.point) : null };
   };
   useImperativeHandle(
     ref,
     (): LayoutGridHandle => ({
-      add: (layer: EditorLayer): void => {
+      add: (layer: GridLayer): void => {
         const rect: CellRect | null = firstFreeCell(orientation, cells, layer);
-        const problem: PlaceProblem | null = rect ? layoutProblem(layers, orientation, layer, rect) : null;
-        if (!rect || problem) {
-          say(problem ? notKept("add", layer, problem) : t("overlay.grid.noRoom", { layer: name(layer) }), true);
+        if (!rect) {
+          say(t("overlay.grid.noRoom", { layer: name(layer) }), true);
           return;
         }
         onPlace(layer, rect, "now");
         say(t("overlay.grid.placed", { layer: name(layer), ...placeText(rect) }));
         added(layer, rect);
       },
-      dragOver: (layer: EditorLayer, x: number, y: number): void => setDrag(paletteDrag(layer, x, y)),
-      drop: (layer: EditorLayer, x: number, y: number): void => {
+      dragOver: (layer: GridLayer, x: number, y: number): void => setDrag(paletteDrag(layer, x, y)),
+      drop: (layer: GridLayer, x: number, y: number): void => {
         const active: Drag = paletteDrag(layer, x, y);
         const rect: CellRect | null = dragShape(cells, orientation, active);
         if (commit(active) && rect) added(layer, rect);
@@ -512,16 +517,12 @@ export function LayoutGrid({
 
   const shape: CellRect | null = drag ? dragShape(cells, orientation, drag) : null;
   const invalid: boolean =
-    drag !== null && shape !== null && layoutProblem(layers, orientation, drag.layer, shape) !== null;
-  const lifted: EditorLayer | null = drag?.mode === "move" ? drag.layer : null;
+    drag !== null && shape !== null && placeProblem(orientation, cells, drag.layer, shape) !== null;
+  const lifted: GridLayer | null = drag?.mode === "move" ? drag.layer : null;
   // During a resize the layer, its label and its content follow the new size. Nothing is saved before the release.
   const resized: CellRect | null = drag?.mode === "resize" ? shape : null;
   const shownLayers: OverlayLayers = resized && drag ? withCell(layers, orientation, drag.layer, resized) : layers;
-  const shown: GridCells = gridCells(shownLayers, orientation);
-
-  // The preview shows the layers on the grid: chat plays the sample messages. A content cell with nothing on air
-  // shows a dimmed sample card. `layers` stays as it is: nothing here is saved or sent to OBS.
-  const sampleContent: boolean = shown.content !== null && !showsContent(source, scene.data);
+  const shown: LayerCells = shownLayers.cells[orientation];
 
   return (
     <>
@@ -529,15 +530,14 @@ export function LayoutGrid({
         className="ov-frame ov-comp-frame"
         data-orientation={orientation}
         data-background={background}
-        data-sample-off={sampleContent ? "content" : undefined}
         ref={frame}
         aria-label={t("overlay.comp.preview")}
       >
         <div className="ov-scaler" style={frameStyle(orientation)}>
           {background === "game" && <div className="ov-comp-game" aria-hidden="true" />}
+          {/* The layers on stream with their real content. Chat plays the sample messages. */}
           <OverlayComposition
-            scene={sampleContent ? sampleScene(scene) : scene}
-            source={sampleContent ? SAMPLE_SOURCE : source}
+            scene={scene}
             layers={shownLayers}
             only={null}
             feed={null}
@@ -545,7 +545,7 @@ export function LayoutGrid({
             samples={SAMPLE_CHAT}
           />
           <div className="ov-grid-lines" aria-hidden="true" />
-          {EDITOR_LAYERS.map((layer: EditorLayer) => {
+          {GRID_LAYERS.map((layer: GridLayer) => {
             const rect: CellRect | null = shown[layer];
             if (!rect) return null;
             const px = cellPixels(rect);
@@ -554,16 +554,16 @@ export function LayoutGrid({
                 key={layer}
                 className="ov-grid-box"
                 data-grid-box={layer}
-                data-selected={layer === selected || undefined}
+                data-selected={layer === chosen || undefined}
                 data-lifted={layer === lifted || undefined}
-                data-off={(layer === "content" && sampleContent) || undefined}
+                data-off={!layerEnabled(layers, layer) || undefined}
                 style={boxStyle(rect)}
                 aria-hidden="true"
               >
                 <span className="ov-grid-tag">
                   {name(layer)} · {px.w} × {px.h}
                 </span>
-                {layer === selected &&
+                {layer === chosen &&
                   RESIZE_HANDLES.map((handle: ResizeHandle) => (
                     <span key={handle} className="ov-grid-handle" data-grid-handle={handle} />
                   ))}

@@ -183,7 +183,7 @@ describe("viewer polls", (): void => {
     expect((await getOverlayData(env, streamer.id, [])).polls.map((poll) => poll.id)).toEqual([own.id]);
     expect((await liveSnapshotPolls()).map((poll) => poll.id)).toEqual([own.id]);
     await expect(
-      updateOverlay(env, "owner", streamer.id, { action: "preview", source: { type: "poll", ref: held.id } }),
+      updateOverlay(env, "owner", streamer.id, { action: "layers", items: { poll: { ref: held.id } } }),
     ).rejects.toMatchObject({ status: 404, message: "Poll not found." });
 
     // After review, the owner can pick the poll. Automatic selection still ignores it. A declined poll stays out.
@@ -292,17 +292,17 @@ describe("viewer polls", (): void => {
     const snapshot = await getOverlaySnapshot(env, streamer.id, null);
     expect(snapshot.polls).toMatchObject([{ id: ownerOpen, byOwner: true }]);
 
-    // "A specific poll": the owner picks the viewer poll by its ID.
+    // The owner picks the viewer poll for the poll layer by its ID.
     const picked = await getOverlaySnapshot(env, streamer.id, viewerOpen);
     expect(picked.polls).toMatchObject([{ id: viewerOpen, title: "Viewer open", byOwner: false }]);
     const { overlay } = await updateOverlay(env, "owner", streamer.id, {
-      action: "preview",
-      source: { type: "poll", ref: viewerOpen },
+      action: "layers",
+      items: { poll: { ref: viewerOpen } },
     });
-    expect(overlay.preview).toEqual({ type: "poll", ref: viewerOpen });
+    expect(overlay.layers.items.poll.ref).toBe(viewerOpen);
     // The author of the poll cannot put it on the overlay.
     await expect(
-      updateOverlay(env, "viewer", streamer.id, { action: "preview", source: { type: "poll", ref: viewerOpen } }),
+      updateOverlay(env, "viewer", streamer.id, { action: "layers", items: { poll: { ref: viewerOpen } } }),
     ).rejects.toMatchObject({ status: 403 });
   });
 
@@ -325,7 +325,7 @@ describe("viewer polls", (): void => {
     expect(polls.filter((poll) => poll.byOwner).map((poll) => poll.id)).toEqual([ownerOpen]);
     expect(polls.find((poll) => poll.id === newer[49])).toMatchObject({ byOwner: false });
 
-    // The OBS overlay socket receives the polls of the owner, plus the poll that the owner put on air.
+    // The OBS overlay socket receives the polls of the owner, plus the poll that the owner picked for the poll layer.
     const snapshot: LiveSnapshot = {
       type: "snapshot",
       revision: 1,
@@ -335,17 +335,19 @@ describe("viewer polls", (): void => {
     };
     expect(overlaySnapshot(snapshot).polls.map((poll) => poll.id)).toEqual([ownerOpen]);
     expect(overlaySnapshot({ ...snapshot, overlay: undefined }).polls.map((poll) => poll.id)).toEqual([ownerOpen]);
-    const onAir: LiveSnapshot = {
+    const items = DEFAULT_OVERLAY.layers.items;
+    const withItems = (changed: Partial<typeof items>): LiveSnapshot => ({
       ...snapshot,
-      overlay: overlayPublic({ ...DEFAULT_OVERLAY, air: { type: "poll", ref: newer[49] } }),
-    };
-    expect(overlaySnapshot(onAir).polls.map((poll) => poll.id)).toEqual([newer[49], ownerOpen]);
-    // A topic source with the same ID field shows no viewer poll.
-    const topicOnAir: LiveSnapshot = {
-      ...snapshot,
-      overlay: overlayPublic({ ...DEFAULT_OVERLAY, air: { type: "topic", ref: newer[49] } }),
-    };
-    expect(overlaySnapshot(topicOnAir).polls.map((poll) => poll.id)).toEqual([ownerOpen]);
+      overlay: overlayPublic({
+        ...DEFAULT_OVERLAY,
+        layers: { ...DEFAULT_OVERLAY.layers, items: { ...items, ...changed } },
+      }),
+    });
+    const picked: LiveSnapshot = withItems({ poll: { ...items.poll, ref: newer[49] } });
+    expect(overlaySnapshot(picked).polls.map((poll) => poll.id)).toEqual([newer[49], ownerOpen]);
+    // A topic layer with the same ID in its ref shows no viewer poll.
+    const topic: LiveSnapshot = withItems({ topic: { ...items.topic, ref: newer[49] } });
+    expect(overlaySnapshot(topic).polls.map((poll) => poll.id)).toEqual([ownerOpen]);
   });
 
   it("lists the owner's polls first in the overlay picker, and names the author of each viewer poll", async (): Promise<void> => {

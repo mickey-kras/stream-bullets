@@ -161,10 +161,14 @@ describe("cards, links and the Ideas board in storage", (): void => {
     await expect(saveCards(env, "owner", { cards: [] })).rejects.toMatchObject({ status: 423 });
   });
 
-  it("keeps card ids across saves, so the card on air stays on air", async (): Promise<void> => {
+  it("keeps card ids across saves, so the card layer keeps its card", async (): Promise<void> => {
     const first = (await saveCards(env, "owner", { cards: [card("One"), card("Two"), card("Three")] }))!;
-    await updateOverlay(env, "owner", page, { action: "preview", source: { type: "card", ref: first[1].id } });
-    await updateOverlay(env, "owner", page, { action: "take" });
+    await updateOverlay(env, "owner", page, {
+      action: "layers",
+      items: { card: { ref: first[1].id } },
+      // Below the default poll layer of a page without a row.
+      cells: { horizontal: { card: { c: 0, r: 7, w: 4, h: 2 } } },
+    });
     const before = (await getOverlayState(env, page)).revision;
     // Edit, reorder, and add cards; replace IDs not owned by this page.
     const edited = (await saveCards(env, "owner", {
@@ -187,12 +191,13 @@ describe("cards, links and the Ideas board in storage", (): void => {
     expect(edited[1].id).toBe(first[0].id);
     expect(edited[4].id).toBe(first[2].id);
     let overlay = await getOverlayState(env, page);
-    expect(overlay.air).toEqual({ type: "card", ref: first[1].id });
-    expect(overlay.revision).toBeGreaterThan(before);
+    expect(overlay.layers.items.card.ref).toBe(first[1].id);
+    expect(overlay.revision).toBe(before + 1);
+    // The layer keeps the ref of a removed card and shows nothing. It never goes to another card.
     await saveCards(env, "owner", { cards: edited.filter((value: CommunityCard) => value.id !== first[1].id) });
     overlay = await getOverlayState(env, page);
-    expect(overlay.air).toEqual({ type: "hidden", ref: null });
-    expect(overlay.preview).toEqual({ type: "hidden", ref: null });
+    expect(overlay.layers.items.card.ref).toBe(first[1].id);
+    expect(overlay.revision).toBe(before + 2);
   });
 
   it("saves up to four support links on their providers' domains", async (): Promise<void> => {

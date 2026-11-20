@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
 import { t, tAround, type MessageId, type MessageVars } from "../../i18n";
 import { CHARACTERS_TIMEOUT } from "../../lib/overlay-layers";
-import { CHARACTERS_TEST_MS } from "../../lib/playground/constants";
 import {
   type ModeView,
   type PlaygroundControl,
@@ -148,31 +147,6 @@ function testTime(
 }
 
 /**
- * The test news: a start (which also ends a pause), a stop from here, or an end by time or elsewhere. The caller sets
- * the returned marks before a stop or a start that ends a pause.
- */
-function useTestNews(
-  running: boolean,
-  setNews: (news: string) => void,
-): { stoppedHereRef: RefObject<boolean>; resumedHereRef: RefObject<boolean> } {
-  const wasRunning = useRef<boolean>(running);
-  const stoppedHereRef = useRef<boolean>(false);
-  const resumedHereRef = useRef<boolean>(false);
-  useEffect(() => {
-    if (wasRunning.current === running) return;
-    wasRunning.current = running;
-    let text: MessageId = "overlay.characters.testEnded";
-    if (running)
-      text = resumedHereRef.current ? "overlay.characters.testStartedResumed" : "overlay.characters.testStarted";
-    else if (stoppedHereRef.current) text = "overlay.characters.testStopped";
-    stoppedHereRef.current = false;
-    resumedHereRef.current = false;
-    setNews(t(text));
-  }, [running, setNews]);
-  return { stoppedHereRef, resumedHereRef };
-}
-
-/**
  * A removed character leaves the list with its button: focus goes to the next Remove button, the last one when it
  * was the last, or the list title when the list is empty.
  */
@@ -192,76 +166,64 @@ function useRemovedFocus(
   }, [roster, removedRef, list, listTitle]);
 }
 
-/**
- * The characters controls in the editor: timeout, pause, reset, the characters test and the participants with a
- * Remove button. Buttons never take the `disabled` attribute: they keep focus while their request runs and ignore
- * presses while busy or unavailable. A polite region says what changed; the time left is not read each second.
- */
-export function CharactersControls({
-  feed,
-  enabled,
-  timeout,
-  onTimeout,
-  now,
-}: Readonly<{
-  /** The owner's characters feed, or null while the characters layer is off in the editor. */
+/** What `CharactersControl.send` does after the answer. */
+interface SendOptions {
+  /** The news after success. */
+  done?: MessageId;
+  vars?: MessageVars;
+  ok?: (result: PlaygroundStatus) => void;
+  /** Undoes local marks after a failure. */
+  failed?: () => void;
+}
+
+/** The state of the character playground and its controls, for the test button and the characters settings. */
+export interface CharactersControl {
+  /** The owner's characters feed, or null while the characters layer is off stream in the editor. */
   feed: ActivityFeed | null;
-  /** The saved characters layer is on. */
+  /** The saved characters layer is on stream. */
   enabled: boolean;
-  timeout: number;
-  onTimeout: (seconds: number) => void;
-  /** Server time. */
-  now: number;
-}>): ReactNode {
+  roster: readonly RosterEntry[];
+  /** The server has no playground (channels off, or no activity feed in this deployment): a note, not an error. */
+  off: boolean;
+  statusError: string | null;
+  /** A request runs. The controls ignore presses meanwhile. */
+  busy: boolean;
+  paused: boolean;
+  /** The time left of the characters test in milliseconds. 0 with `testRunning`: another tab started the test. */
+  testLeft: number;
+  testRunning: boolean;
+  /** What changed last, for a polite live region. */
+  news: string;
+  setNews: (news: string) => void;
+  /** Sends a control. It shows a failure as a toast. */
+  send: (body: PlaygroundControl, options?: SendOptions) => Promise<void>;
+}
+
+/**
+ * Reads and controls the character playground of the page. `enabled`: the saved characters layer is on stream. With
+ * it off the playground keeps nothing, so there is nothing to read. `now` is server time.
+ */
+export function useCharactersControl(feed: ActivityFeed | null, enabled: boolean, now: number): CharactersControl {
   const toast = useToast();
-  const testHintId: string = useId();
-  const listTitleId: string = useId();
-  const removeHintId: string = useId();
   const summary: PlaygroundSummary | null = usePlaygroundSummary(feed);
   const [status, setStatus] = useState<PlaygroundStatus | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
-  // The server has no playground (channels off, or no activity feed in this deployment): a note, not an error.
   const [off, setOff] = useState<boolean>(false);
   const [busy, setBusy] = useState<boolean>(false);
-  const [confirming, setConfirming] = useState<boolean>(false);
   const [news, setNews] = useState<string>("");
-  const listTitle = useRef<HTMLHeadingElement | null>(null);
-  const list = useRef<HTMLUListElement | null>(null);
-  const removedRef = useRef<{ id: number; index: number } | null>(null);
-  const [linkBefore, linkAfter] = tAround("overlay.characters.participantsNone", "link");
 
-  // The state after a page load: paused and the test end are not in the saved layers. With the saved layer off the
-  // playground keeps nothing, so there is nothing to read.
+  // The state after a page load: paused and the test end are not in the saved layers.
   useEffect(() => {
     if (enabled) return readStatus(setStatus, setStatusError, setOff);
   }, [enabled]);
 
   const frameMode: ModeView | null = useFrameMode(summary, status, setStatus);
-
-  const paused: boolean = status?.paused ?? false;
   const { left, endUnknown, running } = testTime(status, frameMode, now);
   useEffect(() => {
     if (enabled && endUnknown) return readStatus(setStatus, setStatusError, setOff);
   }, [enabled, endUnknown]);
-  const testUnavailable: boolean = busy || (!running && !enabled);
-  // With the saved layer off the playground keeps nothing: pause and reset would do nothing.
-  const controlUnavailable: boolean = busy || !enabled;
 
-  const { stoppedHereRef, resumedHereRef } = useTestNews(running, setNews);
-  const roster: readonly RosterEntry[] = summary?.roster ?? NO_ROSTER;
-  useRemovedFocus(roster, removedRef, list, listTitle);
-  const testHint: MessageId = enabled ? "overlay.characters.testHint" : "overlay.characters.needsLayer";
-
-  /** Sends a control. `done` is the news after success; `failed` undoes local marks after a failure. */
-  async function send(
-    body: PlaygroundControl,
-    options: {
-      done?: MessageId;
-      vars?: MessageVars;
-      ok?: (result: PlaygroundStatus) => void;
-      failed?: () => void;
-    } = {},
-  ): Promise<void> {
+  async function send(body: PlaygroundControl, options: SendOptions = {}): Promise<void> {
     if (busy) return;
     setBusy(true);
     try {
@@ -279,20 +241,48 @@ export function CharactersControls({
     }
   }
 
-  function toggleTest(): void {
-    if (testUnavailable) return;
-    stoppedHereRef.current = running;
-    resumedHereRef.current = !running && paused;
-    void send(
-      { op: running ? "stopTest" : "test" },
-      {
-        failed: (): void => {
-          stoppedHereRef.current = false;
-          resumedHereRef.current = false;
-        },
-      },
-    );
-  }
+  return {
+    feed,
+    enabled,
+    roster: summary?.roster ?? NO_ROSTER,
+    off,
+    statusError,
+    busy,
+    paused: status?.paused ?? false,
+    testLeft: left,
+    testRunning: running,
+    news,
+    setNews,
+    send,
+  };
+}
+
+/**
+ * The characters settings in the editor: timeout, pause, reset and the participants with a Remove button. Buttons
+ * never take the `disabled` attribute: they keep focus while their request runs and ignore presses while busy or
+ * unavailable. A polite region says what changed.
+ */
+export function CharactersControls({
+  control: playground,
+  timeout,
+  onTimeout,
+}: Readonly<{
+  control: CharactersControl;
+  timeout: number;
+  onTimeout: (seconds: number) => void;
+}>): ReactNode {
+  const { feed, enabled, roster, off, statusError, busy, paused, news, setNews, send } = playground;
+  const needsId: string = useId();
+  const listTitleId: string = useId();
+  const removeHintId: string = useId();
+  const [confirming, setConfirming] = useState<boolean>(false);
+  const listTitle = useRef<HTMLHeadingElement | null>(null);
+  const list = useRef<HTMLUListElement | null>(null);
+  const removedRef = useRef<{ id: number; index: number } | null>(null);
+  const [linkBefore, linkAfter] = tAround("overlay.characters.participantsNone", "link");
+  // With the saved layer off stream the playground keeps nothing: pause and reset would do nothing.
+  const controlUnavailable: boolean = busy || !enabled;
+  useRemovedFocus(roster, removedRef, list, listTitle);
 
   /** Pause or resume. The news says only a change that the answer confirms. */
   function togglePause(): void {
@@ -340,7 +330,7 @@ export function CharactersControls({
         <button
           type="button"
           aria-disabled={controlUnavailable}
-          aria-describedby={enabled ? undefined : testHintId}
+          aria-describedby={enabled ? undefined : needsId}
           onClick={togglePause}
           data-characters-pause
         >
@@ -349,7 +339,7 @@ export function CharactersControls({
         <button
           type="button"
           aria-disabled={controlUnavailable}
-          aria-describedby={enabled ? undefined : testHintId}
+          aria-describedby={enabled ? undefined : needsId}
           onClick={() => {
             if (!controlUnavailable) setConfirming(true);
           }}
@@ -358,31 +348,19 @@ export function CharactersControls({
           {t("overlay.characters.reset")}
         </button>
       </div>
+      {!enabled && (
+        <p className="muted ov-comp-note" id={needsId} data-characters-needs-layer>
+          {t("overlay.characters.needsLayer")}
+        </p>
+      )}
       {paused && (
         <p className="muted ov-comp-note" data-characters-paused>
           {t("overlay.characters.paused", { badge: t("overlay.characters.badgePaused") })}
         </p>
       )}
-      <div className="ov-comp-test">
-        <button
-          type="button"
-          aria-disabled={testUnavailable}
-          aria-describedby={testHintId}
-          onClick={toggleTest}
-          data-characters-test-toggle
-        >
-          {t(running ? "overlay.characters.testStop" : "overlay.characters.testStart")}
-        </button>
-        <p className="muted ov-comp-note" id={testHintId} data-characters-test-status>
-          {left > 0
-            ? t("overlay.characters.testLeft", { seconds: Math.ceil(left / 1000) })
-            : t(testHint, { minutes: CHARACTERS_TEST_MS / 60_000, badge: t("overlay.characters.badgeTest") })}
-          {!running && enabled && paused && ` ${t("overlay.characters.testResumes")}`}
-        </p>
-      </div>
-      <h3 className="ov-chars-title" id={listTitleId} tabIndex={-1} ref={listTitle}>
+      <h4 className="ov-chars-title" id={listTitleId} tabIndex={-1} ref={listTitle}>
         {t("overlay.characters.participants")}
-      </h3>
+      </h4>
       <p className="muted ov-comp-note" id={removeHintId}>
         {t("overlay.characters.removeHint")}
       </p>

@@ -285,16 +285,10 @@ header nav a.nav-tab[aria-current="page"] { background: linear-gradient(110deg, 
 :root .sb-toast .toast-action { min-height: 32px; padding: 4px 12px; border: 1px solid var(--bg); border-radius: var(--radius-panel); background: transparent; color: var(--bg); font: 700 .9375rem var(--body); cursor: pointer; }
 .site-header .account-menu { width: min(300px, calc(100% - 24px)); max-width: calc(100cqw - 24px); }
 .site-header .account-menu :is(a, button):not(.icon-button) { font: 500 1rem/1.3 var(--body) !important; text-transform: none !important; letter-spacing: 0 !important; white-space: normal; overflow-wrap: anywhere; gap: 10px; min-height: 44px; }
-@media (max-width: 56.25em) {
-  :root:has(.ov-control) .sb-toast { bottom: auto; top: 72px; }
-}
 .header-streamers { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 10px; color: var(--cream); font: 600 1rem var(--body); text-decoration: none; white-space: nowrap; }
 .header-streamers:hover { color: var(--gold); text-decoration: underline; }
 @media (max-width: 78.125em) {
   .header-streamers { display: none; }
-}
-@media (max-width: 56.25em) {
-  body:has(.ov-control) > .site-footer { display: none; }
 }
 header .account-menu nav { display: block !important; grid-template-columns: none !important; width: auto; height: auto; gap: 0; justify-content: normal; overflow: visible; }
 header .account-menu ul { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 2px; margin: 0; padding: 0; list-style: none; width: 100%; }

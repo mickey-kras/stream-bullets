@@ -1,11 +1,6 @@
 /* Composition editor on Overlay control. The preview reuses .ov-frame / .ov-scaler (the frame of the orientation,
    scaled by --ov-scale). Boxes inside the scaler use design pixels; their outlines divide by --ov-scale. */
 
-.ov-comp {
-  max-width: 1300px;
-  margin: 0 auto;
-}
-
 /* ---------- Steps of Overlay control (step-heading.tsx) ---------- */
 .ov-step {
   max-width: 1300px;
@@ -29,17 +24,8 @@
   font: 700 0.75em / 1 var(--body);
   vertical-align: 0.15em;
 }
-.ov-step-intro {
-  margin: 0 0 12px;
-}
 .ov-step .ov-url {
   margin-top: 0;
-}
-/* Step 2: the chat and characters switches, side by side under the live control. */
-.ov-step-layers {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-  align-items: start;
-  margin-top: 20px;
 }
 /* Step 1: the status line opens the channel panel. */
 .ch-details > summary {
@@ -54,11 +40,37 @@
 .ch-details[open] > summary {
   margin-bottom: 4px;
 }
-.ov-comp-body {
+/* ---------- Step 2: the overlay studio (composition-editor.tsx) ----------
+   Wide: the palette, the grid and the settings of the selected layer side by side. Medium: the palette above the
+   grid and the settings. Narrow: one column, in that order. */
+.ov-studio {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
-  gap: 16px 24px;
+  grid-template-columns: 13rem minmax(0, 1fr) minmax(16rem, 19rem);
+  gap: 16px;
   align-items: start;
+  margin-top: 12px;
+}
+.ov-studio-side {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.ov-studio-title {
+  margin: 0 0 8px;
+  padding: 0;
+}
+@media (max-width: 75em) {
+  .ov-studio {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 19rem);
+  }
+  .ov-palette {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 56.25em) {
+  .ov-studio {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .ov-comp-stage {
   display: grid;
@@ -67,17 +79,6 @@
 }
 .ov-comp-help {
   margin: 0;
-}
-/* A note, not an error: the layout still saves. */
-.ov-comp-overlap {
-  padding: 6px 10px;
-  border-inline-start: 3px solid var(--gold);
-  font-size: 0.9375rem;
-}
-/* The note's live region stays mounted; empty, it takes no space. */
-.ov-comp-overlap:empty {
-  padding: 0;
-  border: 0;
 }
 
 /* ---------- Preview background ---------- */
@@ -132,17 +133,43 @@
 
 /* ---------- Layout grid (layout-grid.tsx) ----------
    The grid boxes sit in the scaler in design pixels: a cell is 120 px. Lines and labels divide by --ov-scale. */
+/* The toolbar: orientation, preview background, the test and the live note. Its controls have one height. */
 .ov-comp-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 24px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
-.ov-comp-bar .field {
+.ov-comp-bar .ov-seg-field {
   margin: 0;
 }
-/* The vertical frame fits the screen height between the site header and the page bottom: about 140 px on a wide
-   screen, and about 310 px with the phone Take dock (header 119 px, and a dock of up to 168 px at 390 × 844 when its
-   title wraps in German or Russian). It never gets narrower than 200 px. */
+.ov-comp-bar .seg {
+  flex-wrap: nowrap;
+}
+.ov-comp-bar button {
+  height: 44px;
+  min-height: 44px;
+  padding-block: 0;
+}
+.ov-live-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 auto;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.ov-live-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-live-bg);
+}
+/* The vertical frame fits the screen height between the site header and the footer bar: they take about 140 px on
+   a wide screen and about 180 px on a phone, where the header has two rows. The frame never gets narrower than
+   200 px. */
 .ov-comp-frame[data-orientation="vertical"] {
   --ov-comp-chrome: 140px;
   aspect-ratio: 9 / 16;
@@ -152,7 +179,7 @@
 }
 @media (max-width: 56.25em) {
   .ov-comp-frame[data-orientation="vertical"] {
-    --ov-comp-chrome: 310px;
+    --ov-comp-chrome: 180px;
   }
 }
 .ov-grid-lines {
@@ -178,11 +205,6 @@
 .ov-grid-box[data-off] {
   border-style: dashed;
   opacity: 0.7;
-}
-/* A sample of content that is not on air: dimmed. Only the editor preview sets
-   data-sample-off; the OBS pages never do. */
-.ov-comp-frame[data-sample-off~="content"] .ov-layer[data-layer="content"] {
-  opacity: 0.45;
 }
 .ov-grid-box[data-grid-box="characters"] {
   background: repeating-linear-gradient(135deg, rgb(242 210 46 / 0.08) 0 24px, transparent 24px 48px);
@@ -249,6 +271,10 @@
   max-width: 100%;
   box-sizing: border-box;
   overflow-wrap: anywhere;
+}
+/* The top-left handle of the selected layer does not cover the label. */
+.ov-grid-box[data-selected] .ov-grid-tag {
+  margin-inline-start: calc(14px / var(--ov-scale, 1));
 }
 .ov-grid-preview {
   position: absolute;
@@ -327,10 +353,14 @@
   color: var(--error);
 }
 /* ---------- Layer palette (layer-palette.tsx) ---------- */
-/* The palette keeps one height with chips, with its note and as a drop place: the grid below does not jump. */
+.ov-palette {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
 .ov-palette-body {
   position: relative;
-  min-height: 5.5rem;
 }
 /* Where a pointer drops a placed layer to take it off the grid. It covers the chips, so the bar keeps its size and
    the grid under the pointer does not move. */
@@ -355,26 +385,54 @@
   background: var(--gold);
   color: var(--ink);
 }
+/* One chip for each layer: a column beside the grid on a wide screen, rows above it on a narrower one. */
 .ov-palette-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 6px;
 }
 .ov-palette .ov-comp-note {
-  margin-top: 6px;
-  max-width: 28rem;
+  margin-top: 8px;
 }
-/* A chip is 44 px high for touch. It does not scroll the page under a finger: a drag carries it to the grid. */
+/* A chip is 44 px high for touch. A chip of a layer off the grid does not scroll the page under a finger: a drag
+   carries it to the grid. */
 .ov-palette-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
   min-height: 44px;
-  padding: 6px 14px;
+  padding: 8px 12px;
   border-style: dashed;
   border-color: var(--gold);
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   font-weight: 600;
+  text-align: start;
   cursor: grab;
   touch-action: none;
   user-select: none;
+}
+.ov-palette-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* A layer on the grid: its chip selects it. */
+.ov-palette-chip[data-placed] {
+  border-style: solid;
+  border-color: var(--line);
+  cursor: pointer;
+  touch-action: auto;
+}
+.ov-palette-chip[aria-pressed="true"] {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+.ov-palette-placed {
+  margin-inline-start: auto;
+  color: var(--gold);
+  font: 700 0.75rem / 1 var(--body);
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 .ov-palette-chip[data-dragging] {
   position: relative;
@@ -384,45 +442,80 @@
   /* The grid under the chip stays in view, and the chip does not move back with a transition. */
   transition: none;
 }
+/* The test button with its status beside it (studio-test.tsx). */
 .ov-comp-test {
-  display: grid;
-  gap: 6px;
-  justify-items: start;
+  display: flex;
+  flex: 1 1 18rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  min-width: 0;
+}
+.ov-comp-test .ov-comp-note {
+  flex: 1 1 14rem;
 }
 
-/* ---------- Layer controls ---------- */
-.ov-comp-layers {
+/* ---------- Settings of the selected layer (layer-properties.tsx) ---------- */
+.ov-props {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
-}
-.ov-comp-layer {
-  margin: 0;
-  padding: 12px 14px 14px;
-  display: grid;
-  gap: 10px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  min-width: 0;
+  background: var(--card);
 }
-.ov-comp-layer legend {
-  padding: 0 6px;
-  font-weight: 700;
+.ov-props-name {
+  margin: 0;
+  font: 600 1.375rem / 1.2 var(--heading);
 }
-.ov-comp-layer .choice {
+.ov-props .field-label {
+  font-size: 0.875rem;
+}
+.ov-props .choice {
   display: flex;
   align-items: center;
   gap: 10px;
   margin: 0;
 }
-.ov-comp-layer .choice:has(:disabled) {
+.ov-props .choice:has(:disabled) {
   color: var(--muted);
+}
+.ov-props-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+.ov-props-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-control);
+  background: var(--field);
+}
+.ov-props-field .ov-seg-field {
+  margin: 0;
+}
+/* A long poll or topic title wraps in the picker. */
+.ov-props .cselect-trigger {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 44px;
+  text-align: start;
+}
+.ov-props .cselect-value {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
 }
 .ov-comp-note {
   margin: 0;
   font-size: 0.8125rem;
 }
-/* A labelled range with its value as text: the message background of the chat. */
+/* A labelled range with its value as text: the background of a layer. */
 .ov-comp-range {
   display: flex;
   flex-wrap: wrap;
@@ -439,7 +532,8 @@
   font-weight: 600;
 }
 .ov-comp-range input {
-  flex: 0 1 20rem;
+  flex: 1 1 8rem;
+  max-width: 20rem;
   width: auto;
   min-width: 0;
   margin: 0;
@@ -528,12 +622,6 @@
   border-radius: var(--radius-control);
   color: var(--error);
   font-size: 0.875rem;
-}
-
-@media (max-width: 60em) {
-  .ov-comp-body {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 /* ---------- Per-layer overlay URLs (overlay-link.tsx) ---------- */

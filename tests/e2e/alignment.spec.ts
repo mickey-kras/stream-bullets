@@ -122,18 +122,3 @@ test("on a frozen page the owner gets the date and no delete buttons", async ({ 
   await expect(page.locator(".votes button").first()).toBeDisabled();
   await close(owner);
 });
-
-test("overlay control keeps the Take bar at the bottom of a phone screen", async ({ browser }) => {
-  const owner = await signedIn(browser, "featureowner", clientIp("alignment", 145), {
-    viewport: { width: 390, height: 844 },
-  });
-  const page = await newPage(owner);
-  await page.goto("/overlay-control");
-  const dock = page.locator(".ov-take-dock");
-  await expect(dock).toBeVisible();
-  const box = await dock.boundingBox();
-  expect(box && box.y + box.height).toBeGreaterThan(780);
-  expect(box && box.y + box.height).toBeLessThanOrEqual(845);
-  await expect(dock.getByRole("button", { name: /Take/ })).toBeInViewport();
-  await close(owner);
-});

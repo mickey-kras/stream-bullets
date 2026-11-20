@@ -265,24 +265,18 @@ export interface OverlaySourceRef {
 
 // Owner control state (`GET /api/overlay`).
 export interface OverlayState {
-  air: OverlaySourceRef;
-  preview: OverlaySourceRef;
-  position: OverlayPosition;
-  size: OverlaySize;
-  // Publish preview changes immediately.
-  instant: boolean;
   showResults: boolean;
   message: string;
   messageStyle: OverlayMessageStyle;
-  // Orientation and grid cells of the chat, characters, and content layers. Public: OBS renders them.
+  // Orientation, settings and grid cells of the layers. Public: OBS renders them.
   layers: OverlayLayers;
   // Server time when the chat test ends. A time in the past (0 by default) means no test.
   chatTestUntil: number;
   revision: number;
 }
 
-// Public state. `message` is empty unless its banner is on air.
-export type OverlayPublic = Omit<OverlayState, "preview" | "instant">;
+// Public state. `message` is empty unless the message layer is on stream.
+export type OverlayPublic = OverlayState;
 
 export type ApplicationStatus = "pending" | "approved" | "rejected";
 

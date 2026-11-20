@@ -692,13 +692,14 @@ describe("tables added by migrations 0006–0012", (): void => {
         showResults: false,
         message: "BRB 5 min",
         messageStyle: "hype",
-        // Read leniently: the unknown key is dropped and missing layers take their defaults.
+        // Read leniently: the unknown key is dropped and missing settings take their defaults. The layers are from
+        // before the overlay studio: the chat was on, so it keeps its cell and takes its old default vertical cell.
         layers: {
           ...DEFAULT_LAYERS,
           chat: { enabled: true, hideCommands: true },
           cells: {
-            ...DEFAULT_LAYERS.cells,
             horizontal: { ...DEFAULT_LAYERS.cells.horizontal, chat: { c: 10, r: 0, w: 3, h: 2 } },
+            vertical: { ...DEFAULT_LAYERS.cells.vertical, chat: { c: 0, r: 8, w: 9, h: 5 } },
           },
         },
         updatedAt: new Date(now).toISOString(),

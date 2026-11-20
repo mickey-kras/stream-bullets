@@ -138,19 +138,39 @@ test("signed in, display preferences save to the account", async ({ browser }) =
   await close(viewer);
 });
 
-test("the overlay control page enlarges a monitor and collapses Position and size on phones", async ({ browser }) => {
+test("the overlay studio names every control and keeps 44 px touch targets on a phone", async ({ browser }) => {
   const owner = await signedIn(browser, "owner", clientIp("a11y", 179));
   const page = await newPage(owner);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/overlay-control");
-  await expect(page.locator(".ov-layout-wrap")).not.toHaveAttribute("open", "");
-  const enlarge = page.getByRole("button", { name: "Enlarge the on-air monitor" });
-  await enlarge.click();
-  await expect(enlarge).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator(".ov-grid")).toHaveClass(/enlarge-air/);
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.reload();
-  await expect(page.locator(".ov-layout-wrap")).toHaveAttribute("open", "");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  const editor = page.locator("[data-composition-editor]");
+  // A page that the owner did not change has the poll layer on the grid. Its chip selects it.
+  await editor.locator('[data-comp-layer="poll"]').click();
+  const panel = page.getByRole("region", { name: "Poll" });
+  await expect(panel.getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
+  expect(await problems(page)).toEqual({ unnamed: [], noAlt: 0, duplicateIds: [] });
+  // The parts of the studio have names: the toolbar groups, the palette, the grid and the settings.
+  for (const name of ["Screen orientation", "Preview background", "Layers · one of each"])
+    await expect(editor.getByRole("group", { name })).toBeVisible();
+  await expect(editor.getByRole("application", { name: "Layout grid, 16 columns by 9 rows" })).toBeVisible();
+  await expect(panel.getByRole("combobox", { name: "Poll" })).toBeVisible();
+  await expect(panel.getByRole("slider", { name: "Background" })).toHaveAttribute("aria-valuetext", "100%");
+  // Buttons and pickers are at least 44 px high for a finger. The toolbar controls have one height.
+  const heights = async (selector: string): Promise<number[]> =>
+    editor
+      .locator(selector)
+      .evaluateAll((elements: Element[]) => elements.map((element) => element.getBoundingClientRect().height));
+  for (const selector of [
+    "[data-comp-palette] button",
+    ".ov-comp-bar button",
+    ".ov-props > button",
+    '[role="combobox"]',
+  ])
+    for (const height of await heights(selector)) expect(height, selector).toBeGreaterThanOrEqual(44);
+  expect(new Set(await heights(".ov-comp-bar button")).size).toBe(1);
+  // The page does not scroll sideways.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await close(owner);
 });
 
