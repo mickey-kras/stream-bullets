@@ -119,6 +119,8 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
   if (before.characters.enabled !== after.characters.enabled) patch.characters = { enabled: after.characters.enabled };
   if (before.characters.timeout !== after.characters.timeout)
     patch.characters = { ...patch.characters, timeout: after.characters.timeout };
+  if (before.characters.max !== after.characters.max)
+    patch.characters = { ...patch.characters, max: after.characters.max };
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch = {};
     for (const layer of GRID_LAYERS) {

@@ -94,7 +94,7 @@ Each layer has the `enabled` setting. The other settings are these:
 | Layer | Settings |
 | --- | --- |
 | `chat` | `hideCommands` and `backgroundOpacity`. See [Commands](#commands) and [Message background](#message-background). |
-| `characters` | `timeout`. See [Interactive characters](characters.md). |
+| `characters` | `timeout` and `max`. See [Interactive characters](characters.md). |
 | Each content layer | `ref`, `backgroundOpacity`, and `qr` |
 
 The settings of a content layer are these:
@@ -365,7 +365,7 @@ The settings show the name of the selected layer and these controls:
 | **Hide chat commands (!jump)** | Chat | See [Commands](#commands). |
 | **Message background** | Chat | See [Message background](#message-background). |
 | **Background** | Each content layer | The opacity of the card background, from 0 to 100 in steps of 5. |
-| Timeout, **Pause**, **Reset playground**, and the participants | Characters | See [Interactive characters](characters.md). |
+| Timeout, **Maximum characters on screen**, **Pause**, **Reset playground**, and the participants | Characters | See [Interactive characters](characters.md). |
 | **Remove from grid** | All | Takes the layer off the grid. |
 
 Up next and the support banner have no picker. The characters layer has no background.

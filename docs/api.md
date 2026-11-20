@@ -117,7 +117,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | Endpoint | Body | Response |
 | --- | --- | --- |
 | `GET /api/overlay` | - | `{overlay, data, handle}`. The `OverlayState` of the page of the signed-in owner, and the polls, topics, and cards for the pickers |
-| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?}, items?: {poll?, topic?, next?, message?, card?, support?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?, max?}, items?: {poll?, topic?, next?, message?, card?, support?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
 | `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
 | `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
@@ -158,6 +158,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   A `layers` action that takes the chat layer off stream also sets `chatTestUntil` to 0.
   Overlay pages get the value through the live room. A time in the past means no test.
 - `characters.timeout` is the time in seconds without chat before a character walks out. It is a whole number from 10 to 600. The default is 60.
+- `characters.max` is the maximum number of characters on screen. It is a whole number from 5 to 40. The default is 40.
 - Each `layers` action and each `chatTest` action with `on: true` counts against the write quota of 60 changes each minute.
 - `POST /api/overlay/characters` controls the character playground of the page:
   - `status` changes nothing. It only returns the state.
@@ -174,7 +175,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
 - `OverlayState` and `OverlayPublic` are `{showResults, message, messageStyle, layers, chatTestUntil, revision}`.
   `OverlayPublic` is what the overlay page and the live room get. Its `message` is empty unless the `message` layer is on stream.
-- `layers` is `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout}, items, cells: {horizontal, vertical}}`.
+- `layers` is `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout, max}, items, cells: {horizontal, vertical}}`.
   Each orientation in `cells` is `{chat, characters, poll, topic, next, message, card, support}`. Each value is a cell or `null`.
   `items` holds `{enabled, ref, backgroundOpacity, qr}` for each content layer.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value.

@@ -91,7 +91,7 @@ describe("old stored text", (): void => {
     expect(layers).toEqual({
       ...DEFAULT_LAYERS,
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
-      characters: { enabled: false, timeout: 90 },
+      characters: { enabled: false, timeout: 90, max: 40 },
     });
     expect(parseStoredLayers(oldText({ orientation: "vertical" })).orientation).toBe("vertical");
   });
@@ -110,7 +110,7 @@ describe("old stored text", (): void => {
         chat: oldChat[orientation],
         characters: oldCharacters[orientation],
       });
-    expect(both.characters).toEqual({ enabled: true, timeout: 90 });
+    expect(both.characters).toEqual({ enabled: true, timeout: 90, max: 40 });
   });
 
   it("gives a layer that was on its old default cell when the text has no valid cell", (): void => {
