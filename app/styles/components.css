@@ -960,6 +960,14 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .ov-message.style-hype { border-left-color: var(--live); background: linear-gradient(110deg, var(--c-0a2025ed), var(--live-glow)); }
 .ov-message.style-hype h1 svg { color: var(--live); }
 .ov-support h1 span { color: var(--gold); }
+/* A card with a QR code (qr-code.tsx): the text keeps the left side and the code sits at the right edge. */
+.ov-qr-row { display: flex; align-items: center; gap: 28px; }
+.ov-qr-text { flex: 1; min-width: 0; }
+.ov-card .ov-qr-text { display: grid; gap: 10px; }
+/* On a poll card the code sits at the bottom, to the right of the votes line or the "Tap at" hint. */
+.overlay-card .ov-qr-row { align-items: flex-end; }
+.ov-qr { flex: none; display: block; }
+.ov-qr img { display: block; width: 100%; height: 100%; }
 .ov-hidden-results { margin: 20px 0; font: 600 22px var(--body); color: var(--muted); }
 .support-section { gap: 14px; }
 .support-section h2 { display: flex; align-items: center; gap: 10px; }

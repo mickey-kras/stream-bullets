@@ -71,7 +71,7 @@ export interface ContentItem {
   ref: string | null;
   /** Percent of the card background that shows (LAYER_BACKGROUND). */
   backgroundOpacity: number;
-  /** Stored only: the overlay does not draw a QR code. */
+  /** The card shows a QR code of the public page of its item. The message banner never shows one. */
   qr: boolean;
 }
 

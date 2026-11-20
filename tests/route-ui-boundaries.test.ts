@@ -524,7 +524,13 @@ describe("overlay loader contracts", (): void => {
 
   it("loads the automatic poll for a page without saved state and returns the public overlay", async (): Promise<void> => {
     const result = await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
-    expect(result).toMatchObject({ handle: "zed", name: "Zed", host: "stream.example.test", override: null });
+    expect(result).toMatchObject({
+      handle: "zed",
+      name: "Zed",
+      host: "stream.example.test",
+      origin: "https://stream.example.test",
+      override: null,
+    });
     expect(result.overlay).toEqual({ ...DEFAULT_OVERLAY, message: "" });
     expect(refs()).toEqual([null]);
     expect(overlay.getOverlayData).toHaveBeenCalledWith(expect.anything(), "page", []);
@@ -627,7 +633,13 @@ describe("overlay loader contracts", (): void => {
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["recent", "layer-poll"]);
     expect(refs()).toEqual([null, "layer-poll"]);
     expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["layer-topic"]);
-    expect(result).toMatchObject({ handle: "zed", host: "stream.example.test", hasOverlayKey: false, channels: [] });
+    expect(result).toMatchObject({
+      handle: "zed",
+      host: "stream.example.test",
+      origin: "https://stream.example.test",
+      hasOverlayKey: false,
+      channels: [],
+    });
     expect(result.state.layers).toEqual({ ...picked, orientation: "vertical" });
   });
 

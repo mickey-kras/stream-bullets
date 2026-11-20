@@ -13,9 +13,11 @@ import { controlState, OverlayControl } from "../app/components/overlay/overlay-
 import {
   OverlayStage,
   overlayPoll,
+  qrTarget,
   type OverlayPoll,
   type OverlayScene,
 } from "../app/components/overlay/overlay-stage";
+import { QR_MIN, QrCode } from "../app/components/overlay/qr-code";
 import { StudioTest } from "../app/components/overlay/studio-test";
 import { t } from "../app/i18n";
 import type { ChatRow } from "../app/lib/chat-feed";
@@ -51,6 +53,7 @@ const scene: OverlayScene = {
   name: "Host",
   handle: "host",
   host: "stream.example.test",
+  origin: "https://stream.example.test",
   overlay: state,
   polls: [],
   data,
@@ -70,8 +73,8 @@ const populated: OverlayData = {
   ],
 };
 
-function stage(source: ContentSource, override: Partial<OverlayScene> = {}): string {
-  return renderToStaticMarkup(createElement(OverlayStage, { scene: { ...scene, ...override }, source }));
+function stage(source: ContentSource, override: Partial<OverlayScene> = {}, qr: boolean = false): string {
+  return renderToStaticMarkup(createElement(OverlayStage, { scene: { ...scene, ...override }, source, qr }));
 }
 
 function poll(id: string, override: Partial<OverlayPoll> = {}): OverlayPoll {
@@ -216,7 +219,7 @@ describe("settings of the selected layer", () => {
       }),
     );
   }
-  const withItem = (layer: "poll" | "topic" | "card" | "message", item: object): OverlayLayers => ({
+  const withItem = (layer: "poll" | "topic" | "card" | "message" | "next", item: object): OverlayLayers => ({
     ...placed,
     items: { ...placed.items, [layer]: { ...placed.items[layer], ...item } },
   });
@@ -236,9 +239,9 @@ describe("settings of the selected layer", () => {
     expect(html).toMatch(new RegExp(`<h3 class="ov-props-name" id="[^"]+">${t(LAYER_NAMES[layer])}</h3>`));
     expect(html).toContain("Show on stream");
     expect(html).toMatch(/<button type="button" data-props-remove="true">Remove from grid<\/button>/);
-    // The characters have no background. No layer has a QR setting.
+    // The characters have no background. The chat, the characters and the message banner have no QR code.
     expect(html.includes("data-props-background")).toBe(layer !== "characters");
-    expect(html).not.toMatch(/QR/i);
+    expect(html.includes("data-props-qr")).toBe(layer !== "chat" && layer !== "characters" && layer !== "message");
   });
 
   it("reads Show on stream from the layer", () => {
@@ -308,8 +311,27 @@ describe("settings of the selected layer", () => {
     for (const layer of ["next", "support"] as const) {
       const html: string = settings(layer);
       expect(html).not.toContain('role="combobox"');
-      expect(html.match(/<input/g)).toHaveLength(2);
+      // "Show on stream", the QR code switch and the background.
+      expect(html.match(/<input/g)).toHaveLength(3);
     }
+  });
+
+  it("offers the QR code switch on each content layer with a page, with the saved value and a hint", () => {
+    const poll: string = settings("poll");
+    // The poll layer shows a QR code by default.
+    expect(poll).toMatch(
+      /<input type="checkbox" aria-describedby="([^"]+)" data-props-qr="true" checked=""\/><span>Show QR code<\/span>/,
+    );
+    expect(poll).toMatch(
+      /<p class="muted ov-comp-note" id="[^"]+">Viewers scan it with a phone to open this item\.<\/p>/,
+    );
+    expect(settings("poll", { layers: withItem("poll", { qr: false }) })).toContain('data-props-qr="true"/>');
+    for (const layer of ["topic", "next", "card", "support"] as const)
+      expect(settings(layer), layer).toContain('data-props-qr="true"/><span>Show QR code</span>');
+    expect(settings("next", { layers: withItem("next", { qr: true }) })).toContain('data-props-qr="true" checked=""/>');
+    // No page to open: the message banner, the chat and the characters.
+    for (const layer of ["message", "chat", "characters"] as const)
+      expect(settings(layer), layer).not.toContain("data-props-qr");
   });
 
   it("shows the background of a content layer and of the chat as a range with its value", () => {
@@ -520,6 +542,124 @@ describe("overlay source fallbacks", () => {
     ).not.toContain('class="ov-cta"');
   });
 
+  describe("the QR code", () => {
+    const page = "https://stream.example.test/@host";
+    const link = { kind: "kofi", label: null, url: "https://ko-fi.com/host" } as const;
+    const card: OverlayData["cards"][number] = {
+      id: "c1",
+      icon: null,
+      title: "Rules",
+      body: "",
+      label: null,
+      target: null,
+    };
+    const full: OverlayScene = {
+      ...scene,
+      polls: [poll("closed", { revealed: true }), poll("open"), poll("viewer", { byOwner: false })],
+      data: { ...populated, cards: [card], next: { title: "Next stream", startsAt: 5000 }, support: link },
+    };
+
+    it("links each layer to the public page of its item", () => {
+      expect(qrTarget(full, { type: "poll", ref: "viewer" })).toBe(`${page}?view=polls&entry=viewer`);
+      // The automatic poll: the poll that the layer shows.
+      expect(qrTarget(full, { type: "auto", ref: null })).toBe(`${page}?view=polls&entry=open`);
+      expect(qrTarget(full, { type: "topic", ref: "topic" })).toBe(`${page}?view=topics&entry=topic`);
+      expect(qrTarget(full, { type: "next", ref: null })).toBe(`${page}?view=schedule`);
+      expect(qrTarget(full, { type: "card", ref: null })).toBe(`${page}?view=community`);
+      expect(qrTarget(full, { type: "card", ref: "c1" })).toBe(`${page}?view=community`);
+      expect(qrTarget(full, { type: "support", ref: null })).toBe("https://ko-fi.com/host");
+      // The support banner without a link opens the page.
+      expect(qrTarget(scene, { type: "support", ref: null })).toBe(page);
+      // The origin comes from the scene, with or without a slash at its end.
+      expect(qrTarget({ ...full, origin: "http://localhost:5173/" }, { type: "next", ref: null })).toBe(
+        "http://localhost:5173/@host?view=schedule",
+      );
+    });
+
+    it("has no link for a layer with nothing to show, and never for the message banner", () => {
+      expect(qrTarget(scene, { type: "auto", ref: null })).toBeNull();
+      expect(qrTarget(full, { type: "poll", ref: "deleted" })).toBeNull();
+      expect(qrTarget(full, { type: "topic", ref: "deleted" })).toBeNull();
+      expect(qrTarget(full, { type: "topic", ref: null })).toBeNull();
+      expect(qrTarget(scene, { type: "next", ref: null })).toBeNull();
+      expect(qrTarget(full, { type: "card", ref: "deleted" })).toBeNull();
+      expect(qrTarget(scene, { type: "card", ref: null })).toBeNull();
+      expect(qrTarget(full, { type: "message", ref: null })).toBeNull();
+    });
+
+    it("draws the code as an SVG picture with a name, the same for the same link", () => {
+      const html: string = renderToStaticMarkup(createElement(QrCode, { url: `${page}?view=schedule` }));
+      expect(html).toMatch(
+        new RegExp(
+          `^<span class="ov-qr" role="img" aria-label="QR code: open on your phone" ` +
+            `style="width:${QR_MIN}px;height:${QR_MIN}px" data-overlay-qr="${page}\\?view=schedule">` +
+            `<img src="data:image/svg\\+xml,[^"]+" alt=""/></span>$`,
+        ),
+      );
+      const svg: string = decodeURIComponent(/src="data:image\/svg\+xml,([^"]+)"/.exec(html)?.[1] ?? "");
+      // Version 3 (29 modules) with a quiet zone of 2 modules on each side: dark modules on the light plate.
+      expect(svg).toMatch(
+        /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" viewBox="0 0 33 33"><rect fill="#f7edcf" width="33" height="33"\/><path fill="#0b2228" d="M2,2h1v1h-1z/,
+      );
+      expect(renderToStaticMarkup(createElement(QrCode, { url: `${page}?view=schedule` }))).toBe(html);
+      expect(renderToStaticMarkup(createElement(QrCode, { url: page }))).not.toBe(html);
+    });
+
+    it("shows the code inside the card of each layer with the setting on, and not with it off", () => {
+      const sources: readonly ContentSource[] = [
+        { type: "auto", ref: null },
+        { type: "poll", ref: "open" },
+        { type: "topic", ref: "topic" },
+        { type: "next", ref: null },
+        { type: "card", ref: null },
+        { type: "support", ref: null },
+      ];
+      for (const source of sources) {
+        const on: string = stage(source, full, true);
+        const link: string = (qrTarget(full, source) ?? "").replaceAll("&", "&amp;");
+        // The text keeps the left side. The code is the last part of the card.
+        expect(on, source.type).toMatch(/<article [^>]*><div class="ov-qr-row"><div class="ov-qr-text">/);
+        expect(on, source.type).toContain(`data-overlay-qr="${link}"><img `);
+        expect(on, source.type).toMatch(/alt=""\/><\/span><\/div><\/article><\/div>$/);
+        expect(on.match(/class="ov-qr"/g), source.type).toHaveLength(1);
+        const off: string = stage(source, full);
+        expect(off, source.type).toContain("<article");
+        expect(off, source.type).not.toContain("ov-qr");
+      }
+    });
+
+    it("shows no code for the message banner or for a layer with nothing to show", () => {
+      expect(stage({ type: "message", ref: null }, full, true)).not.toContain("ov-qr");
+      expect(stage({ type: "auto", ref: null }, scene, true)).toBe(
+        '<div class="ov-stage" data-overlay-type="auto"><div class="overlay-empty">Waiting for the next poll</div></div>',
+      );
+      expect(stage({ type: "card", ref: "deleted" }, full, true)).toBe(
+        '<div class="ov-stage" data-overlay-type="card"></div>',
+      );
+      expect(stage({ type: "topic", ref: "deleted" }, full, true)).not.toContain("ov-qr");
+      expect(stage({ type: "next", ref: null }, scene, true)).not.toContain("ov-qr");
+    });
+
+    it("shows the code on a Mash Battle card", () => {
+      const battle: OverlayPoll = poll("battle", {
+        kind: "mash",
+        mash: {
+          durationS: 30,
+          phase: "live",
+          startsAt: 0,
+          endsAt: 30_000,
+          winner: null,
+          totals: [1, 2],
+          players: 2,
+          assisted: 0,
+        },
+      });
+      const html: string = stage({ type: "poll", ref: "battle" }, { ...full, polls: [battle] }, true);
+      expect(html).toContain('data-overlay-mash="live"><div class="ov-qr-row"><div class="ov-qr-text">');
+      expect(html).toContain(`data-overlay-qr="${page}?view=polls&amp;entry=battle"`);
+    });
+  });
+
   it("shows support and message setup hints until content has been saved", () => {
     expect(stage({ type: "support", ref: null })).toContain("<span>add a link</span>");
     const link = { kind: "kofi", label: null, url: "https://ko-fi.com/host" } as const;
@@ -655,6 +795,22 @@ describe("layers in the composition", () => {
     expect(html).not.toContain('data-layer="support"');
     expect(html).not.toContain('data-layer="characters"');
     expect(html).not.toMatch(/<div class="ov-composition"><div class="ov-stage/);
+  });
+
+  it("gives each content layer its QR code setting: the poll by default, never the message banner", () => {
+    const codes = (html: string): string[] =>
+      [...html.matchAll(/data-overlay-qr="([^"]+)"/g)].map((match: RegExpMatchArray): string => match[1]);
+    expect(codes(composition(layers))).toEqual(["https://stream.example.test/@host?view=polls&amp;entry=Open+poll"]);
+    const all: OverlayLayers = {
+      ...layers,
+      items: {
+        ...layers.items,
+        poll: { ...layers.items.poll, qr: false },
+        topic: { ...layers.items.topic, qr: true },
+        message: { ...layers.items.message, qr: true },
+      },
+    };
+    expect(codes(composition(all))).toEqual(["https://stream.example.test/@host?view=topics&amp;entry=topic"]);
   });
 
   it("shows nothing for layers without a cell in the selected orientation", () => {

@@ -2,12 +2,15 @@ import { useSyncExternalStore, type ReactNode } from "react";
 import { intlLocale, t, tn } from "../../i18n";
 import { MASH_NAME, mashPhaseAt, mashWinner } from "../../lib/mash";
 import type { ContentSource } from "../../lib/overlay-layers";
+import { paths } from "../../lib/shell";
 import type { LiveSnapshot, OverlayData, OverlayPublic } from "../../types";
 import { MashBars, MashRing, MashSides, MashWinner } from "../mash/mash-parts";
 import { useMashView } from "../mash/use-mash";
 import { PollResults, PollStatus } from "../poll";
+import type { StreamerView } from "../shell/streamer-header";
 import { Avatar } from "../ui/avatar";
 import { Icon } from "../ui/icon";
+import { QrCode } from "./qr-code";
 
 export type OverlayPoll = LiveSnapshot["polls"][number];
 
@@ -17,6 +20,8 @@ export interface OverlayScene {
   handle: string;
   // Host shown in Tap at.
   host: string;
+  // The origin of the app, for the QR code links.
+  origin: string;
   overlay: Pick<OverlayPublic, "showResults" | "message" | "messageStyle">;
   polls: readonly OverlayPoll[];
   data: OverlayData;
@@ -54,7 +59,61 @@ export function overlayPoll(
   return own.find(open) ?? own[0];
 }
 
-function MashOverlay({ scene, poll }: Readonly<{ scene: OverlayScene; poll: OverlayPoll }>): ReactNode {
+type Card = OverlayData["cards"][number];
+
+// A card layer without a ref shows the first card. A deleted ref shows nothing.
+function overlayCard(source: ContentSource, cards: readonly Card[]): Card | undefined {
+  return source.ref === null ? cards[0] : cards.find((item: Card): boolean => item.id === source.ref);
+}
+
+function pageUrl(scene: OverlayScene, view?: StreamerView, entry?: string): string {
+  const url = new URL(paths.streamer(scene.handle), scene.origin);
+  if (view) url.searchParams.set("view", view);
+  if (entry) url.searchParams.set("entry", entry);
+  return url.toString();
+}
+
+/**
+ * The link of the QR code of a content layer: the public page of what the layer shows. Null when the layer shows
+ * nothing, and for the message banner, which has no page.
+ */
+export function qrTarget(scene: OverlayScene, source: ContentSource): string | null {
+  switch (source.type) {
+    case "auto":
+    case "poll": {
+      const poll: OverlayPoll | undefined = overlayPoll(source, scene.polls, scene.now);
+      return poll ? pageUrl(scene, "polls", poll.id) : null;
+    }
+    case "topic": {
+      const topic = scene.data.topics.find((item): boolean => item.id === source.ref);
+      return topic ? pageUrl(scene, "topics", topic.id) : null;
+    }
+    case "next":
+      return scene.data.next ? pageUrl(scene, "schedule") : null;
+    case "card":
+      return overlayCard(source, scene.data.cards) ? pageUrl(scene, "community") : null;
+    case "support":
+      return scene.data.support?.url ?? pageUrl(scene);
+    case "message":
+      return null;
+  }
+}
+
+/** The content of a card. With a QR code link, the text keeps the left side and the code sits at the right edge. */
+function CardBody({ qr, children }: Readonly<{ qr: string | null; children: ReactNode }>): ReactNode {
+  if (qr === null) return children;
+  return (
+    <div className="ov-qr-row">
+      <div className="ov-qr-text">{children}</div>
+      <QrCode url={qr} />
+    </div>
+  );
+}
+
+/** What each card gets. `qr` is the link of its QR code, or null for no code. */
+type CardProps = Readonly<{ scene: OverlayScene; qr: string | null }>;
+
+function MashOverlay({ scene, poll, qr }: CardProps & Readonly<{ poll: OverlayPoll }>): ReactNode {
   const view = useMashView(poll, scene.now);
   if (!view) return null;
   const shown: boolean = scene.overlay.showResults;
@@ -69,52 +128,56 @@ function MashOverlay({ scene, poll }: Readonly<{ scene: OverlayScene; poll: Over
     );
   return (
     <article className={`poll-card overlay-card mash-overlay phase-${view.current}`} data-overlay-mash={view.current}>
-      <div className="mash-ov-head">
-        <div>
-          <span className="eyebrow">
-            <Icon name="zap" size={16} />
-            {scene.name} · {MASH_NAME}
-          </span>
-          <h1>{poll.title}</h1>
+      <CardBody qr={qr}>
+        <div className="mash-ov-head">
+          <div>
+            <span className="eyebrow">
+              <Icon name="zap" size={16} />
+              {scene.name} · {MASH_NAME}
+            </span>
+            <h1>{poll.title}</h1>
+          </div>
+          {top}
         </div>
-        {top}
-      </div>
-      {shown ? (
-        <MashBars sides={poll.options} totals={view.totals} big />
-      ) : (
-        <>
-          <MashSides sides={poll.options} />
-          <p className="ov-hidden-results">{t("overlay.resultsHidden")}</p>
-        </>
-      )}
-      <p className="mash-cta">
-        <Icon name="arrow-right" size={24} />
-        {t("overlay.tapAt")}{" "}
-        <span className="mash-short">
-          {scene.host}/@{scene.handle}
-        </span>
-      </p>
+        {shown ? (
+          <MashBars sides={poll.options} totals={view.totals} big />
+        ) : (
+          <>
+            <MashSides sides={poll.options} />
+            <p className="ov-hidden-results">{t("overlay.resultsHidden")}</p>
+          </>
+        )}
+        <p className="mash-cta">
+          <Icon name="arrow-right" size={24} />
+          {t("overlay.tapAt")}{" "}
+          <span className="mash-short">
+            {scene.host}/@{scene.handle}
+          </span>
+        </p>
+      </CardBody>
     </article>
   );
 }
 
-function PollOverlay({ scene, poll }: Readonly<{ scene: OverlayScene; poll: OverlayPoll }>): ReactNode {
-  if (poll.kind === "mash" && poll.mash) return <MashOverlay scene={scene} poll={poll} />;
+function PollOverlay({ scene, poll, qr }: CardProps & Readonly<{ poll: OverlayPoll }>): ReactNode {
+  if (poll.kind === "mash" && poll.mash) return <MashOverlay scene={scene} poll={poll} qr={qr} />;
   const hiddenUntilReveal: boolean = poll.kind === "binary" && !poll.revealed;
   return (
     <article className="poll-card overlay-card" data-overlay-poll={poll.id}>
-      <span className="eyebrow">{t("overlay.livePoll", { name: scene.name })}</span>
-      <PollStatus poll={poll} now={scene.now} />
-      <h1>{poll.title}</h1>
-      {scene.overlay.showResults ? (
-        <PollResults poll={poll} now={scene.now} />
-      ) : (
-        <p className="ov-hidden-results">{t("overlay.resultsHidden")}</p>
-      )}
-      <p className="overlay-total">
-        {tn("poll.votes", poll.total)}
-        {hiddenUntilReveal && ` · ${t("overlay.notRevealed")}`}
-      </p>
+      <CardBody qr={qr}>
+        <span className="eyebrow">{t("overlay.livePoll", { name: scene.name })}</span>
+        <PollStatus poll={poll} now={scene.now} />
+        <h1>{poll.title}</h1>
+        {scene.overlay.showResults ? (
+          <PollResults poll={poll} now={scene.now} />
+        ) : (
+          <p className="ov-hidden-results">{t("overlay.resultsHidden")}</p>
+        )}
+        <p className="overlay-total">
+          {tn("poll.votes", poll.total)}
+          {hiddenUntilReveal && ` · ${t("overlay.notRevealed")}`}
+        </p>
+      </CardBody>
     </article>
   );
 }
@@ -127,7 +190,7 @@ function startsIn(startsAt: number, now: number): string {
   return t("overlay.inDays", { n: Math.floor(hours / 24) });
 }
 
-function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
+function NextStream({ scene, qr }: CardProps): ReactNode {
   const hydrated: boolean = useHydrated();
   const next = scene.data.next;
   if (!next) return null;
@@ -138,51 +201,54 @@ function NextStream({ scene }: Readonly<{ scene: OverlayScene }>): ReactNode {
     : "";
   return (
     <article className="ov-card" data-overlay-source="next">
-      <span className="eyebrow">
-        <Icon name="schedule" size={16} />
-        {t("overlay.upNext")}
-      </span>
-      <h1>{next.title}</h1>
-      <p className="ov-meta">
-        <Icon name="timer" size={24} />
-        {when}
-        {hydrated && <span className="ov-pill">{startsIn(next.startsAt, scene.now)}</span>}
-      </p>
+      <CardBody qr={qr}>
+        <span className="eyebrow">
+          <Icon name="schedule" size={16} />
+          {t("overlay.upNext")}
+        </span>
+        <h1>{next.title}</h1>
+        <p className="ov-meta">
+          <Icon name="timer" size={24} />
+          {when}
+          {hydrated && <span className="ov-pill">{startsIn(next.startsAt, scene.now)}</span>}
+        </p>
+      </CardBody>
     </article>
   );
 }
 
-function CommunityOverlay({ scene, source }: Readonly<{ scene: OverlayScene; source: ContentSource }>): ReactNode {
-  // Missing ref selects first card; deleted refs show nothing.
-  const card = source.ref === null ? scene.data.cards[0] : scene.data.cards.find((item) => item.id === source.ref);
+function CommunityOverlay({ scene, source, qr }: CardProps & Readonly<{ source: ContentSource }>): ReactNode {
+  const card: Card | undefined = overlayCard(source, scene.data.cards);
   if (!card) return null;
   let target: string = "";
   if (card.target?.startsWith("tab:")) target = `${scene.host}/@${scene.handle}`;
   else if (card.target) target = card.target.replace(/^https:\/\//, "");
   return (
     <article className="ov-card" data-overlay-source="card">
-      <span className="eyebrow">
-        <Icon name="community" size={16} />
-        {t("overlay.community", { name: scene.name })}
-      </span>
-      <h1>{card.title}</h1>
-      <p className="ov-body">{card.body}</p>
-      {card.label && (
-        <p className="ov-cta">
-          {card.label}
-          {target && ` · ${target}`}
-        </p>
-      )}
+      <CardBody qr={qr}>
+        <span className="eyebrow">
+          <Icon name="community" size={16} />
+          {t("overlay.community", { name: scene.name })}
+        </span>
+        <h1>{card.title}</h1>
+        <p className="ov-body">{card.body}</p>
+        {card.label && (
+          <p className="ov-cta">
+            {card.label}
+            {target && ` · ${target}`}
+          </p>
+        )}
+      </CardBody>
     </article>
   );
 }
 
-function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source: ContentSource }>): ReactNode {
+function SourceContent({ scene, source, qr }: CardProps & Readonly<{ source: ContentSource }>): ReactNode {
   const { data, overlay } = scene;
   if (source.type === "auto" || source.type === "poll") {
     const poll = overlayPoll(source, scene.polls, scene.now);
     return poll ? (
-      <PollOverlay scene={scene} poll={poll} />
+      <PollOverlay scene={scene} poll={poll} qr={qr} />
     ) : (
       <div className="overlay-empty">{t("overlay.waiting")}</div>
     );
@@ -192,25 +258,27 @@ function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source
     if (!topic) return null;
     return (
       <article className="ov-card" data-overlay-source="topic">
-        <span className="eyebrow">
-          <Icon name="topics" size={16} />
-          {t("overlay.topicSpotlight")}
-        </span>
-        <h1>{topic.title}</h1>
-        <p className="ov-meta">
-          <Avatar url={topic.avatar} preset={topic.avatarPreset} className="avatar-32" />
-          <span>
-            {t("overlay.suggestedBy")} <strong>{topic.author}</strong>
+        <CardBody qr={qr}>
+          <span className="eyebrow">
+            <Icon name="topics" size={16} />
+            {t("overlay.topicSpotlight")}
           </span>
-          <span className="ov-likes">
-            <Icon name="thumbs-up" size={24} />
-            {topic.likes}
-          </span>
-        </p>
+          <h1>{topic.title}</h1>
+          <p className="ov-meta">
+            <Avatar url={topic.avatar} preset={topic.avatarPreset} className="avatar-32" />
+            <span>
+              {t("overlay.suggestedBy")} <strong>{topic.author}</strong>
+            </span>
+            <span className="ov-likes">
+              <Icon name="thumbs-up" size={24} />
+              {topic.likes}
+            </span>
+          </p>
+        </CardBody>
       </article>
     );
   }
-  if (source.type === "next") return <NextStream scene={scene} />;
+  if (source.type === "next") return <NextStream scene={scene} qr={qr} />;
   if (source.type === "message")
     return (
       <article className={`ov-card ov-message style-${overlay.messageStyle}`} data-overlay-source="message">
@@ -220,23 +288,29 @@ function SourceContent({ scene, source }: Readonly<{ scene: OverlayScene; source
         </h1>
       </article>
     );
-  if (source.type === "card") return <CommunityOverlay scene={scene} source={source} />;
+  if (source.type === "card") return <CommunityOverlay scene={scene} source={source} qr={qr} />;
   const link = data.support;
   return (
     <article className="ov-card ov-support" data-overlay-source="support">
-      <h1>
-        <Icon name="heart" size={40} />
-        {t("overlay.supportStream")} <span>{link ? link.url.replace(/^https:\/\//, "") : t("overlay.addLink")}</span>
-      </h1>
+      <CardBody qr={qr}>
+        <h1>
+          <Icon name="heart" size={40} />
+          {t("overlay.supportStream")} <span>{link ? link.url.replace(/^https:\/\//, "") : t("overlay.addLink")}</span>
+        </h1>
+      </CardBody>
     </article>
   );
 }
 
-// The content of one layer in its grid cell: centred, at the full cell width.
-export function OverlayStage({ scene, source }: Readonly<{ scene: OverlayScene; source: ContentSource }>): ReactNode {
+// The content of one layer in its grid cell: centred, at the full cell width. `qr` is the QR code setting of the layer.
+export function OverlayStage({
+  scene,
+  source,
+  qr,
+}: Readonly<{ scene: OverlayScene; source: ContentSource; qr: boolean }>): ReactNode {
   return (
     <div className="ov-stage" data-overlay-type={source.type}>
-      <SourceContent scene={scene} source={source} />
+      <SourceContent scene={scene} source={source} qr={qr ? qrTarget(scene, source) : null} />
     </div>
   );
 }
