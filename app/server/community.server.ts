@@ -3,6 +3,7 @@ import type { CardIcon, CommunityCard } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { consumeMutationQuota } from "./data.server";
 import { HttpError } from "./http.server";
+import { placedLayerSql } from "./overlay-state";
 import { communityCardsSchema, type CommunityCardInput } from "./validation";
 
 interface CardRow {
@@ -41,7 +42,8 @@ function clearedCard(column: "air" | "preview"): string {
 }
 
 // Replace up to eight cards atomically. Empty restores defaults; existing IDs preserve overlay references.
-// Rewrite positions (unique, 0-7), bump overlay revision, and reload.
+// Rewrite positions (unique, 0-7), bump overlay revision, and reload. An overlay with the card layer on the grid
+// also reloads. A card layer that names a removed card shows nothing.
 export async function saveCards(env: AppEnv, viewerId: string, value: unknown): Promise<CommunityCard[] | null> {
   const result = communityCardsSchema.safeParse(value);
   if (!result.success) throw new HttpError(400, result.error.issues[0]?.message ?? "Invalid cards.");
@@ -66,10 +68,8 @@ export async function saveCards(env: AppEnv, viewerId: string, value: unknown): 
     ),
     env.DB.prepare(`UPDATE overlay_state SET air=${clearedCard("air")}, preview=${clearedCard("preview")},
       revision=revision+1, updated_at=?2
-      WHERE streamer_id=?1 AND (json_extract(air,'$.type')='card' OR json_extract(preview,'$.type')='card')`).bind(
-      page.id,
-      Date.now(),
-    ),
+      WHERE streamer_id=?1 AND (json_extract(air,'$.type')='card' OR json_extract(preview,'$.type')='card'
+        OR ${placedLayerSql("'card'")})`).bind(page.id, Date.now()),
   ]);
   return listCards(env, page.id);
 }

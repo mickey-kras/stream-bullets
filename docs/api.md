@@ -116,19 +116,29 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 
 | Endpoint | Body | Response |
 | --- | --- | --- |
-| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
+| `POST /api/overlay` | `{action: "layers", write?, orientation?, chat?: {enabled?, hideCommands?, backgroundOpacity?}, characters?: {enabled?, timeout?}, items?: {poll?, topic?, next?, message?, card?, support?}, cells?: {horizontal?, vertical?}}` | `{overlay}`. The whole new `OverlayState`, with `layers` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
 | `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
 | `GET /@handle/overlay?key&layer` | Optional `layer`: `content`, `chat`, or `characters` | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that layer alone. An unknown value shows an empty page. |
 
 - `orientation` is `horizontal` (a grid of 16 × 9 cells) or `vertical` (9 × 16 cells). A cell is 120 pixels.
-- Each orientation in `cells` holds `{chat?, characters?, content?}`. Each value is a cell rectangle `{c, r, w, h}` of whole cells.
+- Each orientation in `cells` holds `{chat?, characters?, content?, poll?, topic?, next?, message?, card?, support?}`. Each value is a cell rectangle `{c, r, w, h}` of whole cells.
   `c + w` is at most the number of columns, and `r + h` is at most the number of rows.
+- `poll`, `topic`, `next`, `message`, `card`, and `support` are the source layers. Each source layer shows one content source.
+  A source layer cell accepts `null`. Then the layer is not on the grid.
+- Each value in `items` holds the settings of one source layer: `{enabled?, ref?, backgroundOpacity?, qr?}`.
+  - `ref` is the ID of a poll, a topic, or a Community card of the page. An unknown ID returns `404`.
+    A `poll` layer with `ref: null` shows the latest active poll. A `card` layer with `ref: null` shows the first card.
+    For `next`, `message`, and `support`, `ref` must be `null`.
+  - `backgroundOpacity` has the same values as `chat.backgroundOpacity`. It applies to the card background of the layer.
+  - The API only stores `qr`. The overlay does not show a QR code.
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
   Other values return `400`. See [Message background](overlay-composition.md#message-background).
 - `content` accepts `null`. Then the content uses the full frame and its position and size settings.
-- The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for `content`.
-- After the merge, no two layers can overlap in an orientation. A content layer without a cell does not count.
+- The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for `content` and for each source layer.
+- After the merge, no two layers can overlap in an orientation. A content layer or a source layer without a cell does not count.
+- The stored layers have a limit of 1000 characters. The server stores only the source layer cells and the source layer settings that are not the defaults.
+  A change that goes above the limit returns `400`.
 - `write` is `{writer, seq}`. `writer` is a random ID of 8 to 64 letters, digits, `_` or `-`. `seq` is a positive integer.
   The server keeps the largest applied `seq` of each of the last 8 writers. It ignores a change with a `seq` that is not larger than the kept `seq` of its `writer`.
   The server then answers `200` with the current state and does not notify the overlay pages. A change without `write` always applies.
@@ -154,9 +164,11 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 - The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
 - Errors: `400` for an invalid body, a cell outside the grid, or overlapping layers, `401` without sign-in, and `403` for another origin.
   Also `404` without a streamer page, `409` when concurrent saves conflict, `423` for a frozen or suspended page, and `429` above the quota.
-- `OverlayState.layers` and `OverlayPublic.layers` are `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout}, cells: {horizontal, vertical}}`.
-  Each orientation in `cells` is `{chat, characters, content}`. `content` is a cell or `null`.
+- `OverlayState.layers` and `OverlayPublic.layers` are `{orientation, chat: {enabled, hideCommands, backgroundOpacity}, characters: {enabled, timeout}, items, cells: {horizontal, vertical}}`.
+  Each orientation in `cells` is `{chat, characters, content, poll, topic, next, message, card, support}`. `content` and each source layer value are a cell or `null`.
+  `items` holds `{enabled, ref, backgroundOpacity, qr}` for each source layer.
   Missing, unknown, or incorrect stored fields take the defaults. Reads never fail because of a stored `layers` value. Chat and characters are off by default, `hideCommands` is on, and `backgroundOpacity` is 100.
+  A source layer has no cell by default. Its defaults are `enabled: true`, `ref: null`, and `backgroundOpacity: 100`. `qr` is `true` for `poll` and `false` for the other source layers.
 - See [Overlay composition and merged chat](overlay-composition.md) for the layers, the URLs, the chat test, and the chat limits.
 
 ## Later phases

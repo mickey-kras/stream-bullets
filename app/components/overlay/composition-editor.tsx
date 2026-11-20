@@ -4,13 +4,13 @@ import { CHAT_TEST_MS, chatTestLeft } from "../../lib/chat-test";
 import { onGrid, withPlaced, withRemoved } from "../../lib/layer-geometry";
 import {
   CHAT_BACKGROUND,
+  EDITOR_LAYERS,
   GRID,
-  GRID_LAYERS,
   ORIENTATIONS,
   frameSize,
   layerPixels,
   type CellRect,
-  type GridLayer,
+  type EditorLayer,
   type OverlayLayers,
   type Orientation,
 } from "../../lib/overlay-layers";
@@ -172,7 +172,7 @@ export function CompositionEditor({
   const orientationNoteId: string = useId();
   const [background, setBackground] = useState<PreviewBackground>("checker");
   // The selected layer of the grid. It is here, not in the grid, so that other controls can read and set it.
-  const [selected, setSelected] = useState<GridLayer>("chat");
+  const [selected, setSelected] = useState<EditorLayer>("chat");
   const grid = useRef<LayoutGridHandle | null>(null);
   // The palette takes a layer that a pointer drags off the grid: the grid reads its box and sets what it shows.
   const palette = useRef<HTMLFieldSetElement | null>(null);
@@ -186,7 +186,7 @@ export function CompositionEditor({
     owner: true,
   });
   const content: CellRect | null = shown.cells[orientation].content;
-  const free: GridLayer[] = GRID_LAYERS.filter((layer: GridLayer): boolean => !onGrid(shown, orientation, layer));
+  const free: EditorLayer[] = EDITOR_LAYERS.filter((layer: EditorLayer): boolean => !onGrid(shown, orientation, layer));
   const frame = useRef<HTMLDivElement | null>(null);
   const covers: boolean = useChatOverlap(
     frame,
@@ -210,9 +210,9 @@ export function CompositionEditor({
     edit(update, when);
   };
   // The grid checks a cell before it calls `place`, so a cell that no longer fits changes nothing.
-  const place = (layer: GridLayer, rect: CellRect, when: EditTiming): void =>
+  const place = (layer: EditorLayer, rect: CellRect, when: EditTiming): void =>
     change((current: OverlayLayers) => withPlaced(current, current.orientation, layer, rect) ?? current, when);
-  const remove = (layer: GridLayer): void =>
+  const remove = (layer: EditorLayer): void =>
     change((current: OverlayLayers) => withRemoved(current, current.orientation, layer));
 
   const backgroundText: string = t("overlay.comp.chatBackgroundValue", { percent: shown.chat.backgroundOpacity });

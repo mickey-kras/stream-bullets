@@ -27,11 +27,11 @@ import {
 } from "../app/lib/layer-geometry";
 import {
   DEFAULT_LAYERS,
-  GRID_LAYERS,
+  EDITOR_LAYERS,
   MIN_CELLS,
   overlappingPair,
   type CellRect,
-  type GridLayer,
+  type EditorLayer,
   type LayerCells,
   type LayersPatch,
   type OverlayLayers,
@@ -116,6 +116,7 @@ describe("field-level patches", () => {
       orientation: "vertical",
       chat: { enabled: false, hideCommands: false, backgroundOpacity: 40 },
       characters: { enabled: true, timeout: 90 },
+      items: before.items,
       cells: {
         horizontal: { ...before.cells.horizontal, chat: cell, content: { c: 5, r: 0, w: 4, h: 2 } },
         vertical: before.cells.vertical,
@@ -274,7 +275,7 @@ describe("resize by a handle", () => {
   });
 
   it("stops at the minimum size of the layer and says so", () => {
-    for (const layer of GRID_LAYERS) {
+    for (const layer of EDITOR_LAYERS) {
       const least = MIN_CELLS[layer];
       const wide: CellRect = { c: 2, r: 2, w: 8, h: 5 };
       // The bottom-right corner goes past the top-left corner: the top-left corner stays.
@@ -409,7 +410,7 @@ describe("layer palette", () => {
   });
 
   it("finds a place that passes the placement rules for each layer", () => {
-    for (const layer of GRID_LAYERS) {
+    for (const layer of EDITOR_LAYERS) {
       const cells: LayerCells = { ...DEFAULT_LAYERS.cells.horizontal, content: { c: 5, r: 0, w: 4, h: 2 } };
       const rect: CellRect | null = firstFreeCell("horizontal", cells, layer);
       expect(rect && placeProblem("horizontal", cells, layer, rect), layer).toBeNull();
@@ -418,6 +419,7 @@ describe("layer palette", () => {
 
   it("gives no place when the grid is full", () => {
     const full: LayerCells = {
+      ...DEFAULT_LAYERS.cells.horizontal,
       chat: { c: 0, r: 0, w: 16, h: 7 },
       characters: { c: 0, r: 7, w: 16, h: 2 },
       content: null,
@@ -429,7 +431,7 @@ describe("layer palette", () => {
   });
 
   it("drops a layer at its minimum size around the pointed cell, inside the grid", () => {
-    const drops: readonly (readonly [GridLayer, Cell, CellRect])[] = [
+    const drops: readonly (readonly [EditorLayer, Cell, CellRect])[] = [
       ["content", { c: 8, r: 4 }, { c: 6, r: 3, w: 4, h: 2 }],
       ["content", { c: 0, r: 0 }, { c: 0, r: 0, w: 4, h: 2 }],
       ["content", { c: 15, r: 8 }, { c: 12, r: 7, w: 4, h: 2 }],
@@ -457,12 +459,17 @@ describe("layers off the grid", () => {
 
   it("draws a chat or characters layer only while it is on, and content only with a cell", () => {
     expect(gridCells(off(), "horizontal")).toEqual({ chat: null, characters: null, content: null });
-    expect(GRID_LAYERS.filter((layer: GridLayer): boolean => onGrid(off(), "horizontal", layer))).toEqual([]);
+    expect(EDITOR_LAYERS.filter((layer: EditorLayer): boolean => onGrid(off(), "horizontal", layer))).toEqual([]);
     const on: OverlayLayers = withCell(allOn(), "horizontal", "content", cell);
-    expect(gridCells(on, "horizontal")).toEqual({ ...DEFAULT_LAYERS.cells.horizontal, content: cell });
-    expect(GRID_LAYERS.every((layer: GridLayer): boolean => onGrid(on, "horizontal", layer))).toBe(true);
+    const { chat, characters } = DEFAULT_LAYERS.cells.horizontal;
+    expect(gridCells(on, "horizontal")).toEqual({ chat, characters, content: cell });
+    expect(EDITOR_LAYERS.every((layer: EditorLayer): boolean => onGrid(on, "horizontal", layer))).toBe(true);
     // The content has a cell only in the horizontal layout. The switches apply to both orientations.
-    expect(gridCells(on, "vertical")).toEqual({ ...DEFAULT_LAYERS.cells.vertical, content: null });
+    expect(gridCells(on, "vertical")).toEqual({
+      chat: DEFAULT_LAYERS.cells.vertical.chat,
+      characters: DEFAULT_LAYERS.cells.vertical.characters,
+      content: null,
+    });
     expect(onGrid(on, "vertical", "content")).toBe(false);
   });
 

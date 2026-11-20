@@ -14,12 +14,16 @@ import { chatTestLeft } from "../../lib/chat-test";
 import type { ChatView } from "../../lib/fading-rows";
 import {
   CELL_PX,
+  cellPixels,
   frameSize,
   layerPixels,
+  placedContent,
+  type GridLayer,
   type LayerRect,
   type OverlayLayer,
   type OverlayLayers,
   type Orientation,
+  type PlacedContent,
 } from "../../lib/overlay-layers";
 import type { OverlaySourceRef } from "../../types";
 import type { ActivityFeed } from "./activity-feed";
@@ -78,12 +82,12 @@ export function usesActivityFeed(layers: OverlayLayers, only: OverlayLayer | nul
 
 /**
  * Whether a composition (all layers, `only` null) lays out in the design canvas of the selected orientation, like
- * the editor preview. It does when it shows a feed layer or the content has a cell: those layers sit at cells, so
- * the content must use the same space. Otherwise the content keeps its responsive layout, so existing OBS scenes do
- * not change.
+ * the editor preview. It does when it shows a feed layer or a content layer, or the content has a cell: those layers
+ * sit at cells, so the content must use the same space. Otherwise the content keeps its responsive layout, so
+ * existing OBS scenes do not change.
  */
 export function usesDesignCanvas(layers: OverlayLayers, only: OverlayLayer | null): boolean {
-  const content: boolean = layers.cells[layers.orientation].content !== null;
+  const content: boolean = layers.cells[layers.orientation].content !== null || placedContent(layers).length > 0;
   return only === null && (layers.chat.enabled || (CHARACTERS_READY && layers.characters.enabled) || content);
 }
 
@@ -93,7 +97,7 @@ export const LAYER_CLASS = "ov-layer";
 export const CONTENT_SELECTOR = ".ov-composition > .ov-stage";
 
 /** The box of one layer in a composition. */
-export function layerSelector(layer: OverlayLayer): string {
+export function layerSelector(layer: GridLayer): string {
   return `.ov-composition > .${LAYER_CLASS}[data-layer="${layer}"]`;
 }
 
@@ -141,18 +145,24 @@ function percent(value: number, total: number): string {
  * viewport and the content scales to fit inside it ("contain"), anchored to the bottom-right corner: the OBS source
  * size may not match the layer's aspect ratio, and chat grows from the bottom (newest row last), so the newest rows
  * stay visible and in place. The free space is left and above.
+ *
+ * `backgroundOpacity` sets `--ov-bg`, the card background opacity from 0 to 1. wasteland.css scales only the card
+ * background of a content layer with it.
  */
 function LayerBox({
   layer,
   rect,
   frame,
   alone,
+  backgroundOpacity,
   children,
 }: Readonly<{
-  layer: OverlayLayer;
+  layer: GridLayer;
   rect: LayerRect;
   frame: { w: number; h: number };
   alone: boolean;
+  /** Percent of the card background that shows (LAYER_BACKGROUND). */
+  backgroundOpacity?: number;
   children: ReactNode;
 }>): ReactNode {
   const box = useRef<HTMLDivElement | null>(null);
@@ -165,8 +175,12 @@ function LayerBox({
         width: percent(rect.w, frame.w),
         height: percent(rect.h, frame.h),
       };
+  const style: CSSProperties =
+    backgroundOpacity === undefined
+      ? place
+      : ({ ...place, "--ov-bg": String(backgroundOpacity / 100) } as CSSProperties);
   return (
-    <div className={LAYER_CLASS} data-layer={layer} data-alone={alone || undefined} style={place} ref={box}>
+    <div className={LAYER_CLASS} data-layer={layer} data-alone={alone || undefined} style={style} ref={box}>
       <div className="ov-layer-canvas" style={{ width: rect.w, height: rect.h }}>
         {children}
       </div>
@@ -220,6 +234,26 @@ function ContentCell({ scene, source }: Readonly<{ scene: OverlayScene; source: 
       <OverlayStage scene={scene} source={source} fit />
     </div>
   );
+}
+
+/** The content layers on stream: each layer shows its own source in its cell. */
+function ContentLayers({
+  scene,
+  layers,
+  frame,
+}: Readonly<{ scene: OverlayScene; layers: OverlayLayers; frame: { w: number; h: number } }>): ReactNode {
+  return placedContent(layers).map((placed: PlacedContent) => (
+    <LayerBox
+      key={placed.layer}
+      layer={placed.layer}
+      rect={cellPixels(placed.rect)}
+      frame={frame}
+      alone={false}
+      backgroundOpacity={placed.item.backgroundOpacity}
+    >
+      <ContentCell scene={scene} source={placed.source} />
+    </LayerBox>
+  ));
 }
 
 /**
@@ -287,8 +321,9 @@ const ChatSlot = memo(function ChatSlot({
 });
 
 /**
- * The overlay: characters at the bottom, then the on-air content, then chat on top. OBS and the editor preview
- * render this same component. `only` renders one layer alone for a per-layer source; null renders them all.
+ * The overlay: characters at the bottom, then the on-air content and the content layers, then chat on top. OBS and
+ * the editor preview render this same component. `only` renders one layer alone for a per-layer source; null renders
+ * them all. The content layers show only in the whole composition.
  * `testUntil` is the server time when the chat test ends. `charactersFeed` replaces `feed` for the characters: the
  * editor preview plays sample chat but shows the live playground.
  */
@@ -334,6 +369,7 @@ export function OverlayComposition({
         ) : (
           <OverlayStage scene={scene} source={source} />
         ))}
+      {only === null && <ContentLayers scene={scene} layers={layers} frame={frame} />}
       {shows("chat") && layers.chat.enabled && chat && (
         <LayerBox layer="chat" rect={chat} frame={frame} alone={alone}>
           <ChatSlot

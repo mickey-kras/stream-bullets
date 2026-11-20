@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { redirect, useLoaderData, useRevalidator, useSearchParams, type LoaderFunctionArgs } from "react-router";
 import { appContext } from "../env";
 import { t } from "../i18n";
+import { contentSources } from "../lib/overlay-layers";
 import { paths } from "../lib/shell";
 import { requestViewer } from "../lib/shell.server";
 import { signInProvider } from "../server/api/account";
@@ -19,7 +20,7 @@ import { OverlayControl } from "../components/overlay/overlay-control";
 import type { OverlayPoll } from "../components/overlay/overlay-stage";
 import { SiteHeader } from "../components/shell/site-header";
 import { useRevalidateAt } from "../components/use-clock";
-import type { LiveSnapshot } from "../types";
+import type { LiveSnapshot, OverlaySourceRef } from "../types";
 import "../components/overlay/wasteland/wasteland.css";
 import "../components/overlay/composition.css";
 
@@ -34,11 +35,12 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
   const streamer = await getOwnStreamer(app.env, viewer.id);
   if (!streamer) throw new Response("Page not found.", { status: 404 });
   const state = await getOverlayState(app.env, streamer.id);
-  // Load on-air and preview entries even outside the newest 50.
+  // Load on-air, preview and content layer entries even outside the newest 50.
+  const sources: OverlaySourceRef[] = [state.air, state.preview, ...contentSources(state.layers)];
   const refs = new Set<string | null>([null]);
-  for (const source of [state.air, state.preview]) if (source.type === "poll") refs.add(source.ref);
+  for (const source of sources) if (source.type === "poll") refs.add(source.ref);
   const [data, ...snapshots] = await Promise.all([
-    getOverlayData(app.env, streamer.id, sourceTopics(state.air, state.preview)),
+    getOverlayData(app.env, streamer.id, sourceTopics(...sources)),
     ...[...refs].map((ref: string | null) => getOverlaySnapshot(app.env, streamer.id, ref)),
   ]);
   const polls: OverlayPoll[] = [];

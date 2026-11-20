@@ -5,7 +5,9 @@ import { HttpError, getOrigin, json, readJson } from "../http.server";
 import { notifyMash, notifyOverlay, notifyOverlayKey, notifyPlayground } from "../live.server";
 import { mashStartSchema, runMashAction, type MashAction } from "../mash.server";
 import { callIngest } from "../ingest-call.server";
+import { contentSources } from "../../lib/overlay-layers";
 import { playgroundControlSchema, playgroundStatusSchema } from "../../lib/playground/protocol";
+import type { OverlaySourceRef } from "../../types";
 import { overlayKeySchema, regenerateOverlayKey } from "../overlay-key.server";
 import { getOverlayData, getOverlayState, overlayActionSchema, sourceTopics, updateOverlay } from "../overlay.server";
 import { get, requireViewer, write, type ApiRoute } from "./router";
@@ -26,7 +28,8 @@ export const liveRoutes: ApiRoute[] = [
     const streamer = await getOwnStreamer(env, owner.id);
     if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
     const overlay = await getOverlayState(env, streamer.id);
-    const data = await getOverlayData(env, streamer.id, sourceTopics(overlay.air, overlay.preview));
+    const sources: OverlaySourceRef[] = [overlay.air, overlay.preview, ...contentSources(overlay.layers)];
+    const data = await getOverlayData(env, streamer.id, sourceTopics(...sources));
     return json({ overlay, data, handle: streamer.handle });
   }),
   // POST /api/overlay/key {} → {url}: a new overlay key, shown this once. The old key stops working.

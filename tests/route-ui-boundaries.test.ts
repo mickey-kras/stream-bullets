@@ -7,6 +7,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { appContext, type AppEnv } from "../app/env";
 import type { Entry, LiveSnapshot, StepUpStatus, Streamer, StreamEvent, Viewer } from "../app/types";
+import { DEFAULT_LAYERS, type OverlayLayers } from "../app/lib/overlay-layers";
 import { DEFAULT_OVERLAY } from "../app/server/overlay-state";
 import * as auth from "../app/server/auth.server";
 import * as access from "../app/server/access.server";
@@ -537,6 +538,75 @@ describe("overlay loader contracts", (): void => {
     expect(result.override).toBe("override");
     expect(result.initial.polls.map((poll) => poll.id)).toEqual(["override"]);
     expect(data.getOverlaySnapshot).toHaveBeenLastCalledWith(expect.anything(), "page", "override");
+  });
+
+  it("loads the polls and the topic of the content layers on stream", async (): Promise<void> => {
+    const cell = (r: number): { c: number; r: number; w: number; h: number } => ({ c: 6, r, w: 4, h: 2 });
+    const layers: OverlayLayers = {
+      ...DEFAULT_LAYERS,
+      items: {
+        ...DEFAULT_LAYERS.items,
+        topic: { ...DEFAULT_LAYERS.items.topic, ref: "layer-topic" },
+        card: { ...DEFAULT_LAYERS.items.card, ref: "layer-card" },
+      },
+      cells: {
+        ...DEFAULT_LAYERS.cells,
+        horizontal: { ...DEFAULT_LAYERS.cells.horizontal, poll: cell(0), topic: cell(2), card: cell(4) },
+      },
+    };
+    const picked: OverlayLayers = {
+      ...layers,
+      items: { ...layers.items, poll: { ...layers.items.poll, ref: "layer-poll" } },
+    };
+    vi.mocked(data.getOverlaySnapshot).mockImplementation((_env, _id, ref) =>
+      Promise.resolve({ ...initial, polls: [{ ...entry, id: ref ?? "auto", kind: "choice", byOwner: true }] }),
+    );
+    const refs = (): (string | null)[] => vi.mocked(data.getOverlaySnapshot).mock.calls.map((call) => call[2]);
+    // A poll layer without a ref uses the automatic poll: the overlay page already loads it.
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({
+      ...DEFAULT_OVERLAY,
+      air: { type: "topic", ref: "air-topic" },
+      layers,
+    });
+    let result = await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
+    expect(refs()).toEqual([null]);
+    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["auto"]);
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", ["air-topic", "layer-topic"]);
+    // The on-air poll stays first. A poll override loads the automatic poll for the layer too.
+    vi.mocked(data.getOverlaySnapshot).mockClear();
+    result = await overlayRoute.loader(args("/@zed/overlay?poll=override", { handle: "@zed" }));
+    expect(refs()).toEqual(["override", null]);
+    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["override", "auto"]);
+    vi.mocked(data.getOverlaySnapshot).mockClear();
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({
+      ...DEFAULT_OVERLAY,
+      air: { type: "poll", ref: "air" },
+      preview: { type: "topic", ref: "preview-topic" },
+      layers: picked,
+    });
+    result = await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
+    expect(refs()).toEqual(["air", "layer-poll"]);
+    expect(result.initial.polls.map((poll) => poll.id)).toEqual(["air", "layer-poll"]);
+    // The control page loads the same entries, with the preview.
+    signedIn();
+    vi.mocked(data.getOwnStreamer).mockResolvedValue(streamer);
+    vi.mocked(data.getOverlaySnapshot).mockClear();
+    const control = await controlRoute.loader(args("/overlay-control"));
+    expect(refs()).toEqual([null, "air", "layer-poll"]);
+    expect(control.initial.polls.map((poll) => poll.id)).toEqual(["auto", "air", "layer-poll"]);
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", [
+      "preview-topic",
+      "layer-topic",
+    ]);
+    // A content layer in the other orientation loads nothing.
+    vi.mocked(data.getOverlaySnapshot).mockClear();
+    vi.mocked(overlay.getOverlayState).mockResolvedValue({
+      ...DEFAULT_OVERLAY,
+      layers: { ...picked, orientation: "vertical" },
+    });
+    await overlayRoute.loader(args("/@zed/overlay", { handle: "@zed" }));
+    expect(refs()).toEqual([null]);
+    expect(overlay.getOverlayData).toHaveBeenLastCalledWith(expect.anything(), "page", []);
   });
 
   it("redirects signed-out control users and returns 404 to users without a page", async (): Promise<void> => {

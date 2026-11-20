@@ -60,8 +60,24 @@
 .ov-layer[data-layer="characters"] {
   z-index: 1;
 }
-.ov-layer[data-layer="content"] {
+/* The content layer and the layers of one content source each. */
+.ov-layer:not([data-layer="characters"], [data-layer="chat"]) {
   z-index: 2;
+}
+/* A layer of one content source: --ov-bg (0 to 1, overlay-composition.tsx) scales the card background fill, never
+   the text. The border and the shadow of the card stay. */
+.ov-layer:not([data-layer="content"]) {
+  --ov-card: color-mix(in srgb, var(--c-0a2025ed) calc(var(--ov-bg, 1) * 100%), transparent);
+}
+.ov-layer:not([data-layer="content"]) :is(.ov-card, .overlay-card) {
+  background: var(--ov-card);
+}
+.ov-layer:not([data-layer="content"]) .ov-message.style-hype {
+  background: linear-gradient(
+    110deg,
+    var(--ov-card),
+    color-mix(in srgb, var(--live-glow) calc(var(--ov-bg, 1) * 100%), transparent)
+  );
 }
 .ov-layer[data-layer="chat"] {
   z-index: 3;

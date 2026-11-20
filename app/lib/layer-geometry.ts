@@ -1,6 +1,6 @@
 import {
+  EDITOR_LAYERS,
   GRID,
-  GRID_LAYERS,
   MIN_CELLS,
   ORIENTATIONS,
   cellFits,
@@ -8,7 +8,7 @@ import {
   copyCell,
   type CellRect,
   type CellsPatch,
-  type GridLayer,
+  type EditorLayer,
   type LayerCells,
   type LayersPatch,
   type Orientation,
@@ -49,14 +49,14 @@ function sameCell(a: CellRect | null | undefined, b: CellRect | null | undefined
   return a.c === b.c && a.r === b.r && a.w === b.w && a.h === b.h;
 }
 
-function setCell(cells: CellsPatch, layer: GridLayer, rect: CellRect | null): void {
+function setCell(cells: CellsPatch, layer: EditorLayer, rect: CellRect | null): void {
   if (layer === "content") cells.content = rect ? copyCell(rect) : null;
   else if (rect) cells[layer] = copyCell(rect);
 }
 
 function copyCells(cells: CellsPatch): CellsPatch {
   const copy: CellsPatch = {};
-  for (const layer of GRID_LAYERS) {
+  for (const layer of EDITOR_LAYERS) {
     const rect: CellRect | null | undefined = cells[layer];
     if (rect !== undefined) setCell(copy, layer, rect);
   }
@@ -91,7 +91,7 @@ export function diffLayers(before: OverlayLayers, after: OverlayLayers): LayersP
     patch.characters = { ...patch.characters, timeout: after.characters.timeout };
   for (const orientation of ORIENTATIONS) {
     const layout: CellsPatch = {};
-    for (const layer of GRID_LAYERS) {
+    for (const layer of EDITOR_LAYERS) {
       const rect: CellRect | null = after.cells[orientation][layer];
       if (!sameCell(before.cells[orientation][layer], rect)) setCell(layout, layer, rect);
     }
@@ -114,7 +114,7 @@ export function mergePatches(base: LayersPatch, next: LayersPatch): LayersPatch 
 }
 
 function removeSentCells(layout: CellsPatch, sent: CellsPatch): void {
-  for (const layer of GRID_LAYERS)
+  for (const layer of EDITOR_LAYERS)
     if (layout[layer] !== undefined && sent[layer] !== undefined && sameCell(layout[layer], sent[layer]))
       delete layout[layer];
 }
@@ -159,7 +159,7 @@ export function layersAction(patch: LayersPatch, write: LayersWrite): LayersActi
 export function withCell(
   layers: OverlayLayers,
   orientation: Orientation,
-  layer: GridLayer,
+  layer: EditorLayer,
   rect: CellRect | null,
 ): OverlayLayers {
   const cells: LayerCells = { ...layers.cells[orientation] };
@@ -189,13 +189,13 @@ export function moveCell(orientation: Orientation, rect: CellRect, grab: Cell, a
 }
 
 /** The cells the layout grid draws. A layer that is not on the grid has null. */
-export type GridCells = Readonly<Record<GridLayer, CellRect | null>>;
+export type GridCells = Readonly<Record<EditorLayer, CellRect | null>>;
 
 /** The layers that leave the grid by their `enabled` setting. Their cells stay stored. */
 const SWITCHED_LAYERS = ["chat", "characters"] as const;
 
 /** True when the grid draws `layer`: a chat or characters layer that is on, or content with a cell. */
-export function onGrid(layers: OverlayLayers, orientation: Orientation, layer: GridLayer): boolean {
+export function onGrid(layers: OverlayLayers, orientation: Orientation, layer: EditorLayer): boolean {
   return layer === "content" ? layers.cells[orientation].content !== null : layers[layer].enabled;
 }
 
@@ -209,20 +209,20 @@ export function gridCells(layers: OverlayLayers, orientation: Orientation): Grid
   };
 }
 
-function withEnabled(layers: OverlayLayers, layer: GridLayer, enabled: boolean): OverlayLayers {
+function withEnabled(layers: OverlayLayers, layer: EditorLayer, enabled: boolean): OverlayLayers {
   if (layer === "chat") return { ...layers, chat: { ...layers.chat, enabled } };
   if (layer === "characters") return { ...layers, characters: { ...layers.characters, enabled } };
   return layers;
 }
 
 /** `layers` with `layer` off the grid. Content loses its cell. Chat and characters go off and keep their cells. */
-export function withRemoved(layers: OverlayLayers, orientation: Orientation, layer: GridLayer): OverlayLayers {
+export function withRemoved(layers: OverlayLayers, orientation: Orientation, layer: EditorLayer): OverlayLayers {
   return layer === "content" ? withCell(layers, orientation, "content", null) : withEnabled(layers, layer, false);
 }
 
 /** The placed layer at a cell, or null for an empty cell. */
-export function layerAt(cells: GridCells, cell: Cell): GridLayer | null {
-  for (const layer of GRID_LAYERS) {
+export function layerAt(cells: GridCells, cell: Cell): EditorLayer | null {
+  for (const layer of EDITOR_LAYERS) {
     const rect: CellRect | null = cells[layer];
     if (rect && cell.c >= rect.c && cell.c < rect.c + rect.w && cell.r >= rect.r && cell.r < rect.r + rect.h)
       return layer;
@@ -232,9 +232,9 @@ export function layerAt(cells: GridCells, cell: Cell): GridLayer | null {
 
 export type PlaceProblem =
   | { kind: "outside" }
-  | { kind: "overlap"; other: GridLayer }
+  | { kind: "overlap"; other: EditorLayer }
   | { kind: "small" }
-  | { kind: "noRoom"; other: GridLayer };
+  | { kind: "noRoom"; other: EditorLayer };
 
 /**
  * Why `rect` cannot be the cell of `layer` in `orientation` (it leaves the grid, touches another layer or is below
@@ -243,12 +243,12 @@ export type PlaceProblem =
 export function placeProblem(
   orientation: Orientation,
   cells: GridCells,
-  layer: GridLayer,
+  layer: EditorLayer,
   rect: CellRect,
 ): PlaceProblem | null {
   const { cols, rows } = GRID[orientation];
   if (rect.c < 0 || rect.r < 0 || rect.c + rect.w > cols || rect.r + rect.h > rows) return { kind: "outside" };
-  for (const other of GRID_LAYERS) {
+  for (const other of EDITOR_LAYERS) {
     const place: CellRect | null = cells[other];
     if (other !== layer && place && cellsOverlap(rect, place)) return { kind: "overlap", other };
   }
@@ -306,7 +306,7 @@ function resizeSpan(start: number, size: number, side: Side, to: number, least: 
  */
 export function resizeCell(
   orientation: Orientation,
-  layer: GridLayer,
+  layer: EditorLayer,
   rect: CellRect,
   handle: ResizeHandle,
   to: Cell,
@@ -320,7 +320,7 @@ export function resizeCell(
 }
 
 /** `rect` with its bottom-right corner moved by `step` cells: the keyboard resize. */
-export function growCell(orientation: Orientation, layer: GridLayer, rect: CellRect, step: Cell): Resize {
+export function growCell(orientation: Orientation, layer: EditorLayer, rect: CellRect, step: Cell): Resize {
   return resizeCell(orientation, layer, rect, "se", { c: rect.c + rect.w + step.c, r: rect.r + rect.h + step.r });
 }
 
@@ -359,7 +359,7 @@ export function handleAt(rect: CellRect, point: GridPoint, reach: GridPoint): Re
 }
 
 /** The minimum-size cell of `layer` with its middle at the cell `at`, moved inside the grid: a drop from the palette. */
-export function dropCell(orientation: Orientation, layer: GridLayer, at: Cell): CellRect {
+export function dropCell(orientation: Orientation, layer: EditorLayer, at: Cell): CellRect {
   const { w, h } = MIN_CELLS[layer];
   return moveCell(orientation, { c: 0, r: 0, w, h }, { c: Math.floor(w / 2), r: Math.floor(h / 2) }, at);
 }
@@ -371,7 +371,7 @@ export function dropCell(orientation: Orientation, layer: GridLayer, at: Cell): 
 export function firstFreeCell(
   orientation: Orientation,
   cells: GridCells,
-  layer: GridLayer,
+  layer: EditorLayer,
   size: Readonly<{ w: number; h: number }> = MIN_CELLS[layer],
 ): CellRect | null {
   const { cols, rows } = GRID[orientation];
@@ -385,10 +385,10 @@ export function firstFreeCell(
 }
 
 /** The stored cells after a placement, or the layer off the grid that has no free place for its stored cell. */
-type Parked = { cells: LayerCells; stuck: null } | { cells: null; stuck: GridLayer };
+type Parked = { cells: LayerCells; stuck: null } | { cells: null; stuck: EditorLayer };
 
 // Stored cells never overlap, also the cell of a layer that is off. So such a cell moves away from a new cell.
-function parkedCells(orientation: Orientation, layers: OverlayLayers, layer: GridLayer, rect: CellRect): Parked {
+function parkedCells(orientation: Orientation, layers: OverlayLayers, layer: EditorLayer, rect: CellRect): Parked {
   const cells: LayerCells = { ...layers.cells[orientation] };
   if (layer === "content") cells.content = rect;
   else cells[layer] = rect;
@@ -410,7 +410,7 @@ function parkedCells(orientation: Orientation, layers: OverlayLayers, layer: Gri
 export function layoutProblem(
   layers: OverlayLayers,
   orientation: Orientation,
-  layer: GridLayer,
+  layer: EditorLayer,
   rect: CellRect,
 ): PlaceProblem | null {
   const problem: PlaceProblem | null = placeProblem(orientation, gridCells(layers, orientation), layer, rect);
@@ -426,7 +426,7 @@ export function layoutProblem(
 export function withPlaced(
   layers: OverlayLayers,
   orientation: Orientation,
-  layer: GridLayer,
+  layer: EditorLayer,
   rect: CellRect,
 ): OverlayLayers | null {
   if (placeProblem(orientation, gridCells(layers, orientation), layer, rect) !== null) return null;

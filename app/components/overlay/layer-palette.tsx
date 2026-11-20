@@ -9,7 +9,7 @@ import {
   type RefObject,
 } from "react";
 import { t } from "../../i18n";
-import type { GridLayer } from "../../lib/overlay-layers";
+import type { EditorLayer } from "../../lib/overlay-layers";
 import { LAYER_NAMES, type LayoutGridHandle, type RemoveDrop } from "./layout-grid";
 
 /** A press that moves this many pixels is a drag, not a click. */
@@ -29,7 +29,7 @@ function PaletteChip({
   layer,
   grid,
   hintId,
-}: Readonly<{ layer: GridLayer; grid: RefObject<LayoutGridHandle | null>; hintId: string }>): ReactNode {
+}: Readonly<{ layer: EditorLayer; grid: RefObject<LayoutGridHandle | null>; hintId: string }>): ReactNode {
   // Where the press started. Null: no press.
   const from = useRef<Point | null>(null);
   // How far the chip is from its place during a drag. Null: no drag.
@@ -106,7 +106,7 @@ export function LayerPalette({
   ref,
 }: Readonly<{
   /** The layers that are not on the grid in the selected orientation. */
-  free: readonly GridLayer[];
+  free: readonly EditorLayer[];
   grid: RefObject<LayoutGridHandle | null>;
   /** A pointer carries a placed layer ("ready"), or holds it over the palette ("over"). Null: no such drag. */
   drop: RemoveDrop | null;
@@ -120,7 +120,7 @@ export function LayerPalette({
         {free.length > 0 ? (
           <>
             <div className="ov-palette-chips">
-              {free.map((layer: GridLayer) => (
+              {free.map((layer: EditorLayer) => (
                 <PaletteChip key={layer} layer={layer} grid={grid} hintId={hintId} />
               ))}
             </div>
