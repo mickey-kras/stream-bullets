@@ -53,7 +53,7 @@ See [Authentication setup](docs/auth-setup.md) for production sign-in and admini
 - Administrators manage ideas. Signed-in users submit improvements and bugs. Everyone can vote. **Suggest an improvement** opens the board.
 - The board uses no personal profile slot and survives administrator deletion.
 - UI supports English, Spanish, Brazilian Portuguese, German, Polish, Ukrainian, Russian, Japanese, Simplified Chinese, French, and Hindi.
-- Locale priority: account, `sb_locale` cookie, `Accept-Language`, English. The footer and account menu open language selection.
+- Locale priority: account, `sb_locale` cookie, `Accept-Language`, English. The header globe button, footer, and account menu open language selection.
 - Add message IDs to all 11 `app/i18n/` catalogs. `tests/i18n.test.ts` checks IDs, plural forms, and `{placeholder}` values.
 - User content keeps its language. Legal text remains English with translated notices of its legal authority.
 - **Accessibility & display** controls colour-vision palettes, contrast, text size, font, link underlines, and motion.

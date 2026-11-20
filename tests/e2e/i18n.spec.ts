@@ -46,12 +46,52 @@ test("the language switcher saves the choice and reloads in it", async ({ page, 
   await expect(page.locator("html")).toHaveAttribute("lang", "ru");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   expect((await context.cookies()).find((cookie) => cookie.name === "sb_locale")?.value).toBe("ru");
-  await expect(page.getByRole("link", { name: "Язык: Русский" })).toBeFocused();
+  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Язык: Русский" })).toBeFocused();
   await page.getByRole("contentinfo").getByRole("link", { name: "Язык: Русский" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "English" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.getByRole("link", { name: "Language: English" })).toBeFocused();
+  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Language: English" })).toBeFocused();
 });
+
+for (const width of [1280, 390, 320]) {
+  test(`the header language button needs no menu and works by keyboard at ${width}px`, async ({ browser }) => {
+    const context = await browser.newContext({ baseURL: origin, viewport: { width, height: 844 } });
+    const page = await newPage(context);
+    for (const path of ["/@test_host", "/streamers"]) {
+      await page.goto(path);
+      const button = page.locator(".site-header").getByRole("button", { name: "Language: English" });
+      await expect(button).toBeVisible();
+      await expect(button).toBeInViewport({ ratio: 1 });
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      const box = await button.boundingBox();
+      expect(box?.width).toBeGreaterThanOrEqual(44);
+      expect(box?.height).toBeGreaterThanOrEqual(44);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    }
+    const button = page.locator(".site-header").getByRole("button", { name: "Language: English" });
+    await button.focus();
+    await page.keyboard.press("Enter");
+    const dialog = page.getByRole("dialog", { name: "Language" });
+    await expect(dialog.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(button).toBeFocused();
+    await page.keyboard.press("Enter");
+    await dialog.getByRole("button", { name: "Русский" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    const russian = page.locator(".site-header").getByRole("button", { name: "Язык: Русский" });
+    await expect(russian).toBeFocused();
+    expect((await context.cookies()).find((cookie) => cookie.name === "sb_locale")?.value).toBe("ru");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    await expect(russian).toBeVisible();
+    await page.goto("/@test_host");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    await expect(russian).toBeInViewport({ ratio: 1 });
+    await close(context);
+  });
+}
 
 test("a signed-in choice is saved to the account and wins over the cookie", async ({ browser }) => {
   const viewer = await signedIn(browser, "prefsviewer", clientIp("i18n", 180));
@@ -130,9 +170,9 @@ test("streamer pages carry JSON-LD for search engines and agents", async ({ page
   );
   expect(blocks).toContainEqual(expect.objectContaining({ "@type": "Person", alternateName: "@test_host" }));
   await page.goto("/");
-  const site = JSON.parse(
-    (await page.locator('script[type="application/ld+json"]').first().textContent()) ?? "{}",
-  ) as { "@graph": { "@type": string }[] };
+  const site = JSON.parse((await page.locator('script[type="application/ld+json"]').first().textContent()) ?? "{}") as {
+    "@graph": { "@type": string }[];
+  };
   expect(site["@graph"].map((node: { "@type": string }) => node["@type"])).toEqual(["WebSite", "Organization"]);
 });
 
@@ -294,7 +334,9 @@ for (const locale of ["en", "de", "es", "fr", "pl", "pt-BR", "ru", "uk", "hi", "
     const page = await newPage(context);
     await page.goto("/@streambullets?view=about");
     const about = page.locator('.streamer-header nav a[aria-current="page"]');
-    const catalog: Record<string, string> = JSON.parse(readFileSync(new URL(`../../app/i18n/${locale}.json`, import.meta.url), "utf8")) as Record<string, string>;
+    const catalog: Record<string, string> = JSON.parse(
+      readFileSync(new URL(`../../app/i18n/${locale}.json`, import.meta.url), "utf8"),
+    ) as Record<string, string>;
     await expect(page.locator("html")).toHaveAttribute("lang", locale);
     await expect(about.locator(".nav-label")).toHaveText(catalog["ideas.aboutTab"]);
     expect(await phoneProblems(page)).toEqual([]);

@@ -23,10 +23,13 @@ export function dialogHref(
   return `${location.pathname}${query}${location.hash}`;
 }
 
+// The control that receives focus after a language change: the account avatar, header button or footer link.
+export type LanguageOpener = "account" | "header" | "footer";
+
 // Mark in-app dialogs so closure navigates back.
 export interface DialogState {
   dialogFrom?: string;
-  languageOpener?: "account";
+  languageOpener?: LanguageOpener;
 }
 
 // Preserve Back navigation: app-opened dialogs pop history; direct dialog URLs use replacement.

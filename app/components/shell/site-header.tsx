@@ -5,6 +5,7 @@ import { paths, useShell, type ShellData } from "../../lib/shell";
 import { Icon } from "../ui/icon";
 import { AccountMenu } from "./account-menu";
 import { useFitHeader } from "./fit-header";
+import { HeaderLanguage } from "./header-language";
 
 // Home link uses the wordmark, or icon on phones.
 export function SiteLogo(): ReactNode {
@@ -45,6 +46,7 @@ export function SiteHeader(): ReactNode {
         )}
       </nav>
       <div className="header-end">
+        <HeaderLanguage />
         <AccountMenu />
       </div>
     </header>
