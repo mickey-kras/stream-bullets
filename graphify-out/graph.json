@@ -29335,6 +29335,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_root_errorboundary",
+      "source_file": "app/root.tsx",
+      "source_location": "L136",
+      "target": "app_components_account_account_dialogs_accountdialogs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_root_layout",
       "source_file": "app/root.tsx",
       "source_location": "L62",
@@ -50493,7 +50505,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L106",
+      "source_location": "L119",
       "target": "tests_e2e_i18n_spec_inlanguage",
       "weight": 1.0
     },
@@ -50505,7 +50517,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L324",
+      "source_location": "L337",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -50517,7 +50529,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L325",
+      "source_location": "L338",
       "target": "tests_e2e_i18n_spec_shot",
       "weight": 1.0
     },
@@ -181927,7 +181939,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L180",
+      "source_location": "L193",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -181938,7 +181950,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L215",
+      "source_location": "L228",
       "target": "tests_e2e_i18n_spec_phonescreen",
       "weight": 1.0
     },
@@ -181949,7 +181961,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L222",
+      "source_location": "L235",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -181960,7 +181972,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L225",
+      "source_location": "L238",
       "target": "tests_e2e_i18n_spec_phonescreens",
       "weight": 1.0
     },
@@ -193591,7 +193603,7 @@
       "relation": "indirect_call",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L281",
+      "source_location": "L294",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -194161,10 +194173,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "e2eeca9f7b53d8b1ab9084740ad719c5163dbc5a3a35aa63772c10e8c712e8d5",
+    "content_sha256": "129c4a46925704f8889594479654a2a74bd4ec85c0d2003d32a915a44bfd4681",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "8fd8261837bb1fb1851db7d4fbe7b8e6fed2ba2f1906c9018e823f4c360db3a2",
+    "source_sha256": "f77ef487e78040bf960ce21c02c1a03937180cea355f4c1c8e51b2aebacf6811",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -200611,7 +200623,7 @@
       "label": "PhoneScreen",
       "norm_label": "phonescreen",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L215"
+      "source_location": "L228"
     },
     {
       "_callable": true,
@@ -225975,7 +225987,7 @@
       "label": "headerAction()",
       "norm_label": "headeraction()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L222"
+      "source_location": "L235"
     },
     {
       "_callable": true,
@@ -226012,21 +226024,21 @@
             "callee": "checkVisibility",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L197",
+            "line": "L210",
             "receiver_type": "Element"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L198",
+            "line": "L211",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "phoneproblems()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L180"
+      "source_location": "L193"
     },
     {
       "_callable": true,
@@ -241492,7 +241504,7 @@
       "label": "phoneScreens",
       "norm_label": "phonescreens",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L225"
+      "source_location": "L238"
     },
     {
       "_origin": "ast",

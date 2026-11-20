@@ -93,6 +93,19 @@ for (const width of [1280, 390, 320]) {
   });
 }
 
+test("the header language button works on the page of an address with no route", async ({ browser }) => {
+  const context = await browser.newContext({ baseURL: origin });
+  const page = await newPage(context);
+  const missing = await page.goto("/missing/path");
+  expect(missing?.status()).toBe(404);
+  await page.locator(".site-header").getByRole("button", { name: "Language: English" }).click();
+  await page.getByRole("dialog", { name: "Language" }).getByRole("button", { name: "Русский" }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+  await expect(page).toHaveURL(/\/missing\/path$/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await close(context);
+});
+
 test("a signed-in choice is saved to the account and wins over the cookie", async ({ browser }) => {
   const viewer = await signedIn(browser, "prefsviewer", clientIp("i18n", 180));
   const page = await newPage(viewer);
