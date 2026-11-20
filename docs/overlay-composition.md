@@ -97,7 +97,7 @@ With all six source layers on the grid in the two orientations, some changes to 
 
 The page scales the design pixels to the size of the browser source.
 
-The composition puts all of its layers in one canvas in three cases. The chat layer is on, the content has a cell, or a source layer is on stream.
+The composition puts all layers in one canvas when chat is on, the content has a cell, or a source layer is on stream.
 The canvas has the frame size of the selected orientation. It is the same as the canvas of the editor preview.
 Thus the layout is the same at all source sizes with the same aspect ratio, and the same as in the preview.
 If the source does not have the frame size, the on-air content changes size when the chat layer comes on.
