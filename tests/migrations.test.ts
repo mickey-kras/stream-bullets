@@ -23,6 +23,25 @@ let db: D1Database;
 let before: Record<string, number>;
 let applied: string[];
 
+/** What `overlay_state` holds and how it is built, read before and after the rebuild of 0032. */
+interface OverlayTable {
+  rows: Record<string, unknown>[];
+  columns: Record<string, unknown>[];
+  foreignKeys: Record<string, unknown>[];
+  objects: Record<string, unknown>[];
+}
+let overlayBefore: OverlayTable;
+
+async function overlayTable(): Promise<OverlayTable> {
+  const all = async (sql: string): Promise<Record<string, unknown>[]> => (await db.prepare(sql).all()).results;
+  return {
+    rows: await all("SELECT * FROM overlay_state ORDER BY streamer_id"),
+    columns: await all("SELECT * FROM pragma_table_info('overlay_state')"),
+    foreignKeys: await all("SELECT * FROM pragma_foreign_key_list('overlay_state')"),
+    objects: await all("SELECT type,name FROM sqlite_master WHERE tbl_name='overlay_state' ORDER BY name"),
+  };
+}
+
 async function counts(): Promise<Record<string, number>> {
   const results = await db.batch(TABLES.map((table) => db.prepare(`SELECT count(*) AS n FROM "${table}"`)));
   return Object.fromEntries(TABLES.map((table, index) => [table, (results[index].results[0] as { n: number }).n]));
@@ -129,14 +148,36 @@ beforeAll(async (): Promise<void> => {
     .run();
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0030"),
+    applied.filter((file: string): boolean => file >= "0030" && file < "0032"),
+  );
+  // A row with a value in each column, saved before 0032 rebuilds the table.
+  await db
+    .prepare(
+      `INSERT INTO overlay_state (streamer_id,air,preview,position,size,instant,show_results,message,message_style,
+          revision,updated_at,layers,chat_test_until,layers_writes)
+        SELECT id,'{"type":"topic","ref":"topic"}','{"type":"hidden","ref":null}','corner','l',1,0,'Kept','hype',
+          41,1790000000001,'{"chat":{"enabled":true}}',1790000000002,'[["writer-0001",3]]'
+        FROM streamers WHERE id!='page'`,
+    )
+    .run();
+  // The test database has a trigger of another table that reads overlay_state.
+  await db
+    .prepare(
+      `CREATE TRIGGER overlay_reader BEFORE DELETE ON streamers
+        BEGIN SELECT RAISE(ABORT,'never') WHERE (SELECT count(*) FROM overlay_state) < 0; END`,
+    )
+    .run();
+  overlayBefore = await overlayTable();
+  await applyMigrations(
+    db,
+    applied.filter((file: string): boolean => file >= "0032"),
   );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0031", (): void => {
+  it("covers 0006 to 0032", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -164,7 +205,44 @@ describe("migrations 0006 onwards", (): void => {
       "0029",
       "0030",
       "0031",
+      "0032",
     ]);
+  });
+
+  it("rebuilds overlay_state (0032) with every row, column, default and foreign key", async (): Promise<void> => {
+    expect(overlayBefore.rows).toHaveLength(2);
+    expect(await overlayTable()).toEqual(overlayBefore);
+    expect(await db.prepare("SELECT name FROM sqlite_master WHERE name='overlay_state_rows'").first()).toBeNull();
+    expect(await db.prepare("SELECT * FROM pragma_foreign_key_check('overlay_state')").first()).toBeNull();
+  });
+
+  it("raises the layers limit (0032) to 4000 characters and keeps the other checks", async (): Promise<void> => {
+    const other = "(SELECT streamer_id FROM overlay_state WHERE streamer_id!='page')";
+    const set = (column: string, value: number | string | null): Promise<D1Result> =>
+      db.prepare(`UPDATE overlay_state SET ${column}=? WHERE streamer_id=${other}`).bind(value).run();
+    const layers = (length: number): string => JSON.stringify({ note: "x".repeat(length - 11) });
+    expect(layers(4000)).toHaveLength(4000);
+    await set("layers", layers(4000));
+    await expect(set("layers", layers(4001))).rejects.toThrow(/constraint failed/);
+    const refused: [string, number | string | null][] = [
+      ["layers", "[]"],
+      ["air", '{"type":"other","ref":null}'],
+      ["preview", "not json"],
+      ["position", "left"],
+      ["size", "xl"],
+      ["instant", 2],
+      ["show_results", 2],
+      ["message", "x".repeat(121)],
+      ["message_style", "loud"],
+      ["chat_test_until", -1],
+      ["layers_writes", "{}"],
+      ["revision", -1],
+      ["updated_at", null],
+    ];
+    for (const [column, value] of refused) await expect(set(column, value)).rejects.toThrow(/constraint failed/);
+    await expect(
+      db.prepare("INSERT INTO overlay_state (streamer_id,updated_at) VALUES ('no-page',1)").run(),
+    ).rejects.toThrow(/FOREIGN KEY constraint failed/);
   });
 
   it("localizes existing fixed binary labels from the host locale (0031)", async (): Promise<void> => {
@@ -204,7 +282,7 @@ describe("migrations 0006 onwards", (): void => {
     await rejects("[]");
     await rejects('"text"');
     await rejects(null);
-    await rejects(JSON.stringify({ chat: { note: "x".repeat(1000) } }));
+    await rejects(JSON.stringify({ chat: { note: "x".repeat(4000) } }));
     const layers = JSON.stringify({ chat: { enabled: true }, cells: { horizontal: { chat: { c: 0, r: 0, w: 3, h: 2 } } } });
     await db.prepare("UPDATE overlay_state SET layers=? WHERE streamer_id='page'").bind(layers).run();
     expect(await db.prepare("SELECT layers FROM overlay_state WHERE streamer_id='page'").first()).toEqual({ layers });

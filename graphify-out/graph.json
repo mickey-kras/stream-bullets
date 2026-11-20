@@ -51789,7 +51789,7 @@
       "relation": "calls",
       "source": "tests_migrations_test",
       "source_file": "tests/migrations.test.ts",
-      "source_location": "L95",
+      "source_location": "L114",
       "target": "tests_migrations_test_seedreleaseddata",
       "weight": 1.0
     },
@@ -51801,8 +51801,20 @@
       "relation": "calls",
       "source": "tests_migrations_test",
       "source_file": "tests/migrations.test.ts",
-      "source_location": "L96",
+      "source_location": "L115",
       "target": "tests_migrations_test_counts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_migrations_test",
+      "source_file": "tests/migrations.test.ts",
+      "source_location": "L170",
+      "target": "tests_migrations_test_overlaytable_b2083296e4bb",
       "weight": 1.0
     },
     {
@@ -179752,7 +179764,29 @@
       "relation": "contains",
       "source": "tests_migrations_test",
       "source_file": "tests/migrations.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
+      "target": "tests_migrations_test_overlaytable",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_migrations_test",
+      "source_file": "tests/migrations.test.ts",
+      "source_location": "L35",
+      "target": "tests_migrations_test_overlaytable_b2083296e4bb",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_migrations_test",
+      "source_file": "tests/migrations.test.ts",
+      "source_location": "L45",
       "target": "tests_migrations_test_counts",
       "weight": 1.0
     },
@@ -179763,7 +179797,7 @@
       "relation": "contains",
       "source": "tests_migrations_test",
       "source_file": "tests/migrations.test.ts",
-      "source_location": "L31",
+      "source_location": "L50",
       "target": "tests_migrations_test_seedreleaseddata",
       "weight": 1.0
     },
@@ -188369,10 +188403,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "c2c04ae15cecd81003f51de6afbc38972b77a4901c8107a763bc16a867a459a9",
+    "content_sha256": "06ede4cd738950a7041bebf6b4eaa838fa1245508c10b169b5b98e3a734831ca",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "f21c2057fba8d9bf4b1b9048bd790cef3c49bea63a10cffe77168a18d2bde38e",
+    "source_sha256": "fa1215517015f4b34347aca3da7c18ad63fee097bdbc52941d9ec9f5adb8976b",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -195012,6 +195046,18 @@
       "norm_label": "socket",
       "source_file": "tests/live-capacity.test.ts",
       "source_location": "L10"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_migrations_test_overlaytable",
+      "label": "OverlayTable",
+      "norm_label": "overlaytable",
+      "source_file": "tests/migrations.test.ts",
+      "source_location": "L27"
     },
     {
       "_callable": true,
@@ -222107,7 +222153,18 @@
       "label": "counts()",
       "norm_label": "counts()",
       "source_file": "tests/migrations.test.ts",
-      "source_location": "L26"
+      "source_location": "L45"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_migrations_test_overlaytable_b2083296e4bb",
+      "label": "overlayTable()",
+      "norm_label": "overlaytable()",
+      "source_file": "tests/migrations.test.ts",
+      "source_location": "L35"
     },
     {
       "_callable": true,
@@ -222118,7 +222175,7 @@
       "label": "seedReleasedData()",
       "norm_label": "seedreleaseddata()",
       "source_file": "tests/migrations.test.ts",
-      "source_location": "L31"
+      "source_location": "L50"
     },
     {
       "_callable": true,
