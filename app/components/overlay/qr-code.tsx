@@ -15,7 +15,7 @@ export const QR_MIN = 96;
  * The side of the code in design pixels, from the height of its card. A new side can change the card height, so the
  * hook measures again until the side stays the same. Each write waits for the next frame.
  */
-function useCardSide(plate: { readonly current: HTMLSpanElement | null }): number {
+function useCardSide(plate: { readonly current: HTMLImageElement | null }): number {
   const [side, setSide] = useState<number>(QR_MIN);
   useEffect(() => {
     const card: HTMLElement | null | undefined = plate.current?.closest("article");
@@ -40,7 +40,7 @@ function useCardSide(plate: { readonly current: HTMLSpanElement | null }): numbe
  * the same URL again.
  */
 export const QrCode = memo(function QrCode({ url }: Readonly<{ url: string }>): ReactNode {
-  const plate = useRef<HTMLSpanElement | null>(null);
+  const plate = useRef<HTMLImageElement | null>(null);
   const side: number = useCardSide(plate);
   const svg: string = renderSVG(url, {
     border: QR_BORDER,
@@ -49,15 +49,13 @@ export const QrCode = memo(function QrCode({ url }: Readonly<{ url: string }>): 
     blackColor: QR_MODULES,
   });
   return (
-    <span
+    <img
       className="ov-qr"
-      role="img"
-      aria-label={t("overlay.qr.label")}
+      src={`data:image/svg+xml,${encodeURIComponent(svg)}`}
+      alt={t("overlay.qr.label")}
       style={{ width: side, height: side }}
       ref={plate}
       data-overlay-qr={url}
-    >
-      <img src={`data:image/svg+xml,${encodeURIComponent(svg)}`} alt="" />
-    </span>
+    />
   );
 });

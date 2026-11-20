@@ -591,9 +591,8 @@ describe("overlay source fallbacks", () => {
       const html: string = renderToStaticMarkup(createElement(QrCode, { url: `${page}?view=schedule` }));
       expect(html).toMatch(
         new RegExp(
-          `^<span class="ov-qr" role="img" aria-label="QR code: open on your phone" ` +
-            `style="width:${QR_MIN}px;height:${QR_MIN}px" data-overlay-qr="${page}\\?view=schedule">` +
-            `<img src="data:image/svg\\+xml,[^"]+" alt=""/></span>$`,
+          `^<img class="ov-qr" src="data:image/svg\\+xml,[^"]+" alt="QR code: open on your phone" ` +
+            `style="width:${QR_MIN}px;height:${QR_MIN}px" data-overlay-qr="${page}\\?view=schedule"/>$`,
         ),
       );
       const svg: string = decodeURIComponent(/src="data:image\/svg\+xml,([^"]+)"/.exec(html)?.[1] ?? "");
@@ -619,8 +618,9 @@ describe("overlay source fallbacks", () => {
         const link: string = (qrTarget(full, source) ?? "").replaceAll("&", "&amp;");
         // The text keeps the left side. The code is the last part of the card.
         expect(on, source.type).toMatch(/<article [^>]*><div class="ov-qr-row"><div class="ov-qr-text">/);
-        expect(on, source.type).toContain(`data-overlay-qr="${link}"><img `);
-        expect(on, source.type).toMatch(/alt=""\/><\/span><\/div><\/article><\/div>$/);
+        expect(on, source.type).toMatch(
+          new RegExp(`data-overlay-qr="${link.replace(/[?]/g, "\\?")}"/></div></article></div>$`),
+        );
         expect(on.match(/class="ov-qr"/g), source.type).toHaveLength(1);
         const off: string = stage(source, full);
         expect(off, source.type).toContain("<article");
