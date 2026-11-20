@@ -1,7 +1,7 @@
 import { canonicalMeta, streamerCanonicalPath } from "../lib/seo";
 export { RouteErrorBoundary as ErrorBoundary } from "../components/route-error";
 import { withRouteErrors } from "../server/route-errors.server";
-import { useCallback, useEffect, useRef, useState, type ReactNode, type ComponentProps } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Link,
   useLoaderData,
@@ -33,7 +33,13 @@ import { IdeaDialog } from "../components/ideas/idea-dialog";
 import { statusLabel } from "../components/ideas/ideas";
 import { ScheduleView, scheduleModes, type ScheduleMode } from "../components/schedule/schedule-view";
 import { useRememberContentRoute } from "../components/shell/back-link";
-import { StreamerHeader, streamerViews, type StreamerView } from "../components/shell/streamer-header";
+import {
+  StreamerHeader,
+  officialViews,
+  streamerHeaderAppearance,
+  streamerViews,
+  type StreamerView,
+} from "../components/shell/streamer-header";
 import { EntryDetail } from "../components/streamer/entry-detail";
 import { PageBanner } from "../components/streamer/page-banner";
 import { useBoardRefresh, usePendingTopic } from "../components/streamer/use-board-refresh";
@@ -77,7 +83,6 @@ function cameFromList(state: unknown): boolean {
   return typeof state === "object" && state !== null && (state as Partial<ListReturnState>).listReturn === true;
 }
 // Official board tabs: Ideas, About, Community.
-const officialViews: readonly View[] = ["topics", "about", "community"];
 
 export function shouldRevalidate({
   formMethod,
@@ -279,29 +284,6 @@ function useIntentDialog(intent: ReturnType<typeof readIntent>, viewer: Viewer |
 function pageRole(owner: boolean, moderator: boolean): "owner" | "admin" | "viewer" {
   if (owner) return "owner";
   return moderator ? "admin" : "viewer";
-}
-
-function streamerHeaderAppearance(
-  streamer: Streamer,
-): Pick<ComponentProps<typeof StreamerHeader>, "className" | "views" | "labels" | "icons" | "brand"> {
-  if (!streamer.isOfficial) return { className: "", views: streamerViews, labels: {}, icons: {} };
-  return {
-    className: "ideas-header",
-    views: officialViews,
-    labels: { topics: t("ideas.tab"), about: t("ideas.aboutTab"), community: t("ideas.howEyebrow") },
-    icons: { topics: "idea" },
-    brand: (
-      <>
-        <span className="ideas-logo" aria-hidden="true">
-          <img src="/assets/stream-bullets-icon.svg" alt="" width="128" height="136" />
-        </span>
-        <span className="streamer-name-wrap">
-          <span className="streamer-name">{streamer.name}</span>
-          <span className="ideas-sub">{t("ideas.subtitle")}</span>
-        </span>
-      </>
-    ),
-  };
 }
 
 export default function StreamerPage(): ReactNode {

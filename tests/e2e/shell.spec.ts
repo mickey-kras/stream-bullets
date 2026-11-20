@@ -182,9 +182,12 @@ test("the streamer header offers Overlay to the owner of the page only, and the 
   await page.setViewportSize({ width: 1280, height: 720 });
   await overlay.click();
   await expect(page.getByRole("heading", { level: 1, name: "Overlay control" })).toBeVisible();
-  // The site header has no Overlay entry, also on Overlay control. "Your page" stays, also on a phone.
+  // Overlay control keeps the streamer header: Overlay is the current tab and the other tabs lead to the page.
+  await expect(nav.getByRole("link")).toHaveText(["Topics", "Polls", "Schedule", "About", "Community", "Overlay"]);
+  await expect(overlay).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "Polls", exact: true })).toHaveAttribute("href", "/@test_host?view=polls");
+  // The site header has no Overlay entry. "Your page" stays, also on a phone.
   const site = page.getByRole("banner").getByRole("navigation", { name: "Main navigation" });
-  await expect(site.getByRole("link")).toHaveText(["Streamers", "Your page"]);
   await page.goto("/streamers");
   await expect(site.getByRole("link")).toHaveText(["Streamers", "Your page"]);
   await page.setViewportSize({ width: 390, height: 844 });

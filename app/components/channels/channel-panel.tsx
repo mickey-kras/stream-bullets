@@ -16,6 +16,7 @@ import { Icon } from "../ui/icon";
 import { useToast } from "../ui/toast";
 import { useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
+import { PlatformLogo } from "./platform-logo";
 
 /** One platform as GET /api/channels and the overlay-control loader list it. */
 export interface ChannelView {
@@ -385,6 +386,7 @@ export function ChannelPanel({
           return (
             <li key={channel.platform} className="ch-item" data-channel={channel.platform}>
               <p className="ch-head">
+                <PlatformLogo platform={channel.platform} />
                 <span className="ch-badge">{name}</span>
                 <strong>
                   {connection
