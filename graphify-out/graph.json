@@ -16845,7 +16845,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_morerow",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L20",
+      "source_location": "L19",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -16857,7 +16857,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L115",
+      "source_location": "L114",
       "target": "app_components_shell_contact_dialog_contactdialog",
       "weight": 1.0
     },
@@ -16869,7 +16869,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L116",
+      "source_location": "L115",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -16881,7 +16881,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L126",
+      "source_location": "L125",
       "target": "app_components_shell_footer_morerow",
       "weight": 1.0
     },
@@ -16893,7 +16893,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L30",
+      "source_location": "L29",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -16905,7 +16905,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L31",
+      "source_location": "L30",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -16917,7 +16917,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L72",
+      "source_location": "L71",
       "target": "app_components_shell_dialog_link_dialoglink",
       "weight": 1.0
     },
@@ -16929,7 +16929,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L74",
+      "source_location": "L73",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -154284,7 +154284,7 @@
       "relation": "contains",
       "source": "app_components_shell_footer",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L11",
+      "source_location": "L10",
       "target": "app_components_shell_footer_language_openers",
       "weight": 1.0
     },
@@ -154295,7 +154295,7 @@
       "relation": "contains",
       "source": "app_components_shell_footer",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L17",
+      "source_location": "L16",
       "target": "app_components_shell_footer_morerow",
       "weight": 1.0
     },
@@ -154306,7 +154306,7 @@
       "relation": "contains",
       "source": "app_components_shell_footer",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L26",
+      "source_location": "L25",
       "target": "app_components_shell_footer_sitefooter",
       "weight": 1.0
     },
@@ -178253,7 +178253,7 @@
       "relation": "contains",
       "source": "docs_localization_localization",
       "source_file": "docs/localization.md",
-      "source_location": "L71",
+      "source_location": "L72",
       "target": "docs_localization_legal_translation_gaps",
       "weight": 1.0
     },
@@ -178264,7 +178264,7 @@
       "relation": "contains",
       "source": "docs_localization_localization",
       "source_file": "docs/localization.md",
-      "source_location": "L77",
+      "source_location": "L78",
       "target": "docs_localization_verification_and_native_review",
       "weight": 1.0
     },
@@ -194161,10 +194161,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "476da66d4a8d162245cbad63459b4421609c0de8deeef5584aabb0b0a0daa2c6",
+    "content_sha256": "e2eeca9f7b53d8b1ab9084740ad719c5163dbc5a3a35aa63772c10e8c712e8d5",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "cdf588217a23849fac62f463b1a73bb2735b1230fd6fd053b214830e63ee1536",
+    "source_sha256": "8fd8261837bb1fb1851db7d4fbe7b8e6fed2ba2f1906c9018e823f4c360db3a2",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -207650,7 +207650,7 @@
       "label": "MoreRow()",
       "norm_label": "morerow()",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L17"
+      "source_location": "L16"
     },
     {
       "_callable": true,
@@ -207665,14 +207665,14 @@
             "callee": "getClientRects",
             "file": "app/components/shell/footer.tsx",
             "lang": "typescript",
-            "line": "L50",
+            "line": "L49",
             "receiver_type": "HTMLElement"
           }
         ]
       },
       "norm_label": "sitefooter()",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L26"
+      "source_location": "L25"
     },
     {
       "_callable": true,
@@ -232487,7 +232487,7 @@
       "label": "LANGUAGE_OPENERS",
       "norm_label": "language_openers",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L11"
+      "source_location": "L10"
     },
     {
       "_origin": "ast",
@@ -245321,7 +245321,7 @@
       "node_kind": "heading",
       "norm_label": "legal translation gaps",
       "source_file": "docs/localization.md",
-      "source_location": "L71"
+      "source_location": "L72"
     },
     {
       "_origin": "ast",
@@ -245376,7 +245376,7 @@
       "node_kind": "heading",
       "norm_label": "verification and native review",
       "source_file": "docs/localization.md",
-      "source_location": "L77"
+      "source_location": "L78"
     },
     {
       "_origin": "ast",

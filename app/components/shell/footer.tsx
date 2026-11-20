@@ -7,7 +7,6 @@ import { Sheet } from "../ui/sheet";
 import { ContactDialog } from "./contact-dialog";
 import { DialogLink } from "./dialog-link";
 
-// Controls that open the language dialog, by the name saved before the reload.
 const LANGUAGE_OPENERS: Readonly<Record<string, string>> = {
   account: ".account-menu-wrap > button.profile",
   header: ".site-header button.header-language",

@@ -65,7 +65,8 @@ All entries open one dialog. The dialog lists each language by its own name, wit
 A choice saves the `sb_locale` cookie and, for a signed-in visitor, the account language.
 The page then reloads with the same path, query, and fragment.
 
-Comment drafts and the discussion scroll position stay, because session storage holds them.
+A comment draft stays, because session storage holds it.
+The page also keeps its place in the discussion.
 Focus returns to the control that opened the dialog.
 
 ## Legal translation gaps
