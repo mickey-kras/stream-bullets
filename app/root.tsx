@@ -133,6 +133,7 @@ export function ErrorBoundary(): ReactNode {
       <SkipLink />
       <RouteErrorBoundary />
       <SiteFooter />
+      <AccountDialogs />
     </ToastProvider>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useLocation } from "react-router";
-import type { DialogState } from "../account/dialog-route";
+import type { DialogState, LanguageOpener } from "../account/dialog-route";
 import { DEFAULT_LOCALE, getLocale, LOCALE_NAMES, LOCALES, t, type Locale } from "../../i18n";
 import { saveLocaleCookie } from "../../lib/prefs";
 import { useShell } from "../../lib/shell";
@@ -17,14 +17,18 @@ const ORDERED: readonly Locale[] = [
 ];
 
 // Save locale to account when signed in and browser cookie; reload to apply it.
-export async function chooseLocale(locale: Locale, signedIn: boolean, fromAccount: boolean = false): Promise<void> {
+export async function chooseLocale(
+  locale: Locale,
+  signedIn: boolean,
+  opener: LanguageOpener = "footer",
+): Promise<void> {
   if (signedIn) await sendJson("PATCH", "/api/me/locale", { locale });
   await saveLocaleCookie(locale);
   // Remove dialog=language before reload to avoid reopening.
   const url = new URL(globalThis.location.href);
   url.searchParams.delete("dialog");
   try {
-    sessionStorage.setItem("sb-language-opener", fromAccount ? "account" : "footer");
+    sessionStorage.setItem("sb-language-opener", opener);
     sessionStorage.setItem("sb-language-focus", url.href);
   } catch {
     // Blocked storage must not prevent locale changes.
@@ -36,7 +40,7 @@ export async function chooseLocale(locale: Locale, signedIn: boolean, fromAccoun
 export function LanguageDialog({ onClose }: Readonly<{ onClose: () => void }>): ReactNode {
   const shell = useShell();
   const location = useLocation();
-  const fromAccount: boolean = (location.state as DialogState | null)?.languageOpener === "account";
+  const opener: LanguageOpener = (location.state as DialogState | null)?.languageOpener ?? "footer";
   const active: Locale = getLocale();
   const [busy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -48,7 +52,7 @@ export function LanguageDialog({ onClose }: Readonly<{ onClose: () => void }>): 
     setBusy(true);
     setError("");
     try {
-      await chooseLocale(locale, Boolean(shell.viewer), fromAccount);
+      await chooseLocale(locale, Boolean(shell.viewer), opener);
     } catch (error_: unknown) {
       setError(errorMessage(error_));
       setBusy(false);

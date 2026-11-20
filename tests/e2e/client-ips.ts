@@ -30,7 +30,7 @@ const ranges = {
   landing: [[154, 155]],
   "board-navigation": [[160, 163]],
   "discussion-notifications": [[164, 169]],
-  "mobile-discussion": [[170, 172]],
+  "mobile-discussion": [[170, 174]],
   a11y: [[175, 179]],
   i18n: [
     [180, 181],

@@ -7,6 +7,12 @@ import { Sheet } from "../ui/sheet";
 import { ContactDialog } from "./contact-dialog";
 import { DialogLink } from "./dialog-link";
 
+const LANGUAGE_OPENERS: Readonly<Record<string, string>> = {
+  account: ".account-menu-wrap > button.profile",
+  header: ".site-header button.header-language",
+  footer: '.site-footer a[href*="dialog=language"]',
+};
+
 function MoreRow({ icon, children }: Readonly<{ icon: IconName; children: ReactNode }>): ReactNode {
   return (
     <>
@@ -30,20 +36,19 @@ export function SiteFooter(): ReactNode {
       return;
     }
     const frame: number = requestAnimationFrame(() => {
-      let fromAccount: boolean;
+      let opener: string | null;
       try {
-        fromAccount = sessionStorage.getItem("sb-language-opener") === "account";
+        opener = sessionStorage.getItem("sb-language-opener");
         sessionStorage.removeItem("sb-language-focus");
         sessionStorage.removeItem("sb-language-opener");
       } catch {
         return;
       }
       const selector: HTMLElement | undefined = [
-        ...document.querySelectorAll<HTMLElement>(
-          fromAccount ? ".account-menu-wrap > button.profile" : '.site-footer a[href*="dialog=language"]',
-        ),
+        ...document.querySelectorAll<HTMLElement>(LANGUAGE_OPENERS[opener ?? ""] ?? LANGUAGE_OPENERS.footer),
       ].find((element: HTMLElement) => element.getClientRects().length > 0);
-      selector?.focus();
+      // The reader stays where the page restored its scroll position.
+      selector?.focus({ preventScroll: opener === "header" });
     });
     return () => cancelAnimationFrame(frame);
   }, []);

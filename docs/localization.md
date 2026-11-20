@@ -55,6 +55,20 @@ API messages stay English. Non-English UI translates known codes, including hand
 Unknown codes use translated HTTP-status guidance without internal validation details.
 HTTP status and machine codes remain available. Schedule, community, and admin forms share the error formatter.
 
+## Language selection
+
+Each site and streamer header shows one globe button at every width. No menu hides it.
+The button name states the current language, for example "Language: English".
+The button holds no address. The footer and the account menu keep their language links. The landing page uses the footer link.
+
+All entries open one dialog. The dialog lists each language by its own name, without flags.
+A choice saves the `sb_locale` cookie and, for a signed-in visitor, the account language.
+The page then reloads with the same path, query, and fragment.
+
+A comment draft stays, because session storage holds it.
+The page also keeps its place in the discussion.
+Focus returns to the control that opened the dialog.
+
 ## Legal translation gaps
 
 Terms and privacy remain English with a translated language notice.

@@ -181,7 +181,7 @@ for (const width of [1363, 390]) {
     await page.getByRole("dialog").getByRole("button", { name: "Русский" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
     await expect(page).toHaveURL(/\/@streambullets\?view=topics&status=planned$/);
-    const language = page.locator('a[href*="dialog=language"]:visible');
+    const language = page.locator('.site-footer a[href*="dialog=language"]:visible');
     await expect(language).toBeFocused();
     await language.press("Enter");
     await page.getByRole("dialog").getByRole("button", { name: "English" }).click();
@@ -274,7 +274,7 @@ for (const failure of ["read", "write"] as const) {
     page.on("pageerror", (error: Error) => errors.push(error.message));
     await page.goto("/streamers");
     await expect(page.getByRole("heading", { name: "Streamers", exact: true })).toBeVisible();
-    await page.getByRole("link", { name: "Language: English" }).click();
+    await page.locator(".site-header").getByRole("button", { name: "Language: English" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Русский" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
     await expect(page.getByRole("main")).toBeVisible();

@@ -337,6 +337,16 @@ header.site-header:has(> .onair-ticker) { row-gap: 0; padding-bottom: 0; }
 header.site-header.header-stacked > .onair-ticker { margin-top: 8px; }
 header .header-end > a.header-streamers { display: inline-flex !important; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; border: 1px solid var(--btn-border); border-radius: var(--radius-control); color: var(--cream); font: 600 .9375rem var(--body); text-decoration: none; white-space: nowrap; }
 header .header-end > a.header-streamers:hover { border-color: var(--gold); color: var(--gold); }
+/* Language button: the compact icon size of the Streamers link at every width. */
+.header-end > button.header-language { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; min-height: 44px; padding: 0; background: none; color: var(--cream); }
+.header-end > button.header-language:hover { color: var(--gold); }
+/* Up to 1800px, beside the sign-in button, the Streamers label, the sign-in icon and part of the gap yield their room to the language button. */
+@media (max-width: 112.5em) {
+  .streamer-header .header-end { gap: 8px; }
+  .streamer-header .header-signin > svg { display: none; }
+  .streamer-header .header-end:has(.header-signin) > a.header-streamers { width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; }
+  .streamer-header .header-end:has(.header-signin) > a.header-streamers .hs-label { display: none; }
+}
 @media (max-width: 78.125em) {
   header .header-end > a.header-streamers { width: 44px; min-width: 44px; height: 44px; padding: 0; justify-content: center; }
   header .header-end > a.header-streamers .hs-label { display: none; }
@@ -354,10 +364,14 @@ header .header-end > a.header-streamers:hover { border-color: var(--gold); color
 @media (max-width: 43.75em) {
   .generic-header:not(.header-stacked) > nav { justify-content: center; justify-self: stretch; min-width: 0; }
   .generic-header:not(.header-stacked):has(.header-signin) > nav { justify-content: flex-start; }
+  /* Room for the language button beside the sign-in label on phones. */
+  .generic-header .header-signin svg { display: none; }
+  .generic-header .header-end { gap: 6px; }
 }
 @media (max-width: 24em) {
   .generic-header .header-signin { gap: 4px; padding-inline: 8px; }
-  .generic-header .header-signin svg { display: none; }
+  .generic-header .header-signin .header-signin-label { display: none; }
+  .generic-header .header-signin .header-signin-short { display: inline; }
 }
 @media (max-width: 43.75em) {
   :root .sb-toast { left: 16px; right: 16px; max-width: none; transform: translateY(20px); text-align: center; justify-content: center; }
