@@ -1,5 +1,11 @@
 import { renderToReadableStream } from "react-dom/server";
-import { ServerRouter, type EntryContext, type HandleErrorFunction, type RouterContextProvider } from "react-router";
+import {
+  isRouteErrorResponse,
+  ServerRouter,
+  type EntryContext,
+  type HandleErrorFunction,
+  type RouterContextProvider,
+} from "react-router";
 import { appContext } from "./env";
 import { requestLocale } from "./i18n/resolve";
 import { withLocale } from "./i18n/server";
@@ -8,6 +14,8 @@ import { logError } from "./server/http.server";
 import { requestId } from "./server/route-errors.server";
 
 export const handleError: HandleErrorFunction = (error, { request, context }) => {
+  // A client error, like the 404 of an address with no route, is not a server failure.
+  if (isRouteErrorResponse(error) && error.status < 500) return;
   if (!request.signal.aborted) logError("server_request_failed", error, request, requestId(context.get(appContext)));
 };
 
