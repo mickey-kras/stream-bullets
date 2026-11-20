@@ -1761,6 +1761,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ch-item p { margin: 6px 0; overflow-wrap: anywhere; }
 .ch-item > * { min-width: 0; }
 .ch-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ch-logo { flex: none; width: 28px; height: 28px; }
 .ch-badge { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; font-weight: 600; }
 .ch-problem { display: flex; align-items: flex-start; gap: 6px; }
 .ch-problem .icon { flex: none; margin-top: 2px; color: var(--live); }
