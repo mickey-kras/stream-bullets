@@ -43,6 +43,18 @@ export const HEALTH_INTERVAL_MS = 30_000;
  */
 export const YOUTUBE_MIN_POLL_MS = 10_000;
 export const YOUTUBE_IDLE_POLL_MS = 10 * 60_000;
+/**
+ * The floor after a page without items, and for each poll once YOUTUBE_LOW_BUDGET_SHARE of a daily budget is
+ * spent. It stays below LIVE_WINDOW_MS, so a message that waits one interval is still live.
+ */
+export const YOUTUBE_QUIET_POLL_MS = 20_000;
+export const YOUTUBE_LOW_BUDGET_SHARE = 0.8;
+/**
+ * For this long after the first consumer connects, the check for a live broadcast runs at the shorter interval:
+ * chat starts soon after the streamer goes live. The window costs at most 30 units.
+ */
+export const YOUTUBE_STARTUP_WINDOW_MS = 30 * 60_000;
+export const YOUTUBE_STARTUP_POLL_MS = 60_000;
 export const BACKOFF_MIN_MS = 1_000;
 export const BACKOFF_MAX_MS = 5 * 60_000;
 /** The stored YouTube channel title is read again from YouTube this often while an overlay is open. */
