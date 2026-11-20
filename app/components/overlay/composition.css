@@ -343,7 +343,7 @@
   margin: 0;
   padding: 4px 10px;
   border: 2px dashed var(--gold);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: var(--bg);
   color: var(--cream);
   font-weight: 600;
@@ -402,7 +402,7 @@
   display: grid;
   gap: 10px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   min-width: 0;
 }
 .ov-comp-layer legend {
@@ -472,7 +472,7 @@
   width: 6em;
   padding: 8px 10px;
   border: 1px solid var(--input-border);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: var(--field);
 }
 .ov-chars-timeout input[aria-invalid="true"] {
@@ -525,7 +525,7 @@
   margin: 0;
   padding: 8px 12px;
   border: 1px solid var(--danger-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   color: var(--error);
   font-size: 0.875rem;
 }
