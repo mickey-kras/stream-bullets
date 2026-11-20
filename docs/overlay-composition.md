@@ -407,7 +407,7 @@ A removed card fades out in 300 milliseconds from the time that it leaves the ch
 The value is a percentage from 0 to 100 in steps of 5 (`CHAT_BACKGROUND`). The default is 100, which is the full card.
 At 0, the chat shows no card: only the platform icon, the user name, and the message show.
 
-The setting scales the card fill, the borders, the shadows, the bar of the newest card, and the vault mark together.
+The setting scales the card fill, the borders, the shadows, and the bar of the newest card together.
 The platform icon, the badge labels, the user name, the message, and the emotes always stay fully opaque.
 Below 50%, the text and the platform icon get a dark outline. Thus you can read the chat on a bright game.
 
@@ -415,7 +415,7 @@ Use the slider with a mouse, a finger, or the arrow keys. The preview shows each
 The editor saves the value after 400 milliseconds without a change. Then OBS shows it without a reload.
 To see the result on a game, select **Sample game** under **Preview background**.
 
-The chat root has the `--wl-bg` CSS property, from 0 to 1. Only the card background and the vault mark read it.
+The chat root has the `--wl-bg` CSS property, from 0 to 1. Only the card background reads it.
 The layers store the value as `chat.backgroundOpacity`. A missing or incorrect stored value reads as 100.
 Thus a layout from before this setting does not change.
 

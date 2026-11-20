@@ -15,7 +15,7 @@ import {
 import { CHAT_BACKGROUND } from "../../lib/overlay-layers";
 import { motionReduced } from "../station/motion";
 import { useRowMotion } from "./use-row-motion";
-import { PlatformIcon, VaultMark } from "./wasteland/glyphs";
+import { PlatformIcon } from "./wasteland/glyphs";
 import { PLATFORM_NAMES, WASTELAND_STYLE } from "./wasteland/theme";
 
 /** User names longer than this many characters end in an ellipsis. */
@@ -166,7 +166,6 @@ const ChatRowItem = memo(function ChatRowItem({
             )}
           </span>
         </span>
-        <VaultMark className="wl-vault" />
       </div>
     </li>
   );

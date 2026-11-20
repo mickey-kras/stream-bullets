@@ -181,7 +181,7 @@
 .wl-card {
   position: relative;
   /* Each side has 1px more for the border, which the background (::after) draws. */
-  padding: calc(0.3em + 1px) calc(2em + 1px) calc(0.32em + 1px) calc(0.48em + 1px);
+  padding: calc(0.3em + 1px) calc(0.48em + 1px) calc(0.32em + 1px);
   border-radius: 0.32em;
   /* A card never changes the layout or the paint outside its box. */
   contain: layout paint;
@@ -234,6 +234,8 @@
 .wl-badge {
   margin-right: 0.25em;
   font-size: 0.72em;
+  /* Lifts the small text so that its middle is level with the platform icon and the name. */
+  vertical-align: 0.14em;
   color: var(--wl-muted);
 }
 .wl-user {
@@ -252,18 +254,6 @@
   margin: 0 0.08em;
   vertical-align: -0.15em;
   object-fit: contain;
-}
-.wl-vault {
-  position: absolute;
-  right: calc(0.45em + 1px);
-  top: 50%;
-  width: 1.1em;
-  height: 0.8em;
-  transform: translateY(-50%);
-  fill: none;
-  stroke: var(--wl-accent);
-  stroke-width: 1.7;
-  opacity: calc(0.55 * var(--wl-bg, 1));
 }
 /* A faint card background (data-outline, chat-layer.tsx): a dark outline keeps the text readable over a bright game. */
 .wl-chat[data-outline] .wl-line {
