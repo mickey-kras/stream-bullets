@@ -424,11 +424,13 @@ describe("overlay poll card", (): void => {
     const card = (total: number): string =>
       renderToStaticMarkup(
         createElement(OverlayStage, {
+          qr: false,
           source: { type: "poll", ref: poll },
           scene: {
             name: "Nova",
             handle: "nova",
             host: "streambullets.com",
+            origin: "https://streambullets.com",
             overlay: { showResults: true, message: "", messageStyle: "info" },
             polls: [
               {
@@ -457,11 +459,13 @@ describe("overlay poll card", (): void => {
     const battle = (phase: "live" | "finished", showResults: boolean): string =>
       renderToStaticMarkup(
         createElement(OverlayStage, {
+          qr: false,
           source: { type: "poll", ref: poll },
           scene: {
             name: "Nova",
             handle: "nova",
             host: "streambullets.com",
+            origin: "https://streambullets.com",
             overlay: { showResults, message: "", messageStyle: "info" },
             polls: [
               {
@@ -512,11 +516,13 @@ describe("overlay poll card", (): void => {
     const shown = (ref: string | null): string =>
       renderToStaticMarkup(
         createElement(OverlayStage, {
+          qr: false,
           source: { type: "card", ref },
           scene: {
             name: "Nova",
             handle: "nova",
             host: "streambullets.com",
+            origin: "https://streambullets.com",
             overlay: { showResults: true, message: "", messageStyle: "info" },
             polls: [],
             data: {

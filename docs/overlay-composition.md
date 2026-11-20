@@ -19,7 +19,7 @@ The code is in these files:
 | Chat test | `app/lib/chat-test.ts` |
 | Activity socket client | `app/lib/activity-socket.ts`, `app/components/overlay/activity-feed.tsx` |
 | Chat rows and the composition | `app/components/overlay/chat-layer.tsx`, `app/components/overlay/overlay-composition.tsx` |
-| Content of a layer | `app/components/overlay/overlay-stage.tsx` |
+| Content of a layer and its QR code | `app/components/overlay/overlay-stage.tsx`, `app/components/overlay/qr-code.tsx` |
 | Chat appearance and motion | `app/components/overlay/wasteland/`, `app/components/overlay/use-row-motion.ts` |
 | Editor | `app/components/overlay/composition-editor.tsx`, `layout-grid.tsx`, `layer-palette.tsx`, `use-layer-draft.ts` |
 | Layer settings and the test | `app/components/overlay/layer-properties.tsx`, `studio-test.tsx`, `characters-controls.tsx` |
@@ -106,13 +106,39 @@ The settings of a content layer are these:
   The `next`, `message`, and `support` layers have no `ref`.
 - `backgroundOpacity`: the opacity of the card background in percent. The text stays opaque.
   The border and the shadow of the card stay.
-- `qr`: the API stores this setting. The overlay does not show a QR code, and the editor has no control for it.
+- `qr`: the card of the layer shows a QR code. The `poll` layer has `qr: true` by default.
+  The other content layers have `qr: false`. See [QR code](#qr-code).
 
 Two more values are not in the layers. They apply to the layer that uses them:
 
 - `showResults` shows or hides the results of the poll in the poll layer.
 - `message` and `messageStyle` are the text and the style of the message banner.
   The public overlay state has the text only while the message layer is on stream. Otherwise the text is a draft.
+
+### QR code
+
+A viewer scans the QR code with a phone. The phone then opens the public page of the item that the layer shows.
+
+| Layer | The QR code opens |
+| --- | --- |
+| `poll` | The poll that the layer shows: `/@<handle>?view=polls&entry=<poll id>`. This applies also to the latest active poll. |
+| `topic` | The topic: `/@<handle>?view=topics&entry=<topic id>` |
+| `next` | The schedule: `/@<handle>?view=schedule` |
+| `card` | The Community tab: `/@<handle>?view=community` |
+| `support` | The support link of the page. Without a support link, it opens `/@<handle>`. |
+| `message` | No QR code. The message banner has no page to open. |
+
+- Each link starts with the origin of the app (`APP_ORIGIN`), the same value that gives the host in the **Tap at** hint.
+- The code is in the card of the layer, at the right edge. On a poll card it is at the bottom, beside the **Tap at** hint.
+- The side of the code is 22 percent of the card height, and at least 96 design pixels.
+  It is at most 30 percent of the card width, unless that is below the minimum.
+  The card with the code becomes smaller with its cell, as each card does.
+- The code has dark modules (`#0b2228`) on a light plate (`#f7edcf`) with a quiet zone of 2 modules.
+  The plate stays opaque at each `backgroundOpacity`. Thus a phone can read the code on each background.
+- The code is an SVG picture from the `uqr` package. Thus it stays sharp at each OBS source size.
+- A screen reader reads the code as an image with the name **QR code: open on your phone**.
+- A layer that shows nothing shows no code. Examples are a poll layer without a poll and a card layer with a deleted card.
+- The API accepts `qr` for the `message` layer, but that layer never shows a code.
 
 The stored layers have a limit of 4000 characters. The server stores only what is not a default.
 All eight layers on the grid of the two orientations, with each setting changed, need less than half of the limit.
@@ -364,6 +390,7 @@ The settings show the name of the selected layer and these controls:
 | **Message** and **Message style** | Message banner | The text, up to 120 characters, and the info style or the hype style. **Save message** saves the text. |
 | **Hide chat commands (!jump)** | Chat | See [Commands](#commands). |
 | **Message background** | Chat | See [Message background](#message-background). |
+| **Show QR code** | Each content layer but the message banner | Shows or hides the QR code in the card. See [QR code](#qr-code). |
 | **Background** | Each content layer | The opacity of the card background, from 0 to 100 in steps of 5. |
 | Timeout, **Maximum characters on screen**, **Pause**, **Reset playground**, and the participants | Characters | See [Interactive characters](characters.md). |
 | **Remove from grid** | All | Takes the layer off the grid. |
@@ -612,6 +639,5 @@ Thus close the overlay sources that you do not use.
 - The server orders only the saves of one editor. If two editors save almost together, their saves can arrive in a different sequence.
 - The overlay has one theme. There is no theme selection.
 - Layer edits go live at once. To prepare a layer, clear **Show on stream** for it first.
-- The overlay does not show a QR code.
 - Kick has no message deletion events. YouTube has no clear events. See the capability matrix in
   [Channel connections and activity](channel-connections.md#capability-matrix).

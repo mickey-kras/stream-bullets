@@ -284,6 +284,36 @@ function LayerBackground({
   );
 }
 
+/** The QR code switch of a content layer. The message banner has no page to open, so it has no switch. */
+function QrSetting({
+  layer,
+  layers,
+  change,
+}: Readonly<{ layer: GridLayer; layers: OverlayLayers; change: ChangeLayers }>): ReactNode {
+  const hintId: string = useId();
+  if (layer === "chat" || layer === "characters" || layer === "message") return null;
+  return (
+    <>
+      <label className="choice">
+        <input
+          type="checkbox"
+          checked={layers.items[layer].qr}
+          aria-describedby={hintId}
+          onChange={(event) => {
+            const qr: boolean = event.currentTarget.checked;
+            change((current: OverlayLayers) => withItem(current, layer, { qr }));
+          }}
+          data-props-qr
+        />
+        <span>{t("overlay.props.qr")}</span>
+      </label>
+      <p className="muted ov-comp-note" id={hintId}>
+        {t("overlay.props.qrHint")}
+      </p>
+    </>
+  );
+}
+
 /** The settings that only one content layer has. Up next and the support banner have none. */
 function ContentSettings({ layer, ...props }: Readonly<SettingsProps & { layer: ContentLayer }>): ReactNode {
   if (layer === "poll") return <PollSettings {...props} />;
@@ -295,9 +325,9 @@ function ContentSettings({ layer, ...props }: Readonly<SettingsProps & { layer: 
 }
 
 /**
- * The settings of the selected layer: "Show on stream", what it shows, its background and "Remove from grid". With
- * no layer (`layer` null) a hint shows. Layer settings save through `change` like grid edits. The poll results
- * switch and the message save through `run`.
+ * The settings of the selected layer: "Show on stream", what it shows, its QR code, its background and "Remove from
+ * grid". With no layer (`layer` null) a hint shows. Layer settings save through `change` like grid edits. The poll
+ * results switch and the message save through `run`.
  */
 export function LayerProperties({
   layer,
@@ -358,6 +388,7 @@ export function LayerProperties({
         />
       )}
       {layer !== "chat" && layer !== "characters" && <ContentSettings layer={layer} {...props} />}
+      <QrSetting layer={layer} layers={layers} change={change} />
       <LayerBackground layer={layer} layers={layers} change={change} />
       <button type="button" onClick={() => onRemove(layer)} data-props-remove>
         {t("overlay.props.remove")}

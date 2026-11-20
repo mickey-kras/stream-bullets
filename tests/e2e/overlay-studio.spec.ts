@@ -29,6 +29,7 @@ const LEGACY_IP = clientIp("overlay-studio", 31);
 const PHONE_IP = clientIp("overlay-studio", 32);
 const KEYS_IP = clientIp("overlay-studio", 33);
 const OBS_IP = clientIp("overlay-studio", 34);
+const QR_IP = clientIp("overlay-studio", 35);
 
 test.beforeEach(async () => {
   await runSql("overlay-studio-reset", [
@@ -99,8 +100,10 @@ test("each content layer goes on the grid one time with its real content, and OB
     await expect(chip(editor, layer)).toHaveText(`${names[layer]}Placed`);
     await expect(settings(editor)).toHaveAttribute("data-comp-props", layer);
     await expect(settings(editor).getByRole("checkbox", { name: "Show on stream" })).toBeChecked();
-    // No layer has a QR setting yet.
-    await expect(settings(editor).getByText(/QR/i)).toHaveCount(0);
+    // Each content layer has the QR code switch. The message banner has none: it has no page to open.
+    await expect(settings(editor).getByRole("checkbox", { name: "Show QR code" })).toHaveCount(
+      layer === "message" ? 0 : 1,
+    );
   }
   await expect(frame.locator("[data-grid-box]")).toHaveCount(6);
   // The preview shows the real content of each layer, like the stream.
@@ -248,6 +251,63 @@ test("Show on stream and the background of a layer reach the OBS page at once", 
   await expect(obs.locator('.ov-layer[data-layer="chat"]')).toHaveCount(0);
   // The OBS page followed each change live, without a page load.
   await expect(obs.locator("html")).toHaveAttribute("data-e2e-loaded", "1");
+  await close(obs);
+  await close(owner);
+});
+
+test("the poll layer shows a QR code in OBS by default, and its switch removes it", async ({ browser }) => {
+  await runSql("overlay-studio-qr", [layersSql({ cells: { horizontal: { poll: POLL_CELL } } })]);
+  const owner = await signedIn(browser, "featureowner", QR_IP);
+  const page = await newPage(owner);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/overlay-control");
+  const editor = page.locator("[data-composition-editor]");
+  const frame = editor.getByRole("region", { name: "Composition preview" });
+  const previewCode = frame.locator('.ov-layer[data-layer="poll"] [data-overlay-qr]');
+  const obs = await obsPage(browser);
+  const obsPoll = obs.locator('.ov-layer[data-layer="poll"]');
+  const code = obsPoll.getByRole("img", { name: "QR code: open on your phone" });
+  await expect(code).toBeVisible();
+  // The code opens the poll that the layer shows, on the public page of the streamer.
+  await expect(code).toHaveAttribute(
+    "data-overlay-qr",
+    /^http:\/\/localhost:5173\/@feature_host\?view=polls&entry=[\da-f-]{36}$/,
+  );
+  // The code is at least 96 design pixels, inside the card, and the card stays inside its cell.
+  expect(await code.evaluate((element: HTMLElement) => element.offsetWidth)).toBeGreaterThanOrEqual(96);
+  const inside: boolean = await code.evaluate((element: Element) => {
+    const within = (inner: DOMRect, outer: DOMRect): boolean =>
+      inner.left >= outer.left - 0.5 &&
+      inner.right <= outer.right + 0.5 &&
+      inner.top >= outer.top - 0.5 &&
+      inner.bottom <= outer.bottom + 0.5;
+    const card: Element | null = element.closest("article");
+    const layer: Element | null = element.closest(".ov-layer");
+    if (!card || !layer) return false;
+    return (
+      within(element.getBoundingClientRect(), card.getBoundingClientRect()) &&
+      within(card.getBoundingClientRect(), layer.getBoundingClientRect())
+    );
+  });
+  expect(inside).toBe(true);
+  // The studio preview shows the same card.
+  await expect(previewCode).toHaveCount(1);
+
+  await chip(editor, "poll").click();
+  const toggle = settings(editor).getByRole("checkbox", { name: "Show QR code" });
+  await expect(toggle).toBeChecked();
+  await expect(toggle).toHaveAccessibleDescription("Viewers scan it with a phone to open this item.");
+  let save = saved(page);
+  await toggle.uncheck();
+  await save;
+  await expect(code).toHaveCount(0);
+  await expect(previewCode).toHaveCount(0);
+  await expect(obsPoll.locator("[data-overlay-mash]")).toBeVisible();
+  expect((await storedLayers(page)).items.poll.qr).toBe(false);
+  save = saved(page);
+  await toggle.check();
+  await save;
+  await expect(code).toBeVisible();
   await close(obs);
   await close(owner);
 });
@@ -546,6 +606,14 @@ test("the keyboard alone places, selects, changes and removes a layer", async ({
   await page.keyboard.press("Escape");
   await expect(page.getByRole("listbox")).toHaveCount(0);
   await expect(picker).toBeFocused();
+  // The QR code switch follows the Space key.
+  await page.keyboard.press("Tab");
+  const qr = panel.getByRole("checkbox", { name: "Show QR code" });
+  await expect(qr).toBeFocused();
+  save = saved(page);
+  await page.keyboard.press("Space");
+  await expect(qr).toBeChecked();
+  await save;
   // The background slider follows the arrow keys.
   await page.keyboard.press("Tab");
   const slider = panel.getByRole("slider", { name: "Background" });

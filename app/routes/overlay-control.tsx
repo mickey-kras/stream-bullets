@@ -58,6 +58,7 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
       isOfficial: streamer.isOfficial,
     },
     host: new URL(origin).host,
+    origin: new URL(origin).origin,
     hasOverlayKey: await hasOverlayKey(app.env, streamer.id),
     channels: await listConnections(app.env, streamer.id),
     providers: configuredProviders(app.env),
@@ -104,7 +105,15 @@ export default function OverlayControlPage(): ReactNode {
           hasOverlayKey={loaded.hasOverlayKey}
           connected={status === "live" || status === "connecting"}
           reconnect={status === "offline" ? reconnect : undefined}
-          scene={{ name: loaded.name, handle: loaded.handle, host: loaded.host, polls, data: loaded.data, now }}
+          scene={{
+            name: loaded.name,
+            handle: loaded.handle,
+            host: loaded.host,
+            origin: loaded.origin,
+            polls,
+            data: loaded.data,
+            now,
+          }}
           channels={
             <ChannelsStep
               channels={loaded.channels}

@@ -136,7 +136,9 @@ English also shows `error` for `step_up_required` and `other_key_required`.
     A `poll` layer with `ref: null` shows the latest active poll. A `card` layer with `ref: null` shows the first card.
     `next`, `message`, and `support` accept only `ref: null`.
   - `backgroundOpacity` has the same values as `chat.backgroundOpacity`. It applies to the card background of the layer.
-  - The API only stores `qr`. The overlay does not show a QR code.
+  - `qr` shows a QR code in the card of the layer. A viewer scans it to open the public page of the item.
+    The `message` layer accepts the value and never shows a code.
+    See [QR code](overlay-composition.md#qr-code).
 - `chat.backgroundOpacity` is the opacity of the message cards in percent: an integer from 0 to 100 that is a multiple of 5.
   Other values return `400`. See [Message background](overlay-composition.md#message-background).
 - The minimum size is 3 × 2 cells for `chat`, 6 × 2 for `characters`, and 4 × 2 for each content layer.

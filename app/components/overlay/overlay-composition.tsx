@@ -213,12 +213,16 @@ function useFitScale(box: RefObject<HTMLDivElement | null>): void {
 }
 
 /** The content of a layer inside its cell: centred, and scaled down to fit when it is larger than the cell. */
-function ContentCell({ scene, source }: Readonly<{ scene: OverlayScene; source: ContentSource }>): ReactNode {
+function ContentCell({
+  scene,
+  source,
+  qr,
+}: Readonly<{ scene: OverlayScene; source: ContentSource; qr: boolean }>): ReactNode {
   const box = useRef<HTMLDivElement | null>(null);
   useFitScale(box);
   return (
     <div className="ov-fit" ref={box}>
-      <OverlayStage scene={scene} source={source} />
+      <OverlayStage scene={scene} source={source} qr={qr} />
     </div>
   );
 }
@@ -238,7 +242,7 @@ function ContentLayers({
       alone={false}
       backgroundOpacity={placed.item.backgroundOpacity}
     >
-      <ContentCell scene={scene} source={placed.source} />
+      <ContentCell scene={scene} source={placed.source} qr={placed.item.qr} />
     </LayerBox>
   ));
 }
