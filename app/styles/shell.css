@@ -176,7 +176,7 @@ header nav button { gap: 8px; }
   .header-end .suggest-plus svg.icon { width: 22px; height: 22px; }
 }
 .back-link, .back-step { display: inline-flex; align-items: center; gap: 4px; }
-:root .sb-toast { position: absolute; left: 50%; bottom: 64px; z-index: 60; transform: translate(-50%, 20px); max-width: calc(100% - 32px); padding: 10px 18px; border-radius: var(--radius-panel); background: var(--cream); color: var(--bg); font: 600 15px/1.3 var(--body); box-shadow: 0 8px 30px var(--c-0009); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; top: auto !important; }
+:root .sb-toast { position: absolute; left: 50%; bottom: 64px; z-index: 60; transform: translate(-50%, 20px); max-width: calc(100% - 32px); padding: 10px 18px; border-radius: var(--radius-panel); background: var(--cream); color: var(--bg); font: 600 15px/1.3 var(--body); box-shadow: 0 8px 30px var(--c-0009); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; top: auto !important; display: inline-flex; align-items: center; box-sizing: border-box; min-height: 52px; }
 :root .sb-toast.show { opacity: 1; transform: translate(-50%, 0); }
 .site-logo { justify-content: flex-start; width: auto; }
 .site-logo::before, .site-logo::after { display: none; }
@@ -279,8 +279,7 @@ header nav a.nav-tab[aria-current="page"] { background: linear-gradient(110deg, 
 @media (max-width: 43.75em) {
   .ideas-header .streamer-name.streamer-name { max-width: 16ch; }
 }
-/* Each toast has the height of a toast with an action button. */
-:root .sb-toast { display: inline-flex; align-items: center; box-sizing: border-box; min-height: 52px; }
+/* Each toast has the height of a toast with an action button: see min-height of .sb-toast. */
 :root .sb-toast.has-action { pointer-events: auto; gap: 12px; }
 :root .sb-toast .toast-action { min-height: 32px; padding: 4px 12px; border: 1px solid var(--bg); border-radius: var(--radius-panel); background: transparent; color: var(--bg); font: 700 .9375rem var(--body); cursor: pointer; }
 .site-header .account-menu { width: min(300px, calc(100% - 24px)); max-width: calc(100cqw - 24px); }

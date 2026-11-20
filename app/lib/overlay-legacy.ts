@@ -170,7 +170,7 @@ function withLegacyContent(layers: OverlayLayers, value: unknown, legacy: Legacy
   if (layer === null || usesContentLayers(layers)) return layers;
   const old: Record<string, unknown> = record(record(value).cells);
   const place: Place = layer === "poll" ? "full" : legacy.position;
-  const ref: string | null = REF_LAYERS.includes(layer) ? legacy.air.ref : null;
+  const ref: string | null = REF_LAYERS.has(layer) ? legacy.air.ref : null;
   return withContentPlaced(
     withItem(layers, layer, { enabled: true, ref }),
     layer,

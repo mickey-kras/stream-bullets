@@ -76,7 +76,7 @@ export interface ContentItem {
 }
 
 /** The content layers that use `ref`. */
-export const REF_LAYERS: readonly ContentLayer[] = ["poll", "topic", "card"];
+export const REF_LAYERS: ReadonlySet<ContentLayer> = new Set<ContentLayer>(["poll", "topic", "card"]);
 
 export interface OverlayLayers {
   orientation: Orientation;
@@ -264,7 +264,7 @@ const layerBackground = z
 
 /** The `ref` of a content layer. The length limit matches `overlaySourceSchema`. Layers without a ref take null only. */
 function refSchema(layer: ContentLayer): z.ZodType<string | null> {
-  return REF_LAYERS.includes(layer) ? z.string().min(1).max(64).nullable() : z.null();
+  return REF_LAYERS.has(layer) ? z.string().min(1).max(64).nullable() : z.null();
 }
 
 function itemPatchSchema(layer: ContentLayer): z.ZodOptional<z.ZodType<Partial<ContentItem>>> {

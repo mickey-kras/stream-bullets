@@ -24933,7 +24933,7 @@
       "relation": "calls",
       "source": "app_entry_server_handleerror",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L11",
+      "source_location": "L19",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -24945,7 +24945,7 @@
       "relation": "calls",
       "source": "app_entry_server_handleerror",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L11",
+      "source_location": "L19",
       "target": "app_server_route_errors_server_requestid",
       "weight": 1.0
     },
@@ -24957,7 +24957,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L25",
+      "source_location": "L33",
       "target": "app_i18n_resolve_requestlocale",
       "weight": 1.0
     },
@@ -24969,7 +24969,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L26",
+      "source_location": "L34",
       "target": "app_i18n_server_withlocale",
       "weight": 1.0
     },
@@ -24981,7 +24981,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L28",
+      "source_location": "L36",
       "target": "app_lib_nonce_noncecontext",
       "weight": 1.0
     },
@@ -24993,7 +24993,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L35",
+      "source_location": "L43",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -25005,7 +25005,7 @@
       "relation": "calls",
       "source": "app_entry_server_handlerequest",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L35",
+      "source_location": "L43",
       "target": "app_server_route_errors_server_requestid",
       "weight": 1.0
     },
@@ -74294,31 +74294,7 @@
       "relation": "imports",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L3",
-      "target": "app_env_appcontext",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_entry_server",
-      "source_file": "app/entry.server.tsx",
-      "source_location": "L3",
-      "target": "app_env_appcontext_54cf5bec59a5",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_entry_server",
-      "source_file": "app/entry.server.tsx",
-      "source_location": "L4",
+      "source_location": "L10",
       "target": "app_i18n_resolve_requestlocale",
       "weight": 1.0
     },
@@ -74330,7 +74306,7 @@
       "relation": "imports",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L5",
+      "source_location": "L11",
       "target": "app_i18n_server_withlocale",
       "weight": 1.0
     },
@@ -74342,7 +74318,7 @@
       "relation": "imports",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L6",
+      "source_location": "L12",
       "target": "app_lib_nonce_noncecontext",
       "weight": 1.0
     },
@@ -74354,7 +74330,7 @@
       "relation": "imports",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L7",
+      "source_location": "L13",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -74366,8 +74342,32 @@
       "relation": "imports",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L8",
+      "source_location": "L14",
       "target": "app_server_route_errors_server_requestid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_entry_server",
+      "source_file": "app/entry.server.tsx",
+      "source_location": "L9",
+      "target": "app_env_appcontext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_entry_server",
+      "source_file": "app/entry.server.tsx",
+      "source_location": "L9",
+      "target": "app_env_appcontext_54cf5bec59a5",
       "weight": 1.0
     },
     {
@@ -122112,6 +122112,66 @@
       "relation": "imports_from",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
+      "source_location": "L10",
+      "target": "app_i18n_resolve",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_entry_server",
+      "source_file": "app/entry.server.tsx",
+      "source_location": "L11",
+      "target": "app_i18n_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_entry_server",
+      "source_file": "app/entry.server.tsx",
+      "source_location": "L12",
+      "target": "app_lib_nonce",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_entry_server",
+      "source_file": "app/entry.server.tsx",
+      "source_location": "L13",
+      "target": "app_server_http_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_entry_server",
+      "source_file": "app/entry.server.tsx",
+      "source_location": "L14",
+      "target": "app_server_route_errors_server",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_entry_server",
+      "source_file": "app/entry.server.tsx",
       "source_location": "L2",
       "target": "ref_react_router",
       "weight": 1.0
@@ -122124,68 +122184,8 @@
       "relation": "imports_from",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L3",
+      "source_location": "L9",
       "target": "app_env",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_entry_server",
-      "source_file": "app/entry.server.tsx",
-      "source_location": "L4",
-      "target": "app_i18n_resolve",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_entry_server",
-      "source_file": "app/entry.server.tsx",
-      "source_location": "L5",
-      "target": "app_i18n_server",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_entry_server",
-      "source_file": "app/entry.server.tsx",
-      "source_location": "L6",
-      "target": "app_lib_nonce",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_entry_server",
-      "source_file": "app/entry.server.tsx",
-      "source_location": "L7",
-      "target": "app_server_http_server",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_entry_server",
-      "source_file": "app/entry.server.tsx",
-      "source_location": "L8",
-      "target": "app_server_route_errors_server",
       "weight": 1.0
     },
     {
@@ -156123,7 +156123,7 @@
       "relation": "contains",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L10",
+      "source_location": "L16",
       "target": "app_entry_server_handleerror",
       "weight": 1.0
     },
@@ -156134,7 +156134,7 @@
       "relation": "contains",
       "source": "app_entry_server",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L14",
+      "source_location": "L22",
       "target": "app_entry_server_handlerequest",
       "weight": 1.0
     },
@@ -191239,10 +191239,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f205e65a8d2e223f927aaa82d519082296cfaa10d98c84bce49f605053441793",
+    "content_sha256": "762193d2f5bebbf6d3017287f19feeb88a69a5173ad0d0dbfb65aacf4de3c9a5",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "52aac62319353f86ed4bb1420a346a81382ca8cfdabcb67799d35508ae1a4b59",
+    "source_sha256": "c3e7cf3532312db56fce769223842eaa35adadccc00de07a5d5db4e24d71a72e",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -208339,14 +208339,14 @@
             "callee": "get",
             "file": "app/entry.server.tsx",
             "lang": "typescript",
-            "line": "L11",
+            "line": "L19",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "handleerror()",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L10"
+      "source_location": "L16"
     },
     {
       "_callable": true,
@@ -208361,14 +208361,14 @@
             "callee": "get",
             "file": "app/entry.server.tsx",
             "lang": "typescript",
-            "line": "L22",
+            "line": "L30",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "handlerequest()",
       "source_file": "app/entry.server.tsx",
-      "source_location": "L14"
+      "source_location": "L22"
     },
     {
       "_callable": true,
