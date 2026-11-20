@@ -175462,7 +175462,7 @@
       "relation": "contains",
       "source": "docs_characters_interactive_characters",
       "source_file": "docs/characters.md",
-      "source_location": "L295",
+      "source_location": "L296",
       "target": "docs_characters_cost",
       "weight": 1.0
     },
@@ -175473,7 +175473,7 @@
       "relation": "contains",
       "source": "docs_characters_interactive_characters",
       "source_file": "docs/characters.md",
-      "source_location": "L301",
+      "source_location": "L302",
       "target": "docs_characters_logs",
       "weight": 1.0
     },
@@ -175495,7 +175495,7 @@
       "relation": "contains",
       "source": "docs_characters_interactive_characters",
       "source_file": "docs/characters.md",
-      "source_location": "L316",
+      "source_location": "L317",
       "target": "docs_characters_retention",
       "weight": 1.0
     },
@@ -175506,7 +175506,7 @@
       "relation": "contains",
       "source": "docs_characters_interactive_characters",
       "source_file": "docs/characters.md",
-      "source_location": "L332",
+      "source_location": "L333",
       "target": "docs_characters_asset_provenance",
       "weight": 1.0
     },
@@ -175517,7 +175517,7 @@
       "relation": "contains",
       "source": "docs_characters_interactive_characters",
       "source_file": "docs/characters.md",
-      "source_location": "L354",
+      "source_location": "L355",
       "target": "docs_characters_obs_setup",
       "weight": 1.0
     },
@@ -191472,10 +191472,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "0927e93efca63a652b164b30de18d7e4190482f10ab5ef3b798c7c357ad2ef96",
+    "content_sha256": "c507402408a8e60e7c65c10b0e6360de54a24d8b7ec48943e89f4a3f44db6793",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "aa2a53669ea98189a34a18432b564ea07cc5efd7996b9af5021796db7fe58f46",
+    "source_sha256": "1443c98d1f1f5a55d500809d8be5bfc6fcc53421d02cab36e66f2c1ed85e3413",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -241435,7 +241435,7 @@
       "node_kind": "heading",
       "norm_label": "asset provenance",
       "source_file": "docs/characters.md",
-      "source_location": "L332"
+      "source_location": "L333"
     },
     {
       "_origin": "ast",
@@ -241512,7 +241512,7 @@
       "node_kind": "heading",
       "norm_label": "cost",
       "source_file": "docs/characters.md",
-      "source_location": "L295"
+      "source_location": "L296"
     },
     {
       "_origin": "ast",
@@ -241578,7 +241578,7 @@
       "node_kind": "heading",
       "norm_label": "logs",
       "source_file": "docs/characters.md",
-      "source_location": "L301"
+      "source_location": "L302"
     },
     {
       "_origin": "ast",
@@ -241600,7 +241600,7 @@
       "node_kind": "heading",
       "norm_label": "obs setup",
       "source_file": "docs/characters.md",
-      "source_location": "L354"
+      "source_location": "L355"
     },
     {
       "_origin": "ast",
@@ -241622,7 +241622,7 @@
       "node_kind": "heading",
       "norm_label": "retention",
       "source_file": "docs/characters.md",
-      "source_location": "L316"
+      "source_location": "L317"
     },
     {
       "_origin": "ast",

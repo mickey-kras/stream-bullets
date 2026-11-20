@@ -78,7 +78,7 @@ The playground chooses the visible participants again after each change:
 
 - An active participant has a score above 0 and a message in the timeout period. A removed participant is not active.
 - The owner sets the maximum number of visible characters, from 5 to 40. The default is 40.
-- The ranked slots are 75 percent of the slots, as a rounded whole number. The other slots are rotating slots.
+- The ranked slots are 75 percent of the slots, as a rounded whole number. The other slots rotate.
   Thus 40 slots give 30 and 10, and 5 slots give 4 and 1.
 - The active participants with the highest decayed scores get the ranked slots.
 - The other active participants get the rotating slots in turn, in the order of registration.
@@ -289,6 +289,7 @@ The owner decides about that binding in a separate change.
 A rollback to a version without the playground leaves the checkpoint in the object storage.
 The old version does not read it. The alarm of a later version deletes it when it holds no participant.
 After a rollback, refresh each OBS browser source with the characters layer.
+
 An old version that saves the layers drops the characters timeout. The timeout then goes back to 60 seconds.
 A version without the maximum drops `characters.max` in the same way. The maximum then goes back to 40.
 
