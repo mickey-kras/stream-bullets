@@ -41,7 +41,7 @@ test("a poll card has the mockup's React group, owner menu and time left", async
   const card = page.locator(".poll-card").filter({ hasText: "Alignment poll" }).first();
   await expect(card.locator(".poll-countdown")).toHaveText(/^(1 h 0 min|60 min|59 min) left$/u);
   await expect(card.getByText("Viewers can vote until voting closes.")).toBeVisible();
-  const react = card.getByRole("group", { name: "React to this poll" });
+  const react = card.getByRole("group", { name: "Like or dislike this poll" });
   await expect(react.getByRole("button", { name: "Like poll, 0", exact: true })).toBeVisible();
   await card.getByLabel("Poll actions: Alignment poll").click();
   await expect(card.getByRole("button", { name: "End voting" })).toBeVisible();
