@@ -165,8 +165,8 @@ The callback refuses an authorization that gives fewer scopes than the list abov
 | Fragments | 64 for each message |
 | Activity sockets per page | 20 |
 | Authorization state | 10 minutes, single use |
-| YouTube poll interval | The larger of `pollingIntervalMillis` and 10 seconds |
-| YouTube check for a live broadcast | Every 10 minutes while the channel is not live |
+| YouTube poll interval | The larger of `pollingIntervalMillis` and the floor: 10 seconds, or 20 seconds after an empty page or with a low budget |
+| YouTube check for a live broadcast | Every minute for 30 minutes after the first consumer connects, then every 10 minutes, while the channel is not live |
 | YouTube backoff | 1 second up to 5 minutes, with jitter |
 | YouTube quota | 9,000 units each quota day for all pages together, and 9,000 units for each page |
 | `last_event_at` writes | One each 30 seconds for each channel |
@@ -235,11 +235,17 @@ follows this reset, also across summer time.
 | Case | Units |
 | --- | --- |
 | One live page at the 10-second floor | 1,800 each hour (6 polls each minute × 5 units × 60) |
-| One open overlay, channel not live | 6 each hour (one check each 10 minutes) |
+| One live page at the 20-second floor | 900 each hour |
+| One open overlay, channel not live | 6 each hour, and a maximum of 30 in the first 30 minutes |
 | Budget for one page | 9,000 each day: about 5 hours of live chat at the floor |
 | Budget for all pages | 9,000 each day: about 5 hours of live chat at the floor |
 
 YouTube can ask for a longer interval with `pollingIntervalMillis`. Then a page uses fewer units.
+
+The floor is 20 seconds after a page without items. It is 10 seconds again after a page with items.
+The floor is also 20 seconds after the feed spends 80% of the page budget or of the shared budget.
+The 20-second floor is below the 30-second live window. Thus a message that waits one interval is still live.
+
 The counters are in `app_rate_limits`, with the keys `youtube-quota:<day>` and `youtube-quota:<day>:<page>`.
 When a page uses up a budget, the connection shows the `quota_exhausted` status until the next quota day.
 

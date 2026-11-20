@@ -52,6 +52,10 @@ import {
   YOUTUBE_JOB_RETRY_MS,
   YOUTUBE_DAILY_BUDGET,
   YOUTUBE_PAGE_DAILY_BUDGET,
+  YOUTUBE_LOW_BUDGET_SHARE,
+  YOUTUBE_QUIET_POLL_MS,
+  YOUTUBE_STARTUP_POLL_MS,
+  YOUTUBE_STARTUP_WINDOW_MS,
   REFRESH_MARGIN_MS,
   type Admission,
   type Bucket,
@@ -740,10 +744,11 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   }
 
   /**
-   * Spends units of today's quota: the page's own budget first, then the shared one. Returns false when either is
-   * used up; a refused shared spend gives the page's units back.
+   * Spends units of today's quota: the page's own budget first, then the shared one. Returns the larger spent
+   * share of the two budgets (0 to 1), or null when either is used up; a refused shared spend gives the page's
+   * units back.
    */
-  private async spendQuota(units: number, now: number): Promise<boolean> {
+  private async spendQuota(units: number, now: number): Promise<number | null> {
     const { day, resetAt } = quotaDay(now);
     const spend = (key: string, budget: number): Promise<{ count: number } | null> =>
       this.env.DB.prepare(
@@ -756,10 +761,12 @@ export class ChannelIngest extends DurableObject<AppEnv> {
         .bind(key, units, resetAt, budget)
         .first<{ count: number }>();
     const pageKey = `youtube-quota:${day}:${this.streamerId}`;
-    if (!(await spend(pageKey, YOUTUBE_PAGE_DAILY_BUDGET))) return false;
-    if (await spend(`youtube-quota:${day}`, YOUTUBE_DAILY_BUDGET)) return true;
+    const own = await spend(pageKey, YOUTUBE_PAGE_DAILY_BUDGET);
+    if (!own) return null;
+    const shared = await spend(`youtube-quota:${day}`, YOUTUBE_DAILY_BUDGET);
+    if (shared) return Math.max(own.count / YOUTUBE_PAGE_DAILY_BUDGET, shared.count / YOUTUBE_DAILY_BUDGET);
     await this.env.DB.prepare("UPDATE app_rate_limits SET count = count - ? WHERE key = ?").bind(units, pageKey).run();
-    return false;
+    return null;
   }
 
   /**
@@ -887,7 +894,8 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   /** Returns the wait before the next poll. */
   private async poll(connection: Connection, state: YoutubeState, now: number, current: () => void): Promise<number> {
-    if (!(await this.spendQuota(state.liveChatId ? 5 : 1, now))) throw new ProviderError(403, "quotaExceeded");
+    const spent = await this.spendQuota(state.liveChatId ? 5 : 1, now);
+    if (spent === null) throw new ProviderError(403, "quotaExceeded");
     const tokens = await this.freshTokens("youtube", connection);
     // Stored YouTube data must be fresh (YouTube API Services policy): read the title again once a day. A failed
     // read is tried again after an hour, a read of another channel after a day; neither stops the chat poll.
@@ -898,7 +906,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (!state.liveChatId) {
       state.liveChatId = await youtubeLiveChat(tokens.accessToken);
       state.pageToken = null;
-      return state.liveChatId ? 0 : YOUTUBE_IDLE_POLL_MS;
+      if (state.liveChatId) return 0;
+      const since = (await this.ctx.storage.get<number>("listeningSince")) ?? now;
+      return now - since < YOUTUBE_STARTUP_WINDOW_MS ? YOUTUBE_STARTUP_POLL_MS : YOUTUBE_IDLE_POLL_MS;
     }
     const page = await youtubeChatPage(tokens.accessToken, state.liveChatId, state.pageToken);
     current();
@@ -911,7 +921,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       state.pageToken = null;
       return YOUTUBE_IDLE_POLL_MS;
     }
-    return Math.max(page.pollingIntervalMillis, YOUTUBE_MIN_POLL_MS);
+    // A quiet chat and a budget that runs low both get the longer floor: the day's units last longer.
+    const quiet = page.items.length === 0 || spent >= YOUTUBE_LOW_BUDGET_SHARE;
+    return Math.max(page.pollingIntervalMillis, quiet ? YOUTUBE_QUIET_POLL_MS : YOUTUBE_MIN_POLL_MS);
   }
 
   private async refreshPollingTitle(

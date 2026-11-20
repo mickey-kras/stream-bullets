@@ -19,6 +19,10 @@ import {
   YOUTUBE_DAILY_BUDGET,
   YOUTUBE_IDLE_POLL_MS,
   YOUTUBE_MIN_POLL_MS,
+  YOUTUBE_LOW_BUDGET_SHARE,
+  YOUTUBE_QUIET_POLL_MS,
+  YOUTUBE_STARTUP_POLL_MS,
+  YOUTUBE_STARTUP_WINDOW_MS,
   YOUTUBE_NAME_REFRESH_MS,
   YOUTUBE_NAME_RETRY_MS,
   YOUTUBE_PAGE_DAILY_BUDGET,
@@ -1373,7 +1377,8 @@ describe("ChannelIngest YouTube polling", (): void => {
     await poll();
     const calls = pollCalls();
     const due = state().storage.alarm ?? 0;
-    expect(due).toBe(clock + YOUTUBE_MIN_POLL_MS);
+    // The page had no items: the next poll waits the quiet interval.
+    expect(due).toBe(clock + YOUTUBE_QUIET_POLL_MS);
     // A delivery schedules a cleanup alarm; it runs before the poll is due and spends nothing.
     await deliver("d1", [chat("m1")]);
     await room().alarm();
@@ -1408,6 +1413,10 @@ describe("ChannelIngest YouTube polling", (): void => {
     await addConnection("youtube");
     await listen();
     fake.liveChatId = null;
+    await poll();
+    // Soon after the consumer connected, the check for a live broadcast runs at the short interval.
+    expect(state().storage.alarm).toBe(clock + YOUTUBE_STARTUP_POLL_MS);
+    clock += YOUTUBE_STARTUP_WINDOW_MS;
     await poll();
     expect(state().storage.alarm).toBe(clock + YOUTUBE_IDLE_POLL_MS);
     fake.liveChatId = "chat-1";
@@ -1457,6 +1466,25 @@ describe("ChannelIngest YouTube polling", (): void => {
     expect(await connectionRow("youtube")).toMatchObject({ status: "error", status_code: "quota_exhausted" });
     // The shared counter holds only the poll that succeeded after the reset, and its title refresh.
     expect(await quota(`youtube-quota:${next}`)).toBe(2);
+  });
+
+  it("polls a busy chat at the floor, and slower once a budget runs low", async (): Promise<void> => {
+    await addConnection("youtube");
+    await listen();
+    const busy = (): void => {
+      fake.chatPages = [{ items: [youtubeText(`m${clock}`, "UCa", "hi", {}, new Date(clock).toISOString())], nextPageToken: "p" }];
+    };
+    await poll();
+    busy();
+    await poll();
+    expect(state().storage.alarm).toBe(clock + YOUTUBE_MIN_POLL_MS);
+    const { day } = quotaDay(clock);
+    await env.DB.prepare("UPDATE app_rate_limits SET count=? WHERE key=?")
+      .bind(YOUTUBE_PAGE_DAILY_BUDGET * YOUTUBE_LOW_BUDGET_SHARE, `youtube-quota:${day}:${page}`)
+      .run();
+    busy();
+    await poll();
+    expect(state().storage.alarm).toBe(clock + YOUTUBE_QUIET_POLL_MS);
   });
 
   it("does not poll while channels are off", async (): Promise<void> => {
