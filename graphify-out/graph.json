@@ -10113,7 +10113,7 @@
       "relation": "calls",
       "source": "app_components_overlay_chat_layer_chatlayer",
       "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L189",
+      "source_location": "L188",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -10125,7 +10125,7 @@
       "relation": "calls",
       "source": "app_components_overlay_chat_layer_chatlayer",
       "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L190",
+      "source_location": "L189",
       "target": "app_components_overlay_chat_layer_nameframe_2424f5245062",
       "weight": 1.0
     },
@@ -10137,7 +10137,7 @@
       "relation": "calls",
       "source": "app_components_overlay_chat_layer_chatlayer",
       "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L191",
+      "source_location": "L190",
       "target": "app_components_overlay_chat_layer_usefadingrows",
       "weight": 1.0
     },
@@ -10149,7 +10149,7 @@
       "relation": "calls",
       "source": "app_components_overlay_chat_layer_chatlayer",
       "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L193",
+      "source_location": "L192",
       "target": "app_components_overlay_use_row_motion_userowmotion",
       "weight": 1.0
     },
@@ -10161,7 +10161,7 @@
       "relation": "calls",
       "source": "app_components_overlay_chat_layer_chatlayer",
       "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L194",
+      "source_location": "L193",
       "target": "app_components_overlay_chat_layer_chatstyle",
       "weight": 1.0
     },
@@ -10173,7 +10173,7 @@
       "relation": "calls",
       "source": "app_components_overlay_chat_layer_chatlayer",
       "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L205",
+      "source_location": "L204",
       "target": "app_components_overlay_chat_layer_chatrowitem",
       "weight": 1.0
     },
@@ -10211,18 +10211,6 @@
       "source_file": "app/components/overlay/chat-layer.tsx",
       "source_location": "L162",
       "target": "app_components_overlay_chat_layer_fragment",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_overlay_chat_layer_chatrowitem",
-      "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L169",
-      "target": "app_components_overlay_wasteland_glyphs_vaultmark",
       "weight": 1.0
     },
     {
@@ -63808,18 +63796,6 @@
       "source_file": "app/components/overlay/chat-layer.tsx",
       "source_location": "L18",
       "target": "app_components_overlay_wasteland_glyphs_platformicon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_overlay_chat_layer",
-      "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L18",
-      "target": "app_components_overlay_wasteland_glyphs_vaultmark",
       "weight": 1.0
     },
     {
@@ -145819,7 +145795,7 @@
       "relation": "contains",
       "source": "app_components_overlay_chat_layer",
       "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L179",
+      "source_location": "L178",
       "target": "app_components_overlay_chat_layer_chatlayer",
       "weight": 1.0
     },
@@ -147383,17 +147359,6 @@
       "source_file": "app/components/overlay/wasteland/glyphs.tsx",
       "source_location": "L56",
       "target": "app_components_overlay_wasteland_glyphs_platformicon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_overlay_wasteland_glyphs",
-      "source_file": "app/components/overlay/wasteland/glyphs.tsx",
-      "source_location": "L72",
-      "target": "app_components_overlay_wasteland_glyphs_vaultmark",
       "weight": 1.0
     },
     {
@@ -186866,10 +186831,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "ad31710d7885236bfdb3d234022cf61745c462ca4b748ec0c0d0e8b20a7773e4",
+    "content_sha256": "272f0ec4b96eabf7b64db6465e7cd1e639b80a35c4884d3aedcff9e06ecfbcd5",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "174eead867d7a87b4260c1657296f7fe510aaf6e38aee3180c27be9bdeb7d571",
+    "source_sha256": "cae39940dc3dce8c44eb07dda98be8ffb63cd22e20a616e550626755c7925ab6",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -198953,17 +198918,6 @@
       "norm_label": "platformicon()",
       "source_file": "app/components/overlay/wasteland/glyphs.tsx",
       "source_location": "L56"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_components_overlay_wasteland_glyphs_vaultmark",
-      "label": "VaultMark()",
-      "norm_label": "vaultmark()",
-      "source_file": "app/components/overlay/wasteland/glyphs.tsx",
-      "source_location": "L72"
     },
     {
       "_callable": true,
@@ -223341,7 +223295,7 @@
       "label": "ChatLayer",
       "norm_label": "chatlayer",
       "source_file": "app/components/overlay/chat-layer.tsx",
-      "source_location": "L179"
+      "source_location": "L178"
     },
     {
       "_origin": "ast",

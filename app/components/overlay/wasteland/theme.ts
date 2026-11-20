@@ -14,7 +14,7 @@ export const WASTELAND_COLORS = {
   card: "rgba(8, 43, 46, 0.9)",
   /** The thin card border. The newest card uses `accent` for its border and left bar. */
   border: "#b89649",
-  /** User names, platform icons, the vault mark and the newest card. */
+  /** User names, platform icons and the newest card. */
   accent: "#e5bd54",
   /** Message text. */
   message: "#f4ebce",

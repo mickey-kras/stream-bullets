@@ -67,14 +67,3 @@ export function PlatformIcon({
     </>
   );
 }
-
-/** The vault mark at the right end of each card: a ring with a hub and two pairs of side ticks. Decorative. */
-export function VaultMark({ className }: Readonly<{ className?: string }>): ReactNode {
-  return (
-    <svg className={className} viewBox="0 0 36 24" aria-hidden="true" focusable="false">
-      <path d="M1 9h10M1 15h10M25 9h10M25 15h10" />
-      <circle cx="18" cy="12" r="9" />
-      <circle cx="18" cy="12" r="4" />
-    </svg>
-  );
-}
