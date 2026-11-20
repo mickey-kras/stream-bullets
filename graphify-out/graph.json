@@ -55786,7 +55786,7 @@
       "relation": "re_exports",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L41",
+      "source_location": "L40",
       "target": "app_lib_playground_protocol",
       "weight": 1.0
     },
@@ -75708,18 +75708,6 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
-      "source": "app_lib_playground_constants",
-      "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L2",
-      "target": "app_lib_playground_protocol_frame_chars_max",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
       "source": "app_lib_playground_crowd",
       "source_file": "app/lib/playground/crowd.ts",
       "source_location": "L1",
@@ -76564,18 +76552,6 @@
       "source_file": "app/lib/playground/sim.ts",
       "source_location": "L6",
       "target": "app_lib_playground_constants_turn_chance",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_lib_playground_sim",
-      "source_file": "app/lib/playground/sim.ts",
-      "source_location": "L6",
-      "target": "app_lib_playground_constants_visible_max",
       "weight": 1.0
     },
     {
@@ -108747,18 +108723,6 @@
       "source": "tests_playground_sim_test",
       "source_file": "tests/playground-sim.test.ts",
       "source_location": "L4",
-      "target": "app_lib_playground_constants_visible_max",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "tests_playground_sim_test",
-      "source_file": "tests/playground-sim.test.ts",
-      "source_location": "L4",
       "target": "app_lib_playground_protocol_bubble_graphemes",
       "weight": 1.0
     },
@@ -123109,18 +123073,6 @@
       "source_file": "app/lib/playground/constants.ts",
       "source_location": "L1",
       "target": "app_lib_overlay_layers",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_lib_playground_constants",
-      "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L2",
-      "target": "app_lib_playground_protocol",
       "weight": 1.0
     },
     {
@@ -143453,6 +143405,18 @@
       "confidence_score": 1.0,
       "context": "re-export",
       "relation": "imports_from",
+      "source": "app_lib_playground_constants",
+      "source_file": "app/lib/playground/constants.ts",
+      "source_location": "L40",
+      "target": "app_lib_playground_protocol",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "re-export",
+      "relation": "imports_from",
       "source": "app_routes_admin",
       "source_file": "app/routes/admin.tsx",
       "source_location": "L1",
@@ -143696,7 +143660,19 @@
       "relation": "re_exports",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L65",
+      "source_location": "L40",
+      "target": "app_lib_playground_protocol_frame_chars_max",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "re-export",
+      "relation": "re_exports",
+      "source": "app_lib_playground_constants",
+      "source_file": "app/lib/playground/constants.ts",
+      "source_location": "L64",
       "target": "app_lib_playground_protocol_bubble_graphemes",
       "weight": 1.0
     },
@@ -143708,7 +143684,7 @@
       "relation": "re_exports",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L65",
+      "source_location": "L64",
       "target": "app_lib_playground_protocol_frame_bubbles_max",
       "weight": 1.0
     },
@@ -143720,7 +143696,7 @@
       "relation": "re_exports",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L74",
+      "source_location": "L73",
       "target": "app_lib_playground_protocol_frame_stairs_max",
       "weight": 1.0
     },
@@ -160403,18 +160379,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L10",
-      "target": "app_lib_playground_constants_tick_hz",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_playground_constants",
-      "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L104",
+      "source_location": "L103",
       "target": "app_lib_playground_constants_walk_speed",
       "weight": 1.0
     },
@@ -160425,7 +160390,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L105",
+      "source_location": "L104",
       "target": "app_lib_playground_constants_walk_speed_spread",
       "weight": 1.0
     },
@@ -160436,7 +160401,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L107",
+      "source_location": "L106",
       "target": "app_lib_playground_constants_stair_speed",
       "weight": 1.0
     },
@@ -160447,7 +160412,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L108",
+      "source_location": "L107",
       "target": "app_lib_playground_constants_goto_speed_max",
       "weight": 1.0
     },
@@ -160458,7 +160423,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L110",
+      "source_location": "L109",
       "target": "app_lib_playground_constants_turn_chance",
       "weight": 1.0
     },
@@ -160469,7 +160434,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L111",
+      "source_location": "L110",
       "target": "app_lib_playground_constants_idle_chance",
       "weight": 1.0
     },
@@ -160480,7 +160445,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L113",
+      "source_location": "L112",
       "target": "app_lib_playground_constants_step_up",
       "weight": 1.0
     },
@@ -160491,7 +160456,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L115",
+      "source_location": "L114",
       "target": "app_lib_playground_constants_gravity",
       "weight": 1.0
     },
@@ -160502,7 +160467,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L116",
+      "source_location": "L115",
       "target": "app_lib_playground_constants_jump_vy",
       "weight": 1.0
     },
@@ -160513,7 +160478,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L117",
+      "source_location": "L116",
       "target": "app_lib_playground_constants_jump_vx",
       "weight": 1.0
     },
@@ -160524,7 +160489,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L118",
+      "source_location": "L117",
       "target": "app_lib_playground_constants_fall_vx",
       "weight": 1.0
     },
@@ -160535,7 +160500,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L119",
+      "source_location": "L118",
       "target": "app_lib_playground_constants_flat_height",
       "weight": 1.0
     },
@@ -160546,18 +160511,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L125",
-      "target": "app_lib_playground_constants_duration",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_playground_constants",
-      "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L13",
+      "source_location": "L12",
       "target": "app_lib_playground_constants_pixel_scale",
       "weight": 1.0
     },
@@ -160568,7 +160522,18 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L15",
+      "source_location": "L124",
+      "target": "app_lib_playground_constants_duration",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_playground_constants",
+      "source_file": "app/lib/playground/constants.ts",
+      "source_location": "L14",
       "target": "app_lib_playground_constants_cell_logical",
       "weight": 1.0
     },
@@ -160579,7 +160544,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L17",
+      "source_location": "L16",
       "target": "app_lib_playground_constants_cells_w_min",
       "weight": 1.0
     },
@@ -160590,7 +160555,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L18",
+      "source_location": "L17",
       "target": "app_lib_playground_constants_cells_w_max",
       "weight": 1.0
     },
@@ -160601,7 +160566,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L19",
+      "source_location": "L18",
       "target": "app_lib_playground_constants_cells_h_min",
       "weight": 1.0
     },
@@ -160612,7 +160577,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L20",
+      "source_location": "L19",
       "target": "app_lib_playground_constants_cells_h_max",
       "weight": 1.0
     },
@@ -160623,7 +160588,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L23",
+      "source_location": "L22",
       "target": "app_lib_playground_constants_tile",
       "weight": 1.0
     },
@@ -160634,7 +160599,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L24",
+      "source_location": "L23",
       "target": "app_lib_playground_constants_ground_offset",
       "weight": 1.0
     },
@@ -160645,7 +160610,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L26",
+      "source_location": "L25",
       "target": "app_lib_playground_constants_zone_tiles",
       "weight": 1.0
     },
@@ -160656,7 +160621,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L28",
+      "source_location": "L27",
       "target": "app_lib_playground_constants_middle_dirt",
       "weight": 1.0
     },
@@ -160667,7 +160632,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L29",
+      "source_location": "L28",
       "target": "app_lib_playground_constants_middle_girder",
       "weight": 1.0
     },
@@ -160678,7 +160643,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L31",
+      "source_location": "L30",
       "target": "app_lib_playground_constants_entry_x",
       "weight": 1.0
     },
@@ -160689,7 +160654,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L32",
+      "source_location": "L31",
       "target": "app_lib_playground_constants_exit_inset",
       "weight": 1.0
     },
@@ -160700,7 +160665,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L34",
+      "source_location": "L33",
       "target": "app_lib_playground_constants_walk_inset",
       "weight": 1.0
     },
@@ -160711,7 +160676,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L36",
+      "source_location": "L35",
       "target": "app_lib_playground_constants_bounce_inset",
       "weight": 1.0
     },
@@ -160722,7 +160687,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L38",
+      "source_location": "L37",
       "target": "app_lib_playground_constants_fall_out",
       "weight": 1.0
     },
@@ -160733,18 +160698,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L41",
-      "target": "app_lib_playground_constants_visible_max",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_lib_playground_constants",
-      "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L46",
+      "source_location": "L45",
       "target": "app_lib_playground_constants_ranked_share",
       "weight": 1.0
     },
@@ -160755,7 +160709,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L48",
+      "source_location": "L47",
       "target": "app_lib_playground_constants_rotation_ticks",
       "weight": 1.0
     },
@@ -160766,7 +160720,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L50",
+      "source_location": "L49",
       "target": "app_lib_playground_constants_min_stay_ticks",
       "weight": 1.0
     },
@@ -160777,7 +160731,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L53",
+      "source_location": "L52",
       "target": "app_lib_playground_constants_score_cooldown_ticks",
       "weight": 1.0
     },
@@ -160788,7 +160742,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L55",
+      "source_location": "L54",
       "target": "app_lib_playground_constants_score_decay_ticks",
       "weight": 1.0
     },
@@ -160799,7 +160753,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L58",
+      "source_location": "L57",
       "target": "app_lib_playground_constants_command_cooldown_ticks",
       "weight": 1.0
     },
@@ -160810,7 +160764,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L60",
+      "source_location": "L59",
       "target": "app_lib_playground_constants_command_expiry_ticks",
       "weight": 1.0
     },
@@ -160821,7 +160775,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L63",
+      "source_location": "L62",
       "target": "app_lib_playground_constants_bubble_ticks",
       "weight": 1.0
     },
@@ -160832,7 +160786,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L64",
+      "source_location": "L63",
       "target": "app_lib_playground_constants_command_bubble_ticks",
       "weight": 1.0
     },
@@ -160843,7 +160797,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L67",
+      "source_location": "L66",
       "target": "app_lib_playground_constants_mark_ticks",
       "weight": 1.0
     },
@@ -160854,7 +160808,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L69",
+      "source_location": "L68",
       "target": "app_lib_playground_constants_new_ticks",
       "weight": 1.0
     },
@@ -160865,7 +160819,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L72",
+      "source_location": "L71",
       "target": "app_lib_playground_constants_terrain_lifetime_ticks",
       "weight": 1.0
     },
@@ -160876,7 +160830,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L76",
+      "source_location": "L75",
       "target": "app_lib_playground_constants_build_steps",
       "weight": 1.0
     },
@@ -160887,7 +160841,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L78",
+      "source_location": "L77",
       "target": "app_lib_playground_constants_build_turn_inset",
       "weight": 1.0
     },
@@ -160898,7 +160852,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L80",
+      "source_location": "L79",
       "target": "app_lib_playground_constants_respawn_ticks",
       "weight": 1.0
     },
@@ -160909,7 +160863,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L83",
+      "source_location": "L82",
       "target": "app_lib_playground_constants_registry_max",
       "weight": 1.0
     },
@@ -160920,7 +160874,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L85",
+      "source_location": "L84",
       "target": "app_lib_playground_constants_registry_idle_ticks",
       "weight": 1.0
     },
@@ -160931,7 +160885,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L87",
+      "source_location": "L86",
       "target": "app_lib_playground_constants_restricted_max",
       "weight": 1.0
     },
@@ -160942,7 +160896,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L89",
+      "source_location": "L88",
       "target": "app_lib_playground_constants_sweep_ticks",
       "weight": 1.0
     },
@@ -160953,7 +160907,18 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L92",
+      "source_location": "L9",
+      "target": "app_lib_playground_constants_tick_hz",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_playground_constants",
+      "source_file": "app/lib/playground/constants.ts",
+      "source_location": "L91",
       "target": "app_lib_playground_constants_characters_test_ms",
       "weight": 1.0
     },
@@ -160964,7 +160929,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L93",
+      "source_location": "L92",
       "target": "app_lib_playground_constants_characters_test_ticks",
       "weight": 1.0
     },
@@ -160975,7 +160940,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L95",
+      "source_location": "L94",
       "target": "app_lib_playground_constants_test_user_prefix",
       "weight": 1.0
     },
@@ -160986,7 +160951,7 @@
       "relation": "contains",
       "source": "app_lib_playground_constants",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L98",
+      "source_location": "L97",
       "target": "app_lib_playground_constants_checkpoint_max_length",
       "weight": 1.0
     },
@@ -192012,10 +191977,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "630c2f54c0401dcdd55afdaf8b62c29f0c8e2fb84f4c1581a3b87da6b2c9eb4c",
+    "content_sha256": "97528216d035bee496808f9bff613486a45b0b048731230e0c11f0c9cf8b0f55",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "9546a7a3d1f7f98ebac6d9d9373cfaae4aae8201d215d3bca2ba0444e1ad9212",
+    "source_sha256": "0433356c1c5e2ccae79f453cd4fbe5c1221c2c6d38bb94df77fc5e1a3b80e5b4",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -232114,7 +232079,7 @@
       "label": "BOUNCE_INSET",
       "norm_label": "bounce_inset",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L36"
+      "source_location": "L35"
     },
     {
       "_origin": "ast",
@@ -232124,7 +232089,7 @@
       "label": "BUBBLE_TICKS",
       "norm_label": "bubble_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L63"
+      "source_location": "L62"
     },
     {
       "_origin": "ast",
@@ -232134,7 +232099,7 @@
       "label": "BUILD_STEPS",
       "norm_label": "build_steps",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L76"
+      "source_location": "L75"
     },
     {
       "_origin": "ast",
@@ -232144,7 +232109,7 @@
       "label": "BUILD_TURN_INSET",
       "norm_label": "build_turn_inset",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L78"
+      "source_location": "L77"
     },
     {
       "_origin": "ast",
@@ -232154,7 +232119,7 @@
       "label": "CELL_LOGICAL",
       "norm_label": "cell_logical",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L15"
+      "source_location": "L14"
     },
     {
       "_origin": "ast",
@@ -232164,7 +232129,7 @@
       "label": "CELLS_H_MAX",
       "norm_label": "cells_h_max",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L20"
+      "source_location": "L19"
     },
     {
       "_origin": "ast",
@@ -232174,7 +232139,7 @@
       "label": "CELLS_H_MIN",
       "norm_label": "cells_h_min",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L19"
+      "source_location": "L18"
     },
     {
       "_origin": "ast",
@@ -232184,7 +232149,7 @@
       "label": "CELLS_W_MAX",
       "norm_label": "cells_w_max",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L18"
+      "source_location": "L17"
     },
     {
       "_origin": "ast",
@@ -232194,7 +232159,7 @@
       "label": "CELLS_W_MIN",
       "norm_label": "cells_w_min",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L17"
+      "source_location": "L16"
     },
     {
       "_origin": "ast",
@@ -232204,7 +232169,7 @@
       "label": "CHARACTERS_TEST_MS",
       "norm_label": "characters_test_ms",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L92"
+      "source_location": "L91"
     },
     {
       "_origin": "ast",
@@ -232214,7 +232179,7 @@
       "label": "CHARACTERS_TEST_TICKS",
       "norm_label": "characters_test_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L93"
+      "source_location": "L92"
     },
     {
       "_origin": "ast",
@@ -232224,7 +232189,7 @@
       "label": "CHECKPOINT_MAX_LENGTH",
       "norm_label": "checkpoint_max_length",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L98"
+      "source_location": "L97"
     },
     {
       "_origin": "ast",
@@ -232234,7 +232199,7 @@
       "label": "COMMAND_BUBBLE_TICKS",
       "norm_label": "command_bubble_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L64"
+      "source_location": "L63"
     },
     {
       "_origin": "ast",
@@ -232244,7 +232209,7 @@
       "label": "COMMAND_COOLDOWN_TICKS",
       "norm_label": "command_cooldown_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L58"
+      "source_location": "L57"
     },
     {
       "_origin": "ast",
@@ -232254,7 +232219,7 @@
       "label": "COMMAND_EXPIRY_TICKS",
       "norm_label": "command_expiry_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L60"
+      "source_location": "L59"
     },
     {
       "_origin": "ast",
@@ -232264,7 +232229,7 @@
       "label": "DURATION",
       "norm_label": "duration",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L125"
+      "source_location": "L124"
     },
     {
       "_origin": "ast",
@@ -232274,7 +232239,7 @@
       "label": "ENTRY_X",
       "norm_label": "entry_x",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L31"
+      "source_location": "L30"
     },
     {
       "_origin": "ast",
@@ -232284,7 +232249,7 @@
       "label": "EXIT_INSET",
       "norm_label": "exit_inset",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L32"
+      "source_location": "L31"
     },
     {
       "_origin": "ast",
@@ -232294,7 +232259,7 @@
       "label": "FALL_OUT",
       "norm_label": "fall_out",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L38"
+      "source_location": "L37"
     },
     {
       "_origin": "ast",
@@ -232304,7 +232269,7 @@
       "label": "FALL_VX",
       "norm_label": "fall_vx",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L118"
+      "source_location": "L117"
     },
     {
       "_origin": "ast",
@@ -232314,7 +232279,7 @@
       "label": "FLAT_HEIGHT",
       "norm_label": "flat_height",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L119"
+      "source_location": "L118"
     },
     {
       "_origin": "ast",
@@ -232324,7 +232289,7 @@
       "label": "GOTO_SPEED_MAX",
       "norm_label": "goto_speed_max",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L108"
+      "source_location": "L107"
     },
     {
       "_origin": "ast",
@@ -232334,7 +232299,7 @@
       "label": "GRAVITY",
       "norm_label": "gravity",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L115"
+      "source_location": "L114"
     },
     {
       "_origin": "ast",
@@ -232344,7 +232309,7 @@
       "label": "GROUND_OFFSET",
       "norm_label": "ground_offset",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L24"
+      "source_location": "L23"
     },
     {
       "_origin": "ast",
@@ -232354,7 +232319,7 @@
       "label": "IDLE_CHANCE",
       "norm_label": "idle_chance",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L111"
+      "source_location": "L110"
     },
     {
       "_origin": "ast",
@@ -232364,7 +232329,7 @@
       "label": "JUMP_VX",
       "norm_label": "jump_vx",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L117"
+      "source_location": "L116"
     },
     {
       "_origin": "ast",
@@ -232374,7 +232339,7 @@
       "label": "JUMP_VY",
       "norm_label": "jump_vy",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L116"
+      "source_location": "L115"
     },
     {
       "_origin": "ast",
@@ -232384,7 +232349,7 @@
       "label": "MARK_TICKS",
       "norm_label": "mark_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L67"
+      "source_location": "L66"
     },
     {
       "_origin": "ast",
@@ -232394,7 +232359,7 @@
       "label": "MIDDLE_DIRT",
       "norm_label": "middle_dirt",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L28"
+      "source_location": "L27"
     },
     {
       "_origin": "ast",
@@ -232404,7 +232369,7 @@
       "label": "MIDDLE_GIRDER",
       "norm_label": "middle_girder",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L29"
+      "source_location": "L28"
     },
     {
       "_origin": "ast",
@@ -232414,7 +232379,7 @@
       "label": "MIN_STAY_TICKS",
       "norm_label": "min_stay_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L50"
+      "source_location": "L49"
     },
     {
       "_origin": "ast",
@@ -232424,7 +232389,7 @@
       "label": "NEW_TICKS",
       "norm_label": "new_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L69"
+      "source_location": "L68"
     },
     {
       "_origin": "ast",
@@ -232434,7 +232399,7 @@
       "label": "PIXEL_SCALE",
       "norm_label": "pixel_scale",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L13"
+      "source_location": "L12"
     },
     {
       "_origin": "ast",
@@ -232444,7 +232409,7 @@
       "label": "RANKED_SHARE",
       "norm_label": "ranked_share",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L46"
+      "source_location": "L45"
     },
     {
       "_origin": "ast",
@@ -232454,7 +232419,7 @@
       "label": "REGISTRY_IDLE_TICKS",
       "norm_label": "registry_idle_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L85"
+      "source_location": "L84"
     },
     {
       "_origin": "ast",
@@ -232464,7 +232429,7 @@
       "label": "REGISTRY_MAX",
       "norm_label": "registry_max",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L83"
+      "source_location": "L82"
     },
     {
       "_origin": "ast",
@@ -232474,7 +232439,7 @@
       "label": "RESPAWN_TICKS",
       "norm_label": "respawn_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L80"
+      "source_location": "L79"
     },
     {
       "_origin": "ast",
@@ -232484,7 +232449,7 @@
       "label": "RESTRICTED_MAX",
       "norm_label": "restricted_max",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L87"
+      "source_location": "L86"
     },
     {
       "_origin": "ast",
@@ -232494,7 +232459,7 @@
       "label": "ROTATION_TICKS",
       "norm_label": "rotation_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L48"
+      "source_location": "L47"
     },
     {
       "_origin": "ast",
@@ -232504,7 +232469,7 @@
       "label": "SCORE_COOLDOWN_TICKS",
       "norm_label": "score_cooldown_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L53"
+      "source_location": "L52"
     },
     {
       "_origin": "ast",
@@ -232514,7 +232479,7 @@
       "label": "SCORE_DECAY_TICKS",
       "norm_label": "score_decay_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L55"
+      "source_location": "L54"
     },
     {
       "_origin": "ast",
@@ -232524,7 +232489,7 @@
       "label": "STAIR_SPEED",
       "norm_label": "stair_speed",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L107"
+      "source_location": "L106"
     },
     {
       "_origin": "ast",
@@ -232534,7 +232499,7 @@
       "label": "STEP_UP",
       "norm_label": "step_up",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L113"
+      "source_location": "L112"
     },
     {
       "_origin": "ast",
@@ -232544,7 +232509,7 @@
       "label": "SWEEP_TICKS",
       "norm_label": "sweep_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L89"
+      "source_location": "L88"
     },
     {
       "_origin": "ast",
@@ -232554,7 +232519,7 @@
       "label": "TERRAIN_LIFETIME_TICKS",
       "norm_label": "terrain_lifetime_ticks",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L72"
+      "source_location": "L71"
     },
     {
       "_origin": "ast",
@@ -232564,7 +232529,7 @@
       "label": "TEST_USER_PREFIX",
       "norm_label": "test_user_prefix",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L95"
+      "source_location": "L94"
     },
     {
       "_origin": "ast",
@@ -232574,7 +232539,7 @@
       "label": "TICK_HZ",
       "norm_label": "tick_hz",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L10"
+      "source_location": "L9"
     },
     {
       "_origin": "ast",
@@ -232584,7 +232549,7 @@
       "label": "TILE",
       "norm_label": "tile",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L23"
+      "source_location": "L22"
     },
     {
       "_origin": "ast",
@@ -232594,17 +232559,7 @@
       "label": "TURN_CHANCE",
       "norm_label": "turn_chance",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L110"
-    },
-    {
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_lib_playground_constants_visible_max",
-      "label": "VISIBLE_MAX",
-      "norm_label": "visible_max",
-      "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L41"
+      "source_location": "L109"
     },
     {
       "_origin": "ast",
@@ -232614,7 +232569,7 @@
       "label": "WALK_INSET",
       "norm_label": "walk_inset",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L34"
+      "source_location": "L33"
     },
     {
       "_origin": "ast",
@@ -232624,7 +232579,7 @@
       "label": "WALK_SPEED",
       "norm_label": "walk_speed",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L104"
+      "source_location": "L103"
     },
     {
       "_origin": "ast",
@@ -232634,7 +232589,7 @@
       "label": "WALK_SPEED_SPREAD",
       "norm_label": "walk_speed_spread",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L105"
+      "source_location": "L104"
     },
     {
       "_origin": "ast",
@@ -232644,7 +232599,7 @@
       "label": "ZONE_TILES",
       "norm_label": "zone_tiles",
       "source_file": "app/lib/playground/constants.ts",
-      "source_location": "L26"
+      "source_location": "L25"
     },
     {
       "_origin": "ast",

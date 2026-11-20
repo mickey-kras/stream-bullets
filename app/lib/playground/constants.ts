@@ -1,5 +1,4 @@
 import { CELL_PX } from "../overlay-layers";
-import { FRAME_CHARS_MAX } from "./protocol";
 
 /**
  * The rules of the character playground (issue #664, docs/characters.md). Time is in ticks of the rules clock.
@@ -38,7 +37,7 @@ export const BOUNCE_INSET = 60;
 export const FALL_OUT = 40;
 
 /** The most visible characters that a frame holds, entrance, exit and respawn included. */
-export const VISIBLE_MAX = FRAME_CHARS_MAX;
+export { FRAME_CHARS_MAX as VISIBLE_MAX } from "./protocol";
 /**
  * The share of the visible slots that goes to the highest decayed scores. The other slots rotate through the other
  * active participants. The owner sets the number of visible slots (CHARACTERS_MAX): 40 slots give 30 and 10.
