@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { RouterContextProvider } from "react-router";
+import { RouterContextProvider, UNSAFE_ErrorResponseImpl } from "react-router";
 import { handleError } from "../app/entry.server";
 import { appContext, type AppEnv } from "../app/env";
 
@@ -46,6 +46,20 @@ describe("server route error logging", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     handleError("boom", { request: new Request("https://app.example/"), context: context(), params: {} });
     expect(log.mock.calls).toEqual([["server_request_failed", { cause: "string", frames: [], ray: null, requestId: "test-request" }]]);
+  });
+
+  it("does not report the 404 of an address with no route as a server failure", () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const request = new Request("https://app.example/assets/de.json");
+    handleError(new UNSAFE_ErrorResponseImpl(404, "Not Found", null, true), { request, context: context(), params: {} });
+    expect(log).not.toHaveBeenCalled();
+  });
+
+  it("reports a route error response with a 5xx status", () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const request = new Request("https://app.example/");
+    handleError(new UNSAFE_ErrorResponseImpl(500, "Server Error", null), { request, context: context(), params: {} });
+    expect(log).toHaveBeenCalledTimes(1);
   });
 
   it("does not report a cancelled request as a server failure", () => {
