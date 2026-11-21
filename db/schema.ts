@@ -269,9 +269,23 @@ export const commentTranslations = sqliteTable(
     text: text("text"),
     createdAt: integer("created_at").notNull(),
   },
+  (table) => [primaryKey({ columns: [table.commentId, table.locale] })],
+);
+
+// One row for each start of the translation model. A row reserves the comment text and locale, so two
+// requests at the same time start the model one time. The rows also count toward the daily limit. They have
+// no foreign key: an edit or a removal of the comment does not remove them. Cron deletes them after 2 days.
+export const translationAttempts = sqliteTable(
+  "translation_attempts",
+  {
+    commentId: text("comment_id").notNull(),
+    locale: text("locale").notNull(),
+    sourceHash: text("source_hash").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
   (table) => [
-    primaryKey({ columns: [table.commentId, table.locale] }),
-    index("comment_translations_created_idx").on(table.createdAt),
+    primaryKey({ columns: [table.commentId, table.locale, table.sourceHash] }),
+    index("translation_attempts_created_idx").on(table.createdAt),
   ],
 );
 

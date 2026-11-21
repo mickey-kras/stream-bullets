@@ -1,5 +1,6 @@
 import type { AppEnv } from "../env";
 import { pruneAiInterest } from "./ai.server";
+import { pruneTranslationAttempts } from "./translation.server";
 
 // Resolved reports are deleted after 365 days.
 export const REPORT_RETENTION_MS = 365 * 86_400_000;
@@ -31,5 +32,6 @@ export async function cleanExpiredData(env: AppEnv, now: number): Promise<void> 
     ),
     // AI interest votes count for 30 days.
     ...pruneAiInterest(env, now),
+    pruneTranslationAttempts(env, now),
   ]);
 }

@@ -29,7 +29,7 @@ function codeSpans(text: string): string {
 }
 
 function links(text: string): string {
-  return (text.match(/https?:\/\/[^\s)]+/gu) ?? []).join("\n");
+  return (text.match(/(?:https?:\/\/|mailto:)[^\s)]+/gu) ?? []).join("\n");
 }
 
 /** Whether `translation` has the same Markdown marks, line breaks, code and links as `source`. */

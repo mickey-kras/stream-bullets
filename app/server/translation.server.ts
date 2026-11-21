@@ -7,10 +7,20 @@ import { getVisibleEntry } from "./data.server";
 import { HttpError } from "./http.server";
 
 export const TRANSLATION_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
-// New translations in 24 hours, for all accounts together. Stored translations are not counted again.
+// Starts of the model in 24 hours, for all accounts together. A stored translation starts no model.
 export const TRANSLATION_DAILY_LIMIT = 2000;
 export const TRANSLATION_LIMIT_KEY = "translation";
 const DAY = 86_400_000;
+// A reservation without a stored result is open again after this time.
+const CLAIM_MS = 60_000;
+export const TRANSLATION_ATTEMPT_RETENTION_MS = 2 * DAY;
+
+// Cron removes the old rows of the daily count.
+export function pruneTranslationAttempts(env: AppEnv, now: number): D1PreparedStatement {
+  return env.DB.prepare("DELETE FROM translation_attempts WHERE created_at < ?").bind(
+    now - TRANSLATION_ATTEMPT_RETENTION_MS,
+  );
+}
 
 // `POST /api/comments/:id/translation`.
 export const translationSchema = z.object({ locale: z.enum(LOCALES) }).strict();
@@ -107,16 +117,33 @@ export async function translateComment(
 
   if (!(await env.REQUEST_LIMITER.limit({ key: `${TRANSLATION_LIMIT_KEY}:${viewerId}` })).success)
     throw new HttpError(429, "Too many requests. Please try again in a minute.");
-  const recent = await env.DB.prepare("SELECT COUNT(*) AS count FROM comment_translations WHERE created_at > ?")
+  const recent = await env.DB.prepare("SELECT COUNT(*) AS count FROM translation_attempts WHERE created_at > ?")
     .bind(now - DAY)
     .first<{ count: number }>();
   if ((recent?.count ?? 0) >= TRANSLATION_DAILY_LIMIT) throw new HttpError(503, "Translation is not available.");
+  // Reserve this comment text and locale. A second request for them does not start the model again.
+  const claim = await env.DB.prepare(
+    `INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at) VALUES (?,?,?,?)
+      ON CONFLICT(comment_id, locale, source_hash) DO UPDATE SET created_at=excluded.created_at
+      WHERE translation_attempts.created_at < excluded.created_at - ?`,
+  )
+    .bind(commentId, locale, hash, now, CLAIM_MS)
+    .run();
+  if (claim.meta.changes === 0) throw new HttpError(409, "The translation is not ready. Try again in a moment.");
 
-  const translation: CommentTranslation | null = checked(
-    comment.text,
-    rows,
-    readAnswer(await askModel(env.AI, locale, comment.text, rows)),
-  );
+  let answer: string;
+  try {
+    answer = await askModel(env.AI, locale, comment.text, rows);
+  } catch (error) {
+    // The model gave no answer, so a later request can try again.
+    await env.DB.prepare(
+      "UPDATE translation_attempts SET created_at=0 WHERE comment_id=? AND locale=? AND source_hash=?",
+    )
+      .bind(commentId, locale, hash)
+      .run();
+    throw error;
+  }
+  const translation: CommentTranslation | null = checked(comment.text, rows, readAnswer(answer));
   await env.DB.prepare(
     `INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at) VALUES (?,?,?,?,?)
       ON CONFLICT(comment_id, locale) DO UPDATE SET

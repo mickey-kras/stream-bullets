@@ -12,6 +12,7 @@ describe("translation checks", (): void => {
     ["a lost quote mark", "> quoted\n\nreply", "zitiert\n\nAntwort"],
     ["changed code", "run `!jump` now", "jetzt `!springen` ausführen"],
     ["a changed link", "see https://example.test/a", "siehe https://example.test/b"],
+    ["a changed mail address", "Mail [us](mailto:help@example.test)", "Mail [uns](mailto:wrong@example.test)"],
     ["a lost line break", "one\ntwo", "eins zwei"],
   ])("refuses %s", (_name: string, source: string, translation: string): void => {
     expect(keepsStructure(source, translation)).toBe(false);

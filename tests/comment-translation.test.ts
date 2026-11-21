@@ -1,6 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import type { AppEnv } from "../app/env";
-import { TRANSLATION_DAILY_LIMIT, translateComment, translationSchema } from "../app/server/translation.server";
+import {
+  pruneTranslationAttempts,
+  TRANSLATION_ATTEMPT_RETENTION_MS,
+  TRANSLATION_DAILY_LIMIT,
+  translateComment,
+  translationSchema,
+} from "../app/server/translation.server";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 const NOW = 1_800_000_000_000;
@@ -46,6 +52,7 @@ beforeEach(async (): Promise<void> => {
   } as unknown as AppEnv;
   await env.DB.batch([
     env.DB.prepare("DELETE FROM user"),
+    env.DB.prepare("DELETE FROM translation_attempts"),
     ...["host", "fan", "bob"].map(
       (id: string): D1PreparedStatement =>
         env.DB.prepare("INSERT INTO user (id,name,email,created_at,updated_at) VALUES (?,?,?,1,1)").bind(
@@ -135,16 +142,53 @@ describe("comment translation", (): void => {
     expect(run).toHaveBeenCalledTimes(1);
   });
 
-  it("stops at the daily limit of new translations", async (): Promise<void> => {
+  it("stops at the daily limit of model starts, also after edits and removals", async (): Promise<void> => {
     const id: string = await seedComment();
     await env.DB.prepare(
       `WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i+1 FROM n WHERE i < ?)
-        INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at) SELECT ?, 'l'||i, 'h', NULL, ? FROM n`,
+        INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at) SELECT 'gone', 'de', 'h'||i, ? FROM n`,
     )
-      .bind(TRANSLATION_DAILY_LIMIT, id, NOW - 1000)
+      .bind(TRANSLATION_DAILY_LIMIT, NOW - 1000)
       .run();
     await expect(translateComment(env, id, "fan", "de", NOW)).rejects.toMatchObject({ status: 503 });
+    expect(run).not.toHaveBeenCalled();
     run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
     expect(await translateComment(env, id, "fan", "de", NOW + 86_400_000)).not.toBeNull();
+  });
+
+  it("starts the model one time for two requests at the same time", async (): Promise<void> => {
+    let finish: (value: { response: string }) => void = (): void => undefined;
+    run.mockReturnValue(
+      new Promise<{ response: string }>((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const id: string = await seedComment();
+    const first = translateComment(env, id, "fan", "de", NOW);
+    await vi.waitFor((): void => expect(run).toHaveBeenCalledTimes(1));
+    await expect(translateComment(env, id, "host", "de", NOW + 1)).rejects.toMatchObject({ status: 409 });
+    finish(answer("**Hallo** @Bob Lee, siehe `x`"));
+    expect(await first).not.toBeNull();
+    expect(await translateComment(env, id, "host", "de", NOW + 2)).not.toBeNull();
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets a later request try again after the model failed", async (): Promise<void> => {
+    run.mockRejectedValueOnce(new Error("model down"));
+    const id: string = await seedComment();
+    await expect(translateComment(env, id, "fan", "de", NOW)).rejects.toThrow("model down");
+    run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
+    expect(await translateComment(env, id, "fan", "de", NOW + 1)).not.toBeNull();
+  });
+
+  it("removes the old rows of the daily count", async (): Promise<void> => {
+    await env.DB.prepare(
+      "INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at) VALUES ('a','de','old',?),('a','de','new',?)",
+    )
+      .bind(NOW - TRANSLATION_ATTEMPT_RETENTION_MS - 1, NOW - 1000)
+      .run();
+    await pruneTranslationAttempts(env, NOW).run();
+    const { results } = await env.DB.prepare("SELECT source_hash FROM translation_attempts WHERE comment_id='a'").all();
+    expect(results).toEqual([{ source_hash: "new" }]);
   });
 });
