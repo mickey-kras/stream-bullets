@@ -185,8 +185,8 @@ for (const width of [1280, 390]) {
       // Translated labels change the height of rows, so the position holds within one row.
       await expect.poll(async () => Math.abs((await top()) - readAt)).toBeLessThanOrEqual(48);
     } finally {
-      // The viewer account is shared; later specs expect English.
-      await context.request.patch("/api/me/locale", { data: { locale: null } });
+      // The viewer account is shared; later specs expect its seeded English setting.
+      await context.request.patch("/api/me/locale", { data: { locale: "en" } });
       await close(context);
     }
   });
