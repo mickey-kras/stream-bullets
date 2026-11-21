@@ -135,7 +135,14 @@ test("logos go home, the streamer picture goes to its topics, and navigation mar
   const generic = page.getByRole("banner");
   await expect(generic.getByRole("link", { name: "StreamBullets home" })).toHaveAttribute("href", "/");
   const main = generic.getByRole("navigation", { name: "Main navigation" });
-  await expect(main.getByRole("link", { name: "Admin" })).toHaveAttribute("aria-current", "page");
+  // The Admin link is in the account menu only.
+  await expect(main.getByRole("link", { name: "Admin" })).toHaveCount(0);
+  await page.locator("button.profile").click();
+  await expect(page.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Admin" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await page.keyboard.press("Escape");
   await expect(main.getByRole("link", { name: "Streamers" })).not.toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("link", { name: "Back to Test host" })).toHaveAttribute("href", "/@test_host");
   await close(context);

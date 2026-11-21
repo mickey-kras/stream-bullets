@@ -786,7 +786,6 @@
   "moderation.unsuspendBody": "页面恢复公开并重新出现在主播列表中。",
   "moderation.unsuspendTitle": "解除暂停 @{handle}？",
   "moderation.unsuspendedDone": "已解除暂停 @{handle}。",
-  "nav.admin": "管理",
   "nav.home": "StreamBullets 首页",
   "nav.main": "主导航",
   "nav.overlay": "叠加层",

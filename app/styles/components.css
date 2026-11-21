@@ -1607,7 +1607,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .req { color: var(--gold); font-weight: 700; }
 .req-note { margin: 0 0 4px; font-size: .8125rem; color: var(--muted); }
 /* Disabled controls on moderated pages. */
-.streamer-shell:has(> .page-banner) :is(.votes button, .composer button, .composer textarea, .poll-option, .comment-actions button, .header-action, #suggest, .mash-pick):disabled { background: var(--tab) !important; color: var(--muted) !important; border-color: var(--line) !important; border-style: dashed !important; box-shadow: none !important; opacity: .55; cursor: not-allowed; }
+.streamer-shell:has(> .page-banner) :is(.votes button, .composer button, .composer textarea, .poll-option, .comment-actions button, #suggest, .mash-pick):disabled { background: var(--tab) !important; color: var(--muted) !important; border-color: var(--line) !important; border-style: dashed !important; box-shadow: none !important; opacity: .55; cursor: not-allowed; }
 .streamer-shell:has(> .page-banner) :is(.votes button, .composer button, .comment-actions button):disabled svg { color: var(--muted); }
 /* Moderation banner actions. */
 .banner-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; flex-basis: 100%; margin-left: 28px; }
@@ -1715,6 +1715,6 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
   .discussion-focus .poll-discussion { border: 0; margin: 0; padding: 0; }
   .discussion-focus .poll-discussion > :not(.discussion) { display: none; }
 }
-.notification-nav { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 0 0 auto; min-width: 44px; min-height: 44px; padding: 4px; }
+.notification-head > .icon-button { margin-left: auto; }
 
 .mention-options ul { list-style: none; margin: 0; padding: 0; }

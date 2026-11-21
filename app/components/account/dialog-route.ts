@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate, type Location } from "react-router";
 import { detached } from "../../lib/detached";
 
-// Account, language and display dialogs use ?dialog=<name>.
-export const ACCOUNT_DIALOGS = ["profile", "host", "data", "page", "language", "a11y"] as const;
+// Account, language, display and notification dialogs use ?dialog=<name>.
+export const ACCOUNT_DIALOGS = ["profile", "host", "data", "page", "language", "a11y", "notifications"] as const;
 export type AccountDialogName = (typeof ACCOUNT_DIALOGS)[number];
 
 export function isAccountDialog(value: string | null): value is AccountDialogName {

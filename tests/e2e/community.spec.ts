@@ -40,7 +40,7 @@ test("the owner adds, reorders and deletes cards; the support card follows the l
   await page.goto("/@feature_host?view=community");
   const titles = page.locator(".community-grid .community-card h2");
   await expect(titles).toHaveText(["Bring an idea", "Join the Discord", "Support Feature"]);
-  await page.locator("#suggest").click();
+  await page.locator("button.add-card-tile").click();
   const dialog = page.getByRole("dialog", { name: "Add card" });
   await dialog.getByRole("radio", { name: "Megaphone" }).check();
   await dialog.getByLabel("Title").fill("Clip of the week");

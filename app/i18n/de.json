@@ -800,7 +800,6 @@
   "moderation.unsuspendBody": "Die Seite ist wieder öffentlich und erscheint wieder in der Streamer-Liste.",
   "moderation.unsuspendTitle": "@{handle} entsperren?",
   "moderation.unsuspendedDone": "Sperre von @{handle} aufgehoben.",
-  "nav.admin": "Admin",
   "nav.home": "StreamBullets-Startseite",
   "nav.main": "Hauptnavigation",
   "nav.overlay": "Overlay",
