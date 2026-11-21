@@ -1412,6 +1412,11 @@ input[type="checkbox"], input[type="radio"], .modal-content .choice input { widt
   .poll-option > .option-score, .binary-votes .poll-option > .option-score { flex-basis: 4.25em; padding: 12px 12px 12px 8px; }
 }
 .comment-meta .reported-note { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; padding: 1px 8px; border: 1px dashed var(--line); border-radius: 999px; color: var(--muted); font: 500 .8125rem/1.4 var(--body); }
+/* The control that changes between a comment and its translation. */
+.comment-translation { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 2px 0 0; color: var(--muted); font-size: .875rem; }
+.comment-translation button { min-height: 30px; padding: 0; border: 0; border-radius: 0; background: none; color: var(--muted); font: inherit; text-decoration: underline; }
+.comment-translation button:hover { color: var(--gold); }
+.comment-translation output:empty { display: none; }
 .discard-box .discard-list { margin: 4px 0 0; padding-left: 22px; list-style: disc; }
 .discard-box .discard-list li { margin: 2px 0; }
 .discard-box .modal-actions { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }

@@ -1388,5 +1388,9 @@
   "waitlist.request": "Подати запит",
   "waitlist.sendAgain": "Надіслати запит знову",
   "waitlist.update": "Оновити запит",
-  "overlay.characters.off": "Персонажі на цьому сервері вимкнені."
+  "overlay.characters.off": "Персонажі на цьому сервері вимкнені.",
+  "discussion.translate": "Перекласти",
+  "discussion.translated": "Перекладено",
+  "discussion.showOriginal": "Показати оригінал",
+  "discussion.noTranslation": "Для цього коментаря немає перекладу."
 }

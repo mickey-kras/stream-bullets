@@ -1388,5 +1388,9 @@
   "waitlist.request": "Подать заявку",
   "waitlist.sendAgain": "Отправить заявку снова",
   "waitlist.update": "Обновить заявку",
-  "overlay.characters.off": "Персонажи на этом сервере выключены."
+  "overlay.characters.off": "Персонажи на этом сервере выключены.",
+  "discussion.translate": "Перевести",
+  "discussion.translated": "Переведено",
+  "discussion.showOriginal": "Показать оригинал",
+  "discussion.noTranslation": "Для этого комментария нет перевода."
 }

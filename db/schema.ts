@@ -256,6 +256,41 @@ export const commentMentions = sqliteTable(
   ],
 );
 
+// One machine translation of a comment for one locale. `text` is null when the comment needs no translation
+// or the translation failed its checks. `source_hash` is the SHA-256 of the comment text that was translated.
+export const commentTranslations = sqliteTable(
+  "comment_translations",
+  {
+    commentId: text("comment_id")
+      .notNull()
+      .references(() => entryComments.id, { onDelete: "cascade" }),
+    locale: text("locale").notNull(),
+    sourceHash: text("source_hash").notNull(),
+    text: text("text"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.commentId, table.locale] })],
+);
+
+// One row for each start of the translation model. A row reserves the comment text and locale, so two
+// requests at the same time start the model one time. The rows also count toward the daily limit. They have
+// no foreign key: an edit or a removal of the comment does not remove them. Cron deletes them after 2 days.
+export const translationAttempts = sqliteTable(
+  "translation_attempts",
+  {
+    commentId: text("comment_id").notNull(),
+    locale: text("locale").notNull(),
+    sourceHash: text("source_hash").notNull(),
+    // The time of the last start, and the number of starts for this text and locale.
+    createdAt: integer("created_at").notNull(),
+    starts: integer("starts").notNull().default(1),
+  },
+  (table) => [
+    primaryKey({ columns: [table.commentId, table.locale, table.sourceHash] }),
+    index("translation_attempts_created_idx").on(table.createdAt),
+  ],
+);
+
 export const notificationPreferences = sqliteTable(
   "notification_preferences",
   {

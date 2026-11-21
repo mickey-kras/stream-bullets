@@ -245,6 +245,8 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           <li>
             <strong>Cloudflare, Inc.</strong> hosts the service as our processor. It runs the application (Workers), the
             database (D1), image storage (R2), live updates (Durable Objects), and the network that protects the site.
+            When a signed-in reader asks for the translation of a comment, Cloudflare's translation model (Workers AI)
+            gets the text of that comment. We keep the translation with the comment.
           </li>
           <li>
             <strong>Google</strong>, <strong>Twitch</strong>, <strong>TikTok</strong> and <strong>Instagram</strong>{" "}
