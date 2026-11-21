@@ -302,7 +302,8 @@ See [live capacity](live-room-capacity.md).
 2. **Build your overlay**: the overlay studio.
 3. **Add to OBS**: the overlay link. When the page has a link, one line shows the OBS connection.
    It shows the number of connected sources. Without a source, it shows when the last one connected or went away.
-   The live room counts the sockets that came in with the current key and sends each change to the owner's tabs.
+   The live room counts the sockets that came in with the current key.
+   It sends each change to the owner's tabs.
 
 A signed-in page owner opens the page from **Overlay** in the header of their own streamer page or from the account menu.
 The site header has no **Overlay** entry.
