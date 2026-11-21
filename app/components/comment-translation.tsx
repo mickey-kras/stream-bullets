@@ -32,10 +32,11 @@ export function useCommentTranslation(
   useEffect(() => {
     if (!canAsk || known || removed || translationOff()) return;
     let stopped: boolean = false;
-    requestTranslation<{ translation: Translation | null }>(`/api/comments/${id}/translation`, {
-      locale: getLocale(),
-      text,
-    })
+    requestTranslation<{ translation: Translation | null }>(
+      `/api/comments/${id}/translation`,
+      { locale: getLocale(), text },
+      (): boolean => stopped,
+    )
       .then((result) => {
         if (!stopped) setLoaded({ forText: text, translation: result.translation });
       })
