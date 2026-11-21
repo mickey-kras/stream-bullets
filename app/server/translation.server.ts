@@ -108,27 +108,6 @@ async function askModel(ai: Ai, locale: Locale, source: string, mentions: readon
   return result.response;
 }
 
-// The comment can change while the model runs. Only the translation of the current text is stored.
-async function storeTranslation(
-  env: AppEnv,
-  commentId: string,
-  locale: Locale,
-  hash: string,
-  text: string | null,
-  now: number,
-  source: string,
-): Promise<void> {
-  await env.DB.prepare(
-    `INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at)
-      SELECT ?1, ?2, ?3, ?4, ?5
-      WHERE EXISTS(SELECT 1 FROM entry_comments WHERE id=?1 AND removed_at IS NULL AND text=?6)
-      ON CONFLICT(comment_id, locale) DO UPDATE SET
-        source_hash=excluded.source_hash, text=excluded.text, created_at=excluded.created_at`,
-  )
-    .bind(commentId, locale, hash, text, now, source)
-    .run();
-}
-
 /**
  * Reserves one start of the model for a text and locale, after the limits. The subject is a comment or an entry.
  * Throws 429 at the limit of the account, 503 at the daily limit, and 409 when a different request has the
