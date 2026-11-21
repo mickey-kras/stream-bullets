@@ -199,6 +199,28 @@ describe("test access", (): void => {
       status: 413,
     });
   });
+  it("sends sample chat to the feed of test_host only when the deployment has the feed", async (): Promise<void> => {
+    await expect(testEnvironmentResponse(request({ action: "chat" }), env)).rejects.toMatchObject({ status: 503 });
+    const fetchIngest = vi.fn((_url: string, _init: RequestInit): Promise<Response> =>
+      Promise.resolve(new Response(null, { status: 204 })),
+    );
+    const feed = { idFromName: (id: string): string => id, get: (): object => ({ fetch: fetchIngest }) };
+    const withFeed = { ...env, CHANNEL_INGEST: feed } as unknown as AppEnv;
+    const sent = await testEnvironmentResponse(request({ action: "chat" }), withFeed);
+    expect([sent.status, sent.headers.get("Location")]).toEqual([303, "/__test"]);
+    expect(fetchIngest.mock.calls.map(([url, init]) => [url, init.method])).toEqual([
+      ["https://channel-ingest.internal/test-chat?streamerId=67500000-0000-4000-8001-000000000001", "POST"],
+    ]);
+    await expect(testEnvironmentResponse(request({ action: "chat", secret: "wrong" }), withFeed)).rejects.toMatchObject({
+      status: 403,
+    });
+    fetchIngest.mockResolvedValueOnce(new Response(null, { status: 404 }));
+    await expect(testEnvironmentResponse(request({ action: "chat" }), withFeed)).rejects.toMatchObject({ status: 503 });
+    await expect(
+      testEnvironmentResponse(request({ action: "chat" }), { ...withFeed, CHANNELS_OFF: "1" }),
+    ).rejects.toMatchObject({ status: 503 });
+  });
+
   it("protects signed-out requests with separate access cookies and rejects tampering", async (): Promise<void> => {
     const response = await testEnvironmentResponse(request({ account: "signedout" }), env);
     const cookies: string[] = response.headers.getSetCookie();

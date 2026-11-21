@@ -1,5 +1,6 @@
 import nodeCrypto from "node:crypto";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { SAMPLE_CHAT } from "../app/lib/chat-feed";
 import type { AppEnv } from "../app/env";
 import { MAX_ACTIVITY_MESSAGE_LENGTH, parseActivityMessage, quotaDay, type ActivityChat, type ActivityEvent } from "../app/lib/activity";
 import { ChannelIngest, snapshotMessage } from "../app/server/channel-ingest";
@@ -228,6 +229,35 @@ describe("ChannelIngest requests", (): void => {
     const other = ingest.entry(otherPage);
     await ingest.get(ingest.idFromName(otherPage)).fetch(url("overlay-key").replace(page, otherPage), { method: "POST" });
     expect((await other.room.fetch(new Request(url("overlay-key"), { method: "POST" }))).status).toBe(400);
+  });
+
+  it("takes sample chat only in the test deployment, as new live messages each time", async (): Promise<void> => {
+    expect((await post("test-chat", "twitch")).status).toBe(404);
+    // Test settings on a deployment that is not the test deployment fail closed.
+    env.TEST_ACCESS_SECRET = "s".repeat(40);
+    await expect(post("test-chat", "twitch")).rejects.toMatchObject({ status: 503 });
+    Object.assign(env, {
+      APP_ENV: "test",
+      APP_ORIGIN: "https://test.streambullets.com",
+      TEST_DATABASE_ID: "e475eb5b-db31-43bd-8692-5926711e8faa",
+      ADMIN_EMAILS: "admin@example.test",
+      TWITCH_CLIENT_ID: undefined,
+      TWITCH_CLIENT_SECRET: undefined,
+      GOOGLE_CLIENT_ID: undefined,
+      GOOGLE_CLIENT_SECRET: undefined,
+    });
+    const socket = await listen({ "X-SB-Overlay": "1" });
+    expect((await post("test-chat", "twitch")).status).toBe(204);
+    const live = socket.ofType<{ event: ActivityChat }>("event").map(({ event }) => event);
+    expect(live).toHaveLength(SAMPLE_CHAT.length);
+    expect(live.every((event) => event.live)).toBe(true);
+    expect(new Set(live.map((event) => event.platform))).toEqual(new Set(["twitch", "youtube", "kick"]));
+    expect(live.map((event) => event.text)).toEqual(SAMPLE_CHAT.map((event) => event.text));
+    vi.setSystemTime(Date.now() + 1000);
+    expect((await post("test-chat", "twitch")).status).toBe(204);
+    expect(socket.ofType("event")).toHaveLength(2 * SAMPLE_CHAT.length);
+    expect(await snapshot()).toHaveLength(2 * SAMPLE_CHAT.length);
+    expect(fake.calls).toEqual([]);
   });
 
   it("admits only sockets the Worker vouched for, up to the limit, and sends the snapshot first", async (): Promise<void> => {

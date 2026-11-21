@@ -522,3 +522,14 @@ export const SAMPLE_CHAT: readonly ActivityChat[] = [
   ),
   sample(9, "kick", "Mad Maxine", "V8! 🔥🔥🔥"),
 ];
+
+/**
+ * The sample chat as new live messages at the time `now`, for the test deployment. Each call gives new message ids,
+ * so a second batch shows again.
+ */
+export function sampleChatAt(now: number): ActivityChat[] {
+  return SAMPLE_CHAT.map((message: ActivityChat, index: number): ActivityChat => {
+    const messageId = `test-${now}-${index}`;
+    return { ...message, id: `${message.platform}:${messageId}`, messageId, receivedAt: now + index, live: true };
+  });
+}

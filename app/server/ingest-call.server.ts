@@ -14,7 +14,8 @@ export type IngestPath =
   | "refresh"
   | "reconcile"
   | "playground"
-  | "playground-config";
+  | "playground-config"
+  | "test-chat";
 
 /** Calls the page's ingest object. `init` defaults to an empty POST. `characters` asks a subscribe for frames. */
 export function callIngest(

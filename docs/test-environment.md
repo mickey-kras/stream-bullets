@@ -129,6 +129,21 @@ Revision watermarks keep replacement data newer than the data in open overlays.
 Configuration and resource bindings remain separate from resettable data.
 Do not reset while another tester uses the environment.
 
+### Sample chat
+
+**Send sample chat to test_host** on `/__test` sends one batch of sample chat to the activity feed of `test_host`.
+The batch has messages from each platform, with Unicode text, an emote, a badge, and a command.
+The messages are live, like messages from a connected channel.
+Each batch has new message identifiers, so you can send it again.
+The feed keeps a message for 10 minutes. A reset does not remove the batch.
+
+The action reads no provider and needs no channel connection.
+It works only when the test deployment has the `CHANNEL_INGEST` binding. Without the binding, the answer is `503`.
+In all other deployments, the feed object answers `404`.
+
+To see the chat, sign in as `owner`, put the chat layer on stream in **Overlay control**, and create the overlay link.
+Open the link in the same browser, because the test deployment needs the test access cookie.
+
 ## Authorization checks
 
 The authorization model has viewers, page owners, and administrators.
