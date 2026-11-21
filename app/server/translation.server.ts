@@ -90,7 +90,7 @@ export async function attachTranslations(env: AppEnv, comments: readonly Comment
   for (const comment of open) {
     const row = stored.get(comment.id);
     // An edit between the read of the comment and this read gives a result for a different text.
-    if (row && row.source_hash === (await sha256(comment.text)))
+    if (row?.source_hash === (await sha256(comment.text)))
       comment.translation = checked(comment.text, comment.mentions ?? [], row.text);
   }
 }
@@ -202,7 +202,7 @@ export async function translateComment(
     .first<{ source_hash: string; text: string | null }>();
   if (stored?.source_hash === hash) return checked(comment.text, rows, stored.text);
   // Text without letters, for example emoji or a link only, has no translation and starts no model.
-  if (!/\p{L}/u.test(comment.text.replace(/https?:\/\/\S+/gu, ""))) {
+  if (!/\p{L}/u.test(comment.text.replaceAll(/https?:\/\/\S+/gu, ""))) {
     await storeTranslation(env, commentId, locale, hash, null, now, comment.text);
     return null;
   }
