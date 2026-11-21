@@ -56925,7 +56925,7 @@
       "relation": "calls",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L267",
+      "source_location": "L272",
       "target": "tests_route_ui_boundaries_test_args",
       "weight": 1.0
     },
@@ -56937,7 +56937,7 @@
       "relation": "calls",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L281",
+      "source_location": "L286",
       "target": "tests_route_ui_boundaries_test_signedin",
       "weight": 1.0
     },
@@ -56949,7 +56949,7 @@
       "relation": "calls",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L774",
+      "source_location": "L779",
       "target": "tests_route_ui_boundaries_test_navigation",
       "weight": 1.0
     },
@@ -56961,7 +56961,7 @@
       "relation": "calls",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L810",
+      "source_location": "L815",
       "target": "tests_route_ui_boundaries_test_streamermetaargs",
       "weight": 1.0
     },
@@ -56973,7 +56973,7 @@
       "relation": "calls",
       "source": "tests_route_ui_boundaries_test_streamermetaargs",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L796",
+      "source_location": "L801",
       "target": "tests_route_ui_boundaries_test_args",
       "weight": 1.0
     },
@@ -194326,7 +194326,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L116",
+      "source_location": "L121",
       "target": "tests_route_ui_boundaries_test_viewer",
       "weight": 1.0
     },
@@ -194337,7 +194337,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L124",
+      "source_location": "L129",
       "target": "tests_route_ui_boundaries_test_streamer",
       "weight": 1.0
     },
@@ -194348,7 +194348,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L140",
+      "source_location": "L145",
       "target": "tests_route_ui_boundaries_test_entry",
       "weight": 1.0
     },
@@ -194359,7 +194359,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L167",
+      "source_location": "L172",
       "target": "tests_route_ui_boundaries_test_event",
       "weight": 1.0
     },
@@ -194370,7 +194370,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L184",
+      "source_location": "L189",
       "target": "tests_route_ui_boundaries_test_ready",
       "weight": 1.0
     },
@@ -194381,7 +194381,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L195",
+      "source_location": "L200",
       "target": "tests_route_ui_boundaries_test_initial",
       "weight": 1.0
     },
@@ -194392,7 +194392,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L197",
+      "source_location": "L202",
       "target": "tests_route_ui_boundaries_test_args",
       "weight": 1.0
     },
@@ -194403,7 +194403,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L216",
+      "source_location": "L221",
       "target": "tests_route_ui_boundaries_test_signedin",
       "weight": 1.0
     },
@@ -194414,7 +194414,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L756",
+      "source_location": "L761",
       "target": "tests_route_ui_boundaries_test_navigation",
       "weight": 1.0
     },
@@ -194425,7 +194425,7 @@
       "relation": "contains",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L792",
+      "source_location": "L797",
       "target": "tests_route_ui_boundaries_test_streamermetaargs",
       "weight": 1.0
     },
@@ -202115,7 +202115,7 @@
       "relation": "indirect_call",
       "source": "tests_route_ui_boundaries_test",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L540",
+      "source_location": "L545",
       "target": "tests_layer_geometry_test_layers",
       "weight": 1.0
     },
@@ -202469,10 +202469,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "d3115878c9ee60b11346285c4ae9ea8963d5a623edfa2699504f8fa932d76e41",
+    "content_sha256": "bc14429efa1f7f1777c80bdb0b15a9b185cdf51ffe871529c10f5d0cd28c5690",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "56cbdd2898348675c23bccf6b4bb6460a4b8759f19fa728514082ee41f284c9a",
+    "source_sha256": "574a8fcf3325ed2c8fd48c6dd825052a197b735897e6337889266148df8471c8",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -239812,14 +239812,14 @@
             "callee": "set",
             "file": "tests/route-ui-boundaries.test.ts",
             "lang": "typescript",
-            "line": "L204",
+            "line": "L209",
             "receiver_type": "RouterContextProvider"
           }
         ]
       },
       "norm_label": "args()",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L197"
+      "source_location": "L202"
     },
     {
       "_callable": true,
@@ -239830,7 +239830,7 @@
       "label": "navigation()",
       "norm_label": "navigation()",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L756"
+      "source_location": "L761"
     },
     {
       "_callable": true,
@@ -239841,7 +239841,7 @@
       "label": "signedIn()",
       "norm_label": "signedin()",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L216"
+      "source_location": "L221"
     },
     {
       "_callable": true,
@@ -239852,7 +239852,7 @@
       "label": "streamerMetaArgs()",
       "norm_label": "streamermetaargs()",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L792"
+      "source_location": "L797"
     },
     {
       "_callable": true,
@@ -254484,7 +254484,7 @@
       "label": "entry",
       "norm_label": "entry",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L140"
+      "source_location": "L145"
     },
     {
       "_origin": "ast",
@@ -254494,7 +254494,7 @@
       "label": "event",
       "norm_label": "event",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L167"
+      "source_location": "L172"
     },
     {
       "_origin": "ast",
@@ -254504,7 +254504,7 @@
       "label": "initial",
       "norm_label": "initial",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L195"
+      "source_location": "L200"
     },
     {
       "_origin": "ast",
@@ -254514,7 +254514,7 @@
       "label": "ready",
       "norm_label": "ready",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L184"
+      "source_location": "L189"
     },
     {
       "_origin": "ast",
@@ -254524,7 +254524,7 @@
       "label": "streamer",
       "norm_label": "streamer",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L124"
+      "source_location": "L129"
     },
     {
       "_origin": "ast",
@@ -254534,7 +254534,7 @@
       "label": "viewer",
       "norm_label": "viewer",
       "source_file": "tests/route-ui-boundaries.test.ts",
-      "source_location": "L116"
+      "source_location": "L121"
     },
     {
       "_origin": "ast",
