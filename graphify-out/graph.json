@@ -8985,7 +8985,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationlink",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "target": "app_components_api_requestjson",
       "weight": 1.0
     },
@@ -8997,7 +8997,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationlink",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -9009,20 +9009,8 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationlink",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L52",
+      "source_location": "L53",
       "target": "app_i18n_index_t",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_notifications_notificationlink",
-      "source_file": "app/components/notifications.tsx",
-      "source_location": "L61",
-      "target": "app_lib_detached_detached",
       "weight": 1.0
     },
     {
@@ -9034,6 +9022,18 @@
       "source": "app_components_notifications_notificationlink",
       "source_file": "app/components/notifications.tsx",
       "source_location": "L62",
+      "target": "app_lib_detached_detached",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_notifications_notificationlink",
+      "source_file": "app/components/notifications.tsx",
+      "source_location": "L63",
       "target": "app_components_account_dialog_route_dialoghref",
       "weight": 1.0
     },
@@ -9045,7 +9045,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationlink",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -9057,7 +9057,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L146",
+      "source_location": "L147",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -9069,7 +9069,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L156",
+      "source_location": "L157",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -9081,7 +9081,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L193",
+      "source_location": "L194",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -9093,7 +9093,19 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L212",
+      "source_location": "L207",
+      "target": "app_components_ui_icon_button_iconbutton",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_notifications_notifications",
+      "source_file": "app/components/notifications.tsx",
+      "source_location": "L211",
       "target": "app_components_notifications_notifications_load",
       "weight": 1.0
     },
@@ -9105,19 +9117,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L214",
-      "target": "app_components_ui_icon_icon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_notifications_notifications",
-      "source_file": "app/components/notifications.tsx",
-      "source_location": "L230",
+      "source_location": "L227",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -9129,7 +9129,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L241",
+      "source_location": "L238",
       "target": "app_components_notifications_notifications_mark",
       "weight": 1.0
     },
@@ -9141,7 +9141,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L254",
+      "source_location": "L251",
       "target": "app_components_notifications_notifications_save",
       "weight": 1.0
     },
@@ -9153,7 +9153,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_load",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L144",
+      "source_location": "L145",
       "target": "app_components_notifications_changed",
       "weight": 1.0
     },
@@ -9165,7 +9165,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_load",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L146",
+      "source_location": "L147",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -9177,7 +9177,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_mark",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L156",
+      "source_location": "L157",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -9189,7 +9189,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_mark",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L164",
+      "source_location": "L165",
       "target": "app_components_notifications_changed",
       "weight": 1.0
     },
@@ -9201,7 +9201,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_mark",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L167",
+      "source_location": "L168",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -9213,7 +9213,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_open",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L178",
+      "source_location": "L179",
       "target": "app_components_notifications_notifications_mark",
       "weight": 1.0
     },
@@ -9225,7 +9225,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_open",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L182",
+      "source_location": "L183",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -9237,7 +9237,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_save",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L191",
+      "source_location": "L192",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -9249,7 +9249,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_save",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L193",
+      "source_location": "L194",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -9261,7 +9261,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notifications_save",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L195",
+      "source_location": "L196",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -9273,7 +9273,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationsdialog",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L108",
+      "source_location": "L109",
       "target": "app_components_notifications_notifications",
       "weight": 1.0
     },
@@ -9285,7 +9285,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationsdialog",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L86",
+      "source_location": "L87",
       "target": "app_components_api_requestjson",
       "weight": 1.0
     },
@@ -9297,7 +9297,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationsdialog",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L89",
+      "source_location": "L90",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -9309,7 +9309,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationsdialog",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L94",
+      "source_location": "L95",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -9321,7 +9321,7 @@
       "relation": "calls",
       "source": "app_components_notifications_notificationsdialog",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L97",
+      "source_location": "L98",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -65823,6 +65823,18 @@
       "relation": "imports",
       "source": "app_components_notifications",
       "source_file": "app/components/notifications.tsx",
+      "source_location": "L10",
+      "target": "app_components_ui_sheet_sheet",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_notifications",
+      "source_file": "app/components/notifications.tsx",
       "source_location": "L3",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
@@ -65968,7 +65980,7 @@
       "source": "app_components_notifications",
       "source_file": "app/components/notifications.tsx",
       "source_location": "L9",
-      "target": "app_components_ui_sheet_sheet",
+      "target": "app_components_ui_icon_button_iconbutton",
       "weight": 1.0
     },
     {
@@ -118813,6 +118825,18 @@
       "relation": "imports_from",
       "source": "app_components_notifications",
       "source_file": "app/components/notifications.tsx",
+      "source_location": "L10",
+      "target": "app_components_ui_sheet",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_notifications",
+      "source_file": "app/components/notifications.tsx",
       "source_location": "L2",
       "target": "ref_react_router",
       "weight": 1.0
@@ -118899,7 +118923,7 @@
       "source": "app_components_notifications",
       "source_file": "app/components/notifications.tsx",
       "source_location": "L9",
-      "target": "app_components_ui_sheet",
+      "target": "app_components_ui_icon_button",
       "weight": 1.0
     },
     {
@@ -152016,7 +152040,7 @@
       "relation": "contains",
       "source": "app_components_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L117",
+      "source_location": "L118",
       "target": "app_components_notifications_notifications",
       "weight": 1.0
     },
@@ -152027,7 +152051,7 @@
       "relation": "contains",
       "source": "app_components_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "target": "app_components_notifications_changed",
       "weight": 1.0
     },
@@ -152038,7 +152062,7 @@
       "relation": "contains",
       "source": "app_components_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_components_notifications_notificationlink",
       "weight": 1.0
     },
@@ -152049,7 +152073,7 @@
       "relation": "contains",
       "source": "app_components_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L81",
+      "source_location": "L82",
       "target": "app_components_notifications_notificationsdialog",
       "weight": 1.0
     },
@@ -152060,7 +152084,7 @@
       "relation": "contains",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L128",
+      "source_location": "L129",
       "target": "app_components_notifications_notifications_load",
       "weight": 1.0
     },
@@ -152071,7 +152095,7 @@
       "relation": "contains",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L152",
+      "source_location": "L153",
       "target": "app_components_notifications_notifications_mark",
       "weight": 1.0
     },
@@ -152082,7 +152106,7 @@
       "relation": "contains",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L174",
+      "source_location": "L175",
       "target": "app_components_notifications_notifications_open",
       "weight": 1.0
     },
@@ -152093,7 +152117,7 @@
       "relation": "contains",
       "source": "app_components_notifications_notifications",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L185",
+      "source_location": "L186",
       "target": "app_components_notifications_notifications_save",
       "weight": 1.0
     },
@@ -197193,10 +197217,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "157075455bf425447d5f60d72af43261ff4752902c70fad5b1217b9196ea28fd",
+    "content_sha256": "91a3b936e94892f1ba7ea4bc0262a6e18c7e4d55d32cbcb7ed9dcb951af8bc82",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "1992dac758823c20306039540ee2ab24c54c53e2fe2b1d7203c552a42d6903cb",
+    "source_sha256": "bc422a9994d222ebf27d5ef8f7754b3e59fe778a7bc7a41c8b66969d0fbd2beb",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -207272,7 +207296,7 @@
       "label": "changed()",
       "norm_label": "changed()",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L13"
+      "source_location": "L14"
     },
     {
       "_callable": true,
@@ -207283,7 +207307,7 @@
       "label": "NotificationLink()",
       "norm_label": "notificationlink()",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L17"
+      "source_location": "L18"
     },
     {
       "_callable": true,
@@ -207294,7 +207318,7 @@
       "label": "Notifications()",
       "norm_label": "notifications()",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L117"
+      "source_location": "L118"
     },
     {
       "_callable": true,
@@ -207305,7 +207329,7 @@
       "label": "load()",
       "norm_label": "load()",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L128"
+      "source_location": "L129"
     },
     {
       "_callable": true,
@@ -207316,7 +207340,7 @@
       "label": "mark()",
       "norm_label": "mark()",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L152"
+      "source_location": "L153"
     },
     {
       "_callable": true,
@@ -207327,7 +207351,7 @@
       "label": "open()",
       "norm_label": "open()",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L174"
+      "source_location": "L175"
     },
     {
       "_callable": true,
@@ -207338,7 +207362,7 @@
       "label": "save()",
       "norm_label": "save()",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L185"
+      "source_location": "L186"
     },
     {
       "_callable": true,
@@ -207349,7 +207373,7 @@
       "label": "NotificationsDialog()",
       "norm_label": "notificationsdialog()",
       "source_file": "app/components/notifications.tsx",
-      "source_location": "L81"
+      "source_location": "L82"
     },
     {
       "_callable": true,

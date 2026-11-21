@@ -6,6 +6,7 @@ import { detached } from "../lib/detached";
 import { dialogHref, type DialogState } from "./account/dialog-route";
 import { errorMessage, postJson, requestJson } from "./api";
 import { Icon } from "./ui/icon";
+import { IconButton } from "./ui/icon-button";
 import { Sheet } from "./ui/sheet";
 
 const NOTIFICATIONS_CHANGED = "notifications-changed";
@@ -203,16 +204,12 @@ export function Notifications({
       <section className="info-card" aria-label={t("notifications.title")}>
         <div className="discussion-head notification-head">
           {!dialog && <h1>{t("notifications.title")}</h1>}
-          <button
-            type="button"
-            className="icon-only"
-            aria-label={t("notifications.refresh")}
-            title={t("notifications.refresh")}
+          <IconButton
+            label={t("notifications.refresh")}
+            icon="refresh"
             disabled={busy}
             onClick={() => void load(false)}
-          >
-            <Icon name="refresh" size={18} />
-          </button>
+          />
         </div>
         <p role="alert" className="form-error">
           {error}
