@@ -247,7 +247,8 @@ function mergeLiveEntry(entry: Entry | null, snapshot: LiveSnapshot | null, revi
 }
 
 // Each tab has one primary action. Each signed-in viewer can create a poll; the other actions are for the owner.
-function headerAction(view: View, owner: boolean, official: boolean): { dialog: Dialog; label: string } | null {
+// The action of a view: the floating button on a phone opens it. Each view also has its own button in the page.
+function viewAction(view: View, owner: boolean, official: boolean): { dialog: Dialog; label: string } | null {
   if (official) return view === "topics" ? { dialog: "idea", label: t("ideas.suggest") } : null;
   if (view === "polls") return { dialog: "poll", label: t("streamer.newPoll") };
   if (view === "topics" || !owner) return null;
@@ -256,9 +257,9 @@ function headerAction(view: View, owner: boolean, official: boolean): { dialog: 
   return null;
 }
 
-function floatingAction(view: View, owner: boolean, official: boolean): ReturnType<typeof headerAction> {
+function floatingAction(view: View, owner: boolean, official: boolean): ReturnType<typeof viewAction> {
   if ((official && view === "topics") || (!official && view === "polls") || (owner && view === "schedule"))
-    return headerAction(view, owner, official);
+    return viewAction(view, owner, official);
   return null;
 }
 
@@ -858,7 +859,8 @@ export default function StreamerPage(): ReactNode {
     );
   }
 
-  const action = viewer ? headerAction(view, owner, official) : null;
+  // The header has an action only on the official page: "Suggest an improvement".
+  const action = viewer && official ? viewAction(view, false, true) : null;
   const showFab: boolean = Boolean(viewer && writable && !pollsClass.includes("mash-page"));
   const fab = showFab ? floatingAction(view, owner, official) : null;
   const role = pageRole(owner, moderator);
@@ -898,7 +900,7 @@ export default function StreamerPage(): ReactNode {
         action={
           action && (
             <button
-              className={official ? "gold" : "header-secondary header-action"}
+              className="gold"
               id="suggest"
               type="button"
               aria-label={action.label}

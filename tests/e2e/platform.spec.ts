@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { test, expect, type Browser, type BrowserContext, type Page } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
+import { commentBox } from "./fixtures";
 
 // Workers globals declare Buffer as any; use the Node constructor type for this Node test.
 const Buffer: BufferConstructor = NodeBuffer as BufferConstructor;
@@ -114,7 +115,7 @@ test("viewer topics, reactions, replies, and comment likes survive reload", asyn
     await expect(page.getByRole("heading", { name: "How should we build a quiet PC?" })).toBeVisible();
     await page.getByRole("button", { name: /^Like 0$/ }).click();
     await expect(page.getByRole("button", { name: /^Like 1$/ })).toHaveAttribute("aria-pressed", "true");
-    await page.getByRole("textbox", { name: "Write a comment" }).fill("Large fans make a difference.");
+    await commentBox(page, "Write a comment").fill("Large fans make a difference.");
     await page.getByRole("button", { name: "Post", exact: true }).click();
     const comment = page.locator("article.comment").filter({ hasText: "Large fans make a difference." });
     await expect(comment).toBeVisible();
@@ -125,7 +126,7 @@ test("viewer topics, reactions, replies, and comment likes survive reload", asyn
     );
     await comment.getByRole("button", { name: "Reply", exact: true }).click();
     const replyBox = page.locator(".inline-reply");
-    await replyBox.getByRole("textbox", { name: "Write a reply to viewer" }).fill("A larger case can also help.");
+    await commentBox(replyBox, "Write a reply to viewer").fill("A larger case can also help.");
     await replyBox.getByRole("button", { name: "Post", exact: true }).click();
     await expect(page.getByText("A larger case can also help.", { exact: true })).toBeVisible();
     await page.reload();
@@ -248,7 +249,8 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   const admin = await newPage(adminContext);
   await assertNoScriptErrors(admin, async () => {
     await admin.goto("/streamers");
-    await admin.getByRole("link", { name: "Admin", exact: true }).click();
+    await admin.locator("button.profile").click();
+    await admin.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Admin", exact: true }).click();
     await expect(admin).toHaveURL(/\/admin$/);
     await expect(admin.getByRole("heading", { name: "Streamer requests" })).toBeVisible();
     await expect(admin.getByRole("link", { name: "Pending" })).toHaveAttribute("aria-current", "page");

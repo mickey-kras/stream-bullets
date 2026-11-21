@@ -36,7 +36,15 @@
     "@simplewebauthn/server": "14.1.0",
     "three": "0.187.0",
     "uqr": "0.1.3",
-    "marked": "18.2.0"
+    "marked": "18.2.0",
+    "lexical": "0.53.0",
+    "@lexical/history": "0.53.0",
+    "@lexical/markdown": "0.53.0",
+    "@lexical/rich-text": "0.53.0",
+    "@lexical/list": "0.53.0",
+    "@lexical/link": "0.53.0",
+    "@lexical/code-core": "0.53.0",
+    "@lexical/selection": "0.53.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.68.0",

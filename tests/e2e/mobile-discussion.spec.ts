@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { Page } from "@playwright/test";
 import { close, expect, newPage, test } from "./coverage";
-import { accounts, runSql, signedIn } from "./fixtures";
+import { accounts, commentBox, expectCommentText, runSql, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
 async function discussion(): Promise<string> {
@@ -56,14 +56,14 @@ for (const width of [320, 390]) {
       const page = await newPage(context);
       await page.goto(`/@test_host?entry=${entryId}`);
       await expect(page.locator("article.comment")).toHaveCount(24);
-      const composer = page.getByRole("textbox", { name: "Write a comment" });
+      const composer = commentBox(page, "Write a comment");
       await composer.fill("Keep this mobile draft.");
       await page.getByRole("button", { name: "Open discussion", exact: true }).tap();
       await expect(page).toHaveURL(/discussion=1/);
       await expect(page.getByRole("button", { name: "Back to topic", exact: true })).toBeFocused();
       await expect(page.locator(".site-footer")).toBeHidden();
       await expect(page.locator(".topic-content .votes")).toBeHidden();
-      await expect(composer).toHaveValue("Keep this mobile draft.");
+      await expectCommentText(composer, "Keep this mobile draft.");
       expect(
         await page.locator("#detail").evaluate((element: HTMLElement) => element.clientWidth),
       ).toBeGreaterThanOrEqual(width - 2);
@@ -91,7 +91,7 @@ for (const width of [320, 390]) {
       await expect(
         page.locator(".site-footer").getByRole("link", { name: "Privacy", exact: true }).last(),
       ).toBeVisible();
-      await expect(composer).toHaveValue("Keep this mobile draft.");
+      await expectCommentText(composer, "Keep this mobile draft.");
       await page.goForward();
       await expect(page).toHaveURL(/discussion=1/);
       await expect
@@ -116,7 +116,7 @@ test("focused composer permits touch scrolling after reduced-height and orientat
     const page = await newPage(context);
     await page.goto(`/@test_host?entry=${entryId}&discussion=1`);
     await expect(page.locator("article.comment")).toHaveCount(24);
-    const composer = page.getByRole("textbox", { name: "Write a comment" });
+    const composer = commentBox(page, "Write a comment");
     await composer.fill("Long draft line\n".repeat(90));
     await composer.focus();
     // A smaller viewport exercises layout recovery; desktop emulation does not open a real keyboard.
@@ -136,13 +136,13 @@ test("focused composer permits touch scrolling after reduced-height and orientat
       .poll(() => page.locator("#detail").evaluate((element: HTMLElement) => element.scrollTop))
       .toBeGreaterThan(before);
     await expect(composer).toBeFocused();
-    await composer.evaluate((element: HTMLTextAreaElement) => {
+    await composer.evaluate((element: HTMLElement) => {
       element.scrollTop = 0;
     });
     const textarea = await composer.boundingBox();
     if (!textarea) throw new Error("Composer is not visible.");
     await touchScroll(page, textarea.y + textarea.height - 15, textarea.y + 15);
-    await expect.poll(() => composer.evaluate((element: HTMLTextAreaElement) => element.scrollTop)).toBeGreaterThan(0);
+    await expect.poll(() => composer.evaluate((element: HTMLElement) => element.scrollTop)).toBeGreaterThan(0);
     await page.setViewportSize({ width: 670, height: 390 });
     await expect(composer).toBeVisible();
     await expect(page.getByRole("button", { name: "Back to topic", exact: true })).toBeVisible();
@@ -150,7 +150,7 @@ test("focused composer permits touch scrolling after reduced-height and orientat
       await page.locator("#detail").evaluate((element: HTMLElement) => element.scrollWidth - element.clientWidth),
     ).toBeLessThanOrEqual(1);
     await page.setViewportSize({ width: 390, height: 844 });
-    await expect(composer).toHaveValue("Long draft line\n".repeat(90));
+    await expectCommentText(composer, "Long draft line\n".repeat(90));
   } finally {
     await close(context);
   }
@@ -166,7 +166,7 @@ for (const width of [1280, 390]) {
       const page = await newPage(context);
       await page.goto(`/@test_host?entry=${entryId}`);
       await expect(page.locator("article.comment")).toHaveCount(24);
-      const composer = page.locator("#detail textarea").first();
+      const composer = page.locator("#detail .ed-content[data-composer]").first();
       await composer.fill("Keep this draft in every language.");
       const detail = page.locator("#detail");
       const top = (): Promise<number> => detail.evaluate((element: HTMLElement) => element.scrollTop);
@@ -181,12 +181,12 @@ for (const width of [1280, 390]) {
       await expect(page.locator("html")).toHaveAttribute("lang", "ru");
       expect(page.url()).toBe(address);
       await expect(page.locator("article.comment")).toHaveCount(24);
-      await expect(composer).toHaveValue("Keep this draft in every language.");
+      await expectCommentText(composer, "Keep this draft in every language.");
       // Translated labels change the height of rows, so the position holds within one row.
       await expect.poll(async () => Math.abs((await top()) - readAt)).toBeLessThanOrEqual(48);
     } finally {
-      // The viewer account is shared; later specs expect English.
-      await context.request.patch("/api/me/locale", { data: { locale: null } });
+      // The viewer account is shared; later specs expect its seeded English setting.
+      await context.request.patch("/api/me/locale", { data: { locale: "en" } });
       await close(context);
     }
   });

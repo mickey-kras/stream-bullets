@@ -7,7 +7,7 @@ import { mashStartSchema, runMashAction, type MashAction } from "../mash.server"
 import { callIngest } from "../ingest-call.server";
 import { contentSources, onStream } from "../../lib/overlay-layers";
 import { playgroundControlSchema, playgroundStatusSchema } from "../../lib/playground/protocol";
-import { overlayKeySchema, regenerateOverlayKey } from "../overlay-key.server";
+import { overlayKeySchema, regenerateOverlayKey, showOverlayKey } from "../overlay-key.server";
 import { getOverlayData, getOverlayState, overlayActionSchema, sourceTopics, updateOverlay } from "../overlay.server";
 import { get, requireViewer, write, type ApiRoute } from "./router";
 
@@ -30,7 +30,17 @@ export const liveRoutes: ApiRoute[] = [
     const data = await getOverlayData(env, streamer.id, sourceTopics(contentSources(overlay.layers)));
     return json({ overlay, data, handle: streamer.handle });
   }),
-  // POST /api/overlay/key {} → {url}: a new overlay key, shown this once. The old key stops working.
+  // POST /api/overlay/key/show {} → {url}: the current overlay link of the owner. `url` is null when the page has
+  // no key that the server kept.
+  write("POST", /overlay\/key\/show/, async ({ request, env, viewer }) => {
+    await readJson(request, overlayKeySchema);
+    const streamer = await getOwnStreamer(env, viewer.id);
+    if (!streamer) throw new HttpError(404, "You do not have a streamer page.");
+    await consumeMutationQuota(env, viewer.id, true);
+    const key = await showOverlayKey(env, viewer.id, streamer.id);
+    return json({ url: key === null ? null : `${getOrigin(env)}/@${streamer.handle}/overlay?key=${key}` });
+  }),
+  // POST /api/overlay/key {} → {url}: a new overlay key. The old key stops working.
   write("POST", /overlay\/key/, async ({ request, env, viewer }) => {
     await readJson(request, overlayKeySchema);
     const streamer = await getOwnStreamer(env, viewer.id);

@@ -99,7 +99,7 @@ test("the owner schedules a weekly stream, edits, cancels and deletes it", async
   const page = await newPage(context);
   try {
     await page.goto("/@feature_host?view=schedule");
-    await page.locator("#suggest").click();
+    await page.locator("main").getByRole("button", { name: "Schedule a stream", exact: true }).click();
     const form = page.getByRole("dialog", { name: "Schedule a stream" });
     await form.getByLabel("Title").fill("Speedrun practice");
     await form.getByLabel("Date").fill(dateFromToday(3));
@@ -376,7 +376,7 @@ test("the schedule form keeps edits after a failed save and warns about linked o
     await expect(linkedEdit.getByLabel("Ends on (optional)")).not.toHaveValue("");
     await linkedEdit.getByRole("button", { name: "Back", exact: true }).click();
     await page.keyboard.press("Escape");
-    await page.locator("#suggest").click();
+    await page.locator("main").getByRole("button", { name: "Schedule a stream", exact: true }).click();
     const form = page.getByRole("dialog", { name: "Schedule a stream" });
     await form.getByLabel("Title").fill("Coverage studio rehearsal");
     await form.getByLabel("Date").fill(instant.slice(0, 10));

@@ -334,6 +334,8 @@ To rotate the key:
 6. Remove the old key from the secret.
 
 A row gets the new key only when the server writes its tokens again: at a refresh or a reconnect.
+The encrypted overlay key of a page has the same rule: it gets the new key when the owner regenerates the link.
+After you remove the old key, an overlay link from before the rotation still works, but the owner cannot see it again.
 YouTube tokens refresh about each hour while an overlay is open. Twitch and Kick tokens refresh only when a
 connect or a disconnect needs them. Thus their rows can keep the old key for a long time.
 
@@ -525,7 +527,13 @@ The logs hold only fixed codes, platforms, and counts. They never hold an ID, a 
 The activity socket accepts only the current overlay key of the page or the signed-in owner.
 The key gives read access to the live room and the activity feed. It gives no access to the account,
 to channel management, or to provider tokens. A new overlay key closes the sockets that used the old key.
-The overlay page sends no `Referer`, and the server stores only the SHA-256 of the key.
+The overlay page sends no `Referer`.
+
+The server compares a key with the stored SHA-256 of the key.
+The server also keeps the key in encrypted form, so the owner can see the overlay link again.
+The encryption uses the first key of `CHANNEL_TOKEN_KEYS` and applies only to the page of the key.
+A deployment without `CHANNEL_TOKEN_KEYS` does not keep the key. The owner then sees the link only one time.
+`POST /api/overlay/key/show` gives the link to the signed-in owner and writes an audit record.
 
 ## Setup
 

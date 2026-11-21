@@ -1,7 +1,7 @@
 import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "./coverage";
-import { accounts, runSql, signedIn } from "./fixtures";
+import { accounts, commentBox, expectCommentText, runSql, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 import { z } from "zod";
 
@@ -51,12 +51,12 @@ test("replies collapse after two, removed comments keep their thread, one reply 
   await expect(orphan.locator(".reply-mention")).toHaveText("Reply to a removed comment");
 
   await replies.nth(2).getByRole("button", { name: "Reply", exact: true }).click();
-  await expect(page.locator("textarea[data-composer]")).toHaveCount(2);
+  await expect(page.locator(".ed-content[data-composer]")).toHaveCount(2);
   await replies.nth(0).getByRole("button", { name: "Reply", exact: true }).click();
-  await expect(page.locator("textarea[data-composer]")).toHaveCount(2);
+  await expect(page.locator(".ed-content[data-composer]")).toHaveCount(2);
   const box = thread.locator(".inline-reply");
   await expect(box).toContainText("Replying to reporter");
-  await box.getByRole("textbox", { name: "Write a reply to reporter" }).fill("Agreed with the first reply.");
+  await commentBox(box, "Write a reply to reporter").fill("Agreed with the first reply.");
   await box.getByRole("button", { name: "Post", exact: true }).click();
   await expect(thread.locator(".inline-reply")).toHaveCount(0);
   const posted = thread.locator("article.comment").filter({ hasText: "Agreed with the first reply." });
@@ -106,8 +106,50 @@ test("a posted comment renders the Markdown subset and keeps markup inert", asyn
   try {
     const page = await newPage(context);
     await page.goto(`/@other_host?entry=${entryId}`);
-    await page.getByRole("textbox", { name: "Write a comment", exact: true }).fill(text);
+    // The author types Markdown and the editor shows each format at once. The stored text is the same Markdown.
+    const composer = commentBox(page, "Write a comment");
+    await composer.click();
+    const typed: readonly (readonly string[])[] = [
+      ["**bold** *italic* ~~struck~~ `inline` [site](https://example.com/page)"],
+      // The second Enter on an empty list item ends the list.
+      ["- first", "second", ""],
+      ["1. one", "two", ""],
+      ["> quoted"],
+      // Three backticks and a space start a code block. Two empty lines end it.
+      [`\`\`\` const wide = "${"x".repeat(300)}";`, "", ""],
+    ];
+    for (const block of typed) {
+      for (const line of block) {
+        await page.keyboard.type(line);
+        await page.keyboard.press("Enter");
+      }
+      await page.keyboard.press("Enter");
+    }
+    await page.keyboard.type("# no heading <script>window.pwned = true</script>");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("plain line");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("next line");
+    await expect(composer.locator("strong")).toHaveText("bold");
+    await expect(composer.locator("em")).toHaveText("italic");
+    await expect(composer.locator(".ed-strike")).toHaveText("struck");
+    await expect(composer.locator("p > code")).toHaveText("inline");
+    await expect(composer.locator('a[href="https://example.com/page"]')).toHaveText("site");
+    await expect(composer.locator("ul > li")).toHaveText(["first", "second"]);
+    await expect(composer.locator("ol > li")).toHaveText(["one", "two"]);
+    await expect(composer.locator("blockquote")).toHaveText("quoted");
+    await expect(composer.locator(":scope > code")).toContainText("const wide");
+    await expect(composer.locator("h1, script, img")).toHaveCount(0);
+    const created = page.waitForResponse(
+      (response) => response.request().method() === "POST" && response.url().endsWith("/api/streamers/other_host"),
+    );
     await page.getByRole("button", { name: "Post", exact: true }).click();
+    const commentId: string = z.object({ id: z.string() }).parse(await (await created).json()).id;
+    const storedText = async (): Promise<string> =>
+      z
+        .object({ comment: z.object({ text: z.string() }) })
+        .parse(await (await context.request.get(`/api/comments/${commentId}`)).json()).comment.text;
+    expect(await storedText()).toBe(text);
     const posted = page.locator("article.comment").filter({ hasText: "plain line" });
     const body = posted.locator(".comment-text");
     await expect(body.locator("strong")).toHaveText("bold");
@@ -137,7 +179,24 @@ test("a posted comment renders the Markdown subset and keeps markup inert", asyn
     await page.reload();
     await expect(body.locator("strong")).toHaveText("bold");
     await posted.getByRole("button", { name: "Edit", exact: true }).click();
-    await expect(posted.getByRole("textbox", { name: "Edit comment", exact: true })).toHaveValue(text);
+    // The edit field shows the same formats, and a save without a change keeps the same Markdown.
+    const editBox = commentBox(posted, "Edit comment");
+    await expect(editBox.locator("strong")).toHaveText("bold");
+    await expect(editBox.locator("em")).toHaveText("italic");
+    await expect(editBox.locator(".ed-strike")).toHaveText("struck");
+    await expect(editBox.locator("p > code")).toHaveText("inline");
+    await expect(editBox.locator('a[href="https://example.com/page"]')).toHaveText("site");
+    await expect(editBox.locator("ul > li")).toHaveText(["first", "second"]);
+    await expect(editBox.locator("ol > li")).toHaveText(["one", "two"]);
+    await expect(editBox.locator("blockquote")).toHaveText("quoted");
+    await expect(editBox.locator(":scope > code")).toContainText("const wide");
+    await expect(editBox).toContainText("# no heading <script>window.pwned = true</script>");
+    const saved = page.waitForResponse(
+      (response) => response.request().method() === "POST" && response.url().endsWith("/api/comments"),
+    );
+    await posted.getByRole("button", { name: "Save", exact: true }).click();
+    expect((await saved).ok()).toBe(true);
+    expect(await storedText()).toBe(text);
   } finally {
     await close(context);
     await runSql("threads-markdown-cleanup", [`DELETE FROM entries WHERE id='${entryId}';`]);
@@ -176,30 +235,30 @@ test("failed comment actions keep drafts and editors available for retry", async
       }
       await route.continue();
     });
-    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    const composer = commentBox(page, "Write a comment");
     await composer.fill("A recoverable comment draft.");
     await page.getByRole("button", { name: "Post", exact: true }).click();
     await expect(page.locator(".discussion > .form-error")).toHaveText("The request failed. Please try again.");
-    await expect(composer).toHaveValue("A recoverable comment draft.");
+    await expectCommentText(composer, "A recoverable comment draft.");
     failedAction = null;
     await page.getByRole("button", { name: "Post", exact: true }).click();
     await expect(page.getByText("A recoverable comment draft.", { exact: true })).toBeVisible();
-    await expect(composer).toHaveValue("");
+    await expect(composer).toHaveText("");
 
     await root.getByRole("button", { name: "Edit", exact: true }).click();
-    const editor = root.getByRole("textbox", { name: "Edit comment", exact: true });
+    const editor = commentBox(root, "Edit comment");
     await expect(editor).toBeFocused();
     await editor.fill("Cancelled edit");
     await root.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(root.locator(".comment-text")).toHaveText("Root comment");
     await expect(root.getByRole("button", { name: "Like comment by frozenowner", exact: true })).toBeFocused();
     await root.getByRole("button", { name: "Edit", exact: true }).click();
-    await expect(editor).toHaveValue("Root comment");
+    await expectCommentText(editor, "Root comment");
     await editor.fill("Root comment after retry");
     failedAction = "edit";
     await root.getByRole("button", { name: "Save", exact: true }).click();
     await expect(root.getByRole("alert")).toHaveText("The request failed. Please try again.");
-    await expect(editor).toHaveValue("Root comment after retry");
+    await expectCommentText(editor, "Root comment after retry");
     failedAction = null;
     await root.getByRole("button", { name: "Save", exact: true }).click();
     await expect(root.locator(".comment-text")).toHaveText("Root comment after retry");
@@ -277,5 +336,44 @@ test("signed-out readers can expand a removed-parent thread and return from sign
   } finally {
     await close(context);
     await runSql("threads-signed-out-cleanup", [`DELETE FROM entries WHERE id='${entryId}';`]);
+  }
+});
+
+test("the link field adds a link and does not post the comment", async ({ browser }) => {
+  const entryId: string = await seedThreads();
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  const page = await newPage(context);
+  try {
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const comments = page.locator("article.comment");
+    // Each write to the page of the streamer. Enter in the link field must not start one.
+    const posts: string[] = [];
+    page.on("request", (request) => {
+      if (request.method() === "POST" && request.url().includes("/api/streamers/")) posts.push(request.url());
+    });
+    const composer = commentBox(page, "Write a comment");
+    await composer.click();
+    await page.keyboard.type("See the guide");
+    await page.keyboard.press("Shift+Home");
+    await page.getByRole("button", { name: "Add link", exact: true }).click();
+    const address = page.getByRole("textbox", { name: "Link address", exact: true });
+    await address.fill("https://example.com/guide");
+    await address.press("Enter");
+    // Enter in the link field applies the link. The comment stays in the editor.
+    await expect(address).toHaveCount(0);
+    await expect(composer.getByRole("link", { name: "See the guide" })).toHaveAttribute(
+      "href",
+      "https://example.com/guide",
+    );
+    expect(posts).toEqual([]);
+    await expect(comments.filter({ hasText: "See the guide" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    const posted = comments.filter({ hasText: "See the guide" }).first();
+    await expect(posted.getByRole("link", { name: "See the guide" })).toHaveAttribute(
+      "href",
+      "https://example.com/guide",
+    );
+  } finally {
+    await close(context);
   }
 });

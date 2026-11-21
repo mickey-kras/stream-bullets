@@ -1,9 +1,13 @@
 import { useEffect, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { intlLocale, t } from "../i18n";
 import type { NotificationItem, NotificationPreferences, NotificationSnapshot } from "../types";
+import { detached } from "../lib/detached";
+import { dialogHref, type DialogState } from "./account/dialog-route";
 import { errorMessage, postJson, requestJson } from "./api";
 import { Icon } from "./ui/icon";
+import { IconButton } from "./ui/icon-button";
+import { Sheet } from "./ui/sheet";
 
 const NOTIFICATIONS_CHANGED = "notifications-changed";
 
@@ -12,6 +16,8 @@ function changed(): void {
 }
 
 export function NotificationLink(): ReactNode {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [unread, setUnread] = useState<number>(0);
   const [error, setError] = useState<string>("");
   useEffect(() => {
@@ -46,7 +52,21 @@ export function NotificationLink(): ReactNode {
   }, []);
   const label: string = unread > 0 ? t("notifications.unread", { count: unread }) : t("notifications.title");
   return (
-    <Link className="notification-nav" to="/notifications" aria-label={label} title={error || label}>
+    <button
+      type="button"
+      className="notification-nav"
+      aria-haspopup="dialog"
+      aria-label={label}
+      title={error || label}
+      onClick={() =>
+        detached(
+          navigate(dialogHref(location, "notifications"), {
+            state: { dialogFrom: location.pathname } satisfies DialogState,
+            preventScrollReset: true,
+          }),
+        )
+      }
+    >
       <Icon name={error ? "warning" : "requests"} size={20} />
       {unread > 0 && (
         <span className="notification-badge" aria-hidden="true">
@@ -54,11 +74,51 @@ export function NotificationLink(): ReactNode {
         </span>
       )}
       {error && <span className="sr-only">{error}</span>}
-    </Link>
+    </button>
   );
 }
 
-export function Notifications({ initial }: Readonly<{ initial: NotificationSnapshot }>): ReactNode {
+// The notifications of the account in a dialog over the current page, like the language dialog.
+export function NotificationsDialog({ onClose }: Readonly<{ onClose: () => void }>): ReactNode {
+  const [snapshot, setSnapshot] = useState<NotificationSnapshot | null>(null);
+  const [error, setError] = useState<string>("");
+  useEffect(() => {
+    const controller = new AbortController();
+    requestJson<NotificationSnapshot>("/api/notifications", { signal: controller.signal })
+      .then((next: NotificationSnapshot) => setSnapshot(next))
+      .catch((error_: unknown) => {
+        if (!controller.signal.aborted) setError(errorMessage(error_));
+      });
+    return () => controller.abort();
+  }, []);
+  return (
+    <Sheet
+      open
+      name="notifications"
+      title={t("notifications.title")}
+      onOpenChange={(open: boolean) => {
+        if (!open) onClose();
+      }}
+    >
+      {error && (
+        <p className="form-error" role="alert">
+          {error}
+        </p>
+      )}
+      {snapshot ? (
+        <Notifications initial={snapshot} dialog />
+      ) : (
+        !error && <p className="muted">{t("notifications.loading")}</p>
+      )}
+    </Sheet>
+  );
+}
+
+// `dialog`: the dialog has the title, so the list has no heading of its own.
+export function Notifications({
+  initial,
+  dialog = false,
+}: Readonly<{ initial: NotificationSnapshot; dialog?: boolean }>): ReactNode {
   const navigate = useNavigate();
   const [snapshot, setSnapshot] = useState<NotificationSnapshot>(initial);
   const [preferences, setPreferences] = useState<NotificationPreferences>(initial.preferences);
@@ -141,13 +201,15 @@ export function Notifications({ initial }: Readonly<{ initial: NotificationSnaps
 
   return (
     <>
-      <section className="info-card" aria-labelledby="notifications-title">
-        <div className="discussion-head">
-          <h1 id="notifications-title">{t("notifications.title")}</h1>
-          <button type="button" disabled={busy} onClick={() => void load(false)}>
-            <Icon name="refresh" size={18} />
-            {t("notifications.refresh")}
-          </button>
+      <section className="info-card" aria-label={t("notifications.title")}>
+        <div className="discussion-head notification-head">
+          {!dialog && <h1>{t("notifications.title")}</h1>}
+          <IconButton
+            label={t("notifications.refresh")}
+            icon="refresh"
+            disabled={busy}
+            onClick={() => void load(false)}
+          />
         </div>
         <p role="alert" className="form-error">
           {error}

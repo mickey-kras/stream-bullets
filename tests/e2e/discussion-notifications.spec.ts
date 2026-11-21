@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { close, expect, newPage, test, type BrowserContext } from "./coverage";
-import { accounts, runSql, signedIn } from "./fixtures";
+import { accounts, commentBox, expectCommentText, runSql, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
 const mutationSchema = z.object({ id: z.string().uuid() });
@@ -53,11 +53,11 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     const page = await newPage(viewer);
     const ownerPage = await newPage(owner);
     await page.goto(`/@test_host?view=topics&entry=${entryId}`);
-    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    const composer = commentBox(page, "Write a comment");
     await composer.fill("Hello @test_host");
     await expect(page.locator(".mention-option")).toContainText("@test_host");
     await composer.press("Enter");
-    await expect(composer).toHaveValue("Hello @owner ");
+    await expectCommentText(composer, "Hello @owner ");
     await composer.press("End");
     await composer.pressSequentially("please check this thread.");
     const created = page.waitForResponse(
@@ -70,7 +70,7 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     expect(await inbox(owner, rootId)).toHaveLength(1);
 
     await root.getByRole("button", { name: "Edit", exact: true }).click();
-    const editor = root.getByRole("textbox", { name: "Edit comment", exact: true });
+    const editor = commentBox(root, "Edit comment");
     await editor.press("End");
     await editor.pressSequentially(" Please confirm.");
     await root.getByRole("button", { name: "Save", exact: true }).click();
@@ -124,13 +124,13 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     await thread.locator(".thread-toggle").click();
     await expect(reply).not.toBeVisible();
     await ownerPage.locator(`#cm-${rootId}`).getByRole("button", { name: "Reply", exact: true }).click();
-    await expect(thread.getByRole("textbox", { name: "Write a reply to viewer", exact: true })).toBeVisible();
+    await expect(commentBox(thread, "Write a reply to viewer")).toBeVisible();
     await thread.locator(".thread-toggle").click();
     await ownerPage.locator(`#cm-${rootId}`).getByRole("button", { name: "Reply", exact: true }).click();
-    await expect(thread.getByRole("textbox", { name: "Write a reply to viewer", exact: true })).toBeVisible();
+    await expect(commentBox(thread, "Write a reply to viewer")).toBeVisible();
     await thread.getByRole("button", { name: "Cancel reply", exact: true }).click();
     await reply.getByRole("button", { name: "Edit", exact: true }).click();
-    const replyEditor = reply.getByRole("textbox", { name: "Edit comment", exact: true });
+    const replyEditor = commentBox(reply, "Edit comment");
     await replyEditor.press("End");
     await replyEditor.pressSequentially(" Please confirm.");
     await reply.getByRole("button", { name: "Save", exact: true }).click();
@@ -190,10 +190,10 @@ test("touch selects a stable account mention and notifications survive a new vis
   try {
     const page = await newPage(viewer);
     await page.goto(`/@test_host?entry=${entryId}&discussion=1`);
-    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    const composer = commentBox(page, "Write a comment");
     await composer.fill("Touch mention @test_host");
     await page.locator(".mention-option").tap();
-    await expect(composer).toHaveValue("Touch mention @owner ");
+    await expectCommentText(composer, "Touch mention @owner ");
     const created = page.waitForResponse(
       (response) => response.request().method() === "POST" && response.url().endsWith("/api/streamers/test_host"),
     );
@@ -202,8 +202,9 @@ test("touch selects a stable account mention and notifications survive a new vis
     expect(await inbox(owner, commentId)).toHaveLength(1);
     const ownerPage = await newPage(owner);
     await ownerPage.goto("/streamers");
-    await ownerPage.getByRole("link", { name: /Unread notifications:/ }).click();
-    const notice = ownerPage.locator(`.notification-link[href*="comment=${commentId}"]`);
+    await ownerPage.getByRole("button", { name: /Unread notifications:/ }).click();
+    const notifications = ownerPage.getByRole("dialog", { name: "Notifications", exact: true });
+    const notice = notifications.locator(`.notification-link[href*="comment=${commentId}"]`);
     await expect(notice).toContainText("viewer mentioned you");
     await notice.click();
     await expect(ownerPage.locator(`#cm-${commentId}`)).toBeVisible();
@@ -236,15 +237,15 @@ test("duplicate names retain the selected account through draft reload, rename, 
     ]);
     const page = await newPage(viewer);
     await page.goto(`/@test_host?entry=${entryId}`);
-    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    const composer = commentBox(page, "Write a comment");
     await composer.fill("Identity @Shared participant");
     const suggestions = page.locator(".mention-option");
     await expect(suggestions).toHaveCount(2);
     await expect(suggestions.locator(".mention-label")).toHaveText(candidates.map((candidate) => candidate.id));
     await suggestions.filter({ hasText: selected.id }).click();
-    await expect(composer).toHaveValue("Identity @Shared participant ");
+    await expectCommentText(composer, "Identity @Shared participant ");
     await page.reload();
-    await expect(composer).toHaveValue("Identity @Shared participant ");
+    await expectCommentText(composer, "Identity @Shared participant ");
     await composer.press("End");
     await composer.pressSequentially("please reply.");
     const created = page.waitForResponse(
@@ -263,20 +264,20 @@ test("duplicate names retain the selected account through draft reload, rename, 
     await page.reload();
     const comment = page.locator(`#cm-${commentId}`);
     await comment.getByRole("button", { name: "Edit", exact: true }).click();
-    const editor = comment.getByRole("textbox", { name: "Edit comment", exact: true });
+    const editor = commentBox(comment, "Edit comment");
     const originalText: string = "Identity @Shared participant please reply.";
-    await expect(editor).toHaveValue(originalText);
+    await expectCommentText(editor, originalText);
     await editor.press("End");
     await editor.pressSequentially("!".repeat(100));
-    await expect(editor).toHaveValue(`${originalText}${"!".repeat(100)}`);
-    for (let count = 0; count < 100 && (await editor.inputValue()) !== originalText; count++) {
+    await expectCommentText(editor, `${originalText}${"!".repeat(100)}`);
+    for (let count = 0; count < 100 && (await editor.innerText()) !== originalText; count++) {
       await editor.press("Control+z");
     }
-    await expect(editor).toHaveValue(originalText);
-    for (let count = 0; count < 100 && (await editor.inputValue()) !== `${originalText}${"!".repeat(100)}`; count++) {
+    await expectCommentText(editor, originalText);
+    for (let count = 0; count < 100 && (await editor.innerText()) !== `${originalText}${"!".repeat(100)}`; count++) {
       await editor.press("Control+Shift+z");
     }
-    await expect(editor).toHaveValue(`${originalText}${"!".repeat(100)}`);
+    await expectCommentText(editor, `${originalText}${"!".repeat(100)}`);
     await comment.getByRole("button", { name: "Save", exact: true }).click();
     await expect(comment.getByText("Edited", { exact: true })).toBeVisible();
     await expect(comment.locator(".comment-text")).toHaveText(`${originalText}${"!".repeat(100)}`);
@@ -402,7 +403,7 @@ test("mention lookup recovers and keyboard edits keep only intact account select
       }
       await route.continue();
     });
-    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    const composer = commentBox(page, "Write a comment");
     await composer.fill("@test_host");
     await expect(page.locator(".mention-options")).toContainText("The request failed. Please try again.");
     await composer.press("Escape");
@@ -416,17 +417,25 @@ test("mention lookup recovers and keyboard edits keep only intact account select
     await composer.press("ArrowUp");
     await expect(page.locator(".mention-option")).toHaveAttribute("data-active", "true");
     await composer.press("Enter");
-    await expect(composer).toHaveValue("@owner ");
-    // Deleting outside the label preserves it; deleting within it removes the account selection.
+    await expectCommentText(composer, "@owner ");
+    // Deleting outside the label preserves it. The label is one unit: Delete at its start removes all of it and
+    // the account selection.
     await composer.press("Home");
     await composer.pressSequentially("Hello ");
     await composer.press("End");
     await composer.press("Backspace");
-    await expect(composer).toHaveValue("Hello @owner");
+    await expectCommentText(composer, "Hello @owner");
     await composer.press("Home");
-    for (let index: number = 0; index < 7; index += 1) await composer.press("ArrowRight");
+    await expect(composer.locator(".mention")).toHaveText("@owner");
+    for (let index: number = 0; index < 6; index += 1) await composer.press("ArrowRight");
     await composer.press("Delete");
-    await expect(composer).toHaveValue("Hello @wner");
+    await expectCommentText(composer, "Hello ");
+    await expect(composer.locator(".mention")).toHaveCount(0);
+    // A typed name without a selected account is plain text.
+    await composer.pressSequentially("@wner");
+    await composer.press("Escape");
+    await expect(page.locator(".mention-options")).toHaveCount(0);
+    await expectCommentText(composer, "Hello @wner");
     await composer.press("End");
     await composer.pressSequentially(" @test_host");
     await expect(page.locator(".mention-option")).toHaveCount(1);

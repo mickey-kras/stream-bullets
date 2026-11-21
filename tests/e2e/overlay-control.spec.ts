@@ -128,6 +128,12 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   const oldUrl: string = await control.evaluate(() => navigator.clipboard.readText());
   expect(oldUrl).toBe(await field.inputValue());
   const oldKey: string = new URL(oldUrl).searchParams.get("key") ?? "";
+  // After a reload the link is hidden, and the owner can see the same link again.
+  await control.reload();
+  await expect(field).toHaveCount(0);
+  await control.getByRole("button", { name: "Show link", exact: true }).click();
+  await expect(field).toHaveValue(oldUrl);
+  await expect(control.getByRole("button", { name: "Show link", exact: true })).toHaveCount(0);
 
   // OBS has no session; its network already holds ten guest sockets.
   const obs = await browser.newContext({

@@ -266,9 +266,8 @@ header nav a.nav-tab[aria-current="page"] { background: linear-gradient(110deg, 
 }
 @media (max-width: 43.75em) {
   :root:has(.streamer-shell > button.fab) .sb-toast { bottom: 128px; }
-  :root:has(textarea[data-composer]:focus, [role=dialog]) .sb-toast { bottom: auto; top: 72px; }
+  :root:has([data-composer]:focus, [role=dialog]) .sb-toast { bottom: auto; top: 72px; }
 }
-.header-secondary { display: inline-flex; align-items: center; gap: 6px; }
 @media (max-width: 43.75em) {
   .ideas-header .ideas-logo { display: none; }
   .ideas-header .streamer-name-wrap { display: grid; }
@@ -335,7 +334,7 @@ header.site-header:has(> .onair-ticker) { row-gap: 0; padding-bottom: 0; }
 @media (max-width: 1050px) { .onair-ticker { margin-top: 8px; } }
 @media (max-width: 560px) { .onair-ticker { margin: 8px -6px 0; padding: 0 6px; } }
 header.site-header.header-stacked > .onair-ticker { margin-top: 8px; }
-header .header-end > a.header-streamers { display: inline-flex !important; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; border: 1px solid var(--btn-border); border-radius: var(--radius-control); color: var(--cream); font: 600 .9375rem var(--body); text-decoration: none; white-space: nowrap; }
+header .header-end > a.header-streamers { display: inline-flex !important; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 1px solid var(--btn-border); border-radius: var(--radius-control); color: var(--cream); font: 600 .9375rem var(--body); text-decoration: none; white-space: nowrap; }
 header .header-end > a.header-streamers:hover { border-color: var(--gold); color: var(--gold); }
 /* Language button: the compact icon size of the Streamers link at every width. */
 .header-end > button.header-language { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; min-height: 44px; padding: 0; background: none; color: var(--cream); }
@@ -381,9 +380,6 @@ header .header-end > a.header-streamers:hover { border-color: var(--gold); color
 @media (max-width: 43.75em) {
   .streamer-header .header-signin { width: auto; min-width: 44px; padding: 0 10px; gap: 6px; white-space: nowrap; }
   .streamer-header .header-signin .header-signin-short { display: none; }
-}
-@media (max-width: 43.75em) {
-  .header-end .header-action { display: none; }
 }
 @media (max-width: 43.75em) {
   .streamer-header .header-signin > svg { display: block; }
@@ -436,3 +432,12 @@ body > .site-footer :is(.footer-full, .footer-compact) :is(a, button) { min-widt
 body > .site-footer .lang-switch span { opacity: 1; }
 .contact-links { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); flex-direction: column; align-items: stretch; }
 .contact-links .button-link { margin: 0; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; justify-content: flex-start; }
+/* The header controls have one height. Language and notifications are icons without a border. */
+.header-end > button.header-language, .header-end > button.notification-nav { position: relative; display: inline-grid; place-items: center; flex: none; width: 44px; min-width: 44px; height: 44px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--cream); }
+.header-end > button.header-language:hover, .header-end > button.notification-nav:hover { color: var(--gold); background: none; }
+.header-end > button.notification-nav .notification-badge { position: absolute; top: 2px; right: 0; }
+/* A phone header gives its width to the streamer name: the avatar menu has the Streamers link. */
+@media (max-width: 480px) {
+  header.streamer-header .header-end:has(.account-menu-wrap) > a.header-streamers { display: none !important; }
+  .streamer-header .header-end { gap: 2px; }
+}

@@ -121,6 +121,8 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | `POST /api/overlay` | `{action: "showResults", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `showResults` |
 | `POST /api/overlay` | `{action: "message", text, style: "info" \| "hype"}` | `{overlay}`. The whole new `OverlayState`, with `message` and `messageStyle` |
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
+| `POST /api/overlay/key` | `{}` | `{url}`. A new private overlay link for the page of the signed-in owner. The old link stops immediately. |
+| `POST /api/overlay/key/show` | `{}` | `{url}`. The current private overlay link, or `null` when the server kept no key. Only the owner can read it. |
 | `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
 | `GET /@handle/overlay?key&layer&poll` | Optional `layer`: `content`, `chat`, or `characters`. Optional `poll`: a poll ID | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that part alone. An unknown value shows an empty page. |
 
@@ -237,7 +239,17 @@ Existing content quotas also apply.
 
 The service stores the exact text that the author sends.
 The page formats the text when it shows a comment or a reply.
-The composer and the stored text do not change.
+
+The comment field is an editor that shows each format while the author types.
+The toolbar of the editor has one button for each format in the table below.
+When the author types Markdown syntax, the editor shows its format immediately.
+`Ctrl+B` sets bold text, `Ctrl+I` sets italic text, and `Ctrl+K` opens the link field.
+The editor sends the comment as Markdown text, so the stored text has the same syntax as before.
+
+At first, the page shows a text field without formats.
+This field works without the editor code.
+The editor code loads after the page and then replaces the field.
+The text and the mentions in the field move to the editor.
 
 Comments support this Markdown syntax:
 

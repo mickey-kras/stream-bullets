@@ -127,6 +127,53 @@ async function decrypt(
   return new TextDecoder().decode(plain);
 }
 
+export interface SealedSecret {
+  sealed: string;
+  keyId: string;
+}
+
+async function sealWith(key: CryptoKey, context: string, value: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const sealed = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv, additionalData: new TextEncoder().encode(context) },
+    key,
+    new TextEncoder().encode(value),
+  );
+  return `${toBase64Url(iv)}.${toBase64Url(new Uint8Array(sealed))}`;
+}
+
+/**
+ * Encrypts a secret that is not a channel token, bound to `context`. Null when the deployment has no valid
+ * encryption keys: the caller then does not keep the secret.
+ */
+export async function sealSecret(env: AppEnv, context: string, value: string): Promise<SealedSecret | null> {
+  let ring: Keyring;
+  try {
+    ring = await keyring(env);
+  } catch {
+    return null;
+  }
+  const key = ring.keys.get(ring.currentId);
+  return key ? { sealed: await sealWith(key, context, value), keyId: ring.currentId } : null;
+}
+
+/** The secret of `sealSecret`. Null when its key is gone or the text does not belong to `context`. */
+export async function openSecret(env: AppEnv, context: string, secret: SealedSecret): Promise<string | null> {
+  try {
+    const key = (await keyring(env)).keys.get(secret.keyId);
+    if (!key) return null;
+    const [iv, sealed] = secret.sealed.split(".");
+    const plain = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: fromBase64Url(iv), additionalData: new TextEncoder().encode(context) },
+      key,
+      fromBase64Url(sealed ?? ""),
+    );
+    return new TextDecoder().decode(plain);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * The upsert for a connection's tokens, encrypted with the current key, to batch with the connection row. It
  * writes nothing while a disconnect of the connection runs, so a racing reconnect cannot leave tokens behind.
