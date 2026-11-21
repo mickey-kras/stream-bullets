@@ -13,7 +13,7 @@ No code exists for this feature.
 - Use the stateless Streamable HTTP transport. The server needs no Durable Object and no session store.
 - Use the MCP plugin of `better-auth` as the OAuth 2.1 authorization server. It uses the sessions and the D1 database that the application has.
 - Claude meets the full goal on all plans. A streamer adds the server by its address, without a review.
-- ChatGPT meets the full goal only in Business, Enterprise and Edu workspaces. All other plans need a published plugin, and that needs a review by OpenAI.
+- ChatGPT meets the full goal only in Business, Enterprise and Edu workspaces. The documents give Pro users read tools only. Write tools on all other plans need a published plugin, and that needs a review by OpenAI.
 - Start with read tools. Add write tools in later steps, each with its own scope.
 
 ## Facts from the vendor documents
@@ -108,11 +108,14 @@ Rules for all tools:
 
 ## What each assistant can do after step 4
 
-| Capability | Claude | ChatGPT workspace | ChatGPT other plans |
-| --- | --- | --- | --- |
-| Connect without review | Yes | Yes, an administrator adds the server | No |
-| Read tools | Yes | Yes | Only with a published plugin |
-| Write tools | Yes | Yes, with a confirmation for each action | Only with a published plugin |
+| Capability | Claude | ChatGPT workspace | ChatGPT Pro | ChatGPT other plans |
+| --- | --- | --- | --- | --- |
+| Connect without review | Yes | Yes, an administrator adds the server | Yes | Not in the documents |
+| Read tools | Yes | Yes | Yes | Only with a published plugin |
+| Write tools | Yes | Yes, with a confirmation for each action | Only with a published plugin | Only with a published plugin |
+
+The Pro column comes from one answer in the help article of OpenAI. That answer can be older than Plugins.
+The prototype must check it. The documents do not say if the Free, Go and Plus plans can add a custom server.
 
 ## Decisions for the owner
 
@@ -131,6 +134,7 @@ These points are not in the documents. A short prototype in the test deployment 
 - Does `@better-auth/mcp` 1.7.17 work on Workers with the D1 adapter of the application?
 - Does Claude connect with a client ID metadata document when the server supplies its own fetch transport?
 - Which protocol revision does each assistant send?
+- Can a ChatGPT Pro user add the server and use the read tools?
 - Is there a limit on the number of tools in Claude or in ChatGPT?
 - Does ChatGPT have a limit on the size or the time of a tool result?
 

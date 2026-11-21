@@ -177611,7 +177611,7 @@
       "relation": "contains",
       "source": "docs_assistant_integration_assistant_integration_capability_check_and_decision_record",
       "source_file": "docs/assistant-integration.md",
-      "source_location": "L117",
+      "source_location": "L120",
       "target": "docs_assistant_integration_decisions_for_the_owner",
       "weight": 1.0
     },
@@ -177622,7 +177622,7 @@
       "relation": "contains",
       "source": "docs_assistant_integration_assistant_integration_capability_check_and_decision_record",
       "source_file": "docs/assistant-integration.md",
-      "source_location": "L127",
+      "source_location": "L130",
       "target": "docs_assistant_integration_checks_before_the_build",
       "weight": 1.0
     },
@@ -177633,7 +177633,7 @@
       "relation": "contains",
       "source": "docs_assistant_integration_assistant_integration_capability_check_and_decision_record",
       "source_file": "docs/assistant-integration.md",
-      "source_location": "L139",
+      "source_location": "L143",
       "target": "docs_assistant_integration_sources",
       "weight": 1.0
     },
@@ -194630,10 +194630,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "7a1da0b1ab63641fc1a43a0208821525305c3af63bf388ce2cfe9e1e149a8598",
+    "content_sha256": "8cebd7225fc40469f56c78deb7a48fa4d59bafdc9e7e4d509be32ab761b16d87",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "48c9a814415750e5c681021a1131d34f3eb2bfe014ffd2d405bcc0b5f1fb77d7",
+    "source_sha256": "5e939d7a7fa1c64928edea317d6f1f0cb0d553062a95251a588a2539ba7d7ed3",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -244910,7 +244910,7 @@
       "node_kind": "heading",
       "norm_label": "checks before the build",
       "source_file": "docs/assistant-integration.md",
-      "source_location": "L127"
+      "source_location": "L130"
     },
     {
       "_origin": "ast",
@@ -244943,7 +244943,7 @@
       "node_kind": "heading",
       "norm_label": "decisions for the owner",
       "source_file": "docs/assistant-integration.md",
-      "source_location": "L117"
+      "source_location": "L120"
     },
     {
       "_origin": "ast",
@@ -245009,7 +245009,7 @@
       "node_kind": "heading",
       "norm_label": "sources",
       "source_file": "docs/assistant-integration.md",
-      "source_location": "L139"
+      "source_location": "L143"
     },
     {
       "_origin": "ast",
