@@ -70,7 +70,7 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     expect(await inbox(owner, rootId)).toHaveLength(1);
 
     await root.getByRole("button", { name: "Edit", exact: true }).click();
-    const editor = root.getByRole("textbox", { name: "Edit comment", exact: true });
+    const editor = commentBox(root, "Edit comment");
     await editor.press("End");
     await editor.pressSequentially(" Please confirm.");
     await root.getByRole("button", { name: "Save", exact: true }).click();
@@ -124,13 +124,13 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     await thread.locator(".thread-toggle").click();
     await expect(reply).not.toBeVisible();
     await ownerPage.locator(`#cm-${rootId}`).getByRole("button", { name: "Reply", exact: true }).click();
-    await expect(thread.getByRole("textbox", { name: "Write a reply to viewer", exact: true })).toBeVisible();
+    await expect(commentBox(thread, "Write a reply to viewer")).toBeVisible();
     await thread.locator(".thread-toggle").click();
     await ownerPage.locator(`#cm-${rootId}`).getByRole("button", { name: "Reply", exact: true }).click();
-    await expect(thread.getByRole("textbox", { name: "Write a reply to viewer", exact: true })).toBeVisible();
+    await expect(commentBox(thread, "Write a reply to viewer")).toBeVisible();
     await thread.getByRole("button", { name: "Cancel reply", exact: true }).click();
     await reply.getByRole("button", { name: "Edit", exact: true }).click();
-    const replyEditor = reply.getByRole("textbox", { name: "Edit comment", exact: true });
+    const replyEditor = commentBox(reply, "Edit comment");
     await replyEditor.press("End");
     await replyEditor.pressSequentially(" Please confirm.");
     await reply.getByRole("button", { name: "Save", exact: true }).click();
@@ -417,15 +417,23 @@ test("mention lookup recovers and keyboard edits keep only intact account select
     await expect(page.locator(".mention-option")).toHaveAttribute("data-active", "true");
     await composer.press("Enter");
     await expectCommentText(composer, "@owner ");
-    // Deleting outside the label preserves it; deleting within it removes the account selection.
+    // Deleting outside the label preserves it. The label is one unit: Delete at its start removes all of it and
+    // the account selection.
     await composer.press("Home");
     await composer.pressSequentially("Hello ");
     await composer.press("End");
     await composer.press("Backspace");
     await expectCommentText(composer, "Hello @owner");
     await composer.press("Home");
-    for (let index: number = 0; index < 7; index += 1) await composer.press("ArrowRight");
+    await expect(composer.locator(".mention")).toHaveText("@owner");
+    for (let index: number = 0; index < 6; index += 1) await composer.press("ArrowRight");
     await composer.press("Delete");
+    await expectCommentText(composer, "Hello ");
+    await expect(composer.locator(".mention")).toHaveCount(0);
+    // A typed name without a selected account is plain text.
+    await composer.pressSequentially("@wner");
+    await composer.press("Escape");
+    await expect(page.locator(".mention-options")).toHaveCount(0);
     await expectCommentText(composer, "Hello @wner");
     await composer.press("End");
     await composer.pressSequentially(" @test_host");

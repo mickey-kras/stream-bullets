@@ -106,8 +106,50 @@ test("a posted comment renders the Markdown subset and keeps markup inert", asyn
   try {
     const page = await newPage(context);
     await page.goto(`/@other_host?entry=${entryId}`);
-    await commentBox(page, "Write a comment").fill(text);
+    // The author types Markdown and the editor shows each format at once. The stored text is the same Markdown.
+    const composer = commentBox(page, "Write a comment");
+    await composer.click();
+    const typed: readonly (readonly string[])[] = [
+      ["**bold** *italic* ~~struck~~ `inline` [site](https://example.com/page)"],
+      // The second Enter on an empty list item ends the list.
+      ["- first", "second", ""],
+      ["1. one", "two", ""],
+      ["> quoted"],
+      // Three backticks and a space start a code block. Two empty lines end it.
+      [`\`\`\` const wide = "${"x".repeat(300)}";`, "", ""],
+    ];
+    for (const block of typed) {
+      for (const line of block) {
+        await page.keyboard.type(line);
+        await page.keyboard.press("Enter");
+      }
+      await page.keyboard.press("Enter");
+    }
+    await page.keyboard.type("# no heading <script>window.pwned = true</script>");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("plain line");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("next line");
+    await expect(composer.locator("strong")).toHaveText("bold");
+    await expect(composer.locator("em")).toHaveText("italic");
+    await expect(composer.locator(".ed-strike")).toHaveText("struck");
+    await expect(composer.locator("p > code")).toHaveText("inline");
+    await expect(composer.locator('a[href="https://example.com/page"]')).toHaveText("site");
+    await expect(composer.locator("ul > li")).toHaveText(["first", "second"]);
+    await expect(composer.locator("ol > li")).toHaveText(["one", "two"]);
+    await expect(composer.locator("blockquote")).toHaveText("quoted");
+    await expect(composer.locator(":scope > code")).toContainText("const wide");
+    await expect(composer.locator("h1, script, img")).toHaveCount(0);
+    const created = page.waitForResponse(
+      (response) => response.request().method() === "POST" && response.url().endsWith("/api/streamers/other_host"),
+    );
     await page.getByRole("button", { name: "Post", exact: true }).click();
+    const commentId: string = z.object({ id: z.string() }).parse(await (await created).json()).id;
+    const storedText = async (): Promise<string> =>
+      z
+        .object({ comment: z.object({ text: z.string() }) })
+        .parse(await (await context.request.get(`/api/comments/${commentId}`)).json()).comment.text;
+    expect(await storedText()).toBe(text);
     const posted = page.locator("article.comment").filter({ hasText: "plain line" });
     const body = posted.locator(".comment-text");
     await expect(body.locator("strong")).toHaveText("bold");
@@ -137,7 +179,24 @@ test("a posted comment renders the Markdown subset and keeps markup inert", asyn
     await page.reload();
     await expect(body.locator("strong")).toHaveText("bold");
     await posted.getByRole("button", { name: "Edit", exact: true }).click();
-    await expect(posted.getByRole("textbox", { name: "Edit comment", exact: true })).toHaveValue(text);
+    // The edit field shows the same formats, and a save without a change keeps the same Markdown.
+    const editBox = commentBox(posted, "Edit comment");
+    await expect(editBox.locator("strong")).toHaveText("bold");
+    await expect(editBox.locator("em")).toHaveText("italic");
+    await expect(editBox.locator(".ed-strike")).toHaveText("struck");
+    await expect(editBox.locator("p > code")).toHaveText("inline");
+    await expect(editBox.locator('a[href="https://example.com/page"]')).toHaveText("site");
+    await expect(editBox.locator("ul > li")).toHaveText(["first", "second"]);
+    await expect(editBox.locator("ol > li")).toHaveText(["one", "two"]);
+    await expect(editBox.locator("blockquote")).toHaveText("quoted");
+    await expect(editBox.locator(":scope > code")).toContainText("const wide");
+    await expect(editBox).toContainText("# no heading <script>window.pwned = true</script>");
+    const saved = page.waitForResponse(
+      (response) => response.request().method() === "POST" && response.url().endsWith("/api/comments"),
+    );
+    await posted.getByRole("button", { name: "Save", exact: true }).click();
+    expect((await saved).ok()).toBe(true);
+    expect(await storedText()).toBe(text);
   } finally {
     await close(context);
     await runSql("threads-markdown-cleanup", [`DELETE FROM entries WHERE id='${entryId}';`]);

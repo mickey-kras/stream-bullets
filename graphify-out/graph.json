@@ -198488,10 +198488,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "edc0160bc0a4269e0365db4abcbf5720783422af90d89235f7e55b4c520e640f",
+    "content_sha256": "e1f2e03077160babac8dff94fbb2575a6a96acd6be7a8a27ba5f14777c5d5060",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "b425890b7b5f9c11c5a12a7f886e2723aab807b9f1759c03ad2127585b4173ee",
+    "source_sha256": "1c13633b164942f635d796c2ec5d2f912fe5607cf847d2452e2da4bd04b20d0b",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -248410,7 +248410,7 @@
             "callee": "closest",
             "file": "tests/e2e/threads.spec.ts",
             "lang": "typescript",
-            "line": "L133",
+            "line": "L175",
             "receiver_type": "HTMLElement"
           }
         ]
