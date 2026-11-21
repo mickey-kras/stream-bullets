@@ -45,6 +45,7 @@
         ]
       },
       "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1003", "simple": { "limit": 120, "period": 60 } }],
+      "ai": { "binding": "AI" },
       "triggers": { "crons": [] }
     },
     "production": {
@@ -62,7 +63,8 @@
           { "name": "CHANNEL_INGEST", "class_name": "ChannelIngest" }
         ]
       },
-      "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }]
+      "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }],
+      "ai": { "binding": "AI" }
     }
   }
 }

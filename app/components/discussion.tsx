@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEv
 import { useSearchParams } from "react-router";
 import { createDraftStore, type DiscussionDraft } from "../lib/discussion-draft";
 import { CommentInput } from "./comment-input";
+import { useCommentTranslation } from "./comment-translation";
 import type { MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
@@ -253,6 +254,7 @@ function CommentArticle({
   const [mentions, setMentions] = useState<MentionSelection[]>(comment.mentions ?? []);
   const [error, setError] = useState<string>("");
   const editButton = useRef<HTMLDivElement | null>(null);
+  const shown = useCommentTranslation(comment, rules.viewer !== null && rules.viewer.id !== comment.authorId);
   const focusActions = (): void => {
     requestAnimationFrame(() =>
       editButton.current?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true }),
@@ -342,9 +344,12 @@ function CommentArticle({
             </div>
           </form>
         ) : (
-          <div className="comment-text">
-            <CommentMarkdown text={comment.text} mentions={comment.mentions} />
-          </div>
+          <>
+            <div className="comment-text">
+              <CommentMarkdown text={shown.text} mentions={shown.mentions} />
+            </div>
+            {shown.control}
+          </>
         )}
         {comment.editedAt && <span className="muted">{t("discussion.edited")}</span>}
         <div ref={editButton}>

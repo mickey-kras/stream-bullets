@@ -1348,5 +1348,9 @@
   "waitlist.request": "होस्ट करने का अनुरोध",
   "waitlist.sendAgain": "अनुरोध फिर से भेजें",
   "waitlist.update": "अनुरोध अपडेट करें",
-  "overlay.characters.off": "इस सर्वर पर किरदार बंद हैं।"
+  "overlay.characters.off": "इस सर्वर पर किरदार बंद हैं।",
+  "discussion.translate": "अनुवाद करें",
+  "discussion.translated": "अनूदित",
+  "discussion.showOriginal": "मूल दिखाएँ",
+  "discussion.noTranslation": "इस टिप्पणी का अनुवाद उपलब्ध नहीं है।"
 }

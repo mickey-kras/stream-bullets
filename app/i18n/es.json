@@ -1348,5 +1348,9 @@
   "waitlist.request": "Solicitar alojar",
   "waitlist.sendAgain": "Enviar la solicitud de nuevo",
   "waitlist.update": "Actualizar solicitud",
-  "overlay.characters.off": "Los personajes están desactivados en este servidor."
+  "overlay.characters.off": "Los personajes están desactivados en este servidor.",
+  "discussion.translate": "Traducir",
+  "discussion.translated": "Traducido",
+  "discussion.showOriginal": "Ver original",
+  "discussion.noTranslation": "Este comentario no tiene traducción."
 }

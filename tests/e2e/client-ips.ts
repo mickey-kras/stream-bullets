@@ -16,6 +16,7 @@ const ranges = {
   "overlay-control": [[90, 94]],
   community: [[95, 96]],
   threads: [[100, 100]],
+  "comment-translation": [[101, 102]],
   ideas: [[105, 111]],
   "admin-keys": [[120, 124]],
   schedule: [
