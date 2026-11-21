@@ -181,6 +181,32 @@ async function webhookResponse(request: Request, env: AppEnv, path: string, key:
   }
 }
 
+/**
+ * A plain-HTTP read of the application host goes to the same address on HTTPS. Link checkers, such as the one for
+ * the Google consent screen, start with HTTP. Another host or port gets no redirect.
+ */
+export function httpsRedirect(request: Request, origin: string): Response | null {
+  const url = new URL(request.url);
+  const target = new URL(origin);
+  const read: boolean = request.method === "GET" || request.method === "HEAD";
+  if (!read || url.protocol !== "http:" || target.protocol !== "https:" || url.host !== target.host) return null;
+  return new Response(null, { status: 301, headers: { Location: `${origin}${url.pathname}${url.search}` } });
+}
+
+function secured(
+  response: Response,
+  request: Request,
+  env: AppEnv,
+  context: Readonly<{ nonce: string; origin: string; requestId: string; responseHeaders: Headers }>,
+): Response {
+  const result: Response = securityHeaders(response, request, context.nonce, context.origin, import.meta.env.DEV);
+  if (env.APP_ENV === "test") result.headers.set("X-Robots-Tag", "noindex, nofollow");
+  result.headers.set("X-Request-ID", context.requestId);
+  result.headers.set(BINARY_LABELS_COMPATIBILITY_HEADER, BINARY_LABELS_COMPATIBILITY_VERSION);
+  for (const value of context.responseHeaders.getSetCookie()) result.headers.append("Set-Cookie", value);
+  return result;
+}
+
 async function imageResponse(request: Request, env: AppEnv, path: string): Promise<Response> {
   if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
   const image: Response = await serveImage(env, path.slice("/images/".length), request.method);
@@ -263,6 +289,8 @@ export default {
     try {
       validateTestEnvironment(env);
       origin = getOrigin(env);
+      const secure: Response | null = httpsRedirect(request, origin);
+      if (secure) return secured(secure, request, env, { nonce, origin, requestId, responseHeaders });
       if (new URL(request.url).origin !== origin) throw new HttpError(421, "Use the configured application URL.");
       const path = new URL(request.url).pathname;
       const key = await clientKey(request);
@@ -282,11 +310,6 @@ export default {
       response = errorResponse(error, request, requestId);
       origin = "https://invalid.invalid";
     }
-    const secured = securityHeaders(response, request, nonce, origin, import.meta.env.DEV);
-    if (env.APP_ENV === "test") secured.headers.set("X-Robots-Tag", "noindex, nofollow");
-    secured.headers.set("X-Request-ID", requestId);
-    secured.headers.set(BINARY_LABELS_COMPATIBILITY_HEADER, BINARY_LABELS_COMPATIBILITY_VERSION);
-    for (const value of responseHeaders.getSetCookie()) secured.headers.append("Set-Cookie", value);
-    return secured;
+    return secured(response, request, env, { nonce, origin, requestId, responseHeaders });
   },
 } satisfies ExportedHandler<AppEnv>;
