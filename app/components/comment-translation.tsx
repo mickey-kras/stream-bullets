@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { getLocale, t } from "../i18n";
 import type { Comment, CommentMention } from "../types";
-import { ApiError, postJson } from "./api";
+import { requestTranslation, translationOff } from "./translation-queue";
 import { Icon } from "./ui/icon";
 
 interface Translation {
@@ -13,34 +13,6 @@ interface Translation {
 interface Loaded {
   forText: string;
   translation: Translation | null;
-}
-
-// A page with many comments asks for a small number of translations at one time.
-const LANES = 3;
-let active: number = 0;
-const waiting: (() => void)[] = [];
-// The deployment has no translation, or the daily limit is reached. The page stops its requests.
-let unavailable: boolean = false;
-
-function inLane<T>(task: () => Promise<T>): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const start = (): void => {
-      if (unavailable) {
-        reject(new Error("Translation is not available."));
-        waiting.shift()?.();
-        return;
-      }
-      active += 1;
-      task()
-        .then(resolve, reject)
-        .finally(() => {
-          active -= 1;
-          waiting.shift()?.();
-        });
-    };
-    if (active < LANES) start();
-    else waiting.push(start);
-  });
 }
 
 /**
@@ -58,21 +30,18 @@ export function useCommentTranslation(
   const known: boolean = comment.translation !== undefined || loaded?.forText === text;
 
   useEffect(() => {
-    if (!canAsk || known || removed || unavailable) return;
+    if (!canAsk || known || removed || translationOff()) return;
     let stopped: boolean = false;
-    inLane(() =>
-      postJson<{ translation: Translation | null }>(`/api/comments/${id}/translation`, {
-        locale: getLocale(),
-        text,
-      }),
+    requestTranslation<{ translation: Translation | null }>(
+      `/api/comments/${id}/translation`,
+      { locale: getLocale(), text },
+      (): boolean => stopped,
     )
       .then((result) => {
         if (!stopped) setLoaded({ forText: text, translation: result.translation });
       })
       // Without a translation, the comment stays in its original text.
-      .catch((error: unknown) => {
-        if (error instanceof ApiError && error.status === 503) unavailable = true;
-      });
+      .catch(() => undefined);
     return () => {
       stopped = true;
     };

@@ -95,3 +95,26 @@ test("a deployment without translation shows the original text and stops its req
     await close(context);
   }
 });
+
+test("the page asks again when a different reader has the translation in progress", async ({ browser }) => {
+  const { entryId } = await seedComments();
+  const context = await signedIn(browser, "viewer", clientIp("comment-translation", 102));
+  const page = await newPage(context);
+  try {
+    let answers: number = 0;
+    await page.route("**/api/comments/*/translation", async (route) => {
+      const body = route.request().postDataJSON() as { text: string };
+      if (body.text !== "**Hallo** Welt") return route.fulfill({ json: { translation: null } });
+      answers += 1;
+      if (answers === 1)
+        return route.fulfill({ status: 409, json: { error: "The translation is not ready. Try again in a moment." } });
+      return route.fulfill({ json: { translation: { text: "**Hello** world", mentions: [] } } });
+    });
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const comment = page.locator("article.comment").filter({ hasText: "reporter" });
+    await expect(comment.locator(".comment-text")).toHaveText("Hello world");
+    expect(answers).toBe(2);
+  } finally {
+    await close(context);
+  }
+});

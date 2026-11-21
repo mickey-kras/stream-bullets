@@ -5577,8 +5577,8 @@
       "relation": "calls",
       "source": "app_components_comment_translation_usecommenttranslation",
       "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L63",
-      "target": "app_components_comment_translation_inlane",
+      "source_location": "L33",
+      "target": "app_components_translation_queue_translationoff",
       "weight": 1.0
     },
     {
@@ -5589,8 +5589,8 @@
       "relation": "calls",
       "source": "app_components_comment_translation_usecommenttranslation",
       "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L64",
-      "target": "app_components_api_postjson",
+      "source_location": "L35",
+      "target": "app_components_translation_queue_requesttranslation",
       "weight": 1.0
     },
     {
@@ -5601,7 +5601,7 @@
       "relation": "calls",
       "source": "app_components_comment_translation_usecommenttranslation",
       "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L65",
+      "source_location": "L37",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -5613,7 +5613,7 @@
       "relation": "calls",
       "source": "app_components_comment_translation_usecommenttranslation",
       "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L84",
+      "source_location": "L53",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -5625,7 +5625,7 @@
       "relation": "calls",
       "source": "app_components_comment_translation_usecommenttranslation",
       "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L91",
+      "source_location": "L60",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -25595,6 +25595,30 @@
       "source_file": "app/components/topic-icon.tsx",
       "source_location": "L23",
       "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_translation_queue_requesttranslation",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L43",
+      "target": "app_components_translation_queue_send",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_translation_queue_send",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L30",
+      "target": "app_components_translation_queue_wait",
       "weight": 1.0
     },
     {
@@ -64349,7 +64373,7 @@
       "source": "app_components_comment_translation",
       "source_file": "app/components/comment-translation.tsx",
       "source_location": "L4",
-      "target": "app_components_api_apierror",
+      "target": "app_components_translation_queue_requesttranslation",
       "weight": 1.0
     },
     {
@@ -64361,7 +64385,7 @@
       "source": "app_components_comment_translation",
       "source_file": "app/components/comment-translation.tsx",
       "source_location": "L4",
-      "target": "app_components_api_postjson",
+      "target": "app_components_translation_queue_translationoff",
       "weight": 1.0
     },
     {
@@ -77442,6 +77466,30 @@
       "source_file": "app/components/topic-icon.tsx",
       "source_location": "L4",
       "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L1",
+      "target": "app_components_api_apierror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L1",
+      "target": "app_components_api_postjson",
       "weight": 1.0
     },
     {
@@ -119114,7 +119162,7 @@
       "source": "app_components_comment_translation",
       "source_file": "app/components/comment-translation.tsx",
       "source_location": "L4",
-      "target": "app_components_api",
+      "target": "app_components_translation_queue",
       "weight": 1.0
     },
     {
@@ -127423,6 +127471,18 @@
       "source_file": "app/components/topic-icon.tsx",
       "source_location": "L3",
       "target": "app_components_ui_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L1",
+      "target": "app_components_api",
       "weight": 1.0
     },
     {
@@ -153230,29 +153290,7 @@
       "relation": "contains",
       "source": "app_components_comment_translation",
       "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L21",
-      "target": "app_components_comment_translation_waiting",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_comment_translation",
-      "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L25",
-      "target": "app_components_comment_translation_inlane",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_comment_translation",
-      "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L51",
+      "source_location": "L23",
       "target": "app_components_comment_translation_usecommenttranslation",
       "weight": 1.0
     },
@@ -163099,6 +163137,72 @@
       "source_file": "app/components/topic-icon.tsx",
       "source_location": "L6",
       "target": "app_components_topic_icon_icons",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L13",
+      "target": "app_components_translation_queue_translationoff",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L17",
+      "target": "app_components_translation_queue_wait",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L21",
+      "target": "app_components_translation_queue_send",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L39",
+      "target": "app_components_translation_queue_requesttranslation",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L6",
+      "target": "app_components_translation_queue_retry_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_translation_queue",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L9",
+      "target": "app_components_translation_queue_waiting",
       "weight": 1.0
     },
     {
@@ -200894,10 +200998,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "00309b19d3acd83f5c971013e596fda372faac0aef0151e21e832b4d9a0d4118",
+    "content_sha256": "cb6f21ba1b30601f2184689b8811e974b06c47ff0aa92c295bd8d3f3b214f47f",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "d309d33c6b1e8c4cdbd3307dc82db919a3107aee753b82f2494f0c98c3ed7445",
+    "source_sha256": "b18ec8a2a72af59a111a09e73e1ebc83d53d3606ee81ad9fa1464df0157ebd45",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -209917,22 +210021,11 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_components_comment_translation_inlane",
-      "label": "inLane()",
-      "norm_label": "inlane()",
-      "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L25"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
       "id": "app_components_comment_translation_usecommenttranslation",
       "label": "useCommentTranslation()",
       "norm_label": "usecommenttranslation()",
       "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L51"
+      "source_location": "L23"
     },
     {
       "_callable": true,
@@ -218565,6 +218658,50 @@
       "norm_label": "topicicon()",
       "source_file": "app/components/topic-icon.tsx",
       "source_location": "L22"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_translation_queue_requesttranslation",
+      "label": "requestTranslation()",
+      "norm_label": "requesttranslation()",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L39"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_translation_queue_send",
+      "label": "send()",
+      "norm_label": "send()",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L21"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_translation_queue_translationoff",
+      "label": "translationOff()",
+      "norm_label": "translationoff()",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L13"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_translation_queue_wait",
+      "label": "wait()",
+      "norm_label": "wait()",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L17"
     },
     {
       "_callable": true,
@@ -239576,16 +239713,6 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_components_comment_translation_waiting",
-      "label": "waiting",
-      "norm_label": "waiting",
-      "source_file": "app/components/comment-translation.tsx",
-      "source_location": "L21"
-    },
-    {
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
       "id": "app_components_common",
       "label": "common.tsx",
       "norm_label": "common.tsx",
@@ -241771,6 +241898,36 @@
       "norm_label": "topic_category_labels",
       "source_file": "app/components/topic-icon.tsx",
       "source_location": "L26"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_translation_queue",
+      "label": "translation-queue.ts",
+      "norm_label": "translation-queue.ts",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_translation_queue_retry_ms",
+      "label": "RETRY_MS",
+      "norm_label": "retry_ms",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L6"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_translation_queue_waiting",
+      "label": "waiting",
+      "norm_label": "waiting",
+      "source_file": "app/components/translation-queue.ts",
+      "source_location": "L9"
     },
     {
       "_origin": "ast",
