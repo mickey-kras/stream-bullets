@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { expect, test, type Browser, type BrowserContext } from "./coverage";
 import { z } from "zod";
 import { clientAddress } from "./client-ips";
+import { commentBox, expectCommentText } from "./fixtures";
 
 async function signedIn(browser: Browser): Promise<BrowserContext> {
   const sessions = z
@@ -35,11 +36,11 @@ test("older topics show fresh reactions, retain drafts, and disappear after dele
   const olderTopic = page.locator("#topics .topic").filter({ hasText: "Archive topic 03" });
   await olderTopic.click();
   await expect(page.getByRole("heading", { name: "Archive topic 03", exact: true })).toBeVisible();
-  const draft = page.getByRole("textbox", { name: "Write a comment" });
+  const draft = commentBox(page, "Write a comment");
   await draft.fill("Keep this draft while I change my vote.");
   await page.getByRole("button", { name: /^Like 0$/ }).click();
   await expect(page.getByRole("button", { name: /^Like 1$/ })).toHaveAttribute("aria-pressed", "true");
-  await expect(draft).toHaveValue("Keep this draft while I change my vote.");
+  await expectCommentText(draft, "Keep this draft while I change my vote.");
   await page.getByRole("button", { name: /^Like 1$/ }).click();
   await expect(page.getByRole("button", { name: /^Like 0$/ })).toHaveAttribute("aria-pressed", "false");
   await page.getByRole("button", { name: "Load more topics", exact: true }).click();
@@ -65,16 +66,14 @@ test("poll discussion refreshes when a remote comment changes the board", async 
   const page = await newPage(context);
   await page.goto(`/@pagination_host?view=polls&entry=${poll.id}`);
   await expect(page.getByText("Live updates connected", { exact: true })).toBeVisible();
-  await page.getByRole("textbox", { name: "Write a comment" }).fill("My local draft survives remote updates.");
+  await commentBox(page, "Write a comment").fill("My local draft survives remote updates.");
   const posted = await context.request.post("/api/streamers/pagination_host", {
     headers: { Origin: "http://localhost:5173" },
     data: { action: "comment", id: poll.id, text: "A comment from a different connection." },
   });
   expect(posted.status()).toBe(200);
   await expect(page.getByText("A comment from a different connection.", { exact: true })).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "Write a comment" })).toHaveValue(
-    "My local draft survives remote updates.",
-  );
+  await expectCommentText(commentBox(page, "Write a comment"), "My local draft survives remote updates.");
   await close(context);
 });
 

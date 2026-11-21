@@ -1,7 +1,14 @@
 import { execFileSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import type { Browser, BrowserContext, BrowserContextOptions } from "@playwright/test";
+import {
+  expect,
+  type Browser,
+  type BrowserContext,
+  type BrowserContextOptions,
+  type Locator,
+  type Page,
+} from "@playwright/test";
 import { z } from "zod";
 
 export const origin: string = "http://localhost:5173";
@@ -68,4 +75,14 @@ export async function runSql(name: string, statements: string[]): Promise<void> 
 export function dateFromToday(days: number): string {
   const date = new Date(Date.now() + days * 86_400_000);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+// The comment field after the editor with formats has replaced the first plain text field.
+export function commentBox(scope: Page | Locator, name: string): Locator {
+  return scope.getByRole("textbox", { name, exact: true }).and(scope.locator(".ed-content[data-composer]"));
+}
+
+// The text that a comment field shows, with its exact spaces and line breaks.
+export async function expectCommentText(box: Locator, text: string): Promise<void> {
+  await expect.poll(() => box.innerText()).toBe(text);
 }
