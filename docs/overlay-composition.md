@@ -448,12 +448,13 @@ A change of size does not scale a chat layer or a characters layer. Each layer u
 
 The poll card has three parts: the question beside the QR code, the options across the full width, and one status line.
 Each option is a thin bar. It shows its share of the votes when the results are on.
+The card is complete in a cell of 4 by 2.
+Viewers cannot select an option on stream. They scan the code to vote.
+
 An option name shows two lines at most and then an ellipsis.
 When an option name has more than 12 characters, the options have wide bars with one line each.
 Up to three such options have one row each. Four to six such options have two columns.
 The page of the poll shows the full names.
-The card is complete in a cell of 4 by 2.
-Viewers cannot select an option on stream. They scan the code to vote.
 
 ### Saves
 
