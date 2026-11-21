@@ -615,7 +615,7 @@ describe("Mash Battle taps", (): void => {
 
 describe("overlay updates", (): void => {
   it("tells the owner when an OBS source connects and when it closes", async (): Promise<void> => {
-    type Sources = { type: string; count: number; seenAt: number | null };
+    type Sources = { type: string; sources?: { count: number; seenAt: number | null } };
     const subscribe = (extra: Record<string, string>): ReturnType<Miniflare["dispatchFetch"]> =>
       runtime.dispatchFetch(`${origin}/${streamerId}/subscribe?streamerId=${streamerId}`, {
         headers: { Upgrade: "websocket", Origin: origin, "X-Stream-Bullets-Client": clientKey, ...extra },
@@ -624,18 +624,18 @@ describe("overlay updates", (): void => {
     if (!owner) throw new Error("Missing WebSocket");
     sockets.push(owner);
     const sources = (count: number): Promise<Sources> =>
-      nextMessage<Sources>(owner, (message) => message.type === "overlay-sources" && message.count === count);
+      nextMessage<Sources>(owner, (message) => message.type === "overlay" && message.sources?.count === count);
     const none = sources(0);
     owner.accept();
-    expect((await none).seenAt).toBeNull();
+    expect((await none).sources?.seenAt).toBeNull();
     const joined = sources(1);
     const source = (await subscribe({ "X-SB-Overlay": "1" })).webSocket;
     if (!source) throw new Error("Missing WebSocket");
     source.accept();
-    expect((await joined).seenAt).toBeGreaterThan(0);
+    expect((await joined).sources?.seenAt).toBeGreaterThan(0);
     const gone = sources(0);
     source.close(1000, "done");
-    expect((await gone).seenAt).toBeGreaterThan(0);
+    expect((await gone).sources?.seenAt).toBeGreaterThan(0);
   });
 
   it("reaches only the room of the page that changed", async (): Promise<void> => {

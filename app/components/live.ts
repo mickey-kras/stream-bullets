@@ -68,11 +68,16 @@ const deniedSchema = z.object({
   id: z.string().uuid(),
   reason: z.enum(["sign-in", "closed", "pick"]),
 });
-const overlayMessageSchema = z.object({ type: z.literal("overlay"), overlay: overlaySchema });
-const overlaySourcesSchema = z.object({ type: z.literal("overlay-sources"), count, seenAt: count.nullable() });
+const overlaySourcesSchema = z.object({ count, seenAt: count.nullable() });
+// The owner's sockets also get `sources` in this message. An older script ignores the key.
+const overlayMessageSchema = z.object({
+  type: z.literal("overlay"),
+  overlay: overlaySchema,
+  sources: overlaySourcesSchema.optional(),
+});
 
 /** The OBS sources of a page, for its owner: how many are connected, and when one last connected or went away. */
-export type OverlaySources = Omit<z.infer<typeof overlaySourcesSchema>, "type">;
+export type OverlaySources = z.infer<typeof overlaySourcesSchema>;
 
 export type LiveStatus = "connecting" | "live" | "reconnecting" | "offline";
 export type MashDenial = z.infer<typeof deniedSchema>["reason"];
@@ -168,11 +173,7 @@ function handleSideMessage(
   const overlay = overlayMessageSchema.safeParse(message);
   if (overlay.success) {
     onOverlay(overlay.data.overlay);
-    return true;
-  }
-  const sources = overlaySourcesSchema.safeParse(message);
-  if (sources.success) {
-    onSources({ count: sources.data.count, seenAt: sources.data.seenAt });
+    if (overlay.data.sources) onSources(overlay.data.sources);
     return true;
   }
   return false;

@@ -94,13 +94,17 @@ it("renews the budget after a sustained healthy connection", (): void => {
   expect(hooks.update).not.toHaveBeenCalledWith("offline");
 });
 
-it("keeps the OBS source count that the room sends to the owner", (): void => {
+it("keeps the OBS source count that the room sends to the owner in an overlay message", (): void => {
+  const overlay = { showResults: true, message: "", messageStyle: "info", chatTestUntil: 0, revision: 1 };
   start();
   current().snapshot();
   hooks.update.mockClear();
-  current().onmessage?.({ data: JSON.stringify({ type: "overlay-sources", count: 2, seenAt: 5 }) });
-  expect(hooks.update.mock.calls).toEqual([[{ count: 2, seenAt: 5 }]]);
-  current().onmessage?.({ data: JSON.stringify({ type: "overlay-sources", count: -1, seenAt: null }) });
+  current().onmessage?.({ data: JSON.stringify({ type: "overlay", overlay }) });
+  expect(hooks.update).not.toHaveBeenCalledWith({ count: 2, seenAt: 5 });
+  current().onmessage?.({ data: JSON.stringify({ type: "overlay", overlay, sources: { count: 2, seenAt: 5 } }) });
+  expect(hooks.update).toHaveBeenCalledWith({ count: 2, seenAt: 5 });
+  expect(current().readyState).toBe(1);
+  current().onmessage?.({ data: JSON.stringify({ type: "overlay", overlay, sources: { count: -1, seenAt: null } }) });
   expect(current().readyState).toBe(3);
 });
 

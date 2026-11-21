@@ -362,10 +362,13 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   // The OBS sources for the overlay control: how many are connected, and when one last connected or went away.
+  // They go in an `overlay` message: a page that still runs an older script reads the overlay and ignores the rest.
+  // A message type that such a page does not know would close its socket.
   private async overlaySources(): Promise<string> {
     this.overlaySeenAt ??= (await this.ctx.storage.get<number>("overlaySeenAt")) ?? null;
-    const count = this.activeSockets("overlay-key").length;
-    return JSON.stringify({ type: "overlay-sources", count, seenAt: this.overlaySeenAt });
+    this.overlay ??= await this.loadOverlay();
+    const sources = { count: this.activeSockets("overlay-key").length, seenAt: this.overlaySeenAt };
+    return JSON.stringify({ type: "overlay", overlay: this.overlay, sources });
   }
 
   // An OBS source connected or went away: store the time and tell the owner's sockets that are not OBS sources.
