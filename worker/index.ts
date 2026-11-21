@@ -15,6 +15,7 @@ import {
 } from "../app/server/http.server";
 import { serveImage } from "../app/server/images.server";
 import { overlayKeyMatches } from "../app/server/overlay-key.server";
+import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
 import { visitorPrefix } from "../app/server/ip-prefix";
 import { cleanExpiredData } from "../app/server/cleanup.server";
 import { scheduleCalendar, topUpSeries } from "../app/server/schedule.server";
@@ -157,8 +158,20 @@ async function activityResponse(
   if (await overlayKeyMatches(env, streamer.id, overlayKey)) headers.set("X-SB-Overlay", "1");
   else if ((await getViewer(request, { env, nonce, responseHeaders }))?.id === streamer.ownerId)
     headers.set("X-SB-Owner", "1");
-  else throw new HttpError(403, "Use the overlay URL with its key.");
+  else if (overlayKey === null) throw new HttpError(403, "Use the overlay URL with its key.");
+  else return keyRefused();
   return callIngest(env, streamer.id, "subscribe", { init: { headers }, characters: characters === "1" });
+}
+
+/**
+ * A wrong or revoked overlay key: accept the socket and close it with KEY_REFUSED_CLOSE. A browser cannot read the
+ * status of a failed upgrade, so only a close code tells the overlay page to stop its retries.
+ */
+function keyRefused(): Response {
+  const [client, server] = Object.values(new WebSocketPair());
+  server.accept();
+  server.close(KEY_REFUSED_CLOSE, "Overlay key refused");
+  return new Response(null, { status: 101, webSocket: client });
 }
 
 async function webhookResponse(request: Request, env: AppEnv, path: string, key: string): Promise<Response> {

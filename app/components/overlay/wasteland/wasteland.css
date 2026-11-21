@@ -272,3 +272,155 @@
     opacity: 0;
   }
 }
+
+/* ---------- The poll on stream: sized from its cell, so it stays readable from 4 x 2 cells up ---------- */
+.ov-stage > .ov-poll {
+  height: 100%;
+  padding: 0;
+  container-type: size;
+}
+.ov-poll-body {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(8px, 4cqh, 28px);
+  padding: clamp(12px, 6cqh, 40px) clamp(14px, 3.5cqw, 44px);
+}
+/* The question has the height of the QR code. useFitText sets its font size. The head takes the height that the
+   options and the status line leave, so a poll with two rows of options also fits its cell. */
+.ov-poll-head {
+  display: flex;
+  flex: 1 1 0;
+  gap: clamp(10px, 3cqw, 32px);
+  min-height: 0;
+  max-height: 30cqw;
+  min-width: 0;
+}
+.ov-poll .poll-choices,
+.ov-poll .ov-hidden-results,
+.ov-poll-foot {
+  flex: none;
+}
+.ov-scaler .overlay-card.ov-poll h1,
+.overlay-card.ov-poll h1 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: clamp(16px, 10cqh, 64px);
+  line-height: 1.1;
+}
+.ov-poll .ov-qr {
+  width: auto !important;
+  height: 100% !important;
+  aspect-ratio: 1;
+}
+/* The options share the full width in one row, each with its part of the result. */
+.ov-poll .poll-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 28cqw), 1fr));
+  gap: clamp(6px, 2cqw, 16px);
+  margin: 0;
+  min-height: 0;
+}
+/* A thin bar: the result needs little height, and the question and the code get the space. */
+.ov-poll .poll-option {
+  height: clamp(32px, 15cqh, 104px);
+  min-height: 0;
+  margin: 0;
+  font-size: clamp(14px, min(6.2cqh, 4.5cqw), 52px);
+}
+/* A label has two lines at most and then an ellipsis, so the bar never cuts a line in the middle. Two lines of each
+   font size above fit the height of the bar. */
+.ov-poll .poll-option .opt-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  line-height: 1.1;
+}
+/* Long option names (optionColumns): each name gets a wide bar and one line, so more of it shows. A high cell
+   keeps one option in each row. */
+@container (aspect-ratio >= 1.2) {
+  .ov-poll[data-option-columns="1"] .poll-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ov-poll[data-option-columns="2"] .poll-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ov-poll[data-option-columns] .poll-choices .poll-option:nth-child(n) {
+    height: clamp(26px, 11cqh, 104px);
+    font-size: clamp(12px, min(5.5cqh, 3.4cqw), 48px);
+  }
+}
+.ov-poll[data-option-columns] .poll-option .opt-label {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow-wrap: anywhere;
+}
+/* Three or more options in one row get smaller text, so one long word stays whole. */
+.ov-poll .poll-choices:has(.poll-option:nth-child(3)) .poll-option {
+  font-size: clamp(13px, min(6.5cqh, 3.3cqw), 56px);
+}
+.ov-poll .poll-choices:has(.poll-option:nth-child(4)) .poll-option {
+  font-size: clamp(11px, min(5.5cqh, 2.8cqw), 48px);
+}
+/* A high cell has room for one option in each row. */
+@container (aspect-ratio < 1.2) {
+  .ov-poll .poll-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ov-poll .poll-choices .poll-option:nth-child(n) {
+    height: clamp(32px, 8cqh, 104px);
+    font-size: clamp(14px, min(4cqh, 6cqw), 52px);
+  }
+  .ov-poll-head {
+    max-height: 42cqw;
+  }
+}
+.ov-poll .poll-option > .opt-track {
+  padding: 0 clamp(8px, 2cqw, 20px);
+}
+.ov-poll .poll-option > .option-score {
+  flex: none;
+  padding: 0 clamp(8px, 2cqw, 20px);
+}
+.ov-poll .option-score small {
+  display: none;
+}
+.ov-poll .ov-hidden-results {
+  margin: 0;
+  align-self: center;
+  font-size: clamp(14px, min(8cqh, 4.5cqw), 56px);
+}
+.ov-poll-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  font-size: clamp(11px, min(5.5cqh, 3cqw), 34px);
+  white-space: nowrap;
+}
+.ov-poll-foot .poll-topline {
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+  min-width: 0;
+}
+.ov-poll-foot .poll-topline,
+.ov-poll-foot .overlay-total {
+  margin: 0;
+  font-size: inherit;
+}
+.ov-poll-foot .overlay-total {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

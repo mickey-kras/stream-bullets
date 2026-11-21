@@ -100,7 +100,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | `POST /api/channels/:platform/reconnect` | `{}` | `{authorizeUrl}`. The connection row stays. |
 | `DELETE /api/channels/:platform` | none, or `{}` | `{revoked}`: true when the provider confirmed the revoke. `404` when the page has no connection for the platform. `409` (`channel_conflict`) when the row changed during the disconnect. A reconnect replaced it, or another disconnect or the expiry job removed it. |
 | `GET /channels/callback/:platform` | provider query | A redirect to `/overlay-control?channel=<platform>&result=<code>`. |
-| `GET /api/activity/:handle` | WebSocket upgrade, optional `key`, optional `characters=1` | The activity feed. Only the current overlay key or the signed-in owner can connect. With `characters=1` the socket also gets the character playground frames. `400` for another `characters` value or another parameter. `426` without a WebSocket upgrade, `403` without a valid key or owner session, `404` for a missing or suspended page, `503` while the `CHANNELS_OFF` secret exists. |
+| `GET /api/activity/:handle` | WebSocket upgrade, optional `key`, optional `characters=1` | The activity feed. Only the current overlay key or the signed-in owner can connect. With `characters=1` the socket also gets the character playground frames. `400` for another `characters` value or another parameter. `426` without a WebSocket upgrade, `403` without a key or owner session. A wrong or revoked key gets a socket that the server closes at once with the code `4403`. `404` for a missing or suspended page, `503` while the `CHANNELS_OFF` secret exists. |
 | `POST /hooks/twitch`, `POST /hooks/kick` | signed provider webhook | `204`, or `200` with the challenge for a Twitch subscription check. `410` for a signed Twitch notification of an unknown channel. Twitch counts it as a failed delivery. It revokes the subscription after repeated failures. `403` for a bad signature or an old timestamp. `413` for a large body. `429` when an address with too many forged webhooks reaches the per-address limit. `503` when the server cannot check the webhook. |
 
 - `:platform` is `twitch`, `youtube` or `kick`.
@@ -232,3 +232,38 @@ Each inbox keeps up to 200 notifications for up to 90 days.
 The next delivery deletes expired records.
 Each sender can send up to 100 notifications per hour, with at most 10 per recipient.
 Existing content quotas also apply.
+
+## Markdown in comments
+
+The service stores the exact text that the author sends.
+The page formats the text when it shows a comment or a reply.
+The composer and the stored text do not change.
+
+Comments support this Markdown syntax:
+
+| Syntax | Result |
+| --- | --- |
+| `**text**` | Bold |
+| `*text*` | Italic |
+| `~~text~~` | Strikethrough |
+| `` `text` `` | Inline code |
+| `[label](https://example.com)` or a plain web address | Link |
+| `- item` | Bullet list |
+| `1. item` | Numbered list |
+| `> text` | Quote |
+| Three backticks on the lines before and after the text | Code block |
+
+One line break in the text starts a new line. An empty line starts a new paragraph.
+Selected mentions keep their highlight. A mention inside code shows as plain code text.
+
+The page shows all other syntax as the typed text.
+This rule applies to HTML, images, headings, tables, footnotes, task lists, rules, and reference links.
+
+Safety rules:
+
+- `parseCommentMarkdown()` uses the `marked` lexer and returns a typed tree.
+- The page creates React elements from that tree. It never inserts HTML from a comment.
+- A link must use `http:`, `https:`, or `mailto:`. The page shows other link syntax as text.
+- Each link opens in a new tab with `rel="nofollow ugc noopener noreferrer"`.
+- Quotes and lists can nest eight levels. The page shows deeper levels as text.
+- Only code blocks scroll sideways. Other text wraps.

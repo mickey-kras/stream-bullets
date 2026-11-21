@@ -283,9 +283,9 @@ export function PollsView(props: Readonly<PollsViewProps>): ReactNode {
       )}
       {selected && !battle && (
         <div className="poll-card poll-discussion">
-          <h2>
-            <span className="sr-only">{t("polls.discussionOf")} </span>
-            {selected.title}
+          {/* The poll card above shows the title. The heading stays for screen readers. */}
+          <h2 className="sr-only">
+            {t("polls.discussionOf")} {selected.title}
           </h2>
           <EntryActions
             entry={selected}

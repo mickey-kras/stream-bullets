@@ -1,9 +1,12 @@
 import { useId, useState, type ReactNode } from "react";
-import { t, type MessageId } from "../../i18n";
+import { intlLocale, t, tn, type MessageId } from "../../i18n";
+import { relativeAge } from "../../lib/channel-health";
 import { copyText } from "../../lib/clipboard";
 import { frameSize, layerPixels, layerUrl, type OverlayLayer, type OverlayLayers } from "../../lib/overlay-layers";
 import { errorMessage, postJson } from "../api";
+import type { OverlaySources } from "../live";
 import { Dialog, DialogActions } from "../ui/dialog";
+import { Icon } from "../ui/icon";
 import { IconButton } from "../ui/icon-button";
 import { useToast } from "../ui/toast";
 import { CHARACTERS_READY } from "./overlay-composition";
@@ -52,14 +55,28 @@ function CopyField({
   );
 }
 
+/** The sentence about the OBS sources of the page at the time `now`. */
+export function sourcesText(sources: OverlaySources, now: number): string {
+  if (sources.count > 0) return tn("overlay.sources.connected", sources.count);
+  if (sources.seenAt === null) return t("overlay.sources.never");
+  const age: string | null = relativeAge(sources.seenAt, now, intlLocale());
+  return age === null ? t("overlay.sources.goneNow") : t("overlay.sources.gone", { age });
+}
+
 // Show private URL once; store only its key hash. Confirm regeneration because it revokes the old link.
 export function OverlayLink({
   hasKey,
   layers,
+  sources,
+  now,
 }: Readonly<{
   hasKey: boolean;
   /** The newest saved or live layers, for the source sizes. */
   layers: OverlayLayers;
+  /** The connected OBS sources. Null while the live room did not tell. */
+  sources: OverlaySources | null;
+  /** The server time, for the age of the last connection. */
+  now: number;
 }>): ReactNode {
   const toast = useToast();
   const [url, setUrl] = useState<string | null>(null);
@@ -96,6 +113,12 @@ export function OverlayLink({
           <p className="muted ov-url-caption">{t("overlay.layer.composition")}</p>
           <CopyField value={url} label={t("overlay.url")} copyLabel={t("overlay.copyUrl")} layer={null} />
         </>
+      )}
+      {made && sources && (
+        <p className="ov-obs-status" data-ov-sources={sources.count}>
+          <Icon name={sources.count > 0 ? "wifi" : "wifi-off"} size={18} />
+          <span>{sourcesText(sources, now)}</span>
+        </p>
       )}
       <p className="muted">{hint}</p>
       <p className="muted">{t("overlay.obsHelp")}</p>
