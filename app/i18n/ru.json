@@ -841,7 +841,6 @@
   "moderation.unsuspendBody": "Страница снова станет публичной и вернётся в список стримеров.",
   "moderation.unsuspendTitle": "Снять приостановку с @{handle}?",
   "moderation.unsuspendedDone": "Приостановка @{handle} снята.",
-  "nav.admin": "Администрирование",
   "nav.home": "Главная StreamBullets",
   "nav.main": "Основная навигация",
   "nav.overlay": "Оверлей",

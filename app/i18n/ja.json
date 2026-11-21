@@ -799,7 +799,6 @@
   "moderation.unsuspendBody": "ページは再び公開され、配信者一覧に戻ります。",
   "moderation.unsuspendTitle": "@{handle} の停止を解除しますか？",
   "moderation.unsuspendedDone": "@{handle} の停止を解除しました。",
-  "nav.admin": "管理",
   "nav.home": "StreamBullets ホーム",
   "nav.main": "メインナビゲーション",
   "nav.overlay": "オーバーレイ",

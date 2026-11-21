@@ -158,7 +158,7 @@ test("role matrix: the streamer page header action and content tools", async ({ 
     await expect(page.getByRole("button", { name: "Delete topic" }), role).toHaveCount(want.remove ? 1 : 0);
     await page.goto("/@pagination_host?view=polls");
     // Each signed-in account can create a poll, like a topic. A guest signs in first.
-    const newPoll = page.getByRole("button", { name: "New poll" });
+    const newPoll = page.getByRole("button", { name: /^Create (a )?poll$/ });
     if (want.signedIn) await expect(newPoll.first(), role).toBeVisible();
     else await expect(newPoll, role).toHaveCount(0);
 
@@ -176,7 +176,7 @@ test("role matrix: the streamer page header action and content tools", async ({ 
   const owner = await signedIn(browser, "owner", clientIp("roles", 208));
   const page = await newPage(owner);
   await page.goto("/@test_host?view=polls");
-  await expect(page.getByRole("button", { name: "New poll" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Create (a )?poll$/ }).first()).toBeVisible();
   await close(owner);
 });
 

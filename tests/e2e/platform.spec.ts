@@ -249,7 +249,8 @@ test("a viewer joins the waitlist, an admin approves, and the viewer creates a s
   const admin = await newPage(adminContext);
   await assertNoScriptErrors(admin, async () => {
     await admin.goto("/streamers");
-    await admin.getByRole("link", { name: "Admin", exact: true }).click();
+    await admin.locator("button.profile").click();
+    await admin.getByRole("navigation", { name: "Account" }).getByRole("link", { name: "Admin", exact: true }).click();
     await expect(admin).toHaveURL(/\/admin$/);
     await expect(admin.getByRole("heading", { name: "Streamer requests" })).toBeVisible();
     await expect(admin.getByRole("link", { name: "Pending" })).toHaveAttribute("aria-current", "page");

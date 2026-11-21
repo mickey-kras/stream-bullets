@@ -813,7 +813,6 @@
   "moderation.unsuspendBody": "पेज फिर से सार्वजनिक होकर स्ट्रीमर सूची में लौट आता है।",
   "moderation.unsuspendTitle": "@{handle} का निलंबन हटाएँ?",
   "moderation.unsuspendedDone": "@{handle} का निलंबन हटाया गया।",
-  "nav.admin": "एडमिन",
   "nav.home": "StreamBullets होम",
   "nav.main": "मुख्य नेविगेशन",
   "nav.overlay": "ओवरले",
