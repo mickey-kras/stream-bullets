@@ -30033,7 +30033,7 @@
       "relation": "calls",
       "source": "app_lib_translation_check_keepsstructure",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L38",
+      "source_location": "L40",
       "target": "app_lib_translation_check_shape",
       "weight": 1.0
     },
@@ -30045,7 +30045,7 @@
       "relation": "calls",
       "source": "app_lib_translation_check_keepsstructure",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L39",
+      "source_location": "L41",
       "target": "app_lib_translation_check_codespans",
       "weight": 1.0
     },
@@ -30057,7 +30057,7 @@
       "relation": "calls",
       "source": "app_lib_translation_check_keepsstructure",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L40",
+      "source_location": "L42",
       "target": "app_lib_translation_check_links",
       "weight": 1.0
     },
@@ -30069,7 +30069,7 @@
       "relation": "calls",
       "source": "app_lib_translation_check_shape",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_lib_translation_check_count",
       "weight": 1.0
     },
@@ -169873,7 +169873,7 @@
       "relation": "contains",
       "source": "app_lib_translation_check",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L27",
+      "source_location": "L29",
       "target": "app_lib_translation_check_codespans",
       "weight": 1.0
     },
@@ -169884,7 +169884,7 @@
       "relation": "contains",
       "source": "app_lib_translation_check",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L31",
+      "source_location": "L33",
       "target": "app_lib_translation_check_links",
       "weight": 1.0
     },
@@ -169895,7 +169895,7 @@
       "relation": "contains",
       "source": "app_lib_translation_check",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L36",
+      "source_location": "L38",
       "target": "app_lib_translation_check_keepsstructure",
       "weight": 1.0
     },
@@ -169917,7 +169917,7 @@
       "relation": "contains",
       "source": "app_lib_translation_check",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L48",
+      "source_location": "L50",
       "target": "app_lib_translation_check_movementions",
       "weight": 1.0
     },
@@ -169928,7 +169928,7 @@
       "relation": "contains",
       "source": "app_lib_translation_check",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L76",
+      "source_location": "L78",
       "target": "app_lib_translation_check_readanswer",
       "weight": 1.0
     },
@@ -200630,10 +200630,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "a758fdc180ebc1db86279c0da8d618aa95e733167fe3ed955798effaca28ddef",
+    "content_sha256": "adf51c5cef55c1688729564c95224f025ca02a6866b04ea7c353fb41a95c8fc2",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "b22ec42739f273c41b2471582d859898c2a7d4512600fa819563ed6c3774cc15",
+    "source_sha256": "16cb651aed66b8682fc683369f0d3bac1f64e9d0d782f3bd1164ac911ef61ad9",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -222493,7 +222493,7 @@
       "label": "codeSpans()",
       "norm_label": "codespans()",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L27"
+      "source_location": "L29"
     },
     {
       "_callable": true,
@@ -222515,7 +222515,7 @@
       "label": "keepsStructure()",
       "norm_label": "keepsstructure()",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L36"
+      "source_location": "L38"
     },
     {
       "_callable": true,
@@ -222526,7 +222526,7 @@
       "label": "links()",
       "norm_label": "links()",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L31"
+      "source_location": "L33"
     },
     {
       "_callable": true,
@@ -222537,7 +222537,7 @@
       "label": "moveMentions()",
       "norm_label": "movementions()",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L48"
+      "source_location": "L50"
     },
     {
       "_callable": true,
@@ -222548,7 +222548,7 @@
       "label": "readAnswer()",
       "norm_label": "readanswer()",
       "source_file": "app/lib/translation-check.ts",
-      "source_location": "L76"
+      "source_location": "L78"
     },
     {
       "_callable": true,

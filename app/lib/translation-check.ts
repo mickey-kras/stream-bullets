@@ -14,7 +14,9 @@ function count(text: string, pattern: RegExp): number {
 // The number of each Markdown mark and of the line breaks.
 function shape(text: string): string {
   return [
-    count(text, /\*\*/gu),
+    // All stars and underscores: the bold and italic marks in each of their forms.
+    count(text, /\*/gu),
+    count(text, /_/gu),
     count(text, /~~/gu),
     count(text, /```/gu),
     count(text, /^> /gmu),

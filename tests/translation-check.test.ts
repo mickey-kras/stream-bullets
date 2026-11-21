@@ -9,6 +9,8 @@ describe("translation checks", (): void => {
   });
   it.each([
     ["a lost bold mark", "**Great** stream", "Toller Stream"],
+    ["a lost underscore bold mark", "__Important__ notice", "Wichtiger Hinweis"],
+    ["a lost italic mark", "*really* good", "wirklich gut"],
     ["a lost quote mark", "> quoted\n\nreply", "zitiert\n\nAntwort"],
     ["changed code", "run `!jump` now", "jetzt `!springen` ausführen"],
     ["a changed link", "see https://example.test/a", "siehe https://example.test/b"],
