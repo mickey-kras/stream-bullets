@@ -23,7 +23,8 @@ export function pruneTranslationAttempts(env: AppEnv, now: number): D1PreparedSt
 }
 
 // `POST /api/comments/:id/translation`.
-export const translationSchema = z.object({ locale: z.enum(LOCALES) }).strict();
+// `text` is the comment text that the reader sees.
+export const translationSchema = z.object({ locale: z.enum(LOCALES), text: z.string().min(1).max(2000) }).strict();
 
 export interface CommentTranslation {
   text: string;
@@ -95,6 +96,7 @@ export async function translateComment(
   viewerId: string,
   locale: Locale,
   now: number,
+  shownText?: string,
 ): Promise<CommentTranslation | null> {
   if (!env.AI) throw new HttpError(503, "Translation is not available.");
   const comment = await env.DB.prepare("SELECT entry_id, text, removed_at FROM entry_comments WHERE id=?")
@@ -102,6 +104,9 @@ export async function translateComment(
     .first<{ entry_id: string; text: string; removed_at: number | null }>();
   if (comment?.removed_at !== null || !(await getVisibleEntry(env, comment.entry_id, viewerId)))
     throw new HttpError(404, "Comment not found.");
+  // The author can edit the comment after the reader got the page. The reader then has an old text.
+  if (shownText !== undefined && shownText !== comment.text)
+    throw new HttpError(409, "The comment changed. Load the page again.");
   const { results: rows } = await env.DB.prepare(
     'SELECT user_id AS userId, start, "end" FROM comment_mentions WHERE comment_id=?',
   )

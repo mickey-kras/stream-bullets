@@ -36,7 +36,7 @@ test("a reader changes between a comment and its translation with one request", 
     await expect(comment.locator(".comment-text")).toHaveText("Hallo Welt");
     await comment.getByRole("button", { name: "Translate", exact: true }).click();
     await expect(comment.locator(".comment-text")).toHaveText("Hello world");
-    expect(locales).toEqual([{ locale: "en" }]);
+    expect(locales).toEqual([{ locale: "en", text: "**Hallo** Welt" }]);
   } finally {
     await close(context);
   }

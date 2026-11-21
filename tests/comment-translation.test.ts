@@ -71,9 +71,10 @@ beforeEach(async (): Promise<void> => {
 
 describe("comment translation", (): void => {
   it("accepts only a locale of the site", (): void => {
-    expect(translationSchema.safeParse({ locale: "de" }).success).toBe(true);
-    expect(translationSchema.safeParse({ locale: "xx" }).success).toBe(false);
-    expect(translationSchema.safeParse({ locale: "de", model: "other" }).success).toBe(false);
+    expect(translationSchema.safeParse({ locale: "de", text: "Hi" }).success).toBe(true);
+    expect(translationSchema.safeParse({ locale: "de" }).success).toBe(false);
+    expect(translationSchema.safeParse({ locale: "xx", text: "Hi" }).success).toBe(false);
+    expect(translationSchema.safeParse({ locale: "de", text: "Hi", model: "other" }).success).toBe(false);
   });
 
   it("gives the translation with the mention at its new position", async (): Promise<void> => {
@@ -124,6 +125,14 @@ describe("comment translation", (): void => {
     await expect(translateComment(env, id, "fan", "de", NOW)).rejects.toMatchObject({ status: 404 });
     await expect(translateComment(env, crypto.randomUUID(), "fan", "de", NOW)).rejects.toMatchObject({ status: 404 });
     expect(run).not.toHaveBeenCalled();
+  });
+
+  it("refuses a reader who has an old text of the comment", async (): Promise<void> => {
+    const id: string = await seedComment();
+    await expect(translateComment(env, id, "host", "de", NOW, "Old text")).rejects.toMatchObject({ status: 409 });
+    expect(run).not.toHaveBeenCalled();
+    run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
+    expect(await translateComment(env, id, "host", "de", NOW, SOURCE)).not.toBeNull();
   });
 
   it("is off without the Workers AI binding", async (): Promise<void> => {

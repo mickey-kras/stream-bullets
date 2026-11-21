@@ -34,7 +34,10 @@ export function useCommentTranslation(
     if (current) return;
     setBusy(true);
     setError("");
-    postJson<{ translation: Translation | null }>(`/api/comments/${comment.id}/translation`, { locale: getLocale() })
+    postJson<{ translation: Translation | null }>(`/api/comments/${comment.id}/translation`, {
+      locale: getLocale(),
+      text: comment.text,
+    })
       .then((result) => setLoaded({ forText: comment.text, translation: result.translation }))
       .catch((error_: unknown) => setError(errorMessage(error_)))
       .finally(() => setBusy(false));

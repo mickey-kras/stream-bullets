@@ -208,7 +208,7 @@ Streamer-page writes must call `assertStreamerWritable()`.
 | `POST /api/streamers/:handle` | `{action: "comment", id, text, parentId?, mentions?}` | `{id}`. New comment or reply. |
 | `POST /api/comments` | `{action: "edit", id, text, mentions?}` | `{id}`. Only authors can edit their comments. Removed comments cannot change. |
 | `GET /api/comments/:id` | None | `{comment, rootId, thread, handle, entryId}`. Exact comment and its thread, subject to page access. |
-| `POST /api/comments/:id/translation` | `{locale}` | `{translation: {text, mentions} \| null}`. Signed-in accounts only. `null`: the comment needs no translation, or the translation failed a check. `503` when translation is off. |
+| `POST /api/comments/:id/translation` | `{locale, text}`. `text` is the comment text that the reader sees; `409` when the comment changed. | `{translation: {text, mentions} \| null}`. Signed-in accounts only. `null`: the comment needs no translation, or the translation failed a check. `503` when translation is off. |
 | `GET /api/entries/:id/mention-candidates` | `query`, at most 40 characters | `{users}`. At most 10 public profiles or participants in this community. Requires sign-in. |
 | `GET /api/notifications` | Optional opaque `cursor` | `NotificationSnapshot`: at most 50 notifications, unread count, preferences and next cursor. Requires sign-in. |
 | `POST /api/notifications` | `{action: "read", id, read}` | `{ok: true}`. Only the recipient can change read state. |
