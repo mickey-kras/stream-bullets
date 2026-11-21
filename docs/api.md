@@ -232,3 +232,38 @@ Each inbox keeps up to 200 notifications for up to 90 days.
 The next delivery deletes expired records.
 Each sender can send up to 100 notifications per hour, with at most 10 per recipient.
 Existing content quotas also apply.
+
+## Markdown in comments
+
+The service stores the exact text that the author sends.
+The page formats the text when it shows a comment or a reply.
+The composer and the stored text do not change.
+
+Comments support this Markdown syntax:
+
+| Syntax | Result |
+| --- | --- |
+| `**text**` | Bold |
+| `*text*` | Italic |
+| `~~text~~` | Strikethrough |
+| `` `text` `` | Inline code |
+| `[label](https://example.com)` or a plain web address | Link |
+| `- item` | Bullet list |
+| `1. item` | Numbered list |
+| `> text` | Quote |
+| Three backticks on the lines before and after the text | Code block |
+
+One line break in the text starts a new line. An empty line starts a new paragraph.
+Selected mentions keep their highlight. A mention inside code shows as plain code text.
+
+The page shows all other syntax as the typed text.
+This rule applies to HTML, images, headings, tables, footnotes, task lists, rules, and reference links.
+
+Safety rules:
+
+- `parseCommentMarkdown()` uses the `marked` lexer and returns a typed tree.
+- The page creates React elements from that tree. It never inserts HTML from a comment.
+- A link must use `http:`, `https:`, or `mailto:`. The page shows other link syntax as text.
+- Each link opens in a new tab with `rel="nofollow ugc noopener noreferrer"`.
+- Quotes and lists can nest eight levels. The page shows deeper levels as text.
+- Only code blocks scroll sideways. Other text wraps.

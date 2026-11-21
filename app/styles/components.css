@@ -52,7 +52,7 @@ button.gold:hover { background:var(--gold-hover); }
 .comment-meta { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .comment-meta strong { font:600 1.125rem Figtree,Onest,sans-serif; color:var(--gold); }
 .comment-meta small { font:0.6875rem Figtree,Onest,sans-serif; color:var(--c-a8b9b4); }
-.comment p { font:400 1.062rem/1.36 Figtree,Onest,sans-serif; margin:5px 0 8px; color:var(--c-e5e9df); overflow-wrap:anywhere; }
+.comment :is(p, li) { font:400 1.062rem/1.36 Figtree,Onest,sans-serif; margin:5px 0 8px; color:var(--c-e5e9df); overflow-wrap:anywhere; }
 .comment-actions { display:flex; align-items:center; gap:4px 14px; flex-wrap:wrap; }
 .comment-actions button { border:0; border-radius:0; padding:0; display:flex; align-items:center; gap:7px; font:400 1rem Figtree,Onest,sans-serif; color:var(--c-e4e5d7); background:none; min-height:24px; }
 .comment-actions button:hover, .comment-actions button[aria-pressed=true] { color:var(--gold); }
@@ -79,7 +79,7 @@ button.gold:hover { background:var(--gold-hover); }
   .description { font-size:1.188rem; }
   .author { font-size:1.125rem; }
   .votes button { min-width:170px; min-height:51px; font-size:1.312rem; }
-  .comment p { font-size:1rem; }
+  .comment :is(p, li) { font-size:1rem; }
   .comment-meta small { display:none; }
   .discussion-head { gap:10px; }
   .discussion-head h3 { font-size:1.75rem; }
@@ -124,7 +124,7 @@ button.gold:hover { background:var(--gold-hover); }
   .discussion-head h3 { font-size:1.562rem; }
   .discussion-head select { width:87px; min-height:36px; font-size:1rem; }
   .comment-meta strong { font-size:1.062rem; }
-  .comment p { font-size:1rem; line-height:1.4; }
+  .comment :is(p, li) { font-size:1rem; line-height:1.4; }
   .comment-actions button { font-size:0.9375rem; }
   .composer textarea { font-size:1rem; padding-inline:10px; }
   .composer>.gold { font-size:1.188rem; }
@@ -268,7 +268,19 @@ button.gold:hover { background:var(--gold-hover); }
 .comment-sort { margin-left: auto; }
 .comment-sort select { width: 125px; }
 .comment-meta time { font-size: 0.6875rem; color: var(--muted); }
-.comment-text { white-space: pre-wrap; }
+.comment-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment-text :is(p, li) { font-family: inherit; line-height: inherit; }
+.comment-text :is(ul, ol) { margin: 5px 0 8px; padding-left: 1.5em; }
+.comment-text ul { list-style: disc; }
+.comment-text ol { list-style: decimal; }
+.comment-text li { margin: 2px 0; }
+.comment-text li > :is(ul, ol, p) { margin: 2px 0; }
+.comment-text blockquote { margin: 5px 0 8px; padding: 2px 0 2px 12px; border-left: 3px solid var(--line); }
+.comment-text blockquote p { color: var(--muted); }
+.comment-text a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+.comment-text code { padding: 1px 5px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); color: var(--cream); font: 0.875em/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.comment-text pre { max-width: 100%; margin: 5px 0 8px; padding: 10px 12px; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); white-space: pre; overflow-wrap: normal; }
+.comment-text pre code { padding: 0; border: 0; background: none; }
 .comment-actions > button { min-height: 30px; }
 .comment-actions button:disabled { cursor: default; }
 .composer .user-avatar { align-self: flex-start; margin-top: 3px; }
