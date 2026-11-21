@@ -5467,10 +5467,82 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_components_comment_markdown_block",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L48",
+      "target": "app_components_comment_markdown_inlines",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_comment_markdown_block",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L52",
+      "target": "app_components_comment_markdown_blocks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_comment_markdown_blocks",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L13",
+      "target": "app_components_comment_markdown_block",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_components_comment_markdown_commentmarkdown",
       "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L70",
+      "source_location": "L73",
       "target": "app_lib_comment_markdown_parsecommentmarkdown",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_comment_markdown_commentmarkdown",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L76",
+      "target": "app_components_comment_markdown_blocks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_comment_markdown_inline",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L31",
+      "target": "app_components_comment_markdown_inlines",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_comment_markdown_inlines",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L9",
+      "target": "app_components_comment_markdown_inline",
       "weight": 1.0
     },
     {
@@ -149803,7 +149875,29 @@
       "relation": "contains",
       "source": "app_components_comment_markdown",
       "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L36",
+      "source_location": "L12",
+      "target": "app_components_comment_markdown_blocks",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_comment_markdown",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L16",
+      "target": "app_components_comment_markdown_inline",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_comment_markdown",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L45",
       "target": "app_components_comment_markdown_block",
       "weight": 1.0
     },
@@ -149825,7 +149919,7 @@
       "relation": "contains",
       "source": "app_components_comment_markdown",
       "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L65",
+      "source_location": "L68",
       "target": "app_components_comment_markdown_commentmarkdown",
       "weight": 1.0
     },
@@ -149836,8 +149930,8 @@
       "relation": "contains",
       "source": "app_components_comment_markdown",
       "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L7",
-      "target": "app_components_comment_markdown_inline",
+      "source_location": "L8",
+      "target": "app_components_comment_markdown_inlines",
       "weight": 1.0
     },
     {
@@ -193276,30 +193370,6 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
-      "source": "app_components_comment_markdown_block",
-      "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L39",
-      "target": "app_components_comment_markdown_inline",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "relation": "indirect_call",
-      "source": "app_components_comment_markdown_commentmarkdown",
-      "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L73",
-      "target": "app_components_comment_markdown_block",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "relation": "indirect_call",
       "source": "app_components_community_community_view_communityview_save",
       "source_file": "app/components/community/community-view.tsx",
       "source_location": "L137",
@@ -196464,10 +196534,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "75079ab3d60900a4d38de9a9ed7acec727459f56a9a691c0a329eaa9cedc06d5",
+    "content_sha256": "d1e32cc5a74dba4eef8f70cdb962b6f9e1a5c2349a2f02f0f2432faaf55401df",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "83981d3c0853e6d80c2955916d34773be072fc6723ec146b8c41ddc3f03b9f6a",
+    "source_sha256": "94591830281d6e7d9e05d74b7c879bbd3d4e71992fea10f02034a0ecd60615b2",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -205235,7 +205305,18 @@
       "label": "block()",
       "norm_label": "block()",
       "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L36"
+      "source_location": "L45"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_comment_markdown_blocks",
+      "label": "blocks()",
+      "norm_label": "blocks()",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L12"
     },
     {
       "_callable": true,
@@ -205246,7 +205327,7 @@
       "label": "CommentMarkdown()",
       "norm_label": "commentmarkdown()",
       "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L65"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -205257,7 +205338,18 @@
       "label": "inline()",
       "norm_label": "inline()",
       "source_file": "app/components/comment-markdown.tsx",
-      "source_location": "L7"
+      "source_location": "L16"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_comment_markdown_inlines",
+      "label": "inlines()",
+      "norm_label": "inlines()",
+      "source_file": "app/components/comment-markdown.tsx",
+      "source_location": "L8"
     },
     {
       "_callable": true,

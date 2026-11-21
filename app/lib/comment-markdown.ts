@@ -96,11 +96,11 @@ function markMentions(text: string, mentions: readonly CommentMention[]): Marked
   let offset = 0;
   for (const mention of [...mentions].sort((a: CommentMention, b: CommentMention): number => a.start - b.start)) {
     if (mention.start < offset || mention.end <= mention.start || mention.end > text.length) continue;
-    source += `${text.slice(offset, mention.start).replace(MARKERS, "")}${MARK_OPEN}${labels.length}${MARK_CLOSE}`;
+    source += `${text.slice(offset, mention.start).replaceAll(MARKERS, "")}${MARK_OPEN}${labels.length}${MARK_CLOSE}`;
     labels.push({ kind: "mention", userId: mention.userId, text: text.slice(mention.start, mention.end) });
     offset = mention.end;
   }
-  return { source: source + text.slice(offset).replace(MARKERS, ""), labels };
+  return { source: source + text.slice(offset).replaceAll(MARKERS, ""), labels };
 }
 
 function labelText(label: MarkdownInline | undefined): string {
@@ -108,7 +108,7 @@ function labelText(label: MarkdownInline | undefined): string {
 }
 
 function plain(value: string, labels: readonly MarkdownInline[]): string {
-  return value.replace(PLACEHOLDERS, (_match: string, index: string): string => labelText(labels[Number(index)]));
+  return value.replaceAll(PLACEHOLDERS, (_match: string, index: string): string => labelText(labels[Number(index)]));
 }
 
 function textNodes(value: string, labels: readonly MarkdownInline[]): MarkdownInline[] {
