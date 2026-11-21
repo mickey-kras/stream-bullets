@@ -69,6 +69,87 @@ export async function requireTestAccess(request: Request, env: AppEnv): Promise<
   await checkSecret(match[2], await makeSignature(match[1], env.TEST_ACCESS_SECRET!));
 }
 
+const DAY_MS: number = 86_400_000;
+const MARKDOWN_COMMENT: string = [
+  "**Settings** that work for me:",
+  "",
+  "- 1080p at 60 frames",
+  "- ~~Fast~~ *medium* encoder preset",
+  "",
+  "> Read the guide at https://example.test/guides/streaming before you change the bitrate.",
+  "",
+  "```",
+  "bitrate=6000",
+  "keyframe_interval=2",
+  "```",
+].join("\n");
+const LONG_LINK_COMMENT: string = `Thanks. The full link: https://example.test/${"clips/".repeat(30)}final`;
+
+// A second and a third topic, a closed poll with results, and a thread with formatted text and a long link.
+function moreContent(env: AppEnv, community: number, owner: TestAccount, now: number): D1PreparedStatement[] {
+  const base: number = 200 + community * 10;
+  const page: string = fixtureId(community);
+  const topic: string = fixtureId(base);
+  const poll: string = fixtureId(base + 1);
+  const entry: string =
+    "INSERT OR IGNORE INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at,ends_at,revealed) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+  const comment: string =
+    "INSERT OR IGNORE INTO entry_comments(id,entry_id,author_id,text,created_at,parent_id) VALUES(?,?,?,?,?,?)";
+  const vote: string = "INSERT OR IGNORE INTO entry_votes(entry_id,user_id,choice) VALUES(?,?,?)";
+  return [
+    env.DB.prepare(entry).bind(
+      topic,
+      page,
+      testAccountId(owner),
+      "topic",
+      "Which stream settings do you use?",
+      "Share your resolution, bitrate and encoder.",
+      "Tech & setups",
+      "[]",
+      now - DAY_MS,
+      null,
+      0,
+    ),
+    env.DB.prepare(entry).bind(
+      poll,
+      page,
+      testAccountId(owner),
+      "binary",
+      "Was the last stream too long?",
+      "",
+      "",
+      '["Yes","No"]',
+      now - 2 * DAY_MS,
+      now - DAY_MS,
+      1,
+    ),
+    env.DB.prepare(entry).bind(
+      fixtureId(base + 2),
+      page,
+      testAccountId("other_viewer"),
+      "topic",
+      "Play a co-op game with viewers",
+      "",
+      "Gaming",
+      "[]",
+      now - 3 * DAY_MS,
+      null,
+      0,
+    ),
+    env.DB.prepare(comment).bind(fixtureId(base + 3), topic, testAccountId(owner), MARKDOWN_COMMENT, now, null),
+    env.DB.prepare(comment).bind(
+      fixtureId(base + 4),
+      topic,
+      testAccountId("viewer"),
+      LONG_LINK_COMMENT,
+      now + 1,
+      fixtureId(base + 3),
+    ),
+    env.DB.prepare(vote).bind(poll, testAccountId("viewer"), 0),
+    env.DB.prepare(vote).bind(poll, testAccountId("other_viewer"), 1),
+  ];
+}
+
 function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
   const statements: D1PreparedStatement[] = [];
   const owners: TestAccount[] = ["owner", "other_owner", "frozen_owner", "suspended_owner"];
@@ -134,6 +215,7 @@ function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
         1,
       ),
     );
+    statements.push(...moreContent(env, community, owner, now));
     if (community > 2) {
       statements.push(
         env.DB.prepare(

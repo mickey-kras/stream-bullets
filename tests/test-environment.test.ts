@@ -301,7 +301,35 @@ describe("synthetic fixtures", (): void => {
     const nested = await env.DB.prepare(
       "SELECT count(*) AS count FROM entry_comments WHERE parent_id IS NOT NULL",
     ).first<{ count: number }>();
-    expect(nested?.count).toBe(9);
+    expect(nested?.count).toBe(13);
+  });
+  it("seeds topics, an open and a closed poll, and formatted comments in each community", async (): Promise<void> => {
+    const { results } = await env.DB.prepare(
+      `SELECT s.handle,
+        sum(e.kind='topic') AS topics,
+        sum(e.kind<>'topic' AND e.ends_at IS NULL) AS open_polls,
+        sum(e.kind<>'topic' AND e.ends_at < ? AND e.revealed=1) AS closed_polls
+        FROM entries e JOIN streamers s ON s.id=e.streamer_id
+        WHERE s.handle LIKE '%\\_host' ESCAPE '\\' AND e.title<>'Viewer poll' GROUP BY s.handle ORDER BY s.handle`,
+    )
+      .bind(Date.now())
+      .all<{ handle: string; topics: number; open_polls: number; closed_polls: number }>();
+    expect(results).toEqual(
+      ["frozen_host", "other_host", "suspended_host", "test_host"].map((handle: string) => ({
+        handle,
+        topics: 3,
+        open_polls: 1,
+        closed_polls: 1,
+      })),
+    );
+    const votes = await env.DB.prepare(
+      "SELECT count(*) AS count FROM entry_votes v JOIN entries e ON e.id=v.entry_id WHERE e.revealed=1",
+    ).first<{ count: number }>();
+    expect(votes?.count).toBe(8);
+    const formatted = await env.DB.prepare(
+      "SELECT count(*) AS count FROM entry_comments WHERE text LIKE '%```%' AND text LIKE '%**Settings**%'",
+    ).first<{ count: number }>();
+    expect(formatted?.count).toBe(4);
   });
   it("seeds mention and reply notifications in each state across both communities", async (): Promise<void> => {
     const inbox = async (account: TestAccount): Promise<string[]> =>
@@ -351,11 +379,11 @@ describe("synthetic fixtures", (): void => {
             (await env.DB.prepare(`SELECT count(*) AS count FROM ${table}`).first<{ count: number }>())!.count,
         ),
       );
-    expect(await counts()).toEqual([15, 3, 8]);
+    expect(await counts()).toEqual([23, 3, 8]);
     const [first] = (await listNotifications(env, testAccountId("owner"))).notifications;
     await markNotification(env, testAccountId("owner"), first.id, true);
     await seedTestEnvironment(env, false);
-    expect(await counts()).toEqual([15, 3, 8]);
+    expect(await counts()).toEqual([23, 3, 8]);
     expect((await listNotifications(env, testAccountId("owner"))).notifications[0].read).toBe(true);
   });
   it("does not restore notifications for edited or removed fixture comments", async (): Promise<void> => {
