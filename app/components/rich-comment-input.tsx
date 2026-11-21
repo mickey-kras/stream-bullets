@@ -64,6 +64,9 @@ interface Active {
   link: boolean;
 }
 
+// The link field takes the focus when the author opens it.
+const focusInput = (input: HTMLInputElement | null): void => input?.focus();
+
 const NO_FORMAT: Active = { formats: new Set<TextFormatType>(), block: "paragraph", link: false };
 
 const TEXT_BUTTONS: readonly { format: TextFormatType; icon: IconName; label: MessageId }[] = [
@@ -149,6 +152,7 @@ export function RichCommentInput({
   const root = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<LexicalEditor | null>(null);
   const emitted = useRef<CommentValue>({ text: value, mentions });
+  const focusFirst = useRef<boolean>(focusOnMount);
   const handlers = useRef({ onChange, onMentionsChange });
   handlers.current = { onChange, onMentionsChange };
   const [active, setActive] = useState<Active>(NO_FORMAT);
@@ -165,6 +169,17 @@ export function RichCommentInput({
     choice: 0,
   });
 
+  // Start a new search each time the text after "@" changes.
+  function showToken(next: Token | null): void {
+    const before: Token | null = picker.current.token;
+    setToken(next);
+    if (!next || next.query === before?.query) return;
+    setUsers([]);
+    setChoice(0);
+    setError("");
+    setLoading(true);
+  }
+
   useEffect(() => {
     const element = root.current;
     if (!element) return;
@@ -178,6 +193,8 @@ export function RichCommentInput({
     });
     editorRef.current = editor;
     editor.update(() => $writeComment(emitted.current), { discrete: true });
+    // No HTML tag gives the textbox role to an element with editable content.
+    element.setAttribute("role", "textbox");
     editor.setRootElement(element);
     const stop: (() => void)[] = [
       registerRichText(editor),
@@ -193,7 +210,7 @@ export function RichCommentInput({
           }
           editorState.read(() => {
             setActive($activeOf());
-            setToken($tokenOf(next.mentions.length));
+            showToken($tokenOf(next.mentions.length));
           });
           setEmpty(next.text === "");
           if (sameValue(emitted.current, next.text, next.mentions)) return;
@@ -234,16 +251,15 @@ export function RichCommentInput({
         COMMAND_PRIORITY_HIGH,
       ),
     ];
-    if (focusOnMount) editor.focus();
+    if (focusFirst.current) editor.focus();
     return () => {
       for (const unregister of stop) unregister();
       editor.setRootElement(null);
       editorRef.current = null;
     };
-    // The editor lives as long as the component. Later values arrive through the effect below.
   }, []);
 
-  // A value from outside (an emptied form, a restored draft) replaces the editor content.
+  // The form can set a new value, for example an empty one after a post. The editor then shows that value.
   useEffect(() => {
     if (sameValue(emitted.current, value, mentions)) return;
     emitted.current = { text: value, mentions };
@@ -257,10 +273,6 @@ export function RichCommentInput({
   const query: string | null = token ? token.query : null;
   useEffect(() => {
     if (query === null) return;
-    setUsers([]);
-    setChoice(0);
-    setError("");
-    setLoading(true);
     const controller = new AbortController();
     const timer = setTimeout(() => {
       requestJson<{ users: Candidate[] }>(
@@ -400,7 +412,7 @@ export function RichCommentInput({
         <form id={linkId} className="ed-link" onSubmit={applyLink}>
           <input
             type="url"
-            autoFocus
+            ref={focusInput}
             required
             value={linkUrl}
             aria-label={t("editor.linkUrl")}
@@ -420,7 +432,6 @@ export function RichCommentInput({
         ref={root}
         className="ed-content comment-text"
         data-composer
-        role="textbox"
         aria-multiline="true"
         aria-label={label}
         aria-required="true"

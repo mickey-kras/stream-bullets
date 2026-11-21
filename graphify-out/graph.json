@@ -14109,7 +14109,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_activeof",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L97",
+      "source_location": "L100",
       "target": "app_components_rich_comment_input_blockof",
       "weight": 1.0
     },
@@ -14121,7 +14121,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L180",
+      "source_location": "L195",
       "target": "app_lib_rich_comment_writecomment",
       "weight": 1.0
     },
@@ -14133,7 +14133,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L195",
+      "source_location": "L212",
       "target": "app_components_rich_comment_input_activeof",
       "weight": 1.0
     },
@@ -14145,7 +14145,19 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L196",
+      "source_location": "L213",
+      "target": "app_components_rich_comment_input_richcommentinput_showtoken",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L213",
       "target": "app_components_rich_comment_input_tokenof",
       "weight": 1.0
     },
@@ -14157,7 +14169,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L199",
+      "source_location": "L216",
       "target": "app_components_rich_comment_input_samevalue",
       "weight": 1.0
     },
@@ -14169,7 +14181,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L229",
+      "source_location": "L246",
       "target": "app_components_rich_comment_input_richcommentinput_select",
       "weight": 1.0
     },
@@ -14181,7 +14193,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L266",
+      "source_location": "L278",
       "target": "app_components_api_requestjson",
       "weight": 1.0
     },
@@ -14193,7 +14205,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L277",
+      "source_location": "L289",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -14205,7 +14217,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L301",
+      "source_location": "L313",
       "target": "app_lib_rich_comment_creatementionnode",
       "weight": 1.0
     },
@@ -14217,7 +14229,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L352",
+      "source_location": "L364",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -14229,7 +14241,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L368",
+      "source_location": "L380",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -14241,7 +14253,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L393",
+      "source_location": "L405",
       "target": "app_components_rich_comment_input_richcommentinput_setblock",
       "weight": 1.0
     },
@@ -14253,7 +14265,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_richcommentinput_select",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L301",
+      "source_location": "L313",
       "target": "app_lib_rich_comment_creatementionnode",
       "weight": 1.0
     },
@@ -14265,7 +14277,7 @@
       "relation": "calls",
       "source": "app_components_rich_comment_input_tokenof",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L104",
+      "source_location": "L107",
       "target": "app_lib_rich_comment_ismentionnode",
       "weight": 1.0
     },
@@ -155884,7 +155896,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L100",
+      "source_location": "L103",
       "target": "app_components_rich_comment_input_tokenof",
       "weight": 1.0
     },
@@ -155895,7 +155907,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L111",
+      "source_location": "L114",
       "target": "app_components_rich_comment_input_samevalue",
       "weight": 1.0
     },
@@ -155906,7 +155918,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L126",
+      "source_location": "L129",
       "target": "app_components_rich_comment_input_richcommentinput",
       "weight": 1.0
     },
@@ -155961,7 +155973,18 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L67",
+      "source_location": "L68",
+      "target": "app_components_rich_comment_input_focusinput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L70",
       "target": "app_components_rich_comment_input_no_format",
       "weight": 1.0
     },
@@ -155972,7 +155995,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L69",
+      "source_location": "L72",
       "target": "app_components_rich_comment_input_text_buttons",
       "weight": 1.0
     },
@@ -155983,7 +156006,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L76",
+      "source_location": "L79",
       "target": "app_components_rich_comment_input_block_buttons",
       "weight": 1.0
     },
@@ -155994,7 +156017,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L83",
+      "source_location": "L86",
       "target": "app_components_rich_comment_input_blockof",
       "weight": 1.0
     },
@@ -156005,7 +156028,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L91",
+      "source_location": "L94",
       "target": "app_components_rich_comment_input_activeof",
       "weight": 1.0
     },
@@ -156016,7 +156039,18 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L292",
+      "source_location": "L173",
+      "target": "app_components_rich_comment_input_richcommentinput_showtoken",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L304",
       "target": "app_components_rich_comment_input_richcommentinput_select",
       "weight": 1.0
     },
@@ -156027,7 +156061,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L311",
+      "source_location": "L323",
       "target": "app_components_rich_comment_input_richcommentinput_setblock",
       "weight": 1.0
     },
@@ -156038,7 +156072,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L333",
+      "source_location": "L345",
       "target": "app_components_rich_comment_input_richcommentinput_applylink",
       "weight": 1.0
     },
@@ -156049,7 +156083,7 @@
       "relation": "contains",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L343",
+      "source_location": "L355",
       "target": "app_components_rich_comment_input_richcommentinput_linkbutton",
       "weight": 1.0
     },
@@ -195223,7 +195257,7 @@
       "relation": "indirect_call",
       "source": "app_components_rich_comment_input_richcommentinput",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L189",
+      "source_location": "L206",
       "target": "app_lib_rich_comment_readcomment",
       "weight": 1.0
     },
@@ -198265,10 +198299,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "480358f02bb7363058c683a8980edbb74f92ad4af54bf495e63296c88ea86631",
+    "content_sha256": "236ca7513199d4b3a8e5040954dcb59e72e9a0f096aaa1e4a4e445bb35cfa1d7",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "e3c62b2d396350b82d9612eb37788aedb84f0825afaadd15c8de6b6dcc688844",
+    "source_sha256": "9a56797da80bec6a2ec79fbd3936736044efe196d658daf525232de628eb6039",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -211106,14 +211140,14 @@
             "callee": "hasFormat",
             "file": "app/components/rich-comment-input.tsx",
             "lang": "typescript",
-            "line": "L95",
+            "line": "L98",
             "receiver_type": "RangeSelection"
           }
         ]
       },
       "norm_label": "$activeof()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L91"
+      "source_location": "L94"
     },
     {
       "_callable": true,
@@ -211124,7 +211158,18 @@
       "label": "$blockOf()",
       "norm_label": "$blockof()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L83"
+      "source_location": "L86"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_focusinput",
+      "label": "focusInput()",
+      "norm_label": "focusinput()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -211139,21 +211184,21 @@
             "callee": "preventDefault",
             "file": "app/components/rich-comment-input.tsx",
             "lang": "typescript",
-            "line": "L209",
+            "line": "L226",
             "receiver_type": "KeyboardEvent"
           },
           {
             "callee": "stopPropagation",
             "file": "app/components/rich-comment-input.tsx",
             "lang": "typescript",
-            "line": "L217",
+            "line": "L234",
             "receiver_type": "KeyboardEvent"
           }
         ]
       },
       "norm_label": "richcommentinput()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L126"
+      "source_location": "L129"
     },
     {
       "_callable": true,
@@ -211168,14 +211213,14 @@
             "callee": "preventDefault",
             "file": "app/components/rich-comment-input.tsx",
             "lang": "typescript",
-            "line": "L334",
+            "line": "L346",
             "receiver_type": "KeyboardEvent"
           }
         ]
       },
       "norm_label": "applylink()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L333"
+      "source_location": "L345"
     },
     {
       "_callable": true,
@@ -211186,7 +211231,7 @@
       "label": "linkButton()",
       "norm_label": "linkbutton()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L343"
+      "source_location": "L355"
     },
     {
       "_callable": true,
@@ -211197,7 +211242,7 @@
       "label": "select()",
       "norm_label": "select()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L292"
+      "source_location": "L304"
     },
     {
       "_callable": true,
@@ -211208,7 +211253,18 @@
       "label": "setBlock()",
       "norm_label": "setblock()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L311"
+      "source_location": "L323"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_richcommentinput_showtoken",
+      "label": "showToken()",
+      "norm_label": "showtoken()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L173"
     },
     {
       "_callable": true,
@@ -211219,7 +211275,7 @@
       "label": "sameValue()",
       "norm_label": "samevalue()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L111"
+      "source_location": "L114"
     },
     {
       "_callable": true,
@@ -211234,14 +211290,14 @@
             "callee": "isCollapsed",
             "file": "app/components/rich-comment-input.tsx",
             "lang": "typescript",
-            "line": "L102",
+            "line": "L105",
             "receiver_type": "RangeSelection"
           }
         ]
       },
       "norm_label": "$tokenof()",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L100"
+      "source_location": "L103"
     },
     {
       "_callable": true,
@@ -237622,7 +237678,7 @@
       "label": "BLOCK_BUTTONS",
       "norm_label": "block_buttons",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L76"
+      "source_location": "L79"
     },
     {
       "_origin": "ast",
@@ -237632,7 +237688,7 @@
       "label": "NO_FORMAT",
       "norm_label": "no_format",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L67"
+      "source_location": "L70"
     },
     {
       "_origin": "ast",
@@ -237642,7 +237698,7 @@
       "label": "TEXT_BUTTONS",
       "norm_label": "text_buttons",
       "source_file": "app/components/rich-comment-input.tsx",
-      "source_location": "L69"
+      "source_location": "L72"
     },
     {
       "_origin": "ast",
