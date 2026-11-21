@@ -132,6 +132,11 @@ describe("translation of new and old content", (): void => {
     expect(await count("entry_translations")).toBe(LOCALES.length);
   });
 
+  it("fails the run when each start fails", async (): Promise<void> => {
+    run.mockRejectedValue(new Error("model down"));
+    await expect(translatePending(env, NOW)).rejects.toThrow("translation starts failed");
+  });
+
   it("does nothing without the Workers AI binding", async (): Promise<void> => {
     await addComment("Hallo Welt");
     expect(await translatePending({ ...env, AI: undefined }, NOW)).toBe(0);

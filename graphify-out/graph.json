@@ -49185,7 +49185,7 @@
       "relation": "calls",
       "source": "app_server_translation_jobs_server_translateafterpost",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L64",
+      "source_location": "L69",
       "target": "app_server_translation_jobs_server_translateitem",
       "weight": 1.0
     },
@@ -49197,7 +49197,7 @@
       "relation": "calls",
       "source": "app_server_translation_jobs_server_translateitem",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L54",
+      "source_location": "L59",
       "target": "app_server_entry_translation_server_translateentry",
       "weight": 1.0
     },
@@ -49209,7 +49209,7 @@
       "relation": "calls",
       "source": "app_server_translation_jobs_server_translateitem",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L54",
+      "source_location": "L59",
       "target": "app_server_translation_server_translatecomment",
       "weight": 1.0
     },
@@ -49221,7 +49221,7 @@
       "relation": "calls",
       "source": "app_server_translation_jobs_server_translatepending",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L24",
+      "source_location": "L27",
       "target": "app_server_translation_jobs_server_ids",
       "weight": 1.0
     },
@@ -49233,7 +49233,7 @@
       "relation": "calls",
       "source": "app_server_translation_jobs_server_translatepending",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L41",
+      "source_location": "L44",
       "target": "app_server_translation_server_translatecomment",
       "weight": 1.0
     },
@@ -49245,7 +49245,7 @@
       "relation": "calls",
       "source": "app_server_translation_jobs_server_translatepending",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L42",
+      "source_location": "L45",
       "target": "app_server_entry_translation_server_translateentry",
       "weight": 1.0
     },
@@ -58197,7 +58197,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L306",
+      "source_location": "L309",
       "target": "app_server_test_environment_config_validatetestenvironment",
       "weight": 1.0
     },
@@ -58209,7 +58209,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L307",
+      "source_location": "L310",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -58221,7 +58221,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L308",
+      "source_location": "L311",
       "target": "worker_index_httpsredirect",
       "weight": 1.0
     },
@@ -58233,7 +58233,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L309",
+      "source_location": "L312",
       "target": "worker_index_secured",
       "weight": 1.0
     },
@@ -58245,7 +58245,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L310",
+      "source_location": "L313",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -58257,7 +58257,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L312",
+      "source_location": "L315",
       "target": "worker_index_clientkey",
       "weight": 1.0
     },
@@ -58269,7 +58269,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L320",
+      "source_location": "L323",
       "target": "worker_index_quotascope_24615190bf5a",
       "weight": 1.0
     },
@@ -58281,7 +58281,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L323",
+      "source_location": "L326",
       "target": "app_server_test_environment_server_requiretestaccess",
       "weight": 1.0
     },
@@ -58293,7 +58293,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L324",
+      "source_location": "L327",
       "target": "worker_index_routeresponse",
       "weight": 1.0
     },
@@ -58305,7 +58305,7 @@
       "relation": "calls",
       "source": "worker_index_fetch",
       "source_file": "worker/index.ts",
-      "source_location": "L326",
+      "source_location": "L329",
       "target": "app_server_http_server_errorresponse",
       "weight": 1.0
     },
@@ -58581,7 +58581,19 @@
       "relation": "calls",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L290",
+      "source_location": "L275",
+      "target": "app_server_translation_jobs_server_translatepending",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "worker_index_scheduled",
+      "source_file": "worker/index.ts",
+      "source_location": "L293",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -58593,7 +58605,7 @@
       "relation": "calls",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L295",
+      "source_location": "L298",
       "target": "worker_index_fetch",
       "weight": 1.0
     },
@@ -117510,6 +117522,18 @@
       "source_file": "worker/index.ts",
       "source_location": "L21",
       "target": "app_server_translation_jobs_server_translatepending",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "worker_index",
+      "source_file": "worker/index.ts",
+      "source_location": "L21",
+      "target": "app_server_translation_jobs_server_translation_cron",
       "weight": 1.0
     },
     {
@@ -182685,7 +182709,18 @@
       "relation": "contains",
       "source": "app_server_translation_jobs_server",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L11",
+      "source_location": "L12",
+      "target": "app_server_translation_jobs_server_translation_batch",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_translation_jobs_server",
+      "source_file": "app/server/translation-jobs.server.ts",
+      "source_location": "L14",
       "target": "app_server_translation_jobs_server_ids",
       "weight": 1.0
     },
@@ -182696,7 +182731,7 @@
       "relation": "contains",
       "source": "app_server_translation_jobs_server",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L21",
+      "source_location": "L24",
       "target": "app_server_translation_jobs_server_translatepending",
       "weight": 1.0
     },
@@ -182707,7 +182742,7 @@
       "relation": "contains",
       "source": "app_server_translation_jobs_server",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L49",
+      "source_location": "L54",
       "target": "app_server_translation_jobs_server_translateitem",
       "weight": 1.0
     },
@@ -182718,7 +182753,7 @@
       "relation": "contains",
       "source": "app_server_translation_jobs_server",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L63",
+      "source_location": "L68",
       "target": "app_server_translation_jobs_server_translateafterpost",
       "weight": 1.0
     },
@@ -182730,7 +182765,7 @@
       "source": "app_server_translation_jobs_server",
       "source_file": "app/server/translation-jobs.server.ts",
       "source_location": "L9",
-      "target": "app_server_translation_jobs_server_translation_batch",
+      "target": "app_server_translation_jobs_server_translation_cron",
       "weight": 1.0
     },
     {
@@ -185391,7 +185426,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L275",
+      "source_location": "L276",
       "target": "docs_api_topic_and_poll_translation",
       "weight": 1.0
     },
@@ -185402,7 +185437,7 @@
       "relation": "contains",
       "source": "docs_api_api_reference",
       "source_file": "docs/api.md",
-      "source_location": "L292",
+      "source_location": "L293",
       "target": "docs_api_markdown_in_comments",
       "weight": 1.0
     },
@@ -196028,7 +196063,7 @@
       "relation": "contains",
       "source": "worker_index",
       "source_file": "worker/index.ts",
-      "source_location": "L299",
+      "source_location": "L302",
       "target": "worker_index_fetch",
       "weight": 1.0
     },
@@ -202929,7 +202964,7 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L274",
+      "source_location": "L279",
       "target": "app_server_cleanup_server_cleanexpireddata",
       "weight": 1.0
     },
@@ -202941,7 +202976,7 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L276",
+      "source_location": "L281",
       "target": "app_server_schedule_server_topupseries",
       "weight": 1.0
     },
@@ -202953,7 +202988,7 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L278",
+      "source_location": "L283",
       "target": "app_server_channels_server_expireyoutubeconnections",
       "weight": 1.0
     },
@@ -202965,20 +203000,8 @@
       "relation": "indirect_call",
       "source": "worker_index_scheduled",
       "source_file": "worker/index.ts",
-      "source_location": "L280",
+      "source_location": "L285",
       "target": "app_server_channels_server_repairchannelsubscriptions",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "collection",
-      "relation": "indirect_call",
-      "source": "worker_index_scheduled",
-      "source_file": "worker/index.ts",
-      "source_location": "L282",
-      "target": "app_server_translation_jobs_server_translatepending",
       "weight": 1.0
     },
     {
@@ -203265,7 +203288,7 @@
       "relation": "references",
       "source": "docs_api_markdown_in_comments",
       "source_file": "docs/api.md",
-      "source_location": "L330",
+      "source_location": "L331",
       "target": "app_lib_comment_markdown_parsecommentmarkdown",
       "weight": 1.0
     },
@@ -203283,10 +203306,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "ab7930f937f7d488b56be4a082fb9e0a6a106b022340a34649fedaa5d38b0f8c",
+    "content_sha256": "6ee2e6beb824a489971b7e9a6ec45e0211d43d356e86f93b5834ac9006f07a9e",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "9a4be9668ce7fbcfaf92872a1b3388a6c70fa762c82b2477506b7c74c7a4687e",
+    "source_sha256": "144d885302ae4bd24e5a4f66b2b7d118e27890273337638e6c8fd4e8d4c1d226",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -234071,7 +234094,7 @@
       "label": "ids()",
       "norm_label": "ids()",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L11"
+      "source_location": "L14"
     },
     {
       "_callable": true,
@@ -234082,7 +234105,7 @@
       "label": "translateAfterPost()",
       "norm_label": "translateafterpost()",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L63"
+      "source_location": "L68"
     },
     {
       "_callable": true,
@@ -234093,7 +234116,7 @@
       "label": "translateItem()",
       "norm_label": "translateitem()",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L49"
+      "source_location": "L54"
     },
     {
       "_callable": true,
@@ -234104,7 +234127,7 @@
       "label": "translatePending()",
       "norm_label": "translatepending()",
       "source_file": "app/server/translation-jobs.server.ts",
-      "source_location": "L21"
+      "source_location": "L24"
     },
     {
       "_callable": true,
@@ -241449,7 +241472,7 @@
       "label": "fetch()",
       "norm_label": "fetch()",
       "source_file": "worker/index.ts",
-      "source_location": "L299"
+      "source_location": "L302"
     },
     {
       "_callable": true,
@@ -250427,6 +250450,16 @@
       "label": "TRANSLATION_BATCH",
       "norm_label": "translation_batch",
       "source_file": "app/server/translation-jobs.server.ts",
+      "source_location": "L12"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_translation_jobs_server_translation_cron",
+      "label": "TRANSLATION_CRON",
+      "norm_label": "translation_cron",
+      "source_file": "app/server/translation-jobs.server.ts",
       "source_location": "L9"
     },
     {
@@ -255997,7 +256030,7 @@
       "node_kind": "heading",
       "norm_label": "markdown in comments",
       "source_file": "docs/api.md",
-      "source_location": "L292"
+      "source_location": "L293"
     },
     {
       "_origin": "ast",
@@ -256052,7 +256085,7 @@
       "node_kind": "heading",
       "norm_label": "topic and poll translation",
       "source_file": "docs/api.md",
-      "source_location": "L275"
+      "source_location": "L276"
     },
     {
       "_origin": "ast",
