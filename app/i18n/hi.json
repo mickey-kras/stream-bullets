@@ -941,7 +941,6 @@
   "overlay.layerHelp": "किसी लेयर को अलग OBS सोर्स में चाहिए? अपने ओवरले URL में &layer=chat जोड़ें। सिर्फ़ कंटेंट के लिए &layer=content इस्तेमाल करें।",
   "overlay.layerUrls": "लेयर URL",
   "overlay.layerUrlsHelp": "सब कुछ एक ब्राउज़र सोर्स में रखें या हर लेयर के लिए अलग सोर्स बनाएँ। हर सोर्स का आकार उसकी लेयर जितना रखें। बड़ा सोर्स लेयर को बड़ा दिखाता है।",
-  "overlay.livePoll": "{name} · लाइव पोल",
   "overlay.messageLabel": "संदेश (अधिकतम {n} अक्षर)",
   "overlay.messagePlaceholder": "आपका संदेश",
   "overlay.messageStyle": "संदेश शैली",

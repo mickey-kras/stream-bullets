@@ -969,7 +969,6 @@
   "overlay.layerHelp": "Нужен слой в отдельном источнике OBS? Добавьте &layer=chat к URL оверлея. Для одного контента используйте &layer=content.",
   "overlay.layerUrls": "URL слоёв",
   "overlay.layerUrlsHelp": "Используйте один источник «Браузер» для всего или отдельный источник для каждого слоя. Задайте каждому источнику размер его слоя. Источник большего размера увеличивает слой.",
-  "overlay.livePoll": "{name} · Опрос в эфире",
   "overlay.messageLabel": "Сообщение (до {n} символов)",
   "overlay.messagePlaceholder": "Ваше сообщение",
   "overlay.messageStyle": "Стиль сообщения",

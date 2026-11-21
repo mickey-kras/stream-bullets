@@ -969,7 +969,6 @@
   "overlay.layerHelp": "Chcesz mieć warstwę w osobnym źródle OBS? Dodaj &layer=chat do adresu nakładki. Użyj &layer=content, aby pokazać tylko treść.",
   "overlay.layerUrls": "Adresy URL warstw",
   "overlay.layerUrlsHelp": "Użyj jednego źródła przeglądarki dla całości albo jednego źródła na warstwę. Nadaj każdemu źródłu rozmiar jego warstwy. Większe źródło powiększa warstwę.",
-  "overlay.livePoll": "{name} · Ankieta na żywo",
   "overlay.messageLabel": "Wiadomość (do {n} znaków)",
   "overlay.messagePlaceholder": "Twoja wiadomość",
   "overlay.messageStyle": "Styl wiadomości",

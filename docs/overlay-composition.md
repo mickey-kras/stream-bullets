@@ -129,10 +129,12 @@ A viewer scans the QR code with a phone. The phone then opens the public page of
 | `message` | No QR code. The message banner has no page to open. |
 
 - Each link starts with the origin of the app (`APP_ORIGIN`), the same value that gives the host in the **Tap at** hint.
-- The code is in the card of the layer, at the right edge. On a poll card it is at the bottom, beside the **Tap at** hint.
+- The code is in the card of the layer, at the right edge.
 - The side of the code is 22 percent of the card height, and at least 96 design pixels.
   It is at most 30 percent of the card width, unless that is below the minimum.
   The card with the code becomes smaller with its cell, as each card does.
+- On a poll card, the code is beside the question, and the question has the height of the code.
+  There the side is 54 percent of the cell height, at least 96 design pixels and at most 30 percent of the cell width.
 - The code has dark modules (`#0b2228`) on a light plate (`#f7edcf`) with a quiet zone of 2 modules.
   The plate stays opaque at each `backgroundOpacity`. Thus a phone can read the code on each background.
 - The code is an SVG picture from the `uqr` package. Thus it stays sharp at each OBS source size.
@@ -442,6 +444,12 @@ A change of size does not scale a chat layer or a characters layer. Each layer u
 | `chat` | The font stays at 26 pixels. A message wraps later, so its card has fewer lines. | More cards show. The layer clips the oldest cards at the top. |
 | `characters` | The sprites keep their size: 1 world pixel is 3 design pixels. The ground is longer. | More sky shows above the ground. The sprites keep their size. |
 | Each content layer | The content uses the full width of the cell. | The content stays in the middle of the cell. If it is higher than the cell, it becomes smaller until it fits. |
+| `poll` | The card fills the cell. The text and the code become larger. | The card fills the cell. In a cell that is higher than it is wide, each option has its own row. |
+
+The poll card has three parts: the question beside the QR code, the options across the full width, and one status line.
+Each option is a thin bar. It shows its share of the votes when the results are on.
+The card is complete in a cell of 4 by 2.
+Viewers cannot select an option on stream. They scan the code to vote.
 
 ### Saves
 

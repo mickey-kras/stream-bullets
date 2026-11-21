@@ -942,7 +942,6 @@
   "overlay.layerHelp": "Need one layer in its own OBS source? Add &layer=chat to your overlay URL. Use &layer=content for the content alone.",
   "overlay.layerUrls": "Layer URLs",
   "overlay.layerUrlsHelp": "Use one Browser source for everything, or one source per layer. Give each layer source the size of its layer. A larger source scales the layer up.",
-  "overlay.livePoll": "{name} · Live poll",
   "overlay.messageLabel": "Message (up to {n} characters)",
   "overlay.messagePlaceholder": "Your message",
   "overlay.messageStyle": "Message style",
