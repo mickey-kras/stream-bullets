@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "121532c1-e494-4d02-b900-1876c4c22593",
+  "id": "fa9bb89d-3c44-4287-9500-97f3e05979c7",
   "prevId": "d905cf02-3286-4913-8c1b-ca0a0066b433",
   "tables": {
     "ai_interest": {
@@ -3526,6 +3526,14 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "starts": {
+          "name": "starts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
         }
       },
       "indexes": {

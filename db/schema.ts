@@ -281,7 +281,9 @@ export const translationAttempts = sqliteTable(
     commentId: text("comment_id").notNull(),
     locale: text("locale").notNull(),
     sourceHash: text("source_hash").notNull(),
+    // The time of the last start, and the number of starts for this text and locale.
     createdAt: integer("created_at").notNull(),
+    starts: integer("starts").notNull().default(1),
   },
   (table) => [
     primaryKey({ columns: [table.commentId, table.locale, table.sourceHash] }),

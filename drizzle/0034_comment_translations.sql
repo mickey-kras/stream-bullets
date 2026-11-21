@@ -13,6 +13,7 @@ CREATE TABLE `translation_attempts` (
 	`locale` text NOT NULL,
 	`source_hash` text NOT NULL,
 	`created_at` integer NOT NULL,
+	`starts` integer DEFAULT 1 NOT NULL,
 	PRIMARY KEY(`comment_id`, `locale`, `source_hash`)
 );
 --> statement-breakpoint

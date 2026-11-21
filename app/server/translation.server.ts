@@ -117,7 +117,9 @@ export async function translateComment(
 
   if (!(await env.REQUEST_LIMITER.limit({ key: `${TRANSLATION_LIMIT_KEY}:${viewerId}` })).success)
     throw new HttpError(429, "Too many requests. Please try again in a minute.");
-  const recent = await env.DB.prepare("SELECT COUNT(*) AS count FROM translation_attempts WHERE created_at > ?")
+  const recent = await env.DB.prepare(
+    "SELECT COALESCE(SUM(starts), 0) AS count FROM translation_attempts WHERE created_at > ?",
+  )
     .bind(now - DAY)
     .first<{ count: number }>();
   if ((recent?.count ?? 0) >= TRANSLATION_DAILY_LIMIT) throw new HttpError(503, "Translation is not available.");
@@ -125,26 +127,17 @@ export async function translateComment(
   // The statement also examines the daily limit, so requests at the same time cannot go above it.
   const claim = await env.DB.prepare(
     `INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at)
-      SELECT ?1, ?2, ?3, ?4 WHERE (SELECT COUNT(*) FROM translation_attempts WHERE created_at > ?5) < ?6
-      ON CONFLICT(comment_id, locale, source_hash) DO UPDATE SET created_at=excluded.created_at
+      SELECT ?1, ?2, ?3, ?4 WHERE (SELECT COALESCE(SUM(starts), 0) FROM translation_attempts WHERE created_at > ?5) < ?6
+      ON CONFLICT(comment_id, locale, source_hash) DO UPDATE SET created_at=excluded.created_at,
+        starts=translation_attempts.starts + 1
       WHERE translation_attempts.created_at < excluded.created_at - ?7`,
   )
     .bind(commentId, locale, hash, now, now - DAY, TRANSLATION_DAILY_LIMIT, CLAIM_MS)
     .run();
   if (claim.meta.changes === 0) throw new HttpError(409, "The translation is not ready. Try again in a moment.");
 
-  let answer: string;
-  try {
-    answer = await askModel(env.AI, locale, comment.text, rows);
-  } catch (error) {
-    // The model gave no answer, so a later request can try again.
-    await env.DB.prepare(
-      "UPDATE translation_attempts SET created_at=0 WHERE comment_id=? AND locale=? AND source_hash=?",
-    )
-      .bind(commentId, locale, hash)
-      .run();
-    throw error;
-  }
+  // If the model fails, the reservation stays in the daily count and opens again after CLAIM_MS.
+  const answer: string = await askModel(env.AI, locale, comment.text, rows);
   const translation: CommentTranslation | null = checked(comment.text, rows, readAnswer(answer));
   await env.DB.prepare(
     `INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at) VALUES (?,?,?,?,?)

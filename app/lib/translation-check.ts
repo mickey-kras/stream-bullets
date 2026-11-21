@@ -1,45 +1,42 @@
 // Checks on a machine translation of a comment. The translation must keep the Markdown structure, the code,
 // the links and the mentions of the source. A translation that fails a check is not shown.
 
+import { parseCommentMarkdown, type MarkdownBlock, type MarkdownInline } from "./comment-markdown";
+
 export interface MentionRange {
   userId: string;
   start: number;
   end: number;
 }
 
-function count(text: string, pattern: RegExp): number {
-  return text.match(pattern)?.length ?? 0;
+// The parsed comment without its text: the blocks, the marks, the line breaks, the code and the link addresses.
+function inlineShape(nodes: readonly MarkdownInline[]): unknown[] {
+  return nodes.flatMap((node: MarkdownInline): unknown[] => {
+    if (node.kind === "text" || node.kind === "mention") return [];
+    if (node.kind === "break") return ["break"];
+    if (node.kind === "code") return [{ code: node.text }];
+    if (node.kind === "link") return [{ link: node.href, children: inlineShape(node.children) }];
+    return [{ mark: node.kind, children: inlineShape(node.children) }];
+  });
 }
 
-// The number of each Markdown mark and of the line breaks.
-function shape(text: string): string {
-  return [
-    // All stars and underscores: the bold and italic marks in each of their forms.
-    count(text, /\*/gu),
-    count(text, /_/gu),
-    count(text, /~~/gu),
-    count(text, /```/gu),
-    count(text, /^> /gmu),
-    count(text, /^- /gmu),
-    count(text, /^\d+\. /gmu),
-    count(text, /\n/gu),
-  ].join(",");
+function blockShape(blocks: readonly MarkdownBlock[]): unknown[] {
+  return blocks.map((block: MarkdownBlock): unknown => {
+    if (block.kind === "codeBlock") return { codeBlock: block.text };
+    if (block.kind === "quote") return { quote: blockShape(block.children) };
+    if (block.kind === "list") return { list: block.ordered, start: block.start, items: block.items.map(blockShape) };
+    return { [block.kind]: inlineShape(block.children) };
+  });
 }
 
-function codeSpans(text: string): string {
-  return (text.match(/```[\s\S]*?```|`[^`\n]+`/gu) ?? []).join("\n");
-}
-
-function links(text: string): string {
-  return (text.match(/(?:https?:\/\/|mailto:)[^\s)]+/gu) ?? []).join("\n");
-}
-
-/** Whether `translation` has the same Markdown marks, line breaks, code and links as `source`. */
+/**
+ * Whether `translation` has the same structure as `source`. The comment renderer parses the two texts, so the
+ * check reads each form of a mark, a code block and a link as the page shows it.
+ */
 export function keepsStructure(source: string, translation: string): boolean {
   return (
-    shape(source) === shape(translation) &&
-    codeSpans(source) === codeSpans(translation) &&
-    links(source) === links(translation)
+    JSON.stringify(blockShape(parseCommentMarkdown(source))) ===
+    JSON.stringify(blockShape(parseCommentMarkdown(translation)))
   );
 }
 

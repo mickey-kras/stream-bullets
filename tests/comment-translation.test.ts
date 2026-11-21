@@ -177,8 +177,12 @@ describe("comment translation", (): void => {
     run.mockRejectedValueOnce(new Error("model down"));
     const id: string = await seedComment();
     await expect(translateComment(env, id, "fan", "de", NOW)).rejects.toThrow("model down");
+    await expect(translateComment(env, id, "fan", "de", NOW + 1)).rejects.toMatchObject({ status: 409 });
     run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
-    expect(await translateComment(env, id, "fan", "de", NOW + 1)).not.toBeNull();
+    expect(await translateComment(env, id, "fan", "de", NOW + 60_001)).not.toBeNull();
+    // The failed start stays in the daily count.
+    const row = await env.DB.prepare("SELECT starts FROM translation_attempts WHERE comment_id=?").bind(id).first();
+    expect(row).toEqual({ starts: 2 });
   });
 
   it("removes the old rows of the daily count", async (): Promise<void> => {
