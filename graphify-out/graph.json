@@ -198247,7 +198247,7 @@
       "relation": "references",
       "source": "docs_api_markdown_in_comments",
       "source_file": "docs/api.md",
-      "source_location": "L273",
+      "source_location": "L274",
       "target": "app_lib_comment_markdown_parsecommentmarkdown",
       "weight": 1.0
     },
@@ -198265,10 +198265,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "7a1b4394e9e249eadd3fd1c61a5449ddb0a474bf33639957ccd1d657ad1715ca",
+    "content_sha256": "480358f02bb7363058c683a8980edbb74f92ad4af54bf495e63296c88ea86631",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "588687ee6f77b6c36b12e9f3db164b2bf72db7ed32b13c6bc8be4021acb47aa4",
+    "source_sha256": "fc0beb3de6f0925824f832497da33774dc92a60299e6869fbc82987ba0af2944",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
