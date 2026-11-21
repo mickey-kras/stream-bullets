@@ -29527,6 +29527,54 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_lib_translation_check_keepsstructure",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L38",
+      "target": "app_lib_translation_check_shape",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_translation_check_keepsstructure",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L39",
+      "target": "app_lib_translation_check_codespans",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_translation_check_keepsstructure",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L40",
+      "target": "app_lib_translation_check_links",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_translation_check_shape",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L17",
+      "target": "app_lib_translation_check_count",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_lib_use_prefs_useprefs",
       "source_file": "app/lib/use-prefs.ts",
       "source_location": "L10",
@@ -113353,6 +113401,42 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_translation_check_test",
+      "source_file": "tests/translation-check.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_translation_check_keepsstructure",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_translation_check_test",
+      "source_file": "tests/translation-check.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_translation_check_movementions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_translation_check_test",
+      "source_file": "tests/translation-check.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_translation_check_readanswer",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
       "source_location": "L11",
@@ -144891,6 +144975,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_translation_check_test",
+      "source_file": "tests/translation-check.test.ts",
+      "source_location": "L1",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_translation_check_test",
+      "source_file": "tests/translation-check.test.ts",
+      "source_location": "L2",
+      "target": "app_lib_translation_check",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
       "source_location": "L1",
@@ -166698,6 +166806,94 @@
       "source_file": "app/lib/threads.ts",
       "source_location": "L7",
       "target": "app_lib_threads_orderreplies",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_translation_check",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L10",
+      "target": "app_lib_translation_check_count",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_translation_check",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L15",
+      "target": "app_lib_translation_check_shape",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_translation_check",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L27",
+      "target": "app_lib_translation_check_codespans",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_translation_check",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L31",
+      "target": "app_lib_translation_check_links",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_translation_check",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L36",
+      "target": "app_lib_translation_check_keepsstructure",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_translation_check",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L4",
+      "target": "app_lib_translation_check_mentionrange",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_translation_check",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L48",
+      "target": "app_lib_translation_check_movementions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_translation_check",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L76",
+      "target": "app_lib_translation_check_readanswer",
       "weight": 1.0
     },
     {
@@ -196922,10 +197118,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "439a7fa2372a28191fbc7efb5646b794992fe5a5323fdbb2f4215bdf71ef1810",
+    "content_sha256": "d1fc760c5b6aefeb7bbe8c29fb9e483ab55c3a14309fa4ce65cb625815bb4a4e",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "7996bb5af29ddb5ead1de26a56b41fc7a928abf5538d4467496d980cbb28a3a0",
+    "source_sha256": "077074fa7f584fe6d16b8549b601c3c8f5ce189447cc8d84667a11569a91c4cd",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -200413,6 +200609,18 @@
       "norm_label": "supportprovider",
       "source_file": "app/lib/support.ts",
       "source_location": "L5"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_translation_check_mentionrange",
+      "label": "MentionRange",
+      "norm_label": "mentionrange",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L4"
     },
     {
       "_callable": true,
@@ -218180,6 +218388,83 @@
       "norm_label": "visiblereplies()",
       "source_file": "app/lib/threads.ts",
       "source_location": "L12"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_translation_check_codespans",
+      "label": "codeSpans()",
+      "norm_label": "codespans()",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L27"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_translation_check_count",
+      "label": "count()",
+      "norm_label": "count()",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L10"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_translation_check_keepsstructure",
+      "label": "keepsStructure()",
+      "norm_label": "keepsstructure()",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L36"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_translation_check_links",
+      "label": "links()",
+      "norm_label": "links()",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L31"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_translation_check_movementions",
+      "label": "moveMentions()",
+      "norm_label": "movementions()",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L48"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_translation_check_readanswer",
+      "label": "readAnswer()",
+      "norm_label": "readanswer()",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L76"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_translation_check_shape",
+      "label": "shape()",
+      "norm_label": "shape()",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L15"
     },
     {
       "_callable": true,
@@ -239533,6 +239818,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_translation_check",
+      "label": "translation-check.ts",
+      "norm_label": "translation-check.ts",
+      "source_file": "app/lib/translation-check.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_url_text",
       "label": "url-text.ts",
       "norm_label": "url-text.ts",
@@ -247667,6 +247962,16 @@
       "norm_label": "fetchroom",
       "source_file": "tests/test-environment.test.ts",
       "source_location": "L27"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_translation_check_test",
+      "label": "translation-check.test.ts",
+      "norm_label": "translation-check.test.ts",
+      "source_file": "tests/translation-check.test.ts",
+      "source_location": "L1"
     },
     {
       "_origin": "ast",
