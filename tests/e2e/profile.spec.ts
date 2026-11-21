@@ -139,7 +139,7 @@ test("Your profile: preset order, a cropped upload, then a preset again", async 
   await expect(page.locator(".author .user-avatar")).toHaveAttribute("data-preset", "17");
   const composer = page.locator("form.composer").first();
   await expect(composer.locator(".user-avatar")).toHaveAttribute("data-preset", "17");
-  await composer.locator("textarea[data-composer]").fill("Shown with my preset.");
+  await composer.locator(".ed-content[data-composer]").fill("Shown with my preset.");
   await composer.getByRole("button", { name: "Post", exact: true }).click();
   const posted = page.locator("article.comment").filter({ hasText: "Shown with my preset." });
   await expect(posted.locator(".user-avatar")).toHaveAttribute("data-preset", "17");

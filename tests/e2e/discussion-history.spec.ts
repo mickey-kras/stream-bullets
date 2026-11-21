@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { expect, test, type BrowserContext } from "./coverage";
 import { z } from "zod";
 import { clientAddress, clientIp } from "./client-ips";
-import { accounts, runSql, signedIn } from "./fixtures";
+import { accounts, commentBox, expectCommentText, runSql, signedIn } from "./fixtures";
 
 const origin = "http://localhost:5173";
 const sessionSchema = z.record(z.string(), z.object({ id: z.string().uuid(), cookie: z.string().min(1) }));
@@ -104,7 +104,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     await like.click();
     await expect(like).toHaveAttribute("aria-pressed", "false");
     await expect(like).toHaveText("Like 0");
-    await page.getByRole("textbox", { name: "Write a comment" }).fill("Keep this unsent draft.");
+    await commentBox(page, "Write a comment").fill("Keep this unsent draft.");
     await oldest.getByRole("button", { name: "Delete comment", exact: true }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Delete comment", exact: true }).click();
     await expect(oldest).toHaveCount(0);
@@ -116,7 +116,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     await expect(page.getByText("Loading comments…", { exact: true })).toHaveCount(0);
     await expect(oldest).toHaveCount(0);
     await expect(reply).toBeVisible();
-    await expect(page.getByRole("textbox", { name: "Write a comment" })).toHaveValue("Keep this unsent draft.");
+    await expectCommentText(commentBox(page, "Write a comment"), "Keep this unsent draft.");
     const added = await context.request.post("/api/streamers/test_host", {
       headers: { Origin: origin },
       data: { action: "comment", id: entryId, text: "A newer comment arrives." },
@@ -145,10 +145,10 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     );
     await remoteParent.getByRole("button", { name: "Reply", exact: true }).click();
     await expect(page.getByRole("button", { name: "Cancel reply", exact: true })).toBeVisible();
-    const replyDraft = page.getByRole("textbox", { name: "Write a reply to viewer", exact: true });
+    const replyDraft = commentBox(page, "Write a reply to viewer");
     await replyDraft.fill("Keep this historical reply draft.");
     await page.reload();
-    await expect(replyDraft).toHaveValue("Keep this historical reply draft.");
+    await expectCommentText(replyDraft, "Keep this historical reply draft.");
     await expect(remoteParent).toBeVisible();
     await page.getByRole("button", { name: "Load more comments" }).click();
     await expect(reply).toBeVisible();
@@ -166,7 +166,7 @@ test("historical comment mutations stay visible and accurate after refresh", asy
     // The placeholder remains a reply target until the viewer cancels.
     await page.getByRole("button", { name: "Cancel reply", exact: true }).click();
     await expect(page.getByRole("button", { name: "Cancel reply", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("textbox", { name: "Write a comment" })).toHaveValue("Keep this unsent draft.");
+    await expectCommentText(commentBox(page, "Write a comment"), "Keep this unsent draft.");
     await page.getByRole("button", { name: "Post", exact: true }).click();
     const postedDraft = page
       .locator("article.comment")
@@ -253,7 +253,7 @@ test("comment loading and pagination recover without dropping the loaded history
     const alert = page.locator(".discussion > .form-error");
     await expect(alert).toHaveText("The request failed. Please try again.");
     await expect(page.getByText("Loading comments…", { exact: true })).toHaveCount(0);
-    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    const composer = commentBox(page, "Write a comment");
     await composer.fill("Keep this draft through history retries.");
     failure = null;
     await page.getByRole("button", { name: "Refresh comments", exact: true }).click();
@@ -266,7 +266,7 @@ test("comment loading and pagination recover without dropping the loaded history
     await expect(alert).toHaveText("The request failed. Please try again.");
     await expect(roots).toHaveCount(100);
     await expect(more).toBeEnabled();
-    await expect(composer).toHaveValue("Keep this draft through history retries.");
+    await expectCommentText(composer, "Keep this draft through history retries.");
     failure = null;
     await more.click();
     await expect(roots).toHaveCount(110);
@@ -278,7 +278,7 @@ test("comment loading and pagination recover without dropping the loaded history
     await expect(alert).toHaveText("This comment is no longer available.");
     await expect(page.locator(`#cm-${foreignCommentId}`)).toHaveCount(0);
     await expect(roots).toHaveCount(100);
-    await expect(composer).toHaveValue("Keep this draft through history retries.");
+    await expectCommentText(composer, "Keep this draft through history retries.");
   } finally {
     await close(context);
     await runSql("discussion-loading-cleanup", [`DELETE FROM entries WHERE id IN ('${entryId}','${foreignEntryId}');`]);
