@@ -263,11 +263,6 @@ function floatingAction(view: View, owner: boolean, official: boolean): ReturnTy
   return null;
 }
 
-// The header has an action only on the official page: "Suggest an improvement".
-function headerAction(view: View, official: boolean): ReturnType<typeof viewAction> {
-  return official ? viewAction(view, false, true) : null;
-}
-
 function useIntentDialog(intent: ReturnType<typeof readIntent>, viewer: Viewer | null, streamer: Streamer) {
   const intentDialog = (): Dialog => {
     if (intent !== "suggest" || !viewer || streamer.status !== "active") return null;
@@ -864,7 +859,8 @@ export default function StreamerPage(): ReactNode {
     );
   }
 
-  const action = viewer ? headerAction(view, official) : null;
+  // The header has an action only on the official page: "Suggest an improvement".
+  const action = viewer && official ? viewAction(view, false, true) : null;
   const showFab: boolean = Boolean(viewer && writable && !pollsClass.includes("mash-page"));
   const fab = showFab ? floatingAction(view, owner, official) : null;
   const role = pageRole(owner, moderator);
