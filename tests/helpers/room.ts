@@ -36,6 +36,11 @@ export class FakeSocket {
     this.sent.push(message);
   }
 
+  // The Worker accepts a socket that it closes itself.
+  accept(): void {
+    this.readyState = OPEN;
+  }
+
   close(code: number = 1005, reason: string = ""): void {
     if (this.readyState === CLOSED) return;
     this.readyState = CLOSED;
@@ -182,6 +187,17 @@ export class RoomState {
 
   setWebSocketAutoResponse(pair: FakeResponsePair): void {
     this.autoResponse = pair;
+  }
+
+  // Work that the room starts without waiting for it. Tests wait with `drain`.
+  readonly background: Promise<unknown>[] = [];
+
+  waitUntil(promise: Promise<unknown>): void {
+    this.background.push(promise);
+  }
+
+  async drain(): Promise<void> {
+    await Promise.all(this.background.splice(0));
   }
 
   acceptWebSocket(socket: FakeSocket, tags: string[] = []): void {

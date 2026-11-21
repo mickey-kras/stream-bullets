@@ -8,7 +8,6 @@ import { Avatar } from "./common";
 import { DeleteButton } from "./discussion";
 import { formatPercent } from "./mash/mash-parts";
 import { useMashView } from "./mash/use-mash";
-import { VoteButtons } from "./streamer/vote-buttons";
 import { Icon } from "./ui/icon";
 
 type PublicPoll = Omit<LiveSnapshot["polls"][number], "byOwner">;
@@ -265,20 +264,6 @@ export function PollCard({
           </button>
         )}
       </div>
-      <fieldset className="poll-react">
-        <legend className="sr-only">{t("poll.reactGroup")}</legend>
-        <span className="react-label" aria-hidden="true">
-          {t("poll.react")}
-        </span>
-        <VoteButtons
-          reaction={entry.reaction}
-          likes={entry.likes}
-          dislikes={entry.dislikes}
-          disabled={!signedIn || pending}
-          poll
-          onReact={(value) => onAction({ action: "react", id: entry.id, value })}
-        />
-      </fieldset>
       <div className="poll-engagement">
         <button type="button" className="discuss-link" onClick={onDiscuss}>
           <Icon name="comment" size={16} />

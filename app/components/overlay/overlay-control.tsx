@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import { t } from "../../i18n";
 import { onStream } from "../../lib/overlay-layers";
 import type { OverlayPublic, OverlayState } from "../../types";
+import type { OverlaySources } from "../live";
 import { announce } from "../a11y/announcer";
 import { errorMessage, postJson } from "../api";
 import { Icon } from "../ui/icon";
@@ -30,6 +31,7 @@ export function OverlayControl({
   live,
   scene,
   hasOverlayKey,
+  sources = null,
   connected = true,
   reconnect,
   channels,
@@ -40,6 +42,8 @@ export function OverlayControl({
   scene: Omit<OverlayScene, "overlay">;
   // Private-link existence only; never return its key.
   hasOverlayKey: boolean;
+  // The connected OBS sources, from the live room. Null while the room did not tell.
+  sources?: OverlaySources | null;
   // Offline changes save but reach OBS after reconnect.
   connected?: boolean;
   reconnect?: () => void;
@@ -99,7 +103,7 @@ export function OverlayControl({
       <CompositionEditor scene={view} state={state} busy={busy} run={run} onSaved={keepNewest} />
       <section className="ov-step" aria-labelledby={obsId} data-step="obs">
         <StepHeading step={3} id={obsId} title={t("overlay.step.obs")} />
-        <OverlayLink hasKey={hasOverlayKey} layers={state.layers} />
+        <OverlayLink hasKey={hasOverlayKey} layers={state.layers} sources={sources} now={scene.now} />
       </section>
     </>
   );

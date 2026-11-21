@@ -73,7 +73,7 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
 
 export default function OverlayControlPage(): ReactNode {
   const loaded = useLoaderData<typeof loader>();
-  const { snapshot, status, reconnect } = useLivePolls(loaded.handle);
+  const { snapshot, status, reconnect, overlaySources } = useLivePolls(loaded.handle);
   const revalidator = useRevalidator();
   // Step 1 and the chat layer settings of step 2 read the same live channel list.
   const { channels, stale } = useLiveChannels(loaded.channels);
@@ -108,6 +108,7 @@ export default function OverlayControlPage(): ReactNode {
             initial={loaded.state}
             live={liveOverlay}
             hasOverlayKey={loaded.hasOverlayKey}
+            sources={status === "live" ? overlaySources : null}
             connected={status === "live" || status === "connecting"}
             reconnect={status === "offline" ? reconnect : undefined}
             scene={{
