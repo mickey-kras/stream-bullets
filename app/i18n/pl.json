@@ -828,7 +828,6 @@
   "moderation.unsuspendBody": "Strona znów będzie publiczna i wróci na listę streamerów.",
   "moderation.unsuspendTitle": "Cofnąć zawieszenie @{handle}?",
   "moderation.unsuspendedDone": "Cofnięto zawieszenie @{handle}.",
-  "nav.admin": "Administracja",
   "nav.home": "Strona główna StreamBullets",
   "nav.main": "Nawigacja główna",
   "nav.overlay": "Nakładka",

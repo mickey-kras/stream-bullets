@@ -202,8 +202,9 @@ test("touch selects a stable account mention and notifications survive a new vis
     expect(await inbox(owner, commentId)).toHaveLength(1);
     const ownerPage = await newPage(owner);
     await ownerPage.goto("/streamers");
-    await ownerPage.getByRole("link", { name: /Unread notifications:/ }).click();
-    const notice = ownerPage.locator(`.notification-link[href*="comment=${commentId}"]`);
+    await ownerPage.getByRole("button", { name: /Unread notifications:/ }).click();
+    const notifications = ownerPage.getByRole("dialog", { name: "Notifications", exact: true });
+    const notice = notifications.locator(`.notification-link[href*="comment=${commentId}"]`);
     await expect(notice).toContainText("viewer mentioned you");
     await notice.click();
     await expect(ownerPage.locator(`#cm-${commentId}`)).toBeVisible();
