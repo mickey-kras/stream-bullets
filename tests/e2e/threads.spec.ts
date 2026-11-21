@@ -1,7 +1,7 @@
 import { newPage, close } from "./coverage";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "./coverage";
-import { accounts, runSql, signedIn } from "./fixtures";
+import { accounts, commentBox, expectCommentText, runSql, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 import { z } from "zod";
 
@@ -51,12 +51,12 @@ test("replies collapse after two, removed comments keep their thread, one reply 
   await expect(orphan.locator(".reply-mention")).toHaveText("Reply to a removed comment");
 
   await replies.nth(2).getByRole("button", { name: "Reply", exact: true }).click();
-  await expect(page.locator("textarea[data-composer]")).toHaveCount(2);
+  await expect(page.locator(".ed-content[data-composer]")).toHaveCount(2);
   await replies.nth(0).getByRole("button", { name: "Reply", exact: true }).click();
-  await expect(page.locator("textarea[data-composer]")).toHaveCount(2);
+  await expect(page.locator(".ed-content[data-composer]")).toHaveCount(2);
   const box = thread.locator(".inline-reply");
   await expect(box).toContainText("Replying to reporter");
-  await box.getByRole("textbox", { name: "Write a reply to reporter" }).fill("Agreed with the first reply.");
+  await commentBox(box, "Write a reply to reporter").fill("Agreed with the first reply.");
   await box.getByRole("button", { name: "Post", exact: true }).click();
   await expect(thread.locator(".inline-reply")).toHaveCount(0);
   const posted = thread.locator("article.comment").filter({ hasText: "Agreed with the first reply." });
@@ -106,7 +106,7 @@ test("a posted comment renders the Markdown subset and keeps markup inert", asyn
   try {
     const page = await newPage(context);
     await page.goto(`/@other_host?entry=${entryId}`);
-    await page.getByRole("textbox", { name: "Write a comment", exact: true }).fill(text);
+    await commentBox(page, "Write a comment").fill(text);
     await page.getByRole("button", { name: "Post", exact: true }).click();
     const posted = page.locator("article.comment").filter({ hasText: "plain line" });
     const body = posted.locator(".comment-text");
@@ -176,30 +176,30 @@ test("failed comment actions keep drafts and editors available for retry", async
       }
       await route.continue();
     });
-    const composer = page.getByRole("textbox", { name: "Write a comment", exact: true });
+    const composer = commentBox(page, "Write a comment");
     await composer.fill("A recoverable comment draft.");
     await page.getByRole("button", { name: "Post", exact: true }).click();
     await expect(page.locator(".discussion > .form-error")).toHaveText("The request failed. Please try again.");
-    await expect(composer).toHaveValue("A recoverable comment draft.");
+    await expectCommentText(composer, "A recoverable comment draft.");
     failedAction = null;
     await page.getByRole("button", { name: "Post", exact: true }).click();
     await expect(page.getByText("A recoverable comment draft.", { exact: true })).toBeVisible();
-    await expect(composer).toHaveValue("");
+    await expect(composer).toHaveText("");
 
     await root.getByRole("button", { name: "Edit", exact: true }).click();
-    const editor = root.getByRole("textbox", { name: "Edit comment", exact: true });
+    const editor = commentBox(root, "Edit comment");
     await expect(editor).toBeFocused();
     await editor.fill("Cancelled edit");
     await root.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(root.locator(".comment-text")).toHaveText("Root comment");
     await expect(root.getByRole("button", { name: "Like comment by frozenowner", exact: true })).toBeFocused();
     await root.getByRole("button", { name: "Edit", exact: true }).click();
-    await expect(editor).toHaveValue("Root comment");
+    await expectCommentText(editor, "Root comment");
     await editor.fill("Root comment after retry");
     failedAction = "edit";
     await root.getByRole("button", { name: "Save", exact: true }).click();
     await expect(root.getByRole("alert")).toHaveText("The request failed. Please try again.");
-    await expect(editor).toHaveValue("Root comment after retry");
+    await expectCommentText(editor, "Root comment after retry");
     failedAction = null;
     await root.getByRole("button", { name: "Save", exact: true }).click();
     await expect(root.locator(".comment-text")).toHaveText("Root comment after retry");

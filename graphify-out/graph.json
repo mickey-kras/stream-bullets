@@ -52089,7 +52089,7 @@
       "relation": "calls",
       "source": "tests_e2e_pagination_spec",
       "source_file": "tests/e2e/pagination.spec.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "target": "tests_e2e_pagination_spec_signedin",
       "weight": 1.0
     },
@@ -52101,7 +52101,7 @@
       "relation": "calls",
       "source": "tests_e2e_pagination_spec_signedin",
       "source_file": "tests/e2e/pagination.spec.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "tests_e2e_client_ips_clientaddress",
       "weight": 1.0
     },
@@ -52113,7 +52113,7 @@
       "relation": "calls",
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L100",
+      "source_location": "L101",
       "target": "tests_e2e_platform_spec_assertnoscripterrors",
       "weight": 1.0
     },
@@ -52125,7 +52125,7 @@
       "relation": "calls",
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L63",
+      "source_location": "L64",
       "target": "tests_e2e_platform_spec_signedin",
       "weight": 1.0
     },
@@ -52137,7 +52137,7 @@
       "relation": "calls",
       "source": "tests_e2e_platform_spec_signedin",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "tests_e2e_client_ips_clientaddress",
       "weight": 1.0
     },
@@ -102365,6 +102365,30 @@
       "source": "tests_e2e_discussion_history_spec",
       "source_file": "tests/e2e/discussion-history.spec.ts",
       "source_location": "L9",
+      "target": "tests_e2e_fixtures_commentbox",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_discussion_history_spec",
+      "source_file": "tests/e2e/discussion-history.spec.ts",
+      "source_location": "L9",
+      "target": "tests_e2e_fixtures_expectcommenttext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_discussion_history_spec",
+      "source_file": "tests/e2e/discussion-history.spec.ts",
+      "source_location": "L9",
       "target": "tests_e2e_fixtures_runsql",
       "weight": 1.0
     },
@@ -102450,6 +102474,30 @@
       "source_file": "tests/e2e/discussion-notifications.spec.ts",
       "source_location": "L4",
       "target": "tests_e2e_fixtures_accounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_discussion_notifications_spec",
+      "source_file": "tests/e2e/discussion-notifications.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_fixtures_commentbox",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_discussion_notifications_spec",
+      "source_file": "tests/e2e/discussion-notifications.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_fixtures_expectcommenttext",
       "weight": 1.0
     },
     {
@@ -102702,6 +102750,18 @@
       "source_file": "tests/e2e/ideas.spec.ts",
       "source_location": "L2",
       "target": "tests_e2e_coverage_ts_tests_e2e_coverage_test",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_ideas_spec",
+      "source_file": "tests/e2e/ideas.spec.ts",
+      "source_location": "L3",
+      "target": "tests_e2e_fixtures_commentbox",
       "weight": 1.0
     },
     {
@@ -103278,6 +103338,30 @@
       "source_file": "tests/e2e/mobile-discussion.spec.ts",
       "source_location": "L4",
       "target": "tests_e2e_fixtures_accounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_mobile_discussion_spec",
+      "source_file": "tests/e2e/mobile-discussion.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_fixtures_commentbox",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_mobile_discussion_spec",
+      "source_file": "tests/e2e/mobile-discussion.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_fixtures_expectcommenttext",
       "weight": 1.0
     },
     {
@@ -104498,6 +104582,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_e2e_pagination_spec",
+      "source_file": "tests/e2e/pagination.spec.ts",
+      "source_location": "L6",
+      "target": "tests_e2e_fixtures_commentbox",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_pagination_spec",
+      "source_file": "tests/e2e/pagination.spec.ts",
+      "source_location": "L6",
+      "target": "tests_e2e_fixtures_expectcommenttext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
       "source_location": "L2",
@@ -104586,6 +104694,18 @@
       "source_file": "tests/e2e/platform.spec.ts",
       "source_location": "L6",
       "target": "tests_e2e_client_ips_clientaddress",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_platform_spec",
+      "source_file": "tests/e2e/platform.spec.ts",
+      "source_location": "L7",
+      "target": "tests_e2e_fixtures_commentbox",
       "weight": 1.0
     },
     {
@@ -105234,6 +105354,30 @@
       "source_file": "tests/e2e/threads.spec.ts",
       "source_location": "L4",
       "target": "tests_e2e_fixtures_accounts",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_threads_spec",
+      "source_file": "tests/e2e/threads.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_fixtures_commentbox",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_e2e_threads_spec",
+      "source_file": "tests/e2e/threads.spec.ts",
+      "source_location": "L4",
+      "target": "tests_e2e_fixtures_expectcommenttext",
       "weight": 1.0
     },
     {
@@ -139632,7 +139776,6 @@
       "source_file": "tests/e2e/fixtures.ts",
       "source_location": "L4",
       "target": "ref_playwright_test",
-      "type_only": true,
       "weight": 1.0
     },
     {
@@ -140564,6 +140707,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_e2e_pagination_spec",
+      "source_file": "tests/e2e/pagination.spec.ts",
+      "source_location": "L6",
+      "target": "tests_e2e_fixtures",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
       "source_location": "L1",
@@ -140616,6 +140771,18 @@
       "source_file": "tests/e2e/platform.spec.ts",
       "source_location": "L6",
       "target": "tests_e2e_client_ips",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_e2e_platform_spec",
+      "source_file": "tests/e2e/platform.spec.ts",
+      "source_location": "L7",
+      "target": "tests_e2e_fixtures",
       "weight": 1.0
     },
     {
@@ -185332,6 +185499,28 @@
       "relation": "contains",
       "source": "tests_e2e_fixtures",
       "source_file": "tests/e2e/fixtures.ts",
+      "source_location": "L74",
+      "target": "tests_e2e_fixtures_commentbox",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_fixtures",
+      "source_file": "tests/e2e/fixtures.ts",
+      "source_location": "L79",
+      "target": "tests_e2e_fixtures_expectcommenttext",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_fixtures",
+      "source_file": "tests/e2e/fixtures.ts",
       "source_location": "L8",
       "target": "tests_e2e_fixtures_sessionschema",
       "weight": 1.0
@@ -186311,7 +186500,7 @@
       "relation": "contains",
       "source": "tests_e2e_pagination_spec",
       "source_file": "tests/e2e/pagination.spec.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "tests_e2e_pagination_spec_signedin",
       "weight": 1.0
     },
@@ -186322,8 +186511,8 @@
       "relation": "contains",
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L12",
-      "target": "tests_e2e_platform_spec_sessionschema",
+      "source_location": "L10",
+      "target": "tests_e2e_platform_spec_buffer",
       "weight": 1.0
     },
     {
@@ -186334,6 +186523,17 @@
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
       "source_location": "L13",
+      "target": "tests_e2e_platform_spec_sessionschema",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_e2e_platform_spec",
+      "source_file": "tests/e2e/platform.spec.ts",
+      "source_location": "L14",
       "target": "tests_e2e_platform_spec_png",
       "weight": 1.0
     },
@@ -186344,7 +186544,7 @@
       "relation": "contains",
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "target": "tests_e2e_platform_spec_signedin",
       "weight": 1.0
     },
@@ -186355,19 +186555,8 @@
       "relation": "contains",
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L40",
+      "source_location": "L41",
       "target": "tests_e2e_platform_spec_assertnoscripterrors",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "tests_e2e_platform_spec",
-      "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L9",
-      "target": "tests_e2e_platform_spec_buffer",
       "weight": 1.0
     },
     {
@@ -198299,10 +198488,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "236ca7513199d4b3a8e5040954dcb59e72e9a0f096aaa1e4a4e445bb35cfa1d7",
+    "content_sha256": "edc0160bc0a4269e0365db4abcbf5720783422af90d89235f7e55b4c520e640f",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "9a56797da80bec6a2ec79fbd3936736044efe196d658daf525232de628eb6039",
+    "source_sha256": "b425890b7b5f9c11c5a12a7f886e2723aab807b9f1759c03ad2127585b4173ee",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -231036,11 +231225,44 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_e2e_fixtures_commentbox",
+      "label": "commentBox()",
+      "norm_label": "commentbox()",
+      "source_file": "tests/e2e/fixtures.ts",
+      "source_location": "L74"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_e2e_fixtures_datefromtoday",
       "label": "dateFromToday()",
       "norm_label": "datefromtoday()",
       "source_file": "tests/e2e/fixtures.ts",
       "source_location": "L68"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_e2e_fixtures_expectcommenttext",
+      "label": "expectCommentText()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "innerText",
+            "file": "tests/e2e/fixtures.ts",
+            "lang": "typescript",
+            "line": "L80",
+            "receiver_type": "Locator"
+          }
+        ]
+      },
+      "norm_label": "expectcommenttext()",
+      "source_file": "tests/e2e/fixtures.ts",
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -231751,14 +231973,14 @@
             "callee": "newContext",
             "file": "tests/e2e/pagination.spec.ts",
             "lang": "typescript",
-            "line": "L13",
+            "line": "L14",
             "receiver_type": "Browser"
           }
         ]
       },
       "norm_label": "signedin()",
       "source_file": "tests/e2e/pagination.spec.ts",
-      "source_location": "L7"
+      "source_location": "L8"
     },
     {
       "_callable": true,
@@ -231769,7 +231991,7 @@
       "label": "assertNoScriptErrors()",
       "norm_label": "assertnoscripterrors()",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L40"
+      "source_location": "L41"
     },
     {
       "_callable": true,
@@ -231784,14 +232006,14 @@
             "callee": "newContext",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L23",
+            "line": "L24",
             "receiver_type": "Browser"
           }
         ]
       },
       "norm_label": "signedin()",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "_callable": true,
@@ -247677,7 +247899,7 @@
             "callee": "newContext",
             "file": "tests/e2e/pagination.spec.ts",
             "lang": "typescript",
-            "line": "L89",
+            "line": "L88",
             "receiver_type": "Browser"
           }
         ]
@@ -247698,7 +247920,7 @@
             "callee": "newContext",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L170",
+            "line": "L171",
             "receiver_type": "Browser"
           }
         ]
@@ -247715,7 +247937,7 @@
       "label": "Buffer",
       "norm_label": "buffer",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L9"
+      "source_location": "L10"
     },
     {
       "_origin": "ast",
@@ -247725,7 +247947,7 @@
       "label": "png",
       "norm_label": "png",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L13"
+      "source_location": "L14"
     },
     {
       "_origin": "ast",
@@ -247735,7 +247957,7 @@
       "label": "sessionSchema",
       "norm_label": "sessionschema",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "_origin": "ast",
