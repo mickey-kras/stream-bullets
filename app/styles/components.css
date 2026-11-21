@@ -1218,6 +1218,8 @@ html[data-reduced="true"] .landing-station .station-tilt { display: none !import
 }
 .ov-conn { display: flex; align-items: flex-start; gap: 10px; max-width: 1300px; margin: 12px auto 0; padding: 12px 16px; border: 1px solid var(--live); border-radius: var(--radius-control); background: var(--modal); }
 .ov-conn .icon { flex: none; color: var(--live); margin-top: 2px; }
+.ov-obs-status { display: flex; align-items: flex-start; gap: 8px; }
+.ov-obs-status .icon { flex: none; margin-top: 2px; }
 .overlay-empty { display: none; }
 .view-tabs .tab-short { display: none; }
 @media (max-width: 43.75em) {

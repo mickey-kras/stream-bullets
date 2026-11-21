@@ -143,6 +143,9 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   await source.goto(oldUrl);
   await expect(source.locator("[data-overlay-type]")).toBeVisible();
   await expect(source.locator(".overlay-connection")).toHaveCount(0);
+  // The control page shows the OBS source that came in with the key.
+  const sources = control.locator("[data-ov-sources]");
+  await expect(sources).toHaveText("OBS is connected: 1 source.");
 
   await control.getByRole("button", { name: "Regenerate link" }).click();
   const confirm = control.getByRole("dialog", { name: "Regenerate the overlay link?" });
@@ -152,9 +155,32 @@ test("the owner copies the private overlay link, and a new link revokes the old 
   const newKey: string = new URL(await field.inputValue()).searchParams.get("key") ?? "";
   // The revoked link becomes a guest; the full network must refuse it.
   await expect(source.locator(".overlay-connection")).toContainText("Reconnecting");
+  await expect(sources).toContainText("OBS is not connected. Last seen");
   expect(await liveSockets(crowd, 1, oldKey)).toEqual(["refused"]);
   expect(await liveSockets(crowd, 1, newKey)).toEqual(["open"]);
   await Promise.all([close(owner), close(obs)]);
+});
+
+test("an OBS source with a refused key stops its chat feed retries", async ({ browser }) => {
+  await runSql("overlay-control-refused-key", [
+    layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL } } }),
+  ]);
+  const obs = await browser.newContext({
+    baseURL: origin,
+    viewport: { width: 1920, height: 1080 },
+    extraHTTPHeaders: { "CF-Connecting-IP": clientAddress("overlay-control", 91) },
+  });
+  const source = await newPage(obs);
+  const tries: string[] = [];
+  source.on("websocket", (socket) => {
+    if (new URL(socket.url()).pathname.startsWith("/api/activity/")) tries.push(socket.url());
+  });
+  await source.goto(`/@feature_host/overlay?key=${"A".repeat(43)}`);
+  await expect(source.locator("main")).toHaveAttribute("data-feed-status", "refused");
+  // The first wait before a retry is 1 second at most: no second socket opens.
+  await source.waitForTimeout(2500);
+  expect(tries).toHaveLength(1);
+  await close(obs);
 });
 
 test("overlay control is for the page owner only", async ({ browser, page }) => {

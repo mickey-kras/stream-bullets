@@ -11,6 +11,7 @@ import { LayerProperties, OVERLAY_MESSAGE_MAX } from "../app/components/overlay/
 import { LAYER_NAMES, LayoutGrid, type LayoutGridHandle } from "../app/components/overlay/layout-grid";
 import { CharactersSlot, OverlayComposition, usesDesignCanvas } from "../app/components/overlay/overlay-composition";
 import { controlState, OverlayControl } from "../app/components/overlay/overlay-control";
+import { sourcesText } from "../app/components/overlay/overlay-link";
 import {
   OverlayStage,
   overlayPoll,
@@ -132,6 +133,20 @@ describe("overlay control page", () => {
       expect(html, gone).not.toContain(gone);
     for (const text of ["Preview:", "On air", "Position", "Shortcuts", "On-air content", ">Auto<", ">Hidden<"])
       expect(html, text).not.toContain(text);
+  });
+
+  it("shows the OBS connection of a page that has an overlay link", () => {
+    const html = (hasOverlayKey: boolean, count: number): string =>
+      renderToStaticMarkup(
+        createElement(OverlayControl, { initial: state, scene, hasOverlayKey, sources: { count, seenAt: null } }),
+      );
+    expect(html(true, 2)).toContain('data-ov-sources="2"');
+    expect(html(true, 2)).toContain("OBS is connected: 2 sources.");
+    expect(html(true, 0)).toContain("OBS did not connect yet.");
+    expect(html(false, 2)).not.toContain("data-ov-sources");
+    expect(sourcesText({ count: 1, seenAt: 0 }, 0)).toBe("OBS is connected: 1 source.");
+    expect(sourcesText({ count: 0, seenAt: 1000 }, 181_000)).toBe("OBS is not connected. Last seen 3 minutes ago.");
+    expect(sourcesText({ count: 0, seenAt: 1000 }, 1000)).toBe("OBS is not connected. Last seen just now.");
   });
 
   it("offers each layer one time in the palette and marks the layers on the grid", () => {

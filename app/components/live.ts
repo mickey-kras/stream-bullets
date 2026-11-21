@@ -68,7 +68,16 @@ const deniedSchema = z.object({
   id: z.string().uuid(),
   reason: z.enum(["sign-in", "closed", "pick"]),
 });
-const overlayMessageSchema = z.object({ type: z.literal("overlay"), overlay: overlaySchema });
+const overlaySourcesSchema = z.object({ count, seenAt: count.nullable() });
+// The owner's sockets also get `sources` in this message. An older script ignores the key.
+const overlayMessageSchema = z.object({
+  type: z.literal("overlay"),
+  overlay: overlaySchema,
+  sources: overlaySourcesSchema.optional(),
+});
+
+/** The OBS sources of a page, for its owner: how many are connected, and when one last connected or went away. */
+export type OverlaySources = z.infer<typeof overlaySourcesSchema>;
 
 export type LiveStatus = "connecting" | "live" | "reconnecting" | "offline";
 export type MashDenial = z.infer<typeof deniedSchema>["reason"];
@@ -138,7 +147,11 @@ export function sendLive(message: object): boolean {
 }
 
 // Handle non-snapshot messages; return whether one matched.
-function handleSideMessage(message: unknown, onOverlay: (overlay: OverlayPublic) => void): boolean {
+function handleSideMessage(
+  message: unknown,
+  onOverlay: (overlay: OverlayPublic) => void,
+  onSources: (sources: OverlaySources) => void,
+): boolean {
   const tick = tickSchema.safeParse(message);
   if (tick.success) {
     setMashLive((current: MashLive) => ({ ...current, ticks: { ...current.ticks, [tick.data.id]: tick.data } }));
@@ -160,6 +173,7 @@ function handleSideMessage(message: unknown, onOverlay: (overlay: OverlayPublic)
   const overlay = overlayMessageSchema.safeParse(message);
   if (overlay.success) {
     onOverlay(overlay.data.overlay);
+    if (overlay.data.sources) onSources(overlay.data.sources);
     return true;
   }
   return false;
@@ -172,8 +186,15 @@ export function useLivePolls(
   overlayKey: string | null = null,
   /** Never goes offline: keeps retrying (an unattended OBS source has nobody to press Reconnect). */
   persistent = false,
-): { snapshot: LiveSnapshot | null; status: LiveStatus; reconnect: () => void } {
+): {
+  snapshot: LiveSnapshot | null;
+  status: LiveStatus;
+  reconnect: () => void;
+  /** Only the owner's socket gets this. Null before its first message. */
+  overlaySources: OverlaySources | null;
+} {
   const [snapshot, setSnapshot] = useState<LiveSnapshot | null>(null);
+  const [overlaySources, setOverlaySources] = useState<OverlaySources | null>(null);
   const [status, setStatus] = useState<LiveStatus>("connecting");
   const [retry, setRetry] = useState<number>(0);
   const session: string = `${handle}:${enabled}:${retry}`;
@@ -220,7 +241,7 @@ export function useLivePolls(
         current.close();
         return;
       }
-      if (handleSideMessage(message, updateOverlay)) return;
+      if (handleSideMessage(message, updateOverlay, setOverlaySources)) return;
       const parsed = snapshotSchema.safeParse(message);
       if (!parsed.success) {
         current.close(1002, "Invalid snapshot");
@@ -304,7 +325,7 @@ export function useLivePolls(
       socket?.close();
     };
   }, [handle, enabled, retry, overlayKey, persistent]);
-  return { snapshot, status, reconnect: (): void => setRetry((value: number) => value + 1) };
+  return { snapshot, status, reconnect: (): void => setRetry((value: number) => value + 1), overlaySources };
 }
 
 export function useServerTime(serverNow: number, intervalMs = 1000): number {

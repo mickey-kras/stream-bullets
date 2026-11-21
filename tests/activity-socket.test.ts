@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ActivityChat, ActivityMessage } from "../app/lib/activity";
 import {
   BACKOFF_MAX_MS,
+  BACKOFF_START_MS,
+  KEY_REFUSED_CLOSE,
   PING_INTERVAL_MS,
   WATCHDOG_MS,
   activityUrl,
@@ -43,9 +45,9 @@ class FakeSocket implements ActivityWebSocket {
   receive(data: unknown): void {
     this.onmessage?.({ data } as MessageEvent);
   }
-  serverClose(): void {
+  serverClose(code: number = 1006): void {
     this.readyState = 3;
-    this.onclose?.({} as CloseEvent);
+    this.onclose?.({ code } as CloseEvent);
   }
 }
 
@@ -298,6 +300,25 @@ describe("openActivitySocket", () => {
     expect(FakeSocket.instances).toHaveLength(1);
     expect(messages).toEqual([]);
     expect(statuses).toEqual(["connecting"]);
+  });
+
+  it("stops for good when the server refuses the overlay key", () => {
+    const { socket, statuses } = open();
+    const current = latest();
+    current.open();
+    current.serverClose(KEY_REFUSED_CLOSE);
+    expect(statuses).toEqual(["connecting", "refused"]);
+    socket.wake();
+    vi.advanceTimersByTime(BACKOFF_MAX_MS * 2);
+    expect(FakeSocket.instances).toHaveLength(1);
+    // A revoked key: the server sends `unavailable`, the next try gets the refusal.
+    const revoked = open();
+    latest().receive(UNAVAILABLE);
+    vi.advanceTimersByTime(BACKOFF_START_MS);
+    latest().serverClose(KEY_REFUSED_CLOSE);
+    vi.advanceTimersByTime(BACKOFF_MAX_MS * 2);
+    expect(FakeSocket.instances).toHaveLength(3);
+    expect(revoked.statuses.at(-1)).toBe("refused");
   });
 
   it("stops while waiting to reconnect, and ignores a close that throws", () => {
