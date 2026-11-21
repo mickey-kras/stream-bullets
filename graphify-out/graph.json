@@ -12705,7 +12705,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_communityoverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L257",
+      "source_location": "L273",
       "target": "app_components_overlay_overlay_stage_overlaycard",
       "weight": 1.0
     },
@@ -12717,7 +12717,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_communityoverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L264",
+      "source_location": "L280",
       "target": "app_components_overlay_overlay_stage_cardbody",
       "weight": 1.0
     },
@@ -12729,7 +12729,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_communityoverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L266",
+      "source_location": "L282",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -12741,7 +12741,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_communityoverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L267",
+      "source_location": "L283",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12861,7 +12861,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_nextstream",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L230",
+      "source_location": "L246",
       "target": "app_components_overlay_overlay_stage_usehydrated",
       "weight": 1.0
     },
@@ -12873,7 +12873,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_nextstream",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L234",
+      "source_location": "L250",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -12885,7 +12885,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_nextstream",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L240",
+      "source_location": "L256",
       "target": "app_components_overlay_overlay_stage_cardbody",
       "weight": 1.0
     },
@@ -12897,7 +12897,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_nextstream",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L242",
+      "source_location": "L258",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -12909,7 +12909,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_nextstream",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L243",
+      "source_location": "L259",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -12921,7 +12921,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_nextstream",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L249",
+      "source_location": "L265",
       "target": "app_components_overlay_overlay_stage_startsin",
       "weight": 1.0
     },
@@ -12957,7 +12957,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_overlaystage",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L349",
+      "source_location": "L365",
       "target": "app_components_overlay_overlay_stage_qrtarget",
       "weight": 1.0
     },
@@ -12969,7 +12969,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_overlaystage",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L349",
+      "source_location": "L365",
       "target": "app_components_overlay_overlay_stage_sourcecontent",
       "weight": 1.0
     },
@@ -12981,7 +12981,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_polloverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L194",
+      "source_location": "L206",
       "target": "app_components_overlay_overlay_stage_usefittext",
       "weight": 1.0
     },
@@ -12993,7 +12993,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_polloverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L195",
+      "source_location": "L207",
       "target": "app_components_overlay_overlay_stage_mashoverlay",
       "weight": 1.0
     },
@@ -13005,7 +13005,19 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_polloverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L202",
+      "source_location": "L213",
+      "target": "app_components_overlay_overlay_stage_optioncolumns",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_overlay_overlay_stage_polloverlay",
+      "source_file": "app/components/overlay/overlay-stage.tsx",
+      "source_location": "L218",
       "target": "app_components_overlay_qr_code_qrcode",
       "weight": 1.0
     },
@@ -13017,7 +13029,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_polloverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L205",
+      "source_location": "L221",
       "target": "app_components_poll_pollresults",
       "weight": 1.0
     },
@@ -13029,7 +13041,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_polloverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L207",
+      "source_location": "L223",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -13041,7 +13053,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_polloverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L210",
+      "source_location": "L226",
       "target": "app_components_poll_pollstatus",
       "weight": 1.0
     },
@@ -13053,7 +13065,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_polloverlay",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L212",
+      "source_location": "L228",
       "target": "app_i18n_index_tn",
       "weight": 1.0
     },
@@ -13101,7 +13113,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_sourcecontent",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L285",
+      "source_location": "L301",
       "target": "app_components_overlay_overlay_stage_overlaypoll_b68c1e94b806",
       "weight": 1.0
     },
@@ -13113,7 +13125,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_sourcecontent",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L287",
+      "source_location": "L303",
       "target": "app_components_overlay_overlay_stage_polloverlay",
       "weight": 1.0
     },
@@ -13125,7 +13137,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_sourcecontent",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L289",
+      "source_location": "L305",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -13137,7 +13149,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_sourcecontent",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L297",
+      "source_location": "L313",
       "target": "app_components_overlay_overlay_stage_cardbody",
       "weight": 1.0
     },
@@ -13149,7 +13161,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_sourcecontent",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L299",
+      "source_location": "L315",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -13161,7 +13173,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_sourcecontent",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L304",
+      "source_location": "L320",
       "target": "app_components_ui_avatar_avatar",
       "weight": 1.0
     },
@@ -13173,7 +13185,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_sourcecontent",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L317",
+      "source_location": "L333",
       "target": "app_components_overlay_overlay_stage_nextstream",
       "weight": 1.0
     },
@@ -13185,7 +13197,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_sourcecontent",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L327",
+      "source_location": "L343",
       "target": "app_components_overlay_overlay_stage_communityoverlay",
       "weight": 1.0
     },
@@ -13197,7 +13209,7 @@
       "relation": "calls",
       "source": "app_components_overlay_overlay_stage_startsin",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L223",
+      "source_location": "L239",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -53805,7 +53817,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L127",
+      "source_location": "L128",
       "target": "tests_overlay_ui_coverage_test_control",
       "weight": 1.0
     },
@@ -53817,7 +53829,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L244",
+      "source_location": "L245",
       "target": "tests_overlay_ui_coverage_test_settings",
       "weight": 1.0
     },
@@ -53829,7 +53841,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L277",
+      "source_location": "L278",
       "target": "tests_overlay_ui_coverage_test_playground",
       "weight": 1.0
     },
@@ -53841,7 +53853,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L452",
+      "source_location": "L453",
       "target": "tests_overlay_ui_coverage_test_test",
       "weight": 1.0
     },
@@ -53853,7 +53865,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L509",
+      "source_location": "L510",
       "target": "tests_overlay_ui_coverage_test_palette",
       "weight": 1.0
     },
@@ -53865,7 +53877,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L539",
+      "source_location": "L540",
       "target": "tests_overlay_ui_coverage_test_layout",
       "weight": 1.0
     },
@@ -53877,7 +53889,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L557",
+      "source_location": "L558",
       "target": "tests_overlay_ui_coverage_test_poll",
       "weight": 1.0
     },
@@ -53889,7 +53901,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L569",
+      "source_location": "L570",
       "target": "tests_overlay_ui_coverage_test_stage",
       "weight": 1.0
     },
@@ -53901,7 +53913,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L848",
+      "source_location": "L857",
       "target": "tests_overlay_ui_coverage_test_composition",
       "weight": 1.0
     },
@@ -53913,7 +53925,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L849",
+      "source_location": "L858",
       "target": "tests_overlay_ui_coverage_test_boxes",
       "weight": 1.0
     },
@@ -53925,7 +53937,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L934",
+      "source_location": "L943",
       "target": "tests_overlay_ui_coverage_test_cards",
       "weight": 1.0
     },
@@ -53937,7 +53949,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test_settings",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L233",
+      "source_location": "L234",
       "target": "tests_overlay_ui_coverage_test_playground",
       "weight": 1.0
     },
@@ -53949,7 +53961,7 @@
       "relation": "calls",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L442",
+      "source_location": "L443",
       "target": "tests_overlay_ui_coverage_test_playground",
       "weight": 1.0
     },
@@ -109048,6 +109060,18 @@
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
       "source_location": "L15",
+      "target": "app_components_overlay_overlay_stage_optioncolumns",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_overlay_ui_coverage_test",
+      "source_file": "tests/overlay-ui-coverage.test.ts",
+      "source_location": "L15",
       "target": "app_components_overlay_overlay_stage_overlaypoll",
       "weight": 1.0
     },
@@ -109107,7 +109131,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_components_overlay_qr_code_qr_min",
       "weight": 1.0
     },
@@ -109119,7 +109143,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_components_overlay_qr_code_qrcode",
       "weight": 1.0
     },
@@ -109131,7 +109155,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_components_overlay_qr_code_qrside",
       "weight": 1.0
     },
@@ -109143,7 +109167,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_components_overlay_studio_test_studiotest",
       "weight": 1.0
     },
@@ -109155,7 +109179,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L24",
+      "source_location": "L25",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -109167,7 +109191,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_lib_chat_feed_chatrow",
       "weight": 1.0
     },
@@ -109179,7 +109203,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_overlay_layers_contentsource",
       "weight": 1.0
     },
@@ -109191,7 +109215,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_overlay_layers_default_layers",
       "weight": 1.0
     },
@@ -109203,7 +109227,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_overlay_layers_emptycells",
       "weight": 1.0
     },
@@ -109215,7 +109239,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_overlay_layers_grid_layers",
       "weight": 1.0
     },
@@ -109227,7 +109251,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_overlay_layers_gridlayer",
       "weight": 1.0
     },
@@ -109239,7 +109263,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_overlay_layers_overlaylayer",
       "weight": 1.0
     },
@@ -109251,7 +109275,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_overlay_layers_overlaylayers",
       "weight": 1.0
     },
@@ -109263,7 +109287,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "target": "app_types_overlaydata",
       "weight": 1.0
     },
@@ -109275,7 +109299,7 @@
       "relation": "imports",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "target": "app_types_overlaystate",
       "weight": 1.0
     },
@@ -142053,7 +142077,7 @@
       "relation": "imports_from",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "app_components_overlay_qr_code",
       "weight": 1.0
     },
@@ -142065,7 +142089,7 @@
       "relation": "imports_from",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "app_components_overlay_studio_test",
       "weight": 1.0
     },
@@ -142077,7 +142101,7 @@
       "relation": "imports_from",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L24",
+      "source_location": "L25",
       "target": "app_i18n_index",
       "weight": 1.0
     },
@@ -142089,7 +142113,7 @@
       "relation": "imports_from",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_lib_chat_feed",
       "type_only": true,
       "weight": 1.0
@@ -142102,7 +142126,7 @@
       "relation": "imports_from",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_overlay_layers",
       "weight": 1.0
     },
@@ -142126,7 +142150,7 @@
       "relation": "imports_from",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -153800,7 +153824,18 @@
       "relation": "contains",
       "source": "app_components_overlay_overlay_stage",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L193",
+      "source_location": "L196",
+      "target": "app_components_overlay_overlay_stage_optioncolumns",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_overlay_overlay_stage",
+      "source_file": "app/components/overlay/overlay-stage.tsx",
+      "source_location": "L205",
       "target": "app_components_overlay_overlay_stage_polloverlay",
       "weight": 1.0
     },
@@ -153811,7 +153846,7 @@
       "relation": "contains",
       "source": "app_components_overlay_overlay_stage",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L221",
+      "source_location": "L237",
       "target": "app_components_overlay_overlay_stage_startsin",
       "weight": 1.0
     },
@@ -153822,7 +153857,7 @@
       "relation": "contains",
       "source": "app_components_overlay_overlay_stage",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L229",
+      "source_location": "L245",
       "target": "app_components_overlay_overlay_stage_nextstream",
       "weight": 1.0
     },
@@ -153833,7 +153868,7 @@
       "relation": "contains",
       "source": "app_components_overlay_overlay_stage",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L256",
+      "source_location": "L272",
       "target": "app_components_overlay_overlay_stage_communityoverlay",
       "weight": 1.0
     },
@@ -153844,7 +153879,7 @@
       "relation": "contains",
       "source": "app_components_overlay_overlay_stage",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L282",
+      "source_location": "L298",
       "target": "app_components_overlay_overlay_stage_sourcecontent",
       "weight": 1.0
     },
@@ -153866,7 +153901,7 @@
       "relation": "contains",
       "source": "app_components_overlay_overlay_stage",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L342",
+      "source_location": "L358",
       "target": "app_components_overlay_overlay_stage_overlaystage",
       "weight": 1.0
     },
@@ -180266,7 +180301,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L541",
+      "source_location": "L545",
       "target": "docs_overlay_composition_chat_appearance",
       "weight": 1.0
     },
@@ -180277,7 +180312,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L570",
+      "source_location": "L574",
       "target": "docs_overlay_composition_message_background",
       "weight": 1.0
     },
@@ -180288,7 +180323,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L588",
+      "source_location": "L592",
       "target": "docs_overlay_composition_moderation",
       "weight": 1.0
     },
@@ -180299,7 +180334,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L599",
+      "source_location": "L603",
       "target": "docs_overlay_composition_commands",
       "weight": 1.0
     },
@@ -180310,7 +180345,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_chat_behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L608",
+      "source_location": "L612",
       "target": "docs_overlay_composition_reconnection",
       "weight": 1.0
     },
@@ -180365,7 +180400,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_editor",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L454",
+      "source_location": "L458",
       "target": "docs_overlay_composition_saves",
       "weight": 1.0
     },
@@ -180486,7 +180521,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L477",
+      "source_location": "L481",
       "target": "docs_overlay_composition_test",
       "weight": 1.0
     },
@@ -180497,7 +180532,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L517",
+      "source_location": "L521",
       "target": "docs_overlay_composition_chat_behavior",
       "weight": 1.0
     },
@@ -180519,7 +180554,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L626",
+      "source_location": "L630",
       "target": "docs_overlay_composition_youtube_quota_and_sockets",
       "weight": 1.0
     },
@@ -180530,7 +180565,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L642",
+      "source_location": "L646",
       "target": "docs_overlay_composition_security",
       "weight": 1.0
     },
@@ -180541,7 +180576,7 @@
       "relation": "contains",
       "source": "docs_overlay_composition_overlay_composition_and_merged_chat",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L657",
+      "source_location": "L661",
       "target": "docs_overlay_composition_limits_and_known_gaps",
       "weight": 1.0
     },
@@ -187328,7 +187363,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L103",
+      "source_location": "L104",
       "target": "tests_overlay_ui_coverage_test_playground",
       "weight": 1.0
     },
@@ -187339,7 +187374,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L122",
+      "source_location": "L123",
       "target": "tests_overlay_ui_coverage_test_control",
       "weight": 1.0
     },
@@ -187350,7 +187385,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L220",
+      "source_location": "L221",
       "target": "tests_overlay_ui_coverage_test_settings",
       "weight": 1.0
     },
@@ -187361,7 +187396,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L37",
+      "source_location": "L38",
       "target": "tests_overlay_ui_coverage_test_data",
       "weight": 1.0
     },
@@ -187372,7 +187407,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L39",
+      "source_location": "L40",
       "target": "tests_overlay_ui_coverage_test_placed",
       "weight": 1.0
     },
@@ -187383,7 +187418,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L436",
+      "source_location": "L437",
       "target": "tests_overlay_ui_coverage_test_test",
       "weight": 1.0
     },
@@ -187394,7 +187429,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L46",
+      "source_location": "L47",
       "target": "tests_overlay_ui_coverage_test_state",
       "weight": 1.0
     },
@@ -187405,7 +187440,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L502",
+      "source_location": "L503",
       "target": "tests_overlay_ui_coverage_test_palette",
       "weight": 1.0
     },
@@ -187416,7 +187451,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L521",
+      "source_location": "L522",
       "target": "tests_overlay_ui_coverage_test_layout",
       "weight": 1.0
     },
@@ -187427,7 +187462,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L54",
+      "source_location": "L55",
       "target": "tests_overlay_ui_coverage_test_scene",
       "weight": 1.0
     },
@@ -187438,7 +187473,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L64",
+      "source_location": "L65",
       "target": "tests_overlay_ui_coverage_test_populated",
       "weight": 1.0
     },
@@ -187449,7 +187484,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L78",
+      "source_location": "L79",
       "target": "tests_overlay_ui_coverage_test_stage",
       "weight": 1.0
     },
@@ -187460,7 +187495,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "target": "tests_overlay_ui_coverage_test_poll",
       "weight": 1.0
     },
@@ -187471,7 +187506,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L837",
+      "source_location": "L846",
       "target": "tests_overlay_ui_coverage_test_composition",
       "weight": 1.0
     },
@@ -187482,7 +187517,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L841",
+      "source_location": "L850",
       "target": "tests_overlay_ui_coverage_test_boxes",
       "weight": 1.0
     },
@@ -187493,7 +187528,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L921",
+      "source_location": "L930",
       "target": "tests_overlay_ui_coverage_test_cards",
       "weight": 1.0
     },
@@ -187504,7 +187539,7 @@
       "relation": "contains",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L98",
+      "source_location": "L99",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -194235,7 +194270,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L1026",
+      "source_location": "L1035",
       "target": "app_components_channels_channel_panel_channelpanel",
       "weight": 1.0
     },
@@ -194247,7 +194282,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "target": "app_components_overlay_overlay_control_overlaycontrol",
       "weight": 1.0
     },
@@ -194259,7 +194294,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L269",
+      "source_location": "L270",
       "target": "app_components_overlay_layer_properties_layerproperties",
       "weight": 1.0
     },
@@ -194271,7 +194306,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L617",
+      "source_location": "L618",
       "target": "tests_playground_protocol_test_full",
       "weight": 1.0
     },
@@ -194283,7 +194318,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L744",
+      "source_location": "L753",
       "target": "app_components_overlay_overlay_composition_charactersslot",
       "weight": 1.0
     },
@@ -194295,7 +194330,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L848",
+      "source_location": "L857",
       "target": "tests_layer_geometry_test_layers",
       "weight": 1.0
     },
@@ -194307,7 +194342,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_cards",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L926",
+      "source_location": "L935",
       "target": "app_components_channels_channel_panel_channelpanel",
       "weight": 1.0
     },
@@ -194319,7 +194354,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_composition",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L838",
+      "source_location": "L847",
       "target": "app_components_overlay_overlay_composition_overlaycomposition",
       "weight": 1.0
     },
@@ -194331,7 +194366,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_control",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L123",
+      "source_location": "L124",
       "target": "app_components_overlay_overlay_control_overlaycontrol",
       "weight": 1.0
     },
@@ -194343,7 +194378,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_layout",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L523",
+      "source_location": "L524",
       "target": "app_components_overlay_layout_grid_layoutgrid",
       "weight": 1.0
     },
@@ -194355,7 +194390,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_palette",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L504",
+      "source_location": "L505",
       "target": "app_components_overlay_layer_palette_layerpalette",
       "weight": 1.0
     },
@@ -194367,7 +194402,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_settings",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L225",
+      "source_location": "L226",
       "target": "app_components_overlay_layer_properties_layerproperties",
       "weight": 1.0
     },
@@ -194379,7 +194414,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_stage",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L79",
+      "source_location": "L80",
       "target": "app_components_overlay_overlay_stage_overlaystage",
       "weight": 1.0
     },
@@ -194391,7 +194426,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L438",
+      "source_location": "L439",
       "target": "app_components_overlay_studio_test_studiotest",
       "weight": 1.0
     },
@@ -196071,7 +196106,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L275",
+      "source_location": "L276",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -196083,7 +196118,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_composition",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L838",
+      "source_location": "L847",
       "target": "app_components_channels_channel_panel_channelpanel_shown",
       "weight": 1.0
     },
@@ -196095,7 +196130,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_layout",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L529",
+      "source_location": "L530",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -196107,7 +196142,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_palette",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L504",
+      "source_location": "L505",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -196119,7 +196154,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_playground",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L115",
+      "source_location": "L116",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -196131,7 +196166,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_settings",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L231",
+      "source_location": "L232",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -196143,7 +196178,7 @@
       "relation": "indirect_call",
       "source": "tests_overlay_ui_coverage_test_test",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L443",
+      "source_location": "L444",
       "target": "tests_overlay_ui_coverage_test_nothing",
       "weight": 1.0
     },
@@ -196521,10 +196556,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "5ae2a58ecd33b1ed263b2c29d18f80a9de74cf4b1b0871e7dfd9d4a3578d6b27",
+    "content_sha256": "8c616a508acd4eb1e2d6f57f6ff59fba714bdde858d7ca392684246808794885",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "f420b60341f020e181603aec1290513998de920f3fc042e86682b107e45919ce",
+    "source_sha256": "79be43aacbe1013d8cde81af92e9a25b43726c2d99c75859c06fcf36935aa235",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -208611,7 +208646,7 @@
       "label": "CommunityOverlay()",
       "norm_label": "communityoverlay()",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L256"
+      "source_location": "L272"
     },
     {
       "_callable": true,
@@ -208633,7 +208668,7 @@
       "label": "NextStream()",
       "norm_label": "nextstream()",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L229"
+      "source_location": "L245"
     },
     {
       "_callable": true,
@@ -208645,6 +208680,17 @@
       "norm_label": "nosubscription()",
       "source_file": "app/components/overlay/overlay-stage.tsx",
       "source_location": "L31"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_overlay_overlay_stage_optioncolumns",
+      "label": "optionColumns()",
+      "norm_label": "optioncolumns()",
+      "source_file": "app/components/overlay/overlay-stage.tsx",
+      "source_location": "L196"
     },
     {
       "_callable": true,
@@ -208677,7 +208723,7 @@
       "label": "OverlayStage()",
       "norm_label": "overlaystage()",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L342"
+      "source_location": "L358"
     },
     {
       "_callable": true,
@@ -208699,7 +208745,7 @@
       "label": "PollOverlay()",
       "norm_label": "polloverlay()",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L193"
+      "source_location": "L205"
     },
     {
       "_callable": true,
@@ -208721,7 +208767,7 @@
       "label": "SourceContent()",
       "norm_label": "sourcecontent()",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L282"
+      "source_location": "L298"
     },
     {
       "_callable": true,
@@ -208732,7 +208778,7 @@
       "label": "startsIn()",
       "norm_label": "startsin()",
       "source_file": "app/components/overlay/overlay-stage.tsx",
-      "source_location": "L221"
+      "source_location": "L237"
     },
     {
       "_callable": true,
@@ -231689,7 +231735,7 @@
       "label": "boxes()",
       "norm_label": "boxes()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L841"
+      "source_location": "L850"
     },
     {
       "_callable": true,
@@ -231700,7 +231746,7 @@
       "label": "cards()",
       "norm_label": "cards()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L921"
+      "source_location": "L930"
     },
     {
       "_callable": true,
@@ -231711,7 +231757,7 @@
       "label": "composition()",
       "norm_label": "composition()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L837"
+      "source_location": "L846"
     },
     {
       "_callable": true,
@@ -231722,7 +231768,7 @@
       "label": "control()",
       "norm_label": "control()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L122"
+      "source_location": "L123"
     },
     {
       "_callable": true,
@@ -231733,7 +231779,7 @@
       "label": "layout()",
       "norm_label": "layout()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L521"
+      "source_location": "L522"
     },
     {
       "_callable": true,
@@ -231744,7 +231790,7 @@
       "label": "nothing()",
       "norm_label": "nothing()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L98"
+      "source_location": "L99"
     },
     {
       "_callable": true,
@@ -231755,7 +231801,7 @@
       "label": "palette()",
       "norm_label": "palette()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L502"
+      "source_location": "L503"
     },
     {
       "_callable": true,
@@ -231766,7 +231812,7 @@
       "label": "playground()",
       "norm_label": "playground()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L103"
+      "source_location": "L104"
     },
     {
       "_callable": true,
@@ -231777,7 +231823,7 @@
       "label": "poll()",
       "norm_label": "poll()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L82"
+      "source_location": "L83"
     },
     {
       "_callable": true,
@@ -231788,7 +231834,7 @@
       "label": "settings()",
       "norm_label": "settings()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L220"
+      "source_location": "L221"
     },
     {
       "_callable": true,
@@ -231799,7 +231845,7 @@
       "label": "stage()",
       "norm_label": "stage()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L78"
+      "source_location": "L79"
     },
     {
       "_callable": true,
@@ -231810,7 +231856,7 @@
       "label": "test()",
       "norm_label": "test()",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L436"
+      "source_location": "L437"
     },
     {
       "_callable": true,
@@ -246677,7 +246723,7 @@
       "label": "data",
       "norm_label": "data",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L37"
+      "source_location": "L38"
     },
     {
       "_origin": "ast",
@@ -246687,7 +246733,7 @@
       "label": "placed",
       "norm_label": "placed",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L39"
+      "source_location": "L40"
     },
     {
       "_origin": "ast",
@@ -246697,7 +246743,7 @@
       "label": "populated",
       "norm_label": "populated",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L64"
+      "source_location": "L65"
     },
     {
       "_origin": "ast",
@@ -246707,7 +246753,7 @@
       "label": "scene",
       "norm_label": "scene",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L54"
+      "source_location": "L55"
     },
     {
       "_origin": "ast",
@@ -246717,7 +246763,7 @@
       "label": "state",
       "norm_label": "state",
       "source_file": "tests/overlay-ui-coverage.test.ts",
-      "source_location": "L46"
+      "source_location": "L47"
     },
     {
       "_origin": "ast",
@@ -248811,7 +248857,7 @@
       "node_kind": "heading",
       "norm_label": "chat appearance",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L541"
+      "source_location": "L545"
     },
     {
       "_origin": "ast",
@@ -248822,7 +248868,7 @@
       "node_kind": "heading",
       "norm_label": "chat behavior",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L517"
+      "source_location": "L521"
     },
     {
       "_origin": "ast",
@@ -248833,7 +248879,7 @@
       "node_kind": "heading",
       "norm_label": "commands",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L599"
+      "source_location": "L603"
     },
     {
       "_origin": "ast",
@@ -248910,7 +248956,7 @@
       "node_kind": "heading",
       "norm_label": "limits and known gaps",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L657"
+      "source_location": "L661"
     },
     {
       "_origin": "ast",
@@ -248932,7 +248978,7 @@
       "node_kind": "heading",
       "norm_label": "message background",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L570"
+      "source_location": "L574"
     },
     {
       "_origin": "ast",
@@ -248943,7 +248989,7 @@
       "node_kind": "heading",
       "norm_label": "moderation",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L588"
+      "source_location": "L592"
     },
     {
       "_origin": "ast",
@@ -248987,7 +249033,7 @@
       "node_kind": "heading",
       "norm_label": "reconnection",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L608"
+      "source_location": "L612"
     },
     {
       "_origin": "ast",
@@ -248998,7 +249044,7 @@
       "node_kind": "heading",
       "norm_label": "saves",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L454"
+      "source_location": "L458"
     },
     {
       "_origin": "ast",
@@ -249009,7 +249055,7 @@
       "node_kind": "heading",
       "norm_label": "security",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L642"
+      "source_location": "L646"
     },
     {
       "_origin": "ast",
@@ -249053,7 +249099,7 @@
       "node_kind": "heading",
       "norm_label": "test",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L477"
+      "source_location": "L481"
     },
     {
       "_origin": "ast",
@@ -249075,7 +249121,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota and sockets",
       "source_file": "docs/overlay-composition.md",
-      "source_location": "L626"
+      "source_location": "L630"
     },
     {
       "_origin": "ast",

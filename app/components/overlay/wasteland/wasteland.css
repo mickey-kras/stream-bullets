@@ -333,11 +333,34 @@
   height: clamp(32px, 15cqh, 104px);
   min-height: 0;
   margin: 0;
-  font-size: clamp(14px, min(7cqh, 4.5cqw), 52px);
+  font-size: clamp(14px, min(6.2cqh, 4.5cqw), 52px);
 }
+/* A label has two lines at most and then an ellipsis, so the bar never cuts a line in the middle. Two lines of each
+   font size above fit the height of the bar. */
 .ov-poll .poll-option .opt-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
   overflow-wrap: break-word;
-  line-height: 1.15;
+  line-height: 1.1;
+}
+/* Long option names (optionColumns): each name gets a wide bar and one line, so more of it shows. */
+.ov-poll[data-option-columns="1"] .poll-choices {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ov-poll[data-option-columns="2"] .poll-choices {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ov-poll[data-option-columns] .poll-choices .poll-option:nth-child(n) {
+  height: clamp(26px, 11cqh, 104px);
+  font-size: clamp(12px, min(5.5cqh, 3.4cqw), 48px);
+}
+.ov-poll[data-option-columns] .poll-option .opt-label {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow-wrap: anywhere;
 }
 /* Three or more options in one row get smaller text, so one long word stays whole. */
 .ov-poll .poll-choices:has(.poll-option:nth-child(3)) .poll-option {

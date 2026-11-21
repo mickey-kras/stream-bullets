@@ -186,6 +186,18 @@ function useFitText(text: string): RefObject<HTMLHeadingElement | null> {
   return element;
 }
 
+/** Option names longer than this many characters do not fit a bar that shares its row with two others. */
+const SHORT_OPTION = 12;
+
+/**
+ * The number of option columns for long option names: one row for each of up to three options, else two columns.
+ * Undefined for short names: the options then share one row, or two rows of three.
+ */
+export function optionColumns(options: readonly string[]): 1 | 2 | undefined {
+  if (options.every((option: string): boolean => option.length <= SHORT_OPTION)) return undefined;
+  return options.length <= 3 ? 1 : 2;
+}
+
 /**
  * A poll on stream. Viewers cannot select it, so it is short: the question beside the QR code at the same height,
  * the options across the full width with the live result, and one status line.
@@ -195,7 +207,11 @@ function PollOverlay({ scene, poll, qr }: CardProps & Readonly<{ poll: OverlayPo
   if (poll.kind === "mash" && poll.mash) return <MashOverlay scene={scene} poll={poll} qr={qr} />;
   const hiddenUntilReveal: boolean = poll.kind === "binary" && !poll.revealed;
   return (
-    <article className="poll-card overlay-card ov-poll" data-overlay-poll={poll.id}>
+    <article
+      className="poll-card overlay-card ov-poll"
+      data-overlay-poll={poll.id}
+      data-option-columns={optionColumns(poll.options)}
+    >
       <div className="ov-poll-body">
         <div className="ov-poll-head">
           <h1 ref={title}>{poll.title}</h1>

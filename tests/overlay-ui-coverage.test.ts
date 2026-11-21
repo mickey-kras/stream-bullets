@@ -14,6 +14,7 @@ import { controlState, OverlayControl } from "../app/components/overlay/overlay-
 import { sourcesText } from "../app/components/overlay/overlay-link";
 import {
   OverlayStage,
+  optionColumns,
   overlayPoll,
   qrTarget,
   type OverlayPoll,
@@ -693,6 +694,14 @@ describe("overlay source fallbacks", () => {
         expect(off, source.type).toContain("<article");
         expect(off, source.type).not.toContain("ov-qr");
       }
+    });
+
+    it("gives long option names wide bars: a row for each of up to three, else two columns", () => {
+      expect(optionColumns(["Yes", "No"])).toBeUndefined();
+      expect(optionColumns(["Twelve chars", "No"])).toBeUndefined();
+      expect(optionColumns(["Thirteen chars", "No"])).toBe(1);
+      expect(optionColumns(["A long option name", "b", "c"])).toBe(1);
+      expect(optionColumns(["A long option name", "b", "c", "d"])).toBe(2);
     });
 
     it("shows no code for the message banner or for a layer with nothing to show", () => {
