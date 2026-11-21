@@ -82,16 +82,16 @@ export async function attachTranslations(env: AppEnv, comments: readonly Comment
   const open: Comment[] = comments.filter((comment: Comment): boolean => !comment.removed);
   if (open.length === 0) return;
   const { results } = await env.DB.prepare(
-    "SELECT comment_id, text FROM comment_translations WHERE locale=? AND comment_id IN (SELECT value FROM json_each(?))",
+    "SELECT comment_id, source_hash, text FROM comment_translations WHERE locale=? AND comment_id IN (SELECT value FROM json_each(?))",
   )
     .bind(locale, JSON.stringify(open.map((comment: Comment): string => comment.id)))
-    .all<{ comment_id: string; text: string | null }>();
-  const stored = new Map<string, string | null>(
-    results.map((row): [string, string | null] => [row.comment_id, row.text]),
-  );
+    .all<{ comment_id: string; source_hash: string; text: string | null }>();
+  const stored = new Map(results.map((row) => [row.comment_id, row]));
   for (const comment of open) {
-    const text: string | null | undefined = stored.get(comment.id);
-    if (text !== undefined) comment.translation = checked(comment.text, comment.mentions ?? [], text);
+    const row = stored.get(comment.id);
+    // An edit between the read of the comment and this read gives a result for a different text.
+    if (row && row.source_hash === (await sha256(comment.text)))
+      comment.translation = checked(comment.text, comment.mentions ?? [], row.text);
   }
 }
 
