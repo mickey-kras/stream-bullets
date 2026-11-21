@@ -98,7 +98,6 @@ function response(message: string, status: number): Response {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-
 export class PollRoom extends DurableObject<AppEnv> {
   private streamerId: string | undefined;
   private latestSnapshot: LiveSnapshot | undefined;

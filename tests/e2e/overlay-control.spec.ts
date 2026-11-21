@@ -162,7 +162,9 @@ test("the owner copies the private overlay link, and a new link revokes the old 
 });
 
 test("an OBS source with a refused key stops its chat feed retries", async ({ browser }) => {
-  await runSql("overlay-control-refused-key", [layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL } } })]);
+  await runSql("overlay-control-refused-key", [
+    layersSql({ chat: { enabled: true }, cells: { horizontal: { chat: CHAT_CELL } } }),
+  ]);
   const obs = await browser.newContext({
     baseURL: origin,
     viewport: { width: 1920, height: 1080 },

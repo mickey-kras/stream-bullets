@@ -427,9 +427,7 @@ describe("live room admission", (): void => {
   it("tells the owner how many OBS sources are connected and when one was last seen", async (): Promise<void> => {
     type Sources = { count: number; seenAt: number | null };
     const sources = (socket: FakeSocket): Sources[] =>
-      socket
-        .ofType<{ sources?: Sources }>("overlay")
-        .flatMap(({ sources }) => (sources ? [sources] : []));
+      socket.ofType<{ sources?: Sources }>("overlay").flatMap(({ sources }) => (sources ? [sources] : []));
     const owner = await join({ key: KEY, user: "owner-1", owner: true });
     const viewer = await join({ key: seat(1) });
     expect(sources(owner)).toEqual([{ count: 0, seenAt: null }]);
@@ -459,7 +457,8 @@ describe("live room admission", (): void => {
 
   it("tells the owner when a revoked key or a silent connection ends an OBS source", async (): Promise<void> => {
     const owner = await join({ key: KEY, user: "owner-1", owner: true });
-    const counts = (): number[] => owner.ofType<{ sources: { count: number } }>("overlay").map(({ sources }) => sources.count);
+    const counts = (): number[] =>
+      owner.ofType<{ sources: { count: number } }>("overlay").map(({ sources }) => sources.count);
     expect((await post("overlay-key")).status).toBe(204);
     expect(counts()).toEqual([0]);
     await join({ key: KEY, overlay: true });
