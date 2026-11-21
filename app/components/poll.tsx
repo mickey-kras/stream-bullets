@@ -1,3 +1,4 @@
+import { EntryTranslationControl } from "./entry-translation";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { t, tn } from "../i18n";
@@ -236,6 +237,7 @@ export function PollCard({
       {owner && <PollMenu entry={entry} closed={closed} pending={pending} onAction={onAction} onDelete={onDelete} />}
       <PollStatus poll={entry} now={now} />
       <h2>{entry.title}</h2>
+      <EntryTranslationControl entry={entry} />
       <div className="author" data-poll-author>
         <Avatar name={entry.author} url={entry.avatar} preset={entry.avatarPreset} />
         <span className="byline">

@@ -1,3 +1,4 @@
+import { EntryTranslationControl } from "../entry-translation";
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
@@ -125,6 +126,7 @@ export function EntryDetail({
         </span>
       </div>
       <p className="description">{entry.body}</p>
+      <EntryTranslationControl entry={entry} />
       <IdeaOutcome entry={entry} />
       <button type="button" className="open-discussion gold" onClick={onDiscuss}>
         <Icon name="comment" size={18} />
