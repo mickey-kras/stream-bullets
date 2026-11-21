@@ -1,9 +1,10 @@
 import { parseActivityMessage, type ActivityMessage } from "./activity";
 
 /**
- * The client of the activity socket (docs/channel-connections.md, "Rules for consumers"). It never gives up: an
- * unattended OBS source has nobody to press Reconnect. The WebSocket, the timers and the randomness are injected,
- * so tests drive it without a network or a real clock.
+ * The client of the activity socket (docs/channel-connections.md, "Rules for consumers"). It never gives up on a
+ * failure: an unattended OBS source has nobody to press Reconnect. It stops only when the server refuses its overlay
+ * key, because that key never works again. The WebSocket, the timers and the randomness are injected, so tests drive
+ * it without a network or a real clock.
  */
 
 export const PING_INTERVAL_MS = 20_000;
@@ -12,9 +13,16 @@ export const WATCHDOG_MS = 90_000;
 export const BACKOFF_START_MS = 1_000;
 export const BACKOFF_MAX_MS = 60_000;
 
+/**
+ * The close code of a socket whose overlay key is wrong or revoked. A browser cannot read the HTTP status of a
+ * failed upgrade, so the Worker accepts the socket and closes it with this code.
+ */
+export const KEY_REFUSED_CLOSE = 4403;
+
 const OPEN = 1;
 
-export type ActivitySocketStatus = "connecting" | "live" | "reconnecting";
+/** `refused`: the server refused the overlay key. The client made its last try. */
+export type ActivitySocketStatus = "connecting" | "live" | "reconnecting" | "refused";
 
 /** The part of the browser WebSocket that the client uses. */
 export interface ActivityWebSocket {
@@ -173,7 +181,15 @@ export function openActivitySocket(options: ActivitySocketOptions): ActivitySock
       receive(current, event.data);
     };
     current.onerror = (): void => drop(current);
-    current.onclose = (): void => drop(current);
+    current.onclose = (event: CloseEvent): void => {
+      if (event.code !== KEY_REFUSED_CLOSE) {
+        drop(current);
+        return;
+      }
+      detach(current);
+      closed = true;
+      options.onStatus("refused");
+    };
   }
 
   connect();

@@ -73,6 +73,9 @@ The socket sends these messages:
 - `{"type":"unavailable"}` before the server closes the socket. This occurs when the overlay key changes,
   when an administrator suspends the page, and when the owner deletes the account.
 
+A browser cannot read the HTTP status of a failed WebSocket upgrade.
+Thus the server accepts a connection with a wrong or revoked key and closes it at once with the code `4403`.
+
 Each chat message in a snapshot has `live: false`. A consumer must not run a command from such a message.
 Thus a reconnect never runs an old command again.
 
@@ -90,6 +93,7 @@ Thus the feed uses the time of the webhook message. We did not check that a Twit
 - When the socket closes, wait and connect again. Start with a wait of 1 second.
 - Double the wait after each failed try, up to 60 seconds. Add a random part (jitter).
 - Reset the wait after a successful connection.
+- When the socket closes with the code `4403`, do not connect again. The key never works again.
 
 ### Overlay chat
 

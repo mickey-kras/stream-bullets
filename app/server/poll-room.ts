@@ -17,6 +17,7 @@ import { OVERLAY_COLUMNS, overlayPublic, overlayValue, type OverlayRow } from ".
 import { validateTestEnvironment } from "./test-environment-config";
 import { detached } from "../lib/detached";
 import { ENTRY_ID, tapMessage, type TapMessage } from "./tap-message";
+import { leaseOf, oldest, OverlaySources, type ConnectionLease } from "./room-connections";
 
 const MAX_CONNECTIONS = 200;
 // Reserve half the room for signed-in viewers.
@@ -41,13 +42,6 @@ const ROOM_PATHS: Readonly<Record<string, "GET" | "POST">> = {
   "/overlay": "POST",
   "/overlay-key": "POST",
 };
-
-// Worker-vouched account, opening time, and lease expiry.
-interface ConnectionLease {
-  expiresAt: number;
-  userId: string | null;
-  openedAt: number;
-}
 
 // Owners always enter; anonymous sockets yield first.
 type SocketRole = "owner" | "member" | "anonymous";
@@ -104,18 +98,12 @@ function response(message: string, status: number): Response {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-// The socket that opened first, or null for none.
-function oldest(sockets: readonly WebSocket[], openedAt: (socket: WebSocket) => number): WebSocket | null {
-  let found: WebSocket | null = null;
-  for (const socket of sockets) if (found === null || openedAt(socket) < openedAt(found)) found = socket;
-  return found;
-}
-
 export class PollRoom extends DurableObject<AppEnv> {
   private streamerId: string | undefined;
   private latestSnapshot: LiveSnapshot | undefined;
   private pendingSnapshot: Promise<LiveSnapshot> | undefined;
   private overlay: OverlayPublic | undefined;
+  private readonly sources = new OverlaySources(this.ctx.storage);
   private readonly battles = new Map<string, Battle>();
   private readonly loadingBattles = new Map<string, Promise<Battle | null>>();
   private readonly notLive = new Map<string, number>();
@@ -216,6 +204,7 @@ export class PollRoom extends DurableObject<AppEnv> {
         this.latestSnapshot = undefined;
         this.pendingSnapshot = undefined;
         this.overlay = undefined;
+        await this.sources.reset();
         this.ctx.storage.sql.exec("DELETE FROM tap_journal");
         await this.ctx.storage.deleteAlarm();
       } finally {
@@ -277,6 +266,8 @@ export class PollRoom extends DurableObject<AppEnv> {
     server.serializeAttachment(lease);
     const first: LiveSnapshot = this.withBattles(snapshot);
     this.send(server, JSON.stringify(overlayKey ? overlaySnapshot(first) : first));
+    if (overlayKey) await this.overlaySourcesChanged();
+    else if (role === "owner") this.send(server, await this.overlaySources());
     this.startTicker();
     await this.scheduleResync();
     return new Response(null, { status: 101, webSocket: client });
@@ -345,12 +336,28 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   // Reconnect old-key sockets without owner priority.
-  private overlayKeyRevoked(): Response {
-    for (const socket of this.activeSockets("overlay-key")) {
+  private async overlayKeyRevoked(): Promise<Response> {
+    const sources = this.activeSockets("overlay-key");
+    for (const socket of sources) {
       this.send(socket, JSON.stringify({ type: "unavailable" }));
       if (socket.readyState === WebSocket.OPEN) socket.close(1001, "Overlay key revoked");
     }
+    if (sources.length > 0) await this.overlaySourcesChanged();
     return new Response(null, { status: 204 });
+  }
+
+  // The OBS sources in an `overlay` message, for the owner's sockets that are not OBS sources.
+  private async overlaySources(): Promise<string> {
+    this.overlay ??= await this.loadOverlay();
+    return this.sources.message(this.overlay, this.activeSockets("overlay-key").length);
+  }
+
+  // An OBS source connected or went away: store the time and tell the overlay control.
+  private async overlaySourcesChanged(): Promise<void> {
+    await this.sources.touch(Date.now());
+    const message = await this.overlaySources();
+    for (const socket of this.activeSockets("role:owner"))
+      if (!this.ctx.getTags(socket).includes("overlay-key")) this.send(socket, message);
   }
 
   private async overlayChanged(): Promise<Response> {
@@ -382,13 +389,17 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   async webSocketClose(socket: WebSocket, _code: number, _reason: string, _wasClean: boolean): Promise<void> {
+    const source = this.ctx.getTags(socket).includes("overlay-key");
     socket.close();
+    if (source) await this.overlaySourcesChanged();
     for (const battle of this.battles.values()) battle.seqs.delete(socket);
     if (this.activeSockets().length === 0 && this.battles.size === 0) await this.ctx.storage.deleteAlarm();
   }
 
-  webSocketError(socket: WebSocket, _error: unknown): void {
+  async webSocketError(socket: WebSocket, _error: unknown): Promise<void> {
+    const source = this.ctx.getTags(socket).includes("overlay-key");
     socket.close(1011, "Live connection failed");
+    if (source) await this.overlaySourcesChanged();
   }
 
   // Recover/end battles and broadcast a snapshot. Reschedule in `finally` so D1 failures cannot stop recovery.
@@ -422,7 +433,7 @@ export class PollRoom extends DurableObject<AppEnv> {
 
   // Counts one batch of taps. Returns the reply for this socket, or null to stay silent.
   private async tap(socket: WebSocket, message: TapMessage): Promise<object | null> {
-    const lease = this.lease(socket);
+    const lease = leaseOf(socket);
     if (!lease.userId) return { type: "mash-denied", id: message.id, reason: "sign-in" };
     const userId = lease.userId;
     const battle = await this.battleFor(message.id);
@@ -875,7 +886,7 @@ export class PollRoom extends DurableObject<AppEnv> {
   // Always admit owners. Anonymous sockets fill at most half the room; members/owners evict the oldest
   // anonymous socket when full.
   private admission(clientKey: string, role: SocketRole): { refusal: Response | null; evict: WebSocket | null } {
-    const openedAt = (socket: WebSocket): number => this.lease(socket).openedAt;
+    const openedAt = (socket: WebSocket): number => leaseOf(socket).openedAt;
     const anonymous = this.activeSockets("role:anonymous");
     const full = this.activeSockets().length >= MAX_CONNECTIONS;
     if (role === "owner") {
@@ -901,25 +912,10 @@ export class PollRoom extends DurableObject<AppEnv> {
     if (socket.readyState === WebSocket.OPEN) socket.close(1013, "Live room is full");
   }
 
-  private lease(socket: WebSocket): ConnectionLease {
-    const lease: unknown = socket.deserializeAttachment();
-    if (
-      typeof lease !== "object" ||
-      lease === null ||
-      !("expiresAt" in lease) ||
-      typeof lease.expiresAt !== "number" ||
-      !Number.isSafeInteger(lease.expiresAt)
-    )
-      return { expiresAt: 0, userId: null, openedAt: 0 };
-    const userId = "userId" in lease && typeof lease.userId === "string" ? lease.userId : null;
-    const openedAt = "openedAt" in lease && typeof lease.openedAt === "number" ? lease.openedAt : 0;
-    return { expiresAt: lease.expiresAt, userId, openedAt };
-  }
-
   private pruneConnectionCaches(now: number): void {
     for (const [id, until] of this.notLive) if (until <= now) this.notLive.delete(id);
     // Drop full buckets without sockets; keep partial ones so reconnects cannot reset quotas.
-    const signedIn = new Set(this.activeSockets().map((socket: WebSocket): string | null => this.lease(socket).userId));
+    const signedIn = new Set(this.activeSockets().map((socket: WebSocket): string | null => leaseOf(socket).userId));
     for (const [userId, bucket] of this.buckets)
       if (!signedIn.has(userId) && now - bucket.at >= 1_000) this.buckets.delete(userId);
   }
@@ -929,13 +925,15 @@ export class PollRoom extends DurableObject<AppEnv> {
     const now: number = Date.now();
     this.pruneConnectionCaches(now);
     for (const socket of this.activeSockets()) {
-      const lease = this.lease(socket);
+      const lease = leaseOf(socket);
       const pinged = this.ctx.getWebSocketAutoResponseTimestamp(socket)?.getTime() ?? 0;
       const idle = now - Math.max(lease.openedAt, pinged) >= IDLE_TIMEOUT_MS;
       if (lease.expiresAt > now && !idle) continue;
       this.send(socket, JSON.stringify({ type: "unavailable" }));
-      if (socket.readyState === WebSocket.OPEN)
-        socket.close(1001, idle ? "Live connection idle" : "Live connection lease expired");
+      if (socket.readyState !== WebSocket.OPEN) continue;
+      socket.close(1001, idle ? "Live connection idle" : "Live connection lease expired");
+      // An OBS source that went silent sends no close: tell the overlay control here.
+      if (this.ctx.getTags(socket).includes("overlay-key")) this.ctx.waitUntil(this.overlaySourcesChanged());
     }
   }
 
@@ -943,7 +941,7 @@ export class PollRoom extends DurableObject<AppEnv> {
     const sockets = this.activeSockets();
     const now = Date.now();
     let deadline = retry || sockets.length > 0 ? now + RESYNC_INTERVAL_MS : Number.POSITIVE_INFINITY;
-    for (const socket of sockets) deadline = Math.min(deadline, this.lease(socket).expiresAt);
+    for (const socket of sockets) deadline = Math.min(deadline, leaseOf(socket).expiresAt);
     if (sockets.length > 0) {
       for (const poll of this.latestSnapshot?.polls ?? []) {
         if (!poll.revealed && poll.endsAt !== null && poll.endsAt > now) deadline = Math.min(deadline, poll.endsAt);
