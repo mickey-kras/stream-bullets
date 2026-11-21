@@ -129,7 +129,7 @@ export async function translateComment(
     `INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at)
       SELECT ?1, ?2, ?3, ?4 WHERE (SELECT COALESCE(SUM(starts), 0) FROM translation_attempts WHERE created_at > ?5) < ?6
       ON CONFLICT(comment_id, locale, source_hash) DO UPDATE SET created_at=excluded.created_at,
-        starts=translation_attempts.starts + 1
+        starts=CASE WHEN translation_attempts.created_at > ?5 THEN translation_attempts.starts + 1 ELSE 1 END
       WHERE translation_attempts.created_at < excluded.created_at - ?7`,
   )
     .bind(commentId, locale, hash, now, now - DAY, TRANSLATION_DAILY_LIMIT, CLAIM_MS)

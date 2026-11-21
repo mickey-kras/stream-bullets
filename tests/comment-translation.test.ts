@@ -186,6 +186,16 @@ describe("comment translation", (): void => {
     expect(row).toEqual({ starts: 2 });
   });
 
+  it("does not count again the starts that are older than one day", async (): Promise<void> => {
+    run.mockRejectedValue(new Error("model down"));
+    const id: string = await seedComment();
+    await expect(translateComment(env, id, "fan", "de", NOW)).rejects.toThrow("model down");
+    await expect(translateComment(env, id, "fan", "de", NOW + 60_001)).rejects.toThrow("model down");
+    await expect(translateComment(env, id, "fan", "de", NOW + 2 * 86_400_000)).rejects.toThrow("model down");
+    const row = await env.DB.prepare("SELECT starts FROM translation_attempts WHERE comment_id=?").bind(id).first();
+    expect(row).toEqual({ starts: 1 });
+  });
+
   it("deletes the stored translations when the comment is removed or edited", async (): Promise<void> => {
     run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
     const stored = async (id: string): Promise<number> => {
