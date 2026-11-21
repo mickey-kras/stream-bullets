@@ -1,6 +1,6 @@
 import { newPage, close } from "./coverage";
 import { expect, test } from "./coverage";
-import { signedIn } from "./fixtures";
+import { commentBox, signedIn } from "./fixtures";
 import { clientIp } from "./client-ips";
 
 const template = "What happened?\n\nWhat did you expect?\n\nSteps to reproduce:\n1. ";
@@ -114,11 +114,12 @@ test("frozen and suspended pages show banners and keep writes off", async ({ bro
   await page.goto("/@frozen_host");
   await expect(page.locator("#page-banner")).toContainText("This page is frozen. Viewing only");
   await expect(page.getByRole("button", { name: /^Like/ }).first()).toBeDisabled();
-  await expect(page.getByRole("textbox", { name: "Write a comment" })).toBeDisabled();
-  await expect(page.getByRole("textbox", { name: "Write a comment" })).toHaveAttribute(
-    "placeholder",
-    "Comments are paused while this page is frozen.",
-  );
+  // The editor does not accept text while the page is frozen.
+  const frozenBox = commentBox(page, "Write a comment");
+  await expect(frozenBox).toHaveAttribute("contenteditable", "false");
+  await expect(page.locator(".rich-input")).toHaveAttribute("data-disabled", "true");
+  await expect(frozenBox).toHaveAttribute("aria-placeholder", "Comments are paused while this page is frozen.");
+  await expect(page.locator(".composer").getByRole("button", { name: "Post", exact: true })).toBeDisabled();
   await expect(page.locator("#suggest")).toBeDisabled();
   const owner = await signedIn(browser, "frozenowner", clientIp("ideas", 107));
   const ownerPage = await newPage(owner);

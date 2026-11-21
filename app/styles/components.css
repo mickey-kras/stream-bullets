@@ -1253,7 +1253,7 @@ html[data-reduced="true"] .landing-station .station-tilt { display: none !import
 }
 @media (max-width: 43.75em) {
   .streamer-shell:has(> button.fab) > main { padding-bottom: 96px; }
-  body:has([role=dialog], textarea[data-composer]:focus, .inline-reply) button.fab.fab { display: none; }
+  body:has([role=dialog], [data-composer]:focus, .inline-reply) button.fab.fab { display: none; }
 }
 .poll-toolbar .back { margin-right: auto; }
 .join-discussion { margin: 0 0 16px; }
@@ -1674,6 +1674,32 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .mention-option { display: flex; flex-wrap: wrap; gap: 4px 8px; width: 100%; padding: 8px; min-height: 44px; overflow-wrap: anywhere; }
 .mention-option[data-active="true"] { background: var(--tab); color: var(--gold); }
 .mention-label { font-size: var(--text-meta); color: var(--muted); }
+/* The field has the same height before and after the editor arrives, and with or without the focus. Thus the
+   page and the Post button do not move. */
+.comment-input { display: grid; grid-template-columns: minmax(0, 1fr); flex: 1; min-width: 0; }
+.ed-toolbar-space { height: 45px; }
+.rich-input { display: grid; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--c-637677); border-radius: var(--radius-control); background: var(--c-162e3255); }
+.rich-input:focus-within { border-color: var(--gold); }
+.rich-input[data-disabled="true"] { opacity: .55; }
+.ed-toolbar { display: flex; gap: 2px; padding: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); scrollbar-width: none; }
+.rich-input .ed-toolbar button { flex: 0 0 auto; display: grid; place-items: center; width: 36px; min-width: 36px; height: 36px; min-height: 36px; padding: 0; border: 0; border-radius: var(--radius-control); background: none; color: var(--muted); }
+.rich-input .ed-toolbar button:hover:not(:disabled) { color: var(--cream); background: var(--tab); }
+.rich-input .ed-toolbar button[aria-pressed="true"] { color: var(--gold); background: var(--tab); }
+.ed-link { display: flex; gap: 6px; padding: 6px; border-bottom: 1px solid var(--line); }
+.ed-link input { flex: 1; min-width: 0; min-height: 36px; padding: 4px 8px; }
+.rich-input .ed-link button { min-height: 36px; padding: 4px 12px; }
+.ed-content { position: relative; min-height: 46px; max-height: 240px; padding: 12px 15px; overflow-y: auto; outline: none; color: var(--cream); font: 400 1.062rem/1.25 Figtree, Onest, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rich-input[data-empty="true"] .ed-content::before { content: attr(data-placeholder); position: absolute; color: var(--muted); pointer-events: none; }
+.ed-content p { margin: 0; }
+.ed-content > code { display: block; max-width: 100%; margin: 5px 0 8px; padding: 10px 12px; overflow-x: auto; white-space: pre; overflow-wrap: normal; }
+.ed-content .ed-bold { font-weight: 700; }
+.ed-content .ed-italic { font-style: italic; }
+.ed-content .ed-strike { text-decoration: line-through; }
+.ed-content .ed-code { padding: 1px 5px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); font: 0.875em/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.ed-content .mention { color: var(--gold); font-weight: 600; }
+.composer:has(.comment-input) > .gold { align-self: flex-end; }
+.comment-editor .ed-content { min-height: 86px; }
+@media (max-width: 720px) { .inline-reply .composer .ed-content { min-height: 86px; } }
 .comment-editor { display: grid; gap: 8px; min-width: 0; }
 .comment-editor textarea { width: 100%; min-height: 88px; max-height: 180px; padding: 10px; resize: vertical; overflow-y: auto; font-size: 1rem; }
 .comment-edit-actions { display: flex; flex-wrap: wrap; gap: 8px; }
