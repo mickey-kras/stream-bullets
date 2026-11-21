@@ -300,7 +300,10 @@ See [live capacity](live-room-capacity.md).
    Select the line to open the full panel.
    The line and the cards follow the channel health while the page is open.
 2. **Build your overlay**: the overlay studio.
-3. **Add to OBS**: the overlay link.
+3. **Add to OBS**: the overlay link. When the page has a link, one line shows the OBS connection.
+   It shows the number of connected sources. Without a source, it shows when the last one connected or went away.
+   The live room counts the sockets that came in with the current key.
+   It sends each change to the owner's tabs.
 
 A signed-in page owner opens the page from **Overlay** in the header of their own streamer page or from the account menu.
 The site header has no **Overlay** entry.
@@ -606,6 +609,8 @@ The chat adds only the snapshot rows that are newer than the newest row on scree
 
 An `unavailable` message clears the chat. The server sends it when the key changes or when an administrator suspends the page.
 The page then keeps trying with a longer wait.
+When the server refuses the key (close code `4403`), the page stops. The value of `data-feed-status` is then `refused`.
+The source needs the new link from **Overlay control**.
 
 For troubleshooting, the root element of the overlay page has the `data-feed-status` attribute.
 It shows the status of the activity feed.
@@ -636,7 +641,8 @@ Thus close the overlay sources that you do not use.
   Thus a policy only for that page does not apply to the preview.
 - The Twitch image CDN gets the IP address of the device that shows an emote. The privacy policy (`/privacy`) names this recipient.
 - The overlay page sends no `Referer`. Thus an emote image does not get the key.
-- The overlay key gives access to the activity feed. Without a valid key or an owner session, the socket gets `403`.
+- The overlay key gives access to the activity feed. Without a key or an owner session, the socket gets `403`.
+  With a wrong or revoked key, the server closes the socket with the code `4403`, and the page does not try again.
 - **Regenerate link** makes a new key. The old key stops at once, and its open sockets close.
 - The chat ignores `user.color`. It uses the theme colors only.
 
