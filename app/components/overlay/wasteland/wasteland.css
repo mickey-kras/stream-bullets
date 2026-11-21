@@ -282,18 +282,26 @@
 .ov-poll-body {
   box-sizing: border-box;
   height: 100%;
-  display: grid;
-  grid-template-rows: auto auto auto;
-  align-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   gap: clamp(8px, 4cqh, 28px);
   padding: clamp(12px, 6cqh, 40px) clamp(14px, 3.5cqw, 44px);
 }
-/* The question has the height of the QR code. useFitText sets its font size. */
+/* The question has the height of the QR code. useFitText sets its font size. The head takes the height that the
+   options and the status line leave, so a poll with two rows of options also fits its cell. */
 .ov-poll-head {
   display: flex;
+  flex: 1 1 0;
   gap: clamp(10px, 3cqw, 32px);
-  height: min(max(96px, 54cqh), 30cqw);
+  min-height: 0;
+  max-height: 30cqw;
   min-width: 0;
+}
+.ov-poll .poll-choices,
+.ov-poll .ov-hidden-results,
+.ov-poll-foot {
+  flex: none;
 }
 .ov-scaler .overlay-card.ov-poll h1,
 .overlay-card.ov-poll h1 {
@@ -335,6 +343,9 @@
 .ov-poll .poll-choices:has(.poll-option:nth-child(3)) .poll-option {
   font-size: clamp(13px, min(6.5cqh, 3.3cqw), 56px);
 }
+.ov-poll .poll-choices:has(.poll-option:nth-child(4)) .poll-option {
+  font-size: clamp(11px, min(5.5cqh, 2.8cqw), 48px);
+}
 /* A high cell has room for one option in each row. */
 @container (aspect-ratio < 1.2) {
   .ov-poll .poll-choices {
@@ -345,7 +356,7 @@
     font-size: clamp(14px, min(4cqh, 6cqw), 52px);
   }
   .ov-poll-head {
-    height: min(max(96px, 30cqh), 42cqw);
+    max-height: 42cqw;
   }
 }
 .ov-poll .poll-option > .opt-track {

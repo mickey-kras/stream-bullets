@@ -134,7 +134,7 @@ A viewer scans the QR code with a phone. The phone then opens the public page of
   It is at most 30 percent of the card width, unless that is below the minimum.
   The card with the code becomes smaller with its cell, as each card does.
 - On a poll card, the code is beside the question, and the question has the height of the code.
-  There the side is 54 percent of the cell height, at least 96 design pixels and at most 30 percent of the cell width.
+  There the code takes the height that the options and the status line leave, at most 30 percent of the cell width.
 - The code has dark modules (`#0b2228`) on a light plate (`#f7edcf`) with a quiet zone of 2 modules.
   The plate stays opaque at each `backgroundOpacity`. Thus a phone can read the code on each background.
 - The code is an SVG picture from the `uqr` package. Thus it stays sharp at each OBS source size.
