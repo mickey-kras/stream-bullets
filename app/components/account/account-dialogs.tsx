@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
-import { t } from "../../i18n";
+import { createElement, type ReactNode } from "react";
+import { t, type MessageId } from "../../i18n";
 import { useShell } from "../../lib/shell";
 import { PreferencesDialog } from "../a11y/preferences-dialog";
+import { NotificationsDialog } from "../notifications";
 import { LanguageDialog } from "../shell/language-dialog";
 import { SignInDialog } from "../shell/sign-in-dialog";
 import { Sheet } from "../ui/sheet";
@@ -12,26 +13,39 @@ import { HostDialog } from "./host-dialog";
 import { useMe } from "./me";
 import { ProfileDialog } from "./profile-dialog";
 
-const titles: Record<
-  Exclude<AccountDialogName, "language" | "a11y">,
-  "account.yourProfile" | "account.hostCommunity" | "account.yourData" | "account.editPage"
-> = {
+const titles: Record<AccountDialogName, MessageId> = {
   profile: "account.yourProfile",
   host: "account.hostCommunity",
   data: "account.yourData",
   page: "account.editPage",
+  language: "language.title",
+  a11y: "prefs.title",
+  notifications: "notifications.title",
 };
+
+// These dialogs need no account.
+const OPEN_DIALOGS: Partial<Record<AccountDialogName, (props: Readonly<{ onClose: () => void }>) => ReactNode>> = {
+  language: LanguageDialog,
+  a11y: PreferencesDialog,
+};
+
+// These dialogs do not read the account data of the viewer.
+const WITHOUT_ACCOUNT_DATA: ReadonlySet<AccountDialogName> = new Set<AccountDialogName>([
+  "language",
+  "a11y",
+  "notifications",
+]);
 
 // Account dialogs overlay any page through ?dialog=. Signed-out users return after sign-in; language/display
 // dialogs work signed out.
 export function AccountDialogs(): ReactNode {
   const shell = useShell();
   const { name, close } = useAccountDialog();
-  const account: boolean = name !== null && name !== "language" && name !== "a11y";
+  const account: boolean = name !== null && !WITHOUT_ACCOUNT_DATA.has(name);
   const { me, error, reload } = useMe(account && Boolean(shell.viewer));
-  if (name === "language") return <LanguageDialog onClose={close} />;
-  if (name === "a11y") return <PreferencesDialog onClose={close} />;
   if (!name) return null;
+  const open = OPEN_DIALOGS[name];
+  if (open) return createElement(open, { onClose: close });
   if (!shell.viewer)
     return (
       <SignInDialog
@@ -42,6 +56,7 @@ export function AccountDialogs(): ReactNode {
         providers={shell.providers}
       />
     );
+  if (name === "notifications") return <NotificationsDialog onClose={close} />;
   // Open profile/data immediately; fill provider details after loading.
   if (name === "profile")
     return <ProfileDialog viewer={shell.viewer} provider={me?.signInProvider ?? null} onClose={close} />;

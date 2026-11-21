@@ -38,12 +38,6 @@ export function SiteHeader(): ReactNode {
             {t("nav.yourPage")}
           </Link>
         )}
-        {shell.admin && (
-          <Link to={paths.admin} aria-current={pathname.startsWith(paths.admin) ? "page" : undefined}>
-            <Icon name="admin" size={18} />
-            {t("nav.admin")}
-          </Link>
-        )}
       </nav>
       <div className="header-end">
         <HeaderLanguage />

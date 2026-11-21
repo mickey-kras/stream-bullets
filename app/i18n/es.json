@@ -800,7 +800,6 @@
   "moderation.unsuspendBody": "La página vuelve a ser pública y regresa a la lista de streamers.",
   "moderation.unsuspendTitle": "¿Quitar la suspensión de @{handle}?",
   "moderation.unsuspendedDone": "Se quitó la suspensión de @{handle}.",
-  "nav.admin": "Administración",
   "nav.home": "Inicio de StreamBullets",
   "nav.main": "Navegación principal",
   "nav.overlay": "Overlay",
