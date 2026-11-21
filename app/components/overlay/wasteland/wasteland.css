@@ -346,16 +346,19 @@
   overflow-wrap: break-word;
   line-height: 1.1;
 }
-/* Long option names (optionColumns): each name gets a wide bar and one line, so more of it shows. */
-.ov-poll[data-option-columns="1"] .poll-choices {
-  grid-template-columns: minmax(0, 1fr);
-}
-.ov-poll[data-option-columns="2"] .poll-choices {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.ov-poll[data-option-columns] .poll-choices .poll-option:nth-child(n) {
-  height: clamp(26px, 11cqh, 104px);
-  font-size: clamp(12px, min(5.5cqh, 3.4cqw), 48px);
+/* Long option names (optionColumns): each name gets a wide bar and one line, so more of it shows. A high cell
+   keeps one option in each row. */
+@container (aspect-ratio >= 1.2) {
+  .ov-poll[data-option-columns="1"] .poll-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ov-poll[data-option-columns="2"] .poll-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ov-poll[data-option-columns] .poll-choices .poll-option:nth-child(n) {
+    height: clamp(26px, 11cqh, 104px);
+    font-size: clamp(12px, min(5.5cqh, 3.4cqw), 48px);
+  }
 }
 .ov-poll[data-option-columns] .poll-option .opt-label {
   -webkit-line-clamp: 1;
