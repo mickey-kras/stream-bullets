@@ -138,7 +138,7 @@ Each batch has new message identifiers, so you can send it again.
 The feed keeps a message for 10 minutes. A reset does not remove the batch.
 
 The action reads no provider and needs no channel connection.
-It works only when the test deployment has the `CHANNEL_INGEST` binding. Without the binding, the answer is `503`.
+The test deployment has the `CHANNEL_INGEST` binding for this action. Without the binding, the answer is `503`.
 In all other deployments, the feed object answers `404`.
 
 To see the chat, sign in as `owner`, put the chat layer on stream in **Overlay control**, and create the overlay link.
