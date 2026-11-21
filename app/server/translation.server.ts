@@ -122,12 +122,14 @@ export async function translateComment(
     .first<{ count: number }>();
   if ((recent?.count ?? 0) >= TRANSLATION_DAILY_LIMIT) throw new HttpError(503, "Translation is not available.");
   // Reserve this comment text and locale. A second request for them does not start the model again.
+  // The statement also examines the daily limit, so requests at the same time cannot go above it.
   const claim = await env.DB.prepare(
-    `INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at) VALUES (?,?,?,?)
+    `INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at)
+      SELECT ?1, ?2, ?3, ?4 WHERE (SELECT COUNT(*) FROM translation_attempts WHERE created_at > ?5) < ?6
       ON CONFLICT(comment_id, locale, source_hash) DO UPDATE SET created_at=excluded.created_at
-      WHERE translation_attempts.created_at < excluded.created_at - ?`,
+      WHERE translation_attempts.created_at < excluded.created_at - ?7`,
   )
-    .bind(commentId, locale, hash, now, CLAIM_MS)
+    .bind(commentId, locale, hash, now, now - DAY, TRANSLATION_DAILY_LIMIT, CLAIM_MS)
     .run();
   if (claim.meta.changes === 0) throw new HttpError(409, "The translation is not ready. Try again in a moment.");
 
