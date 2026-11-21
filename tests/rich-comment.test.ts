@@ -76,6 +76,17 @@ describe("comment editor text", (): void => {
     };
     expect(roundTrip(value)).toEqual(value);
   });
+  it("shows a mention in code as its label only", (): void => {
+    const text: string = "`@Bob` and\n\n```\nping @Bob\n```";
+    const result: CommentValue = roundTrip({
+      text,
+      mentions: [
+        { userId: "u7", start: 1, end: 5 },
+        { userId: "u7", start: 21, end: 25 },
+      ],
+    });
+    expect(result).toEqual({ text, mentions: [] });
+  });
   it("keeps a mention label with Markdown characters as plain text", (): void => {
     const value: CommentValue = { text: "@a_b_c *d* hi", mentions: [{ userId: "u9", start: 0, end: 10 }] };
     expect(roundTrip(value)).toEqual(value);

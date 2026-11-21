@@ -21,6 +21,7 @@ import {
 import { QuoteNode } from "@lexical/rich-text";
 import {
   $applyNodeReplacement,
+  $getRoot,
   TextNode,
   type EditorConfig,
   type Klass,
@@ -167,6 +168,11 @@ export function $readComment(): CommentValue {
 
 export function $writeComment(value: CommentValue): void {
   $convertFromMarkdownString(markMentions(value), COMMENT_TRANSFORMERS, undefined, true);
+  // Code does not make mention nodes: a mention in code shows as its label.
+  for (const node of $getRoot().getAllTextNodes()) {
+    const text: string = node.getTextContent();
+    if (!$isMentionNode(node) && text.includes(OPEN)) node.setTextContent(unmarkMentions(text).text);
+  }
 }
 
 export { $createCodeNode };
