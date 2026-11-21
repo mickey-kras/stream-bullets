@@ -357,7 +357,7 @@ function CommentArticle({
               setEditing(true);
               requestAnimationFrame(() =>
                 document
-                  .querySelector<HTMLTextAreaElement>(`#cm-${comment.id} textarea`)
+                  .querySelector<HTMLElement>(`#cm-${comment.id} [data-composer]`)
                   ?.focus({ preventScroll: true }),
               );
             }}

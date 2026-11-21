@@ -2,7 +2,7 @@ import { $isCodeNode } from "@lexical/code-core";
 import { createEmptyHistoryState, registerHistory } from "@lexical/history";
 import { $isLinkNode, $toggleLink } from "@lexical/link";
 import { $isListNode, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, registerList } from "@lexical/list";
-import { registerMarkdownShortcuts } from "@lexical/markdown";
+import { $generateNodesFromMarkdownString, registerMarkdownShortcuts } from "@lexical/markdown";
 import { $createQuoteNode, $isQuoteNode, registerRichText } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
 import {
@@ -15,6 +15,7 @@ import {
   COMMAND_PRIORITY_HIGH,
   FORMAT_TEXT_COMMAND,
   KEY_DOWN_COMMAND,
+  PASTE_COMMAND,
   createEditor,
   type EditorState,
   type ElementNode,
@@ -135,7 +136,6 @@ export function RichCommentInput({
   label,
   placeholder,
   disabled,
-  focusOnMount,
 }: Readonly<{
   entryId: string;
   value: string;
@@ -145,14 +145,12 @@ export function RichCommentInput({
   label: string;
   placeholder: string;
   disabled: boolean;
-  focusOnMount: boolean;
 }>): ReactNode {
   const listId: string = useId();
   const linkId: string = useId();
   const root = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<LexicalEditor | null>(null);
   const emitted = useRef<CommentValue>({ text: value, mentions });
-  const focusFirst = useRef<boolean>(focusOnMount);
   const handlers = useRef({ onChange, onMentionsChange });
   handlers.current = { onChange, onMentionsChange };
   const [active, setActive] = useState<Active>(NO_FORMAT);
@@ -220,6 +218,21 @@ export function RichCommentInput({
         },
       ),
       editor.registerCommand(
+        PASTE_COMMAND,
+        (event: ClipboardEvent | InputEvent | KeyboardEvent): boolean => {
+          const text: string | undefined =
+            event instanceof ClipboardEvent ? event.clipboardData?.getData("text/plain") : undefined;
+          const selection = $getSelection();
+          if (!text || !$isRangeSelection(selection)) return false;
+          const node: LexicalNode = selection.anchor.getNode();
+          if ($isCodeNode(node) || $isCodeNode(node.getParent())) return false;
+          event.preventDefault();
+          selection.insertNodes($generateNodesFromMarkdownString(text, COMMENT_TRANSFORMERS, true));
+          return true;
+        },
+        COMMAND_PRIORITY_HIGH,
+      ),
+      editor.registerCommand(
         KEY_DOWN_COMMAND,
         (event: KeyboardEvent): boolean => {
           if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
@@ -251,7 +264,6 @@ export function RichCommentInput({
         COMMAND_PRIORITY_HIGH,
       ),
     ];
-    if (focusFirst.current) editor.focus();
     return () => {
       for (const unregister of stop) unregister();
       editor.setRootElement(null);
@@ -435,6 +447,7 @@ export function RichCommentInput({
         aria-multiline="true"
         aria-label={label}
         aria-required="true"
+        aria-disabled={disabled}
         aria-placeholder={placeholder}
         data-placeholder={placeholder}
         aria-controls={token ? listId : undefined}

@@ -1674,7 +1674,10 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .mention-option { display: flex; flex-wrap: wrap; gap: 4px 8px; width: 100%; padding: 8px; min-height: 44px; overflow-wrap: anywhere; }
 .mention-option[data-active="true"] { background: var(--tab); color: var(--gold); }
 .mention-label { font-size: var(--text-meta); color: var(--muted); }
-.comment-input { display: contents; }
+/* The field has the same height before and after the editor arrives, and with or without the focus. Thus the
+   page and the Post button do not move. */
+.comment-input { display: grid; grid-template-columns: minmax(0, 1fr); flex: 1; min-width: 0; }
+.ed-toolbar-space { height: 45px; }
 .rich-input { display: grid; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--c-637677); border-radius: var(--radius-control); background: var(--c-162e3255); }
 .rich-input:focus-within { border-color: var(--gold); }
 .rich-input[data-disabled="true"] { opacity: .55; }
@@ -1685,7 +1688,7 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ed-link { display: flex; gap: 6px; padding: 6px; border-bottom: 1px solid var(--line); }
 .ed-link input { flex: 1; min-width: 0; min-height: 36px; padding: 4px 8px; }
 .rich-input .ed-link button { min-height: 36px; padding: 4px 12px; }
-.ed-content { position: relative; min-height: 48px; max-height: 240px; padding: 12px 15px; overflow-y: auto; outline: none; color: var(--cream); font: 400 1.062rem/1.4 Figtree, Onest, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ed-content { position: relative; min-height: 46px; max-height: 240px; padding: 12px 15px; overflow-y: auto; outline: none; color: var(--cream); font: 400 1.062rem/1.25 Figtree, Onest, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }
 .rich-input[data-empty="true"] .ed-content::before { content: attr(data-placeholder); position: absolute; color: var(--muted); pointer-events: none; }
 .ed-content p { margin: 0; }
 .ed-content > code { display: block; max-width: 100%; margin: 5px 0 8px; padding: 10px 12px; overflow-x: auto; white-space: pre; overflow-wrap: normal; }
@@ -1694,10 +1697,9 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ed-content .ed-strike { text-decoration: line-through; }
 .ed-content .ed-code { padding: 1px 5px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--field); font: 0.875em/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .ed-content .mention { color: var(--gold); font-weight: 600; }
-.rich-input[data-empty="true"]:not(:focus-within) .ed-toolbar { display: none; }
-.composer:has(.rich-input) > .gold { align-self: flex-end; }
-.comment-editor .ed-content { min-height: 88px; }
-@media (max-width: 720px) { .inline-reply .composer .ed-content { min-height: 88px; } }
+.composer:has(.comment-input) > .gold { align-self: flex-end; }
+.comment-editor .ed-content { min-height: 86px; }
+@media (max-width: 720px) { .inline-reply .composer .ed-content { min-height: 86px; } }
 .comment-editor { display: grid; gap: 8px; min-width: 0; }
 .comment-editor textarea { width: 100%; min-height: 88px; max-height: 180px; padding: 10px; resize: vertical; overflow-y: auto; font-size: 1rem; }
 .comment-edit-actions { display: flex; flex-wrap: wrap; gap: 8px; }
