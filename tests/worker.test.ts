@@ -168,6 +168,20 @@ describe("Worker request checks", (): void => {
     expect(router.calls).toHaveLength(0);
   });
 
+  it("sends a plain-HTTP read of the application host to HTTPS, and nothing else", async (): Promise<void> => {
+    const host: string = new URL(env.APP_ORIGIN).host;
+    const moved = await worker.fetch(new Request(`http://${host}/privacy?lang=en`), env);
+    expect(moved.status).toBe(301);
+    expect(moved.headers.get("Location")).toBe(`${env.APP_ORIGIN}/privacy?lang=en`);
+    expect(moved.headers.get("X-Request-ID")).toMatch(/^[a-f0-9-]{36}$/);
+    expect((await worker.fetch(new Request(`http://${host}/`, { method: "HEAD" }), env)).status).toBe(301);
+    // A write, another port and another host keep the refusal.
+    expect((await worker.fetch(new Request(`http://${host}/api/vote`, { method: "POST" }), env)).status).toBe(421);
+    expect((await worker.fetch(new Request(`http://${host}:8080/`), env)).status).toBe(421);
+    expect((await worker.fetch(new Request("http://other.example.test/"), env)).status).toBe(421);
+    expect(router.calls).toHaveLength(0);
+  });
+
   it("answers 503 when the app origin is not configured", async (): Promise<void> => {
     env.APP_ORIGIN = "not a url";
     expect((await fetchPath("/")).status).toBe(503);
