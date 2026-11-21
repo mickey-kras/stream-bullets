@@ -177,7 +177,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0032", (): void => {
+  it("covers 0006 to 0033", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -206,6 +206,7 @@ describe("migrations 0006 onwards", (): void => {
       "0030",
       "0031",
       "0032",
+      "0033",
     ]);
   });
 

@@ -232,6 +232,13 @@
       "when": 1795160422350,
       "tag": "0032_overlay_layers_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1795249445660,
+      "tag": "0033_overlay_key_kept",
+      "breakpoints": true
     }
   ]
 }

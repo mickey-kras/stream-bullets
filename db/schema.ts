@@ -695,6 +695,10 @@ export const overlayKeys = sqliteTable(
       .primaryKey()
       .references(() => streamers.id, { onDelete: "cascade" }),
     keyHash: text("key_hash").notNull(),
+    // The key, encrypted with a key of CHANNEL_TOKEN_KEYS, so the owner can see the link again. Null: not kept.
+    keySealed: text("key_sealed"),
+    // The id of the encryption key.
+    keyId: text("key_id"),
     createdAt: integer("created_at").notNull(),
   },
   (table) => [
