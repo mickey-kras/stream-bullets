@@ -45,8 +45,8 @@ export function channelsOff(env: AppEnv): boolean {
 }
 
 /**
- * Whether the activity feed can run: channels are on and the deployment has the CHANNEL_INGEST binding. The test
- * environment has no binding, so its feed and character playground are off.
+ * Whether the activity feed can run: channels are on and the deployment has the CHANNEL_INGEST binding. A
+ * deployment without the binding has no feed and no character playground.
  */
 export function activityAvailable(env: AppEnv): boolean {
   return !channelsOff(env) && (env as Partial<AppEnv>).CHANNEL_INGEST !== undefined;

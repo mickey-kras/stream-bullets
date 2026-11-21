@@ -280,9 +280,8 @@ and `POST /api/overlay/characters` returns `503`. See [Turn the feature off](cha
 
 The open characters layers go empty.
 
-The `test` environment in `wrangler.jsonc` has no `CHANNEL_INGEST` binding.
-Thus the characters do not run there, and `POST /api/overlay/characters` returns `503`.
-The owner decides about that binding in a separate change.
+A deployment without the `CHANNEL_INGEST` binding has no characters, and `POST /api/overlay/characters` returns `503`.
+The `test` environment in `wrangler.jsonc` has the binding, so the characters run there.
 
 ## Rollback
 
