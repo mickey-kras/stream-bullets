@@ -338,3 +338,42 @@ test("signed-out readers can expand a removed-parent thread and return from sign
     await runSql("threads-signed-out-cleanup", [`DELETE FROM entries WHERE id='${entryId}';`]);
   }
 });
+
+test("the link field adds a link and does not post the comment", async ({ browser }) => {
+  const entryId: string = await seedThreads();
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  const page = await newPage(context);
+  try {
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const comments = page.locator("article.comment");
+    // Each write to the page of the streamer. Enter in the link field must not start one.
+    const posts: string[] = [];
+    page.on("request", (request) => {
+      if (request.method() === "POST" && request.url().includes("/api/streamers/")) posts.push(request.url());
+    });
+    const composer = commentBox(page, "Write a comment");
+    await composer.click();
+    await page.keyboard.type("See the guide");
+    await page.keyboard.press("Shift+Home");
+    await page.getByRole("button", { name: "Add link", exact: true }).click();
+    const address = page.getByRole("textbox", { name: "Link address", exact: true });
+    await address.fill("https://example.com/guide");
+    await address.press("Enter");
+    // Enter in the link field applies the link. The comment stays in the editor.
+    await expect(address).toHaveCount(0);
+    await expect(composer.getByRole("link", { name: "See the guide" })).toHaveAttribute(
+      "href",
+      "https://example.com/guide",
+    );
+    expect(posts).toEqual([]);
+    await expect(comments.filter({ hasText: "See the guide" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    const posted = comments.filter({ hasText: "See the guide" }).first();
+    await expect(posted.getByRole("link", { name: "See the guide" })).toHaveAttribute(
+      "href",
+      "https://example.com/guide",
+    );
+  } finally {
+    await close(context);
+  }
+});

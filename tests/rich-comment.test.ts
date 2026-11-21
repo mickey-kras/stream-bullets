@@ -63,6 +63,12 @@ describe("comment editor text", (): void => {
   ])("keeps %j", (text: string): void => {
     expect(roundTrip({ text, mentions: [] })).toEqual({ text, mentions: [] });
   });
+  it("reads the underscore forms and writes the star forms", (): void => {
+    expect(roundTrip({ text: "__bold__ and _italic_", mentions: [] })).toEqual({
+      text: "**bold** and *italic*",
+      mentions: [],
+    });
+  });
   it("keeps a mention and its range next to formatted text", (): void => {
     const value: CommentValue = {
       text: "**Hi** @Bob Lee, see `x`",

@@ -24,7 +24,7 @@ import {
   type RangeSelection,
   type TextFormatType,
 } from "lexical";
-import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { t, type MessageId } from "../i18n";
 import {
   $createCodeNode,
@@ -225,7 +225,9 @@ export function RichCommentInput({
           const selection = $getSelection();
           if (!text || !$isRangeSelection(selection)) return false;
           const node: LexicalNode = selection.anchor.getNode();
+          // Text in a code block or in inline code stays as the author pasted it.
           if ($isCodeNode(node) || $isCodeNode(node.getParent())) return false;
+          if ($isTextNode(node) && node.hasFormat("code")) return false;
           event.preventDefault();
           selection.insertNodes($generateNodesFromMarkdownString(text, COMMENT_TRANSFORMERS, true));
           return true;
@@ -354,8 +356,8 @@ export function RichCommentInput({
     editor.focus();
   }
 
-  function applyLink(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
+  // The link field is in the form of the comment. Thus it is not a form of its own.
+  function applyLink(): void {
     const url: string = (linkUrl ?? "").trim();
     const editor = editorRef.current;
     if (!editor || !/^(https?:\/\/|mailto:)\S+$/iu.test(url)) return;
@@ -421,24 +423,30 @@ export function RichCommentInput({
         ))}
       </div>
       {linkUrl !== null && (
-        <form id={linkId} className="ed-link" onSubmit={applyLink}>
+        <div id={linkId} className="ed-link">
           <input
             type="url"
             ref={focusInput}
-            required
             value={linkUrl}
             aria-label={t("editor.linkUrl")}
             placeholder="https://"
             onChange={(event) => setLinkUrl(event.currentTarget.value)}
             onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                // Enter applies the link and must not post the comment.
+                event.preventDefault();
+                applyLink();
+              }
               if (event.key !== "Escape") return;
               event.stopPropagation();
               setLinkUrl(null);
               editorRef.current?.focus();
             }}
           />
-          <button type="submit">{t("editor.linkApply")}</button>
-        </form>
+          <button type="button" onClick={applyLink}>
+            {t("editor.linkApply")}
+          </button>
+        </div>
       )}
       <div
         ref={root}
