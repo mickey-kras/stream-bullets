@@ -3,6 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import type { LoaderFunctionArgs, ServerBuild } from "react-router";
 import type { AppContext, AppEnv } from "../app/env";
 import { appContext } from "../app/env";
+import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
 import { hashOverlayKey, regenerateOverlayKey } from "../app/server/overlay-key.server";
 import { PollRoom } from "../app/server/poll-room";
 import { resetKickKey, resetRoutes } from "../app/server/channel-webhooks.server";
@@ -610,6 +611,14 @@ describe("Worker activity feed and provider webhooks", (): void => {
     return fetchPath(`/api/activity/${handle}${query}`, { headers: { Origin: origin, Upgrade: "websocket", ...headers } });
   }
 
+  /** Whether the response is an accepted socket that the Worker closed with the key refusal. */
+  async function refusedKey(pending: Promise<Response>): Promise<boolean> {
+    const response = await pending;
+    if (response.status !== 101) return false;
+    const socket = serverSocketOf((response as Response & { webSocket: unknown }).webSocket);
+    return socket.closeCode === KEY_REFUSED_CLOSE && socket.closeReason === "Overlay key refused";
+  }
+
   it("forwards the feed only with the current overlay key or the owner's session", async (): Promise<void> => {
     env.CHANNEL_INGEST = capturingRooms() as unknown as DurableObjectNamespace;
     const key = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
@@ -623,11 +632,13 @@ describe("Worker activity feed and provider webhooks", (): void => {
     expect(lastForwarded().url).toBe(`https://channel-ingest.internal/subscribe?streamerId=${pageId}&characters=1`);
     forwarded = [];
     expect((await activity("zed_page", {}, `?key=${key}&characters=0`)).status).toBe(400);
-    // Viewers, wrong keys, revoked keys and client-sent identity headers get nothing.
+    // Viewers and client-sent identity headers get nothing.
     expect((await activity("zed_page", { Cookie: await cookie("viewer"), "X-SB-Owner": "1" })).status).toBe(403);
-    expect((await activity("zed_page", {}, `?key=${"A".repeat(43)}`)).status).toBe(403);
+    // A wrong or revoked key gets a socket that is closed with the refusal code, so the overlay stops its retries.
+    expect(await refusedKey(activity("zed_page", {}, `?key=${"A".repeat(43)}`))).toBe(true);
+    expect(await refusedKey(activity("zed_page", { Cookie: await cookie("viewer") }, "?key=short"))).toBe(true);
     await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
-    expect((await activity("zed_page", {}, `?key=${key}`)).status).toBe(403);
+    expect(await refusedKey(activity("zed_page", {}, `?key=${key}`))).toBe(true);
     expect((await activity("hidden_page", { Cookie: await cookie("hidden") })).status).toBe(404);
     expect((await activity("zed_page", { Origin: "https://evil.example" }, `?key=${key}`)).status).toBe(403);
     expect((await activity("zed_page", {}, "?other=1")).status).toBe(400);
@@ -645,8 +656,8 @@ describe("Worker activity feed and provider webhooks", (): void => {
       .run();
     const keyA = await regenerateOverlayKey(env, "owner", { id: pageId, status: "active" });
     const keyB = await regenerateOverlayKey(env, "viewer", { id: otherId, status: "active" });
-    expect((await activity("b_page", {}, `?key=${keyA}`)).status).toBe(403);
-    expect((await activity("zed_page", {}, `?key=${keyB}`)).status).toBe(403);
+    expect(await refusedKey(activity("b_page", {}, `?key=${keyA}`))).toBe(true);
+    expect(await refusedKey(activity("zed_page", {}, `?key=${keyB}`))).toBe(true);
     expect((await activity("b_page", { Cookie: await cookie("owner") })).status).toBe(403);
     expect(forwarded).toHaveLength(0);
     expect((await activity("b_page", {}, `?key=${keyB}`)).status).toBe(101);

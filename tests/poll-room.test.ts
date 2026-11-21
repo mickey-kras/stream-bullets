@@ -424,6 +424,54 @@ describe("live room admission", (): void => {
     expect([owner.open, viewer.open]).toEqual([true, true]);
   });
 
+  it("tells the owner how many OBS sources are connected and when one was last seen", async (): Promise<void> => {
+    type Sources = { count: number; seenAt: number | null };
+    const sources = (socket: FakeSocket): Sources[] =>
+      socket.ofType<Sources & { type: string }>("overlay-sources").map(({ count, seenAt }) => ({ count, seenAt }));
+    const owner = await join({ key: KEY, user: "owner-1", owner: true });
+    const viewer = await join({ key: seat(1) });
+    expect(sources(owner)).toEqual([{ count: 0, seenAt: null }]);
+    const joinedAt = Date.now();
+    const [first, second] = await joinAll(2, () => ({ key: KEY, overlay: true }));
+    expect(sources(owner).slice(1)).toEqual([
+      { count: 1, seenAt: joinedAt },
+      { count: 2, seenAt: joinedAt + 1 },
+    ]);
+    // A source that closes, and one whose connection fails.
+    first.readyState = 3;
+    await room().webSocketClose(first as unknown as WebSocket, 1001, "", true);
+    expect(sources(owner).at(-1)).toEqual({ count: 1, seenAt: Date.now() });
+    vi.setSystemTime(Date.now() + MINUTE);
+    const goneAt = Date.now();
+    await room().webSocketError(second as unknown as WebSocket, new Error("lost"));
+    expect(second.closeCode).toBe(1011);
+    expect(sources(owner).at(-1)).toEqual({ count: 0, seenAt: goneAt });
+    // Other sockets close without a message. Only the owner's own sockets get one, and a later one gets the stored time.
+    await room().webSocketError(viewer as unknown as WebSocket, new Error("lost"));
+    expect(sources(owner)).toHaveLength(5);
+    expect([...sources(viewer), ...sources(first), ...sources(second)]).toEqual([]);
+    vi.setSystemTime(Date.now() + MINUTE);
+    rooms.restart(streamerId);
+    expect(sources(await join({ key: KEY, user: "owner-1", owner: true }))).toEqual([{ count: 0, seenAt: goneAt }]);
+  });
+
+  it("tells the owner when a revoked key or a silent connection ends an OBS source", async (): Promise<void> => {
+    const owner = await join({ key: KEY, user: "owner-1", owner: true });
+    const counts = (): number[] => owner.ofType<{ count: number }>("overlay-sources").map(({ count }) => count);
+    expect((await post("overlay-key")).status).toBe(204);
+    expect(counts()).toEqual([0]);
+    await join({ key: KEY, overlay: true });
+    expect((await post("overlay-key")).status).toBe(204);
+    expect(counts()).toEqual([0, 1, 0]);
+    // The source stops its pings: the room closes it at the next check and tells the owner.
+    await join({ key: KEY, overlay: true });
+    vi.setSystemTime(Date.now() + 2 * MINUTE);
+    state().ping(owner);
+    await room().alarm();
+    await state().drain();
+    expect(counts()).toEqual([0, 1, 0, 1, 0]);
+  });
+
   it("treats an owner header without an account as a signed-out socket", async (): Promise<void> => {
     const response = await call("subscribe", {
       headers: { Upgrade: "websocket", "X-Stream-Bullets-Client": KEY, "X-SB-Owner": "1" },
@@ -473,7 +521,7 @@ describe("live room connections over time", (): void => {
 
   it("closes a socket the runtime reports as failed", async (): Promise<void> => {
     const socket = await join();
-    room().webSocketError(socket as unknown as WebSocket, new Error("reset"));
+    await room().webSocketError(socket as unknown as WebSocket, new Error("reset"));
     expect([socket.closeCode, socket.closeReason]).toEqual([1011, "Live connection failed"]);
   });
 

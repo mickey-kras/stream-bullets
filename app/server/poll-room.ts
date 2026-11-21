@@ -116,6 +116,8 @@ export class PollRoom extends DurableObject<AppEnv> {
   private latestSnapshot: LiveSnapshot | undefined;
   private pendingSnapshot: Promise<LiveSnapshot> | undefined;
   private overlay: OverlayPublic | undefined;
+  // When an OBS source last connected or went away. Undefined before the first read of the stored value.
+  private overlaySeenAt: number | null | undefined;
   private readonly battles = new Map<string, Battle>();
   private readonly loadingBattles = new Map<string, Promise<Battle | null>>();
   private readonly notLive = new Map<string, number>();
@@ -216,6 +218,8 @@ export class PollRoom extends DurableObject<AppEnv> {
         this.latestSnapshot = undefined;
         this.pendingSnapshot = undefined;
         this.overlay = undefined;
+        this.overlaySeenAt = undefined;
+        await this.ctx.storage.delete("overlaySeenAt");
         this.ctx.storage.sql.exec("DELETE FROM tap_journal");
         await this.ctx.storage.deleteAlarm();
       } finally {
@@ -277,6 +281,8 @@ export class PollRoom extends DurableObject<AppEnv> {
     server.serializeAttachment(lease);
     const first: LiveSnapshot = this.withBattles(snapshot);
     this.send(server, JSON.stringify(overlayKey ? overlaySnapshot(first) : first));
+    if (overlayKey) await this.overlaySourcesChanged();
+    else if (role === "owner") this.send(server, await this.overlaySources());
     this.startTicker();
     await this.scheduleResync();
     return new Response(null, { status: 101, webSocket: client });
@@ -345,12 +351,30 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   // Reconnect old-key sockets without owner priority.
-  private overlayKeyRevoked(): Response {
-    for (const socket of this.activeSockets("overlay-key")) {
+  private async overlayKeyRevoked(): Promise<Response> {
+    const sources = this.activeSockets("overlay-key");
+    for (const socket of sources) {
       this.send(socket, JSON.stringify({ type: "unavailable" }));
       if (socket.readyState === WebSocket.OPEN) socket.close(1001, "Overlay key revoked");
     }
+    if (sources.length > 0) await this.overlaySourcesChanged();
     return new Response(null, { status: 204 });
+  }
+
+  // The OBS sources for the overlay control: how many are connected, and when one last connected or went away.
+  private async overlaySources(): Promise<string> {
+    this.overlaySeenAt ??= (await this.ctx.storage.get<number>("overlaySeenAt")) ?? null;
+    const count = this.activeSockets("overlay-key").length;
+    return JSON.stringify({ type: "overlay-sources", count, seenAt: this.overlaySeenAt });
+  }
+
+  // An OBS source connected or went away: store the time and tell the owner's sockets that are not OBS sources.
+  private async overlaySourcesChanged(): Promise<void> {
+    this.overlaySeenAt = Date.now();
+    await this.ctx.storage.put("overlaySeenAt", this.overlaySeenAt);
+    const message = await this.overlaySources();
+    for (const socket of this.activeSockets("role:owner"))
+      if (!this.ctx.getTags(socket).includes("overlay-key")) this.send(socket, message);
   }
 
   private async overlayChanged(): Promise<Response> {
@@ -382,13 +406,17 @@ export class PollRoom extends DurableObject<AppEnv> {
   }
 
   async webSocketClose(socket: WebSocket, _code: number, _reason: string, _wasClean: boolean): Promise<void> {
+    const source = this.ctx.getTags(socket).includes("overlay-key");
     socket.close();
+    if (source) await this.overlaySourcesChanged();
     for (const battle of this.battles.values()) battle.seqs.delete(socket);
     if (this.activeSockets().length === 0 && this.battles.size === 0) await this.ctx.storage.deleteAlarm();
   }
 
-  webSocketError(socket: WebSocket, _error: unknown): void {
+  async webSocketError(socket: WebSocket, _error: unknown): Promise<void> {
+    const source = this.ctx.getTags(socket).includes("overlay-key");
     socket.close(1011, "Live connection failed");
+    if (source) await this.overlaySourcesChanged();
   }
 
   // Recover/end battles and broadcast a snapshot. Reschedule in `finally` so D1 failures cannot stop recovery.
@@ -934,8 +962,10 @@ export class PollRoom extends DurableObject<AppEnv> {
       const idle = now - Math.max(lease.openedAt, pinged) >= IDLE_TIMEOUT_MS;
       if (lease.expiresAt > now && !idle) continue;
       this.send(socket, JSON.stringify({ type: "unavailable" }));
-      if (socket.readyState === WebSocket.OPEN)
-        socket.close(1001, idle ? "Live connection idle" : "Live connection lease expired");
+      if (socket.readyState !== WebSocket.OPEN) continue;
+      socket.close(1001, idle ? "Live connection idle" : "Live connection lease expired");
+      // An OBS source that went silent sends no close: tell the overlay control here.
+      if (this.ctx.getTags(socket).includes("overlay-key")) this.ctx.waitUntil(this.overlaySourcesChanged());
     }
   }
 

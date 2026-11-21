@@ -94,6 +94,16 @@ it("renews the budget after a sustained healthy connection", (): void => {
   expect(hooks.update).not.toHaveBeenCalledWith("offline");
 });
 
+it("keeps the OBS source count that the room sends to the owner", (): void => {
+  start();
+  current().snapshot();
+  hooks.update.mockClear();
+  current().onmessage?.({ data: JSON.stringify({ type: "overlay-sources", count: 2, seenAt: 5 }) });
+  expect(hooks.update.mock.calls).toEqual([[{ count: 2, seenAt: 5 }]]);
+  current().onmessage?.({ data: JSON.stringify({ type: "overlay-sources", count: -1, seenAt: null }) });
+  expect(current().readyState).toBe(3);
+});
+
 it("cancels a pending retry when the page leaves", (): void => {
   start();
   current().close();
