@@ -18,6 +18,7 @@ import { overlayKeyMatches } from "../app/server/overlay-key.server";
 import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
 import { visitorPrefix } from "../app/server/ip-prefix";
 import { cleanExpiredData } from "../app/server/cleanup.server";
+import { TRANSLATION_CRON, translatePending } from "../app/server/translation-jobs.server";
 import { scheduleCalendar, topUpSeries } from "../app/server/schedule.server";
 import {
   requireTestAccess,
@@ -269,6 +270,11 @@ export default {
   async scheduled(controller: ScheduledController, env: AppEnv): Promise<void> {
     validateTestEnvironment(env);
     if (env.APP_ENV === "test") await requireTestDatabase(env);
+    // This trigger only translates content. A failure of all its work fails the run, so the cron alert shows it.
+    if (controller.cron === TRANSLATION_CRON) {
+      await translatePending(env, controller.scheduledTime);
+      return;
+    }
     const jobs: Record<string, (env: AppEnv, now: number) => Promise<unknown>> = {
       cleanup: cleanExpiredData,
       // Keep weekly series 12 weeks ahead.

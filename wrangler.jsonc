@@ -22,7 +22,8 @@
   // Logs store error classes, frames, and Ray IDs. Issues groups failures; source maps resolve frames.
   "observability": { "enabled": true, "head_sampling_rate": 1, "issues": { "enabled": true } },
   "upload_source_maps": true,
-  "triggers": { "crons": ["17 * * * *"] },
+  // Hourly jobs, and the translation of new and old content each 10 minutes.
+  "triggers": { "crons": ["17 * * * *", "*/10 * * * *"] },
   "env": {
     "test": {
       "name": "stream-bullets-test",

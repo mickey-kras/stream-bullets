@@ -260,6 +260,19 @@ All accounts together have a daily limit of model starts. An edit or a removal o
 Two readers who ask at the same time start the model one time: the second reader gets `409` and can try again.
 A deployment without the `AI` binding has no translation.
 
+## Translation of new content
+
+A person posts a topic, a poll or a comment, or edits a comment.
+The server then starts the translations of that item after the response.
+It translates the item to each site language and stores the results. A reader then gets the translation with the page.
+
+A job does the same work for content that has no stored result for each site language.
+This job translates the content from before this feature, and it tries again after a failure.
+It runs each 10 minutes and takes the newest items first, 4 comments and 4 entries in one run.
+
+The translation at the time of the read stays for content that the server did not translate yet.
+The daily limit of model starts applies to all these paths.
+
 ## Topic and poll translation
 
 A reader also sees each topic, poll and idea in the language of the site for that reader.

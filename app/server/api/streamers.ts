@@ -1,4 +1,5 @@
 import { notifyRoom } from "../live.server";
+import { translateAfterPost } from "../translation-jobs.server";
 import { requestLocale } from "../../i18n/resolve";
 import { attachEntryTranslations } from "../entry-translation.server";
 import {
@@ -48,6 +49,9 @@ export const streamerRoutes: ApiRoute[] = [
         ? await createMash(env, viewer.id, streamer.id, input)
         : await mutateEntry(env, viewer.id, streamer.id, input, () => requireAdminSession(request, app));
     notifyRoom(env, streamer.id);
+    // A new topic, poll or comment gets its translations after the response.
+    if (input.action === "create") translateAfterPost(env, "entry", result.id);
+    if (input.action === "comment") translateAfterPost(env, "comment", result.id);
     return json(result);
   }),
   // PATCH /api/streamer {name?, about?, handle?, logoMode?: "profile" | "logo"} → {streamer}

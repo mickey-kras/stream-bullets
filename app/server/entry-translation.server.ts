@@ -3,7 +3,7 @@ import { LOCALES } from "../../db/enums";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
 import type { Entry, EntryText } from "../types";
-import { getVisibleEntry } from "./data.server";
+import { getEntry, getVisibleEntry } from "./data.server";
 import { HttpError } from "./http.server";
 import { LANGUAGES, reserveStart, sha256, TRANSLATION_MODEL } from "./translation.server";
 
@@ -124,16 +124,19 @@ export async function attachEntryTranslations(env: AppEnv, entries: readonly Ent
 export async function translateEntry(
   env: AppEnv,
   entryId: string,
-  viewerId: string,
+  viewerId: string | null,
   locale: Locale,
   now: number,
-  shown: EntryText,
+  shown?: EntryText,
 ): Promise<EntryText | null> {
   if (!env.AI) throw new HttpError(503, "Translation is not available.");
-  const entry: Entry | null = await getVisibleEntry(env, entryId, viewerId);
+  // A null `viewerId` is the server: it translates new content and has no access check.
+  const entry: Entry | null =
+    viewerId === null ? await getEntry(env, entryId, null) : await getVisibleEntry(env, entryId, viewerId);
   if (!entry) throw new HttpError(404, "Topic or poll not found.");
   const source: EntryText = sourceText(entry);
-  if (signature(shown) !== signature(source)) throw new HttpError(409, "The text changed. Load the page again.");
+  if (shown && signature(shown) !== signature(source))
+    throw new HttpError(409, "The text changed. Load the page again.");
   await attachEntryTranslations(env, [entry], locale);
   if (entry.translation !== undefined) return entry.translation;
 
@@ -155,7 +158,7 @@ export async function translateEntry(
       .run();
   };
   // Text without letters has no translation and starts no model.
-  if (!/\p{L}/u.test([source.title, source.body, ...source.options].join(" ").replace(/https?:\/\/\S+/gu, ""))) {
+  if (!/\p{L}/u.test([source.title, source.body, ...source.options].join(" ").replaceAll(/https?:\/\/\S+/gu, ""))) {
     await store(null);
     return null;
   }

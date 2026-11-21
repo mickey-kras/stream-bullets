@@ -1,3 +1,4 @@
+import { EntryTranslationControl } from "../entry-translation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { useMatches, useRevalidator } from "react-router";
 import { t, tn } from "../../i18n";
@@ -510,6 +511,7 @@ export function MashCard({
     >
       {owner && <HostBar entry={entry} view={view} onAction={onAction} />}
       <Headline view={view} title={entry.title} titleId={titleId} />
+      <EntryTranslationControl entry={entry} />
       {body}
       {!signedIn && (
         <div className="mash-signin">
