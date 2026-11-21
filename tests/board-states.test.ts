@@ -163,14 +163,13 @@ describe("poll states", (): void => {
     counts: [0, 0],
   };
 
-  it("keeps a poll without an end time open, with zero votes and separate like and dislike controls", (): void => {
+  it("keeps a poll without an end time open, with zero votes and no like or dislike controls", (): void => {
     const markup: string = card(entry({ ...options, endsAt: null }));
     expect(markup).toContain("0 votes");
     expect(markup).not.toMatch(/<button[^>]*disabled=""[^>]*class="poll-option/);
-    // Like and Dislike are two buttons, each with its own pressed state and name.
-    const reactions: string[] = markup.split('aria-pressed="false"').slice(1);
-    expect(reactions.filter((button: string) => button.includes(">Like poll, <"))).toHaveLength(1);
-    expect(reactions.filter((button: string) => button.includes(">Dislike poll, <"))).toHaveLength(1);
+    // Viewers confused Like and Dislike with a Yes and No vote: a poll has only its options.
+    expect(markup).not.toContain("poll-react");
+    expect(markup).not.toMatch(/>(Like|Dislike)</);
     expect(markup).toContain('data-entry-id="entry-1"');
   });
 

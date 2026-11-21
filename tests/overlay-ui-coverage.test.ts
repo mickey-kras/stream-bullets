@@ -14,6 +14,7 @@ import { controlState, OverlayControl } from "../app/components/overlay/overlay-
 import { sourcesText } from "../app/components/overlay/overlay-link";
 import {
   OverlayStage,
+  optionColumns,
   overlayPoll,
   qrTarget,
   type OverlayPoll,
@@ -679,14 +680,28 @@ describe("overlay source fallbacks", () => {
       for (const source of sources) {
         const on: string = stage(source, full, true);
         const link: string = (qrTarget(full, source) ?? "").replaceAll("&", "&amp;");
-        // The text keeps the left side. The code is the last part of the card.
-        expect(on, source.type).toMatch(/<article [^>]*><div class="ov-qr-row"><div class="ov-qr-text">/);
-        expect(on.endsWith(`data-overlay-qr="${link}"/></div></article></div>`), source.type).toBe(true);
+        // The text keeps the left side. The code is the last part of the card. A poll has the code beside its
+        // question, in the head of the card.
+        if (source.type === "auto" || source.type === "poll") {
+          expect(on, source.type).toMatch(/<div class="ov-poll-head"><h1>[^<]+<\/h1><img class="ov-qr"/);
+          expect(on, source.type).toContain(`data-overlay-qr="${link}"/></div><div class="poll-choices`);
+        } else {
+          expect(on, source.type).toMatch(/<article [^>]*><div class="ov-qr-row"><div class="ov-qr-text">/);
+          expect(on.endsWith(`data-overlay-qr="${link}"/></div></article></div>`), source.type).toBe(true);
+        }
         expect(on.match(/class="ov-qr"/g), source.type).toHaveLength(1);
         const off: string = stage(source, full);
         expect(off, source.type).toContain("<article");
         expect(off, source.type).not.toContain("ov-qr");
       }
+    });
+
+    it("gives long option names wide bars: a row for each of up to three, else two columns", () => {
+      expect(optionColumns(["Yes", "No"])).toBeUndefined();
+      expect(optionColumns(["Twelve chars", "No"])).toBeUndefined();
+      expect(optionColumns(["Thirteen chars", "No"])).toBe(1);
+      expect(optionColumns(["A long option name", "b", "c"])).toBe(1);
+      expect(optionColumns(["A long option name", "b", "c", "d"])).toBe(2);
     });
 
     it("shows no code for the message banner or for a layer with nothing to show", () => {

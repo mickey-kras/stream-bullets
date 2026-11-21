@@ -29,7 +29,7 @@ test("the Polls tab: a Mash Battle is a teaser row that opens the battle's own v
   await close(owner);
 });
 
-test("a poll card has the mockup's React group, owner menu and time left", async ({ browser }) => {
+test("a poll card has the owner menu and time left, and no Like or Dislike buttons", async ({ browser }) => {
   const owner = await signedIn(browser, "featureowner", clientIp("alignment", 141));
   const created = await owner.request.post("/api/streamers/feature_host", {
     data: { action: "create", kind: "choice", title: "Alignment poll", options: ["Red", "Blue"], duration: 3600 },
@@ -41,8 +41,9 @@ test("a poll card has the mockup's React group, owner menu and time left", async
   const card = page.locator(".poll-card").filter({ hasText: "Alignment poll" }).first();
   await expect(card.locator(".poll-countdown")).toHaveText(/^(1 h 0 min|60 min|59 min) left$/u);
   await expect(card.getByText("Viewers can vote until voting closes.")).toBeVisible();
-  const react = card.getByRole("group", { name: "Like or dislike this poll" });
-  await expect(react.getByRole("button", { name: "Like poll, 0", exact: true })).toBeVisible();
+  // A poll has no Like and Dislike buttons, and the page shows its title one time.
+  await expect(card.getByRole("button", { name: /Like|Dislike/ })).toHaveCount(0);
+  await expect(page.getByText("Alignment poll", { exact: true })).toHaveCount(1);
   await card.getByLabel("Poll actions: Alignment poll").click();
   await expect(card.getByRole("button", { name: "End voting" })).toBeVisible();
   await card.getByRole("button", { name: "Delete poll" }).click();

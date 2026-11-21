@@ -1,4 +1,4 @@
-import { useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, type ReactNode, type RefObject } from "react";
 import { intlLocale, t, tn } from "../../i18n";
 import { MASH_NAME, mashPhaseAt, mashWinner } from "../../lib/mash";
 import type { ContentSource } from "../../lib/overlay-layers";
@@ -159,25 +159,77 @@ function MashOverlay({ scene, poll, qr }: CardProps & Readonly<{ poll: OverlayPo
   );
 }
 
+/**
+ * Sets the largest font size at which the text of `element` fits its box. The poll question has the height of the QR
+ * code, so a short question shows large and a long question shows small. It measures again when the box changes.
+ */
+function useFitText(text: string): RefObject<HTMLHeadingElement | null> {
+  const element = useRef<HTMLHeadingElement | null>(null);
+  useEffect(() => {
+    const node: HTMLHeadingElement | null = element.current;
+    if (!node) return;
+    const fit = (): void => {
+      let low = 12;
+      let high: number = Math.max(low, Math.floor(node.clientHeight * 0.6));
+      while (low < high) {
+        const size: number = Math.ceil((low + high) / 2);
+        node.style.fontSize = `${size}px`;
+        if (node.scrollHeight <= node.clientHeight && node.scrollWidth <= node.clientWidth) low = size;
+        else high = size - 1;
+      }
+      node.style.fontSize = `${low}px`;
+    };
+    const sizes = new ResizeObserver(fit);
+    sizes.observe(node);
+    return (): void => sizes.disconnect();
+  }, [text]);
+  return element;
+}
+
+/** Option names longer than this many characters do not fit a bar that shares its row with two others. */
+const SHORT_OPTION = 12;
+
+/**
+ * The number of option columns for long option names: one row for each of up to three options, else two columns.
+ * Undefined for short names: the options then share one row, or two rows of three.
+ */
+export function optionColumns(options: readonly string[]): 1 | 2 | undefined {
+  if (options.every((option: string): boolean => option.length <= SHORT_OPTION)) return undefined;
+  return options.length <= 3 ? 1 : 2;
+}
+
+/**
+ * A poll on stream. Viewers cannot select it, so it is short: the question beside the QR code at the same height,
+ * the options across the full width with the live result, and one status line.
+ */
 function PollOverlay({ scene, poll, qr }: CardProps & Readonly<{ poll: OverlayPoll }>): ReactNode {
+  const title = useFitText(poll.title);
   if (poll.kind === "mash" && poll.mash) return <MashOverlay scene={scene} poll={poll} qr={qr} />;
   const hiddenUntilReveal: boolean = poll.kind === "binary" && !poll.revealed;
   return (
-    <article className="poll-card overlay-card" data-overlay-poll={poll.id}>
-      <CardBody qr={qr}>
-        <span className="eyebrow">{t("overlay.livePoll", { name: scene.name })}</span>
-        <PollStatus poll={poll} now={scene.now} />
-        <h1>{poll.title}</h1>
+    <article
+      className="poll-card overlay-card ov-poll"
+      data-overlay-poll={poll.id}
+      data-option-columns={optionColumns(poll.options)}
+    >
+      <div className="ov-poll-body">
+        <div className="ov-poll-head">
+          <h1 ref={title}>{poll.title}</h1>
+          {qr !== null && <QrCode url={qr} />}
+        </div>
         {scene.overlay.showResults ? (
           <PollResults poll={poll} now={scene.now} />
         ) : (
           <p className="ov-hidden-results">{t("overlay.resultsHidden")}</p>
         )}
-        <p className="overlay-total">
-          {tn("poll.votes", poll.total)}
-          {hiddenUntilReveal && ` · ${t("overlay.notRevealed")}`}
-        </p>
-      </CardBody>
+        <div className="ov-poll-foot">
+          <PollStatus poll={poll} now={scene.now} />
+          <p className="overlay-total">
+            {tn("poll.votes", poll.total)}
+            {hiddenUntilReveal && ` · ${t("overlay.notRevealed")}`}
+          </p>
+        </div>
+      </div>
     </article>
   );
 }
