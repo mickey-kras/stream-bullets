@@ -214,8 +214,8 @@ function communityFixtures(env: AppEnv, now: number): D1PreparedStatement[] {
         testAccountId("other_viewer"),
         1,
       ),
+      ...moreContent(env, community, owner, now),
     );
-    statements.push(...moreContent(env, community, owner, now));
     if (community > 2) {
       statements.push(
         env.DB.prepare(
