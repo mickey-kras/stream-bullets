@@ -53,23 +53,21 @@ function urls(text: string): string {
 }
 
 /**
- * The parts of the answer of the model. Null when the form is wrong. The model writes a line "---" between the
- * parts, and it can write one more of these lines for an empty part.
+ * The parts of the answer of the model. Null when the form is wrong. A line "---" ends the title and ends the
+ * answer options. All text after that is the description, so a description can have such a line. The model can
+ * write one more of these lines for an empty part.
  */
 export function readEntryAnswer(answer: string): EntryText | null {
-  const [head, ...lines] = answer.trim().split("\n");
-  if (!head.startsWith("ORIGINAL=") || lines[0] !== "---") return null;
-  const parts: string[][] = [];
-  for (const line of lines) {
-    if (line.trim() === "---") parts.push([]);
-    else parts.at(-1)?.push(line);
-  }
-  const [title, options, ...rest] = parts.map((part: string[]): string => part.join("\n").trim());
-  if (title === undefined || title === "" || title.includes("\n")) return null;
+  const [head, first, title, second, ...lines] = answer.trim().split("\n");
+  if (!head.startsWith("ORIGINAL=") || first !== "---" || !title?.trim() || second?.trim() !== "---") return null;
+  let end: number = lines.findIndex((line: string): boolean => line.trim() === "---");
+  if (end === -1) end = lines.length;
+  const rest: string[] = lines.slice(end + 1);
+  const empty: boolean = rest.every((line: string): boolean => line.trim() === "" || line.trim() === "---");
   return {
-    title,
-    options: (options ?? "").split("\n").flatMap((option: string): string[] => (option.trim() ? [option.trim()] : [])),
-    body: rest.filter((part: string): boolean => part !== "").join("\n---\n"),
+    title: title.trim(),
+    options: lines.slice(0, end).flatMap((option: string): string[] => (option.trim() ? [option.trim()] : [])),
+    body: empty ? "" : rest.join("\n").trim(),
   };
 }
 

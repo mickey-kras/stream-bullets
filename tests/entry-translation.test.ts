@@ -85,6 +85,11 @@ describe("the answer of the model for an entry", (): void => {
       "ORIGINAL=ru\n---\nIdea\n---\n---\nIt is good.",
       { title: "Idea", options: [], body: "It is good." },
     ],
+    [
+      "a separator line in the description",
+      "ORIGINAL=de\n---\nTitle\n---\nA\nB\n---\nHello\n\n---\n\nWorld",
+      { title: "Title", options: ["A", "B"], body: "Hello\n\n---\n\nWorld" },
+    ],
   ])("reads an answer with %s", (_name: string, answer: string, expected: EntryText): void => {
     expect(readEntryAnswer(answer)).toEqual(expected);
   });

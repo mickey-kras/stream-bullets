@@ -351,12 +351,11 @@ export default function StreamerPage(): ReactNode {
     return mergeLiveEntry(entry, live.snapshot, board.revision) as Entry;
   });
   // The entries in the language of the reader.
-  const shown = useEntryTranslations(loadedSelected ? [...liveEntries, loadedSelected] : liveEntries, viewer !== null);
+  const shown = useEntryTranslations(liveEntries, loadedSelected, viewer !== null);
   const entries: Entry[] = liveEntries.map(shown);
   const topicSelection = usePendingTopic(entries, loadedSelected);
   const selectedBase: Entry | null = topicSelection.selected || entries[0] || null;
-  const liveSelected: Entry | null = mergeLiveEntry(selectedBase, live.snapshot, board.revision);
-  const selected: Entry | null = liveSelected && shown(liveSelected);
+  const selected: Entry | null = shown(mergeLiveEntry(selectedBase, live.snapshot, board.revision));
   // Wake at battle start and end.
   const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
   const pollsClass: string = usePollsMainClass(view === "polls" && loadedSelected ? selected : null, now);

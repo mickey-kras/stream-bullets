@@ -14,20 +14,30 @@ export function translationOff(): boolean {
   return unavailable;
 }
 
+/** The item left the page before its request started. A later visit can ask again. */
+export class TranslationStopped extends Error {}
+
 function wait(ms: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
+// The time to wait before the next attempt. Null when a new attempt has no use.
+function retryAfter(error: unknown): number | null {
+  const status: number = error instanceof ApiError ? error.status : 0;
+  if (status === 503) unavailable = true;
+  return RETRY_MS[status] ?? null;
+}
+
 async function send<T>(url: string, body: unknown, stopped: () => boolean): Promise<T> {
   for (let attempt = 0; ; attempt += 1) {
-    if (stopped() || unavailable) throw new Error("The translation is not necessary.");
+    if (stopped()) throw new TranslationStopped();
+    if (unavailable) throw new Error("Translation is not available.");
     try {
       return await postJson<T>(url, body);
     } catch (error) {
-      const status: number = error instanceof ApiError ? error.status : 0;
-      if (status === 503) unavailable = true;
-      if (!(status in RETRY_MS) || attempt === RETRIES) throw error;
-      await wait(RETRY_MS[status]);
+      const delay: number | null = retryAfter(error);
+      if (delay === null || attempt === RETRIES) throw error;
+      await wait(delay);
     }
   }
 }

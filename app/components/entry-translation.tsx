@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { getLocale, t } from "../i18n";
 import type { Entry, EntryText } from "../types";
-import { requestTranslation, translationOff } from "./translation-queue";
+import { requestTranslation, translationOff, TranslationStopped } from "./translation-queue";
 import { Icon } from "./ui/icon";
 
 // The results that this page asked for, and the entries that the reader set to the original text. Topics and
@@ -14,6 +14,8 @@ interface State {
 const EMPTY: State = { loaded: new Map(), originals: new Set() };
 let state: State = EMPTY;
 const asked = new Set<string>();
+// The entries of the page now. A request for an entry that left the page is not sent.
+let wanted: ReadonlySet<string> = new Set();
 const listeners = new Set<() => void>();
 
 function change(next: State): void {
@@ -40,26 +42,31 @@ function ask(entry: Entry): void {
   const key: string = `${entry.id}:${getLocale()}:${signature(entry)}`;
   if (asked.has(key) || translationOff()) return;
   asked.add(key);
-  requestTranslation<{ translation: EntryText | null }>(`/api/entries/${entry.id}/translation`, {
-    locale: getLocale(),
-    title: entry.title,
-    body: entry.body,
-    options: entry.options,
-  })
+  requestTranslation<{ translation: EntryText | null }>(
+    `/api/entries/${entry.id}/translation`,
+    { locale: getLocale(), title: entry.title, body: entry.body, options: entry.options },
+    (): boolean => !wanted.has(entry.id),
+  )
     .then((result) => {
       const loaded = new Map(state.loaded);
       loaded.set(entry.id, { signature: signature(entry), translation: result.translation });
       change({ ...state, loaded });
     })
     // Without a translation, the entry stays in its original text.
-    .catch(() => undefined);
+    .catch((error: unknown) => {
+      if (error instanceof TranslationStopped) asked.delete(key);
+    });
 }
 
 /**
  * Gives a function that puts the language of the reader on a topic, poll or idea. The server gives a stored
  * translation with the entry. When it has none, the page of a signed-in reader asks for it one time.
  */
-export function useEntryTranslations(entries: readonly Entry[], canAsk: boolean): (entry: Entry) => Entry {
+export function useEntryTranslations(
+  entries: readonly Entry[],
+  selected: Entry | null,
+  canAsk: boolean,
+): <T extends Entry | null>(entry: T) => T {
   const current: State = useSyncExternalStore(
     subscribe,
     (): State => state,
@@ -67,16 +74,25 @@ export function useEntryTranslations(entries: readonly Entry[], canAsk: boolean)
   );
   // Each render examines the entries. `ask` starts one request for each entry text and language.
   useEffect(() => {
-    if (!canAsk) return;
-    for (const entry of entries) if (known(entry, current) === undefined) ask(entry);
+    const all: Entry[] = selected ? [...entries, selected] : [...entries];
+    wanted = new Set(all.map((entry: Entry): string => entry.id));
+    if (canAsk) for (const entry of all) if (known(entry, current) === undefined) ask(entry);
   });
-  return (entry: Entry): Entry => {
-    if (entry.translated) return entry;
-    const translation = known(entry, current);
-    if (!translation) return entry;
-    if (current.originals.has(entry.id)) return { ...entry, translated: "original" };
-    return { ...entry, ...translation, translated: "shown" };
-  };
+  useEffect(
+    () => (): void => {
+      wanted = new Set();
+    },
+    [],
+  );
+  return <T extends Entry | null>(entry: T): T => (entry ? (shownEntry(entry, current) as T) : entry);
+}
+
+function shownEntry(entry: Entry, current: State): Entry {
+  if (entry.translated) return entry;
+  const translation = known(entry, current);
+  if (!translation) return entry;
+  if (current.originals.has(entry.id)) return { ...entry, translated: "original" };
+  return { ...entry, ...translation, translated: "shown" };
 }
 
 /** The control on one translated entry: it shows the original text of this entry, and then the translation again. */
