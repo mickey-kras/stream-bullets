@@ -243,7 +243,7 @@ The server stores each result, so the model runs one time for each comment text 
 An edit of the comment starts a new translation.
 
 The server shows a translation only if it has the same Markdown marks, line breaks, code, links and mentions as the comment.
-Each account has a request limit, and all accounts together have a daily limit of new translations.
+Each account has a limit of new translations in one minute, and all accounts together have a daily limit of new translations.
 A deployment without the `AI` binding has no translation.
 
 ## Markdown in comments
