@@ -76,8 +76,17 @@ jobs:
         env:
           REVISION: ${{ steps.revision.outputs.sha }}
         run: |
-          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 5 --max-time 30 https://test.streambullets.com/__test --output /tmp/test-deployment.html
-          grep -Fq "$REVISION" /tmp/test-deployment.html
+          set -euo pipefail
+          # The edge can serve the previous version for a short time after the deploy. Read the page until it shows
+          # this commit, for 60 seconds at most.
+          shown=0
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 5 --max-time 30 https://test.streambullets.com/__test --output /tmp/test-deployment.html
+            if grep -Fq "$REVISION" /tmp/test-deployment.html; then shown=1; break; fi
+            echo "Attempt $attempt: the test deployment does not show commit $REVISION yet."
+            sleep 5
+          done
+          test "$shown" = 1 || { echo "::error::The test deployment does not show commit $REVISION."; exit 1; }
           {
             echo 'Test URL: https://test.streambullets.com'
             echo "Commit: $REVISION"
