@@ -1,4 +1,4 @@
-import { $isCodeNode } from "@lexical/code-core";
+import { $createCodeNode, $isCodeNode } from "@lexical/code-core";
 import { createEmptyHistoryState, registerHistory } from "@lexical/history";
 import { $isLinkNode, $toggleLink } from "@lexical/link";
 import { $isListNode, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, registerList } from "@lexical/list";
@@ -27,7 +27,6 @@ import {
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { t, type MessageId } from "../i18n";
 import {
-  $createCodeNode,
   $createMentionNode,
   $isMentionNode,
   $readComment,
@@ -194,6 +193,11 @@ export function RichCommentInput({
     // No HTML tag gives the textbox role to an element with editable content.
     element.setAttribute("role", "textbox");
     editor.setRootElement(element);
+    const closeList = (event: FocusEvent): void => {
+      const next: EventTarget | null = event.relatedTarget;
+      if (!(next instanceof Node && element.parentElement?.contains(next))) setToken(null);
+    };
+    element.addEventListener("focusout", closeList);
     const stop: (() => void)[] = [
       registerRichText(editor),
       registerHistory(editor, createEmptyHistoryState(), 300),
@@ -268,6 +272,7 @@ export function RichCommentInput({
     ];
     return () => {
       for (const unregister of stop) unregister();
+      element.removeEventListener("focusout", closeList);
       editor.setRootElement(null);
       editorRef.current = null;
     };
@@ -461,9 +466,6 @@ export function RichCommentInput({
         aria-controls={token ? listId : undefined}
         contentEditable={!disabled}
         suppressContentEditableWarning
-        onBlur={(event) => {
-          if (!event.currentTarget.parentElement?.contains(event.relatedTarget)) setToken(null);
-        }}
       />
       {token && (
         <div className="mention-options">

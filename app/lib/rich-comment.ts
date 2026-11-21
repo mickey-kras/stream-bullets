@@ -1,4 +1,4 @@
-import { $createCodeNode, CodeNode } from "@lexical/code-core";
+import { CodeNode } from "@lexical/code-core";
 import { LinkNode } from "@lexical/link";
 import { ListItemNode, ListNode } from "@lexical/list";
 import {
@@ -36,7 +36,8 @@ import type { MentionSelection } from "../components/mention-input";
 const OPEN = "";
 const SPLIT = "";
 const CLOSE = "";
-const MARKED_MENTION = /([^]+)([^]+)/u;
+// Each part excludes the marks, so the search does not go back over text that it already read.
+const MARKED_MENTION = /([^]+)([^]+)/u;
 
 export interface CommentValue {
   text: string;
@@ -174,5 +175,3 @@ export function $writeComment(value: CommentValue): void {
     if (!$isMentionNode(node) && text.includes(OPEN)) node.setTextContent(unmarkMentions(text).text);
   }
 }
-
-export { $createCodeNode };
