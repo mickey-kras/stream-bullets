@@ -28,6 +28,8 @@ import {
 import { ChannelSubscriptions } from "./channel-ingest-subscriptions";
 import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./channel-tokens.server";
 import { HttpError } from "./http.server";
+import { sampleChatAt } from "../lib/chat-feed";
+import { validateTestEnvironment } from "./test-environment-config";
 import { ID_SQL, type IdTable } from "./channel-ingest-sql";
 import { type PlaygroundHost, playgroundOf } from "./playground-host";
 import { detached } from "../lib/detached";
@@ -87,6 +89,7 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/reconcile": "POST",
   "/playground": "POST",
   "/playground-config": "POST",
+  "/test-chat": "POST",
 };
 
 type EventRow = { body: string };
@@ -185,6 +188,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     // Ingestion is off: consumers get `unavailable` and reconnect once it is on again.
     if (channelsOff(this.env)) this.closeSockets("Channels off");
     if (url.pathname === "/subscribe") return this.subscribe(request);
+    if (url.pathname === "/test-chat") return this.testChat();
     if (url.pathname === "/overlay-key") return this.overlayKeyRevoked();
     if (url.pathname === "/page-status") return this.pageStatusChanged();
     if (url.pathname === "/close") return this.closeAll();
@@ -235,6 +239,16 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (characters) await this.playground.open(server);
     await this.listeningStarted(first, Date.now());
     return new Response(null, { status: 101, webSocket: client });
+  }
+
+  /** The test deployment only: one batch of sample chat as live messages. It reads no provider and no connection. */
+  private async testChat(): Promise<Response> {
+    validateTestEnvironment(this.env);
+    if (this.env.APP_ENV !== "test") return reply("Not found", 404);
+    const now = Date.now();
+    this.ingest(sampleChatAt(now), now);
+    await this.scheduleAlarm(Math.min(now + SNAPSHOT_MAX_AGE_MS + 1, this.playground.wakeAt() ?? Infinity));
+    return new Response(null, { status: 204 });
   }
 
   /** A consumer listens: YouTube polling and the subscription checks start, each no earlier than its own wait. */

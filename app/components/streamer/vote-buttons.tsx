@@ -4,20 +4,18 @@ import { Icon } from "../ui/icon";
 
 type Reaction = -1 | 0 | 1;
 
-// Filled thumbs indicate reactions. Accessible poll labels include type and count.
+// Filled thumbs indicate reactions.
 export function VoteButtons({
   reaction,
   likes,
   dislikes,
   disabled,
-  poll = false,
   onReact,
 }: Readonly<{
   reaction: Reaction;
   likes: number;
   dislikes: number;
   disabled: boolean;
-  poll?: boolean;
   onReact: (value: Reaction) => void;
 }>): ReactNode {
   const button = (value: 1 | -1): ReactNode => {
@@ -30,11 +28,7 @@ export function VoteButtons({
     return (
       <button type="button" disabled={disabled} aria-pressed={pressed} onClick={() => onReact(pressed ? 0 : value)}>
         <Icon name={icon} size={24} />
-        <span className="vote-word" aria-hidden={poll || undefined}>
-          {t(like ? "entry.like" : "entry.dislike")}
-        </span>
-        {poll && <span className="sr-only">{t(like ? "poll.like" : "poll.dislike")}, </span>}{" "}
-        <b>{like ? likes : dislikes}</b>
+        <span className="vote-word">{t(like ? "entry.like" : "entry.dislike")}</span> <b>{like ? likes : dislikes}</b>
       </button>
     );
   };

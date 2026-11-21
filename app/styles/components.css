@@ -291,7 +291,6 @@ button.gold:hover { background:var(--gold-hover); }
 .poll-choices .poll-option[aria-pressed=true] { border-color: var(--gold); }
 .poll-choices .poll-option:disabled { cursor: default; }
 .poll-discussion .discussion { padding-left: 0; padding-right: 0; border-top: 0; }
-.poll-discussion > h2 { font-size: 1.75rem; }
 .poll-toolbar a { font-size: 0.875rem; }
 body:has(.overlay-screen) { padding: 0; background: transparent; }
 body:has(.overlay-screen)::before, body:has(.overlay-screen)::after { display: none; }
@@ -1219,6 +1218,8 @@ html[data-reduced="true"] .landing-station .station-tilt { display: none !import
 }
 .ov-conn { display: flex; align-items: flex-start; gap: 10px; max-width: 1300px; margin: 12px auto 0; padding: 12px 16px; border: 1px solid var(--live); border-radius: var(--radius-control); background: var(--modal); }
 .ov-conn .icon { flex: none; color: var(--live); margin-top: 2px; }
+.ov-obs-status { display: flex; align-items: flex-start; gap: 8px; }
+.ov-obs-status .icon { flex: none; margin-top: 2px; }
 .overlay-empty { display: none; }
 .view-tabs .tab-short { display: none; }
 @media (max-width: 43.75em) {
@@ -1510,9 +1511,6 @@ output.intent-prompt, output.handle-warn { color: inherit; }
 }
 body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .polls-page .mash-card:has(.mash-chosen:not([hidden])) .mash-status { display: none; }
-.poll-react { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); min-width: 0; margin-inline: 0; padding-inline: 0; padding-bottom: 0; border-inline: 0; border-bottom: 0; }
-.poll-react .react-label { font: 600 .8125rem var(--body); color: var(--muted); text-transform: none; }
-.poll-react button { min-height: 32px; padding: 4px 10px; font: 500 .875rem var(--body); text-transform: none; }
 .poll-kebab { position: absolute; top: 10px; right: 10px; z-index: 2; }
 .poll-card:has(> .poll-kebab) .poll-topline { padding-right: 44px; }
 .poll-option > .opt-track { position: relative; z-index: 0; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; padding: 14px 18px; overflow: hidden; }
@@ -1609,8 +1607,8 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .req { color: var(--gold); font-weight: 700; }
 .req-note { margin: 0 0 4px; font-size: .8125rem; color: var(--muted); }
 /* Disabled controls on moderated pages. */
-.streamer-shell:has(> .page-banner) :is(.votes button, .poll-react button, .composer button, .composer textarea, .poll-option, .comment-actions button, .header-action, #suggest, .mash-pick):disabled { background: var(--tab) !important; color: var(--muted) !important; border-color: var(--line) !important; border-style: dashed !important; box-shadow: none !important; opacity: .55; cursor: not-allowed; }
-.streamer-shell:has(> .page-banner) :is(.votes button, .poll-react button, .composer button, .comment-actions button):disabled svg { color: var(--muted); }
+.streamer-shell:has(> .page-banner) :is(.votes button, .composer button, .composer textarea, .poll-option, .comment-actions button, .header-action, #suggest, .mash-pick):disabled { background: var(--tab) !important; color: var(--muted) !important; border-color: var(--line) !important; border-style: dashed !important; box-shadow: none !important; opacity: .55; cursor: not-allowed; }
+.streamer-shell:has(> .page-banner) :is(.votes button, .composer button, .comment-actions button):disabled svg { color: var(--muted); }
 /* Moderation banner actions. */
 .banner-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; flex-basis: 100%; margin-left: 28px; }
 .banner-actions .banner-link { margin: 0; flex-basis: auto; }
