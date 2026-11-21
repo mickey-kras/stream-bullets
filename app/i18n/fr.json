@@ -1349,8 +1349,6 @@
   "waitlist.sendAgain": "Renvoyer la demande",
   "waitlist.update": "Mettre à jour la demande",
   "overlay.characters.off": "Les personnages sont désactivés sur ce serveur.",
-  "discussion.translate": "Traduire",
-  "discussion.translated": "Traduit",
   "discussion.showOriginal": "Afficher l’original",
-  "discussion.noTranslation": "Ce commentaire n’a pas de traduction."
+  "discussion.showTranslation": "Afficher la traduction"
 }

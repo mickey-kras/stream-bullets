@@ -1349,8 +1349,6 @@
   "waitlist.sendAgain": "Antrag erneut senden",
   "waitlist.update": "Antrag aktualisieren",
   "overlay.characters.off": "Figuren sind auf diesem Server aus.",
-  "discussion.translate": "Übersetzen",
-  "discussion.translated": "Übersetzt",
   "discussion.showOriginal": "Original anzeigen",
-  "discussion.noTranslation": "Für diesen Kommentar gibt es keine Übersetzung."
+  "discussion.showTranslation": "Übersetzung anzeigen"
 }

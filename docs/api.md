@@ -238,11 +238,23 @@ Existing content quotas also apply.
 
 ## Comment translation
 
+A reader sees each comment in the language of the site for that reader.
 Workers AI translates a comment to one of the site locales.
-The server stores each result, so the model runs one time for each comment text and locale.
-An edit of the comment starts a new translation.
 
-The server shows a translation only if it has the same Markdown marks, line breaks, code, links and mentions as the comment.
+The comment lists and the lookup of one comment give each comment with a `translation` field:
+
+- `{text, mentions}`: the stored translation for the language of the reader.
+- `null`: the comment needs no translation, or its translation failed a check.
+- No field: the server has no result. The page of a signed-in reader then asks for the translation with `POST /api/comments/:id/translation`.
+
+A signed-out reader gets the stored translations and starts no new one.
+The page shows a control on each translated comment. The control shows the original text of that comment.
+
+The server stores each result, so the model runs one time for each comment text and locale.
+An edit or a removal of the comment deletes its stored translations.
+Text without letters starts no model.
+
+The server shows a translation only if it has the same Markdown structure, code, links and mentions as the comment.
 Each account has a limit of new translations in one minute.
 All accounts together have a daily limit of model starts. An edit or a removal of a comment does not decrease the count, and a failed start stays in it.
 Two readers who ask at the same time start the model one time: the second reader gets `409` and can try again.

@@ -1329,8 +1329,6 @@
   "waitlist.sendAgain": "もう一度申請する",
   "waitlist.update": "申請を更新",
   "overlay.characters.off": "このサーバーではキャラクターはオフです。",
-  "discussion.translate": "翻訳する",
-  "discussion.translated": "翻訳済み",
   "discussion.showOriginal": "原文を表示",
-  "discussion.noTranslation": "このコメントの翻訳はありません。"
+  "discussion.showTranslation": "翻訳を表示"
 }

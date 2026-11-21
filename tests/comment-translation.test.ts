@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import type { AppEnv } from "../app/env";
-import { deleteComment, mutateComment } from "../app/server/comments.server";
+import { deleteComment, listComments, mutateComment } from "../app/server/comments.server";
 import {
+  attachTranslations,
   pruneTranslationAttempts,
   TRANSLATION_ATTEMPT_RETENTION_MS,
   TRANSLATION_DAILY_LIMIT,
@@ -242,6 +243,39 @@ describe("comment translation", (): void => {
       .bind(id)
       .first();
     expect(row).toEqual({ n: 0 });
+  });
+
+  it("starts no model for text without letters", async (): Promise<void> => {
+    const id: string = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'fan','🎉 100% https://example.test/a',1)",
+    )
+      .bind(id, entryId)
+      .run();
+    expect(await translateComment(env, id, "host", "de", NOW)).toBeNull();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("puts the stored translation on the comments of a page", async (): Promise<void> => {
+    run.mockResolvedValueOnce(answer("**Hallo** @Bob Lee, siehe `x`")).mockResolvedValueOnce(answer(SOURCE));
+    const translated: string = await seedComment();
+    const same: string = await seedComment();
+    const unknown: string = await seedComment();
+    await translateComment(env, translated, "host", "de", NOW);
+    await translateComment(env, same, "host", "de", NOW);
+    const page = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
+    await attachTranslations(env, page.comments, "de");
+    const byId = new Map(page.comments.map((comment) => [comment.id, comment.translation]));
+    expect(byId.get(translated)).toEqual({
+      text: "**Hallo** @Bob Lee, siehe `x`",
+      mentions: [{ userId: "bob", start: 10, end: 18 }],
+    });
+    expect(byId.get(same)).toBeNull();
+    expect(byId.get(unknown)).toBeUndefined();
+    // A different language has its own results.
+    const french = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
+    await attachTranslations(env, french.comments, "fr");
+    expect(french.comments.every((comment) => comment.translation === undefined)).toBe(true);
   });
 
   it("removes the old rows of the daily count", async (): Promise<void> => {

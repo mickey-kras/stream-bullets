@@ -254,7 +254,7 @@ function CommentArticle({
   const [mentions, setMentions] = useState<MentionSelection[]>(comment.mentions ?? []);
   const [error, setError] = useState<string>("");
   const editButton = useRef<HTMLDivElement | null>(null);
-  const shown = useCommentTranslation(comment, rules.viewer !== null && rules.viewer.id !== comment.authorId);
+  const shown = useCommentTranslation(comment, rules.viewer !== null);
   const focusActions = (): void => {
     requestAnimationFrame(() =>
       editButton.current?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true }),
