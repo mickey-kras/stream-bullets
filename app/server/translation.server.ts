@@ -139,12 +139,15 @@ export async function translateComment(
   // If the model fails, the reservation stays in the daily count and opens again after CLAIM_MS.
   const answer: string = await askModel(env.AI, locale, comment.text, rows);
   const translation: CommentTranslation | null = checked(comment.text, rows, readAnswer(answer));
+  // The comment can change while the model runs. Only the translation of the current text is stored.
   await env.DB.prepare(
-    `INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at) VALUES (?,?,?,?,?)
+    `INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at)
+      SELECT ?1, ?2, ?3, ?4, ?5
+      WHERE EXISTS(SELECT 1 FROM entry_comments WHERE id=?1 AND removed_at IS NULL AND text=?6)
       ON CONFLICT(comment_id, locale) DO UPDATE SET
         source_hash=excluded.source_hash, text=excluded.text, created_at=excluded.created_at`,
   )
-    .bind(commentId, locale, hash, translation?.text ?? null, now)
+    .bind(commentId, locale, hash, translation?.text ?? null, now, comment.text)
     .run();
   return translation;
 }

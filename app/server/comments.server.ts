@@ -209,6 +209,10 @@ async function removeComment(
       DELETE FROM entry_comments WHERE id IN (SELECT id FROM gone)`).bind(comment.parent_id),
     env.DB.prepare("DELETE FROM notifications WHERE comment_id=?").bind(id),
     env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(id),
+    // A placeholder keeps its row, so the stored translations of the removed text need their own statement.
+    env.DB.prepare(
+      "DELETE FROM comment_translations WHERE comment_id=? AND NOT EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND removed_at IS NULL)",
+    ).bind(id, id),
     env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
   ];
   const result = await env.DB.batch(statements);
@@ -248,6 +252,10 @@ export async function mutateComment(
         "UPDATE entry_comments SET text=?,edited_at=? WHERE id=? AND author_id=? AND removed_at IS NULL",
       ).bind(action.text, Date.now(), action.id, viewerId),
       env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(action.id),
+      // The stored translations are of the text before the edit.
+      env.DB.prepare(
+        "DELETE FROM comment_translations WHERE comment_id=? AND EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND author_id=?)",
+      ).bind(action.id, action.id, viewerId),
       ...mentionStatements(env, action.id, action.mentions),
       env.DB.prepare(`DELETE FROM notifications WHERE comment_id=? AND kind='mention'
         AND NOT EXISTS(SELECT 1 FROM comment_mentions m WHERE m.comment_id=notifications.comment_id AND m.user_id=notifications.user_id)`).bind(

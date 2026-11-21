@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import type { AppEnv } from "../app/env";
+import { deleteComment, mutateComment } from "../app/server/comments.server";
 import {
   pruneTranslationAttempts,
   TRANSLATION_ATTEMPT_RETENTION_MS,
@@ -183,6 +184,45 @@ describe("comment translation", (): void => {
     // The failed start stays in the daily count.
     const row = await env.DB.prepare("SELECT starts FROM translation_attempts WHERE comment_id=?").bind(id).first();
     expect(row).toEqual({ starts: 2 });
+  });
+
+  it("deletes the stored translations when the comment is removed or edited", async (): Promise<void> => {
+    run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
+    const stored = async (id: string): Promise<number> => {
+      const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM comment_translations WHERE comment_id=?")
+        .bind(id)
+        .first<{ n: number }>();
+      return row?.n ?? -1;
+    };
+    // A removed comment with a reply stays as a placeholder row.
+    const parent: string = await seedComment();
+    await env.DB.prepare(
+      "INSERT INTO entry_comments (id,entry_id,author_id,text,created_at,parent_id) VALUES (?,?,'host','Reply',2,?)",
+    )
+      .bind(crypto.randomUUID(), entryId, parent)
+      .run();
+    await translateComment(env, parent, "host", "de", NOW);
+    expect(await stored(parent)).toBe(1);
+    await deleteComment(env, "fan", parent);
+    expect(await stored(parent)).toBe(0);
+
+    const edited: string = await seedComment();
+    await translateComment(env, edited, "host", "de", NOW);
+    await mutateComment(env, "fan", { action: "edit", id: edited, text: "New text", mentions: [] });
+    expect(await stored(edited)).toBe(0);
+  });
+
+  it("does not store the translation of a text that changed while the model ran", async (): Promise<void> => {
+    const id: string = await seedComment();
+    run.mockImplementation(async (): Promise<{ response: string }> => {
+      await env.DB.prepare("UPDATE entry_comments SET text='Other text' WHERE id=?").bind(id).run();
+      return answer("**Hallo** @Bob Lee, siehe `x`");
+    });
+    await translateComment(env, id, "host", "de", NOW);
+    const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM comment_translations WHERE comment_id=?")
+      .bind(id)
+      .first();
+    expect(row).toEqual({ n: 0 });
   });
 
   it("removes the old rows of the daily count", async (): Promise<void> => {
