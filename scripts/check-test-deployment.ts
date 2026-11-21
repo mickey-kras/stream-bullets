@@ -33,11 +33,18 @@ assert.equal(config.d1_databases[0].binding, "DB");
 assert.equal(config.d1_databases[0].database_name, "stream-bullets-test");
 assert.equal(config.d1_databases[0].database_id, config.vars.TEST_DATABASE_ID);
 assert.deepEqual(config.r2_buckets, [{ binding: "IMAGES", bucket_name: "stream-bullets-test-images" }]);
-assert.deepEqual(config.durable_objects.bindings, [{ name: "POLL_ROOMS", class_name: "PollRoom" }]);
+// The activity feed object is optional: its binding arrives in a separate application change.
+const objects = config.durable_objects.bindings;
+assert.deepEqual(objects[0], { name: "POLL_ROOMS", class_name: "PollRoom" });
+if (objects.length > 1) assert.deepEqual(objects[1], { name: "CHANNEL_INGEST", class_name: "ChannelIngest" });
+assert.ok(objects.length <= 2, "Unexpected Durable Object binding");
 assert.equal(config.ratelimits.length, 1);
 assert.equal(config.ratelimits[0].namespace_id, "1003");
 assert.deepEqual(config.triggers.crons, []);
-for (const binding of ["services", "send_email", "kv_namespaces", "hyperdrive", "ai", "analytics_engine_datasets"]) {
+// Workers AI has no stored data, so the test deployment can use the same binding name as production.
+const ai = (config as unknown as { ai?: { binding?: unknown } }).ai;
+assert.ok(ai === undefined || ai.binding === "AI", "Unexpected ai binding");
+for (const binding of ["services", "send_email", "kv_namespaces", "hyperdrive", "analytics_engine_datasets"]) {
   const value: unknown = (config as unknown as Record<string, unknown>)[binding];
   assert.ok(value === undefined || (Array.isArray(value) && value.length === 0), `Unexpected ${binding} binding`);
 }
