@@ -96,7 +96,9 @@ Choose a fixture account to create a normal application session.
 
 ### Discussion fixtures
 
-Each fixture community has one topic, one poll, and a thread of three comments.
+Each fixture community has three topics, one open poll, and one closed poll with results.
+One topic has a thread of three comments.
+One topic has a comment with formatted text and a reply with a long link.
 The seed adds mention comments and notifications to `test_host` and `other_host`.
 The author of the comment causes the notification.
 
