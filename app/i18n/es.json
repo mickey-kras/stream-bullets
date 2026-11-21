@@ -941,7 +941,6 @@
   "overlay.layerHelp": "¿Quieres una capa en su propia fuente de OBS? Añade &layer=chat a la URL de tu overlay. Usa &layer=content para el contenido solo.",
   "overlay.layerUrls": "URL de las capas",
   "overlay.layerUrlsHelp": "Usa una fuente de navegador para todo o una fuente por capa. Dale a cada fuente el tamaño de su capa. Una fuente más grande amplía la capa.",
-  "overlay.livePoll": "{name} · Encuesta en vivo",
   "overlay.messageLabel": "Mensaje (hasta {n} caracteres)",
   "overlay.messagePlaceholder": "Tu mensaje",
   "overlay.messageStyle": "Estilo del mensaje",

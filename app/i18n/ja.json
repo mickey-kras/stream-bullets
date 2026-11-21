@@ -927,7 +927,6 @@
   "overlay.layerHelp": "レイヤーを個別の OBS ソースにしたい場合は、オーバーレイ URL に &layer=chat を追加します。コンテンツだけなら &layer=content を使います。",
   "overlay.layerUrls": "レイヤー URL",
   "overlay.layerUrlsHelp": "すべてを 1 つのブラウザソースにするか、レイヤーごとにソースを分けます。各ソースはレイヤーと同じサイズにしてください。ソースを大きくすると、レイヤーも拡大されます。",
-  "overlay.livePoll": "{name} · ライブ投票",
   "overlay.messageLabel": "メッセージ（最大 {n} 文字）",
   "overlay.messagePlaceholder": "メッセージ",
   "overlay.messageStyle": "メッセージのスタイル",

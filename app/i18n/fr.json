@@ -941,7 +941,6 @@
   "overlay.layerHelp": "Besoin d’un calque dans sa propre source OBS ? Ajoutez &layer=chat à l’URL de votre overlay. Utilisez &layer=content pour le contenu seul.",
   "overlay.layerUrls": "URL des calques",
   "overlay.layerUrlsHelp": "Utilisez une source navigateur pour tout, ou une source par calque. Donnez à chaque source la taille de son calque. Une source plus grande agrandit le calque.",
-  "overlay.livePoll": "{name} · Sondage en direct",
   "overlay.messageLabel": "Message ({n} caractères max.)",
   "overlay.messagePlaceholder": "Votre message",
   "overlay.messageStyle": "Style du message",

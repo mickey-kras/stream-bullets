@@ -927,7 +927,6 @@
   "overlay.layerHelp": "想把某个图层放进单独的 OBS 来源？在叠加层 URL 后添加 &layer=chat。只要内容时使用 &layer=content。",
   "overlay.layerUrls": "图层 URL",
   "overlay.layerUrlsHelp": "可以用一个浏览器来源显示全部，也可以每个图层一个来源。把每个来源设为对应图层的大小。来源越大，图层显示越大。",
-  "overlay.livePoll": "{name} · 实时投票",
   "overlay.messageLabel": "消息（最多 {n} 个字符）",
   "overlay.messagePlaceholder": "你的消息",
   "overlay.messageStyle": "消息样式",
