@@ -13569,7 +13569,7 @@
       "relation": "calls",
       "source": "app_components_poll_mashteaser",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L181",
+      "source_location": "L180",
       "target": "app_components_mash_use_mash_usemashview",
       "weight": 1.0
     },
@@ -13581,7 +13581,7 @@
       "relation": "calls",
       "source": "app_components_poll_mashteaser",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L183",
+      "source_location": "L182",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -13593,7 +13593,7 @@
       "relation": "calls",
       "source": "app_components_poll_mashteaser",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L186",
+      "source_location": "L185",
       "target": "app_lib_mash_mashwinner",
       "weight": 1.0
     },
@@ -13605,7 +13605,7 @@
       "relation": "calls",
       "source": "app_components_poll_mashteaser",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L196",
+      "source_location": "L195",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -13617,7 +13617,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollcard",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L237",
+      "source_location": "L236",
       "target": "app_components_poll_pollmenu",
       "weight": 1.0
     },
@@ -13629,7 +13629,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollcard",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L238",
+      "source_location": "L237",
       "target": "app_components_poll_pollstatus",
       "weight": 1.0
     },
@@ -13641,7 +13641,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollcard",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L241",
+      "source_location": "L240",
       "target": "app_components_ui_avatar_avatar",
       "weight": 1.0
     },
@@ -13653,7 +13653,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollcard",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L243",
+      "source_location": "L242",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -13665,7 +13665,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollcard",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L246",
+      "source_location": "L245",
       "target": "app_components_poll_pollresults",
       "weight": 1.0
     },
@@ -13677,7 +13677,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollcard",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L256",
+      "source_location": "L255",
       "target": "app_i18n_index_tn",
       "weight": 1.0
     },
@@ -13689,7 +13689,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollcard",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L259",
+      "source_location": "L258",
       "target": "app_components_poll_votingmessage",
       "weight": 1.0
     },
@@ -13701,20 +13701,8 @@
       "relation": "calls",
       "source": "app_components_poll_pollcard",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L263",
+      "source_location": "L262",
       "target": "app_components_ui_icon_icon",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_poll_pollcard",
-      "source_file": "app/components/poll.tsx",
-      "source_location": "L273",
-      "target": "app_components_streamer_vote_buttons_votebuttons",
       "weight": 1.0
     },
     {
@@ -13725,7 +13713,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollmenu",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L159",
+      "source_location": "L158",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -13737,7 +13725,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollmenu",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L165",
+      "source_location": "L164",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -13749,7 +13737,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollmenu",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L174",
+      "source_location": "L173",
       "target": "app_components_discussion_deletebutton",
       "weight": 1.0
     },
@@ -13761,7 +13749,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollresults",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L33",
+      "source_location": "L32",
       "target": "app_lib_percent_largestremainder",
       "weight": 1.0
     },
@@ -13773,7 +13761,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollresults",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -13785,7 +13773,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollresults",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L51",
+      "source_location": "L50",
       "target": "app_i18n_index_tn",
       "weight": 1.0
     },
@@ -13797,7 +13785,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollresults",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L52",
+      "source_location": "L51",
       "target": "app_components_mash_mash_parts_formatpercent",
       "weight": 1.0
     },
@@ -13809,7 +13797,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollstatus",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L123",
+      "source_location": "L122",
       "target": "app_components_poll_timeleft",
       "weight": 1.0
     },
@@ -13821,7 +13809,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollstatus",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L91",
+      "source_location": "L90",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -13833,7 +13821,7 @@
       "relation": "calls",
       "source": "app_components_poll_pollstatus",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L99",
+      "source_location": "L98",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -13845,7 +13833,7 @@
       "relation": "calls",
       "source": "app_components_poll_timeleft",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L80",
+      "source_location": "L79",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -13857,7 +13845,7 @@
       "relation": "calls",
       "source": "app_components_poll_votingmessage",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L135",
+      "source_location": "L134",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -24789,7 +24777,7 @@
       "relation": "calls",
       "source": "app_components_streamer_vote_buttons_votebuttons",
       "source_file": "app/components/streamer/vote-buttons.tsx",
-      "source_location": "L32",
+      "source_location": "L30",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -24801,7 +24789,7 @@
       "relation": "calls",
       "source": "app_components_streamer_vote_buttons_votebuttons",
       "source_file": "app/components/streamer/vote-buttons.tsx",
-      "source_location": "L34",
+      "source_location": "L31",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -69232,18 +69220,6 @@
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
       "source_location": "L11",
-      "target": "app_components_streamer_vote_buttons_votebuttons",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_poll",
-      "source_file": "app/components/poll.tsx",
-      "source_location": "L12",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -120105,18 +120081,6 @@
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
       "source_location": "L11",
-      "target": "app_components_streamer_vote_buttons",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_poll",
-      "source_file": "app/components/poll.tsx",
-      "source_location": "L12",
       "target": "app_components_ui_icon",
       "weight": 1.0
     },
@@ -153834,18 +153798,7 @@
       "relation": "contains",
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L134",
-      "target": "app_components_poll_votingmessage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_poll",
-      "source_file": "app/components/poll.tsx",
-      "source_location": "L14",
+      "source_location": "L13",
       "target": "app_components_poll_publicpoll",
       "weight": 1.0
     },
@@ -153856,7 +153809,18 @@
       "relation": "contains",
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L143",
+      "source_location": "L133",
+      "target": "app_components_poll_votingmessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_poll",
+      "source_file": "app/components/poll.tsx",
+      "source_location": "L142",
       "target": "app_components_poll_pollmenu",
       "weight": 1.0
     },
@@ -153867,7 +153831,7 @@
       "relation": "contains",
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L16",
+      "source_location": "L15",
       "target": "app_components_poll_pollresults",
       "weight": 1.0
     },
@@ -153878,7 +153842,7 @@
       "relation": "contains",
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L180",
+      "source_location": "L179",
       "target": "app_components_poll_mashteaser",
       "weight": 1.0
     },
@@ -153889,7 +153853,7 @@
       "relation": "contains",
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L215",
+      "source_location": "L214",
       "target": "app_components_poll_pollcard",
       "weight": 1.0
     },
@@ -153900,7 +153864,7 @@
       "relation": "contains",
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L79",
+      "source_location": "L78",
       "target": "app_components_poll_timeleft",
       "weight": 1.0
     },
@@ -153911,7 +153875,7 @@
       "relation": "contains",
       "source": "app_components_poll",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L86",
+      "source_location": "L85",
       "target": "app_components_poll_pollstatus",
       "weight": 1.0
     },
@@ -195651,10 +195615,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "f6259778aa96bfbec1de96e7d64f615965e815cedd9560a68728e31e2c8c6e00",
+    "content_sha256": "ac4591ac834d5d7b466786ecfe653a8a66f5878c0c6d06de28ede60eb34711ad",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "1497816b34281c3bab4baa6f2fe129642a8adb5ecfecf844293837adf8d8ba12",
+    "source_sha256": "cf93cd79104e43d65b664033501f272222ce36cc4127e4ef816de39734931821",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -197121,7 +197085,7 @@
       "label": "PublicPoll",
       "norm_label": "publicpoll",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L14"
+      "source_location": "L13"
     },
     {
       "_callable": true,
@@ -208146,7 +208110,7 @@
       "label": "MashTeaser()",
       "norm_label": "mashteaser()",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L180"
+      "source_location": "L179"
     },
     {
       "_callable": true,
@@ -208157,7 +208121,7 @@
       "label": "PollCard()",
       "norm_label": "pollcard()",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L215"
+      "source_location": "L214"
     },
     {
       "_callable": true,
@@ -208168,7 +208132,7 @@
       "label": "PollMenu()",
       "norm_label": "pollmenu()",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L143"
+      "source_location": "L142"
     },
     {
       "_callable": true,
@@ -208179,7 +208143,7 @@
       "label": "PollResults()",
       "norm_label": "pollresults()",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L16"
+      "source_location": "L15"
     },
     {
       "_callable": true,
@@ -208190,7 +208154,7 @@
       "label": "PollStatus()",
       "norm_label": "pollstatus()",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L86"
+      "source_location": "L85"
     },
     {
       "_callable": true,
@@ -208201,7 +208165,7 @@
       "label": "timeLeft()",
       "norm_label": "timeleft()",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L79"
+      "source_location": "L78"
     },
     {
       "_callable": true,
@@ -208212,7 +208176,7 @@
       "label": "votingMessage()",
       "norm_label": "votingmessage()",
       "source_file": "app/components/poll.tsx",
-      "source_location": "L134"
+      "source_location": "L133"
     },
     {
       "_callable": true,
