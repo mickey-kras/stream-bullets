@@ -266,7 +266,7 @@ header nav a.nav-tab[aria-current="page"] { background: linear-gradient(110deg, 
 }
 @media (max-width: 43.75em) {
   :root:has(.streamer-shell > button.fab) .sb-toast { bottom: 128px; }
-  :root:has(textarea[data-composer]:focus, [role=dialog]) .sb-toast { bottom: auto; top: 72px; }
+  :root:has([data-composer]:focus, [role=dialog]) .sb-toast { bottom: auto; top: 72px; }
 }
 .header-secondary { display: inline-flex; align-items: center; gap: 6px; }
 @media (max-width: 43.75em) {

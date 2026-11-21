@@ -237,7 +237,16 @@ Existing content quotas also apply.
 
 The service stores the exact text that the author sends.
 The page formats the text when it shows a comment or a reply.
-The composer and the stored text do not change.
+
+The comment field is an editor that shows each format while the author types.
+The toolbar of the editor has one button for each format in the table below.
+Typed Markdown syntax changes to its format immediately.
+`Ctrl+B` sets bold text, `Ctrl+I` sets italic text, and `Ctrl+K` opens the link field.
+The editor sends the comment as Markdown text, so the stored text has the same syntax as before.
+
+The page first shows a plain text field, which works without the editor code.
+The editor code loads after the page and then replaces the field.
+The text and the mentions in the field move to the editor.
 
 Comments support this Markdown syntax:
 

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import { useSearchParams } from "react-router";
 import { createDraftStore, type DiscussionDraft } from "../lib/discussion-draft";
-import { MentionInput, type MentionSelection } from "./mention-input";
+import { CommentInput } from "./comment-input";
+import type { MentionSelection } from "./mention-input";
 import { intlLocale, t } from "../i18n";
 import { useShell } from "../lib/shell";
 import { orderThreads, replyParent, visibleReplies } from "../lib/threads";
@@ -129,7 +130,7 @@ function Composer({
       }}
     >
       <Avatar name={viewer.name} url={viewer.avatar} preset={viewer.avatarPreset} />
-      <MentionInput
+      <CommentInput
         entryId={entryId}
         value={value}
         mentions={mentions}
@@ -311,7 +312,7 @@ function CommentArticle({
                 .catch((error_: unknown) => setError(errorMessage(error_)));
             }}
           >
-            <MentionInput
+            <CommentInput
               entryId={rules.entryId}
               value={draft}
               mentions={mentions}

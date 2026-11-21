@@ -5467,6 +5467,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "app_components_comment_input_commentinput",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L29",
+      "target": "app_components_mention_input_mentioninput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "app_components_comment_markdown_block",
       "source_file": "app/components/comment-markdown.tsx",
       "source_location": "L48",
@@ -6429,7 +6441,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentactions",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L182",
+      "source_location": "L183",
       "target": "app_components_report_reportbutton",
       "weight": 1.0
     },
@@ -6441,7 +6453,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentactions",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L185",
+      "source_location": "L186",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -6453,7 +6465,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentactions",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L191",
+      "source_location": "L192",
       "target": "app_components_discussion_deletebutton",
       "weight": 1.0
     },
@@ -6465,7 +6477,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentactions",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L207",
+      "source_location": "L208",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -6477,7 +6489,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L262",
+      "source_location": "L263",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -6489,7 +6501,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L264",
+      "source_location": "L265",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -6501,7 +6513,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L276",
+      "source_location": "L277",
       "target": "app_components_ui_avatar_avatar",
       "weight": 1.0
     },
@@ -6513,7 +6525,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L282",
+      "source_location": "L283",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -6525,7 +6537,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L284",
+      "source_location": "L285",
       "target": "app_components_discussion_relativetime",
       "weight": 1.0
     },
@@ -6537,7 +6549,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L311",
+      "source_location": "L312",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -6549,8 +6561,8 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L314",
-      "target": "app_components_mention_input_mentioninput",
+      "source_location": "L315",
+      "target": "app_components_comment_input_commentinput",
       "weight": 1.0
     },
     {
@@ -6561,7 +6573,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L345",
+      "source_location": "L346",
       "target": "app_components_comment_markdown_commentmarkdown",
       "weight": 1.0
     },
@@ -6573,7 +6585,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L350",
+      "source_location": "L351",
       "target": "app_components_discussion_commentactions",
       "weight": 1.0
     },
@@ -6585,7 +6597,7 @@
       "relation": "calls",
       "source": "app_components_discussion_composer",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L131",
+      "source_location": "L132",
       "target": "app_components_ui_avatar_avatar",
       "weight": 1.0
     },
@@ -6597,20 +6609,8 @@
       "relation": "calls",
       "source": "app_components_discussion_composer",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L132",
-      "target": "app_components_mention_input_mentioninput",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "relation": "calls",
-      "source": "app_components_discussion_composer",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L143",
-      "target": "app_components_ui_icon_icon",
+      "source_location": "L133",
+      "target": "app_components_comment_input_commentinput",
       "weight": 1.0
     },
     {
@@ -6622,6 +6622,18 @@
       "source": "app_components_discussion_composer",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L144",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_discussion_composer",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L145",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -6633,7 +6645,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -6645,7 +6657,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -6657,7 +6669,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -6669,7 +6681,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L56",
+      "source_location": "L57",
       "target": "app_components_common_modal",
       "weight": 1.0
     },
@@ -6681,7 +6693,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L62",
+      "source_location": "L63",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -6693,7 +6705,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L67",
+      "source_location": "L68",
       "target": "app_components_admin_key_confirm_keyconfirm",
       "weight": 1.0
     },
@@ -6705,7 +6717,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "app_components_discussion_deletebutton_remove",
       "weight": 1.0
     },
@@ -6717,7 +6729,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton_remove",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -6729,7 +6741,7 @@
       "relation": "calls",
       "source": "app_components_discussion_deletebutton_remove",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -6741,7 +6753,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L527",
+      "source_location": "L528",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -6753,7 +6765,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L539",
+      "source_location": "L540",
       "target": "app_lib_discussion_draft_createdraftstore",
       "weight": 1.0
     },
@@ -6765,7 +6777,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L561",
+      "source_location": "L562",
       "target": "app_components_discussion_fetchthreads",
       "weight": 1.0
     },
@@ -6777,7 +6789,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L567",
+      "source_location": "L568",
       "target": "app_components_discussion_findcomment",
       "weight": 1.0
     },
@@ -6789,7 +6801,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L575",
+      "source_location": "L576",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -6801,7 +6813,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L576",
+      "source_location": "L577",
       "target": "app_components_discussion_mergethreads",
       "weight": 1.0
     },
@@ -6813,7 +6825,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L578",
+      "source_location": "L579",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -6825,7 +6837,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L648",
+      "source_location": "L649",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -6837,7 +6849,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L657",
+      "source_location": "L658",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -6849,7 +6861,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L676",
+      "source_location": "L677",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -6861,7 +6873,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L693",
+      "source_location": "L694",
       "target": "app_components_discussion_updatecomment",
       "weight": 1.0
     },
@@ -6873,7 +6885,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L723",
+      "source_location": "L724",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -6885,7 +6897,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L727",
+      "source_location": "L728",
       "target": "app_components_discussion_composer",
       "weight": 1.0
     },
@@ -6897,7 +6909,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L740",
+      "source_location": "L741",
       "target": "app_components_discussion_discussion_post",
       "weight": 1.0
     },
@@ -6909,7 +6921,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L750",
+      "source_location": "L751",
       "target": "app_components_ui_select_select",
       "weight": 1.0
     },
@@ -6921,7 +6933,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L763",
+      "source_location": "L764",
       "target": "app_components_ui_icon_button_iconbutton",
       "weight": 1.0
     },
@@ -6933,7 +6945,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L791",
+      "source_location": "L792",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -6945,7 +6957,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L801",
+      "source_location": "L802",
       "target": "app_components_discussion_thread",
       "weight": 1.0
     },
@@ -6957,7 +6969,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_post",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L656",
+      "source_location": "L657",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -6969,7 +6981,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_post",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L657",
+      "source_location": "L658",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -6981,7 +6993,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_run",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L648",
+      "source_location": "L649",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -6993,7 +7005,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_run",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L648",
+      "source_location": "L649",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -7005,7 +7017,7 @@
       "relation": "calls",
       "source": "app_components_discussion_fetchthreads",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L480",
+      "source_location": "L481",
       "target": "app_components_discussion_mergethreads",
       "weight": 1.0
     },
@@ -7017,7 +7029,7 @@
       "relation": "calls",
       "source": "app_components_discussion_mergethreads",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L486",
+      "source_location": "L487",
       "target": "app_lib_threads_orderthreads",
       "weight": 1.0
     },
@@ -7029,7 +7041,7 @@
       "relation": "calls",
       "source": "app_components_discussion_relativetime",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L95",
+      "source_location": "L96",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -7041,7 +7053,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L385",
+      "source_location": "L386",
       "target": "app_lib_threads_visiblereplies",
       "weight": 1.0
     },
@@ -7053,7 +7065,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L406",
+      "source_location": "L407",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -7065,7 +7077,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L409",
+      "source_location": "L410",
       "target": "app_components_discussion_commentarticle",
       "weight": 1.0
     },
@@ -7077,7 +7089,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L418",
+      "source_location": "L419",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -7089,7 +7101,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L433",
+      "source_location": "L434",
       "target": "app_lib_threads_replyparent",
       "weight": 1.0
     },
@@ -14087,6 +14099,174 @@
       "source_file": "app/components/report.tsx",
       "source_location": "L60",
       "target": "app_components_api_errormessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_activeof",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L97",
+      "target": "app_components_rich_comment_input_blockof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L180",
+      "target": "app_lib_rich_comment_writecomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L195",
+      "target": "app_components_rich_comment_input_activeof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L196",
+      "target": "app_components_rich_comment_input_tokenof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L199",
+      "target": "app_components_rich_comment_input_samevalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L229",
+      "target": "app_components_rich_comment_input_richcommentinput_select",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L266",
+      "target": "app_components_api_requestjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L277",
+      "target": "app_components_api_errormessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L301",
+      "target": "app_lib_rich_comment_creatementionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L352",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L368",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L393",
+      "target": "app_components_rich_comment_input_richcommentinput_setblock",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_richcommentinput_select",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L301",
+      "target": "app_lib_rich_comment_creatementionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_components_rich_comment_input_tokenof",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L104",
+      "target": "app_lib_rich_comment_ismentionnode",
       "weight": 1.0
     },
     {
@@ -29243,6 +29423,66 @@
       "source_file": "app/lib/prefs.ts",
       "source_location": "L99",
       "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_rich_comment_creatementionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L94",
+      "target": "app_lib_rich_comment_mentionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_rich_comment_mentionnode_clone",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L54",
+      "target": "app_lib_rich_comment_mentionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_rich_comment_mentionnode_importjson",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L63",
+      "target": "app_lib_rich_comment_creatementionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_rich_comment_readcomment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L160",
+      "target": "app_lib_rich_comment_unmarkmentions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_rich_comment_writecomment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L164",
+      "target": "app_lib_rich_comment_markmentions",
       "weight": 1.0
     },
     {
@@ -55555,6 +55795,30 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L64",
+      "target": "tests_rich_comment_test_roundtrip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_rich_comment_test_roundtrip",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L20",
+      "target": "app_lib_rich_comment_writecomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
       "source": "tests_route_errors_test",
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L35",
@@ -57576,7 +57840,7 @@
       "relation": "references",
       "source": "app_components_discussion_commentrules",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L151",
+      "source_location": "L152",
       "target": "app_types_viewer",
       "weight": 1.0
     },
@@ -57588,7 +57852,7 @@
       "relation": "references",
       "source": "app_components_discussion_commentrules",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "app_components_mention_input_mentionselection",
       "weight": 1.0
     },
@@ -57600,7 +57864,7 @@
       "relation": "references",
       "source": "app_components_discussion_commentrules",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L158",
+      "source_location": "L159",
       "target": "app_types_comment",
       "weight": 1.0
     },
@@ -58538,6 +58802,18 @@
       "source_file": "app/lib/prefs.ts",
       "source_location": "L57",
       "target": "app_types_displayprefs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "relation": "references",
+      "source": "app_lib_rich_comment_commentvalue",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L40",
+      "target": "app_components_mention_input_mentionselection",
       "weight": 1.0
     },
     {
@@ -59666,6 +59942,19 @@
       "source_file": "app/server/poll-room.ts",
       "source_location": "L764",
       "target": "app_types_livesnapshot",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "deferred": true,
+      "relation": "imports_from",
+      "source": "app_components_comment_input_commentinput",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L16",
+      "target": "app_components_rich_comment_input",
       "weight": 1.0
     },
     {
@@ -63217,6 +63506,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "app_components_comment_input",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L2",
+      "target": "app_components_mention_input_mentioninput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_comment_input",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L3",
+      "target": "app_components_rich_comment_input_richcommentinput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "app_components_comment_markdown",
       "source_file": "app/components/comment-markdown.tsx",
       "source_location": "L2",
@@ -64108,43 +64421,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L10",
-      "target": "app_components_api_errormessage",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_discussion",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L10",
-      "target": "app_components_api_needsstepup",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_discussion",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L10",
-      "target": "app_components_api_postjson",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_discussion",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L10",
-      "target": "app_components_api_requestjson",
+      "target": "app_components_admin_key_confirm_keyconfirm",
       "weight": 1.0
     },
     {
@@ -64156,6 +64433,54 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L11",
+      "target": "app_components_api_errormessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L11",
+      "target": "app_components_api_needsstepup",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L11",
+      "target": "app_components_api_postjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L11",
+      "target": "app_components_api_requestjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L12",
       "target": "app_components_comment_markdown_commentmarkdown",
       "weight": 1.0
     },
@@ -64167,7 +64492,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_components_common_modal",
       "weight": 1.0
     },
@@ -64179,7 +64504,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "target": "app_components_ui_avatar_avatar",
       "weight": 1.0
     },
@@ -64191,7 +64516,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "target": "app_components_report_reportbutton",
       "weight": 1.0
     },
@@ -64203,7 +64528,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -64215,7 +64540,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -64227,7 +64552,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "target": "app_components_ui_icon_button_iconbutton",
       "weight": 1.0
     },
@@ -64239,7 +64564,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "target": "app_components_ui_select_select",
       "weight": 1.0
     },
@@ -64276,7 +64601,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L4",
-      "target": "app_components_mention_input_mentioninput",
+      "target": "app_components_comment_input_commentinput",
       "weight": 1.0
     },
     {
@@ -64287,7 +64612,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L4",
+      "source_location": "L5",
       "target": "app_components_mention_input_mentionselection",
       "weight": 1.0
     },
@@ -64299,7 +64624,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_i18n_index_intllocale",
       "weight": 1.0
     },
@@ -64311,7 +64636,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -64323,7 +64648,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -64335,7 +64660,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_lib_threads_orderthreads",
       "weight": 1.0
     },
@@ -64347,7 +64672,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_lib_threads_replyparent",
       "weight": 1.0
     },
@@ -64359,7 +64684,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "target": "app_lib_threads_visiblereplies",
       "weight": 1.0
     },
@@ -64371,7 +64696,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_types_comment",
       "weight": 1.0
     },
@@ -64383,7 +64708,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_types_commentthread",
       "weight": 1.0
     },
@@ -64395,7 +64720,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_types_sortorder",
       "weight": 1.0
     },
@@ -64407,7 +64732,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_types_streamerstatus",
       "weight": 1.0
     },
@@ -64419,7 +64744,7 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "target": "app_types_threadsnapshot",
       "weight": 1.0
     },
@@ -64431,20 +64756,8 @@
       "relation": "imports",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L8",
-      "target": "app_types_viewer",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_discussion",
-      "source_file": "app/components/discussion.tsx",
       "source_location": "L9",
-      "target": "app_components_admin_key_confirm_keyconfirm",
+      "target": "app_types_viewer",
       "weight": 1.0
     },
     {
@@ -70001,6 +70314,186 @@
       "source_file": "app/components/report.tsx",
       "source_location": "L6",
       "target": "app_components_api_postjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L27",
+      "target": "app_i18n_index_messageid",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L27",
+      "target": "app_i18n_index_t",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment_comment_nodes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment_comment_transformers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment_commentvalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment_createcodenode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment_creatementionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment_ismentionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment_readcomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment_writecomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L38",
+      "target": "app_components_api_errormessage",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L38",
+      "target": "app_components_api_requestjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L39",
+      "target": "app_components_mention_input_mentionselection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L40",
+      "target": "app_components_ui_icon_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L40",
+      "target": "app_components_ui_icon_iconname",
       "weight": 1.0
     },
     {
@@ -76167,7 +76660,7 @@
       "relation": "imports",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L63",
+      "source_location": "L71",
       "target": "app_components_ui_icon_paths_localiconname",
       "weight": 1.0
     },
@@ -76179,7 +76672,7 @@
       "relation": "imports",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L63",
+      "source_location": "L71",
       "target": "app_components_ui_icon_paths_localicons",
       "weight": 1.0
     },
@@ -79145,6 +79638,18 @@
       "source_file": "app/lib/prefs.ts",
       "source_location": "L3",
       "target": "app_types_displayprefs",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L29",
+      "target": "app_components_mention_input_mentionselection",
       "weight": 1.0
     },
     {
@@ -111793,6 +112298,78 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_rich_comment_comment_nodes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_rich_comment_commentvalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_rich_comment_markmentions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_rich_comment_readcomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_rich_comment_unmarkmentions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_rich_comment_writecomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
       "source": "tests_route_errors_test",
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L11",
@@ -116840,6 +117417,43 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "app_components_comment_input",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L1",
+      "target": "ref_react",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_comment_input",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L2",
+      "target": "app_components_mention_input",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_comment_input",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L3",
+      "target": "app_components_rich_comment_input",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "app_components_comment_markdown",
       "source_file": "app/components/comment-markdown.tsx",
       "source_location": "L1",
@@ -117559,7 +118173,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L10",
-      "target": "app_components_api",
+      "target": "app_components_admin_key_confirm",
       "weight": 1.0
     },
     {
@@ -117571,7 +118185,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L11",
-      "target": "app_components_comment_markdown",
+      "target": "app_components_api",
       "weight": 1.0
     },
     {
@@ -117583,7 +118197,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L12",
-      "target": "app_components_common",
+      "target": "app_components_comment_markdown",
       "weight": 1.0
     },
     {
@@ -117595,7 +118209,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L13",
-      "target": "app_components_report",
+      "target": "app_components_common",
       "weight": 1.0
     },
     {
@@ -117607,7 +118221,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L14",
-      "target": "app_components_shell_sign_in_dialog",
+      "target": "app_components_report",
       "weight": 1.0
     },
     {
@@ -117619,7 +118233,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L15",
-      "target": "app_components_ui_icon",
+      "target": "app_components_shell_sign_in_dialog",
       "weight": 1.0
     },
     {
@@ -117631,7 +118245,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L16",
-      "target": "app_components_ui_icon_button",
+      "target": "app_components_ui_icon",
       "weight": 1.0
     },
     {
@@ -117643,6 +118257,18 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L17",
+      "target": "app_components_ui_icon_button",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L18",
       "target": "app_components_ui_select",
       "weight": 1.0
     },
@@ -117679,7 +118305,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L4",
-      "target": "app_components_mention_input",
+      "target": "app_components_comment_input",
       "weight": 1.0
     },
     {
@@ -117691,43 +118317,7 @@
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
       "source_location": "L5",
-      "target": "app_i18n_index",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_discussion",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L6",
-      "target": "app_lib_shell",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_discussion",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L7",
-      "target": "app_lib_threads",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_discussion",
-      "source_file": "app/components/discussion.tsx",
-      "source_location": "L8",
-      "target": "app_types",
+      "target": "app_components_mention_input",
       "type_only": true,
       "weight": 1.0
     },
@@ -117739,8 +118329,45 @@
       "relation": "imports_from",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
+      "source_location": "L6",
+      "target": "app_i18n_index",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L7",
+      "target": "app_lib_shell",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_discussion",
+      "source_file": "app/components/discussion.tsx",
+      "source_location": "L8",
+      "target": "app_lib_threads",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_discussion",
+      "source_file": "app/components/discussion.tsx",
       "source_location": "L9",
-      "target": "app_components_admin_key_confirm",
+      "target": "app_types",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -121046,6 +121673,175 @@
       "source_file": "app/components/report.tsx",
       "source_location": "L6",
       "target": "app_components_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L1",
+      "target": "ref_lexical_code_core",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L2",
+      "target": "ref_lexical_history",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L26",
+      "target": "ref_react",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L27",
+      "target": "app_i18n_index",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L28",
+      "target": "app_lib_rich_comment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L3",
+      "target": "ref_lexical_link",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L38",
+      "target": "app_components_api",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L39",
+      "target": "app_components_mention_input",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L4",
+      "target": "ref_lexical_list",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L40",
+      "target": "app_components_ui_icon",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L5",
+      "target": "ref_lexical_markdown",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L6",
+      "target": "ref_lexical_rich_text",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L7",
+      "target": "ref_lexical_selection",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L8",
+      "target": "ref_lexical",
       "weight": 1.0
     },
     {
@@ -125030,7 +125826,7 @@
       "relation": "imports_from",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L63",
+      "source_location": "L71",
       "target": "app_components_ui_icon_paths",
       "weight": 1.0
     },
@@ -126280,6 +127076,91 @@
       "source_location": "L3",
       "target": "app_types",
       "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L1",
+      "target": "ref_lexical_code_core",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L19",
+      "target": "ref_lexical_rich_text",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L2",
+      "target": "ref_lexical_link",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L20",
+      "target": "ref_lexical",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L29",
+      "target": "app_components_mention_input",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L3",
+      "target": "ref_lexical_list",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L4",
+      "target": "ref_lexical_markdown",
       "weight": 1.0
     },
     {
@@ -143507,6 +144388,42 @@
       "confidence_score": 1.0,
       "context": "import",
       "relation": "imports_from",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L1",
+      "target": "ref_lexical",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L2",
+      "target": "ref_vitest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L3",
+      "target": "app_lib_rich_comment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports_from",
       "source": "tests_route_errors_test",
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L1",
@@ -150125,6 +151042,28 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "app_components_comment_input",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L5",
+      "target": "app_components_comment_input_rich",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_comment_input",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L9",
+      "target": "app_components_comment_input_commentinput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "app_components_comment_markdown",
       "source_file": "app/components/comment-markdown.tsx",
       "source_location": "L12",
@@ -150534,7 +151473,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L150",
+      "source_location": "L151",
       "target": "app_components_discussion_commentrules",
       "weight": 1.0
     },
@@ -150545,7 +151484,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L165",
+      "source_location": "L166",
       "target": "app_components_discussion_commentactions",
       "weight": 1.0
     },
@@ -150556,7 +151495,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L19",
+      "source_location": "L20",
       "target": "app_components_discussion_deletebutton",
       "weight": 1.0
     },
@@ -150567,7 +151506,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L241",
+      "source_location": "L242",
       "target": "app_components_discussion_commentarticle",
       "weight": 1.0
     },
@@ -150578,7 +151517,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L370",
+      "source_location": "L371",
       "target": "app_components_discussion_thread",
       "weight": 1.0
     },
@@ -150589,7 +151528,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L457",
+      "source_location": "L458",
       "target": "app_components_discussion_fetchthreads",
       "weight": 1.0
     },
@@ -150600,7 +151539,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L484",
+      "source_location": "L485",
       "target": "app_components_discussion_mergethreads",
       "weight": 1.0
     },
@@ -150611,7 +151550,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L489",
+      "source_location": "L490",
       "target": "app_components_discussion_findcomment",
       "weight": 1.0
     },
@@ -150622,7 +151561,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L498",
+      "source_location": "L499",
       "target": "app_components_discussion_updatecomment",
       "weight": 1.0
     },
@@ -150633,7 +151572,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L507",
+      "source_location": "L508",
       "target": "app_components_discussion_discussion",
       "weight": 1.0
     },
@@ -150644,7 +151583,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L83",
+      "source_location": "L84",
       "target": "app_components_discussion_timeunits",
       "weight": 1.0
     },
@@ -150655,7 +151594,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L92",
+      "source_location": "L93",
       "target": "app_components_discussion_relativetime",
       "weight": 1.0
     },
@@ -150666,7 +151605,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L98",
+      "source_location": "L99",
       "target": "app_components_discussion_composer",
       "weight": 1.0
     },
@@ -150677,7 +151616,7 @@
       "relation": "contains",
       "source": "app_components_discussion_deletebutton",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "target": "app_components_discussion_deletebutton_remove",
       "weight": 1.0
     },
@@ -150688,7 +151627,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L639",
+      "source_location": "L640",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -150699,7 +151638,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L655",
+      "source_location": "L656",
       "target": "app_components_discussion_discussion_post",
       "weight": 1.0
     },
@@ -154936,6 +155875,182 @@
       "source_file": "app/components/report.tsx",
       "source_location": "L51",
       "target": "app_components_report_reportbutton_submit",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L100",
+      "target": "app_components_rich_comment_input_tokenof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L111",
+      "target": "app_components_rich_comment_input_samevalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L126",
+      "target": "app_components_rich_comment_input_richcommentinput",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L45",
+      "target": "app_components_rich_comment_input_candidate",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L52",
+      "target": "app_components_rich_comment_input_token",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L59",
+      "target": "app_components_rich_comment_input_block",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L61",
+      "target": "app_components_rich_comment_input_active",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L67",
+      "target": "app_components_rich_comment_input_no_format",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L69",
+      "target": "app_components_rich_comment_input_text_buttons",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L76",
+      "target": "app_components_rich_comment_input_block_buttons",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L83",
+      "target": "app_components_rich_comment_input_blockof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L91",
+      "target": "app_components_rich_comment_input_activeof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L292",
+      "target": "app_components_rich_comment_input_richcommentinput_select",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L311",
+      "target": "app_components_rich_comment_input_richcommentinput_setblock",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L333",
+      "target": "app_components_rich_comment_input_richcommentinput_applylink",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L343",
+      "target": "app_components_rich_comment_input_richcommentinput_linkbutton",
       "weight": 1.0
     },
     {
@@ -159961,7 +161076,7 @@
       "relation": "contains",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L127",
+      "source_location": "L143",
       "target": "app_components_ui_icon_iconname",
       "weight": 1.0
     },
@@ -159972,7 +161087,7 @@
       "relation": "contains",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L128",
+      "source_location": "L144",
       "target": "app_components_ui_icon_iconsize",
       "weight": 1.0
     },
@@ -159983,7 +161098,7 @@
       "relation": "contains",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L132",
+      "source_location": "L148",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -159994,7 +161109,7 @@
       "relation": "contains",
       "source": "app_components_ui_icon",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L66",
+      "source_location": "L74",
       "target": "app_components_ui_icon_lucideicons",
       "weight": 1.0
     },
@@ -166167,6 +167282,138 @@
       "source_file": "app/lib/prefs.ts",
       "source_location": "L80",
       "target": "app_lib_prefs_setpreferencecookie",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L101",
+      "target": "app_lib_rich_comment_mention",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L115",
+      "target": "app_lib_rich_comment_comment_transformers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L128",
+      "target": "app_lib_rich_comment_comment_nodes",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L131",
+      "target": "app_lib_rich_comment_markmentions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L145",
+      "target": "app_lib_rich_comment_unmarkmentions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L159",
+      "target": "app_lib_rich_comment_readcomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L163",
+      "target": "app_lib_rich_comment_writecomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L38",
+      "target": "app_lib_rich_comment_commentvalue",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L43",
+      "target": "app_lib_rich_comment_serializedmentionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L46",
+      "target": "app_lib_rich_comment_mentionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L93",
+      "target": "app_lib_rich_comment_creatementionnode",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_rich_comment",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L97",
+      "target": "app_lib_rich_comment_ismentionnode",
       "weight": 1.0
     },
     {
@@ -188911,6 +190158,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
+      "source": "tests_rich_comment_test",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L12",
+      "target": "tests_rich_comment_test_roundtrip",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
       "source": "tests_route_errors_test",
       "source_file": "tests/route-errors.test.ts",
       "source_location": "L16",
@@ -189945,6 +191203,15 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "dynamic_import",
+      "source": "app_components_comment_input",
+      "source_file": "app/components/comment-input.tsx",
+      "target": "app_components_rich_comment_input"
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "dynamic_import",
       "source": "app_components_station_station",
       "source_file": "app/components/station/station.tsx",
       "target": "app_components_station_scene_client"
@@ -190880,6 +192147,116 @@
       "source_file": "app/lib/playground/sim.ts",
       "source_location": "L789",
       "target": "app_lib_playground_sim_playgroundsim_restore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L49",
+      "target": "app_lib_rich_comment_mentionnode_gettype",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L53",
+      "target": "app_lib_rich_comment_mentionnode_clone",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L57",
+      "target": "app_lib_rich_comment_mentionnode_constructor",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L62",
+      "target": "app_lib_rich_comment_mentionnode_importjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L66",
+      "target": "app_lib_rich_comment_mentionnode_exportjson",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L70",
+      "target": "app_lib_rich_comment_mentionnode_createdom",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L76",
+      "target": "app_lib_rich_comment_mentionnode_caninserttextbefore",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L80",
+      "target": "app_lib_rich_comment_mentionnode_caninserttextafter",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L84",
+      "target": "app_lib_rich_comment_mentionnode_istextentity",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "method",
+      "source": "app_lib_rich_comment_mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L88",
+      "target": "app_lib_rich_comment_mentionnode_getuserid",
       "weight": 1.0
     },
     {
@@ -193844,6 +195221,18 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "app_components_rich_comment_input_richcommentinput",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L189",
+      "target": "app_lib_rich_comment_readcomment",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "app_components_schedule_format_useviewerzone",
       "source_file": "app/components/schedule/format.ts",
       "source_location": "L19",
@@ -194724,6 +196113,18 @@
       "source_file": "tests/overlay-ui-coverage.test.ts",
       "source_location": "L439",
       "target": "app_components_overlay_studio_test_studiotest",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
+      "source": "tests_rich_comment_test_roundtrip",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L21",
+      "target": "app_lib_rich_comment_readcomment",
       "weight": 1.0
     },
     {
@@ -196846,7 +198247,7 @@
       "relation": "references",
       "source": "docs_api_markdown_in_comments",
       "source_file": "docs/api.md",
-      "source_location": "L264",
+      "source_location": "L273",
       "target": "app_lib_comment_markdown_parsecommentmarkdown",
       "weight": 1.0
     },
@@ -196864,10 +198265,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "252c7341873949e6507ed2738aaf39e192e54f7d4435974c7b42ee782ed43a99",
+    "content_sha256": "7a1b4394e9e249eadd3fd1c61a5449ddb0a474bf33639957ccd1d657ad1715ca",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "c44ac1ca0e94c8d136ca1db6b9601ba4ebbd56795c8927814556764a6286ee66",
+    "source_sha256": "588687ee6f77b6c36b12e9f3db164b2bf72db7ed32b13c6bc8be4021acb47aa4",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -197506,6 +198907,18 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_comment_input_rich",
+      "label": "Rich",
+      "norm_label": "rich",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L5"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_common_legalsection",
       "label": "LegalSection",
       "norm_label": "legalsection",
@@ -197534,7 +198947,7 @@
       "label": "CommentRules",
       "norm_label": "commentrules",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L150"
+      "source_location": "L151"
     },
     {
       "_callable": true,
@@ -198370,6 +199783,54 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_rich_comment_input_active",
+      "label": "Active",
+      "norm_label": "active",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L61"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_block",
+      "label": "Block",
+      "norm_label": "block",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L59"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_candidate",
+      "label": "Candidate",
+      "norm_label": "candidate",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L45"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_token",
+      "label": "Token",
+      "norm_label": "token",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L52"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_schedule_event_dialog_eventstep",
       "label": "EventStep",
       "norm_label": "eventstep",
@@ -198938,7 +200399,7 @@
       "label": "IconName",
       "norm_label": "iconname",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L127"
+      "source_location": "L143"
     },
     {
       "_callable": true,
@@ -198950,7 +200411,7 @@
       "label": "IconSize",
       "norm_label": "iconsize",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L128"
+      "source_location": "L144"
     },
     {
       "_callable": true,
@@ -200283,6 +201744,42 @@
       "norm_label": "window",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L56"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_commentvalue",
+      "label": "CommentValue",
+      "norm_label": "commentvalue",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L38"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode",
+      "label": "MentionNode",
+      "norm_label": "mentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L46"
+    },
+    {
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_serializedmentionnode",
+      "label": "SerializedMentionNode",
+      "norm_label": "serializedmentionnode",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L43"
     },
     {
       "_callable": true,
@@ -205631,6 +207128,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_comment_input_commentinput",
+      "label": "CommentInput()",
+      "norm_label": "commentinput()",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L9"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_comment_markdown_block",
       "label": "block()",
       "norm_label": "block()",
@@ -205932,7 +207440,7 @@
       "label": "CommentActions()",
       "norm_label": "commentactions()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L165"
+      "source_location": "L166"
     },
     {
       "_callable": true,
@@ -205943,7 +207451,7 @@
       "label": "CommentArticle()",
       "norm_label": "commentarticle()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L241"
+      "source_location": "L242"
     },
     {
       "_callable": true,
@@ -205954,7 +207462,7 @@
       "label": "Composer()",
       "norm_label": "composer()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L98"
+      "source_location": "L99"
     },
     {
       "_callable": true,
@@ -205965,7 +207473,7 @@
       "label": "DeleteButton()",
       "norm_label": "deletebutton()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L19"
+      "source_location": "L20"
     },
     {
       "_callable": true,
@@ -205976,7 +207484,7 @@
       "label": "remove()",
       "norm_label": "remove()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L36"
+      "source_location": "L37"
     },
     {
       "_callable": true,
@@ -205987,7 +207495,7 @@
       "label": "Discussion()",
       "norm_label": "discussion()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L507"
+      "source_location": "L508"
     },
     {
       "_callable": true,
@@ -205998,7 +207506,7 @@
       "label": "post()",
       "norm_label": "post()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L655"
+      "source_location": "L656"
     },
     {
       "_callable": true,
@@ -206009,7 +207517,7 @@
       "label": "run()",
       "norm_label": "run()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L639"
+      "source_location": "L640"
     },
     {
       "_callable": true,
@@ -206020,7 +207528,7 @@
       "label": "fetchThreads()",
       "norm_label": "fetchthreads()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L457"
+      "source_location": "L458"
     },
     {
       "_callable": true,
@@ -206031,7 +207539,7 @@
       "label": "findComment()",
       "norm_label": "findcomment()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L489"
+      "source_location": "L490"
     },
     {
       "_callable": true,
@@ -206042,7 +207550,7 @@
       "label": "mergeThreads()",
       "norm_label": "mergethreads()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L484"
+      "source_location": "L485"
     },
     {
       "_callable": true,
@@ -206053,7 +207561,7 @@
       "label": "relativeTime()",
       "norm_label": "relativetime()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L92"
+      "source_location": "L93"
     },
     {
       "_callable": true,
@@ -206064,7 +207572,7 @@
       "label": "Thread()",
       "norm_label": "thread()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L370"
+      "source_location": "L371"
     },
     {
       "_callable": true,
@@ -206075,7 +207583,7 @@
       "label": "updateComment()",
       "norm_label": "updatecomment()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L498"
+      "source_location": "L499"
     },
     {
       "_callable": true,
@@ -209584,6 +211092,156 @@
       "norm_label": "submit()",
       "source_file": "app/components/report.tsx",
       "source_location": "L51"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_activeof",
+      "label": "$activeOf()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "hasFormat",
+            "file": "app/components/rich-comment-input.tsx",
+            "lang": "typescript",
+            "line": "L95",
+            "receiver_type": "RangeSelection"
+          }
+        ]
+      },
+      "norm_label": "$activeof()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L91"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_blockof",
+      "label": "$blockOf()",
+      "norm_label": "$blockof()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L83"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_richcommentinput",
+      "label": "RichCommentInput()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "preventDefault",
+            "file": "app/components/rich-comment-input.tsx",
+            "lang": "typescript",
+            "line": "L209",
+            "receiver_type": "KeyboardEvent"
+          },
+          {
+            "callee": "stopPropagation",
+            "file": "app/components/rich-comment-input.tsx",
+            "lang": "typescript",
+            "line": "L217",
+            "receiver_type": "KeyboardEvent"
+          }
+        ]
+      },
+      "norm_label": "richcommentinput()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L126"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_richcommentinput_applylink",
+      "label": "applyLink()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "preventDefault",
+            "file": "app/components/rich-comment-input.tsx",
+            "lang": "typescript",
+            "line": "L334",
+            "receiver_type": "KeyboardEvent"
+          }
+        ]
+      },
+      "norm_label": "applylink()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L333"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_richcommentinput_linkbutton",
+      "label": "linkButton()",
+      "norm_label": "linkbutton()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L343"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_richcommentinput_select",
+      "label": "select()",
+      "norm_label": "select()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L292"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_richcommentinput_setblock",
+      "label": "setBlock()",
+      "norm_label": "setblock()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L311"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_samevalue",
+      "label": "sameValue()",
+      "norm_label": "samevalue()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L111"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_tokenof",
+      "label": "$tokenOf()",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "isCollapsed",
+            "file": "app/components/rich-comment-input.tsx",
+            "lang": "typescript",
+            "line": "L102",
+            "receiver_type": "RangeSelection"
+          }
+        ]
+      },
+      "norm_label": "$tokenof()",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L100"
     },
     {
       "_callable": true,
@@ -214253,7 +215911,7 @@
       "label": "Icon()",
       "norm_label": "icon()",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L132"
+      "source_location": "L148"
     },
     {
       "_callable": true,
@@ -217825,6 +219483,182 @@
       "norm_label": "withdefaults()",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L20"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_creatementionnode",
+      "label": "$createMentionNode()",
+      "norm_label": "$creatementionnode()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L93"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_ismentionnode",
+      "label": "$isMentionNode()",
+      "norm_label": "$ismentionnode()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L97"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_markmentions",
+      "label": "markMentions()",
+      "norm_label": "markmentions()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L131"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_caninserttextafter",
+      "label": ".canInsertTextAfter()",
+      "norm_label": ".caninserttextafter()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L80"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_caninserttextbefore",
+      "label": ".canInsertTextBefore()",
+      "norm_label": ".caninserttextbefore()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L76"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_clone",
+      "label": ".clone()",
+      "norm_label": ".clone()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L53"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_constructor",
+      "label": ".constructor()",
+      "norm_label": ".constructor()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L57"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_createdom",
+      "label": ".createDOM()",
+      "norm_label": ".createdom()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L70"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_exportjson",
+      "label": ".exportJSON()",
+      "norm_label": ".exportjson()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L66"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_gettype",
+      "label": ".getType()",
+      "norm_label": ".gettype()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L49"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_getuserid",
+      "label": ".getUserId()",
+      "norm_label": ".getuserid()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L88"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_importjson",
+      "label": ".importJSON()",
+      "norm_label": ".importjson()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L62"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mentionnode_istextentity",
+      "label": ".isTextEntity()",
+      "norm_label": ".istextentity()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L84"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_readcomment",
+      "label": "$readComment()",
+      "norm_label": "$readcomment()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L159"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_unmarkmentions",
+      "label": "unmarkMentions()",
+      "norm_label": "unmarkmentions()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L145"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_writecomment",
+      "label": "$writeComment()",
+      "norm_label": "$writecomment()",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L163"
     },
     {
       "_callable": true,
@@ -233062,6 +234896,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_rich_comment_test_roundtrip",
+      "label": "roundTrip()",
+      "norm_label": "roundtrip()",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L12"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_route_errors_test_args",
       "label": "args()",
       "metadata": {
@@ -234583,6 +236428,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_components_comment_input",
+      "label": "comment-input.tsx",
+      "norm_label": "comment-input.tsx",
+      "source_file": "app/components/comment-input.tsx",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_components_comment_markdown",
       "label": "comment-markdown.tsx",
       "norm_label": "comment-markdown.tsx",
@@ -234757,7 +236612,7 @@
       "label": "timeUnits",
       "norm_label": "timeunits",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L83"
+      "source_location": "L84"
     },
     {
       "_origin": "ast",
@@ -235748,6 +237603,46 @@
       "norm_label": "reportreasons",
       "source_file": "app/components/report.tsx",
       "source_location": "L8"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input",
+      "label": "rich-comment-input.tsx",
+      "norm_label": "rich-comment-input.tsx",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_block_buttons",
+      "label": "BLOCK_BUTTONS",
+      "norm_label": "block_buttons",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L76"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_no_format",
+      "label": "NO_FORMAT",
+      "norm_label": "no_format",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L67"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_rich_comment_input_text_buttons",
+      "label": "TEXT_BUTTONS",
+      "norm_label": "text_buttons",
+      "source_file": "app/components/rich-comment-input.tsx",
+      "source_location": "L69"
     },
     {
       "_origin": "ast",
@@ -236837,7 +238732,7 @@
       "label": "lucideIcons",
       "norm_label": "lucideicons",
       "source_file": "app/components/ui/icon.tsx",
-      "source_location": "L66"
+      "source_location": "L74"
     },
     {
       "_origin": "ast",
@@ -239259,6 +241154,46 @@
       "norm_label": "prefs_script",
       "source_file": "app/lib/prefs.ts",
       "source_location": "L26"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment",
+      "label": "rich-comment.ts",
+      "norm_label": "rich-comment.ts",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_comment_nodes",
+      "label": "COMMENT_NODES",
+      "norm_label": "comment_nodes",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L128"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_comment_transformers",
+      "label": "COMMENT_TRANSFORMERS",
+      "norm_label": "comment_transformers",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L115"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_rich_comment_mention",
+      "label": "MENTION",
+      "norm_label": "mention",
+      "source_file": "app/lib/rich-comment.ts",
+      "source_location": "L101"
     },
     {
       "_origin": "ast",
@@ -247360,6 +249295,16 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "tests_rich_comment_test",
+      "label": "rich-comment.test.ts",
+      "norm_label": "rich-comment.test.ts",
+      "source_file": "tests/rich-comment.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "tests_route_errors_test",
       "label": "route-errors.test.ts",
       "norm_label": "route-errors.test.ts",
@@ -249930,6 +251875,16 @@
       "community": null,
       "external": true,
       "file_type": "concept",
+      "id": "app_lib_rich_comment_createcodenode",
+      "label": "app_lib_rich_comment_createcodenode",
+      "norm_label": "app_lib_rich_comment_createcodenode",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
       "id": "ref_better_auth",
       "label": "ref_better_auth",
       "norm_label": "ref_better_auth",
@@ -250023,6 +251978,86 @@
       "id": "ref_image_size",
       "label": "ref_image_size",
       "norm_label": "ref_image_size",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
+      "id": "ref_lexical",
+      "label": "ref_lexical",
+      "norm_label": "ref_lexical",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
+      "id": "ref_lexical_code_core",
+      "label": "ref_lexical_code_core",
+      "norm_label": "ref_lexical_code_core",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
+      "id": "ref_lexical_history",
+      "label": "ref_lexical_history",
+      "norm_label": "ref_lexical_history",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
+      "id": "ref_lexical_link",
+      "label": "ref_lexical_link",
+      "norm_label": "ref_lexical_link",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
+      "id": "ref_lexical_list",
+      "label": "ref_lexical_list",
+      "norm_label": "ref_lexical_list",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
+      "id": "ref_lexical_markdown",
+      "label": "ref_lexical_markdown",
+      "norm_label": "ref_lexical_markdown",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
+      "id": "ref_lexical_rich_text",
+      "label": "ref_lexical_rich_text",
+      "norm_label": "ref_lexical_rich_text",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "community": null,
+      "external": true,
+      "file_type": "concept",
+      "id": "ref_lexical_selection",
+      "label": "ref_lexical_selection",
+      "norm_label": "ref_lexical_selection",
       "source_file": "",
       "type": "external"
     },
