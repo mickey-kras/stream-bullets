@@ -63,7 +63,8 @@ export function sourcesText(sources: OverlaySources, now: number): string {
   return age === null ? t("overlay.sources.goneNow") : t("overlay.sources.gone", { age });
 }
 
-// Show private URL once; store only its key hash. Confirm regeneration because it revokes the old link.
+// The private URL shows after its owner makes it or asks to see it again. Confirm regeneration because it
+// revokes the old link.
 export function OverlayLink({
   hasKey,
   layers,
@@ -83,6 +84,8 @@ export function OverlayLink({
   const [made, setMade] = useState<boolean>(hasKey);
   const [confirming, setConfirming] = useState<boolean>(false);
   const [busy, setBusy] = useState<boolean>(false);
+  // False after the server said that it has no copy of the key.
+  const [kept, setKept] = useState<boolean>(true);
   const sizeId: string = useId();
 
   async function regenerate(): Promise<void> {
@@ -91,6 +94,7 @@ export function OverlayLink({
       const result = await postJson<{ url: string }>("/api/overlay/key", {});
       setUrl(result.url);
       setMade(true);
+      setKept(true);
       setConfirming(false);
       toast(t("overlay.keyMade"));
     } catch (error: unknown) {
@@ -100,9 +104,22 @@ export function OverlayLink({
     }
   }
 
+  async function show(): Promise<void> {
+    setBusy(true);
+    try {
+      const result = await postJson<{ url: string | null }>("/api/overlay/key/show", {});
+      if (result.url === null) setKept(false);
+      else setUrl(result.url);
+    } catch (error: unknown) {
+      toast(errorMessage(error), { tone: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   let hint: string = t("overlay.keyNone");
   if (url) hint = t("overlay.keyOnce");
-  else if (made) hint = t("overlay.keyHidden");
+  else if (made) hint = t(kept ? "overlay.keyHidden" : "overlay.keyNotKept");
   return (
     <div className="ov-url">
       <p>
@@ -156,7 +173,12 @@ export function OverlayLink({
       ) : (
         <p className="muted">{t("overlay.layerHelp")}</p>
       )}
-      <p>
+      <p className="ov-url-actions">
+        {made && !url && kept && (
+          <button type="button" className="gold" disabled={busy} onClick={() => void show()}>
+            {t("overlay.keyShow")}
+          </button>
+        )}
         <button type="button" disabled={busy} onClick={() => (made ? setConfirming(true) : void regenerate())}>
           {t(made ? "overlay.keyRegenerate" : "overlay.keyCreate")}
         </button>

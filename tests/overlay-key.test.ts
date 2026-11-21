@@ -128,7 +128,10 @@ describe("overlay key values", (): void => {
 
   it("reads every character, also after the first difference", (): void => {
     const read: number[] = [];
-    const original = Object.getOwnPropertyDescriptor(String.prototype, "codePointAt")!.value as (this: string, index: number) => number | undefined;
+    const original = Object.getOwnPropertyDescriptor(String.prototype, "codePointAt")!.value as (
+      this: string,
+      index: number,
+    ) => number | undefined;
     vi.spyOn(String.prototype, "codePointAt").mockImplementation(function (this: string, index: number) {
       read.push(index);
       return original.call(this, index);
@@ -148,7 +151,14 @@ describe("making and checking the overlay key", (): void => {
     expect(await hasOverlayKey(env, page)).toBe(true);
     const row = await env.DB.prepare("SELECT * FROM overlay_keys WHERE streamer_id=?").bind(page).first();
     const expectedCreatedAt: unknown = expect.any(Number);
-    expect(row).toEqual({ streamer_id: page, key_hash: await hashOverlayKey(key), created_at: expectedCreatedAt });
+    // This deployment has no encryption keys, so the key is not kept.
+    expect(row).toEqual({
+      streamer_id: page,
+      key_hash: await hashOverlayKey(key),
+      key_sealed: null,
+      key_id: null,
+      created_at: expectedCreatedAt,
+    });
     expect(JSON.stringify(row)).not.toContain(key);
     expect(await overlayKeyMatches(env, page, key)).toBe(true);
     const state = await call("GET", "overlay", { user: "owner" });
@@ -206,7 +216,51 @@ describe("making and checking the overlay key", (): void => {
     }
   });
 
-  it("lets only the page owner make a key, and offers no way to read it", async (): Promise<void> => {
+  it("shows the current link to the owner again, and to no other account", async (): Promise<void> => {
+    const keys = `a:${btoa(String.fromCodePoint(...new Uint8Array(32).fill(7)))}`;
+    env = { ...env, CHANNEL_TOKEN_KEYS: keys };
+    const { url } = await newUrl();
+    const shown = await call("POST", "overlay/key/show", { user: "owner", body: {} });
+    expect(shown.status).toBe(200);
+    expect(await shown.json()).toEqual({ url });
+    expect((await call("POST", "overlay/key/show", { body: {} })).status).toBe(401);
+    expect((await call("POST", "overlay/key/show", { user: "viewer", body: {} })).status).toBe(404);
+    const stored = await env.DB.prepare("SELECT key_sealed, key_id FROM overlay_keys WHERE streamer_id=?")
+      .bind(page)
+      .first<{ key_sealed: string; key_id: string }>();
+    expect(stored?.key_id).toBe("a");
+    expect(stored?.key_sealed).not.toContain(new URL(url).searchParams.get("key"));
+    const { results } = await env.DB.prepare(
+      "SELECT action, actor_id, metadata FROM moderation_actions WHERE action='overlay_key_shown'",
+    ).all<{ action: string; actor_id: string; metadata: string | null }>();
+    expect(results).toHaveLength(1);
+    expect(JSON.stringify(results)).not.toContain(new URL(url).searchParams.get("key"));
+    // An encrypted key of one page does not open for another page.
+    await newUrl("frozen");
+    await env.DB.prepare(
+      "UPDATE overlay_keys SET key_sealed=(SELECT key_sealed FROM overlay_keys WHERE streamer_id=?) WHERE streamer_id=?",
+    )
+      .bind(page, frozenPage)
+      .run();
+    expect(await (await call("POST", "overlay/key/show", { user: "frozen", body: {} })).json()).toEqual({ url: null });
+    env = { ...env, CHANNEL_TOKEN_KEYS: undefined };
+  });
+
+  it("shows no link when the key was not kept or its encryption key is gone", async (): Promise<void> => {
+    await newUrl();
+    expect(await (await call("POST", "overlay/key/show", { user: "owner", body: {} })).json()).toEqual({ url: null });
+    const first = `a:${btoa(String.fromCodePoint(...new Uint8Array(32).fill(7)))}`;
+    const second = `b:${btoa(String.fromCodePoint(...new Uint8Array(32).fill(9)))}`;
+    env = { ...env, CHANNEL_TOKEN_KEYS: first };
+    const { url } = await newUrl();
+    env = { ...env, CHANNEL_TOKEN_KEYS: `${second},${first}` };
+    expect(await (await call("POST", "overlay/key/show", { user: "owner", body: {} })).json()).toEqual({ url });
+    env = { ...env, CHANNEL_TOKEN_KEYS: second };
+    expect(await (await call("POST", "overlay/key/show", { user: "owner", body: {} })).json()).toEqual({ url: null });
+    env = { ...env, CHANNEL_TOKEN_KEYS: undefined };
+  });
+
+  it("lets only the page owner make a key, and reads no key with GET", async (): Promise<void> => {
     expect((await call("POST", "overlay/key", { body: {} })).status).toBe(401);
     const stranger = await regenerate("viewer");
     expect(stranger.status).toBe(404);
