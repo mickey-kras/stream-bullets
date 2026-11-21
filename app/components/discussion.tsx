@@ -8,6 +8,7 @@ import { orderThreads, replyParent, visibleReplies } from "../lib/threads";
 import type { Comment, CommentThread, SortOrder, StreamerStatus, ThreadSnapshot, Viewer } from "../types";
 import { KeyConfirm } from "./admin/key-confirm";
 import { errorMessage, needsStepUp, postJson, requestJson } from "./api";
+import { CommentMarkdown } from "./comment-markdown";
 import { Avatar, Modal } from "./common";
 import { ReportButton } from "./report";
 import { SignInDialog } from "./shell/sign-in-dialog";
@@ -237,24 +238,6 @@ function CommentActions({
   );
 }
 
-function MentionText({ comment }: Readonly<{ comment: Comment }>): ReactNode {
-  const parts: ReactNode[] = [];
-  let offset = 0;
-  for (const mention of [...(comment.mentions ?? [])].sort(
-    (a: MentionSelection, b: MentionSelection) => a.start - b.start,
-  )) {
-    parts.push(
-      comment.text.slice(offset, mention.start),
-      <strong className="comment-mention" key={mention.userId} title={mention.userId}>
-        {comment.text.slice(mention.start, mention.end)}
-      </strong>,
-    );
-    offset = mention.end;
-  }
-  parts.push(comment.text.slice(offset));
-  return parts;
-}
-
 function CommentArticle({
   comment,
   parent,
@@ -358,9 +341,9 @@ function CommentArticle({
             </div>
           </form>
         ) : (
-          <p className="comment-text">
-            <MentionText comment={comment} />
-          </p>
+          <div className="comment-text">
+            <CommentMarkdown text={comment.text} mentions={comment.mentions} />
+          </div>
         )}
         {comment.editedAt && <span className="muted">{t("discussion.edited")}</span>}
         <div ref={editButton}>

@@ -77,6 +77,73 @@ test("replies collapse after two, removed comments keep their thread, one reply 
   await close(context);
 });
 
+test("a posted comment renders the Markdown subset and keeps markup inert", async ({ browser }) => {
+  const entryId: string = await seedThreads();
+  const users = await accounts();
+  await runSql("threads-markdown-quota", [
+    `DELETE FROM app_rate_limits WHERE key IN ('content:${users.viewer.id}','write:${users.viewer.id}');`,
+  ]);
+  const text: string = [
+    "**bold** *italic* ~~struck~~ `inline` [site](https://example.com/page)",
+    "",
+    "- first",
+    "- second",
+    "",
+    "1. one",
+    "2. two",
+    "",
+    "> quoted",
+    "",
+    "```",
+    `const wide = "${"x".repeat(300)}";`,
+    "```",
+    "",
+    "# no heading <script>window.pwned = true</script>",
+    "plain line",
+    "next line",
+  ].join("\n");
+  const context = await signedIn(browser, "viewer", clientIp("threads", 100));
+  try {
+    const page = await newPage(context);
+    await page.goto(`/@other_host?entry=${entryId}`);
+    await page.getByRole("textbox", { name: "Write a comment", exact: true }).fill(text);
+    await page.getByRole("button", { name: "Post", exact: true }).click();
+    const posted = page.locator("article.comment").filter({ hasText: "plain line" });
+    const body = posted.locator(".comment-text");
+    await expect(body.locator("strong")).toHaveText("bold");
+    await expect(body.locator("em")).toHaveText("italic");
+    await expect(body.locator("del")).toHaveText("struck");
+    await expect(body.locator("p > code")).toHaveText("inline");
+    const link = body.getByRole("link", { name: "site", exact: true });
+    await expect(link).toHaveAttribute("href", "https://example.com/page");
+    await expect(link).toHaveAttribute("rel", "nofollow ugc noopener noreferrer");
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect(body.locator("ul > li")).toHaveText(["first", "second"]);
+    await expect(body.locator("ol > li")).toHaveText(["one", "two"]);
+    await expect(body.locator("blockquote")).toHaveText("quoted");
+    await expect(body.locator("pre > code")).toContainText("const wide");
+    await expect(body.locator("h1, script, img")).toHaveCount(0);
+    const last = body.locator("p").last();
+    await expect(last).toContainText("# no heading <script>window.pwned = true</script>");
+    await expect(last.locator("br")).toHaveCount(2);
+    expect(await page.evaluate((): boolean => "pwned" in globalThis)).toBe(false);
+    const scroll = await body.locator("pre").evaluate((pre: HTMLElement) => ({
+      code: pre.scrollWidth > pre.clientWidth,
+      page: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      thread: (pre.closest(".comment-body")?.scrollWidth ?? 0) > (pre.closest(".comment-body")?.clientWidth ?? 0),
+    }));
+    expect(scroll).toEqual({ code: true, page: false, thread: false });
+
+    await page.reload();
+    await expect(body.locator("strong")).toHaveText("bold");
+    await posted.getByRole("button", { name: "Edit", exact: true }).click();
+    await expect(posted.getByRole("textbox", { name: "Edit comment", exact: true })).toHaveValue(text);
+  } finally {
+    await close(context);
+    await runSql("threads-markdown-cleanup", [`DELETE FROM entries WHERE id='${entryId}';`]);
+  }
+});
+
 test("failed comment actions keep drafts and editors available for retry", async ({ browser }) => {
   const entryId: string = await seedThreads();
   const users = await accounts();
