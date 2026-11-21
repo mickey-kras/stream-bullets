@@ -4,6 +4,7 @@ import { mentionCandidates } from "../discussion-notifications.server";
 import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
 import { requireAdminSession } from "../stepup.server";
+import { attachEntryTranslations, entryTranslationSchema, translateEntry } from "../entry-translation.server";
 import { attachTranslations, translateComment, translationSchema } from "../translation.server";
 import { requestLocale } from "../../i18n/resolve";
 import type { Comment, CommentThread } from "../../types";
@@ -47,7 +48,14 @@ export const entryRoutes: ApiRoute[] = [
       return json(page);
     }
     queryParams(request, []);
+    await attachEntryTranslations(env, [entry], requestLocale(request, viewer?.locale ?? null));
     return json({ entry });
+  }),
+  // POST /api/entries/:id/translation {locale, title, body, options} → {translation: {title, body, options} | null}
+  write("POST", /entries\/([a-f0-9-]{36})\/translation/, async ({ request, env, match, viewer }) => {
+    if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Topic or poll not found.");
+    const { locale, ...shown } = await readJson(request, entryTranslationSchema);
+    return json({ translation: await translateEntry(env, match[1], viewer.id, locale, Date.now(), shown) });
   }),
   // POST /api/comments/:id/translation {locale} → {translation: {text, mentions} | null}
   write("POST", /comments\/([a-f0-9-]{36})\/translation/, async ({ request, env, match, viewer }) => {

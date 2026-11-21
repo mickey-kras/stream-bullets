@@ -17,6 +17,8 @@ import { appContext, type AppEnv } from "../env";
 import { configuredProviders } from "../server/auth.server";
 import { requestViewer } from "../lib/shell.server";
 import { getEntry, getVisibleStreamer, listEntries } from "../server/data.server";
+import { attachEntryTranslations } from "../server/entry-translation.server";
+import { requestLocale } from "../i18n/resolve";
 import { isAdmin } from "../server/access.server";
 import { listCards } from "../server/community.server";
 import { defaultRange, getEvent, listEvents, listTopicChoices } from "../server/schedule.server";
@@ -221,6 +223,11 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
     view === "community" && !official ? listCards(app.env, streamer.id) : null,
     owner && view === "schedule" ? listTopicChoices(app.env, streamer.id) : [],
   ]);
+  await attachEntryTranslations(
+    app.env,
+    selected ? [...board.entries, selected] : board.entries,
+    requestLocale(request, viewer?.locale ?? null),
+  );
   return {
     board,
     selected,

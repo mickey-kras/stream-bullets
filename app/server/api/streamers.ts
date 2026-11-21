@@ -1,4 +1,6 @@
 import { notifyRoom } from "../live.server";
+import { requestLocale } from "../../i18n/resolve";
+import { attachEntryTranslations } from "../entry-translation.server";
 import {
   getOwnStreamer,
   getStreamer,
@@ -31,7 +33,9 @@ export const streamerRoutes: ApiRoute[] = [
     const input = parsedQuery(request, ["kind", "sort", "query", "cursor", "status"], entryQuerySchema);
     const streamer = await getVisibleStreamer(env, match[1], viewer?.id ?? null);
     if (!streamer) throw new HttpError(404, "Streamer not found.");
-    return json(await listEntries(env, streamer, viewer?.id ?? null, input));
+    const page = await listEntries(env, streamer, viewer?.id ?? null, input);
+    await attachEntryTranslations(env, page.entries, requestLocale(request, viewer?.locale ?? null));
+    return json(page);
   }),
   write("POST", /streamers\/([a-z0-9_]{3,30})/, async ({ request, app, env, match, viewer }) => {
     const input = await readJson(request, mashCreateSchema.or(entryActionSchema));
