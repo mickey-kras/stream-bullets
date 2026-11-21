@@ -203,6 +203,9 @@ export interface Comment {
   removed: boolean;
   // Show "Reported" and hide Report when true.
   reported: boolean;
+  // The stored translation for the language of the reader. Null: this comment needs none, or its translation
+  // failed a check. Absent: the server has no result yet.
+  translation?: { text: string; mentions: CommentMention[] } | null;
 }
 
 // Top-level comment with replies flattened oldest first (`?view=thread`).

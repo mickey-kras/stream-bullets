@@ -3,63 +3,117 @@ import { close, expect, newPage, test } from "./coverage";
 import { clientIp } from "./client-ips";
 import { accounts, runSql, signedIn } from "./fixtures";
 
-async function seedComments(): Promise<string> {
+interface Seeded {
+  entryId: string;
+  commentId: string;
+}
+
+async function seedComments(): Promise<Seeded> {
   const users = await accounts();
   const entryId: string = randomUUID();
+  const commentId: string = randomUUID();
   const now: number = Date.now() - 600_000;
   await runSql("comment-translation", [
     `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${entryId}',id,'${users.viewer.id}','topic','Translate topic','Body','Just chatting',${now} FROM streamers WHERE handle='other_host';`,
-    `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at) VALUES ('${randomUUID()}','${entryId}','${users.reporter.id}','**Hallo** Welt',${now + 1});`,
-    `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at) VALUES ('${randomUUID()}','${entryId}','${users.viewer.id}','My own comment',${now + 2});`,
+    `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at) VALUES ('${commentId}','${entryId}','${users.reporter.id}','**Hallo** Welt',${now + 1});`,
+    `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at) VALUES ('${randomUUID()}','${entryId}','${users.viewer.id}','Already English',${now + 2});`,
   ]);
-  return entryId;
+  return { entryId, commentId };
 }
 
-test("a reader changes between a comment and its translation with one request", async ({ browser }) => {
-  const entryId: string = await seedComments();
+test("a signed-in reader gets each comment in the site language and can see one original", async ({ browser }) => {
+  const { entryId } = await seedComments();
   const context = await signedIn(browser, "viewer", clientIp("comment-translation", 101));
   const page = await newPage(context);
   try {
-    const locales: unknown[] = [];
+    const asked: unknown[] = [];
     await page.route("**/api/comments/*/translation", async (route) => {
-      locales.push(route.request().postDataJSON());
-      await route.fulfill({ json: { translation: { text: "**Hello** world", mentions: [] } } });
+      const body = route.request().postDataJSON() as { text: string };
+      asked.push(body);
+      const translation = body.text === "**Hallo** Welt" ? { text: "**Hello** world", mentions: [] } : null;
+      await route.fulfill({ json: { translation } });
     });
     await page.goto(`/@other_host?entry=${entryId}`);
     const comment = page.locator("article.comment").filter({ hasText: "reporter" });
-    const own = page.locator("article.comment").filter({ hasText: "My own comment" });
-    await expect(own.getByRole("button", { name: "Translate", exact: true })).toHaveCount(0);
-    await comment.getByRole("button", { name: "Translate", exact: true }).click();
+    const english = page.locator("article.comment").filter({ hasText: "Already English" });
+    // No selection is necessary: the page asks for the translation and shows it.
     await expect(comment.locator(".comment-text")).toHaveText("Hello world");
-    await expect(comment.locator(".comment-translation")).toContainText("Translated");
+    await expect(english.locator(".comment-translation")).toHaveCount(0);
     await comment.getByRole("button", { name: "Show original", exact: true }).click();
     await expect(comment.locator(".comment-text")).toHaveText("Hallo Welt");
-    await comment.getByRole("button", { name: "Translate", exact: true }).click();
+    await expect(english.locator(".comment-text")).toHaveText("Already English");
+    await comment.getByRole("button", { name: "Show translation", exact: true }).click();
     await expect(comment.locator(".comment-text")).toHaveText("Hello world");
-    expect(locales).toEqual([{ locale: "en", text: "**Hallo** Welt" }]);
+    expect(asked).toHaveLength(2);
+    expect(asked).toContainEqual({ locale: "en", text: "**Hallo** Welt" });
   } finally {
     await close(context);
   }
 });
 
-test("a comment without a translation, and a deployment without translation, show a message", async ({ browser }) => {
-  const entryId: string = await seedComments();
+test("a signed-out reader gets a stored translation and starts no new one", async ({ browser }) => {
+  const { entryId, commentId } = await seedComments();
+  await runSql("comment-translation", [
+    `INSERT INTO comment_translations(comment_id,locale,source_hash,text,created_at) VALUES ('${commentId}','en','b50519076d50f1ce7796177e2ab3f8d9ee6a75faeb38ae6cb97b7b7aa0220092','**Hello** world',1);`,
+  ]);
+  const page = await newPage(browser);
+  try {
+    let asked: number = 0;
+    await page.route("**/api/comments/*/translation", async (route) => {
+      asked += 1;
+      await route.abort();
+    });
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const comment = page.locator("article.comment").filter({ hasText: "reporter" });
+    await expect(comment.locator(".comment-text")).toHaveText("Hello world");
+    await comment.getByRole("button", { name: "Show original", exact: true }).click();
+    await expect(comment.locator(".comment-text")).toHaveText("Hallo Welt");
+    await expect(page.locator("article.comment").filter({ hasText: "Already English" })).toBeVisible();
+    expect(asked).toBe(0);
+  } finally {
+    await close(page);
+  }
+});
+
+test("a deployment without translation shows the original text and stops its requests", async ({ browser }) => {
+  const { entryId } = await seedComments();
   const context = await signedIn(browser, "viewer", clientIp("comment-translation", 102));
   const page = await newPage(context);
   try {
-    await page.route("**/api/comments/*/translation", (route) => route.fulfill({ json: { translation: null } }));
+    // The local server has no Workers AI binding: the endpoint answers 503.
+    const answers: number[] = [];
+    page.on("response", (response) => {
+      if (response.url().includes("/translation")) answers.push(response.status());
+    });
     await page.goto(`/@other_host?entry=${entryId}`);
     const comment = page.locator("article.comment").filter({ hasText: "reporter" });
-    await comment.getByRole("button", { name: "Translate", exact: true }).click();
-    await expect(comment.locator(".comment-translation")).toHaveText("This comment has no translation.");
     await expect(comment.locator(".comment-text")).toHaveText("Hallo Welt");
+    await expect.poll(() => answers.length).toBeGreaterThan(0);
+    expect(answers.every((status: number): boolean => status === 503)).toBe(true);
+    await expect(page.locator(".comment-translation")).toHaveCount(0);
+  } finally {
+    await close(context);
+  }
+});
 
-    // The local server has no Workers AI binding: the real endpoint answers 503.
-    await page.unroute("**/api/comments/*/translation");
-    await page.reload();
-    await comment.getByRole("button", { name: "Translate", exact: true }).click();
-    await expect(comment.locator(".comment-translation output")).toHaveText("Translation is not available.");
-    await expect(comment.getByRole("button", { name: "Translate", exact: true })).toBeEnabled();
+test("the page asks again when a different reader has the translation in progress", async ({ browser }) => {
+  const { entryId } = await seedComments();
+  const context = await signedIn(browser, "viewer", clientIp("comment-translation", 102));
+  const page = await newPage(context);
+  try {
+    let answers: number = 0;
+    await page.route("**/api/comments/*/translation", async (route) => {
+      const body = route.request().postDataJSON() as { text: string };
+      if (body.text !== "**Hallo** Welt") return route.fulfill({ json: { translation: null } });
+      answers += 1;
+      if (answers === 1)
+        return route.fulfill({ status: 409, json: { error: "The translation is not ready. Try again in a moment." } });
+      return route.fulfill({ json: { translation: { text: "**Hello** world", mentions: [] } } });
+    });
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const comment = page.locator("article.comment").filter({ hasText: "reporter" });
+    await expect(comment.locator(".comment-text")).toHaveText("Hello world");
+    expect(answers).toBe(2);
   } finally {
     await close(context);
   }

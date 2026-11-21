@@ -1389,8 +1389,6 @@
   "waitlist.sendAgain": "Wyślij prośbę ponownie",
   "waitlist.update": "Zaktualizuj prośbę",
   "overlay.characters.off": "Postacie są wyłączone na tym serwerze.",
-  "discussion.translate": "Przetłumacz",
-  "discussion.translated": "Przetłumaczono",
   "discussion.showOriginal": "Pokaż oryginał",
-  "discussion.noTranslation": "Ten komentarz nie ma tłumaczenia."
+  "discussion.showTranslation": "Pokaż tłumaczenie"
 }

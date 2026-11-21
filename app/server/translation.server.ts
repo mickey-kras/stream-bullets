@@ -2,13 +2,14 @@ import { z } from "zod";
 import { LOCALES } from "../../db/enums";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
+import type { Comment } from "../types";
 import { keepsStructure, moveMentions, readAnswer, type MentionRange } from "../lib/translation-check";
 import { getVisibleEntry } from "./data.server";
 import { HttpError } from "./http.server";
 
 export const TRANSLATION_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 // Starts of the model in 24 hours, for all accounts together. A stored translation starts no model.
-export const TRANSLATION_DAILY_LIMIT = 2000;
+export const TRANSLATION_DAILY_LIMIT = 20_000;
 export const TRANSLATION_LIMIT_KEY = "translation";
 const DAY = 86_400_000;
 // A reservation without a stored result is open again after this time.
@@ -73,6 +74,27 @@ function checked(source: string, mentions: readonly MentionRange[], text: string
   return moved ? { text, mentions: moved } : null;
 }
 
+/**
+ * Puts the stored translation for `locale` on each comment. A comment without a stored result stays as it is, so
+ * the page of a signed-in reader can ask for its translation.
+ */
+export async function attachTranslations(env: AppEnv, comments: readonly Comment[], locale: Locale): Promise<void> {
+  const open: Comment[] = comments.filter((comment: Comment): boolean => !comment.removed);
+  if (open.length === 0) return;
+  const { results } = await env.DB.prepare(
+    "SELECT comment_id, source_hash, text FROM comment_translations WHERE locale=? AND comment_id IN (SELECT value FROM json_each(?))",
+  )
+    .bind(locale, JSON.stringify(open.map((comment: Comment): string => comment.id)))
+    .all<{ comment_id: string; source_hash: string; text: string | null }>();
+  const stored = new Map(results.map((row) => [row.comment_id, row]));
+  for (const comment of open) {
+    const row = stored.get(comment.id);
+    // An edit between the read of the comment and this read gives a result for a different text.
+    if (row && row.source_hash === (await sha256(comment.text)))
+      comment.translation = checked(comment.text, comment.mentions ?? [], row.text);
+  }
+}
+
 async function askModel(ai: Ai, locale: Locale, source: string, mentions: readonly MentionRange[]): Promise<string> {
   const labels: string = mentions.map((mention: MentionRange) => source.slice(mention.start, mention.end)).join(" ");
   const result = await ai.run(TRANSLATION_MODEL, {
@@ -84,6 +106,27 @@ async function askModel(ai: Ai, locale: Locale, source: string, mentions: readon
     max_tokens: 1500,
   });
   return result.response;
+}
+
+// The comment can change while the model runs. Only the translation of the current text is stored.
+async function storeTranslation(
+  env: AppEnv,
+  commentId: string,
+  locale: Locale,
+  hash: string,
+  text: string | null,
+  now: number,
+  source: string,
+): Promise<void> {
+  await env.DB.prepare(
+    `INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at)
+      SELECT ?1, ?2, ?3, ?4, ?5
+      WHERE EXISTS(SELECT 1 FROM entry_comments WHERE id=?1 AND removed_at IS NULL AND text=?6)
+      ON CONFLICT(comment_id, locale) DO UPDATE SET
+        source_hash=excluded.source_hash, text=excluded.text, created_at=excluded.created_at`,
+  )
+    .bind(commentId, locale, hash, text, now, source)
+    .run();
 }
 
 /**
@@ -119,6 +162,11 @@ export async function translateComment(
     .bind(commentId, locale)
     .first<{ source_hash: string; text: string | null }>();
   if (stored?.source_hash === hash) return checked(comment.text, rows, stored.text);
+  // Text without letters, for example emoji or a link only, has no translation and starts no model.
+  if (!/\p{L}/u.test(comment.text.replace(/https?:\/\/\S+/gu, ""))) {
+    await storeTranslation(env, commentId, locale, hash, null, now, comment.text);
+    return null;
+  }
 
   if (!(await env.REQUEST_LIMITER.limit({ key: `${TRANSLATION_LIMIT_KEY}:${viewerId}` })).success)
     throw new HttpError(429, "Too many requests. Please try again in a minute.");
@@ -144,15 +192,6 @@ export async function translateComment(
   // If the model fails, the reservation stays in the daily count and opens again after CLAIM_MS.
   const answer: string = await askModel(env.AI, locale, comment.text, rows);
   const translation: CommentTranslation | null = checked(comment.text, rows, readAnswer(answer));
-  // The comment can change while the model runs. Only the translation of the current text is stored.
-  await env.DB.prepare(
-    `INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at)
-      SELECT ?1, ?2, ?3, ?4, ?5
-      WHERE EXISTS(SELECT 1 FROM entry_comments WHERE id=?1 AND removed_at IS NULL AND text=?6)
-      ON CONFLICT(comment_id, locale) DO UPDATE SET
-        source_hash=excluded.source_hash, text=excluded.text, created_at=excluded.created_at`,
-  )
-    .bind(commentId, locale, hash, translation?.text ?? null, now, comment.text)
-    .run();
+  await storeTranslation(env, commentId, locale, hash, translation?.text ?? null, now, comment.text);
   return translation;
 }

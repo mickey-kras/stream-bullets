@@ -1,7 +1,8 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { getLocale, t } from "../i18n";
 import type { Comment, CommentMention } from "../types";
-import { errorMessage, postJson } from "./api";
+import { requestTranslation, translationOff } from "./translation-queue";
+import { Icon } from "./ui/icon";
 
 interface Translation {
   text: string;
@@ -15,58 +16,51 @@ interface Loaded {
 }
 
 /**
- * The text of a comment to show, and the control that changes between the comment and its translation.
- * The request for a translation starts only when the reader selects the control.
+ * The text of a comment in the language of the reader, and the control that shows the original of this comment.
+ * The server gives a stored translation with the comment. When it has none, the page of a signed-in reader asks
+ * for it one time. The comment stays in its original text until the translation is ready.
  */
 export function useCommentTranslation(
   comment: Comment,
-  enabled: boolean,
+  canAsk: boolean,
 ): { text: string; mentions: CommentMention[] | undefined; control: ReactNode } {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
-  const [shown, setShown] = useState<boolean>(false);
-  const [busy, setBusy] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const current: Loaded | null = loaded?.forText === comment.text ? loaded : null;
-  const translation: Translation | null = shown && current ? current.translation : null;
+  const [original, setOriginal] = useState<boolean>(false);
+  const { id, text, removed } = comment;
+  const known: boolean = comment.translation !== undefined || loaded?.forText === text;
 
-  function translate(): void {
-    setShown(true);
-    if (current) return;
-    setBusy(true);
-    setError("");
-    postJson<{ translation: Translation | null }>(`/api/comments/${comment.id}/translation`, {
-      locale: getLocale(),
-      text: comment.text,
-    })
-      .then((result) => setLoaded({ forText: comment.text, translation: result.translation }))
-      .catch((error_: unknown) => setError(errorMessage(error_)))
-      .finally(() => setBusy(false));
-  }
+  useEffect(() => {
+    if (!canAsk || known || removed || translationOff()) return;
+    let stopped: boolean = false;
+    requestTranslation<{ translation: Translation | null }>(
+      `/api/comments/${id}/translation`,
+      { locale: getLocale(), text },
+      (): boolean => stopped,
+    )
+      .then((result) => {
+        if (!stopped) setLoaded({ forText: text, translation: result.translation });
+      })
+      // Without a translation, the comment stays in its original text.
+      .catch(() => undefined);
+    return () => {
+      stopped = true;
+    };
+  }, [canAsk, known, removed, id, text]);
 
-  let control: ReactNode = null;
-  if (enabled) {
-    const missing: boolean = shown && current !== null && current.translation === null;
-    control = (
-      <p className="comment-translation">
-        {translation && <span>{t("discussion.translated")}</span>}
-        {translation ? (
-          <button type="button" onClick={() => setShown(false)}>
-            {t("discussion.showOriginal")}
-          </button>
-        ) : (
-          !missing && (
-            <button type="button" disabled={busy} onClick={translate}>
-              {t("discussion.translate")}
-            </button>
-          )
-        )}
-        <output>{missing ? t("discussion.noTranslation") : error}</output>
-      </p>
-    );
-  }
+  let translation: Translation | null = comment.translation ?? null;
+  if (loaded?.forText === text) translation = loaded.translation;
+  if (!translation) return { text, mentions: comment.mentions, control: null };
+  const label: string = original ? t("discussion.showTranslation") : t("discussion.showOriginal");
   return {
-    text: translation ? translation.text : comment.text,
-    mentions: translation ? translation.mentions : comment.mentions,
-    control,
+    text: original ? text : translation.text,
+    mentions: original ? comment.mentions : translation.mentions,
+    control: (
+      <p className="comment-translation">
+        <button type="button" aria-pressed={original} onClick={() => setOriginal(!original)}>
+          <Icon name="translate" size={16} />
+          {label}
+        </button>
+      </p>
+    ),
   };
 }

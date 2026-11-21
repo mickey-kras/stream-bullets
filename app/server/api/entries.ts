@@ -4,7 +4,9 @@ import { mentionCandidates } from "../discussion-notifications.server";
 import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
 import { requireAdminSession } from "../stepup.server";
-import { translateComment, translationSchema } from "../translation.server";
+import { attachTranslations, translateComment, translationSchema } from "../translation.server";
+import { requestLocale } from "../../i18n/resolve";
+import type { Comment, CommentThread } from "../../types";
 import { commentActionSchema, commentQuerySchema } from "../validation";
 import { get, parsedQuery, requireViewer, write, type ApiRoute } from "./router";
 
@@ -14,7 +16,13 @@ export const entryRoutes: ApiRoute[] = [
   get(/comments\/([a-f0-9-]{36})/, async ({ request, env, match, viewer }) => {
     queryParams(request, []);
     if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Comment not found.");
-    return json(await getCommentThread(env, match[1], viewer?.id ?? null));
+    const result = await getCommentThread(env, match[1], viewer?.id ?? null);
+    await attachTranslations(
+      env,
+      [result.comment, result.thread, ...result.thread.replies],
+      requestLocale(request, viewer?.locale ?? null),
+    );
+    return json(result);
   }),
   get(/entries\/([a-f0-9-]{36})\/mention-candidates/, async ({ request, env, match, viewer }) => {
     const user = requireViewer(viewer);
@@ -31,7 +39,12 @@ export const entryRoutes: ApiRoute[] = [
     if (!entry) throw new HttpError(404, "Topic or poll not found.");
     if (match[2]) {
       const input = parsedQuery(request, ["sort", "cursor", "view"], commentQuerySchema);
-      return json(await listComments(env, entry.id, viewer?.id ?? null, input));
+      const page = await listComments(env, entry.id, viewer?.id ?? null, input);
+      const all: Comment[] = page.comments.flatMap((comment: Comment | CommentThread): Comment[] =>
+        "replies" in comment ? [comment, ...comment.replies] : [comment],
+      );
+      await attachTranslations(env, all, requestLocale(request, viewer?.locale ?? null));
+      return json(page);
     }
     queryParams(request, []);
     return json({ entry });

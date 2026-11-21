@@ -1329,8 +1329,6 @@
   "waitlist.sendAgain": "重新提交申请",
   "waitlist.update": "更新申请",
   "overlay.characters.off": "此服务器上的角色已关闭。",
-  "discussion.translate": "翻译",
-  "discussion.translated": "已翻译",
   "discussion.showOriginal": "显示原文",
-  "discussion.noTranslation": "此评论没有翻译。"
+  "discussion.showTranslation": "显示译文"
 }
