@@ -1,4 +1,11 @@
-import { useRef, useSyncExternalStore, type ComponentProps, type ReactNode, type RefObject } from "react";
+import {
+  createElement,
+  useRef,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { MentionInput } from "./mention-input";
 import type { RichCommentInput } from "./rich-comment-input";
 
@@ -56,7 +63,7 @@ export function CommentInput(props: ComponentProps<typeof MentionInput>): ReactN
   return (
     <div ref={holder} className="comment-input">
       {Editor ? (
-        <Editor {...props} />
+        createElement(Editor, props)
       ) : (
         <>
           <div className="ed-toolbar-space" />
