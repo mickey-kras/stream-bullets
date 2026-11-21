@@ -155,7 +155,7 @@ export async function translateEntry(
       .run();
   };
   // Text without letters has no translation and starts no model.
-  if (!/\p{L}/u.test([source.title, source.body, ...source.options].join(" ").replace(/https?:\/\/\S+/gu, ""))) {
+  if (!/\p{L}/u.test([source.title, source.body, ...source.options].join(" ").replaceAll(/https?:\/\/\S+/gu, ""))) {
     await store(null);
     return null;
   }
