@@ -18,6 +18,7 @@ import { overlayKeyMatches } from "../app/server/overlay-key.server";
 import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
 import { visitorPrefix } from "../app/server/ip-prefix";
 import { cleanExpiredData } from "../app/server/cleanup.server";
+import { translatePending } from "../app/server/translation-jobs.server";
 import { scheduleCalendar, topUpSeries } from "../app/server/schedule.server";
 import {
   requireTestAccess,
@@ -277,6 +278,8 @@ export default {
       youtube_expiry: expireYoutubeConnections,
       // Twitch and Kick subscriptions that the provider ended are created again.
       channel_repair: repairChannelSubscriptions,
+      // New content that has no translation for each site language, and content from before translation.
+      translations: translatePending,
     };
     const names: string[] = Object.keys(jobs);
     const results = await Promise.allSettled(names.map((name: string) => jobs[name](env, controller.scheduledTime)));

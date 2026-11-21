@@ -110,18 +110,20 @@ async function askModel(ai: Ai, locale: Locale, source: string, mentions: readon
 
 /**
  * Reserves one start of the model for a text and locale, after the limits. The subject is a comment or an entry.
+ * A null `viewerId` is the server.
  * Throws 429 at the limit of the account, 503 at the daily limit, and 409 when a different request has the
  * reservation.
  */
 export async function reserveStart(
   env: AppEnv,
-  viewerId: string,
+  viewerId: string | null,
   subjectId: string,
   locale: Locale,
   hash: string,
   now: number,
 ): Promise<void> {
-  if (!(await env.REQUEST_LIMITER.limit({ key: `${TRANSLATION_LIMIT_KEY}:${viewerId}` })).success)
+  // The server has no account limit when it translates new content. The daily limit applies to all starts.
+  if (viewerId !== null && !(await env.REQUEST_LIMITER.limit({ key: `${TRANSLATION_LIMIT_KEY}:${viewerId}` })).success)
     throw new HttpError(429, "Too many requests. Please try again in a minute.");
   const recent = await env.DB.prepare(
     "SELECT COALESCE(SUM(starts), 0) AS count FROM translation_attempts WHERE created_at > ?",
@@ -171,7 +173,7 @@ async function storeTranslation(
 export async function translateComment(
   env: AppEnv,
   commentId: string,
-  viewerId: string,
+  viewerId: string | null,
   locale: Locale,
   now: number,
   shownText?: string,
@@ -180,8 +182,10 @@ export async function translateComment(
   const comment = await env.DB.prepare("SELECT entry_id, text, removed_at FROM entry_comments WHERE id=?")
     .bind(commentId)
     .first<{ entry_id: string; text: string; removed_at: number | null }>();
-  if (comment?.removed_at !== null || !(await getVisibleEntry(env, comment.entry_id, viewerId)))
-    throw new HttpError(404, "Comment not found.");
+  // A null `viewerId` is the server: it translates new content and has no access check.
+  const visible: boolean =
+    Boolean(comment) && (viewerId === null || Boolean(await getVisibleEntry(env, comment?.entry_id ?? "", viewerId)));
+  if (comment?.removed_at !== null || !visible) throw new HttpError(404, "Comment not found.");
   // The author can edit the comment after the reader got the page. The reader then has an old text.
   if (shownText !== undefined && shownText !== comment.text)
     throw new HttpError(409, "The comment changed. Load the page again.");

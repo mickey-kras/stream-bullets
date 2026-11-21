@@ -1,0 +1,53 @@
+import { waitUntil } from "cloudflare:workers";
+import { LOCALES } from "../../db/enums";
+import type { AppEnv } from "../env";
+import type { Locale } from "../i18n";
+import { translateEntry } from "./entry-translation.server";
+import { translateComment } from "./translation.server";
+
+// The items of each kind that one hourly run translates. One item starts the model for each site language.
+export const TRANSLATION_BATCH = 20;
+// The items that the server translates immediately after a person posts or edits content.
+const AFTER_POST = 2;
+
+async function ids(env: AppEnv, sql: string, limit: number): Promise<string[]> {
+  const { results } = await env.DB.prepare(sql).bind(LOCALES.length, limit).all<{ id: string }>();
+  return results.map((row: { id: string }): string => row.id);
+}
+
+/**
+ * Translates the newest comments and entries that do not have a stored result for each site language. This is
+ * the translation of new content, the first translation of content from before this feature, and the new
+ * attempt after a failure. Gives the number of items that it examined.
+ */
+export async function translatePending(env: AppEnv, now: number, limit: number = TRANSLATION_BATCH): Promise<number> {
+  if (!env.AI) return 0;
+  const [comments, entries] = await Promise.all([
+    ids(
+      env,
+      `SELECT c.id FROM entry_comments c WHERE c.removed_at IS NULL
+        AND (SELECT COUNT(*) FROM comment_translations t WHERE t.comment_id=c.id) < ?
+        ORDER BY COALESCE(c.edited_at, c.created_at) DESC LIMIT ?`,
+      limit,
+    ),
+    ids(
+      env,
+      `SELECT e.id FROM entries e
+        WHERE (SELECT COUNT(*) FROM entry_translations t WHERE t.entry_id=e.id) < ?
+        ORDER BY e.created_at DESC LIMIT ?`,
+      limit,
+    ),
+  ]);
+  // A stored result starts no model. A failure of one language does not stop the other languages.
+  const work: Promise<unknown>[] = LOCALES.flatMap((locale: Locale): Promise<unknown>[] => [
+    ...comments.map((id: string): Promise<unknown> => translateComment(env, id, null, locale, now)),
+    ...entries.map((id: string): Promise<unknown> => translateEntry(env, id, null, locale, now)),
+  ]);
+  await Promise.allSettled(work);
+  return comments.length + entries.length;
+}
+
+/** Starts the translation of new content after the response. A failure leaves the content for the hourly run. */
+export function translateAfterPost(env: AppEnv): void {
+  if (env.AI) waitUntil(translatePending(env, Date.now(), AFTER_POST));
+}

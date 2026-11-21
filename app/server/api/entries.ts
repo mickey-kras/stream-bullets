@@ -5,6 +5,7 @@ import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
 import { requireAdminSession } from "../stepup.server";
 import { attachEntryTranslations, entryTranslationSchema, translateEntry } from "../entry-translation.server";
+import { translateAfterPost } from "../translation-jobs.server";
 import { attachTranslations, translateComment, translationSchema } from "../translation.server";
 import { requestLocale } from "../../i18n/resolve";
 import type { Comment, CommentThread } from "../../types";
@@ -64,11 +65,11 @@ export const entryRoutes: ApiRoute[] = [
     return json({ translation: await translateComment(env, match[1], viewer.id, locale, Date.now(), text) });
   }),
   // An admin removal of someone else's comment passes the same step-up gate as the admin routes.
-  write("POST", /comments/, async ({ request, app, env, viewer }) =>
-    json(
-      await mutateComment(env, viewer.id, await readJson(request, commentActionSchema), () =>
-        requireAdminSession(request, app),
-      ),
-    ),
-  ),
+  write("POST", /comments/, async ({ request, app, env, viewer }) => {
+    const input = await readJson(request, commentActionSchema);
+    const result = await mutateComment(env, viewer.id, input, () => requireAdminSession(request, app));
+    // An edited comment gets new translations after the response.
+    if (input.action === "edit") translateAfterPost(env);
+    return json(result);
+  }),
 ];
