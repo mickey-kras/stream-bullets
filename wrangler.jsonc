@@ -38,7 +38,12 @@
       },
       "d1_databases": [{ "binding": "DB", "database_name": "stream-bullets-test", "database_id": "e475eb5b-db31-43bd-8692-5926711e8faa", "migrations_dir": "drizzle" }],
       "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "stream-bullets-test-images" }],
-      "durable_objects": { "bindings": [{ "name": "POLL_ROOMS", "class_name": "PollRoom" }] },
+      "durable_objects": {
+        "bindings": [
+          { "name": "POLL_ROOMS", "class_name": "PollRoom" },
+          { "name": "CHANNEL_INGEST", "class_name": "ChannelIngest" }
+        ]
+      },
       "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1003", "simple": { "limit": 120, "period": 60 } }],
       "triggers": { "crons": [] }
     },

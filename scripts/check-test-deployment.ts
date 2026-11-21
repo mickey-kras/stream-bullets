@@ -33,7 +33,10 @@ assert.equal(config.d1_databases[0].binding, "DB");
 assert.equal(config.d1_databases[0].database_name, "stream-bullets-test");
 assert.equal(config.d1_databases[0].database_id, config.vars.TEST_DATABASE_ID);
 assert.deepEqual(config.r2_buckets, [{ binding: "IMAGES", bucket_name: "stream-bullets-test-images" }]);
-assert.deepEqual(config.durable_objects.bindings, [{ name: "POLL_ROOMS", class_name: "PollRoom" }]);
+assert.deepEqual(config.durable_objects.bindings, [
+  { name: "POLL_ROOMS", class_name: "PollRoom" },
+  { name: "CHANNEL_INGEST", class_name: "ChannelIngest" },
+]);
 assert.equal(config.ratelimits.length, 1);
 assert.equal(config.ratelimits[0].namespace_id, "1003");
 assert.deepEqual(config.triggers.crons, []);
