@@ -69,7 +69,7 @@ export const entryRoutes: ApiRoute[] = [
     const input = await readJson(request, commentActionSchema);
     const result = await mutateComment(env, viewer.id, input, () => requireAdminSession(request, app));
     // An edited comment gets new translations after the response.
-    if (input.action === "edit") translateAfterPost(env);
+    if (input.action === "edit") translateAfterPost(env, "comment", input.id);
     return json(result);
   }),
 ];

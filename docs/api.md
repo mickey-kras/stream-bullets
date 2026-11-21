@@ -262,7 +262,7 @@ A deployment without the `AI` binding has no translation.
 
 ## Translation of new content
 
-When a person posts a topic, a poll or a comment, or edits a comment, the server starts the translations after the response.
+When a person posts a topic, a poll or a comment, or edits a comment, the server starts the translations of that item after the response.
 It translates the content to each site language and stores the results. A reader then gets the translation with the page.
 
 An hourly job does the same work for content that has no stored result for each site language.

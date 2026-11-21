@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { LOCALES } from "../db/enums";
 import type { AppEnv } from "../app/env";
-import { translatePending } from "../app/server/translation-jobs.server";
+import { translateItem, translatePending } from "../app/server/translation-jobs.server";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 vi.mock("cloudflare:workers", () => ({ waitUntil: vi.fn() }));
@@ -118,6 +118,17 @@ describe("translation of new and old content", (): void => {
     expect(await count("entry_translations")).toBe(LOCALES.length - 1);
     run.mockImplementation(answer);
     expect(await translatePending(env, NOW + 120_000)).toBe(1);
+    expect(await count("entry_translations")).toBe(LOCALES.length);
+  });
+
+  it("translates one posted item to each site language", async (): Promise<void> => {
+    const posted: string = await addComment("Hallo Welt");
+    await addComment("Ein anderer Kommentar");
+    await translateItem(env, "comment", posted, NOW);
+    const rows = await env.DB.prepare("SELECT DISTINCT comment_id FROM comment_translations").all();
+    expect(rows.results).toEqual([{ comment_id: posted }]);
+    expect(await count("comment_translations")).toBe(LOCALES.length);
+    await translateItem(env, "entry", entryId, NOW);
     expect(await count("entry_translations")).toBe(LOCALES.length);
   });
 

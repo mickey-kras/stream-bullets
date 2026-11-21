@@ -7,8 +7,6 @@ import { translateComment } from "./translation.server";
 
 // The items of each kind that one hourly run translates. One item starts the model for each site language.
 export const TRANSLATION_BATCH = 20;
-// The items that the server translates immediately after a person posts or edits content.
-const AFTER_POST = 2;
 
 async function ids(env: AppEnv, sql: string, limit: number): Promise<string[]> {
   const { results } = await env.DB.prepare(sql).bind(LOCALES.length, limit).all<{ id: string }>();
@@ -47,7 +45,21 @@ export async function translatePending(env: AppEnv, now: number, limit: number =
   return comments.length + entries.length;
 }
 
-/** Starts the translation of new content after the response. A failure leaves the content for the hourly run. */
-export function translateAfterPost(env: AppEnv): void {
-  if (env.AI) waitUntil(translatePending(env, Date.now(), AFTER_POST));
+/** Translates one comment or entry to each site language. A failure of one language does not stop the others. */
+export async function translateItem(env: AppEnv, kind: "comment" | "entry", id: string, now: number): Promise<void> {
+  if (!env.AI) return;
+  await Promise.allSettled(
+    LOCALES.map(
+      (locale: Locale): Promise<unknown> =>
+        kind === "comment" ? translateComment(env, id, null, locale, now) : translateEntry(env, id, null, locale, now),
+    ),
+  );
+}
+
+/**
+ * Starts the translation of the content that a person posted or edited, after the response. A failure leaves
+ * the content for the hourly run.
+ */
+export function translateAfterPost(env: AppEnv, kind: "comment" | "entry", id: string): void {
+  if (env.AI) waitUntil(translateItem(env, kind, id, Date.now()));
 }

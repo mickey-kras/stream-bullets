@@ -50,7 +50,8 @@ export const streamerRoutes: ApiRoute[] = [
         : await mutateEntry(env, viewer.id, streamer.id, input, () => requireAdminSession(request, app));
     notifyRoom(env, streamer.id);
     // A new topic, poll or comment gets its translations after the response.
-    if (input.action === "create" || input.action === "comment") translateAfterPost(env);
+    if (input.action === "create") translateAfterPost(env, "entry", result.id);
+    if (input.action === "comment") translateAfterPost(env, "comment", result.id);
     return json(result);
   }),
   // PATCH /api/streamer {name?, about?, handle?, logoMode?: "profile" | "logo"} → {streamer}
