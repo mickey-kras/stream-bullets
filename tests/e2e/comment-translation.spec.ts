@@ -54,7 +54,7 @@ test("a signed-in reader gets each comment in the site language and can see one 
 test("a signed-out reader gets a stored translation and starts no new one", async ({ browser }) => {
   const { entryId, commentId } = await seedComments();
   await runSql("comment-translation", [
-    `INSERT INTO comment_translations(comment_id,locale,source_hash,text,created_at) VALUES ('${commentId}','en','hash','**Hello** world',1);`,
+    `INSERT INTO comment_translations(comment_id,locale,source_hash,text,created_at) VALUES ('${commentId}','en','b50519076d50f1ce7796177e2ab3f8d9ee6a75faeb38ae6cb97b7b7aa0220092','**Hello** world',1);`,
   ]);
   const page = await newPage(browser);
   try {

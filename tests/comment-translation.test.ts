@@ -272,6 +272,13 @@ describe("comment translation", (): void => {
     });
     expect(byId.get(same)).toBeNull();
     expect(byId.get(unknown)).toBeUndefined();
+    // A stored result for a different text of the comment is not used.
+    await env.DB.prepare("UPDATE comment_translations SET source_hash='other' WHERE comment_id=?")
+      .bind(translated)
+      .run();
+    const stale = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
+    await attachTranslations(env, stale.comments, "de");
+    expect(stale.comments.find((comment) => comment.id === translated)?.translation).toBeUndefined();
     // A different language has its own results.
     const french = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
     await attachTranslations(env, french.comments, "fr");

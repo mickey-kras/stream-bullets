@@ -48753,6 +48753,18 @@
       "relation": "calls",
       "source": "app_server_translation_server_attachtranslations",
       "source_file": "app/server/translation.server.ts",
+      "source_location": "L93",
+      "target": "app_server_translation_server_sha256",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_translation_server_attachtranslations",
+      "source_file": "app/server/translation.server.ts",
       "source_location": "L94",
       "target": "app_server_translation_server_checked",
       "weight": 1.0
@@ -200998,10 +201010,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "cb6f21ba1b30601f2184689b8811e974b06c47ff0aa92c295bd8d3f3b214f47f",
+    "content_sha256": "dd94093a847eab85acd1115beb7fe0bb7752b131ef6ae4854e16051ab51f9226",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "b18ec8a2a72af59a111a09e73e1ebc83d53d3606ee81ad9fa1464df0157ebd45",
+    "source_sha256": "4c9446db461dedae0d355d74b4455d60d875e5686daa0a6cbc1d6f83d13ec251",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
