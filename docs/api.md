@@ -208,6 +208,7 @@ Streamer-page writes must call `assertStreamerWritable()`.
 | `POST /api/streamers/:handle` | `{action: "comment", id, text, parentId?, mentions?}` | `{id}`. New comment or reply. |
 | `POST /api/comments` | `{action: "edit", id, text, mentions?}` | `{id}`. Only authors can edit their comments. Removed comments cannot change. |
 | `GET /api/comments/:id` | None | `{comment, rootId, thread, handle, entryId}`. Exact comment and its thread, subject to page access. |
+| `POST /api/comments/:id/translation` | `{locale}` | `{translation: {text, mentions} \| null}`. Signed-in accounts only. `null`: the comment needs no translation, or the translation failed a check. `503` when translation is off. |
 | `GET /api/entries/:id/mention-candidates` | `query`, at most 40 characters | `{users}`. At most 10 public profiles or participants in this community. Requires sign-in. |
 | `GET /api/notifications` | Optional opaque `cursor` | `NotificationSnapshot`: at most 50 notifications, unread count, preferences and next cursor. Requires sign-in. |
 | `POST /api/notifications` | `{action: "read", id, read}` | `{ok: true}`. Only the recipient can change read state. |
@@ -234,6 +235,16 @@ Each inbox keeps up to 200 notifications for up to 90 days.
 The next delivery deletes expired records.
 Each sender can send up to 100 notifications per hour, with at most 10 per recipient.
 Existing content quotas also apply.
+
+## Comment translation
+
+Workers AI translates a comment to one of the site locales.
+The server stores each result, so the model runs one time for each comment text and locale.
+An edit of the comment starts a new translation.
+
+The server shows a translation only if it has the same Markdown marks, line breaks, code, links and mentions as the comment.
+Each account has a request limit, and all accounts together have a daily limit of new translations.
+A deployment without the `AI` binding has no translation.
 
 ## Markdown in comments
 

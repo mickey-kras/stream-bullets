@@ -177,7 +177,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0033", (): void => {
+  it("covers 0006 to 0034", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -207,6 +207,7 @@ describe("migrations 0006 onwards", (): void => {
       "0031",
       "0032",
       "0033",
+      "0034",
     ]);
   });
 
@@ -247,29 +248,44 @@ describe("migrations 0006 onwards", (): void => {
   });
 
   it("localizes existing fixed binary labels from the host locale (0031)", async (): Promise<void> => {
-    expect(await db.prepare("SELECT options,binary_labels FROM entries WHERE id='binary'").first())
-      .toEqual({ options: '["Yes","No"]', binary_labels: '["Да","Нет"]' });
+    expect(await db.prepare("SELECT options,binary_labels FROM entries WHERE id='binary'").first()).toEqual({
+      options: '["Yes","No"]',
+      binary_labels: '["Да","Нет"]',
+    });
   });
 
   it("backfills entry activity counts (0031) without losing replies or reactions", async (): Promise<void> => {
-    const result = await db.prepare("SELECT likes,dislikes,comments FROM entry_activity_counts WHERE entry_id='topic'").first();
+    const result = await db
+      .prepare("SELECT likes,dislikes,comments FROM entry_activity_counts WHERE entry_id='topic'")
+      .first();
     expect(result).toEqual({ likes: 1, dislikes: 1, comments: 3 });
-    expect(await db.prepare("SELECT likes,dislikes,comments FROM entry_activity_counts WHERE entry_id='poll'").first())
-      .toEqual({ likes: 0, dislikes: 0, comments: 0 });
+    expect(
+      await db.prepare("SELECT likes,dislikes,comments FROM entry_activity_counts WHERE entry_id='poll'").first(),
+    ).toEqual({ likes: 0, dislikes: 0, comments: 0 });
   });
 
   it("adds discussion metadata (0029) without changing existing comment text", async (): Promise<void> => {
     const row = await db.prepare("SELECT text,edited_at FROM entry_comments WHERE id='c1'").first();
     expect(row).toEqual({ text: "First", edited_at: null });
     for (const table of ["comment_mentions", "notifications", "notification_preferences"]) {
-      expect(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").bind(table).first()).toEqual({ name: table });
+      expect(
+        await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").bind(table).first(),
+      ).toEqual({ name: table });
     }
   });
 
   it("adds overlay layers (0030) in place: old rows keep their values and read {}", async (): Promise<void> => {
     expect(
-      await db.prepare("SELECT air,position,message,revision,layers FROM overlay_state WHERE streamer_id='page'").first(),
-    ).toEqual({ air: '{"type":"message","ref":null}', position: "top", message: "Back soon", revision: 9, layers: "{}" });
+      await db
+        .prepare("SELECT air,position,message,revision,layers FROM overlay_state WHERE streamer_id='page'")
+        .first(),
+    ).toEqual({
+      air: '{"type":"message","ref":null}',
+      position: "top",
+      message: "Back soon",
+      revision: 9,
+      layers: "{}",
+    });
     const column = await db
       .prepare("SELECT dflt_value, \"notnull\" AS required FROM pragma_table_info('overlay_state') WHERE name='layers'")
       .first();
@@ -284,7 +300,10 @@ describe("migrations 0006 onwards", (): void => {
     await rejects('"text"');
     await rejects(null);
     await rejects(JSON.stringify({ chat: { note: "x".repeat(4000) } }));
-    const layers = JSON.stringify({ chat: { enabled: true }, cells: { horizontal: { chat: { c: 0, r: 0, w: 3, h: 2 } } } });
+    const layers = JSON.stringify({
+      chat: { enabled: true },
+      cells: { horizontal: { chat: { c: 0, r: 0, w: 3, h: 2 } } },
+    });
     await db.prepare("UPDATE overlay_state SET layers=? WHERE streamer_id='page'").bind(layers).run();
     expect(await db.prepare("SELECT layers FROM overlay_state WHERE streamer_id='page'").first()).toEqual({ layers });
   });
@@ -314,7 +333,9 @@ describe("migrations 0006 onwards", (): void => {
   });
 
   it("adds data_read_at (0028) with a default for new rows", async (): Promise<void> => {
-    const columns = await db.prepare("SELECT name, dflt_value FROM pragma_table_info('channel_connections') WHERE name='data_read_at'").all();
+    const columns = await db
+      .prepare("SELECT name, dflt_value FROM pragma_table_info('channel_connections') WHERE name='data_read_at'")
+      .all();
     expect(columns.results).toEqual([{ name: "data_read_at", dflt_value: "0" }]);
   });
 

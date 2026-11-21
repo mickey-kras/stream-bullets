@@ -1,0 +1,150 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import type { AppEnv } from "../app/env";
+import { TRANSLATION_DAILY_LIMIT, translateComment, translationSchema } from "../app/server/translation.server";
+import { createTestDatabase, type TestDatabase } from "./helpers/database";
+
+const NOW = 1_800_000_000_000;
+const SOURCE = "**Hi** @Bob Lee, see `x`";
+
+let database: TestDatabase;
+let env: AppEnv;
+let run: Mock<
+  (model: string, input: { messages: { role: string; content: string }[] }) => Promise<{ response: string }>
+>;
+let allowed: boolean;
+let entryId: string;
+
+function answer(text: string): { response: string } {
+  return { response: `ORIGINAL=en\n---\n${text}` };
+}
+
+async function seedComment(text: string = SOURCE): Promise<string> {
+  const id: string = crypto.randomUUID();
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'fan',?,1)").bind(
+      id,
+      entryId,
+      text,
+    ),
+    env.DB.prepare('INSERT INTO comment_mentions (comment_id,user_id,start,"end") VALUES (?,?,7,15)').bind(id, "bob"),
+  ]);
+  return id;
+}
+
+beforeAll(async (): Promise<void> => {
+  database = await createTestDatabase();
+});
+afterAll(async (): Promise<void> => database.dispose());
+beforeEach(async (): Promise<void> => {
+  run = vi.fn();
+  allowed = true;
+  entryId = crypto.randomUUID();
+  env = {
+    DB: database.db,
+    AI: { run } as unknown as Ai,
+    REQUEST_LIMITER: { limit: (): Promise<{ success: boolean }> => Promise.resolve({ success: allowed }) },
+  } as unknown as AppEnv;
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM user"),
+    ...["host", "fan", "bob"].map(
+      (id: string): D1PreparedStatement =>
+        env.DB.prepare("INSERT INTO user (id,name,email,created_at,updated_at) VALUES (?,?,?,1,1)").bind(
+          id,
+          id,
+          `${id}@example.test`,
+        ),
+    ),
+    env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES ('page','host','host','Host')"),
+    env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,created_at) VALUES (?,'page','host','topic','Topic',1)",
+    ).bind(entryId),
+  ]);
+});
+
+describe("comment translation", (): void => {
+  it("accepts only a locale of the site", (): void => {
+    expect(translationSchema.safeParse({ locale: "de" }).success).toBe(true);
+    expect(translationSchema.safeParse({ locale: "xx" }).success).toBe(false);
+    expect(translationSchema.safeParse({ locale: "de", model: "other" }).success).toBe(false);
+  });
+
+  it("gives the translation with the mention at its new position", async (): Promise<void> => {
+    run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
+    const id: string = await seedComment();
+    expect(await translateComment(env, id, "fan", "de", NOW)).toEqual({
+      text: "**Hallo** @Bob Lee, siehe `x`",
+      mentions: [{ userId: "bob", start: 10, end: 18 }],
+    });
+    const [, input] = run.mock.calls[0];
+    expect(input.messages[1].content).toBe(`German\n@Bob Lee\n${SOURCE}`);
+  });
+
+  it("runs the model one time for each comment text and locale", async (): Promise<void> => {
+    run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
+    const id: string = await seedComment();
+    const first = await translateComment(env, id, "fan", "de", NOW);
+    expect(await translateComment(env, id, "host", "de", NOW + 1)).toEqual(first);
+    expect(run).toHaveBeenCalledTimes(1);
+    await translateComment(env, id, "fan", "fr", NOW + 2);
+    expect(run).toHaveBeenCalledTimes(2);
+    await env.DB.prepare("UPDATE entry_comments SET text=? WHERE id=?").bind("**Yo** @Bob Lee, see `x`", id).run();
+    await translateComment(env, id, "fan", "de", NOW + 3);
+    expect(run).toHaveBeenCalledTimes(3);
+  });
+
+  it.each([
+    ["changed code", "**Hallo** @Bob Lee, siehe `y`"],
+    ["lost Markdown", "Hallo @Bob Lee, siehe `x`"],
+    ["lost mention", "**Hallo** @Robert, siehe `x`"],
+    ["the same text", SOURCE],
+  ])("gives no translation for %s, and does not ask again", async (_name: string, text: string): Promise<void> => {
+    run.mockResolvedValue(answer(text));
+    const id: string = await seedComment();
+    expect(await translateComment(env, id, "fan", "de", NOW)).toBeNull();
+    expect(await translateComment(env, id, "fan", "de", NOW + 1)).toBeNull();
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives no translation for an answer in the wrong form", async (): Promise<void> => {
+    run.mockResolvedValue({ response: "Here is the translation: Hallo" });
+    expect(await translateComment(env, await seedComment(), "fan", "de", NOW)).toBeNull();
+  });
+
+  it("refuses a removed or unknown comment and does not run the model", async (): Promise<void> => {
+    const id: string = await seedComment();
+    await env.DB.prepare("UPDATE entry_comments SET removed_at=1 WHERE id=?").bind(id).run();
+    await expect(translateComment(env, id, "fan", "de", NOW)).rejects.toMatchObject({ status: 404 });
+    await expect(translateComment(env, crypto.randomUUID(), "fan", "de", NOW)).rejects.toMatchObject({ status: 404 });
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("is off without the Workers AI binding", async (): Promise<void> => {
+    const id: string = await seedComment();
+    await expect(translateComment({ ...env, AI: undefined }, id, "fan", "de", NOW)).rejects.toMatchObject({
+      status: 503,
+    });
+  });
+
+  it("stops at the request limit of the account, but still gives a stored translation", async (): Promise<void> => {
+    run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
+    const stored: string = await seedComment();
+    await translateComment(env, stored, "fan", "de", NOW);
+    allowed = false;
+    await expect(translateComment(env, await seedComment(), "fan", "de", NOW)).rejects.toMatchObject({ status: 429 });
+    expect(await translateComment(env, stored, "fan", "de", NOW)).not.toBeNull();
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops at the daily limit of new translations", async (): Promise<void> => {
+    const id: string = await seedComment();
+    await env.DB.prepare(
+      `WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i+1 FROM n WHERE i < ?)
+        INSERT INTO comment_translations (comment_id, locale, source_hash, text, created_at) SELECT ?, 'l'||i, 'h', NULL, ? FROM n`,
+    )
+      .bind(TRANSLATION_DAILY_LIMIT, id, NOW - 1000)
+      .run();
+    await expect(translateComment(env, id, "fan", "de", NOW)).rejects.toMatchObject({ status: 503 });
+    run.mockResolvedValue(answer("**Hallo** @Bob Lee, siehe `x`"));
+    expect(await translateComment(env, id, "fan", "de", NOW + 86_400_000)).not.toBeNull();
+  });
+});

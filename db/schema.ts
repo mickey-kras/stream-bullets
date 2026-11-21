@@ -256,6 +256,25 @@ export const commentMentions = sqliteTable(
   ],
 );
 
+// One machine translation of a comment for one locale. `text` is null when the comment needs no translation
+// or the translation failed its checks. `source_hash` is the SHA-256 of the comment text that was translated.
+export const commentTranslations = sqliteTable(
+  "comment_translations",
+  {
+    commentId: text("comment_id")
+      .notNull()
+      .references(() => entryComments.id, { onDelete: "cascade" }),
+    locale: text("locale").notNull(),
+    sourceHash: text("source_hash").notNull(),
+    text: text("text"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.commentId, table.locale] }),
+    index("comment_translations_created_idx").on(table.createdAt),
+  ],
+);
+
 export const notificationPreferences = sqliteTable(
   "notification_preferences",
   {

@@ -4,6 +4,7 @@ import { mentionCandidates } from "../discussion-notifications.server";
 import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
 import { requireAdminSession } from "../stepup.server";
+import { translateComment, translationSchema } from "../translation.server";
 import { commentActionSchema, commentQuerySchema } from "../validation";
 import { get, parsedQuery, requireViewer, write, type ApiRoute } from "./router";
 
@@ -34,6 +35,12 @@ export const entryRoutes: ApiRoute[] = [
     }
     queryParams(request, []);
     return json({ entry });
+  }),
+  // POST /api/comments/:id/translation {locale} → {translation: {text, mentions} | null}
+  write("POST", /comments\/([a-f0-9-]{36})\/translation/, async ({ request, env, match, viewer }) => {
+    if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Comment not found.");
+    const { locale } = await readJson(request, translationSchema);
+    return json({ translation: await translateComment(env, match[1], viewer.id, locale, Date.now()) });
   }),
   // An admin removal of someone else's comment passes the same step-up gate as the admin routes.
   write("POST", /comments/, async ({ request, app, env, viewer }) =>

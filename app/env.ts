@@ -8,6 +8,8 @@ export interface AppEnv {
   /** One ChannelIngest object per page: the connected channels' activity feed (docs/channel-connections.md). */
   CHANNEL_INGEST: DurableObjectNamespace;
   REQUEST_LIMITER: RateLimit;
+  /** Workers AI. Without it, comments have no translation. */
+  AI?: Ai;
   APP_ORIGIN: string;
   APP_ENV?: string;
   DEPLOYED_COMMIT?: string;
