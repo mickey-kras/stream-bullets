@@ -32,7 +32,7 @@ export interface CommentTranslation {
   mentions: MentionRange[];
 }
 
-const LANGUAGES: Readonly<Record<Locale, string>> = {
+export const LANGUAGES: Readonly<Record<Locale, string>> = {
   de: "German",
   en: "English",
   es: "Spanish",
@@ -62,7 +62,7 @@ ORIGINAL=<BCP 47 code of the language of the comment>
 ---
 <the translation>`;
 
-async function sha256(text: string): Promise<string> {
+export async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(digest), (byte: number) => byte.toString(16).padStart(2, "0")).join("");
 }
@@ -106,6 +106,41 @@ async function askModel(ai: Ai, locale: Locale, source: string, mentions: readon
     max_tokens: 1500,
   });
   return result.response;
+}
+
+/**
+ * Reserves one start of the model for a text and locale, after the limits. The subject is a comment or an entry.
+ * Throws 429 at the limit of the account, 503 at the daily limit, and 409 when a different request has the
+ * reservation.
+ */
+export async function reserveStart(
+  env: AppEnv,
+  viewerId: string,
+  subjectId: string,
+  locale: Locale,
+  hash: string,
+  now: number,
+): Promise<void> {
+  if (!(await env.REQUEST_LIMITER.limit({ key: `${TRANSLATION_LIMIT_KEY}:${viewerId}` })).success)
+    throw new HttpError(429, "Too many requests. Please try again in a minute.");
+  const recent = await env.DB.prepare(
+    "SELECT COALESCE(SUM(starts), 0) AS count FROM translation_attempts WHERE created_at > ?",
+  )
+    .bind(now - DAY)
+    .first<{ count: number }>();
+  if ((recent?.count ?? 0) >= TRANSLATION_DAILY_LIMIT) throw new HttpError(503, "Translation is not available.");
+  // Reserve this text and locale. A second request for them does not start the model again.
+  // The statement also examines the daily limit, so requests at the same time cannot go above it.
+  const claim = await env.DB.prepare(
+    `INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at)
+      SELECT ?1, ?2, ?3, ?4 WHERE (SELECT COALESCE(SUM(starts), 0) FROM translation_attempts WHERE created_at > ?5) < ?6
+      ON CONFLICT(comment_id, locale, source_hash) DO UPDATE SET created_at=excluded.created_at,
+        starts=CASE WHEN translation_attempts.created_at > ?5 THEN translation_attempts.starts + 1 ELSE 1 END
+      WHERE translation_attempts.created_at < excluded.created_at - ?7`,
+  )
+    .bind(subjectId, locale, hash, now, now - DAY, TRANSLATION_DAILY_LIMIT, CLAIM_MS)
+    .run();
+  if (claim.meta.changes === 0) throw new HttpError(409, "The translation is not ready. Try again in a moment.");
 }
 
 // The comment can change while the model runs. Only the translation of the current text is stored.
@@ -168,26 +203,7 @@ export async function translateComment(
     return null;
   }
 
-  if (!(await env.REQUEST_LIMITER.limit({ key: `${TRANSLATION_LIMIT_KEY}:${viewerId}` })).success)
-    throw new HttpError(429, "Too many requests. Please try again in a minute.");
-  const recent = await env.DB.prepare(
-    "SELECT COALESCE(SUM(starts), 0) AS count FROM translation_attempts WHERE created_at > ?",
-  )
-    .bind(now - DAY)
-    .first<{ count: number }>();
-  if ((recent?.count ?? 0) >= TRANSLATION_DAILY_LIMIT) throw new HttpError(503, "Translation is not available.");
-  // Reserve this comment text and locale. A second request for them does not start the model again.
-  // The statement also examines the daily limit, so requests at the same time cannot go above it.
-  const claim = await env.DB.prepare(
-    `INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at)
-      SELECT ?1, ?2, ?3, ?4 WHERE (SELECT COALESCE(SUM(starts), 0) FROM translation_attempts WHERE created_at > ?5) < ?6
-      ON CONFLICT(comment_id, locale, source_hash) DO UPDATE SET created_at=excluded.created_at,
-        starts=CASE WHEN translation_attempts.created_at > ?5 THEN translation_attempts.starts + 1 ELSE 1 END
-      WHERE translation_attempts.created_at < excluded.created_at - ?7`,
-  )
-    .bind(commentId, locale, hash, now, now - DAY, TRANSLATION_DAILY_LIMIT, CLAIM_MS)
-    .run();
-  if (claim.meta.changes === 0) throw new HttpError(409, "The translation is not ready. Try again in a moment.");
+  await reserveStart(env, viewerId, commentId, locale, hash, now);
 
   // If the model fails, the reservation stays in the daily count and opens again after CLAIM_MS.
   const answer: string = await askModel(env.AI, locale, comment.text, rows);

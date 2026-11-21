@@ -260,6 +260,23 @@ All accounts together have a daily limit of model starts. An edit or a removal o
 Two readers who ask at the same time start the model one time: the second reader gets `409` and can try again.
 A deployment without the `AI` binding has no translation.
 
+## Topic and poll translation
+
+A reader also sees each topic, poll and idea in the language of the site for that reader.
+The translation has the title, the description and the answer options.
+
+The page loader, `GET /api/streamers/:handle` and `GET /api/entries/:id` give each entry with a `translation` field. The field has the same three states as the field of a comment, and its value is `{title, body, options}`.
+
+`POST /api/entries/:id/translation` with `{locale, title, body, options}` gives `{translation}`. Send the text that the reader sees in the text fields. A different text gets the answer `409`.
+
+The server shows a translation only if it passes these checks:
+
+- The title has one line.
+- The answer options have the same number and different names.
+- The description has the same line breaks and links.
+
+The limits, the daily count and the stored results are the same as for comments.
+
 ## Markdown in comments
 
 The service stores the exact text that the author sends.

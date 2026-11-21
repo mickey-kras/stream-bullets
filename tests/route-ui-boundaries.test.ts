@@ -107,6 +107,11 @@ vi.mock("../app/server/featured-streamer.server", async (original) => ({
   ...(await original<typeof import("../app/server/featured-streamer.server")>()),
   getFeaturedStreamer: vi.fn(),
 }));
+// The route tests have no database. The loader then has no stored translations.
+vi.mock("../app/server/entry-translation.server", async (original) => ({
+  ...(await original<typeof import("../app/server/entry-translation.server")>()),
+  attachEntryTranslations: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock("../app/server/ai.server", async (original) => ({
   ...(await original<typeof import("../app/server/ai.server")>()),
   aiInterestStatus: vi.fn(),

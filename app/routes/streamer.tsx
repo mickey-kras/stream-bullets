@@ -17,6 +17,9 @@ import { appContext, type AppEnv } from "../env";
 import { configuredProviders } from "../server/auth.server";
 import { requestViewer } from "../lib/shell.server";
 import { getEntry, getVisibleStreamer, listEntries } from "../server/data.server";
+import { attachEntryTranslations } from "../server/entry-translation.server";
+import { useEntryTranslations } from "../components/entry-translation";
+import { requestLocale } from "../i18n/resolve";
 import { isAdmin } from "../server/access.server";
 import { listCards } from "../server/community.server";
 import { defaultRange, getEvent, listEvents, listTopicChoices } from "../server/schedule.server";
@@ -221,6 +224,11 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
     view === "community" && !official ? listCards(app.env, streamer.id) : null,
     owner && view === "schedule" ? listTopicChoices(app.env, streamer.id) : [],
   ]);
+  await attachEntryTranslations(
+    app.env,
+    selected ? [...board.entries, selected] : board.entries,
+    requestLocale(request, viewer?.locale ?? null),
+  );
   return {
     board,
     selected,
@@ -331,7 +339,7 @@ export default function StreamerPage(): ReactNode {
   const scheduleNow: number = useScheduleClock(data.serverNow, events);
   const liveEvent: StreamEvent | null = streamer.status === "suspended" ? null : liveEventAt(events, scheduleNow);
   const boardIds: Set<string> = new Set(board.entries.map((entry: Entry) => entry.id));
-  const entries: Entry[] = [
+  const liveEntries: Entry[] = [
     ...new Map(
       [...board.entries, ...extra.filter((entry: Entry) => !boardIds.has(entry.id))].map((entry: Entry) => [
         entry.id,
@@ -342,9 +350,12 @@ export default function StreamerPage(): ReactNode {
     const entry: Entry = loadedSelected?.id === cached.id ? loadedSelected : cached;
     return mergeLiveEntry(entry, live.snapshot, board.revision) as Entry;
   });
+  // The entries in the language of the reader.
+  const shown = useEntryTranslations(liveEntries, loadedSelected, viewer !== null);
+  const entries: Entry[] = liveEntries.map(shown);
   const topicSelection = usePendingTopic(entries, loadedSelected);
   const selectedBase: Entry | null = topicSelection.selected || entries[0] || null;
-  const selected: Entry | null = mergeLiveEntry(selectedBase, live.snapshot, board.revision);
+  const selected: Entry | null = shown(mergeLiveEntry(selectedBase, live.snapshot, board.revision));
   // Wake at battle start and end.
   const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
   const pollsClass: string = usePollsMainClass(view === "polls" && loadedSelected ? selected : null, now);

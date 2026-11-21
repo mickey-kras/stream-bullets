@@ -33,6 +33,7 @@ test("a signed-in reader gets each comment in the site language and can see one 
       const translation = body.text === "**Hallo** Welt" ? { text: "**Hello** world", mentions: [] } : null;
       await route.fulfill({ json: { translation } });
     });
+    await page.route("**/api/entries/*/translation", (route) => route.fulfill({ json: { translation: null } }));
     await page.goto(`/@other_host?entry=${entryId}`);
     const comment = page.locator("article.comment").filter({ hasText: "reporter" });
     const english = page.locator("article.comment").filter({ hasText: "Already English" });
@@ -96,6 +97,71 @@ test("a deployment without translation shows the original text and stops its req
   }
 });
 
+test("a signed-in reader gets a topic in the site language and can see its original", async ({ browser }) => {
+  const users = await accounts();
+  const entryId: string = randomUUID();
+  await runSql("comment-translation", [
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${entryId}',id,'${users.reporter.id}','topic','Welches Spiel zuerst','Sagt es mir.','Just chatting',${Date.now() - 600_000} FROM streamers WHERE handle='other_host';`,
+  ]);
+  const context = await signedIn(browser, "viewer", clientIp("comment-translation", 101));
+  const page = await newPage(context);
+  try {
+    const asked: unknown[] = [];
+    await page.route("**/api/entries/*/translation", async (route) => {
+      const body = route.request().postDataJSON() as { title: string };
+      asked.push(body);
+      const translation =
+        body.title === "Welches Spiel zuerst" ? { title: "Which game first", body: "Tell me.", options: [] } : null;
+      await route.fulfill({ json: { translation } });
+    });
+    await page.route("**/api/comments/*/translation", (route) => route.fulfill({ json: { translation: null } }));
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const title = page.locator("h2.detail-title");
+    await expect(title).toHaveText("Which game first");
+    await expect(page.locator("p.description")).toHaveText("Tell me.");
+    // The list of topics has the same text.
+    await expect(page.getByText("Which game first").first()).toBeVisible();
+    await page.getByRole("button", { name: "Show original", exact: true }).click();
+    await expect(title).toHaveText("Welches Spiel zuerst");
+    await expect(page.locator("p.description")).toHaveText("Sagt es mir.");
+    await page.getByRole("button", { name: "Show translation", exact: true }).click();
+    await expect(title).toHaveText("Which game first");
+    expect(asked).toContainEqual({ locale: "en", title: "Welches Spiel zuerst", body: "Sagt es mir.", options: [] });
+    expect(
+      asked.filter((body: unknown): boolean => (body as { title: string }).title === "Welches Spiel zuerst"),
+    ).toHaveLength(1);
+  } finally {
+    await close(context);
+  }
+});
+
+test("a signed-out reader gets a stored translation of a poll and starts no new one", async ({ browser }) => {
+  const users = await accounts();
+  const entryId: string = randomUUID();
+  await runSql("comment-translation", [
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,options,created_at) SELECT '${entryId}',id,'${users.reporter.id}','choice','Was kochen wir','','Just chatting','["Suppe","Kuchen"]',${Date.now() - 600_000} FROM streamers WHERE handle='other_host';`,
+    `INSERT INTO entry_translations(entry_id,locale,source_hash,title,body,options,created_at) VALUES ('${entryId}','en','hash','What do we cook','','["Soup","Cake"]',1);`,
+  ]);
+  const page = await newPage(browser);
+  try {
+    let asked: number = 0;
+    await page.route("**/translation", async (route) => {
+      asked += 1;
+      await route.abort();
+    });
+    await page.goto(`/@other_host?view=polls&entry=${entryId}`);
+    await expect(page.getByRole("heading", { name: "What do we cook" }).first()).toBeVisible();
+    await expect(page.getByText("Soup", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Cake", { exact: true }).first()).toBeVisible();
+    await page.getByRole("button", { name: "Show original", exact: true }).first().click();
+    await expect(page.getByRole("heading", { name: "Was kochen wir" }).first()).toBeVisible();
+    await expect(page.getByText("Suppe", { exact: true }).first()).toBeVisible();
+    expect(asked).toBe(0);
+  } finally {
+    await close(page);
+  }
+});
+
 test("the page asks again when a different reader has the translation in progress", async ({ browser }) => {
   const { entryId } = await seedComments();
   const context = await signedIn(browser, "viewer", clientIp("comment-translation", 102));
@@ -110,6 +176,7 @@ test("the page asks again when a different reader has the translation in progres
         return route.fulfill({ status: 409, json: { error: "The translation is not ready. Try again in a moment." } });
       return route.fulfill({ json: { translation: { text: "**Hello** world", mentions: [] } } });
     });
+    await page.route("**/api/entries/*/translation", (route) => route.fulfill({ json: { translation: null } }));
     await page.goto(`/@other_host?entry=${entryId}`);
     const comment = page.locator("article.comment").filter({ hasText: "reporter" });
     await expect(comment.locator(".comment-text")).toHaveText("Hello world");

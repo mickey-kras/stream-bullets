@@ -124,6 +124,18 @@ export interface Entry {
   reported: boolean;
   // Mash state; null for other kinds. `counts` holds players per side.
   mash: MashState | null;
+  // The stored translation for the language of the reader. Null: this entry needs none, or its translation
+  // failed a check. Absent: the server has no result yet.
+  translation?: EntryText | null;
+  // Set by the page: the entry shows its translation, or the original text that the reader selected.
+  translated?: "shown" | "original";
+}
+
+// The text of an entry that a person typed.
+export interface EntryText {
+  title: string;
+  body: string;
+  options: string[];
 }
 
 // Sides use entry options; each viewer's vote selects their side.

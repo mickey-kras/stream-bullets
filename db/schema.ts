@@ -272,12 +272,31 @@ export const commentTranslations = sqliteTable(
   (table) => [primaryKey({ columns: [table.commentId, table.locale] })],
 );
 
+// One machine translation of a topic, poll or idea for one locale. `title` is null when the entry needs no
+// translation or the translation failed its checks.
+export const entryTranslations = sqliteTable(
+  "entry_translations",
+  {
+    entryId: text("entry_id")
+      .notNull()
+      .references(() => entries.id, { onDelete: "cascade" }),
+    locale: text("locale").notNull(),
+    sourceHash: text("source_hash").notNull(),
+    title: text("title"),
+    body: text("body"),
+    options: text("options", { mode: "json" }).$type<string[]>(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.entryId, table.locale] })],
+);
+
 // One row for each start of the translation model. A row reserves the comment text and locale, so two
 // requests at the same time start the model one time. The rows also count toward the daily limit. They have
 // no foreign key: an edit or a removal of the comment does not remove them. Cron deletes them after 2 days.
 export const translationAttempts = sqliteTable(
   "translation_attempts",
   {
+    // The ID of a comment or of an entry.
     commentId: text("comment_id").notNull(),
     locale: text("locale").notNull(),
     sourceHash: text("source_hash").notNull(),
