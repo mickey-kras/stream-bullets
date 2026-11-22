@@ -111,7 +111,10 @@ describe("entry translation", (): void => {
     expect(await translateEntry(env, pollId, "host", "en", NOW + 1, POLL)).toEqual(expected);
     expect(run).toHaveBeenCalledTimes(1);
     const [, input] = run.mock.calls[0];
-    expect(JSON.parse(input.messages[1].content)).toEqual(POLL);
+    // The target language comes before the JSON. With the JSON only, the model often gave back the source.
+    const [instruction, json] = input.messages[1].content.split(/\n(.*)/su);
+    expect(instruction).toBe("Translate into English:");
+    expect(JSON.parse(json)).toEqual(POLL);
     expect(input.messages[0].content).toContain("into English");
     const value: Entry = await entry(pollId);
     await attachEntryTranslations(env, [value], "en");

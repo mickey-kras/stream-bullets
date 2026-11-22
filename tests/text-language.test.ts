@@ -32,6 +32,11 @@ describe("the language of a text from its letters", (): void => {
     expect(inLanguageOf("uk", "Misha, it is impossible to read the messages")).toBe(false);
     expect(inLanguageOf("uk", "Миша, повідомлення неможливо читати")).toBe(true);
     expect(inLanguageOf("en", "Привет")).toBe(false);
+    // A name kept in Cyrillic letters in a language with a different script.
+    expect(inLanguageOf("pl", "Миша, nie myślałeś o przeprowadzce do innego stanu?")).toBe(false);
+    expect(inLanguageOf("pl", "Misha, nie myślałeś o przeprowadzce do innego stanu?")).toBe(true);
+    expect(inLanguageOf("ja", "ミシャ、Мишаの配信")).toBe(false);
+    expect(inLanguageOf("ru", "Миша, привет от Kasia")).toBe(true);
     expect(inLanguageOf("ja", "今日の配信")).toBe(true);
     expect(inLanguageOf("ja", "東京")).toBe(true);
     expect(inLanguageOf("zh-CN", "今日の配信は楽しい")).toBe(false);

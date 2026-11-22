@@ -53,6 +53,7 @@ const prompt = (language: string): string => `You translate comments from a live
 The user message has the target language on line 1, the mentions on line 2, and then the comment.
 Rules:
 - Write the translation in ${language}. Do not write it in a different language.
+- Write names in the alphabet of ${language}. For example, write Миша as Misha in a language with Latin letters.
 - Keep the meaning and the informal tone. Do not add or remove information.
 - Keep all Markdown syntax as it is: ** * ~~ \` \`\`\` > - 1. [label](url). Translate the text inside it, except code.
 - Do not change text inside \`inline code\` or \`\`\` code blocks.

@@ -31,6 +31,8 @@ interface OverlayTable {
   objects: Record<string, unknown>[];
 }
 let overlayBefore: OverlayTable;
+const TRANSLATION_TABLES = ["comment_translations", "entry_translations", "page_translations", "translation_attempts"];
+const afterReset: Record<string, number> = {};
 
 async function overlayTable(): Promise<OverlayTable> {
   const all = async (sql: string): Promise<Record<string, unknown>[]> => (await db.prepare(sql).all()).results;
@@ -185,14 +187,35 @@ beforeAll(async (): Promise<void> => {
   ]);
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0036"),
+    applied.filter((file: string): boolean => file >= "0036" && file < "0039"),
+  );
+  for (const table of TRANSLATION_TABLES)
+    afterReset[table] = (await db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).first<{ n: number }>())?.n ?? -1;
+  // Results from after the reset: a translation, no translation, and a name kept in Cyrillic letters.
+  await db.batch([
+    db.prepare(
+      `INSERT INTO comment_translations (comment_id,locale,source_hash,text,created_at) VALUES
+        ('c1','pl','h','Misha, cześć',1),('c1','de','h','Миша, hallo',1),('c1','ru','h','Миша, привет',1),('c2','pl','h',NULL,1)`,
+    ),
+    db.prepare(
+      `INSERT INTO entry_translations (entry_id,locale,source_hash,title,body,options,created_at) VALUES
+        ('topic','pl','h',NULL,NULL,NULL,1),('topic','de','h','Thema','Für Миша','[]',1),('topic','en','h','Topic','','[]',1)`,
+    ),
+    db.prepare(
+      `INSERT INTO page_translations (streamer_id,source_hash,locale,value,created_at) VALUES
+        ('page','a','pl',NULL,1),('page','a','de','{"title":"Миша"}',1),('page','a','en','{"title":"Misha"}',1)`,
+    ),
+  ]);
+  await applyMigrations(
+    db,
+    applied.filter((file: string): boolean => file >= "0039"),
   );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0038", (): void => {
+  it("covers 0006 to 0039", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -227,14 +250,22 @@ describe("migrations 0006 onwards", (): void => {
       "0036",
       "0037",
       "0038",
+      "0039",
     ]);
   });
 
-  it("deletes each stored translation (0036 and 0038), so the job makes them again", async (): Promise<void> => {
-    for (const table of ["comment_translations", "entry_translations", "page_translations", "translation_attempts"]) {
-      const row = await db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).first<{ n: number }>();
-      expect(row?.n).toBe(0);
-    }
+  it("deletes each stored translation (0036 and 0038), so the job makes them again", (): void => {
+    for (const table of TRANSLATION_TABLES) expect(afterReset[table], table).toBe(0);
+  });
+
+  it("deletes the results without a translation and the names in Cyrillic letters (0039)", async (): Promise<void> => {
+    const rows = async (sql: string): Promise<unknown[]> => (await db.prepare(sql).all()).results;
+    expect(await rows("SELECT locale, text FROM comment_translations ORDER BY locale")).toEqual([
+      { locale: "pl", text: "Misha, cześć" },
+      { locale: "ru", text: "Миша, привет" },
+    ]);
+    expect(await rows("SELECT locale FROM entry_translations ORDER BY locale")).toEqual([{ locale: "en" }]);
+    expect(await rows("SELECT locale FROM page_translations ORDER BY locale")).toEqual([{ locale: "en" }]);
   });
 
   it("rebuilds overlay_state (0032) with every row, column, default and foreign key", async (): Promise<void> => {
