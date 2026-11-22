@@ -189,6 +189,7 @@ const event: StreamEvent = {
   repeatUntil: null,
   tz: "UTC",
   topics: [],
+  alsoOn: [],
   updatedAt: now,
 };
 const ready: StepUpStatus = {

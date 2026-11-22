@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t, tn } from "../../i18n";
-import type { EventTopic, StreamEvent } from "../../types";
+import type { EventTopic, StreamEvent, StreamLink } from "../../types";
 import { Icon } from "../ui/icon";
 import { categoryIcon } from "../topic-icon";
 import { upcomingRows } from "../../lib/schedule";
@@ -11,9 +11,11 @@ import {
   durationLabel,
   platformIcon,
   platformLabel,
+  platformsLabel,
   repeatLabel,
   statusIcon,
   statusWord,
+  streamLinks,
   timeOf,
   whenLine,
   zoneLabel,
@@ -47,22 +49,21 @@ export function TopicChips({ topics, handle }: Readonly<{ topics: EventTopic[]; 
 }
 
 export function PlatformLink({ event, gold = false }: Readonly<{ event: StreamEvent; gold?: boolean }>): ReactNode {
-  const label =
-    event.status === "live"
-      ? t("schedule.watchLive", { platform: platformLabel[event.platform] })
-      : t("schedule.watchOn", { platform: platformLabel[event.platform] });
-  return (
+  return streamLinks(event).map((link: StreamLink) => (
     <a
+      key={link.platform}
       className={`button-link${gold ? " gold" : ""} platform-link`}
-      href={event.url}
+      href={link.url}
       target="_blank"
       rel="noopener noreferrer"
     >
-      <Icon name={platformIcon[event.platform]} size={18} />
-      {label}
+      <Icon name={platformIcon[link.platform]} size={18} />
+      {event.status === "live"
+        ? t("schedule.watchLive", { platform: platformLabel[link.platform] })
+        : t("schedule.watchOn", { platform: platformLabel[link.platform] })}
       <span className="sr-only"> {t("common.newTab")}</span>
     </a>
-  );
+  ));
 }
 
 function EventRow({
@@ -90,8 +91,10 @@ function EventRow({
             )}
           </span>
           <span className="sched-meta">
-            <Icon name={platformIcon[event.platform]} size={18} />
-            {platformLabel[event.platform]} · {durationLabel(event.durationMin)}
+            {streamLinks(event).map((link: StreamLink) => (
+              <Icon key={link.platform} name={platformIcon[link.platform]} size={18} />
+            ))}
+            {platformsLabel(event)} · {durationLabel(event.durationMin)}
           </span>
         </span>
         <StatusTag event={event} />

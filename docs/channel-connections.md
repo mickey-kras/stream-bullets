@@ -186,6 +186,53 @@ The feed uses these provider subscriptions:
 
 The callback refuses an authorization that gives fewer scopes than the list above.
 
+## Scheduled streams
+
+The schedule of a page shows the scheduled streams of its connected Twitch and YouTube channels.
+The code is in `app/server/schedule-import.server.ts`.
+
+| Platform | Source | Access |
+| --- | --- | --- |
+| Twitch | `GET https://api.twitch.tv/helix/schedule` | The app token. The endpoint needs no scope. |
+| YouTube | `liveBroadcasts.list` with `broadcastStatus=upcoming` | The token of the channel, with the `youtube.readonly` scope. 1 quota unit. |
+| Kick | The public API has no schedule endpoint | Kick streams stay manual. |
+
+The `ChannelIngest` object of the page reads the platform (`POST /upcoming`).
+Thus only the object refreshes tokens, and a YouTube read spends the quota of the page.
+
+These rules apply to a read:
+
+- The read covers 4 weeks. Twitch gives at most 4 pages of 25 segments. YouTube gives one page of 50 broadcasts.
+- The import ignores a canceled Twitch segment. It also ignores a YouTube broadcast that is not public or has no start time.
+- An empty title takes the Twitch category. Without a category, it takes the channel name.
+- A stream without an end gets 120 minutes. The length stays between 15 minutes and 24 hours.
+- Each read stream has a row in `stream_event_sources`, with the platform and its ID.
+  Thus a new read updates the entry. It does not make a second entry.
+- Two streams are the same stream when their starts are at most 15 minutes apart and their titles agree.
+  The comparison ignores case, marks, and extra spaces. The schedule then shows one entry with the link of each platform.
+- The import makes entries with `imported = 1`. An edit by the owner sets `imported = 0`.
+  The import changes only entries with `imported = 1`, and only from the platform that made them.
+- A manual entry of the owner keeps its text. A read stream that agrees with it adds only a link.
+- When the owner deletes an entry, its source row stays without an entry. Thus a new read does not add it again.
+- When a platform no longer lists a stream, the read removes its link. This occurs only for a stream that starts
+  in more than one hour, inside the 4 weeks. An entry with `imported = 1` and no other link goes too.
+- A failed read changes nothing. A refused YouTube token sets `needs_reauth`.
+- A full schedule takes no new entry. The next read tries again.
+
+The import reads a page at these times:
+
+- When the owner opens the schedule, after the response. At most one read each 10 minutes for each page.
+- In the hourly `schedule_import` job. The job reads at most 25 pages in each run.
+  It reads a page again after 6 hours, and takes the oldest reads first.
+
+`schedule_imports` keeps the time of the last read of each page.
+
+The hourly job also deletes YouTube source rows that no read found for 30 days.
+It deletes the imported entries that only these rows held. Twitch rows stay with their entry.
+A row without an entry goes after the same 30 days.
+
+The test deployment reads no platform. It uses the synthetic streams of `testStreams`.
+
 ## Limits and retention
 
 | Item | Limit |
@@ -279,6 +326,7 @@ follows this reset, also across summer time.
 | One live page at the 10-second floor | 1,800 each hour (6 polls each minute × 5 units × 60) |
 | One live page at the 20-second floor | 900 each hour |
 | One open overlay, channel not live | 6 each hour, and a maximum of 30 in the first 30 minutes |
+| Schedule reads of one page | 1 for each read: at most 4 each day from the hourly job, and 1 for each 10 minutes of owner visits |
 | Budget for one page | 9,000 each day: about 5 hours of live chat at the floor |
 | Budget for all pages | 9,000 each day: about 5 hours of live chat at the floor |
 
@@ -521,6 +569,8 @@ The logs hold only fixed codes, platforms, and counts. They never hold an ID, a 
 | `channel_ingest_dropped` | The object dropped chat over the admission limit | Information only |
 | `channel_callback_failed`, `channel_connect_cleanup_failed`, `channel_disconnect_failed`, `channel_cleanup_failed` | A step failed. The log holds the error class. | Alert when it repeats |
 | `activity_notify_failed` | A key or suspension notice did not reach the object | Alert when it repeats |
+| `schedule_read_failed` | A schedule read of a platform failed (`platform`). The read changes nothing. The log holds the error class. | Alert when it repeats for a day |
+| `schedule_import_failed` | The schedule import of a page failed. The log holds the error class. | Alert when it repeats |
 
 ## Overlay key
 
@@ -724,6 +774,8 @@ ask an app to refresh or delete the API data that it stores within 30 days. Thus
 - For each removal, the job first runs the disconnect steps, best effort and limited to 5 seconds. The tokens go
   with the row. The job writes an audit row (`channel_expired`, no actor) and a `channel_youtube_expired` log.
 - The job also finishes a disconnect, on any platform, that stopped more than an hour ago (`reason: stuck`).
+
+Scheduled streams read from YouTube follow the same 30-day rule. See [Scheduled streams](#scheduled-streams).
 
 The connection has two times. `data_read_at` is when the server last read the channel data from YouTube. The
 30-day rule uses it. `updated_at` is when the status or its code last changed, or when a disconnect marked the

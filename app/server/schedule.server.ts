@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 import { effectiveStatus, expandSeries, SERIES_HORIZON_MS, type SeriesRule } from "../lib/schedule";
 import { addDays, localDateOf, parseDate, weekdayOf, zonedParts, zonedTime, type LocalDate } from "../lib/zoned";
-import type { EventTopic, StreamEvent, StreamEventStatus, StreamPlatform } from "../types";
+import type { EventTopic, StreamEvent, StreamEventStatus, StreamLink, StreamPlatform } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { consumeMutationQuota } from "./data.server";
 import { HttpError } from "./http.server";
@@ -31,6 +31,7 @@ interface EventRow {
   repeat_until: number | null;
   tz: string;
   is_exception: number;
+  imported: number;
   created_at: number;
   updated_at: number;
 }
@@ -57,7 +58,32 @@ async function topicsFor(env: AppEnv, ids: string[]): Promise<Map<string, EventT
   return map;
 }
 
-function eventValue(row: EventRow, topics: EventTopic[], now: number): StreamEvent {
+// The other platforms of each stream that the schedule import linked to it.
+async function linksFor(env: AppEnv, rows: EventRow[]): Promise<Map<string, StreamLink[]>> {
+  const map = new Map<string, StreamLink[]>(rows.map((row: EventRow): [string, StreamLink[]] => [row.id, []]));
+  if (rows.length === 0) return map;
+  const { results } = await env.DB.prepare(`SELECT event_id, platform, url FROM stream_event_sources
+    WHERE event_id IN (SELECT value FROM json_each(?)) ORDER BY platform`)
+    .bind(JSON.stringify(rows.map((row: EventRow): string => row.id)))
+    .all<{ event_id: string; platform: StreamPlatform; url: string }>();
+  const platforms = new Map<string, StreamPlatform>(rows.map((row: EventRow): [string, StreamPlatform] => [row.id, row.platform]));
+  for (const link of results)
+    if (link.platform !== platforms.get(link.event_id)) map.get(link.event_id)?.push({ platform: link.platform, url: link.url });
+  return map;
+}
+
+async function eventValues(env: AppEnv, rows: EventRow[], now: number): Promise<StreamEvent[]> {
+  const [topics, links] = await Promise.all([
+    topicsFor(
+      env,
+      rows.map((row: EventRow): string => row.id),
+    ),
+    linksFor(env, rows),
+  ]);
+  return rows.map((row: EventRow): StreamEvent => eventValue(row, topics.get(row.id) ?? [], links.get(row.id) ?? [], now));
+}
+
+function eventValue(row: EventRow, topics: EventTopic[], alsoOn: StreamLink[], now: number): StreamEvent {
   return {
     id: row.id,
     seriesId: row.series_id,
@@ -73,6 +99,7 @@ function eventValue(row: EventRow, topics: EventTopic[], now: number): StreamEve
     repeatUntil: row.repeat_until,
     tz: row.tz,
     topics,
+    alsoOn,
     updatedAt: row.updated_at,
   };
 }
@@ -109,11 +136,7 @@ export async function listEvents(
   now: number = Date.now(),
 ): Promise<StreamEvent[]> {
   const results = await eventRows(env, streamerId, { from, to, now }, { upcoming: UPCOMING_LIMIT, past: PAST_LIMIT });
-  const topics = await topicsFor(
-    env,
-    results.map((row: EventRow): string => row.id),
-  );
-  return results.map((row: EventRow): StreamEvent => eventValue(row, topics.get(row.id) ?? [], now));
+  return eventValues(env, results, now);
 }
 
 // Topics the owner can link to a stream: the 30 newest.
@@ -398,7 +421,7 @@ export async function getEvent(
     .bind(id, streamerId)
     .first<EventRow>();
   if (!row) return null;
-  return eventValue(row, (await topicsFor(env, [id])).get(id) ?? [], now);
+  return (await eventValues(env, [row], now))[0];
 }
 
 // `PATCH /api/events/:id`: edit (this stream, or this and the following ones of a series), cancel, replay
@@ -442,7 +465,7 @@ async function editOneEvent(
   if (adds) await assertRoom(env, row.streamer_id, 1, now);
   await guardedBatch(env, [
     env.DB.prepare(`UPDATE stream_events SET title=?, notes=?, starts_at=?, duration_min=?, platform=?, url=?, tz=?,
-      status=CASE WHEN status='cancelled' THEN 'cancelled' ELSE 'scheduled' END, is_exception=1, updated_at=?
+      status=CASE WHEN status='cancelled' THEN 'cancelled' ELSE 'scheduled' END, is_exception=1, imported=0, updated_at=?
       WHERE id=?`).bind(
       patch.title,
       patch.notes,

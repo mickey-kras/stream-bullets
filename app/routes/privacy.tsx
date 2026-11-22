@@ -66,8 +66,8 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
           <li>
             Access and refresh tokens from the platform, encrypted with keys kept apart from the database. We use them
-            only to read the channel’s chat and moderation events. We never post, moderate, or change anything on the
-            channel.
+            only to read the channel’s chat, its moderation events and its scheduled streams. We never post, moderate,
+            or change anything on the channel.
           </li>
         </ul>
         <p>
@@ -86,6 +86,12 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           their last message. When a viewer is banned or timed out, we keep their platform user ID until the ban or
           timeout ends, or for 30 minutes if it has no end, so their character stays off. When the streamer turns the
           characters layer off, we delete the list at once, or at the latest within a minute.
+        </p>
+        <p>
+          The streamer’s schedule shows the scheduled streams of a connected Twitch or YouTube channel: for each stream
+          its title, start, end and link. We read only public YouTube broadcasts. We read them again when the streamer
+          opens the schedule, and about every 6 hours. A scheduled stream that a platform no longer lists leaves the
+          schedule, unless the streamer edited it.
         </p>
         <h3>YouTube channels</h3>
         <p>
@@ -311,7 +317,8 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           subscriptions, and asks the platform to revoke access. A YouTube connection is also removed 7 days after we
           find that its access ended, or when its channel data was not read again from YouTube for 30 days. While an
           overlay is open, we read it again each day; without an open overlay, we find an ended access within 30 days.
-          Chat passing through for overlays stays for at most 11 minutes, and IDs of deliveries already received stay
+          Scheduled streams read from YouTube are deleted when we could not read them again for 30 days. Chat passing
+          through for overlays stays for at most 11 minutes, and IDs of deliveries already received stay
           for at most 16 minutes. The viewer list of the character playground keeps each viewer for at most 30 minutes
           after their last message, and a ban or timeout until it ends.
         </li>

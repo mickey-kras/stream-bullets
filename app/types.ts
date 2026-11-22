@@ -357,6 +357,12 @@ export interface EventTopic {
   category: string;
 }
 
+// A platform where the same stream also runs, which the schedule import found.
+export interface StreamLink {
+  platform: StreamPlatform;
+  url: string;
+}
+
 // One occurrence per row; weekly occurrences share `seriesId`.
 export interface StreamEvent {
   id: string;
@@ -377,6 +383,8 @@ export interface StreamEvent {
   // Owner's scheduling zone. Viewers use their own zone.
   tz: string;
   topics: EventTopic[];
+  // The same stream on other platforms, with the address there.
+  alsoOn: StreamLink[];
   // Last change; shared by download and feed DTSTAMP/SEQUENCE.
   updatedAt: number;
   // The text in the language of the reader. Null: no translation is necessary. Absent: not translated yet.

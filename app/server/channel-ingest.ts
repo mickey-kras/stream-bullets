@@ -17,13 +17,17 @@ export { snapshotMessage } from "./channel-ingest-events";
 import { youtubeEvents } from "./channel-normalize";
 import {
   channelIdentity,
+  IMPORT_HORIZON_MS,
+  type ImportedStream,
   ProviderError,
   ReauthRequired,
   refreshTokens,
   revokeToken,
   unsubscribe,
+  twitchSchedule,
   youtubeChatPage,
   youtubeLiveChat,
+  youtubeUpcoming,
 } from "./channel-providers.server";
 import { ChannelSubscriptions } from "./channel-ingest-subscriptions";
 import { channelsOff, loadTokens, replaceTokens, type StoredTokens } from "./channel-tokens.server";
@@ -90,6 +94,7 @@ const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/playground": "POST",
   "/playground-config": "POST",
   "/test-chat": "POST",
+  "/upcoming": "POST",
 };
 
 type EventRow = { body: string };
@@ -202,6 +207,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
     if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
     if (pathname === "/reconcile") return Response.json(await this.subscriptions.requested(platform, Date.now()));
+    if (pathname === "/upcoming") return Response.json(await this.upcomingRequested(platform));
     return this.statusChanged(platform, request);
   }
 
@@ -903,6 +909,32 @@ export class ChannelIngest extends DurableObject<AppEnv> {
       if (this.generations.get("youtube") !== generation) return { result: "failed" };
       await this.setStatus("youtube", connection, "needs_reauth", "authorization_revoked");
       return { result: "reauth" };
+    }
+  }
+
+  /**
+   * The scheduled streams of the channel for the next 4 weeks, for the schedule import. `streams` is null when the
+   * channel cannot be read now (no usable connection, no YouTube quota, a provider failure): the import then
+   * changes nothing. Twitch needs only the app token; YouTube spends 1 quota unit of the page.
+   */
+  private async upcomingRequested(platform: ActivityPlatform): Promise<{ streams: ImportedStream[] | null }> {
+    if (channelsOff(this.env) || platform === "kick") return { streams: null };
+    const connection = await this.connection(platform);
+    if (!connection || connection.status === "needs_reauth" || connection.suspended || connection.code === "disconnecting")
+      return { streams: null };
+    const now = Date.now();
+    const generation = this.generations.get(platform);
+    try {
+      if (platform === "twitch")
+        return { streams: await twitchSchedule(this.env, connection.externalId, now, now + IMPORT_HORIZON_MS) };
+      if ((await this.spendQuota(1, now)) === null) return { streams: null };
+      const tokens = await this.freshTokens(platform, connection);
+      return { streams: await youtubeUpcoming(tokens.accessToken, now + IMPORT_HORIZON_MS) };
+    } catch (error: unknown) {
+      if (error instanceof ReauthRequired && platform === "youtube" && this.generations.get(platform) === generation)
+        await this.setStatus(platform, connection, "needs_reauth", "authorization_revoked");
+      else console.warn("schedule_read_failed", { platform, cause: error instanceof Error ? error.name : "unknown" });
+      return { streams: null };
     }
   }
 
