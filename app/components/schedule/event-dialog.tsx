@@ -2,14 +2,14 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { t } from "../../i18n";
 import { copyText } from "../../lib/clipboard";
 import { buildCalendar } from "../../server/ics";
-import type { EventTopic, StreamEvent } from "../../types";
+import type { EventTopic, StreamEvent, StreamLink } from "../../types";
 import { errorMessage, sendJson } from "../api";
 import { shownEvent, TranslationControl, useOriginals } from "../page-translation";
 import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { Sheet } from "../ui/sheet";
 import { useToast } from "../ui/toast";
-import { durationLabel, platformIcon, platformLabel, repeatLabel, statusWord, whenLine } from "./format";
+import { durationLabel, platformIcon, platformLabel, repeatLabel, statusWord, streamLinks, whenLine } from "./format";
 import { PlatformLink, TopicChips } from "./schedule-feed";
 import { ScheduleForm, type EventBody } from "./schedule-form";
 
@@ -56,12 +56,14 @@ function Facts({ event, zone, handle }: Readonly<{ event: StreamEvent; zone: str
           {durationLabel(event.durationMin)}
           {event.seriesId && ` · ${t("schedule.every", { days: repeatLabel(event.repeatDays) })}`}
         </p>
-        <p>
-          <Icon name={platformIcon[event.platform]} size={18} />
-          <a className="text-link" href={event.url} target="_blank" rel="noopener noreferrer">
-            {platformLabel[event.platform]} · {event.url.replace("https://", "")}
-          </a>
-        </p>
+        {streamLinks(event).map((link: StreamLink) => (
+          <p key={link.platform}>
+            <Icon name={platformIcon[link.platform]} size={18} />
+            <a className="text-link" href={link.url} target="_blank" rel="noopener noreferrer">
+              {platformLabel[link.platform]} · {link.url.replace("https://", "")}
+            </a>
+          </p>
+        ))}
       </div>
       {event.notes && <p className="event-notes">{event.notes}</p>}
       {event.topics.length > 0 && (

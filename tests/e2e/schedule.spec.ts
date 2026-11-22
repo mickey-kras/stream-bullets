@@ -10,6 +10,7 @@ test("viewers see the feed, the calendar views on desktop only, and a stable col
   const hero = page.locator(".sched-hero");
   await expect(hero.getByRole("button", { name: "Mic shootout" })).toBeVisible();
   await expect(hero.getByRole("link", { name: "Mic shootout" })).toHaveAttribute("href", /entry=/);
+  await expect(hero.getByRole("link", { name: /Watch on YouTube/ })).toBeVisible();
   await expect(page.locator(".sched-upcoming")).toContainText("Variety night");
   await expect(page.locator(".sched-upcoming .series-note")).toContainText("every");
   await expect(page.locator(".sched-past").getByRole("link", { name: /Watch replay/ })).toHaveAttribute(
@@ -37,6 +38,12 @@ test("the event dialog shows the stream and the .ics feed serves the schedule", 
   await page.locator(".sched-hero").getByRole("button", { name: "Mic shootout" }).click();
   const dialog = page.getByRole("dialog", { name: "Mic shootout" });
   await expect(dialog).toContainText("Bring your questions.");
+  // A stream on two platforms is one entry with a link to each.
+  await expect(dialog.getByRole("link", { name: /Watch on Twitch/ })).toHaveAttribute("href", "https://twitch.tv/feature_host");
+  await expect(dialog.getByRole("link", { name: /Watch on YouTube/ })).toHaveAttribute(
+    "href",
+    "https://www.youtube.com/watch?v=mic-video",
+  );
   const downloading = page.waitForEvent("download");
   await dialog.getByRole("button", { name: "Add to calendar" }).click();
   const download = await downloading;

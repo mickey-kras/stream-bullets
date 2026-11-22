@@ -25,6 +25,7 @@ import { requestLocale } from "../i18n/resolve";
 import { isAdmin } from "../server/access.server";
 import { listCards } from "../server/community.server";
 import { defaultRange, getEvent, listEvents, listTopicChoices } from "../server/schedule.server";
+import { importAfterVisit } from "../server/schedule-import.server";
 import { getSupport } from "../server/support.server";
 import { EmptyState } from "../components/common";
 import { contactEmails } from "../legal";
@@ -190,6 +191,12 @@ async function pageSchedule(
   };
 }
 
+// The owner opened the schedule: read the scheduled streams of the connected channels after the response; the next
+// load shows them.
+function ownerVisit(env: AppEnv, streamer: Streamer, owner: boolean, view: View): void {
+  if (owner && view === "schedule" && !streamer.isOfficial) importAfterVisit(env, streamer.id);
+}
+
 export const loader = withRouteErrors(async ({ request, context, params }: LoaderFunctionArgs) => {
   const app = context.get(appContext);
   if (!params.handle?.startsWith("@")) throw new Response("Page not found.", { status: 404 });
@@ -205,6 +212,7 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   const entryId: string | null = url.searchParams.get("entry");
   const owner = viewer?.id === streamer.ownerId;
   const now = Date.now();
+  ownerVisit(app.env, streamer, owner, view);
 
   const [selected, moderator, support, schedule] = await Promise.all([
     entryId ? getEntry(app.env, entryId, viewer?.id || null) : null,

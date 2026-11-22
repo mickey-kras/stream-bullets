@@ -208,14 +208,25 @@ beforeAll(async (): Promise<void> => {
   ]);
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0039"),
+    applied.filter((file: string): boolean => file >= "0039" && file < "0040"),
+  );
+  // A stream with a topic link from before 0040.
+  await db.batch([
+    db.prepare(
+      "INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,created_at,updated_at) VALUES ('ev39','page','Old',1,60,'twitch','https://twitch.tv/host','UTC',1,1)",
+    ),
+    db.prepare("INSERT INTO stream_event_topics (event_id,entry_id) VALUES ('ev39','topic')"),
+  ]);
+  await applyMigrations(
+    db,
+    applied.filter((file: string): boolean => file >= "0040"),
   );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0039", (): void => {
+  it("covers 0006 to 0040", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -251,7 +262,31 @@ describe("migrations 0006 onwards", (): void => {
       "0037",
       "0038",
       "0039",
+      "0040",
     ]);
+  });
+
+  it("adds the imported flag (0040) and keeps each stream and its topic links", async (): Promise<void> => {
+    expect(await db.prepare("SELECT imported FROM stream_events WHERE id='ev39'").first()).toEqual({ imported: 0 });
+    expect(await db.prepare("SELECT count(*) AS n FROM stream_event_topics WHERE event_id='ev39'").first()).toEqual({ n: 1 });
+    await expect(db.prepare("UPDATE stream_events SET imported=2 WHERE id='ev39'").run()).rejects.toThrow(/CHECK/);
+    // A source keeps its row without the stream when the owner deletes the stream.
+    await db
+      .prepare(
+        "INSERT INTO stream_event_sources (streamer_id,platform,external_id,event_id,url,read_at) VALUES ('page','twitch','seg','ev39','https://www.twitch.tv/host',1)",
+      )
+      .run();
+    await db.prepare("DELETE FROM stream_events WHERE id='ev39'").run();
+    expect(await db.prepare("SELECT event_id FROM stream_event_sources WHERE external_id='seg'").first()).toEqual({
+      event_id: null,
+    });
+    await expect(
+      db
+        .prepare(
+          "INSERT INTO stream_event_sources (streamer_id,platform,external_id,url,read_at) VALUES ('page','tiktok','x','https://tiktok.com/x',1)",
+        )
+        .run(),
+    ).rejects.toThrow(/CHECK/);
   });
 
   it("deletes each stored translation (0036 and 0038), so the job makes them again", (): void => {
