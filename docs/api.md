@@ -255,11 +255,15 @@ An edit or a removal of the comment deletes its stored translations.
 Text without letters starts no model.
 
 Text in the language of the reader has no translation and starts no model. The reader sees the original text.
-The server finds this language from the letters of the text, not from the model.
-It knows Russian, Ukrainian, Hindi, Japanese and Chinese text in this way. It does not know the language of text in Latin letters.
+The server finds this language without the model.
+The letters tell Russian, Ukrainian, Hindi, Japanese and Chinese text.
+For text in Latin letters, the library `eld` gives the language. When it is not sure, the language stays unknown.
 
-The server shows a translation only if it has the same Markdown structure, code, links and mentions as the comment.
-The translation must also have the script of the language of the reader. The model sometimes answers in English.
+The server shows a translation only if it has the same Markdown blocks, marks, code, links and mentions as the comment.
+Lines in one paragraph can be different: the model joins lines that the author divided.
+The translation must also be in the language of the reader. The model sometimes answers in a different language.
+A line with only a link at the start or at the end of a comment does not go to the model. It stays as it is.
+
 These rules also apply to topics, polls and ideas.
 
 Each account has a limit of new translations in one minute.
@@ -285,6 +289,7 @@ The daily limit of model starts applies to all these paths.
 
 A reader also sees each topic, poll and idea in the language of the site for that reader.
 The translation has the title, the description and the answer options.
+The model gets these three parts as JSON and answers with JSON of the same form.
 
 The page loader, `GET /api/streamers/:handle` and `GET /api/entries/:id` give each entry with a `translation` field. The field has the same three states as the field of a comment, and its value is `{title, body, options}`.
 

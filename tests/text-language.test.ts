@@ -1,5 +1,7 @@
-import { describe, expect, it } from "vitest";
-import { hasScriptOf, writtenIn } from "../app/lib/text-language";
+import { beforeAll, describe, expect, it } from "vitest";
+import { inLanguageOf, loadLanguageDetector, writtenIn } from "../app/lib/text-language";
+
+beforeAll(loadLanguageDetector);
 
 describe("the language of a text from its letters", (): void => {
   it.each([
@@ -14,7 +16,12 @@ describe("the language of a text from its letters", (): void => {
     ["नमस्ते दोस्तों", ["hi"]],
     ["今日の配信は楽しかった", ["ja"]],
     ["今天的直播很有趣", ["zh-CN"]],
-    ["Hallo Welt", []],
+    ["Hallo Welt, wie geht es euch heute?", ["de"]],
+    ["What are your thoughts about the massive Microsoft outage yesterday?!", ["en"]],
+    ["Nie wiem, co o tym myśleć", ["pl"]],
+    ["O que vocês acham da transmissão de hoje à noite?", ["pt-BR"]],
+    // The detector is not sure about names and short slang.
+    ["Elden Ring", []],
     ["lol 👍 123", []],
     ["👍 123", []],
   ])("finds the site languages of %j", (text: string, locales: string[]): void => {
@@ -22,16 +29,22 @@ describe("the language of a text from its letters", (): void => {
   });
 
   it("tells if a translation has the script of the language of the reader", (): void => {
-    expect(hasScriptOf("uk", "Misha, it is impossible to read the messages")).toBe(false);
-    expect(hasScriptOf("uk", "Миша, повідомлення неможливо читати")).toBe(true);
-    expect(hasScriptOf("en", "Привет")).toBe(false);
-    expect(hasScriptOf("ja", "今日の配信")).toBe(true);
-    expect(hasScriptOf("ja", "東京")).toBe(true);
-    expect(hasScriptOf("zh-CN", "今日の配信は楽しい")).toBe(false);
-    expect(hasScriptOf("hi", "Hello")).toBe(false);
+    expect(inLanguageOf("uk", "Misha, it is impossible to read the messages")).toBe(false);
+    expect(inLanguageOf("uk", "Миша, повідомлення неможливо читати")).toBe(true);
+    expect(inLanguageOf("en", "Привет")).toBe(false);
+    expect(inLanguageOf("ja", "今日の配信")).toBe(true);
+    expect(inLanguageOf("ja", "東京")).toBe(true);
+    expect(inLanguageOf("zh-CN", "今日の配信は楽しい")).toBe(false);
+    expect(inLanguageOf("hi", "Hello")).toBe(false);
     // A code block is not text of the language.
-    expect(hasScriptOf("uk", 'Привіт!\n~~~js\nconst message = "hello world";\n~~~')).toBe(true);
+    expect(inLanguageOf("uk", 'Привіт!\n~~~js\nconst message = "hello world";\n~~~')).toBe(true);
+    // A different site language in the same script.
+    expect(inLanguageOf("en", "¿Qué opinan del gran corte de Microsoft de ayer?! Hay rumores de bots rebeldes.")).toBe(
+      false,
+    );
+    expect(inLanguageOf("en", "What are your thoughts about the massive Microsoft outage yesterday?!")).toBe(true);
+    expect(inLanguageOf("en", "lol gg")).toBe(true);
     // Text without letters has no script.
-    expect(hasScriptOf("ru", "👍 2024")).toBe(true);
+    expect(inLanguageOf("ru", "👍 2024")).toBe(true);
   });
 });

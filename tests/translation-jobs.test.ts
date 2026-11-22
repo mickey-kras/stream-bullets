@@ -5,6 +5,11 @@ import { translateItem, translatePending } from "../app/server/translation-jobs.
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 vi.mock("cloudflare:workers", () => ({ waitUntil: vi.fn() }));
+// These tests are about the job. Without the detector, text in Latin letters has no known language.
+vi.mock("../app/lib/text-language", async (original) => ({
+  ...(await original<typeof import("../app/lib/text-language")>()),
+  loadLanguageDetector: vi.fn().mockResolvedValue(undefined),
+}));
 
 const NOW = 1_800_000_000_000;
 
@@ -14,15 +19,16 @@ interface Input {
 
 let database: TestDatabase;
 let env: AppEnv;
-let run: Mock<(model: string, input: Input) => Promise<{ response: string }>>;
+let run: Mock<(model: string, input: Input) => Promise<{ response: unknown }>>;
 let entryId: string;
 
 // A translation that has the name of the target language, so each language has a different text.
-function answer(_model: string, input: Input): Promise<{ response: string }> {
+function answer(_model: string, input: Input): Promise<{ response: unknown }> {
   const [language] = input.messages[1].content.split("\n");
   const entry: boolean = input.messages[0].content.includes("topics and polls");
+  const title: string = `Title in ${input.messages[0].content.split(" into ")[1]?.split(".")[0]}`;
   return Promise.resolve({
-    response: entry ? `ORIGINAL=de\n---\nTitle in ${language}\n---\n---\n---` : `ORIGINAL=de\n---\nText in ${language}`,
+    response: entry ? { title, options: [], body: "" } : `ORIGINAL=de\n---\nText in ${language}`,
   });
 }
 
@@ -112,7 +118,9 @@ describe("translation of new and old content", (): void => {
 
   it("leaves an item for the next run when the model fails for one language", async (): Promise<void> => {
     run.mockImplementation((model: string, input: Input) =>
-      input.messages[1].content.startsWith("French\n") ? Promise.reject(new Error("model down")) : answer(model, input),
+      input.messages[0].content.includes("into French.")
+        ? Promise.reject(new Error("model down"))
+        : answer(model, input),
     );
     expect(await translatePending(env, NOW)).toBe(1);
     expect(await count("entry_translations")).toBe(LOCALES.length - 1);

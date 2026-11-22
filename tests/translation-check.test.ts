@@ -15,12 +15,16 @@ describe("translation checks", (): void => {
     ["changed code", "run `!jump` now", "jetzt `!springen` ausführen"],
     ["a changed link", "see https://example.test/a", "siehe https://example.test/b"],
     ["a changed mail address", "Mail [us](mailto:help@example.test)", "Mail [uns](mailto:wrong@example.test)"],
-    ["a lost line break", "one\ntwo", "eins zwei"],
+    ["a lost paragraph", "one\n\ntwo", "eins zwei"],
     ["a changed link with parentheses", "[f](https://example.test/a(b)/safe)", "[d](https://example.test/a(b)/wrong)"],
     ["changed code in a tilde block", '~~~\nprint("hello")\n~~~', '~~~\nprint("hallo")\n~~~'],
     ["a list that became text", "- one\n- two", "eins\nzwei"],
   ])("refuses %s", (_name: string, source: string, translation: string): void => {
     expect(keepsStructure(source, translation)).toBe(false);
+  });
+
+  it("accepts lines of one paragraph that the translation joined", (): void => {
+    expect(keepsStructure("one\ntwo", "eins zwei")).toBe(true);
   });
   it("moves each mention range to the place of its label in the translation", (): void => {
     const source = "Thanks @owner and @Other Viewer, it works";

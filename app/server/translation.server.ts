@@ -3,7 +3,7 @@ import { LOCALES } from "../../db/enums";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
 import type { Comment } from "../types";
-import { hasScriptOf, writtenIn } from "../lib/text-language";
+import { inLanguageOf, loadLanguageDetector, writtenIn } from "../lib/text-language";
 import { keepsStructure, moveMentions, readAnswer, type MentionRange } from "../lib/translation-check";
 import { getVisibleEntry } from "./data.server";
 import { HttpError } from "./http.server";
@@ -99,7 +99,7 @@ function checked(
   // The stored results from before these checks have text in the language of the source, and text in English.
   if (!needsTranslation(source, locale, mentions)) return null;
   const moved: MentionRange[] | null = moveMentions(source, mentions, text);
-  return moved && hasScriptOf(locale, withoutMentions(text, moved)) ? { text, mentions: moved } : null;
+  return moved && inLanguageOf(locale, withoutMentions(text, moved)) ? { text, mentions: moved } : null;
 }
 
 /**
@@ -109,6 +109,7 @@ function checked(
 export async function attachTranslations(env: AppEnv, comments: readonly Comment[], locale: Locale): Promise<void> {
   const open: Comment[] = comments.filter((comment: Comment): boolean => !comment.removed);
   if (open.length === 0) return;
+  await loadLanguageDetector();
   const { results } = await env.DB.prepare(
     "SELECT comment_id, source_hash, text FROM comment_translations WHERE locale=? AND comment_id IN (SELECT value FROM json_each(?))",
   )
@@ -123,22 +124,45 @@ export async function attachTranslations(env: AppEnv, comments: readonly Comment
   }
 }
 
-async function askModel(ai: Ai, locale: Locale, source: string, mentions: readonly MentionRange[]): Promise<string> {
+// A line without letters: a link, emoji or numbers. Also an empty line.
+function fixedLine(line: string): boolean {
+  return !/\p{L}/u.test(line.replaceAll(/https?:\/\/\S+/gu, ""));
+}
+
+/**
+ * Asks the model for the translation of a text. The model removes a line that has only a link, so the lines
+ * without letters at the start and at the end of the text do not go to the model. They stay as the author wrote
+ * them. Null when the answer has the wrong form.
+ */
+async function askModel(
+  ai: Ai,
+  locale: Locale,
+  source: string,
+  mentions: readonly MentionRange[],
+): Promise<string | null> {
+  const lines: string[] = source.split("\n");
+  let first: number = 0;
+  let last: number = lines.length;
+  while (first < last && fixedLine(lines[first])) first += 1;
+  while (last > first && fixedLine(lines[last - 1])) last -= 1;
   const labels: string = mentions.map((mention: MentionRange) => source.slice(mention.start, mention.end)).join(" ");
   const result = await ai.run(TRANSLATION_MODEL, {
     messages: [
       { role: "system", content: prompt(LANGUAGES[locale]) },
-      { role: "user", content: `${LANGUAGES[locale]}\n${labels}\n${source}` },
+      { role: "user", content: `${LANGUAGES[locale]}\n${labels}\n${lines.slice(first, last).join("\n")}` },
     ],
     temperature: 0,
     max_tokens: 1500,
   });
-  return result.response;
+  const answer: string | null = readAnswer(result.response);
+  if (answer === null) return null;
+  return [...lines.slice(0, first), answer, ...lines.slice(last)].join("\n");
 }
 
 /** Asks the model for the translation of a text without mentions. Null when no translation is necessary or a check fails. */
 export async function translateText(ai: Ai, locale: Locale, source: string): Promise<string | null> {
-  return checked(source, [], readAnswer(await askModel(ai, locale, source, [])), locale)?.text ?? null;
+  await loadLanguageDetector();
+  return checked(source, [], await askModel(ai, locale, source, []), locale)?.text ?? null;
 }
 
 /**
@@ -212,6 +236,7 @@ export async function translateComment(
   shownText?: string,
 ): Promise<CommentTranslation | null> {
   if (!env.AI) throw new HttpError(503, "Translation is not available.");
+  await loadLanguageDetector();
   const comment = await env.DB.prepare("SELECT entry_id, text, removed_at FROM entry_comments WHERE id=?")
     .bind(commentId)
     .first<{ entry_id: string; text: string; removed_at: number | null }>();
@@ -243,8 +268,8 @@ export async function translateComment(
   await reserveStart(env, viewerId, commentId, locale, hash, now);
 
   // If the model fails, the reservation stays in the daily count and opens again after CLAIM_MS.
-  const answer: string = await askModel(env.AI, locale, comment.text, rows);
-  const translation: CommentTranslation | null = checked(comment.text, rows, readAnswer(answer), locale);
+  const answer: string | null = await askModel(env.AI, locale, comment.text, rows);
+  const translation: CommentTranslation | null = checked(comment.text, rows, answer, locale);
   await storeTranslation(env, commentId, locale, hash, translation?.text ?? null, now, comment.text);
   return translation;
 }
