@@ -6,7 +6,7 @@ import { activityAvailable } from "./channel-tokens.server";
 import { logError } from "./http.server";
 import { callIngest } from "./ingest-call.server";
 import { refreshPageOverlay } from "./overlay.server";
-import { MAX_UPCOMING_EVENTS } from "./schedule.server";
+import { capacityGuard, isCapacityError, MAX_UPCOMING_EVENTS } from "./schedule.server";
 
 /**
  * Reads the scheduled streams of a page's connected Twitch and YouTube channels into its schedule. Each read
@@ -110,8 +110,9 @@ interface Sync {
   known: Map<string, SourceRow>;
   // Entries without a source of this platform that a read stream can join.
   free: Candidate[];
-  // New upcoming entries the page has room for.
+  // New upcoming entries the page has room for, and whether the batch adds one.
   room: number;
+  adds: boolean;
   statements: D1PreparedStatement[];
   changed: boolean;
 }
@@ -142,6 +143,7 @@ async function startSync(env: AppEnv, streamerId: string, platform: ImportPlatfo
     room: MAX_UPCOMING_EVENTS - ((upcoming.results[0] as { n: number } | undefined)?.n ?? 0),
     statements: [],
     changed: false,
+    adds: false,
   };
 }
 
@@ -165,6 +167,8 @@ function readAgain(sync: Sync, source: SourceRow, stream: ImportedStream): void 
   // Only the platform that created an entry changes it, and only until the owner edits it.
   if (source.event_id === null || source.imported !== 1 || source.event_platform !== sync.platform) return;
   if (!outdated(source, stream)) return;
+  // A stream that moves from the past into the future takes room like a new one; a full page keeps the entry.
+  if (!takeRoom(sync, (source.starts_at ?? 0) < sync.now && stream.startsAt >= sync.now)) return;
   sync.changed = true;
   sync.statements.push(
     env.DB.prepare(`UPDATE stream_events SET title=?, starts_at=?, duration_min=?, url=?, updated_at=?
@@ -180,15 +184,22 @@ function readAgain(sync: Sync, source: SourceRow, stream: ImportedStream): void 
   );
 }
 
+/** Takes room for one more upcoming entry when `upcoming`. False when the page is full. */
+function takeRoom(sync: Sync, upcoming: boolean): boolean {
+  if (!upcoming) return true;
+  if (sync.room <= 0) return false;
+  sync.room -= 1;
+  sync.adds = true;
+  return true;
+}
+
 /** The entry for a new stream: the same stream of another platform, or a new imported entry. Null when full. */
 function entryFor(sync: Sync, stream: ImportedStream): string | null {
   const index = sync.free.findIndex((candidate: Candidate): boolean =>
     sameStream({ title: candidate.title, startsAt: candidate.starts_at }, stream),
   );
   if (index >= 0) return sync.free.splice(index, 1)[0].id;
-  const upcoming = stream.startsAt >= sync.now;
-  if (upcoming && sync.room <= 0) return null;
-  if (upcoming) sync.room -= 1;
+  if (!takeRoom(sync, stream.startsAt >= sync.now)) return null;
   const id = crypto.randomUUID();
   sync.statements.push(
     sync.env.DB.prepare(`INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,imported,
@@ -261,7 +272,15 @@ export async function syncPlatform(
     else readNew(sync, stream);
   }
   for (const source of sync.known.values()) if (!read.has(source.external_id)) notRead(sync, source);
-  if (sync.statements.length > 0) await env.DB.batch(sync.statements);
+  if (sync.statements.length === 0) return false;
+  // The room was counted before the batch: the guard rolls the batch back when a parallel write filled the page.
+  try {
+    await env.DB.batch(sync.adds ? [...sync.statements, capacityGuard(env, streamerId, now)] : sync.statements);
+  } catch (error: unknown) {
+    if (!isCapacityError(error)) throw error;
+    console.warn("schedule_import_full", { platform });
+    return false;
+  }
   return sync.changed;
 }
 

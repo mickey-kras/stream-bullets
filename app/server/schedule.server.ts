@@ -359,7 +359,7 @@ const OVER_CAPACITY = "schedule over capacity";
 
 // Final guard rolls back the batch above `MAX_UPCOMING_EVENTS`, including concurrent preflight passes. Invalid
 // JSON path raises the error because SQLite RAISE requires a trigger.
-function capacityGuard(env: AppEnv, streamerId: string, now: number): D1PreparedStatement {
+export function capacityGuard(env: AppEnv, streamerId: string, now: number): D1PreparedStatement {
   return env.DB.prepare(
     `SELECT CASE WHEN (${UPCOMING_COUNT}) > ? THEN json_extract('{}', '${OVER_CAPACITY}') ELSE 1 END`,
   ).bind(streamerId, now, MAX_UPCOMING_EVENTS);
@@ -373,7 +373,7 @@ function failedGuard(error: unknown, marker: string): boolean {
 }
 
 // Whether a batch failed on its `capacityGuard`.
-function isCapacityError(error: unknown): boolean {
+export function isCapacityError(error: unknown): boolean {
   return failedGuard(error, OVER_CAPACITY);
 }
 

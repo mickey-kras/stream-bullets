@@ -47901,8 +47901,20 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_entryfor",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L186",
+      "source_location": "L199",
       "target": "app_server_schedule_import_server_samestream",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_import_server_entryfor",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L202",
+      "target": "app_server_schedule_import_server_takeroom",
       "weight": 1.0
     },
     {
@@ -47913,7 +47925,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importaftervisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L324",
+      "source_location": "L343",
       "target": "app_server_schedule_import_server_importonvisit",
       "weight": 1.0
     },
@@ -47925,7 +47937,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importavailable",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L319",
+      "source_location": "L338",
       "target": "app_server_channel_tokens_server_activityavailable",
       "weight": 1.0
     },
@@ -47937,7 +47949,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L328",
+      "source_location": "L347",
       "target": "app_server_schedule_import_server_importavailable",
       "weight": 1.0
     },
@@ -47949,7 +47961,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L328",
+      "source_location": "L347",
       "target": "app_server_schedule_import_server_readableplatforms",
       "weight": 1.0
     },
@@ -47961,7 +47973,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L329",
+      "source_location": "L348",
       "target": "app_server_schedule_import_server_claim",
       "weight": 1.0
     },
@@ -47973,7 +47985,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L331",
+      "source_location": "L350",
       "target": "app_server_schedule_import_server_importpageschedule",
       "weight": 1.0
     },
@@ -47985,7 +47997,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importonvisit",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L333",
+      "source_location": "L352",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -47997,7 +48009,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importpageschedule",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L299",
+      "source_location": "L318",
       "target": "app_server_schedule_import_server_readableplatforms",
       "weight": 1.0
     },
@@ -48009,7 +48021,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importpageschedule",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L300",
+      "source_location": "L319",
       "target": "app_server_schedule_import_server_readstreams",
       "weight": 1.0
     },
@@ -48021,7 +48033,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importpageschedule",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L302",
+      "source_location": "L321",
       "target": "app_server_schedule_import_server_syncplatform",
       "weight": 1.0
     },
@@ -48033,7 +48045,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importpageschedule",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L304",
+      "source_location": "L323",
       "target": "app_server_overlay_server_refreshpageoverlay",
       "weight": 1.0
     },
@@ -48045,7 +48057,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L367",
+      "source_location": "L386",
       "target": "app_server_schedule_import_server_importavailable",
       "weight": 1.0
     },
@@ -48057,7 +48069,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L378",
+      "source_location": "L397",
       "target": "app_server_schedule_import_server_claim",
       "weight": 1.0
     },
@@ -48069,7 +48081,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L380",
+      "source_location": "L399",
       "target": "app_server_schedule_import_server_importpageschedule",
       "weight": 1.0
     },
@@ -48081,7 +48093,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L383",
+      "source_location": "L402",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -48093,7 +48105,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_notread",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L239",
+      "source_location": "L250",
       "target": "app_server_schedule_import_server_unlinked",
       "weight": 1.0
     },
@@ -48105,8 +48117,20 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_readagain",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L167",
+      "source_location": "L169",
       "target": "app_server_schedule_import_server_outdated",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_import_server_readagain",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L171",
+      "target": "app_server_schedule_import_server_takeroom",
       "weight": 1.0
     },
     {
@@ -48117,7 +48141,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_readnew",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L211",
+      "source_location": "L222",
       "target": "app_server_schedule_import_server_entryfor",
       "weight": 1.0
     },
@@ -48165,7 +48189,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L254",
+      "source_location": "L265",
       "target": "app_server_schedule_import_server_startsync",
       "weight": 1.0
     },
@@ -48177,7 +48201,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L260",
+      "source_location": "L271",
       "target": "app_server_schedule_import_server_readagain",
       "weight": 1.0
     },
@@ -48189,7 +48213,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L261",
+      "source_location": "L272",
       "target": "app_server_schedule_import_server_readnew",
       "weight": 1.0
     },
@@ -48201,8 +48225,32 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_syncplatform",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L263",
+      "source_location": "L274",
       "target": "app_server_schedule_import_server_notread",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_import_server_syncplatform",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L278",
+      "target": "app_server_schedule_server_capacityguard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_schedule_import_server_syncplatform",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L280",
+      "target": "app_server_schedule_server_iscapacityerror",
       "weight": 1.0
     },
     {
@@ -58845,7 +58893,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L178",
+      "source_location": "L187",
       "target": "tests_schedule_import_test_addconnection",
       "weight": 1.0
     },
@@ -58857,7 +58905,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L180",
+      "source_location": "L189",
       "target": "tests_schedule_import_test_schedule",
       "weight": 1.0
     },
@@ -58869,7 +58917,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L182",
+      "source_location": "L191",
       "target": "tests_schedule_import_test_segment",
       "weight": 1.0
     },
@@ -58881,7 +58929,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L191",
+      "source_location": "L200",
       "target": "tests_schedule_import_test_events",
       "weight": 1.0
     },
@@ -58893,7 +58941,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L203",
+      "source_location": "L212",
       "target": "tests_schedule_import_test_providercalls",
       "weight": 1.0
     },
@@ -58905,7 +58953,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L209",
+      "source_location": "L218",
       "target": "tests_schedule_import_test_broadcast",
       "weight": 1.0
     },
@@ -58917,7 +58965,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L244",
+      "source_location": "L253",
       "target": "tests_schedule_import_test_iso",
       "weight": 1.0
     },
@@ -58929,8 +58977,20 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L381",
+      "source_location": "L390",
       "target": "tests_schedule_import_test_imported",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L457",
+      "target": "tests_schedule_import_test_fillers",
       "weight": 1.0
     },
     {
@@ -58941,7 +59001,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test_addconnection",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L92",
+      "source_location": "L101",
       "target": "app_server_channel_tokens_server_tokenstatement",
       "weight": 1.0
     },
@@ -58953,7 +59013,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test_broadcast",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L73",
+      "source_location": "L74",
       "target": "tests_schedule_import_test_iso",
       "weight": 1.0
     },
@@ -58965,7 +59025,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test_events",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L103",
+      "source_location": "L112",
       "target": "app_server_schedule_server_listevents",
       "weight": 1.0
     },
@@ -58977,7 +59037,7 @@
       "relation": "calls",
       "source": "tests_schedule_import_test_segment",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L46",
+      "source_location": "L47",
       "target": "tests_schedule_import_test_iso",
       "weight": 1.0
     },
@@ -98046,6 +98106,30 @@
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L9",
+      "target": "app_server_schedule_server_capacityguard",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L9",
+      "target": "app_server_schedule_server_iscapacityerror",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L9",
       "target": "app_server_schedule_server_max_upcoming_events",
       "weight": 1.0
     },
@@ -118373,7 +118457,7 @@
       "relation": "imports",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "app_types_streamevent",
       "weight": 1.0
     },
@@ -118385,7 +118469,7 @@
       "relation": "imports",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "tests_helpers_channels_fakeproviders",
       "weight": 1.0
     },
@@ -118397,7 +118481,7 @@
       "relation": "imports",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "tests_helpers_channels_installfakeproviders",
       "weight": 1.0
     },
@@ -118409,7 +118493,7 @@
       "relation": "imports",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "tests_helpers_database_createtestdatabase",
       "weight": 1.0
     },
@@ -118421,7 +118505,7 @@
       "relation": "imports",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "tests_helpers_database_testdatabase",
       "weight": 1.0
     },
@@ -118433,7 +118517,7 @@
       "relation": "imports",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "tests_helpers_room_installworkersruntime",
       "weight": 1.0
     },
@@ -118445,7 +118529,7 @@
       "relation": "imports",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "tests_helpers_room_roomnamespace",
       "weight": 1.0
     },
@@ -118457,7 +118541,7 @@
       "relation": "imports",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "tests_helpers_room_roomstate",
       "weight": 1.0
     },
@@ -118675,6 +118759,18 @@
       "source_file": "tests/schedule-import.test.ts",
       "source_location": "L9",
       "target": "app_server_schedule_import_server_source_retention_ms",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "relation": "imports",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L9",
+      "target": "app_server_schedule_import_server_syncplatform",
       "weight": 1.0
     },
     {
@@ -152752,7 +152848,7 @@
       "relation": "imports_from",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "target": "app_types",
       "type_only": true,
       "weight": 1.0
@@ -152765,7 +152861,7 @@
       "relation": "imports_from",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "target": "tests_helpers_channels",
       "weight": 1.0
     },
@@ -152777,7 +152873,7 @@
       "relation": "imports_from",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "target": "tests_helpers_database",
       "weight": 1.0
     },
@@ -152789,7 +152885,7 @@
       "relation": "imports_from",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "target": "tests_helpers_room",
       "weight": 1.0
     },
@@ -186218,7 +186314,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L119",
+      "source_location": "L120",
       "target": "app_server_schedule_import_server_startsync",
       "weight": 1.0
     },
@@ -186229,7 +186325,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L148",
+      "source_location": "L150",
       "target": "app_server_schedule_import_server_outdated",
       "weight": 1.0
     },
@@ -186240,7 +186336,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L158",
+      "source_location": "L160",
       "target": "app_server_schedule_import_server_readagain",
       "weight": 1.0
     },
@@ -186262,8 +186358,8 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L184",
-      "target": "app_server_schedule_import_server_entryfor",
+      "source_location": "L188",
+      "target": "app_server_schedule_import_server_takeroom",
       "weight": 1.0
     },
     {
@@ -186284,8 +186380,8 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L210",
-      "target": "app_server_schedule_import_server_readnew",
+      "source_location": "L197",
+      "target": "app_server_schedule_import_server_entryfor",
       "weight": 1.0
     },
     {
@@ -186306,7 +186402,18 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L226",
+      "source_location": "L221",
+      "target": "app_server_schedule_import_server_readnew",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L237",
       "target": "app_server_schedule_import_server_notread",
       "weight": 1.0
     },
@@ -186328,7 +186435,7 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L247",
+      "source_location": "L258",
       "target": "app_server_schedule_import_server_syncplatform",
       "weight": 1.0
     },
@@ -186350,17 +186457,6 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L272",
-      "target": "app_server_schedule_import_server_unlinked",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L28",
       "target": "app_server_schedule_import_server_cron_read_interval_ms",
       "weight": 1.0
@@ -186372,19 +186468,8 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L284",
-      "target": "app_server_schedule_import_server_readableplatforms",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_schedule_import_server",
-      "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L297",
-      "target": "app_server_schedule_import_server_importpageschedule",
+      "source_location": "L291",
+      "target": "app_server_schedule_import_server_unlinked",
       "weight": 1.0
     },
     {
@@ -186405,8 +186490,8 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L308",
-      "target": "app_server_schedule_import_server_claim",
+      "source_location": "L303",
+      "target": "app_server_schedule_import_server_readableplatforms",
       "weight": 1.0
     },
     {
@@ -186416,8 +186501,8 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L318",
-      "target": "app_server_schedule_import_server_importavailable",
+      "source_location": "L316",
+      "target": "app_server_schedule_import_server_importpageschedule",
       "weight": 1.0
     },
     {
@@ -186438,8 +186523,8 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L323",
-      "target": "app_server_schedule_import_server_importaftervisit",
+      "source_location": "L327",
+      "target": "app_server_schedule_import_server_claim",
       "weight": 1.0
     },
     {
@@ -186449,8 +186534,8 @@
       "relation": "contains",
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L327",
-      "target": "app_server_schedule_import_server_importonvisit",
+      "source_location": "L337",
+      "target": "app_server_schedule_import_server_importavailable",
       "weight": 1.0
     },
     {
@@ -186461,7 +186546,18 @@
       "source": "app_server_schedule_import_server",
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L342",
-      "target": "app_server_schedule_import_server_importschedules",
+      "target": "app_server_schedule_import_server_importaftervisit",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L346",
+      "target": "app_server_schedule_import_server_importonvisit",
       "weight": 1.0
     },
     {
@@ -186473,6 +186569,17 @@
       "source_file": "app/server/schedule-import.server.ts",
       "source_location": "L35",
       "target": "app_server_schedule_import_server_normalizetitle",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_schedule_import_server",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L361",
+      "target": "app_server_schedule_import_server_importschedules",
       "weight": 1.0
     },
     {
@@ -200694,7 +200801,7 @@
       "relation": "contains",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L102",
+      "source_location": "L111",
       "target": "tests_schedule_import_test_events",
       "weight": 1.0
     },
@@ -200705,7 +200812,7 @@
       "relation": "contains",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L106",
+      "source_location": "L115",
       "target": "tests_schedule_import_test_imported",
       "weight": 1.0
     },
@@ -200716,7 +200823,7 @@
       "relation": "contains",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L111",
+      "source_location": "L120",
       "target": "tests_schedule_import_test_providercalls",
       "weight": 1.0
     },
@@ -200727,7 +200834,7 @@
       "relation": "contains",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L38",
+      "source_location": "L39",
       "target": "tests_schedule_import_test_iso",
       "weight": 1.0
     },
@@ -200738,7 +200845,7 @@
       "relation": "contains",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L42",
+      "source_location": "L43",
       "target": "tests_schedule_import_test_segment",
       "weight": 1.0
     },
@@ -200749,7 +200856,7 @@
       "relation": "contains",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L55",
+      "source_location": "L56",
       "target": "tests_schedule_import_test_schedule",
       "weight": 1.0
     },
@@ -200760,7 +200867,7 @@
       "relation": "contains",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L68",
+      "source_location": "L69",
       "target": "tests_schedule_import_test_broadcast",
       "weight": 1.0
     },
@@ -200771,7 +200878,18 @@
       "relation": "contains",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L80",
+      "source_location": "L82",
+      "target": "tests_schedule_import_test_fillers",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L89",
       "target": "tests_schedule_import_test_addconnection",
       "weight": 1.0
     },
@@ -239485,7 +239603,7 @@
       "label": "claim()",
       "norm_label": "claim()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L308"
+      "source_location": "L327"
     },
     {
       "_callable": true,
@@ -239496,7 +239614,7 @@
       "label": "entryFor()",
       "norm_label": "entryfor()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L184"
+      "source_location": "L197"
     },
     {
       "_callable": true,
@@ -239507,7 +239625,7 @@
       "label": "importAfterVisit()",
       "norm_label": "importaftervisit()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L323"
+      "source_location": "L342"
     },
     {
       "_callable": true,
@@ -239518,7 +239636,7 @@
       "label": "importAvailable()",
       "norm_label": "importavailable()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L318"
+      "source_location": "L337"
     },
     {
       "_callable": true,
@@ -239529,7 +239647,7 @@
       "label": "importOnVisit()",
       "norm_label": "importonvisit()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L327"
+      "source_location": "L346"
     },
     {
       "_callable": true,
@@ -239540,7 +239658,7 @@
       "label": "importPageSchedule()",
       "norm_label": "importpageschedule()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L297"
+      "source_location": "L316"
     },
     {
       "_callable": true,
@@ -239551,7 +239669,7 @@
       "label": "importSchedules()",
       "norm_label": "importschedules()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L342"
+      "source_location": "L361"
     },
     {
       "_callable": true,
@@ -239573,7 +239691,7 @@
       "label": "notRead()",
       "norm_label": "notread()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L226"
+      "source_location": "L237"
     },
     {
       "_callable": true,
@@ -239584,7 +239702,7 @@
       "label": "outdated()",
       "norm_label": "outdated()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L148"
+      "source_location": "L150"
     },
     {
       "_callable": true,
@@ -239595,7 +239713,7 @@
       "label": "readablePlatforms()",
       "norm_label": "readableplatforms()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L284"
+      "source_location": "L303"
     },
     {
       "_callable": true,
@@ -239606,7 +239724,7 @@
       "label": "readAgain()",
       "norm_label": "readagain()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L158"
+      "source_location": "L160"
     },
     {
       "_callable": true,
@@ -239617,7 +239735,7 @@
       "label": "readNew()",
       "norm_label": "readnew()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L210"
+      "source_location": "L221"
     },
     {
       "_callable": true,
@@ -239650,7 +239768,7 @@
       "label": "startSync()",
       "norm_label": "startsync()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L119"
+      "source_location": "L120"
     },
     {
       "_callable": true,
@@ -239661,7 +239779,18 @@
       "label": "syncPlatform()",
       "norm_label": "syncplatform()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L247"
+      "source_location": "L258"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_server_schedule_import_server_takeroom",
+      "label": "takeRoom()",
+      "norm_label": "takeroom()",
+      "source_file": "app/server/schedule-import.server.ts",
+      "source_location": "L188"
     },
     {
       "_callable": true,
@@ -239683,7 +239812,7 @@
       "label": "unlinked()",
       "norm_label": "unlinked()",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L272"
+      "source_location": "L291"
     },
     {
       "_callable": true,
@@ -247490,7 +247619,7 @@
       "label": "addConnection()",
       "norm_label": "addconnection()",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L80"
+      "source_location": "L89"
     },
     {
       "_callable": true,
@@ -247501,7 +247630,7 @@
       "label": "broadcast()",
       "norm_label": "broadcast()",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L68"
+      "source_location": "L69"
     },
     {
       "_callable": true,
@@ -247512,7 +247641,18 @@
       "label": "events()",
       "norm_label": "events()",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L102"
+      "source_location": "L111"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "tests_schedule_import_test_fillers",
+      "label": "fillers()",
+      "norm_label": "fillers()",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L82"
     },
     {
       "_callable": true,
@@ -247523,7 +247663,7 @@
       "label": "imported()",
       "norm_label": "imported()",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L106"
+      "source_location": "L115"
     },
     {
       "_callable": true,
@@ -247534,7 +247674,7 @@
       "label": "iso()",
       "norm_label": "iso()",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L38"
+      "source_location": "L39"
     },
     {
       "_callable": true,
@@ -247545,7 +247685,7 @@
       "label": "providerCalls()",
       "norm_label": "providercalls()",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L111"
+      "source_location": "L120"
     },
     {
       "_callable": true,
@@ -247556,7 +247696,7 @@
       "label": "schedule()",
       "norm_label": "schedule()",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L55"
+      "source_location": "L56"
     },
     {
       "_callable": true,
@@ -247567,7 +247707,7 @@
       "label": "segment()",
       "norm_label": "segment()",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "_callable": true,

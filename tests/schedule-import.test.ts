@@ -15,6 +15,7 @@ import {
   OWNER_READ_INTERVAL_MS,
   sameStream,
   SOURCE_RETENTION_MS,
+  syncPlatform,
   testStreams,
 } from "../app/server/schedule-import.server";
 import type { StreamEvent } from "../app/types";
@@ -75,6 +76,14 @@ function broadcast(id: string, title: string, start: number, privacy = "public",
     },
     status: { privacyStatus: privacy, lifeCycleStatus: "ready" },
   };
+}
+
+/** Manual entries far after the import horizon that fill the page's upcoming schedule. */
+function fillers(count: number): D1PreparedStatement[] {
+  return Array.from({ length: count }, (_, index: number) =>
+    env.DB.prepare(`INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,created_at,updated_at)
+      VALUES (?,?,'Filler',?,60,'other','https://example.test/','UTC',1,1)`).bind(crypto.randomUUID(), page, now + 40 * day + index * hour),
+  );
 }
 
 async function addConnection(
@@ -445,16 +454,41 @@ describe("one entry for one stream", (): void => {
   });
 
   it("adds no entry to a full schedule", async (): Promise<void> => {
-    const rows = Array.from({ length: MAX_UPCOMING_EVENTS }, (_, index: number) =>
-      env.DB.prepare(`INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,created_at,updated_at)
-        VALUES (?,?,'Filler',?,60,'other','https://example.test/',  'UTC',1,1)`).bind(crypto.randomUUID(), page, now + 40 * day + index * hour),
-    );
-    await env.DB.batch(rows);
+    await env.DB.batch(fillers(MAX_UPCOMING_EVENTS));
     fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
     await importPageSchedule(env, page, now);
     const count = await env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE streamer_id=? AND title='Show'")
       .bind(page)
       .first<{ n: number }>();
+    expect(count?.n).toBe(0);
+  });
+
+  it("keeps a past entry in the past when a full schedule has no room for its new start", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now - 2 * hour)])];
+    await importPageSchedule(env, page, now);
+    await env.DB.batch(fillers(MAX_UPCOMING_EVENTS));
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
+    await importPageSchedule(env, page, now + 60_000);
+    const show = await env.DB.prepare("SELECT starts_at FROM stream_events WHERE title='Show'").first<{ starts_at: number }>();
+    expect(show?.starts_at).toBe(now - 2 * hour);
+  });
+
+  it("rolls the import back when a parallel write filled the schedule", async (): Promise<void> => {
+    let calls = 0;
+    // The first batch reads the sources and the room; before the second one writes, another write fills the page.
+    const racing = Object.assign(Object.create(env.DB) as D1Database, {
+      batch: async (statements: D1PreparedStatement[]): Promise<D1Result[]> => {
+        calls += 1;
+        if (calls === 2) await env.DB.batch(fillers(MAX_UPCOMING_EVENTS));
+        return env.DB.batch(statements);
+      },
+    });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const stream = { externalId: "s1", title: "Show", startsAt: now + 2 * day, durationMin: 60, url: "https://www.twitch.tv/host" };
+    expect(await syncPlatform({ ...env, DB: racing }, page, "twitch", [stream], now)).toBe(false);
+    expect(calls).toBe(2);
+    expect(warn).toHaveBeenCalledWith("schedule_import_full", { platform: "twitch" });
+    const count = await env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE title='Show'").first<{ n: number }>();
     expect(count?.n).toBe(0);
   });
 });
