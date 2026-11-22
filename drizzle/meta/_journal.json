@@ -260,6 +260,13 @@
       "when": 1795310092882,
       "tag": "0036_translation_wrong_language",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "6",
+      "when": 1795311928717,
+      "tag": "0037_page_translations",
+      "breakpoints": true
     }
   ]
 }

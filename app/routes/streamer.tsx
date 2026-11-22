@@ -18,7 +18,9 @@ import { configuredProviders } from "../server/auth.server";
 import { requestViewer } from "../lib/shell.server";
 import { getEntry, getVisibleStreamer, listEntries } from "../server/data.server";
 import { attachEntryTranslations } from "../server/entry-translation.server";
+import { attachPageTranslations } from "../server/page-translation.server";
 import { useEntryTranslations } from "../components/entry-translation";
+import { TranslationControl, useOriginals } from "../components/page-translation";
 import { requestLocale } from "../i18n/resolve";
 import { isAdmin } from "../server/access.server";
 import { listCards } from "../server/community.server";
@@ -224,11 +226,9 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
     view === "community" && !official ? listCards(app.env, streamer.id) : null,
     owner && view === "schedule" ? listTopicChoices(app.env, streamer.id) : [],
   ]);
-  await attachEntryTranslations(
-    app.env,
-    selected ? [...board.entries, selected] : board.entries,
-    requestLocale(request, viewer?.locale ?? null),
-  );
+  const locale = requestLocale(request, viewer?.locale ?? null);
+  await attachEntryTranslations(app.env, selected ? [...board.entries, selected] : board.entries, locale);
+  await attachPageTranslations(app.env, streamer, locale, cards, [...schedule.events, schedule.linkedEvent]);
   return {
     board,
     selected,
@@ -325,6 +325,7 @@ export default function StreamerPage(): ReactNode {
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const generation = useRef<number>(0);
   const official = streamer.isOfficial;
+  const aboutOriginal: boolean = useOriginals().has(streamer.id);
   const live = useLivePolls(streamer.handle, view === "polls");
   const refreshBoard = useCallback(async (): Promise<void> => {
     try {
@@ -726,13 +727,16 @@ export default function StreamerPage(): ReactNode {
   }
 
   function renderAbout(): ReactNode {
+    const about: string = (!aboutOriginal && streamer.aboutTranslation) || streamer.about;
+    const aboutControl = <TranslationControl id={streamer.id} translated={Boolean(streamer.aboutTranslation)} />;
     if (official)
       return (
         <>
           <span className="eyebrow">{t("ideas.aboutEyebrow")}</span>
           <h1>{streamer.name}</h1>
           <section className="info-card">
-            <p className="description">{streamer.about || t("ideas.aboutBody")}</p>
+            <p className="description">{about || t("ideas.aboutBody")}</p>
+            {aboutControl}
             <Link className="text-link" to="?view=topics">
               {t("ideas.tab")}
             </Link>
@@ -751,7 +755,8 @@ export default function StreamerPage(): ReactNode {
               <span className="muted">@{streamer.handle}</span>
             </div>
           </div>
-          <p className="description">{streamer.about || t("about.empty")}</p>
+          <p className="description">{about || t("about.empty")}</p>
+          {aboutControl}
         </section>
         <SupportSection name={streamer.name} support={support} />
         {owner && writable && (

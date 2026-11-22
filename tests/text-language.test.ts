@@ -29,6 +29,8 @@ describe("the language of a text from its letters", (): void => {
     expect(hasScriptOf("ja", "東京")).toBe(true);
     expect(hasScriptOf("zh-CN", "今日の配信は楽しい")).toBe(false);
     expect(hasScriptOf("hi", "Hello")).toBe(false);
+    // A code block is not text of the language.
+    expect(hasScriptOf("uk", 'Привіт!\n~~~js\nconst message = "hello world";\n~~~')).toBe(true);
     // Text without letters has no script.
     expect(hasScriptOf("ru", "👍 2024")).toBe(true);
   });

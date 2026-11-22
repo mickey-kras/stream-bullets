@@ -276,6 +276,7 @@ It translates the item to each site language and stores the results. A reader th
 A job does the same work for content that has no stored result for each site language.
 This job translates the content from before this feature, and it tries again after a failure.
 It runs each 10 minutes and takes the newest items first, 4 comments and 4 entries in one run.
+The same run translates the text of pages: one text of each of 2 pages.
 
 The translation at the time of the read stays for content that the server did not translate yet.
 The daily limit of model starts applies to all these paths.
@@ -296,6 +297,27 @@ The server shows a translation only if it passes these checks:
 - The description has the same line breaks and links.
 
 The limits, the daily count and the stored results are the same as for comments.
+
+## Page text translation
+
+A reader also sees the About text, the Community cards and the scheduled streams in the language of the site.
+
+The page loader gives these fields:
+
+- The page has `aboutTranslation`, a text.
+- Each card has `translation` with `{title, body, buttonLabel}`.
+- Each stream has `translation` with `{title, notes}`.
+
+`GET /api/streamers/:handle/events` gives the same field with each stream.
+`GET /api/streamers` and the directory give `aboutTranslation` with each page.
+Each field has the same three states as the field of a comment.
+
+The owner saves the page profile, the cards or a stream. The server then starts the translations after the response.
+The server stores one result for each text and site language. Streams with the same title and notes use one result.
+After a change of a text, the server deletes the results of the old text.
+
+The page does not ask for these translations. A reader gets only the stored results.
+The on-stream overlay and the calendar feed show the original text.
 
 ## Markdown in comments
 

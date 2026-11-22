@@ -4,6 +4,7 @@ import { copyText } from "../../lib/clipboard";
 import { buildCalendar } from "../../server/ics";
 import type { EventTopic, StreamEvent } from "../../types";
 import { errorMessage, sendJson } from "../api";
+import { shownEvent, TranslationControl, useOriginals } from "../page-translation";
 import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { Sheet } from "../ui/sheet";
@@ -93,6 +94,7 @@ function ViewStep({
   return (
     <>
       <Facts event={event} zone={zone} handle={handle} />
+      <TranslationControl id={event.id} translated={Boolean(event.translation)} />
       <div className="sched-actions">
         {ended &&
           (event.vodUrl ? (
@@ -269,9 +271,12 @@ export function EventDialog({
   onClose: () => void;
   onChanged: (message: string) => Promise<void>;
 }>): ReactNode {
+  const originals = useOriginals();
   if (!event) return null;
+  // The reader gets the text in the language of the site. The owner edits the original text.
+  const shown: StreamEvent = shownEvent(event, originals);
   const titles: Record<EventStep, string> = {
-    view: event.title,
+    view: shown.title,
     edit: t("schedule.editStream"),
     cancel: t("schedule.cancelTitle"),
     delete: t("schedule.deleteTitle"),
@@ -293,12 +298,12 @@ export function EventDialog({
     >
       {step === "view" && (
         <ViewStep
-          event={event}
+          event={shown}
           zone={zone}
           handle={handle}
           owner={owner}
           onStep={onStep}
-          onCalendar={() => downloadEvent(event, name, `${location.origin}/@${handle}`)}
+          onCalendar={() => downloadEvent(shown, name, `${location.origin}/@${handle}`)}
         />
       )}
       {step === "edit" && (

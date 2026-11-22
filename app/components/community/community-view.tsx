@@ -5,6 +5,7 @@ import { t } from "../../i18n";
 import type { CommunityCard, SupportSettings } from "../../types";
 import { sendJson, errorMessage } from "../api";
 import { EmptyState } from "../common";
+import { shownCard, TranslationControl, useOriginals } from "../page-translation";
 import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { IconButton } from "../ui/icon-button";
@@ -119,6 +120,7 @@ export function CommunityView({
   const [cards, setCards] = useState<CommunityCard[]>(saved ?? defaultCards());
   const [previous, setPrevious] = useState<CommunityCard[] | null>(saved);
   const [preview, setPreview] = useState<boolean>(false);
+  const originals = useOriginals();
   const [editing, setEditing] = useState<CommunityCard | null>(null);
   const [deleting, setDeleting] = useState<CommunityCard | null>(null);
   const [announcement, setAnnouncement] = useState<string>("");
@@ -226,7 +228,9 @@ export function CommunityView({
                   }}
                 />
               )}
-              <CardContent card={card} />
+              {/* The owner edits the original text. A reader gets the text in the language of the site. */}
+              <CardContent card={editable ? card : shownCard(card, originals)} />
+              {!editable && <TranslationControl id={card.id} translated={Boolean(card.translation)} />}
             </div>
           ))}
           {editable && cards.length < MAX_COMMUNITY_CARDS && (

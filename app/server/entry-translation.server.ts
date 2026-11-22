@@ -81,13 +81,13 @@ function allText(text: EntryText): string {
 
 // The language of an entry is the language of most of its text. A poll in Russian often has names of games in
 // Latin letters as its answer options. A Russian reader gets this poll as the author wrote it.
-function entryNeedsTranslation(source: EntryText, locale: Locale): boolean {
+export function entryNeedsTranslation(source: EntryText, locale: Locale): boolean {
   return needsTranslation(allText(source), locale);
 }
 
 // The translation when it has the form of the source. Null when a check fails or nothing changed.
 function checkedEntry(source: EntryText, answer: EntryText | null, locale: Locale): EntryText | null {
-  if (!answer || answer.options.length !== source.options.length || !entryNeedsTranslation(source, locale)) return null;
+  if (answer?.options.length !== source.options.length || !entryNeedsTranslation(source, locale)) return null;
   // A part that is in the language of the reader stays as the author wrote it. The model changes such text.
   const kept = (part: string, translated: string): string => (needsTranslation(part, locale) ? translated : part);
   const text: EntryText = {
@@ -107,6 +107,25 @@ function checkedEntry(source: EntryText, answer: EntryText | null, locale: Local
     text.body.length <= 4000;
   const title: boolean = text.title !== "" && text.title.length <= 320;
   return title && sameOptions && sameBody ? text : null;
+}
+
+/**
+ * Asks the model for the translation of a title, answer options and a description. Null when the text needs no
+ * translation or the translation failed a check.
+ */
+export async function translateParts(ai: Ai, locale: Locale, source: EntryText): Promise<EntryText | null> {
+  const result = await ai.run(TRANSLATION_MODEL, {
+    messages: [
+      { role: "system", content: prompt(LANGUAGES[locale]) },
+      {
+        role: "user",
+        content: `${LANGUAGES[locale]}\n${source.title}\n---\n${source.options.join("\n")}\n---\n${source.body}`,
+      },
+    ],
+    temperature: 0,
+    max_tokens: 1800,
+  });
+  return checkedEntry(source, readEntryAnswer(result.response), locale);
 }
 
 /**
@@ -187,18 +206,7 @@ export async function translateEntry(
   await reserveStart(env, viewerId, entryId, locale, hash, now);
 
   // If the model fails, the reservation stays in the daily count and opens again after one minute.
-  const result = await env.AI.run(TRANSLATION_MODEL, {
-    messages: [
-      { role: "system", content: prompt(LANGUAGES[locale]) },
-      {
-        role: "user",
-        content: `${LANGUAGES[locale]}\n${source.title}\n---\n${source.options.join("\n")}\n---\n${source.body}`,
-      },
-    ],
-    temperature: 0,
-    max_tokens: 1800,
-  });
-  const translation: EntryText | null = checkedEntry(source, readEntryAnswer(result.response), locale);
+  const translation: EntryText | null = await translateParts(env.AI, locale, source);
   await store(translation);
   return translation;
 }

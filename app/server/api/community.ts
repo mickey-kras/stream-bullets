@@ -3,6 +3,7 @@ import { saveCards } from "../community.server";
 import { getOwnStreamer } from "../data.server";
 import { json, readJson } from "../http.server";
 import { notifyOverlay } from "../live.server";
+import { translatePageAfterSave } from "../page-translation.server";
 import { refreshOverlayFor } from "../overlay.server";
 import { saveSupport } from "../support.server";
 import { write, type ApiRoute } from "./router";
@@ -13,7 +14,9 @@ export const communityRoutes: ApiRoute[] = [
   write("PUT", /community-cards/, async ({ request, env, viewer }) => {
     const cards = await saveCards(env, viewer.id, await readJson(request, z.unknown()));
     // The OBS page reloads a card it shows, or drops one that was removed.
-    notifyOverlay(env, (await getOwnStreamer(env, viewer.id))!.id);
+    const pageId: string = (await getOwnStreamer(env, viewer.id))!.id;
+    notifyOverlay(env, pageId);
+    translatePageAfterSave(env, pageId);
     return json({ cards });
   }),
   // PUT /api/support-links {links: [{kind, label, url}] (≤ 4), visible, card} → {links, visible, card}

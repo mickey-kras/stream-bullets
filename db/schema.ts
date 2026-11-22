@@ -290,6 +290,24 @@ export const entryTranslations = sqliteTable(
   (table) => [primaryKey({ columns: [table.entryId, table.locale] })],
 );
 
+// One machine translation of a text of a page for one locale: the About text, a Community card or a scheduled
+// stream. `source_hash` is the SHA-256 of the kind and the text, so streams of one series share a row. `value`
+// is the JSON `{title, body, options}`. It is null when the text needs no translation or the translation failed
+// its checks. The translation job deletes the rows of a text that the page no longer has.
+export const pageTranslations = sqliteTable(
+  "page_translations",
+  {
+    streamerId: text("streamer_id")
+      .notNull()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    sourceHash: text("source_hash").notNull(),
+    locale: text("locale").notNull(),
+    value: text("value"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.streamerId, table.sourceHash, table.locale] })],
+);
+
 // One row for each start of the translation model. A row reserves the comment text and locale, so two
 // requests at the same time start the model one time. The rows also count toward the daily limit. They have
 // no foreign key: an edit or a removal of the comment does not remove them. Cron deletes them after 2 days.

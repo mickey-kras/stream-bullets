@@ -136,6 +136,11 @@ async function askModel(ai: Ai, locale: Locale, source: string, mentions: readon
   return result.response;
 }
 
+/** Asks the model for the translation of a text without mentions. Null when no translation is necessary or a check fails. */
+export async function translateText(ai: Ai, locale: Locale, source: string): Promise<string | null> {
+  return checked(source, [], readAnswer(await askModel(ai, locale, source, [])), locale)?.text ?? null;
+}
+
 /**
  * Reserves one start of the model for a text and locale, after the limits. The subject is a comment or an entry.
  * A null `viewerId` is the server.
