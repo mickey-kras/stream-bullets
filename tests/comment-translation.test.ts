@@ -279,7 +279,9 @@ describe("comment translation", (): void => {
     const text = "Миша, сообщения  невозможно читать :((";
     const id: string = await seedComment(text);
     const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-    const hash: string = Array.from(new Uint8Array(digest), (byte: number) => byte.toString(16).padStart(2, "0")).join("");
+    const hash: string = Array.from(new Uint8Array(digest), (byte: number) => byte.toString(16).padStart(2, "0")).join(
+      "",
+    );
     // The model changed the Russian text for a Russian reader, and answered in English for a Ukrainian reader.
     await env.DB.prepare(
       `INSERT INTO comment_translations (comment_id,locale,source_hash,text,created_at)

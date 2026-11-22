@@ -261,6 +261,7 @@ It knows Russian, Ukrainian, Hindi, Japanese and Chinese text in this way. It do
 The server shows a translation only if it has the same Markdown structure, code, links and mentions as the comment.
 The translation must also have the script of the language of the reader. The model sometimes answers in English.
 These rules also apply to topics, polls and ideas.
+
 Each account has a limit of new translations in one minute.
 All accounts together have a daily limit of model starts. An edit or a removal of a comment does not decrease the count, and a failed start stays in it.
 Two readers who ask at the same time start the model one time: the second reader gets `409` and can try again.

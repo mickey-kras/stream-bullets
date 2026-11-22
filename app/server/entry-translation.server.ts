@@ -18,7 +18,9 @@ export const entryTranslationSchema = z
   })
   .strict();
 
-const prompt = (language: string): string => `You translate topics and polls from a live-stream community page into ${language}.
+const prompt = (
+  language: string,
+): string => `You translate topics and polls from a live-stream community page into ${language}.
 The user message has the target language on line 1. Then it has three parts, with a line "---" between them:
 the title, the answer options (one on each line, possibly none), and the description (possibly empty).
 Rules:
