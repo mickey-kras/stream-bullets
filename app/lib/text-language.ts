@@ -1,4 +1,5 @@
 import type { Locale } from "../i18n";
+import { parseCommentMarkdown, type MarkdownBlock, type MarkdownInline } from "./comment-markdown";
 
 // The detector of the language of text in Latin letters. Its data is large, so the module loads at the first
 // use and not at the start of the Worker.
@@ -47,9 +48,48 @@ const LOCALE_SCRIPTS: Readonly<Record<Locale, readonly Script[]>> = {
   "zh-CN": ["han"],
 };
 
-// Links and code are not text of a language.
+// Links, email addresses of mailto links, and code are not text of a language. A code span can have more than
+// one backtick on each side, and it can continue on the next line, but not after an empty line.
 function prose(text: string): string {
-  return text.replaceAll(/https?:\/\/\S+|```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`/gu, " ");
+  return text.replaceAll(
+    /https?:\/\/\S+|mailto:[^\s)]+|```[\s\S]*?```|~~~[\s\S]*?~~~|(`+)(?:(?!\n[ \t]*\n)[\s\S])*?\1/gu,
+    " ",
+  );
+}
+
+// A link address without its scheme and percent-encoding, to compare it with the label of the link.
+function address(link: string): string {
+  const bare: string = link.replace(/^(?:https?:\/\/|mailto:)/u, "");
+  try {
+    return decodeURI(bare);
+  } catch {
+    return bare;
+  }
+}
+
+// The text that a reader sees, with the parser of the comment renderer: no code, no code block, also one without
+// a closing fence, and no link targets or bare links. The model must not change these parts.
+function visibleText(text: string): string {
+  const inline = (node: MarkdownInline): string => {
+    if (node.kind === "text" || node.kind === "mention") return node.text;
+    if (node.kind === "break") return "\n";
+    if (node.kind === "code") return " ";
+    const label: string = node.children.map(inline).join("");
+    // A bare link, for example www.example.com/Миша, shows its own address. The model must not change it.
+    if (node.kind === "link" && address(node.href).startsWith(address(label))) return " ";
+    return label;
+  };
+  const block = (node: MarkdownBlock): string => {
+    if (node.kind === "codeBlock") return " ";
+    if (node.kind === "quote") return node.children.map(block).join("\n");
+    if (node.kind === "list")
+      return node.items.map((item: MarkdownBlock[]): string => item.map(block).join("\n")).join("\n");
+    return node.children.map(inline).join("");
+  };
+  return parseCommentMarkdown(text)
+    .map(block)
+    .join("\n")
+    .replaceAll(/https?:\/\/\S+/gu, " ");
 }
 
 // The script of most letters of the text. Null without letters.
@@ -89,13 +129,18 @@ export function writtenIn(text: string): readonly Locale[] {
 /**
  * Tells if a translation can be in the language of the reader. A model sometimes answers in a different
  * language. The text must have the script of the language. Text in Latin letters must not be in a different
- * site language, when the detector is sure.
+ * site language, when the detector is sure. The `translated` part of the text, by default all of it, must have
+ * no Cyrillic letters when the language has a different script. A part that the author already wrote in the
+ * language of the reader stays as it is, also with a name in Cyrillic letters.
  */
-export function inLanguageOf(locale: Locale, text: string): boolean {
+export function inLanguageOf(locale: Locale, text: string, translated: string = text): boolean {
   const plain: string = prose(text);
   const script: Script | null = mainScript(plain);
   if (script === null) return true;
   if (!LOCALE_SCRIPTS[locale].includes(script)) return false;
+  // The model sometimes keeps a name in Cyrillic letters, for example "Миша, ..." in a Polish translation.
+  if (!LOCALE_SCRIPTS[locale].includes("cyrillic") && /\p{Script=Cyrillic}/u.test(visibleText(translated)))
+    return false;
   if (script !== "latin") return true;
   const language: Locale | null = latinLanguage(plain);
   return language === null || language === locale;
