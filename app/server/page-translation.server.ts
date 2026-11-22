@@ -194,7 +194,7 @@ export async function attachAboutTranslations(
     ));
   for (const page of pages) {
     const text = rows.get(`${page.id}:${await textHash("about", aboutText(page.about))}`);
-    if (text !== undefined) page.aboutTranslation = text && text.body;
+    if (text !== undefined) page.aboutTranslation = text?.body ?? null;
   }
 }
 
