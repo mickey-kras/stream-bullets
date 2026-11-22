@@ -24,7 +24,8 @@ git config merge.graphify.driver "$HOME/.local/share/stream-bullets-graphify/bin
 If it changes the graph, it stops the merge. Run `git commit` to finish.
 The merge driver combines conflicting graphs. The hook then rebuilds from merged sources.
 
-GitHub cannot run the driver. Resolve graph conflicts locally:
+The graph has no digest of the sources, so pull requests that change different files merge on GitHub.
+GitHub cannot run the driver. When two pull requests change the same file, resolve the graph conflict locally:
 
 ```sh
 git fetch origin main
