@@ -189272,7 +189272,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L34",
+      "source_location": "L35",
       "target": "docs_code_graph_checks",
       "weight": 1.0
     },
@@ -189283,7 +189283,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L44",
+      "source_location": "L45",
       "target": "docs_code_graph_remove_the_old_setup",
       "weight": 1.0
     },
@@ -189294,7 +189294,7 @@
       "relation": "contains",
       "source": "docs_code_graph_repository_graph",
       "source_file": "docs/code-graph.md",
-      "source_location": "L52",
+      "source_location": "L53",
       "target": "docs_code_graph_scope_and_queries",
       "weight": 1.0
     },
@@ -206417,11 +206417,9 @@
     }
   ],
   "graph": {
-    "content_sha256": "da1027dcdac5616538cbb4e424a8b86a6fe3d816afa3f7b4ede6249d40074387",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "ff32708c222735c9f5a646e70a186306db35a5a47f1b0345d2007b5a8e658bef",
-    "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
+    "tool_sha256": "e18ff534f84bd8ab4d689673eecb9301cbd6b90c04bc38062ecb7ef02b2065c6"
   },
   "hyperedges": [],
   "multigraph": true,
@@ -260861,7 +260859,7 @@
       "node_kind": "heading",
       "norm_label": "checks",
       "source_file": "docs/code-graph.md",
-      "source_location": "L34"
+      "source_location": "L35"
     },
     {
       "_origin": "ast",
@@ -260894,7 +260892,7 @@
       "node_kind": "heading",
       "norm_label": "remove the old setup",
       "source_file": "docs/code-graph.md",
-      "source_location": "L44"
+      "source_location": "L45"
     },
     {
       "_origin": "ast",
@@ -260916,7 +260914,7 @@
       "node_kind": "heading",
       "norm_label": "scope and queries",
       "source_file": "docs/code-graph.md",
-      "source_location": "L52"
+      "source_location": "L53"
     },
     {
       "_origin": "ast",
