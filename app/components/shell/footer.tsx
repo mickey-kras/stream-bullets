@@ -37,10 +37,13 @@ export function SiteFooter(): ReactNode {
     }
     const frame: number = requestAnimationFrame(() => {
       let opener: string | null;
+      let ring: boolean;
       try {
         opener = sessionStorage.getItem("sb-language-opener");
+        ring = sessionStorage.getItem("sb-language-ring") !== "0";
         sessionStorage.removeItem("sb-language-focus");
         sessionStorage.removeItem("sb-language-opener");
+        sessionStorage.removeItem("sb-language-ring");
       } catch {
         return;
       }
@@ -48,7 +51,7 @@ export function SiteFooter(): ReactNode {
         ...document.querySelectorAll<HTMLElement>(LANGUAGE_OPENERS[opener ?? ""] ?? LANGUAGE_OPENERS.footer),
       ].find((element: HTMLElement) => element.getClientRects().length > 0);
       // The reader stays where the page restored its scroll position.
-      selector?.focus({ preventScroll: opener === "header" });
+      selector?.focus({ preventScroll: opener === "header", focusVisible: ring });
     });
     return () => cancelAnimationFrame(frame);
   }, []);

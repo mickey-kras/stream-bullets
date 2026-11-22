@@ -81,7 +81,7 @@ function CardTools({
         onClick={onEdit}
       >
         <Icon name="pencil" size={16} />
-        {t("common.edit")}
+        <span className="tool-label">{t("common.edit")}</span>
       </button>
       <button
         type="button"
@@ -90,7 +90,7 @@ function CardTools({
         onClick={onDelete}
       >
         <Icon name="trash" size={16} />
-        {t("common.delete")}
+        <span className="tool-label">{t("common.delete")}</span>
       </button>
     </fieldset>
   );
@@ -229,8 +229,10 @@ export function CommunityView({
                 />
               )}
               {/* The owner edits the original text. A reader gets the text in the language of the site. */}
-              <CardContent card={editable ? card : shownCard(card, originals)} />
-              {!editable && <TranslationControl id={card.id} translated={Boolean(card.translation)} />}
+              <CardContent
+                card={editable ? card : shownCard(card, originals)}
+                control={!editable && <TranslationControl id={card.id} translated={Boolean(card.translation)} />}
+              />
             </div>
           ))}
           {editable && cards.length < MAX_COMMUNITY_CARDS && (

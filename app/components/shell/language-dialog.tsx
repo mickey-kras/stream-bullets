@@ -21,6 +21,7 @@ export async function chooseLocale(
   locale: Locale,
   signedIn: boolean,
   opener: LanguageOpener = "footer",
+  keyboard: boolean = true,
 ): Promise<void> {
   if (signedIn) await sendJson("PATCH", "/api/me/locale", { locale });
   await saveLocaleCookie(locale);
@@ -28,8 +29,11 @@ export async function chooseLocale(
   const url = new URL(globalThis.location.href);
   url.searchParams.delete("dialog");
   try {
+    // After the reload, focus goes back to the control that opened the dialog, also for a screen reader that
+    // sends a pointer click. After a pointer choice the control gets focus without its ring.
     sessionStorage.setItem("sb-language-opener", opener);
     sessionStorage.setItem("sb-language-focus", url.href);
+    sessionStorage.setItem("sb-language-ring", keyboard ? "1" : "0");
   } catch {
     // Blocked storage must not prevent locale changes.
   }
@@ -44,7 +48,7 @@ export function LanguageDialog({ onClose }: Readonly<{ onClose: () => void }>): 
   const active: Locale = getLocale();
   const [busy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  async function pick(locale: Locale): Promise<void> {
+  async function pick(locale: Locale, keyboard: boolean): Promise<void> {
     if (locale === active) {
       onClose();
       return;
@@ -52,7 +56,7 @@ export function LanguageDialog({ onClose }: Readonly<{ onClose: () => void }>): 
     setBusy(true);
     setError("");
     try {
-      await chooseLocale(locale, Boolean(shell.viewer), opener);
+      await chooseLocale(locale, Boolean(shell.viewer), opener, keyboard);
     } catch (error_: unknown) {
       setError(errorMessage(error_));
       setBusy(false);
@@ -82,7 +86,8 @@ export function LanguageDialog({ onClose }: Readonly<{ onClose: () => void }>): 
               lang={locale}
               aria-pressed={locale === active}
               disabled={busy}
-              onClick={() => void pick(locale)}
+              // A click from the keyboard has no click count.
+              onClick={(event) => void pick(locale, event.detail === 0)}
             >
               {locale === active ? <Icon name="check" size={18} /> : <span className="lang-check" aria-hidden="true" />}
               <span>{LOCALE_NAMES[locale]}</span>

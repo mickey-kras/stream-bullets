@@ -696,13 +696,17 @@ a.topic-chip:hover, .topic-chip.toggle:hover { border-color: var(--gold); }
 .repeat-options { display: flex; flex-direction: column; gap: 12px; }
 .repeat-options[hidden] { display: none; }
 .modal-content .repeat-options label { margin: 0; }
+.community-card { display: flex; flex-direction: column; container-type: inline-size; }
+.community-card > a.button-link.gold { align-self: flex-start; margin-top: auto; }
 .community-card h2 { display: flex; align-items: center; gap: 12px; }
 .card-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: var(--radius-panel); background: var(--c-edbd5326); color: var(--gold); }
 .card-icon svg { width: 24px; height: 24px; }
 .community-card a.button-link.gold { display: inline-flex; gap: 8px; font: 600 20px Oswald, sans-serif; }
-.card-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: -10px -10px 0 0; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+.card-tools { display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; margin: -10px -10px 0 0; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
 .card-tools .small-button { display: inline-flex; align-items: center; gap: 6px; }
 .card-tools .small-button:last-child { margin-left: auto; }
+/* A long word, for example in Russian, has no room in a narrow card. The button then shows only its icon. */
+@container (max-width: 28rem) { .card-tools .small-button .tool-label { display: none; } }
 .card-tools .icon-button { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
 .drag-handle { display: inline-grid; place-items: center; width: 32px; height: 36px; color: var(--muted); cursor: grab; }
 .add-card-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 200px; margin-top: 25px; border: 2px dashed var(--line); border-radius: var(--radius-panel); background: transparent; color: var(--gold); font: 600 22px/1.1 var(--heading); text-transform: uppercase; }
@@ -721,7 +725,7 @@ fieldset:is(.day-toggles, .topic-chips, .sched-switch, .sort-switch, .card-tools
 fieldset:is(.sched-switch, .sort-switch) { flex-wrap: nowrap; gap: 0; }
 fieldset.day-toggles { gap: 6px; }
 fieldset.topic-chips { gap: 8px; }
-fieldset.card-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: -10px -10px 0 0; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+fieldset.card-tools { display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; margin: -10px -10px 0 0; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
 .button-fields { display: flex; flex-direction: column; gap: 16px; }
 .button-fields[hidden], .external-field[hidden] { display: none; }
 .modal-content .button-fields label, .modal-content .card-form > label { margin: 0; }
@@ -1653,13 +1657,14 @@ body.battle-focus .polls-page .poll-toolbar.owner-tools { display: flex; }
 .ch-item p { margin: 6px 0; overflow-wrap: anywhere; }
 .ch-item > * { min-width: 0; }
 .ch-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.ch-logo { flex: none; width: 28px; height: 28px; }
+.ch-logo { flex: none; width: 28px; height: 28px; color: var(--gold); }
 .ch-badge { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; font-weight: 600; }
 .ch-mark { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 0.875rem; font-weight: 600; }
 .ch-mark[data-health="attention"] .icon { color: var(--live); }
 .ch-problem { display: flex; align-items: flex-start; gap: 6px; }
 .ch-problem .icon { flex: none; margin-top: 2px; color: var(--live); }
 .ch-actions { display: flex; flex-wrap: wrap; align-items: center; align-self: end; gap: 8px; }
+.ch-actions > button { flex: 1 1 12rem; }
 .ch-more > summary { width: fit-content; max-width: 100%; padding: 10px 0; cursor: pointer; color: var(--muted); font-weight: 600; }
 .ch-more > ul { display: grid; gap: 6px; margin: 0 0 6px; padding-left: 1.25em; color: var(--muted); overflow-wrap: anywhere; }
 .ch-result { display: block; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius-control); }
