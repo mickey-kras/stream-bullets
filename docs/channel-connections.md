@@ -203,8 +203,8 @@ Thus only the object refreshes tokens, and a YouTube read spends the quota of th
 These rules apply to a read:
 
 - The read covers 4 weeks. Twitch gives at most 4 pages of 25 segments. YouTube gives at most 4 pages of 50 broadcasts.
-- A YouTube read with more pages, or without quota for a page, is not complete. It changes nothing.
-- The import ignores a canceled Twitch segment. It also ignores a YouTube broadcast that is not public or has no start time.
+- A read with more pages, or a YouTube read without quota for a page, is not complete. It changes nothing.
+- The import ignores a canceled Twitch segment and a segment that starts in the vacation of the channel. It also ignores a YouTube broadcast that is not public or has no start time.
 - An empty title takes the Twitch category. Without a category, it takes the channel name.
 - A stream without an end gets 120 minutes. The length stays between 15 minutes and 24 hours.
 - Each read stream has a row in `stream_event_sources`, with the platform and its ID.
@@ -230,6 +230,7 @@ The import reads a page at these times:
 
 The hourly job also deletes YouTube source rows that no read found for 30 days.
 It deletes the imported entries that only these rows held. Twitch rows stay with their entry.
+An entry with a YouTube link and a Twitch row takes the Twitch link.
 A row without an entry goes after the same 30 days.
 
 The test deployment reads no platform. It uses the synthetic streams of `testStreams`.

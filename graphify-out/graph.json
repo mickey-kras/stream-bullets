@@ -38925,7 +38925,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L691",
+      "source_location": "L699",
       "target": "app_server_channel_providers_server_twitchapptoken",
       "weight": 1.0
     },
@@ -38937,7 +38937,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L692",
+      "source_location": "L700",
       "target": "app_server_channel_providers_server_providerclient",
       "weight": 1.0
     },
@@ -38949,7 +38949,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L706",
+      "source_location": "L714",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -38961,7 +38961,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchschedule",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L711",
+      "source_location": "L719",
       "target": "app_server_channel_providers_server_twitchstreams",
       "weight": 1.0
     },
@@ -38973,7 +38973,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchstreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L670",
+      "source_location": "L677",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -38985,7 +38985,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_twitchstreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L672",
+      "source_location": "L679",
       "target": "app_server_channel_providers_server_streamlength",
       "weight": 1.0
     },
@@ -39045,7 +39045,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubestreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L743",
+      "source_location": "L751",
       "target": "app_server_channel_providers_server_streamtitle",
       "weight": 1.0
     },
@@ -39057,7 +39057,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubestreams",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L745",
+      "source_location": "L753",
       "target": "app_server_channel_providers_server_streamlength",
       "weight": 1.0
     },
@@ -39069,7 +39069,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubeupcoming",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L779",
+      "source_location": "L787",
       "target": "app_server_channel_providers_server_getjson",
       "weight": 1.0
     },
@@ -39081,7 +39081,7 @@
       "relation": "calls",
       "source": "app_server_channel_providers_server_youtubeupcoming",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L780",
+      "source_location": "L788",
       "target": "app_server_channel_providers_server_youtubestreams",
       "weight": 1.0
     },
@@ -48045,7 +48045,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L356",
+      "source_location": "L367",
       "target": "app_server_schedule_import_server_importavailable",
       "weight": 1.0
     },
@@ -48057,7 +48057,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L367",
+      "source_location": "L378",
       "target": "app_server_schedule_import_server_claim",
       "weight": 1.0
     },
@@ -48069,7 +48069,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L369",
+      "source_location": "L380",
       "target": "app_server_schedule_import_server_importpageschedule",
       "weight": 1.0
     },
@@ -48081,7 +48081,7 @@
       "relation": "calls",
       "source": "app_server_schedule_import_server_importschedules",
       "source_file": "app/server/schedule-import.server.ts",
-      "source_location": "L372",
+      "source_location": "L383",
       "target": "app_server_http_server_logerror",
       "weight": 1.0
     },
@@ -58917,7 +58917,19 @@
       "relation": "calls",
       "source": "tests_schedule_import_test",
       "source_file": "tests/schedule-import.test.ts",
-      "source_location": "L355",
+      "source_location": "L244",
+      "target": "tests_schedule_import_test_iso",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "tests_schedule_import_test",
+      "source_file": "tests/schedule-import.test.ts",
+      "source_location": "L381",
       "target": "tests_schedule_import_test_imported",
       "weight": 1.0
     },
@@ -181080,7 +181092,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L659",
+      "source_location": "L663",
       "target": "app_server_channel_providers_server_twitchstreams",
       "weight": 1.0
     },
@@ -181091,7 +181103,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L684",
+      "source_location": "L692",
       "target": "app_server_channel_providers_server_twitchschedule",
       "weight": 1.0
     },
@@ -181102,7 +181114,7 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L719",
+      "source_location": "L727",
       "target": "app_server_channel_providers_server_youtubeupcomingschema",
       "weight": 1.0
     },
@@ -181113,19 +181125,8 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L735",
+      "source_location": "L743",
       "target": "app_server_channel_providers_server_youtubestreams",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_server_channel_providers_server",
-      "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L753",
-      "target": "app_server_channel_providers_server_youtube_upcoming_pages",
       "weight": 1.0
     },
     {
@@ -181146,7 +181147,18 @@
       "relation": "contains",
       "source": "app_server_channel_providers_server",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L762",
+      "source_location": "L761",
+      "target": "app_server_channel_providers_server_youtube_upcoming_pages",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_server_channel_providers_server",
+      "source_file": "app/server/channel-providers.server.ts",
+      "source_location": "L770",
       "target": "app_server_channel_providers_server_youtubeupcoming",
       "weight": 1.0
     },
@@ -191123,7 +191135,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L237",
+      "source_location": "L238",
       "target": "docs_channel_connections_limits_and_retention",
       "weight": 1.0
     },
@@ -191134,7 +191146,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L357",
+      "source_location": "L358",
       "target": "docs_channel_connections_token_encryption_and_rotation",
       "weight": 1.0
     },
@@ -191145,7 +191157,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L411",
+      "source_location": "L412",
       "target": "docs_channel_connections_disconnect",
       "weight": 1.0
     },
@@ -191167,7 +191179,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L546",
+      "source_location": "L547",
       "target": "docs_channel_connections_logs_and_alerts",
       "weight": 1.0
     },
@@ -191178,7 +191190,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L576",
+      "source_location": "L577",
       "target": "docs_channel_connections_overlay_key",
       "weight": 1.0
     },
@@ -191189,7 +191201,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L589",
+      "source_location": "L590",
       "target": "docs_channel_connections_setup",
       "weight": 1.0
     },
@@ -191200,7 +191212,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L617",
+      "source_location": "L618",
       "target": "docs_channel_connections_runbook",
       "weight": 1.0
     },
@@ -191211,7 +191223,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L642",
+      "source_location": "L643",
       "target": "docs_channel_connections_turn_the_feature_off",
       "weight": 1.0
     },
@@ -191222,7 +191234,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L680",
+      "source_location": "L681",
       "target": "docs_channel_connections_rollback",
       "weight": 1.0
     },
@@ -191233,7 +191245,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L691",
+      "source_location": "L692",
       "target": "docs_channel_connections_threat_model",
       "weight": 1.0
     },
@@ -191244,7 +191256,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L752",
+      "source_location": "L753",
       "target": "docs_channel_connections_stored_youtube_data",
       "weight": 1.0
     },
@@ -191255,7 +191267,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_channel_connections_and_activity",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L791",
+      "source_location": "L792",
       "target": "docs_channel_connections_facts_not_checked",
       "weight": 1.0
     },
@@ -191266,7 +191278,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L437",
+      "source_location": "L438",
       "target": "docs_channel_connections_provider_subscriptions",
       "weight": 1.0
     },
@@ -191277,7 +191289,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L450",
+      "source_location": "L451",
       "target": "docs_channel_connections_subscription_repair",
       "weight": 1.0
     },
@@ -191288,7 +191300,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L498",
+      "source_location": "L499",
       "target": "docs_channel_connections_refused_webhooks",
       "weight": 1.0
     },
@@ -191299,7 +191311,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L522",
+      "source_location": "L523",
       "target": "docs_channel_connections_account_deletion",
       "weight": 1.0
     },
@@ -191310,7 +191322,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L530",
+      "source_location": "L531",
       "target": "docs_channel_connections_callback_failures",
       "weight": 1.0
     },
@@ -191354,7 +191366,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_limits_and_retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L311",
+      "source_location": "L312",
       "target": "docs_channel_connections_youtube_quota",
       "weight": 1.0
     },
@@ -191365,7 +191377,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L693",
+      "source_location": "L694",
       "target": "docs_channel_connections_assets",
       "weight": 1.0
     },
@@ -191376,7 +191388,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L701",
+      "source_location": "L702",
       "target": "docs_channel_connections_actors",
       "weight": 1.0
     },
@@ -191387,7 +191399,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L709",
+      "source_location": "L710",
       "target": "docs_channel_connections_threats_and_mitigations",
       "weight": 1.0
     },
@@ -191398,7 +191410,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_threat_model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L738",
+      "source_location": "L739",
       "target": "docs_channel_connections_residual_risks",
       "weight": 1.0
     },
@@ -191409,7 +191421,7 @@
       "relation": "contains",
       "source": "docs_channel_connections_token_encryption_and_rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L400",
+      "source_location": "L401",
       "target": "docs_channel_connections_refresh",
       "weight": 1.0
     },
@@ -208711,7 +208723,7 @@
       "relation": "references",
       "source": "docs_channel_connections_disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L416",
+      "source_location": "L417",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -208735,7 +208747,7 @@
       "relation": "references",
       "source": "docs_channel_connections_refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L402",
+      "source_location": "L403",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -208747,7 +208759,7 @@
       "relation": "references",
       "source": "docs_channel_connections_rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L682",
+      "source_location": "L683",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -208771,7 +208783,7 @@
       "relation": "references",
       "source": "docs_channel_connections_setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L608",
+      "source_location": "L609",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -208783,7 +208795,7 @@
       "relation": "references",
       "source": "docs_channel_connections_threats_and_mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L721",
+      "source_location": "L722",
       "target": "app_server_channel_ingest_channelingest",
       "weight": 1.0
     },
@@ -208999,7 +209011,7 @@
       "relation": "references",
       "source": "docs_channel_connections_scheduled_streams",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L235",
+      "source_location": "L236",
       "target": "app_server_schedule_import_server_teststreams",
       "weight": 1.0
     },
@@ -234769,7 +234781,7 @@
       "label": "twitchSchedule()",
       "norm_label": "twitchschedule()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L684"
+      "source_location": "L692"
     },
     {
       "_callable": true,
@@ -234780,7 +234792,7 @@
       "label": "twitchStreams()",
       "norm_label": "twitchstreams()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L659"
+      "source_location": "L663"
     },
     {
       "_callable": true,
@@ -234846,7 +234858,7 @@
       "label": "youtubeStreams()",
       "norm_label": "youtubestreams()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L735"
+      "source_location": "L743"
     },
     {
       "_callable": true,
@@ -234857,7 +234869,7 @@
       "label": "youtubeUpcoming()",
       "norm_label": "youtubeupcoming()",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L762"
+      "source_location": "L770"
     },
     {
       "_callable": true,
@@ -255849,7 +255861,7 @@
       "label": "YOUTUBE_UPCOMING_PAGES",
       "norm_label": "youtube_upcoming_pages",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L753"
+      "source_location": "L761"
     },
     {
       "_origin": "ast",
@@ -255869,7 +255881,7 @@
       "label": "youtubeUpcomingSchema",
       "norm_label": "youtubeupcomingschema",
       "source_file": "app/server/channel-providers.server.ts",
-      "source_location": "L719"
+      "source_location": "L727"
     },
     {
       "_origin": "ast",
@@ -263569,7 +263581,7 @@
       "node_kind": "heading",
       "norm_label": "account deletion",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L522"
+      "source_location": "L523"
     },
     {
       "_origin": "ast",
@@ -263580,7 +263592,7 @@
       "node_kind": "heading",
       "norm_label": "actors",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L701"
+      "source_location": "L702"
     },
     {
       "_origin": "ast",
@@ -263591,7 +263603,7 @@
       "node_kind": "heading",
       "norm_label": "assets",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L693"
+      "source_location": "L694"
     },
     {
       "_origin": "ast",
@@ -263602,7 +263614,7 @@
       "node_kind": "heading",
       "norm_label": "callback failures",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L530"
+      "source_location": "L531"
     },
     {
       "_origin": "ast",
@@ -263657,7 +263669,7 @@
       "node_kind": "heading",
       "norm_label": "disconnect",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L411"
+      "source_location": "L412"
     },
     {
       "_origin": "ast",
@@ -263679,7 +263691,7 @@
       "node_kind": "heading",
       "norm_label": "facts not checked",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L791"
+      "source_location": "L792"
     },
     {
       "_origin": "ast",
@@ -263701,7 +263713,7 @@
       "node_kind": "heading",
       "norm_label": "limits and retention",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L237"
+      "source_location": "L238"
     },
     {
       "_origin": "ast",
@@ -263712,7 +263724,7 @@
       "node_kind": "heading",
       "norm_label": "logs and alerts",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L546"
+      "source_location": "L547"
     },
     {
       "_origin": "ast",
@@ -263734,7 +263746,7 @@
       "node_kind": "heading",
       "norm_label": "overlay key",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L576"
+      "source_location": "L577"
     },
     {
       "_origin": "ast",
@@ -263756,7 +263768,7 @@
       "node_kind": "heading",
       "norm_label": "provider subscriptions",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L437"
+      "source_location": "L438"
     },
     {
       "_origin": "ast",
@@ -263767,7 +263779,7 @@
       "node_kind": "heading",
       "norm_label": "refresh",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L400"
+      "source_location": "L401"
     },
     {
       "_origin": "ast",
@@ -263778,7 +263790,7 @@
       "node_kind": "heading",
       "norm_label": "refused webhooks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L498"
+      "source_location": "L499"
     },
     {
       "_origin": "ast",
@@ -263789,7 +263801,7 @@
       "node_kind": "heading",
       "norm_label": "residual risks",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L738"
+      "source_location": "L739"
     },
     {
       "_origin": "ast",
@@ -263800,7 +263812,7 @@
       "node_kind": "heading",
       "norm_label": "rollback",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L680"
+      "source_location": "L681"
     },
     {
       "_origin": "ast",
@@ -263822,7 +263834,7 @@
       "node_kind": "heading",
       "norm_label": "runbook",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L617"
+      "source_location": "L618"
     },
     {
       "_origin": "ast",
@@ -263844,7 +263856,7 @@
       "node_kind": "heading",
       "norm_label": "setup",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L589"
+      "source_location": "L590"
     },
     {
       "_origin": "ast",
@@ -263855,7 +263867,7 @@
       "node_kind": "heading",
       "norm_label": "stored youtube data",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L752"
+      "source_location": "L753"
     },
     {
       "_origin": "ast",
@@ -263866,7 +263878,7 @@
       "node_kind": "heading",
       "norm_label": "subscription repair",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L450"
+      "source_location": "L451"
     },
     {
       "_origin": "ast",
@@ -263877,7 +263889,7 @@
       "node_kind": "heading",
       "norm_label": "threat model",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L691"
+      "source_location": "L692"
     },
     {
       "_origin": "ast",
@@ -263888,7 +263900,7 @@
       "node_kind": "heading",
       "norm_label": "threats and mitigations",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L709"
+      "source_location": "L710"
     },
     {
       "_origin": "ast",
@@ -263899,7 +263911,7 @@
       "node_kind": "heading",
       "norm_label": "token encryption and rotation",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L357"
+      "source_location": "L358"
     },
     {
       "_origin": "ast",
@@ -263910,7 +263922,7 @@
       "node_kind": "heading",
       "norm_label": "turn the feature off",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L642"
+      "source_location": "L643"
     },
     {
       "_origin": "ast",
@@ -263921,7 +263933,7 @@
       "node_kind": "heading",
       "norm_label": "youtube quota",
       "source_file": "docs/channel-connections.md",
-      "source_location": "L311"
+      "source_location": "L312"
     },
     {
       "_origin": "ast",

@@ -52,14 +52,14 @@ function segment(id: string, title: string, start: number, options: { end?: numb
   };
 }
 
-function schedule(segments: unknown[], cursor?: string): unknown {
+function schedule(segments: unknown[], cursor?: string, vacation: unknown = null): unknown {
   return {
     data: {
       segments,
       broadcaster_id: "111",
       broadcaster_name: "TwitchHost",
       broadcaster_login: "TwitchHost",
-      vacation: null,
+      vacation,
     },
     pagination: cursor ? { cursor } : {},
   };
@@ -237,6 +237,32 @@ describe("reading the platforms", (): void => {
     expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Show"]);
     const source = await env.DB.prepare("SELECT external_id FROM stream_event_sources").first<{ external_id: string }>();
     expect(source?.external_id).toBe(id);
+  });
+
+  it("leaves out Twitch segments in the vacation of the channel", async (): Promise<void> => {
+    await addConnection("twitch");
+    const vacation = { start_time: iso(now + 3 * day), end_time: iso(now + 10 * day) };
+    fake.twitchSchedule = [
+      schedule(
+        [segment("s1", "Before", now + 2 * day), segment("s2", "Away", now + 4 * day), segment("s3", "Back", now + 11 * day)],
+        undefined,
+        vacation,
+      ),
+    ];
+    await importPageSchedule(env, page, now);
+    expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Before", "Back"]);
+  });
+
+  it("removes nothing after a Twitch read with more pages than the import reads", async (): Promise<void> => {
+    await addConnection("twitch");
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
+    await importPageSchedule(env, page, now);
+    // Each page has a cursor and no segment past the horizon: page 5 can hold "Show".
+    fake.twitchSchedule = Array.from({ length: 5 }, (_, index: number) =>
+      schedule([segment(`other-${index}`, "Other", now + day + index * hour)], String(index + 1)),
+    );
+    await importPageSchedule(env, page, now + 60_000);
+    expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Show"]);
   });
 
   it("reads each page of YouTube broadcasts, one quota unit for each", async (): Promise<void> => {
@@ -519,6 +545,22 @@ describe("when the import runs", (): void => {
     expect(list.map((event: StreamEvent) => [event.title, event.platform, event.alsoOn.length])).toEqual([["Same show", "twitch", 0]]);
     const sources = await env.DB.prepare("SELECT platform FROM stream_event_sources").all<{ platform: string }>();
     expect(sources.results).toEqual([{ platform: "twitch" }]);
+  });
+
+  it("gives an entry from YouTube the Twitch link when its YouTube data expires", async (): Promise<void> => {
+    await addConnection("youtube");
+    fake.upcoming = [broadcast("vid-1", "Same show", now + 2 * day)];
+    await importPageSchedule(env, page, now);
+    await addConnection("twitch");
+    fake.twitchSchedule = [schedule([segment("s1", "Same show", now + 2 * day)])];
+    await importPageSchedule(env, page, now + 60_000);
+    expect((await events()).map((event: StreamEvent) => [event.platform, event.alsoOn.length])).toEqual([["youtube", 1]]);
+    await env.DB.prepare("DELETE FROM channel_connections").run();
+    await importSchedules(env, now + 60_000 + SOURCE_RETENTION_MS + 1);
+    const list = await events();
+    expect(list.map((event: StreamEvent) => [event.platform, event.url, event.alsoOn.length])).toEqual([
+      ["twitch", "https://www.twitch.tv/twitchhost", 0],
+    ]);
   });
 
   it("uses synthetic streams in the test deployment and calls no provider", async (): Promise<void> => {

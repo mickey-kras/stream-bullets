@@ -342,6 +342,17 @@ export async function importOnVisit(env: AppEnv, streamerId: string, now: number
 export async function importSchedules(env: AppEnv, now: number): Promise<number> {
   const stale = now - SOURCE_RETENTION_MS;
   await env.DB.batch([
+    // An imported entry with an expired YouTube link and another source takes the link of that source.
+    env.DB.prepare(`UPDATE stream_events SET
+        platform=(SELECT platform FROM stream_event_sources s WHERE s.event_id=stream_events.id AND s.platform <> 'youtube'
+          ORDER BY s.platform LIMIT 1),
+        url=(SELECT url FROM stream_event_sources s WHERE s.event_id=stream_events.id AND s.platform <> 'youtube'
+          ORDER BY s.platform LIMIT 1)
+      WHERE imported=1 AND platform='youtube' AND id IN (SELECT event_id FROM stream_event_sources
+          WHERE platform='youtube' AND read_at < ?1 AND event_id IS NOT NULL)
+        AND EXISTS(SELECT 1 FROM stream_event_sources s WHERE s.event_id=stream_events.id AND s.platform <> 'youtube')`).bind(
+      stale,
+    ),
     // YouTube data must not stay longer than 30 days without a new read: the entries that only it holds go too.
     // An entry that a Twitch source also holds stays, without its YouTube link.
     env.DB.prepare(`DELETE FROM stream_events WHERE imported=1 AND id IN (SELECT event_id FROM stream_event_sources

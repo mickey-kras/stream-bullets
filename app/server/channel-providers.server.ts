@@ -636,6 +636,10 @@ const twitchScheduleSchema = z.object({
   data: z.object({
     broadcaster_login: z.string().regex(/^\w{1,64}$/),
     broadcaster_name: z.string().max(100),
+    // Vacation mode keeps the segments; the streams in this interval do not take place.
+    vacation: z
+      .object({ start_time: z.iso.datetime({ offset: true }), end_time: z.iso.datetime({ offset: true }) })
+      .nullish(),
     segments: z
       .array(
         z.object({
@@ -661,10 +665,13 @@ function twitchStreams(
   until: number,
 ): { streams: ImportedStream[]; past: boolean } {
   const streams: ImportedStream[] = [];
+  const vacation = body.data.vacation;
+  const away = (start: number): boolean =>
+    !!vacation && start >= Date.parse(vacation.start_time) && start < Date.parse(vacation.end_time);
   for (const segment of body.data.segments ?? []) {
     const start = Date.parse(segment.start_time);
     if (start >= until) return { streams, past: true };
-    if (segment.canceled_until !== null) continue;
+    if (segment.canceled_until !== null || away(start)) continue;
     streams.push({
       externalId: segment.id,
       title: streamTitle(segment.title, segment.category?.name, body.data.broadcaster_name),
@@ -678,15 +685,16 @@ function twitchStreams(
 
 /**
  * The Twitch schedule segments that end after `from` and start before `until`, with an app token (Get Channel
- * Stream Schedule needs no scope). Cancelled segments are left out. A channel without a schedule answers 404:
- * that is an empty schedule.
+ * Stream Schedule needs no scope). Cancelled segments and segments in the vacation are left out. A channel without
+ * a schedule answers 404: that is an empty schedule. Returns null when more pages than `TWITCH_SCHEDULE_PAGES`
+ * start before `until`: the read is not complete, so the import removes nothing.
  */
 export async function twitchSchedule(
   env: AppEnv,
   broadcasterId: string,
   from: number,
   until: number,
-): Promise<ImportedStream[]> {
+): Promise<ImportedStream[] | null> {
   const headers = {
     Authorization: `Bearer ${await twitchAppToken(env)}`,
     "Client-Id": providerClient(env, "twitch").id,
@@ -711,9 +719,9 @@ export async function twitchSchedule(
     const read = twitchStreams(body, until);
     streams.push(...read.streams);
     cursor = body.pagination?.cursor;
-    if (read.past || !cursor) break;
+    if (read.past || !cursor) return streams;
   }
-  return streams;
+  return null;
 }
 
 const youtubeUpcomingSchema = z.object({
