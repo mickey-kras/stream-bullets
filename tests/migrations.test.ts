@@ -170,14 +170,29 @@ beforeAll(async (): Promise<void> => {
   overlayBefore = await overlayTable();
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0032"),
+    applied.filter((file: string): boolean => file >= "0032" && file < "0036"),
+  );
+  // Stored translations for Russian and Ukrainian readers, for a different language, and a row without a translation.
+  await db.batch([
+    db.prepare(
+      `INSERT INTO comment_translations (comment_id,locale,source_hash,text,created_at) VALUES
+        ('c1','ru','h','First in English',1),('c1','uk','h','Перший',1),('c1','de','h','Erster',1),('c2','uk','h',NULL,1)`,
+    ),
+    db.prepare(
+      `INSERT INTO entry_translations (entry_id,locale,source_hash,title,body,options,created_at) VALUES
+        ('topic','uk','h','A title in English','','[]',1),('topic','ru','h','Тема','','[]',1),('topic','en','h','Topic','','[]',1)`,
+    ),
+  ]);
+  await applyMigrations(
+    db,
+    applied.filter((file: string): boolean => file >= "0036"),
   );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0035", (): void => {
+  it("covers 0006 to 0036", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -209,7 +224,18 @@ describe("migrations 0006 onwards", (): void => {
       "0033",
       "0034",
       "0035",
+      "0036",
     ]);
+  });
+
+  it("deletes the stored translations (0036) for Russian and Ukrainian readers", async (): Promise<void> => {
+    const comments = await db.prepare("SELECT locale, text FROM comment_translations ORDER BY locale, text").all();
+    expect(comments.results).toEqual([
+      { locale: "de", text: "Erster" },
+      { locale: "uk", text: null },
+    ]);
+    const entries = await db.prepare("SELECT locale, title FROM entry_translations ORDER BY locale").all();
+    expect(entries.results).toEqual([{ locale: "en", title: "Topic" }]);
   });
 
   it("rebuilds overlay_state (0032) with every row, column, default and foreign key", async (): Promise<void> => {
