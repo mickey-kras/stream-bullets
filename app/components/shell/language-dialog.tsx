@@ -29,12 +29,11 @@ export async function chooseLocale(
   const url = new URL(globalThis.location.href);
   url.searchParams.delete("dialog");
   try {
-    // After the reload, focus goes back to the control that opened the dialog. A person who used a pointer has
-    // no use for it, and the focus ring then stays on the control.
-    if (keyboard) {
-      sessionStorage.setItem("sb-language-opener", opener);
-      sessionStorage.setItem("sb-language-focus", url.href);
-    }
+    // After the reload, focus goes back to the control that opened the dialog, also for a screen reader that
+    // sends a pointer click. After a pointer choice the control gets focus without its ring.
+    sessionStorage.setItem("sb-language-opener", opener);
+    sessionStorage.setItem("sb-language-focus", url.href);
+    sessionStorage.setItem("sb-language-ring", keyboard ? "1" : "0");
   } catch {
     // Blocked storage must not prevent locale changes.
   }

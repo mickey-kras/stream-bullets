@@ -17745,7 +17745,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L114",
+      "source_location": "L117",
       "target": "app_components_shell_contact_dialog_contactdialog",
       "weight": 1.0
     },
@@ -17757,7 +17757,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L115",
+      "source_location": "L118",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -17769,7 +17769,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L125",
+      "source_location": "L128",
       "target": "app_components_shell_footer_morerow",
       "weight": 1.0
     },
@@ -17805,7 +17805,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L71",
+      "source_location": "L74",
       "target": "app_components_shell_dialog_link_dialoglink",
       "weight": 1.0
     },
@@ -17817,7 +17817,7 @@
       "relation": "calls",
       "source": "app_components_shell_footer_sitefooter",
       "source_file": "app/components/shell/footer.tsx",
-      "source_location": "L73",
+      "source_location": "L76",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -17913,7 +17913,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L46",
+      "source_location": "L45",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -17925,7 +17925,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L49",
+      "source_location": "L48",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -17937,7 +17937,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L62",
+      "source_location": "L61",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -17949,7 +17949,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L67",
+      "source_location": "L66",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -17961,7 +17961,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L71",
+      "source_location": "L70",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -17973,7 +17973,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L91",
+      "source_location": "L90",
       "target": "app_components_shell_language_dialog_languagedialog_pick",
       "weight": 1.0
     },
@@ -17985,7 +17985,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L93",
+      "source_location": "L92",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -17997,7 +17997,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog_pick",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L60",
+      "source_location": "L59",
       "target": "app_components_shell_language_dialog_chooselocale",
       "weight": 1.0
     },
@@ -18009,7 +18009,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog_pick",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L62",
+      "source_location": "L61",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -53589,7 +53589,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L122",
+      "source_location": "L128",
       "target": "tests_e2e_i18n_spec_inlanguage",
       "weight": 1.0
     },
@@ -53601,7 +53601,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L340",
+      "source_location": "L346",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -53613,7 +53613,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L341",
+      "source_location": "L347",
       "target": "tests_e2e_i18n_spec_shot",
       "weight": 1.0
     },
@@ -163550,7 +163550,7 @@
       "relation": "contains",
       "source": "app_components_shell_language_dialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "target": "app_components_shell_language_dialog_languagedialog",
       "weight": 1.0
     },
@@ -163561,7 +163561,7 @@
       "relation": "contains",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L52",
+      "source_location": "L51",
       "target": "app_components_shell_language_dialog_languagedialog_pick",
       "weight": 1.0
     },
@@ -192909,7 +192909,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L196",
+      "source_location": "L202",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -192920,7 +192920,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L231",
+      "source_location": "L237",
       "target": "tests_e2e_i18n_spec_phonescreen",
       "weight": 1.0
     },
@@ -192931,7 +192931,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L238",
+      "source_location": "L244",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -192942,7 +192942,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L241",
+      "source_location": "L247",
       "target": "tests_e2e_i18n_spec_phonescreens",
       "weight": 1.0
     },
@@ -205323,7 +205323,7 @@
       "relation": "indirect_call",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L297",
+      "source_location": "L303",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -205941,10 +205941,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "5f219415f383bb3a2aeadd761badd785994bf21f68ef4c2a0d402b69d0b413d7",
+    "content_sha256": "ab79ff57c271ec27255f5032555c16573b85db59fc6b8801f9a2028d5e90ac80",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "90999c51c4d3fef8b74fde3f0fe1f656bc8d71f6d84063a7e9e17e73992c575c",
+    "source_sha256": "e6fe494b30ec66adb5367717c51914062c0b9ed86a3098c7b081410522211a57",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -212719,7 +212719,7 @@
       "label": "PhoneScreen",
       "norm_label": "phonescreen",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L231"
+      "source_location": "L237"
     },
     {
       "_callable": true,
@@ -220293,7 +220293,7 @@
             "callee": "getClientRects",
             "file": "app/components/shell/footer.tsx",
             "lang": "typescript",
-            "line": "L49",
+            "line": "L52",
             "receiver_type": "HTMLElement"
           }
         ]
@@ -220333,7 +220333,7 @@
       "label": "LanguageDialog()",
       "norm_label": "languagedialog()",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L45"
+      "source_location": "L44"
     },
     {
       "_callable": true,
@@ -220344,7 +220344,7 @@
       "label": "pick()",
       "norm_label": "pick()",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L52"
+      "source_location": "L51"
     },
     {
       "_callable": true,
@@ -240007,7 +240007,7 @@
       "label": "headerAction()",
       "norm_label": "headeraction()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L238"
+      "source_location": "L244"
     },
     {
       "_callable": true,
@@ -240044,21 +240044,21 @@
             "callee": "checkVisibility",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L213",
+            "line": "L219",
             "receiver_type": "Element"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L214",
+            "line": "L220",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "phoneproblems()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L196"
+      "source_location": "L202"
     },
     {
       "_callable": true,
@@ -256327,6 +256327,13 @@
             "lang": "typescript",
             "line": "L48",
             "receiver_type": "BrowserContext"
+          },
+          {
+            "callee": "matches",
+            "file": "tests/e2e/i18n.spec.ts",
+            "lang": "typescript",
+            "line": "L54",
+            "receiver_type": "Element"
           }
         ]
       },
@@ -256342,7 +256349,7 @@
       "label": "phoneScreens",
       "norm_label": "phonescreens",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L241"
+      "source_location": "L247"
     },
     {
       "_origin": "ast",

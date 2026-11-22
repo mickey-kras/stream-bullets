@@ -46,14 +46,20 @@ test("the language switcher saves the choice and reloads in it", async ({ page, 
   await expect(page.locator("html")).toHaveAttribute("lang", "ru");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   expect((await context.cookies()).find((cookie) => cookie.name === "sb_locale")?.value).toBe("ru");
-  // A choice with the pointer does not put focus, and its ring, on the control after the reload.
-  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Язык: Русский" })).not.toBeFocused();
-  await page.getByRole("contentinfo").getByRole("link", { name: "Язык: Русский" }).click();
-  // A choice with the keyboard puts focus back on the control.
+  // A choice with the pointer puts focus back on the control, without its ring.
+  // The footer has a full and a compact language link. Only one shows at a width.
+  const language = page.locator('.site-footer a[href*="dialog=language"]:visible');
+  await expect(language).toHaveAccessibleName("Язык: Русский");
+  await expect(language).toBeFocused();
+  expect(await language.evaluate((element: Element): boolean => element.matches(":focus-visible"))).toBe(false);
+  await language.click();
+  // A choice with the keyboard puts focus back on the control, with its ring.
   await page.getByRole("dialog").getByRole("button", { name: "English" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Language: English" })).toBeFocused();
+  await expect(language).toHaveAccessibleName("Language: English");
+  await expect(language).toBeFocused();
+  expect(await language.evaluate((element: Element): boolean => element.matches(":focus-visible"))).toBe(true);
 });
 
 for (const width of [1280, 390, 320]) {
