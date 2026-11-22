@@ -88,16 +88,18 @@ export function writtenIn(text: string): readonly Locale[] {
 
 /**
  * Tells if a translation can be in the language of the reader. A model sometimes answers in a different
- * language. The text must have the script of the language, and no Cyrillic letters when the language has a
- * different script. Text in Latin letters must not be in a different site language, when the detector is sure.
+ * language. The text must have the script of the language. Text in Latin letters must not be in a different
+ * site language, when the detector is sure. The `translated` part of the text, by default all of it, must have
+ * no Cyrillic letters when the language has a different script. A part that the author already wrote in the
+ * language of the reader stays as it is, also with a name in Cyrillic letters.
  */
-export function inLanguageOf(locale: Locale, text: string): boolean {
+export function inLanguageOf(locale: Locale, text: string, translated: string = text): boolean {
   const plain: string = prose(text);
   const script: Script | null = mainScript(plain);
   if (script === null) return true;
   if (!LOCALE_SCRIPTS[locale].includes(script)) return false;
   // The model sometimes keeps a name in Cyrillic letters, for example "Миша, ..." in a Polish translation.
-  if (!LOCALE_SCRIPTS[locale].includes("cyrillic") && /\p{Script=Cyrillic}/u.test(plain)) return false;
+  if (!LOCALE_SCRIPTS[locale].includes("cyrillic") && /\p{Script=Cyrillic}/u.test(prose(translated))) return false;
   if (script !== "latin") return true;
   const language: Locale | null = latinLanguage(plain);
   return language === null || language === locale;

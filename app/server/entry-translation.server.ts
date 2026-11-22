@@ -95,7 +95,7 @@ export function entryNeedsTranslation(source: EntryText, locale: Locale): boolea
 function checkedEntry(source: EntryText, answer: EntryText | null, locale: Locale): EntryText | null {
   if (answer?.options.length !== source.options.length || !entryNeedsTranslation(source, locale)) return null;
   // A part that is in the language of the reader stays as the author wrote it. The model changes such text.
-  // The language check reads only the translated parts: a kept part can have a name in Cyrillic letters.
+  // A kept part can have a name in Cyrillic letters, so the Cyrillic check reads only the translated parts.
   const translated: string[] = [];
   const kept = (part: string, answerPart: string): string => {
     if (!needsTranslation(part, locale)) return part;
@@ -107,7 +107,8 @@ function checkedEntry(source: EntryText, answer: EntryText | null, locale: Local
     body: kept(source.body, answer.body),
     options: source.options.map((option: string, index: number): string => kept(option, answer.options[index])),
   };
-  if (signature(text) === signature(source) || !inLanguageOf(locale, translated.join("\n"))) return null;
+  if (signature(text) === signature(source) || !inLanguageOf(locale, allText(text), translated.join("\n")))
+    return null;
   const sameOptions: boolean =
     text.options.length === source.options.length &&
     new Set(text.options).size === text.options.length &&

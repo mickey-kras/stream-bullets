@@ -225,6 +225,19 @@ describe("entry translation", (): void => {
       body: "Ask Миша about the next stream and the plans for this week.",
       options: [],
     });
+    // Game names in Latin letters stay as they are. The Japanese parts decide the script of a Japanese answer.
+    const games: string = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,options,created_at) VALUES (?,'page','host','choice','Во что играем дальше?','次の配信で遊ぶゲームを選んでください。',?,1)",
+    )
+      .bind(games, JSON.stringify(["Elden Ring", "Cyberpunk 2077"]))
+      .run();
+    run.mockResolvedValue({ response: answer("次のゲーム", ["Elden Ring", "Cyberpunk 2077"], "Ignored") });
+    expect(await translateEntry(env, games, "fan", "ja", NOW)).toEqual({
+      title: "次のゲーム",
+      body: "次の配信で遊ぶゲームを選んでください。",
+      options: ["Elden Ring", "Cyberpunk 2077"],
+    });
   });
 
   it("uses the same daily count as the comments", async (): Promise<void> => {
