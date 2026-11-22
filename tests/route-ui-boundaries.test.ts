@@ -112,6 +112,11 @@ vi.mock("../app/server/entry-translation.server", async (original) => ({
   ...(await original<typeof import("../app/server/entry-translation.server")>()),
   attachEntryTranslations: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock("../app/server/page-translation.server", async (original) => ({
+  ...(await original<typeof import("../app/server/page-translation.server")>()),
+  attachAboutTranslations: vi.fn().mockResolvedValue(undefined),
+  attachPageTranslations: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock("../app/server/ai.server", async (original) => ({
   ...(await original<typeof import("../app/server/ai.server")>()),
   aiInterestStatus: vi.fn(),

@@ -3,6 +3,7 @@ import { LOCALES } from "../../db/enums";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
 import { translateEntry } from "./entry-translation.server";
+import { translatePendingPages } from "./page-translation.server";
 import { translateComment } from "./translation.server";
 
 // The cron trigger of the translation run. See wrangler.jsonc.
@@ -17,7 +18,8 @@ async function ids(env: AppEnv, sql: string, limit: number): Promise<string[]> {
 }
 
 /**
- * Translates the newest comments and entries that do not have a stored result for each site language. This is
+ * Translates the newest comments and entries that do not have a stored result for each site language, and the
+ * text of pages. This is
  * the translation of new content, the first translation of content from before this feature, and the new
  * attempt after a failure. Gives the number of items that it examined. Throws when each start failed.
  */
@@ -45,8 +47,11 @@ export async function translatePending(env: AppEnv, now: number, limit: number =
     ...entries.map((id: string): Promise<unknown> => translateEntry(env, id, null, locale, now)),
   ]);
   const results = await Promise.allSettled(work);
-  const failed: number = results.filter((result): boolean => result.status === "rejected").length;
-  if (work.length > 0 && failed === work.length) throw new Error(`All ${failed} translation starts failed.`);
+  // The About text, the cards and the streams of pages. This work has its own batch.
+  const pages = await translatePendingPages(env, now);
+  const starts: number = work.length + pages.starts;
+  const failed: number = results.filter((result): boolean => result.status === "rejected").length + pages.failed;
+  if (starts > 0 && failed === starts) throw new Error(`All ${failed} translation starts failed.`);
   return comments.length + entries.length;
 }
 

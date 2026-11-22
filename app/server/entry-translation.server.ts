@@ -88,6 +88,25 @@ function checkedEntry(source: EntryText, text: EntryText | null): EntryText | nu
 }
 
 /**
+ * Asks the model for the translation of a title, answer options and a description. Null when the text needs no
+ * translation or the translation failed a check.
+ */
+export async function translateParts(ai: Ai, locale: Locale, source: EntryText): Promise<EntryText | null> {
+  const result = await ai.run(TRANSLATION_MODEL, {
+    messages: [
+      { role: "system", content: PROMPT },
+      {
+        role: "user",
+        content: `${LANGUAGES[locale]}\n${source.title}\n---\n${source.options.join("\n")}\n---\n${source.body}`,
+      },
+    ],
+    temperature: 0,
+    max_tokens: 1800,
+  });
+  return checkedEntry(source, readEntryAnswer(result.response));
+}
+
+/**
  * Puts the stored translation for `locale` on each entry. An entry without a stored result stays as it is, so
  * the page of a signed-in reader can ask for its translation.
  */
@@ -165,18 +184,7 @@ export async function translateEntry(
   await reserveStart(env, viewerId, entryId, locale, hash, now);
 
   // If the model fails, the reservation stays in the daily count and opens again after one minute.
-  const result = await env.AI.run(TRANSLATION_MODEL, {
-    messages: [
-      { role: "system", content: PROMPT },
-      {
-        role: "user",
-        content: `${LANGUAGES[locale]}\n${source.title}\n---\n${source.options.join("\n")}\n---\n${source.body}`,
-      },
-    ],
-    temperature: 0,
-    max_tokens: 1800,
-  });
-  const translation: EntryText | null = checkedEntry(source, readEntryAnswer(result.response));
+  const translation: EntryText | null = await translateParts(env.AI, locale, source);
   await store(translation);
   return translation;
 }

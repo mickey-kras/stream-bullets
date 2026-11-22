@@ -68,6 +68,8 @@ export interface Streamer {
   handle: string;
   name: string;
   about: string;
+  // The About text in the language of the reader. Null: no translation is necessary. Absent: not translated yet.
+  aboutTranslation?: string | null;
   // Owner's uploaded picture.
   avatar: string | null;
   background: string | null;
@@ -377,6 +379,8 @@ export interface StreamEvent {
   topics: EventTopic[];
   // Last change; shared by download and feed DTSTAMP/SEQUENCE.
   updatedAt: number;
+  // The text in the language of the reader. Null: no translation is necessary. Absent: not translated yet.
+  translation?: { title: string; notes: string } | null;
 }
 
 export interface ScheduleSnapshot {
@@ -392,6 +396,8 @@ export interface CommunityCard {
   body: string;
   buttonLabel: string | null;
   buttonTarget: string | null;
+  // The text in the language of the reader. Null: no translation is necessary. Absent: not translated yet.
+  translation?: { title: string; body: string; buttonLabel: string | null } | null;
 }
 
 // External support link. `label` applies only to `other`.

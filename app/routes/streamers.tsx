@@ -9,7 +9,10 @@ import { appContext } from "../env";
 import { t, tn } from "../i18n";
 import { directoryHref, readIntent, streamerTarget, type Intent } from "../lib/directory";
 import { useShell } from "../lib/shell";
+import { requestLocale } from "../i18n/resolve";
+import { requestViewer } from "../lib/shell.server";
 import { countStreamers, listStreamers } from "../server/data.server";
+import { attachAboutTranslations } from "../server/page-translation.server";
 import { getFeaturedStreamer, type FeaturedStreamer } from "../server/featured-streamer.server";
 import type { Streamer, StreamerDirectory } from "../types";
 import { errorMessage, requestJson } from "../components/api";
@@ -34,11 +37,13 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
   const url = new URL(request.url);
   // Strip the user-facing @ prefix from handle searches.
   const query: string = (url.searchParams.get("query") ?? "").trim().replace(/^@/u, "").slice(0, 60);
-  const [page, total, featured] = await Promise.all([
+  const [page, total, featured, viewer] = await Promise.all([
     listStreamers(app.env, null, query),
     countStreamers(app.env, query),
     query ? Promise.resolve(null) : getFeaturedStreamer(app.env),
+    requestViewer(request, app),
   ]);
+  await attachAboutTranslations(app.env, page.streamers, requestLocale(request, viewer?.locale ?? null));
   return { ...page, total, featured, query, intent: readIntent(url.searchParams.get("then")) };
 });
 
@@ -73,7 +78,7 @@ function StreamerCard({ streamer, intent }: Readonly<{ streamer: Streamer; inten
             </span>
           </p>
         )}
-        <p className="streamer-bio">{streamer.about || t("streamers.noAbout")}</p>
+        <p className="streamer-bio">{streamer.aboutTranslation || streamer.about || t("streamers.noAbout")}</p>
       </div>
     </Link>
   );

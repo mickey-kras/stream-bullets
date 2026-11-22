@@ -8,6 +8,7 @@ import { EmptyState } from "../common";
 import { Icon } from "../ui/icon";
 import { Sheet } from "../ui/sheet";
 import { useToast } from "../ui/toast";
+import { shownEvent, useOriginals } from "../page-translation";
 import { useScheduleClock } from "../use-clock";
 import { EventDialog, downloadEvent, type EventStep } from "./event-dialog";
 import { useNarrow, useViewerZone } from "./format";
@@ -175,6 +176,7 @@ export function ScheduleView({
   const zone = useViewerZone();
   const narrow = useNarrow();
   const toast = useToast();
+  const originals = useOriginals();
   const [anchor, setAnchor] = useState<number>(serverNow);
   const [extra, setExtra] = useState<StreamEvent[]>([]);
   const [step, setStep] = useState<EventStep>("view");
@@ -284,7 +286,7 @@ export function ScheduleView({
         mode={mode}
         days={days}
         anchor={anchor}
-        events={events}
+        events={events.map((event: StreamEvent): StreamEvent => shownEvent(event, originals))}
         zone={zone}
         now={now}
         handle={handle}

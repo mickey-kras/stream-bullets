@@ -1,7 +1,10 @@
 import { z } from "zod";
-import { getVisibleStreamer } from "../data.server";
+import type { AppEnv } from "../../env";
+import { requestLocale } from "../../i18n/resolve";
+import { getOwnStreamer, getVisibleStreamer } from "../data.server";
 import { HttpError, json, readJson } from "../http.server";
 import { refreshOverlayFor } from "../overlay.server";
+import { attachPageTranslations, translatePageAfterSave } from "../page-translation.server";
 import { createEvents, deleteEvent, listEvents, patchEvent } from "../schedule.server";
 import { eventRangeSchema } from "../validation";
 import { get, parsedQuery, write, type ApiRoute } from "./router";
@@ -13,6 +16,13 @@ function eventId(match: RegExpExecArray): string {
   return match[1];
 }
 
+// A new or changed stream gets its translations after the response. A removal deletes the stored results.
+async function scheduleChanged(env: AppEnv, ownerId: string): Promise<void> {
+  await refreshOverlayFor(env, ownerId, ["next"]);
+  const page = await getOwnStreamer(env, ownerId);
+  if (page) translatePageAfterSave(env, page.id);
+}
+
 // Schedule reads are public; only the owner writes.
 export const scheduleRoutes: ApiRoute[] = [
   // GET /api/streamers/:handle/events?from&to → {events, serverNow}
@@ -21,26 +31,28 @@ export const scheduleRoutes: ApiRoute[] = [
     const streamer = await getVisibleStreamer(env, match[1], viewer?.id ?? null);
     if (!streamer) throw new HttpError(404, "Streamer not found.");
     const now = Date.now();
-    return json({ events: await listEvents(env, streamer.id, range.from, range.to, now), serverNow: now });
+    const events = await listEvents(env, streamer.id, range.from, range.to, now);
+    await attachPageTranslations(env, streamer, requestLocale(request, viewer?.locale ?? null), [], events);
+    return json({ events, serverNow: now });
   }),
   // Schedule writes refresh overlays showing Up next.
   write("POST", /events/, async ({ request, env, viewer }) => {
     const event = await createEvents(env, viewer.id, await readJson(request, z.unknown()));
-    await refreshOverlayFor(env, viewer.id, ["next"]);
+    await scheduleChanged(env, viewer.id);
     return json({ event });
   }),
   // PATCH /api/events/:id {action: "edit", scope, ...} | {action: "cancel"} | {action: "replay", vodUrl} →
   // {event}
   write("PATCH", eventPath, async ({ request, env, match, viewer }) => {
     const event = await patchEvent(env, viewer.id, eventId(match), await readJson(request, z.unknown()));
-    await refreshOverlayFor(env, viewer.id, ["next"]);
+    await scheduleChanged(env, viewer.id);
     return json({ event });
   }),
   // DELETE /api/events/:id, optional body {scope: "one" | "following"} → {deleted: true}
   write("DELETE", eventPath, async ({ request, env, match, viewer }) => {
     const body = request.headers.get("Content-Type") ? await readJson(request, z.unknown()) : {};
     await deleteEvent(env, viewer.id, eventId(match), body);
-    await refreshOverlayFor(env, viewer.id, ["next"]);
+    await scheduleChanged(env, viewer.id);
     return json({ deleted: true });
   }),
 ];

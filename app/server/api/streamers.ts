@@ -1,5 +1,6 @@
 import { notifyRoom } from "../live.server";
 import { translateAfterPost } from "../translation-jobs.server";
+import { attachAboutTranslations, translatePageAfterSave } from "../page-translation.server";
 import { requestLocale } from "../../i18n/resolve";
 import { attachEntryTranslations } from "../entry-translation.server";
 import {
@@ -26,9 +27,11 @@ import { get, parsedQuery, write, type ApiRoute } from "./router";
 
 export const streamerRoutes: ApiRoute[] = [
   // GET /api/streamers?cursor&query → {streamers, nextCursor}. Official pages first; suspended pages left out.
-  get(/streamers/, async ({ request, env }) => {
+  get(/streamers/, async ({ request, env, viewer }) => {
     const input = parsedQuery(request, ["cursor", "query"], directoryQuerySchema);
-    return json(await listStreamers(env, input.cursor, input.query));
+    const directory = await listStreamers(env, input.cursor, input.query);
+    await attachAboutTranslations(env, directory.streamers, requestLocale(request, viewer?.locale ?? null));
+    return json(directory);
   }),
   get(/streamers\/([a-z0-9_]{3,30})/, async ({ request, env, match, viewer }) => {
     const input = parsedQuery(request, ["kind", "sort", "query", "cursor", "status"], entryQuerySchema);
@@ -55,13 +58,17 @@ export const streamerRoutes: ApiRoute[] = [
     return json(result);
   }),
   // PATCH /api/streamer {name?, about?, handle?, logoMode?: "profile" | "logo"} → {streamer}
-  write("PATCH", /streamer/, async ({ request, env, viewer }) =>
-    json({ streamer: await updateStreamer(env, viewer.id, await readJson(request, streamerEditSchema)) }),
-  ),
+  write("PATCH", /streamer/, async ({ request, env, viewer }) => {
+    const streamer = await updateStreamer(env, viewer.id, await readJson(request, streamerEditSchema));
+    translatePageAfterSave(env, streamer.id);
+    return json({ streamer });
+  }),
   // POST /api/streamer creates a page for approved accounts/admins. PATCH handles later edits.
   write("POST", /streamer/, async ({ request, env, viewer }) => {
     const input = await readJson(request, streamerSchema);
     if (await getOwnStreamer(env, viewer.id)) throw new HttpError(409, "You already have a streamer page.");
-    return json({ streamer: await saveStreamer(env, viewer.id, input) });
+    const streamer = await saveStreamer(env, viewer.id, input);
+    translatePageAfterSave(env, streamer.id);
+    return json({ streamer });
   }),
 ];
