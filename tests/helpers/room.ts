@@ -366,15 +366,20 @@ export function faultyDatabase(real: D1Database): {
   heal: () => void;
   // Queries paused until their failure releases `until`.
   held: () => number;
+  // Resolves when a query is paused. It does not move the fake timers, so a ticker of the room does not start.
+  whenHeld: () => Promise<void>;
 } {
   const faults: { pattern: RegExp; until?: Promise<unknown> }[] = [];
   let held = 0;
+  let waiting: (() => void)[] = [];
   const sqlOf = new WeakMap<object, string>();
   const realOf = new WeakMap<object, D1PreparedStatement>();
   const check = async (sql: string[]): Promise<void> => {
     const fault = faults.find(({ pattern }) => sql.some((text: string): boolean => pattern.test(text)));
     if (!fault) return;
     held += 1;
+    for (const resolve of waiting) resolve();
+    waiting = [];
     await fault.until;
     held -= 1;
     throw new Error("D1_ERROR: injected failure");
@@ -415,5 +420,7 @@ export function faultyDatabase(real: D1Database): {
       faults.length = 0;
     },
     held: (): number => held,
+    whenHeld: (): Promise<void> =>
+      held > 0 ? Promise.resolve() : new Promise<void>((resolve): void => void waiting.push(resolve)),
   };
 }

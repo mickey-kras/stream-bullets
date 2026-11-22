@@ -269,13 +269,14 @@ function authUserOptions(env: AppEnv): NonNullable<BetterAuthOptions["user"]> {
         return;
       }
       const session = await getSessionFromCtx(ctx, { disableCookieCache: true });
+      const reauth = { error: "reauth_required", errorDescription: "Sign in again and restart account linking." };
+      if (!session) return reauth;
       if (
-        !session ||
         state?.link?.userId !== session.user.id ||
         state.serverContext?.linkingSession !== session.session.id ||
         Date.now() - session.session.createdAt.getTime() > RECENT_SIGN_IN_MS
       ) {
-        return { error: "reauth_required", errorDescription: "Sign in again and restart account linking." };
+        return reauth;
       }
       if (typeof user.email !== "string" || !user.email.trim()) {
         return {
