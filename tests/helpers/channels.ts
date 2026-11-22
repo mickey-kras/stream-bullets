@@ -53,6 +53,10 @@ export interface FakeProviders {
   deleteStatus: number | null;
   /** Runs while a refresh request is in flight, before the provider answers (to simulate a second writer). */
   duringRefresh: (() => Promise<void>) | null;
+  /** Get Channel Stream Schedule pages in order (the last one repeats), or a status for every request. */
+  twitchSchedule: unknown[] | number;
+  /** The items liveBroadcasts.list returns for `broadcastStatus=upcoming`, or a status for every request. */
+  upcoming: unknown[] | number;
 }
 
 export const TWITCH_SCOPES = [
@@ -105,6 +109,8 @@ export function installFakeProviders(): FakeProviders {
     listStatus: null,
     listFailures: 0,
     deleteStatus: null,
+    twitchSchedule: 404,
+    upcoming: [],
   };
   let subscription = 0;
   let page = 0;
@@ -219,6 +225,18 @@ export function installFakeProviders(): FakeProviders {
     }
     if (path === "id.twitch.tv/oauth2/revoke" || path === "oauth2.googleapis.com/revoke" || path === "id.kick.com/oauth/revoke")
       return new Response(null, { status: fake.revokeStatus });
+    if (path === "api.twitch.tv/helix/schedule") {
+      if (typeof fake.twitchSchedule === "number") return json({ error: "Not Found" }, fake.twitchSchedule);
+      const after = url.searchParams.get("after");
+      return json(fake.twitchSchedule[Math.min(after === null ? 0 : Number(after), fake.twitchSchedule.length - 1)]);
+    }
+    if (path === "www.googleapis.com/youtube/v3/liveBroadcasts" && url.searchParams.get("broadcastStatus") === "upcoming") {
+      if (typeof fake.upcoming === "number") return json({ error: { errors: [{ reason: "quotaExceeded" }] } }, fake.upcoming);
+      // Pages of 50, with the index of the next item as the page token.
+      const from = Number(url.searchParams.get("pageToken") ?? "0");
+      const next = from + 50 < fake.upcoming.length ? { nextPageToken: String(from + 50) } : {};
+      return json({ items: fake.upcoming.slice(from, from + 50), ...next });
+    }
     if (path === "www.googleapis.com/youtube/v3/liveBroadcasts")
       return json({ items: fake.liveChatId ? [{ snippet: { liveChatId: fake.liveChatId } }] : [] });
     if (path === "www.googleapis.com/youtube/v3/liveChat/messages") {

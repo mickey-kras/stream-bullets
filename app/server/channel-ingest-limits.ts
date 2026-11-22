@@ -1,5 +1,7 @@
 /** Limits of the ChannelIngest object: retention, admission rates, polling and quotas. */
 
+import { quotaDay } from "../lib/activity";
+
 /** Chat messages kept for the reconnect snapshot, and for how long. */
 export const SNAPSHOT_SIZE = 100;
 export const SNAPSHOT_MAX_AGE_MS = 10 * 60_000;
@@ -90,3 +92,35 @@ export const WATCHDOG_QUIET_MS = 10 * 60_000;
 export const WATCHDOG_COOLDOWN_MS = 60 * 60_000;
 /** Sampled refusals inside WATCHDOG_QUIET_MS before the watchdog counts them: one a minute for each isolate. */
 export const WATCHDOG_MIN_REFUSALS = 3;
+
+/**
+ * Spends units of today's YouTube quota: the page's own budget first, then the shared one. Returns the larger spent
+ * share of the two budgets (0 to 1), or null when either is used up; a refused shared spend gives the page's
+ * units back.
+ */
+export async function spendYoutubeQuota(
+  db: D1Database,
+  streamerId: string | undefined,
+  units: number,
+  now: number,
+): Promise<number | null> {
+  const { day, resetAt } = quotaDay(now);
+  const spend = (key: string, budget: number): Promise<{ count: number } | null> =>
+    db
+      .prepare(
+        `INSERT INTO app_rate_limits (key, count, window_start) SELECT ?1, ?2, ?3 WHERE ?2 <= ?4
+          ON CONFLICT(key) DO UPDATE SET count = count + excluded.count
+          WHERE app_rate_limits.count + excluded.count <= ?4
+          RETURNING count`,
+      )
+      // The row starts at the day's reset, so the 24-hour cleanup never removes it before the day ends.
+      .bind(key, units, resetAt, budget)
+      .first<{ count: number }>();
+  const pageKey = `youtube-quota:${day}:${streamerId}`;
+  const own = await spend(pageKey, YOUTUBE_PAGE_DAILY_BUDGET);
+  if (!own) return null;
+  const shared = await spend(`youtube-quota:${day}`, YOUTUBE_DAILY_BUDGET);
+  if (shared) return Math.max(own.count / YOUTUBE_PAGE_DAILY_BUDGET, shared.count / YOUTUBE_DAILY_BUDGET);
+  await db.prepare("UPDATE app_rate_limits SET count = count - ? WHERE key = ?").bind(units, pageKey).run();
+  return null;
+}

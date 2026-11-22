@@ -10,7 +10,7 @@ import {
   dayOf,
   hourLabel,
   longDay,
-  platformLabel,
+  platformsLabel,
   statusIcon,
   statusWord,
   timeOf,
@@ -225,7 +225,7 @@ function EventBlock({
           {startDay}
           {timeOf(event.startsAt, zone)} ·{" "}
         </span>
-        {platformLabel[event.platform]}
+        {platformsLabel(event)}
       </span>
     </button>
   );

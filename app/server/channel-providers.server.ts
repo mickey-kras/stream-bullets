@@ -604,3 +604,190 @@ export async function youtubeChatPage(
     offline: body.offlineAt !== undefined,
   };
 }
+
+/** A scheduled stream as a channel's platform lists it (app/server/schedule-import.server.ts). */
+export const importedStreamSchema = z.object({
+  // Twitch segment IDs are Base64 (about 108 characters, with `+`, `/` and `=`); YouTube video IDs are shorter.
+  externalId: z.string().regex(/^[\w+/=-]{1,256}$/),
+  title: z.string().trim().min(1).max(100),
+  startsAt: z.number().int().nonnegative(),
+  durationMin: z.number().int().min(15).max(1440),
+  url: z.string().regex(/^https:\/\/[\w.-]+\/\S{0,450}$/),
+});
+export type ImportedStream = z.infer<typeof importedStreamSchema>;
+
+/** How far ahead the import reads scheduled streams: 4 weeks. */
+export const IMPORT_HORIZON_MS = 28 * 86_400_000;
+
+/** The length of a stream without a planned end, as the schedule form proposes it. */
+export const DEFAULT_STREAM_MIN = 120;
+
+function streamLength(start: number, end: number | null): number {
+  if (end === null || end <= start) return DEFAULT_STREAM_MIN;
+  return Math.min(1440, Math.max(15, Math.round((end - start) / 60_000)));
+}
+
+function streamTitle(...names: (string | null | undefined)[]): string {
+  const name = names.map((value): string => value?.trim() ?? "").find((value: string): boolean => value.length > 0);
+  return (name ?? "Stream").slice(0, 100);
+}
+
+const twitchScheduleSchema = z.object({
+  data: z.object({
+    broadcaster_login: z.string().regex(/^\w{1,64}$/),
+    broadcaster_name: z.string().max(100),
+    // Vacation mode keeps the segments; the streams in this interval do not take place.
+    vacation: z
+      .object({ start_time: z.iso.datetime({ offset: true }), end_time: z.iso.datetime({ offset: true }) })
+      .nullish(),
+    segments: z
+      .array(
+        z.object({
+          id: z.string().regex(/^[\w+/=-]{1,256}$/),
+          start_time: z.iso.datetime({ offset: true }),
+          end_time: z.iso.datetime({ offset: true }).nullable(),
+          title: z.string().max(1000),
+          canceled_until: z.string().nullable(),
+          category: z.object({ name: z.string().max(200) }).nullable(),
+        }),
+      )
+      .nullable(),
+  }),
+  pagination: z.object({ cursor: z.string().max(512).optional() }).optional(),
+});
+
+/** Pages of 25 segments the import reads at most: a stream each day for 4 weeks fits in 2. */
+const TWITCH_SCHEDULE_PAGES = 4;
+
+/** The segments of one page that start before `until`, without cancelled ones; `past` once a segment is later. */
+function twitchStreams(
+  body: z.infer<typeof twitchScheduleSchema>,
+  until: number,
+): { streams: ImportedStream[]; past: boolean } {
+  const streams: ImportedStream[] = [];
+  const vacation = body.data.vacation;
+  const away = (start: number): boolean =>
+    !!vacation && start >= Date.parse(vacation.start_time) && start < Date.parse(vacation.end_time);
+  for (const segment of body.data.segments ?? []) {
+    const start = Date.parse(segment.start_time);
+    if (start >= until) return { streams, past: true };
+    if (segment.canceled_until !== null || away(start)) continue;
+    streams.push({
+      externalId: segment.id,
+      title: streamTitle(segment.title, segment.category?.name, body.data.broadcaster_name),
+      startsAt: start,
+      durationMin: streamLength(start, segment.end_time === null ? null : Date.parse(segment.end_time)),
+      url: `https://www.twitch.tv/${body.data.broadcaster_login.toLowerCase()}`,
+    });
+  }
+  return { streams, past: false };
+}
+
+/**
+ * The Twitch schedule segments that end after `from` and start before `until`, with an app token (Get Channel
+ * Stream Schedule needs no scope). Cancelled segments and segments in the vacation are left out. A channel without
+ * a schedule answers 404: that is an empty schedule. Returns null when more pages than `TWITCH_SCHEDULE_PAGES`
+ * start before `until`: the read is not complete, so the import removes nothing.
+ */
+export async function twitchSchedule(
+  env: AppEnv,
+  broadcasterId: string,
+  from: number,
+  until: number,
+): Promise<ImportedStream[] | null> {
+  const headers = {
+    Authorization: `Bearer ${await twitchAppToken(env)}`,
+    "Client-Id": providerClient(env, "twitch").id,
+  };
+  const streams: ImportedStream[] = [];
+  let cursor: string | undefined;
+  for (let page = 0; page < TWITCH_SCHEDULE_PAGES; page++) {
+    const url = new URL("https://api.twitch.tv/helix/schedule");
+    url.search = new URLSearchParams({
+      broadcaster_id: broadcasterId,
+      start_time: new Date(from).toISOString(),
+      first: "25",
+      ...(cursor ? { after: cursor } : {}),
+    }).toString();
+    let body: z.infer<typeof twitchScheduleSchema>;
+    try {
+      body = twitchScheduleSchema.parse(await getJson(url.toString(), headers));
+    } catch (error: unknown) {
+      if (error instanceof ProviderError && error.status === 404) return streams;
+      throw error;
+    }
+    const read = twitchStreams(body, until);
+    streams.push(...read.streams);
+    cursor = body.pagination?.cursor;
+    if (read.past || !cursor) return streams;
+  }
+  return null;
+}
+
+const youtubeUpcomingSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.string().regex(/^[\w-]{1,64}$/),
+      snippet: z.object({
+        title: z.string().max(1000),
+        scheduledStartTime: z.iso.datetime({ offset: true }).optional(),
+        scheduledEndTime: z.iso.datetime({ offset: true }).optional(),
+      }),
+      status: z.object({ privacyStatus: z.string().max(32) }),
+    }),
+  ),
+  nextPageToken: z.string().max(512).optional(),
+});
+
+/** The public broadcasts of one page with a planned start before `until`. */
+function youtubeStreams(items: z.infer<typeof youtubeUpcomingSchema>["items"], until: number): ImportedStream[] {
+  const streams: ImportedStream[] = [];
+  for (const item of items) {
+    const start = item.snippet.scheduledStartTime ? Date.parse(item.snippet.scheduledStartTime) : 0;
+    if (start <= 0 || start >= until || item.status.privacyStatus !== "public") continue;
+    const end = item.snippet.scheduledEndTime ? Date.parse(item.snippet.scheduledEndTime) : null;
+    streams.push({
+      externalId: item.id,
+      title: streamTitle(item.snippet.title),
+      startsAt: start,
+      durationMin: streamLength(start, end),
+      url: `https://www.youtube.com/watch?v=${item.id}`,
+    });
+  }
+  return streams;
+}
+
+/** Pages of 50 broadcasts the import reads at most, 1 quota unit each. */
+export const YOUTUBE_UPCOMING_PAGES = 4;
+
+/**
+ * The public upcoming broadcasts of the token's channel that start before `until` (liveBroadcasts.list with
+ * `broadcastStatus=upcoming`, pages of 50). `spend` takes the quota unit of each page (null: no quota). A broadcast without a planned
+ * start (time 0) is left out, and so are private and unlisted ones: the schedule is public. Returns null when the
+ * read is not complete (no quota for a page, or more than `YOUTUBE_UPCOMING_PAGES` pages): the import then removes
+ * nothing that it did not read.
+ */
+export async function youtubeUpcoming(
+  accessToken: string,
+  until: number,
+  spend: () => Promise<number | null>,
+): Promise<ImportedStream[] | null> {
+  const streams: ImportedStream[] = [];
+  let pageToken: string | undefined;
+  for (let page = 0; page < YOUTUBE_UPCOMING_PAGES; page += 1) {
+    if ((await spend()) === null) return null;
+    const url = new URL("https://www.googleapis.com/youtube/v3/liveBroadcasts");
+    url.search = new URLSearchParams({
+      part: "id,snippet,status",
+      broadcastStatus: "upcoming",
+      broadcastType: "all",
+      maxResults: "50",
+      ...(pageToken ? { pageToken } : {}),
+    }).toString();
+    const body = youtubeUpcomingSchema.parse(await getJson(url.toString(), { Authorization: `Bearer ${accessToken}` }));
+    streams.push(...youtubeStreams(body.items, until));
+    pageToken = body.nextPageToken;
+    if (!pageToken) return streams;
+  }
+  return null;
+}

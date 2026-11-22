@@ -30,6 +30,7 @@ import {
   sqlList,
 } from "./enums";
 export * from "./auth-schema";
+export * from "./comment-revisions-schema";
 
 // Keep SQLite CHECK values aligned with the TypeScript enum.
 function enumCheck(name: string, column: AnySQLiteColumn, values: readonly (string | number)[]) {
@@ -252,31 +253,6 @@ export const commentMentions = sqliteTable(
     check(
       "comment_mentions_range_check",
       sql`${table.start} >= 0 AND ${table.end} > ${table.start} AND ${table.end} <= 2000`,
-    ),
-  ],
-);
-
-// The text of a comment before one edit. `written_at` is the time the text was written, `edited_at` the time of
-// the edit that replaced it. The page owner and admins can read these rows; the cleanup job deletes them after
-// 90 days, and a removed comment loses them at once.
-export const commentRevisions = sqliteTable(
-  "comment_revisions",
-  {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    commentId: text("comment_id")
-      .notNull()
-      .references(() => entryComments.id, { onDelete: "cascade" }),
-    text: text("text").notNull(),
-    mentions: text("mentions", { mode: "json" }).$type<{ userId: string; start: number; end: number }[]>().notNull(),
-    writtenAt: integer("written_at").notNull(),
-    editedAt: integer("edited_at").notNull(),
-  },
-  (table) => [
-    index("comment_revisions_comment_idx").on(table.commentId, table.editedAt),
-    index("comment_revisions_edited_idx").on(table.editedAt),
-    check(
-      "comment_revisions_mentions_check",
-      sql`json_valid(${table.mentions}) AND json_type(${table.mentions}) = 'array'`,
     ),
   ],
 );
@@ -606,6 +582,8 @@ export const streamEvents = sqliteTable(
     tz: text("tz").notNull(),
     // Individually edited occurrences never become cron templates.
     isException: integer("is_exception", { mode: "boolean" }).notNull().default(false),
+    // The schedule import created the stream and the owner did not edit it: a new read updates or removes it.
+    imported: integer("imported", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull(),
     updatedAt: integer("updated_at").notNull(),
   },
@@ -629,8 +607,44 @@ export const streamEvents = sqliteTable(
     ),
     check("stream_events_tz_check", sql`length(${table.tz}) BETWEEN 1 AND 64`),
     check("stream_events_exception_check", sql`${table.isException} IN (0, 1)`),
+    check("stream_events_imported_check", sql`${table.imported} IN (0, 1)`),
   ],
 );
+
+/**
+ * A scheduled stream that the import read from a connected channel (app/server/schedule-import.server.ts). One
+ * stream can have one source for each platform. A source without a stream is one the owner deleted: a new read
+ * does not add it again. A source that is not read again for 30 days is deleted.
+ */
+export const streamEventSources = sqliteTable(
+  "stream_event_sources",
+  {
+    streamerId: text("streamer_id")
+      .notNull()
+      .references(() => streamers.id, { onDelete: "cascade" }),
+    platform: text("platform", { enum: CHANNEL_PLATFORMS }).notNull(),
+    externalId: text("external_id").notNull(),
+    eventId: text("event_id").references(() => streamEvents.id, { onDelete: "set null" }),
+    url: text("url").notNull(),
+    readAt: integer("read_at").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.streamerId, table.platform, table.externalId] }),
+    index("stream_event_sources_event_idx").on(table.eventId),
+    index("stream_event_sources_read_idx").on(table.readAt),
+    enumCheck("stream_event_sources_platform_check", table.platform, CHANNEL_PLATFORMS),
+    check("stream_event_sources_external_check", sql`length(${table.externalId}) BETWEEN 1 AND 256`),
+    check("stream_event_sources_url_check", sql`${table.url} LIKE 'https://_%' AND length(${table.url}) <= 500`),
+  ],
+);
+
+/** When the import last read the scheduled streams of a page. */
+export const scheduleImports = sqliteTable("schedule_imports", {
+  streamerId: text("streamer_id")
+    .primaryKey()
+    .references(() => streamers.id, { onDelete: "cascade" }),
+  readAt: integer("read_at").notNull(),
+});
 
 // Resume after this watermark, so deleted occurrences stay deleted. Legacy series start at their latest
 // occurrence.

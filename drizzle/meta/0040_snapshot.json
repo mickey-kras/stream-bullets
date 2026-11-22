@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6dedf42b-d747-47bd-b0ad-91518991aab7",
+  "id": "7c2aa183-3a63-4256-958c-ef5e70e69ac1",
   "prevId": "f4052929-8867-40a1-bc5b-74fe2b40e5dd",
   "tables": {
     "ai_interest": {
@@ -506,93 +506,6 @@
         "comment_mentions_range_check": {
           "name": "comment_mentions_range_check",
           "value": "\"comment_mentions\".\"start\" >= 0 AND \"comment_mentions\".\"end\" > \"comment_mentions\".\"start\" AND \"comment_mentions\".\"end\" <= 2000"
-        }
-      }
-    },
-    "comment_revisions": {
-      "name": "comment_revisions",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "comment_id": {
-          "name": "comment_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "text": {
-          "name": "text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "mentions": {
-          "name": "mentions",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "written_at": {
-          "name": "written_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "edited_at": {
-          "name": "edited_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "comment_revisions_comment_idx": {
-          "name": "comment_revisions_comment_idx",
-          "columns": [
-            "comment_id",
-            "edited_at"
-          ],
-          "isUnique": false
-        },
-        "comment_revisions_edited_idx": {
-          "name": "comment_revisions_edited_idx",
-          "columns": [
-            "edited_at"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "comment_revisions_comment_id_entry_comments_id_fk": {
-          "name": "comment_revisions_comment_id_entry_comments_id_fk",
-          "tableFrom": "comment_revisions",
-          "tableTo": "entry_comments",
-          "columnsFrom": [
-            "comment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {
-        "comment_revisions_mentions_check": {
-          "name": "comment_revisions_mentions_check",
-          "value": "json_valid(\"comment_revisions\".\"mentions\") AND json_type(\"comment_revisions\".\"mentions\") = 'array'"
         }
       }
     },
@@ -2905,6 +2818,160 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "schedule_imports": {
+      "name": "schedule_imports",
+      "columns": {
+        "streamer_id": {
+          "name": "streamer_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "read_at": {
+          "name": "read_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "schedule_imports_streamer_id_streamers_id_fk": {
+          "name": "schedule_imports_streamer_id_streamers_id_fk",
+          "tableFrom": "schedule_imports",
+          "tableTo": "streamers",
+          "columnsFrom": [
+            "streamer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "stream_event_sources": {
+      "name": "stream_event_sources",
+      "columns": {
+        "streamer_id": {
+          "name": "streamer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "platform": {
+          "name": "platform",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "external_id": {
+          "name": "external_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "read_at": {
+          "name": "read_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "stream_event_sources_event_idx": {
+          "name": "stream_event_sources_event_idx",
+          "columns": [
+            "event_id"
+          ],
+          "isUnique": false
+        },
+        "stream_event_sources_read_idx": {
+          "name": "stream_event_sources_read_idx",
+          "columns": [
+            "read_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "stream_event_sources_streamer_id_streamers_id_fk": {
+          "name": "stream_event_sources_streamer_id_streamers_id_fk",
+          "tableFrom": "stream_event_sources",
+          "tableTo": "streamers",
+          "columnsFrom": [
+            "streamer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "stream_event_sources_event_id_stream_events_id_fk": {
+          "name": "stream_event_sources_event_id_stream_events_id_fk",
+          "tableFrom": "stream_event_sources",
+          "tableTo": "stream_events",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "stream_event_sources_streamer_id_platform_external_id_pk": {
+          "columns": [
+            "streamer_id",
+            "platform",
+            "external_id"
+          ],
+          "name": "stream_event_sources_streamer_id_platform_external_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "stream_event_sources_platform_check": {
+          "name": "stream_event_sources_platform_check",
+          "value": "\"stream_event_sources\".\"platform\" IN ('twitch', 'youtube', 'kick')"
+        },
+        "stream_event_sources_external_check": {
+          "name": "stream_event_sources_external_check",
+          "value": "length(\"stream_event_sources\".\"external_id\") BETWEEN 1 AND 256"
+        },
+        "stream_event_sources_url_check": {
+          "name": "stream_event_sources_url_check",
+          "value": "\"stream_event_sources\".\"url\" LIKE 'https://_%' AND length(\"stream_event_sources\".\"url\") <= 500"
+        }
+      }
+    },
     "stream_event_topics": {
       "name": "stream_event_topics",
       "columns": {
@@ -3084,6 +3151,14 @@
           "autoincrement": false,
           "default": false
         },
+        "imported": {
+          "name": "imported",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -3178,6 +3253,10 @@
         "stream_events_exception_check": {
           "name": "stream_events_exception_check",
           "value": "\"stream_events\".\"is_exception\" IN (0, 1)"
+        },
+        "stream_events_imported_check": {
+          "name": "stream_events_imported_check",
+          "value": "\"stream_events\".\"imported\" IN (0, 1)"
         }
       }
     },

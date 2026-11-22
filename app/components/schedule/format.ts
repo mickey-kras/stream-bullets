@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { intlLocale, t } from "../../i18n";
 import { hasWeekday } from "../../lib/schedule";
-import type { StreamEvent, StreamEventStatus, StreamPlatform } from "../../types";
+import type { StreamEvent, StreamEventStatus, StreamLink, StreamPlatform } from "../../types";
 import type { IconName } from "../ui/icon";
 
 const noop = (): (() => void) => () => undefined;
@@ -39,6 +39,17 @@ export const platformLabel: Record<StreamPlatform, string> = {
   tiktok: "TikTok",
   other: "Other",
 };
+
+// Each platform of the stream, the owner's own first.
+export function streamLinks(event: StreamEvent): StreamLink[] {
+  return [{ platform: event.platform, url: event.url }, ...event.alsoOn];
+}
+
+export function platformsLabel(event: StreamEvent): string {
+  return streamLinks(event)
+    .map((link: StreamLink): string => platformLabel[link.platform])
+    .join(", ");
+}
 
 export const platformIcon: Record<StreamPlatform, IconName> = {
   twitch: "twitch",
