@@ -27,7 +27,8 @@ function CardButton({ card }: Readonly<{ card: CommunityCard }>): ReactNode {
   );
 }
 
-export function CardContent({ card }: Readonly<{ card: CommunityCard }>): ReactNode {
+/** `control` shows between the text and the button, so the buttons of all cards are on one line. */
+export function CardContent({ card, control }: Readonly<{ card: CommunityCard; control?: ReactNode }>): ReactNode {
   return (
     <>
       <h2>
@@ -39,6 +40,7 @@ export function CardContent({ card }: Readonly<{ card: CommunityCard }>): ReactN
         {card.title}
       </h2>
       <p>{card.body}</p>
+      {control}
       <CardButton card={card} />
     </>
   );

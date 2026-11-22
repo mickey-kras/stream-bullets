@@ -11,7 +11,7 @@ import { Icon, type IconName } from "../ui/icon";
 import { useToast } from "../ui/toast";
 import { useShell } from "../../lib/shell";
 import { detached } from "../../lib/detached";
-import { PlatformLogo } from "./platform-logo";
+import { PlatformIcon } from "../overlay/wasteland/glyphs";
 
 export type { ChannelView } from "../../lib/channel-health";
 
@@ -427,7 +427,7 @@ export function ChannelPanel({
           return (
             <li key={channel.platform} className="ch-item" data-channel={channel.platform}>
               <p className="ch-head">
-                <PlatformLogo platform={channel.platform} />
+                <PlatformIcon className="ch-logo" platform={channel.platform} label="" />
                 <span className="ch-badge">{name}</span>
                 {connection && <strong>{t("channels.connectedAs", { name: connection.displayName })}</strong>}
                 <HealthMark health={channelHealth(channel)} />
