@@ -48,15 +48,6 @@ const LOCALE_SCRIPTS: Readonly<Record<Locale, readonly Script[]>> = {
   "zh-CN": ["han"],
 };
 
-// Links, email addresses of mailto links, and code are not text of a language. A code span can have more than
-// one backtick on each side, and it can continue on the next line, but not after an empty line.
-function prose(text: string): string {
-  return text.replaceAll(
-    /https?:\/\/\S+|mailto:[^\s)]+|```[\s\S]*?```|~~~[\s\S]*?~~~|(`+)(?:(?!\n[ \t]*\n)[\s\S])*?\1/gu,
-    " ",
-  );
-}
-
 // A link address without its scheme and percent-encoding, to compare it with the label of the link.
 function address(link: string): string {
   const bare: string = link.replace(/^(?:https?:\/\/|mailto:)/u, "");
@@ -110,7 +101,7 @@ function mainScript(plain: string): Script | null {
  * is empty when the language is not sure.
  */
 export function writtenIn(text: string): readonly Locale[] {
-  const plain: string = prose(text);
+  const plain: string = visibleText(text);
   const script: Script | null = mainScript(plain);
   if (script === "devanagari") return ["hi"];
   if (script === "kana") return ["ja"];
@@ -134,7 +125,7 @@ export function writtenIn(text: string): readonly Locale[] {
  * language of the reader stays as it is, also with a name in Cyrillic letters.
  */
 export function inLanguageOf(locale: Locale, text: string, translated: string = text): boolean {
-  const plain: string = prose(text);
+  const plain: string = visibleText(text);
   const script: Script | null = mainScript(plain);
   if (script === null) return true;
   if (!LOCALE_SCRIPTS[locale].includes(script)) return false;
