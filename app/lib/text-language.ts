@@ -57,6 +57,16 @@ function prose(text: string): string {
   );
 }
 
+// A link address without its scheme and percent-encoding, to compare it with the label of the link.
+function address(link: string): string {
+  const bare: string = link.replace(/^(?:https?:\/\/|mailto:)/u, "");
+  try {
+    return decodeURI(bare);
+  } catch {
+    return bare;
+  }
+}
+
 // The text that a reader sees, with the parser of the comment renderer: no code, no code block, also one without
 // a closing fence, and no link targets or bare links. The model must not change these parts.
 function visibleText(text: string): string {
@@ -64,7 +74,10 @@ function visibleText(text: string): string {
     if (node.kind === "text" || node.kind === "mention") return node.text;
     if (node.kind === "break") return "\n";
     if (node.kind === "code") return " ";
-    return node.children.map(inline).join("");
+    const label: string = node.children.map(inline).join("");
+    // A bare link, for example www.example.com/Миша, shows its own address. The model must not change it.
+    if (node.kind === "link" && address(node.href).startsWith(address(label))) return " ";
+    return label;
   };
   const block = (node: MarkdownBlock): string => {
     if (node.kind === "codeBlock") return " ";

@@ -46,6 +46,9 @@ describe("the language of a text from its letters", (): void => {
     expect(inLanguageOf("en", "Use this greeting string.\n```\nПривет")).toBe(true);
     // A bare link with Cyrillic letters is not text of the language.
     expect(inLanguageOf("en", "Read https://ru.wikipedia.org/wiki/Миша before the stream.")).toBe(true);
+    expect(inLanguageOf("en", "Read www.example.com/Миша before the stream.")).toBe(true);
+    // The label of a link is text of the language.
+    expect(inLanguageOf("en", "Read [the page of Миша](https://example.com) before the stream.")).toBe(false);
     // An empty line ends a paragraph, so a backtick before it does not start code.
     expect(inLanguageOf("en", "One ` here.\n\nПривет, and one ` here in the next paragraph.")).toBe(false);
     // The address of a mailto link is not text of the language. Its label is.
