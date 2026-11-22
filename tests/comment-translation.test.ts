@@ -26,6 +26,15 @@ function answer(text: string): { response: string } {
   return { response: `ORIGINAL=en\n---\n${text}` };
 }
 
+// A comment without a mention.
+async function plainComment(text: string): Promise<string> {
+  const id: string = crypto.randomUUID();
+  await env.DB.prepare("INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'fan',?,1)")
+    .bind(id, entryId, text)
+    .run();
+  return id;
+}
+
 async function seedComment(text: string = SOURCE): Promise<string> {
   const id: string = crypto.randomUUID();
   await env.DB.batch([
@@ -273,6 +282,39 @@ describe("comment translation", (): void => {
     expect(run.mock.calls[0][1].messages[0].content).toContain("into Ukrainian");
     run.mockResolvedValue(answer("Mischa, die Nachrichten sind unleserlich :(("));
     expect((await translateComment(env, id, "fan", "de", NOW))?.text).toContain("Mischa");
+  });
+
+  it("gives English text to an English reader as it is, and does not show an answer in Spanish", async (): Promise<void> => {
+    const text =
+      "What are your thoughts about the massive Microsoft outage yesterday?! Some rumors about rogue AI bots.";
+    const id: string = await plainComment(text);
+    expect(await translateComment(env, id, "fan", "en", NOW)).toBeNull();
+    expect(run).not.toHaveBeenCalled();
+    const russian: string = await plainComment("Как вы думаете, нужен ли на стримах модератор?");
+    run.mockResolvedValue(answer("¿Qué opinan, hace falta un moderador en las transmisiones en vivo?"));
+    expect(await translateComment(env, russian, "fan", "en", NOW)).toBeNull();
+  });
+
+  it("keeps a line with only a link, and accepts lines that the model joined", async (): Promise<void> => {
+    const linked: string = await plainComment(
+      "https://example.com/stats  \nКарина зарабатывает много денег каждый месяц.",
+    );
+    // The model gets only the text. It removed the line with the link before.
+    run.mockResolvedValue(answer("Karina makes a lot of money each month."));
+    expect((await translateComment(env, linked, "fan", "en", NOW))?.text).toBe(
+      "https://example.com/stats  \nKarina makes a lot of money each month.",
+    );
+    expect(run.mock.calls[0][1].messages[1].content).toBe("English\n\nКарина зарабатывает много денег каждый месяц.");
+    // The fence of a code block at the start goes to the model with its code.
+    const code: string = await plainComment("```\nprint(1)\n```\nЭто пример кода для стрима.");
+    run.mockResolvedValue(answer("```\nprint(1)\n```\nThis is a code example for the stream."));
+    await translateComment(env, code, "fan", "en", NOW);
+    expect(run.mock.lastCall?.[1].messages[1].content).toContain("```\nprint(1)\n```");
+    const wrapped: string = await plainComment(
+      "Во-первых, откуда вы взяли, что жена не должна\nработать ни одного дня?",
+    );
+    run.mockResolvedValue(answer("First, where did you get the idea that the wife must not work a single day?"));
+    expect((await translateComment(env, wrapped, "fan", "en", NOW))?.text).toContain("First, where did you get");
   });
 
   it("does not use the name in a mention to find the language", async (): Promise<void> => {

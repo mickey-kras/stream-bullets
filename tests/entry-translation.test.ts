@@ -16,12 +16,16 @@ const POLL: EntryText = {
   body: "Stimmt ab!\nEnde ist Freitag.",
   options: ["Elden Ring", "Gemütlich"],
 };
-const GOOD = "ORIGINAL=de\n---\nWhich game?\n---\nElden Ring\nCozy\n---\nVote!\nEnds on Friday.";
+// The answer of the model: JSON with the three parts. The runtime gives an object.
+function answer(title: string, options: string[], body: string): { title: string; options: string[]; body: string } {
+  return { title, options, body };
+}
+const GOOD = answer("Which game?", ["Elden Ring", "Cozy"], "Vote!\nEnds on Friday.");
 
 let database: TestDatabase;
 let env: AppEnv;
 let run: Mock<
-  (model: string, input: { messages: { role: string; content: string }[] }) => Promise<{ response: string }>
+  (model: string, input: { messages: { role: string; content: string }[] }) => Promise<{ response: unknown }>
 >;
 let pollId: string;
 let topicId: string;
@@ -74,29 +78,17 @@ describe("the answer of the model for an entry", (): void => {
       body: "Vote!\nEnds on Friday.",
     });
   });
-  it.each([
-    [
-      "no options and no description",
-      "ORIGINAL=en\n---\nTitle\n---\n---\n---",
-      { title: "Title", options: [], body: "" },
-    ],
-    [
-      "no options",
-      "ORIGINAL=ru\n---\nIdea\n---\n---\nIt is good.",
-      { title: "Idea", options: [], body: "It is good." },
-    ],
-    [
-      "a separator line in the description",
-      "ORIGINAL=de\n---\nTitle\n---\nA\nB\n---\nHello\n\n---\n\nWorld",
-      { title: "Title", options: ["A", "B"], body: "Hello\n\n---\n\nWorld" },
-    ],
-  ])("reads an answer with %s", (_name: string, answer: string, expected: EntryText): void => {
-    expect(readEntryAnswer(answer)).toEqual(expected);
+  it("reads JSON text, and removes spaces at the ends", (): void => {
+    expect(readEntryAnswer(JSON.stringify(answer(" Title ", [" A "], " Hello\n\nWorld ")))).toEqual({
+      title: "Title",
+      options: ["A"],
+      body: "Hello\n\nWorld",
+    });
   });
-  it.each(["Here is the translation", "ORIGINAL=de\nWhich game?", "ORIGINAL=de\n---\n\n---\nA\n---\n"])(
-    "refuses a wrong form: %s",
-    (answer: string): void => {
-      expect(readEntryAnswer(answer)).toBeNull();
+  it.each(["Here is the translation", { title: "Which game?" }, { title: "A", options: "B", body: "" }, null])(
+    "refuses a wrong form: %j",
+    (wrong: unknown): void => {
+      expect(readEntryAnswer(wrong)).toBeNull();
     },
   );
 });
@@ -119,7 +111,8 @@ describe("entry translation", (): void => {
     expect(await translateEntry(env, pollId, "host", "en", NOW + 1, POLL)).toEqual(expected);
     expect(run).toHaveBeenCalledTimes(1);
     const [, input] = run.mock.calls[0];
-    expect(input.messages[1].content).toBe(`English\n${POLL.title}\n---\nElden Ring\nGemütlich\n---\n${POLL.body}`);
+    expect(JSON.parse(input.messages[1].content)).toEqual(POLL);
+    expect(input.messages[0].content).toContain("into English");
     const value: Entry = await entry(pollId);
     await attachEntryTranslations(env, [value], "en");
     expect(value.translation).toEqual(expected);
@@ -129,13 +122,17 @@ describe("entry translation", (): void => {
   });
 
   it.each([
-    ["a different number of options", "ORIGINAL=de\n---\nWhich game?\n---\nElden Ring\n---\nVote!\nEnds on Friday."],
-    ["two options with the same name", "ORIGINAL=de\n---\nWhich game?\n---\nCozy\nCozy\n---\nVote!\nEnds on Friday."],
-    ["a lost line break", "ORIGINAL=de\n---\nWhich game?\n---\nElden Ring\nCozy\n---\nVote! Ends on Friday."],
-    ["a lost description", "ORIGINAL=de\n---\nWhich game?\n---\nElden Ring\nCozy\n---\n"],
-    ["the same text", `ORIGINAL=de\n---\n${POLL.title}\n---\nElden Ring\nGemütlich\n---\n${POLL.body}`],
+    ["a different number of options", answer("Which game?", ["Elden Ring"], "Vote!\nEnds on Friday.")],
+    ["two options with the same name", answer("Which game?", ["Cozy", "Cozy"], "Vote!\nEnds on Friday.")],
+    ["a lost line break", answer("Which game?", ["Elden Ring", "Cozy"], "Vote! Ends on Friday.")],
+    ["a lost description", answer("Which game?", ["Elden Ring", "Cozy"], "")],
+    ["the same text", answer(POLL.title, POLL.options, POLL.body)],
+    [
+      "an answer in a different language",
+      answer("¿Qué juego?", ["Elden Ring", "Acogedor"], "¡Voten ahora!\nTermina el viernes por la noche."),
+    ],
     ["a wrong form", "Which game?"],
-  ])("gives no translation for %s, and does not ask again", async (_name: string, response: string): Promise<void> => {
+  ])("gives no translation for %s, and does not ask again", async (_name: string, response: unknown): Promise<void> => {
     run.mockResolvedValue({ response });
     expect(await translateEntry(env, pollId, "fan", "en", NOW, POLL)).toBeNull();
     expect(await translateEntry(env, pollId, "fan", "en", NOW + 1, POLL)).toBeNull();
@@ -146,7 +143,7 @@ describe("entry translation", (): void => {
   });
 
   it("translates a topic that has only a title", async (): Promise<void> => {
-    run.mockResolvedValue({ response: "ORIGINAL=de\n---\nTopic without text\n---\n---\n---" });
+    run.mockResolvedValue({ response: answer("Topic without text", [], "") });
     const shown: EntryText = { title: "Thema ohne Text", body: "", options: [] };
     expect(await translateEntry(env, topicId, "fan", "en", NOW, shown)).toEqual({
       title: "Topic without text",
@@ -177,10 +174,10 @@ describe("entry translation", (): void => {
       .run();
     expect(await translateEntry(env, id, "fan", "ru", NOW)).toBeNull();
     expect(run).not.toHaveBeenCalled();
-    run.mockResolvedValue({ response: "ORIGINAL=uk\n---\nWhich game to stream?\n---\n---\nVote, it is important!" });
+    run.mockResolvedValue({ response: answer("Which game to stream?", [], "Vote, it is important!") });
     expect(await translateEntry(env, id, "fan", "uk", NOW)).toBeNull();
     expect(run.mock.calls[0][1].messages[0].content).toContain("into Ukrainian");
-    run.mockResolvedValue({ response: "ORIGINAL=ru\n---\nWhich game to stream?\n---\n---\nVote, it is important!" });
+    run.mockResolvedValue({ response: answer("Which game to stream?", [], "Vote, it is important!") });
     expect(await translateEntry(env, id, "fan", "en", NOW)).toEqual({
       title: "Which game to stream?",
       body: "Vote, it is important!",
@@ -196,7 +193,7 @@ describe("entry translation", (): void => {
       .bind(id, JSON.stringify(["Ведьмак", "Hades"]))
       .run();
     // The model changes the Russian answer option. A Russian reader gets it unchanged, with the other parts in Russian.
-    run.mockResolvedValue({ response: "ORIGINAL=en\n---\nВ какую игру играем?\n---\nВедьмак 3\nАид\n---" });
+    run.mockResolvedValue({ response: answer("В какую игру играем?", ["Ведьмак 3", "Аид"], "") });
     expect(await translateEntry(env, id, "fan", "ru", NOW)).toEqual({
       title: "В какую игру играем?",
       body: "",

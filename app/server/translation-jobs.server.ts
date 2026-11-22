@@ -21,7 +21,7 @@ async function ids(env: AppEnv, sql: string, limit: number): Promise<string[]> {
  * Translates the newest comments and entries that do not have a stored result for each site language, and the
  * text of pages. This is
  * the translation of new content, the first translation of content from before this feature, and the new
- * attempt after a failure. Gives the number of items that it examined. Throws when each start failed.
+ * attempt after a failure. Gives the number of items that it examined. Throws when most starts failed.
  */
 export async function translatePending(env: AppEnv, now: number, limit: number = TRANSLATION_BATCH): Promise<number> {
   if (!env.AI) return 0;
@@ -51,7 +51,8 @@ export async function translatePending(env: AppEnv, now: number, limit: number =
   const pages = await translatePendingPages(env, now);
   const starts: number = work.length + pages.starts;
   const failed: number = results.filter((result): boolean => result.status === "rejected").length + pages.failed;
-  if (starts > 0 && failed === starts) throw new Error(`All ${failed} translation starts failed.`);
+  // A text in a site language needs no model for that language, so a run with a failed model has some results.
+  if (failed * 2 > starts) throw new Error(`${failed} of ${starts} translation starts failed.`);
   return comments.length + entries.length;
 }
 

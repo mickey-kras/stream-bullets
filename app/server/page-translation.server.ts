@@ -1,6 +1,7 @@
 import { waitUntil } from "cloudflare:workers";
 import { z } from "zod";
 import { LOCALES } from "../../db/enums";
+import { loadLanguageDetector } from "../lib/text-language";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
 import type { CommunityCard, EntryText, StreamEvent, Streamer } from "../types";
@@ -107,6 +108,7 @@ export async function translatePage(
     .run();
   const ai: Ai | undefined = env.AI;
   if (!ai) return { starts: 0, failed: 0 };
+  await loadLanguageDetector();
   const { results } = await env.DB.prepare("SELECT source_hash, locale FROM page_translations WHERE streamer_id=?")
     .bind(streamerId)
     .all<{ source_hash: string; locale: string }>();
