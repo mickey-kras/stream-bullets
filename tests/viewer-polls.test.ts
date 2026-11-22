@@ -208,9 +208,10 @@ describe("viewer polls", (): void => {
     await expect(createBattle("viewer")).rejects.toMatchObject({ status: 404 });
     await setStatus("active");
 
-    // The content quota of topics also limits polls: six new items in one minute.
+    // The content quota of topics also limits polls: six new items in one minute. The window of the full quota is
+    // in the future, so a new minute between the two requests does not start a new window.
     await env.DB.prepare(
-      "INSERT INTO app_rate_limits (key,count,window_start) VALUES ('content:viewer',6,CAST(strftime('%s','now') AS INTEGER)/60*60000)",
+      "INSERT INTO app_rate_limits (key,count,window_start) VALUES ('content:viewer',6,(CAST(strftime('%s','now') AS INTEGER)/60+60)*60000)",
     ).run();
     await expect(createChoice("viewer")).rejects.toMatchObject({ status: 429 });
     await expect(createBattle("viewer")).rejects.toMatchObject({ status: 429 });
