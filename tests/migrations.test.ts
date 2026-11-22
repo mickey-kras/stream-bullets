@@ -172,7 +172,7 @@ beforeAll(async (): Promise<void> => {
     db,
     applied.filter((file: string): boolean => file >= "0032" && file < "0036"),
   );
-  // Stored translations for Russian and Ukrainian readers: two in English, two with Cyrillic letters.
+  // Stored translations for Russian and Ukrainian readers, for a different language, and a row without a translation.
   await db.batch([
     db.prepare(
       `INSERT INTO comment_translations (comment_id,locale,source_hash,text,created_at) VALUES
@@ -228,18 +228,14 @@ describe("migrations 0006 onwards", (): void => {
     ]);
   });
 
-  it("deletes the stored translations (0036) that are in English for a Russian or Ukrainian reader", async (): Promise<void> => {
+  it("deletes the stored translations (0036) for Russian and Ukrainian readers", async (): Promise<void> => {
     const comments = await db.prepare("SELECT locale, text FROM comment_translations ORDER BY locale, text").all();
     expect(comments.results).toEqual([
       { locale: "de", text: "Erster" },
       { locale: "uk", text: null },
-      { locale: "uk", text: "Перший" },
     ]);
     const entries = await db.prepare("SELECT locale, title FROM entry_translations ORDER BY locale").all();
-    expect(entries.results).toEqual([
-      { locale: "en", title: "Topic" },
-      { locale: "ru", title: "Тема" },
-    ]);
+    expect(entries.results).toEqual([{ locale: "en", title: "Topic" }]);
   });
 
   it("rebuilds overlay_state (0032) with every row, column, default and foreign key", async (): Promise<void> => {

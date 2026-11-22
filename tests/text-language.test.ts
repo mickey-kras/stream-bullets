@@ -7,6 +7,8 @@ describe("the language of a text from its letters", (): void => {
     ["Привіт усім, як справи?", ["uk"]],
     ["Спасибо, поправлю!", ["ru"]],
     ["Смотри `npm run dev` тут https://example.com/a-long-latin-address", ["ru"]],
+    // A letter in code or in a link is not text of the comment.
+    ["Спасибо! `і` https://example.com/їжак", ["ru"]],
     // Letters of the two languages.
     ["Привіт! Это мой ответ", ["ru", "uk"]],
     ["नमस्ते दोस्तों", ["hi"]],

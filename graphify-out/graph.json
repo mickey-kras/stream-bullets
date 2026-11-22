@@ -30237,8 +30237,20 @@
       "relation": "calls",
       "source": "app_lib_text_language_hasscriptof",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L60",
+      "source_location": "L65",
       "target": "app_lib_text_language_mainscript",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_text_language_hasscriptof",
+      "source_file": "app/lib/text-language.ts",
+      "source_location": "L65",
+      "target": "app_lib_text_language_prose",
       "weight": 1.0
     },
     {
@@ -30249,7 +30261,19 @@
       "relation": "calls",
       "source": "app_lib_text_language_writtenin",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L47",
+      "source_location": "L51",
+      "target": "app_lib_text_language_prose",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_lib_text_language_writtenin",
+      "source_file": "app/lib/text-language.ts",
+      "source_location": "L52",
       "target": "app_lib_text_language_mainscript",
       "weight": 1.0
     },
@@ -172488,7 +172512,7 @@
       "source": "app_lib_text_language",
       "source_file": "app/lib/text-language.ts",
       "source_location": "L29",
-      "target": "app_lib_text_language_mainscript",
+      "target": "app_lib_text_language_prose",
       "weight": 1.0
     },
     {
@@ -172509,8 +172533,8 @@
       "relation": "contains",
       "source": "app_lib_text_language",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L46",
-      "target": "app_lib_text_language_writtenin",
+      "source_location": "L34",
+      "target": "app_lib_text_language_mainscript",
       "weight": 1.0
     },
     {
@@ -172531,7 +172555,18 @@
       "relation": "contains",
       "source": "app_lib_text_language",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L59",
+      "source_location": "L50",
+      "target": "app_lib_text_language_writtenin",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_text_language",
+      "source_file": "app/lib/text-language.ts",
+      "source_location": "L64",
       "target": "app_lib_text_language_hasscriptof",
       "weight": 1.0
     },
@@ -203787,10 +203822,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "b8e96e3edf2642a3721b6a66daf1cac006835be59d09770da1ec6ae57412eebf",
+    "content_sha256": "725c49fd3c49fd7cf1e2a0463fec2431f51a64ce17233a8a68ffc0a3009a12a2",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "c22e59a5a54182747d5d679b3acbb42220ca39ad17d6339d8aa6c272b1b80755",
+    "source_sha256": "20fd92f2b6abe7b4b6ab83d7be0d1b8fbcaef35fdb855723931407e2ea4e374a",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -225810,7 +225845,7 @@
       "label": "hasScriptOf()",
       "norm_label": "hasscriptof()",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L59"
+      "source_location": "L64"
     },
     {
       "_callable": true,
@@ -225820,6 +225855,17 @@
       "id": "app_lib_text_language_mainscript",
       "label": "mainScript()",
       "norm_label": "mainscript()",
+      "source_file": "app/lib/text-language.ts",
+      "source_location": "L34"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_lib_text_language_prose",
+      "label": "prose()",
+      "norm_label": "prose()",
       "source_file": "app/lib/text-language.ts",
       "source_location": "L29"
     },
@@ -225832,7 +225878,7 @@
       "label": "writtenIn()",
       "norm_label": "writtenin()",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L46"
+      "source_location": "L50"
     },
     {
       "_callable": true,

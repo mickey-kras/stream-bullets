@@ -25,9 +25,13 @@ const LOCALE_SCRIPTS: Readonly<Record<Locale, readonly Script[]>> = {
   "zh-CN": ["han"],
 };
 
-// The script of most letters of the text. Links and code are not text of a language. Null without letters.
-function mainScript(text: string): Script | null {
-  const plain: string = text.replaceAll(/https?:\/\/\S+|```[\s\S]*?```|`[^`\n]*`/gu, " ");
+// Links and code are not text of a language.
+function prose(text: string): string {
+  return text.replaceAll(/https?:\/\/\S+|```[\s\S]*?```|`[^`\n]*`/gu, " ");
+}
+
+// The script of most letters of the text. Null without letters.
+function mainScript(plain: string): Script | null {
   const count = (script: Script): number => plain.match(SCRIPTS[script])?.length ?? 0;
   // Japanese text has kana between its Han characters.
   if (count("kana") > 0 && count("kana") + count("han") > Math.max(count("latin"), count("cyrillic"))) return "kana";
@@ -44,19 +48,20 @@ function mainScript(text: string): Script | null {
  * not tell the language.
  */
 export function writtenIn(text: string): readonly Locale[] {
-  const script: Script | null = mainScript(text);
+  const plain: string = prose(text);
+  const script: Script | null = mainScript(plain);
   if (script === "devanagari") return ["hi"];
   if (script === "kana") return ["ja"];
   if (script === "han") return ["zh-CN"];
   if (script !== "cyrillic") return [];
-  const russian: boolean = /[ыэъё]/iu.test(text);
-  const ukrainian: boolean = /[іїєґ]/iu.test(text);
+  const russian: boolean = /[ыэъё]/iu.test(plain);
+  const ukrainian: boolean = /[іїєґ]/iu.test(plain);
   if (!ukrainian) return ["ru"];
   return russian ? ["ru", "uk"] : ["uk"];
 }
 
 /** Tells if the text has the script of the language. A model sometimes answers in a different language. */
 export function hasScriptOf(locale: Locale, text: string): boolean {
-  const script: Script | null = mainScript(text);
+  const script: Script | null = mainScript(prose(text));
   return script === null || LOCALE_SCRIPTS[locale].includes(script);
 }
