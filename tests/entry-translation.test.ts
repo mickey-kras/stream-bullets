@@ -168,6 +168,26 @@ describe("entry translation", (): void => {
     expect(run).not.toHaveBeenCalled();
   });
 
+  it("gives the original text to a reader of the language of the entry, and hides an answer in English", async (): Promise<void> => {
+    const id: string = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,created_at) VALUES (?,'page','host','topic','Какую игру стримить?','Голосуйте, это важно!',1)",
+    )
+      .bind(id)
+      .run();
+    expect(await translateEntry(env, id, "fan", "ru", NOW)).toBeNull();
+    expect(run).not.toHaveBeenCalled();
+    run.mockResolvedValue({ response: "ORIGINAL=uk\n---\nWhich game to stream?\n---\n---\nVote, it is important!" });
+    expect(await translateEntry(env, id, "fan", "uk", NOW)).toBeNull();
+    expect(run.mock.calls[0][1].messages[0].content).toContain("into Ukrainian");
+    run.mockResolvedValue({ response: "ORIGINAL=ru\n---\nWhich game to stream?\n---\n---\nVote, it is important!" });
+    expect(await translateEntry(env, id, "fan", "en", NOW)).toEqual({
+      title: "Which game to stream?",
+      body: "Vote, it is important!",
+      options: [],
+    });
+  });
+
   it("uses the same daily count as the comments", async (): Promise<void> => {
     run.mockResolvedValue({ response: GOOD });
     await translateEntry(env, pollId, "fan", "en", NOW, POLL);
