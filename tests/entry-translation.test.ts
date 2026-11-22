@@ -111,7 +111,10 @@ describe("entry translation", (): void => {
     expect(await translateEntry(env, pollId, "host", "en", NOW + 1, POLL)).toEqual(expected);
     expect(run).toHaveBeenCalledTimes(1);
     const [, input] = run.mock.calls[0];
-    expect(JSON.parse(input.messages[1].content)).toEqual(POLL);
+    // The target language comes before the JSON. With the JSON only, the model often gave back the source.
+    const [instruction, json] = input.messages[1].content.split(/\n(.*)/su);
+    expect(instruction).toBe("Translate into English:");
+    expect(JSON.parse(json)).toEqual(POLL);
     expect(input.messages[0].content).toContain("into English");
     const value: Entry = await entry(pollId);
     await attachEntryTranslations(env, [value], "en");
@@ -209,6 +212,34 @@ describe("entry translation", (): void => {
     run.mockClear();
     expect(await translateEntry(env, russian, "fan", "ru", NOW)).toBeNull();
     expect(run).not.toHaveBeenCalled();
+    // A kept part with a name in Cyrillic letters does not make the translated parts fail the language check.
+    const mixed: string = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,created_at) VALUES (?,'page','host','topic','Обсуждаем следующую трансляцию и планы на неделю',?,1)",
+    )
+      .bind(mixed, "Ask Миша about the next stream and the plans for this week.")
+      .run();
+    run.mockResolvedValue({
+      response: answer("We discuss the next stream and the plans for the week", [], "Ask Misha."),
+    });
+    expect(await translateEntry(env, mixed, "fan", "en", NOW)).toEqual({
+      title: "We discuss the next stream and the plans for the week",
+      body: "Ask Миша about the next stream and the plans for this week.",
+      options: [],
+    });
+    // Game names in Latin letters stay as they are. The Japanese parts decide the script of a Japanese answer.
+    const games: string = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,options,created_at) VALUES (?,'page','host','choice','Во что играем дальше?','次の配信で遊ぶゲームを選んでください。',?,1)",
+    )
+      .bind(games, JSON.stringify(["Elden Ring", "Cyberpunk 2077"]))
+      .run();
+    run.mockResolvedValue({ response: answer("次のゲーム", ["Elden Ring", "Cyberpunk 2077"], "Ignored") });
+    expect(await translateEntry(env, games, "fan", "ja", NOW)).toEqual({
+      title: "次のゲーム",
+      body: "次の配信で遊ぶゲームを選んでください。",
+      options: ["Elden Ring", "Cyberpunk 2077"],
+    });
   });
 
   it("uses the same daily count as the comments", async (): Promise<void> => {
