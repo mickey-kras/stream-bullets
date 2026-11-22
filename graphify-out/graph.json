@@ -58653,7 +58653,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L217",
+      "source_location": "L218",
       "target": "tests_viewer_polls_test_resetquota",
       "weight": 1.0
     },
@@ -58665,7 +58665,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L285",
+      "source_location": "L286",
       "target": "tests_viewer_polls_test_seedpoll_83e60aa48c83",
       "weight": 1.0
     },
@@ -58677,7 +58677,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L313",
+      "source_location": "L314",
       "target": "tests_viewer_polls_test_seedpolls",
       "weight": 1.0
     },
@@ -58689,7 +58689,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L434",
+      "source_location": "L435",
       "target": "tests_viewer_polls_test_finishedbattle",
       "weight": 1.0
     },
@@ -58701,7 +58701,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L439",
+      "source_location": "L440",
       "target": "tests_viewer_polls_test_allpages",
       "weight": 1.0
     },
@@ -58713,7 +58713,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L441",
+      "source_location": "L442",
       "target": "tests_viewer_polls_test_expectedorder",
       "weight": 1.0
     },
@@ -58725,7 +58725,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L500",
+      "source_location": "L501",
       "target": "tests_viewer_polls_test_listpolls",
       "weight": 1.0
     },
@@ -58737,7 +58737,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test_allpages",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L387",
+      "source_location": "L388",
       "target": "tests_viewer_polls_test_listpolls",
       "weight": 1.0
     },
@@ -58785,7 +58785,7 @@
       "relation": "calls",
       "source": "tests_viewer_polls_test_listpolls",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L379",
+      "source_location": "L380",
       "target": "app_server_data_server_listentries",
       "weight": 1.0
     },
@@ -154908,7 +154908,7 @@
       "relation": "inherits",
       "source": "tests_viewer_polls_test_listed",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L395",
+      "source_location": "L396",
       "target": "tests_viewer_polls_test_seedpoll",
       "weight": 1.0
     },
@@ -198666,7 +198666,7 @@
       "relation": "contains",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L378",
+      "source_location": "L379",
       "target": "tests_viewer_polls_test_listpolls",
       "weight": 1.0
     },
@@ -198677,7 +198677,7 @@
       "relation": "contains",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L383",
+      "source_location": "L384",
       "target": "tests_viewer_polls_test_allpages",
       "weight": 1.0
     },
@@ -198688,7 +198688,7 @@
       "relation": "contains",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L395",
+      "source_location": "L396",
       "target": "tests_viewer_polls_test_listed",
       "weight": 1.0
     },
@@ -198699,7 +198699,7 @@
       "relation": "contains",
       "source": "tests_viewer_polls_test",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L401",
+      "source_location": "L402",
       "target": "tests_viewer_polls_test_expectedorder",
       "weight": 1.0
     },
@@ -206417,10 +206417,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "c5776a0a0c757326e5f30f1fae5c9538ab0050f3366538459e0d912ff9c96b48",
+    "content_sha256": "da1027dcdac5616538cbb4e424a8b86a6fe3d816afa3f7b4ede6249d40074387",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "89c212dc00ff62be4c20e244de846d8aa0a3b27146f8fb2f26acf22092e46955",
+    "source_sha256": "ff32708c222735c9f5a646e70a186306db35a5a47f1b0345d2007b5a8e658bef",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -213723,7 +213723,7 @@
       "label": "Listed",
       "norm_label": "listed",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L395"
+      "source_location": "L396"
     },
     {
       "_callable": true,
@@ -244796,7 +244796,7 @@
       "label": "allPages()",
       "norm_label": "allpages()",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L383"
+      "source_location": "L384"
     },
     {
       "_callable": true,
@@ -244840,7 +244840,7 @@
       "label": "expectedOrder()",
       "norm_label": "expectedorder()",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L401"
+      "source_location": "L402"
     },
     {
       "_callable": true,
@@ -244862,7 +244862,7 @@
       "label": "listPolls()",
       "norm_label": "listpolls()",
       "source_file": "tests/viewer-polls.test.ts",
-      "source_location": "L378"
+      "source_location": "L379"
     },
     {
       "_callable": true,
