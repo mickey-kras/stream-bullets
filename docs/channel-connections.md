@@ -194,7 +194,7 @@ The code is in `app/server/schedule-import.server.ts`.
 | Platform | Source | Access |
 | --- | --- | --- |
 | Twitch | `GET https://api.twitch.tv/helix/schedule` | The app token. The endpoint needs no scope. |
-| YouTube | `liveBroadcasts.list` with `broadcastStatus=upcoming` | The token of the channel, with the `youtube.readonly` scope. 1 quota unit. |
+| YouTube | `liveBroadcasts.list` with `broadcastStatus=upcoming` | The token of the channel, with the `youtube.readonly` scope. 1 quota unit for each page. |
 | Kick | The public API has no schedule endpoint | Kick streams stay manual. |
 
 The `ChannelIngest` object of the page reads the platform (`POST /upcoming`).
@@ -202,7 +202,8 @@ Thus only the object refreshes tokens, and a YouTube read spends the quota of th
 
 These rules apply to a read:
 
-- The read covers 4 weeks. Twitch gives at most 4 pages of 25 segments. YouTube gives one page of 50 broadcasts.
+- The read covers 4 weeks. Twitch gives at most 4 pages of 25 segments. YouTube gives at most 4 pages of 50 broadcasts.
+- A YouTube read with more pages, or without quota for a page, is not complete. It changes nothing.
 - The import ignores a canceled Twitch segment. It also ignores a YouTube broadcast that is not public or has no start time.
 - An empty title takes the Twitch category. Without a category, it takes the channel name.
 - A stream without an end gets 120 minutes. The length stays between 15 minutes and 24 hours.

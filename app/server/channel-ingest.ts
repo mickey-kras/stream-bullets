@@ -915,7 +915,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   /**
    * The scheduled streams of the channel for the next 4 weeks, for the schedule import. `streams` is null when the
    * channel cannot be read now (no usable connection, no YouTube quota, a provider failure): the import then
-   * changes nothing. Twitch needs only the app token; YouTube spends 1 quota unit of the page.
+   * changes nothing. Twitch needs only the app token; YouTube spends 1 quota unit of the page for each page of 50.
    */
   private async upcomingRequested(platform: ActivityPlatform): Promise<{ streams: ImportedStream[] | null }> {
     if (channelsOff(this.env) || platform === "kick") return { streams: null };
@@ -927,9 +927,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     try {
       if (platform === "twitch")
         return { streams: await twitchSchedule(this.env, connection.externalId, now, now + IMPORT_HORIZON_MS) };
-      if ((await this.spendQuota(1, now)) === null) return { streams: null };
       const tokens = await this.freshTokens(platform, connection);
-      return { streams: await youtubeUpcoming(tokens.accessToken, now + IMPORT_HORIZON_MS) };
+      const spend = async (): Promise<boolean> => (await this.spendQuota(1, Date.now())) !== null;
+      return { streams: await youtubeUpcoming(tokens.accessToken, now + IMPORT_HORIZON_MS, spend) };
     } catch (error: unknown) {
       if (error instanceof ReauthRequired && platform === "youtube" && this.generations.get(platform) === generation)
         await this.setStatus(platform, connection, "needs_reauth", "authorization_revoked");

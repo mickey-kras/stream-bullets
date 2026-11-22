@@ -333,9 +333,11 @@ export async function importSchedules(env: AppEnv, now: number): Promise<number>
   const stale = now - SOURCE_RETENTION_MS;
   await env.DB.batch([
     // YouTube data must not stay longer than 30 days without a new read: the entries that only it holds go too.
+    // An entry that a Twitch source also holds stays, without its YouTube link.
     env.DB.prepare(`DELETE FROM stream_events WHERE imported=1 AND id IN (SELECT event_id FROM stream_event_sources
         WHERE platform='youtube' AND read_at < ?1 AND event_id IS NOT NULL)
-      AND NOT EXISTS(SELECT 1 FROM stream_event_sources s WHERE s.event_id=stream_events.id AND s.read_at >= ?1)`).bind(
+      AND NOT EXISTS(SELECT 1 FROM stream_event_sources s WHERE s.event_id=stream_events.id
+        AND (s.read_at >= ?1 OR s.platform <> 'youtube'))`).bind(
       stale,
     ),
     // Twitch links of past streams stay with their entry; links without an entry go.

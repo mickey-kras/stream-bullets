@@ -632,7 +632,7 @@ export const streamEventSources = sqliteTable(
     index("stream_event_sources_event_idx").on(table.eventId),
     index("stream_event_sources_read_idx").on(table.readAt),
     enumCheck("stream_event_sources_platform_check", table.platform, CHANNEL_PLATFORMS),
-    check("stream_event_sources_external_check", sql`length(${table.externalId}) BETWEEN 1 AND 64`),
+    check("stream_event_sources_external_check", sql`length(${table.externalId}) BETWEEN 1 AND 256`),
     check("stream_event_sources_url_check", sql`${table.url} LIKE 'https://_%' AND length(${table.url}) <= 500`),
   ],
 );

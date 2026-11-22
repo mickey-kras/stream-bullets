@@ -15,7 +15,7 @@ CREATE TABLE `stream_event_sources` (
 	FOREIGN KEY (`streamer_id`) REFERENCES `streamers`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`event_id`) REFERENCES `stream_events`(`id`) ON UPDATE no action ON DELETE set null,
 	CONSTRAINT "stream_event_sources_platform_check" CHECK("stream_event_sources"."platform" IN ('twitch', 'youtube', 'kick')),
-	CONSTRAINT "stream_event_sources_external_check" CHECK(length("stream_event_sources"."external_id") BETWEEN 1 AND 64),
+	CONSTRAINT "stream_event_sources_external_check" CHECK(length("stream_event_sources"."external_id") BETWEEN 1 AND 256),
 	CONSTRAINT "stream_event_sources_url_check" CHECK("stream_event_sources"."url" LIKE 'https://_%' AND length("stream_event_sources"."url") <= 500)
 );
 --> statement-breakpoint

@@ -607,7 +607,8 @@ export async function youtubeChatPage(
 
 /** A scheduled stream as a channel's platform lists it (app/server/schedule-import.server.ts). */
 export const importedStreamSchema = z.object({
-  externalId: z.string().regex(/^[\w-]{1,64}$/),
+  // Twitch segment IDs are Base64 (about 108 characters, with `+`, `/` and `=`); YouTube video IDs are shorter.
+  externalId: z.string().regex(/^[\w+/=-]{1,256}$/),
   title: z.string().trim().min(1).max(100),
   startsAt: z.number().int().nonnegative(),
   durationMin: z.number().int().min(15).max(1440),
@@ -638,7 +639,7 @@ const twitchScheduleSchema = z.object({
     segments: z
       .array(
         z.object({
-          id: z.string().regex(/^[\w-]{1,64}$/),
+          id: z.string().regex(/^[\w+/=-]{1,256}$/),
           start_time: z.iso.datetime({ offset: true }),
           end_time: z.iso.datetime({ offset: true }).nullable(),
           title: z.string().max(1000),
@@ -727,22 +728,10 @@ const youtubeUpcomingSchema = z.object({
   nextPageToken: z.string().max(512).optional(),
 });
 
-/**
- * The public upcoming broadcasts of the token's channel that start before `until`: one page of 50 (liveBroadcasts.list
- * with `broadcastStatus=upcoming`, 1 quota unit). A broadcast without a planned start (time 0) is left out, and so are
- * private and unlisted ones: the schedule is public.
- */
-export async function youtubeUpcoming(accessToken: string, until: number): Promise<ImportedStream[]> {
-  const url = new URL("https://www.googleapis.com/youtube/v3/liveBroadcasts");
-  url.search = new URLSearchParams({
-    part: "id,snippet,status",
-    broadcastStatus: "upcoming",
-    broadcastType: "all",
-    maxResults: "50",
-  }).toString();
-  const body = youtubeUpcomingSchema.parse(await getJson(url.toString(), { Authorization: `Bearer ${accessToken}` }));
+/** The public broadcasts of one page with a planned start before `until`. */
+function youtubeStreams(items: z.infer<typeof youtubeUpcomingSchema>["items"], until: number): ImportedStream[] {
   const streams: ImportedStream[] = [];
-  for (const item of body.items) {
+  for (const item of items) {
     const start = item.snippet.scheduledStartTime ? Date.parse(item.snippet.scheduledStartTime) : 0;
     if (start <= 0 || start >= until || item.status.privacyStatus !== "public") continue;
     const end = item.snippet.scheduledEndTime ? Date.parse(item.snippet.scheduledEndTime) : null;
@@ -755,4 +744,39 @@ export async function youtubeUpcoming(accessToken: string, until: number): Promi
     });
   }
   return streams;
+}
+
+/** Pages of 50 broadcasts the import reads at most, 1 quota unit each. */
+export const YOUTUBE_UPCOMING_PAGES = 4;
+
+/**
+ * The public upcoming broadcasts of the token's channel that start before `until` (liveBroadcasts.list with
+ * `broadcastStatus=upcoming`, pages of 50). `spend` takes the quota unit of each page. A broadcast without a planned
+ * start (time 0) is left out, and so are private and unlisted ones: the schedule is public. Returns null when the
+ * read is not complete (no quota for a page, or more than `YOUTUBE_UPCOMING_PAGES` pages): the import then removes
+ * nothing that it did not read.
+ */
+export async function youtubeUpcoming(
+  accessToken: string,
+  until: number,
+  spend: () => Promise<boolean>,
+): Promise<ImportedStream[] | null> {
+  const streams: ImportedStream[] = [];
+  let pageToken: string | undefined;
+  for (let page = 0; page < YOUTUBE_UPCOMING_PAGES; page += 1) {
+    if (!(await spend())) return null;
+    const url = new URL("https://www.googleapis.com/youtube/v3/liveBroadcasts");
+    url.search = new URLSearchParams({
+      part: "id,snippet,status",
+      broadcastStatus: "upcoming",
+      broadcastType: "all",
+      maxResults: "50",
+      ...(pageToken ? { pageToken } : {}),
+    }).toString();
+    const body = youtubeUpcomingSchema.parse(await getJson(url.toString(), { Authorization: `Bearer ${accessToken}` }));
+    streams.push(...youtubeStreams(body.items, until));
+    pageToken = body.nextPageToken;
+    if (!pageToken) return streams;
+  }
+  return null;
 }

@@ -232,7 +232,10 @@ export function installFakeProviders(): FakeProviders {
     }
     if (path === "www.googleapis.com/youtube/v3/liveBroadcasts" && url.searchParams.get("broadcastStatus") === "upcoming") {
       if (typeof fake.upcoming === "number") return json({ error: { errors: [{ reason: "quotaExceeded" }] } }, fake.upcoming);
-      return json({ items: fake.upcoming });
+      // Pages of 50, with the index of the next item as the page token.
+      const from = Number(url.searchParams.get("pageToken") ?? "0");
+      const next = from + 50 < fake.upcoming.length ? { nextPageToken: String(from + 50) } : {};
+      return json({ items: fake.upcoming.slice(from, from + 50), ...next });
     }
     if (path === "www.googleapis.com/youtube/v3/liveBroadcasts")
       return json({ items: fake.liveChatId ? [{ snippet: { liveChatId: fake.liveChatId } }] : [] });

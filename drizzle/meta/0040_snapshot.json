@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1e8e168b-96b6-48dc-abb8-e38a87c9bd36",
+  "id": "7c2aa183-3a63-4256-958c-ef5e70e69ac1",
   "prevId": "f4052929-8867-40a1-bc5b-74fe2b40e5dd",
   "tables": {
     "ai_interest": {
@@ -2964,7 +2964,7 @@
         },
         "stream_event_sources_external_check": {
           "name": "stream_event_sources_external_check",
-          "value": "length(\"stream_event_sources\".\"external_id\") BETWEEN 1 AND 64"
+          "value": "length(\"stream_event_sources\".\"external_id\") BETWEEN 1 AND 256"
         },
         "stream_event_sources_url_check": {
           "name": "stream_event_sources_url_check",

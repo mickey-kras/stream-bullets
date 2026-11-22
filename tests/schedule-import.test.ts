@@ -2,7 +2,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import type { AppEnv } from "../app/env";
 import { quotaDay } from "../app/lib/activity";
 import { ChannelIngest } from "../app/server/channel-ingest";
-import { IMPORT_HORIZON_MS } from "../app/server/channel-providers.server";
+import { YOUTUBE_DAILY_BUDGET } from "../app/server/channel-ingest-limits";
+import { IMPORT_HORIZON_MS, YOUTUBE_UPCOMING_PAGES } from "../app/server/channel-providers.server";
 import { tokenStatement } from "../app/server/channel-tokens.server";
 import { deleteEvent, listEvents, MAX_UPCOMING_EVENTS, patchEvent } from "../app/server/schedule.server";
 import {
@@ -224,6 +225,54 @@ describe("reading the platforms", (): void => {
       .bind(`youtube-quota:${quotaDay(now).day}:${page}`)
       .first<{ count: number }>();
     expect(quota?.count).toBe(1);
+  });
+
+  it("accepts the Base64 segment IDs that Twitch gives", async (): Promise<void> => {
+    await addConnection("twitch");
+    // The form of the ID in the Twitch reference: Base64 of 108 characters, with `=` at the end.
+    const id = btoa(JSON.stringify({ segmentID: "e4acc724-371f-402c-81ca-23ada79759d4", isoYear: 2021, isoWeek: 26 }));
+    expect(id).toMatch(/=$/);
+    fake.twitchSchedule = [schedule([segment(id, "Show", now + 2 * day)])];
+    await importPageSchedule(env, page, now);
+    expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Show"]);
+    const source = await env.DB.prepare("SELECT external_id FROM stream_event_sources").first<{ external_id: string }>();
+    expect(source?.external_id).toBe(id);
+  });
+
+  it("reads each page of YouTube broadcasts, one quota unit for each", async (): Promise<void> => {
+    await addConnection("youtube");
+    // 50 private broadcasts fill the first page; the public one is on the second.
+    fake.upcoming = [
+      ...Array.from({ length: 50 }, (_, index: number) => broadcast(`priv-${index}`, "Private", now + day, "private")),
+      broadcast("vid-late", "Second page", now + 2 * day),
+    ];
+    await importPageSchedule(env, page, now);
+    expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Second page"]);
+    const pages = fake.calls.filter((item) => item.url.pathname === "/youtube/v3/liveBroadcasts");
+    expect(pages.map((item) => item.url.searchParams.get("pageToken"))).toEqual([null, "50"]);
+    const quota = await env.DB.prepare("SELECT count FROM app_rate_limits WHERE key=?")
+      .bind(`youtube-quota:${quotaDay(now).day}:${page}`)
+      .first<{ count: number }>();
+    expect(quota?.count).toBe(2);
+  });
+
+  it("removes nothing after an incomplete YouTube read", async (): Promise<void> => {
+    await addConnection("youtube");
+    fake.upcoming = [broadcast("vid-1", "Show", now + 2 * day)];
+    await importPageSchedule(env, page, now);
+    // More pages than the import reads: the read is not complete, so "Show" is not known to be gone.
+    fake.upcoming = Array.from({ length: 50 * YOUTUBE_UPCOMING_PAGES + 1 }, (_, index: number) =>
+      broadcast(`priv-${index}`, "Private", now + day, "private"),
+    );
+    await importPageSchedule(env, page, now + 60_000);
+    expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Show"]);
+    // Quota for the first page only: the same.
+    fake.upcoming = Array.from({ length: 51 }, (_, index: number) => broadcast(`priv-${index}`, "Private", now + day, "private"));
+    await env.DB.prepare("UPDATE app_rate_limits SET count=? WHERE key=?")
+      .bind(YOUTUBE_DAILY_BUDGET - 1, `youtube-quota:${quotaDay(now).day}`)
+      .run();
+    await importPageSchedule(env, page, now + 120_000);
+    expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Show"]);
   });
 
   it("treats a Twitch channel without a schedule as an empty schedule", async (): Promise<void> => {
@@ -453,6 +502,21 @@ describe("when the import runs", (): void => {
     expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Twitch show", "Tube show"]);
     await importSchedules(env, now + SOURCE_RETENTION_MS + 1);
     expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Twitch show"]);
+    const sources = await env.DB.prepare("SELECT platform FROM stream_event_sources").all<{ platform: string }>();
+    expect(sources.results).toEqual([{ platform: "twitch" }]);
+  });
+
+  it("keeps an entry that Twitch also holds when its YouTube data expires", async (): Promise<void> => {
+    await addConnection("twitch");
+    await addConnection("youtube");
+    fake.twitchSchedule = [schedule([segment("s1", "Same show", now + 2 * day)])];
+    fake.upcoming = [broadcast("vid-1", "Same show", now + 2 * day)];
+    await importPageSchedule(env, page, now);
+    expect((await events()).map((event: StreamEvent) => event.alsoOn.length)).toEqual([1]);
+    await env.DB.prepare("DELETE FROM channel_connections").run();
+    await importSchedules(env, now + SOURCE_RETENTION_MS + 1);
+    const list = await events();
+    expect(list.map((event: StreamEvent) => [event.title, event.platform, event.alsoOn.length])).toEqual([["Same show", "twitch", 0]]);
     const sources = await env.DB.prepare("SELECT platform FROM stream_event_sources").all<{ platform: string }>();
     expect(sources.results).toEqual([{ platform: "twitch" }]);
   });
