@@ -30,6 +30,7 @@ import {
   sqlList,
 } from "./enums";
 export * from "./auth-schema";
+export * from "./comment-revisions-schema";
 
 // Keep SQLite CHECK values aligned with the TypeScript enum.
 function enumCheck(name: string, column: AnySQLiteColumn, values: readonly (string | number)[]) {

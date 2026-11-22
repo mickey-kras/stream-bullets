@@ -1,7 +1,14 @@
 import type { AppEnv } from "../env";
-import type { Comment, CommentThread, DiscussionSnapshot, ThreadSnapshot } from "../types";
+import type {
+  Comment,
+  CommentMention,
+  CommentRevision,
+  CommentThread,
+  DiscussionSnapshot,
+  ThreadSnapshot,
+} from "../types";
 import { mentionStatements, validateMentions } from "./discussion-notifications.server";
-import { assertStreamerWritable } from "./access.server";
+import { assertStreamerWritable, isAdmin } from "./access.server";
 import {
   applyMutation,
   consumeMutationQuota,
@@ -209,6 +216,10 @@ async function removeComment(
       DELETE FROM entry_comments WHERE id IN (SELECT id FROM gone)`).bind(comment.parent_id),
     env.DB.prepare("DELETE FROM notifications WHERE comment_id=?").bind(id),
     env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(id),
+    // A placeholder keeps its row, so its earlier texts need their own statement too.
+    env.DB.prepare(
+      "DELETE FROM comment_revisions WHERE comment_id=? AND NOT EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND removed_at IS NULL)",
+    ).bind(id, id),
     // A placeholder keeps its row, so the stored translations of the removed text need their own statement.
     env.DB.prepare(
       "DELETE FROM comment_translations WHERE comment_id=? AND NOT EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND removed_at IS NULL)",
@@ -247,10 +258,23 @@ export async function mutateComment(
     if (comment.author_id !== viewerId) throw new HttpError(403, "Only the author can edit this comment.");
     await consumeMutationQuota(env, viewerId, true);
     await validateMentions(env, comment.streamer_id, action.text, action.mentions, action.id);
+    const now = Date.now();
     const result = await env.DB.batch([
+      // Keep the text before the edit for the page owner and admins. An edit that keeps the text stores nothing.
+      // The text was written by the last edit that changed it; without a stored one, by the last edit or the post.
+      env.DB.prepare(`INSERT INTO comment_revisions (comment_id,text,mentions,written_at,edited_at)
+        SELECT c.id,c.text,(SELECT json_group_array(json_object('userId',m.user_id,'start',m.start,'end',m.end))
+          FROM comment_mentions m WHERE m.comment_id=c.id),
+          coalesce((SELECT max(r.edited_at) FROM comment_revisions r WHERE r.comment_id=c.id),c.edited_at,c.created_at),?
+        FROM entry_comments c WHERE c.id=? AND c.author_id=? AND c.removed_at IS NULL AND c.text<>?`).bind(
+        now,
+        action.id,
+        viewerId,
+        action.text,
+      ),
       env.DB.prepare(
         "UPDATE entry_comments SET text=?,edited_at=? WHERE id=? AND author_id=? AND removed_at IS NULL",
-      ).bind(action.text, Date.now(), action.id, viewerId),
+      ).bind(action.text, now, action.id, viewerId),
       env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(action.id),
       // The stored translations are of the text before the edit.
       env.DB.prepare(
@@ -263,7 +287,7 @@ export async function mutateComment(
       ),
       env.DB.prepare("UPDATE streamers SET revision=revision+1 WHERE id=?").bind(comment.streamer_id),
     ]);
-    if (!result[0].meta.changes) throw new HttpError(404, "Comment not found.");
+    if (!result[1].meta.changes) throw new HttpError(404, "Comment not found.");
   } else if (action.action === "like") {
     const statement = action.liked
       ? env.DB.prepare(
@@ -321,4 +345,41 @@ export async function getCommentThread(
     handle: page.handle,
     entryId: row.entry_id,
   };
+}
+
+// Earlier texts kept for 90 days after the edit that replaced them.
+export const REVISION_RETENTION_MS = 90 * 86_400_000;
+
+// The earlier texts of a comment, oldest first. Only the owner of the page and admins can read them; an admin
+// passes the step-up gate. Everyone else, the author included, gets the same 404 as for a missing comment.
+export async function listCommentRevisions(
+  env: AppEnv,
+  viewerId: string,
+  id: string,
+  stepUp: () => Promise<unknown>,
+): Promise<CommentRevision[]> {
+  const comment = await env.DB.prepare(
+    `SELECT s.owner_id,c.removed_at FROM entry_comments c JOIN entries e ON e.id=c.entry_id
+      JOIN streamers s ON s.id=e.streamer_id WHERE c.id=?`,
+  )
+    .bind(id)
+    .first<{ owner_id: string; removed_at: number | null }>();
+  if (comment?.removed_at !== null) throw new HttpError(404, "Comment not found.");
+  if (comment.owner_id !== viewerId) {
+    if (!(await isAdmin(env, viewerId))) throw new HttpError(404, "Comment not found.");
+    await stepUp();
+  }
+  const { results } = await env.DB.prepare(
+    "SELECT text,mentions,written_at,edited_at FROM comment_revisions WHERE comment_id=? ORDER BY edited_at,id",
+  )
+    .bind(id)
+    .all<{ text: string; mentions: string; written_at: number; edited_at: number }>();
+  return results.map(
+    (row): CommentRevision => ({
+      text: row.text,
+      mentions: JSON.parse(row.mentions) as CommentMention[],
+      writtenAt: row.written_at,
+      editedAt: row.edited_at,
+    }),
+  );
 }

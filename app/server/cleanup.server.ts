@@ -1,5 +1,6 @@
 import type { AppEnv } from "../env";
 import { pruneAiInterest } from "./ai.server";
+import { REVISION_RETENTION_MS } from "./comments.server";
 import { pruneTranslationAttempts } from "./translation.server";
 
 // Resolved reports are deleted after 365 days.
@@ -30,6 +31,10 @@ export async function cleanExpiredData(env: AppEnv, now: number): Promise<void> 
     env.DB.prepare("DELETE FROM conversion_daily WHERE day < date(?, 'unixepoch', '-90 days')").bind(
       Math.floor(now / 1000),
     ),
+    // Earlier texts of edited comments stay for 90 days.
+    env.DB.prepare(
+      "DELETE FROM comment_revisions WHERE id IN (SELECT id FROM comment_revisions WHERE edited_at < ? LIMIT 5000)",
+    ).bind(now - REVISION_RETENTION_MS),
     // AI interest votes count for 30 days.
     ...pruneAiInterest(env, now),
     pruneTranslationAttempts(env, now),

@@ -444,6 +444,9 @@ button.danger:hover { background: var(--danger-hover); border-color: var(--error
 .info-card fieldset legend { margin-bottom: 4px; }
 .text-button { align-self: flex-start; min-height: 32px; padding: 4px 2px; border: 0; background: none; color: var(--gold); font: 600 15px/1.2 var(--body); text-decoration: underline; text-underline-offset: 4px; }
 .text-button:hover { background: none; color: var(--gold-hover); }
+.comment-history-button { min-height: 24px; padding: 0; font-size: 0.9375rem; font-weight: 400; }
+.comment-history { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.comment-history li { display: grid; gap: 4px; }
 .avatar-picker > .text-button { margin: 0 0 8px; }
 .crop-layout { display: flex; align-items: center; gap: 22px; margin-top: 18px; }
 .crop-stage { position: relative; flex: 0 0 auto; width: 320px; aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-control); background: var(--field); touch-action: none; cursor: grab; user-select: none; }

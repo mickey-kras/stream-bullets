@@ -1390,5 +1390,11 @@
   "waitlist.update": "Оновити запит",
   "overlay.characters.off": "Персонажі на цьому сервері вимкнені.",
   "discussion.showOriginal": "Показати оригінал",
-  "discussion.showTranslation": "Показати переклад"
+  "discussion.showTranslation": "Показати переклад",
+  "discussion.historyTitle": "Попередні тексти",
+  "discussion.historyOpen": "Показати попередні тексти цього коментаря",
+  "discussion.historyDescription": "Тексти до кожної зміни бачать лише власник сторінки та адміністратори. Вони зберігаються 90 днів.",
+  "discussion.historyEmpty": "Попередніх текстів немає.",
+  "discussion.historyLoading": "Завантажуємо попередні тексти…",
+  "discussion.historyWritten": "Написано {time}"
 }

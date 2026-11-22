@@ -181,6 +181,8 @@ interface CommentRow extends PagedRow {
   created_at: number;
   parent_id: string | null;
   removed_at: number | null;
+  edited_at: number | null;
+  revisions: string;
 }
 
 interface ReactionRow extends PagedRow {
@@ -367,6 +369,9 @@ export interface AccountExport {
     parentId: string | null;
     // Deleted while it had replies: the text is gone and the thread shows "Comment removed".
     removed: boolean;
+    editedAt: string | null;
+    // The texts before each edit, oldest first. Kept for 90 days after the edit.
+    earlierTexts: { text: string; writtenAt: string; editedAt: string }[];
   }[];
   reactions: { entryId: string; entryTitle: string; streamerHandle: string; reaction: "like" | "dislike" }[];
   votes: { entryId: string; entryTitle: string; streamerHandle: string; choice: number; option: string | null }[];
@@ -475,7 +480,9 @@ async function readHistory(env: AppEnv, userId: string, now: number) {
   );
   const comments = await readAll<CommentRow>(
     env,
-    `SELECT x.rowid AS row_cursor,x.id,x.entry_id,e.title AS entry_title,s.handle,x.text,x.created_at,x.parent_id,x.removed_at
+    `SELECT x.rowid AS row_cursor,x.id,x.entry_id,e.title AS entry_title,s.handle,x.text,x.created_at,x.parent_id,x.removed_at,
+        x.edited_at,(SELECT json_group_array(json_object('text',r.text,'writtenAt',r.written_at,'editedAt',r.edited_at))
+          FROM (SELECT * FROM comment_revisions WHERE comment_id=x.id ORDER BY edited_at,id) r) AS revisions
       FROM entry_comments x ${entryJoin} WHERE x.author_id=?1 AND ${page}`,
     userId,
   );
@@ -816,6 +823,10 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
       createdAt: iso(row.created_at),
       parentId: row.parent_id,
       removed: row.removed_at !== null,
+      editedAt: optionalIso(row.edited_at),
+      earlierTexts: (JSON.parse(row.revisions) as { text: string; writtenAt: number; editedAt: number }[]).map(
+        (revision) => ({ text: revision.text, writtenAt: iso(revision.writtenAt), editedAt: iso(revision.editedAt) }),
+      ),
     })),
     reactions: history.reactions.map((row: ReactionRow) => ({
       entryId: row.entry_id,

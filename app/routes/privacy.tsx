@@ -118,6 +118,10 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
             with your account; signed out, they stay in cookies in your browser.
           </li>
           <li>Topics, polls, comments, replies, votes, reactions, and likes.</li>
+          <li>
+            The text of a comment before each edit, with the time it was written and edited. Only the owner of the page
+            and administrators can see it. Other readers see only the newest text and the label Edited.
+          </li>
           <li>Mash Battle taps: how many times you tapped for your side, and whether you used assisted tapping.</li>
           <li>
             For streamers: your handle, page name, about text, page logo, avatar, page background, stream schedule,
@@ -324,6 +328,10 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
         </li>
         <li>
           <strong>AI interest votes</strong> are deleted after 30 days by the hourly task.
+        </li>
+        <li>
+          <strong>Earlier texts of an edited comment</strong> are deleted 90 days after the edit by the hourly task.
+          Removing the comment or deleting the account deletes them at once.
         </li>
         <li>
           <strong>Moderation records</strong> stay as an audit log so we can answer appeals and lawful requests. They

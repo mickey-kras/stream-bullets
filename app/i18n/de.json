@@ -1350,5 +1350,11 @@
   "waitlist.update": "Antrag aktualisieren",
   "overlay.characters.off": "Figuren sind auf diesem Server aus.",
   "discussion.showOriginal": "Original anzeigen",
-  "discussion.showTranslation": "Übersetzung anzeigen"
+  "discussion.showTranslation": "Übersetzung anzeigen",
+  "discussion.historyTitle": "Frühere Texte",
+  "discussion.historyOpen": "Frühere Texte dieses Kommentars anzeigen",
+  "discussion.historyDescription": "Nur der Besitzer der Seite und Admins sehen die Texte vor jeder Bearbeitung. Sie bleiben 90 Tage gespeichert.",
+  "discussion.historyEmpty": "Kein früherer Text gespeichert.",
+  "discussion.historyLoading": "Frühere Texte werden geladen …",
+  "discussion.historyWritten": "Geschrieben {time}"
 }

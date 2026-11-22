@@ -1330,5 +1330,11 @@
   "waitlist.update": "申請を更新",
   "overlay.characters.off": "このサーバーではキャラクターはオフです。",
   "discussion.showOriginal": "原文を表示",
-  "discussion.showTranslation": "翻訳を表示"
+  "discussion.showTranslation": "翻訳を表示",
+  "discussion.historyTitle": "以前のテキスト",
+  "discussion.historyOpen": "このコメントの以前のテキストを表示",
+  "discussion.historyDescription": "編集前のテキストはページのオーナーと管理者だけが見られます。90日間保存されます。",
+  "discussion.historyEmpty": "以前のテキストは保存されていません。",
+  "discussion.historyLoading": "以前のテキストを読み込み中…",
+  "discussion.historyWritten": "{time} に書き込み"
 }

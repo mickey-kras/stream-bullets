@@ -226,7 +226,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0040", (): void => {
+  it("covers 0006 to 0041", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -263,6 +263,7 @@ describe("migrations 0006 onwards", (): void => {
       "0038",
       "0039",
       "0040",
+      "0041",
     ]);
   });
 
@@ -287,6 +288,18 @@ describe("migrations 0006 onwards", (): void => {
         )
         .run(),
     ).rejects.toThrow(/CHECK/);
+  });
+
+  it("adds comment revisions (0041) that go with their comment and hold a JSON array of mentions", async (): Promise<void> => {
+    await db
+      .prepare("INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES ('c9','topic','fan','New',1)")
+      .run();
+    await expect(
+      db.prepare("INSERT INTO comment_revisions (comment_id,text,mentions,written_at,edited_at) VALUES ('c9','Old','{}',1,2)").run(),
+    ).rejects.toThrow(/CHECK constraint failed/);
+    await db.prepare("INSERT INTO comment_revisions (comment_id,text,mentions,written_at,edited_at) VALUES ('c9','Old','[]',1,2)").run();
+    await db.prepare("DELETE FROM entry_comments WHERE id='c9'").run();
+    expect(await db.prepare("SELECT count(*) AS n FROM comment_revisions").first()).toEqual({ n: 0 });
   });
 
   it("deletes each stored translation (0036 and 0038), so the job makes them again", (): void => {
