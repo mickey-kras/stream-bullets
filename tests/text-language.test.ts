@@ -37,6 +37,9 @@ describe("the language of a text from its letters", (): void => {
     expect(inLanguageOf("pl", "Misha, nie myślałeś o przeprowadzce do innego stanu?")).toBe(true);
     expect(inLanguageOf("ja", "ミシャ、Мишаの配信")).toBe(false);
     expect(inLanguageOf("ru", "Миша, привет от Kasia")).toBe(true);
+    // Code is not text of the language, also in a code span with two backticks.
+    expect(inLanguageOf("en", "Use `Привет` as the greeting string.")).toBe(true);
+    expect(inLanguageOf("en", "Use ``Привет`` as the greeting string.")).toBe(true);
     expect(inLanguageOf("ja", "今日の配信")).toBe(true);
     expect(inLanguageOf("ja", "東京")).toBe(true);
     expect(inLanguageOf("zh-CN", "今日の配信は楽しい")).toBe(false);
