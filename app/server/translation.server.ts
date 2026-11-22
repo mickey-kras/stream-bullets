@@ -124,9 +124,10 @@ export async function attachTranslations(env: AppEnv, comments: readonly Comment
   }
 }
 
-// A line without letters: a link, emoji or numbers. Also an empty line.
+// A line without letters: a link, emoji or numbers. Also an empty line. The fence of a code block is not such
+// a line: without it, the model gets the code as text.
 function fixedLine(line: string): boolean {
-  return !/\p{L}/u.test(line.replaceAll(/https?:\/\/\S+/gu, ""));
+  return !/^\s*(?:```|~~~)/u.test(line) && !/\p{L}/u.test(line.replaceAll(/https?:\/\/\S+/gu, ""));
 }
 
 /**

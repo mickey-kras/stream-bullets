@@ -305,6 +305,11 @@ describe("comment translation", (): void => {
       "https://example.com/stats  \nKarina makes a lot of money each month.",
     );
     expect(run.mock.calls[0][1].messages[1].content).toBe("English\n\nКарина зарабатывает много денег каждый месяц.");
+    // The fence of a code block at the start goes to the model with its code.
+    const code: string = await plainComment("```\nprint(1)\n```\nЭто пример кода для стрима.");
+    run.mockResolvedValue(answer("```\nprint(1)\n```\nThis is a code example for the stream."));
+    await translateComment(env, code, "fan", "en", NOW);
+    expect(run.mock.lastCall?.[1].messages[1].content).toContain("```\nprint(1)\n```");
     const wrapped: string = await plainComment(
       "Во-первых, откуда вы взяли, что жена не должна\nработать ни одного дня?",
     );
