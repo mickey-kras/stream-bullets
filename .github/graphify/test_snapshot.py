@@ -68,6 +68,18 @@ class SnapshotTests(unittest.TestCase):
             self.assertNotIn("built_at_commit", graphs[0])
             self.assertEqual(graphs[0], graphs[1])
 
+    def test_metadata_does_not_change_with_the_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "app").mkdir()
+            (root / "app/a.ts").write_text("export const value = 1;\n")
+            stage(root)
+            with patch.object(snapshot, "ROOT", root):
+                before = snapshot.build()["graph"]
+                (root / "app/b.ts").write_text("export const other = 2;\n")
+                subprocess.run(["git", "add", "--all"], cwd=root, check=True)
+                self.assertEqual(snapshot.build()["graph"], before)
+
     def test_check_rejects_a_stale_graph_and_accepts_a_current_one(self) -> None:
         graph = {"nodes": [{"id": "current"}], "edges": [], "graph": {}}
         with tempfile.TemporaryDirectory() as directory:

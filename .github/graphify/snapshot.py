@@ -32,11 +32,6 @@ def tool_digest() -> str:
     return digest.hexdigest()
 
 
-def content_digest(graph: dict[str, object]) -> str:
-    content = {key: value for key, value in graph.items() if key != "graph"}
-    return hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()
-
-
 def source_files() -> dict[str, bytes]:
     """Read graph sources from the Git index, so a commit's graph never includes unstaged edits."""
     entries = subprocess.check_output(
@@ -55,13 +50,6 @@ def source_files() -> dict[str, bytes]:
     if not files:
         raise ValueError("No tracked graph sources found")
     return dict(sorted(files.items()))
-
-
-def source_digest(files: dict[str, bytes]) -> str:
-    digest = hashlib.sha256()
-    for name, content in files.items():
-        digest.update(name.encode() + b"\0" + hashlib.sha256(content).digest())
-    return digest.hexdigest()
 
 
 def build() -> dict[str, object]:
@@ -102,11 +90,11 @@ def build() -> dict[str, object]:
         graph.pop("built_at_commit", None)
     for key in ("nodes", "edges", "hyperedges"):
         graph[key] = sorted(graph.get(key, []), key=lambda item: json.dumps(item, sort_keys=True))
+    # No digest of the sources or of the content: each source change would change the same lines, and GitHub
+    # cannot run the merge driver, so any two pull requests would conflict. The check compares the full graph.
     graph["graph"] = {
         "graphify_version": version("graphifyy"),
-        "source_sha256": source_digest(files),
         "tool_sha256": tool_digest(),
-        "content_sha256": content_digest(graph),
         "scope": "Application TypeScript and authored Markdown documentation",
     }
     return graph
