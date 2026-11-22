@@ -101,8 +101,8 @@ describe("translation of the text of a page", (): void => {
     expect(event.translation).toEqual({ title: "Title in French", notes: "" });
     expect(other.translation).toBeUndefined();
     const listed: Streamer = page();
-    await attachAboutTranslations(env, [listed, page("")], "ja");
-    expect(listed.aboutTranslation).toBe("About in Japanese");
+    await attachAboutTranslations(env, [listed, page("")], "de");
+    expect(listed.aboutTranslation).toBe("About in German");
   });
 
   it("deletes the results of text that the page no longer has, and translates the new text", async (): Promise<void> => {
@@ -150,6 +150,31 @@ describe("translation of the text of a page", (): void => {
     expect(await translatePage(env, "page", NOW, 8)).toEqual({ starts: 3 * LOCALES.length, failed: 3 });
     run.mockImplementation(answer);
     expect(await translatePendingPages(env, NOW + 120_000)).toEqual({ starts: 1, failed: 0 });
+  });
+
+  it("gives the original text to a reader of the language of the text, and starts no model", async (): Promise<void> => {
+    await env.DB.batch([
+      env.DB.prepare("UPDATE streamers SET about='Я стримлю ролевые игры по вечерам.' WHERE id='page'"),
+      env.DB.prepare("DELETE FROM community_cards"),
+      env.DB.prepare("DELETE FROM stream_events"),
+      addEvent("Вечерний стрим: отвечаю на вопросы", NOW),
+    ]);
+    await translatePage(env, "page", NOW, 8);
+    // 2 texts, and no start for the Russian reader.
+    expect(run).toHaveBeenCalledTimes(2 * (LOCALES.length - 1));
+    const streamer: Streamer = page("Я стримлю ролевые игры по вечерам.");
+    const event = { id: "e", title: "Вечерний стрим: отвечаю на вопросы", notes: "" } as StreamEvent;
+    await attachPageTranslations(env, streamer, "ru", null, [event]);
+    expect(streamer.aboutTranslation).toBeNull();
+    expect(event.translation).toBeNull();
+  });
+
+  it("finds a new text when the results of a deleted stream make the count complete", async (): Promise<void> => {
+    await translatePage(env, "page", NOW, 8);
+    // A job deleted the streams, and the owner added a stream. The page has the same number of texts.
+    await env.DB.batch([env.DB.prepare("DELETE FROM stream_events"), addEvent("Neuer Stream", NOW)]);
+    expect(await translatePendingPages(env, NOW + 1)).toEqual({ starts: LOCALES.length, failed: 0 });
+    expect(await count()).toBe(3 * LOCALES.length);
   });
 
   it("only deletes old results without the Workers AI binding", async (): Promise<void> => {

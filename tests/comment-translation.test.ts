@@ -256,6 +256,66 @@ describe("comment translation", (): void => {
     expect(run).not.toHaveBeenCalled();
   });
 
+  it("gives the original text to a reader of the language of the comment, and starts no model", async (): Promise<void> => {
+    const id: string = await seedComment("Миша, сообщения  невозможно читать :((");
+    expect(await translateComment(env, id, "fan", "ru", NOW)).toBeNull();
+    expect(run).not.toHaveBeenCalled();
+    const ukrainian: string = await seedComment("Привіт усім, як справи?");
+    expect(await translateComment(env, ukrainian, "fan", "uk", NOW)).toBeNull();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("does not show an answer in English to a reader of a different language", async (): Promise<void> => {
+    const id: string = await seedComment("Миша, сообщения  невозможно читать :((");
+    await env.DB.prepare("DELETE FROM comment_mentions WHERE comment_id=?").bind(id).run();
+    run.mockResolvedValue(answer("Misha, it is impossible to read the messages :(("));
+    expect(await translateComment(env, id, "fan", "uk", NOW)).toBeNull();
+    expect(run.mock.calls[0][1].messages[0].content).toContain("into Ukrainian");
+    run.mockResolvedValue(answer("Mischa, die Nachrichten sind unleserlich :(("));
+    expect((await translateComment(env, id, "fan", "de", NOW))?.text).toContain("Mischa");
+  });
+
+  it("does not use the name in a mention to find the language", async (): Promise<void> => {
+    const id: string = crypto.randomUUID();
+    const text = "@Александр Петрович hi!";
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'fan',?,1)").bind(
+        id,
+        entryId,
+        text,
+      ),
+      env.DB.prepare('INSERT INTO comment_mentions (comment_id,user_id,start,"end") VALUES (?,?,0,19)').bind(id, "bob"),
+    ]);
+    // The comment is not Russian text, so a Russian reader gets a translation. The name stays in Cyrillic letters.
+    run.mockResolvedValue(answer("@Александр Петрович привет!"));
+    expect((await translateComment(env, id, "fan", "ru", NOW))?.text).toBe("@Александр Петрович привет!");
+    run.mockResolvedValue(answer("@Александр Петрович hallo!"));
+    expect((await translateComment(env, id, "fan", "de", NOW))?.text).toBe("@Александр Петрович hallo!");
+  });
+
+  it("does not show a stored result from before the checks of the language", async (): Promise<void> => {
+    const text = "Миша, сообщения  невозможно читать :((";
+    const id: string = await seedComment(text);
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    const hash: string = Array.from(new Uint8Array(digest), (byte: number) => byte.toString(16).padStart(2, "0")).join(
+      "",
+    );
+    // The model changed the Russian text for a Russian reader, and answered in English for a Ukrainian reader.
+    await env.DB.prepare(
+      `INSERT INTO comment_translations (comment_id,locale,source_hash,text,created_at)
+        VALUES (?1,'ru',?2,'Миша, сообщения невозможно читать :((',1), (?1,'uk',?2,'Misha, the messages :((',1)`,
+    )
+      .bind(id, hash)
+      .run();
+    for (const locale of ["ru", "uk"] as const) {
+      const page = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
+      await attachTranslations(env, page.comments, locale);
+      expect(page.comments.find((comment) => comment.id === id)?.translation).toBeNull();
+      expect(await translateComment(env, id, "fan", locale, NOW)).toBeNull();
+    }
+    expect(run).not.toHaveBeenCalled();
+  });
+
   it("puts the stored translation on the comments of a page", async (): Promise<void> => {
     run.mockResolvedValueOnce(answer("**Hallo** @Bob Lee, siehe `x`")).mockResolvedValueOnce(answer(SOURCE));
     const translated: string = await seedComment();

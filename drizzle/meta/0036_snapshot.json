@@ -1,8 +1,8 @@
 {
+  "id": "9a74a7c5-6803-4f09-b407-f4d9e65e514b",
+  "prevId": "ffc1e5b3-ea2b-46d8-b5d9-ec517d5eeccd",
   "version": "6",
   "dialect": "sqlite",
-  "id": "8122622d-010d-476b-8b94-e27f7a50dff4",
-  "prevId": "ffc1e5b3-ea2b-46d8-b5d9-ec517d5eeccd",
   "tables": {
     "ai_interest": {
       "name": "ai_interest",
@@ -254,15 +254,15 @@
         "channel_connections_streamer_id_streamers_id_fk": {
           "name": "channel_connections_streamer_id_streamers_id_fk",
           "tableFrom": "channel_connections",
-          "tableTo": "streamers",
           "columnsFrom": [
             "streamer_id"
           ],
+          "tableTo": "streamers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -341,15 +341,15 @@
         "channel_tokens_connection_id_channel_connections_id_fk": {
           "name": "channel_tokens_connection_id_channel_connections_id_fk",
           "tableFrom": "channel_tokens",
-          "tableTo": "channel_connections",
           "columnsFrom": [
             "connection_id"
           ],
+          "tableTo": "channel_connections",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -387,28 +387,28 @@
         "comment_likes_comment_id_entry_comments_id_fk": {
           "name": "comment_likes_comment_id_entry_comments_id_fk",
           "tableFrom": "comment_likes",
-          "tableTo": "entry_comments",
           "columnsFrom": [
             "comment_id"
           ],
+          "tableTo": "entry_comments",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "comment_likes_user_id_user_id_fk": {
           "name": "comment_likes_user_id_user_id_fk",
           "tableFrom": "comment_likes",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -468,28 +468,28 @@
         "comment_mentions_comment_id_entry_comments_id_fk": {
           "name": "comment_mentions_comment_id_entry_comments_id_fk",
           "tableFrom": "comment_mentions",
-          "tableTo": "entry_comments",
           "columnsFrom": [
             "comment_id"
           ],
+          "tableTo": "entry_comments",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "comment_mentions_user_id_user_id_fk": {
           "name": "comment_mentions_user_id_user_id_fk",
           "tableFrom": "comment_mentions",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -553,15 +553,15 @@
         "comment_translations_comment_id_entry_comments_id_fk": {
           "name": "comment_translations_comment_id_entry_comments_id_fk",
           "tableFrom": "comment_translations",
-          "tableTo": "entry_comments",
           "columnsFrom": [
             "comment_id"
           ],
+          "tableTo": "entry_comments",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -639,15 +639,15 @@
         "poll_comments_poll_id_polls_id_fk": {
           "name": "poll_comments_poll_id_polls_id_fk",
           "tableFrom": "poll_comments",
-          "tableTo": "polls",
           "columnsFrom": [
             "poll_id"
           ],
+          "tableTo": "polls",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -728,15 +728,15 @@
         "community_cards_streamer_id_streamers_id_fk": {
           "name": "community_cards_streamer_id_streamers_id_fk",
           "tableFrom": "community_cards",
-          "tableTo": "streamers",
           "columnsFrom": [
             "streamer_id"
           ],
+          "tableTo": "streamers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -916,49 +916,49 @@
             "target_kind",
             "target_id"
           ],
-          "isUnique": true,
-          "where": "\"content_reports\".\"status\" = 'open'"
+          "where": "\"content_reports\".\"status\" = 'open'",
+          "isUnique": true
         }
       },
       "foreignKeys": {
         "content_reports_reporter_id_user_id_fk": {
           "name": "content_reports_reporter_id_user_id_fk",
           "tableFrom": "content_reports",
-          "tableTo": "user",
           "columnsFrom": [
             "reporter_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "content_reports_target_author_id_user_id_fk": {
           "name": "content_reports_target_author_id_user_id_fk",
           "tableFrom": "content_reports",
-          "tableTo": "user",
           "columnsFrom": [
             "target_author_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "content_reports_resolved_by_user_id_fk": {
           "name": "content_reports_resolved_by_user_id_fk",
           "tableFrom": "content_reports",
-          "tableTo": "user",
           "columnsFrom": [
             "resolved_by"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -1219,28 +1219,28 @@
         "entries_streamer_id_streamers_id_fk": {
           "name": "entries_streamer_id_streamers_id_fk",
           "tableFrom": "entries",
-          "tableTo": "streamers",
           "columnsFrom": [
             "streamer_id"
           ],
+          "tableTo": "streamers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "entries_author_id_user_id_fk": {
           "name": "entries_author_id_user_id_fk",
           "tableFrom": "entries",
-          "tableTo": "user",
           "columnsFrom": [
             "author_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1328,15 +1328,15 @@
         "entry_activity_counts_entry_id_entries_id_fk": {
           "name": "entry_activity_counts_entry_id_entries_id_fk",
           "tableFrom": "entry_activity_counts",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1445,43 +1445,43 @@
         "entry_comments_entry_id_entries_id_fk": {
           "name": "entry_comments_entry_id_entries_id_fk",
           "tableFrom": "entry_comments",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "entry_comments_author_id_user_id_fk": {
           "name": "entry_comments_author_id_user_id_fk",
           "tableFrom": "entry_comments",
-          "tableTo": "user",
           "columnsFrom": [
             "author_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "entry_comments_parent_fk": {
           "name": "entry_comments_parent_fk",
           "tableFrom": "entry_comments",
-          "tableTo": "entry_comments",
           "columnsFrom": [
             "parent_id",
             "entry_id"
           ],
+          "tableTo": "entry_comments",
           "columnsTo": [
             "id",
             "entry_id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1549,15 +1549,15 @@
         "entry_mash_entry_id_entries_id_fk": {
           "name": "entry_mash_entry_id_entries_id_fk",
           "tableFrom": "entry_mash",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1619,28 +1619,28 @@
         "entry_reactions_entry_id_entries_id_fk": {
           "name": "entry_reactions_entry_id_entries_id_fk",
           "tableFrom": "entry_reactions",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "entry_reactions_user_id_user_id_fk": {
           "name": "entry_reactions_user_id_user_id_fk",
           "tableFrom": "entry_reactions",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1718,15 +1718,15 @@
         "entry_translations_entry_id_entries_id_fk": {
           "name": "entry_translations_entry_id_entries_id_fk",
           "tableFrom": "entry_translations",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1772,15 +1772,15 @@
         "entry_vote_counts_entry_id_entries_id_fk": {
           "name": "entry_vote_counts_entry_id_entries_id_fk",
           "tableFrom": "entry_vote_counts",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1838,28 +1838,28 @@
         "entry_votes_entry_id_entries_id_fk": {
           "name": "entry_votes_entry_id_entries_id_fk",
           "tableFrom": "entry_votes",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "entry_votes_user_id_user_id_fk": {
           "name": "entry_votes_user_id_user_id_fk",
           "tableFrom": "entry_votes",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1909,15 +1909,15 @@
         "image_versions_owner_id_user_id_fk": {
           "name": "image_versions_owner_id_user_id_fk",
           "tableFrom": "image_versions",
-          "tableTo": "user",
           "columnsFrom": [
             "owner_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1991,28 +1991,28 @@
         "mash_taps_entry_id_entries_id_fk": {
           "name": "mash_taps_entry_id_entries_id_fk",
           "tableFrom": "mash_taps",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "mash_taps_user_id_user_id_fk": {
           "name": "mash_taps_user_id_user_id_fk",
           "tableFrom": "mash_taps",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -2141,15 +2141,15 @@
         "moderation_actions_actor_id_user_id_fk": {
           "name": "moderation_actions_actor_id_user_id_fk",
           "tableFrom": "moderation_actions",
-          "tableTo": "user",
           "columnsFrom": [
             "actor_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -2213,15 +2213,15 @@
         "notification_preferences_user_id_user_id_fk": {
           "name": "notification_preferences_user_id_user_id_fk",
           "tableFrom": "notification_preferences",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2336,41 +2336,41 @@
         "notifications_user_id_user_id_fk": {
           "name": "notifications_user_id_user_id_fk",
           "tableFrom": "notifications",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "notifications_actor_id_user_id_fk": {
           "name": "notifications_actor_id_user_id_fk",
           "tableFrom": "notifications",
-          "tableTo": "user",
           "columnsFrom": [
             "actor_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "notifications_comment_id_entry_comments_id_fk": {
           "name": "notifications_comment_id_entry_comments_id_fk",
           "tableFrom": "notifications",
-          "tableTo": "entry_comments",
           "columnsFrom": [
             "comment_id"
           ],
+          "tableTo": "entry_comments",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2430,15 +2430,15 @@
         "overlay_keys_streamer_id_streamers_id_fk": {
           "name": "overlay_keys_streamer_id_streamers_id_fk",
           "tableFrom": "overlay_keys",
-          "tableTo": "streamers",
           "columnsFrom": [
             "streamer_id"
           ],
+          "tableTo": "streamers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2569,15 +2569,15 @@
         "overlay_state_streamer_id_streamers_id_fk": {
           "name": "overlay_state_streamer_id_streamers_id_fk",
           "tableFrom": "overlay_state",
-          "tableTo": "streamers",
           "columnsFrom": [
             "streamer_id"
           ],
+          "tableTo": "streamers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2628,74 +2628,6 @@
           "value": "\"overlay_state\".\"revision\" >= 0"
         }
       }
-    },
-    "page_translations": {
-      "name": "page_translations",
-      "columns": {
-        "streamer_id": {
-          "name": "streamer_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "source_hash": {
-          "name": "source_hash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "locale": {
-          "name": "locale",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "value": {
-          "name": "value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "page_translations_streamer_id_streamers_id_fk": {
-          "name": "page_translations_streamer_id_streamers_id_fk",
-          "tableFrom": "page_translations",
-          "tableTo": "streamers",
-          "columnsFrom": [
-            "streamer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "page_translations_streamer_id_source_hash_locale_pk": {
-          "columns": [
-            "streamer_id",
-            "source_hash",
-            "locale"
-          ],
-          "name": "page_translations_streamer_id_source_hash_locale_pk"
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {}
     },
     "polls": {
       "name": "polls",
@@ -2795,15 +2727,15 @@
         "poll_reactions_poll_id_polls_id_fk": {
           "name": "poll_reactions_poll_id_polls_id_fk",
           "tableFrom": "poll_reactions",
-          "tableTo": "polls",
           "columnsFrom": [
             "poll_id"
           ],
+          "tableTo": "polls",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -2849,28 +2781,28 @@
         "stream_event_topics_event_id_stream_events_id_fk": {
           "name": "stream_event_topics_event_id_stream_events_id_fk",
           "tableFrom": "stream_event_topics",
-          "tableTo": "stream_events",
           "columnsFrom": [
             "event_id"
           ],
+          "tableTo": "stream_events",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "stream_event_topics_entry_id_entries_id_fk": {
           "name": "stream_event_topics_entry_id_entries_id_fk",
           "tableFrom": "stream_event_topics",
-          "tableTo": "entries",
           "columnsFrom": [
             "entry_id"
           ],
+          "tableTo": "entries",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -3034,15 +2966,15 @@
         "stream_events_streamer_id_streamers_id_fk": {
           "name": "stream_events_streamer_id_streamers_id_fk",
           "tableFrom": "stream_events",
-          "tableTo": "streamers",
           "columnsFrom": [
             "streamer_id"
           ],
+          "tableTo": "streamers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3201,15 +3133,15 @@
         "stream_series_streamer_id_streamers_id_fk": {
           "name": "stream_series_streamer_id_streamers_id_fk",
           "tableFrom": "stream_series",
-          "tableTo": "streamers",
           "columnsFrom": [
             "streamer_id"
           ],
+          "tableTo": "streamers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3307,28 +3239,28 @@
         "streamer_applications_user_id_user_id_fk": {
           "name": "streamer_applications_user_id_user_id_fk",
           "tableFrom": "streamer_applications",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "streamer_applications_reviewed_by_user_id_fk": {
           "name": "streamer_applications_reviewed_by_user_id_fk",
           "tableFrom": "streamer_applications",
-          "tableTo": "user",
           "columnsFrom": [
             "reviewed_by"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -3412,15 +3344,15 @@
         "streamer_links_streamer_id_streamers_id_fk": {
           "name": "streamer_links_streamer_id_streamers_id_fk",
           "tableFrom": "streamer_links",
-          "tableTo": "streamers",
           "columnsFrom": [
             "streamer_id"
           ],
+          "tableTo": "streamers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3593,15 +3525,15 @@
         "streamers_owner_id_user_id_fk": {
           "name": "streamers_owner_id_user_id_fk",
           "tableFrom": "streamers",
-          "tableTo": "user",
           "columnsFrom": [
             "owner_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3746,15 +3678,15 @@
         "poll_votes_poll_id_polls_id_fk": {
           "name": "poll_votes_poll_id_polls_id_fk",
           "tableFrom": "poll_votes",
-          "tableTo": "polls",
           "columnsFrom": [
             "poll_id"
           ],
+          "tableTo": "polls",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -3885,15 +3817,15 @@
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4001,15 +3933,15 @@
         "passkey_user_id_user_id_fk": {
           "name": "passkey_user_id_user_id_fk",
           "tableFrom": "passkey",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4163,15 +4095,15 @@
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4222,15 +4154,15 @@
         "signup_acceptance_user_id_user_id_fk": {
           "name": "signup_acceptance_user_id_user_id_fk",
           "tableFrom": "signup_acceptance",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4441,9 +4373,9 @@
   "views": {},
   "enums": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
+    "tables": {}
   },
   "internal": {
     "indexes": {

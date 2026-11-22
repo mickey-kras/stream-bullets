@@ -228,13 +228,7 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
   ]);
   const locale = requestLocale(request, viewer?.locale ?? null);
   await attachEntryTranslations(app.env, selected ? [...board.entries, selected] : board.entries, locale);
-  await attachPageTranslations(
-    app.env,
-    streamer,
-    locale,
-    cards,
-    [...schedule.events, schedule.linkedEvent],
-  );
+  await attachPageTranslations(app.env, streamer, locale, cards, [...schedule.events, schedule.linkedEvent]);
   return {
     board,
     selected,

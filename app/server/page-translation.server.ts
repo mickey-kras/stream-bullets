@@ -4,8 +4,8 @@ import { LOCALES } from "../../db/enums";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
 import type { CommunityCard, EntryText, StreamEvent, Streamer } from "../types";
-import { translateParts } from "./entry-translation.server";
-import { reserveStart, sha256, translateText } from "./translation.server";
+import { entryNeedsTranslation, translateParts } from "./entry-translation.server";
+import { needsTranslation, reserveStart, sha256, translateText } from "./translation.server";
 
 // The texts of one page that one cron run translates. One text starts the model for each site language. The
 // batch is small: the work for comments, entries and pages in one day must stay below the daily limit of starts.
@@ -72,8 +72,8 @@ async function translateOne(
 ): Promise<void> {
   const { hash, kind, text } = item;
   let value: EntryText | null = null;
-  // Text without letters has no translation and starts no model.
-  if (/\p{L}/u.test([text.title, text.body, ...text.options].join(" ").replaceAll(/https?:\/\/\S+/gu, ""))) {
+  // Text without letters, and text in the language of the reader, has no translation and starts no model.
+  if (kind === "about" ? needsTranslation(text.body, locale) : entryNeedsTranslation(text, locale)) {
     await reserveStart(env, null, streamerId, locale, hash, now);
     if (kind === "about") {
       const about: string | null = await translateText(ai, locale, text.body);
@@ -126,16 +126,20 @@ export async function translatePage(
 
 /**
  * Translates pages that do not have a stored result for each text and site language. The pages are in random
- * order, so a text that fails each time does not stop the other pages.
+ * order, so a text that fails each time does not stop the other pages. Each run also examines one more page
+ * that has stored results. The hourly job deletes old streams, and their results can make the count of a page
+ * complete while a text has no result. The examination deletes these results.
  */
 export async function translatePendingPages(env: AppEnv, now: number): Promise<{ starts: number; failed: number }> {
   const { results } = await env.DB.prepare(
-    `SELECT s.id FROM streamers s
+    `SELECT id FROM (SELECT s.id FROM streamers s
       WHERE (SELECT COUNT(*) FROM page_translations t WHERE t.streamer_id=s.id) < ?1 * (
         (s.about != '')
         + (SELECT COUNT(*) FROM (SELECT DISTINCT title, body, button_label FROM community_cards WHERE streamer_id=s.id))
         + (SELECT COUNT(*) FROM (SELECT DISTINCT title, notes FROM stream_events WHERE streamer_id=s.id)))
-      ORDER BY random() LIMIT ?2`,
+      ORDER BY random() LIMIT ?2)
+      UNION
+      SELECT id FROM (SELECT DISTINCT streamer_id AS id FROM page_translations ORDER BY random() LIMIT 1)`,
   )
     .bind(LOCALES.length, PAGE_BATCH)
     .all<{ id: string }>();
