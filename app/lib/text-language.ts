@@ -48,13 +48,10 @@ const LOCALE_SCRIPTS: Readonly<Record<Locale, readonly Script[]>> = {
   "zh-CN": ["han"],
 };
 
-// Links, email addresses of mailto links, and code are not text of a language. A code span can have more than
-// one backtick on each side, and it can continue on the next line, but not after an empty line.
+// Links and code are not text of a language. This is enough to find the script of most of the letters. The
+// Cyrillic check reads `visibleText`, which has the exact rules of the renderer.
 function prose(text: string): string {
-  return text.replaceAll(
-    /https?:\/\/\S+|mailto:[^\s)]+|```[\s\S]*?```|~~~[\s\S]*?~~~|(`+)(?:(?!\n[ \t]*\n)[\s\S])*?\1/gu,
-    " ",
-  );
+  return text.replaceAll(/https?:\/\/\S+|```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`/gu, " ");
 }
 
 // A link address without its scheme and percent-encoding, to compare it with the label of the link.
