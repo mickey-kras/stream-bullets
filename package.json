@@ -36,6 +36,7 @@
     "drizzle-orm": "0.45.4",
     "eld": "2.1.1",
     "image-size": "2.1.0",
+    "isbot": "5.2.2",
     "lexical": "0.53.0",
     "lucide-react": "1.72.0",
     "marked": "18.2.0",
