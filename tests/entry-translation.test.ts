@@ -212,6 +212,19 @@ describe("entry translation", (): void => {
     run.mockClear();
     expect(await translateEntry(env, russian, "fan", "ru", NOW)).toBeNull();
     expect(run).not.toHaveBeenCalled();
+    // A kept part with a name in Cyrillic letters does not make the translated parts fail the language check.
+    const mixed: string = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,body,created_at) VALUES (?,'page','host','topic','Обсуждаем следующую трансляцию и планы на неделю',?,1)",
+    )
+      .bind(mixed, "Ask Миша about the next stream and the plans for this week.")
+      .run();
+    run.mockResolvedValue({ response: answer("We discuss the next stream and the plans for the week", [], "Ask Misha.") });
+    expect(await translateEntry(env, mixed, "fan", "en", NOW)).toEqual({
+      title: "We discuss the next stream and the plans for the week",
+      body: "Ask Миша about the next stream and the plans for this week.",
+      options: [],
+    });
   });
 
   it("uses the same daily count as the comments", async (): Promise<void> => {
