@@ -1,4 +1,5 @@
 import type { Locale } from "../i18n";
+import { parseCommentMarkdown, type MarkdownBlock, type MarkdownInline } from "./comment-markdown";
 
 // The detector of the language of text in Latin letters. Its data is large, so the module loads at the first
 // use and not at the start of the Worker.
@@ -56,6 +57,28 @@ function prose(text: string): string {
   );
 }
 
+// The text that a reader sees, with the parser of the comment renderer: no code, no code block, also one without
+// a closing fence, and no link targets or bare links. The model must not change these parts.
+function visibleText(text: string): string {
+  const inline = (node: MarkdownInline): string => {
+    if (node.kind === "text" || node.kind === "mention") return node.text;
+    if (node.kind === "break") return "\n";
+    if (node.kind === "code") return " ";
+    return node.children.map(inline).join("");
+  };
+  const block = (node: MarkdownBlock): string => {
+    if (node.kind === "codeBlock") return " ";
+    if (node.kind === "quote") return node.children.map(block).join("\n");
+    if (node.kind === "list")
+      return node.items.map((item: MarkdownBlock[]): string => item.map(block).join("\n")).join("\n");
+    return node.children.map(inline).join("");
+  };
+  return parseCommentMarkdown(text)
+    .map(block)
+    .join("\n")
+    .replaceAll(/https?:\/\/\S+/gu, " ");
+}
+
 // The script of most letters of the text. Null without letters.
 function mainScript(plain: string): Script | null {
   const count = (script: Script): number => [...plain.matchAll(SCRIPTS[script])].length;
@@ -103,7 +126,8 @@ export function inLanguageOf(locale: Locale, text: string, translated: string = 
   if (script === null) return true;
   if (!LOCALE_SCRIPTS[locale].includes(script)) return false;
   // The model sometimes keeps a name in Cyrillic letters, for example "Миша, ..." in a Polish translation.
-  if (!LOCALE_SCRIPTS[locale].includes("cyrillic") && /\p{Script=Cyrillic}/u.test(prose(translated))) return false;
+  if (!LOCALE_SCRIPTS[locale].includes("cyrillic") && /\p{Script=Cyrillic}/u.test(visibleText(translated)))
+    return false;
   if (script !== "latin") return true;
   const language: Locale | null = latinLanguage(plain);
   return language === null || language === locale;
