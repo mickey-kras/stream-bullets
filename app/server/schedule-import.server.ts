@@ -50,9 +50,16 @@ const readSchema = z.object({ streams: z.array(importedStreamSchema).max(200).nu
 /** Synthetic streams for the test deployment, which reads no provider. */
 export function testStreams(platform: ImportPlatform, now: number): ImportedStream[] {
   const day = Math.floor(now / 86_400_000) * 86_400_000;
-  const url = platform === "twitch" ? "https://www.twitch.tv/test_channel" : "https://www.youtube.com/watch?v=test-video";
+  const url =
+    platform === "twitch" ? "https://www.twitch.tv/test_channel" : "https://www.youtube.com/watch?v=test-video";
   return [
-    { externalId: `${platform}-test-1`, title: "Test stream", startsAt: day + 2 * 86_400_000 + 18 * 3_600_000, durationMin: 120, url },
+    {
+      externalId: `${platform}-test-1`,
+      title: "Test stream",
+      startsAt: day + 2 * 86_400_000 + 18 * 3_600_000,
+      durationMin: 120,
+      url,
+    },
     {
       externalId: `${platform}-test-2`,
       title: `${platform === "twitch" ? "Twitch" : "YouTube"} only`,
@@ -118,7 +125,10 @@ async function startSync(env: AppEnv, streamerId: string, platform: ImportPlatfo
     env.DB.prepare(`SELECT id, title, starts_at FROM stream_events e WHERE streamer_id=? AND starts_at >= ? AND starts_at < ?
         AND NOT EXISTS(SELECT 1 FROM stream_event_sources s WHERE s.event_id=e.id AND s.platform=?)
       ORDER BY starts_at, id`).bind(streamerId, now - 86_400_000, now + IMPORT_HORIZON_MS + MATCH_WINDOW_MS, platform),
-    env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE streamer_id=? AND starts_at >= ?").bind(streamerId, now),
+    env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE streamer_id=? AND starts_at >= ?").bind(
+      streamerId,
+      now,
+    ),
   ]);
   return {
     env,
@@ -337,13 +347,11 @@ export async function importSchedules(env: AppEnv, now: number): Promise<number>
     env.DB.prepare(`DELETE FROM stream_events WHERE imported=1 AND id IN (SELECT event_id FROM stream_event_sources
         WHERE platform='youtube' AND read_at < ?1 AND event_id IS NOT NULL)
       AND NOT EXISTS(SELECT 1 FROM stream_event_sources s WHERE s.event_id=stream_events.id
-        AND (s.read_at >= ?1 OR s.platform <> 'youtube'))`).bind(
-      stale,
-    ),
+        AND (s.read_at >= ?1 OR s.platform <> 'youtube'))`).bind(stale),
     // Twitch links of past streams stay with their entry; links without an entry go.
-    env.DB.prepare("DELETE FROM stream_event_sources WHERE read_at < ? AND (platform='youtube' OR event_id IS NULL)").bind(
-      stale,
-    ),
+    env.DB.prepare(
+      "DELETE FROM stream_event_sources WHERE read_at < ? AND (platform='youtube' OR event_id IS NULL)",
+    ).bind(stale),
   ]);
   if (!importAvailable(env)) return 0;
   const { results } = await env.DB.prepare(

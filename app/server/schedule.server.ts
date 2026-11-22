@@ -66,9 +66,12 @@ async function linksFor(env: AppEnv, rows: EventRow[]): Promise<Map<string, Stre
     WHERE event_id IN (SELECT value FROM json_each(?)) ORDER BY platform`)
     .bind(JSON.stringify(rows.map((row: EventRow): string => row.id)))
     .all<{ event_id: string; platform: StreamPlatform; url: string }>();
-  const platforms = new Map<string, StreamPlatform>(rows.map((row: EventRow): [string, StreamPlatform] => [row.id, row.platform]));
+  const platforms = new Map<string, StreamPlatform>(
+    rows.map((row: EventRow): [string, StreamPlatform] => [row.id, row.platform]),
+  );
   for (const link of results)
-    if (link.platform !== platforms.get(link.event_id)) map.get(link.event_id)?.push({ platform: link.platform, url: link.url });
+    if (link.platform !== platforms.get(link.event_id))
+      map.get(link.event_id)?.push({ platform: link.platform, url: link.url });
   return map;
 }
 
@@ -80,7 +83,9 @@ async function eventValues(env: AppEnv, rows: EventRow[], now: number): Promise<
     ),
     linksFor(env, rows),
   ]);
-  return rows.map((row: EventRow): StreamEvent => eventValue(row, topics.get(row.id) ?? [], links.get(row.id) ?? [], now));
+  return rows.map(
+    (row: EventRow): StreamEvent => eventValue(row, topics.get(row.id) ?? [], links.get(row.id) ?? [], now),
+  );
 }
 
 function eventValue(row: EventRow, topics: EventTopic[], alsoOn: StreamLink[], now: number): StreamEvent {

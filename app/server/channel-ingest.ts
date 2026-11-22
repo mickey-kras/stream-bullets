@@ -1,6 +1,7 @@
 import nodeCrypto from "node:crypto";
 import { DurableObject } from "cloudflare:workers";
 import type { AppEnv } from "../env";
+import { CHANNEL_PLATFORMS } from "../../db/enums";
 import { z } from "zod";
 import {
   activityEventSchema,
@@ -56,8 +57,6 @@ import {
   YOUTUBE_NAME_REFRESH_MS,
   YOUTUBE_NAME_RETRY_MS,
   YOUTUBE_JOB_RETRY_MS,
-  YOUTUBE_DAILY_BUDGET,
-  YOUTUBE_PAGE_DAILY_BUDGET,
   YOUTUBE_LOW_BUDGET_SHARE,
   YOUTUBE_QUIET_POLL_MS,
   YOUTUBE_STARTUP_POLL_MS,
@@ -67,6 +66,7 @@ import {
   type Bucket,
   ADMISSIONS,
   newBuckets,
+  spendYoutubeQuota,
 } from "./channel-ingest-limits";
 
 /**
@@ -79,7 +79,6 @@ import {
  */
 
 const STREAMER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const PLATFORMS: readonly ActivityPlatform[] = ["twitch", "youtube", "kick"];
 const ROUTES: Readonly<Record<string, "GET" | "POST">> = {
   "/subscribe": "GET",
   "/event": "POST",
@@ -104,10 +103,6 @@ class Superseded extends Error {}
 
 function reply(message: string, status: number): Response {
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
-}
-
-function isPlatform(value: string | null): value is ActivityPlatform {
-  return value !== null && (PLATFORMS as readonly string[]).includes(value);
 }
 
 export class ChannelIngest extends DurableObject<AppEnv> {
@@ -201,8 +196,9 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     if (url.pathname.startsWith("/playground")) return this.playground.request(url.pathname, request);
     return this.platformRequest(url.pathname, platform, request);
   }
-  private async platformRequest(pathname: string, platform: string | null, request: Request): Promise<Response> {
-    if (!isPlatform(platform)) return reply("Invalid platform", 400);
+  private async platformRequest(pathname: string, name: string | null, request: Request): Promise<Response> {
+    const platform = CHANNEL_PLATFORMS.find((item: ActivityPlatform): boolean => item === name);
+    if (!platform) return reply("Invalid platform", 400);
     if (pathname === "/event") return this.receive(platform, request);
     if (pathname === "/connect") return Response.json(await this.connectChannel(platform));
     if (pathname === "/disconnect") return Response.json(await this.disconnectChannel(platform));
@@ -292,7 +288,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   private async closeAll(): Promise<Response> {
     this.playground.wipe();
     this.closeSockets("Page deleted");
-    for (const platform of PLATFORMS) this.bump(platform);
+    for (const platform of CHANNEL_PLATFORMS) this.bump(platform);
     await this.ctx.storage.deleteAlarm();
     await this.ctx.storage.deleteAll();
     this.streamerId = undefined;
@@ -764,32 +760,6 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   }
 
   /**
-   * Spends units of today's quota: the page's own budget first, then the shared one. Returns the larger spent
-   * share of the two budgets (0 to 1), or null when either is used up; a refused shared spend gives the page's
-   * units back.
-   */
-  private async spendQuota(units: number, now: number): Promise<number | null> {
-    const { day, resetAt } = quotaDay(now);
-    const spend = (key: string, budget: number): Promise<{ count: number } | null> =>
-      this.env.DB.prepare(
-        `INSERT INTO app_rate_limits (key, count, window_start) SELECT ?1, ?2, ?3 WHERE ?2 <= ?4
-          ON CONFLICT(key) DO UPDATE SET count = count + excluded.count
-          WHERE app_rate_limits.count + excluded.count <= ?4
-          RETURNING count`,
-      )
-        // The row starts at the day's reset, so the 24-hour cleanup never removes it before the day ends.
-        .bind(key, units, resetAt, budget)
-        .first<{ count: number }>();
-    const pageKey = `youtube-quota:${day}:${this.streamerId}`;
-    const own = await spend(pageKey, YOUTUBE_PAGE_DAILY_BUDGET);
-    if (!own) return null;
-    const shared = await spend(`youtube-quota:${day}`, YOUTUBE_DAILY_BUDGET);
-    if (shared) return Math.max(own.count / YOUTUBE_PAGE_DAILY_BUDGET, shared.count / YOUTUBE_DAILY_BUDGET);
-    await this.env.DB.prepare("UPDATE app_rate_limits SET count = count - ? WHERE key = ?").bind(units, pageKey).run();
-    return null;
-  }
-
-  /**
    * Expires old snapshot messages, so nothing stays past SNAPSHOT_MAX_AGE_MS even when no more traffic comes, and
    * polls YouTube. Polling runs only while a consumer listens, so an idle page spends no quota.
    */
@@ -872,7 +842,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
     const identity = await channelIdentity(this.env, "youtube", accessToken);
     // The token reads another channel: nothing about this one was refreshed.
     if (identity.externalId !== connection.externalId) throw new ProviderError(409, "channelMismatch");
-    await this.spendQuota(1, now);
+    await spendYoutubeQuota(this.env.DB, this.streamerId, 1, now);
     await this.env.DB.prepare(
       `UPDATE channel_connections SET display_name=?, data_read_at=?
         WHERE id=? AND (status_code IS NULL OR status_code <> 'disconnecting')`,
@@ -913,22 +883,21 @@ export class ChannelIngest extends DurableObject<AppEnv> {
   }
 
   /**
-   * The scheduled streams of the channel for the next 4 weeks, for the schedule import. `streams` is null when the
-   * channel cannot be read now (no usable connection, no YouTube quota, a provider failure): the import then
-   * changes nothing. Twitch needs only the app token; YouTube spends 1 quota unit of the page for each page of 50.
+   * The channel's scheduled streams for 4 weeks (schedule import), or null when they cannot be read now: the import
+   * then changes nothing. Twitch uses the app token; YouTube spends 1 quota unit of the page for each page of 50.
    */
   private async upcomingRequested(platform: ActivityPlatform): Promise<{ streams: ImportedStream[] | null }> {
-    if (channelsOff(this.env) || platform === "kick") return { streams: null };
-    const connection = await this.connection(platform);
-    if (!connection || connection.status === "needs_reauth" || connection.suspended || connection.code === "disconnecting")
-      return { streams: null };
+    const connection = channelsOff(this.env) || platform === "kick" ? null : await this.connection(platform);
+    const blocked =
+      connection?.status === "needs_reauth" || connection?.suspended || connection?.code === "disconnecting";
+    if (!connection || blocked) return { streams: null };
     const now = Date.now();
     const generation = this.generations.get(platform);
     try {
       if (platform === "twitch")
         return { streams: await twitchSchedule(this.env, connection.externalId, now, now + IMPORT_HORIZON_MS) };
       const tokens = await this.freshTokens(platform, connection);
-      const spend = async (): Promise<boolean> => (await this.spendQuota(1, Date.now())) !== null;
+      const spend = (): Promise<number | null> => spendYoutubeQuota(this.env.DB, this.streamerId, 1, Date.now());
       return { streams: await youtubeUpcoming(tokens.accessToken, now + IMPORT_HORIZON_MS, spend) };
     } catch (error: unknown) {
       if (error instanceof ReauthRequired && platform === "youtube" && this.generations.get(platform) === generation)
@@ -940,7 +909,7 @@ export class ChannelIngest extends DurableObject<AppEnv> {
 
   /** Returns the wait before the next poll. */
   private async poll(connection: Connection, state: YoutubeState, now: number, current: () => void): Promise<number> {
-    const spent = await this.spendQuota(state.liveChatId ? 5 : 1, now);
+    const spent = await spendYoutubeQuota(this.env.DB, this.streamerId, state.liveChatId ? 5 : 1, now);
     if (spent === null) throw new ProviderError(403, "quotaExceeded");
     const tokens = await this.freshTokens("youtube", connection);
     // Stored YouTube data must be fresh (YouTube API Services policy): read the title again once a day. A failed

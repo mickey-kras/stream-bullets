@@ -687,7 +687,10 @@ export async function twitchSchedule(
   from: number,
   until: number,
 ): Promise<ImportedStream[]> {
-  const headers = { Authorization: `Bearer ${await twitchAppToken(env)}`, "Client-Id": providerClient(env, "twitch").id };
+  const headers = {
+    Authorization: `Bearer ${await twitchAppToken(env)}`,
+    "Client-Id": providerClient(env, "twitch").id,
+  };
   const streams: ImportedStream[] = [];
   let cursor: string | undefined;
   for (let page = 0; page < TWITCH_SCHEDULE_PAGES; page++) {
@@ -751,7 +754,7 @@ export const YOUTUBE_UPCOMING_PAGES = 4;
 
 /**
  * The public upcoming broadcasts of the token's channel that start before `until` (liveBroadcasts.list with
- * `broadcastStatus=upcoming`, pages of 50). `spend` takes the quota unit of each page. A broadcast without a planned
+ * `broadcastStatus=upcoming`, pages of 50). `spend` takes the quota unit of each page (null: no quota). A broadcast without a planned
  * start (time 0) is left out, and so are private and unlisted ones: the schedule is public. Returns null when the
  * read is not complete (no quota for a page, or more than `YOUTUBE_UPCOMING_PAGES` pages): the import then removes
  * nothing that it did not read.
@@ -759,12 +762,12 @@ export const YOUTUBE_UPCOMING_PAGES = 4;
 export async function youtubeUpcoming(
   accessToken: string,
   until: number,
-  spend: () => Promise<boolean>,
+  spend: () => Promise<number | null>,
 ): Promise<ImportedStream[] | null> {
   const streams: ImportedStream[] = [];
   let pageToken: string | undefined;
   for (let page = 0; page < YOUTUBE_UPCOMING_PAGES; page += 1) {
-    if (!(await spend())) return null;
+    if ((await spend()) === null) return null;
     const url = new URL("https://www.googleapis.com/youtube/v3/liveBroadcasts");
     url.search = new URLSearchParams({
       part: "id,snippet,status",
