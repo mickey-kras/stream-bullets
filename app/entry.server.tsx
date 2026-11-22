@@ -1,3 +1,4 @@
+import { isbot } from "isbot";
 import { renderToReadableStream } from "react-dom/server";
 import {
   isRouteErrorResponse,
@@ -45,7 +46,9 @@ export default async function handleRequest(
         },
       },
     );
-    await stream.allReady;
+    // Bots and SPA mode get the complete document. Browsers get the shell first, so the status
+    // and headers are sent before a late render error can change them.
+    if (isbot(request.headers.get("User-Agent")) || routerContext.isSpaMode) await stream.allReady;
     headers.set("Content-Type", "text/html; charset=utf-8");
     headers.set("Content-Language", locale);
     return new Response(stream, { status, headers });
