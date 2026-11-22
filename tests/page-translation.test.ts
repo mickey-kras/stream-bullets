@@ -37,7 +37,10 @@ function answer(_model: string, input: Input): Promise<{ response: unknown }> {
   const language: string = targetOf(input);
   if (!input.messages[0].content.includes("topics and polls"))
     return Promise.resolve({ response: `ORIGINAL=de\n---\nAbout in ${language}` });
-  const source = JSON.parse(input.messages[1].content.slice(input.messages[1].content.indexOf("\n") + 1)) as { options: string[]; body: string };
+  const source = JSON.parse(input.messages[1].content.slice(input.messages[1].content.indexOf("\n") + 1)) as {
+    options: string[];
+    body: string;
+  };
   return Promise.resolve({
     response: {
       title: `Title in ${language}`,

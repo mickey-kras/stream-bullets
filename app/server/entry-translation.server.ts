@@ -107,8 +107,7 @@ function checkedEntry(source: EntryText, answer: EntryText | null, locale: Local
     body: kept(source.body, answer.body),
     options: source.options.map((option: string, index: number): string => kept(option, answer.options[index])),
   };
-  if (signature(text) === signature(source) || !inLanguageOf(locale, allText(text), translated.join("\n")))
-    return null;
+  if (signature(text) === signature(source) || !inLanguageOf(locale, allText(text), translated.join("\n"))) return null;
   const sameOptions: boolean =
     text.options.length === source.options.length &&
     new Set(text.options).size === text.options.length &&

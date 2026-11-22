@@ -219,7 +219,9 @@ describe("entry translation", (): void => {
     )
       .bind(mixed, "Ask Миша about the next stream and the plans for this week.")
       .run();
-    run.mockResolvedValue({ response: answer("We discuss the next stream and the plans for the week", [], "Ask Misha.") });
+    run.mockResolvedValue({
+      response: answer("We discuss the next stream and the plans for the week", [], "Ask Misha."),
+    });
     expect(await translateEntry(env, mixed, "fan", "en", NOW)).toEqual({
       title: "We discuss the next stream and the plans for the week",
       body: "Ask Миша about the next stream and the plans for this week.",

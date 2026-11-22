@@ -42,7 +42,9 @@ describe("the language of a text from its letters", (): void => {
     expect(inLanguageOf("en", "Use ``Привет`` as the greeting string.")).toBe(true);
     // The address of a mailto link is not text of the language. Its label is.
     expect(inLanguageOf("en", "Contact [Email](mailto:миша@example.com) for information about the stream.")).toBe(true);
-    expect(inLanguageOf("en", "Contact [Миша](mailto:misha@example.com) for information about the stream.")).toBe(false);
+    expect(inLanguageOf("en", "Contact [Миша](mailto:misha@example.com) for information about the stream.")).toBe(
+      false,
+    );
     expect(inLanguageOf("ja", "今日の配信")).toBe(true);
     expect(inLanguageOf("ja", "東京")).toBe(true);
     expect(inLanguageOf("zh-CN", "今日の配信は楽しい")).toBe(false);
