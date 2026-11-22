@@ -87,7 +87,7 @@ export function entryNeedsTranslation(source: EntryText, locale: Locale): boolea
 
 // The translation when it has the form of the source. Null when a check fails or nothing changed.
 function checkedEntry(source: EntryText, answer: EntryText | null, locale: Locale): EntryText | null {
-  if (!answer || answer.options.length !== source.options.length || !entryNeedsTranslation(source, locale)) return null;
+  if (answer?.options.length !== source.options.length || !entryNeedsTranslation(source, locale)) return null;
   // A part that is in the language of the reader stays as the author wrote it. The model changes such text.
   const kept = (part: string, translated: string): string => (needsTranslation(part, locale) ? translated : part);
   const text: EntryText = {

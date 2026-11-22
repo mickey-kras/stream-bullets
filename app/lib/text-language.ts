@@ -32,7 +32,7 @@ function prose(text: string): string {
 
 // The script of most letters of the text. Null without letters.
 function mainScript(plain: string): Script | null {
-  const count = (script: Script): number => plain.match(SCRIPTS[script])?.length ?? 0;
+  const count = (script: Script): number => [...plain.matchAll(SCRIPTS[script])].length;
   // Japanese text has kana between its Han characters.
   if (count("kana") > 0 && count("kana") + count("han") > Math.max(count("latin"), count("cyrillic"))) return "kana";
   let main: Script | null = null;
