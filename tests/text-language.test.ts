@@ -62,6 +62,9 @@ describe("the language of a text from its letters", (): void => {
     expect(inLanguageOf("hi", "Hello")).toBe(false);
     // A code block is not text of the language.
     expect(inLanguageOf("uk", 'Привіт!\n~~~js\nconst message = "hello world";\n~~~')).toBe(true);
+    // Code spans with more letters than the text: with two backticks, and on two lines.
+    expect(inLanguageOf("ru", "Привет! ``const longVariableName = true``")).toBe(true);
+    expect(inLanguageOf("ru", "Привет! `const longVariableName =\ntrue`")).toBe(true);
     // A different site language in the same script.
     expect(inLanguageOf("en", "¿Qué opinan del gran corte de Microsoft de ayer?! Hay rumores de bots rebeldes.")).toBe(
       false,
