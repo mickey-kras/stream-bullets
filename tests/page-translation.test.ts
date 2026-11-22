@@ -11,6 +11,11 @@ import type { CommunityCard, StreamEvent, Streamer } from "../app/types";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 vi.mock("cloudflare:workers", () => ({ waitUntil: vi.fn() }));
+// These tests are about the job. Without the detector, text in Latin letters has no known language.
+vi.mock("../app/lib/text-language", async (original) => ({
+  ...(await original<typeof import("../app/lib/text-language")>()),
+  loadLanguageDetector: vi.fn().mockResolvedValue(undefined),
+}));
 
 const NOW = 1_800_000_000_000;
 const ABOUT = "Ich streame Rollenspiele.";
@@ -21,17 +26,24 @@ interface Input {
 
 let database: TestDatabase;
 let env: AppEnv;
-let run: Mock<(model: string, input: Input) => Promise<{ response: string }>>;
+let run: Mock<(model: string, input: Input) => Promise<{ response: unknown }>>;
 
-// A translation that has the name of the target language. It keeps the number of answer options and of lines.
-function answer(_model: string, input: Input): Promise<{ response: string }> {
-  const [language, ...rest] = input.messages[1].content.split("\n");
+function targetOf(input: Input): string {
+  return input.messages[0].content.split(" into ")[1]?.split(".")[0] ?? "";
+}
+
+// A translation that has the name of the target language. It keeps the number of answer options.
+function answer(_model: string, input: Input): Promise<{ response: unknown }> {
+  const language: string = targetOf(input);
   if (!input.messages[0].content.includes("topics and polls"))
     return Promise.resolve({ response: `ORIGINAL=de\n---\nAbout in ${language}` });
-  const [, options, body] = rest.join("\n").split("\n---\n");
-  const label: string = options ? `Button in ${language}` : "";
+  const source = JSON.parse(input.messages[1].content) as { options: string[]; body: string };
   return Promise.resolve({
-    response: `ORIGINAL=de\n---\nTitle in ${language}\n---\n${label}\n---\n${body ? `Body in ${language}` : ""}`,
+    response: {
+      title: `Title in ${language}`,
+      options: source.options.map((): string => `Button in ${language}`),
+      body: source.body ? `Body in ${language}` : "",
+    },
   });
 }
 
@@ -145,7 +157,7 @@ describe("translation of the text of a page", (): void => {
 
   it("leaves a text for the next run when the model fails for one language", async (): Promise<void> => {
     run.mockImplementation((model: string, input: Input) =>
-      input.messages[1].content.startsWith("French\n") ? Promise.reject(new Error("model down")) : answer(model, input),
+      targetOf(input) === "French" ? Promise.reject(new Error("model down")) : answer(model, input),
     );
     expect(await translatePage(env, "page", NOW, 8)).toEqual({ starts: 3 * LOCALES.length, failed: 3 });
     run.mockImplementation(answer);
