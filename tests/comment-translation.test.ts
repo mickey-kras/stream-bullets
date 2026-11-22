@@ -275,6 +275,24 @@ describe("comment translation", (): void => {
     expect((await translateComment(env, id, "fan", "de", NOW))?.text).toContain("Mischa");
   });
 
+  it("does not use the name in a mention to find the language", async (): Promise<void> => {
+    const id: string = crypto.randomUUID();
+    const text = "@Александр Петрович hi!";
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'fan',?,1)").bind(
+        id,
+        entryId,
+        text,
+      ),
+      env.DB.prepare('INSERT INTO comment_mentions (comment_id,user_id,start,"end") VALUES (?,?,0,19)').bind(id, "bob"),
+    ]);
+    // The comment is not Russian text, so a Russian reader gets a translation. The name stays in Cyrillic letters.
+    run.mockResolvedValue(answer("@Александр Петрович привет!"));
+    expect((await translateComment(env, id, "fan", "ru", NOW))?.text).toBe("@Александр Петрович привет!");
+    run.mockResolvedValue(answer("@Александр Петрович hallo!"));
+    expect((await translateComment(env, id, "fan", "de", NOW))?.text).toBe("@Александр Петрович hallo!");
+  });
+
   it("does not show a stored result from before the checks of the language", async (): Promise<void> => {
     const text = "Миша, сообщения  невозможно читать :((";
     const id: string = await seedComment(text);

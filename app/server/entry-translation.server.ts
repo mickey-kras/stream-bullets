@@ -79,11 +79,23 @@ function allText(text: EntryText): string {
   return [text.title, text.body, ...text.options].join("\n");
 }
 
+// The language of an entry is the language of most of its text. A poll in Russian often has names of games in
+// Latin letters as its answer options. A Russian reader gets this poll as the author wrote it.
+function entryNeedsTranslation(source: EntryText, locale: Locale): boolean {
+  return needsTranslation(allText(source), locale);
+}
+
 // The translation when it has the form of the source. Null when a check fails or nothing changed.
-function checkedEntry(source: EntryText, text: EntryText | null, locale: Locale): EntryText | null {
-  if (!text || signature(text) === signature(source)) return null;
-  // The stored results from before these checks have text in the language of the source, and text in English.
-  if (!needsTranslation(allText(source), locale) || !hasScriptOf(locale, allText(text))) return null;
+function checkedEntry(source: EntryText, answer: EntryText | null, locale: Locale): EntryText | null {
+  if (!answer || answer.options.length !== source.options.length || !entryNeedsTranslation(source, locale)) return null;
+  // A part that is in the language of the reader stays as the author wrote it. The model changes such text.
+  const kept = (part: string, translated: string): string => (needsTranslation(part, locale) ? translated : part);
+  const text: EntryText = {
+    title: kept(source.title, answer.title),
+    body: kept(source.body, answer.body),
+    options: source.options.map((option: string, index: number): string => kept(option, answer.options[index])),
+  };
+  if (signature(text) === signature(source) || !hasScriptOf(locale, allText(text))) return null;
   const sameOptions: boolean =
     text.options.length === source.options.length &&
     new Set(text.options).size === text.options.length &&
@@ -168,7 +180,7 @@ export async function translateEntry(
       .run();
   };
   // Text without letters, and text in the language of the reader, has no translation and starts no model.
-  if (!needsTranslation(allText(source), locale)) {
+  if (!entryNeedsTranslation(source, locale)) {
     await store(null);
     return null;
   }

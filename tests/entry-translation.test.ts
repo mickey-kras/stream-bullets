@@ -188,6 +188,32 @@ describe("entry translation", (): void => {
     });
   });
 
+  it("keeps a part in the language of the reader as the author wrote it", async (): Promise<void> => {
+    const id: string = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at) VALUES (?,'page','host','choice','Which game do we play?',?,1)",
+    )
+      .bind(id, JSON.stringify(["Ведьмак", "Hades"]))
+      .run();
+    // The model changes the Russian answer option. A Russian reader gets it unchanged, with the other parts in Russian.
+    run.mockResolvedValue({ response: "ORIGINAL=en\n---\nВ какую игру играем?\n---\nВедьмак 3\nАид\n---" });
+    expect(await translateEntry(env, id, "fan", "ru", NOW)).toEqual({
+      title: "В какую игру играем?",
+      body: "",
+      options: ["Ведьмак", "Аид"],
+    });
+    // A Russian poll with names in Latin letters has no translation for a Russian reader.
+    const russian: string = crypto.randomUUID();
+    await env.DB.prepare(
+      "INSERT INTO entries (id,streamer_id,author_id,kind,title,options,created_at) VALUES (?,'page','host','choice','Во что играем сегодня вечером?',?,1)",
+    )
+      .bind(russian, JSON.stringify(["Hades", "Elden Ring"]))
+      .run();
+    run.mockClear();
+    expect(await translateEntry(env, russian, "fan", "ru", NOW)).toBeNull();
+    expect(run).not.toHaveBeenCalled();
+  });
+
   it("uses the same daily count as the comments", async (): Promise<void> => {
     run.mockResolvedValue({ response: GOOD });
     await translateEntry(env, pollId, "fan", "en", NOW, POLL);

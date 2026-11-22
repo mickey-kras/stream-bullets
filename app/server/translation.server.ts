@@ -75,8 +75,17 @@ export async function sha256(text: string): Promise<string> {
  * Tells if a text gets a translation to `locale`. Text without letters, for example emoji or a link only, gets
  * none. Text that is already in the language of the reader gets none: the reader sees the original text.
  */
-export function needsTranslation(source: string, locale: Locale): boolean {
-  return /\p{L}/u.test(source.replaceAll(/https?:\/\/\S+/gu, "")) && !writtenIn(source).includes(locale);
+export function needsTranslation(source: string, locale: Locale, mentions: readonly MentionRange[] = []): boolean {
+  const text: string = withoutMentions(source, mentions);
+  return /\p{L}/u.test(text.replaceAll(/https?:\/\/\S+/gu, "")) && !writtenIn(text).includes(locale);
+}
+
+// A translation keeps each mention as it is. A name is thus not text of the language of the comment.
+function withoutMentions(text: string, mentions: readonly MentionRange[]): string {
+  let plain: string = text;
+  for (const mention of [...mentions].sort((a: MentionRange, b: MentionRange): number => b.start - a.start))
+    plain = `${plain.slice(0, mention.start)} ${plain.slice(mention.end)}`;
+  return plain;
 }
 
 // The translation with the mention ranges of the source moved to it. Null when a check fails.
@@ -88,9 +97,9 @@ function checked(
 ): CommentTranslation | null {
   if (!text || text === source || text.length > 4000 || !keepsStructure(source, text)) return null;
   // The stored results from before these checks have text in the language of the source, and text in English.
-  if (!needsTranslation(source, locale) || !hasScriptOf(locale, text)) return null;
+  if (!needsTranslation(source, locale, mentions)) return null;
   const moved: MentionRange[] | null = moveMentions(source, mentions, text);
-  return moved ? { text, mentions: moved } : null;
+  return moved && hasScriptOf(locale, withoutMentions(text, moved)) ? { text, mentions: moved } : null;
 }
 
 /**
@@ -221,7 +230,7 @@ export async function translateComment(
     .first<{ source_hash: string; text: string | null }>();
   if (stored?.source_hash === hash) return checked(comment.text, rows, stored.text, locale);
   // This text has no translation and starts no model.
-  if (!needsTranslation(comment.text, locale)) {
+  if (!needsTranslation(comment.text, locale, rows)) {
     await storeTranslation(env, commentId, locale, hash, null, now, comment.text);
     return null;
   }
