@@ -35865,7 +35865,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_authdatabasehooks",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L341",
+      "source_location": "L342",
       "target": "app_server_provider_avatar_server_importproviderphoto",
       "weight": 1.0
     },
@@ -35925,7 +35925,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L377",
+      "source_location": "L378",
       "target": "app_server_http_server_getorigin",
       "weight": 1.0
     },
@@ -35937,7 +35937,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L380",
+      "source_location": "L381",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -35949,7 +35949,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L382",
+      "source_location": "L383",
       "target": "app_server_auth_server_configuredproviders",
       "weight": 1.0
     },
@@ -35961,7 +35961,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L391",
+      "source_location": "L392",
       "target": "app_server_auth_server_authrequesthooks",
       "weight": 1.0
     },
@@ -35973,7 +35973,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L392",
+      "source_location": "L393",
       "target": "app_server_auth_server_authuseroptions",
       "weight": 1.0
     },
@@ -35985,7 +35985,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L393",
+      "source_location": "L394",
       "target": "app_server_auth_server_authdatabasehooks",
       "weight": 1.0
     },
@@ -35997,7 +35997,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_createauth",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L430",
+      "source_location": "L431",
       "target": "app_server_auth_server_instagramprovider",
       "weight": 1.0
     },
@@ -36009,7 +36009,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewer",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L510",
+      "source_location": "L511",
       "target": "app_server_auth_server_getviewersession",
       "weight": 1.0
     },
@@ -36021,7 +36021,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewersession",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L477",
+      "source_location": "L478",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -36033,7 +36033,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_getviewersession",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L486",
+      "source_location": "L487",
       "target": "app_server_auth_server_viewervalue",
       "weight": 1.0
     },
@@ -36045,7 +36045,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_requirerecentsignin",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L500",
+      "source_location": "L501",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -36057,7 +36057,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_requirerecentsignin",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L504",
+      "source_location": "L505",
       "target": "app_server_http_server_httperror",
       "weight": 1.0
     },
@@ -36069,7 +36069,7 @@
       "relation": "calls",
       "source": "app_server_auth_server_viewervalue",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L523",
+      "source_location": "L524",
       "target": "app_server_validation_readdisplayprefs",
       "weight": 1.0
     },
@@ -57333,7 +57333,7 @@
       "relation": "calls",
       "source": "tests_poll_room_test",
       "source_file": "tests/poll-room.test.ts",
-      "source_location": "L1095",
+      "source_location": "L1097",
       "target": "tests_poll_room_test_deferreddatabaseoperation",
       "weight": 1.0
     },
@@ -177481,7 +177481,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L304",
+      "source_location": "L305",
       "target": "app_server_auth_server_authdatabasehooks",
       "weight": 1.0
     },
@@ -177492,7 +177492,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L376",
+      "source_location": "L377",
       "target": "app_server_auth_server_createauth",
       "weight": 1.0
     },
@@ -177525,7 +177525,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L473",
+      "source_location": "L474",
       "target": "app_server_auth_server_getviewersession",
       "weight": 1.0
     },
@@ -177536,7 +177536,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L490",
+      "source_location": "L491",
       "target": "app_server_auth_server_recent_sign_in_ms",
       "weight": 1.0
     },
@@ -177547,7 +177547,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L494",
+      "source_location": "L495",
       "target": "app_server_auth_server_requirerecentsignin",
       "weight": 1.0
     },
@@ -177558,7 +177558,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L509",
+      "source_location": "L510",
       "target": "app_server_auth_server_getviewer",
       "weight": 1.0
     },
@@ -177569,7 +177569,7 @@
       "relation": "contains",
       "source": "app_server_auth_server",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L513",
+      "source_location": "L514",
       "target": "app_server_auth_server_viewervalue",
       "weight": 1.0
     },
@@ -206001,10 +206001,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "4a31f3ffafdb941b25c805fe62df1b29bb7b9f9c565a5a4bde689e7d55536aa9",
+    "content_sha256": "61e1b917ca09aef5cd8ad2795b5d4d5375f0a74d8c856b7e0b393d04cd7ee916",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "4487f5c308249db799a6da6f06178fd749294757551f096f0a9db4da640746f0",
+    "source_sha256": "9607f061687eff8e68e6e3b29843b3526abf308cb1a7d8023c93776161e5f83f",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -230127,7 +230127,7 @@
       "label": "authDatabaseHooks()",
       "norm_label": "authdatabasehooks()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L304"
+      "source_location": "L305"
     },
     {
       "_callable": true,
@@ -230171,7 +230171,7 @@
       "label": "createAuth()",
       "norm_label": "createauth()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L376"
+      "source_location": "L377"
     },
     {
       "_callable": true,
@@ -230182,7 +230182,7 @@
       "label": "getViewer()",
       "norm_label": "getviewer()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L509"
+      "source_location": "L510"
     },
     {
       "_callable": true,
@@ -230193,7 +230193,7 @@
       "label": "getViewerSession()",
       "norm_label": "getviewersession()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L473"
+      "source_location": "L474"
     },
     {
       "_callable": true,
@@ -230259,7 +230259,7 @@
       "label": "requireRecentSignIn()",
       "norm_label": "requirerecentsignin()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L494"
+      "source_location": "L495"
     },
     {
       "_callable": true,
@@ -230281,7 +230281,7 @@
       "label": "viewerValue()",
       "norm_label": "viewervalue()",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L513"
+      "source_location": "L514"
     },
     {
       "_callable": true,
@@ -241525,42 +241525,42 @@
             "callee": "bind",
             "file": "tests/helpers/room.ts",
             "lang": "typescript",
-            "line": "L384",
+            "line": "L389",
             "receiver_type": "D1PreparedStatement"
           },
           {
             "callee": "first",
             "file": "tests/helpers/room.ts",
             "lang": "typescript",
-            "line": "L387",
+            "line": "L392",
             "receiver_type": "D1PreparedStatement"
           },
           {
             "callee": "all",
             "file": "tests/helpers/room.ts",
             "lang": "typescript",
-            "line": "L391",
+            "line": "L396",
             "receiver_type": "D1PreparedStatement"
           },
           {
             "callee": "run",
             "file": "tests/helpers/room.ts",
             "lang": "typescript",
-            "line": "L395",
+            "line": "L400",
             "receiver_type": "D1PreparedStatement"
           },
           {
             "callee": "prepare",
             "file": "tests/helpers/room.ts",
             "lang": "typescript",
-            "line": "L403",
+            "line": "L408",
             "receiver_type": "D1Database"
           },
           {
             "callee": "batch",
             "file": "tests/helpers/room.ts",
             "lang": "typescript",
-            "line": "L406",
+            "line": "L411",
             "receiver_type": "D1Database"
           }
         ]
@@ -251519,7 +251519,7 @@
       "label": "RECENT_SIGN_IN_MS",
       "norm_label": "recent_sign_in_ms",
       "source_file": "app/server/auth.server.ts",
-      "source_location": "L490"
+      "source_location": "L491"
     },
     {
       "_origin": "ast",

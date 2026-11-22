@@ -625,7 +625,9 @@ describe("live room snapshots", (): void => {
       }),
     );
     const first = post("refresh");
-    await vi.waitFor(() => expect(faults.held()).toBe(1));
+    // `vi.waitFor` moves the fake timers. The ticker of the room then starts the query, and not this call.
+    await faults.whenHeld();
+    expect(faults.held()).toBe(1);
     const second = post("refresh");
     faults.heal();
     release();
@@ -1203,7 +1205,9 @@ describe("live room battles", (): void => {
       }),
     );
     const flushing = alarmAfter(MASH_FLUSH_MS);
-    await vi.waitFor(() => expect(faults.held()).toBe(1));
+    // `vi.waitFor` moves the fake timers. The ticker of the room then starts the query, and not this call.
+    await faults.whenHeld();
+    expect(faults.held()).toBe(1);
     // Count taps received during the failing write.
     await tap(one, id, 2, 2);
     await tap(two, id, 4, 1);
