@@ -13,7 +13,8 @@ export interface MentionRange {
 function inlineShape(nodes: readonly MarkdownInline[]): unknown[] {
   return nodes.flatMap((node: MarkdownInline): unknown[] => {
     if (node.kind === "text" || node.kind === "mention") return [];
-    if (node.kind === "break") return ["break"];
+    // A line break in a paragraph is not structure. The model joins lines that the author divided by hand.
+    if (node.kind === "break") return [];
     if (node.kind === "code") return [{ code: node.text }];
     if (node.kind === "link") return [{ link: node.href, children: inlineShape(node.children) }];
     return [{ mark: node.kind, children: inlineShape(node.children) }];

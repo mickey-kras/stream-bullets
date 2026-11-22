@@ -1,5 +1,27 @@
 import type { Locale } from "../i18n";
 
+// The detector of the language of text in Latin letters. Its data is large, so the module loads at the first
+// use and not at the start of the Worker.
+interface Detector {
+  detect: (text: string) => { language: string; isReliable: () => boolean };
+}
+const LATIN: Readonly<Record<string, Locale>> = { de: "de", en: "en", es: "es", fr: "fr", pl: "pl", pt: "pt-BR" };
+let detector: Detector | null = null;
+
+/** Loads the language detector. Call it one time before `writtenIn` and `inLanguageOf`. */
+export async function loadLanguageDetector(): Promise<void> {
+  if (detector) return;
+  const { eld } = await import("eld/extrasmall");
+  eld.setLanguageSubset(Object.keys(LATIN));
+  detector = eld;
+}
+
+// The site language of text in Latin letters. Null when the detector is not sure: short text, names, slang.
+function latinLanguage(plain: string): Locale | null {
+  const result = detector?.detect(plain);
+  return result?.isReliable() ? (LATIN[result.language] ?? null) : null;
+}
+
 type Script = "cyrillic" | "latin" | "devanagari" | "kana" | "han";
 
 const SCRIPTS: Readonly<Record<Script, RegExp>> = {
@@ -42,10 +64,10 @@ function mainScript(plain: string): Script | null {
 }
 
 /**
- * The site languages that the text is written in, found from its letters and not from a model. Almost all
- * Ukrainian text has one of the letters і, ї, є and ґ, and Russian text has none. Cyrillic text with these
- * letters and with letters of only Russian can be the two. The result is empty for Latin text: its letters do
- * not tell the language.
+ * The site languages that the text is written in, found without a model. Almost all Ukrainian text has one of
+ * the letters і, ї, є and ґ, and Russian text has none. Cyrillic text with these letters and with letters of
+ * only Russian can be the two. A statistical detector finds the language of text in Latin letters. The result
+ * is empty when the language is not sure.
  */
 export function writtenIn(text: string): readonly Locale[] {
   const plain: string = prose(text);
@@ -53,6 +75,10 @@ export function writtenIn(text: string): readonly Locale[] {
   if (script === "devanagari") return ["hi"];
   if (script === "kana") return ["ja"];
   if (script === "han") return ["zh-CN"];
+  if (script === "latin") {
+    const language: Locale | null = latinLanguage(plain);
+    return language ? [language] : [];
+  }
   if (script !== "cyrillic") return [];
   const russian: boolean = /[ыэъё]/iu.test(plain);
   const ukrainian: boolean = /[іїєґ]/iu.test(plain);
@@ -60,8 +86,17 @@ export function writtenIn(text: string): readonly Locale[] {
   return russian ? ["ru", "uk"] : ["uk"];
 }
 
-/** Tells if the text has the script of the language. A model sometimes answers in a different language. */
-export function hasScriptOf(locale: Locale, text: string): boolean {
-  const script: Script | null = mainScript(prose(text));
-  return script === null || LOCALE_SCRIPTS[locale].includes(script);
+/**
+ * Tells if a translation can be in the language of the reader. A model sometimes answers in a different
+ * language. The text must have the script of the language. Text in Latin letters must not be in a different
+ * site language, when the detector is sure.
+ */
+export function inLanguageOf(locale: Locale, text: string): boolean {
+  const plain: string = prose(text);
+  const script: Script | null = mainScript(plain);
+  if (script === null) return true;
+  if (!LOCALE_SCRIPTS[locale].includes(script)) return false;
+  if (script !== "latin") return true;
+  const language: Locale | null = latinLanguage(plain);
+  return language === null || language === locale;
 }

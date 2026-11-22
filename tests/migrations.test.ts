@@ -192,7 +192,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0037", (): void => {
+  it("covers 0006 to 0038", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -226,17 +226,15 @@ describe("migrations 0006 onwards", (): void => {
       "0035",
       "0036",
       "0037",
+      "0038",
     ]);
   });
 
-  it("deletes the stored translations (0036) for Russian and Ukrainian readers", async (): Promise<void> => {
-    const comments = await db.prepare("SELECT locale, text FROM comment_translations ORDER BY locale, text").all();
-    expect(comments.results).toEqual([
-      { locale: "de", text: "Erster" },
-      { locale: "uk", text: null },
-    ]);
-    const entries = await db.prepare("SELECT locale, title FROM entry_translations ORDER BY locale").all();
-    expect(entries.results).toEqual([{ locale: "en", title: "Topic" }]);
+  it("deletes each stored translation (0036 and 0038), so the job makes them again", async (): Promise<void> => {
+    for (const table of ["comment_translations", "entry_translations", "page_translations", "translation_attempts"]) {
+      const row = await db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).first<{ n: number }>();
+      expect(row?.n).toBe(0);
+    }
   });
 
   it("rebuilds overlay_state (0032) with every row, column, default and foreign key", async (): Promise<void> => {
