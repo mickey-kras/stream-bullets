@@ -4750,7 +4750,7 @@
       "source": "app_components_channels_channel_panel_channelpanel",
       "source_file": "app/components/channels/channel-panel.tsx",
       "source_location": "L430",
-      "target": "app_components_channels_platform_logo_platformlogo",
+      "target": "app_components_overlay_wasteland_glyphs_platformicon",
       "weight": 1.0
     },
     {
@@ -5925,7 +5925,7 @@
       "relation": "calls",
       "source": "app_components_community_card_view_cardcontent",
       "source_file": "app/components/community/card-view.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -5937,7 +5937,7 @@
       "relation": "calls",
       "source": "app_components_community_card_view_cardcontent",
       "source_file": "app/components/community/card-view.tsx",
-      "source_location": "L42",
+      "source_location": "L44",
       "target": "app_components_community_card_view_cardbutton",
       "weight": 1.0
     },
@@ -6141,7 +6141,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L232",
+      "source_location": "L233",
       "target": "app_components_page_translation_showncard",
       "weight": 1.0
     },
@@ -6153,7 +6153,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L233",
+      "source_location": "L234",
       "target": "app_components_page_translation_translationcontrol",
       "weight": 1.0
     },
@@ -6165,7 +6165,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L246",
+      "source_location": "L248",
       "target": "app_components_community_card_dialog_carddialog",
       "weight": 1.0
     },
@@ -6177,7 +6177,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L263",
+      "source_location": "L265",
       "target": "app_components_community_community_view_communityview_save",
       "weight": 1.0
     },
@@ -6189,7 +6189,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L269",
+      "source_location": "L271",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -6201,7 +6201,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L277",
+      "source_location": "L279",
       "target": "app_components_ui_dialog_dialogactions",
       "weight": 1.0
     },
@@ -6213,7 +6213,7 @@
       "relation": "calls",
       "source": "app_components_community_community_view_communityview",
       "source_file": "app/components/community/community-view.tsx",
-      "source_location": "L278",
+      "source_location": "L280",
       "target": "app_components_community_community_view_communityview_remove",
       "weight": 1.0
     },
@@ -17889,7 +17889,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_chooselocale",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "target": "app_components_api_sendjson",
       "weight": 1.0
     },
@@ -17901,7 +17901,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_chooselocale",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "target": "app_lib_prefs_savelocalecookie",
       "weight": 1.0
     },
@@ -17913,7 +17913,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L41",
+      "source_location": "L46",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -17925,7 +17925,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L44",
+      "source_location": "L49",
       "target": "app_i18n_index_getlocale",
       "weight": 1.0
     },
@@ -17937,7 +17937,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L57",
+      "source_location": "L62",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -17949,7 +17949,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L62",
+      "source_location": "L67",
       "target": "app_components_ui_sheet_sheet",
       "weight": 1.0
     },
@@ -17961,7 +17961,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L66",
+      "source_location": "L71",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -17973,7 +17973,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L85",
+      "source_location": "L91",
       "target": "app_components_shell_language_dialog_languagedialog_pick",
       "weight": 1.0
     },
@@ -17985,7 +17985,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L87",
+      "source_location": "L93",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -17997,7 +17997,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog_pick",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L55",
+      "source_location": "L60",
       "target": "app_components_shell_language_dialog_chooselocale",
       "weight": 1.0
     },
@@ -18009,7 +18009,7 @@
       "relation": "calls",
       "source": "app_components_shell_language_dialog_languagedialog_pick",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L57",
+      "source_location": "L62",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -53589,7 +53589,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L119",
+      "source_location": "L122",
       "target": "tests_e2e_i18n_spec_inlanguage",
       "weight": 1.0
     },
@@ -53601,7 +53601,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L337",
+      "source_location": "L340",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -53613,7 +53613,7 @@
       "relation": "calls",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L338",
+      "source_location": "L341",
       "target": "tests_e2e_i18n_spec_shot",
       "weight": 1.0
     },
@@ -65297,7 +65297,7 @@
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
       "source_location": "L14",
-      "target": "app_components_channels_platform_logo_platformlogo",
+      "target": "app_components_overlay_wasteland_glyphs_platformicon",
       "weight": 1.0
     },
     {
@@ -65694,18 +65694,6 @@
       "source_file": "app/components/channels/channels-step.tsx",
       "source_location": "L8",
       "target": "app_components_channels_channel_panel_platform_names",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports",
-      "source": "app_components_channels_platform_logo",
-      "source_file": "app/components/channels/platform-logo.tsx",
-      "source_location": "L2",
-      "target": "app_lib_activity_activityplatform",
       "weight": 1.0
     },
     {
@@ -121711,7 +121699,7 @@
       "source": "app_components_channels_channel_panel",
       "source_file": "app/components/channels/channel-panel.tsx",
       "source_location": "L14",
-      "target": "app_components_channels_platform_logo",
+      "target": "app_components_overlay_wasteland_glyphs",
       "weight": 1.0
     },
     {
@@ -121906,32 +121894,6 @@
       "source_file": "app/components/channels/channels-step.tsx",
       "source_location": "L8",
       "target": "app_components_channels_channel_panel",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_channels_platform_logo",
-      "source_file": "app/components/channels/platform-logo.tsx",
-      "source_location": "L1",
-      "target": "ref_react",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "relation": "imports_from",
-      "source": "app_components_channels_platform_logo",
-      "source_file": "app/components/channels/platform-logo.tsx",
-      "source_location": "L2",
-      "target": "app_lib_activity",
-      "type_only": true,
       "weight": 1.0
     },
     {
@@ -156953,28 +156915,6 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "relation": "contains",
-      "source": "app_components_channels_platform_logo",
-      "source_file": "app/components/channels/platform-logo.tsx",
-      "source_location": "L26",
-      "target": "app_components_channels_platform_logo_platformlogo",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
-      "source": "app_components_channels_platform_logo",
-      "source_file": "app/components/channels/platform-logo.tsx",
-      "source_location": "L8",
-      "target": "app_components_channels_platform_logo_logos",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "relation": "contains",
       "source": "app_components_channels_use_live_channels",
       "source_file": "app/components/channels/use-live-channels.ts",
       "source_location": "L11",
@@ -157329,7 +157269,7 @@
       "relation": "contains",
       "source": "app_components_community_card_view",
       "source_file": "app/components/community/card-view.tsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "target": "app_components_community_card_view_cardcontent",
       "weight": 1.0
     },
@@ -163610,7 +163550,7 @@
       "relation": "contains",
       "source": "app_components_shell_language_dialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L40",
+      "source_location": "L45",
       "target": "app_components_shell_language_dialog_languagedialog",
       "weight": 1.0
     },
@@ -163621,7 +163561,7 @@
       "relation": "contains",
       "source": "app_components_shell_language_dialog_languagedialog",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L47",
+      "source_location": "L52",
       "target": "app_components_shell_language_dialog_languagedialog_pick",
       "weight": 1.0
     },
@@ -192969,7 +192909,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L193",
+      "source_location": "L196",
       "target": "tests_e2e_i18n_spec_phoneproblems",
       "weight": 1.0
     },
@@ -192980,7 +192920,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L228",
+      "source_location": "L231",
       "target": "tests_e2e_i18n_spec_phonescreen",
       "weight": 1.0
     },
@@ -192991,7 +192931,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L235",
+      "source_location": "L238",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -193002,7 +192942,7 @@
       "relation": "contains",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L238",
+      "source_location": "L241",
       "target": "tests_e2e_i18n_spec_phonescreens",
       "weight": 1.0
     },
@@ -205383,7 +205323,7 @@
       "relation": "indirect_call",
       "source": "tests_e2e_i18n_spec",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L294",
+      "source_location": "L297",
       "target": "tests_e2e_i18n_spec_headeraction",
       "weight": 1.0
     },
@@ -206001,10 +205941,10 @@
     }
   ],
   "graph": {
-    "content_sha256": "61e1b917ca09aef5cd8ad2795b5d4d5375f0a74d8c856b7e0b393d04cd7ee916",
+    "content_sha256": "5f219415f383bb3a2aeadd761badd785994bf21f68ef4c2a0d402b69d0b413d7",
     "graphify_version": "0.9.105",
     "scope": "Application TypeScript and authored Markdown documentation",
-    "source_sha256": "9607f061687eff8e68e6e3b29843b3526abf308cb1a7d8023c93776161e5f83f",
+    "source_sha256": "90999c51c4d3fef8b74fde3f0fe1f656bc8d71f6d84063a7e9e17e73992c575c",
     "tool_sha256": "8d287f4e6bafbd3a19063f5064ccd16463f8e835b499b3876de5f142152496d9"
   },
   "hyperedges": [],
@@ -212779,7 +212719,7 @@
       "label": "PhoneScreen",
       "norm_label": "phonescreen",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L228"
+      "source_location": "L231"
     },
     {
       "_callable": true,
@@ -214932,17 +214872,6 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
-      "id": "app_components_channels_platform_logo_platformlogo",
-      "label": "PlatformLogo()",
-      "norm_label": "platformlogo()",
-      "source_file": "app/components/channels/platform-logo.tsx",
-      "source_location": "L26"
-    },
-    {
-      "_callable": true,
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
       "id": "app_components_channels_use_live_channels_readchannels",
       "label": "readChannels()",
       "norm_label": "readchannels()",
@@ -215200,7 +215129,7 @@
       "label": "CardContent()",
       "norm_label": "cardcontent()",
       "source_file": "app/components/community/card-view.tsx",
-      "source_location": "L30"
+      "source_location": "L31"
     },
     {
       "_callable": true,
@@ -220404,7 +220333,7 @@
       "label": "LanguageDialog()",
       "norm_label": "languagedialog()",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L40"
+      "source_location": "L45"
     },
     {
       "_callable": true,
@@ -220415,7 +220344,7 @@
       "label": "pick()",
       "norm_label": "pick()",
       "source_file": "app/components/shell/language-dialog.tsx",
-      "source_location": "L47"
+      "source_location": "L52"
     },
     {
       "_callable": true,
@@ -240078,7 +240007,7 @@
       "label": "headerAction()",
       "norm_label": "headeraction()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L235"
+      "source_location": "L238"
     },
     {
       "_callable": true,
@@ -240115,21 +240044,21 @@
             "callee": "checkVisibility",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L210",
+            "line": "L213",
             "receiver_type": "Element"
           },
           {
             "callee": "getBoundingClientRect",
             "file": "tests/e2e/i18n.spec.ts",
             "lang": "typescript",
-            "line": "L211",
+            "line": "L214",
             "receiver_type": "Element"
           }
         ]
       },
       "norm_label": "phoneproblems()",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L193"
+      "source_location": "L196"
     },
     {
       "_callable": true,
@@ -245389,26 +245318,6 @@
       "norm_label": "channels-step.tsx",
       "source_file": "app/components/channels/channels-step.tsx",
       "source_location": "L1"
-    },
-    {
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_components_channels_platform_logo",
-      "label": "platform-logo.tsx",
-      "norm_label": "platform-logo.tsx",
-      "source_file": "app/components/channels/platform-logo.tsx",
-      "source_location": "L1"
-    },
-    {
-      "_origin": "ast",
-      "community": null,
-      "file_type": "code",
-      "id": "app_components_channels_platform_logo_logos",
-      "label": "LOGOS",
-      "norm_label": "logos",
-      "source_file": "app/components/channels/platform-logo.tsx",
-      "source_location": "L8"
     },
     {
       "_origin": "ast",
@@ -256433,7 +256342,7 @@
       "label": "phoneScreens",
       "norm_label": "phonescreens",
       "source_file": "tests/e2e/i18n.spec.ts",
-      "source_location": "L238"
+      "source_location": "L241"
     },
     {
       "_origin": "ast",

@@ -5,7 +5,7 @@ import { detached } from "../../lib/detached";
 import { dialogHref, type DialogState } from "../account/dialog-route";
 import { Icon } from "../ui/icon";
 
-// Globe button in both headers. Its name states the current language; it opens the shared language dialog.
+// Globe button with the code of the current language, in both headers. Its name states the current language; it opens the shared language dialog.
 // A button carries no address, so pages that must not repeat their query, such as error pages, stay clean.
 export function HeaderLanguage(): ReactNode {
   const location = useLocation();
@@ -29,6 +29,10 @@ export function HeaderLanguage(): ReactNode {
       }
     >
       <Icon name="globe" size={20} />
+      {/* The code tells the current language at a glance. The name of the button has the full name. */}
+      <span className="header-language-code" aria-hidden="true">
+        {locale.split("-")[0].toUpperCase()}
+      </span>
     </button>
   );
 }
