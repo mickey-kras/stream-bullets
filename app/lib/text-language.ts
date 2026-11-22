@@ -47,9 +47,13 @@ const LOCALE_SCRIPTS: Readonly<Record<Locale, readonly Script[]>> = {
   "zh-CN": ["han"],
 };
 
-// Links, email addresses of mailto links, and code are not text of a language. A code span can have more than one backtick on each side.
+// Links, email addresses of mailto links, and code are not text of a language. A code span can have more than
+// one backtick on each side, and it can continue on the next line, but not after an empty line.
 function prose(text: string): string {
-  return text.replaceAll(/https?:\/\/\S+|mailto:[^\s)]+|```[\s\S]*?```|~~~[\s\S]*?~~~|(`+)[^\n]*?\1/gu, " ");
+  return text.replaceAll(
+    /https?:\/\/\S+|mailto:[^\s)]+|```[\s\S]*?```|~~~[\s\S]*?~~~|(`+)(?:(?!\n[ \t]*\n)[\s\S])*?\1/gu,
+    " ",
+  );
 }
 
 // The script of most letters of the text. Null without letters.

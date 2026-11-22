@@ -40,6 +40,9 @@ describe("the language of a text from its letters", (): void => {
     // Code is not text of the language, also in a code span with two backticks.
     expect(inLanguageOf("en", "Use `Привет` as the greeting string.")).toBe(true);
     expect(inLanguageOf("en", "Use ``Привет`` as the greeting string.")).toBe(true);
+    expect(inLanguageOf("en", "Use `Привет\nмир` as the greeting string.")).toBe(true);
+    // An empty line ends a paragraph, so a backtick before it does not start code.
+    expect(inLanguageOf("en", "One ` here.\n\nПривет, and one ` here in the next paragraph.")).toBe(false);
     // The address of a mailto link is not text of the language. Its label is.
     expect(inLanguageOf("en", "Contact [Email](mailto:миша@example.com) for information about the stream.")).toBe(true);
     expect(inLanguageOf("en", "Contact [Миша](mailto:misha@example.com) for information about the stream.")).toBe(
