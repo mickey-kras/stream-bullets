@@ -1350,5 +1350,11 @@
   "waitlist.update": "Actualizar solicitud",
   "overlay.characters.off": "Los personajes están desactivados en este servidor.",
   "discussion.showOriginal": "Ver original",
-  "discussion.showTranslation": "Ver traducción"
+  "discussion.showTranslation": "Ver traducción",
+  "discussion.historyTitle": "Textos anteriores",
+  "discussion.historyOpen": "Ver los textos anteriores de este comentario",
+  "discussion.historyDescription": "Solo el dueño de la página y los administradores ven los textos anteriores a cada edición. Se guardan 90 días.",
+  "discussion.historyEmpty": "No hay ningún texto anterior guardado.",
+  "discussion.historyLoading": "Cargando los textos anteriores…",
+  "discussion.historyWritten": "Escrito {time}"
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getCommentThread, listComments, mutateComment } from "../comments.server";
+import { getCommentThread, listCommentRevisions, listComments, mutateComment } from "../comments.server";
 import { mentionCandidates } from "../discussion-notifications.server";
 import { getVisibleEntry } from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
@@ -25,6 +25,14 @@ export const entryRoutes: ApiRoute[] = [
       requestLocale(request, viewer?.locale ?? null),
     );
     return json(result);
+  }),
+  // GET /api/comments/:id/history → {revisions: [{text, mentions, writtenAt, editedAt}]}, oldest first. The page
+  // owner and admins (with step-up) only; 404 for everyone else, also when signed out.
+  get(/comments\/([a-f0-9-]{36})\/history/, async ({ request, app, env, match, viewer }) => {
+    queryParams(request, []);
+    if (!viewer || !z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Comment not found.");
+    const revisions = await listCommentRevisions(env, viewer.id, match[1], () => requireAdminSession(request, app));
+    return json({ revisions });
   }),
   get(/entries\/([a-f0-9-]{36})\/mention-candidates/, async ({ request, env, match, viewer }) => {
     const user = requireViewer(viewer);

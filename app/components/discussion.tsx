@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import { useSearchParams } from "react-router";
 import { createDraftStore, type DiscussionDraft } from "../lib/discussion-draft";
+import { CommentHistory } from "./comment-history";
 import { CommentInput } from "./comment-input";
 import { useCommentTranslation } from "./comment-translation";
 import type { MentionSelection } from "./mention-input";
@@ -351,7 +352,12 @@ function CommentArticle({
             {shown.control}
           </>
         )}
-        {comment.editedAt && <span className="muted">{t("discussion.edited")}</span>}
+        {comment.editedAt &&
+          (rules.viewer && (rules.ownerId === rules.viewer.id || rules.moderator) ? (
+            <CommentHistory commentId={comment.id} />
+          ) : (
+            <span className="muted">{t("discussion.edited")}</span>
+          ))}
         <div ref={editButton}>
           <CommentActions
             comment={comment}

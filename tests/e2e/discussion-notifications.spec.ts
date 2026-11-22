@@ -77,6 +77,18 @@ test("keyboard mentions, own comment edits, historical reply links and persisten
     await expect(root.getByText("Edited", { exact: true })).toBeVisible();
     await expect(root).toContainText("Hello @owner please check this thread. Please confirm.");
     expect(await inbox(owner, rootId)).toHaveLength(1);
+    // The author sees only the label. The page owner opens the earlier text.
+    await expect(root.getByRole("button", { name: "Show the earlier texts of this comment" })).toHaveCount(0);
+    await ownerPage.goto(`/@test_host?view=topics&entry=${entryId}`);
+    await ownerPage
+      .locator(`#cm-${rootId}`)
+      .getByRole("button", { name: "Show the earlier texts of this comment" })
+      .click();
+    const history = ownerPage.getByRole("dialog", { name: "Earlier texts" });
+    await expect(history.locator(".comment-history li")).toHaveCount(1);
+    await expect(history.locator(".comment-history li")).toContainText("Hello @owner please check this thread.");
+    await expect(history.locator(".comment-history li")).not.toContainText("Please confirm.");
+    await history.getByRole("button", { name: "Close dialog" }).click();
 
     await ownerPage.goto("/notifications");
     await ownerPage.reload();

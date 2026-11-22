@@ -1390,5 +1390,11 @@
   "waitlist.update": "Обновить заявку",
   "overlay.characters.off": "Персонажи на этом сервере выключены.",
   "discussion.showOriginal": "Показать оригинал",
-  "discussion.showTranslation": "Показать перевод"
+  "discussion.showTranslation": "Показать перевод",
+  "discussion.historyTitle": "Прежние тексты",
+  "discussion.historyOpen": "Показать прежние тексты этого комментария",
+  "discussion.historyDescription": "Тексты до каждого изменения видят только владелец страницы и администраторы. Они хранятся 90 дней.",
+  "discussion.historyEmpty": "Прежних текстов нет.",
+  "discussion.historyLoading": "Загружаем прежние тексты…",
+  "discussion.historyWritten": "Написано {time}"
 }

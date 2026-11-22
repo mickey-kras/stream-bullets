@@ -1350,5 +1350,11 @@
   "waitlist.update": "अनुरोध अपडेट करें",
   "overlay.characters.off": "इस सर्वर पर किरदार बंद हैं।",
   "discussion.showOriginal": "मूल दिखाएँ",
-  "discussion.showTranslation": "अनुवाद दिखाएँ"
+  "discussion.showTranslation": "अनुवाद दिखाएँ",
+  "discussion.historyTitle": "पुराने टेक्स्ट",
+  "discussion.historyOpen": "इस टिप्पणी के पुराने टेक्स्ट दिखाएं",
+  "discussion.historyDescription": "हर बदलाव से पहले का टेक्स्ट सिर्फ़ पेज का मालिक और एडमिन देखते हैं। ये 90 दिन तक रखे जाते हैं।",
+  "discussion.historyEmpty": "कोई पुराना टेक्स्ट सहेजा नहीं गया है।",
+  "discussion.historyLoading": "पुराने टेक्स्ट लोड हो रहे हैं…",
+  "discussion.historyWritten": "लिखा गया {time}"
 }

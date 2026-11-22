@@ -1330,5 +1330,11 @@
   "waitlist.update": "更新申请",
   "overlay.characters.off": "此服务器上的角色已关闭。",
   "discussion.showOriginal": "显示原文",
-  "discussion.showTranslation": "显示译文"
+  "discussion.showTranslation": "显示译文",
+  "discussion.historyTitle": "之前的内容",
+  "discussion.historyOpen": "查看这条评论之前的内容",
+  "discussion.historyDescription": "只有页面所有者和管理员能看到每次编辑前的内容。这些内容保留 90 天。",
+  "discussion.historyEmpty": "没有保存之前的内容。",
+  "discussion.historyLoading": "正在加载之前的内容…",
+  "discussion.historyWritten": "写于 {time}"
 }

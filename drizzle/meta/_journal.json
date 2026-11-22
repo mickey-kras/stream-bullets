@@ -281,6 +281,13 @@
       "when": 1795329505862,
       "tag": "0039_translation_failures_reset",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "6",
+      "when": 1795386817354,
+      "tag": "0040_comment_revisions",
+      "breakpoints": true
     }
   ]
 }

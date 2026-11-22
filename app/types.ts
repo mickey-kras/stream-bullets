@@ -195,6 +195,15 @@ export interface NotificationSnapshot {
   preferences: NotificationPreferences;
 }
 
+// The text of a comment before one edit. Only the page owner and admins can read it.
+export interface CommentRevision {
+  text: string;
+  mentions: CommentMention[];
+  // When this text was written, and when an edit replaced it.
+  writtenAt: number;
+  editedAt: number;
+}
+
 export interface Comment {
   editedAt?: number | null;
   mentions?: CommentMention[];

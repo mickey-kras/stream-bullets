@@ -1350,5 +1350,11 @@
   "waitlist.update": "Mettre à jour la demande",
   "overlay.characters.off": "Les personnages sont désactivés sur ce serveur.",
   "discussion.showOriginal": "Afficher l’original",
-  "discussion.showTranslation": "Afficher la traduction"
+  "discussion.showTranslation": "Afficher la traduction",
+  "discussion.historyTitle": "Textes précédents",
+  "discussion.historyOpen": "Afficher les textes précédents de ce commentaire",
+  "discussion.historyDescription": "Seuls le propriétaire de la page et les administrateurs voient les textes avant chaque modification. Ils sont conservés 90 jours.",
+  "discussion.historyEmpty": "Aucun texte précédent n’est conservé.",
+  "discussion.historyLoading": "Chargement des textes précédents…",
+  "discussion.historyWritten": "Écrit {time}"
 }
