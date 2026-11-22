@@ -445,7 +445,8 @@ export async function patchEvent(env: AppEnv, viewerId: string, id: string, valu
   }
   if (patch.action === "replay") {
     if (status !== "ended") throw new HttpError(409, "Add a replay link after the stream ends.");
-    await env.DB.prepare("UPDATE stream_events SET vod_url=?, updated_at=? WHERE id=?")
+    // A replay link is owner content: like an edit, it takes the entry from the import, so it outlives its source.
+    await env.DB.prepare("UPDATE stream_events SET vod_url=?, imported=0, updated_at=? WHERE id=?")
       .bind(patch.vodUrl, now, id)
       .run();
     return (await getEvent(env, id, now))!;

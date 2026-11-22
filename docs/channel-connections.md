@@ -211,7 +211,7 @@ These rules apply to a read:
   Thus a new read updates the entry. It does not make a second entry.
 - Two streams are the same stream when their starts are at most 15 minutes apart and their titles agree.
   The comparison ignores case, marks, and extra spaces. The schedule then shows one entry with the link of each platform.
-- The import makes entries with `imported = 1`. An edit by the owner sets `imported = 0`.
+- The import makes entries with `imported = 1`. An edit by the owner, or a replay link, sets `imported = 0`.
   The import changes only entries with `imported = 1`, and only from the platform that made them.
 - A manual entry of the owner keeps its text. A read stream that agrees with it adds only a link.
 - When the owner deletes an entry, its source row stays without an entry. Thus a new read does not add it again.

@@ -597,6 +597,23 @@ describe("when the import runs", (): void => {
     ]);
   });
 
+  it("keeps an imported entry that the owner gave a replay link when its YouTube data expires", async (): Promise<void> => {
+    await addConnection("youtube");
+    fake.upcoming = [broadcast("vid-1", "Tube show", now + 2 * hour)];
+    await importPageSchedule(env, page, now);
+    const [entry] = await events();
+    // After the stream ended, the owner adds the replay.
+    vi.useFakeTimers({ now: now + day, toFake: ["Date"] });
+    await patchEvent(env, "owner", entry.id, { action: "replay", vodUrl: "https://www.youtube.com/watch?v=vid-1" });
+    vi.useRealTimers();
+    await env.DB.prepare("DELETE FROM channel_connections").run();
+    await importSchedules(env, now + SOURCE_RETENTION_MS + 1);
+    const row = await env.DB.prepare("SELECT vod_url, imported FROM stream_events WHERE id=?")
+      .bind(entry.id)
+      .first<{ vod_url: string; imported: number }>();
+    expect(row).toEqual({ vod_url: "https://www.youtube.com/watch?v=vid-1", imported: 0 });
+  });
+
   it("uses synthetic streams in the test deployment and calls no provider", async (): Promise<void> => {
     await addConnection("twitch");
     await addConnection("youtube");
