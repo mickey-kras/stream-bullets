@@ -396,6 +396,12 @@ export interface StreamLink {
   url: string;
 }
 
+// The picture of a scheduled stream: a YouTube thumbnail (16:9) or a Twitch category cover (3:4).
+export interface StreamImage {
+  url: string;
+  kind: "thumbnail" | "cover";
+}
+
 // One occurrence per row; weekly occurrences share `seriesId`.
 export interface StreamEvent {
   id: string;
@@ -418,6 +424,10 @@ export interface StreamEvent {
   topics: EventTopic[];
   // The same stream on other platforms, with the address there.
   alsoOn: StreamLink[];
+  // The Twitch category with its cover, and the picture from the connected channels (the YouTube thumbnail
+  // first). Null: none.
+  category: { name: string; cover: string | null } | null;
+  image: StreamImage | null;
   // Last change; shared by download and feed DTSTAMP/SEQUENCE.
   updatedAt: number;
   // The text in the language of the reader. Null: no translation is necessary. Absent: not translated yet.

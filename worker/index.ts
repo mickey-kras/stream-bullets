@@ -14,6 +14,7 @@ import {
   securityHeaders,
 } from "../app/server/http.server";
 import { serveImage } from "../app/server/images.server";
+import { serveStreamImage } from "../app/server/stream-images.server";
 import { overlayKeyMatches } from "../app/server/overlay-key.server";
 import { KEY_REFUSED_CLOSE } from "../app/lib/activity-socket";
 import { visitorPrefix } from "../app/server/ip-prefix";
@@ -224,7 +225,9 @@ function secured(
 
 async function imageResponse(request: Request, env: AppEnv, path: string): Promise<Response> {
   if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
-  const image: Response = await serveImage(env, path.slice("/images/".length), request.method);
+  const image: Response = path.startsWith("/images/stream/")
+    ? await serveStreamImage(env, path.slice("/images/stream/".length), request.method)
+    : await serveImage(env, path.slice("/images/".length), request.method);
   // The test environment serves images only behind its access cookie.
   if (env.APP_ENV === "test") image.headers.set("Cache-Control", "private, no-cache");
   return image;

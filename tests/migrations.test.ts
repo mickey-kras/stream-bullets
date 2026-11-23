@@ -266,7 +266,7 @@ beforeAll(async (): Promise<void> => {
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0044", (): void => {
+  it("covers 0006 to 0045", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -307,6 +307,7 @@ describe("migrations 0006 onwards", (): void => {
       "0042",
       "0043",
       "0044",
+      "0045",
     ]);
   });
 
@@ -341,6 +342,13 @@ describe("migrations 0006 onwards", (): void => {
     expect(await rows("SELECT event_id FROM stream_event_topics WHERE entry_id='topic' AND event_id IN ('tw1','yt1')")).toEqual([
       { event_id: "tw1" },
     ]);
+  });
+
+  it("adds the category and the picture of a stream source (0045), empty for old rows", async (): Promise<void> => {
+    expect(await db.prepare("SELECT category, image_url FROM stream_event_sources WHERE external_id='seg1'").first()).toEqual({
+      category: null,
+      image_url: null,
+    });
   });
 
   it("adds the imported flag (0040) and keeps each stream and its topic links", async (): Promise<void> => {

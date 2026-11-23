@@ -150,9 +150,16 @@ function outdated(source: SourceRow, stream: ImportedStream): boolean {
 function readAgain(sync: Sync, source: SourceRow, stream: ImportedStream): void {
   const { env } = sync;
   sync.statements.push(
-    env.DB.prepare(
-      "UPDATE stream_event_sources SET url=?, read_at=? WHERE streamer_id=? AND platform=? AND external_id=?",
-    ).bind(stream.url, sync.now, sync.streamerId, sync.platform, stream.externalId),
+    env.DB.prepare(`UPDATE stream_event_sources SET url=?, category=?, image_url=?, read_at=?
+      WHERE streamer_id=? AND platform=? AND external_id=?`).bind(
+      stream.url,
+      stream.category ?? null,
+      stream.imageUrl ?? null,
+      sync.now,
+      sync.streamerId,
+      sync.platform,
+      stream.externalId,
+    ),
   );
   // Only the platform that created an entry changes it, and only until the owner edits it.
   if (source.event_id === null || source.imported !== 1 || source.event_platform !== sync.platform) return;
@@ -214,8 +221,17 @@ function readNew(sync: Sync, stream: ImportedStream): void {
   if (eventId === null) return;
   sync.changed = true;
   sync.statements.push(
-    sync.env.DB.prepare(`INSERT INTO stream_event_sources (streamer_id,platform,external_id,event_id,url,read_at)
-      VALUES (?,?,?,?,?,?)`).bind(sync.streamerId, sync.platform, stream.externalId, eventId, stream.url, sync.now),
+    sync.env.DB.prepare(`INSERT INTO stream_event_sources (streamer_id,platform,external_id,event_id,url,category,
+        image_url,read_at) VALUES (?,?,?,?,?,?,?,?)`).bind(
+      sync.streamerId,
+      sync.platform,
+      stream.externalId,
+      eventId,
+      stream.url,
+      stream.category ?? null,
+      stream.imageUrl ?? null,
+      sync.now,
+    ),
   );
 }
 

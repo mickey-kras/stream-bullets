@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 import { effectiveStatus, expandSeries, SERIES_HORIZON_MS, type SeriesRule } from "../lib/schedule";
 import { addDays, localDateOf, parseDate, weekdayOf, zonedParts, zonedTime, type LocalDate } from "../lib/zoned";
-import type { EventTopic, StreamEvent, StreamEventStatus, StreamLink, StreamPlatform } from "../types";
+import type { EventTopic, StreamEvent, StreamEventStatus, StreamImage, StreamLink, StreamPlatform } from "../types";
 import { assertStreamerWritable } from "./access.server";
 import { consumeMutationQuota } from "./data.server";
 import { HttpError } from "./http.server";
@@ -59,36 +59,68 @@ async function topicsFor(env: AppEnv, ids: string[]): Promise<Map<string, EventT
 }
 
 // The other platforms of each stream that the schedule import linked to it.
-async function linksFor(env: AppEnv, rows: EventRow[]): Promise<Map<string, StreamLink[]>> {
-  if (rows.length === 0) return new Map<string, StreamLink[]>();
-  const map = new Map<string, StreamLink[]>(rows.map((row: EventRow): [string, StreamLink[]] => [row.id, []]));
-  const { results } = await env.DB.prepare(`SELECT event_id, platform, url FROM stream_event_sources
-    WHERE event_id IN (SELECT value FROM json_each(?)) ORDER BY platform`)
+/** What the schedule import read for an entry: the other platforms, the Twitch category and the picture. */
+interface SourceInfo {
+  alsoOn: StreamLink[];
+  category: StreamEvent["category"];
+  image: StreamImage | null;
+}
+
+const NO_SOURCES: SourceInfo = { alsoOn: [], category: null, image: null };
+
+interface SourceRow {
+  event_id: string;
+  platform: StreamPlatform;
+  url: string;
+  category: string | null;
+  image_url: string | null;
+}
+
+function addSource(info: SourceInfo, link: SourceRow, primary: StreamPlatform | undefined): void {
+  if (link.platform !== primary) info.alsoOn.push({ platform: link.platform, url: link.url });
+  const image: string | null = link.image_url
+    ? `/images/stream/${encodeURIComponent(link.event_id)}/${link.platform}`
+    : null;
+  if (link.platform === "twitch" && link.category) info.category = { name: link.category, cover: image };
+  // A YouTube thumbnail wins over a Twitch cover: it shows this stream, the cover only its category.
+  if (image && (link.platform === "youtube" || !info.image)) {
+    info.image = { url: image, kind: link.platform === "youtube" ? "thumbnail" : "cover" };
+  }
+}
+
+async function sourcesFor(env: AppEnv, rows: EventRow[]): Promise<Map<string, SourceInfo>> {
+  if (rows.length === 0) return new Map<string, SourceInfo>();
+  const map = new Map<string, SourceInfo>(
+    rows.map((row: EventRow): [string, SourceInfo] => [row.id, { alsoOn: [], category: null, image: null }]),
+  );
+  const { results } = await env.DB.prepare(`SELECT event_id, platform, url, category, image_url
+    FROM stream_event_sources WHERE event_id IN (SELECT value FROM json_each(?)) ORDER BY platform`)
     .bind(JSON.stringify(rows.map((row: EventRow): string => row.id)))
-    .all<{ event_id: string; platform: StreamPlatform; url: string }>();
+    .all<SourceRow>();
   const platforms = new Map<string, StreamPlatform>(
     rows.map((row: EventRow): [string, StreamPlatform] => [row.id, row.platform]),
   );
-  for (const link of results)
-    if (link.platform !== platforms.get(link.event_id))
-      map.get(link.event_id)?.push({ platform: link.platform, url: link.url });
+  for (const link of results) {
+    const info = map.get(link.event_id);
+    if (info) addSource(info, link, platforms.get(link.event_id));
+  }
   return map;
 }
 
 async function eventValues(env: AppEnv, rows: EventRow[], now: number): Promise<StreamEvent[]> {
-  const [topics, links] = await Promise.all([
+  const [topics, sources] = await Promise.all([
     topicsFor(
       env,
       rows.map((row: EventRow): string => row.id),
     ),
-    linksFor(env, rows),
+    sourcesFor(env, rows),
   ]);
   return rows.map(
-    (row: EventRow): StreamEvent => eventValue(row, topics.get(row.id) ?? [], links.get(row.id) ?? [], now),
+    (row: EventRow): StreamEvent => eventValue(row, topics.get(row.id) ?? [], sources.get(row.id) ?? NO_SOURCES, now),
   );
 }
 
-function eventValue(row: EventRow, topics: EventTopic[], alsoOn: StreamLink[], now: number): StreamEvent {
+function eventValue(row: EventRow, topics: EventTopic[], sources: SourceInfo, now: number): StreamEvent {
   return {
     id: row.id,
     seriesId: row.series_id,
@@ -104,7 +136,9 @@ function eventValue(row: EventRow, topics: EventTopic[], alsoOn: StreamLink[], n
     repeatUntil: row.repeat_until,
     tz: row.tz,
     topics,
-    alsoOn,
+    alsoOn: sources.alsoOn,
+    category: sources.category,
+    image: sources.image,
     updatedAt: row.updated_at,
   };
 }

@@ -563,3 +563,33 @@ test("the owner can retry, change and remove a past stream's replay", async ({ b
     await close(context);
   }
 });
+
+test("the next stream shows its picture and category, with the calendar as the main action", async ({ page }) => {
+  const thumbnail = "https://i.ytimg.com/vi/mic-shootout/maxresdefault.jpg";
+  const cover = "https://static-cdn.jtvnw.net/ttv-boxart/509658-144x192.jpg";
+  const sources = (platform: string, id: string, url: string, category: string, image: string): string =>
+    `INSERT INTO stream_event_sources(streamer_id,platform,external_id,event_id,url,category,image_url,read_at) SELECT streamer_id,'${platform}','${id}',id,'${url}',${category},'${image}',${Date.now()} FROM stream_events WHERE title='Mic shootout';`;
+  await runSql("schedule-pictures", [
+    sources("youtube", "mic-shootout", "https://www.youtube.com/watch?v=mic-shootout", "NULL", thumbnail),
+    sources("twitch", "mic-shootout-segment", "https://www.twitch.tv/feature_host", "'Just Chatting'", cover),
+  ]);
+  try {
+    await page.goto("/@feature_host?view=schedule");
+    const hero = page.locator(".sched-hero");
+    await expect(hero).toHaveClass(/has-picture/);
+    await expect(hero.locator(".sched-picture.thumbnail img")).toHaveAttribute(
+      "src",
+      /^\/images\/stream\/[0-9a-f-]{36}\/youtube$/,
+    );
+    await expect(hero.locator(".sched-category")).toHaveText("Just Chatting");
+    await expect(hero.locator(".sched-category img")).toHaveAttribute("src", /\/twitch$/);
+    // Before the stream starts, the calendar is the gold, first action.
+    const first = hero.locator(".sched-actions > *").first();
+    await expect(first).toHaveText(/Add to calendar/);
+    await expect(first).toHaveClass(/gold/);
+  } finally {
+    await runSql("schedule-pictures-cleanup", [
+      "DELETE FROM stream_event_sources WHERE external_id IN ('mic-shootout','mic-shootout-segment');",
+    ]);
+  }
+});
