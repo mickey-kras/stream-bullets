@@ -55425,7 +55425,7 @@
       "relation": "calls",
       "source": "tests_e2e_platform_spec",
       "source_file": "tests/e2e/platform.spec.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "target": "tests_e2e_platform_spec_assertnoscripterrors",
       "weight": 1.0
     },
@@ -262906,7 +262906,7 @@
             "callee": "newContext",
             "file": "tests/e2e/platform.spec.ts",
             "lang": "typescript",
-            "line": "L171",
+            "line": "L172",
             "receiver_type": "Browser"
           }
         ]

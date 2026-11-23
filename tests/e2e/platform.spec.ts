@@ -86,6 +86,7 @@ test("public access rejects forged identities and unsafe mutations", async ({ br
     "avatarPreset",
     "displayPrefs",
     "id",
+    "keepOriginal",
     "locale",
     "name",
   ]);
