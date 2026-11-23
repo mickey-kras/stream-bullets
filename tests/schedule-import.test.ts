@@ -17,6 +17,7 @@ import {
   syncPlatform,
   testStreams,
 } from "../app/server/schedule-import.server";
+import { serveStreamImage } from "../app/server/stream-images.server";
 import type { StreamEvent } from "../app/types";
 import { installFakeProviders, type FakeProviders } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -70,13 +71,21 @@ function schedule(segments: unknown[], cursor?: string, vacation: unknown = null
   };
 }
 
-function broadcast(id: string, title: string, start: number, privacy = "public", end?: number): unknown {
+function broadcast(
+  id: string,
+  title: string,
+  start: number,
+  privacy = "public",
+  end?: number,
+  thumbnails?: Record<string, { url: string }>,
+): unknown {
   return {
     id,
     snippet: {
       title,
       scheduledStartTime: iso(start),
       ...(end === undefined ? {} : { scheduledEndTime: iso(end) }),
+      ...(thumbnails ? { thumbnails } : {}),
     },
     status: { privacyStatus: privacy, lifeCycleStatus: "ready" },
   };
@@ -686,5 +695,94 @@ describe("when the import runs", (): void => {
       ["YouTube only", "youtube", []],
     ]);
     expect(testStreams("twitch", now)).toHaveLength(2);
+  });
+});
+
+describe("pictures and categories", (): void => {
+  const cover = "https://static-cdn.jtvnw.net/ttv-boxart/509658-144x192.jpg";
+  const thumbnail = "https://i.ytimg.com/vi/vid-1/maxresdefault.jpg";
+
+  beforeEach(async (): Promise<void> => {
+    await addConnection("twitch");
+    await addConnection("youtube");
+  });
+
+  it("stores the Twitch category with its cover and the YouTube thumbnail, and shows the thumbnail first", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day), segment("s2", "Solo", now + 3 * day)])];
+    fake.twitchGames = [
+      { id: "509658", box_art_url: "https://static-cdn.jtvnw.net/ttv-boxart/509658-{width}x{height}.jpg" },
+    ];
+    fake.upcoming = [
+      broadcast("vid-1", "Show (part 5)", now + 2 * day, "public", undefined, {
+        medium: { url: "https://i.ytimg.com/vi/vid-1/mqdefault.jpg" },
+        maxres: { url: thumbnail },
+      }),
+    ];
+    await importPageSchedule(env, page, now);
+    const [shared, solo] = await events();
+    expect(shared.image).toEqual({ url: `/images/stream/${shared.id}/youtube`, kind: "thumbnail" });
+    expect(shared.category).toEqual({ name: "Just Chatting", cover: `/images/stream/${shared.id}/twitch` });
+    expect(solo.image).toEqual({ url: `/images/stream/${solo.id}/twitch`, kind: "cover" });
+    const rows = await env.DB.prepare(
+      "SELECT platform, category, image_url FROM stream_event_sources ORDER BY platform, external_id",
+    ).all();
+    expect(rows.results).toEqual([
+      { platform: "twitch", category: "Just Chatting", image_url: cover },
+      { platform: "twitch", category: "Just Chatting", image_url: cover },
+      { platform: "youtube", category: null, image_url: thumbnail },
+    ]);
+    // One Get Games request for the category of both segments.
+    const games = fake.calls.filter((call) => call.url.pathname === "/helix/games");
+    expect(games.map((call) => call.url.searchParams.getAll("id"))).toEqual([["509658"]]);
+  });
+
+  it("reads the schedule without covers when Get Games fails, and drops a thumbnail from another host", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
+    fake.twitchGames = 500;
+    fake.upcoming = [
+      broadcast("vid-2", "Other", now + 4 * day, "public", undefined, { maxres: { url: "https://example.com/x.jpg" } }),
+      broadcast("vid-3", "Small", now + 5 * day, "public", undefined, {
+        medium: { url: "https://i.ytimg.com/vi/vid-3/mqdefault.jpg" },
+      }),
+    ];
+    await importPageSchedule(env, page, now);
+    const list = await events();
+    expect(list.map((event: StreamEvent) => [event.title, event.category, event.image?.kind ?? null])).toEqual([
+      ["Show", { name: "Just Chatting", cover: null }, null],
+      ["Other", null, null],
+      ["Small", null, "thumbnail"],
+    ]);
+  });
+
+  it("serves a stored picture through the image route and refuses everything else", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
+    fake.twitchGames = [
+      { id: "509658", box_art_url: "https://static-cdn.jtvnw.net/ttv-boxart/509658-{width}x{height}.jpg" },
+    ];
+    await importPageSchedule(env, page, now);
+    const [event] = await events();
+    const loaded: string[] = [];
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL): Promise<Response> => {
+      loaded.push(String(input));
+      return new Response(new Uint8Array([1, 2, 3]), { headers: { "Content-Type": "image/jpeg" } });
+    });
+    const image = await serveStreamImage(env, `${event.id}/twitch`, "GET");
+    expect(image.headers.get("Content-Type")).toBe("image/jpeg");
+    expect(image.headers.get("Cache-Control")).toBe("public, max-age=3600");
+    expect(new Uint8Array(await image.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
+    expect(loaded).toEqual([cover]);
+    expect((await serveStreamImage(env, `${event.id}/twitch`, "HEAD")).body).toBeNull();
+    // No picture for that platform, a malformed path, or a host answer that is not an image.
+    await expect(serveStreamImage(env, `${event.id}/youtube`, "GET")).rejects.toMatchObject({ status: 404 });
+    await expect(serveStreamImage(env, "../avatar/x", "GET")).rejects.toMatchObject({ status: 404 });
+    vi.stubGlobal(
+      "fetch",
+      async (): Promise<Response> => new Response("<html>", { headers: { "Content-Type": "text/html" } }),
+    );
+    await expect(serveStreamImage(env, `${event.id}/twitch`, "GET")).rejects.toMatchObject({ status: 404 });
+    vi.stubGlobal("fetch", async (): Promise<Response> => {
+      throw new DOMException("timeout", "TimeoutError");
+    });
+    await expect(serveStreamImage(env, `${event.id}/twitch`, "GET")).rejects.toMatchObject({ status: 404 });
   });
 });

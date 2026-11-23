@@ -55,6 +55,8 @@ export interface FakeProviders {
   duringRefresh: (() => Promise<void>) | null;
   /** Get Channel Stream Schedule pages in order (the last one repeats), or a status for every request. */
   twitchSchedule: unknown[] | number;
+  /** The games Get Games returns (only the requested IDs), or a status for every request. */
+  twitchGames: { id: string; box_art_url: string }[] | number;
   /** The items liveBroadcasts.list returns for `broadcastStatus=upcoming`, or a status for every request. */
   upcoming: unknown[] | number;
 }
@@ -110,6 +112,7 @@ export function installFakeProviders(): FakeProviders {
     listFailures: 0,
     deleteStatus: null,
     twitchSchedule: 404,
+    twitchGames: [],
     upcoming: [],
   };
   let subscription = 0;
@@ -125,9 +128,14 @@ export function installFakeProviders(): FakeProviders {
     }
     const form = new URLSearchParams(body);
     const path = `${url.hostname}${url.pathname}`;
-    if (path === "id.twitch.tv/oauth2/token" || path === "oauth2.googleapis.com/token" || path === "id.kick.com/oauth/token") {
+    if (
+      path === "id.twitch.tv/oauth2/token" ||
+      path === "oauth2.googleapis.com/token" ||
+      path === "id.kick.com/oauth/token"
+    ) {
       const platform = platformOfToken(url);
-      if (form.get("grant_type") === "client_credentials") return json({ access_token: "twitch-app-token", expires_in: 1000 });
+      if (form.get("grant_type") === "client_credentials")
+        return json({ access_token: "twitch-app-token", expires_in: 1000 });
       const refreshing = form.get("grant_type") === "refresh_token";
       const status = refreshing ? (fake.refreshStatus ?? fake.tokenStatus) : fake.tokenStatus;
       // The hook runs while the refresh is in flight, whether the provider then accepts or refuses it.
@@ -149,12 +157,19 @@ export function installFakeProviders(): FakeProviders {
       });
     }
     if (path === "api.twitch.tv/helix/users")
-      return json({ data: [{ id: fake.identity.twitch.id, login: "twitchhost", display_name: fake.identity.twitch.name }] });
+      return json({
+        data: [{ id: fake.identity.twitch.id, login: "twitchhost", display_name: fake.identity.twitch.name }],
+      });
     if (path === "www.googleapis.com/youtube/v3/channels")
       return json({ items: [{ id: fake.identity.youtube.id, snippet: { title: fake.identity.youtube.name } }] });
     if (path === "api.kick.com/public/v1/users")
-      return json({ data: [{ user_id: Number(fake.identity.kick.id), name: fake.identity.kick.name, email: "x@kick.test" }] });
-    if (path === "api.twitch.tv/helix/eventsub/subscriptions" || path === "api.kick.com/public/v1/events/subscriptions") {
+      return json({
+        data: [{ user_id: Number(fake.identity.kick.id), name: fake.identity.kick.name, email: "x@kick.test" }],
+      });
+    if (
+      path === "api.twitch.tv/helix/eventsub/subscriptions" ||
+      path === "api.kick.com/public/v1/events/subscriptions"
+    ) {
       const platform = url.hostname === "api.twitch.tv" ? "twitch" : "kick";
       if (request.method === "DELETE") {
         if (fake.deleteStatus !== null) return json({ error: "nope" }, fake.deleteStatus);
@@ -170,7 +185,9 @@ export function installFakeProviders(): FakeProviders {
           return json({ error: "nope" }, 500);
         }
         const broadcaster = url.searchParams.get(platform === "twitch" ? "user_id" : "broadcaster_user_id");
-        const mine = fake.subscriptions.filter((item) => item.platform === platform && item.broadcaster === broadcaster);
+        const mine = fake.subscriptions.filter(
+          (item) => item.platform === platform && item.broadcaster === broadcaster,
+        );
         if (platform === "kick")
           return json({
             data: mine.map((item) => ({
@@ -201,7 +218,15 @@ export function installFakeProviders(): FakeProviders {
         };
         // Twitch refuses a second subscription of a type for the same condition while the first is enabled or pending.
         const live = ["enabled", "webhook_callback_verification_pending"];
-        if (fake.subscriptions.some((item) => item.platform === "twitch" && item.type === sub.type && item.broadcaster === sub.condition.broadcaster_user_id && live.includes(item.status ?? "enabled")))
+        if (
+          fake.subscriptions.some(
+            (item) =>
+              item.platform === "twitch" &&
+              item.type === sub.type &&
+              item.broadcaster === sub.condition.broadcaster_user_id &&
+              live.includes(item.status ?? "enabled"),
+          )
+        )
           return json({ error: "Conflict" }, 409);
         subscription += 1;
         const id = `twitch-sub-${subscription}`;
@@ -218,20 +243,39 @@ export function installFakeProviders(): FakeProviders {
       const data = request_.events.map((event) => {
         subscription += 1;
         const id = `kick-sub-${subscription}`;
-        fake.subscriptions.push({ platform, id, broadcaster: String(request_.broadcaster_user_id), callback: "", type: event.name });
+        fake.subscriptions.push({
+          platform,
+          id,
+          broadcaster: String(request_.broadcaster_user_id),
+          callback: "",
+          type: event.name,
+        });
         return { name: event.name, version: 1, subscription_id: id };
       });
       return json({ data });
     }
-    if (path === "id.twitch.tv/oauth2/revoke" || path === "oauth2.googleapis.com/revoke" || path === "id.kick.com/oauth/revoke")
+    if (
+      path === "id.twitch.tv/oauth2/revoke" ||
+      path === "oauth2.googleapis.com/revoke" ||
+      path === "id.kick.com/oauth/revoke"
+    )
       return new Response(null, { status: fake.revokeStatus });
     if (path === "api.twitch.tv/helix/schedule") {
       if (typeof fake.twitchSchedule === "number") return json({ error: "Not Found" }, fake.twitchSchedule);
       const after = url.searchParams.get("after");
       return json(fake.twitchSchedule[Math.min(after === null ? 0 : Number(after), fake.twitchSchedule.length - 1)]);
     }
-    if (path === "www.googleapis.com/youtube/v3/liveBroadcasts" && url.searchParams.get("broadcastStatus") === "upcoming") {
-      if (typeof fake.upcoming === "number") return json({ error: { errors: [{ reason: "quotaExceeded" }] } }, fake.upcoming);
+    if (path === "api.twitch.tv/helix/games") {
+      if (typeof fake.twitchGames === "number") return json({ error: "Error" }, fake.twitchGames);
+      const ids = url.searchParams.getAll("id");
+      return json({ data: fake.twitchGames.filter((game) => ids.includes(game.id)) });
+    }
+    if (
+      path === "www.googleapis.com/youtube/v3/liveBroadcasts" &&
+      url.searchParams.get("broadcastStatus") === "upcoming"
+    ) {
+      if (typeof fake.upcoming === "number")
+        return json({ error: { errors: [{ reason: "quotaExceeded" }] } }, fake.upcoming);
       // Pages of 50, with the index of the next item as the page token.
       const from = Number(url.searchParams.get("pageToken") ?? "0");
       const next = from + 50 < fake.upcoming.length ? { nextPageToken: String(from + 50) } : {};

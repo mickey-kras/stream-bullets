@@ -210,6 +210,14 @@ These rules apply to a read:
 - A stream without an end gets 120 minutes. The length stays between 15 minutes and 24 hours.
 - Each read stream has a row in `stream_event_sources`, with the platform and its ID.
   Thus a new read updates the entry. It does not make a second entry.
+- The row also keeps the Twitch category and the address of a picture.
+  For Twitch, the picture is the category cover from Get Games, 144 × 192 pixels.
+  For YouTube, it is the `maxres` thumbnail, else the `medium` thumbnail.
+  A failed Get Games request leaves the covers empty. It does not stop the read.
+- The schedule shows the YouTube thumbnail of a stream first, else the Twitch cover.
+  The category chip shows the Twitch category with its cover.
+- `GET /images/stream/<event>/<platform>` serves the picture. The server loads it from `static-cdn.jtvnw.net` or
+  `i.ytimg.com`, so the device of a viewer does not contact these hosts. Cloudflare keeps a loaded picture for one day.
 - Two streams are the same stream when their starts are at most 15 minutes apart. The titles can be different.
   A streamer runs one stream at a time. The schedule then shows one entry with the link of each platform.
 - The import makes entries with `imported = 1`. An edit by the owner, or a replay link, sets `imported = 0`.
