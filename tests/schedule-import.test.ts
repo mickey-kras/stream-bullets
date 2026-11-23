@@ -235,7 +235,7 @@ describe("reading the platforms", (): void => {
     fake.upcoming = [
       broadcast("vid-1", "Q&A", now + day, "public", now + day + 90 * 60_000),
       broadcast("vid-2", "Private test", now + day, "private"),
-      broadcast("vid-3", "Unlisted", now + day, "unlisted"),
+      broadcast("vid-3", "Unlisted", now + day + hour, "unlisted"),
       { id: "vid-4", snippet: { title: "No time" }, status: { privacyStatus: "public" } },
       broadcast("vid-5", "Too far", now + IMPORT_HORIZON_MS + day),
     ];
