@@ -739,12 +739,15 @@ const youtubeUpcomingSchema = z.object({
   nextPageToken: z.string().max(512).optional(),
 });
 
-/** The public broadcasts of one page with a planned start before `until`. */
+// A streamer sets a planned broadcast to unlisted to keep it off the channel page, but still schedules it.
+const LISTED_PRIVACY: ReadonlySet<string> = new Set(["public", "unlisted"]);
+
+/** The public and unlisted broadcasts of one page with a planned start before `until`. */
 function youtubeStreams(items: z.infer<typeof youtubeUpcomingSchema>["items"], until: number): ImportedStream[] {
   const streams: ImportedStream[] = [];
   for (const item of items) {
     const start = item.snippet.scheduledStartTime ? Date.parse(item.snippet.scheduledStartTime) : 0;
-    if (start <= 0 || start >= until || item.status.privacyStatus !== "public") continue;
+    if (start <= 0 || start >= until || !LISTED_PRIVACY.has(item.status.privacyStatus)) continue;
     const end = item.snippet.scheduledEndTime ? Date.parse(item.snippet.scheduledEndTime) : null;
     streams.push({
       externalId: item.id,
@@ -763,7 +766,7 @@ export const YOUTUBE_UPCOMING_PAGES = 4;
 /**
  * The public upcoming broadcasts of the token's channel that start before `until` (liveBroadcasts.list with
  * `broadcastStatus=upcoming`, pages of 50). `spend` takes the quota unit of each page (null: no quota). A broadcast without a planned
- * start (time 0) is left out, and so are private and unlisted ones: the schedule is public. Returns null when the
+ * start (time 0) is left out, and so are private ones. Unlisted ones stay: the streamer planned them. Returns null when the
  * read is not complete (no quota for a page, or more than `YOUTUBE_UPCOMING_PAGES` pages): the import then removes
  * nothing that it did not read.
  */

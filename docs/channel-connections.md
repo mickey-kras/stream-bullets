@@ -204,7 +204,8 @@ These rules apply to a read:
 
 - The read covers 4 weeks. Twitch gives at most 4 pages of 25 segments. YouTube gives at most 4 pages of 50 broadcasts.
 - A read with more pages, or a YouTube read without quota for a page, is not complete. It changes nothing.
-- The import ignores a canceled Twitch segment and a segment that starts in the vacation of the channel. It also ignores a YouTube broadcast that is not public or has no start time.
+- The import ignores a canceled Twitch segment and a segment that starts in the vacation of the channel. It also ignores a private YouTube broadcast and a YouTube broadcast without a start time.
+  It reads an unlisted YouTube broadcast: the streamer planned it, but keeps it off the channel page.
 - An empty title takes the Twitch category. Without a category, it takes the channel name.
 - A stream without an end gets 120 minutes. The length stays between 15 minutes and 24 hours.
 - Each read stream has a row in `stream_event_sources`, with the platform and its ID.
