@@ -5,7 +5,7 @@ import type { Locale } from "../i18n";
 import type { Entry, EntryText } from "../types";
 import { getEntry, getVisibleEntry } from "./data.server";
 import { HttpError } from "./http.server";
-import { inLanguageOf, loadLanguageDetector, readsOriginal } from "../lib/text-language";
+import { inLanguageOf, loadLanguageDetector, readsOriginal, sourceLanguage } from "../lib/text-language";
 import { LANGUAGES, needsTranslation, reserveStart, sha256, TRANSLATION_MODEL } from "./translation.server";
 
 // `POST /api/entries/:id/translation`. The text fields are the text that the reader sees.
@@ -118,7 +118,12 @@ function checkedEntry(source: EntryText, answer: EntryText | null, locale: Local
     urls(source.body) === urls(text.body) &&
     text.body.length <= 4000;
   const title: boolean = text.title !== "" && text.title.length <= 320;
-  return title && sameOptions && sameBody ? text : null;
+  return title && sameOptions && sameBody ? withSource(text, source) : null;
+}
+
+function withSource(text: EntryText, source: EntryText): EntryText {
+  const from: Locale | undefined = sourceLanguage(allText(source));
+  return from ? { ...text, from } : text;
 }
 
 /**

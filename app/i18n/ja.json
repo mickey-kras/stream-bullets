@@ -1333,6 +1333,8 @@
   "overlay.characters.off": "このサーバーではキャラクターはオフです。",
   "discussion.showOriginal": "原文を表示",
   "discussion.showTranslation": "翻訳を表示",
+  "discussion.translated": "翻訳済み",
+  "discussion.translatedFrom": "{language}から翻訳",
   "discussion.historyTitle": "以前のテキスト",
   "discussion.historyOpen": "このコメントの以前のテキストを表示",
   "discussion.historyDescription": "編集前のテキストはページのオーナーと管理者だけが見られます。90日間保存されます。",

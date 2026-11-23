@@ -30,7 +30,8 @@ test("a signed-in reader gets each comment in the site language and can see one 
     await page.route("**/api/comments/*/translation", async (route) => {
       const body = route.request().postDataJSON() as { text: string };
       asked.push(body);
-      const translation = body.text === "**Hallo** Welt" ? { text: "**Hello** world", mentions: [] } : null;
+      const translation =
+        body.text === "**Hallo** Welt" ? { text: "**Hello** world", mentions: [], from: "de" } : null;
       await route.fulfill({ json: { translation } });
     });
     await page.route("**/api/entries/*/translation", (route) => route.fulfill({ json: { translation: null } }));
@@ -39,8 +40,10 @@ test("a signed-in reader gets each comment in the site language and can see one 
     const english = page.locator("article.comment").filter({ hasText: "Already English" });
     // No selection is necessary: the page asks for the translation and shows it.
     await expect(comment.locator(".comment-text")).toHaveText("Hello world");
+    await expect(comment.locator(".comment-translation")).toContainText("Translated from German");
     await expect(english.locator(".comment-translation")).toHaveCount(0);
     await comment.getByRole("button", { name: "Show original", exact: true }).click();
+    await expect(comment.locator(".comment-translation")).not.toContainText("Translated from");
     await expect(comment.locator(".comment-text")).toHaveText("Hallo Welt");
     await expect(english.locator(".comment-text")).toHaveText("Already English");
     await comment.getByRole("button", { name: "Show translation", exact: true }).click();

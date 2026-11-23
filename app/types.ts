@@ -140,6 +140,8 @@ export interface EntryText {
   title: string;
   body: string;
   options: string[];
+  // The language of the original text, for the label of a translation. Absent when it is not sure.
+  from?: Locale;
 }
 
 // Sides use entry options; each viewer's vote selects their side.
@@ -230,7 +232,7 @@ export interface Comment {
   reported: boolean;
   // The stored translation for the language of the reader. Null: this comment needs none, or its translation
   // failed a check. Absent: the server has no result yet.
-  translation?: { text: string; mentions: CommentMention[] } | null;
+  translation?: { text: string; mentions: CommentMention[]; from?: Locale } | null;
   // The "Answered" mark of the page owner; absent when the comment has none.
   answer?: CommentAnswer;
 }

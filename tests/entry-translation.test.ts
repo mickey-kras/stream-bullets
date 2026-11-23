@@ -106,6 +106,7 @@ describe("entry translation", (): void => {
       title: "Which game?",
       options: ["Elden Ring", "Cozy"],
       body: "Vote!\nEnds on Friday.",
+      from: "de",
     };
     expect(await translateEntry(env, pollId, "fan", "en", NOW, POLL)).toEqual(expected);
     expect(await translateEntry(env, pollId, "host", "en", NOW + 1, POLL)).toEqual(expected);
@@ -158,6 +159,7 @@ describe("entry translation", (): void => {
       title: "Which game?",
       options: ["Elden Ring", "Cozy"],
       body: "Vote!\nEnds on Friday.",
+      from: "de",
     });
   });
 
@@ -168,6 +170,7 @@ describe("entry translation", (): void => {
       title: "Topic without text",
       body: "",
       options: [],
+      from: "de",
     });
   });
 
@@ -201,6 +204,7 @@ describe("entry translation", (): void => {
       title: "Which game to stream?",
       body: "Vote, it is important!",
       options: [],
+      from: "ru",
     });
   });
 
@@ -217,6 +221,7 @@ describe("entry translation", (): void => {
       title: "В какую игру играем?",
       body: "",
       options: ["Ведьмак", "Аид"],
+      from: "en",
     });
     // A Russian poll with names in Latin letters has no translation for a Russian reader.
     const russian: string = crypto.randomUUID();
@@ -242,6 +247,7 @@ describe("entry translation", (): void => {
       title: "We discuss the next stream and the plans for the week",
       body: "Ask Миша about the next stream and the plans for this week.",
       options: [],
+      from: "ru",
     });
     // Game names in Latin letters stay as they are. The Japanese parts decide the script of a Japanese answer.
     const games: string = crypto.randomUUID();

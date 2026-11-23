@@ -1393,6 +1393,8 @@
   "overlay.characters.off": "Персонажи на этом сервере выключены.",
   "discussion.showOriginal": "Показать оригинал",
   "discussion.showTranslation": "Показать перевод",
+  "discussion.translated": "Переведено",
+  "discussion.translatedFrom": "Переведено с языка: {language}",
   "discussion.historyTitle": "Прежние тексты",
   "discussion.historyOpen": "Показать прежние тексты этого комментария",
   "discussion.historyDescription": "Тексты до каждого изменения видят только владелец страницы и администраторы. Они хранятся 90 дней.",

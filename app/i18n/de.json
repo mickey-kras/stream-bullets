@@ -1353,6 +1353,8 @@
   "overlay.characters.off": "Figuren sind auf diesem Server aus.",
   "discussion.showOriginal": "Original anzeigen",
   "discussion.showTranslation": "Übersetzung anzeigen",
+  "discussion.translated": "Übersetzt",
+  "discussion.translatedFrom": "Übersetzt aus: {language}",
   "discussion.historyTitle": "Frühere Texte",
   "discussion.historyOpen": "Frühere Texte dieses Kommentars anzeigen",
   "discussion.historyDescription": "Nur der Besitzer der Seite und Admins sehen die Texte vor jeder Bearbeitung. Sie bleiben 90 Tage gespeichert.",
