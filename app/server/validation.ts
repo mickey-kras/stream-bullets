@@ -10,6 +10,7 @@ import {
   STREAM_PLATFORMS,
   SUPPORT_LINK_KINDS,
 } from "../../db/enums";
+import type { Locale } from "../i18n";
 import { IDEA_CATEGORIES, TOPIC_CATEGORIES } from "../lib/ideas";
 import { BINARY_LABEL_MAX_LENGTH, isBinaryLabelPair } from "../lib/polls";
 import { isPlainUrlText } from "../lib/url-text";
@@ -274,6 +275,27 @@ export const displayPrefsSchema = z
   })
   .partial()
   .strict();
+
+// `PATCH /api/me/keep-original`: the languages whose content the account reads in its original text.
+export const keepOriginalSchema = z
+  .object({ locales: z.array(z.enum(LOCALES)).max(LOCALES.length) })
+  .strict()
+  .transform(({ locales }): { locales: Locale[] } => ({
+    locales: LOCALES.filter((locale) => locales.includes(locale)),
+  }));
+
+/** The stored languages to keep in the original text. A value that is not a list of site languages gives none. */
+export function readKeepOriginal(value: unknown): Locale[] {
+  if (typeof value !== "string") return [];
+  let saved: unknown;
+  try {
+    saved = JSON.parse(value);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(saved)) return [];
+  return LOCALES.filter((locale: Locale): boolean => saved.includes(locale));
+}
 
 // Drop obsolete stored preference keys/values individually.
 export function readDisplayPrefs(value: unknown): z.infer<typeof displayPrefsSchema> | null {

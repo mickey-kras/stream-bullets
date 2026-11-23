@@ -666,6 +666,8 @@
   "landing.unavailable": "放送局のプレビューは利用できません。公開ページは引き続き閲覧できます。",
   "landing.vote": "投票する",
   "language.current": "言語：{name}",
+  "language.keepHelp": "これらの言語のコンテンツは翻訳せずに原文で表示されます。",
+  "language.keepTitle": "読める言語",
   "language.title": "言語",
   "legal.contents": "目次",
   "legal.englishOnly": "このページは英語のみです。英語版が正式な内容です。",

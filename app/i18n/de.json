@@ -679,6 +679,8 @@
   "landing.unavailable": "Die Stationsvorschau ist nicht verfügbar. Du kannst weiterhin öffentliche Seiten ansehen.",
   "landing.vote": "Abstimmen",
   "language.current": "Sprache: {name}",
+  "language.keepHelp": "Inhalte in diesen Sprachen siehst du im Originaltext, ohne Übersetzung.",
+  "language.keepTitle": "Sprachen, die du liest",
   "language.title": "Sprache",
   "legal.contents": "Inhalt",
   "legal.englishOnly": "Diese Seite gibt es nur auf Englisch. Die englische Fassung ist verbindlich.",

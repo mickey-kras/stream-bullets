@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { LOCALES } from "../db/enums";
 import type { AppEnv } from "../app/env";
+import type { Locale } from "../app/i18n";
 import {
   attachAboutTranslations,
   attachPageTranslations,
@@ -118,6 +119,33 @@ describe("translation of the text of a page", (): void => {
     const listed: Streamer = page();
     await attachAboutTranslations(env, [listed, page("")], "de");
     expect(listed.aboutTranslation).toBe("About in German");
+  });
+
+  it("shows the text of a page in a language that the reader reads in its original text", async (): Promise<void> => {
+    const about = "Привіт! Я стрімлю рольові ігри щовечора і читаю ваші коментарі.";
+    const title = "Вечірня гра з глядачами";
+    await env.DB.batch([
+      env.DB.prepare("UPDATE streamers SET about=? WHERE id='page'").bind(about),
+      env.DB.prepare("UPDATE stream_events SET title=? WHERE streamer_id='page'").bind(title),
+    ]);
+    await translatePage(env, "page", NOW, 8);
+    const read = async (keep: readonly Locale[]) => {
+      const streamer: Streamer = page(about);
+      const card = { id: "card", title: "Regeln", body: "Seid nett.", buttonLabel: "Mehr lesen" } as CommunityCard;
+      const event = { id: "e", title, notes: "" } as StreamEvent;
+      await attachPageTranslations(env, streamer, "fr", [card], [event], keep);
+      const listed: Streamer = page(about);
+      await attachAboutTranslations(env, [listed], "fr", keep);
+      return [streamer.aboutTranslation, event.translation, card.translation !== undefined, listed.aboutTranslation];
+    };
+    // The Ukrainian About text and stream keep their original text; the German card keeps its translation.
+    expect(await read(["uk"])).toEqual([null, undefined, true, null]);
+    expect(await read([])).toEqual([
+      "About in French",
+      { title: "Title in French", notes: "" },
+      true,
+      "About in French",
+    ]);
   });
 
   it("deletes the results of text that the page no longer has, and translates the new text", async (): Promise<void> => {

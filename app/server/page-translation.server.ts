@@ -1,7 +1,7 @@
 import { waitUntil } from "cloudflare:workers";
 import { z } from "zod";
 import { LOCALES } from "../../db/enums";
-import { loadLanguageDetector } from "../lib/text-language";
+import { loadLanguageDetector, readsOriginal } from "../lib/text-language";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
 import type { CommunityCard, EntryText, StreamEvent, Streamer } from "../types";
@@ -178,15 +178,20 @@ async function storedFor(
   );
 }
 
-/** Puts the stored translation of the About text for `locale` on each page. */
+/**
+ * Puts the stored translation of the About text for `locale` on each page. A text in the languages `keep`, which
+ * the reader reads, shows in its original text.
+ */
 export async function attachAboutTranslations(
   env: AppEnv,
   streamers: readonly Streamer[],
   locale: Locale,
+  keep: readonly Locale[] = [],
   stored?: Map<string, EntryText | null>,
 ): Promise<void> {
   const pages: Streamer[] = streamers.filter((streamer: Streamer): boolean => streamer.about !== "");
   if (pages.length === 0) return;
+  if (keep.length > 0) await loadLanguageDetector();
   const rows =
     stored ??
     (await storedFor(
@@ -196,13 +201,14 @@ export async function attachAboutTranslations(
     ));
   for (const page of pages) {
     const text = rows.get(`${page.id}:${await textHash("about", aboutText(page.about))}`);
-    if (text !== undefined) page.aboutTranslation = text?.body ?? null;
+    if (readsOriginal(keep, page.about)) page.aboutTranslation = null;
+    else if (text !== undefined) page.aboutTranslation = text?.body ?? null;
   }
 }
 
 /**
  * Puts the stored translations for `locale` on the About text, the cards and the streams of one page. An item
- * without a stored result stays as it is.
+ * without a stored result, or in the languages `keep` that the reader reads, stays as it is.
  */
 export async function attachPageTranslations(
   env: AppEnv,
@@ -210,13 +216,14 @@ export async function attachPageTranslations(
   locale: Locale,
   cards: readonly CommunityCard[] | null,
   events: readonly (StreamEvent | null)[],
+  keep: readonly Locale[] = [],
 ): Promise<void> {
   const stored = await storedFor(env, [streamer.id], locale);
   if (stored.size === 0) return;
-  await attachAboutTranslations(env, [streamer], locale, stored);
+  await attachAboutTranslations(env, [streamer], locale, keep, stored);
   for (const card of cards ?? []) {
     const text = stored.get(`${streamer.id}:${await textHash("card", cardText(card))}`);
-    if (text !== undefined)
+    if (text !== undefined && !readsOriginal(keep, card.title, card.body, card.buttonLabel ?? ""))
       card.translation = text && { title: text.title, body: text.body, buttonLabel: text.options[0] ?? null };
   }
   // Streams of one series have the same text, so the page computes each hash one time.
@@ -227,6 +234,7 @@ export async function attachPageTranslations(
     const hash: Promise<string> = hashes.get(key) ?? textHash("event", eventText(event));
     hashes.set(key, hash);
     const text = stored.get(`${streamer.id}:${await hash}`);
-    if (text !== undefined) event.translation = text && { title: text.title, notes: text.body };
+    if (text !== undefined && !readsOriginal(keep, event.title, event.notes))
+      event.translation = text && { title: text.title, notes: text.body };
   }
 }

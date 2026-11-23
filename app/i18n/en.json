@@ -687,6 +687,8 @@
   "landing.unavailable": "The station preview is unavailable. You can still browse public pages.",
   "landing.vote": "Vote in a poll",
   "language.current": "Language: {name}",
+  "language.keepHelp": "Content in these languages shows in its original text, without a translation.",
+  "language.keepTitle": "Languages you read",
   "language.title": "Language",
   "legal.contents": "Contents",
   "legal.englishOnly": "This page is in English only. The English version is binding.",

@@ -17,6 +17,8 @@ export const user = sqliteTable(
     avatarPreset: integer("avatar_preset"),
     locale: text("locale", { enum: LOCALES }),
     displayPrefs: text("display_prefs"),
+    // JSON array of locales whose content this account reads: it shows in its original text. Null: none.
+    keepOriginal: text("keep_original"),
     // Server-only milestones; aggregate conversion counts never contain account IDs.
     firstVoteCounted: integer("first_vote_counted", { mode: "boolean" }).notNull().default(false),
     firstTopicCounted: integer("first_topic_counted", { mode: "boolean" }).notNull().default(false),

@@ -1048,6 +1048,9 @@ svg.icon-thumbs-up-filled, svg.icon-thumbs-down-filled { fill: currentColor; }
 .lang-option { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 8px 14px; border-color: transparent; background: none; text-align: left; font-size: 18px; }
 .lang-option:hover { background: var(--btn-hover); border-color: var(--line); }
 .lang-option[aria-pressed="true"] { color: var(--gold); border-color: var(--gold); }
+.keep-original { display: grid; gap: 8px; margin: 20px 0 0; padding: 0; border: 0; }
+.keep-original legend { padding: 0; font-weight: 700; }
+.keep-original .hint { margin: 0; color: var(--muted); }
 .lang-check { width: 18px; height: 18px; flex: none; }
 .legal-translation { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 :root:lang(de) :is(button, .button-link) { white-space: normal; }

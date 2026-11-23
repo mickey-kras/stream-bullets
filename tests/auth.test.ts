@@ -247,6 +247,7 @@ describe("server identity", () => {
       avatarPreset: null,
       locale: null,
       displayPrefs: null,
+      keepOriginal: [],
     });
   });
 
@@ -288,6 +289,7 @@ describe("server identity", () => {
       avatarPreset: null,
       locale: null,
       displayPrefs: null,
+      keepOriginal: [],
     });
     const cookies: string[] = ctx.responseHeaders.getSetCookie();
     expect(
@@ -462,6 +464,7 @@ describe("OAuth boundary", () => {
         avatarPreset: null,
         locale: null,
         displayPrefs: null,
+        keepOriginal: [],
       });
     } finally {
       restore();

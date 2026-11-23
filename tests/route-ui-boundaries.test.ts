@@ -130,6 +130,7 @@ const viewer: Viewer = {
   avatarPreset: null,
   locale: null,
   displayPrefs: null,
+  keepOriginal: [],
 };
 const streamer: Streamer = {
   id: "page",

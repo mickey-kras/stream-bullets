@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useRevalidator } from "react-router";
 import type { DialogState, LanguageOpener } from "../account/dialog-route";
 import { DEFAULT_LOCALE, getLocale, LOCALE_NAMES, LOCALES, t, type Locale } from "../../i18n";
 import { saveLocaleCookie } from "../../lib/prefs";
@@ -38,6 +38,49 @@ export async function chooseLocale(
     // Blocked storage must not prevent locale changes.
   }
   globalThis.location.replace(url.href);
+}
+
+/**
+ * The languages that a signed-in reader reads. Content in these languages shows in its original text, without a
+ * translation. Each change is saved, and the page loads its content again.
+ */
+function KeepOriginal({ saved, active }: Readonly<{ saved: readonly Locale[]; active: Locale }>): ReactNode {
+  const revalidator = useRevalidator();
+  const [keep, setKeep] = useState<readonly Locale[]>(saved);
+  const [error, setError] = useState<string>("");
+  async function toggle(locale: Locale, checked: boolean): Promise<void> {
+    const next: Locale[] = LOCALES.filter((item: Locale) => (item === locale ? checked : keep.includes(item)));
+    setKeep(next);
+    setError("");
+    try {
+      await sendJson("PATCH", "/api/me/keep-original", { locales: next });
+      await revalidator.revalidate();
+    } catch (error_: unknown) {
+      setKeep(keep);
+      setError(errorMessage(error_));
+    }
+  }
+  return (
+    <fieldset className="keep-original">
+      <legend>{t("language.keepTitle")}</legend>
+      <p className="hint">{t("language.keepHelp")}</p>
+      {error && (
+        <p className="form-error" role="alert">
+          {error}
+        </p>
+      )}
+      {ORDERED.filter((locale: Locale) => locale !== active).map((locale: Locale) => (
+        <label key={locale} className="choice">
+          <input
+            type="checkbox"
+            checked={keep.includes(locale)}
+            onChange={(event) => void toggle(locale, event.currentTarget.checked)}
+          />
+          <span lang={locale}>{LOCALE_NAMES[locale]}</span>
+        </label>
+      ))}
+    </fieldset>
+  );
 }
 
 // Display names in each language's own script.
@@ -95,6 +138,7 @@ export function LanguageDialog({ onClose }: Readonly<{ onClose: () => void }>): 
           </li>
         ))}
       </ul>
+      {shell.viewer && <KeepOriginal saved={shell.viewer.keepOriginal} active={active} />}
     </Sheet>
   );
 }

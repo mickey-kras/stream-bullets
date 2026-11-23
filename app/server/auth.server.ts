@@ -12,7 +12,7 @@ import type { Locale } from "../i18n";
 import type { Provider, Viewer } from "../types";
 import { z } from "zod";
 import { getOrigin, HttpError } from "./http.server";
-import { displayNameSchema, readDisplayPrefs } from "./validation";
+import { displayNameSchema, readDisplayPrefs, readKeepOriginal } from "./validation";
 
 export { isPlaceholderEmail } from "./validation";
 
@@ -298,6 +298,7 @@ function authUserOptions(env: AppEnv): NonNullable<BetterAuthOptions["user"]> {
       avatarPreset: { type: "number", required: false, input: false },
       locale: { type: "string", required: false, input: false },
       displayPrefs: { type: "string", required: false, input: false },
+      keepOriginal: { type: "string", required: false, input: false },
     },
   };
 }
@@ -522,5 +523,6 @@ export function viewerValue(account: User & Record<string, unknown>): Viewer {
     avatarPreset: typeof preset === "number" && Number.isInteger(preset) && preset >= 0 && preset <= 17 ? preset : null,
     locale: typeof locale === "string" && (LOCALES as readonly string[]).includes(locale) ? (locale as Locale) : null,
     displayPrefs: readDisplayPrefs(account.displayPrefs),
+    keepOriginal: readKeepOriginal(account.keepOriginal),
   };
 }

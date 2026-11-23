@@ -6,7 +6,7 @@ import { action } from "../app/routes/api";
 import { apiRoutes } from "../app/server/api";
 import { loadShell } from "../app/lib/shell.server";
 import { preferenceCookies } from "../app/server/api/cookies";
-import { readDisplayPrefs } from "../app/server/validation";
+import { readDisplayPrefs, readKeepOriginal } from "../app/server/validation";
 import { serveImage } from "../app/server/images.server";
 import type { CommentThread, Streamer, StreamerDirectory, ThreadSnapshot, Viewer } from "../app/types";
 import { apiCaller } from "./helpers/api";
@@ -168,10 +168,31 @@ describe("profile, language and preferences", (): void => {
       avatarPreset: 4,
       locale: "pt-BR",
       displayPrefs: preferences,
+      keepOriginal: [],
     });
     expect((await call("PATCH", "me/locale", { user: "viewer", body: { locale: null } })).status).toBe(200);
     const after = await (await call("GET", "me", { user: "viewer" })).json<{ viewer: Viewer }>();
     expect(after.viewer.locale).toBeNull();
+  });
+
+  it("saves the languages that the account reads in the original text", async (): Promise<void> => {
+    expect((await call("PATCH", "me/keep-original", { user: "viewer", body: { locales: ["xx"] } })).status).toBe(400);
+    expect((await call("PATCH", "me/keep-original", { body: { locales: ["uk"] } })).status).toBe(401);
+    const saved = await call("PATCH", "me/keep-original", { user: "viewer", body: { locales: ["uk", "de", "uk"] } });
+    // Site order, each language one time.
+    expect(await saved.json()).toEqual({ locales: ["de", "uk"] });
+    const me = await (await call("GET", "me", { user: "viewer" })).json<{ viewer: Viewer }>();
+    expect(me.viewer.keepOriginal).toEqual(["de", "uk"]);
+    await call("PATCH", "me/keep-original", { user: "viewer", body: { locales: [] } });
+    const after = await (await call("GET", "me", { user: "viewer" })).json<{ viewer: Viewer }>();
+    expect(after.viewer.keepOriginal).toEqual([]);
+  });
+
+  it("reads saved languages to keep leniently", (): void => {
+    expect(readKeepOriginal(null)).toEqual([]);
+    expect(readKeepOriginal("not json")).toEqual([]);
+    expect(readKeepOriginal('{"uk":true}')).toEqual([]);
+    expect(readKeepOriginal('["uk","xx","de"]')).toEqual(["de", "uk"]);
   });
 
   it("reads saved preferences leniently", (): void => {
@@ -221,8 +242,7 @@ describe("profile, language and preferences", (): void => {
     expect(await shellOf("owner")).toMatchObject({
       viewer: { id: "owner" },
       admin: false,
-      ownStreamer: { handle: "zed_page",
-      name: "Zed", status: "active", statusReason: null },
+      ownStreamer: { handle: "zed_page", name: "Zed", status: "active", statusReason: null },
       locale: "de",
       origin,
     });
@@ -429,7 +449,11 @@ describe("waitlist and reports through the handler table", (): void => {
 
 describe("first visitor destination", () => {
   it("features the official page, also when another page has content", async (): Promise<void> => {
-    expect(await getFeaturedStreamer(env)).toEqual({ handle: "streambullets", name: "StreamBullets", isOfficial: true });
+    expect(await getFeaturedStreamer(env)).toEqual({
+      handle: "streambullets",
+      name: "StreamBullets",
+      isOfficial: true,
+    });
   });
 
   it("features no page when the official page is not active", async (): Promise<void> => {

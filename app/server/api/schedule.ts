@@ -32,7 +32,14 @@ export const scheduleRoutes: ApiRoute[] = [
     if (!streamer) throw new HttpError(404, "Streamer not found.");
     const now = Date.now();
     const events = await listEvents(env, streamer.id, range.from, range.to, now);
-    await attachPageTranslations(env, streamer, requestLocale(request, viewer?.locale ?? null), [], events);
+    await attachPageTranslations(
+      env,
+      streamer,
+      requestLocale(request, viewer?.locale ?? null),
+      [],
+      events,
+      viewer?.keepOriginal ?? [],
+    );
     return json({ events, serverNow: now });
   }),
   // Schedule writes refresh overlays showing Up next.

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import type { AppEnv } from "../app/env";
+import type { Locale } from "../app/i18n";
 import { deleteComment, listComments, mutateComment } from "../app/server/comments.server";
 import {
   attachTranslations,
@@ -385,6 +386,19 @@ describe("comment translation", (): void => {
     const french = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
     await attachTranslations(env, french.comments, "fr");
     expect(french.comments.every((comment) => comment.translation === undefined)).toBe(true);
+  });
+
+  it("shows a comment in a language that the reader reads in its original text", async (): Promise<void> => {
+    const id: string = await seedComment("Дякую за стрім, було дуже цікаво!");
+    const read = async (keep: readonly Locale[]) => {
+      const page = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
+      await attachTranslations(env, page.comments, "de", keep);
+      return page.comments.find((comment) => comment.id === id)?.translation;
+    };
+    // Null: the page asks for no translation and shows no translation control.
+    expect(await read(["uk"])).toBeNull();
+    expect(await read(["pl"])).toBeUndefined();
+    expect(run).not.toHaveBeenCalled();
   });
 
   it("removes the old rows of the daily count", async (): Promise<void> => {

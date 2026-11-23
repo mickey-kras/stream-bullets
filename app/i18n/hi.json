@@ -679,6 +679,8 @@
   "landing.unavailable": "स्टेशन का पूर्वावलोकन उपलब्ध नहीं है। आप फिर भी सार्वजनिक पेज देख सकते हैं।",
   "landing.vote": "पोल में वोट करें",
   "language.current": "भाषा: {name}",
+  "language.keepHelp": "इन भाषाओं की सामग्री बिना अनुवाद के मूल पाठ में दिखती है।",
+  "language.keepTitle": "आप जो भाषाएँ पढ़ते हैं",
   "language.title": "भाषा",
   "legal.contents": "विषय-सूची",
   "legal.englishOnly": "यह पेज केवल अंग्रेज़ी में है। अंग्रेज़ी संस्करण ही मान्य है।",

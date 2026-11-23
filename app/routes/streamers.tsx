@@ -43,7 +43,12 @@ export const loader = withRouteErrors(async ({ request, context }: LoaderFunctio
     query ? Promise.resolve(null) : getFeaturedStreamer(app.env),
     requestViewer(request, app),
   ]);
-  await attachAboutTranslations(app.env, page.streamers, requestLocale(request, viewer?.locale ?? null));
+  await attachAboutTranslations(
+    app.env,
+    page.streamers,
+    requestLocale(request, viewer?.locale ?? null),
+    viewer?.keepOriginal ?? [],
+  );
   return { ...page, total, featured, query, intent: readIntent(url.searchParams.get("then")) };
 });
 
