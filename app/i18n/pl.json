@@ -1398,5 +1398,11 @@
   "discussion.historyDescription": "Tylko właściciel strony i administratorzy widzą teksty sprzed każdej edycji. Są przechowywane 90 dni.",
   "discussion.historyEmpty": "Brak zapisanych wcześniejszych tekstów.",
   "discussion.historyLoading": "Wczytywanie wcześniejszych tekstów…",
-  "discussion.historyWritten": "Napisano {time}"
+  "discussion.historyWritten": "Napisano {time}",
+  "discussion.answered": "Odpowiedziano",
+  "discussion.answeredOnStream": "Odpowiedziano na streamie: {title}, {date}",
+  "discussion.markAnswered": "Oznacz jako odpowiedziany",
+  "discussion.unmarkAnswered": "Usuń oznaczenie odpowiedzi",
+  "discussion.answerTime": "Znacznik czasu w sekundach",
+  "page.answerLead": "Odpowiedziane komentarze: znacznik czasu przed oznaczeniem, w minutach"
 }

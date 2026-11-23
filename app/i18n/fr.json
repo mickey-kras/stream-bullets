@@ -1358,5 +1358,11 @@
   "discussion.historyDescription": "Seuls le propriétaire de la page et les administrateurs voient les textes avant chaque modification. Ils sont conservés 90 jours.",
   "discussion.historyEmpty": "Aucun texte précédent n’est conservé.",
   "discussion.historyLoading": "Chargement des textes précédents…",
-  "discussion.historyWritten": "Écrit {time}"
+  "discussion.historyWritten": "Écrit {time}",
+  "discussion.answered": "Répondu",
+  "discussion.answeredOnStream": "Répondu en stream : {title}, {date}",
+  "discussion.markAnswered": "Marquer comme répondu",
+  "discussion.unmarkAnswered": "Retirer la marque « Répondu »",
+  "discussion.answerTime": "Repère temporel en secondes",
+  "page.answerLead": "Commentaires répondus : repère temporel avant la marque, en minutes"
 }

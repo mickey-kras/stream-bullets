@@ -1358,5 +1358,11 @@
   "discussion.historyDescription": "हर बदलाव से पहले का टेक्स्ट सिर्फ़ पेज का मालिक और एडमिन देखते हैं। ये 90 दिन तक रखे जाते हैं।",
   "discussion.historyEmpty": "कोई पुराना टेक्स्ट सहेजा नहीं गया है।",
   "discussion.historyLoading": "पुराने टेक्स्ट लोड हो रहे हैं…",
-  "discussion.historyWritten": "लिखा गया {time}"
+  "discussion.historyWritten": "लिखा गया {time}",
+  "discussion.answered": "जवाब दिया गया",
+  "discussion.answeredOnStream": "स्ट्रीम पर जवाब दिया गया: {title}, {date}",
+  "discussion.markAnswered": "जवाब दिया गया के रूप में चिह्नित करें",
+  "discussion.unmarkAnswered": "जवाब का निशान हटाएं",
+  "discussion.answerTime": "सेकंड में समय",
+  "page.answerLead": "जवाब दी गई टिप्पणियां: निशान से पहले का समय, मिनटों में"
 }

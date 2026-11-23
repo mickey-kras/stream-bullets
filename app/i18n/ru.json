@@ -1398,5 +1398,11 @@
   "discussion.historyDescription": "Тексты до каждого изменения видят только владелец страницы и администраторы. Они хранятся 90 дней.",
   "discussion.historyEmpty": "Прежних текстов нет.",
   "discussion.historyLoading": "Загружаем прежние тексты…",
-  "discussion.historyWritten": "Написано {time}"
+  "discussion.historyWritten": "Написано {time}",
+  "discussion.answered": "Отвечено",
+  "discussion.answeredOnStream": "Ответ на стриме: {title}, {date}",
+  "discussion.markAnswered": "Отметить как отвеченный",
+  "discussion.unmarkAnswered": "Снять отметку «Отвечено»",
+  "discussion.answerTime": "Метка времени в секундах",
+  "page.answerLead": "Отвеченные комментарии: метка времени до отметки, в минутах"
 }

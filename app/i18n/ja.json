@@ -1338,5 +1338,11 @@
   "discussion.historyDescription": "編集前のテキストはページのオーナーと管理者だけが見られます。90日間保存されます。",
   "discussion.historyEmpty": "以前のテキストは保存されていません。",
   "discussion.historyLoading": "以前のテキストを読み込み中…",
-  "discussion.historyWritten": "{time} に書き込み"
+  "discussion.historyWritten": "{time} に書き込み",
+  "discussion.answered": "回答済み",
+  "discussion.answeredOnStream": "配信で回答済み：{title}、{date}",
+  "discussion.markAnswered": "回答済みにする",
+  "discussion.unmarkAnswered": "回答済みの印を外す",
+  "discussion.answerTime": "タイムコード（秒）",
+  "page.answerLead": "回答済みのコメント：印を付ける前のタイムコード（分）"
 }

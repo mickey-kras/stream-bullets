@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import { useSearchParams } from "react-router";
 import { createDraftStore, type DiscussionDraft } from "../lib/discussion-draft";
+import { CommentAnswerLine } from "./comment-answer";
 import { CommentHistory } from "./comment-history";
 import { CommentInput } from "./comment-input";
 import { useCommentTranslation } from "./comment-translation";
@@ -358,6 +359,14 @@ function CommentArticle({
           ) : (
             <span className="muted">{t("discussion.edited")}</span>
           ))}
+        {(comment.answer || (rules.writable && rules.viewer?.id === rules.ownerId)) && (
+          <CommentAnswerLine
+            key={comment.answer?.markedAt ?? 0}
+            commentId={comment.id}
+            initial={comment.answer}
+            owner={rules.writable && rules.viewer?.id === rules.ownerId}
+          />
+        )}
         <div ref={editButton}>
           <CommentActions
             comment={comment}

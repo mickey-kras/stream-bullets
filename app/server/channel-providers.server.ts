@@ -791,3 +791,56 @@ export async function youtubeUpcoming(
   }
   return null;
 }
+
+/** A stream that runs now on a channel: where to watch it, and when it started. */
+export interface LiveStream {
+  platform: "twitch";
+  title: string;
+  // The VOD of the stream when Twitch has one, else the channel.
+  url: string;
+  startedAt: number;
+}
+
+const twitchStreamsSchema = z.object({
+  data: z.array(
+    z.object({
+      id: z.string().regex(/^\d{1,32}$/),
+      user_login: z.string().regex(/^\w{1,64}$/),
+      title: z.string().max(1000),
+      type: z.string().max(16),
+      started_at: z.iso.datetime({ offset: true }),
+    }),
+  ),
+});
+
+const twitchVideosSchema = z.object({
+  data: z.array(z.object({ id: z.string().regex(/^\d{1,32}$/), stream_id: z.string().max(32).nullable() })),
+});
+
+/**
+ * The live stream of a Twitch channel, or null when it is offline (Get Streams with an app token). The VOD is the
+ * newest archive whose `stream_id` is the live stream (Get Videos, `type=archive`); a channel without VODs gets
+ * its channel address.
+ */
+export async function twitchLiveStream(env: AppEnv, broadcasterId: string): Promise<LiveStream | null> {
+  const headers = {
+    Authorization: `Bearer ${await twitchAppToken(env)}`,
+    "Client-Id": providerClient(env, "twitch").id,
+  };
+  const id = encodeURIComponent(broadcasterId);
+  const streams = twitchStreamsSchema.parse(
+    await getJson(`https://api.twitch.tv/helix/streams?user_id=${id}`, headers),
+  );
+  const stream = streams.data.find((item) => item.type === "live");
+  if (!stream) return null;
+  const videos = twitchVideosSchema.parse(
+    await getJson(`https://api.twitch.tv/helix/videos?user_id=${id}&type=archive&first=1`, headers),
+  );
+  const vod = videos.data.find((item) => item.stream_id === stream.id);
+  return {
+    platform: "twitch",
+    title: streamTitle(stream.title, stream.user_login),
+    url: vod ? `https://www.twitch.tv/videos/${vod.id}` : `https://www.twitch.tv/${stream.user_login.toLowerCase()}`,
+    startedAt: Date.parse(stream.started_at),
+  };
+}

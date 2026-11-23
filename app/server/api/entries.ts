@@ -1,4 +1,12 @@
 import { z } from "zod";
+import {
+  answerActionSchema,
+  answerComment,
+  answerLeadMinutes,
+  answerLeadSchema,
+  attachAnswerTranslations,
+  setAnswerLead,
+} from "../comment-answers.server";
 import { getCommentThread, listCommentRevisions, listComments, mutateComment } from "../comments.server";
 import { mentionCandidates } from "../discussion-notifications.server";
 import { getVisibleEntry } from "../data.server";
@@ -19,12 +27,10 @@ export const entryRoutes: ApiRoute[] = [
     queryParams(request, []);
     if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Comment not found.");
     const result = await getCommentThread(env, match[1], viewer?.id ?? null);
-    await attachTranslations(
-      env,
-      [result.comment, result.thread, ...result.thread.replies],
-      requestLocale(request, viewer?.locale ?? null),
-      viewer?.keepOriginal ?? [],
-    );
+    const comments: Comment[] = [result.comment, result.thread, ...result.thread.replies];
+    const locale = requestLocale(request, viewer?.locale ?? null);
+    await attachTranslations(env, comments, locale, viewer?.keepOriginal ?? []);
+    await attachAnswerTranslations(env, comments, locale, viewer?.keepOriginal ?? []);
     return json(result);
   }),
   // GET /api/comments/:id/history → {revisions: [{text, mentions, writtenAt, editedAt}]}, oldest first. The page
@@ -54,7 +60,9 @@ export const entryRoutes: ApiRoute[] = [
       const all: Comment[] = page.comments.flatMap((comment: Comment | CommentThread): Comment[] =>
         "replies" in comment ? [comment, ...comment.replies] : [comment],
       );
-      await attachTranslations(env, all, requestLocale(request, viewer?.locale ?? null), viewer?.keepOriginal ?? []);
+      const locale = requestLocale(request, viewer?.locale ?? null);
+      await attachTranslations(env, all, locale, viewer?.keepOriginal ?? []);
+      await attachAnswerTranslations(env, all, locale, viewer?.keepOriginal ?? []);
       return json(page);
     }
     queryParams(request, []);
@@ -78,6 +86,21 @@ export const entryRoutes: ApiRoute[] = [
     const { locale, text } = await readJson(request, translationSchema);
     return json({ translation: await translateComment(env, match[1], viewer.id, locale, Date.now(), text) });
   }),
+  // POST /api/comments/:id/answer {action: "mark" | "unmark"} | {action: "offset", offsetSeconds} → {answer | null}.
+  // The owner of the page of the comment only; 404 for everyone else.
+  write("POST", /comments\/([a-f0-9-]{36})\/answer/, async ({ request, env, match, viewer }) => {
+    if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Comment not found.");
+    return json({ answer: await answerComment(env, viewer.id, match[1], await readJson(request, answerActionSchema)) });
+  }),
+  // GET and PUT /api/streamer/answer-lead {leadMinutes}: the time code of a new mark is this far back. The viewer's
+  // own page only.
+  get(/streamer\/answer-lead/, async ({ request, env, viewer }) => {
+    queryParams(request, []);
+    return json({ leadMinutes: await answerLeadMinutes(env, requireViewer(viewer).id) });
+  }),
+  write("PUT", /streamer\/answer-lead/, async ({ request, env, viewer }) =>
+    json(await setAnswerLead(env, viewer.id, await readJson(request, answerLeadSchema))),
+  ),
   // An admin removal of someone else's comment passes the same step-up gate as the admin routes.
   write("POST", /comments/, async ({ request, app, env, viewer }) => {
     const input = await readJson(request, commentActionSchema);

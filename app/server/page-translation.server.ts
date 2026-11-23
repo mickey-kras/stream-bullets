@@ -238,3 +238,32 @@ export async function attachPageTranslations(
       event.translation = text && { title: text.title, notes: text.body };
   }
 }
+
+/**
+ * Gives `apply` the stored translation for `locale` of the title of each scheduled stream: the title, or null when
+ * it needs none. A stream without a stored result, or in the languages `keep`, gets no call.
+ */
+export async function attachEventTitleTranslations(
+  env: AppEnv,
+  items: readonly { eventId: string; apply: (title: string | null) => void }[],
+  locale: Locale,
+  keep: readonly Locale[],
+): Promise<void> {
+  const { results } = await env.DB.prepare(
+    "SELECT id, streamer_id, title, notes FROM stream_events WHERE id IN (SELECT value FROM json_each(?))",
+  )
+    .bind(JSON.stringify(items.map((item) => item.eventId)))
+    .all<{ id: string; streamer_id: string; title: string; notes: string }>();
+  if (results.length === 0) return;
+  if (keep.length > 0) await loadLanguageDetector();
+  const stored = await storedFor(
+    env,
+    results.map((row) => row.streamer_id),
+    locale,
+  );
+  for (const row of results) {
+    const text = stored.get(`${row.streamer_id}:${await textHash("event", eventText(row))}`);
+    if (text === undefined || readsOriginal(keep, row.title, row.notes)) continue;
+    for (const item of items) if (item.eventId === row.id) item.apply(text?.title ?? null);
+  }
+}
