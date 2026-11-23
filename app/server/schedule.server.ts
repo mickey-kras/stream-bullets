@@ -60,8 +60,8 @@ async function topicsFor(env: AppEnv, ids: string[]): Promise<Map<string, EventT
 
 // The other platforms of each stream that the schedule import linked to it.
 async function linksFor(env: AppEnv, rows: EventRow[]): Promise<Map<string, StreamLink[]>> {
+  if (rows.length === 0) return new Map<string, StreamLink[]>();
   const map = new Map<string, StreamLink[]>(rows.map((row: EventRow): [string, StreamLink[]] => [row.id, []]));
-  if (rows.length === 0) return map;
   const { results } = await env.DB.prepare(`SELECT event_id, platform, url FROM stream_event_sources
     WHERE event_id IN (SELECT value FROM json_each(?)) ORDER BY platform`)
     .bind(JSON.stringify(rows.map((row: EventRow): string => row.id)))
