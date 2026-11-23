@@ -7,6 +7,7 @@ import type {
   DiscussionSnapshot,
   ThreadSnapshot,
 } from "../types";
+import { ANSWER_COLUMN, answerValue } from "./comment-answers.server";
 import { mentionStatements, validateMentions } from "./discussion-notifications.server";
 import { assertStreamerWritable, isAdmin } from "./access.server";
 import {
@@ -44,6 +45,7 @@ interface CommentRow {
   likes: number;
   liked: number;
   reported: number;
+  answer: string | null;
 }
 
 const commentColumns = `c.*,
@@ -52,7 +54,7 @@ const commentColumns = `c.*,
       (SELECT count(*) FROM comment_likes l WHERE l.comment_id=c.id) AS likes,
       EXISTS(SELECT 1 FROM comment_likes l WHERE l.comment_id=c.id AND l.user_id=?) AS liked,
       EXISTS(SELECT 1 FROM content_reports cr WHERE cr.target_kind='comment' AND cr.target_id=c.id
-        AND cr.reporter_id=? AND cr.status='open') AS reported`;
+        AND cr.reporter_id=? AND cr.status='open') AS reported, ${ANSWER_COLUMN}`;
 
 // A removed comment keeps its place in the thread but shows no author, text or likes.
 function commentValue(row: CommentRow): Comment {
@@ -73,6 +75,7 @@ function commentValue(row: CommentRow): Comment {
     liked: !removed && row.liked === 1,
     removed,
     reported: !removed && row.reported === 1,
+    ...(removed || row.answer === null ? {} : { answer: answerValue(row.answer) }),
   };
 }
 
@@ -219,6 +222,10 @@ async function removeComment(
     // A placeholder keeps its row, so its earlier texts need their own statement too.
     env.DB.prepare(
       "DELETE FROM comment_revisions WHERE comment_id=? AND NOT EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND removed_at IS NULL)",
+    ).bind(id, id),
+    // A removed comment loses its "Answered" mark; a placeholder keeps its row, so this needs its own statement.
+    env.DB.prepare(
+      "DELETE FROM comment_answers WHERE comment_id=? AND NOT EXISTS(SELECT 1 FROM entry_comments WHERE id=? AND removed_at IS NULL)",
     ).bind(id, id),
     // A placeholder keeps its row, so the stored translations of the removed text need their own statement.
     env.DB.prepare(

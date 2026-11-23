@@ -231,6 +231,26 @@ export interface Comment {
   // The stored translation for the language of the reader. Null: this comment needs none, or its translation
   // failed a check. Absent: the server has no result yet.
   translation?: { text: string; mentions: CommentMention[] } | null;
+  // The "Answered" mark of the page owner; absent when the comment has none.
+  answer?: CommentAnswer;
+}
+
+export interface CommentAnswer {
+  markedAt: number;
+  // The stream that was live at the mark. Null: the page was not live.
+  stream: AnsweredStream | null;
+}
+
+export interface AnsweredStream {
+  platform: StreamPlatform;
+  title: string;
+  // The title in the language of the reader, when the title is a scheduled stream with a stored translation.
+  titleTranslation?: string | null;
+  startedAt: number;
+  // Seconds after the start of the stream; the page owner can change it.
+  offsetSeconds: number;
+  // The address of the stream, with the time code when the platform accepts one.
+  link: string;
 }
 
 // Top-level comment with replies flattened oldest first (`?view=thread`).

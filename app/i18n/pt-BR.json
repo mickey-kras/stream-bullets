@@ -1358,5 +1358,11 @@
   "discussion.historyDescription": "Só o dono da página e os administradores veem os textos antes de cada edição. Eles ficam guardados por 90 dias.",
   "discussion.historyEmpty": "Nenhum texto anterior guardado.",
   "discussion.historyLoading": "Carregando os textos anteriores…",
-  "discussion.historyWritten": "Escrito {time}"
+  "discussion.historyWritten": "Escrito {time}",
+  "discussion.answered": "Respondido",
+  "discussion.answeredOnStream": "Respondido na live: {title}, {date}",
+  "discussion.markAnswered": "Marcar como respondido",
+  "discussion.unmarkAnswered": "Remover a marca de respondido",
+  "discussion.answerTime": "Marcação de tempo em segundos",
+  "page.answerLead": "Comentários respondidos: marcação de tempo antes da marca, em minutos"
 }

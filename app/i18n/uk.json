@@ -1398,5 +1398,11 @@
   "discussion.historyDescription": "Тексти до кожної зміни бачать лише власник сторінки та адміністратори. Вони зберігаються 90 днів.",
   "discussion.historyEmpty": "Попередніх текстів немає.",
   "discussion.historyLoading": "Завантажуємо попередні тексти…",
-  "discussion.historyWritten": "Написано {time}"
+  "discussion.historyWritten": "Написано {time}",
+  "discussion.answered": "Відповідь надано",
+  "discussion.answeredOnStream": "Відповідь на стримі: {title}, {date}",
+  "discussion.markAnswered": "Позначити як відповідь надано",
+  "discussion.unmarkAnswered": "Зняти позначку «Відповідь надано»",
+  "discussion.answerTime": "Мітка часу в секундах",
+  "page.answerLead": "Коментарі з відповіддю: мітка часу до позначки, у хвилинах"
 }

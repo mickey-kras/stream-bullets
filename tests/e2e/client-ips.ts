@@ -4,6 +4,7 @@
 const ranges = {
   platform: [[10, 15]],
   "viewer-polls": [[16, 19]],
+  "comment-answer": [[20, 21]],
   mutations: [[25, 27]],
   "overlay-studio": [[28, 35]],
   account: [[40, 40]],

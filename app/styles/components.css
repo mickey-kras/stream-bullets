@@ -447,6 +447,13 @@ button.danger:hover { background: var(--danger-hover); border-color: var(--error
 .comment-history-button { min-height: 24px; padding: 0; font-size: 0.9375rem; font-weight: 400; }
 .comment-history { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
 .comment-history li { display: grid; gap: 4px; }
+.comment-answer { display: grid; gap: 4px; }
+.comment-answer-line { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--muted); font-size: 0.9375rem; overflow-wrap: anywhere; }
+.comment-answer-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.comment-answer-controls .text-button { min-height: 24px; padding: 0; font-size: 0.9375rem; font-weight: 400; }
+.comment-answer-time { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.comment-answer-time input { width: 8rem; }
+.comment-answer-controls .form-error:empty { display: none; }
 .avatar-picker > .text-button { margin: 0 0 8px; }
 .crop-layout { display: flex; align-items: center; gap: 22px; margin-top: 18px; }
 .crop-stage { position: relative; flex: 0 0 auto; width: 320px; aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-control); background: var(--field); touch-action: none; cursor: grab; user-select: none; }

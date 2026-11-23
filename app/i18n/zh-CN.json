@@ -1338,5 +1338,11 @@
   "discussion.historyDescription": "只有页面所有者和管理员能看到每次编辑前的内容。这些内容保留 90 天。",
   "discussion.historyEmpty": "没有保存之前的内容。",
   "discussion.historyLoading": "正在加载之前的内容…",
-  "discussion.historyWritten": "写于 {time}"
+  "discussion.historyWritten": "写于 {time}",
+  "discussion.answered": "已回答",
+  "discussion.answeredOnStream": "已在直播中回答：{title}，{date}",
+  "discussion.markAnswered": "标记为已回答",
+  "discussion.unmarkAnswered": "取消已回答标记",
+  "discussion.answerTime": "时间点（秒）",
+  "page.answerLead": "已回答的评论：标记前的时间点（分钟）"
 }

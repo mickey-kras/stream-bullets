@@ -1358,5 +1358,11 @@
   "discussion.historyDescription": "Nur der Besitzer der Seite und Admins sehen die Texte vor jeder Bearbeitung. Sie bleiben 90 Tage gespeichert.",
   "discussion.historyEmpty": "Kein früherer Text gespeichert.",
   "discussion.historyLoading": "Frühere Texte werden geladen …",
-  "discussion.historyWritten": "Geschrieben {time}"
+  "discussion.historyWritten": "Geschrieben {time}",
+  "discussion.answered": "Beantwortet",
+  "discussion.answeredOnStream": "Im Stream beantwortet: {title}, {date}",
+  "discussion.markAnswered": "Als beantwortet markieren",
+  "discussion.unmarkAnswered": "Markierung „Beantwortet“ entfernen",
+  "discussion.answerTime": "Zeitmarke in Sekunden",
+  "page.answerLead": "Beantwortete Kommentare: Zeitmarke vor der Markierung, in Minuten"
 }

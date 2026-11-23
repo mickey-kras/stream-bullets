@@ -13,6 +13,7 @@ import { DialogActions } from "../ui/dialog";
 import { Icon } from "../ui/icon";
 import { Sheet } from "../ui/sheet";
 import { useToast } from "../ui/toast";
+import { AnswerLeadField, useAnswerLead } from "../comment-answer";
 import { Cropper, type CropperHandle } from "./cropper";
 import { useDiscardGuard } from "./discard";
 import { uploadImage } from "./me";
@@ -157,7 +158,11 @@ export function EditPageDialog({
   const logoUrl: string | null = logo?.url ?? streamer.logo;
   const patch: PagePatch = pagePatch(streamer, name, about, handle, logoChoice, initialLogo, logo);
   const supportEdited: boolean = supportChanged(supportDraft, savedSupport);
-  const changes: string[] = pageChanges(patch, background, supportEdited);
+  const lead = useAnswerLead();
+  const changes: string[] = [
+    ...pageChanges(patch, background, supportEdited),
+    ...(lead?.changed ? [t("page.answerLead")] : []),
+  ];
   const guard = useDiscardGuard(changes, onClose);
 
   async function saveImages(): Promise<void> {
@@ -186,6 +191,7 @@ export function EditPageDialog({
       if (Object.keys(patch).length > 0)
         saved = (await sendJson<{ streamer: Streamer }>("PATCH", "/api/streamer", patch)).streamer;
       if (supportEdited) await sendJson<SupportSettings>("PUT", "/api/support-links", supportPayload(supportDraft));
+      if (lead?.changed) await lead.save();
       toast(t("page.saved"));
       const moved = renamedPath(location.pathname, streamer.handle, saved.handle);
       if (saved.handle !== streamer.handle && moved) {
@@ -331,6 +337,7 @@ export function EditPageDialog({
             <p className="muted">{t("page.logoHelp")}</p>
           </fieldset>
           <SupportFields draft={supportDraft} />
+          {lead && <AnswerLeadField lead={lead} />}
           <fieldset>
             <legend>{t("page.background")}</legend>
             <UploadField
