@@ -276,6 +276,21 @@ describe("marking a comment as answered", (): void => {
     const single = await (await call("GET", `comments/${id}`, { user: "viewer" })).json<{ comment: Comment }>();
     expect(single.comment.answer?.stream?.titleTranslation).toBe("Freitags-Stream");
   });
+
+  it("returns the title translation of the owner with a new mark and a new time code", async (): Promise<void> => {
+    await seedLiveEvent({ title: "Friday stream", notes: "Q&A" });
+    const hash = await sha256(JSON.stringify(["event", "Friday stream", "Q&A", []]));
+    await env.DB.batch([
+      env.DB.prepare(
+        "INSERT INTO page_translations (streamer_id,source_hash,locale,value,created_at) VALUES (?,?,'de',?,1)",
+      ).bind(page, hash, JSON.stringify({ title: "Freitags-Stream", body: "Fragen", options: [] })),
+      env.DB.prepare("UPDATE user SET locale='de' WHERE id='owner'"),
+    ]);
+    const id = await seedComment();
+    expect((await mark(id)).stream?.titleTranslation).toBe("Freitags-Stream");
+    const changed = await (await answer(id, { action: "offset", offsetSeconds: 60 })).json<{ answer: CommentAnswer }>();
+    expect(changed.answer.stream).toMatchObject({ offsetSeconds: 60, titleTranslation: "Freitags-Stream" });
+  });
 });
 
 describe("a live Twitch channel", (): void => {

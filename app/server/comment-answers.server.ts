@@ -286,8 +286,23 @@ export async function attachAnswerTranslations(
   locale: Locale,
   keep: readonly Locale[],
 ): Promise<void> {
-  const streams = comments
-    .map((comment: Comment): AnsweredStream | null | undefined => comment.answer?.stream)
+  await translateAnswers(
+    env,
+    comments.map((comment: Comment) => comment.answer),
+    locale,
+    keep,
+  );
+}
+
+/** The same for marks without their comments, such as the answer of a mark request. */
+export async function translateAnswers(
+  env: AppEnv,
+  answers: readonly (CommentAnswer | null | undefined)[],
+  locale: Locale,
+  keep: readonly Locale[],
+): Promise<void> {
+  const streams = answers
+    .map((answer): AnsweredStream | null | undefined => answer?.stream)
     .filter((stream): stream is AnsweredStream => Boolean(stream && eventOf.has(stream)));
   if (streams.length === 0) return;
   await attachEventTitleTranslations(

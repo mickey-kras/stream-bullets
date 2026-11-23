@@ -5,6 +5,7 @@ import {
   answerLeadMinutes,
   answerLeadSchema,
   attachAnswerTranslations,
+  translateAnswers,
   setAnswerLead,
 } from "../comment-answers.server";
 import { getCommentThread, listCommentRevisions, listComments, mutateComment } from "../comments.server";
@@ -90,7 +91,9 @@ export const entryRoutes: ApiRoute[] = [
   // The owner of the page of the comment only; 404 for everyone else.
   write("POST", /comments\/([a-f0-9-]{36})\/answer/, async ({ request, env, match, viewer }) => {
     if (!z.string().uuid().safeParse(match[1]).success) throw new HttpError(404, "Comment not found.");
-    return json({ answer: await answerComment(env, viewer.id, match[1], await readJson(request, answerActionSchema)) });
+    const answer = await answerComment(env, viewer.id, match[1], await readJson(request, answerActionSchema));
+    await translateAnswers(env, [answer], requestLocale(request, viewer.locale), viewer.keepOriginal);
+    return json({ answer });
   }),
   // GET and PUT /api/streamer/answer-lead {leadMinutes}: the time code of a new mark is this far back. The viewer's
   // own page only.
