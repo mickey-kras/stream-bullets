@@ -213,7 +213,7 @@ These rules apply to a read:
 - The row also keeps the Twitch category and the address of a picture.
   For Twitch, the picture is the category cover from Get Games, 144 × 192 pixels.
   For YouTube, it is the `maxres` thumbnail, else the `medium` thumbnail.
-  A failed Get Games request leaves the covers empty. It does not stop the read.
+  When Get Games fails, the covers stay empty. The read continues.
 - The schedule shows the YouTube thumbnail of a stream first, else the Twitch cover.
   The category chip shows the Twitch category with its cover.
 - `GET /images/stream/<event>/<platform>` serves the picture. The server loads it from `static-cdn.jtvnw.net` or
