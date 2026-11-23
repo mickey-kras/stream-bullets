@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD `keep_original` text;

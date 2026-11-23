@@ -705,6 +705,8 @@
   "landing.unavailable": "Podgląd stacji jest niedostępny. Nadal możesz przeglądać publiczne strony.",
   "landing.vote": "Głosuj w ankiecie",
   "language.current": "Język: {name}",
+  "language.keepHelp": "Treści w tych językach pokazują się w oryginale, bez tłumaczenia.",
+  "language.keepTitle": "Języki, które czytasz",
   "language.title": "Język",
   "legal.contents": "Spis treści",
   "legal.englishOnly": "Ta strona jest dostępna tylko po angielsku. Wiążąca jest wersja angielska.",

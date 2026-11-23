@@ -563,7 +563,9 @@ export function Discussion({
   const restoredPosition = useRef<boolean>(false);
   const requestController = useRef<AbortController | null>(null);
   const [loadingMoreKey, setLoadingMoreKey] = useState<string>("");
-  const requestKey = `${entryId}:${sort}:${refreshKey}:${revision}`;
+  // A change of the languages the reader reads loads the comments again, with or without their translations.
+  const keep: string = viewer?.keepOriginal.join(",") ?? "";
+  const requestKey = `${entryId}:${sort}:${refreshKey}:${revision}:${keep}`;
   const loading = loadedKey !== requestKey;
   const loadingMore = loadingMoreKey === requestKey;
 

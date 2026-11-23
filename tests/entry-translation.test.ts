@@ -145,6 +145,22 @@ describe("entry translation", (): void => {
     expect(value.translation).toBeNull();
   });
 
+  it("shows an entry in a language that the reader reads in its original text", async (): Promise<void> => {
+    run.mockResolvedValue({ response: GOOD });
+    await translateEntry(env, pollId, "fan", "en", NOW, POLL);
+    const kept: Entry = { ...(await entry(pollId)), title: "Яку гру оберемо сьогодні ввечері?", body: "", options: [] };
+    await attachEntryTranslations(env, [kept], "en", ["uk"]);
+    // Null: the page asks for no translation and shows no translation control.
+    expect(kept.translation).toBeNull();
+    const translated: Entry = await entry(pollId);
+    await attachEntryTranslations(env, [translated], "en", ["uk"]);
+    expect(translated.translation).toEqual({
+      title: "Which game?",
+      options: ["Elden Ring", "Cozy"],
+      body: "Vote!\nEnds on Friday.",
+    });
+  });
+
   it("translates a topic that has only a title", async (): Promise<void> => {
     run.mockResolvedValue({ response: answer("Topic without text", [], "") });
     const shown: EntryText = { title: "Thema ohne Text", body: "", options: [] };

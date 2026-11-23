@@ -679,6 +679,8 @@
   "landing.unavailable": "A prévia da estação está indisponível. Você ainda pode acessar as páginas públicas.",
   "landing.vote": "Votar em uma enquete",
   "language.current": "Idioma: {name}",
+  "language.keepHelp": "O conteúdo nesses idiomas aparece no texto original, sem tradução.",
+  "language.keepTitle": "Idiomas que você lê",
   "language.title": "Idioma",
   "legal.contents": "Conteúdo",
   "legal.englishOnly": "Esta página está só em inglês. A versão em inglês é a que vale.",

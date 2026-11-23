@@ -39,6 +39,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | --- | --- | --- |
 | `PATCH /api/profile` | `{name?, avatarPreset?: 0..17 \| null}`. At least one field | `{viewer}` |
 | `PATCH /api/me/locale` | `{locale: Locale \| null}` | `{locale}` |
+| `PATCH /api/me/keep-original` | `{locales: Locale[]}`. Replaces the saved list. Content in these languages shows in its original text. | `{locales}` |
 | `PATCH /api/me/preferences` | Complete `DisplayPrefs`. Replaces saved preferences. Debounce by 1 s. | `{preferences}` |
 | `PATCH /api/streamer` | `{name?, about?, handle?, logoMode?: "profile" \| "logo"}`. At least one field | `{streamer}` |
 | `PUT /api/images/logo` | PNG, JPEG, or WebP body with `Content-Type`. At most 5 MB | `{url}` |

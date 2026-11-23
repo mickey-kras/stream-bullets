@@ -61,6 +61,8 @@ export interface Viewer {
   locale: Locale | null;
   // Null until preferences are saved.
   displayPrefs: DisplayPrefs | null;
+  // Languages that this account reads: their content shows in its original text, without a translation.
+  keepOriginal: Locale[];
 }
 
 export interface Streamer {

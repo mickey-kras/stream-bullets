@@ -30,7 +30,12 @@ export const streamerRoutes: ApiRoute[] = [
   get(/streamers/, async ({ request, env, viewer }) => {
     const input = parsedQuery(request, ["cursor", "query"], directoryQuerySchema);
     const directory = await listStreamers(env, input.cursor, input.query);
-    await attachAboutTranslations(env, directory.streamers, requestLocale(request, viewer?.locale ?? null));
+    await attachAboutTranslations(
+      env,
+      directory.streamers,
+      requestLocale(request, viewer?.locale ?? null),
+      viewer?.keepOriginal ?? [],
+    );
     return json(directory);
   }),
   get(/streamers\/([a-z0-9_]{3,30})/, async ({ request, env, match, viewer }) => {
@@ -38,7 +43,12 @@ export const streamerRoutes: ApiRoute[] = [
     const streamer = await getVisibleStreamer(env, match[1], viewer?.id ?? null);
     if (!streamer) throw new HttpError(404, "Streamer not found.");
     const page = await listEntries(env, streamer, viewer?.id ?? null, input);
-    await attachEntryTranslations(env, page.entries, requestLocale(request, viewer?.locale ?? null));
+    await attachEntryTranslations(
+      env,
+      page.entries,
+      requestLocale(request, viewer?.locale ?? null),
+      viewer?.keepOriginal ?? [],
+    );
     return json(page);
   }),
   write("POST", /streamers\/([a-z0-9_]{3,30})/, async ({ request, app, env, match, viewer }) => {

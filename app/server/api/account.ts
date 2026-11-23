@@ -3,10 +3,23 @@ import type { Provider } from "../../types";
 import { getStreamerAccess } from "../access.server";
 import { deleteAccount, exportAccount } from "../account.server";
 import { configuredProviders, createAuth, requireRecentSignIn } from "../auth.server";
-import { consumeMutationQuota, getOwnStreamer, setDisplayPrefs, setLocale, updateProfile } from "../data.server";
+import {
+  consumeMutationQuota,
+  getOwnStreamer,
+  setDisplayPrefs,
+  setKeepOriginal,
+  setLocale,
+  updateProfile,
+} from "../data.server";
 import { HttpError, json, queryParams, readJson } from "../http.server";
 import { getSupport } from "../support.server";
-import { accountDeletionSchema, displayPrefsSchema, localeSchema, profileSchema } from "../validation";
+import {
+  accountDeletionSchema,
+  displayPrefsSchema,
+  keepOriginalSchema,
+  localeSchema,
+  profileSchema,
+} from "../validation";
 import { get, write, type ApiRoute } from "./router";
 
 // Provider label for Your profile and Your data.
@@ -67,6 +80,10 @@ export const accountRoutes: ApiRoute[] = [
   // PATCH /api/me/locale {locale: Locale | null} → {locale}
   write("PATCH", /me\/locale/, async ({ request, env, viewer }) =>
     json({ locale: await setLocale(env, viewer.id, await readJson(request, localeSchema)) }),
+  ),
+  // PATCH /api/me/keep-original {locales: Locale[]} → {locales}
+  write("PATCH", /me\/keep-original/, async ({ request, env, viewer }) =>
+    json({ locales: await setKeepOriginal(env, viewer.id, await readJson(request, keepOriginalSchema)) }),
   ),
   // PATCH /api/me/preferences {...DisplayPrefs} → {preferences}
   write("PATCH", /me\/preferences/, async ({ request, env, viewer }) =>

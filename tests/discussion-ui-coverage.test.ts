@@ -45,6 +45,7 @@ it.each<StreamerStatus>(["frozen", "suspended"])("renders a disabled composer on
     avatarPreset: null,
     locale: null,
     displayPrefs: null,
+    keepOriginal: [],
   };
   const markup: string = await render(
     createElement(Discussion, {

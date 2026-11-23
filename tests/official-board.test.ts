@@ -10,7 +10,7 @@ import { applyMigrations, createTestDatabase, migrationFiles, type TestDatabase 
 let database: TestDatabase;
 let env: AppEnv;
 const admin: AdminSession = {
-  viewer: { id: "admin", name: "Admin", avatar: null, avatarPreset: null, locale: null, displayPrefs: null },
+  viewer: { id: "admin", name: "Admin", avatar: null, avatarPreset: null, locale: null, displayPrefs: null, keepOriginal: [] },
   sessionId: "admin-session",
   stepUp: "fresh",
 };

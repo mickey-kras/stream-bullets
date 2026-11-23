@@ -5,7 +5,7 @@ import type { Locale } from "../i18n";
 import type { Entry, EntryText } from "../types";
 import { getEntry, getVisibleEntry } from "./data.server";
 import { HttpError } from "./http.server";
-import { inLanguageOf, loadLanguageDetector } from "../lib/text-language";
+import { inLanguageOf, loadLanguageDetector, readsOriginal } from "../lib/text-language";
 import { LANGUAGES, needsTranslation, reserveStart, sha256, TRANSLATION_MODEL } from "./translation.server";
 
 // `POST /api/entries/:id/translation`. The text fields are the text that the reader sees.
@@ -146,7 +146,12 @@ export async function translateParts(ai: Ai, locale: Locale, source: EntryText):
  * Puts the stored translation for `locale` on each entry. An entry without a stored result stays as it is, so
  * the page of a signed-in reader can ask for its translation.
  */
-export async function attachEntryTranslations(env: AppEnv, entries: readonly Entry[], locale: Locale): Promise<void> {
+export async function attachEntryTranslations(
+  env: AppEnv,
+  entries: readonly Entry[],
+  locale: Locale,
+  keep: readonly Locale[] = [],
+): Promise<void> {
   if (entries.length === 0) return;
   await loadLanguageDetector();
   const { results } = await env.DB.prepare(
@@ -168,7 +173,9 @@ export async function attachEntryTranslations(env: AppEnv, entries: readonly Ent
   );
   for (const entry of entries) {
     const text: EntryText | null | undefined = stored.get(entry.id);
-    if (text !== undefined) entry.translation = text && checkedEntry(sourceText(entry), text, locale);
+    // An entry in a language that the reader reads shows its original text and asks for no translation.
+    if (readsOriginal(keep, entry.title, entry.body, ...entry.options)) entry.translation = null;
+    else if (text !== undefined) entry.translation = text && checkedEntry(sourceText(entry), text, locale);
   }
 }
 

@@ -679,6 +679,8 @@
   "landing.unavailable": "L’aperçu de la station est indisponible. Vous pouvez toujours consulter les pages publiques.",
   "landing.vote": "Voter dans un sondage",
   "language.current": "Langue : {name}",
+  "language.keepHelp": "Le contenu dans ces langues s’affiche dans son texte original, sans traduction.",
+  "language.keepTitle": "Langues que vous lisez",
   "language.title": "Langue",
   "legal.contents": "Sommaire",
   "legal.englishOnly": "Cette page n’existe qu’en anglais. La version anglaise fait foi.",

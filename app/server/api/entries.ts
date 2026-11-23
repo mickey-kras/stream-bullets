@@ -23,6 +23,7 @@ export const entryRoutes: ApiRoute[] = [
       env,
       [result.comment, result.thread, ...result.thread.replies],
       requestLocale(request, viewer?.locale ?? null),
+      viewer?.keepOriginal ?? [],
     );
     return json(result);
   }),
@@ -53,11 +54,16 @@ export const entryRoutes: ApiRoute[] = [
       const all: Comment[] = page.comments.flatMap((comment: Comment | CommentThread): Comment[] =>
         "replies" in comment ? [comment, ...comment.replies] : [comment],
       );
-      await attachTranslations(env, all, requestLocale(request, viewer?.locale ?? null));
+      await attachTranslations(env, all, requestLocale(request, viewer?.locale ?? null), viewer?.keepOriginal ?? []);
       return json(page);
     }
     queryParams(request, []);
-    await attachEntryTranslations(env, [entry], requestLocale(request, viewer?.locale ?? null));
+    await attachEntryTranslations(
+      env,
+      [entry],
+      requestLocale(request, viewer?.locale ?? null),
+      viewer?.keepOriginal ?? [],
+    );
     return json({ entry });
   }),
   // POST /api/entries/:id/translation {locale, title, body, options} → {translation: {title, body, options} | null}

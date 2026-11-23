@@ -52,6 +52,59 @@ test("a signed-in reader gets each comment in the site language and can see one 
   }
 });
 
+test("a reader who reads a language sees its comments in the original text", async ({ browser }) => {
+  const users = await accounts();
+  const entryId: string = randomUUID();
+  const now: number = Date.now() - 600_000;
+  const ukrainian: string = "Дякую за стрім, було дуже цікаво!";
+  await runSql("comment-translation", [
+    `INSERT INTO entries(id,streamer_id,author_id,kind,title,body,category,created_at) SELECT '${entryId}',id,'${users.viewer.id}','topic','Keep topic','Body','Just chatting',${now} FROM streamers WHERE handle='other_host';`,
+    `INSERT INTO entry_comments(id,entry_id,author_id,text,created_at) VALUES ('${randomUUID()}','${entryId}','${users.reporter.id}','${ukrainian}',${now + 1});`,
+  ]);
+  const context = await signedIn(browser, "viewer", clientIp("comment-translation", 102));
+  const page = await newPage(context);
+  try {
+    let asked: number = 0;
+    await page.route("**/api/comments/*/translation", async (route) => {
+      asked += 1;
+      await route.fulfill({ json: { translation: { text: "Thanks for the stream!", mentions: [] } } });
+    });
+    await page.route("**/api/entries/*/translation", (route) => route.fulfill({ json: { translation: null } }));
+    await page.goto(`/@other_host?entry=${entryId}`);
+    const comment = page.locator("article.comment").filter({ hasText: "reporter" });
+    await expect(comment.locator(".comment-text")).toHaveText("Thanks for the stream!");
+    await page.goto(`/@other_host?entry=${entryId}&dialog=language`);
+    // Each save replaces the whole list, so the other choices wait while one save runs.
+    let release: () => void = (): void => {};
+    const held = new Promise<void>((resolve): void => {
+      release = resolve;
+    });
+    await page.route("**/api/me/keep-original", async (route) => {
+      await held;
+      await route.continue();
+    });
+    const saved = page.waitForResponse("**/api/me/keep-original");
+    await page.getByRole("checkbox", { name: "Українська" }).check();
+    await expect(page.getByRole("checkbox", { name: "Deutsch" })).toBeDisabled();
+    release();
+    expect((await saved).status()).toBe(200);
+    await expect(page.getByRole("checkbox", { name: "Deutsch" })).toBeEnabled();
+    const before: number = asked;
+    // The open discussion loads its comments again, without a reload of the page.
+    await page.keyboard.press("Escape");
+    await expect(comment.locator(".comment-text")).toHaveText(ukrainian);
+    await expect(comment.locator(".comment-translation")).toHaveCount(0);
+    await page.goto(`/@other_host?entry=${entryId}`);
+    await expect(comment.locator(".comment-text")).toHaveText(ukrainian);
+    await expect(comment.locator(".comment-translation")).toHaveCount(0);
+    // The server marks the comment as one that needs no translation, so the page asks for none.
+    expect(asked).toBe(before);
+  } finally {
+    await runSql("comment-translation", [`UPDATE user SET keep_original=NULL WHERE id='${users.viewer.id}';`]);
+    await close(context);
+  }
+});
+
 test("a signed-out reader gets a stored translation and starts no new one", async ({ browser }) => {
   const { entryId, commentId } = await seedComments();
   await runSql("comment-translation", [

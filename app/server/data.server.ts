@@ -37,6 +37,7 @@ import {
   displayPrefsSchema,
   entryActionSchema,
   entryQuerySchema,
+  keepOriginalSchema,
   localeSchema,
   profileSchema,
   streamerEditSchema,
@@ -409,6 +410,17 @@ export async function setLocale(env: AppEnv, userId: string, input: unknown): Pr
   await consumeMutationQuota(env, userId);
   await drizzle(env.DB).update(user).set({ locale, updatedAt: new Date() }).where(eq(user.id, userId));
   return locale;
+}
+
+// `PATCH /api/me/keep-original`. Replaces the saved list. An empty list translates all content again.
+export async function setKeepOriginal(env: AppEnv, userId: string, input: unknown): Promise<Locale[]> {
+  const { locales } = parsed(keepOriginalSchema, input);
+  await consumeMutationQuota(env, userId);
+  await drizzle(env.DB)
+    .update(user)
+    .set({ keepOriginal: locales.length > 0 ? JSON.stringify(locales) : null, updatedAt: new Date() })
+    .where(eq(user.id, userId));
+  return locales;
 }
 
 // `PATCH /api/me/preferences`. Replaces the saved preferences; the client debounces by one second.

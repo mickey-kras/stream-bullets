@@ -115,7 +115,8 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
           <li>
             Your language and your Accessibility &amp; display settings, if you choose them. Signed in, we keep them
-            with your account; signed out, they stay in cookies in your browser.
+            with your account; signed out, they stay in cookies in your browser. Signed in, we also keep the languages
+            you read, if you choose them, so their content shows without a translation.
           </li>
           <li>Topics, polls, comments, replies, votes, reactions, and likes.</li>
           <li>

@@ -415,6 +415,7 @@ describe("account export", (): void => {
       avatarPreset: null,
       locale: null,
       displayPreferences: null,
+      keepOriginal: null,
       conversionMilestones: { firstVote: true, firstTopic: true },
     });
     expect(data.signInMethods).toEqual([

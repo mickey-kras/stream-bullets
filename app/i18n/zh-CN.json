@@ -666,6 +666,8 @@
   "landing.unavailable": "电台预览暂时不可用。你仍可浏览公开页面。",
   "landing.vote": "参与投票",
   "language.current": "语言：{name}",
+  "language.keepHelp": "这些语言的内容以原文显示，不翻译。",
+  "language.keepTitle": "你能读的语言",
   "language.title": "语言",
   "legal.contents": "目录",
   "legal.englishOnly": "此页面仅提供英文版。以英文版本为准。",

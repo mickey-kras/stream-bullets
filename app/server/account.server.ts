@@ -29,6 +29,7 @@ interface UserRow {
   avatar_preset: number | null;
   locale: string | null;
   display_prefs: string | null;
+  keep_original: string | null;
   first_vote_counted: number;
   first_topic_counted: number;
 }
@@ -253,6 +254,7 @@ export interface AccountExport {
     avatarPreset: number | null;
     locale: string | null;
     displayPreferences: unknown;
+    keepOriginal: unknown;
     conversionMilestones: { firstVote: boolean; firstTopic: boolean };
     createdAt: string;
     updatedAt: string;
@@ -694,6 +696,7 @@ function accountProfile(account: UserRow): AccountExport["account"] {
     avatarPreset: account.avatar_preset,
     locale: account.locale,
     displayPreferences: parseJson(account.display_prefs),
+    keepOriginal: parseJson(account.keep_original),
     conversionMilestones: {
       firstVote: account.first_vote_counted === 1,
       firstTopic: account.first_topic_counted === 1,
@@ -735,7 +738,7 @@ export async function exportAccount(env: AppEnv, userId: string): Promise<Accoun
   const now = Date.now();
   const [userResult, streamerResult, applicationResult, overlayResult] = await env.DB.batch([
     env.DB.prepare(
-      "SELECT id,name,email,email_verified,email_link_verified,image,avatar_preset,locale,display_prefs,first_vote_counted,first_topic_counted,created_at,updated_at FROM user WHERE id=?",
+      "SELECT id,name,email,email_verified,email_link_verified,image,avatar_preset,locale,display_prefs,keep_original,first_vote_counted,first_topic_counted,created_at,updated_at FROM user WHERE id=?",
     ).bind(userId),
     env.DB.prepare(
       `SELECT id,handle,name,about,avatar,background,logo,is_official,handle_changed_at,status,status_reason,

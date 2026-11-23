@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import type { AppEnv } from "../app/env";
+import type { Locale } from "../app/i18n";
 import { deleteComment, listComments, mutateComment } from "../app/server/comments.server";
 import {
   attachTranslations,
@@ -385,6 +386,41 @@ describe("comment translation", (): void => {
     const french = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
     await attachTranslations(env, french.comments, "fr");
     expect(french.comments.every((comment) => comment.translation === undefined)).toBe(true);
+  });
+
+  it("shows a comment in a language that the reader reads in its original text", async (): Promise<void> => {
+    const id: string = await seedComment("Дякую за стрім, було дуже цікаво!");
+    const read = async (keep: readonly Locale[]) => {
+      const page = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
+      await attachTranslations(env, page.comments, "de", keep);
+      return page.comments.find((comment) => comment.id === id)?.translation;
+    };
+    // Null: the page asks for no translation and shows no translation control.
+    expect(await read(["uk"])).toBeNull();
+    expect(await read(["pl"])).toBeUndefined();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("does not count a mention as the language of the comment", async (): Promise<void> => {
+    const name = "@Олексій Володимирович Ковальчук";
+    const text = `${name} thanks for the stream!`;
+    const id: string = crypto.randomUUID();
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'fan',?,1)").bind(
+        id,
+        entryId,
+        text,
+      ),
+      env.DB.prepare('INSERT INTO comment_mentions (comment_id,user_id,start,"end") VALUES (?,?,0,?)').bind(
+        id,
+        "bob",
+        name.length,
+      ),
+    ]);
+    const page = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
+    await attachTranslations(env, page.comments, "de", ["uk"]);
+    // The long Ukrainian name would decide the script; the English message keeps its translation.
+    expect(page.comments.find((comment) => comment.id === id)?.translation).toBeUndefined();
   });
 
   it("removes the old rows of the daily count", async (): Promise<void> => {

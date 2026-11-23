@@ -679,6 +679,8 @@
   "landing.unavailable": "La vista previa de la estación no está disponible. Puedes seguir leyendo las páginas públicas.",
   "landing.vote": "Votar en una encuesta",
   "language.current": "Idioma: {name}",
+  "language.keepHelp": "El contenido en estos idiomas se muestra en su texto original, sin traducción.",
+  "language.keepTitle": "Idiomas que lees",
   "language.title": "Idioma",
   "legal.contents": "Contenido",
   "legal.englishOnly": "Esta página solo está en inglés. La versión en inglés es la vinculante.",

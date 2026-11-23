@@ -235,8 +235,9 @@ export const loader = withRouteErrors(async ({ request, context, params }: Loade
     owner && view === "schedule" ? listTopicChoices(app.env, streamer.id) : [],
   ]);
   const locale = requestLocale(request, viewer?.locale ?? null);
-  await attachEntryTranslations(app.env, selected ? [...board.entries, selected] : board.entries, locale);
-  await attachPageTranslations(app.env, streamer, locale, cards, [...schedule.events, schedule.linkedEvent]);
+  const keep = viewer?.keepOriginal ?? [];
+  await attachEntryTranslations(app.env, selected ? [...board.entries, selected] : board.entries, locale, keep);
+  await attachPageTranslations(app.env, streamer, locale, cards, [...schedule.events, schedule.linkedEvent], keep);
   return {
     board,
     selected,

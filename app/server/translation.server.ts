@@ -3,7 +3,7 @@ import { LOCALES } from "../../db/enums";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
 import type { Comment } from "../types";
-import { inLanguageOf, loadLanguageDetector, writtenIn } from "../lib/text-language";
+import { inLanguageOf, loadLanguageDetector, readsOriginal, writtenIn } from "../lib/text-language";
 import { keepsStructure, moveMentions, readAnswer, type MentionRange } from "../lib/translation-check";
 import { getVisibleEntry } from "./data.server";
 import { HttpError } from "./http.server";
@@ -105,12 +105,23 @@ function checked(
 
 /**
  * Puts the stored translation for `locale` on each comment. A comment without a stored result stays as it is, so
- * the page of a signed-in reader can ask for its translation.
+ * the page of a signed-in reader can ask for its translation. A comment in the languages `keep`, which the reader
+ * reads, gets no translation and shows its original text.
  */
-export async function attachTranslations(env: AppEnv, comments: readonly Comment[], locale: Locale): Promise<void> {
-  const open: Comment[] = comments.filter((comment: Comment): boolean => !comment.removed);
-  if (open.length === 0) return;
+export async function attachTranslations(
+  env: AppEnv,
+  comments: readonly Comment[],
+  locale: Locale,
+  keep: readonly Locale[] = [],
+): Promise<void> {
   await loadLanguageDetector();
+  const open: Comment[] = [];
+  for (const comment of comments) {
+    if (comment.removed) continue;
+    if (readsOriginal(keep, withoutMentions(comment.text, comment.mentions ?? []))) comment.translation = null;
+    else open.push(comment);
+  }
+  if (open.length === 0) return;
   const { results } = await env.DB.prepare(
     "SELECT comment_id, source_hash, text FROM comment_translations WHERE locale=? AND comment_id IN (SELECT value FROM json_each(?))",
   )

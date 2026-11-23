@@ -47,8 +47,10 @@ export function useCommentTranslation(
     };
   }, [canAsk, known, removed, id, text]);
 
+  // The server's answer wins over one that this page asked for earlier: after the reader changes the languages
+  // they read, the comments load again, and a comment in such a language comes with `translation: null`.
   let translation: Translation | null = comment.translation ?? null;
-  if (loaded?.forText === text) translation = loaded.translation;
+  if (comment.translation === undefined && loaded?.forText === text) translation = loaded.translation;
   if (!translation) return { text, mentions: comment.mentions, control: null };
   const label: string = original ? t("discussion.showTranslation") : t("discussion.showOriginal");
   return {
