@@ -94,12 +94,31 @@ type PluralBase = MessageId extends infer Id ? (Id extends `${infer Base}.other`
 
 const english: Readonly<Record<string, string>> = en;
 
+const pluralRules = new Map<string, Intl.PluralRules>();
+const numberFormats = new Map<string, Intl.NumberFormat>();
+
+function cached<T>(cache: Map<string, T>, locale: string, make: (locale: string) => T): T {
+  let value: T | undefined = cache.get(locale);
+  if (value === undefined) {
+    value = make(locale);
+    cache.set(locale, value);
+  }
+  return value;
+}
+
 // Select the locale's plural form and format count. Fall back to other, then English for missing messages.
 export function tn(id: PluralBase, count: number, vars?: MessageVars): string {
   const locale: Locale = getLocale();
-  const rule: Intl.LDMLPluralRule = new Intl.PluralRules(intlLocale(locale)).select(count);
-  const englishRule: Intl.LDMLPluralRule = new Intl.PluralRules("en").select(count);
+  const plural = (tag: string): Intl.PluralRules =>
+    cached(pluralRules, tag, (key: string) => new Intl.PluralRules(key));
+  const rule: Intl.LDMLPluralRule = plural(intlLocale(locale)).select(count);
+  const englishRule: Intl.LDMLPluralRule = plural("en").select(count);
   const template: string =
     lookup(`${id}.${rule}`) ?? lookup(`${id}.other`) ?? english[`${id}.${englishRule}`] ?? english[`${id}.other`];
-  return format(template, { count: new Intl.NumberFormat(intlLocale(locale)).format(count), ...vars });
+  const numbers: Intl.NumberFormat = cached(
+    numberFormats,
+    intlLocale(locale),
+    (key: string) => new Intl.NumberFormat(key),
+  );
+  return format(template, { count: numbers.format(count), ...vars });
 }

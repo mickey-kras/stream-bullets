@@ -366,8 +366,12 @@ export default function StreamerPage(): ReactNode {
   const topicSelection = usePendingTopic(entries, loadedSelected);
   const selectedBase: Entry | null = topicSelection.selected || entries[0] || null;
   const selected: Entry | null = shown(mergeLiveEntry(selectedBase, live.snapshot, board.revision));
-  // Wake at battle start and end.
-  const now: number = useBattleClock(live.snapshot?.serverNow || board.serverNow, battleMarks([...entries, selected]));
+  // Wake at battle start and end. Only the polls view shows timers: other views do not render each second.
+  const now: number = useBattleClock(
+    live.snapshot?.serverNow || board.serverNow,
+    battleMarks([...entries, selected]),
+    view === "polls",
+  );
   const pollsClass: string = usePollsMainClass(view === "polls" && loadedSelected ? selected : null, now);
   const discussionFocus: boolean =
     searchParams.get("discussion") === "1" && loadedSelected !== null && selected?.kind !== "mash";

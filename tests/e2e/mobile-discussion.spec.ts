@@ -191,3 +191,13 @@ for (const width of [1280, 390]) {
     }
   });
 }
+
+test("an open discussion moves each comment age without the page clock", async ({ page }) => {
+  const entryId: string = await discussion();
+  await page.clock.install({ time: Date.now() });
+  await page.goto(`/@test_host?entry=${entryId}`);
+  const age = page.locator("article.comment time").first();
+  await expect(age).toHaveText(/seconds? ago|now/);
+  await page.clock.runFor(150_000);
+  await expect(age).toHaveText("2 minutes ago");
+});
