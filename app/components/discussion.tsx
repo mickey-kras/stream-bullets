@@ -93,10 +93,18 @@ const timeUnits: [number, number, Intl.RelativeTimeFormatUnit][] = [
   [Number.POSITIVE_INFINITY, 31_536_000, "year"],
 ];
 
+const relativeFormats = new Map<string, Intl.RelativeTimeFormat>();
+
 function relativeTime(time: number): string {
   const seconds = Math.round((time - Date.now()) / 1000);
   const [, size, unit] = timeUnits.find(([limit]) => Math.abs(seconds) < limit) ?? timeUnits[5];
-  return new Intl.RelativeTimeFormat(intlLocale(), { numeric: "auto" }).format(Math.round(seconds / size), unit);
+  const locale: string = intlLocale();
+  let formatter: Intl.RelativeTimeFormat | undefined = relativeFormats.get(locale);
+  if (formatter === undefined) {
+    formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+    relativeFormats.set(locale, formatter);
+  }
+  return formatter.format(Math.round(seconds / size), unit);
 }
 
 function Composer({

@@ -53,9 +53,9 @@ export function battleMarks(entries: readonly (Pick<Entry, "mash"> | null)[]): n
   return marks;
 }
 
-// Idle battles tick each second. Running battles also wake at exact battleMarks boundaries.
-export function useBattleClock(serverNow: number, marks: readonly number[]): number {
-  return useMarkClock(serverNow, marks, 1_000, 1_000);
+// Idle battles tick each second. Running battles also wake at exact battleMarks boundaries. A disabled clock sleeps.
+export function useBattleClock(serverNow: number, marks: readonly number[], enabled = true): number {
+  return useMarkClock(serverNow, enabled ? marks : [], 1_000, enabled ? 1_000 : null);
 }
 
 // Bound pending taps to MASH_MAX_BATCH; drop excess while disconnected.
