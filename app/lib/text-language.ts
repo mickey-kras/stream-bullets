@@ -137,17 +137,30 @@ export function inLanguageOf(locale: Locale, text: string, translated: string = 
   return language === null || language === locale;
 }
 
+/** The languages of one text, with short Cyrillic text without a letter of only one language as both. */
+function languagesOf(text: string): readonly Locale[] {
+  const languages: readonly Locale[] = writtenIn(text);
+  // A short Ukrainian text often has none of the letters і, ї, є and ґ. Without a letter of only Russian too, the
+  // text can be in the two languages: only a reader of both sees it without a translation.
+  if (languages.length === 1 && languages[0] === "ru" && !/[ыэъё]/iu.test(visibleText(text))) return ["ru", "uk"];
+  return languages;
+}
+
 /**
- * Tells if a reader who reads the languages `keep` sees the text in its original language: each site language
- * that the text is written in is in `keep`. A text with a language that is not sure keeps its translation. Load
- * the detector first.
+ * Tells if a reader who reads the languages `keep` sees the text in its original language. Each part counts on
+ * its own: every language that a part is surely written in is in `keep`, and at least one part has a sure
+ * language. A part in a different language keeps the translation of the whole item. Load the detector first.
  */
 export function readsOriginal(keep: readonly Locale[], ...parts: readonly string[]): boolean {
   if (keep.length === 0) return false;
-  const text: string = parts.filter((part: string): boolean => part !== "").join("\n\n");
-  let languages: readonly Locale[] = writtenIn(text);
-  // A short Ukrainian text often has none of the letters і, ї, є and ґ. Without a letter of only Russian too, the
-  // text can be in the two languages: only a reader of both sees it without a translation.
-  if (languages.length === 1 && languages[0] === "ru" && !/[ыэъё]/iu.test(visibleText(text))) languages = ["ru", "uk"];
-  return languages.length > 0 && languages.every((language: Locale): boolean => keep.includes(language));
+  const found: (readonly Locale[])[] = parts
+    .filter((part: string): boolean => part.trim() !== "")
+    .map(languagesOf)
+    .filter((languages: readonly Locale[]): boolean => languages.length > 0);
+  return (
+    found.length > 0 &&
+    found.every((languages: readonly Locale[]): boolean =>
+      languages.every((language: Locale): boolean => keep.includes(language)),
+    )
+  );
 }

@@ -118,7 +118,7 @@ export async function attachTranslations(
   const open: Comment[] = [];
   for (const comment of comments) {
     if (comment.removed) continue;
-    if (readsOriginal(keep, comment.text)) comment.translation = null;
+    if (readsOriginal(keep, withoutMentions(comment.text, comment.mentions ?? []))) comment.translation = null;
     else open.push(comment);
   }
   if (open.length === 0) return;

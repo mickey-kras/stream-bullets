@@ -9,6 +9,7 @@ import {
   translatePendingPages,
 } from "../app/server/page-translation.server";
 import type { CommunityCard, StreamEvent, Streamer } from "../app/types";
+import { loadLanguageDetector } from "../app/lib/text-language";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
 
 vi.mock("cloudflare:workers", () => ({ waitUntil: vi.fn() }));
@@ -146,6 +147,14 @@ describe("translation of the text of a page", (): void => {
       true,
       "About in French",
     ]);
+  });
+
+  it("loads the language detector for the cards and streams of a page without an About text", async (): Promise<void> => {
+    await translatePage(env, "page", NOW, 8);
+    vi.mocked(loadLanguageDetector).mockClear();
+    const event = { id: "e", title: "Abendspiel", notes: "" } as StreamEvent;
+    await attachPageTranslations(env, page(""), "fr", null, [event], ["de"]);
+    expect(loadLanguageDetector).toHaveBeenCalledTimes(1);
   });
 
   it("deletes the results of text that the page no longer has, and translates the new text", async (): Promise<void> => {

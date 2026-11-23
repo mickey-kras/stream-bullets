@@ -99,6 +99,18 @@ describe("languages that the reader reads", (): void => {
     expect(readsOriginal(["en"], "", "https://example.com")).toBe(false);
   });
 
+  it("keeps the translation when one part of an item is in a language that the reader does not read", (): void => {
+    const title =
+      "Яку гру ми будемо грати сьогодні ввечері разом з глядачами? Напишіть свою думку і проголосуйте, будь ласка, до кінця стріму!";
+    const options = ["Something with exploration and building", "A story game with many choices"];
+    expect(writtenIn([title, ...options].join("\n\n"))).toEqual(["uk"]);
+    // The long Ukrainian title alone would decide the whole text; the English options need their translation.
+    expect(readsOriginal(["uk"], title, ...options)).toBe(false);
+    expect(readsOriginal(["uk", "en"], title, ...options)).toBe(true);
+    // A part without a sure language, like a short option, does not decide.
+    expect(readsOriginal(["uk"], title, "ok")).toBe(true);
+  });
+
   it("measures how often Ukrainian and Russian comments get the wrong one of the two", (): void => {
     // `writtenIn` alone finds Russian in 10 of these 30 Ukrainian comments: they have none of і, ї, є and ґ.
     expect(UKRAINIAN.filter((text: string): boolean => writtenIn(text).join() === "ru")).toHaveLength(10);

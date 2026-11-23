@@ -74,10 +74,26 @@ test("a reader who reads a language sees its comments in the original text", asy
     const comment = page.locator("article.comment").filter({ hasText: "reporter" });
     await expect(comment.locator(".comment-text")).toHaveText("Thanks for the stream!");
     await page.goto(`/@other_host?entry=${entryId}&dialog=language`);
+    // Each save replaces the whole list, so the other choices wait while one save runs.
+    let release: () => void = (): void => {};
+    const held = new Promise<void>((resolve): void => {
+      release = resolve;
+    });
+    await page.route("**/api/me/keep-original", async (route) => {
+      await held;
+      await route.continue();
+    });
     const saved = page.waitForResponse("**/api/me/keep-original");
     await page.getByRole("checkbox", { name: "Українська" }).check();
+    await expect(page.getByRole("checkbox", { name: "Deutsch" })).toBeDisabled();
+    release();
     expect((await saved).status()).toBe(200);
+    await expect(page.getByRole("checkbox", { name: "Deutsch" })).toBeEnabled();
     const before: number = asked;
+    // The open discussion loads its comments again, without a reload of the page.
+    await page.keyboard.press("Escape");
+    await expect(comment.locator(".comment-text")).toHaveText(ukrainian);
+    await expect(comment.locator(".comment-translation")).toHaveCount(0);
     await page.goto(`/@other_host?entry=${entryId}`);
     await expect(comment.locator(".comment-text")).toHaveText(ukrainian);
     await expect(comment.locator(".comment-translation")).toHaveCount(0);
