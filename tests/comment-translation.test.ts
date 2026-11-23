@@ -401,6 +401,28 @@ describe("comment translation", (): void => {
     expect(run).not.toHaveBeenCalled();
   });
 
+  it("does not count a mention as the language of the comment", async (): Promise<void> => {
+    const name = "@Олексій Володимирович Ковальчук";
+    const text = `${name} thanks for the stream!`;
+    const id: string = crypto.randomUUID();
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO entry_comments (id,entry_id,author_id,text,created_at) VALUES (?,?,'fan',?,1)").bind(
+        id,
+        entryId,
+        text,
+      ),
+      env.DB.prepare('INSERT INTO comment_mentions (comment_id,user_id,start,"end") VALUES (?,?,0,?)').bind(
+        id,
+        "bob",
+        name.length,
+      ),
+    ]);
+    const page = await listComments(env, entryId, "host", { sort: "newest", view: "flat" });
+    await attachTranslations(env, page.comments, "de", ["uk"]);
+    // The long Ukrainian name would decide the script; the English message keeps its translation.
+    expect(page.comments.find((comment) => comment.id === id)?.translation).toBeUndefined();
+  });
+
   it("removes the old rows of the daily count", async (): Promise<void> => {
     await env.DB.prepare(
       "INSERT INTO translation_attempts (comment_id, locale, source_hash, created_at) VALUES ('a','de','old',?),('a','de','new',?)",

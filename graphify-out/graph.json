@@ -51141,6 +51141,18 @@
       "relation": "calls",
       "source": "app_server_translation_server_attachtranslations",
       "source_file": "app/server/translation.server.ts",
+      "source_location": "L121",
+      "target": "app_server_translation_server_withoutmentions",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "relation": "calls",
+      "source": "app_server_translation_server_attachtranslations",
+      "source_file": "app/server/translation.server.ts",
       "source_location": "L134",
       "target": "app_server_translation_server_sha256",
       "weight": 1.0
