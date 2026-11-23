@@ -59,7 +59,7 @@ function KeepOriginal({ saved, active }: Readonly<{ saved: readonly Locale[]; ac
       await sendJson("PATCH", "/api/me/keep-original", { locales: next });
       await revalidator.revalidate();
     } catch (error_: unknown) {
-      setKeep(keep);
+      setKeep(LOCALES.filter((item: Locale) => (item === locale ? !checked : next.includes(item))));
       setError(errorMessage(error_));
     } finally {
       setSaving(false);
