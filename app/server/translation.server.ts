@@ -3,7 +3,7 @@ import { LOCALES } from "../../db/enums";
 import type { AppEnv } from "../env";
 import type { Locale } from "../i18n";
 import type { Comment } from "../types";
-import { inLanguageOf, loadLanguageDetector, readsOriginal, writtenIn } from "../lib/text-language";
+import { inLanguageOf, loadLanguageDetector, readsOriginal, sourceLanguage, writtenIn } from "../lib/text-language";
 import { keepsStructure, moveMentions, readAnswer, type MentionRange } from "../lib/translation-check";
 import { getVisibleEntry } from "./data.server";
 import { HttpError } from "./http.server";
@@ -31,6 +31,7 @@ export const translationSchema = z.object({ locale: z.enum(LOCALES), text: z.str
 export interface CommentTranslation {
   text: string;
   mentions: MentionRange[];
+  from?: Locale;
 }
 
 export const LANGUAGES: Readonly<Record<Locale, string>> = {
@@ -100,7 +101,9 @@ function checked(
   // The stored results from before these checks have text in the language of the source, and text in English.
   if (!needsTranslation(source, locale, mentions)) return null;
   const moved: MentionRange[] | null = moveMentions(source, mentions, text);
-  return moved && inLanguageOf(locale, withoutMentions(text, moved)) ? { text, mentions: moved } : null;
+  if (!moved || !inLanguageOf(locale, withoutMentions(text, moved))) return null;
+  const from: Locale | undefined = sourceLanguage(withoutMentions(source, mentions));
+  return from ? { text, mentions: moved, from } : { text, mentions: moved };
 }
 
 /**

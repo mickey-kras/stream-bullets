@@ -359,6 +359,16 @@ describe("comment translation", (): void => {
     expect(run).not.toHaveBeenCalled();
   });
 
+  it("names the language of the comment with its translation", async (): Promise<void> => {
+    const id: string = await plainComment("Ich streame heute Abend ein neues Spiel mit euch allen zusammen.");
+    run.mockResolvedValueOnce(answer("Tonight I stream a new game together with all of you."));
+    expect(await translateComment(env, id, "fan", "en", NOW)).toEqual({
+      text: "Tonight I stream a new game together with all of you.",
+      mentions: [],
+      from: "de",
+    });
+  });
+
   it("puts the stored translation on the comments of a page", async (): Promise<void> => {
     run.mockResolvedValueOnce(answer("**Hallo** @Bob Lee, siehe `x`")).mockResolvedValueOnce(answer(SOURCE));
     const translated: string = await seedComment();

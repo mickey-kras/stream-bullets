@@ -1353,6 +1353,8 @@
   "overlay.characters.off": "Los personajes están desactivados en este servidor.",
   "discussion.showOriginal": "Ver original",
   "discussion.showTranslation": "Ver traducción",
+  "discussion.translated": "Traducido",
+  "discussion.translatedFrom": "Traducido de: {language}",
   "discussion.historyTitle": "Textos anteriores",
   "discussion.historyOpen": "Ver los textos anteriores de este comentario",
   "discussion.historyDescription": "Solo el dueño de la página y los administradores ven los textos anteriores a cada edición. Se guardan 90 días.",

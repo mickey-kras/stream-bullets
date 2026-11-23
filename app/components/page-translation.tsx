@@ -1,6 +1,7 @@
 import { useSyncExternalStore, type ReactNode } from "react";
 import { t } from "../i18n";
 import type { CommunityCard, StreamEvent } from "../types";
+import { TranslatedFrom } from "./translated-from";
 import { Icon } from "./ui/icon";
 
 // The items that the reader set to the original text. A stream shows in more than one place of a page, so the
@@ -46,6 +47,7 @@ export function TranslationControl({ id, translated }: Readonly<{ id: string; tr
   if (!translated) return null;
   return (
     <p className="comment-translation">
+      {!original && <TranslatedFrom />}
       <button type="button" aria-pressed={original} onClick={() => toggle(id)}>
         <Icon name="translate" size={16} />
         {original ? t("discussion.showTranslation") : t("discussion.showOriginal")}

@@ -146,6 +146,12 @@ function languagesOf(text: string): readonly Locale[] {
   return languages;
 }
 
+/** The one site language that the text is surely written in, for the label of its translation. Load the detector first. */
+export function sourceLanguage(text: string): Locale | undefined {
+  const languages: readonly Locale[] = languagesOf(text);
+  return languages.length === 1 ? languages[0] : undefined;
+}
+
 /**
  * Tells if a reader who reads the languages `keep` sees the text in its original language. Each part counts on
  * its own: every language that a part is surely written in is in `keep`, and at least one part has a sure

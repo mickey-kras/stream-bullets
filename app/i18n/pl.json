@@ -1393,6 +1393,8 @@
   "overlay.characters.off": "Postacie są wyłączone na tym serwerze.",
   "discussion.showOriginal": "Pokaż oryginał",
   "discussion.showTranslation": "Pokaż tłumaczenie",
+  "discussion.translated": "Przetłumaczono",
+  "discussion.translatedFrom": "Przetłumaczono z języka: {language}",
   "discussion.historyTitle": "Wcześniejsze teksty",
   "discussion.historyOpen": "Pokaż wcześniejsze teksty tego komentarza",
   "discussion.historyDescription": "Tylko właściciel strony i administratorzy widzą teksty sprzed każdej edycji. Są przechowywane 90 dni.",

@@ -462,6 +462,8 @@
   "discussion.suspended": "Comments are closed while this page is suspended.",
   "discussion.title": "Discussion",
   "discussion.top": "Top",
+  "discussion.translated": "Translated",
+  "discussion.translatedFrom": "Translated from {language}",
   "discussion.unmarkAnswered": "Remove the answered mark",
   "discussion.viewMore": "View {count} more replies",
   "discussion.viewMoreOne": "View {count} more reply",

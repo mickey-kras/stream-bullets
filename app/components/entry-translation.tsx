@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { getLocale, t } from "../i18n";
 import type { Entry, EntryText } from "../types";
 import { requestTranslation, translationOff, TranslationStopped } from "./translation-queue";
+import { TranslatedFrom } from "./translated-from";
 import { Icon } from "./ui/icon";
 
 // The results that this page asked for, and the entries that the reader set to the original text. Topics and
@@ -95,12 +96,18 @@ function shownEntry(entry: Entry, current: State): Entry {
   return { ...entry, ...translation, translated: "shown" };
 }
 
+// The shown entry carries the translated text, so a result that this page asked for is found by the entry id.
+function sourceOf(entry: Entry): EntryText["from"] {
+  return entry.translation?.from ?? state.loaded.get(entry.id)?.translation?.from;
+}
+
 /** The control on one translated entry: it shows the original text of this entry, and then the translation again. */
 export function EntryTranslationControl({ entry }: Readonly<{ entry: Entry }>): ReactNode {
   if (!entry.translated) return null;
   const original: boolean = entry.translated === "original";
   return (
     <p className="comment-translation">
+      {!original && <TranslatedFrom from={sourceOf(entry)} />}
       <button
         type="button"
         aria-pressed={original}

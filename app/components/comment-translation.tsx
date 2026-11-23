@@ -1,12 +1,14 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { getLocale, t } from "../i18n";
+import { getLocale, t, type Locale } from "../i18n";
 import type { Comment, CommentMention } from "../types";
 import { requestTranslation, translationOff } from "./translation-queue";
+import { TranslatedFrom } from "./translated-from";
 import { Icon } from "./ui/icon";
 
 interface Translation {
   text: string;
   mentions: CommentMention[];
+  from?: Locale;
 }
 
 // `forText` is the comment text of the request. An edit of the comment makes the result stale.
@@ -58,6 +60,7 @@ export function useCommentTranslation(
     mentions: original ? comment.mentions : translation.mentions,
     control: (
       <p className="comment-translation">
+        {!original && <TranslatedFrom from={translation.from} />}
         <button type="button" aria-pressed={original} onClick={() => setOriginal(!original)}>
           <Icon name="translate" size={16} />
           {label}

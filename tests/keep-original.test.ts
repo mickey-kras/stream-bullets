@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { Locale } from "../app/i18n";
-import { loadLanguageDetector, readsOriginal, writtenIn } from "../app/lib/text-language";
+import { loadLanguageDetector, readsOriginal, sourceLanguage, writtenIn } from "../app/lib/text-language";
 
 // Short comments as viewers write them in a live-stream chat. The setting "languages you read" depends on the
 // language that `writtenIn` finds, so these lists measure how often it gives the wrong one of the two.
@@ -109,6 +109,14 @@ describe("languages that the reader reads", (): void => {
     expect(readsOriginal(["uk", "en"], title, ...options)).toBe(true);
     // A part without a sure language, like a short option, does not decide.
     expect(readsOriginal(["uk"], title, "ok")).toBe(true);
+  });
+
+  it("names the source language of a translation only when it is sure", (): void => {
+    expect(sourceLanguage("Ich streame jeden Abend Rollenspiele und spreche mit euch über neue Spiele.")).toBe("de");
+    expect(sourceLanguage("Дякую за стрім, було дуже цікаво!")).toBe("uk");
+    // Cyrillic text without a letter of only one of Russian and Ukrainian can be either.
+    expect(sourceLanguage("Сегодня играем вместе")).toBeUndefined();
+    expect(sourceLanguage("ok")).toBeUndefined();
   });
 
   it("measures how often Ukrainian and Russian comments get the wrong one of the two", (): void => {
