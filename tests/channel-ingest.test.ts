@@ -245,6 +245,10 @@ describe("ChannelIngest requests", (): void => {
       TWITCH_CLIENT_SECRET: undefined,
       GOOGLE_CLIENT_ID: undefined,
       GOOGLE_CLIENT_SECRET: undefined,
+      KICK_CLIENT_ID: undefined,
+      KICK_CLIENT_SECRET: undefined,
+      TWITCH_EVENTSUB_SECRET: undefined,
+      CHANNEL_TOKEN_KEYS: undefined,
     });
     const socket = await listen({ "X-SB-Overlay": "1" });
     expect((await post("test-chat", "twitch")).status).toBe(204);

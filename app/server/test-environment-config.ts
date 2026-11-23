@@ -30,7 +30,11 @@ export function validateTestEnvironment(env: AppEnv): void {
     env.TIKTOK_CLIENT_KEY ||
     env.TIKTOK_CLIENT_SECRET ||
     env.INSTAGRAM_CLIENT_ID ||
-    env.INSTAGRAM_CLIENT_SECRET
+    env.INSTAGRAM_CLIENT_SECRET ||
+    env.KICK_CLIENT_ID ||
+    env.KICK_CLIENT_SECRET ||
+    env.TWITCH_EVENTSUB_SECRET ||
+    env.CHANNEL_TOKEN_KEYS
   )
     throw new HttpError(503, "Test environment is not isolated.");
 }
