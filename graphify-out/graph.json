@@ -30703,9 +30703,9 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_lib_text_language_readsoriginal",
+      "source": "app_lib_text_language_languagesof",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L148",
+      "source_location": "L142",
       "target": "app_lib_text_language_writtenin",
       "weight": 1.0
     },
@@ -30715,9 +30715,9 @@
       "confidence_score": 1.0,
       "context": "call",
       "relation": "calls",
-      "source": "app_lib_text_language_readsoriginal",
+      "source": "app_lib_text_language_languagesof",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L151",
+      "source_location": "L145",
       "target": "app_lib_text_language_visibletext",
       "weight": 1.0
     },
@@ -56721,7 +56721,7 @@
       "relation": "calls",
       "source": "tests_keep_original_test",
       "source_file": "tests/keep-original.test.ts",
-      "source_location": "L107",
+      "source_location": "L119",
       "target": "tests_keep_original_test_wronglykept",
       "weight": 1.0
     },
@@ -56733,7 +56733,7 @@
       "relation": "calls",
       "source": "tests_keep_original_test",
       "source_file": "tests/keep-original.test.ts",
-      "source_location": "L111",
+      "source_location": "L123",
       "target": "tests_keep_original_test_wronglytranslated",
       "weight": 1.0
     },
@@ -177973,7 +177973,18 @@
       "relation": "contains",
       "source": "app_lib_text_language",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L145",
+      "source_location": "L141",
+      "target": "app_lib_text_language_languagesof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_lib_text_language",
+      "source_file": "app/lib/text-language.ts",
+      "source_location": "L154",
       "target": "app_lib_text_language_readsoriginal",
       "weight": 1.0
     },
@@ -207696,6 +207707,18 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
+      "source": "app_lib_text_language_readsoriginal",
+      "source_file": "app/lib/text-language.ts",
+      "source_location": "L158",
+      "target": "app_lib_text_language_languagesof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "relation": "indirect_call",
       "source": "app_lib_use_prefs_useprefs",
       "source_file": "app/lib/use-prefs.ts",
       "source_location": "L9",
@@ -233032,6 +233055,17 @@
       "_origin": "ast",
       "community": null,
       "file_type": "code",
+      "id": "app_lib_text_language_languagesof",
+      "label": "languagesOf()",
+      "norm_label": "languagesof()",
+      "source_file": "app/lib/text-language.ts",
+      "source_location": "L141"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
       "id": "app_lib_text_language_latinlanguage",
       "label": "latinLanguage()",
       "norm_label": "latinlanguage()",
@@ -233069,7 +233103,7 @@
       "label": "readsOriginal()",
       "norm_label": "readsoriginal()",
       "source_file": "app/lib/text-language.ts",
-      "source_location": "L145"
+      "source_location": "L154"
     },
     {
       "_callable": true,
