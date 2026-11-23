@@ -204,16 +204,25 @@ These rules apply to a read:
 
 - The read covers 4 weeks. Twitch gives at most 4 pages of 25 segments. YouTube gives at most 4 pages of 50 broadcasts.
 - A read with more pages, or a YouTube read without quota for a page, is not complete. It changes nothing.
-- The import ignores a canceled Twitch segment and a segment that starts in the vacation of the channel. It also ignores a YouTube broadcast that is not public or has no start time.
+- The import ignores a canceled Twitch segment and a segment that starts in the vacation of the channel. It also ignores a private YouTube broadcast and a YouTube broadcast without a start time.
+  It reads an unlisted YouTube broadcast: the streamer planned it, but keeps it off the channel page.
 - An empty title takes the Twitch category. Without a category, it takes the channel name.
 - A stream without an end gets 120 minutes. The length stays between 15 minutes and 24 hours.
 - Each read stream has a row in `stream_event_sources`, with the platform and its ID.
   Thus a new read updates the entry. It does not make a second entry.
-- Two streams are the same stream when their starts are at most 15 minutes apart and their titles agree.
-  The comparison ignores case, marks, and extra spaces. The schedule then shows one entry with the link of each platform.
+- The row also keeps the Twitch category and the address of a picture.
+  For Twitch, the picture is the category cover from Get Games, 144 × 192 pixels.
+  For YouTube, it is the `maxres` thumbnail, else the `medium` thumbnail.
+  When Get Games fails, the covers stay empty. The read continues.
+- The schedule shows the YouTube thumbnail of a stream first, else the Twitch cover.
+  The category chip shows the Twitch category with its cover.
+- `GET /images/stream/<event>/<platform>` serves the picture. The server loads it from `static-cdn.jtvnw.net` or
+  `i.ytimg.com`, so the device of a viewer does not contact these hosts. Cloudflare keeps a loaded picture for one day.
+- Two streams are the same stream when their starts are at most 15 minutes apart. The titles can be different.
+  A streamer runs one stream at a time. The schedule then shows one entry with the link of each platform.
 - The import makes entries with `imported = 1`. An edit by the owner, or a replay link, sets `imported = 0`.
   The import changes only entries with `imported = 1`, and only from the platform that made them.
-- A manual entry of the owner keeps its text. A read stream that agrees with it adds only a link.
+- A manual entry of the owner keeps its text. A read stream with the same start adds only a link.
 - When the owner deletes an entry, its source row stays without an entry. Thus a new read does not add it again.
 - When a platform no longer lists a stream, the read removes its link. This occurs only for a stream that starts
   in more than one hour, inside the 4 weeks. An entry with `imported = 1` and no other link goes too.

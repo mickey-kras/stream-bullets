@@ -11,14 +11,15 @@ import { capacityGuard, isCapacityError, MAX_UPCOMING_EVENTS } from "./schedule.
 /**
  * Reads the scheduled streams of a page's connected Twitch and YouTube channels into its schedule. Each read
  * stream keeps a row in `stream_event_sources`, so a new read updates its entry and never adds a second one. A
- * stream of a second platform with the same start (at most 15 minutes apart) and the same title joins that entry.
+ * stream of a second platform with the same start (at most 15 minutes apart) joins that entry, whatever its title:
+ * a streamer runs one stream at a time, and the platforms often carry different titles for it.
  * The import changes only entries it created and the owner did not edit (`imported`). Kick has no schedule API.
  */
 
 type ImportPlatform = "twitch" | "youtube";
 const IMPORT_PLATFORMS: readonly ImportPlatform[] = ["twitch", "youtube"];
 
-/** Two entries are one stream when their starts are at most this far apart and their titles agree. */
+/** Two entries are one stream when their starts are at most this far apart. */
 export const MATCH_WINDOW_MS = 15 * 60_000;
 /** A stream that starts this soon can be live already, and a provider can stop listing it: no read removes it. */
 export const KEEP_MARGIN_MS = 60 * 60_000;
@@ -31,18 +32,8 @@ export const CRON_PAGES = 25;
 /** A source that no read found again for this time is deleted, like other stored YouTube data. */
 export const SOURCE_RETENTION_MS = 30 * 86_400_000;
 
-/** The title as the match rule compares it: letters and digits in lower case, one space between words. */
-export function normalizeTitle(title: string): string {
-  const words = title
-    .normalize("NFKC")
-    .toLowerCase()
-    .replaceAll(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
-  return words || title.trim().toLowerCase();
-}
-
-export function sameStream(a: { title: string; startsAt: number }, b: { title: string; startsAt: number }): boolean {
-  return Math.abs(a.startsAt - b.startsAt) <= MATCH_WINDOW_MS && normalizeTitle(a.title) === normalizeTitle(b.title);
+export function sameStream(a: { startsAt: number }, b: { startsAt: number }): boolean {
+  return Math.abs(a.startsAt - b.startsAt) <= MATCH_WINDOW_MS;
 }
 
 const readSchema = z.object({ streams: z.array(importedStreamSchema).max(200).nullable() });
@@ -97,7 +88,6 @@ interface SourceRow {
 
 interface Candidate {
   id: string;
-  title: string;
   starts_at: number;
 }
 
@@ -123,7 +113,7 @@ async function startSync(env: AppEnv, streamerId: string, platform: ImportPlatfo
         e.duration_min, e.url
       FROM stream_event_sources s LEFT JOIN stream_events e ON e.id=s.event_id
       WHERE s.streamer_id=? AND s.platform=?`).bind(streamerId, platform),
-    env.DB.prepare(`SELECT id, title, starts_at FROM stream_events e WHERE streamer_id=? AND starts_at >= ? AND starts_at < ?
+    env.DB.prepare(`SELECT id, starts_at FROM stream_events e WHERE streamer_id=? AND starts_at >= ? AND starts_at < ?
         AND NOT EXISTS(SELECT 1 FROM stream_event_sources s WHERE s.event_id=e.id AND s.platform=?)
       ORDER BY starts_at, id`).bind(streamerId, now - 86_400_000, now + IMPORT_HORIZON_MS + MATCH_WINDOW_MS, platform),
     env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE streamer_id=? AND starts_at >= ?").bind(
@@ -160,9 +150,16 @@ function outdated(source: SourceRow, stream: ImportedStream): boolean {
 function readAgain(sync: Sync, source: SourceRow, stream: ImportedStream): void {
   const { env } = sync;
   sync.statements.push(
-    env.DB.prepare(
-      "UPDATE stream_event_sources SET url=?, read_at=? WHERE streamer_id=? AND platform=? AND external_id=?",
-    ).bind(stream.url, sync.now, sync.streamerId, sync.platform, stream.externalId),
+    env.DB.prepare(`UPDATE stream_event_sources SET url=?, category=?, image_url=?, read_at=?
+      WHERE streamer_id=? AND platform=? AND external_id=?`).bind(
+      stream.url,
+      stream.category ?? null,
+      stream.imageUrl ?? null,
+      sync.now,
+      sync.streamerId,
+      sync.platform,
+      stream.externalId,
+    ),
   );
   // Only the platform that created an entry changes it, and only until the owner edits it.
   if (source.event_id === null || source.imported !== 1 || source.event_platform !== sync.platform) return;
@@ -196,7 +193,7 @@ function takeRoom(sync: Sync, upcoming: boolean): boolean {
 /** The entry for a new stream: the same stream of another platform, or a new imported entry. Null when full. */
 function entryFor(sync: Sync, stream: ImportedStream): string | null {
   const index = sync.free.findIndex((candidate: Candidate): boolean =>
-    sameStream({ title: candidate.title, startsAt: candidate.starts_at }, stream),
+    sameStream({ startsAt: candidate.starts_at }, stream),
   );
   if (index >= 0) return sync.free.splice(index, 1)[0].id;
   if (!takeRoom(sync, stream.startsAt >= sync.now)) return null;
@@ -224,8 +221,17 @@ function readNew(sync: Sync, stream: ImportedStream): void {
   if (eventId === null) return;
   sync.changed = true;
   sync.statements.push(
-    sync.env.DB.prepare(`INSERT INTO stream_event_sources (streamer_id,platform,external_id,event_id,url,read_at)
-      VALUES (?,?,?,?,?,?)`).bind(sync.streamerId, sync.platform, stream.externalId, eventId, stream.url, sync.now),
+    sync.env.DB.prepare(`INSERT INTO stream_event_sources (streamer_id,platform,external_id,event_id,url,category,
+        image_url,read_at) VALUES (?,?,?,?,?,?,?,?)`).bind(
+      sync.streamerId,
+      sync.platform,
+      stream.externalId,
+      eventId,
+      stream.url,
+      stream.category ?? null,
+      stream.imageUrl ?? null,
+      sync.now,
+    ),
   );
 }
 

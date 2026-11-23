@@ -39,7 +39,10 @@ test("the event dialog shows the stream and the .ics feed serves the schedule", 
   const dialog = page.getByRole("dialog", { name: "Mic shootout" });
   await expect(dialog).toContainText("Bring your questions.");
   // A stream on two platforms is one entry with a link to each.
-  await expect(dialog.getByRole("link", { name: /Watch on Twitch/ })).toHaveAttribute("href", "https://twitch.tv/feature_host");
+  await expect(dialog.getByRole("link", { name: /Watch on Twitch/ })).toHaveAttribute(
+    "href",
+    "https://twitch.tv/feature_host",
+  );
   await expect(dialog.getByRole("link", { name: /Watch on YouTube/ })).toHaveAttribute(
     "href",
     "https://www.youtube.com/watch?v=mic-video",
@@ -83,6 +86,37 @@ test("an open Schedule tab moves a stream from upcoming to live to ended", async
   await page.clock.fastForward("03:00:00");
   await expect(hero).toContainText("Variety night");
   await expect(page.locator(".sched-past")).toContainText("Mic shootout");
+});
+
+test("an open page without the polls view does not render each second", async ({ page }) => {
+  await page.clock.install({ time: Date.now() });
+  // Count the timers of about one second, the tick of the battle clock.
+  await page.addInitScript(() => {
+    const schedule = globalThis.setTimeout;
+    Object.assign(globalThis, { secondTimers: 0 });
+    globalThis.setTimeout = ((handler: TimerHandler, ms?: number, ...rest: unknown[]) => {
+      if (ms !== undefined && ms > 900 && ms <= 1000)
+        Object.assign(globalThis, {
+          secondTimers: (globalThis as unknown as { secondTimers: number }).secondTimers + 1,
+        });
+      return schedule(handler, ms, ...rest);
+    }) as typeof setTimeout;
+  });
+  const count = (): Promise<number> =>
+    page.evaluate(() => (globalThis as unknown as { secondTimers: number }).secondTimers);
+  for (const view of ["topics", "schedule"]) {
+    await page.goto(`/@feature_host?view=${view}`);
+    await expect(page.getByRole("heading", { name: "Feature host" })).toBeVisible();
+    await page.evaluate(() => Object.assign(globalThis, { secondTimers: 0 }));
+    await page.clock.runFor(60_000);
+    expect(await count(), view).toBeLessThan(3);
+  }
+  // The polls view keeps its clock for battle and poll timers.
+  await page.goto("/@feature_host?view=polls");
+  await expect(page.getByRole("heading", { name: "Feature host" })).toBeVisible();
+  await page.evaluate(() => Object.assign(globalThis, { secondTimers: 0 }));
+  await page.clock.runFor(10_000);
+  expect(await count()).toBeGreaterThanOrEqual(9);
 });
 
 test("an open Topics tab shows and hides the live badge as a stream starts and ends", async ({ page }) => {
@@ -527,5 +561,35 @@ test("the owner can retry, change and remove a past stream's replay", async ({ b
       "UPDATE stream_events SET vod_url='https://twitch.tv/videos/1' WHERE streamer_id=(SELECT id FROM streamers WHERE handle='feature_host') AND title='Desk setup Q&A';",
     ]);
     await close(context);
+  }
+});
+
+test("the next stream shows its picture and category, with the calendar as the main action", async ({ page }) => {
+  const thumbnail = "https://i.ytimg.com/vi/mic-shootout/maxresdefault.jpg";
+  const cover = "https://static-cdn.jtvnw.net/ttv-boxart/509658-144x192.jpg";
+  const sources = (platform: string, id: string, url: string, category: string, image: string): string =>
+    `INSERT INTO stream_event_sources(streamer_id,platform,external_id,event_id,url,category,image_url,read_at) SELECT streamer_id,'${platform}','${id}',id,'${url}',${category},'${image}',${Date.now()} FROM stream_events WHERE title='Mic shootout';`;
+  await runSql("schedule-pictures", [
+    sources("youtube", "mic-shootout", "https://www.youtube.com/watch?v=mic-shootout", "NULL", thumbnail),
+    sources("twitch", "mic-shootout-segment", "https://www.twitch.tv/feature_host", "'Just Chatting'", cover),
+  ]);
+  try {
+    await page.goto("/@feature_host?view=schedule");
+    const hero = page.locator(".sched-hero");
+    await expect(hero).toHaveClass(/has-picture/);
+    await expect(hero.locator(".sched-picture.thumbnail img")).toHaveAttribute(
+      "src",
+      /^\/images\/stream\/[0-9a-f-]{36}\/youtube$/,
+    );
+    await expect(hero.locator(".sched-category")).toHaveText("Just Chatting");
+    await expect(hero.locator(".sched-category img")).toHaveAttribute("src", /\/twitch$/);
+    // Before the stream starts, the calendar is the gold, first action.
+    const first = hero.locator(".sched-actions > *").first();
+    await expect(first).toHaveText(/Add to calendar/);
+    await expect(first).toHaveClass(/gold/);
+  } finally {
+    await runSql("schedule-pictures-cleanup", [
+      "DELETE FROM stream_event_sources WHERE external_id IN ('mic-shootout','mic-shootout-segment');",
+    ]);
   }
 });

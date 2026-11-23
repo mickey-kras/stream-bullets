@@ -55,6 +55,8 @@ export interface FakeProviders {
   duringRefresh: (() => Promise<void>) | null;
   /** Get Channel Stream Schedule pages in order (the last one repeats), or a status for every request. */
   twitchSchedule: unknown[] | number;
+  /** The games Get Games returns (only the requested IDs), or a status for every request. */
+  twitchGames: { id: string; box_art_url: string }[] | number;
   /** The items liveBroadcasts.list returns for `broadcastStatus=upcoming`, or a status for every request. */
   upcoming: unknown[] | number;
 }
@@ -110,6 +112,7 @@ export function installFakeProviders(): FakeProviders {
     listFailures: 0,
     deleteStatus: null,
     twitchSchedule: 404,
+    twitchGames: [],
     upcoming: [],
   };
   let subscription = 0;
@@ -229,6 +232,11 @@ export function installFakeProviders(): FakeProviders {
       if (typeof fake.twitchSchedule === "number") return json({ error: "Not Found" }, fake.twitchSchedule);
       const after = url.searchParams.get("after");
       return json(fake.twitchSchedule[Math.min(after === null ? 0 : Number(after), fake.twitchSchedule.length - 1)]);
+    }
+    if (path === "api.twitch.tv/helix/games") {
+      if (typeof fake.twitchGames === "number") return json({ error: "Error" }, fake.twitchGames);
+      const ids = url.searchParams.getAll("id");
+      return json({ data: fake.twitchGames.filter((game) => ids.includes(game.id)) });
     }
     if (path === "www.googleapis.com/youtube/v3/liveBroadcasts" && url.searchParams.get("broadcastStatus") === "upcoming") {
       if (typeof fake.upcoming === "number") return json({ error: { errors: [{ reason: "quotaExceeded" }] } }, fake.upcoming);

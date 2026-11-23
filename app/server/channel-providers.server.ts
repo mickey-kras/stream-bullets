@@ -605,6 +605,9 @@ export async function youtubeChatPage(
   };
 }
 
+/** The only image hosts a scheduled stream links to: the Twitch image CDN and the YouTube thumbnail host. */
+export const STREAM_IMAGE_URL = /^https:\/\/(static-cdn\.jtvnw\.net|i\.ytimg\.com)\/[\w./-]{1,400}$/;
+
 /** A scheduled stream as a channel's platform lists it (app/server/schedule-import.server.ts). */
 export const importedStreamSchema = z.object({
   // Twitch segment IDs are Base64 (about 108 characters, with `+`, `/` and `=`); YouTube video IDs are shorter.
@@ -613,6 +616,9 @@ export const importedStreamSchema = z.object({
   startsAt: z.number().int().nonnegative(),
   durationMin: z.number().int().min(15).max(1440),
   url: z.string().regex(/^https:\/\/[\w.-]+\/\S{0,450}$/),
+  // The Twitch category, and the Twitch category cover or the YouTube thumbnail (served by the stream image route).
+  category: z.string().trim().min(1).max(100).nullable().optional(),
+  imageUrl: z.string().regex(STREAM_IMAGE_URL).nullable().optional(),
 });
 export type ImportedStream = z.infer<typeof importedStreamSchema>;
 
@@ -648,7 +654,7 @@ const twitchScheduleSchema = z.object({
           end_time: z.iso.datetime({ offset: true }).nullable(),
           title: z.string().max(1000),
           canceled_until: z.string().nullable(),
-          category: z.object({ name: z.string().max(200) }).nullable(),
+          category: z.object({ id: z.string().regex(/^\d{1,32}$/), name: z.string().max(200) }).nullable(),
         }),
       )
       .nullable(),
@@ -659,12 +665,18 @@ const twitchScheduleSchema = z.object({
 /** Pages of 25 segments the import reads at most: a stream each day for 4 weeks fits in 2. */
 const TWITCH_SCHEDULE_PAGES = 4;
 
+/** A Twitch stream with the ID of its category, which the cover lookup needs. */
+interface TwitchStream {
+  stream: ImportedStream;
+  categoryId: string | null;
+}
+
 /** The segments of one page that start before `until`, without cancelled ones; `past` once a segment is later. */
 function twitchStreams(
   body: z.infer<typeof twitchScheduleSchema>,
   until: number,
-): { streams: ImportedStream[]; past: boolean } {
-  const streams: ImportedStream[] = [];
+): { streams: TwitchStream[]; past: boolean } {
+  const streams: TwitchStream[] = [];
   const vacation = body.data.vacation;
   const away = (start: number): boolean =>
     !!vacation && start >= Date.parse(vacation.start_time) && start < Date.parse(vacation.end_time);
@@ -673,14 +685,55 @@ function twitchStreams(
     if (start >= until) return { streams, past: true };
     if (segment.canceled_until !== null || away(start)) continue;
     streams.push({
-      externalId: segment.id,
-      title: streamTitle(segment.title, segment.category?.name, body.data.broadcaster_name),
-      startsAt: start,
-      durationMin: streamLength(start, segment.end_time === null ? null : Date.parse(segment.end_time)),
-      url: `https://www.twitch.tv/${body.data.broadcaster_login.toLowerCase()}`,
+      stream: {
+        externalId: segment.id,
+        title: streamTitle(segment.title, segment.category?.name, body.data.broadcaster_name),
+        startsAt: start,
+        durationMin: streamLength(start, segment.end_time === null ? null : Date.parse(segment.end_time)),
+        url: `https://www.twitch.tv/${body.data.broadcaster_login.toLowerCase()}`,
+        category: segment.category?.name.trim().slice(0, 100) || null,
+        imageUrl: null,
+      },
+      categoryId: segment.category?.id ?? null,
     });
   }
   return { streams, past: false };
+}
+
+const twitchGamesSchema = z.object({
+  data: z.array(z.object({ id: z.string().regex(/^\d{1,32}$/), box_art_url: z.string().max(500) })),
+});
+
+/** The size of a category cover on the schedule: Twitch covers are 3:4. */
+const BOX_ART_SIZE = "144x192";
+
+/**
+ * The streams with the cover of their category (Get Games, up to 100 IDs). A failed lookup leaves the streams
+ * without a cover: a cover is never a reason to fail a read.
+ */
+async function withCovers(headers: Record<string, string>, read: TwitchStream[]): Promise<ImportedStream[]> {
+  const ids = [...new Set(read.map((item: TwitchStream): string | null => item.categoryId))].filter(
+    (id: string | null): id is string => id !== null,
+  );
+  const covers = new Map<string, string>();
+  if (ids.length > 0) {
+    const url = new URL("https://api.twitch.tv/helix/games");
+    for (const id of ids.slice(0, 100)) url.searchParams.append("id", id);
+    try {
+      for (const game of twitchGamesSchema.parse(await getJson(url.toString(), headers)).data) {
+        const cover = game.box_art_url.replace("{width}x{height}", BOX_ART_SIZE);
+        if (STREAM_IMAGE_URL.test(cover)) covers.set(game.id, cover);
+      }
+    } catch (error: unknown) {
+      console.warn("twitch_covers_failed", error instanceof ProviderError ? error.status : "parse");
+    }
+  }
+  return read.map(
+    (item: TwitchStream): ImportedStream => ({
+      ...item.stream,
+      imageUrl: (item.categoryId && covers.get(item.categoryId)) || null,
+    }),
+  );
 }
 
 /**
@@ -699,7 +752,7 @@ export async function twitchSchedule(
     Authorization: `Bearer ${await twitchAppToken(env)}`,
     "Client-Id": providerClient(env, "twitch").id,
   };
-  const streams: ImportedStream[] = [];
+  const streams: TwitchStream[] = [];
   let cursor: string | undefined;
   for (let page = 0; page < TWITCH_SCHEDULE_PAGES; page++) {
     const url = new URL("https://api.twitch.tv/helix/schedule");
@@ -713,13 +766,13 @@ export async function twitchSchedule(
     try {
       body = twitchScheduleSchema.parse(await getJson(url.toString(), headers));
     } catch (error: unknown) {
-      if (error instanceof ProviderError && error.status === 404) return streams;
+      if (error instanceof ProviderError && error.status === 404) return await withCovers(headers, streams);
       throw error;
     }
     const read = twitchStreams(body, until);
     streams.push(...read.streams);
     cursor = body.pagination?.cursor;
-    if (read.past || !cursor) return streams;
+    if (read.past || !cursor) return await withCovers(headers, streams);
   }
   return null;
 }
@@ -732,6 +785,7 @@ const youtubeUpcomingSchema = z.object({
         title: z.string().max(1000),
         scheduledStartTime: z.iso.datetime({ offset: true }).optional(),
         scheduledEndTime: z.iso.datetime({ offset: true }).optional(),
+        thumbnails: z.record(z.string(), z.object({ url: z.string().max(500) })).optional(),
       }),
       status: z.object({ privacyStatus: z.string().max(32) }),
     }),
@@ -739,12 +793,21 @@ const youtubeUpcomingSchema = z.object({
   nextPageToken: z.string().max(512).optional(),
 });
 
-/** The public broadcasts of one page with a planned start before `until`. */
+// A streamer sets a planned broadcast to unlisted to keep it off the channel page, but still schedules it.
+const LISTED_PRIVACY: ReadonlySet<string> = new Set(["public", "unlisted"]);
+
+/** The widest 16:9 thumbnail of a broadcast: `maxres` (1280×720) when the channel has one, else `medium` (320×180). */
+function youtubeThumbnail(thumbnails: Record<string, { url: string }> | undefined): string | null {
+  const url = thumbnails?.maxres?.url ?? thumbnails?.medium?.url;
+  return url && STREAM_IMAGE_URL.test(url) ? url : null;
+}
+
+/** The public and unlisted broadcasts of one page with a planned start before `until`. */
 function youtubeStreams(items: z.infer<typeof youtubeUpcomingSchema>["items"], until: number): ImportedStream[] {
   const streams: ImportedStream[] = [];
   for (const item of items) {
     const start = item.snippet.scheduledStartTime ? Date.parse(item.snippet.scheduledStartTime) : 0;
-    if (start <= 0 || start >= until || item.status.privacyStatus !== "public") continue;
+    if (start <= 0 || start >= until || !LISTED_PRIVACY.has(item.status.privacyStatus)) continue;
     const end = item.snippet.scheduledEndTime ? Date.parse(item.snippet.scheduledEndTime) : null;
     streams.push({
       externalId: item.id,
@@ -752,6 +815,8 @@ function youtubeStreams(items: z.infer<typeof youtubeUpcomingSchema>["items"], u
       startsAt: start,
       durationMin: streamLength(start, end),
       url: `https://www.youtube.com/watch?v=${item.id}`,
+      category: null,
+      imageUrl: youtubeThumbnail(item.snippet.thumbnails),
     });
   }
   return streams;
@@ -763,7 +828,7 @@ export const YOUTUBE_UPCOMING_PAGES = 4;
 /**
  * The public upcoming broadcasts of the token's channel that start before `until` (liveBroadcasts.list with
  * `broadcastStatus=upcoming`, pages of 50). `spend` takes the quota unit of each page (null: no quota). A broadcast without a planned
- * start (time 0) is left out, and so are private and unlisted ones: the schedule is public. Returns null when the
+ * start (time 0) is left out, and so are private ones. Unlisted ones stay: the streamer planned them. Returns null when the
  * read is not complete (no quota for a page, or more than `YOUTUBE_UPCOMING_PAGES` pages): the import then removes
  * nothing that it did not read.
  */

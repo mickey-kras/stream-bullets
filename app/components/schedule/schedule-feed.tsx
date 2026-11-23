@@ -48,6 +48,27 @@ export function TopicChips({ topics, handle }: Readonly<{ topics: EventTopic[]; 
   );
 }
 
+/** The picture of a stream: the YouTube thumbnail fills the 16:9 frame, a Twitch cover sits in its middle. */
+export function StreamPicture({ event, lazy = false }: Readonly<{ event: StreamEvent; lazy?: boolean }>): ReactNode {
+  if (!event.image) return null;
+  return (
+    <span className={`sched-picture ${event.image.kind}`}>
+      <img src={event.image.url} alt="" loading={lazy ? "lazy" : undefined} decoding="async" />
+    </span>
+  );
+}
+
+/** The Twitch category of a stream, with a small cover. */
+export function CategoryChip({ event }: Readonly<{ event: StreamEvent }>): ReactNode {
+  if (!event.category) return null;
+  return (
+    <span className="sched-category">
+      {event.category.cover && <img src={event.category.cover} alt="" loading="lazy" decoding="async" />}
+      {event.category.name}
+    </span>
+  );
+}
+
 export function PlatformLink({ event, gold = false }: Readonly<{ event: StreamEvent; gold?: boolean }>): ReactNode {
   return streamLinks(event).map((link: StreamLink) => (
     <a
@@ -83,6 +104,7 @@ function EventRow({
             {zoneName === "UTC" ? "" : ` · ${timeOf(event.startsAt, "UTC")} UTC`}
           </small>
         </span>
+        <StreamPicture event={event} lazy />
         <span className="sched-info">
           <span className="sched-title-row">
             <span className="sched-title">{event.title}</span>
@@ -91,6 +113,7 @@ function EventRow({
             )}
           </span>
           <span className="sched-meta">
+            <CategoryChip event={event} />
             {streamLinks(event).map((link: StreamLink) => (
               <Icon key={link.platform} name={platformIcon[link.platform]} size={18} />
             ))}
@@ -143,36 +166,48 @@ function Hero({
   onCalendar: (event: StreamEvent) => void;
 }>): ReactNode {
   const live = event.status === "live";
+  // Before the stream, a calendar reminder is the main action; once it is live, watching is.
+  const calendar = (
+    <button type="button" className={live ? undefined : "gold"} onClick={() => onCalendar(event)}>
+      <Icon name="schedule" size={18} />
+      {t("schedule.addToCalendar")}
+    </button>
+  );
   return (
-    <article className={`info-card sched-hero status-${event.status}`} aria-labelledby="up-next-title">
-      <div className="sched-hero-top">
-        <span className="eyebrow">{live ? t("schedule.onAir") : t("schedule.upNext")}</span>
-        {live ? (
-          <StatusTag event={event} />
-        ) : (
-          <span className="sched-countdown">
-            <Icon name="timer" size={18} />
-            {countdown(event.startsAt, now)}
-          </span>
-        )}
-      </div>
-      <h2 id="up-next-title">
-        <button type="button" className="link-button" onClick={() => onOpen(event.id)}>
-          {event.title}
-        </button>
-      </h2>
-      <p className="sched-when">
-        <Icon name="schedule" size={18} />
-        {whenLine(event, zone)}
-      </p>
-      {event.notes && <p className="event-notes">{event.notes}</p>}
-      <TopicChips topics={event.topics} handle={handle} />
-      <div className="sched-actions">
-        <PlatformLink event={event} gold={live} />
-        <button type="button" onClick={() => onCalendar(event)}>
+    <article
+      className={`info-card sched-hero status-${event.status}${event.image ? " has-picture" : ""}`}
+      aria-labelledby="up-next-title"
+    >
+      <StreamPicture event={event} />
+      <div className="sched-hero-body">
+        <div className="sched-hero-top">
+          <span className="eyebrow">{live ? t("schedule.onAir") : t("schedule.upNext")}</span>
+          {live ? (
+            <StatusTag event={event} />
+          ) : (
+            <span className="sched-countdown">
+              <Icon name="timer" size={18} />
+              {countdown(event.startsAt, now)}
+            </span>
+          )}
+        </div>
+        <h2 id="up-next-title">
+          <button type="button" className="link-button" onClick={() => onOpen(event.id)}>
+            {event.title}
+          </button>
+        </h2>
+        <p className="sched-when">
           <Icon name="schedule" size={18} />
-          {t("schedule.addToCalendar")}
-        </button>
+          {whenLine(event, zone)}
+        </p>
+        <CategoryChip event={event} />
+        {event.notes && <p className="event-notes">{event.notes}</p>}
+        <TopicChips topics={event.topics} handle={handle} />
+        <div className="sched-actions">
+          {!live && calendar}
+          <PlatformLink event={event} gold={live} />
+          {live && calendar}
+        </div>
       </div>
     </article>
   );

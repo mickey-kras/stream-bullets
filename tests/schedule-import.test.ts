@@ -11,13 +11,13 @@ import {
   importOnVisit,
   importPageSchedule,
   importSchedules,
-  normalizeTitle,
   OWNER_READ_INTERVAL_MS,
   sameStream,
   SOURCE_RETENTION_MS,
   syncPlatform,
   testStreams,
 } from "../app/server/schedule-import.server";
+import { serveStreamImage } from "../app/server/stream-images.server";
 import type { StreamEvent } from "../app/types";
 import { installFakeProviders, type FakeProviders } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -40,7 +40,12 @@ function iso(time: number): string {
   return new Date(time).toISOString();
 }
 
-function segment(id: string, title: string, start: number, options: { end?: number | null; canceled?: boolean } = {}): unknown {
+function segment(
+  id: string,
+  title: string,
+  start: number,
+  options: { end?: number | null; canceled?: boolean } = {},
+): unknown {
   const end = options.end === undefined ? start + 2 * hour : options.end;
   return {
     id,
@@ -66,13 +71,21 @@ function schedule(segments: unknown[], cursor?: string, vacation: unknown = null
   };
 }
 
-function broadcast(id: string, title: string, start: number, privacy = "public", end?: number): unknown {
+function broadcast(
+  id: string,
+  title: string,
+  start: number,
+  privacy = "public",
+  end?: number,
+  thumbnails?: Record<string, { url: string }>,
+): unknown {
   return {
     id,
     snippet: {
       title,
       scheduledStartTime: iso(start),
       ...(end === undefined ? {} : { scheduledEndTime: iso(end) }),
+      ...(thumbnails ? { thumbnails } : {}),
     },
     status: { privacyStatus: privacy, lifeCycleStatus: "ready" },
   };
@@ -82,7 +95,11 @@ function broadcast(id: string, title: string, start: number, privacy = "public",
 function fillers(count: number): D1PreparedStatement[] {
   return Array.from({ length: count }, (_, index: number) =>
     env.DB.prepare(`INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,created_at,updated_at)
-      VALUES (?,?,'Filler',?,60,'other','https://example.test/','UTC',1,1)`).bind(crypto.randomUUID(), page, now + 40 * day + index * hour),
+      VALUES (?,?,'Filler',?,60,'other','https://example.test/','UTC',1,1)`).bind(
+      crypto.randomUUID(),
+      page,
+      now + 40 * day + index * hour,
+    ),
   );
 }
 
@@ -92,7 +109,8 @@ async function addConnection(
   options: { status?: string; externalId?: string } = {},
 ): Promise<void> {
   const id = `conn-${platform}-${streamerId.slice(-1)}`;
-  const external = options.externalId ?? (platform === "youtube" ? `UCchannel${streamerId.slice(-1)}` : `11${streamerId.slice(-1)}`);
+  const external =
+    options.externalId ?? (platform === "youtube" ? `UCchannel${streamerId.slice(-1)}` : `11${streamerId.slice(-1)}`);
   await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO channel_connections (id,streamer_id,platform,external_id,display_name,scopes,status,created_at,updated_at)
@@ -102,7 +120,11 @@ async function addConnection(
       env,
       id,
       platform,
-      { accessToken: `${platform}-stored-access`, refreshToken: `${platform}-stored-refresh`, expiresAt: Date.now() + hour },
+      {
+        accessToken: `${platform}-stored-access`,
+        refreshToken: `${platform}-stored-refresh`,
+        expiresAt: Date.now() + hour,
+      },
       100,
     ),
   ]);
@@ -113,7 +135,9 @@ async function events(streamerId = page): Promise<StreamEvent[]> {
 }
 
 async function imported(id: string): Promise<number> {
-  const row = await env.DB.prepare("SELECT imported FROM stream_events WHERE id=?").bind(id).first<{ imported: number }>();
+  const row = await env.DB.prepare("SELECT imported FROM stream_events WHERE id=?")
+    .bind(id)
+    .first<{ imported: number }>();
   return row?.imported ?? -1;
 }
 
@@ -148,15 +172,23 @@ beforeEach(async (): Promise<void> => {
     KICK_CLIENT_SECRET: "kick-secret",
     CHANNEL_TOKEN_KEYS: tokenKeys,
   };
-  const ingest = new RoomNamespace((state: RoomState) => new ChannelIngest(state as unknown as DurableObjectState, env));
+  const ingest = new RoomNamespace(
+    (state: RoomState) => new ChannelIngest(state as unknown as DurableObjectState, env),
+  );
   env.CHANNEL_INGEST = ingest as unknown as DurableObjectNamespace;
   await env.DB.batch([
     env.DB.prepare("DELETE FROM user"),
     env.DB.prepare("DELETE FROM app_rate_limits"),
-    env.DB.prepare("INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES ('owner','O','o@x.test',1,1,1)"),
-    env.DB.prepare("INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES ('owner2','P','p@x.test',1,1,1)"),
+    env.DB.prepare(
+      "INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES ('owner','O','o@x.test',1,1,1)",
+    ),
+    env.DB.prepare(
+      "INSERT INTO user (id,name,email,email_verified,created_at,updated_at) VALUES ('owner2','P','p@x.test',1,1,1)",
+    ),
     env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES (?,'owner','host_page','Host')").bind(page),
-    env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES (?,'owner2','other_page','Other')").bind(otherPage),
+    env.DB.prepare("INSERT INTO streamers (id,owner_id,handle,name) VALUES (?,'owner2','other_page','Other')").bind(
+      otherPage,
+    ),
   ]);
 });
 
@@ -166,19 +198,11 @@ afterEach((): void => {
 });
 
 describe("the match rule", (): void => {
-  it("compares titles without case, marks and extra spaces", (): void => {
-    expect(normalizeTitle("  Friday   Stream!! ")).toBe("friday stream");
-    expect(normalizeTitle("ＦＲＩＤＡＹ – stream")).toBe("friday stream");
-    expect(normalizeTitle("Стрим #12")).toBe("стрим 12");
-    // A title of marks only is compared as it is.
-    expect(normalizeTitle(" 🎮🎮 ")).toBe("🎮🎮");
-  });
-
-  it("joins streams at most 15 minutes apart with the same title", (): void => {
+  it("joins streams at most 15 minutes apart, whatever their titles", (): void => {
     const start = Date.UTC(2026, 11, 1, 18);
-    expect(sameStream({ title: "Friday stream", startsAt: start }, { title: "friday STREAM.", startsAt: start + 15 * 60_000 })).toBe(true);
-    expect(sameStream({ title: "Friday stream", startsAt: start }, { title: "Friday stream", startsAt: start + 16 * 60_000 })).toBe(false);
-    expect(sameStream({ title: "Friday stream", startsAt: start }, { title: "Saturday stream", startsAt: start })).toBe(false);
+    expect(sameStream({ startsAt: start }, { startsAt: start + 15 * 60_000 })).toBe(true);
+    expect(sameStream({ startsAt: start }, { startsAt: start - 15 * 60_000 })).toBe(true);
+    expect(sameStream({ startsAt: start }, { startsAt: start + 16 * 60_000 })).toBe(false);
   });
 });
 
@@ -194,7 +218,10 @@ describe("reading the platforms", (): void => {
         ],
         "1",
       ),
-      schedule([segment("s4", "Late", now + 5 * day, { end: now + 5 * day + 10 * 60_000 }), segment("s5", "Too far", now + IMPORT_HORIZON_MS + day)]),
+      schedule([
+        segment("s4", "Late", now + 5 * day, { end: now + 5 * day + 10 * 60_000 }),
+        segment("s5", "Too far", now + IMPORT_HORIZON_MS + day),
+      ]),
     ];
     await importPageSchedule(env, page, now);
     const list = await events();
@@ -212,12 +239,12 @@ describe("reading the platforms", (): void => {
     expect(providerCalls("api.twitch.tv/helix/schedule")).toBe(2);
   });
 
-  it("reads only public YouTube broadcasts with a planned start, and spends one quota unit", async (): Promise<void> => {
+  it("reads public and unlisted YouTube broadcasts with a planned start, and spends one quota unit", async (): Promise<void> => {
     await addConnection("youtube");
     fake.upcoming = [
       broadcast("vid-1", "Q&A", now + day, "public", now + day + 90 * 60_000),
       broadcast("vid-2", "Private test", now + day, "private"),
-      broadcast("vid-3", "Unlisted", now + day, "unlisted"),
+      broadcast("vid-3", "Unlisted", now + day + hour, "unlisted"),
       { id: "vid-4", snippet: { title: "No time" }, status: { privacyStatus: "public" } },
       broadcast("vid-5", "Too far", now + IMPORT_HORIZON_MS + day),
     ];
@@ -225,6 +252,7 @@ describe("reading the platforms", (): void => {
     const list = await events();
     expect(list.map((event: StreamEvent) => [event.title, event.durationMin, event.platform, event.url])).toEqual([
       ["Q&A", 90, "youtube", "https://www.youtube.com/watch?v=vid-1"],
+      ["Unlisted", 120, "youtube", "https://www.youtube.com/watch?v=vid-3"],
     ]);
     const call = fake.calls.find((item) => item.url.pathname === "/youtube/v3/liveBroadcasts");
     expect(call?.url.searchParams.get("broadcastStatus")).toBe("upcoming");
@@ -244,7 +272,9 @@ describe("reading the platforms", (): void => {
     fake.twitchSchedule = [schedule([segment(id, "Show", now + 2 * day)])];
     await importPageSchedule(env, page, now);
     expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Show"]);
-    const source = await env.DB.prepare("SELECT external_id FROM stream_event_sources").first<{ external_id: string }>();
+    const source = await env.DB.prepare("SELECT external_id FROM stream_event_sources").first<{
+      external_id: string;
+    }>();
     expect(source?.external_id).toBe(id);
   });
 
@@ -253,7 +283,11 @@ describe("reading the platforms", (): void => {
     const vacation = { start_time: iso(now + 3 * day), end_time: iso(now + 10 * day) };
     fake.twitchSchedule = [
       schedule(
-        [segment("s1", "Before", now + 2 * day), segment("s2", "Away", now + 4 * day), segment("s3", "Back", now + 11 * day)],
+        [
+          segment("s1", "Before", now + 2 * day),
+          segment("s2", "Away", now + 4 * day),
+          segment("s3", "Back", now + 11 * day),
+        ],
         undefined,
         vacation,
       ),
@@ -302,7 +336,9 @@ describe("reading the platforms", (): void => {
     await importPageSchedule(env, page, now + 60_000);
     expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Show"]);
     // Quota for the first page only: the same.
-    fake.upcoming = Array.from({ length: 51 }, (_, index: number) => broadcast(`priv-${index}`, "Private", now + day, "private"));
+    fake.upcoming = Array.from({ length: 51 }, (_, index: number) =>
+      broadcast(`priv-${index}`, "Private", now + day, "private"),
+    );
     await env.DB.prepare("UPDATE app_rate_limits SET count=? WHERE key=?")
       .bind(YOUTUBE_DAILY_BUDGET - 1, `youtube-quota:${quotaDay(now).day}`)
       .run();
@@ -334,11 +370,13 @@ describe("one entry for one stream", (): void => {
     await addConnection("youtube");
   });
 
-  it("shows the same stream on two platforms as one entry with both links", async (): Promise<void> => {
-    fake.twitchSchedule = [schedule([segment("s1", "Friday Stream", now + 2 * day), segment("s2", "Solo", now + 3 * day)])];
+  it("shows the same stream on two platforms as one entry with both links, also with different titles", async (): Promise<void> => {
+    fake.twitchSchedule = [
+      schedule([segment("s1", "Friday Stream", now + 2 * day), segment("s2", "Solo", now + 3 * day)]),
+    ];
     fake.upcoming = [
-      broadcast("vid-1", "friday stream!", now + 2 * day + 10 * 60_000),
-      // The same title 20 minutes apart is another stream.
+      broadcast("vid-1", "Friday stream (part 5)", now + 2 * day + 10 * 60_000),
+      // A start 20 minutes apart is another stream.
       broadcast("vid-2", "Solo", now + 3 * day + 20 * 60_000),
     ];
     await importPageSchedule(env, page, now);
@@ -354,7 +392,9 @@ describe("one entry for one stream", (): void => {
     fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
     fake.upcoming = [broadcast("vid-1", "Show", now + 2 * day)];
     await importPageSchedule(env, page, now);
-    fake.twitchSchedule = [schedule([segment("s1", "Show, new title", now + 2 * day + hour, { end: now + 2 * day + 4 * hour })])];
+    fake.twitchSchedule = [
+      schedule([segment("s1", "Show, new title", now + 2 * day + hour, { end: now + 2 * day + 4 * hour })]),
+    ];
     await importPageSchedule(env, page, now + 60_000);
     const list = await events();
     expect(list).toHaveLength(1);
@@ -406,7 +446,9 @@ describe("one entry for one stream", (): void => {
       topicIds: [],
     });
     expect(await imported(first.id)).toBe(0);
-    fake.twitchSchedule = [schedule([segment("s1", "Twitch title", now + 2 * day + hour), segment("s2", "Other", now + 3 * day)])];
+    fake.twitchSchedule = [
+      schedule([segment("s1", "Twitch title", now + 2 * day + hour), segment("s2", "Other", now + 3 * day)]),
+    ];
     await importPageSchedule(env, page, now + 60_000);
     expect((await events())[0]).toMatchObject({ id: first.id, title: "My title", durationMin: 60 });
     // A cancel on the platform removes the imported entry, not the edited one.
@@ -417,7 +459,11 @@ describe("one entry for one stream", (): void => {
 
   it("removes a cancelled stream, keeps one that starts within the hour, and does not add a deleted one again", async (): Promise<void> => {
     fake.twitchSchedule = [
-      schedule([segment("soon", "Soon", now + 30 * 60_000), segment("s1", "Show", now + 2 * day), segment("s2", "Gone", now + 3 * day)]),
+      schedule([
+        segment("soon", "Soon", now + 30 * 60_000),
+        segment("s1", "Show", now + 2 * day),
+        segment("s2", "Gone", now + 3 * day),
+      ]),
     ];
     await importPageSchedule(env, page, now);
     const list = await events();
@@ -449,7 +495,9 @@ describe("one entry for one stream", (): void => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     await importPageSchedule(env, page, now + 60_000);
     expect((await events()).map((event: StreamEvent) => event.title)).toEqual(["Tube"]);
-    const row = await env.DB.prepare("SELECT status FROM channel_connections WHERE platform='youtube'").first<{ status: string }>();
+    const row = await env.DB.prepare("SELECT status FROM channel_connections WHERE platform='youtube'").first<{
+      status: string;
+    }>();
     expect(row?.status).toBe("needs_reauth");
   });
 
@@ -469,7 +517,9 @@ describe("one entry for one stream", (): void => {
     await env.DB.batch(fillers(MAX_UPCOMING_EVENTS));
     fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
     await importPageSchedule(env, page, now + 60_000);
-    const show = await env.DB.prepare("SELECT starts_at FROM stream_events WHERE title='Show'").first<{ starts_at: number }>();
+    const show = await env.DB.prepare("SELECT starts_at FROM stream_events WHERE title='Show'").first<{
+      starts_at: number;
+    }>();
     expect(show?.starts_at).toBe(now - 2 * hour);
   });
 
@@ -484,11 +534,19 @@ describe("one entry for one stream", (): void => {
       },
     });
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const stream = { externalId: "s1", title: "Show", startsAt: now + 2 * day, durationMin: 60, url: "https://www.twitch.tv/host" };
+    const stream = {
+      externalId: "s1",
+      title: "Show",
+      startsAt: now + 2 * day,
+      durationMin: 60,
+      url: "https://www.twitch.tv/host",
+    };
     expect(await syncPlatform({ ...env, DB: racing }, page, "twitch", [stream], now)).toBe(false);
     expect(calls).toBe(2);
     expect(warn).toHaveBeenCalledWith("schedule_import_full", { platform: "twitch" });
-    const count = await env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE title='Show'").first<{ n: number }>();
+    const count = await env.DB.prepare("SELECT count(*) AS n FROM stream_events WHERE title='Show'").first<{
+      n: number;
+    }>();
     expect(count?.n).toBe(0);
   });
 });
@@ -513,8 +571,12 @@ describe("isolation between pages", (): void => {
     expect(broadcasters).toEqual(["111"]);
     // The other page's read of the same segment id makes its own entry and leaves this page alone.
     await importPageSchedule(env, otherPage, now);
-    expect((await events(page)).map((event: StreamEvent) => event.id)).toEqual(mine.map((event: StreamEvent) => event.id));
-    expect((await events(otherPage)).map((event: StreamEvent) => [event.id, event.alsoOn.length])).toEqual([[theirs, 1]]);
+    expect((await events(page)).map((event: StreamEvent) => event.id)).toEqual(
+      mine.map((event: StreamEvent) => event.id),
+    );
+    expect((await events(otherPage)).map((event: StreamEvent) => [event.id, event.alsoOn.length])).toEqual([
+      [theirs, 1],
+    ]);
   });
 });
 
@@ -576,7 +638,9 @@ describe("when the import runs", (): void => {
     await env.DB.prepare("DELETE FROM channel_connections").run();
     await importSchedules(env, now + SOURCE_RETENTION_MS + 1);
     const list = await events();
-    expect(list.map((event: StreamEvent) => [event.title, event.platform, event.alsoOn.length])).toEqual([["Same show", "twitch", 0]]);
+    expect(list.map((event: StreamEvent) => [event.title, event.platform, event.alsoOn.length])).toEqual([
+      ["Same show", "twitch", 0],
+    ]);
     const sources = await env.DB.prepare("SELECT platform FROM stream_event_sources").all<{ platform: string }>();
     expect(sources.results).toEqual([{ platform: "twitch" }]);
   });
@@ -588,7 +652,9 @@ describe("when the import runs", (): void => {
     await addConnection("twitch");
     fake.twitchSchedule = [schedule([segment("s1", "Same show", now + 2 * day)])];
     await importPageSchedule(env, page, now + 60_000);
-    expect((await events()).map((event: StreamEvent) => [event.platform, event.alsoOn.length])).toEqual([["youtube", 1]]);
+    expect((await events()).map((event: StreamEvent) => [event.platform, event.alsoOn.length])).toEqual([
+      ["youtube", 1],
+    ]);
     await env.DB.prepare("DELETE FROM channel_connections").run();
     await importSchedules(env, now + 60_000 + SOURCE_RETENTION_MS + 1);
     const list = await events();
@@ -621,11 +687,99 @@ describe("when the import runs", (): void => {
     await importOnVisit(env, page, now);
     expect(fake.calls).toEqual([]);
     const list = await events();
-    expect(list.map((event: StreamEvent) => [event.title, event.platform, event.alsoOn.map((link) => link.platform)])).toEqual([
+    expect(
+      list.map((event: StreamEvent) => [event.title, event.platform, event.alsoOn.map((link) => link.platform)]),
+    ).toEqual([
       ["Test stream", "twitch", ["youtube"]],
       ["Twitch only", "twitch", []],
       ["YouTube only", "youtube", []],
     ]);
     expect(testStreams("twitch", now)).toHaveLength(2);
+  });
+});
+
+describe("pictures and categories", (): void => {
+  const cover = "https://static-cdn.jtvnw.net/ttv-boxart/509658-144x192.jpg";
+  const thumbnail = "https://i.ytimg.com/vi/vid-1/maxresdefault.jpg";
+
+  beforeEach(async (): Promise<void> => {
+    await addConnection("twitch");
+    await addConnection("youtube");
+  });
+
+  it("stores the Twitch category with its cover and the YouTube thumbnail, and shows the thumbnail first", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day), segment("s2", "Solo", now + 3 * day)])];
+    fake.twitchGames = [
+      { id: "509658", box_art_url: "https://static-cdn.jtvnw.net/ttv-boxart/509658-{width}x{height}.jpg" },
+    ];
+    fake.upcoming = [
+      broadcast("vid-1", "Show (part 5)", now + 2 * day, "public", undefined, {
+        medium: { url: "https://i.ytimg.com/vi/vid-1/mqdefault.jpg" },
+        maxres: { url: thumbnail },
+      }),
+    ];
+    await importPageSchedule(env, page, now);
+    const [shared, solo] = await events();
+    expect(shared.image).toEqual({ url: `/images/stream/${shared.id}/youtube`, kind: "thumbnail" });
+    expect(shared.category).toEqual({ name: "Just Chatting", cover: `/images/stream/${shared.id}/twitch` });
+    expect(solo.image).toEqual({ url: `/images/stream/${solo.id}/twitch`, kind: "cover" });
+    const rows = await env.DB.prepare(
+      "SELECT platform, category, image_url FROM stream_event_sources ORDER BY platform, external_id",
+    ).all();
+    expect(rows.results).toEqual([
+      { platform: "twitch", category: "Just Chatting", image_url: cover },
+      { platform: "twitch", category: "Just Chatting", image_url: cover },
+      { platform: "youtube", category: null, image_url: thumbnail },
+    ]);
+    // One Get Games request for the category of both segments.
+    const games = fake.calls.filter((call) => call.url.pathname === "/helix/games");
+    expect(games.map((call) => call.url.searchParams.getAll("id"))).toEqual([["509658"]]);
+  });
+
+  it("reads the schedule without covers when Get Games fails, and drops a thumbnail from another host", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
+    fake.twitchGames = 500;
+    fake.upcoming = [
+      broadcast("vid-2", "Other", now + 4 * day, "public", undefined, { maxres: { url: "https://example.com/x.jpg" } }),
+      broadcast("vid-3", "Small", now + 5 * day, "public", undefined, {
+        medium: { url: "https://i.ytimg.com/vi/vid-3/mqdefault.jpg" },
+      }),
+    ];
+    await importPageSchedule(env, page, now);
+    const list = await events();
+    expect(list.map((event: StreamEvent) => [event.title, event.category, event.image?.kind ?? null])).toEqual([
+      ["Show", { name: "Just Chatting", cover: null }, null],
+      ["Other", null, null],
+      ["Small", null, "thumbnail"],
+    ]);
+  });
+
+  it("serves a stored picture through the image route and refuses everything else", async (): Promise<void> => {
+    fake.twitchSchedule = [schedule([segment("s1", "Show", now + 2 * day)])];
+    fake.twitchGames = [
+      { id: "509658", box_art_url: "https://static-cdn.jtvnw.net/ttv-boxart/509658-{width}x{height}.jpg" },
+    ];
+    await importPageSchedule(env, page, now);
+    const [event] = await events();
+    const loaded: string[] = [];
+    vi.stubGlobal("fetch", (input: string | URL): Promise<Response> => {
+      loaded.push(input.toString());
+      return Promise.resolve(new Response(new Uint8Array([1, 2, 3]), { headers: { "Content-Type": "image/jpeg" } }));
+    });
+    const image = await serveStreamImage(env, `${event.id}/twitch`, "GET");
+    expect(image.headers.get("Content-Type")).toBe("image/jpeg");
+    expect(image.headers.get("Cache-Control")).toBe("public, max-age=3600");
+    expect(new Uint8Array(await image.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
+    expect(loaded).toEqual([cover]);
+    expect((await serveStreamImage(env, `${event.id}/twitch`, "HEAD")).body).toBeNull();
+    // No picture for that platform, a malformed path, or a host answer that is not an image.
+    await expect(serveStreamImage(env, `${event.id}/youtube`, "GET")).rejects.toMatchObject({ status: 404 });
+    await expect(serveStreamImage(env, "../avatar/x", "GET")).rejects.toMatchObject({ status: 404 });
+    vi.stubGlobal("fetch", (): Promise<Response> =>
+      Promise.resolve(new Response("<html>", { headers: { "Content-Type": "text/html" } })),
+    );
+    await expect(serveStreamImage(env, `${event.id}/twitch`, "GET")).rejects.toMatchObject({ status: 404 });
+    vi.stubGlobal("fetch", (): Promise<Response> => Promise.reject(new DOMException("timeout", "TimeoutError")));
+    await expect(serveStreamImage(env, `${event.id}/twitch`, "GET")).rejects.toMatchObject({ status: 404 });
   });
 });
