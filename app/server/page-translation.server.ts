@@ -220,6 +220,8 @@ export async function attachPageTranslations(
 ): Promise<void> {
   const stored = await storedFor(env, [streamer.id], locale);
   if (stored.size === 0) return;
+  // The cards and the streams need the detector also when the About text is empty.
+  if (keep.length > 0) await loadLanguageDetector();
   await attachAboutTranslations(env, [streamer], locale, keep, stored);
   for (const card of cards ?? []) {
     const text = stored.get(`${streamer.id}:${await textHash("card", cardText(card))}`);

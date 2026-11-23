@@ -48,20 +48,25 @@ function KeepOriginal({ saved, active }: Readonly<{ saved: readonly Locale[]; ac
   const revalidator = useRevalidator();
   const [keep, setKeep] = useState<readonly Locale[]>(saved);
   const [error, setError] = useState<string>("");
+  const [saving, setSaving] = useState<boolean>(false);
   async function toggle(locale: Locale, checked: boolean): Promise<void> {
+    if (saving) return;
     const next: Locale[] = LOCALES.filter((item: Locale) => (item === locale ? checked : keep.includes(item)));
     setKeep(next);
     setError("");
+    setSaving(true);
     try {
       await sendJson("PATCH", "/api/me/keep-original", { locales: next });
       await revalidator.revalidate();
     } catch (error_: unknown) {
       setKeep(keep);
       setError(errorMessage(error_));
+    } finally {
+      setSaving(false);
     }
   }
   return (
-    <fieldset className="keep-original">
+    <fieldset className="keep-original" aria-busy={saving}>
       <legend>{t("language.keepTitle")}</legend>
       <p className="hint">{t("language.keepHelp")}</p>
       {error && (
@@ -74,6 +79,7 @@ function KeepOriginal({ saved, active }: Readonly<{ saved: readonly Locale[]; ac
           <input
             type="checkbox"
             checked={keep.includes(locale)}
+            disabled={saving}
             onChange={(event) => void toggle(locale, event.currentTarget.checked)}
           />
           <span lang={locale}>{LOCALE_NAMES[locale]}</span>
