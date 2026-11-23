@@ -11,7 +11,6 @@ import {
   importOnVisit,
   importPageSchedule,
   importSchedules,
-  normalizeTitle,
   OWNER_READ_INTERVAL_MS,
   sameStream,
   SOURCE_RETENTION_MS,
@@ -166,19 +165,11 @@ afterEach((): void => {
 });
 
 describe("the match rule", (): void => {
-  it("compares titles without case, marks and extra spaces", (): void => {
-    expect(normalizeTitle("  Friday   Stream!! ")).toBe("friday stream");
-    expect(normalizeTitle("ＦＲＩＤＡＹ – stream")).toBe("friday stream");
-    expect(normalizeTitle("Стрим #12")).toBe("стрим 12");
-    // A title of marks only is compared as it is.
-    expect(normalizeTitle(" 🎮🎮 ")).toBe("🎮🎮");
-  });
-
-  it("joins streams at most 15 minutes apart with the same title", (): void => {
+  it("joins streams at most 15 minutes apart, whatever their titles", (): void => {
     const start = Date.UTC(2026, 11, 1, 18);
-    expect(sameStream({ title: "Friday stream", startsAt: start }, { title: "friday STREAM.", startsAt: start + 15 * 60_000 })).toBe(true);
-    expect(sameStream({ title: "Friday stream", startsAt: start }, { title: "Friday stream", startsAt: start + 16 * 60_000 })).toBe(false);
-    expect(sameStream({ title: "Friday stream", startsAt: start }, { title: "Saturday stream", startsAt: start })).toBe(false);
+    expect(sameStream({ startsAt: start }, { startsAt: start + 15 * 60_000 })).toBe(true);
+    expect(sameStream({ startsAt: start }, { startsAt: start - 15 * 60_000 })).toBe(true);
+    expect(sameStream({ startsAt: start }, { startsAt: start + 16 * 60_000 })).toBe(false);
   });
 });
 
@@ -334,11 +325,11 @@ describe("one entry for one stream", (): void => {
     await addConnection("youtube");
   });
 
-  it("shows the same stream on two platforms as one entry with both links", async (): Promise<void> => {
+  it("shows the same stream on two platforms as one entry with both links, also with different titles", async (): Promise<void> => {
     fake.twitchSchedule = [schedule([segment("s1", "Friday Stream", now + 2 * day), segment("s2", "Solo", now + 3 * day)])];
     fake.upcoming = [
-      broadcast("vid-1", "friday stream!", now + 2 * day + 10 * 60_000),
-      // The same title 20 minutes apart is another stream.
+      broadcast("vid-1", "Friday stream (part 5)", now + 2 * day + 10 * 60_000),
+      // A start 20 minutes apart is another stream.
       broadcast("vid-2", "Solo", now + 3 * day + 20 * 60_000),
     ];
     await importPageSchedule(env, page, now);

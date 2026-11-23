@@ -219,14 +219,54 @@ beforeAll(async (): Promise<void> => {
   ]);
   await applyMigrations(
     db,
-    applied.filter((file: string): boolean => file >= "0040"),
+    applied.filter((file: string): boolean => file >= "0040" && file < "0044"),
+  );
+  // Before 0044: one stream with a different title on each platform shows two times.
+  const event = (id: string, startsAt: number, platform: string, imported: number, createdAt: number): D1PreparedStatement =>
+    db
+      .prepare(
+        `INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,imported,created_at,updated_at)
+          VALUES (?,'page',?,?,60,?,'https://www.twitch.tv/host','UTC',?,?,1)`,
+      )
+      .bind(id, id, startsAt, platform, imported, createdAt);
+  const source = (platform: string, externalId: string, eventId: string): D1PreparedStatement =>
+    db
+      .prepare(
+        "INSERT INTO stream_event_sources (streamer_id,platform,external_id,event_id,url,read_at) VALUES ('page',?,?,?,'https://www.twitch.tv/host',1)",
+      )
+      .bind(platform, externalId, eventId);
+  const hour = 3_600_000;
+  await db.batch([
+    event("tw1", 100 * hour, "twitch", 1, 1),
+    event("yt1", 100 * hour + 10 * 60_000, "youtube", 1, 2),
+    event("yt2", 102 * hour, "youtube", 1, 2),
+    event("tw2", 102 * hour, "twitch", 1, 3),
+    event("own", 200 * hour, "kick", 0, 1),
+    // A chain: B joins A; C is 20 minutes from A and does not join B, which goes.
+    event("chA", 300 * hour, "twitch", 1, 1),
+    event("chB", 300 * hour + 10 * 60_000, "youtube", 1, 2),
+    event("chC", 300 * hour + 20 * 60_000, "twitch", 1, 3),
+    event("yt3", 200 * hour, "youtube", 1, 2),
+    source("twitch", "seg1", "tw1"),
+    source("youtube", "vid1", "yt1"),
+    source("youtube", "vid2", "yt2"),
+    source("youtube", "vid9", "tw2"),
+    source("youtube", "vid3", "yt3"),
+    source("twitch", "segA", "chA"),
+    source("youtube", "vidB", "chB"),
+    source("twitch", "segC", "chC"),
+    db.prepare("INSERT INTO stream_event_topics (event_id,entry_id) VALUES ('yt1','topic')"),
+  ]);
+  await applyMigrations(
+    db,
+    applied.filter((file: string): boolean => file >= "0044"),
   );
 });
 
 afterAll(async (): Promise<void> => database.dispose());
 
 describe("migrations 0006 onwards", (): void => {
-  it("covers 0006 to 0043", (): void => {
+  it("covers 0006 to 0044", (): void => {
     expect(applied.map((file: string): string => file.slice(0, 4))).toEqual([
       "0006",
       "0007",
@@ -266,6 +306,40 @@ describe("migrations 0006 onwards", (): void => {
       "0041",
       "0042",
       "0043",
+      "0044",
+    ]);
+  });
+
+  it("joins a stream that each platform holds with a different title into the older entry (0044)", async (): Promise<void> => {
+    const rows = async (sql: string): Promise<unknown[]> => (await db.prepare(sql).all()).results;
+    expect(
+      await rows("SELECT id FROM stream_events WHERE id IN ('tw1','yt1','yt2','tw2','own','yt3','chA','chB','chC') ORDER BY id"),
+    ).toEqual([
+      { id: "chA" },
+      { id: "chC" },
+      { id: "own" },
+      { id: "tw1" },
+      { id: "tw2" },
+      { id: "yt2" },
+    ]);
+    expect(
+      await rows(
+        "SELECT external_id, event_id FROM stream_event_sources WHERE external_id LIKE 'seg%' OR external_id LIKE 'vid%' ORDER BY external_id",
+      ),
+    ).toEqual([
+      { external_id: "seg1", event_id: "tw1" },
+      { external_id: "segA", event_id: "chA" },
+      { external_id: "segC", event_id: "chC" },
+      { external_id: "vid1", event_id: "tw1" },
+      // Both entries already hold a YouTube link: they stay apart.
+      { external_id: "vid2", event_id: "yt2" },
+      { external_id: "vid3", event_id: "own" },
+      { external_id: "vid9", event_id: "tw2" },
+      { external_id: "vidB", event_id: "chA" },
+    ]);
+    expect(await rows("SELECT name FROM sqlite_master WHERE name='merge_0044'")).toEqual([]);
+    expect(await rows("SELECT event_id FROM stream_event_topics WHERE entry_id='topic' AND event_id IN ('tw1','yt1')")).toEqual([
+      { event_id: "tw1" },
     ]);
   });
 
