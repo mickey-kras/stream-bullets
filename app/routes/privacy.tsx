@@ -89,9 +89,9 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
         </p>
         <p>
           The streamer’s schedule shows the scheduled streams of a connected Twitch or YouTube channel: for each stream
-          its title, start, end and link. We read only public YouTube broadcasts. We read them again when the streamer
-          opens the schedule, and about every 6 hours. A scheduled stream that a platform no longer lists leaves the
-          schedule, unless the streamer edited it.
+          its title, start, end and link. We read public and unlisted YouTube broadcasts, not private ones. We read them
+          again when the streamer opens the schedule, and about every 6 hours. A scheduled stream that a platform no
+          longer lists leaves the schedule, unless the streamer edited it.
         </p>
         <h3>YouTube channels</h3>
         <p>
