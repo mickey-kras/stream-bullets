@@ -242,12 +242,19 @@ beforeAll(async (): Promise<void> => {
     event("yt2", 102 * hour, "youtube", 1, 2),
     event("tw2", 102 * hour, "twitch", 1, 3),
     event("own", 200 * hour, "kick", 0, 1),
+    // A chain: B joins A; C is 20 minutes from A and does not join B, which goes.
+    event("chA", 300 * hour, "twitch", 1, 1),
+    event("chB", 300 * hour + 10 * 60_000, "youtube", 1, 2),
+    event("chC", 300 * hour + 20 * 60_000, "twitch", 1, 3),
     event("yt3", 200 * hour, "youtube", 1, 2),
     source("twitch", "seg1", "tw1"),
     source("youtube", "vid1", "yt1"),
     source("youtube", "vid2", "yt2"),
     source("youtube", "vid9", "tw2"),
     source("youtube", "vid3", "yt3"),
+    source("twitch", "segA", "chA"),
+    source("youtube", "vidB", "chB"),
+    source("twitch", "segC", "chC"),
     db.prepare("INSERT INTO stream_event_topics (event_id,entry_id) VALUES ('yt1','topic')"),
   ]);
   await applyMigrations(
@@ -305,22 +312,32 @@ describe("migrations 0006 onwards", (): void => {
 
   it("joins a stream that each platform holds with a different title into the older entry (0044)", async (): Promise<void> => {
     const rows = async (sql: string): Promise<unknown[]> => (await db.prepare(sql).all()).results;
-    expect(await rows("SELECT id FROM stream_events WHERE id IN ('tw1','yt1','yt2','tw2','own','yt3') ORDER BY id")).toEqual([
+    expect(
+      await rows("SELECT id FROM stream_events WHERE id IN ('tw1','yt1','yt2','tw2','own','yt3','chA','chB','chC') ORDER BY id"),
+    ).toEqual([
+      { id: "chA" },
+      { id: "chC" },
       { id: "own" },
       { id: "tw1" },
       { id: "tw2" },
       { id: "yt2" },
     ]);
     expect(
-      await rows("SELECT external_id, event_id FROM stream_event_sources WHERE external_id LIKE 'seg1' OR external_id LIKE 'vid%' ORDER BY external_id"),
+      await rows(
+        "SELECT external_id, event_id FROM stream_event_sources WHERE external_id LIKE 'seg%' OR external_id LIKE 'vid%' ORDER BY external_id",
+      ),
     ).toEqual([
       { external_id: "seg1", event_id: "tw1" },
+      { external_id: "segA", event_id: "chA" },
+      { external_id: "segC", event_id: "chC" },
       { external_id: "vid1", event_id: "tw1" },
       // Both entries already hold a YouTube link: they stay apart.
       { external_id: "vid2", event_id: "yt2" },
       { external_id: "vid3", event_id: "own" },
       { external_id: "vid9", event_id: "tw2" },
+      { external_id: "vidB", event_id: "chA" },
     ]);
+    expect(await rows("SELECT name FROM sqlite_master WHERE name='merge_0044'")).toEqual([]);
     expect(await rows("SELECT event_id FROM stream_event_topics WHERE entry_id='topic' AND event_id IN ('tw1','yt1')")).toEqual([
       { event_id: "tw1" },
     ]);
