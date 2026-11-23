@@ -6981,7 +6981,7 @@
       "relation": "calls",
       "source": "app_components_discussion_commentarticle",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L371",
+      "source_location": "L372",
       "target": "app_components_discussion_commentactions",
       "weight": 1.0
     },
@@ -7149,7 +7149,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L548",
+      "source_location": "L549",
       "target": "app_lib_shell_useshell",
       "weight": 1.0
     },
@@ -7161,7 +7161,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L560",
+      "source_location": "L561",
       "target": "app_lib_discussion_draft_createdraftstore",
       "weight": 1.0
     },
@@ -7173,7 +7173,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L584",
+      "source_location": "L585",
       "target": "app_components_discussion_fetchthreads",
       "weight": 1.0
     },
@@ -7185,7 +7185,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L590",
+      "source_location": "L591",
       "target": "app_components_discussion_findcomment",
       "weight": 1.0
     },
@@ -7197,7 +7197,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L598",
+      "source_location": "L599",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -7209,7 +7209,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L599",
+      "source_location": "L600",
       "target": "app_components_discussion_mergethreads",
       "weight": 1.0
     },
@@ -7221,7 +7221,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L601",
+      "source_location": "L602",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -7233,7 +7233,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L671",
+      "source_location": "L672",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -7245,7 +7245,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L680",
+      "source_location": "L681",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -7257,7 +7257,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L699",
+      "source_location": "L700",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -7269,7 +7269,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L716",
+      "source_location": "L717",
       "target": "app_components_discussion_updatecomment",
       "weight": 1.0
     },
@@ -7281,7 +7281,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L746",
+      "source_location": "L747",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -7293,7 +7293,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L750",
+      "source_location": "L751",
       "target": "app_components_discussion_composer",
       "weight": 1.0
     },
@@ -7305,7 +7305,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L763",
+      "source_location": "L764",
       "target": "app_components_discussion_discussion_post",
       "weight": 1.0
     },
@@ -7317,7 +7317,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L773",
+      "source_location": "L774",
       "target": "app_components_ui_select_select",
       "weight": 1.0
     },
@@ -7329,7 +7329,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L786",
+      "source_location": "L787",
       "target": "app_components_ui_icon_button_iconbutton",
       "weight": 1.0
     },
@@ -7341,7 +7341,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L814",
+      "source_location": "L815",
       "target": "app_components_shell_sign_in_dialog_signindialog",
       "weight": 1.0
     },
@@ -7353,7 +7353,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L824",
+      "source_location": "L825",
       "target": "app_components_discussion_thread",
       "weight": 1.0
     },
@@ -7365,7 +7365,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_post",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L679",
+      "source_location": "L680",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -7377,7 +7377,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_post",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L680",
+      "source_location": "L681",
       "target": "app_components_api_postjson",
       "weight": 1.0
     },
@@ -7389,7 +7389,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_run",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L671",
+      "source_location": "L672",
       "target": "app_components_api_errormessage",
       "weight": 1.0
     },
@@ -7401,7 +7401,7 @@
       "relation": "calls",
       "source": "app_components_discussion_discussion_run",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L671",
+      "source_location": "L672",
       "target": "app_components_api_needsstepup",
       "weight": 1.0
     },
@@ -7413,7 +7413,7 @@
       "relation": "calls",
       "source": "app_components_discussion_fetchthreads",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L501",
+      "source_location": "L502",
       "target": "app_components_discussion_mergethreads",
       "weight": 1.0
     },
@@ -7425,7 +7425,7 @@
       "relation": "calls",
       "source": "app_components_discussion_mergethreads",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L507",
+      "source_location": "L508",
       "target": "app_lib_threads_orderthreads",
       "weight": 1.0
     },
@@ -7449,7 +7449,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L406",
+      "source_location": "L407",
       "target": "app_lib_threads_visiblereplies",
       "weight": 1.0
     },
@@ -7461,7 +7461,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L427",
+      "source_location": "L428",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -7473,7 +7473,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L430",
+      "source_location": "L431",
       "target": "app_components_discussion_commentarticle",
       "weight": 1.0
     },
@@ -7485,7 +7485,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L439",
+      "source_location": "L440",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -7497,7 +7497,7 @@
       "relation": "calls",
       "source": "app_components_discussion_thread",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L454",
+      "source_location": "L455",
       "target": "app_lib_threads_replyparent",
       "weight": 1.0
     },
@@ -163143,7 +163143,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L391",
+      "source_location": "L392",
       "target": "app_components_discussion_thread",
       "weight": 1.0
     },
@@ -163154,7 +163154,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L478",
+      "source_location": "L479",
       "target": "app_components_discussion_fetchthreads",
       "weight": 1.0
     },
@@ -163165,7 +163165,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L505",
+      "source_location": "L506",
       "target": "app_components_discussion_mergethreads",
       "weight": 1.0
     },
@@ -163176,7 +163176,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L510",
+      "source_location": "L511",
       "target": "app_components_discussion_findcomment",
       "weight": 1.0
     },
@@ -163187,7 +163187,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L519",
+      "source_location": "L520",
       "target": "app_components_discussion_updatecomment",
       "weight": 1.0
     },
@@ -163198,7 +163198,7 @@
       "relation": "contains",
       "source": "app_components_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L528",
+      "source_location": "L529",
       "target": "app_components_discussion_discussion",
       "weight": 1.0
     },
@@ -163242,7 +163242,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L662",
+      "source_location": "L663",
       "target": "app_components_discussion_discussion_run",
       "weight": 1.0
     },
@@ -163253,7 +163253,7 @@
       "relation": "contains",
       "source": "app_components_discussion_discussion",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L678",
+      "source_location": "L679",
       "target": "app_components_discussion_discussion_post",
       "weight": 1.0
     },
@@ -222866,7 +222866,7 @@
       "label": "Discussion()",
       "norm_label": "discussion()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L528"
+      "source_location": "L529"
     },
     {
       "_callable": true,
@@ -222877,7 +222877,7 @@
       "label": "post()",
       "norm_label": "post()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L678"
+      "source_location": "L679"
     },
     {
       "_callable": true,
@@ -222888,7 +222888,7 @@
       "label": "run()",
       "norm_label": "run()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L662"
+      "source_location": "L663"
     },
     {
       "_callable": true,
@@ -222899,7 +222899,7 @@
       "label": "fetchThreads()",
       "norm_label": "fetchthreads()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L478"
+      "source_location": "L479"
     },
     {
       "_callable": true,
@@ -222910,7 +222910,7 @@
       "label": "findComment()",
       "norm_label": "findcomment()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L510"
+      "source_location": "L511"
     },
     {
       "_callable": true,
@@ -222921,7 +222921,7 @@
       "label": "mergeThreads()",
       "norm_label": "mergethreads()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L505"
+      "source_location": "L506"
     },
     {
       "_callable": true,
@@ -222943,7 +222943,7 @@
       "label": "Thread()",
       "norm_label": "thread()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L391"
+      "source_location": "L392"
     },
     {
       "_callable": true,
@@ -222954,7 +222954,7 @@
       "label": "updateComment()",
       "norm_label": "updatecomment()",
       "source_file": "app/components/discussion.tsx",
-      "source_location": "L519"
+      "source_location": "L520"
     },
     {
       "_callable": true,

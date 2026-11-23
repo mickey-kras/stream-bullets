@@ -361,7 +361,8 @@ function CommentArticle({
           ))}
         {(comment.answer || (rules.writable && rules.viewer?.id === rules.ownerId)) && (
           <CommentAnswerLine
-            key={comment.answer?.markedAt ?? 0}
+            // A refresh with a different time code, title or title translation starts the line again.
+            key={JSON.stringify(comment.answer ?? null)}
             commentId={comment.id}
             initial={comment.answer}
             owner={rules.writable && rules.viewer?.id === rules.ownerId}

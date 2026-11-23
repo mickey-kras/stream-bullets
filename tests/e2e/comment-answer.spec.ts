@@ -40,6 +40,16 @@ test("the page owner marks a comment as answered during a stream, and every read
     await expect(seen.getByRole("button", { name: "Mark as answered" })).toHaveCount(0);
     await expect(seen.getByRole("button", { name: "Remove the answered mark" })).toHaveCount(0);
 
+    // A new time code reaches an open discussion with a refresh, without a page reload.
+    await comment.getByLabel("Time code in seconds").fill("120");
+    await comment.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(link).toHaveAttribute("href", "https://www.youtube.com/watch?v=answer1&t=120s");
+    await page.getByRole("button", { name: "Refresh comments" }).click();
+    await expect(seen.getByRole("link", { name: /^Answered on stream: Answer stream/ })).toHaveAttribute(
+      "href",
+      "https://www.youtube.com/watch?v=answer1&t=120s",
+    );
+
     await comment.getByRole("button", { name: "Remove the answered mark" }).click();
     await expect(comment.getByRole("button", { name: "Mark as answered" })).toBeVisible();
     await page.reload();
