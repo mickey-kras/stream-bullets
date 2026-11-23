@@ -222,13 +222,7 @@ beforeAll(async (): Promise<void> => {
     applied.filter((file: string): boolean => file >= "0040" && file < "0044"),
   );
   // Before 0044: one stream with a different title on each platform shows two times.
-  const event = (
-    id: string,
-    startsAt: number,
-    platform: string,
-    imported: number,
-    createdAt: number,
-  ): D1PreparedStatement =>
+  const event = (id: string, startsAt: number, platform: string, imported: number, createdAt: number): D1PreparedStatement =>
     db
       .prepare(
         `INSERT INTO stream_events (id,streamer_id,title,starts_at,duration_min,platform,url,tz,imported,created_at,updated_at)
@@ -320,10 +314,15 @@ describe("migrations 0006 onwards", (): void => {
   it("joins a stream that each platform holds with a different title into the older entry (0044)", async (): Promise<void> => {
     const rows = async (sql: string): Promise<unknown[]> => (await db.prepare(sql).all()).results;
     expect(
-      await rows(
-        "SELECT id FROM stream_events WHERE id IN ('tw1','yt1','yt2','tw2','own','yt3','chA','chB','chC') ORDER BY id",
-      ),
-    ).toEqual([{ id: "chA" }, { id: "chC" }, { id: "own" }, { id: "tw1" }, { id: "tw2" }, { id: "yt2" }]);
+      await rows("SELECT id FROM stream_events WHERE id IN ('tw1','yt1','yt2','tw2','own','yt3','chA','chB','chC') ORDER BY id"),
+    ).toEqual([
+      { id: "chA" },
+      { id: "chC" },
+      { id: "own" },
+      { id: "tw1" },
+      { id: "tw2" },
+      { id: "yt2" },
+    ]);
     expect(
       await rows(
         "SELECT external_id, event_id FROM stream_event_sources WHERE external_id LIKE 'seg%' OR external_id LIKE 'vid%' ORDER BY external_id",
@@ -340,15 +339,13 @@ describe("migrations 0006 onwards", (): void => {
       { external_id: "vidB", event_id: "chA" },
     ]);
     expect(await rows("SELECT name FROM sqlite_master WHERE name='merge_0044'")).toEqual([]);
-    expect(
-      await rows("SELECT event_id FROM stream_event_topics WHERE entry_id='topic' AND event_id IN ('tw1','yt1')"),
-    ).toEqual([{ event_id: "tw1" }]);
+    expect(await rows("SELECT event_id FROM stream_event_topics WHERE entry_id='topic' AND event_id IN ('tw1','yt1')")).toEqual([
+      { event_id: "tw1" },
+    ]);
   });
 
   it("adds the category and the picture of a stream source (0045), empty for old rows", async (): Promise<void> => {
-    expect(
-      await db.prepare("SELECT category, image_url FROM stream_event_sources WHERE external_id='seg1'").first(),
-    ).toEqual({
+    expect(await db.prepare("SELECT category, image_url FROM stream_event_sources WHERE external_id='seg1'").first()).toEqual({
       category: null,
       image_url: null,
     });

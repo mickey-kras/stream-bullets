@@ -762,9 +762,9 @@ describe("pictures and categories", (): void => {
     await importPageSchedule(env, page, now);
     const [event] = await events();
     const loaded: string[] = [];
-    vi.stubGlobal("fetch", async (input: RequestInfo | URL): Promise<Response> => {
-      loaded.push(String(input));
-      return new Response(new Uint8Array([1, 2, 3]), { headers: { "Content-Type": "image/jpeg" } });
+    vi.stubGlobal("fetch", (input: string | URL): Promise<Response> => {
+      loaded.push(input.toString());
+      return Promise.resolve(new Response(new Uint8Array([1, 2, 3]), { headers: { "Content-Type": "image/jpeg" } }));
     });
     const image = await serveStreamImage(env, `${event.id}/twitch`, "GET");
     expect(image.headers.get("Content-Type")).toBe("image/jpeg");
@@ -775,14 +775,11 @@ describe("pictures and categories", (): void => {
     // No picture for that platform, a malformed path, or a host answer that is not an image.
     await expect(serveStreamImage(env, `${event.id}/youtube`, "GET")).rejects.toMatchObject({ status: 404 });
     await expect(serveStreamImage(env, "../avatar/x", "GET")).rejects.toMatchObject({ status: 404 });
-    vi.stubGlobal(
-      "fetch",
-      async (): Promise<Response> => new Response("<html>", { headers: { "Content-Type": "text/html" } }),
+    vi.stubGlobal("fetch", (): Promise<Response> =>
+      Promise.resolve(new Response("<html>", { headers: { "Content-Type": "text/html" } })),
     );
     await expect(serveStreamImage(env, `${event.id}/twitch`, "GET")).rejects.toMatchObject({ status: 404 });
-    vi.stubGlobal("fetch", async (): Promise<Response> => {
-      throw new DOMException("timeout", "TimeoutError");
-    });
+    vi.stubGlobal("fetch", (): Promise<Response> => Promise.reject(new DOMException("timeout", "TimeoutError")));
     await expect(serveStreamImage(env, `${event.id}/twitch`, "GET")).rejects.toMatchObject({ status: 404 });
   });
 });

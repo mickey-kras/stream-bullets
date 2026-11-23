@@ -57237,7 +57237,7 @@
       "relation": "calls",
       "source": "tests_helpers_channels_installfakeproviders",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L136",
+      "source_location": "L132",
       "target": "tests_helpers_channels_platformoftoken",
       "weight": 1.0
     },
@@ -57249,7 +57249,7 @@
       "relation": "calls",
       "source": "tests_helpers_channels_installfakeproviders",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L138",
+      "source_location": "L133",
       "target": "tests_helpers_channels_json",
       "weight": 1.0
     },
@@ -202758,7 +202758,7 @@
       "relation": "contains",
       "source": "tests_helpers_channels",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L300",
+      "source_location": "L264",
       "target": "tests_helpers_channels_youtubetext",
       "weight": 1.0
     },
@@ -250877,7 +250877,7 @@
       "label": "youtubeText()",
       "norm_label": "youtubetext()",
       "source_file": "tests/helpers/channels.ts",
-      "source_location": "L300"
+      "source_location": "L264"
     },
     {
       "_callable": true,
