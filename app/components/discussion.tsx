@@ -93,10 +93,46 @@ const timeUnits: [number, number, Intl.RelativeTimeFormatUnit][] = [
   [Number.POSITIVE_INFINITY, 31_536_000, "year"],
 ];
 
+const relativeFormats = new Map<string, Intl.RelativeTimeFormat>();
+
 function relativeTime(time: number): string {
   const seconds = Math.round((time - Date.now()) / 1000);
   const [, size, unit] = timeUnits.find(([limit]) => Math.abs(seconds) < limit) ?? timeUnits[5];
-  return new Intl.RelativeTimeFormat(intlLocale(), { numeric: "auto" }).format(Math.round(seconds / size), unit);
+  const locale: string = intlLocale();
+  let formatter: Intl.RelativeTimeFormat | undefined = relativeFormats.get(locale);
+  if (formatter === undefined) {
+    formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+    relativeFormats.set(locale, formatter);
+  }
+  return formatter.format(Math.round(seconds / size), unit);
+}
+
+// One shared timer moves every comment age each minute, without rendering the rest of the page.
+const minuteListeners = new Set<() => void>();
+let minuteTimer: ReturnType<typeof setInterval> | undefined;
+
+function subscribeMinute(listener: () => void): () => void {
+  minuteListeners.add(listener);
+  minuteTimer ??= setInterval((): void => {
+    for (const notify of minuteListeners) notify();
+  }, 60_000);
+  return (): void => {
+    minuteListeners.delete(listener);
+    if (minuteListeners.size > 0) return;
+    clearInterval(minuteTimer);
+    minuteTimer = undefined;
+  };
+}
+
+const currentMinute = (): number => Math.floor(Date.now() / 60_000);
+
+function CommentTime({ time }: Readonly<{ time: number }>): ReactNode {
+  useSyncExternalStore(subscribeMinute, currentMinute, currentMinute);
+  return (
+    <time dateTime={new Date(time).toISOString()} title={new Date(time).toLocaleString(intlLocale())}>
+      {relativeTime(time)}
+    </time>
+  );
 }
 
 function Composer({
@@ -282,12 +318,7 @@ function CommentArticle({
       <div className="comment-body">
         <div className="comment-meta">
           <strong>{comment.author}</strong>
-          <time
-            dateTime={new Date(comment.createdAt).toISOString()}
-            title={new Date(comment.createdAt).toLocaleString(intlLocale())}
-          >
-            {relativeTime(comment.createdAt)}
-          </time>
+          <CommentTime time={comment.createdAt} />
           {reported && (
             <span className="reported-note">
               <Icon name="flag" size={14} />

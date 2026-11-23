@@ -39,7 +39,10 @@ test("the event dialog shows the stream and the .ics feed serves the schedule", 
   const dialog = page.getByRole("dialog", { name: "Mic shootout" });
   await expect(dialog).toContainText("Bring your questions.");
   // A stream on two platforms is one entry with a link to each.
-  await expect(dialog.getByRole("link", { name: /Watch on Twitch/ })).toHaveAttribute("href", "https://twitch.tv/feature_host");
+  await expect(dialog.getByRole("link", { name: /Watch on Twitch/ })).toHaveAttribute(
+    "href",
+    "https://twitch.tv/feature_host",
+  );
   await expect(dialog.getByRole("link", { name: /Watch on YouTube/ })).toHaveAttribute(
     "href",
     "https://www.youtube.com/watch?v=mic-video",
@@ -83,6 +86,37 @@ test("an open Schedule tab moves a stream from upcoming to live to ended", async
   await page.clock.fastForward("03:00:00");
   await expect(hero).toContainText("Variety night");
   await expect(page.locator(".sched-past")).toContainText("Mic shootout");
+});
+
+test("an open page without the polls view does not render each second", async ({ page }) => {
+  await page.clock.install({ time: Date.now() });
+  // Count the timers of about one second, the tick of the battle clock.
+  await page.addInitScript(() => {
+    const schedule = globalThis.setTimeout;
+    Object.assign(globalThis, { secondTimers: 0 });
+    globalThis.setTimeout = ((handler: TimerHandler, ms?: number, ...rest: unknown[]) => {
+      if (ms !== undefined && ms > 900 && ms <= 1000)
+        Object.assign(globalThis, {
+          secondTimers: (globalThis as unknown as { secondTimers: number }).secondTimers + 1,
+        });
+      return schedule(handler, ms, ...rest);
+    }) as typeof setTimeout;
+  });
+  const count = (): Promise<number> =>
+    page.evaluate(() => (globalThis as unknown as { secondTimers: number }).secondTimers);
+  for (const view of ["topics", "schedule"]) {
+    await page.goto(`/@feature_host?view=${view}`);
+    await expect(page.getByRole("heading", { name: "Feature host" })).toBeVisible();
+    await page.evaluate(() => Object.assign(globalThis, { secondTimers: 0 }));
+    await page.clock.runFor(60_000);
+    expect(await count(), view).toBeLessThan(3);
+  }
+  // The polls view keeps its clock for battle and poll timers.
+  await page.goto("/@feature_host?view=polls");
+  await expect(page.getByRole("heading", { name: "Feature host" })).toBeVisible();
+  await page.evaluate(() => Object.assign(globalThis, { secondTimers: 0 }));
+  await page.clock.runFor(10_000);
+  expect(await count()).toBeGreaterThanOrEqual(9);
 });
 
 test("an open Topics tab shows and hides the live badge as a stream starts and ends", async ({ page }) => {
