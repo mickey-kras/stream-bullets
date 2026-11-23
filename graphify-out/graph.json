@@ -53277,7 +53277,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1047",
+      "source_location": "L1051",
       "target": "tests_channel_ingest_test_stuck",
       "weight": 1.0
     },
@@ -53289,7 +53289,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1256",
+      "source_location": "L1260",
       "target": "tests_channel_ingest_test_poll",
       "weight": 1.0
     },
@@ -53301,7 +53301,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1395",
+      "source_location": "L1399",
       "target": "tests_channel_ingest_test_quota",
       "weight": 1.0
     },
@@ -53313,7 +53313,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1408",
+      "source_location": "L1412",
       "target": "tests_channel_ingest_test_pollcalls",
       "weight": 1.0
     },
@@ -53325,7 +53325,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1789",
+      "source_location": "L1793",
       "target": "tests_channel_ingest_test_provider",
       "weight": 1.0
     },
@@ -53337,7 +53337,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1803",
+      "source_location": "L1807",
       "target": "tests_channel_ingest_test_reconcile",
       "weight": 1.0
     },
@@ -53349,7 +53349,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1804",
+      "source_location": "L1808",
       "target": "tests_channel_ingest_test_subscriptioncalls",
       "weight": 1.0
     },
@@ -53361,7 +53361,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1886",
+      "source_location": "L1890",
       "target": "tests_channel_ingest_test_repairstate",
       "weight": 1.0
     },
@@ -53373,7 +53373,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1887",
+      "source_location": "L1891",
       "target": "tests_channel_ingest_test_alarm",
       "weight": 1.0
     },
@@ -53397,7 +53397,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2124",
+      "source_location": "L2128",
       "target": "tests_channel_ingest_test_forgedminutes",
       "weight": 1.0
     },
@@ -53409,7 +53409,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L2129",
+      "source_location": "L2133",
       "target": "tests_channel_ingest_test_rejectedlogs",
       "weight": 1.0
     },
@@ -53445,7 +53445,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L249",
+      "source_location": "L253",
       "target": "tests_channel_ingest_test_listen",
       "weight": 1.0
     },
@@ -53457,7 +53457,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L259",
+      "source_location": "L263",
       "target": "tests_channel_ingest_test_snapshot",
       "weight": 1.0
     },
@@ -53469,7 +53469,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L268",
+      "source_location": "L272",
       "target": "tests_channel_ingest_test_state",
       "weight": 1.0
     },
@@ -53481,7 +53481,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L281",
+      "source_location": "L285",
       "target": "tests_channel_ingest_test_room",
       "weight": 1.0
     },
@@ -53493,7 +53493,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L292",
+      "source_location": "L296",
       "target": "tests_channel_ingest_test_chat",
       "weight": 1.0
     },
@@ -53505,7 +53505,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L292",
+      "source_location": "L296",
       "target": "tests_channel_ingest_test_deliver",
       "weight": 1.0
     },
@@ -53517,7 +53517,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L293",
+      "source_location": "L297",
       "target": "tests_channel_ingest_test_addconnection",
       "weight": 1.0
     },
@@ -53529,7 +53529,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L319",
+      "source_location": "L323",
       "target": "tests_channel_ingest_test_connectionrow",
       "weight": 1.0
     },
@@ -53541,7 +53541,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L492",
+      "source_location": "L496",
       "target": "tests_channel_ingest_test_countconnectionreads",
       "weight": 1.0
     },
@@ -53565,7 +53565,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_alarm",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1764",
+      "source_location": "L1768",
       "target": "tests_channel_ingest_test_state",
       "weight": 1.0
     },
@@ -53577,7 +53577,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_alarm",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1767",
+      "source_location": "L1771",
       "target": "tests_channel_ingest_test_room",
       "weight": 1.0
     },
@@ -53601,7 +53601,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_forgedminutes",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1778",
+      "source_location": "L1782",
       "target": "app_server_channel_webhooks_server_recordrejectedwebhook",
       "weight": 1.0
     },
@@ -53613,7 +53613,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_forgedminutes",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1778",
+      "source_location": "L1782",
       "target": "app_server_channel_webhooks_server_webhookrejected",
       "weight": 1.0
     },
@@ -53649,7 +53649,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_poll",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1223",
+      "source_location": "L1227",
       "target": "tests_channel_ingest_test_state",
       "weight": 1.0
     },
@@ -53661,7 +53661,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_poll",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1225",
+      "source_location": "L1229",
       "target": "tests_channel_ingest_test_room",
       "weight": 1.0
     },
@@ -53685,7 +53685,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_reconcile",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1759",
+      "source_location": "L1763",
       "target": "tests_channel_ingest_test_post",
       "weight": 1.0
     },
@@ -53697,7 +53697,7 @@
       "relation": "calls",
       "source": "tests_channel_ingest_test_repairstate",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1771",
+      "source_location": "L1775",
       "target": "tests_channel_ingest_test_state",
       "weight": 1.0
     },
@@ -197520,7 +197520,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1040",
+      "source_location": "L1044",
       "target": "tests_channel_ingest_test_stuck",
       "weight": 1.0
     },
@@ -197542,7 +197542,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1222",
+      "source_location": "L1226",
       "target": "tests_channel_ingest_test_poll",
       "weight": 1.0
     },
@@ -197553,7 +197553,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1228",
+      "source_location": "L1232",
       "target": "tests_channel_ingest_test_pollcalls",
       "weight": 1.0
     },
@@ -197564,7 +197564,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1232",
+      "source_location": "L1236",
       "target": "tests_channel_ingest_test_quota",
       "weight": 1.0
     },
@@ -197586,7 +197586,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1745",
+      "source_location": "L1749",
       "target": "tests_channel_ingest_test_provider",
       "weight": 1.0
     },
@@ -197597,7 +197597,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1753",
+      "source_location": "L1757",
       "target": "tests_channel_ingest_test_subscriptioncalls",
       "weight": 1.0
     },
@@ -197608,7 +197608,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1758",
+      "source_location": "L1762",
       "target": "tests_channel_ingest_test_reconcile",
       "weight": 1.0
     },
@@ -197619,7 +197619,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1763",
+      "source_location": "L1767",
       "target": "tests_channel_ingest_test_alarm",
       "weight": 1.0
     },
@@ -197630,7 +197630,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1770",
+      "source_location": "L1774",
       "target": "tests_channel_ingest_test_repairstate",
       "weight": 1.0
     },
@@ -197641,7 +197641,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1775",
+      "source_location": "L1779",
       "target": "tests_channel_ingest_test_forgedminutes",
       "weight": 1.0
     },
@@ -197652,7 +197652,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1782",
+      "source_location": "L1786",
       "target": "tests_channel_ingest_test_rejectedlogs",
       "weight": 1.0
     },
@@ -197674,7 +197674,7 @@
       "relation": "contains",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L477",
+      "source_location": "L481",
       "target": "tests_channel_ingest_test_countconnectionreads",
       "weight": 1.0
     },
@@ -205352,7 +205352,7 @@
       "relation": "contains",
       "source": "tests_test_environment_test",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L502",
+      "source_location": "L506",
       "target": "tests_test_environment_test_get",
       "weight": 1.0
     },
@@ -212547,7 +212547,7 @@
       "relation": "indirect_call",
       "source": "tests_channel_ingest_test",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1022",
+      "source_location": "L1026",
       "target": "tests_channels_test_callback",
       "weight": 1.0
     },
@@ -212559,7 +212559,7 @@
       "relation": "indirect_call",
       "source": "tests_channel_ingest_test_provider",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1749",
+      "source_location": "L1753",
       "target": "tests_channels_test_callback",
       "weight": 1.0
     },
@@ -246385,7 +246385,7 @@
       "label": "alarm()",
       "norm_label": "alarm()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1763"
+      "source_location": "L1767"
     },
     {
       "_callable": true,
@@ -246418,7 +246418,7 @@
       "label": "countConnectionReads()",
       "norm_label": "countconnectionreads()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L477"
+      "source_location": "L481"
     },
     {
       "_callable": true,
@@ -246451,7 +246451,7 @@
       "label": "forgedMinutes()",
       "norm_label": "forgedminutes()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1775"
+      "source_location": "L1779"
     },
     {
       "_callable": true,
@@ -246473,7 +246473,7 @@
       "label": "poll()",
       "norm_label": "poll()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1222"
+      "source_location": "L1226"
     },
     {
       "_callable": true,
@@ -246484,7 +246484,7 @@
       "label": "pollCalls()",
       "norm_label": "pollcalls()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1228"
+      "source_location": "L1232"
     },
     {
       "_callable": true,
@@ -246506,7 +246506,7 @@
       "label": "provider()",
       "norm_label": "provider()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1745"
+      "source_location": "L1749"
     },
     {
       "_callable": true,
@@ -246517,7 +246517,7 @@
       "label": "quota()",
       "norm_label": "quota()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1232"
+      "source_location": "L1236"
     },
     {
       "_callable": true,
@@ -246528,7 +246528,7 @@
       "label": "reconcile()",
       "norm_label": "reconcile()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1758"
+      "source_location": "L1762"
     },
     {
       "_callable": true,
@@ -246539,7 +246539,7 @@
       "label": "rejectedLogs()",
       "norm_label": "rejectedlogs()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1782"
+      "source_location": "L1786"
     },
     {
       "_callable": true,
@@ -246550,7 +246550,7 @@
       "label": "repairState()",
       "norm_label": "repairstate()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1770"
+      "source_location": "L1774"
     },
     {
       "_callable": true,
@@ -246594,7 +246594,7 @@
       "label": "stuck()",
       "norm_label": "stuck()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1040"
+      "source_location": "L1044"
     },
     {
       "_callable": true,
@@ -246605,7 +246605,7 @@
       "label": "subscriptionCalls()",
       "norm_label": "subscriptioncalls()",
       "source_file": "tests/channel-ingest.test.ts",
-      "source_location": "L1753"
+      "source_location": "L1757"
     },
     {
       "_callable": true,
@@ -252744,14 +252744,14 @@
             "callee": "delete",
             "file": "tests/test-environment.test.ts",
             "lang": "typescript",
-            "line": "L509",
+            "line": "L513",
             "receiver_type": "R2Bucket"
           }
         ]
       },
       "norm_label": "get()",
       "source_file": "tests/test-environment.test.ts",
-      "source_location": "L502"
+      "source_location": "L506"
     },
     {
       "_callable": true,

@@ -168,9 +168,11 @@ Test login requires the exact test environment, origin, secret, and database mar
 Missing or incorrect settings reject access.
 Production rejects test secrets and test login requests.
 
-OAuth credentials, email bindings, and heartbeat URLs must stay outside test.
+OAuth credentials, channel webhook secrets, channel token keys, email bindings, and heartbeat URLs must stay outside test.
+The check rejects each of them, so a test deployment with one of them answers 503.
 Test deployments disable cron. Tests use synthetic channels, viewers, and email recipients.
 Provider account linking, provider photos, and delivery need separate live-provider checks.
+Translation uses the real Workers AI model of the account and counts toward the daily translation limit of test.
 
 The test build does not inherit production D1, R2, or Durable Object state.
 Never change test bindings to production resource IDs.
