@@ -75,7 +75,7 @@ Workers AI translates user content with the model `TRANSLATION_MODEL` in `app/se
 The text stays in the Cloudflare account of the site. No other provider gets it.
 The server keeps each result for each text and language, and the original text stays the authoritative version.
 A translated item shows a translation icon, the label "Translated from" with the source language, and a control for the original.
-When the detector is not sure of the source language, the label is only "Translated".
+When the detector is not sure of the source language, the label shows only "Translated".
 
 ## Legal translation gaps
 
