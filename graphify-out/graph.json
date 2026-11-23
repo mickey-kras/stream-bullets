@@ -7581,8 +7581,8 @@
       "relation": "calls",
       "source": "app_components_entry_translation_entrytranslationcontrol",
       "source_file": "app/components/entry-translation.tsx",
-      "source_location": "L105",
-      "target": "app_components_entry_translation_known",
+      "source_location": "L110",
+      "target": "app_components_entry_translation_sourceof",
       "weight": 1.0
     },
     {
@@ -7593,7 +7593,7 @@
       "relation": "calls",
       "source": "app_components_entry_translation_entrytranslationcontrol",
       "source_file": "app/components/entry-translation.tsx",
-      "source_location": "L105",
+      "source_location": "L110",
       "target": "app_components_translated_from_translatedfrom",
       "weight": 1.0
     },
@@ -7605,7 +7605,7 @@
       "relation": "calls",
       "source": "app_components_entry_translation_entrytranslationcontrol",
       "source_file": "app/components/entry-translation.tsx",
-      "source_location": "L113",
+      "source_location": "L118",
       "target": "app_components_entry_translation_change",
       "weight": 1.0
     },
@@ -7617,7 +7617,7 @@
       "relation": "calls",
       "source": "app_components_entry_translation_entrytranslationcontrol",
       "source_file": "app/components/entry-translation.tsx",
-      "source_location": "L116",
+      "source_location": "L121",
       "target": "app_components_ui_icon_icon",
       "weight": 1.0
     },
@@ -7629,7 +7629,7 @@
       "relation": "calls",
       "source": "app_components_entry_translation_entrytranslationcontrol",
       "source_file": "app/components/entry-translation.tsx",
-      "source_location": "L117",
+      "source_location": "L122",
       "target": "app_i18n_index_t",
       "weight": 1.0
     },
@@ -163661,6 +163661,17 @@
       "source": "app_components_entry_translation",
       "source_file": "app/components/entry-translation.tsx",
       "source_location": "L100",
+      "target": "app_components_entry_translation_sourceof",
+      "weight": 1.0
+    },
+    {
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "relation": "contains",
+      "source": "app_components_entry_translation",
+      "source_file": "app/components/entry-translation.tsx",
+      "source_location": "L105",
       "target": "app_components_entry_translation_entrytranslationcontrol",
       "weight": 1.0
     },
@@ -210274,18 +210285,6 @@
       "confidence_score": 0.85,
       "context": "argument",
       "relation": "indirect_call",
-      "source": "app_components_entry_translation_entrytranslationcontrol",
-      "source_file": "app/components/entry-translation.tsx",
-      "source_location": "L105",
-      "target": "app_server_channel_ingest_subscriptions_channelsubscriptions_state",
-      "weight": 1.0
-    },
-    {
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "relation": "indirect_call",
       "source": "app_components_entry_translation_useentrytranslations",
       "source_file": "app/components/entry-translation.tsx",
       "source_location": "L72",
@@ -223439,7 +223438,7 @@
       "label": "EntryTranslationControl()",
       "norm_label": "entrytranslationcontrol()",
       "source_file": "app/components/entry-translation.tsx",
-      "source_location": "L100"
+      "source_location": "L105"
     },
     {
       "_callable": true,
@@ -223473,6 +223472,17 @@
       "norm_label": "signature()",
       "source_file": "app/components/entry-translation.tsx",
       "source_location": "L32"
+    },
+    {
+      "_callable": true,
+      "_origin": "ast",
+      "community": null,
+      "file_type": "code",
+      "id": "app_components_entry_translation_sourceof",
+      "label": "sourceOf()",
+      "norm_label": "sourceof()",
+      "source_file": "app/components/entry-translation.tsx",
+      "source_location": "L100"
     },
     {
       "_callable": true,

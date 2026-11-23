@@ -167,7 +167,9 @@ test("a signed-in reader gets a topic in the site language and can see its origi
       const body = route.request().postDataJSON() as { title: string };
       asked.push(body);
       const translation =
-        body.title === "Welches Spiel zuerst" ? { title: "Which game first", body: "Tell me.", options: [] } : null;
+        body.title === "Welches Spiel zuerst"
+          ? { title: "Which game first", body: "Tell me.", options: [], from: "de" }
+          : null;
       await route.fulfill({ json: { translation } });
     });
     await page.route("**/api/comments/*/translation", (route) => route.fulfill({ json: { translation: null } }));
@@ -175,6 +177,8 @@ test("a signed-in reader gets a topic in the site language and can see its origi
     const title = page.locator("h2.detail-title");
     await expect(title).toHaveText("Which game first");
     await expect(page.locator("p.description")).toHaveText("Tell me.");
+    // A translation that the page asked for names its source language too.
+    await expect(page.getByText("Translated from German").first()).toBeVisible();
     // The list of topics has the same text.
     await expect(page.getByText("Which game first").first()).toBeVisible();
     await page.getByRole("button", { name: "Show original", exact: true }).click();
