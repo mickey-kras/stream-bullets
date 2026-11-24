@@ -36,7 +36,7 @@ They contain no account IDs, IPs, URLs, provider details, or content and remain 
 Exports include both account flags. Account deletion removes them.
 
 Each click report contains a fixed button name, a random UUID, and the consent version.
-The endpoint rejects completion events and extra fields. Receipts prevent repeat counts.
+The endpoint rejects completion events and extra fields. The endpoint counts each receipt once.
 
 Homepage clicks count only after the visitor enables statistics in Privacy. The choice expires after 180 days.
 DNT and GPC suppress these counts. Clients send no cookies or referrer.
@@ -53,7 +53,7 @@ Browsers store no visitor identifier.
 2. Check the network panel for a beacon or traffic to `/cdn-cgi/rum`. If the edge adds a beacon, disable automatic Web Analytics installation in the dashboard.
 3. Select a homepage action. A new profile must send no click report.
 4. Enable click statistics under Privacy and repeat the action. Check that the browser sends one report.
-5. Turn statistics off and repeat the action. Check that the browser sends no report.
+5. Disable the statistics and repeat the action. Check that the browser sends no report.
 
 After changes to a tag, analytics provider, or Cloudflare setting, repeat these checks.
 
