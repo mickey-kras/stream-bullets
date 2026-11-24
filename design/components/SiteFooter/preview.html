@@ -1,0 +1,16 @@
+<!-- @dsCard group="Shell" height=120 width=1280 -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:0;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { SiteFooter } = window.StreamBulletsDesignSystem_e1d9fa;
+
+// The app CSS styles the footer as a direct child of <body>, so the preview renders it there.
+ReactDOM.createRoot(document.getElementById("root")).render(
+  ReactDOM.createPortal(<SiteFooter current="streamers" />, document.body),
+);
+</script>
+</body></html>

@@ -1,0 +1,16 @@
+/* Glue for the website kit. bundle.css (the app CSS) styles everything else.
+   The app renders its pages as children of <body>; the kit renders them in #root, so #root takes no box.
+   The site previews reset html and body to scroll; the kit puts back the app document of base.css. */
+#root {
+  display: contents;
+}
+html {
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+}

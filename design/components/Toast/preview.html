@@ -1,0 +1,20 @@
+<!-- @dsCard group="Feedback" height=260 -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:20px}.col{display:grid;gap:16px;min-width:0}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { Toast } = window.StreamBulletsDesignSystem_e1d9fa;
+
+// floating={false} keeps each toast in the page flow. In the app, one toast at a time shows at the bottom center.
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="col">
+    <Toast message="Page link copied." />
+    <Toast message="Topic deleted." action={{ label: "Undo", onClick: () => {} }} />
+    <Toast tone="error" message="Could not save. Try again." />
+  </div>,
+);
+</script>
+</body></html>

@@ -1,0 +1,44 @@
+<!-- @dsCard group="Topic board" height=1050 width=800 subtitle="Selected topic with its discussion, as in the right panel of the topic board" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:20px}.panel{max-width:780px}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { TopicDetail, Discussion, Comment } = window.StreamBulletsDesignSystem_e1d9fa;
+
+const body = `I'm curious how far we can actually take AI in a self-hosted setup. Can it realistically run useful models on a homelab without breaking the bank? What hardware works well, what are the real limitations, and is it actually worth it for a creator setup?
+Let's talk real-world experiences, configs, and what you'd do differently.`;
+
+function Demo() {
+  const [r, setR] = React.useState(0);
+  return (
+    <div className="panel">
+      <TopicDetail
+        category="Tech & setups"
+        title="Can AI run my homelab?"
+        author="Sunny"
+        authorPreset={14}
+        description={body}
+        likes={142 + (r === 1 ? 1 : 0)}
+        dislikes={18 + (r === -1 ? 1 : 0)}
+        reaction={r}
+        onReact={setR}
+      >
+        <Discussion>
+          <Comment name="PixelLuna" preset={6} time="30 minutes ago">
+            Depends on what you want to do. For text and simple workflows it's totally doable. For bigger models you'll definitely feel the hardware limits. Worth it for the control though!
+          </Comment>
+          <Comment name="TechNomad" preset={0} time="1 hour ago">
+            I've been running a local model on a mini PC and it's surprisingly capable for smaller tasks. Not a replacement for cloud, but perfect for learning and experimenting.
+          </Comment>
+        </Discussion>
+      </TopicDetail>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Demo />);
+</script>
+</body></html>

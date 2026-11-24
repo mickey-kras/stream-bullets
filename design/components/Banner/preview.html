@@ -1,0 +1,21 @@
+<!-- @dsCard group="Feedback" height=420 -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:20px 0}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { Banner } = window.StreamBulletsDesignSystem_e1d9fa;
+
+// The app places the banner under the streamer header, in .streamer-shell.
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="streamer-shell" style={{ display: "grid", gap: 12 }}>
+    <Banner />
+    <Banner role="owner" />
+    <Banner role="admin" />
+    <Banner tone="suspended" role="admin" />
+  </div>,
+);
+</script>
+</body></html>

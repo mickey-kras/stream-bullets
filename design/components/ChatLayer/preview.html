@@ -1,0 +1,47 @@
+<!-- @dsCard group="Overlay" height=560 subtitle="Merged Twitch, YouTube and Kick chat for OBS" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>
+body{margin:0;padding:20px;background:repeating-conic-gradient(var(--mock-check-a) 0 25%, var(--mock-check-b) 0 50%) 0 0/24px 24px}
+.cells{display:flex;flex-wrap:wrap;gap:24px;align-items:start}
+.cell{position:relative;outline:1px dashed var(--line)}
+.cell-name{margin:0 0 6px;font:600 12px/1.3 var(--body);color:var(--muted)}
+</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { OverlayComposition, OverlayLayer, ChatLayer } = window.StreamBulletsDesignSystem_e1d9fa;
+// SAMPLE_CHAT of app/lib/chat-feed.ts, plus a moderated message.
+const rows = [
+  { id: "1", platform: "twitch", name: "RustBucket", badges: ["Subscriber"], text: "Wasteland radio is live. Grab a seat by the fire!" },
+  { id: "2", platform: "youtube", name: "Ngozi Okafor", text: "Greetings from Lagos 👋🏾 the dust storm look is wild" },
+  { id: "3", platform: "kick", name: "Zoë_Ünter", text: "Wer hat noch Wasser übrig? 💧" },
+  { id: "4", platform: "twitch", name: "scav_kid", fragments: [{ type: "text", text: "that boss had no chance " }, { type: "emote", name: "Kappa", url: "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0" }, { type: "text", text: " GG" }] },
+  { id: "5", platform: "youtube", name: "ليلى", text: "مرحبا من القاهرة! البث رائع" },
+  { id: "6", platform: "twitch", name: "spam_bot_42", removed: true },
+  { id: "7", platform: "twitch", name: "山田太郎", badges: ["Moderator"], text: "こんにちは！ 👩‍🚀🚀 family run: 👨‍👩‍👧‍👦" },
+  { id: "8", platform: "kick", name: "Mad Maxine", text: "V8! 🔥🔥🔥" },
+];
+const SCALE = 0.55;
+function Cell({ name, children }) {
+  const rect = { x: 0, y: 0, w: 480, h: 840 };
+  return (
+    <div>
+      <p className="cell-name">{name}</p>
+      <div className="cell" style={{ width: rect.w * SCALE, height: rect.h * SCALE }}>
+        <OverlayComposition>
+          <OverlayLayer layer="chat" rect={rect} frame={rect}>{children}</OverlayLayer>
+        </OverlayComposition>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <div className="cells">
+    <Cell name="Message background 100%"><ChatLayer rows={rows} /></Cell>
+    <Cell name="Message background 0%, chat test"><ChatLayer rows={rows} backgroundOpacity={0} test /></Cell>
+  </div>
+);
+</script>
+</body></html>

@@ -1,0 +1,20 @@
+<!-- @dsCard group="Shell" height=120 -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:20px}.col{display:grid;gap:16px;min-width:0}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { BackLink } = window.StreamBulletsDesignSystem_e1d9fa;
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <main className="page-panel legal-page">
+    <article>
+      <BackLink />
+      <BackLink name="Sunny" href="/@sunny" />
+    </article>
+  </main>,
+);
+</script>
+</body></html>
