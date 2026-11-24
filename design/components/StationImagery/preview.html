@@ -1,0 +1,21 @@
+<!-- @dsCard group="Brand" height=320 subtitle="3D radio-station illustration: the landing hero" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<style>
+body{margin:0;background:var(--bg)}
+.stage{position:relative;height:320px;overflow:hidden}
+.caption{position:absolute;z-index:1;left:24px;top:50%;transform:translateY(-50%);max-width:44%;margin:0;color:var(--muted);font:400 15px/1.5 var(--body)}
+.caption strong{display:block;margin-bottom:6px;color:var(--cream);font:600 28px/1.1 var(--heading)}
+</style>
+</head><body>
+<!-- The landing stage of app/components/station/station.tsx before the WebGL scene loads: the poster frame. -->
+<div class="stage">
+  <section class="landing-station" aria-label="StreamBullets broadcast station" data-status="loading">
+    <picture>
+      <source media="(max-width: 700px)" srcset="/_blob/16f4630fd22b33cd5ab57b51009ea64e">
+      <img class="station-poster" src="/_blob/36c2158ea840e29094802fe4ecc4c0ef" alt="" width="1024" height="1024">
+    </picture>
+  </section>
+  <p class="caption"><strong>The broadcast station</strong>Warm brass, teal enamel and a red ON AIR sign. Signposts carry the three verbs: suggest a topic, vote in a poll, discuss the stream. The landing page shows this poster until the WebGL scene is ready. Phones get station-poster-phone.webp.</p>
+</div>
+</body></html>

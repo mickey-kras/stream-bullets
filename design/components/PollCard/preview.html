@@ -1,0 +1,53 @@
+<!-- @dsCard group="Polls" height=1700 width=900 subtitle="Live poll, open poll with its discussion, revealed yes-or-no poll" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{margin:0}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { PollCard, PollDiscussion, Discussion, Comment } = window.StreamBulletsDesignSystem_e1d9fa;
+
+function Live() {
+  const [v, setV] = React.useState(null);
+  const counts = [48, 31, 9].map((c, i) => c + (v === i ? 1 : 0));
+  return (
+    <PollCard
+      title="Should we explore more local AI on stream?"
+      author="Sunny"
+      authorPreset={14}
+      options={["Yes, more local AI", "A mix of both", "Stick to cloud tools"]}
+      counts={counts}
+      myVote={v}
+      onVote={setV}
+      countdown="1 h 2 min left"
+      comments={1}
+    />
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <main className="page-panel polls-page">
+    <div className="page-column">
+      <Live />
+      <PollDiscussion title="Should we explore more local AI on stream?">
+        <Discussion id="poll">
+          <Comment name="PixelLuna" preset={6} time="10 minutes ago">I would like to compare a local assistant with a cloud model.</Comment>
+        </Discussion>
+      </PollDiscussion>
+      <PollCard
+        title="Retro night: 8-bit or 16-bit?"
+        author="PixelLuna"
+        authorPreset={6}
+        kind="binary"
+        state="revealed"
+        options={["8-bit", "16-bit"]}
+        counts={[22, 35]}
+        myVote={1}
+        comments={3}
+      />
+    </div>
+  </main>,
+);
+</script>
+</body></html>

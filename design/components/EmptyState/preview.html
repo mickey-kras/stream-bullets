@@ -1,0 +1,30 @@
+<!-- @dsCard group="Feedback" height=560 -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<style>body{padding:0 20px}</style>
+</head><body>
+<div id="root"></div>
+<script type="text/babel">
+const { EmptyState } = window.StreamBulletsDesignSystem_e1d9fa;
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <>
+    <EmptyState icon="topics" title="No topics yet">
+      Suggest a topic for Sunny&apos;s next stream.
+    </EmptyState>
+    <EmptyState
+      icon="polls"
+      title="No polls yet"
+      action={
+        <button type="button" className="gold">
+          Create a poll
+        </button>
+      }
+    >
+      Start a poll and let the community vote.
+    </EmptyState>
+  </>,
+);
+</script>
+</body></html>

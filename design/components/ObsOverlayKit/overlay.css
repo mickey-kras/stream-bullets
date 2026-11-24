@@ -1,0 +1,18 @@
+/* Layout of the kit page only. The stage, the layers and the controls use the app classes of bundle.css. */
+.ov-kit {
+  display: grid;
+  gap: 8px;
+  max-width: min(100%, calc((100vh - 160px) * 16 / 9));
+  margin: 0 auto;
+  padding: 16px;
+}
+.ov-kit .ov-comp-bar {
+  margin: 0;
+}
+.ov-kit .ov-comp-range {
+  flex: 1 1 16rem;
+}
+/* The kit has more sources than the app bar has buttons: the row may wrap. */
+.ov-kit .ov-comp-bar .seg {
+  flex-wrap: wrap;
+}
