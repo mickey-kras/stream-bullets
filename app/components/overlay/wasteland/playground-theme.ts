@@ -56,6 +56,26 @@ export interface PlaygroundTheme {
     exitLamp: { rect: Rect; color: string };
   };
   flag: { dx: number; dy: number; ticksPerFrame: number };
+  /** The pixels that the renderer draws without a picture: the rope, the hook, the crown, the pole of a viewer flag and the flame of a jetpack. */
+  builds: {
+    rope: string;
+    ropeInk: string;
+    hook: string;
+    crown: string;
+    crownInk: string;
+    pole: string;
+    flame: readonly string[];
+    pack: string;
+    /** A dancing character turns around after this many ticks. */
+    danceTurnTicks: number;
+    /** A cheering character jumps this many world px, one jump in this many ticks. */
+    cheerLift: number;
+    cheerTicks: number;
+    /** The left edge of each of the four treads of a stair in its cell, for a stair that rises to the right. */
+    stairTreads: readonly number[];
+    /** The left edge of each tread picture of a plank in its cell. */
+    plankTreads: readonly number[];
+  };
   joinSign: { dx: number; dy: number };
   exitSign: { dx: number; dy: number };
   antenna: { dx: number; dy: number };
@@ -155,7 +175,16 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
     enter: { row: "entrance", frames: LOOP4, ticksPerFrame: 5, loopFrom: 0, still: 3 },
     walk: { row: "walk", frames: LOOP4, ticksPerFrame: 4, loopFrom: 0 },
     goto: { row: "walk", frames: LOOP4, ticksPerFrame: 4, loopFrom: 0 },
-    bwalk: { row: "walk", frames: LOOP4, ticksPerFrame: 4, loopFrom: 0 },
+    step: { row: "walk", frames: LOOP4, ticksPerFrame: 4, loopFrom: 0 },
+    hold: { row: "idle", frames: LOOP4, ticksPerFrame: 5, loopFrom: 0 },
+    // The atlas has no pictures for these actions yet: they use the jump, wave and build rows.
+    climb: { row: "jump", frames: [1], ticksPerFrame: 1 },
+    zip: { row: "jump", frames: [1], ticksPerFrame: 1 },
+    jet: { row: "jump", frames: [1], ticksPerFrame: 1 },
+    shoot: { row: "wave", frames: [1], ticksPerFrame: 1 },
+    dance: { row: "wave", frames: LOOP4, ticksPerFrame: 6, loopFrom: 0 },
+    cheer: { row: "jump", frames: [0, 1, 1, 2], ticksPerFrame: 4, loopFrom: 0 },
+    push: { row: "build", frames: LOOP4, ticksPerFrame: 2 },
     turn: { row: "turn", frames: LOOP4, ticksPerFrame: 4 },
     idle: { row: "idle", frames: LOOP4, ticksPerFrame: 5, loopFrom: 0 },
     exit: { row: "exit", frames: LOOP4, ticksPerFrame: 5, loopFrom: 0 },
@@ -226,6 +255,21 @@ export const WASTELAND_PLAYGROUND: PlaygroundTheme = {
     exitLamp: { rect: [-5, -52, 5, 5], color: "#FFF0B0" },
   },
   flag: { dx: -34, dy: -80, ticksPerFrame: 7 },
+  builds: {
+    rope: "#E7D7A8",
+    ropeInk: "#1D1712",
+    hook: "#BCC8C4",
+    crown: "#EDBD53",
+    crownInk: "#1D1712",
+    pole: "#1D1712",
+    flame: ["#FFD36B", "#FF8A3C"],
+    pack: "#5C6B70",
+    danceTurnTicks: 12,
+    cheerLift: 7,
+    cheerTicks: 12,
+    stairTreads: [0, 3, 5, 9],
+    plankTreads: [0, 5, 9],
+  },
   joinSign: { dx: 38, dy: -24 },
   exitSign: { dx: -76, dy: -24 },
   antenna: { dx: 10, dy: -54 },

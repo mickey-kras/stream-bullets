@@ -67,14 +67,36 @@ export const MARK_TICKS = 36;
 /** The name label shows this long after admission. */
 export const NEW_TICKS = 90;
 
-/** Holes repair and stairs go this long (30 s) after the last change. */
+/** Holes in the ground repair this long (30 s) after the last hit. Builds do not expire. */
 export const TERRAIN_LIFETIME_TICKS = 900;
-/** Temporary stair steps at once. The oldest goes first. */
-export { FRAME_STAIRS_MAX as STAIRS_MAX } from "./protocol";
-/** Steps in one build. */
-export const BUILD_STEPS = 5;
-/** A build turns toward the middle when it starts this close to a walking limit. */
-export const BUILD_TURN_INSET = 106;
+/** The block grid ends this far below the top of the world: the rows above stay free for bubbles and badges. */
+export const BUILD_CEILING = 30;
+/** The most blocks at once, as a share of the cells of the block grid. At the limit the oldest block goes. */
+export const BLOCK_FILL = 0.47;
+/** Nobody builds in a door zone below this row, or within PAD_CLEAR_COLS of the respawn pad below PAD_CLEAR_ROWS. */
+export const DOOR_CLEAR_ROWS = 5;
+export const PAD_CLEAR_COLS = 1;
+export const PAD_CLEAR_ROWS = 3;
+/** Loose blocks fall one row at this interval. */
+export const BLOCK_FALL_TICKS = 3;
+/** The most blocks that one walk command covers, and the most for a dig, stairs, bridge or jetpack command. */
+export const WALK_BLOCKS_MAX = 20;
+export const REPEAT_MAX = 5;
+/** A jetpack rises this many blocks without a number. */
+export const JETPACK_BLOCKS = 5;
+/** A grapple hook reaches this many blocks. */
+export const GRAPPLE_REACH = 6;
+/** A boom breaks the blocks whose centre is within the root of this many squared blocks, and throws characters this near (logical px). */
+export const BOOM_REACH_SQUARED = 5.5;
+export const BOOM_THROW_PX = 40;
+/** The body of a character for walls: this high above the feet, and this far in front of the centre. */
+export const BODY_HEIGHT = 20;
+export const BODY_REACH = 4;
+/** A platform with active chatters keeps this share of the visible slots, and at least PLATFORM_RESERVE_MIN. */
+export const PLATFORM_RESERVE_SHARE = 0.2;
+export const PLATFORM_RESERVE_MIN = 2;
+/** The crown needs this many blocks of height. */
+export const CROWN_BLOCKS = 2;
 /** A respawn waits this long (2.5 s) after an explosion or a fall. */
 export const RESPAWN_TICKS = 75;
 
@@ -102,24 +124,29 @@ export const CHECKPOINT_MAX_LENGTH = 60_000;
  */
 export const WALK_SPEED = 0.55;
 export const WALK_SPEED_SPREAD = 0.3;
-/** Speed on stairs and the fastest walk toward a target. */
-export const STAIR_SPEED = 0.5;
+/** The speed of a walk of some blocks that a viewer commands, and the fastest walk toward a target. */
+export const STEP_SPEED = 1;
 export const GOTO_SPEED_MAX = 2;
 /** The chance per tick that a walking character turns, and then that it stops to idle. */
 export const TURN_CHANCE = 0.003;
 export const IDLE_CHANCE = 0.003;
 /** A walking character steps up at most this much. */
 export const STEP_UP = 5;
-/** Gravity, jump speeds and the fall height that flattens a character. */
+/** Gravity, jump speeds and the fall height that flattens a character. A jump clears two blocks. */
+/** The speeds of a character that a boom or a push throws. */
+export const THROW_VX = 1.2;
+export const THROW_VY = -2.4;
+export const PUSH_VX = 1;
+export const PUSH_VY = -1.4;
 export const GRAVITY = 0.2;
-export const JUMP_VY = -3.2;
+export const JUMP_VY = -3.8;
 export const JUMP_VX = 0.9;
 export const FALL_VX = 0.3;
-export const FLAT_HEIGHT = 10;
+export const FLAT_HEIGHT = 40;
 
 /**
- * State durations in ticks. Each action ends: wave, boom, dig and build by these counts, jump and fall by landing or
- * leaving the world.
+ * State durations in ticks. Each action ends: the emotes, boom, dig and build by these counts, jump and fall by
+ * landing or leaving the world, and a walk of some blocks at its target or at a wall.
  */
 export const DURATION = {
   enter: 24,
@@ -136,7 +163,19 @@ export const DURATION = {
   digEvery: 20,
   digAt: 15,
   jumpCrouch: 4,
-  /** A build places its step at buildAt and walks onto it from buildEnd. */
+  /** A build places its block at buildAt and ends at buildEnd. */
   buildAt: 7,
   buildEnd: 20,
+  dance: 96,
+  cheer: 48,
+  push: 8,
+  /** A boom breaks blocks and throws characters at this tick. */
+  boomAt: 24,
+  /** A grapple shoots this long before a hit pulls, or before a miss ends. */
+  shootHit: 10,
+  shootMiss: 16,
+  /** A tween (climb, zip, jet) takes tweenBase ticks and tweenPerBlock more for each block of height. */
+  climb: 8,
+  tweenBase: 8,
+  tweenPerBlock: 3,
 } as const;

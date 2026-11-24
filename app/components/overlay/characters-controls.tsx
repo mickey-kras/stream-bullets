@@ -288,7 +288,7 @@ export function useCharactersControl(feed: ActivityFeed | null, enabled: boolean
 }
 
 /**
- * The characters settings in the editor: timeout, maximum, pause, reset and the participants with a Remove button. Buttons
+ * The characters settings in the editor: timeout, maximum, pause, clear, reset and the participants with a Remove button. Buttons
  * never take the `disabled` attribute: they keep focus while their request runs and ignore presses while busy or
  * unavailable. A polite region says what changed.
  */
@@ -370,6 +370,17 @@ export function CharactersControls({
           data-characters-pause
         >
           {t(paused ? "overlay.characters.resume" : "overlay.characters.pause")}
+        </button>
+        <button
+          type="button"
+          aria-disabled={controlUnavailable}
+          aria-describedby={enabled ? undefined : needsId}
+          onClick={() => {
+            if (!controlUnavailable) void send({ op: "clear" }, { done: "overlay.characters.clearDone" });
+          }}
+          data-characters-clear
+        >
+          {t("overlay.characters.clear")}
         </button>
         <button
           type="button"

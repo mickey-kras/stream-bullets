@@ -8,7 +8,7 @@ import { mulberry32 } from "./sim";
  * The characters test (issue #664): a seeded, synthetic crowd that plays for CHARACTERS_TEST_MS. The server feeds
  * these events to the playground as live chat. Nothing goes to a provider.
  *
- * Each minute has all five commands, a deleted message and a timeout. From the second minute, each minute also has
+ * Each minute has each command, a deleted message and a timeout. From the second minute, each minute also has
  * an exit reversal: a participant silent for the default timeout speaks again while it walks to the exit.
  */
 
@@ -26,6 +26,8 @@ const MINUTE_MS = 60_000;
 /** The reversal comes this long after the participant's previous message: past the default timeout of 60 s. */
 const REVERSAL_AFTER_MS = 62_000;
 const TEST_TIMEOUT_MS = 30_000;
+/** The commands of a minute come this far apart: all of them fit in the minute. */
+const COMMAND_GAP_MS = 3_000;
 const PLATFORMS: readonly ActivityPlatform[] = ["twitch", "youtube", "kick"];
 const LINES: readonly string[] = [
   "who left the door open?",
@@ -88,7 +90,7 @@ export function testCrowdScript(seed: number, startMs: number): TestCrowdEvent[]
         say(base + Math.floor(rng() * MINUTE_MS), member, LINES[Math.floor(rng() * LINES.length)]);
       }
     }
-    for (const [i, command] of COMMANDS.entries()) say(base + 5_000 + i * 9_000, pick(), `!${command}`);
+    for (const [i, command] of COMMANDS.entries()) say(base + 5_000 + i * COMMAND_GAP_MS, pick(), `!${command}`);
     const reverser: Member = crowd[RESERVED_FROM + minute];
     say(base + 1_000, reverser, "heading out soon");
     const back: number = base + 1_000 + REVERSAL_AFTER_MS;

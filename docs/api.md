@@ -124,7 +124,7 @@ English also shows `error` for `step_up_required` and `other_key_required`.
 | `POST /api/overlay` | `{action: "chatTest", on: boolean}` | `{overlay}`. The whole new `OverlayState`, with `chatTestUntil` |
 | `POST /api/overlay/key` | `{}` | `{url}`. A new private overlay link for the page of the signed-in owner. The old link stops immediately. |
 | `POST /api/overlay/key/show` | `{}` | `{url}`. The current private overlay link, or `null` when the server kept no key. Only the owner can read it. |
-| `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
+| `POST /api/overlay/characters` | `{op: "status" \| "test" \| "stopTest" \| "pause" \| "resume" \| "reset" \| "clear"}` or `{op: "remove", id}` | `{paused, testEndsAt}`. The state of the character playground |
 | `GET /@handle/overlay?key&layer&poll` | Optional `layer`: `content`, `chat`, or `characters`. Optional `poll`: a poll ID | The overlay page. Without `layer`, it shows the composition. With `layer`, it shows that part alone. An unknown value shows an empty page. |
 
 - The overlay shows only the layers on the grid: `chat`, `characters`, and the content layers.
@@ -170,10 +170,10 @@ English also shows `error` for `step_up_required` and `other_key_required`.
   - `test` starts the characters test for 5 minutes, or starts it again. It also ends a pause.
     It returns `400` when the saved characters layer is off stream.
   - With the saved characters layer off stream, the playground keeps nothing. Then each operation returns `{paused: false, testEndsAt: null}`, and `remove` returns `404`.
-  - `stopTest` stops the test. `pause` and `resume` stop and start the playground. `reset` removes all characters.
+  - `stopTest` stops the test. `pause` and `resume` stop and start the playground. `reset` removes all characters and all builds. `clear` removes all builds and keeps the characters.
   - `remove` removes the character with the frame `id`. It returns `404` when no character has that `id`.
   - `testEndsAt` is the server time at which the test ends, or `null` when no test runs.
-  - `test`, `reset`, and `remove` count against the write quota. The other operations do not.
+  - `test`, `reset`, `clear`, and `remove` count against the write quota. The other operations do not.
   - It returns `503` while the `CHANNELS_OFF` secret exists, when the deployment has no `CHANNEL_INGEST` binding, or when the playground cannot answer.
 - The action changes the streamer page of the signed-in user. A user who does not own a page gets `404`.
 - Errors: `400` for an invalid body, a cell outside the grid, or overlapping layers, `401` without sign-in, and `403` for another origin.

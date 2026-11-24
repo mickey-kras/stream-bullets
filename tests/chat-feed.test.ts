@@ -387,7 +387,7 @@ describe("chatReducer: live events", () => {
     const state = send(initialChatState(), event(chat()), 0);
     const frame: ActivityMessage = {
       type: "playground",
-      v: 1,
+      v: 2,
       full: false,
       tick: 3,
       chars: [],

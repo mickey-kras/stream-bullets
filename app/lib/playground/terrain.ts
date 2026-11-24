@@ -1,29 +1,32 @@
 import {
+  BLOCK_FILL,
   BOUNCE_INSET,
-  BUILD_TURN_INSET,
+  BUILD_CEILING,
   CELL_LOGICAL,
   CELLS_H_MAX,
   CELLS_H_MIN,
   CELLS_W_MAX,
   CELLS_W_MIN,
+  DOOR_CLEAR_ROWS,
   ENTRY_X,
   EXIT_INSET,
   FALL_OUT,
   GROUND_OFFSET,
   MIDDLE_DIRT,
   MIDDLE_GIRDER,
-  STAIRS_MAX,
+  PAD_CLEAR_COLS,
+  PAD_CLEAR_ROWS,
   TERRAIN_LIFETIME_TICKS,
   TILE,
   WALK_INSET,
   ZONE_TILES,
 } from "./constants";
-import type { StairTuple, TerrainView } from "./protocol";
+import { BLOCK_NONE, BLOCK_STAGES, type BlockKind, blockCode, blockOf, type TerrainView } from "./protocol";
 
 /**
  * The world geometry and the shared terrain. The world comes from the characters cell: CELL_LOGICAL logical px per
- * cell. The ground is at the bottom; extra height is sky. Both ends are protected girder zones for the doors. The
- * middle repeats breakable dirt and protected girder runs.
+ * cell. The ground is at the bottom. Both ends are protected girder zones for the doors. The middle repeats breakable
+ * dirt and protected girder runs. Above the ground is the block grid: cells of TILE px that viewers fill with blocks.
  */
 
 export interface World {
@@ -43,6 +46,10 @@ export interface World {
   /** Thrown characters keep inside these x limits. */
   bounceMin: number;
   bounceMax: number;
+  /** The block grid: columns (one per ground tile) and rows, and the most blocks at once. */
+  cols: number;
+  rows: number;
+  cap: number;
 }
 
 export interface Tile {
@@ -54,21 +61,33 @@ export interface Tile {
   repairAt: number;
 }
 
-interface Stair {
-  x: number;
-  top: number;
+export interface Block {
+  kind: BlockKind;
+  /** A stair rises in this direction. Other blocks have 1. */
   dir: 1 | -1;
-  /** The step goes after this tick. */
-  until: number;
+  /** Damage: 0 intact to BLOCK_STAGES - 1. One more hit breaks the block. */
+  stage: number;
+  /** The order of building: at the limit the block with the lowest number goes. */
+  seq: number;
+}
+
+/** A flag of a participant (frame id), on the floor of cell (c, r). */
+export interface Flag {
+  id: number;
+  c: number;
+  r: number;
 }
 
 export interface Terrain {
   tiles: Tile[];
-  stairs: Stair[];
+  /** The block grid, row 0 on the ground: cell (c, r) is at r * cols + c. */
+  blocks: (Block | null)[];
+  flags: Flag[];
+  count: number;
+  seq: number;
+  /** A block went or the ground opened: loose blocks can fall. */
+  loose: boolean;
 }
-
-/** Step width. */
-const STAIR_W = 7;
 
 function cellCount(value: number, min: number, max: number, name: string): number {
   if (!Number.isInteger(value) || value < min || value > max) {
@@ -94,17 +113,20 @@ export function createWorld(cellsW: number, cellsH: number): World {
   const zone: number = ZONE_TILES * TILE;
   const xmin: number = zone - WALK_INSET;
   const xmax: number = w - zone + WALK_INSET;
-  const kinds = tileKinds(Math.ceil(w / TILE), w);
+  const cols: number = Math.ceil(w / TILE);
+  const kinds = tileKinds(cols, w);
   // The pad stands on the first protected middle run, else on the last entrance tile.
   let padTile: number = ZONE_TILES - 1;
   const first: number = kinds.findIndex((kind, i: number): boolean => i >= ZONE_TILES && kind === "g");
   if (first >= 0 && (first + 1) * TILE <= w - zone) padTile = first + Math.floor(MIDDLE_GIRDER / 2);
+  const gy: number = h - GROUND_OFFSET;
+  const rows: number = Math.max(0, Math.floor((gy - BUILD_CEILING) / TILE));
   return {
     cellsW,
     cellsH,
     w,
     h,
-    gy: h - GROUND_OFFSET,
+    gy,
     xmin,
     xmax,
     entryX: ENTRY_X,
@@ -113,12 +135,22 @@ export function createWorld(cellsW: number, cellsH: number): World {
     fallY: h + FALL_OUT,
     bounceMin: BOUNCE_INSET,
     bounceMax: w - BOUNCE_INSET,
+    cols,
+    rows,
+    cap: Math.max(1, Math.round(cols * rows * BLOCK_FILL)),
   };
 }
 
 export function createTerrain(world: World): Terrain {
-  const kinds = tileKinds(Math.ceil(world.w / TILE), world.w);
-  return { tiles: kinds.map((kind): Tile => ({ kind, stage: 0, repairAt: 0 })), stairs: [] };
+  const kinds = tileKinds(world.cols, world.w);
+  return {
+    tiles: kinds.map((kind): Tile => ({ kind, stage: 0, repairAt: 0 })),
+    blocks: new Array<Block | null>(world.cols * world.rows).fill(null),
+    flags: [],
+    count: 0,
+    seq: 0,
+    loose: false,
+  };
 }
 
 export function tileAt(terrain: Terrain, x: number): Tile | undefined {
@@ -130,11 +162,56 @@ export function solidAt(terrain: Terrain, x: number): boolean {
   return tile !== undefined && !(tile.kind === "d" && tile.stage === 3);
 }
 
-/** The surfaces at x: the ground (when solid) and the tops of stair steps. */
+/** The column of x, the row of feet at y (0 on the ground), the centre x of a column and the floor y of a row. */
+export function colOf(x: number): number {
+  return Math.floor(x / TILE);
+}
+export function rowOf(world: World, y: number): number {
+  return Math.round((world.gy - y) / TILE);
+}
+export function cellX(c: number): number {
+  return c * TILE + TILE / 2;
+}
+export function floorY(world: World, r: number): number {
+  return world.gy - r * TILE;
+}
+
+/** The block of cell (c, r), or null for an empty cell and for a cell outside the grid. */
+export function blockAt(world: World, terrain: Terrain, c: number, r: number): Block | null {
+  if (c < 0 || c >= world.cols || r < 0 || r >= world.rows) return null;
+  return terrain.blocks[r * world.cols + c];
+}
+
+/** A dirt block or a plank is a wall to a body. A stair is not: a character walks up it, or behind it. */
+export function wallAt(world: World, terrain: Terrain, c: number, r: number): boolean {
+  const block: Block | null = blockAt(world, terrain, c, r);
+  return block !== null && block.kind !== "stair";
+}
+
+/** A character can stand with its feet on the floor of row r in column c: no wall at its body. */
+export function fits(world: World, terrain: Terrain, c: number, r: number): boolean {
+  return c >= 0 && c < world.cols && !wallAt(world, terrain, c, r) && !wallAt(world, terrain, c, r + 1);
+}
+
+/** The height of a stair at `u` px from its low edge: four steps, the top one from the middle of the cell. */
+function stairRise(u: number): number {
+  if (u < 3) return 4;
+  if (u < 5) return 8;
+  return u < 8 ? 12 : TILE;
+}
+
+/** The surfaces at x: the ground (when solid) and the tops of the blocks of that column. */
 export function tops(world: World, terrain: Terrain, x: number): number[] {
   const found: number[] = [];
   if (solidAt(terrain, x)) found.push(world.gy);
-  for (const stair of terrain.stairs) if (x >= stair.x && x < stair.x + STAIR_W) found.push(stair.top);
+  const c: number = colOf(x);
+  if (c < 0 || c >= world.cols) return found;
+  for (let r = 0; r < world.rows; r++) {
+    const block: Block | null = terrain.blocks[r * world.cols + c];
+    if (!block) continue;
+    const u: number = block.dir > 0 ? x - c * TILE : (c + 1) * TILE - x;
+    found.push(floorY(world, r) - (block.kind === "stair" ? stairRise(u) : TILE));
+  }
   return found;
 }
 
@@ -144,20 +221,15 @@ export function surface(world: World, terrain: Terrain, x: number, y: number, up
 }
 
 /** Breaks dirt one stage. Returns false for protected ground. The repair restarts at each hit. */
-export function hit(tile: Tile, tick: number): boolean {
+export function hit(terrain: Terrain, tile: Tile, tick: number): boolean {
   if (tile.kind === "g") return false;
   tile.stage = Math.min(3, tile.stage + 1);
   tile.repairAt = tick + TERRAIN_LIFETIME_TICKS;
+  if (tile.stage === 3) terrain.loose = true;
   return true;
 }
 
-/** Adds a stair step. At STAIRS_MAX the oldest step goes. */
-export function addStair(terrain: Terrain, x: number, top: number, dir: 1 | -1, tick: number): void {
-  if (terrain.stairs.length >= STAIRS_MAX) terrain.stairs.shift();
-  terrain.stairs.push({ x, top, dir, until: tick + TERRAIN_LIFETIME_TICKS });
-}
-
-/** Repairs due dirt and removes expired steps. */
+/** Repairs due dirt. */
 export function expire(terrain: Terrain, tick: number): void {
   for (const tile of terrain.tiles) {
     if (tile.stage && tile.repairAt && tick >= tile.repairAt) {
@@ -165,23 +237,145 @@ export function expire(terrain: Terrain, tick: number): void {
       tile.repairAt = 0;
     }
   }
-  terrain.stairs = terrain.stairs.filter((stair: Stair): boolean => stair.until >= tick);
 }
 
-/** Where a build may place steps: a little outside the walking limits. */
-export function buildFits(world: World, x: number): boolean {
-  return x >= world.xmin - 10 && x + STAIR_W <= world.xmax + 10;
+/** Nobody builds here: the door zones up to the door height, and the space over the respawn pad. */
+export function protectedCell(world: World, c: number, r: number): boolean {
+  const zone: number = ZONE_TILES * TILE;
+  if ((c * TILE < zone || (c + 1) * TILE > world.w - zone) && r < DOOR_CLEAR_ROWS) return true;
+  return Math.abs(c - colOf(world.padX)) <= PAD_CLEAR_COLS && r < PAD_CLEAR_ROWS;
 }
 
-/** The direction a build takes from x: toward the middle near a walking limit, else `dir`. */
-export function buildDirection(world: World, x: number, dir: 1 | -1): 1 | -1 {
-  if (x > world.xmax - BUILD_TURN_INSET) return -1;
-  if (x < world.xmin + BUILD_TURN_INSET) return 1;
-  return dir;
+/** A block in this cell holds: it is on solid ground, or it touches another block, also at a corner. */
+function touches(world: World, terrain: Terrain, c: number, r: number): boolean {
+  if (r === 0) return solidAt(terrain, cellX(c));
+  for (let dc = -1; dc <= 1; dc++) {
+    for (let dr = -1; dr <= 1; dr++) if ((dc || dr) && blockAt(world, terrain, c + dc, r + dr)) return true;
+  }
+  return false;
+}
+
+/** A block can go in cell (c, r): the cell is in the grid, empty, not protected, and the block would hold. */
+export function canPlace(world: World, terrain: Terrain, c: number, r: number): boolean {
+  if (c < 0 || c >= world.cols || r < 0 || r >= world.rows) return false;
+  return !terrain.blocks[r * world.cols + c] && !protectedCell(world, c, r) && touches(world, terrain, c, r);
+}
+
+export function removeBlock(world: World, terrain: Terrain, c: number, r: number): void {
+  if (!blockAt(world, terrain, c, r)) return;
+  terrain.blocks[r * world.cols + c] = null;
+  terrain.count -= 1;
+  terrain.loose = true;
+}
+
+/** Puts a block in an empty cell. At the limit of the world, the oldest block goes first. */
+export function placeBlock(world: World, terrain: Terrain, c: number, r: number, kind: BlockKind, dir: 1 | -1): void {
+  if (terrain.count >= world.cap) {
+    let oldest = -1;
+    for (const [i, block] of terrain.blocks.entries()) {
+      if (block && (oldest < 0 || block.seq < (terrain.blocks[oldest]?.seq ?? Infinity))) oldest = i;
+    }
+    if (oldest >= 0) removeBlock(world, terrain, oldest % world.cols, Math.floor(oldest / world.cols));
+  }
+  terrain.seq += 1;
+  terrain.blocks[r * world.cols + c] = { kind, dir, stage: 0, seq: terrain.seq };
+  terrain.count += 1;
+}
+
+/** Damages a block one stage. The hit after the last stage breaks it. Returns false for an empty cell. */
+export function hitBlock(world: World, terrain: Terrain, c: number, r: number): boolean {
+  const block: Block | null = blockAt(world, terrain, c, r);
+  if (!block) return false;
+  block.stage += 1;
+  if (block.stage >= BLOCK_STAGES) removeBlock(world, terrain, c, r);
+  return true;
+}
+
+/** The cells of the blocks that hold: a path of touching blocks, also at a corner, goes from each to solid ground. */
+function heldCells(world: World, terrain: Terrain): Set<number> {
+  const { cols } = world;
+  const held = new Set<number>();
+  const stack: number[] = [];
+  const hold = (c: number, r: number): void => {
+    const at: number = r * cols + c;
+    if (!blockAt(world, terrain, c, r) || held.has(at)) return;
+    held.add(at);
+    stack.push(at);
+  };
+  for (let c = 0; c < cols; c++) if (solidAt(terrain, cellX(c))) hold(c, 0);
+  for (let at = stack.pop(); at !== undefined; at = stack.pop()) {
+    for (let dc = -1; dc <= 1; dc++)
+      for (let dr = -1; dr <= 1; dr++) hold((at % cols) + dc, Math.floor(at / cols) + dr);
+  }
+  return held;
+}
+
+/** A flag stays while it has a floor under it and no wall in it. */
+function flagStands(world: World, terrain: Terrain, flag: Flag): boolean {
+  const floor: boolean = flag.r === 0 ? solidAt(terrain, cellX(flag.c)) : !!blockAt(world, terrain, flag.c, flag.r - 1);
+  return floor && !wallAt(world, terrain, flag.c, flag.r);
+}
+
+/**
+ * One step of the loose blocks. A block that does not hold falls one row. A block over a hole in the ground falls
+ * out. `crush(c, r)` is true when a character is in the cell below: the block then breaks. Flags without a floor go.
+ * `terrain.loose` stays true while a block moved.
+ */
+export function dropLoose(world: World, terrain: Terrain, crush: (c: number, r: number) => boolean): void {
+  const { cols } = world;
+  const held: Set<number> = heldCells(world, terrain);
+  let moved = false;
+  for (const [at, block] of terrain.blocks.entries()) {
+    if (!block || held.has(at)) continue;
+    moved = true;
+    const c: number = at % cols;
+    const r: number = Math.floor(at / cols);
+    if (r === 0 || crush(c, r - 1)) removeBlock(world, terrain, c, r);
+    else if (!terrain.blocks[at - cols]) {
+      terrain.blocks[at - cols] = block;
+      terrain.blocks[at] = null;
+    }
+  }
+  terrain.flags = terrain.flags.filter((flag: Flag): boolean => flagStands(world, terrain, flag));
+  terrain.loose = moved;
+}
+
+/** Removes all builds: the blocks and the flags. The ground stays as it is. */
+export function clearBuilds(terrain: Terrain): void {
+  terrain.blocks.fill(null);
+  terrain.flags = [];
+  terrain.count = 0;
+  terrain.loose = false;
 }
 
 export function groundString(terrain: Terrain): string {
   return terrain.tiles.map((tile: Tile): string => (tile.kind === "g" ? "g" : String(tile.stage))).join("");
+}
+
+/** The block grid as text (see TerrainView.blocks): the rows up to the highest block. */
+export function blocksString(world: World, terrain: Terrain): string {
+  let last = -1;
+  for (const [i, block] of terrain.blocks.entries()) if (block) last = i;
+  const cells: number = last < 0 ? 0 : (Math.floor(last / world.cols) + 1) * world.cols;
+  return terrain.blocks
+    .slice(0, cells)
+    .map((block: Block | null): string => (block ? blockCode(block) : BLOCK_NONE))
+    .join("");
+}
+
+/** Puts the blocks of a `blocksString` text into an empty terrain, in building order from the ground up. Throws when the text does not fit the grid. */
+export function restoreBlocks(world: World, terrain: Terrain, text: string): void {
+  if (text.length > terrain.blocks.length || text.length % Math.max(1, world.cols) !== 0) {
+    throw new Error(`playground blocks do not fit the grid: ${text.length}`);
+  }
+  for (const [i, code] of Array.from(text).entries()) {
+    const cell = blockOf(code);
+    if (!cell) continue;
+    terrain.seq += 1;
+    terrain.blocks[i] = { ...cell, seq: terrain.seq };
+    terrain.count += 1;
+  }
+  terrain.loose = terrain.count > 0;
 }
 
 export function terrainView(world: World, terrain: Terrain): TerrainView {
@@ -191,7 +385,8 @@ export function terrainView(world: World, terrain: Terrain): TerrainView {
     gy: world.gy,
     tile: TILE,
     ground: groundString(terrain),
-    stairs: terrain.stairs.map((stair: Stair): StairTuple => [Math.round(stair.x), Math.round(stair.top), stair.dir]),
+    rows: world.rows,
+    blocks: blocksString(world, terrain),
     padX: world.padX,
     entryX: world.entryX,
     exitX: world.exitX,

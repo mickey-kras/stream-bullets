@@ -13,13 +13,20 @@ import {
   type PlaygroundFullFrame,
   type PlaygroundTickFrame,
   parseFrame,
+  BLOCK_KINDS,
+  CHAR_STATES,
+  BLOCK_NONE,
+  BLOCK_STAGES,
+  blockCode,
+  blockOf,
+  FRAME_BLOCKS_MAX,
 } from "../app/lib/playground/protocol";
 import { PlaygroundSim } from "../app/lib/playground/sim";
 
 function full(): PlaygroundFullFrame {
   return {
     type: "playground",
-    v: 1,
+    v: 2,
     full: true,
     tick: 12,
     chars: [[1, 4000, 620, 1, 3, 1, 2]],
@@ -31,13 +38,15 @@ function full(): PlaygroundFullFrame {
       gy: 62,
       tile: 16,
       ground: "gggggg0123ggg",
-      stairs: [[300, 58, 1]],
+      rows: 2,
+      blocks: `${".".repeat(12)}a${".".repeat(12)}r`,
       padX: 200,
       entryX: 40,
       exitX: 598,
       xmin: 84,
       xmax: 556,
     },
+    extras: { ropes: [[1, 300, 20, 1]], flags: [[1, 200, 62]], crown: 1 },
     mode: { paused: false, test: true },
   };
 }
@@ -65,7 +74,7 @@ describe("playground protocol", () => {
     expect(parseFrame(encodeFrame(frame))).toEqual(frame);
     const tick: PlaygroundTickFrame = {
       type: "playground",
-      v: 1,
+      v: 2,
       full: false,
       tick: 13,
       chars: [[7, -5, 0, 16, 959, -1, 0]],
@@ -84,14 +93,14 @@ describe("playground protocol", () => {
     expect(parseFrame(42)).toBeNull();
     expect(parseFrame("{")).toBeNull();
     expect(parseFrame("x".repeat(MAX_FRAME_LENGTH + 1))).toBeNull();
-    expect(parseFrame(bad({ v: 2 }))).toBeNull();
+    expect(parseFrame(bad({ v: 3 }))).toBeNull();
     expect(parseFrame(bad({ type: "event" }))).toBeNull();
     expect(parseFrame(bad({ extra: true }))).toBeNull();
     expect(parseFrame(bad({ roster: undefined }))).toBeNull();
     expect(parseFrame(bad({ chars: [[2, 0, 0, 1, 0, 1, 0]] }))).toBeNull();
     expect(parseFrame(bad({ bubbles: [{ id: 2, text: "hi" }] }))).toBeNull();
     expect(parseFrame(bad({ roster: [frame.roster[0], frame.roster[0]] }))).toBeNull();
-    expect(parseFrame(bad({ chars: [[1, 0, 0, 17, 0, 1, 0]] }))).toBeNull();
+    expect(parseFrame(bad({ chars: [[1, 0, 0, CHAR_STATES.length, 0, 1, 0]] }))).toBeNull();
     expect(parseFrame(bad({ chars: [[1, 0, 0, 1, 960, 1, 0]] }))).toBeNull();
     expect(parseFrame(bad({ chars: [[1, 0, 0, 1, 0, 0, 0]] }))).toBeNull();
     expect(parseFrame(bad({ chars: [[1, 0.5, 0, 1, 0, 1, 0]] }))).toBeNull();
@@ -101,17 +110,42 @@ describe("playground protocol", () => {
     expect(parseFrame(bad({ bubbles: [{ id: 1, text: "line\nbreak" }] }))).toBeNull();
     expect(parseFrame(bad({ bubbles: [{ id: 1, text: "x".repeat(BUBBLE_MAX_UNITS + 1) }] }))).toBeNull();
     expect(parseFrame(bad({ terrain: { ...frame.terrain, ground: "gx" } }))).toBeNull();
+    expect(parseFrame(bad({ terrain: { ...frame.terrain, blocks: "s" } }))).toBeNull();
+    expect(parseFrame(bad({ terrain: { ...frame.terrain, blocks: "a".repeat(FRAME_BLOCKS_MAX + 1) } }))).toBeNull();
+    expect(parseFrame(bad({ terrain: { ...frame.terrain, stairs: [] } }))).toBeNull();
+    expect(parseFrame(bad({ extras: { ...frame.extras, ropes: [[1, 0, 0, 2]] } }))).toBeNull();
+    expect(parseFrame(bad({ extras: { ropes: [], flags: [] } }))).toBeNull();
+    expect(parseFrame(bad({ v: 1 }))).toBeNull();
     const tooMany: CharTuple[] = Array.from({ length: 41 }, (_, i: number): CharTuple => [i + 1, 0, 0, 1, 0, 1, 0]);
-    expect(parseFrame(JSON.stringify({ type: "playground", v: 1, full: false, tick: 1, chars: tooMany }))).toBeNull();
+    expect(parseFrame(JSON.stringify({ type: "playground", v: 2, full: false, tick: 1, chars: tooMany }))).toBeNull();
     const tickFrame = {
       type: "playground",
-      v: 1,
+      v: 2,
       full: false,
       tick: 1,
       chars: [],
       roster: [frame.roster[0], frame.roster[0]],
     };
     expect(parseFrame(JSON.stringify(tickFrame))).toBeNull();
+  });
+
+  it("gives each kind, direction and damage of a block its own character", () => {
+    const codes = new Set<string>();
+    for (const kind of BLOCK_KINDS) {
+      for (const dir of [1, -1] as const) {
+        for (let stage = 0; stage < BLOCK_STAGES; stage++) {
+          const code: string = blockCode({ kind, dir, stage });
+          expect(blockOf(code)).toEqual({ kind, dir, stage });
+          codes.add(code);
+        }
+      }
+    }
+    expect(codes.size).toBe(18);
+    expect([...codes].join("")).toMatch(/^[a-r]+$/);
+    expect(blockCode({ kind: "dirt", dir: 1, stage: 9 })).toBe("c");
+    expect(blockOf(BLOCK_NONE)).toBeNull();
+    expect(blockOf("ab")).toBeNull();
+    expect(blockOf("z")).toBeNull();
   });
 
   it("refuses to encode an invalid or oversized frame", () => {

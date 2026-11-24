@@ -55,7 +55,10 @@ function view(characters: CharacterView[], paused: boolean = false): PlaygroundV
   return {
     world: { width: 640, height: 80, ground: 62 },
     tiles: [],
-    stairs: [],
+    blocks: [],
+    ropes: [],
+    flags: [],
+    crown: null,
     marks: [],
     doors: { entrance: 40, exit: 600 },
     pad: 206,
@@ -155,9 +158,11 @@ describe("playground labels", () => {
   it("show only for speaking, acting or just admitted characters", () => {
     expect(showsLabel(character())).toBe(false);
     expect(showsLabel(character({ state: "goto" }))).toBe(false);
+    expect(showsLabel(character({ state: "hold" }))).toBe(false);
+    expect(showsLabel(character({ state: "step" }))).toBe(false);
     expect(showsLabel(character({ bubble: "hi" }))).toBe(true);
     expect(showsLabel(character({ recent: true }))).toBe(true);
-    for (const state of ["jump", "dig", "build", "bwalk", "wave", "boom", "fall"] as const) {
+    for (const state of ["jump", "dig", "build", "climb", "zip", "jet", "wave", "dance", "boom", "fall"] as const) {
       expect(showsLabel(character({ state }))).toBe(true);
     }
   });
@@ -234,7 +239,14 @@ describe("playground bubble layout", () => {
   });
 
   it("keeps arrival order when speakers share the same position", () => {
-    const slots: BubbleSlot[] = layoutBubbles([{ x: 300, width: 120 }, { x: 300, width: 120 }], 720, 240);
+    const slots: BubbleSlot[] = layoutBubbles(
+      [
+        { x: 300, width: 120 },
+        { x: 300, width: 120 },
+      ],
+      720,
+      240,
+    );
     expect(slots.map((slot: BubbleSlot) => slot.index)).toEqual([0, 1]);
     expectTidy(slots, 720);
   });
@@ -424,7 +436,7 @@ describe("playground canvas rendering", () => {
     expect(memory.particles.every((particle) => particle.picture !== null)).toBe(true);
   });
 
-  it("draws cracked tiles, girder ends, stairs, active doors, respawn pads and unavailable marks", () => {
+  it("draws cracked tiles, girder ends, builds, ropes, flags, the crown, active doors, pads and marks", () => {
     const { render, canvas } = renderer();
     const moment: PlaygroundView = {
       ...view([
@@ -442,10 +454,18 @@ describe("playground canvas rendering", () => {
         { kind: "dirt", stage: 3 },
         { kind: "girder", stage: 0 },
       ],
-      stairs: [
-        { x: 80, top: 45, dir: -1 },
-        { x: 90, top: 59, dir: 1 },
+      blocks: [
+        { c: 8, r: 0, kind: "dirt", dir: 1, stage: 0 },
+        { c: 8, r: 1, kind: "dirt", dir: 1, stage: 2 },
+        { c: 9, r: 0, kind: "stair", dir: -1, stage: 0 },
+        { c: 10, r: 1, kind: "plank", dir: 1, stage: 0 },
       ],
+      ropes: [
+        { id: 1, x: 200, y: 20, hit: true },
+        { id: 99, x: 1, y: 1, hit: false },
+      ],
+      flags: [{ x: 300, y: 62, platform: "kick" }],
+      crown: 1,
       marks: [{ x: 90.4, y: 20.7 }],
     };
     render(moment, theme.blinkMs * 2);
@@ -459,9 +479,24 @@ describe("playground canvas rendering", () => {
     expect(canvas.calls.some((call) => call.method === "fillRect" && call.args[2] === 3 && call.args[3] === 3)).toBe(
       true,
     );
+    // The dirt block at (8, 0) uses a ground picture. The four treads of the stair have legs of 1, 5, 9 and 13 px.
+    expect(pictures).toContainEqual([...theme.terrain.rects.dirt2]);
+    const legs: unknown[] = canvas.calls
+      .filter(
+        (call) => call.method === "drawImage" && call.args.length === 9 && call.args[3] === 7 && call.args[4] === 1,
+      )
+      .map((call) => call.args[8]);
+    expect(legs).toEqual([1, 5, 9, 13]);
+    // Seven treads: four of the stair and three of the plank.
     expect(
-      canvas.calls.filter((call) => call.method === "drawImage" && call.args.length === 9 && call.args[8] === 14),
-    ).toHaveLength(1);
+      canvas.calls.filter((call) => call.method === "drawImage" && call.args.length === 9 && call.args[4] === 3),
+    ).toHaveLength(7);
+    // The rope of character 1 (two strokes), the flag pole and pennant, and the crown.
+    expect(canvas.calls.filter((call) => call.method === "stroke")).toHaveLength(2);
+    const rects: unknown[][] = canvas.calls.filter((call) => call.method === "fillRect").map((call) => call.args);
+    expect(rects).toContainEqual([304, 47, 1, 15]);
+    expect(rects).toContainEqual([305, 47, 7, 5]);
+    expect(rects).toContainEqual([95, 27, 10, 5]);
     canvas.calls.length = 0;
     render({ ...moment, world: { ...moment.world, ground: 10 } }, theme.blinkMs * 3, true);
     expect(
@@ -514,7 +549,11 @@ describe("playground canvas rendering", () => {
     const moment: PlaygroundView = {
       ...view([]),
       world: { width: 640, height: 120, ground: 100 },
-      tiles: [{ kind: "girder", stage: 0 }, { kind: "dirt", stage: 3 }, { kind: "girder", stage: 0 }],
+      tiles: [
+        { kind: "girder", stage: 0 },
+        { kind: "dirt", stage: 3 },
+        { kind: "girder", stage: 0 },
+      ],
     };
     canvas.height = 360;
     render(moment, 1000, true);
@@ -530,9 +569,12 @@ describe("playground canvas rendering", () => {
     canvas.width = 720;
     const speaker: CharacterView = character({ name: "Speaker", x: 100, bubble: "W".repeat(80) });
     render({ ...view([speaker]), speakers: [speaker.id] }, 1000);
-    const texts = (): string[] => labels.flatMap((label: RenderCanvas) =>
-      label.calls.filter((call: CanvasCall) => call.method === "fillText").map((call: CanvasCall) => String(call.args[0])),
-    );
+    const texts = (): string[] =>
+      labels.flatMap((label: RenderCanvas) =>
+        label.calls
+          .filter((call: CanvasCall) => call.method === "fillText")
+          .map((call: CanvasCall) => String(call.args[0])),
+      );
     expect(texts()).toContain("W".repeat(26));
     expect(texts()).toContain(`${"W".repeat(25)}…`);
     labels.length = 0;
@@ -551,7 +593,9 @@ describe("playground canvas rendering", () => {
     const aboveTag: HTMLCanvasElement | undefined = memory.labels.get(JSON.stringify(["n", "twitch", "Above"]));
     expect(coveredTag).toBeDefined();
     expect(aboveTag).toBeDefined();
-    const images: unknown[] = canvas.calls.filter((call: CanvasCall) => call.method === "drawImage").map((call: CanvasCall) => call.args[0]);
+    const images: unknown[] = canvas.calls
+      .filter((call: CanvasCall) => call.method === "drawImage")
+      .map((call: CanvasCall) => call.args[0]);
     expect(images).not.toContain(coveredTag);
     expect(images).toContain(aboveTag);
   });
@@ -560,10 +604,13 @@ describe("playground canvas rendering", () => {
     const { render } = renderer();
     vi.stubGlobal("document", { createElement: (): { getContext: () => null } => ({ getContext: (): null => null }) });
     expect(() => render(view([character({ recent: true })]), 1000)).toThrow("no 2D canvas context for a label");
-    vi.stubGlobal("Image", class {
-      src: string = "";
-      async decode(): Promise<void> {}
-    });
+    vi.stubGlobal(
+      "Image",
+      class {
+        src: string = "";
+        async decode(): Promise<void> {}
+      },
+    );
     const atlas: Atlas = await loadAtlas(theme);
     expect(() => atlas.sheets.get("twitch")).toThrow("no 2D canvas context for the character sheet");
   });

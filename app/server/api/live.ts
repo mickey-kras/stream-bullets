@@ -50,9 +50,9 @@ export const liveRoutes: ApiRoute[] = [
     notifyOverlayKey(env, streamer.id);
     return json({ url: `${getOrigin(env)}/@${streamer.handle}/overlay?key=${key}` });
   }),
-  // POST /api/overlay/characters {op: status|test|stopTest|pause|resume|reset|remove, id?} → {paused, testEndsAt}: the
-  // character playground. `status` only reads. Starting a test, a reset and a removal use the write quota; the others
-  // never do, so the owner can always read, stop or pause.
+  // POST /api/overlay/characters {op: status|test|stopTest|pause|resume|reset|clear|remove, id?} → {paused,
+  // testEndsAt}: the character playground. `status` only reads. Starting a test, a reset, a clear and a removal use
+  // the write quota; the others never do, so the owner can always read, stop or pause.
   write("POST", /overlay\/characters/, async ({ request, env, viewer }) => {
     const control = await readJson(request, playgroundControlSchema);
     const streamer = await getOwnStreamer(env, viewer.id);
@@ -61,7 +61,7 @@ export const liveRoutes: ApiRoute[] = [
     if (!activityAvailable(env)) throw new HttpError(503, "Characters are off on this server.");
     if (control.op === "test" && !onStream((await getOverlayState(env, streamer.id)).layers, "characters"))
       throw new HttpError(400, "Put the characters layer on stream first.");
-    if (control.op === "test" || control.op === "reset" || control.op === "remove")
+    if (control.op === "test" || control.op === "reset" || control.op === "clear" || control.op === "remove")
       await consumeMutationQuota(env, viewer.id);
     const response = await callIngest(env, streamer.id, "playground", {
       init: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(control) },

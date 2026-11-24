@@ -1,4 +1,4 @@
-import type { CharState } from "../../../lib/playground/protocol";
+import type { BlockCell, CharState } from "../../../lib/playground/protocol";
 
 /**
  * The input of the character renderer: one moment of the playground, in world pixels (1 world pixel = PIXEL_SCALE
@@ -52,11 +52,25 @@ export interface TileView {
   stage: TileStage;
 }
 
-interface StairView {
-  /** Left edge and top of one 7 px step; the leg goes down to the ground. */
+/** A block that viewers built: its cell in the block grid (row 0 is on the ground) and what it is. */
+export interface BlockView extends BlockCell {
+  c: number;
+  r: number;
+}
+
+/** A grapple rope from the character `id` to the hook point. `hit` is false for a hook that caught nothing. */
+export interface RopeView {
+  id: number;
   x: number;
-  top: number;
-  dir: 1 | -1;
+  y: number;
+  hit: boolean;
+}
+
+/** A flag on the floor at (x, y), in the helmet colour of `platform`. */
+export interface FlagView {
+  x: number;
+  y: number;
+  platform: string;
 }
 
 export interface PlaygroundView {
@@ -64,7 +78,11 @@ export interface PlaygroundView {
   world: { width: number; height: number; ground: number };
   /** One tile per 16 world pixels, from x 0. */
   tiles: readonly TileView[];
-  stairs: readonly StairView[];
+  blocks: readonly BlockView[];
+  ropes: readonly RopeView[];
+  flags: readonly FlagView[];
+  /** The id of the character that wears the crown, or null. */
+  crown: number | null;
   /** Centres of the "unavailable" marks (a red cross). */
   marks: readonly { x: number; y: number }[];
   /** Centre x of each door and of the respawn pad. */

@@ -15,8 +15,10 @@ import { signedIn } from "./live-helpers";
 import { clientIp } from "./client-ips";
 import type { ActivityChat } from "../../app/lib/activity";
 import type { LayersPatch } from "../../app/lib/overlay-layers";
+import { TILE } from "../../app/lib/playground/constants";
 import { CHAR_STATES, encodeFrame, type RosterEntry } from "../../app/lib/playground/protocol";
-import { mulberry32, PlaygroundSim } from "../../app/lib/playground/sim";
+import { mulberry32, PlaygroundSim, parseCommand, setState } from "../../app/lib/playground/sim";
+import { cellX } from "../../app/lib/playground/terrain";
 
 const OBS_IP = clientIp("characters", 182);
 const REFRESH_IP = clientIp("characters", 183);
@@ -245,6 +247,72 @@ for (const [name, path, viewport] of [
   });
 }
 
+test("a full frame characters layer draws the builds of the viewers: blocks, stairs and planks", async ({
+  browser,
+}) => {
+  await setLayers("characters-builds", {
+    characters: { enabled: true },
+    cells: { horizontal: { characters: { c: 0, r: 0, w: 16, h: 9 } } },
+  });
+  // The real simulation in a full frame world: five viewers stand apart, and each runs its own commands.
+  const sim = new PlaygroundSim({ cellsW: 16, cellsH: 9, rng: mulberry32(5) });
+  sim.resumeAfter(0);
+  const scripts: [number, string[]][] = [
+    [8, ["up", "up", "up", "stairs 3", "flag"]],
+    [15, ["stairs 5", "bridge 3", "block", "dance"]],
+    [21, ["up", "up", "up", "up", "up", "bridge 2", "up", "up"]],
+    [26, ["block", "block", "look left", "block", "jump"]],
+    [31, ["stairs 2 left", "up", "up", "cheer"]],
+  ];
+  for (const [user, [column]] of scripts.entries()) {
+    sim.receive(chat(user + 1, "hello wasteland"));
+    setState(sim.list()[user], "hold", { x: cellX(column), y: sim.world.gy, dir: 1, piloted: true, free: false });
+  }
+  for (let step = 0; step < 8; step += 1) {
+    for (const [user, [, commands]] of scripts.entries()) {
+      const call = parseCommand(`!${commands[step] ?? "wave"}`);
+      const p = sim.list()[user];
+      p.pendingText = null;
+      if (call && p.state === "hold") sim.perform(p, call.name, "", call.n, call.side);
+    }
+    for (let i = 0; i < 200; i += 1) {
+      for (const p of sim.list()) p.lastChat = sim.clock;
+      sim.tick();
+    }
+  }
+  sim.receive(chat(2, "who needs a bridge?"));
+  for (let i = 0; i < 4; i += 1) sim.tick();
+  const frame = sim.fullFrame();
+  const cols: number = frame.terrain.ground.length;
+  const cells: number[] = Array.from(frame.terrain.blocks).flatMap((code: string, i: number) =>
+    code === "a" ? [i] : [],
+  );
+  expect(cells.length).toBeGreaterThan(5);
+  expect(frame.terrain.blocks).toMatch(/[m-r]/);
+  expect(frame.terrain.blocks).toMatch(/[g-l]/);
+  const page = await obsPage(browser, OBS_IP, { width: 1920, height: 1080 });
+  await mockFeed(page, () => [frame].map(encodeFrame));
+  await page.goto("/@feature_host/overlay?key=e2e-key");
+  const canvas = page.locator('.ov-layer[data-layer="characters"] canvas.characters-layer');
+  await expect(canvas).toHaveAttribute("height", "1080");
+  await expect.poll(() => painted(canvas)).toBeGreaterThan(500);
+  // The centre of each dirt block has a pixel of the ground picture, and the top of the layer stays free.
+  const centres: [number, number][] = cells.map((i: number): [number, number] => [
+    ((i % cols) * TILE + TILE / 2) * 3,
+    (frame.terrain.gy - Math.floor(i / cols) * TILE - TILE / 2) * 3,
+  ]);
+  const alphas: number[] = await canvas.evaluate((element: Element, points: [number, number][]): number[] => {
+    const context = (element as HTMLCanvasElement).getContext("2d");
+    return [...points, [960, 4] as [number, number]].map(
+      ([x, y]: [number, number]): number => context?.getImageData(x, y, 1, 1).data[3] ?? -1,
+    );
+  }, centres);
+  expect(alphas.pop()).toBe(0);
+  expect(alphas.every((alpha: number): boolean => alpha === 255)).toBe(true);
+  if (shotDir) await page.screenshot({ path: `${shotDir}/obs-builds.png` });
+  await close(page);
+});
+
 test("a refresh draws the playground again from the new socket's full frame, never from tick frames alone", async ({
   browser,
 }) => {
@@ -424,6 +492,10 @@ test("the characters controls send their requests, keep focus and name every con
   sockets[0].send(frames.without(first.id));
   await expect(layer.getByRole("button", { name: `Remove ${frames.roster[1].name}` })).toBeFocused();
 
+  // Clear removes the builds with one click, without a question.
+  await layer.getByRole("button", { name: "Clear all builds" }).click();
+  await expect(layer.locator("[data-characters-news]")).toHaveText("All builds removed.");
+
   // Reset asks first, in the page.
   await layer.getByRole("button", { name: "Reset playground" }).click();
   const dialog = page.getByRole("dialog", { name: "Reset the playground?" });
@@ -442,6 +514,7 @@ test("the characters controls send their requests, keep focus and name every con
     { op: "test" },
     { op: "stopTest" },
     { op: "remove", id: first.id },
+    { op: "clear" },
     { op: "reset" },
   ]);
 

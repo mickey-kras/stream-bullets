@@ -265,6 +265,9 @@ export class PlaygroundHost {
       case "reset":
         sim.reset();
         break;
+      case "clear":
+        sim.clearBuilds();
+        break;
       case "remove":
         if (!sim.remove(control.id)) return null;
         break;
