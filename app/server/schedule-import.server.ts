@@ -327,8 +327,9 @@ export async function importPageSchedule(env: AppEnv, streamerId: string, now: n
     if (streams === null) continue;
     if (await syncPlatform(env, streamerId, platform, streams, now)) changed = true;
   }
-  await storeStreamImages(env, streamerId);
   if (changed) await refreshPageOverlay(env, streamerId, ["next"]);
+  // Optional work last: a read after a visit runs in `waitUntil`, which ends 30 seconds after the response.
+  await storeStreamImages(env, streamerId);
 }
 
 /** Marks the page as read now when its last read is older than `interval`. Returns whether this call may read. */

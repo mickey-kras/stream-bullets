@@ -13,6 +13,11 @@ const SOURCE_TYPES: ReadonlySet<string> = new Set(["image/jpeg", "image/png", "i
 const MAX_SOURCE_BYTES = 5 * 1024 * 1024;
 /** Downloads in one read at most: a page lists a stream a day for 4 weeks on two platforms. */
 const MAX_DOWNLOADS = 60;
+/**
+ * No download starts later than this after the read: a read after a visit runs in `waitUntil`, which ends 30 seconds
+ * after the response. A picture that does not fit waits for the next read.
+ */
+const DOWNLOAD_WINDOW_MS = 20_000;
 /** The sweep keeps a copy younger than this: a read that runs at the same time can have stored it for a new source. */
 const SWEEP_GRACE_MS = 3_600_000;
 
@@ -71,14 +76,19 @@ function sizesOf(platform: string): readonly Size[] {
 }
 
 /** Stores one picture unless all its copies exist. Takes one download from `budget` before it loads. */
-async function storeOne(env: AppEnv, row: SourceRow, done: Set<string>, budget: { left: number }): Promise<void> {
+async function storeOne(
+  env: AppEnv,
+  row: SourceRow,
+  done: Set<string>,
+  budget: { left: number; until: number },
+): Promise<void> {
   // Without the Images binding (the test deployment), a thumbnail cannot become small: it is not loaded.
   if (row.platform !== "twitch" && !env.IMAGE_TRANSFORM) return;
   const base = await pictureBase(row);
   if (done.has(base)) return;
   done.add(base);
   const present = await Promise.all(sizesOf(row.platform).map((size: Size) => env.IMAGES.head(`${base}-${size}`)));
-  if (present.every(Boolean) || budget.left <= 0) return;
+  if (present.every(Boolean) || budget.left <= 0 || Date.now() > budget.until) return;
   budget.left -= 1;
   const picture = await download(row.image_url);
   if (!picture) return;
@@ -94,14 +104,14 @@ async function storeOne(env: AppEnv, row: SourceRow, done: Set<string>, budget: 
 }
 
 /** After a read of a page: stores the pictures that are new or changed. A failed picture never fails the read. */
-export async function storeStreamImages(env: AppEnv, streamerId: string): Promise<void> {
+export async function storeStreamImages(env: AppEnv, streamerId: string, start: number = Date.now()): Promise<void> {
   const { results } =
     await env.DB.prepare(`SELECT streamer_id, platform, external_id, image_url FROM stream_event_sources
       WHERE streamer_id=? AND image_url IS NOT NULL AND event_id IS NOT NULL ORDER BY read_at DESC`)
       .bind(streamerId)
       .all<SourceRow>();
   const done = new Set<string>();
-  const budget = { left: MAX_DOWNLOADS };
+  const budget = { left: MAX_DOWNLOADS, until: start + DOWNLOAD_WINDOW_MS };
   for (const row of results) {
     if (!STREAM_IMAGE_URL.test(row.image_url)) continue;
     try {

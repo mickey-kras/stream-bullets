@@ -17,7 +17,7 @@ import {
   syncPlatform,
   testStreams,
 } from "../app/server/schedule-import.server";
-import { serveStreamImage, sweepStreamImages } from "../app/server/stream-images.server";
+import { serveStreamImage, storeStreamImages, sweepStreamImages } from "../app/server/stream-images.server";
 import type { StreamEvent } from "../app/types";
 import { installFakeProviders, type FakeProviders } from "./helpers/channels";
 import { createTestDatabase, type TestDatabase } from "./helpers/database";
@@ -866,6 +866,17 @@ describe("pictures and categories", (): void => {
     await env.IMAGES.delete(small?.key ?? "");
     await importPageSchedule(env, page, now + 60_000);
     expect(imageCalls()).toBe(2);
+    expect(await stored()).toEqual(["image/webp-large", "image/webp-small"]);
+  });
+
+  it("starts no download once the 20 seconds after a read have passed: the next read loads the picture", async (): Promise<void> => {
+    fake.upcoming = [broadcast("vid-1", "Show", now + 2 * day, "public", undefined, { maxres: { url: thumbnail } })];
+    await importPageSchedule(env, page, now);
+    const keys = (await env.IMAGES.list({ prefix: "schedule/" })).objects.map((object) => object.key);
+    await env.IMAGES.delete(keys);
+    await storeStreamImages(env, page, Date.now() - 21_000);
+    expect(await stored()).toEqual([]);
+    await storeStreamImages(env, page);
     expect(await stored()).toEqual(["image/webp-large", "image/webp-small"]);
   });
 
