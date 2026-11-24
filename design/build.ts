@@ -1,12 +1,5 @@
-/**
- * Builds the design system in design/components from its sources.
- *
- *   node design/build.ts
- *
- * It writes components/bundle.js, WebsiteKit/kit.js and ObsOverlayKit/kit.js. Git does not track them.
- * The pages that load them supply React 18 as the globals React and ReactDOM. The kits read the parts
- * from the bundle namespace, so a page loads bundle.js before a kit.
- */
+// Builds components/bundle.js and the kit.js of each UI kit: node design/build.ts
+// See the Build section of design/README.md.
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { build, type BuildOptions, type Plugin } from "esbuild";
