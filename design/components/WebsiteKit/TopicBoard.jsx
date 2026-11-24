@@ -1,27 +1,78 @@
 import { useState } from "react";
-import { Comment, Composer, Discussion, SearchField, Tabs, TopicDetail, TopicRow } from "../src/index.js";
+import { Comment, Composer, Discussion, Icon, SearchField, Tabs, TopicDetail, TopicRow } from "../src/index.js";
 import { SB_DATA } from "./data.js";
 
-export function TopicBoard({ toast }) {
-  const D = SB_DATA;
-  const [sel, setSel] = useState(1);
-  const [sort, setSort] = useState("top");
-  const [q, setQ] = useState("");
-  const [votes, setVotes] = useState({});
-  const [comments, setComments] = useState(D.comments);
-  const [draft, setDraft] = useState("");
-  let topics = D.topics.filter((t) => t.title.toLowerCase().includes(q.toLowerCase()));
-  if (sort === "new") topics = [...topics].reverse();
-  const t = D.topics.find((x) => x.id === sel);
-  const r = votes[sel] || 0;
+const plural = (count, one, other) => `${count} ${count === 1 ? one : other}`;
+
+// The resizable divider of app/components/streamer/topic-board.tsx: a range input between the list and the detail.
+function Splitter({ value, onChange }) {
   return (
-    <main className="board">
-      <section className="browse">
+    <input
+      type="range"
+      min={25}
+      max={65}
+      step="any"
+      value={value}
+      onChange={(event) => onChange(Number(event.currentTarget.value))}
+      onDoubleClick={() => onChange(40)}
+      id="splitter"
+      aria-label="Resize the list"
+      aria-controls="topics detail"
+    />
+  );
+}
+
+// "Open discussion" on phones gives the discussion the full screen. The kit moves focus to the comment field.
+export function focusComposer(id) {
+  const field = document.getElementById(`discussion-${id}`)?.closest(".discussion")?.querySelector("[data-composer]");
+  field?.focus();
+}
+
+// The Topics view of a streamer page: app/components/streamer/topic-board.tsx with the topic and its discussion
+// (entry-detail.tsx, discussion.tsx) in the detail panel.
+export function TopicBoard({ name, viewerPreset, toast, onSuggest }) {
+  const [topics, setTopics] = useState(SB_DATA.topics);
+  const [selectedId, setSelectedId] = useState(topics[0].id);
+  // On phones the list and the detail take turns: the detail shows after a row is opened.
+  const [opened, setOpened] = useState(false);
+  const [sort, setSort] = useState("top");
+  const [query, setQuery] = useState("");
+  const [split, setSplit] = useState(40);
+  const [reactions, setReactions] = useState({});
+  const [reported, setReported] = useState({});
+
+  let list = topics.filter((topic) => topic.title.toLowerCase().includes(query.toLowerCase()));
+  if (sort === "newest") list = list.toReversed();
+  const selected = topics.find((topic) => topic.id === selectedId) ?? topics[0];
+  const reaction = reactions[selected.id] ?? 0;
+  const score = (topic) => ({
+    likes: topic.likes + (reactions[topic.id] === 1 ? 1 : 0),
+    dislikes: topic.dislikes + (reactions[topic.id] === -1 ? 1 : 0),
+  });
+  const post = (text) => {
+    if (!text) return;
+    const comment = { id: `c${Date.now()}`, name: SB_DATA.viewer.name, preset: viewerPreset, time: "Just now", text };
+    setTopics(
+      topics.map((topic) => (topic.id === selected.id ? { ...topic, comments: [comment, ...topic.comments] } : topic)),
+    );
+    toast("Comment posted.");
+  };
+
+  return (
+    <main
+      id="main-content"
+      className={`topic-workspace${opened ? " has-selection" : ""}`}
+      style={{ "--split": `${split}%` }}
+    >
+      <section className="browse" aria-label="Browse topics">
         <div className="intro">
-          <h1>Pick the next conversation</h1>
-          <p>Sunny · Suggest topics. Vote. Chat.</p>
+          <h1>
+            <span className="sr-only">{name}: </span>
+            Pick the next conversation
+          </h1>
+          <p>{name} · Suggest topics. Vote. Chat.</p>
         </div>
-        <SearchField value={q} onChange={(e) => setQ(e.target.value)} />
+        <SearchField variant="topics" id="topic-search" onSearch={setQuery} />
         <div className="list-toolbar">
           <Tabs
             label="Topic sorting"
@@ -29,57 +80,76 @@ export function TopicBoard({ toast }) {
             onValueChange={setSort}
             items={[
               { value: "top", label: "Top" },
-              { value: "new", label: "New" },
+              { value: "newest", label: "New" },
             ]}
           />
-          <span className="count">{topics.length} topics</span>
+          <span className="list-count">{plural(list.length, "topic", "topics")}</span>
+          <button
+            type="button"
+            id="suggest"
+            className="suggest-topic gold"
+            aria-label="Suggest a topic"
+            title="Suggest a topic"
+            onClick={onSuggest}
+          >
+            <Icon name="plus" size={18} />
+            <span>Suggest a topic</span>
+          </button>
         </div>
-        <div className="topics">
-          {topics.map((x) => (
-            <TopicRow
-              key={x.id}
-              title={x.title}
-              icon={x.icon}
-              likes={x.likes + (votes[x.id] === 1 ? 1 : 0)}
-              dislikes={x.dislikes + (votes[x.id] === -1 ? 1 : 0)}
-              comments={x.comments}
-              selected={x.id === sel}
-              onClick={() => setSel(x.id)}
-            />
-          ))}
+        <div className="topic-scroll-root">
+          <section id="topics" aria-label="Topics" data-radix-scroll-area-viewport="" style={{ overflowY: "auto" }}>
+            {/* The content box that the Radix scroll viewport puts around the rows. */}
+            <div style={{ minWidth: "100%", display: "table" }}>
+              {list.map((topic) => (
+                <TopicRow
+                  key={topic.id}
+                  id={topic.id}
+                  title={topic.title}
+                  category={topic.category}
+                  {...score(topic)}
+                  comments={topic.comments.length}
+                  selected={topic.id === selected.id}
+                  onClick={() => {
+                    setSelectedId(topic.id);
+                    setOpened(true);
+                  }}
+                />
+              ))}
+            </div>
+          </section>
         </div>
       </section>
-      <TopicDetail
-        category={t.cat}
-        categoryIcon={t.icon}
-        number={"Topic 00" + t.id}
-        title={t.title}
-        author={t.author}
-        authorPreset={t.authorPreset}
-        description={t.body}
-        likes={t.likes + (r === 1 ? 1 : 0)}
-        dislikes={t.dislikes + (r === -1 ? 1 : 0)}
-        reaction={r}
-        onReact={(v) => setVotes({ ...votes, [sel]: v })}
-      >
-        <Discussion count={t.comments + comments.length - 2}>
-          {comments.map((c, i) => (
-            <Comment key={i} name={c.name} subtitle={c.subtitle} preset={c.preset} likes={c.likes} time={c.time}>
-              {c.text}
-            </Comment>
-          ))}
-          <Composer
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onPost={() => {
-              if (!draft.trim()) return;
-              setComments([...comments, { name: "You", preset: 1, likes: 0, text: draft, time: "Just now" }]);
-              setDraft("");
-              toast("Comment posted.");
-            }}
-          />
-        </Discussion>
-      </TopicDetail>
+      <Splitter value={split} onChange={(next) => setSplit(Math.max(25, Math.min(65, next)))} />
+      <div className="detail-scroll-root">
+        <TopicDetail
+          key={selected.id}
+          category={selected.category}
+          title={selected.title}
+          author={selected.author}
+          authorPreset={selected.authorPreset}
+          description={selected.description ?? selected.body}
+          {...score(selected)}
+          reaction={reaction}
+          onReact={(value) => setReactions({ ...reactions, [selected.id]: value })}
+          backLabel="All topics"
+          onBack={() => setOpened(false)}
+          onDiscuss={() => focusComposer(selected.id)}
+          reported={Boolean(reported[selected.id])}
+          onReport={() => {
+            setReported({ ...reported, [selected.id]: true });
+            toast("Report sent");
+          }}
+        >
+          <Discussion id={selected.id} onRefresh={() => toast("Comments are up to date.")}>
+            <Composer viewerPreset={viewerPreset} onPost={post} />
+            {selected.comments.map((comment) => (
+              <Comment key={comment.id} id={comment.id} name={comment.name} preset={comment.preset} time={comment.time}>
+                {comment.text}
+              </Comment>
+            ))}
+          </Discussion>
+        </TopicDetail>
+      </div>
     </main>
   );
 }

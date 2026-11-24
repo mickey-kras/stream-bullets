@@ -1,48 +1,70 @@
 import { useState } from "react";
-import { Avatar, LivePill, SearchField, SiteHeader } from "../src/index.js";
+import { Avatar, Icon, SearchField } from "../src/index.js";
 import { SB_DATA } from "./data.js";
 
+const showing = (count) => `Showing ${count} ${count === 1 ? "page" : "pages"}`;
+
+// The streamer directory: the main panel of app/routes/streamers.tsx. The kit puts SiteHeader above it.
 export function Directory() {
-  const [q, setQ] = useState("");
-  const list = SB_DATA.streamers.filter((s) => (s.name + s.handle).toLowerCase().includes(q.toLowerCase()));
+  const [text, setText] = useState("");
+  const query = text.trim().replace(/^@/u, "").toLowerCase();
+  const list = SB_DATA.streamers.filter((s) => `${s.name} ${s.handle}`.toLowerCase().includes(query));
   return (
-    <>
-      <SiteHeader
-        current="streamers"
-        homeHref="#landing"
-        links={[
-          { id: "streamers", label: "Streamers", icon: "streamers", href: "#streamers" },
-          { id: "your-page", label: "Your page", icon: "your-page", href: "#topics" },
-        ]}
-      />
-      <main className="page-panel">
-        <h1>Streamers</h1>
-        <p className="muted">Find a community. Suggest topics. Vote.</p>
-        <SearchField
-          label="Search streamers"
-          placeholder="Search by name or @handle…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          style={{}}
-        />
-        <p className="count">Showing {list.length} pages</p>
-        <div className="streamer-grid">
-          {list.map((s) => (
-            <a key={s.handle} href="#topics" className="streamer-card">
-              <Avatar preset={s.preset} size={60} />
-              <div>
-                <h2>
-                  {s.name}
-                  {s.live && <LivePill />}
-                  {s.official && <span className="official">Official</span>}
-                </h2>
-                <p className="handle">@{s.handle}</p>
-                <p className="bio">{s.bio}</p>
-              </div>
-            </a>
-          ))}
+    <main className="page-panel streamers-page" id="main-content">
+      <div className="page-title">
+        <div>
+          <span className="eyebrow">Public pages</span>
+          <h1>Streamers</h1>
+          <p>Find a community. Suggest topics. Vote.</p>
         </div>
-      </main>
-    </>
+      </div>
+      {!query && (
+        <section className="ideas-strip" aria-labelledby="ideas-strip-title">
+          <h2 id="ideas-strip-title">
+            <a className="text-link ideas-link" href="#topics">
+              <Icon name="idea" size={16} />
+              Ideas
+            </a>
+          </h2>
+          <p className="muted">{SB_DATA.official.bio}</p>
+        </section>
+      )}
+      <SearchField
+        variant="streamers"
+        id="streamer-search"
+        value={text}
+        onChange={(event) => setText(event.currentTarget.value)}
+        onSearch={setText}
+      />
+      <div className="list-toolbar">
+        <span className="list-count">{list.length > 0 ? showing(list.length) : ""}</span>
+        {list.length === 0 && (
+          <a className="text-link" href="#streamers" onClick={() => setText("")}>
+            Clear search
+          </a>
+        )}
+      </div>
+      <div>
+        {list.length > 0 ? (
+          <div className="streamer-grid">
+            {list.map((streamer) => (
+              <a key={streamer.handle} className="info-card streamer-card" href="#topics">
+                <Avatar preset={streamer.preset} />
+                <div>
+                  <h2>{streamer.name}</h2>
+                  <p className="muted">@{streamer.handle}</p>
+                  <p className="streamer-bio">{streamer.bio || "This streamer has not added an introduction yet."}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p className="empty">
+            <Icon name="search-none" size={20} />
+            {`No streamers match “${text.trim()}”.`}
+          </p>
+        )}
+      </div>
+    </main>
   );
 }
