@@ -121,25 +121,25 @@
    "files": {
     "topic-board.jpg": {
      "name": "topic-board.jpg",
-     "blob": "",
+     "blob": "3a44bf8911df355993b8f784b9116c64",
      "size": 196875,
      "type": "image/jpeg"
     },
     "polls.jpg": {
      "name": "polls.jpg",
-     "blob": "",
+     "blob": "5a0cda20b8573f4b472650e649ae6455",
      "size": 85281,
      "type": "image/jpeg"
     },
     "poll-discussion.jpg": {
      "name": "poll-discussion.jpg",
-     "blob": "",
+     "blob": "fd0c84a7f7e6fff9d1763b3432c90789",
      "size": 130701,
      "type": "image/jpeg"
     },
     "landing.jpg": {
      "name": "landing.jpg",
-     "blob": "",
+     "blob": "410d2cad0cdbd63f8c60c91337aaea1b",
      "size": 197328,
      "type": "image/jpeg"
     }
@@ -152,8 +152,8 @@
  },
  "lastChange": {
   "by": "Claude",
-  "at": "2026-11-20T07:40:00Z",
+  "at": "2026-11-24T08:50:00Z",
   "via": "Claude Code",
-  "note": "Overlay studio proposal: QR code option, toolbar heights; chat cards at one width."
+  "note": "Synced with production: app CSS, app markup in every part, new screenshots, website and OBS kits rebuilt."
  }
 }

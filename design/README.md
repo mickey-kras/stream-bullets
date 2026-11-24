@@ -27,7 +27,7 @@ Use it when you design or build an interface for the product.
 - `WebsiteKit/kit.js` and `ObsOverlayKit/kit.js` hold the UI kits.
 - `site/index.html` shows the full design system: this brand book, the tokens, a live preview of each part, and the assets. Open it in a browser. It works without a server.
 
-`node design/build.ts --claude` builds the files for the Claude design system. The images then use the upload addresses that `design-system.json` lists.
+`node design/build.ts --claude` builds the files for the Claude design system. The images then use the upload addresses that `design-system.json` lists. The theme rules of the app also apply to the `data-theme` attribute that the Claude page sets.
 
 A page that loads the bundle supplies React 18 as the globals `React` and `ReactDOM`, and loads `bundle.js` before a kit.
 
