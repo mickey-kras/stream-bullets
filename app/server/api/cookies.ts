@@ -13,18 +13,17 @@ export const preferenceCookiesSchema = z
 
 const ONE_YEAR_S = 31_536_000;
 
-// Match Cookie Store API names, encoding, and lifetime.
+// Preserve existing cookie names and values when upgrading their attributes.
 export function preferenceCookies(value: z.infer<typeof preferenceCookiesSchema>, secure: boolean): string[] {
   const cookie = (name: string, text: string): string =>
-    `${name}=${encodeURIComponent(text)}; Path=/; Max-Age=${ONE_YEAR_S}; SameSite=Lax${secure ? "; Secure" : ""}`;
+    `${name}=${encodeURIComponent(text)}; Path=/; Max-Age=${ONE_YEAR_S}; SameSite=Lax; HttpOnly${secure ? "; Secure" : ""}`;
   const cookies: string[] = [];
   if (value.locale) cookies.push(cookie(LOCALE_COOKIE, value.locale));
   if (value.prefs) cookies.push(cookie(PREFS_COOKIE, JSON.stringify(value.prefs)));
   return cookies;
 }
 
-// Cookie Store API fallback: set preference cookies server-side. Allow signed-out requests; refuse other
-// origins.
+// Signed-out visitors can save preferences on this origin.
 export const cookieRoutes: ApiRoute[] = [
   // POST /api/preference-cookies {locale?, prefs?} → 204 with Set-Cookie
   openWrite("POST", /preference-cookies/, async ({ request, env }) => {

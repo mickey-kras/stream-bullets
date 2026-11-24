@@ -49,6 +49,7 @@ describe("server rendering", () => {
     const response = await outcome.response;
     expect(response.headers.get("Content-Type")).toBe("text/html; charset=utf-8");
     expect(response.headers.get("Content-Language")).toBe("en");
+    expect(response.headers.get("Cache-Control")).toBe("no-store, no-transform");
   });
 
   it("returns the document headers and no body for HEAD", async () => {
@@ -56,6 +57,7 @@ describe("server rendering", () => {
     const response = await handleRequest(request, 200, new Headers(), {} as EntryContext, context());
     expect(response.headers.get("Content-Type")).toBe("text/html; charset=utf-8");
     expect(response.headers.get("Content-Language")).toBe("en");
+    expect(response.headers.get("Cache-Control")).toBe("no-store, no-transform");
     expect(response.body).toBeNull();
   });
 

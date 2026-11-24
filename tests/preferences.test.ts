@@ -43,24 +43,16 @@ describe("the preference cookies", (): void => {
     vi.unstubAllGlobals();
   });
 
-  it("writes through the Cookie Store API where the browser has it", async (): Promise<void> => {
-    const set = vi.fn((): Promise<void> => Promise.resolve(undefined));
-    const fetcher = vi.fn();
+  it("asks the server to issue HTTP-only cookies, including where the Cookie Store API is available", async (): Promise<void> => {
+    const set = vi.fn();
     vi.stubGlobal("cookieStore", { set });
-    vi.stubGlobal("fetch", fetcher);
-    await saveLocaleCookie("de");
-    expect(set).toHaveBeenCalledWith(expect.objectContaining({ name: "sb_locale", value: "de", path: "/" }));
-    expect(fetcher).not.toHaveBeenCalled();
-  });
-
-  it("asks the server to set the cookie where the Cookie Store API is missing", async (): Promise<void> => {
-    vi.stubGlobal("cookieStore", undefined);
     const fetcher = vi.fn(
       (_url: string, _init: RequestInit): Promise<Response> => Promise.resolve(new Response(null, { status: 204 })),
     );
     vi.stubGlobal("fetch", fetcher);
     await saveLocaleCookie("pt-BR");
     await savePrefsCookie({ text: "130" });
+    expect(set).not.toHaveBeenCalled();
     expect(fetcher.mock.calls.map(([url, init]) => [url, init.body])).toEqual([
       ["/api/preference-cookies", JSON.stringify({ locale: "pt-BR" })],
       ["/api/preference-cookies", JSON.stringify({ prefs: { text: "130" } })],

@@ -33,6 +33,8 @@ export default async function handleRequest(
   const locale = app.locale ?? requestLocale(request, null);
   headers.set("Content-Type", "text/html; charset=utf-8");
   headers.set("Content-Language", locale);
+  // Keep edge analytics scripts out of app documents, including private overlays and OAuth flows.
+  headers.set("Cache-Control", "no-store, no-transform");
   if (request.method === "HEAD") return new Response(null, { status, headers });
   return withLocale(locale, async (): Promise<Response> => {
     const stream = await renderToReadableStream(

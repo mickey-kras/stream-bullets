@@ -202,19 +202,19 @@ describe("profile, language and preferences", (): void => {
     expect(readDisplayPrefs('{"contrast":"high","text":"999","removed":true}')).toEqual({ contrast: "high" });
   });
 
-  it("sets the language and preference cookies for browsers without the Cookie Store API", async (): Promise<void> => {
+  it("sets the language and preference cookies as HTTP-only cookies", async (): Promise<void> => {
     const prefs = { contrast: "high", text: "130" };
     const response = await call("POST", "preference-cookies", { body: { locale: "pt-BR", prefs } });
     expect(response.status).toBe(204);
     const cookies = response.headers.getSetCookie();
     expect(cookies).toEqual([
-      "sb_locale=pt-BR; Path=/; Max-Age=31536000; SameSite=Lax; Secure",
-      `sb_prefs=${encodeURIComponent(JSON.stringify(prefs))}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`,
+      "sb_locale=pt-BR; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly; Secure",
+      `sb_prefs=${encodeURIComponent(JSON.stringify(prefs))}; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly; Secure`,
     ]);
-    // Read back the exact Cookie Store API format.
+    // The server still reads previously issued preference values.
     expect(readDisplayPrefs(decodeURIComponent(cookies[1].split(";")[0].split("=")[1]))).toEqual(prefs);
     expect(preferenceCookies({ locale: "de" }, false)).toEqual([
-      "sb_locale=de; Path=/; Max-Age=31536000; SameSite=Lax",
+      "sb_locale=de; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly",
     ]);
     expect((await call("POST", "preference-cookies", { body: { locale: "xx" } })).status).toBe(400);
     expect((await call("POST", "preference-cookies", { body: { prefs: { text: "999" } } })).status).toBe(400);

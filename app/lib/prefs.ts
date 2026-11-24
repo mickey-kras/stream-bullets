@@ -1,5 +1,4 @@
 import { t } from "../i18n";
-import { LOCALE_COOKIE } from "../i18n/resolve";
 import type { DisplayPrefs } from "../types";
 
 // Browser copy preserves preferences after sign-out.
@@ -65,36 +64,24 @@ export function applyPrefs(prefs: DisplayPrefs): void {
 // One-year cookie makes preferences available before paint.
 export async function savePrefsCookie(prefs: DisplayPrefs): Promise<void> {
   try {
-    await setPreferenceCookie(PREFS_COOKIE, JSON.stringify(prefs), { prefs });
+    await setPreferenceCookie({ prefs });
   } catch {
     // Keep the applied/account change; retry cookie storage on the next change.
   }
 }
 
 export function saveLocaleCookie(locale: string): Promise<void> {
-  return setPreferenceCookie(LOCALE_COOKIE, locale, { locale });
+  return setPreferenceCookie({ locale });
 }
 
-// Set a one-year first-party cookie through Cookie Store or POST /api/preference-cookies. Never write
-// document.cookie.
-export async function setPreferenceCookie(name: string, value: string, fallback: object): Promise<void> {
-  const store = globalThis.cookieStore;
-  if (store) {
-    await store.set({
-      name,
-      value: encodeURIComponent(value),
-      path: "/",
-      sameSite: "lax",
-      expires: Date.now() + 31_536_000_000,
-    });
-    return;
-  }
+// Only the server can issue HttpOnly preference cookies.
+async function setPreferenceCookie(value: { locale?: string; prefs?: DisplayPrefs }): Promise<void> {
   const response: Response = await fetch("/api/preference-cookies", {
     method: "POST",
     credentials: "same-origin",
     keepalive: true,
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(fallback),
+    body: JSON.stringify(value),
   });
   if (!response.ok) throw new Error(t("common.failed"));
 }

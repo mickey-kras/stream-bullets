@@ -9,7 +9,7 @@ Zaraz has no tools. The baseline app had no analytics SDK or conversion events.
 Workers observability captures errors. The baseline privacy page incorrectly denied analytics use.
 
 Audit HTML contained no beacon. CSP permits same-origin or nonce-protected scripts only.
-Check the beacon delivery before treating Web Analytics visits as a denominator.
+Application HTML now uses `Cache-Control: no-store, no-transform` to prevent automatic beacon injection.
 See [Cloudflare setup and CSP guidance](https://developers.cloudflare.com/web-analytics/faq/).
 This change leaves Cloudflare settings and CSP intact.
 
@@ -17,10 +17,10 @@ This change leaves Cloudflare settings and CSP intact.
 
 | Event | Count trigger | Repeat handling |
 | --- | --- | --- |
-| `cta_browse` | Visitor clicks Browse | One receipt per click |
+| `cta_browse` | Visitor clicks Browse | One receipt per opted-in click |
 | `cta_suggest`, `cta_vote`, `cta_discuss` | Visitor activates a link or 3D sign | One receipt per action |
-| `cta_sign_in` | Visitor clicks Sign in | One receipt per click |
-| `cta_your_page` | Visitor clicks Your page | One receipt per click |
+| `cta_sign_in` | Visitor clicks Sign in | One receipt per opted-in click |
+| `cta_your_page` | Visitor clicks Your page | One receipt per opted-in click |
 | `sign_in_completed` | Database stores a new session | Excludes session updates |
 | `streamer_application` | Database stores an application | Excludes application edits |
 | `first_vote` | Account stores its first poll vote | Once per account |
@@ -36,13 +36,22 @@ They contain no account IDs, IPs, URLs, provider details, or content and remain 
 Exports include both account flags. Account deletion removes them.
 
 Click requests accept fixed CTA names and a random UUID only. The endpoint rejects completion events and extra fields.
-Clients send no cookies or referrer. Retained receipts prevent repeat counts.
+Homepage clicks count only after the visitor enables statistics in Privacy. The choice expires after 180 days. DNT and GPC suppress these counts. Clients send no cookies or referrer. Retained receipts prevent repeat counts.
 
 Worker limits do not prevent fraud. The client never retries failed calls, which can undercount. Navigation still works.
 
 Hourly cleanup removes receipts after one day and totals after 90 days.
 Receipt batches hold 5,000 rows. Backlogs can extend retention. Replays after deletion can count again.
 Browsers store no visitor identifier.
+
+## Production privacy checks
+
+After a deployment, open the public home page in a new browser profile. Check the document for the
+`no-transform` directive. Check the network panel for an injected beacon or a request to `/cdn-cgi/rum`.
+Disable automatic Web Analytics installation in the dashboard if the edge still injects a beacon.
+Select a homepage action. A new profile must send no click report. Enable click statistics under
+Privacy, repeat the action, then turn statistics off and repeat it again. Only the opted-in action
+should send a report. Check this again when a tag, analytics provider or Cloudflare setting changes.
 
 ## Read totals
 

@@ -1,12 +1,54 @@
 import { canonicalMeta } from "../lib/seo";
-import type { ReactNode } from "react";
-import { Link, useLoaderData, type MetaArgs } from "react-router";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { Link, useLoaderData, type LoaderFunctionArgs, type MetaArgs } from "react-router";
+import { clickMeasurementAllowed, CLICK_STORAGE, privacySignal } from "../lib/conversions";
+import { signupPolicy } from "../signup-policy";
+import { getLocale, t } from "../i18n";
 import { LegalDocument, type LegalSection } from "../components/common";
-import { contactEmails, legal, type LegalDetails } from "../legal";
+import { contactEmails, legal, legalPlaceholdersRemain, type LegalDetails } from "../legal";
 import { paths } from "../lib/shell";
 import { legalLoader } from "../server/legal.server";
 
-export const loader = legalLoader;
+export function loader(args: LoaderFunctionArgs): LegalDetails & { signal: boolean } {
+  const details: LegalDetails = legalLoader(args);
+  return {
+    ...details,
+    policyEffectiveDate: legalPlaceholdersRemain(details) ? details.policyEffectiveDate : signupPolicy.privacyVersion,
+    signal: privacySignal(args.request.headers),
+  };
+}
+
+function subscribeToClickChoice(listener: () => void): () => void {
+  window.addEventListener("storage", listener);
+  return () => window.removeEventListener("storage", listener);
+}
+
+function ClickSettings({ signal }: Readonly<{ signal: boolean }>): ReactNode {
+  const enabled = useSyncExternalStore(subscribeToClickChoice, clickMeasurementAllowed, () => false);
+  const [error, setError] = useState<string>("");
+  function save(allow: boolean): void {
+    try {
+      if (allow) localStorage.setItem(CLICK_STORAGE, String(Date.now() + 180 * 86_400_000));
+      else localStorage.removeItem(CLICK_STORAGE);
+      // Native storage events notify other tabs. Notify this document too.
+      window.dispatchEvent(new Event("storage"));
+      setError("");
+    } catch {
+      setError(t("legal.clicks.error"));
+    }
+  }
+  return (
+    <div lang={getLocale()}>
+      <p>{t("legal.clicks.purpose")}</p>
+      <p role="status">{t(enabled && !signal ? "legal.clicks.on" : "legal.clicks.off")}</p>
+      {signal && <p>{t("legal.clicks.signal")}</p>}
+      <button type="button" onClick={() => save(true)} disabled={signal}>{t("legal.clicks.allow")}</button>{" "}
+      <button type="button" onClick={() => save(false)}>{t("legal.clicks.disable")}</button>
+      {error && <p role="alert">{error}</p>}
+      <noscript lang="en">Optional statistics are off while JavaScript is disabled.</noscript>
+    </div>
+  );
+}
 
 export function meta({ matches }: MetaArgs) {
   return [
@@ -19,7 +61,7 @@ export function meta({ matches }: MetaArgs) {
 const mail: ReactNode = <a href={`mailto:${legal.contactEmail}`}>{legal.contactEmail}</a>;
 const support: ReactNode = <a href={`mailto:${contactEmails.support}`}>{contactEmails.support}</a>;
 
-const sections = (legal: LegalDetails): readonly LegalSection[] => [
+const sections = (legal: ReturnType<typeof loader>): readonly LegalSection[] => [
   {
     id: "who-we-are",
     title: "Who is responsible",
@@ -30,8 +72,7 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           are the controller of the personal data described in this policy.
         </p>
         <p>
-          Contact for all privacy questions and requests: {mail}. We have not appointed a data protection officer
-          because the law does not require one for a service of this size.
+          Contact {mail} for privacy questions and requests.
         </p>
       </>
     ),
@@ -66,8 +107,9 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
           <li>
             Access and refresh tokens from the platform, encrypted with keys kept apart from the database. We use them
-            only to read the channel’s chat, its moderation events and its scheduled streams. We never post, moderate,
-            or change anything on the channel.
+            to identify your channel and receive chat and moderation events for your overlay. On Kick, these are chat
+            messages and ban events. On Twitch, they include deleted messages, chat clears and moderation actions.
+            We also import upcoming streams from Twitch and YouTube. Access is read-only for your channel.
           </li>
         </ul>
         <p>
@@ -172,10 +214,10 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
         </ul>
         <p>
-          Cloudflare Web Analytics measures visits and page performance. We also keep daily totals of landing-page
-          clicks, completed sign-ins, streamer applications, and first votes and topic submissions for 90 days. These
-          totals contain no account identifiers, IP addresses, page URLs, or user content. Random click receipts expire
-          after one day. Two flags on your account prevent repeated first-vote and first-topic counts; they are included
+          If you enable optional homepage statistics, we count the homepage buttons you use. Separately, the database
+          counts completed sign-ins, streamer applications, and first votes and topic submissions. We keep daily
+          totals for 90 days. These
+          totals contain no account identifiers, IP addresses, page URLs, or user content. Random click receipts become eligible for hourly cleanup after one day. Two flags on your account prevent repeated first-vote and first-topic counts; they are included
           in your data export and removed with your account. We do not use advertising trackers or build advertising
           profiles.
         </p>
@@ -209,6 +251,10 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
                 <td>Legitimate interests in a safe, working service (Art. 6(1)(f)).</td>
               </tr>
               <tr>
+                <td>Count completed actions on the server to see whether core features work for visitors.</td>
+                <td>Legitimate interests in measuring use of the service (Art. 6(1)(f)).</td>
+              </tr>
+              <tr>
                 <td>
                   Handle reports, moderate content and streamer pages (freeze or suspend them), tell page owners about
                   decisions, and enforce the Terms.
@@ -230,8 +276,8 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
         </div>
         <p>
           Where we rely on legitimate interests, we have weighed them against your rights. You can object at any time
-          (see <a href="#your-rights">Your rights</a>). We do not rely on consent for any processing today. If we ever
-          do, we will ask first and you can withdraw consent at any time.
+          (see <a href="#your-rights">Your rights</a>). We use consent for optional homepage click statistics.
+          You can withdraw it at any time in <a href="#cookies">Cookies and local storage</a>.
         </p>
       </>
     ),
@@ -260,8 +306,9 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           <li>
             <strong>Cloudflare, Inc.</strong> hosts the service as our processor. It runs the application (Workers), the
             database (D1), image storage (R2), live updates (Durable Objects), and the network that protects the site.
-            When a signed-in reader asks for the translation of a comment, Cloudflare's translation model (Workers AI)
-            gets the text of that comment. We keep the translation with the comment.
+            Cloudflare Workers AI processes text to translate comments, topics, polls, page descriptions, community cards
+            and stream listings. Translation can start automatically after publication, in a scheduled job, or when
+            a reader requests it. We store translations with the corresponding content.
           </li>
           <li>
             <strong>Google</strong>, <strong>Twitch</strong>, <strong>TikTok</strong> and <strong>Instagram</strong>{" "}
@@ -403,7 +450,9 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           </li>
         </ul>
         <p>
-          For anything you cannot do yourself in your account, email {mail} from the address on your account. If your
+          If your chat appears in a connected channel and you have no StreamBullets account, email {mail} with the
+          platform, channel, your handle and the approximate time. We may ask you to verify that handle. For requests
+          about a StreamBullets account, email {mail} from the address on your account. If your
           account has no email address (TikTok or Instagram sign-in), tell us your display name and we will check it
           another way. We answer within one month. For complex requests we can extend this by two more months, and we
           will tell you why. We may ask you to confirm your identity. A request to delete data that we read from a
@@ -430,8 +479,7 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
           <li>Audio, electronic, or visual information: images you upload.</li>
           <li>
             Sensitive personal information: account sign-in data and channel connection tokens (provider tokens). We use
-            them only to sign you in, keep your account secure, and read connected chat, not to infer anything about
-            you.
+            them for sign-in, account security and the channel features described above.
           </li>
         </ul>
         <p>
@@ -454,8 +502,9 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
       <p>
         StreamBullets is not for anyone under {legal.minimumAge}. You must be {legal.minimumAge} or older to create an
         account. We do not knowingly collect data from children, including children under 13 as defined by the US COPPA.
-        If we learn that someone under {legal.minimumAge} has an account, we delete the account and its data. If you
-        think this has happened, email {mail}.
+        If we learn that someone under {legal.minimumAge} has an account, we delete the account and its data. Parents
+        and guardians can also contact {mail} about a child’s messages from a connected streaming platform, even
+        if the child has no StreamBullets account.
       </p>
     ),
   },
@@ -465,11 +514,21 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
     body: (
       <>
         <p>
-          We use only cookies that are strictly necessary to sign you in, keep your account secure, and remember the
-          language and display settings you choose. We do not use analytics, advertising, or third-party tracking
-          cookies. Because of this, the site does not show a cookie consent banner. If we ever want to add a cookie that
-          is not strictly necessary, we will ask for your consent first.
+          Sign-in and security use first-party cookies. Language and display cookies remember settings you choose.
+          Optional homepage click statistics are off until you turn them on in this browser. You can use every
+          feature with them off. We do not use advertising cookies.
         </p>
+        <h3>Optional homepage statistics</h3>
+        <p>
+          If you allow this, a homepage click sends its button label and a random receipt to StreamBullets without
+          cookies or a referrer. Turning it off stops future reports. Aggregated counts already collected remain
+          until they expire. Server counts of completed actions and security logs operate separately.
+        </p>
+        <p>
+          We treat Global Privacy Control and Do Not Track as a request to turn off optional click measurement.
+          Third-party sign-in providers apply their own policies when you visit them.
+        </p>
+        <ClickSettings signal={legal.signal} />
         <div className="legal-table">
           <table>
             <thead>
@@ -492,7 +551,7 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
                   <code>__Secure-stream-bullets.state</code>
                 </td>
                 <td>
-                  Protects the Google or Twitch sign-in redirect against forgery. The matching PKCE code verifier stays
+                  Protects the sign-in redirect against forgery. The matching PKCE code verifier stays
                   on our server.
                 </td>
                 <td>5 minutes. Deleted when sign-in finishes.</td>
@@ -527,9 +586,16 @@ const sections = (legal: LegalDetails): readonly LegalSection[] => [
         <p>
           On local HTTP development servers the cookie names have no <code>__Host-</code> or <code>__Secure-</code>{" "}
           prefix. On phones that ask for motion access, the home page stores <code>stream-bullets:tilt-declined</code>{" "}
-          in your browser’s local storage if you refuse, so it does not ask again. Pages also keep{" "}
-          <code>sb.lastContent</code> in session storage, the last streamer page you visited, for the back link. Neither
-          leaves your device. You can clear them with your browser’s site data settings.
+          in local storage if you refuse, so it does not ask again. It remains until you clear site data.
+          If you allow optional homepage statistics, local storage holds the expiry under <code>{CLICK_STORAGE}</code>.
+          Permission expires after 180 days. Turning it off removes the choice immediately.
+        </p>
+        <p>
+          Session storage keeps the last streamer page for the back link (<code>sb.lastContent</code>), scroll
+          positions, discussion drafts and reply targets, and focus information for the language picker. While
+          reconnecting a channel, it remembers the pending action, platform and owner so you can finish after
+          signing in again. The action expires after ten minutes and is removed when read. These browser copies
+          stay in the tab for its session. You can remove them using your browser’s site data settings.
         </p>
       </>
     ),
@@ -582,8 +648,10 @@ export default function Privacy(): ReactNode {
       title="Privacy Policy"
       summary={
         <p>
-          The short version: we collect what we need to run StreamBullets, we use only strictly necessary cookies, we
-          never sell your data, and you can download or delete everything from Your data in the account menu.
+          StreamBullets uses your profile for sign-in and connected channels for live chat and schedules.
+          Optional homepage click statistics are off by default. Read about cookies or change your choice in{" "}
+          <a href="#cookies">Cookies and local storage</a>. You can export or delete your account under Your data.
+          We do not sell your personal data.
         </p>
       }
       legal={legal}

@@ -37,7 +37,7 @@ describe("legal links and consent", () => {
 
   it("links the footer to privacy, terms, and reporting, and opens Contact as a dialog", () => {
     const html: string = render(() => createElement(SiteFooter));
-    for (const href of ["/privacy", "/terms", "/terms#reporting"]) expect(html).toContain(`href="${href}"`);
+    for (const href of ["/privacy", "/privacy#cookies", "/terms", "/terms#reporting"]) expect(html).toContain(`href="${href}"`);
     expect(html).toMatch(/<button[^>]*aria-haspopup="dialog"[^>]*>Contact<\/button>/);
     expect(html).not.toContain("mailto:");
   });
