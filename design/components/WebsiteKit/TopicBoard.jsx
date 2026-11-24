@@ -131,6 +131,7 @@ export function TopicBoard({ name, viewerPreset, toast, onSuggest }) {
           {...score(selected)}
           reaction={reaction}
           onReact={(value) => setReactions({ ...reactions, [selected.id]: value })}
+          topicLink="#topics"
           backLabel="All topics"
           onBack={() => setOpened(false)}
           onDiscuss={() => focusComposer(selected.id)}
