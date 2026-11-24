@@ -399,6 +399,8 @@ export interface StreamLink {
 // The picture of a scheduled stream: a YouTube thumbnail (16:9) or a Twitch category cover (3:4).
 export interface StreamImage {
   url: string;
+  // The smaller copy for a schedule row; the same as `url` for a cover.
+  small: string;
   kind: "thumbnail" | "cover";
 }
 

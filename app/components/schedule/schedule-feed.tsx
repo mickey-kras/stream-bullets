@@ -53,7 +53,12 @@ export function StreamPicture({ event, lazy = false }: Readonly<{ event: StreamE
   if (!event.image) return null;
   return (
     <span className={`sched-picture ${event.image.kind}`}>
-      <img src={event.image.url} alt="" loading={lazy ? "lazy" : undefined} decoding="async" />
+      <img
+        src={lazy ? event.image.small : event.image.url}
+        alt=""
+        loading={lazy ? "lazy" : undefined}
+        decoding="async"
+      />
     </span>
   );
 }

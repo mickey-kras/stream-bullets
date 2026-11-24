@@ -605,8 +605,12 @@ export async function youtubeChatPage(
   };
 }
 
-/** The only image hosts a scheduled stream links to: the Twitch image CDN and the YouTube thumbnail host. */
-export const STREAM_IMAGE_URL = /^https:\/\/(static-cdn\.jtvnw\.net|i\.ytimg\.com)\/[\w./-]{1,400}$/;
+/**
+ * The only image hosts a scheduled stream links to: the Twitch image CDN and the YouTube thumbnail hosts. A custom
+ * thumbnail of a planned broadcast comes from `i9.ytimg.com` with a signed query.
+ */
+export const STREAM_IMAGE_URL =
+  /^https:\/\/(static-cdn\.jtvnw\.net|i\d?\.ytimg\.com)\/[\w./-]{1,300}(\?[\w=&%.~-]{1,600})?$/;
 
 /** A scheduled stream as a channel's platform lists it (app/server/schedule-import.server.ts). */
 export const importedStreamSchema = z.object({
@@ -704,8 +708,8 @@ const twitchGamesSchema = z.object({
   data: z.array(z.object({ id: z.string().regex(/^\d{1,32}$/), box_art_url: z.string().max(500) })),
 });
 
-/** The size of a category cover on the schedule: Twitch covers are 3:4. */
-const BOX_ART_SIZE = "144x192";
+/** The size of a stored category cover: Twitch covers are 3:4, and the "Up next" card shows them about 270 px high. */
+const BOX_ART_SIZE = "360x480";
 
 /**
  * The streams with the cover of their category (Get Games, up to 100 IDs). A failed lookup leaves the streams

@@ -57,6 +57,8 @@ export interface FakeProviders {
   twitchSchedule: unknown[] | number;
   /** The games Get Games returns (only the requested IDs), or a status for every request. */
   twitchGames: { id: string; box_art_url: string }[] | number;
+  /** The answer of the Twitch and YouTube image hosts: a status, and the type of the bytes `[1, 2, 3]`. */
+  image: { status: number; type: string };
   /** The items liveBroadcasts.list returns for `broadcastStatus=upcoming`, or a status for every request. */
   upcoming: unknown[] | number;
 }
@@ -113,6 +115,7 @@ export function installFakeProviders(): FakeProviders {
     deleteStatus: null,
     twitchSchedule: 404,
     twitchGames: [],
+    image: { status: 200, type: "image/jpeg" },
     upcoming: [],
   };
   let subscription = 0;
@@ -232,6 +235,12 @@ export function installFakeProviders(): FakeProviders {
       if (typeof fake.twitchSchedule === "number") return json({ error: "Not Found" }, fake.twitchSchedule);
       const after = url.searchParams.get("after");
       return json(fake.twitchSchedule[Math.min(after === null ? 0 : Number(after), fake.twitchSchedule.length - 1)]);
+    }
+    if (url.hostname === "static-cdn.jtvnw.net" || /^i\d?\.ytimg\.com$/.test(url.hostname)) {
+      return new Response(new Uint8Array([1, 2, 3]), {
+        status: fake.image.status,
+        headers: { "Content-Type": fake.image.type, ...(fake.image.status === 302 ? { Location: "https://example.com/" } : {}) },
+      });
     }
     if (path === "api.twitch.tv/helix/games") {
       if (typeof fake.twitchGames === "number") return json({ error: "Error" }, fake.twitchGames);

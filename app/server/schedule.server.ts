@@ -84,7 +84,8 @@ function addSource(info: SourceInfo, link: SourceRow, primary: StreamPlatform | 
   if (link.platform === "twitch" && link.category) info.category = { name: link.category, cover: image };
   // A YouTube thumbnail wins over a Twitch cover: it shows this stream, the cover only its category.
   if (image && (link.platform === "youtube" || !info.image)) {
-    info.image = { url: image, kind: link.platform === "youtube" ? "thumbnail" : "cover" };
+    const youtube = link.platform === "youtube";
+    info.image = { url: image, small: youtube ? `${image}/small` : image, kind: youtube ? "thumbnail" : "cover" };
   }
 }
 

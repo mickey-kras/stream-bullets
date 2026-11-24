@@ -4,6 +4,8 @@ import type { Locale } from "./i18n";
 export interface AppEnv {
   DB: D1Database;
   IMAGES: R2Bucket;
+  // Production only: resizes the YouTube thumbnails of the schedule (app/server/stream-images.server.ts).
+  IMAGE_TRANSFORM?: ImagesBinding;
   POLL_ROOMS: DurableObjectNamespace;
   /** One ChannelIngest object per page: the connected channels' activity feed (docs/channel-connections.md). */
   CHANNEL_INGEST: DurableObjectNamespace;

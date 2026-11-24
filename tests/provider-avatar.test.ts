@@ -50,7 +50,8 @@ describe("provider avatar import", () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(new Response(bytes, { headers: { "Content-Type": "image/png" } }))
-      .mockRejectedValueOnce(new TypeError("redirect"))
+      // With `redirect: "manual"`, a Worker receives the redirect answer itself.
+      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { Location: "https://example.com/x.png" } }))
       .mockResolvedValueOnce(
         new Response(new Uint8Array(5 * 1024 * 1024 + 1), { headers: { "Content-Type": "image/png" } }),
       )
@@ -70,7 +71,7 @@ describe("provider avatar import", () => {
       const expectedSignal: unknown = expect.any(AbortSignal);
       expect(fetchMock).toHaveBeenCalledWith(
         "https://lh3.googleusercontent.com/photo",
-        expect.objectContaining({ redirect: "error", signal: expectedSignal }),
+        expect.objectContaining({ redirect: "manual", signal: expectedSignal }),
       );
       expect(warn).toHaveBeenCalledTimes(3);
     } finally {

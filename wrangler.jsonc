@@ -65,7 +65,8 @@
         ]
       },
       "ratelimits": [{ "name": "REQUEST_LIMITER", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }],
-      "ai": { "binding": "AI" }
+      "ai": { "binding": "AI" },
+      "images": { "binding": "IMAGE_TRANSFORM" }
     }
   }
 }
